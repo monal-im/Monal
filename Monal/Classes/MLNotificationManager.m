@@ -56,8 +56,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             if (message.shouldShowAlert) {
                 dispatch_async(dispatch_get_main_queue(),
                                ^{
-                                   [self presentAlert:notification];
-                               });
+                    [self presentAlert:notification];
+                });
             }
         }
     }];
@@ -65,10 +65,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(NSString *) identifierWithNotification:(NSNotification *) notification
 {
+    MLMessage *message =[notification.userInfo objectForKey:@"message"];
+    
     return [NSString stringWithFormat:@"%@_%@",
-            [notification.userInfo objectForKey:@"accountNo"],
-            [notification.userInfo objectForKey:@"from"]];
-            
+            message.accountId,
+            message.from];
+    
 }
 
 
@@ -77,21 +79,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
  */
 -(void) showModernNotificaion:(NSNotification *)notification
 {
+    MLMessage *message =[notification.userInfo objectForKey:@"message"];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
-    NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];
+    NSString* acctString = message.accountId;
     
-    NSString *displayName = [[DataLayer sharedInstance] fullName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
+    NSString *displayName = [[DataLayer sharedInstance] fullName:message.from forAccount:acctString];
     
-    content.title = displayName.length>0?displayName:[notification.userInfo objectForKey:@"from"];
-
-    if(![[notification.userInfo objectForKey:@"from"] isEqualToString:[notification.userInfo objectForKey:@"from"] ])
+    content.title = displayName.length>0?displayName:message.from;
+    
+    if(![message.from isEqualToString:message.actualFrom])
     {
-        content.subtitle =[NSString stringWithFormat:@"%@ says:",[notification.userInfo objectForKey:@"actuallyfrom"]];
+        content.subtitle =[NSString stringWithFormat:@"%@ says:",message.actualFrom];
     }
     
-    NSString *idval = [NSString stringWithFormat:@"%@_%@", [self identifierWithNotification:notification],[notification.userInfo objectForKey:@"messageid"]];
+    NSString *idval = [NSString stringWithFormat:@"%@_%@", [self identifierWithNotification:notification],message.messageId];
     
-    content.body =[notification.userInfo objectForKey:@"messageText"];
+    content.body = message.messageText;
     content.userInfo= notification.userInfo;
     content.threadIdentifier =[self identifierWithNotification:notification];
     content.categoryIdentifier=@"Reply";
@@ -106,10 +109,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     }
     
-     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-    if([[notification.userInfo objectForKey:@"messageType"] isEqualToString:kMessageTypeImage])
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    if([message.messageType isEqualToString:kMessageTypeImage])
     {
-        [[MLImageManager sharedInstance] imageURLForAttachmentLink:[notification.userInfo objectForKey:@"messageText"] withCompletion:^(NSURL * _Nullable url) {
+        [[MLImageManager sharedInstance] imageURLForAttachmentLink:message.messageText withCompletion:^(NSURL * _Nullable url) {
             if(url) {
                 NSError *error;
                 UNNotificationAttachment* attachment= [UNNotificationAttachment attachmentWithIdentifier:idval URL:url options:@{UNNotificationAttachmentOptionsTypeHintKey:(NSString*) kUTTypePNG} error:&error];
@@ -134,13 +137,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
         
     }
-    else if([[notification.userInfo objectForKey:@"messageType"] isEqualToString:kMessageTypeUrl])
+    else if([message.messageType isEqualToString:kMessageTypeUrl])
     {
         content.body =@"Sent a Link 🔗";
     }
     
     UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval
-                                                                        content:content trigger:nil];
+                                                                          content:content trigger:nil];
     [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
         
     }];
@@ -148,13 +151,14 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) showLegacyNotification:(NSNotification *)notification
 {
+    MLMessage *message =[notification.userInfo objectForKey:@"message"];
+    NSString* acctString =message.accountId;
+    NSString* fullName =[[DataLayer sharedInstance] fullName:message.from forAccount:acctString];
     
-    NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];
-    NSString* fullName =[[DataLayer sharedInstance] fullName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
+    NSString* nickName =[[DataLayer sharedInstance] nickName:message.from forAccount:acctString];
     
-     NSString* nickName =[[DataLayer sharedInstance] nickName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
+    NSString* nameToShow=message.from;
     
-    NSString* nameToShow=[notification.userInfo objectForKey:@"from"];
     if([nickName length]>0) nameToShow=nickName;
     else if([fullName length]>0) nameToShow=fullName;
     NSDate* theDate=[NSDate dateWithTimeIntervalSinceNow:0]; //immediate fire
@@ -178,7 +182,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
         if([[NSUserDefaults standardUserDefaults] boolForKey:@"MessagePreview"]) {
             alarm.alertTitle  =nameToShow;
-            alarm.alertBody =[notification.userInfo objectForKey:@"messageText"];
+            alarm.alertBody =message.messageText;
         }  else {
             alarm.alertTitle =  nameToShow;
         }
@@ -212,21 +216,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
     else
     {
-        if(!([[notification.userInfo objectForKey:@"from"] isEqualToString:self.currentContact]) &&
-           !([[notification.userInfo objectForKey:@"to"] isEqualToString:self.currentContact] ) )
+          MLMessage *message =[notification.userInfo objectForKey:@"message"];
+        if(!([message.from isEqualToString:self.currentContact]) &&
+           !([message.to isEqualToString:self.currentContact] ) )
             //  &&![[notification.userInfo objectForKey:@"from"] isEqualToString:@"Info"]
         {
             if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"10.0")){
                 [self showModernNotificaion:notification];
             } else  {
-                NSString* acctString =[NSString stringWithFormat:@"%ld", (long)[[notification.userInfo objectForKey:@"accountNo"] integerValue]];
-                NSString* fullName =[[DataLayer sharedInstance] fullName:[notification.userInfo objectForKey:@"from"] forAccount:acctString];
+                NSString* acctString =message.accountId;
+                NSString* fullName =[[DataLayer sharedInstance] fullName:message.from forAccount:acctString];
                 
-                NSString* nameToShow=[notification.userInfo objectForKey:@"from"];
+                NSString* nameToShow=message.from;
                 if([fullName length]>0) nameToShow=fullName;
                 NSDate* theDate=[NSDate dateWithTimeIntervalSinceNow:0]; //immediate fire
                 
-                SlidingMessageViewController* slidingView= [[SlidingMessageViewController alloc] correctSliderWithTitle:nameToShow message:[notification.userInfo objectForKey:@"messageText"] user:[notification.userInfo objectForKey:@"from"] account:[notification.userInfo objectForKey:@"accountNo"] ];
+                SlidingMessageViewController* slidingView= [[SlidingMessageViewController alloc] correctSliderWithTitle:nameToShow message:message.messageText user:message.from account:message.accountId];
                 
                 [self.window addSubview:slidingView.view];
                 

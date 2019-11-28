@@ -792,10 +792,10 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
                        int row=0;
                        NSIndexPath *indexPath;
-                       for(NSMutableDictionary *rowDic in self.messageList)
+                       for(MLMessage *message in self.messageList)
                        {
-                           if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
-                               [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:@"delivered"];
+                           if([message.messageId isEqualToString:messageId]) {
+                               message.hasBeenSent=delivered;
                                indexPath =[NSIndexPath indexPathForRow:row inSection:0];
                                break;
                            }

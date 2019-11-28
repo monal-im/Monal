@@ -95,7 +95,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     NSString *idval = [NSString stringWithFormat:@"%@_%@", [self identifierWithNotification:notification],message.messageId];
     
     content.body = message.messageText;
-    content.userInfo= notification.userInfo;
+   // content.userInfo= notification.userInfo;
     content.threadIdentifier =[self identifierWithNotification:notification];
     content.categoryIdentifier=@"Reply";
     
@@ -229,8 +229,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                 
                 NSString* nameToShow=message.from;
                 if([fullName length]>0) nameToShow=fullName;
-                NSDate* theDate=[NSDate dateWithTimeIntervalSinceNow:0]; //immediate fire
-                
+               
                 SlidingMessageViewController* slidingView= [[SlidingMessageViewController alloc] correctSliderWithTitle:nameToShow message:message.messageText user:message.from account:message.accountId];
                 
                 [self.window addSubview:slidingView.view];

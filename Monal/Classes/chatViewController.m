@@ -659,48 +659,44 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         DDLogError(@" not ready to send messages");
         return;
     }
-
+    
     [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString *messageType) {
-		DDLogVerbose(@"added message");
-
+        DDLogVerbose(@"added message");
+        
         if(result) {
-        dispatch_async(dispatch_get_main_queue(),
-                       ^{
-                           NSString *messagetime = [self currentGMTTime];
-
-                           NSDictionary* userInfo = @{@"af": self.jid,
-                                                      @"message": message ,
-                                                      @"thetime": messagetime,
-                                                      @"delivered":@YES,
-                                                      @"messageid": messageId,
-                                                      @"encrypted":[NSNumber numberWithBool:self.encryptChat],
-                                                      kMessageType:messageType
-                                                      };
-                           if(!self.messageList) self.messageList =[[NSMutableArray alloc] init];
-                           [self.messageList addObject:[userInfo mutableCopy]];
-
-                           NSIndexPath *path1;
-                           [self->_messageTable beginUpdates];
-                           NSInteger bottom = [self.messageList count]-1;
-                           if(bottom>=0) {
-                                path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
-                               [self->_messageTable insertRowsAtIndexPaths:@[path1]
-                                                    withRowAnimation:UITableViewRowAnimationFade];
-                           }
-                           [self->_messageTable endUpdates];
-                            if(completion) completion(result);
-
-                           [self scrollToBottom];
-
-
-                       });
-
-
-
-    }
-	else {
-		DDLogVerbose(@"failed to add message");
-    }
+            dispatch_async(dispatch_get_main_queue(),
+                           ^{
+                MLMessage *messageObj = [[MLMessage alloc] init];
+                messageObj.actualFrom=self.jid;
+                messageObj.timestamp=[NSDate date];
+                messageObj.hasBeenSent=YES;
+                messageObj.messageId=messageId;
+                messageObj.encrypted=self.encryptChat;
+                messageObj.messageType=messageType;
+                messageObj.messageText=message;
+                
+                if(!self.messageList) self.messageList =[[NSMutableArray alloc] init];
+                [self.messageList addObject:messageObj];
+                
+                NSIndexPath *path1;
+                [self->_messageTable beginUpdates];
+                NSInteger bottom = [self.messageList count]-1;
+                if(bottom>=0) {
+                    path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
+                    [self->_messageTable insertRowsAtIndexPaths:@[path1]
+                                               withRowAnimation:UITableViewRowAnimationFade];
+                }
+                [self->_messageTable endUpdates];
+                if(completion) completion(result);
+                
+                [self scrollToBottom];
+                
+                
+            });
+        }
+        else {
+            DDLogVerbose(@"failed to add message");
+        }
     }];
 
 	// make sure its in active

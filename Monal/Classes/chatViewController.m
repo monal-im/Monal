@@ -336,7 +336,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if(!_day) {
         newList =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
         [[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo withCompletion:^(NSNumber *unread) {
-            if([unread integerValue]==0) _firstmsg=YES;
+            if([unread integerValue]==0) self->_firstmsg=YES;
 
         }];
         _isMUC=[[DataLayer sharedInstance] isBuddyMuc:_contactName forAccount: _accountNo];
@@ -349,15 +349,17 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
 
     if(!self.jid) return;
-    NSDictionary* unreadStatus = @{@"af": self.jid,
-                              @"message": @"Unread Messages Below" ,
-                              kMessageType:kMessageTypeStatus
-                              };
-    int unreadPos = newList.count-1;
+    
+    MLMessage *unreadStatus = [[MLMessage alloc] init];
+    unreadStatus.messageType=kMessageTypeStatus;
+    unreadStatus.messageText=@"Unread Messages Below";
+    unreadStatus.actualFrom=self.jid;
+    
+    NSInteger unreadPos = newList.count-1;
     while(unreadPos>=0)
     {
-        NSDictionary *row = [newList objectAtIndex:unreadPos];
-        if([[row objectForKey:@"unread"] boolValue]==NO)
+        MLMessage *row = [newList objectAtIndex:unreadPos];
+        if(!row.unread)
         {
             unreadPos++;
             break;

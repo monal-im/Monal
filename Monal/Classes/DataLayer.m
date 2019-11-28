@@ -1801,10 +1801,19 @@ static DataLayer *sharedInstance=nil;
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     if(!accountNo ||! buddy) return nil;
-    NSString* query=[NSString stringWithFormat:@"select af,message_from,  message, thetime, message_history_id, delivered, messageid, messageType, received,encrypted,previewImage, previewText, unread  from (select ifnull(actual_from, message_from) as af, message_from,  message, received, encrypted,   timestamp  as thetime, message_history_id, delivered,messageid, messageType, previewImage, previewText, unread from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 250) order by thetime asc"];
+    NSString* query=[NSString stringWithFormat:@"select af,message_from, message_to, account_id,  message, thetime, message_history_id, delivered, messageid, messageType, received,encrypted,previewImage, previewText, unread  from (select ifnull(actual_from, message_from) as af, message_from, message_to, account_id,   message, received, encrypted,   timestamp  as thetime, message_history_id, delivered,messageid, messageType, previewImage, previewText, unread from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 250) order by thetime asc"];
     NSArray *params=@[accountNo, buddy, buddy];
-    NSMutableArray* toReturn = [[self executeReader:query andArguments:params] mutableCopy];
-
+    NSArray* rawArray = [self executeReader:query andArguments:params];
+    
+    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    
+    NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:rawArray.count];
+    [rawArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSDictionary *dic = (NSDictionary *) obj;
+        [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:formatter]];
+    }];
+    
     if(toReturn!=nil)
     {
         DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count] );

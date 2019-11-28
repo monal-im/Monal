@@ -22,9 +22,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy) NSString *accountId;
 
 /**
- The message's unique identifier
+ The message's local  unique identifier
  */
 @property (nonatomic, copy) NSString *messageId;
+
+/**
+ The id for the message as provided by the xmpp server
+ */
+@property (nonatomic, copy) NSString *stanzaId;
 
 /**
 The of the message in the DB , should be int
@@ -74,13 +79,23 @@ The of the message in the DB , should be int
 @property (nonatomic, assign) BOOL hasBeenSent;
 
 /*
- messages we received 
+ messages we received
  */
 @property (nonatomic, assign) BOOL inbound;
 
 @property (nonatomic, assign) BOOL shouldShowAlert;
 
--(BOOL) shouldForceRefresh; 
+/*
+ the message has not been marked as read in the db
+ */
+@property (nonatomic, assign) BOOL unread;
+
+/**
+ Converts a dictonary to a message object Provide a formatter for the format the dates will be in
+ */
++(MLMessage *) messageFromDictionary:(NSDictionary *) dic withDateFormatter:(NSDateFormatter *) formatter;
+
+-(BOOL) shouldForceRefresh;
 
 @end
 

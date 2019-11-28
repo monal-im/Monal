@@ -1018,21 +1018,20 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                                 }
                                 if(!recipient) return; // this shouldnt happen
 
-                                NSDictionary* userDic=@{@"from":messageNode.from,
-                                                        @"actuallyfrom":actuallyFrom,
-                                                        @"messageText":body,
-                                                        @"to":messageNode.to?messageNode.to:recipient,
-                                                        @"messageid":messageNode.idval?messageNode.idval:@"",
-                                                        @"accountNo":accountNo,
-                                                        @"showAlert":[NSNumber numberWithBool:showAlert],
-                                                        @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh],
-                                                        @"messageType":newMessageType?newMessageType:kMessageTypeText,
-                                                        @"muc_subject":messageNode.subject?messageNode.subject:@"",
-                                                        @"encrypted":[NSNumber numberWithBool:encrypted],
-                                                        @"delayTimeStamp":messageNode.delayTimeStamp?messageNode.delayTimeStamp:@""
-                                                        };
+                                MLMessage *message = [[MLMessage alloc] init];
+                                                            message.from=messageNode.from;
+                                                            message.actualFrom= actuallyFrom;
+                                                            message.messageText= messageNode.messageText;
+                                                            message.to=messageNode.to?messageNode.to:recipient;
+                                                            message.messageId=messageNode.idval?messageNode.idval:@"";
+                                                            message.accountId=accountNo;
+                                                            message.encrypted=encrypted;
+                                                            message.delayTimeStamp=messageNode.delayTimeStamp;
+                                                            message.timestamp =[NSDate date];
+                                                            message.shouldShowAlert= showAlert;
+                                                            message.messageType=kMessageTypeText;
 
-                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
                             }
                         }
                         else {

@@ -8,6 +8,7 @@
 
 #import "MLNotificationManager.h"
 #import "MLImageManager.h"
+#import "MLMessage.h"
 @import UserNotifications;
 @import CoreServices;
 
@@ -44,13 +45,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) handleNewMessage:(NSNotification *)notification
 {
     
-    if([[notification.userInfo objectForKey:@"messageType"] isEqualToString:kMessageTypeStatus]) return; 
+    MLMessage *message =[notification.userInfo objectForKey:@"message"];
+    
+    if([message.messageType isEqualToString:kMessageTypeStatus]) return;
     
     DDLogVerbose(@"notificaiton manager got new message notice %@", notification.userInfo);
-    [[DataLayer sharedInstance] isMutedJid:[notification.userInfo objectForKey:@"from"] withCompletion:^(BOOL muted) {
+    [[DataLayer sharedInstance] isMutedJid:message.actualFrom withCompletion:^(BOOL muted) {
         if(!muted){
             
-            if ([[notification.userInfo objectForKey:@"showAlert"] boolValue]) {
+            if (message.shouldShowAlert) {
                 dispatch_async(dispatch_get_main_queue(),
                                ^{
                                    [self presentAlert:notification];

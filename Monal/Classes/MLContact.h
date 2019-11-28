@@ -12,6 +12,28 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLContact : NSObject
 
+/**
+ account number in the database should be an integer
+ */
+
+@property (nonatomic, copy) NSString *accountId;
+@property (nonatomic, copy) NSString *contactJid;
+@property (nonatomic, copy) NSString *contactDisplayName;
+
+@property (nonatomic, copy) NSString *image;
+
+/**
+ xmpp state text
+ */
+@property (nonatomic, copy) NSString *state;
+
+/**
+ xmppp sttus message
+ */
+@property (nonatomic, copy) NSString *statusMessage;
+
+
+
 @end
 
 NS_ASSUME_NONNULL_END

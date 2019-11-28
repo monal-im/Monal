@@ -1916,18 +1916,14 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                 [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self->_accountNo];
                                 [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self->_accountNo];
                                 [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self->_accountNo];
-
-                                NSString* state=presenceNode.show;
-                                if(!state) state=@"";
-                                NSString* status=presenceNode.status;
-                                if(!status) status=@"";
-                                NSDictionary* userDic=@{kusernameKey: presenceNode.user,
-                                                        kaccountNoKey:self->_accountNo,
-                                                        kstateKey:state,
-                                                        kstatusKey:status
-                                                        };
-
-                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
+ 
+                                MLContact *contact = [[MLContact alloc] init];
+                                contact.accountId=self.accountNo;
+                                contact.contactJid=presenceNode.user;
+                                contact.state=presenceNode.show;
+                                contact.statusMessage=presenceNode.status;
+  
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:@{@"contact":contact}];
 
 
                                 if(!presenceNode.MUC) {

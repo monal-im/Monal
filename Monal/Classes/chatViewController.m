@@ -735,84 +735,50 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) handleNewMessage:(NSNotification *)notification
 {
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
-
-    if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:_accountNo]
-       &&( ( [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName])
-          || ([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName] ))
-       )
+    
+    MLMessage *message = [notification.userInfo objectForKey:@"message"];
+    if(!message) {
+        DDLogError(@"Notification without message");
+    }
+    
+    if([message.accountId isEqualToString:_accountNo]
+       &&([message.from isEqualToString:_contactName]
+          || [message.to isEqualToString:_contactName] ))
     {
-        [[DataLayer sharedInstance] messageTypeForMessage: [notification.userInfo objectForKey:@"messageText"] withCompletion:^(NSString *messageType) {
-
+        [[DataLayer sharedInstance] messageTypeForMessage: message.messageText withCompletion:^(NSString *messageType) {
+            
             dispatch_async(dispatch_get_main_queue(),
                            ^{
-                               NSString *finalMessageType=messageType;
-                               NSDictionary* userInfo;
-                               if([[notification.userInfo objectForKey:kMessageType] isEqualToString:kMessageTypeStatus])
-                               {
-                                   finalMessageType =kMessageTypeStatus;
-                               }
-
-                if([[notification.userInfo objectForKey:@"to"] isEqualToString:self->_contactName])
-                               {
-                                   NSString *timeString;
-                                   
-                                   NSObject *delayTimeStamp = [notification.userInfo objectForKey:@"delayTimeStamp"];
-                                   
-                                   if(delayTimeStamp==nil || [delayTimeStamp isKindOfClass:[NSString class]]) {
-                                       timeString=[self currentGMTTime];
-                                   }
-                                   else  {
-                                       if([delayTimeStamp isKindOfClass:[NSDate class]])
-                                       {
-                                           timeString =[self.sourceDateFormat stringFromDate:(NSDate *)delayTimeStamp];
-                                       } else  {
-                                           timeString= [notification.userInfo objectForKey:@"delayTimeStamp"];
-                                       }
-                                   }
-
-                                   userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
-                                                @"message": [notification.userInfo objectForKey:@"messageText"],
-                                                @"messageid": [notification.userInfo objectForKey:@"messageid"],
-                                                 @"encrypted": [notification.userInfo objectForKey:@"encrypted"],
-                                                @"thetime": timeString,
-                                                @"delivered":@YES,
-                                                kMessageType:finalMessageType
-                                                };
-
-                               } else  {
-                                   userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
-                                                @"message": [notification.userInfo objectForKey:@"messageText"],
-                                                @"messageid": [notification.userInfo objectForKey:@"messageid"],
-                                                @"encrypted": [notification.userInfo objectForKey:@"encrypted"],
-                                                @"thetime": [self currentGMTTime],
-                                                kMessageType:finalMessageType
-                                                };
-                               }
-
-
-                               if(!self.messageList) self.messageList=[[NSMutableArray alloc] init];
-                               [self.messageList addObject:[userInfo mutableCopy]];
-
+                NSString *finalMessageType=messageType;
+                if([message.messageType isEqualToString:kMessageTypeStatus])
+                {
+                    finalMessageType =kMessageTypeStatus;
+                }
+                message.messageType=finalMessageType;
+                
+                if(!self.messageList) self.messageList=[[NSMutableArray alloc] init];
+                [self.messageList addObject:message]; //TODO maybe we wantt to insert base on delay timestamp..
+                
                 [self->_messageTable beginUpdates];
-                               NSIndexPath *path1;
-                               NSInteger bottom =  self.messageList.count-1;
-                               if(bottom>=0) {
-
-                                   path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
-                                   [self->_messageTable insertRowsAtIndexPaths:@[path1]
-                                                        withRowAnimation:UITableViewRowAnimationBottom];
-
-                               }
+                NSIndexPath *path1;
+                NSInteger bottom =  self.messageList.count-1;
+                if(bottom>=0) {
+                    
+                    path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
+                    [self->_messageTable insertRowsAtIndexPaths:@[path1]
+                                               withRowAnimation:UITableViewRowAnimationBottom];
+                    
+                }
                 [self->_messageTable endUpdates];
-
-                               [self scrollToBottom];
-
-                               //mark as read
-                               // [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
-                           });
-
+                
+                [self scrollToBottom];
+                
+                //mark as read
+                // [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
+            });
+            
         }];
-
+        
     }
 }
 
@@ -928,14 +894,6 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(NSString*) currentGMTTime
 {
     NSDate* sourceDate =[NSDate date];
-
-//    NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
-//    NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
-//    NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
-//    NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
-//    NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
-//    NSDate* destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
-//
     return [self.sourceDateFormat stringFromDate:sourceDate];
 }
 
@@ -1057,25 +1015,26 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     MLBaseCell* cell;
-
-    NSDictionary* row;
+    
+    MLMessage* row;
     if(indexPath.row<self.messageList.count) {
-    row= [self.messageList objectAtIndex:indexPath.row];
+        row= [self.messageList objectAtIndex:indexPath.row];
+    } else  {
+        DDLogError(@"Attempt to access beyond bounds");
     }
 
-    NSString *from =[row objectForKey:@"af"];
+    NSString *from =row.actualFrom;
 
     //intended to correct for bad data. Can be removed later probably.
     if([from isEqualToString:@"(null)"])
     {
-        from=[row objectForKey:@"message_from"];;
+        from=row.from;
     }
-      NSString *messageType =[row objectForKey:kMessageType];
 
-    if([messageType isEqualToString:kMessageTypeStatus])
+    if([row.messageType isEqualToString:kMessageTypeStatus])
     {
         cell=[tableView dequeueReusableCellWithIdentifier:@"StatusCell"];
-        cell.messageBody.text =[row objectForKey:@"message"];
+        cell.messageBody.text = row.messageText;
         cell.link=nil;
         return cell;
     }
@@ -1084,7 +1043,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         if([from isEqualToString:_jid])
         {
-            if([messageType isEqualToString:kMessageTypeUrl])
+            if([row.messageType isEqualToString:kMessageTypeUrl])
             {
                 cell=[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
             } else  {
@@ -1093,7 +1052,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
         else
         {
-            if([messageType isEqualToString:kMessageTypeUrl])
+            if([row.messageType isEqualToString:kMessageTypeUrl])
             {
                 cell=[tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
             } else  {
@@ -1103,7 +1062,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     } else  {
         if([from isEqualToString:self.contactName])
         {
-            if([messageType isEqualToString:kMessageTypeUrl])
+            if([row.messageType isEqualToString:kMessageTypeUrl])
             {
                 cell=[tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
             }  else  {
@@ -1112,7 +1071,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
         else
         {
-            if([messageType isEqualToString:kMessageTypeUrl])
+            if([row.messageType isEqualToString:kMessageTypeUrl])
             {
                 cell=[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
             } else  {
@@ -1120,19 +1079,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             }
         }
 
-        NSNumber *received = [row objectForKey:@"message"];
-        if(received){
-
-        }
     }
 
-    NSDictionary *messageRow;
-    if(indexPath.row<self.messageList.count) {
-        messageRow = [self.messageList objectAtIndex:indexPath.row];
-    }
-    NSString *messageString =[messageRow objectForKey:@"message"];
-
-    if([messageType isEqualToString:kMessageTypeImage])
+    if([row.messageType isEqualToString:kMessageTypeImage])
     {
         MLChatImageCell* imageCell;
         if([from isEqualToString:self.contactName])
@@ -1146,8 +1095,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
 
 
-        if(![imageCell.link isEqualToString:messageString]){
-            imageCell.link = messageString;
+        if(![imageCell.link isEqualToString:row.messageText]){
+            imageCell.link = row.messageText;
             imageCell.thumbnailImage.image=nil;
             imageCell.loading=NO;
             [imageCell loadImageWithCompletion:^{}];
@@ -1157,7 +1106,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
     else {
 
-      if([messageType isEqualToString:kMessageTypeUrl])
+      if([row.messageType isEqualToString:kMessageTypeUrl])
       {
           MLLinkCell *toreturn;
           if([from isEqualToString:self.contactName]) {
@@ -1167,31 +1116,30 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
               toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
           }
 
-         NSString * cleanLink=[[row objectForKey:@"message"]  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+         NSString * cleanLink=[row.messageText  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
           NSArray *parts = [cleanLink componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
           cell.link = parts[0];
 
           toreturn.messageBody.text =cell.link;
           toreturn.link=cell.link;
 
-          if([(NSString *)[row objectForKey:@"previewImage"] length]>0
-             || [(NSString *)[row objectForKey:@"previewText"] length]>0)
+          if(row.previewText || row.previewImage)
           {
-              toreturn.imageUrl = [row objectForKey:@"previewImage"];
-              toreturn.messageTitle.text = [row objectForKey:@"previewText"];
+              toreturn.imageUrl = row.previewImage;
+              toreturn.messageTitle.text = row.previewText;
               [toreturn loadImageWithCompletion:^{
 
               }];
           }  else {
               [toreturn loadPreviewWithCompletion:^{
                   if(toreturn.messageTitle.text.length==0) toreturn.messageTitle.text=@" "; // prevent repeated calls
-                  [[DataLayer sharedInstance] setMessageId:[row objectForKey:@"messageid"] previewText:toreturn.messageTitle.text  andPreviewImage:toreturn.imageUrl];
+                  [[DataLayer sharedInstance] setMessageId:row.messageId previewText:toreturn.messageTitle.text  andPreviewImage:toreturn.imageUrl.absoluteString];
               }];
           }
           cell=toreturn;
 
       } else {
-        NSString* lowerCase= [[row objectForKey:@"message"] lowercaseString];
+        NSString* lowerCase= [row.messageText lowercaseString];
         NSRange pos = [lowerCase rangeOfString:@"https://"];
         if(pos.location==NSNotFound) {
             pos=[lowerCase rangeOfString:@"http://"];
@@ -1200,7 +1148,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         NSRange pos2;
         if(pos.location!=NSNotFound)
         {
-            NSString* urlString =[[row objectForKey:@"message"] substringFromIndex:pos.location];
+            NSString* urlString =[row.messageText substringFromIndex:pos.location];
             pos2= [urlString rangeOfString:@" "];
             if(pos2.location==NSNotFound) {
                 pos2= [urlString rangeOfString:@">"];
@@ -1218,11 +1166,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
                 NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link attributes:underlineAttribute];
                 NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
                 [stitchedString appendAttributedString:
-                 [[NSAttributedString alloc] initWithString:[[row objectForKey:@"message"] substringToIndex:pos.location] attributes:nil]];
+                 [[NSAttributedString alloc] initWithString:[row.messageText substringToIndex:pos.location] attributes:nil]];
                 [stitchedString appendAttributedString:underlined];
                 if(pos2.location!=NSNotFound)
                 {
-                    NSString* remainder = [[row objectForKey:@"message"] substringFromIndex:pos.location+[underlined length]];
+                    NSString* remainder = [row.messageText substringFromIndex:pos.location+[underlined length]];
                     [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
                 }
                 cell.messageBody.attributedText=stitchedString;
@@ -1230,7 +1178,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
         else
         {
-            cell.messageBody.text =[row objectForKey:@"message"];
+            cell.messageBody.text =row.messageText;
             cell.link=nil;
         }
 
@@ -1247,21 +1195,18 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         cell.name.hidden=YES;
     }
 
-    if([row objectForKey:@"delivered"]){
-        if([[row objectForKey:@"delivered"] boolValue]!=YES)
-        {
+    if(!row.hasBeenSent){
             cell.deliveryFailed=YES;
-        }
     }
-
-    NSNumber *received = [row objectForKey:kReceived];
-    if(received.boolValue==YES) {
-        NSDictionary *prior =nil;
-        if(indexPath.row>0)
-        {
-            prior = [self.messageList objectAtIndex:indexPath.row-1];
-        }
-        if(indexPath.row==self.messageList.count-1 || ![[prior objectForKey:@"af"] isEqualToString:self.jid]) {
+    
+    MLMessage *priorRow =nil;
+    if(indexPath.row>0)
+    {
+        priorRow = [self.messageList objectAtIndex:indexPath.row-1];
+    }
+    
+    if(row.inbound==YES) {
+        if(indexPath.row==self.messageList.count-1 || ![priorRow.actualFrom isEqualToString:self.jid]) {
             cell.messageStatus.hidden=NO;
         } else  {
             cell.messageStatus.hidden=YES;
@@ -1271,19 +1216,15 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         cell.messageStatus.hidden=YES;
     }
 
-    cell.messageHistoryId=[row objectForKey:@"message_history_id"];
+    cell.messageHistoryId=row.messageDBId;
     BOOL newSender=NO;
-    NSString *priorDate;
     if(indexPath.row>0)
     {
-        NSDictionary *priorRow=[self.messageList objectAtIndex:indexPath.row-1];
-        priorDate =[priorRow objectForKey:@"thetime"];
-        NSString *priorSender =[priorRow objectForKey:@"af"];
-
+        NSString *priorSender =priorRow.actualFrom;
         //intended to correct for bad data. Can be removed later probably.
         if([priorSender isEqualToString:@"(null)"])
         {
-            priorSender=[priorRow objectForKey:@"message_from"];;
+            priorSender=priorRow.from;
         }
         if(![priorSender isEqualToString:from])
         {
@@ -1291,18 +1232,18 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         }
     }
 
-    cell.date.text= [self formattedTimeStampWithSource:[row objectForKey:@"thetime"]];
+    cell.date.text= [self formattedTimeStampWithSource:row.timestamp];
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
 
-    cell.dividerDate.text = [self formattedDateWithSource:[row objectForKey:@"thetime"] andPriorDate:priorDate];
-
-    if([[row objectForKey:@"encrypted"] boolValue])
+    cell.dividerDate.text = [self formattedDateWithSource:row.timestamp andPriorDate:priorRow.timestamp];
+    
+    if(row.encrypted)
     {
         cell.lockImage.hidden=NO;
     } else  {
-         cell.lockImage.hidden=YES;
+        cell.lockImage.hidden=YES;
     }
-
+    
     if([from isEqualToString:_jid])
     {
         cell.outBound=YES;
@@ -1310,7 +1251,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     else  {
         cell.outBound=NO;
     }
-
+    
     cell.parent=self;
 
     [cell updateCellWithNewSender:newSender];

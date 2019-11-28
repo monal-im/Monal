@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MLLinkCell : MLBaseCell
 @property (nonatomic, strong) IBOutlet UILabel* messageTitle;
 @property (nonatomic, strong) IBOutlet UIImageView* previewImage;
-@property (nonatomic, strong) NSString *imageUrl; 
+@property (nonatomic, strong) NSURL *imageUrl; 
 
 -(void) loadImageWithCompletion:(void (^)(void))completion;
 -(void) loadPreviewWithCompletion:(void (^)(void))completion;

@@ -10,13 +10,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef NS_ENUM (NSInteger, MessageType) {
-    MessageTypeText =0,
-    MessageTypeImage,
-    MessageTypeUrl,
-    MessageTypeStatus
-};
-
 /**
  message object intended to be passed around and eventually used to render
  */
@@ -26,12 +19,17 @@ typedef NS_ENUM (NSInteger, MessageType) {
 /**
  account number in the database should be an integer
  */
-@property (nonatomic, copy) NSNumber *accountId;
+@property (nonatomic, copy) NSString *accountId;
 
 /**
  The message's unique identifier
  */
 @property (nonatomic, copy) NSString *messageId;
+
+/**
+The of the message in the DB , should be int
+ */
+@property (nonatomic, copy) NSNumber *messageDBId;
 
 /**
  Actual sender will differ from the "from" when in a group chat
@@ -40,17 +38,30 @@ typedef NS_ENUM (NSInteger, MessageType) {
 @property (nonatomic, copy) NSString *from;
 @property (nonatomic, copy) NSString *to;
 
-@property (nonatomic, assign) MessageType messagetype;
+@property (nonatomic, copy) NSString* messageType;
 
 @property (nonatomic, copy) NSString *messageText;
 
 /**
- If the text was parsed into a URL
+ If the text was parsed into a URL. For message type url
  */
 @property (nonatomic, copy) NSURL *url;
 
+/**
+ path to preview image for image type
+ */
+@property (nonatomic, copy) NSURL *previewImage;
+@property (nonatomic, copy) NSString *previewText;
+
+/**
+ for message type status. The MUC subeject
+ */
+@property (nonatomic, copy) NSString *groupSubject;
+
+
+
 @property (nonatomic, copy) NSDate *delayTimeStamp;
-@property (nonatomic, copy) NSDate *sentTime;
+@property (nonatomic, copy) NSDate *timestamp;
 
 /**
  usually used to indicate if the message was  encrypted on the wire, not in this payload
@@ -60,9 +71,16 @@ typedef NS_ENUM (NSInteger, MessageType) {
 /**
  whether the text was sent out on the wire not if it was delivered to the recipient
  */
-@property (nonatomic, assign) BOOL sent;
+@property (nonatomic, assign) BOOL hasBeenSent;
 
+/*
+ messages we received 
+ */
+@property (nonatomic, assign) BOOL inbound;
 
+@property (nonatomic, assign) BOOL shouldShowAlert;
+
+-(BOOL) shouldForceRefresh; 
 
 @end
 

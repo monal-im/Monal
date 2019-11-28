@@ -18,6 +18,9 @@
 #import "SignalProtocolObjC.h"
 #endif
 
+#import "MLMessage.h"
+#import "MLContact.h"
+
 typedef NS_ENUM (NSInteger, xmppState) {
     kStateLoggedOut =-1,
     kStateDisconnected , // has connected once

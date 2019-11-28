@@ -1823,12 +1823,6 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                     NSString* actuallyFrom= messageNode.actualFrom;
                                     if(!actuallyFrom) actuallyFrom=messageNode.from;
 
-                                    NSString* messageText=messageNode.messageText;
-                                    if(!messageText) messageText=@"";
-
-                                    BOOL shouldRefresh = NO;
-                                    if(messageNode.delayTimeStamp)  shouldRefresh =YES;
-
                                     NSArray *jidParts= [self.jid componentsSeparatedByString:@"/"];
 
                                     NSString *recipient;
@@ -1838,21 +1832,20 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                     if(!recipient) recipient= self->_fulluser;
 
 
-                                    NSDictionary* userDic=@{@"from":messageNode.from,
-                                                            @"actuallyfrom":actuallyFrom,
-                                                            @"messageText":body,
-                                                            @"to":messageNode.to?messageNode.to:recipient,
-                                                            @"messageid":messageNode.idval?messageNode.idval:@"",
-                                                            @"accountNo":self->_accountNo,
-                                                            @"showAlert":[NSNumber numberWithBool:showAlert],
-                                                            @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh],
-                                                            @"messageType":newMessageType?newMessageType:kMessageTypeText,
-                                                            @"muc_subject":messageNode.subject?messageNode.subject:@"",
-                                                            @"encrypted":[NSNumber numberWithBool:encrypted],
-                                                            @"delayTimeStamp":messageNode.delayTimeStamp?messageNode.delayTimeStamp:@""
-                                                            };
-
-                                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                                    MLMessage *message = [[MLMessage alloc] init];
+                                    message.from=messageNode.from;
+                                    message.actualFrom= actuallyFrom;
+                                    message.messageText= messageNode.messageText;
+                                    message.to=messageNode.to?messageNode.to:recipient;
+                                    message.messageId=messageNode.idval?messageNode.idval:@"";
+                                    message.accountId=self.accountNo;
+                                    message.encrypted=encrypted;
+                                    message.delayTimeStamp=messageNode.delayTimeStamp;
+                                    message.timestamp =[NSDate date];
+                                    message.shouldShowAlert= showAlert;
+                                    message.messageType=kMessageTypeText;
+                                    
+                                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
                                 }
                             }];
                         }

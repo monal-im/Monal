@@ -605,22 +605,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) handleNewMessage:(NSNotification *)notification
 {
-    if([[notification.userInfo objectForKey:@"messageType"] isEqualToString:kMessageTypeStatus]) return;
-    NSNumber *showAlert =[notification.userInfo objectForKey:@"showAlert"];
-    
+    MLMessage *message =[notification.userInfo objectForKey:@"message"];
+
+    if([message.messageType isEqualToString:kMessageTypeStatus]) return;
+
     dispatch_sync(dispatch_get_main_queue(),^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || !showAlert.boolValue)
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || !message.shouldShowAlert)
         {
             return;
         }
     });
     
-    DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
+    DDLogVerbose(@"contats view got new message notice %@", notification.userInfo);
     if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]]) {
         chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
-        if( (([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"from"]] )|| ([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"to"]] )) &&
-           [currentTop.accountNo isEqualToString:
-            [NSString stringWithFormat:@"%ld",(long)[[notification.userInfo objectForKey:kaccountNoKey] integerValue] ]]
+        if( (([currentTop.contactName isEqualToString:message.from] )|| ([currentTop.contactName isEqualToString:message.to] )) &&
+           [currentTop.accountNo isEqualToString:message.accountId]
            )
         {
             return;
@@ -631,8 +631,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         int counter=0;
         for(NSDictionary* row in self.contacts)
         {
-            if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
-               [[row objectForKey:@"account_id"]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
+            if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:message.from]==NSOrderedSame &&
+               [[row objectForKey:@"account_id"]  integerValue]==message.accountId.integerValue)
             {
                 pos=counter;
                 break;

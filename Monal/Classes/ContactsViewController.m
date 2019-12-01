@@ -1057,7 +1057,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
                                                                    message:nil preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [alert dismissViewControllerAnimated:YES completion:nil];
     }]];
     
@@ -1089,6 +1089,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
         
     }]];
+    
+    alert.popoverPresentationController.sourceView=self.tableView;
     
     [self presentViewController:alert animated:YES completion:nil];
 }

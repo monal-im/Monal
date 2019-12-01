@@ -295,7 +295,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) addOnlineUser:(NSNotification *) notification
 {
-    NSDictionary* user = notification.userInfo;
+    MLContact *contact = [notification.userInfo objectForKey:@"contact"];
     
     dispatch_async(dispatch_get_main_queue(), ^{
         if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
@@ -312,9 +312,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(initalPos>=0)
         {
             DDLogVerbose(@"user %@ already in list updating status and nothing else",[user objectForKey:kusernameKey]);
-            
            [self updateContactAt:initalPos withInfo:user];
-
         }
         else
         {

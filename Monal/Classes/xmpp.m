@@ -561,6 +561,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
 
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
+    if(_accountNo)
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountClearContacts object:nil userInfo:@{kAccountID:_accountNo}];
 
 

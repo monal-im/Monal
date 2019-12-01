@@ -23,6 +23,7 @@
     _tableData =[[DataLayer sharedInstance] messageHistoryBuddies:_accountId];
     [self.tableView reloadData];
     self.navigationItem.title=_accountName;
+    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 }
 
 - (void)didReceiveMemoryWarning

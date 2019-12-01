@@ -44,10 +44,11 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            _tableData=result;
-            [_chatLogTable reloadData];
+            self->_tableData=result;
+            [self->_chatLogTable reloadData];
         });
         
     }];

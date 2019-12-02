@@ -3211,10 +3211,10 @@ if(!self.supportsSM3)
     {
         [[DataLayer sharedInstance] contactForUsername:[dic objectForKey:@"jid"] forAccount:self.accountNo withCompletion:^(NSArray * result) {
 
-            NSDictionary *row = result.firstObject;
-            if (((NSString *)[row objectForKey:@"raw_full"]).length==0)
+            MLContact *row = result.firstObject;
+            if (row.fullName.length==0)
             {
-                [self getVCard:[dic objectForKey:@"jid"]];
+                [self getVCard:row.contactJid];
             }
 
         }];
@@ -3473,22 +3473,22 @@ if(!self.supportsSM3)
 }
 
 #pragma mark - Jingle calls
--(void)call:(NSDictionary*) contact
+-(void)call:(MLContact*) contact
 {
     if(self.jingle) return;
     self.jingle=[[jingleCall alloc] init];
     self.jingle.me=[NSString stringWithFormat:@"%@/%@", self.fulluser, self.resource];
 
-    NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:[contact objectForKey:@"buddy_name"]];
+    NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:contact.contactJid];
     if([resources count]>0)
     {
         //TODO selct resource action sheet?
-        XMPPIQ* jingleiq =[self.jingle initiateJingleTo:[contact objectForKey:@"buddy_name" ] withId:[[NSUUID UUID] UUIDString] andResource:[[resources objectAtIndex:0] objectForKey:@"resource"]];
+        XMPPIQ* jingleiq =[self.jingle initiateJingleTo:contact.contactJid withId:[[NSUUID UUID] UUIDString] andResource:[[resources objectAtIndex:0] objectForKey:@"resource"]];
         [self send:jingleiq];
     }
 }
 
--(void)hangup:(NSDictionary*) contact
+-(void)hangup:(MLContact*) contact
 {
     XMPPIQ* jingleiq =[self.jingle terminateJinglewithId:[[NSUUID UUID] UUIDString]];
     [self send:jingleiq];

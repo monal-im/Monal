@@ -13,7 +13,7 @@
 
 @interface ContactDetails : UITableViewController <UITextFieldDelegate, IDMPhotoBrowserDelegate>
 
-@property (nonatomic, strong) NSDictionary *contact;
+@property (nonatomic, strong) MLContact *contact;
 
 -(IBAction) callContact:(id)sender;
 -(IBAction) muteContact:(id)sender;

@@ -44,34 +44,23 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [[MLXMPPManager sharedInstance] getVCard:_contact];
+    [[MLXMPPManager sharedInstance] getVCard:self.contact];
     self.tableView.rowHeight= UITableViewAutomaticDimension;
- 
-    NSString* nickName=[self.contact  objectForKey:@"nick_name"];
-    if([[nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
-        self.navigationItem.title=nickName;
-    } else  {
-        NSString* fullName=[self.contact  objectForKey:@"full_name"];
-        if([[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
-            self.navigationItem.title=fullName;
-        }
-        else {
-             self.navigationItem.title=[self.contact  objectForKey:@"buddy_name"];
-        }
-        
-    }
-  
-    self.accountNo=[NSString stringWithFormat:@"%@", [self.contact objectForKey:@"account_id"]];
+    
+    self.navigationItem.title=self.contact.contactDisplayName;
+    
+    
+    self.accountNo=self.contact.accountId;
     //if not in buddylist, add.
-    [[DataLayer sharedInstance] addContact:[self.contact objectForKey:@"buddy_name"]  forAccount:self.accountNo  fullname:@"" nickname:@"" withCompletion:^(BOOL success) {
+    [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" withCompletion:^(BOOL success) {
     }];
     
     
 #ifndef DISABLE_OMEMO
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    [self.xmppAccount queryOMEMODevicesFrom:[self.contact objectForKey:@"buddy_name"]];
+    [self.xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
 #endif
-   
+    
     [self refreshLock];
     [self refreshMute];
     
@@ -80,7 +69,7 @@
 -(IBAction) callContact:(id)sender
 {
     [self performSegueWithIdentifier:@"showCall" sender:self];
-    [[MLXMPPManager sharedInstance] callContact:_contact];
+    [[MLXMPPManager sharedInstance] callContact:self.contact];
 }
 
 
@@ -89,17 +78,17 @@
     if([segue.identifier isEqualToString:@"showCall"])
     {
         CallViewController *callScreen = segue.destinationViewController;
-        callScreen.contact=_contact; 
+        callScreen.contact=self.contact;
     }
-     else if([segue.identifier isEqualToString:@"showResources"])
+    else if([segue.identifier isEqualToString:@"showResources"])
     {
         MLResourcesTableViewController *resourcesVC = segue.destinationViewController;
-        resourcesVC.contact=_contact;
+        resourcesVC.contact=self.contact;
     }
     else if([segue.identifier isEqualToString:@"showKeys"])
     {
         MLKeysTableViewController *keysVC = segue.destinationViewController;
-        keysVC.contact=_contact;
+        keysVC.contact=self.contact;
     }
 }
 
@@ -109,7 +98,7 @@
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
     if(section==0) return 2; // table view does not like <=1
-
+    
     return 30.0;
 }
 
@@ -117,26 +106,25 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell* thecell;
-  
-   switch(indexPath.section) {
+    
+    switch(indexPath.section) {
         case 0: {
             MLContactDetailHeader *detailCell=  (MLContactDetailHeader *)[tableView dequeueReusableCellWithIdentifier:@"headerCell"];
-
-            detailCell.jid.text=[self.contact objectForKey:@"buddy_name"];
-//            thecell.fullName.text=[self.contact objectForKey:@"full_name"];
-//            thecell.buddyStatus.text=[self.contact objectForKey:@"state"];
-
-//            if([thecell.buddyStatus.text isEqualToString:@"(null)"])  thecell.buddyStatus.text=@"";
-//            if([thecell.fullName.text isEqualToString:@"(null)"])  thecell.fullName.text=@"";
-
-            NSString* accountNo=[NSString stringWithFormat:@"%@", [self.contact objectForKey:@"account_id"]];
-            [[MLImageManager sharedInstance] getIconForContact:[self.contact objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {
+            
+            detailCell.jid.text=self.contact.contactJid;
+            //            thecell.fullName.text=[self.contact objectForKey:@"full_name"];
+            //            thecell.buddyStatus.text=[self.contact objectForKey:@"state"];
+            
+            //            if([thecell.buddyStatus.text isEqualToString:@"(null)"])  thecell.buddyStatus.text=@"";
+            //            if([thecell.fullName.text isEqualToString:@"(null)"])  thecell.fullName.text=@"";
+            
+            [[MLImageManager sharedInstance] getIconForContact:self.contact.contactJid andAccount:self.contact.accountId withCompletion:^(UIImage *image) {
                 detailCell.buddyIconView.image=image;
-             //   detailCell.background.image=image;
+                //   detailCell.background.image=image;
             }];
             
             detailCell.background.image= [UIImage imageNamed:@"Tie_My_Boat_by_Ray_García"];
-
+            
             if(self.isMuted) {
                 [detailCell.muteButton setImage:[UIImage imageNamed:@"847-moon-selected"] forState:UIControlStateNormal];
             } else  {
@@ -152,35 +140,35 @@
             thecell=detailCell;
             break;
         }
-       case 1: {
-           if(indexPath.row==0)
-           {
-               MLTextInputCell *cell=  (MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-                   NSString* nickName=[self.contact  objectForKey:@"nick_name"];
-               if([[nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
-                   cell.textInput.text=[_contact objectForKey:@"nick_name"];
-               } else {
-               cell.textInput.text=[_contact objectForKey:@"full_name"];
-               }
-               if([cell.textInput.text isEqualToString:@"(null)"])  cell.textInput.text=@"";
-               cell.textInput.placeholder=@"Set a nickname";
-               cell.textInput.delegate=self;
-               thecell=cell;
-           }
-           else if(indexPath.row==1) {
-               MLDetailsTableViewCell *cell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"MessageCell"];
-               cell.cellDetails.text=[_contact objectForKey:@"status"];
-               if([cell.cellDetails.text isEqualToString:@"(null)"])  cell.cellDetails.text=@"";
-               thecell=cell;
-           }
-           else {
-               UITableViewCell *cell=  (UITableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"TableCell"];
-               cell.textLabel.text = @"View Images Received";
-               thecell=cell;
-           }
-           break;
-       }
-       case 2: {
+        case 1: {
+            if(indexPath.row==0)
+            {
+                MLTextInputCell *cell=  (MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
+                NSString* nickName=self.contact.nickName;
+                if([[nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
+                    cell.textInput.text=nickName;
+                } else {
+                    cell.textInput.text=self.contact.fullName;
+                }
+                if([cell.textInput.text isEqualToString:@"(null)"])  cell.textInput.text=@"";
+                cell.textInput.placeholder=@"Set a nickname";
+                cell.textInput.delegate=self;
+                thecell=cell;
+            }
+            else if(indexPath.row==1) {
+                MLDetailsTableViewCell *cell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"MessageCell"];
+                cell.cellDetails.text=self.contact.statusMessage;
+                if([cell.cellDetails.text isEqualToString:@"(null)"])  cell.cellDetails.text=@"";
+                thecell=cell;
+            }
+            else {
+                UITableViewCell *cell=  (UITableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"TableCell"];
+                cell.textLabel.text = @"View Images Received";
+                thecell=cell;
+            }
+            break;
+        }
+        case 2: {
             thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Sub"];
             if(indexPath.row==1) {
                 thecell.textLabel.text=@"Resources"; //if muc change to participants
@@ -190,7 +178,7 @@
             thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             break;
         }
-   }
+    }
     return thecell;
     
 }
@@ -204,12 +192,12 @@
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-	return 3;
+    return 3;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    NSString* toreturn=nil; 
+    NSString* toreturn=nil;
     if(section==1)
         toreturn= @"About";
     
@@ -247,7 +235,7 @@
 }
 
 -(void) showChatImges{
-    NSMutableArray *images = [[DataLayer sharedInstance] allAttachmentsFromContact:[self.contact objectForKey:@"buddy_name"] forAccount:self.accountNo];
+    NSMutableArray *images = [[DataLayer sharedInstance] allAttachmentsFromContact:self.contact.contactJid forAccount:self.accountNo];
     
     if(!self.photos)
     {   self.photos =[[NSMutableArray alloc] init];
@@ -262,25 +250,25 @@
         }
     }
     
-dispatch_async(dispatch_get_main_queue(), ^{
-    if(self.photos.count>0) {
-        IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
-        browser.delegate=self;
-        browser.displayDoneButton=YES;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(self.photos.count>0) {
+            IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
+            browser.delegate=self;
+            browser.displayDoneButton=YES;
+            
+            UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
+            
+            
+            [self presentViewController:nav animated:YES completion:nil];
+        } else  {
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Nothing to see" message:@"You have not received any images in this conversation." preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                [alert dismissViewControllerAnimated:YES completion:nil];
+            }]];
+            [self presentViewController:alert animated:YES completion:nil];
+        }
         
-        UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
-        
-        
-        [self presentViewController:nav animated:YES completion:nil];
-    } else  {
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Nothing to see" message:@"You have not received any images in this conversation." preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            [alert dismissViewControllerAnimated:YES completion:nil];
-        }]];
-        [self presentViewController:alert animated:YES completion:nil];
-    }
-    
-});
+    });
     
 }
 
@@ -293,16 +281,16 @@ dispatch_async(dispatch_get_main_queue(), ^{
 -(IBAction) muteContact:(id)sender
 {
     if(!self.isMuted) {
-        [[DataLayer sharedInstance] muteJid:[self.contact objectForKey:@"buddy_name"]];
+        [[DataLayer sharedInstance] muteJid:self.contact.contactJid];
     } else {
-        [[DataLayer sharedInstance] unMuteJid:[self.contact objectForKey:@"buddy_name"]];
+        [[DataLayer sharedInstance] unMuteJid:self.contact.contactJid];
     }
     [self refreshMute];
 }
 
 -(void) refreshMute
 {
-    [[DataLayer sharedInstance] isMutedJid:[self.contact objectForKey:@"buddy_name"] withCompletion:^(BOOL muted) {
+    [[DataLayer sharedInstance] isMutedJid:self.contact.contactJid withCompletion:^(BOOL muted) {
         self.isMuted= muted;
         dispatch_async(dispatch_get_main_queue(), ^{
             NSIndexPath *path = [NSIndexPath indexPathForRow:0 inSection:0];
@@ -314,16 +302,16 @@ dispatch_async(dispatch_get_main_queue(), ^{
 
 -(IBAction) toggleEncryption:(id)sender
 {
-      NSArray *devices= [self.xmppAccount.monalSignalStore knownDevicesForAddressName:[self.contact objectForKey:@"buddy_name"]];
+    NSArray *devices= [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
     if(devices.count>0) {
         if(self.isEncrypted) {
-            [[DataLayer sharedInstance] disableEncryptForJid:[self.contact objectForKey:@"buddy_name"] andAccountNo:self.accountNo];
-             [self refreshLock];
+            [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.accountNo];
+            [self refreshLock];
         } else {
-            [[DataLayer sharedInstance] encryptForJid:[self.contact objectForKey:@"buddy_name"] andAccountNo:self.accountNo];
+            [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.accountNo];
             [self refreshLock];
         }
-       
+        
     } else  {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Encryption Not Supported" message:@"This contact does not appear to have any devices that support encryption." preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
@@ -336,7 +324,7 @@ dispatch_async(dispatch_get_main_queue(), ^{
 
 -(void) refreshLock
 {
-    self.isEncrypted= [[DataLayer sharedInstance] shouldEncryptForJid:[self.contact objectForKey:@"buddy_name"] andAccountNo:self.accountNo];
+    self.isEncrypted= [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.accountNo];
     
     dispatch_async(dispatch_get_main_queue(), ^{
         NSIndexPath *path = [NSIndexPath indexPathForRow:0 inSection:0];
@@ -355,15 +343,15 @@ dispatch_async(dispatch_get_main_queue(), ^{
 
 
 -(BOOL) textFieldShouldEndEditing:(UITextField *)textField {
-    [[DataLayer sharedInstance] setNickName:textField.text forContact:[self.contact objectForKey:@"buddy_name"] andAccount:self.accountNo];
-  
+    [[DataLayer sharedInstance] setNickName:textField.text forContact:self.contact.contactJid andAccount:self.accountNo];
+    
     if(textField.text.length>0)
         self.navigationItem.title = textField.text;
     else
-        self.navigationItem.title=[self.contact objectForKey:@"full_name"];
+        self.navigationItem.title=self.contact.fullName;
     
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:self.contact];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
     
     return YES;
 }

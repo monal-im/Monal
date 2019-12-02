@@ -126,7 +126,7 @@ Returns the server set name of the conencted account
 /**
  Call a contact from an account
  */
--(void) callContact:(NSDictionary*) contact;
+-(void) callContact:(MLContact*) contact;
 
 /**
  hangup on a contact from an account
@@ -204,7 +204,7 @@ Attempts to upload a file to the  HTTP upload service
 /**
  fetch a contacts vCard
  */
--(void) getVCard:(NSDictionary *) contact;
+-(void) getVCard:(MLContact *) contact;
 
 /**
  log out everything but doesnt destroy the stream id

@@ -24,7 +24,7 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    self.resources = [[DataLayer sharedInstance] resourcesForContact:[self.contact objectForKey:@"buddy_name"]];
+    self.resources = [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
 }
 
 #pragma mark - Table view data source

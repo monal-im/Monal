@@ -36,12 +36,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
    
     NSString *contactName ;
     if(self.contact) {
-       contactName =  [self.contact objectForKey:@"user"]; //dic form incoming
-        if(!contactName)
-        {
-            contactName =  [self.contact objectForKey:@"buddy_name"]; // dic form outgoing
-        }
-        
+        contactName=self.contact.contactJid;
         if(!contactName) {
             contactName = @"No Contact Selected";
             
@@ -49,9 +44,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     } 
     
         self.userName.text=contactName;
-    NSString* accountNo=[NSString stringWithFormat:@"%@", [self.contact objectForKey:@"account_id"]];
-    
-    [[MLImageManager sharedInstance] getIconForContact:contactName andAccount:accountNo withCompletion:^(UIImage *image) {
+  
+    [[MLImageManager sharedInstance] getIconForContact:contactName andAccount:self.contact.accountId withCompletion:^(UIImage *image) {
         self.userImage.image=image;
     }];
     

@@ -267,12 +267,12 @@ sets away xmpp call.
 /**
  Calls a contact
  */
--(void)call:(NSDictionary*) contact;
+-(void)call:(MLContact*) contact;
 
 /**
 Hangs up current call with contact
  */
--(void)hangup:(NSDictionary*) contact;
+-(void)hangup:(MLContact*) contact;
 
 /**
 Decline a call request

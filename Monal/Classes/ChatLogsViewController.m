@@ -93,7 +93,7 @@
         NSDictionary *dic = (NSDictionary *) sender;
         
         NSString* accountName= [NSString stringWithFormat:@"%@@%@", [dic objectForKey:@"username"],
-                                [dic objectForKey:@"domain"]];;
+                                [dic objectForKey:@"domain"]];
         NSString* accountId= [NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
         
         chat.accountId=accountId;

@@ -14,7 +14,7 @@
 
 @property (nonatomic, strong) NSString* accountId;
 @property (nonatomic, strong) NSString* accountName;
-@property (nonatomic, strong) NSArray* tableData;
+@property (nonatomic, strong) NSMutableArray* tableData;
 
 
 

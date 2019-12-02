@@ -1792,7 +1792,7 @@ static DataLayer *sharedInstance=nil;
 
 }
 
--(NSArray *) messageHistoryContacts:(NSString*) accountNo
+-(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo
 {
     //returns a list of  buddy's with message history
 

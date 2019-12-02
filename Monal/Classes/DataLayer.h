@@ -235,7 +235,7 @@ extern NSString *const kMessageTypeUrl;
 -(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo;
 -(BOOL) messageHistoryCleanAll;
 
--(NSArray *) messageHistoryContacts:(NSString*) accountNo;
+-(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo;
 -(void) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId encrypted:(BOOL) encrypted withCompletion:(void (^)(BOOL, NSString *))completion;
 

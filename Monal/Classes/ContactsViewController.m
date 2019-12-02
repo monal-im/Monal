@@ -18,7 +18,6 @@
 #import "UIColor+Theme.h"
 #import "DDLog.h"
 
-#define kinfoSection 0
 #define konlineSection 1
 #define kofflineSection 2
 
@@ -26,7 +25,6 @@
 @property (nonatomic, strong) NSArray* searchResults ;
 @property (nonatomic, strong) UISearchController *searchController;
 
-@property (nonatomic ,strong) NSMutableArray* infoCells;
 @property (nonatomic ,strong) NSMutableArray* contacts;
 @property (nonatomic ,strong) NSMutableArray* offlineContacts;
 @property (nonatomic ,strong) MLContact* lastSelectedContact;
@@ -51,7 +49,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
     self.contacts=[[NSMutableArray alloc] init] ;
     self.offlineContacts=[[NSMutableArray alloc] init] ;
-    self.infoCells=[[NSMutableArray alloc] init] ;
     
     [self.contactsTable reloadData];
     
@@ -727,8 +724,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     NSString* toReturn=nil;
     switch (section) {
-        case kinfoSection:
-            break;
         case konlineSection:
             toReturn= NSLocalizedString(@"Online", "");
             break;
@@ -842,9 +837,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //if(tableView ==self.view)
     else {
         switch (section) {
-            case kinfoSection:
-                toReturn=[_infoCells count];
-                break;
             case konlineSection:
                 toReturn= [self.contacts count];
                 break;

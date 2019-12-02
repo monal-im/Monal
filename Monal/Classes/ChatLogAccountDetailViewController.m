@@ -22,17 +22,15 @@
     [super viewWillAppear:animated];
     _tableData =[[DataLayer sharedInstance] messageHistoryContacts:self.accountId];
     
-    __block NSInteger pos;
-    
-    [self->_tableData enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        MLContact *contact = (MLContact *) obj;
+    int pos =0;
+    while(pos<self.tableData.count) {
+        MLContact *contact = [self.tableData objectAtIndex:pos];
         if([contact.contactJid isEqualToString:self.accountName]) {
-            *stop=YES;
-            pos=idx;
+            [self.tableData removeObjectAtIndex:pos];
         }
-    }];
+        pos++;
+    }
     
-    [_tableData removeObjectAtIndex:pos];
     
     [self.tableView reloadData];
     self.navigationItem.title=self.accountName;

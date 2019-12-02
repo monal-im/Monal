@@ -649,22 +649,25 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 #pragma mark - contact
 
--(void) removeContact:(NSDictionary*) contact
+-(void) removeContact:(MLContact *) contact
 {
-    NSString* accountNo=[NSString stringWithFormat:@"%@", [contact objectForKey:@"account_id"]];
-    xmpp* account =[self getConnectedAccountForID:accountNo];
-    if( account)
+    xmpp* account =[self getConnectedAccountForID:contact.accountId];
+    if(account)
     {
-        //if not MUC
-        [account removeFromRoster:[contact objectForKey:@"buddy_name"]];
-        //if MUC
-
+        
+        if(contact.isGroup)
+        {
+            //if MUC
+            [account leaveRoom:contact.contactJid withNick:contact.accountNickInGroup];
+        } else  {
+            [account removeFromRoster:contact.contactJid];
+        }
         //remove from DB
-        [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
-
+        [[DataLayer sharedInstance] removeBuddy:contact.contactJid forAccount:contact.accountId];
     }
-
 }
+
+
 
 -(void) addContact:(NSDictionary*) contact
 {
@@ -680,10 +683,10 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     }
 }
 
--(void) getVCard:(NSDictionary *) contact
+-(void) getVCard:(MLContact *) contact
 {
-    xmpp* account =[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[contact objectForKey:kAccountID]]];
-    [account getVCard:[contact objectForKey:@"buddy_name"]];
+    xmpp* account =[self getConnectedAccountForID:contact.accountId];
+    [account getVCard:contact.contactJid];
 }
 
 #pragma mark - MUC commands

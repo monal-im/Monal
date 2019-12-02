@@ -21,7 +21,6 @@
 
 #import "MLKeyViewController.h"
 
-#define kinfoSection 0
 #define konlineSection 1
 #define kofflineSection 2
 

@@ -737,7 +737,10 @@ NSString *const kGtalk = @"Gtalk";
         if(self.jid && self.accountno) {
             MLKeysTableViewController *keys= (MLKeysTableViewController *)segue.destinationViewController;
             keys.ownKeys = YES;
-            keys.contact =@{@"buddy_name":self.jid, @"account_id":self.accountno};
+            MLContact *contact = [[MLContact alloc] init];
+            contact.contactJid=self.jid;
+            contact.accountId=self.accountno;
+            keys.contact=contact;
         }
     }
     else if ([segue.identifier isEqualToString:@"showPassChange"])

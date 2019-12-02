@@ -10,7 +10,6 @@
 #import "chatViewController.h"
 
 @interface ChatLogContactViewController()
-@property (nonatomic,strong) NSMutableDictionary *contactToPass;
 
 @end
 
@@ -25,11 +24,9 @@
 {
     [super viewWillAppear:animated];
  
-    self.contactToPass = [[NSMutableDictionary alloc] initWithDictionary:_contact];
-    [self.contactToPass setObject:_accountId forKey:@"account_id"];
-    self.navigationItem.title=[_contact objectForKey:@"full_name"];
+    self.navigationItem.title=self.contact.fullName;
 
-    _tableData =[[DataLayer sharedInstance] messageHistoryListDates:[_contact objectForKey:@"message_from"] forAccount:_accountId];
+    _tableData =[[DataLayer sharedInstance] messageHistoryListDates:self.contact.contactJid forAccount:self.contact.accountId];
     self.navigationItem.title= @"Log Date";
     [self.tableView reloadData];
 }
@@ -77,7 +74,7 @@
     {
         chatViewController *chat = segue.destinationViewController;
         chat.day=(NSString *)sender;
-        [chat setupWithContact:self.contactToPass];
+        [chat setupWithContact:self.contact];
     }
 }
 

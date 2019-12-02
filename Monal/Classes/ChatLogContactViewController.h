@@ -11,8 +11,7 @@
 
 @interface ChatLogContactViewController : UITableViewController
 
-@property (nonatomic, strong) NSString* accountId;
-@property (nonatomic, strong) NSDictionary* contact;
+@property (nonatomic, strong) MLContact* contact;
 @property (nonatomic, strong) NSArray* tableData;
 
 @end

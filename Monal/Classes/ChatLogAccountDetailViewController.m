@@ -20,9 +20,9 @@
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    _tableData =[[DataLayer sharedInstance] messageHistoryBuddies:_accountId];
+    _tableData =[[DataLayer sharedInstance] messageHistoryContacts:self.accountId];
     [self.tableView reloadData];
-    self.navigationItem.title=_accountName;
+    self.navigationItem.title=self.accountName;
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 }
 
@@ -48,10 +48,10 @@
         cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
     }
     
-    cell.textLabel.text=[[_tableData objectAtIndex:indexPath.row] objectForKey:@"full_name"];
-    if([cell.textLabel.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length<1) cell.textLabel.text=[[_tableData objectAtIndex:indexPath.row] objectForKey:@"message_from"];
-
+    MLContact *row =[_tableData objectAtIndex:indexPath.row];
     
+    cell.textLabel.text=row.contactDisplayName;
+
     return cell;
 
 }
@@ -68,12 +68,10 @@
     if([segue.identifier isEqualToString:@"showContactLogs"])
     {
         ChatLogContactViewController* vc = segue.destinationViewController;
-        NSDictionary *dic = (NSDictionary *) sender;
+        MLContact *contact = (MLContact *) sender;
         
-        vc.accountId=self.accountId;
-        vc.contact= dic;
-      
-        
+        vc.contact= contact;
+ 
     }
 }
 

@@ -10,11 +10,6 @@
 
 
 @interface AccountsViewController : UITableViewController
-{
-    NSArray* _accountList;
-    NSArray* _protocolList; 
-}
-
 
 @property (nonatomic, strong) UITableView* accountsTable;
 

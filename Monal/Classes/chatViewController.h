@@ -20,13 +20,11 @@
 {
     UIView *containerView;
 	CGRect oldFrame;
-	NSString* _contactFullName;
 	BOOL _firstmsg;
 	BOOL wasaway;
 	BOOL wasoffline;
     NSArray* activeChats;
-    NSDictionary* _contact;
-    BOOL  _isMUC;
+    
     BOOL _keyboardVisible; 
 }
 
@@ -40,9 +38,8 @@
 @property (nonatomic, weak) IBOutlet UIImageView* backgroundImage;
 @property (nonatomic, weak) IBOutlet UIView* transparentLayer;
 
-
 @property (nonatomic, strong) NSString* day;
-@property (nonatomic,strong)  NSString* contactName;
+@property (nonatomic, strong) MLContact* contact;
 
 
 -(IBAction)sendMessageText:(id)sender;
@@ -50,7 +47,7 @@
 
 -(IBAction)dismissKeyboard:(id)sender;
 
--(void) setupWithContact:(NSDictionary*) contact  ;
+-(void) setupWithContact:(MLContact *) contact;
 
 /**
  Receives the new message notice and will update if it is this user. 
@@ -71,9 +68,6 @@
  */
 @property (nonatomic, strong) NSString* jid;
 
-/**
- This is the account number of the account this user is for
- */
-@property (nonatomic, strong) NSString* accountNo;
+
 
 @end

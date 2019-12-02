@@ -29,8 +29,8 @@
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    self.account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%@",[self.contact objectForKey:@"account_id"]]];
-    self.devices= [self.account.monalSignalStore knownDevicesForAddressName:[self.contact objectForKey:@"buddy_name"]];
+    self.account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+    self.devices= [self.account.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
 }
 
 #pragma mark - Table view data source
@@ -48,7 +48,7 @@
     MLKeyCell *cell = (MLKeyCell *) [tableView dequeueReusableCellWithIdentifier:@"key" forIndexPath:indexPath];
     
     NSNumber *device =[self.devices objectAtIndex:indexPath.row];
-    SignalAddress *address = [[SignalAddress alloc] initWithName:[self.contact objectForKey:@"buddy_name"] deviceId:(int) device.integerValue];
+    SignalAddress *address = [[SignalAddress alloc] initWithName:self.contact.contactJid deviceId:(int) device.integerValue];
     
     NSData *identity=[self.account.monalSignalStore getIdentityForAddress:address];
     
@@ -95,7 +95,7 @@
     NSInteger row = button.tag-100;
     
     NSNumber *device =[self.devices objectAtIndex:row];
-    SignalAddress *address = [[SignalAddress alloc] initWithName:[self.contact objectForKey:@"buddy_name"] deviceId:(int) device.integerValue];
+    SignalAddress *address = [[SignalAddress alloc] initWithName:self.contact.contactJid deviceId:(int) device.integerValue];
     
     NSData *identity=[self.account.monalSignalStore getIdentityForAddress:address];
     

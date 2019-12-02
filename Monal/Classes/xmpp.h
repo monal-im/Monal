@@ -18,6 +18,9 @@
 #import "SignalProtocolObjC.h"
 #endif
 
+#import "MLMessage.h"
+#import "MLContact.h"
+
 typedef NS_ENUM (NSInteger, xmppState) {
     kStateLoggedOut =-1,
     kStateDisconnected , // has connected once
@@ -264,12 +267,12 @@ sets away xmpp call.
 /**
  Calls a contact
  */
--(void)call:(NSDictionary*) contact;
+-(void)call:(MLContact*) contact;
 
 /**
 Hangs up current call with contact
  */
--(void)hangup:(NSDictionary*) contact;
+-(void)hangup:(MLContact*) contact;
 
 /**
 Decline a call request

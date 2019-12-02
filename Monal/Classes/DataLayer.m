@@ -904,10 +904,10 @@ static DataLayer *sharedInstance=nil;
     NSString* query= query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, nick_name, account_id, MUC, muc_subject, muc_nick , full_name as raw_full from buddylist where buddy_name=? and account_id=?"];
      NSArray *params= @[username, accountNo];
 
-    [self executeReader:query andArguments:params  withCompletion:^(NSArray * toReturn) {
-        if(toReturn!=nil)
+    [self executeReader:query andArguments:params  withCompletion:^(NSArray * results) {
+        if(results!=nil)
         {
-            DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
+            DDLogVerbose(@" count: %lu",  (unsigned long)[results count] );
 
         }
         else
@@ -915,6 +915,12 @@ static DataLayer *sharedInstance=nil;
             DDLogError(@"buddylist is empty or failed to read");
         }
 
+        NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
+         [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+             NSDictionary *dic = (NSDictionary *) obj;
+             [toReturn addObject:[MLContact contactFromDictionary:dic]];
+         }];
+        
         if(completion) {
             completion(toReturn);
         }
@@ -961,8 +967,16 @@ static DataLayer *sharedInstance=nil;
         query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count', ifnull(full_name, buddy_name) as full_name,nick_name,  MUC, muc_subject, muc_nick, account_id from buddylist where   online=1   order by state,full_name COLLATE NOCASE  asc "];
     }
 
+    
     [self executeReader:query withCompletion:^(NSMutableArray *results) {
-        if(completion) completion(results);
+        
+        NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
+        [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSDictionary *dic = (NSDictionary *) obj;
+            [toReturn addObject:[MLContact contactFromDictionary:dic]];
+        }];
+        
+        if(completion) completion(toReturn);
     }];
 
 }
@@ -971,7 +985,14 @@ static DataLayer *sharedInstance=nil;
 {
     NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name,nick_name,  a.account_id, MUC, muc_subject, muc_nick from buddylist  as A inner join account as b  on a.account_id=b.account_id  where  online=0 and enabled=1 order by full_name COLLATE NOCASE "];
     [self executeReader:query withCompletion:^(NSMutableArray *results) {
-        if(completion) completion(results);
+        
+        NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
+           [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+               NSDictionary *dic = (NSDictionary *) obj;
+               [toReturn addObject:[MLContact contactFromDictionary:dic]];
+           }];
+        
+        if(completion) completion(toReturn);
     }];
 }
 
@@ -1801,10 +1822,19 @@ static DataLayer *sharedInstance=nil;
 -(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     if(!accountNo ||! buddy) return nil;
-    NSString* query=[NSString stringWithFormat:@"select af,message_from,  message, thetime, message_history_id, delivered, messageid, messageType, received,encrypted,previewImage, previewText, unread  from (select ifnull(actual_from, message_from) as af, message_from,  message, received, encrypted,   timestamp  as thetime, message_history_id, delivered,messageid, messageType, previewImage, previewText, unread from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 250) order by thetime asc"];
+    NSString* query=[NSString stringWithFormat:@"select af,message_from, message_to, account_id,  message, thetime, message_history_id, delivered, messageid, messageType, received,encrypted,previewImage, previewText, unread  from (select ifnull(actual_from, message_from) as af, message_from, message_to, account_id,   message, received, encrypted,   timestamp  as thetime, message_history_id, delivered,messageid, messageType, previewImage, previewText, unread from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 250) order by thetime asc"];
     NSArray *params=@[accountNo, buddy, buddy];
-    NSMutableArray* toReturn = [[self executeReader:query andArguments:params] mutableCopy];
-
+    NSArray* rawArray = [self executeReader:query andArguments:params];
+    
+    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    
+    NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:rawArray.count];
+    [rawArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSDictionary *dic = (NSDictionary *) obj;
+        [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:formatter]];
+    }];
+    
     if(toReturn!=nil)
     {
         DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count] );

@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <sqlite3.h>
 #import "ParsePresence.h"
+#import "MLMessage.h"
+#import "MLContact.h"
 
 #define kMonalDBQueue "im.monal.dbQueue"
 

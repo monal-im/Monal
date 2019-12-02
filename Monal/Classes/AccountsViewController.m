@@ -25,6 +25,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 @property (nonatomic, strong) NSIndexPath  *selected;
 @property (nonatomic, strong) CWStatusBarNotification * sliding;
 
+@property (nonatomic, strong) NSArray* accountList;
+@property (nonatomic, strong) NSArray* protocolList;
+
 @end
 
 @implementation AccountsViewController
@@ -37,17 +40,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	// Do any additional setup after loading the view.
     self.navigationItem.title=NSLocalizedString(@"Accounts",@"");
    
-    _accountsTable=self.tableView;
-    _accountsTable.delegate=self;
-    _accountsTable.dataSource=self;
+    self.accountsTable=self.tableView;
+    self.accountsTable.delegate=self;
+    self.accountsTable.dataSource=self;
 
-    _accountsTable.backgroundView=nil;
+    self.accountsTable.backgroundView=nil;
  
    [[DataLayer sharedInstance] protocolListWithCompletion:^(NSArray *result) {
-       
        dispatch_async(dispatch_get_main_queue(), ^{
-           self->_protocolList=result;
-           [self->_accountsTable reloadData];
+           self.protocolList=result;
+           [self.accountsTable reloadData];
        });
        
    }];
@@ -73,7 +75,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [super viewWillAppear:animated];
     [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            self->_accountList=result;
+            self.accountList=result;
             [self.accountsTable reloadData];
         });
         
@@ -92,8 +94,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            _accountList=result;
-            [_accountsTable reloadData];
+            self.accountList=result;
+            [self.accountsTable reloadData];
         });
         
     }];

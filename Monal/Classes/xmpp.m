@@ -1824,12 +1824,6 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                     NSString* actuallyFrom= messageNode.actualFrom;
                                     if(!actuallyFrom) actuallyFrom=messageNode.from;
 
-                                    NSString* messageText=messageNode.messageText;
-                                    if(!messageText) messageText=@"";
-
-                                    BOOL shouldRefresh = NO;
-                                    if(messageNode.delayTimeStamp)  shouldRefresh =YES;
-
                                     NSArray *jidParts= [self.jid componentsSeparatedByString:@"/"];
 
                                     NSString *recipient;
@@ -1839,21 +1833,20 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                     if(!recipient) recipient= self->_fulluser;
 
 
-                                    NSDictionary* userDic=@{@"from":messageNode.from,
-                                                            @"actuallyfrom":actuallyFrom,
-                                                            @"messageText":body,
-                                                            @"to":messageNode.to?messageNode.to:recipient,
-                                                            @"messageid":messageNode.idval?messageNode.idval:@"",
-                                                            @"accountNo":self->_accountNo,
-                                                            @"showAlert":[NSNumber numberWithBool:showAlert],
-                                                            @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh],
-                                                            @"messageType":newMessageType?newMessageType:kMessageTypeText,
-                                                            @"muc_subject":messageNode.subject?messageNode.subject:@"",
-                                                            @"encrypted":[NSNumber numberWithBool:encrypted],
-                                                            @"delayTimeStamp":messageNode.delayTimeStamp?messageNode.delayTimeStamp:@""
-                                                            };
-
-                                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                                    MLMessage *message = [[MLMessage alloc] init];
+                                    message.from=messageNode.from;
+                                    message.actualFrom= actuallyFrom;
+                                    message.messageText= messageNode.messageText;
+                                    message.to=messageNode.to?messageNode.to:recipient;
+                                    message.messageId=messageNode.idval?messageNode.idval:@"";
+                                    message.accountId=self.accountNo;
+                                    message.encrypted=encrypted;
+                                    message.delayTimeStamp=messageNode.delayTimeStamp;
+                                    message.timestamp =[NSDate date];
+                                    message.shouldShowAlert= showAlert;
+                                    message.messageType=kMessageTypeText;
+                                    
+                                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
                                 }
                             }];
                         }
@@ -1924,18 +1917,14 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                 [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self->_accountNo];
                                 [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self->_accountNo];
                                 [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self->_accountNo];
-
-                                NSString* state=presenceNode.show;
-                                if(!state) state=@"";
-                                NSString* status=presenceNode.status;
-                                if(!status) status=@"";
-                                NSDictionary* userDic=@{kusernameKey: presenceNode.user,
-                                                        kaccountNoKey:self->_accountNo,
-                                                        kstateKey:state,
-                                                        kstatusKey:status
-                                                        };
-
-                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:userDic];
+ 
+                                MLContact *contact = [[MLContact alloc] init];
+                                contact.accountId=self.accountNo;
+                                contact.contactJid=presenceNode.user;
+                                contact.state=presenceNode.show;
+                                contact.statusMessage=presenceNode.status;
+  
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:@{@"contact":contact}];
 
 
                                 if(!presenceNode.MUC) {
@@ -3223,10 +3212,10 @@ if(!self.supportsSM3)
     {
         [[DataLayer sharedInstance] contactForUsername:[dic objectForKey:@"jid"] forAccount:self.accountNo withCompletion:^(NSArray * result) {
 
-            NSDictionary *row = result.firstObject;
-            if (((NSString *)[row objectForKey:@"raw_full"]).length==0)
+            MLContact *row = result.firstObject;
+            if (row.fullName.length==0)
             {
-                [self getVCard:[dic objectForKey:@"jid"]];
+                [self getVCard:row.contactJid];
             }
 
         }];
@@ -3485,22 +3474,22 @@ if(!self.supportsSM3)
 }
 
 #pragma mark - Jingle calls
--(void)call:(NSDictionary*) contact
+-(void)call:(MLContact*) contact
 {
     if(self.jingle) return;
     self.jingle=[[jingleCall alloc] init];
     self.jingle.me=[NSString stringWithFormat:@"%@/%@", self.fulluser, self.resource];
 
-    NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:[contact objectForKey:@"buddy_name"]];
+    NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:contact.contactJid];
     if([resources count]>0)
     {
         //TODO selct resource action sheet?
-        XMPPIQ* jingleiq =[self.jingle initiateJingleTo:[contact objectForKey:@"buddy_name" ] withId:[[NSUUID UUID] UUIDString] andResource:[[resources objectAtIndex:0] objectForKey:@"resource"]];
+        XMPPIQ* jingleiq =[self.jingle initiateJingleTo:contact.contactJid withId:[[NSUUID UUID] UUIDString] andResource:[[resources objectAtIndex:0] objectForKey:@"resource"]];
         [self send:jingleiq];
     }
 }
 
--(void)hangup:(NSDictionary*) contact
+-(void)hangup:(MLContact*) contact
 {
     XMPPIQ* jingleiq =[self.jingle terminateJinglewithId:[[NSUUID UUID] UUIDString]];
     [self send:jingleiq];

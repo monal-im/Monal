@@ -10,4 +10,36 @@
 
 @implementation MLMessage
 
++(MLMessage *) messageFromDictionary:(NSDictionary *) dic withDateFormatter:(NSDateFormatter *) formatter
+{
+    MLMessage *message = [[MLMessage alloc] init];
+    message.accountId=[NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
+    
+    message.from=[dic objectForKey:@"message_from"];
+    message.actualFrom= [dic objectForKey:@"af"];
+    message.messageText= [dic objectForKey:@"message"];
+    message.to=[dic objectForKey:@"message_to"];
+    
+    message.messageId=[dic objectForKey:@"messageid"];
+    message.stanzaId=[dic objectForKey:@"stanzaid"];
+    message.messageDBId=[dic objectForKey:@"message_history_id"];
+    message.timestamp =[formatter dateFromString:[dic objectForKey:@"thetime"]]; 
+    message.messageType=[dic objectForKey:@"messageType"];
+    
+    message.hasBeenReceived=[(NSNumber *)[dic objectForKey:@"received"] boolValue];
+    message.hasBeenSent=[(NSNumber *)[dic objectForKey:@"delivered"] boolValue];
+    message.encrypted=[(NSNumber *)[dic objectForKey:@"encrypted"] boolValue];
+  
+    message.previewText=[dic objectForKey:@"previewText"];
+    message.previewImage=[NSURL URLWithString:[dic objectForKey:@"previewImage"]];
+    
+    return message;
+}
+
+-(BOOL) shouldForceRefresh
+{
+    if(self.delayTimeStamp!=nil) return YES;
+    else return NO;
+}
+
 @end

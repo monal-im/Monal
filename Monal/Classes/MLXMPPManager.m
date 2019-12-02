@@ -649,22 +649,25 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 #pragma mark - contact
 
--(void) removeContact:(NSDictionary*) contact
+-(void) removeContact:(MLContact *) contact
 {
-    NSString* accountNo=[NSString stringWithFormat:@"%@", [contact objectForKey:@"account_id"]];
-    xmpp* account =[self getConnectedAccountForID:accountNo];
-    if( account)
+    xmpp* account =[self getConnectedAccountForID:contact.accountId];
+    if(account)
     {
-        //if not MUC
-        [account removeFromRoster:[contact objectForKey:@"buddy_name"]];
-        //if MUC
-
+        
+        if(contact.isGroup)
+        {
+            //if MUC
+            [account leaveRoom:contact.contactJid withNick:contact.accountNickInGroup];
+        } else  {
+            [account removeFromRoster:contact.contactJid];
+        }
         //remove from DB
-        [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
-
+        [[DataLayer sharedInstance] removeBuddy:contact.contactJid forAccount:contact.accountId];
     }
-
 }
+
+
 
 -(void) addContact:(NSDictionary*) contact
 {
@@ -680,10 +683,10 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     }
 }
 
--(void) getVCard:(NSDictionary *) contact
+-(void) getVCard:(MLContact *) contact
 {
-    xmpp* account =[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[contact objectForKey:kAccountID]]];
-    [account getVCard:[contact objectForKey:@"buddy_name"]];
+    xmpp* account =[self getConnectedAccountForID:contact.accountId];
+    [account getVCard:contact.contactJid];
 }
 
 #pragma mark - MUC commands
@@ -755,16 +758,16 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 }
 
 #pragma mark - Jingle VOIP
--(void) callContact:(NSDictionary*) contact
+-(void) callContact:(MLContact*) contact
 {
-    xmpp* account =[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[contact objectForKey:kAccountID]]];
+    xmpp* account =[self getConnectedAccountForID:contact.accountId];
     [account call:contact];
 }
 
 
--(void) hangupContact:(NSDictionary*) contact
+-(void) hangupContact:(MLContact*) contact
 {
-    xmpp* account =[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[contact objectForKey:kAccountID]]];
+    xmpp* account =[self getConnectedAccountForID:contact.accountId];
     [account hangup:contact];
 }
 
@@ -1018,21 +1021,20 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                                 }
                                 if(!recipient) return; // this shouldnt happen
 
-                                NSDictionary* userDic=@{@"from":messageNode.from,
-                                                        @"actuallyfrom":actuallyFrom,
-                                                        @"messageText":body,
-                                                        @"to":messageNode.to?messageNode.to:recipient,
-                                                        @"messageid":messageNode.idval?messageNode.idval:@"",
-                                                        @"accountNo":accountNo,
-                                                        @"showAlert":[NSNumber numberWithBool:showAlert],
-                                                        @"shouldRefresh":[NSNumber numberWithBool:shouldRefresh],
-                                                        @"messageType":newMessageType?newMessageType:kMessageTypeText,
-                                                        @"muc_subject":messageNode.subject?messageNode.subject:@"",
-                                                        @"encrypted":[NSNumber numberWithBool:encrypted],
-                                                        @"delayTimeStamp":messageNode.delayTimeStamp?messageNode.delayTimeStamp:@""
-                                                        };
+                                MLMessage *message = [[MLMessage alloc] init];
+                                                            message.from=messageNode.from;
+                                                            message.actualFrom= actuallyFrom;
+                                                            message.messageText= messageNode.messageText;
+                                                            message.to=messageNode.to?messageNode.to:recipient;
+                                                            message.messageId=messageNode.idval?messageNode.idval:@"";
+                                                            message.accountId=accountNo;
+                                                            message.encrypted=encrypted;
+                                                            message.delayTimeStamp=messageNode.delayTimeStamp;
+                                                            message.timestamp =[NSDate date];
+                                                            message.shouldShowAlert= showAlert;
+                                                            message.messageType=kMessageTypeText;
 
-                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:userDic];
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
                             }
                         }
                         else {

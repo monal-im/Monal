@@ -7,10 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MLContact.h"
 
 @interface CallViewController : UIViewController
 
-@property (nonatomic, strong)  NSDictionary* contact;
+@property (nonatomic, strong)  MLContact* contact;
 
 /**
 Icon of the person being called

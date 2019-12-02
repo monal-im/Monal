@@ -26,7 +26,7 @@
 /**
  if in chat with this user then dont push messages for this user when not locked
  */
-@property (nonatomic, strong) NSString* currentContact;
+@property (nonatomic, strong) MLContact* currentContact;
 
 /**
  if in chat with this account's user then dont push messages for this user when not locked

@@ -18,7 +18,6 @@
 #import "UIColor+Theme.h"
 #import "DDLog.h"
 
-#define kinfoSection 0
 #define konlineSection 1
 #define kofflineSection 2
 
@@ -26,10 +25,9 @@
 @property (nonatomic, strong) NSArray* searchResults ;
 @property (nonatomic, strong) UISearchController *searchController;
 
-@property (nonatomic ,strong) NSMutableArray* infoCells;
 @property (nonatomic ,strong) NSMutableArray* contacts;
 @property (nonatomic ,strong) NSMutableArray* offlineContacts;
-@property (nonatomic ,strong) NSDictionary* lastSelectedUser;
+@property (nonatomic ,strong) MLContact* lastSelectedContact;
 
 @end
 
@@ -43,22 +41,21 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     self.navigationItem.title=NSLocalizedString(@"Contacts",@"");
-  
-    _contactsTable=self.tableView;
-    _contactsTable.delegate=self;
-    _contactsTable.dataSource=self;
     
-
-    _contacts=[[NSMutableArray alloc] init] ;
-    _offlineContacts=[[NSMutableArray alloc] init] ;
-    _infoCells=[[NSMutableArray alloc] init] ;
+    self.contactsTable=self.tableView;
+    self.contactsTable.delegate=self;
+    self.contactsTable.dataSource=self;
     
-    [_contactsTable reloadData];
     
-
-    [_contactsTable registerNib:[UINib nibWithNibName:@"MLContactCell"
-                                               bundle:[NSBundle mainBundle]]
-         forCellReuseIdentifier:@"ContactCell"];
+    self.contacts=[[NSMutableArray alloc] init] ;
+    self.offlineContacts=[[NSMutableArray alloc] init] ;
+    
+    [self.contactsTable reloadData];
+    
+    
+    [self.contactsTable registerNib:[UINib nibWithNibName:@"MLContactCell"
+                                                   bundle:[NSBundle mainBundle]]
+             forCellReuseIdentifier:@"ContactCell"];
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     
@@ -85,13 +82,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     appDelegate.splitViewController= self.splitViewController;
     appDelegate.tabBarController = (MLTabBarController *) self.tabBarController;
     
-
+    
 }
 
 -(void) dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -104,7 +100,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     [super viewDidAppear:animated];
     
-    _lastSelectedUser=nil;
+    self.lastSelectedContact=nil;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
     [self refreshDisplay];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
@@ -129,26 +125,24 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     } else  {
         //for 3->4 release remove later
-         if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeeniOS13Message"]) {
-             
-             UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Notification Changes" message:[NSString stringWithFormat:@"Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old expereince back."] preferredStyle:UIAlertControllerStyleAlert];
-             UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:@"Got it!" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-                 [self dismissViewControllerAnimated:YES completion:nil];
-                 
-             }];
-        
-             [messageAlert addAction:acceptAction];
-             [self.tabBarController presentViewController:messageAlert animated:YES completion:nil];
-             [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasSeeniOS13Message"];
-         }
+        if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeeniOS13Message"]) {
+            
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Notification Changes" message:[NSString stringWithFormat:@"Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old expereince back."] preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:@"Got it!" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                [self dismissViewControllerAnimated:YES completion:nil];
+                
+            }];
+            
+            [messageAlert addAction:acceptAction];
+            [self.tabBarController presentViewController:messageAlert animated:YES completion:nil];
+            [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasSeeniOS13Message"];
+        }
     }
     
-  if(self.contacts.count+self.offlineContacts.count==0)
-  {
-      [self.tableView reloadData];
-  }
-    
-   
+    if(self.contacts.count+self.offlineContacts.count==0)
+    {
+        [self.tableView reloadData];
+    }
 }
 
 
@@ -166,15 +160,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 
-#pragma mark updating user display
+#pragma mark - updating user display
 
--(NSInteger) positionOfOnlineContact:(NSDictionary *) user
+-(NSInteger) positionOfOnlineContact:(MLContact *) user
 {
     NSInteger pos=0;
-    for(NSDictionary* row in self.contacts)
+    for(MLContact* row in self.contacts)
     {
-        if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-           [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        if([row.contactJid caseInsensitiveCompare:user.contactJid ]==NSOrderedSame &&
+           [row.accountId integerValue]==[user.accountId integerValue] )
         {
             return pos;
         }
@@ -185,13 +179,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
--(NSInteger) positionOfOfflineContact:(NSDictionary *) user
+-(NSInteger) positionOfOfflineContact:(MLContact *) user
 {
     NSInteger pos=0;
-    for(NSDictionary* row in self.offlineContacts)
+    for(MLContact* row in self.offlineContacts)
     {
-        if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-           [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        if([row.contactJid caseInsensitiveCompare:user.contactJid ]==NSOrderedSame &&
+           [row.accountId integerValue]==[user.accountId integerValue] )
         {
             
             return pos;
@@ -203,66 +197,58 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
--(void)updateContactAt:(NSInteger) pos withInfo:(NSDictionary *) user
+-(BOOL) updateContactRow:(MLContact *) contactrow withContact:(MLContact *) contact
 {
-    NSMutableDictionary *contactrow =[_contacts objectAtIndex:pos];
     BOOL hasChange=NO;
-    
-    if([user objectForKey:kstateKey] && ![[user objectForKey:kstateKey] isEqualToString:[contactrow  objectForKey:kstateKey]] ) {
-        [contactrow setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+    if(contact.state && ![contact.state isEqualToString:contactrow.state] ) {
+        contactrow.state=contact.state;
         hasChange=YES;
     }
-    if([user objectForKey:kstatusKey] && ![[user objectForKey:kstatusKey] isEqualToString:[contactrow  objectForKey:kstatusKey]] ) {
-        [contactrow setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+    if(contact.statusMessage && ![contact.statusMessage isEqualToString:contactrow.statusMessage] ) {
+        contactrow.statusMessage=contact.statusMessage;
         hasChange=YES;
     }
     
-    if([user objectForKey:kfullNameKey] && ![[user objectForKey:kfullNameKey] isEqualToString:[contactrow  objectForKey:kfullNameKey]]  &&
-       [[user objectForKey:kfullNameKey] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0) {
-        [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+    if(contact.contactDisplayName && ![contact.contactDisplayName isEqualToString:contactrow.contactDisplayName]  &&
+       [contact.contactDisplayName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0) {
+        contactrow.nickName=contact.nickName;
+        contactrow.fullName=contact.fullName;
         hasChange=YES;
-    } 
+    }
+    return hasChange;
+}
+
+-(void)updateContactAt:(NSInteger) pos withInfo:(MLContact *) contact
+{
+    MLContact *contactrow =[self.contacts objectAtIndex:pos];
+    BOOL hasChange= [self updateContactRow:contactrow withContact:contact];
     
     if(hasChange &&  self.searchResults.count==0)
     {
-    
-        [_contactsTable beginUpdates];
+        
+        [self.contactsTable beginUpdates];
         NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
-        [_contactsTable reloadRowsAtIndexPaths:@[path1]
-                              withRowAnimation:UITableViewRowAnimationNone];
-        [_contactsTable endUpdates];
+        [self.contactsTable reloadRowsAtIndexPaths:@[path1]
+                                  withRowAnimation:UITableViewRowAnimationNone];
+        [self.contactsTable endUpdates];
     } else  {
         
     }
 }
 
--(void)updateOfflineContactAt:(NSInteger) pos withInfo:(NSDictionary *) user
+-(void)updateOfflineContactAt:(NSInteger) pos withInfo:(MLContact *) contact
 {
-    NSMutableDictionary *contactrow =[_offlineContacts objectAtIndex:pos];
-    BOOL hasChange=NO;
+    MLContact *contactrow =[self.offlineContacts objectAtIndex:pos];
     
-    if([user objectForKey:kstateKey] && ![[user objectForKey:kstateKey] isEqualToString:[contactrow  objectForKey:kstateKey]] ) {
-        [contactrow setObject:[user objectForKey:kstateKey] forKey:kstateKey];
-        hasChange=YES;
-    }
-    if([user objectForKey:kstatusKey] && ![[user objectForKey:kstatusKey] isEqualToString:[contactrow  objectForKey:kstatusKey]] ) {
-        [contactrow setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
-        hasChange=YES;
-    }
-    
-    if([user objectForKey:kfullNameKey] && ![[user objectForKey:kfullNameKey] isEqualToString:[contactrow  objectForKey:kfullNameKey]]  &&
-       [[user objectForKey:kfullNameKey] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0) {
-        [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
-        hasChange=YES;
-    }
+    BOOL hasChange= [self updateContactRow:contactrow withContact:contact];
     
     if(hasChange &&  self.searchResults.count==0) {
         
-        [_contactsTable beginUpdates];
+        [self.contactsTable beginUpdates];
         NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:kofflineSection];
-        [_contactsTable reloadRowsAtIndexPaths:@[path1]
-                              withRowAnimation:UITableViewRowAnimationNone];
-        [_contactsTable endUpdates];
+        [self.contactsTable reloadRowsAtIndexPaths:@[path1]
+                                  withRowAnimation:UITableViewRowAnimationNone];
+        [self.contactsTable endUpdates];
     } else  {
         
     }
@@ -270,32 +256,32 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) refreshContact:(NSNotification *) notification
 {
-        dispatch_async(dispatch_get_main_queue(), ^{
-     NSDictionary* user = notification.userInfo;
-    NSInteger initalPos=-1;
-    initalPos=[self positionOfOnlineContact:user];
-    if(initalPos>=0)
-    {
-        [self updateContactAt:initalPos withInfo:user];
-    }
-    else
-    {
-        //offline?
-         initalPos=[self positionOfOfflineContact:user];
-        
+    dispatch_async(dispatch_get_main_queue(), ^{
+        MLContact* user = [notification.userInfo objectForKey:@"contact"];;
+        NSInteger initalPos=-1;
+        initalPos=[self positionOfOnlineContact:user];
         if(initalPos>=0)
         {
-            [self updateOfflineContactAt:initalPos withInfo:user];
+            [self updateContactAt:initalPos withInfo:user];
         }
-        
-    }
-        });
+        else
+        {
+            //offline?
+            initalPos=[self positionOfOfflineContact:user];
+            
+            if(initalPos>=0)
+            {
+                [self updateOfflineContactAt:initalPos withInfo:user];
+            }
+            
+        }
+    });
 }
 
 
 -(void) addOnlineUser:(NSNotification *) notification
 {
-    NSDictionary* user = notification.userInfo;
+    MLContact *contact = [notification.userInfo objectForKey:@"contact"];
     
     dispatch_async(dispatch_get_main_queue(), ^{
         if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
@@ -308,90 +294,88 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             return;
         }
         NSInteger initalPos=-1;
-        initalPos=[self positionOfOnlineContact:user];
+        initalPos=[self positionOfOnlineContact:contact];
         if(initalPos>=0)
         {
-            DDLogVerbose(@"user %@ already in list updating status and nothing else",[user objectForKey:kusernameKey]);
-            
-           [self updateContactAt:initalPos withInfo:user];
-
+            DDLogVerbose(@"user %@ already in list updating status and nothing else",contact.contactJid);
+            [self updateContactAt:initalPos withInfo:contact];
         }
         else
         {
-          
-        //insert into tableview
-        // for now just online
-        [[DataLayer sharedInstance] contactForUsername:[user objectForKey:kusernameKey] forAccount:[user objectForKey:kaccountNoKey] withCompletion:^(NSArray * contactRow) {
             
-            //mutex to prevent others from modifying contacts at the same time
-            dispatch_async(dispatch_get_main_queue(),
-                           ^{
-                               //check if already there
-                               NSInteger pos=-1;
-                               NSInteger offlinepos=-1;
-                               pos=[self positionOfOnlineContact:user];
-                               
-                               if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
-                               {
-                                   offlinepos =[self positionOfOfflineContact:user];
-                                   if(offlinepos>=0 && offlinepos<[self.offlineContacts count])
-                                   {
-                                       DDLogVerbose(@"removed from offline");
-                                       
-                                       [self.offlineContacts removeObjectAtIndex:offlinepos];
-                                       if(self.searchResults.count==0) {
-                                           [self.contactsTable beginUpdates];
-                                           NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
-                                           [self.contactsTable deleteRowsAtIndexPaths:@[path2]
-                                                                 withRowAnimation:UITableViewRowAnimationFade];
-                                           [self.contactsTable endUpdates];
-                                       }
-                                   }
-                               }
-                             
-                               
-                               //not already in online list
-                               if(pos<0)
-                               {
-                                   if(!(contactRow.count>=1))
-                                   {
-                                       DDLogError(@"ERROR:could not find contact row");
-                                       return;
-                                   }
-                                   //insert into datasource
-                                   DDLogVerbose(@"inserted into contacts");
-                                   [self.contacts insertObject:[contactRow objectAtIndex:0] atIndex:0];
-                                   
-                                   //sort
-                                   NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"buddy_name"  ascending:YES];
-                                   NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
-                                   [self.contacts sortUsingDescriptors:sortArray];
-                                   
-                                   //find where it is
-                                   NSInteger newpos=[self positionOfOnlineContact:user];
-                                   
-                                   DDLogVerbose(@"sorted contacts %@", self.contacts);
-                                   
-                                   DDLogVerbose(@"inserting %@ st sorted  pos %ld", [self.contacts objectAtIndex:newpos], (long)newpos);
-                                   
-                                   if(self.searchResults.count==0) {
-                                       [self.contactsTable beginUpdates];
-                                       
-                                       NSIndexPath *path1 = [NSIndexPath indexPathForRow:newpos inSection:konlineSection];
-                                       [self.contactsTable insertRowsAtIndexPaths:@[path1]
-                                                             withRowAnimation:UITableViewRowAnimationAutomatic];
-                                       
-                                       [self.contactsTable endUpdates];
-                                   }
-                                   
-                                   
-                               }else
-                               {
-                                   DDLogVerbose(@"user %@ already in list updating status",[user objectForKey:kusernameKey]);
-                                    [self updateContactAt:pos withInfo:user];
-                               }
-                           });
-        }];
+            //insert into tableview
+            // for now just online
+            [[DataLayer sharedInstance] contactForUsername:contact.contactJid forAccount:contact.accountId withCompletion:^(NSArray * contactRow) {
+                
+                //mutex to prevent others from modifying contacts at the same time
+                dispatch_async(dispatch_get_main_queue(),
+                               ^{
+                    //check if already there
+                    NSInteger pos=-1;
+                    NSInteger offlinepos=-1;
+                    pos=[self positionOfOnlineContact:contact];
+                    
+                    if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+                    {
+                        offlinepos =[self positionOfOfflineContact:contact];
+                        if(offlinepos>=0 && offlinepos<[self.offlineContacts count])
+                        {
+                            DDLogVerbose(@"removed from offline");
+                            
+                            [self.offlineContacts removeObjectAtIndex:offlinepos];
+                            if(self.searchResults.count==0) {
+                                [self.contactsTable beginUpdates];
+                                NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
+                                [self.contactsTable deleteRowsAtIndexPaths:@[path2]
+                                                          withRowAnimation:UITableViewRowAnimationFade];
+                                [self.contactsTable endUpdates];
+                            }
+                        }
+                    }
+                    
+                    
+                    //not already in online list
+                    if(pos<0)
+                    {
+                        if(!(contactRow.count>=1))
+                        {
+                            DDLogError(@"ERROR:could not find contact row");
+                            return;
+                        }
+                        //insert into datasource
+                        DDLogVerbose(@"inserted into contacts");
+                        [self.contacts insertObject:[contactRow objectAtIndex:0] atIndex:0];
+                        
+                        //sort
+                        NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"contactJid"  ascending:YES];
+                        NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
+                        [self.contacts sortUsingDescriptors:sortArray];
+                        
+                        //find where it is
+                        NSInteger newpos=[self positionOfOnlineContact:contact];
+                        
+                        DDLogVerbose(@"sorted contacts %@", self.contacts);
+                        
+                        DDLogVerbose(@"inserting %@ st sorted  pos %ld", [self.contacts objectAtIndex:newpos], (long)newpos);
+                        
+                        if(self.searchResults.count==0) {
+                            [self.contactsTable beginUpdates];
+                            
+                            NSIndexPath *path1 = [NSIndexPath indexPathForRow:newpos inSection:konlineSection];
+                            [self.contactsTable insertRowsAtIndexPaths:@[path1]
+                                                      withRowAnimation:UITableViewRowAnimationAutomatic];
+                            
+                            [self.contactsTable endUpdates];
+                        }
+                        
+                        
+                    }else
+                    {
+                        DDLogVerbose(@"user %@ already in list updating status",contact.contactJid);
+                        [self updateContactAt:pos withInfo:contact];
+                    }
+                });
+            }];
         }
     });
     
@@ -399,85 +383,85 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) removeOnlineUser:(NSNotification *) notification
 {
-    NSDictionary* user = notification.userInfo;
+    MLContact* contact = [notification.userInfo objectForKey:@"contact"];
     
     dispatch_async(dispatch_get_main_queue(), ^{
-    
-    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-    {
-        return;
-    }
-    
-    if (self.navigationController.topViewController!=self)
-    {
-        return;
-    }
-    
-    [[DataLayer sharedInstance] contactForUsername:[user objectForKey:kusernameKey] forAccount:[user objectForKey:kaccountNoKey] withCompletion:^(NSArray* contactRow) {
         
-        dispatch_async(dispatch_get_main_queue(),
-                       ^{
-                           //mutex to prevent others from modifying contacts at the same time
-                           
-                           //check if  there
-                           NSInteger  pos=-1;
-                           NSInteger  counter=0;
-                           NSInteger  offlinepos=-1;
-                           pos=[self positionOfOnlineContact:user];
-                           
-                           
-                           if((contactRow.count<1))
-                           {
-                               DDLogError(@"ERROR:could not find contact row");
-                               return;
-                           }
-                           
-                           if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
-                           {
-                               
-                               counter=0;
-                               offlinepos =[self positionOfOfflineContact:user];
-                               //in contacts but not in offline.. (not in roster this shouldnt happen)
-                               if((offlinepos==-1) &&(pos>=0)    && self.searchResults.count==0)
-                               {
-                                   NSMutableDictionary* row= [contactRow objectAtIndex:0] ;
-                                   [_offlineContacts insertObject:row atIndex:0];
-                                   
-                                   //sort
-                                   NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"buddy_name"  ascending:YES];
-                                   NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
-                                   [_offlineContacts sortUsingDescriptors:sortArray];
-                                   
-                                   //find where it is
-                                   
-                                   counter=0;
-                                   offlinepos = [self positionOfOfflineContact:user];
-                                   DDLogVerbose(@"sorted contacts %@", _offlineContacts);
-                                   [_contactsTable beginUpdates];
-                                   NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
-                                   DDLogVerbose(@"inserting offline at %d", offlinepos);
-                                   [_contactsTable insertRowsAtIndexPaths:@[path2]
-                                                         withRowAnimation:UITableViewRowAnimationFade];
-                                   [_contactsTable endUpdates];
-                               }
-                           }
-                           
-                           // it exists
-                           if(pos>=0  && self.searchResults.count==0)
-                           {
-                               [_contacts removeObjectAtIndex:pos];
-                               DDLogVerbose(@"removing %@ at pos %d", [user objectForKey:kusernameKey], pos);
-                               [_contactsTable beginUpdates];
-                               NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
-                               [_contactsTable deleteRowsAtIndexPaths:@[path1]
-                                                     withRowAnimation:UITableViewRowAnimationAutomatic];
-                               
-                               
-                               [_contactsTable endUpdates];
-                           }
-                           
-                       });
-    }];
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+        {
+            return;
+        }
+        
+        if (self.navigationController.topViewController!=self)
+        {
+            return;
+        }
+        
+        [[DataLayer sharedInstance] contactForUsername:contact.contactJid forAccount:contact.accountId withCompletion:^(NSArray* contactRow) {
+            
+            dispatch_async(dispatch_get_main_queue(),
+                           ^{
+                //mutex to prevent others from modifying contacts at the same time
+                
+                //check if  there
+                NSInteger  pos=-1;
+                NSInteger  counter=0;
+                NSInteger  offlinepos=-1;
+                pos=[self positionOfOnlineContact:contact];
+                
+                
+                if((contactRow.count<1))
+                {
+                    DDLogError(@"ERROR:could not find contact row");
+                    return;
+                }
+                
+                if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+                {
+                    
+                    counter=0;
+                    offlinepos =[self positionOfOfflineContact:contact];
+                    //in contacts but not in offline.. (not in roster this shouldnt happen)
+                    if((offlinepos==-1) &&(pos>=0)    && self.searchResults.count==0)
+                    {
+                        NSMutableDictionary* row= [contactRow objectAtIndex:0] ;
+                        [self.offlineContacts insertObject:row atIndex:0];
+                        
+                        //sort
+                        NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"contactJid"  ascending:YES];
+                        NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
+                        [self.offlineContacts sortUsingDescriptors:sortArray];
+                        
+                        //find where it is
+                        
+                        counter=0;
+                        offlinepos = [self positionOfOfflineContact:contact];
+                        DDLogVerbose(@"sorted contacts %@", self.offlineContacts);
+                        [self.contactsTable beginUpdates];
+                        NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
+                        DDLogVerbose(@"inserting offline at %ld", (long)offlinepos);
+                        [self.contactsTable insertRowsAtIndexPaths:@[path2]
+                                                  withRowAnimation:UITableViewRowAnimationFade];
+                        [self.contactsTable endUpdates];
+                    }
+                }
+                
+                // it exists
+                if(pos>=0  && self.searchResults.count==0)
+                {
+                    [self.contacts removeObjectAtIndex:pos];
+                    DDLogVerbose(@"removing %@ at pos %ld", contact.contactJid, (long)pos);
+                    [self.contactsTable beginUpdates];
+                    NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
+                    [self.contactsTable deleteRowsAtIndexPaths:@[path1]
+                                              withRowAnimation:UITableViewRowAnimationAutomatic];
+                    
+                    
+                    [self.contactsTable endUpdates];
+                }
+                
+            });
+        }];
     });
     
 }
@@ -489,7 +473,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     dispatch_async(dispatch_get_main_queue(), ^{
         [self clearContactsForAccount:accountNo];
     });
-                   
+    
 }
 
 -(void) clearContactsForAccount: (NSString*) accountNo
@@ -497,35 +481,35 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //mutex to prevent others from modifying contacts at the same time
     dispatch_async(dispatch_get_main_queue(),
                    ^{
-                       if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-                       {
-                           return;
-                       }
-                       
-                       NSMutableArray* indexPaths =[[NSMutableArray alloc] init];
-                       NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
-                       
-                       int counter=0;
-                       for(NSDictionary* row in _contacts)
-                       {
-                           if([[row objectForKey:@"account_id"]  integerValue]==[accountNo integerValue] )
-                           {
-                               DDLogVerbose(@"removing  pos %d", counter);
-                               NSIndexPath *path1 = [NSIndexPath indexPathForRow:counter inSection:konlineSection];
-                               [indexPaths addObject:path1];
-                               [indexSet addIndex:counter];
-
-                           }
-                           counter++;
-                       }
-                       
-                       [_contacts removeObjectsAtIndexes:indexSet];
-                       [_contactsTable beginUpdates];
-                       [_contactsTable deleteRowsAtIndexPaths:indexPaths
-                                             withRowAnimation:UITableViewRowAnimationAutomatic];
-                       [_contactsTable endUpdates];
-                       
-                   });
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+        {
+            return;
+        }
+        
+        NSMutableArray* indexPaths =[[NSMutableArray alloc] init];
+        NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
+        
+        int counter=0;
+        for(MLContact* row in self.contacts)
+        {
+            if([row.accountId  integerValue]==[accountNo integerValue] )
+            {
+                DDLogVerbose(@"removing  pos %d", counter);
+                NSIndexPath *path1 = [NSIndexPath indexPathForRow:counter inSection:konlineSection];
+                [indexPaths addObject:path1];
+                [indexSet addIndex:counter];
+                
+            }
+            counter++;
+        }
+        
+        [self.contacts removeObjectsAtIndexes:indexSet];
+        [self.contactsTable beginUpdates];
+        [self.contactsTable deleteRowsAtIndexPaths:indexPaths
+                                  withRowAnimation:UITableViewRowAnimationAutomatic];
+        [self.contactsTable endUpdates];
+        
+    });
     
 }
 
@@ -550,7 +534,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }];
         
         UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Decline" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-             [[MLXMPPManager sharedInstance] handleCall:dic withResponse:NO];
+            [[MLXMPPManager sharedInstance] handleCall:dic withResponse:NO];
         }];
         [messageAlert addAction:closeAction];
         [messageAlert addAction:acceptAction];
@@ -561,7 +545,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
-#pragma mark message signals
+#pragma mark - message signals
 
 -(void) refreshDisplay
 {
@@ -569,7 +553,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         [[DataLayer sharedInstance] onlineContactsSortedBy:@"Status" withCompeltion:^(NSMutableArray *results) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                _contacts= results;
+                self.contacts= results;
                 [self.contactsTable reloadData];
             });
         }];
@@ -577,17 +561,17 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     else {
         [[DataLayer sharedInstance] onlineContactsSortedBy:@"Name" withCompeltion:^(NSMutableArray *results) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                _contacts= results;
+                self.contacts= results;
                 [self.contactsTable reloadData];
             });
         }];
     }
-
+    
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
     {
         [[DataLayer sharedInstance] offlineContactsWithCompletion:^(NSMutableArray *results) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                _offlineContacts= results;
+                self.offlineContacts= results;
                 [self.contactsTable reloadData];
             });
         }];
@@ -605,22 +589,22 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 -(void) handleNewMessage:(NSNotification *)notification
 {
-    if([[notification.userInfo objectForKey:@"messageType"] isEqualToString:kMessageTypeStatus]) return;
-    NSNumber *showAlert =[notification.userInfo objectForKey:@"showAlert"];
+    MLMessage *message =[notification.userInfo objectForKey:@"message"];
+    
+    if([message.messageType isEqualToString:kMessageTypeStatus]) return;
     
     dispatch_sync(dispatch_get_main_queue(),^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || !showAlert.boolValue)
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || !message.shouldShowAlert)
         {
             return;
         }
     });
     
-    DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
+    DDLogVerbose(@"contats view got new message notice %@", notification.userInfo);
     if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]]) {
         chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
-        if( (([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"from"]] )|| ([currentTop.contactName isEqualToString:[notification.userInfo objectForKey:@"to"]] )) &&
-           [currentTop.accountNo isEqualToString:
-            [NSString stringWithFormat:@"%ld",(long)[[notification.userInfo objectForKey:kaccountNoKey] integerValue] ]]
+        if( (([currentTop.contact.contactJid isEqualToString:message.from] )|| ([currentTop.contact.contactJid isEqualToString:message.to] )) &&
+           [currentTop.contact.accountId isEqualToString:message.accountId]
            )
         {
             return;
@@ -629,10 +613,10 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     dispatch_async(dispatch_get_main_queue(), ^{
         int pos=-1;
         int counter=0;
-        for(NSDictionary* row in self.contacts)
+        for(MLContact* row in self.contacts)
         {
-            if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
-               [[row objectForKey:@"account_id"]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
+            if([row.contactJid caseInsensitiveCompare:message.from]==NSOrderedSame &&
+               [row.accountId  integerValue]==[message.accountId integerValue])
             {
                 pos=counter;
                 break;
@@ -643,41 +627,41 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         if(pos>=0)
         {
             
-            //                          int unreadCount=[[[_contacts objectAtIndex:pos] objectForKey:@"count"] integerValue];
+            //                          int unreadCount=[[[self.contacts objectAtIndex:pos] objectForKey:@"count"] integerValue];
             //                          unreadCount++;
             //                         int unreadCount= [[DataLayer sharedInstance] countUserUnreadMessages:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:kaccountNoKey]];
-            //                          [[_contacts objectAtIndex:pos] setObject: [NSNumber numberWithInt:unreadCount] forKey:@"count"];
+            //                          [[self.contacts objectAtIndex:pos] setObject: [NSNumber numberWithInt:unreadCount] forKey:@"count"];
             
             
             
             NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
             [self.contactsTable beginUpdates];
             [self.contactsTable reloadRowsAtIndexPaths:@[path1]
-                                  withRowAnimation:UITableViewRowAnimationNone];
+                                      withRowAnimation:UITableViewRowAnimationNone];
             [self.contactsTable endUpdates];
         }
     });
     
 }
 
-#pragma mark chat presentation
+#pragma mark - chat presentation
 -(void) presentChat:(NSNotification *)notification
 {
     NSDictionary *userinfo = notification.userInfo;
+    MLContact *row = [userinfo objectForKey:@"contact"];
     
-    NSDictionary *row =@{@"buddy_name":[userinfo objectForKey:@"from"], @"account_id": [userinfo objectForKey:@"accountNo"]};
     [self presentChatWithRow:row];
     
 }
 
--(void) presentChatWithRow:(NSDictionary *)row
+-(void) presentChatWithRow:(MLContact *)row
 {
-    if([[_lastSelectedUser objectForKey:@"buddy_name"] isEqualToString:[row objectForKey:@"buddy_name"]] &&
-       [[_lastSelectedUser objectForKey:@"account_id"] integerValue]==[[row objectForKey:@"account_id"]  integerValue]) {
+    if([self.lastSelectedContact.contactJid isEqualToString:row.contactJid] &&
+       [self.lastSelectedContact.accountId integerValue]==[row.accountId integerValue]) {
         return;
-    } 
+    }
     
-    _lastSelectedUser=row;
+    self.lastSelectedContact=row;
     [self  performSegueWithIdentifier:@"showConversation" sender:row];
 }
 
@@ -701,7 +685,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         CallViewController* details = (CallViewController *)segue.destinationViewController;
         details.contact= sender;
     }
-        
+    
     
     
     
@@ -732,13 +716,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
-#pragma mark tableview datasource
+#pragma mark - tableview datasource
 -(NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     NSString* toReturn=nil;
     switch (section) {
-        case kinfoSection:
-            break;
         case konlineSection:
             toReturn= NSLocalizedString(@"Online", "");
             break;
@@ -770,9 +752,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [mute setBackgroundColor:[UIColor monalGreen]];
         
     } else  {
-         mute = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"Unmute" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+        mute = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"Unmute" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
             [self unMuteContactAtIndexPath:indexPath];
-             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
             });
         }];
@@ -780,53 +762,53 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
     }
     
-//    UITableViewRowAction *block = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"Block" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
-//        [self blockContactAtIndexPath:indexPath];
-//        [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-//    }];
-//    [block setBackgroundColor:[UIColor darkGrayColor]];
+    //    UITableViewRowAction *block = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"Block" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+    //        [self blockContactAtIndexPath:indexPath];
+    //        [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+    //    }];
+    //    [block setBackgroundColor:[UIColor darkGrayColor]];
     
     return @[delete, mute];
     
 }
 
--(NSDictionary  *)contactAtIndexPath:(NSIndexPath *) indexPath
+-(MLContact  *)contactAtIndexPath:(NSIndexPath *) indexPath
 {
-    NSDictionary* contact;
-    if ((indexPath.section==1) && (indexPath.row<=[_contacts count]) ) {
-        contact=[_contacts objectAtIndex:indexPath.row];
+    MLContact* contact;
+    if ((indexPath.section==1) && (indexPath.row<=[self.contacts count]) ) {
+        contact=[self.contacts objectAtIndex:indexPath.row];
     }
-    else if((indexPath.section==2) && (indexPath.row<=[_offlineContacts count]) ) {
-        contact=[_offlineContacts objectAtIndex:indexPath.row];
+    else if((indexPath.section==2) && (indexPath.row<=[self.offlineContacts count]) ) {
+        contact=[self.offlineContacts objectAtIndex:indexPath.row];
     }
     return contact;
 }
 
 -(void) muteContactAtIndexPath:(NSIndexPath *) indexPath
 {
-    NSDictionary *contact = [self contactAtIndexPath:indexPath];
+    MLContact *contact = [self contactAtIndexPath:indexPath];
     if(contact){
-        [[DataLayer sharedInstance] muteJid:[contact objectForKey:@"buddy_name"]];
-    }
-}
-   
--(void) unMuteContactAtIndexPath:(NSIndexPath *) indexPath
-{
-    NSDictionary *contact = [self contactAtIndexPath:indexPath];
-    if(contact){
-        [[DataLayer sharedInstance] unMuteJid:[contact objectForKey:@"buddy_name"]];
+        [[DataLayer sharedInstance] muteJid:contact.contactJid];
     }
 }
 
-                                      
--(void) blockContactAtIndexPath:(NSIndexPath *) indexPath
+-(void) unMuteContactAtIndexPath:(NSIndexPath *) indexPath
 {
-    NSDictionary *contact = [self contactAtIndexPath:indexPath];
+    MLContact *contact = [self contactAtIndexPath:indexPath];
     if(contact){
-        [[DataLayer sharedInstance] blockJid:[contact objectForKey:@"buddy_name"]];
+        [[DataLayer sharedInstance] unMuteJid:contact.contactJid];
     }
 }
-    
+
+
+-(void) blockContactAtIndexPath:(NSIndexPath *) indexPath
+{
+    MLContact *contact = [self contactAtIndexPath:indexPath];
+    if(contact){
+        [[DataLayer sharedInstance] blockJid:contact.contactJid];
+    }
+}
+
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -852,14 +834,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     //if(tableView ==self.view)
     else {
         switch (section) {
-            case kinfoSection:
-                toReturn=[_infoCells count];
-                break;
             case konlineSection:
-                toReturn= [_contacts count];
+                toReturn= [self.contacts count];
                 break;
             case kofflineSection:
-                toReturn=[_offlineContacts count];
+                toReturn=[self.offlineContacts count];
                 break;
             default:
                 break;
@@ -872,43 +851,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSDictionary* row =nil;
+    MLContact* row =nil;
     if(self.searchResults.count>0) {
         row = [self.searchResults objectAtIndex:indexPath.row];
     }
-     else
-   // if(tableView ==self.view)
+    else
     {
-        if(indexPath.section==kinfoSection)
+        if(indexPath.section==konlineSection)
         {
-            MLInfoCell* cell =[tableView dequeueReusableCellWithIdentifier:@"InfoCell"];
-            if(!cell)
-            {
-                cell =[[MLInfoCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"InfoCell"];
-            }
-            
-            cell.textLabel.text=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"accountName"];
-            cell.detailTextLabel.text=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"status"];
-            cell.type=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"type"];
-            cell.accountId=[[_infoCells objectAtIndex:indexPath.row] objectForKey:@"acccountId"];
-            
-            
-            if([cell.detailTextLabel.text isEqualToString:@"Connecting"])
-            {
-                [cell.spinner startAnimating];
-            }
-            
-            return cell;
+            row = [self.contacts objectAtIndex:indexPath.row];
         }
-        else
-            if(indexPath.section==konlineSection)
-            {
-                row = [_contacts objectAtIndex:indexPath.row];
-            }
-            else if(indexPath.section==kofflineSection)
-            {
-                row = [_offlineContacts objectAtIndex:indexPath.row];
-            }
+        else if(indexPath.section==kofflineSection)
+        {
+            row = [self.offlineContacts objectAtIndex:indexPath.row];
+        }
+        else {
+            DDLogError(@"Could not identify cell section");
+        }
     }
     
     MLContactCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
@@ -921,77 +880,65 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     cell.userImage.image=nil;
     cell.statusText.text=@"";
     
-    NSString* nickName=[row objectForKey:@"nick_name"];
-    if([[nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
-        [cell showDisplayName:nickName];
-    } else  {
-        NSString* fullName=[row objectForKey:@"full_name"];
-        if([[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
-            [cell showDisplayName:fullName];
-        }
-        else {
-            [cell showDisplayName:[row objectForKey:@"buddy_name"]];
-        }
-        
-    }
+    [cell showDisplayName:row.contactDisplayName];
     
-    if(![[row objectForKey:@"status"] isEqualToString:@"(null)"] && ![[row objectForKey:@"status"] isEqualToString:@""]) {
-        [cell showStatusText:[row objectForKey:@"status"]];
+    if(![row.statusMessage isEqualToString:@"(null)"] && ![row.statusMessage isEqualToString:@""]) {
+        [cell showStatusText:row.statusMessage];
     }
     else {
-       [cell showStatusText:nil];
+        [cell showStatusText:nil];
     }
-        if(tableView ==self.view) {
-    if(indexPath.section==konlineSection)
-    {
-        NSString* stateString=[[row objectForKey:@"state"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] ;
-        
-        if(([stateString isEqualToString:@"away"]) ||
-           ([stateString isEqualToString:@"dnd"])||
-           ([stateString isEqualToString:@"xa"])
-           )
+    if(tableView ==self.view) {
+        if(indexPath.section==konlineSection)
         {
-            cell.status=kStatusAway;
-        }
-        else if([[row objectForKey:@"state"] isEqualToString:@"(null)"] || [[row objectForKey:@"state"] isEqualToString:@""])
-            cell.status=kStatusOnline;
-    }
-    else  if(indexPath.section==kofflineSection) {
-        cell.status=kStatusOffline;
-    }}
-        else {
-            NSNumber *online=[row objectForKey:@"online"];
-            if([online boolValue]==YES)
+            NSString* stateString=[row.state stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] ;
+            
+            if(([stateString isEqualToString:@"away"]) ||
+               ([stateString isEqualToString:@"dnd"])||
+               ([stateString isEqualToString:@"xa"])
+               )
             {
+                cell.status=kStatusAway;
+            }
+            else if([row.state isEqualToString:@"(null)"] ||
+                    [row.state isEqualToString:@""])
                 cell.status=kStatusOnline;
-            }
-            else
-            {
-                cell.status=kStatusOffline;
-            }
         }
+        else  if(indexPath.section==kofflineSection) {
+            cell.status=kStatusOffline;
+        }}
+    else {
+        
+        if(row.isOnline==YES)
+        {
+            cell.status=kStatusOnline;
+        }
+        else
+        {
+            cell.status=kStatusOffline;
+        }
+    }
     
     cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
     
-    cell.accountNo=[[row objectForKey:@"account_id"] integerValue];
-    cell.username=[row objectForKey:@"buddy_name"] ;
+    cell.accountNo=[row.accountId integerValue];
+    cell.username=row.contactJid;
     
-    //cell.count=[[row objectForKey:@"count"] integerValue];
-    NSString* accountNo=[NSString stringWithFormat:@"%ld", (long)cell.accountNo];
-   [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo withCompletion:^(NSNumber *unread) {
-       dispatch_async(dispatch_get_main_queue(), ^{
-           cell.count=[unread integerValue];
-       });
-   }];
-
     
-    [[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {
-            cell.userImage.image=image;
+    [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:row.accountId withCompletion:^(NSNumber *unread) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            cell.count=[unread integerValue];
+        });
+    }];
+    
+    
+    [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
+        cell.userImage.image=image;
     }];
     
     [cell setOrb];
     
-    [[DataLayer sharedInstance] isMutedJid:[row objectForKey:@"buddy_name"]  withCompletion:^(BOOL muted) {
+    [[DataLayer sharedInstance] isMutedJid:row.contactJid  withCompletion:^(BOOL muted) {
         dispatch_async(dispatch_get_main_queue(), ^{
             cell.muteBadge.hidden=!muted;
         });
@@ -1036,11 +983,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) deleteRowAtIndexPath:(NSIndexPath *) indexPath
 {
     NSDictionary* contact;
-    if ((indexPath.section==1) && (indexPath.row<=[_contacts count]) ) {
-        contact=[_contacts objectAtIndex:indexPath.row];
+    if ((indexPath.section==1) && (indexPath.row<=[self.contacts count]) ) {
+        contact=[self.contacts objectAtIndex:indexPath.row];
     }
-    else if((indexPath.section==2) && (indexPath.row<=[_offlineContacts count]) ) {
-        contact=[_offlineContacts objectAtIndex:indexPath.row];
+    else if((indexPath.section==2) && (indexPath.row<=[self.offlineContacts count]) ) {
+        contact=[self.offlineContacts objectAtIndex:indexPath.row];
     }
     else {
         //we cannot delete here
@@ -1108,42 +1055,37 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         contactDic=  [self.searchResults objectAtIndex:indexPath.row];
     }
-   else  {
+    else  {
         if(indexPath.section==konlineSection) {
-            contactDic=[_contacts objectAtIndex:indexPath.row];
+            contactDic=[self.contacts objectAtIndex:indexPath.row];
         }
         else {
-            contactDic=[_offlineContacts objectAtIndex:indexPath.row];
+            contactDic=[self.offlineContacts objectAtIndex:indexPath.row];
         }
     }
-
+    
     [self performSegueWithIdentifier:@"showDetails" sender:contactDic];
 }
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSMutableDictionary* row;
+    MLContact* row;
     
     if(self.searchResults.count>0)
     {
         row= [self.searchResults objectAtIndex:indexPath.row];
     } else
     {
-        if(indexPath.section==kinfoSection)
+        if((indexPath.section==konlineSection))
         {
-            return;
+            row=[self.contacts objectAtIndex:indexPath.row];
         }
-        else
-            if((indexPath.section==konlineSection))
-            {
-                row=[_contacts objectAtIndex:indexPath.row];
-            }
-            else if (indexPath.section==kofflineSection)
-            {
-                row= [_offlineContacts objectAtIndex:indexPath.row];
-            }
+        else if (indexPath.section==kofflineSection)
+        {
+            row= [self.offlineContacts objectAtIndex:indexPath.row];
+        }
         
-        [row setObject:[NSNumber numberWithInt:0] forKey:@"count"];
+        row.unreadCount=0;
     }
     
     [self presentChatWithRow:row];
@@ -1169,7 +1111,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (NSAttributedString *)descriptionForEmptyDataSet:(UIScrollView *)scrollView
 {
-      NSString *text = @"Add new contacts with the + button above. Your friends will pop up here when they can talk";
+    NSString *text = @"Add new contacts with the + button above. Your friends will pop up here when they can talk";
     
     NSMutableParagraphStyle *paragraph = [NSMutableParagraphStyle new];
     paragraph.lineBreakMode = NSLineBreakByWordWrapping;
@@ -1193,7 +1135,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (BOOL)emptyDataSetShouldDisplay:(UIScrollView *)scrollView
 {
-   BOOL  toreturn=(self.contacts.count+self.offlineContacts.count==0)?YES:NO;
+    BOOL  toreturn=(self.contacts.count+self.offlineContacts.count==0)?YES:NO;
     
     if(toreturn)
     {

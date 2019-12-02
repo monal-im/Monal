@@ -603,8 +603,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     DDLogVerbose(@"contats view got new message notice %@", notification.userInfo);
     if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]]) {
         chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
-        if( (([currentTop.contactName isEqualToString:message.from] )|| ([currentTop.contactName isEqualToString:message.to] )) &&
-           [currentTop.accountNo isEqualToString:message.accountId]
+        if( (([currentTop.contact.contactJid isEqualToString:message.from] )|| ([currentTop.contact.contactJid isEqualToString:message.to] )) &&
+           [currentTop.contact.accountId isEqualToString:message.accountId]
            )
         {
             return;

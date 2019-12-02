@@ -56,35 +56,21 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) setup
 {
-    _contactName=[_contact objectForKey:@"buddy_name"];
-    if(!_contactName)
-    {
-        _contactName=[_contact objectForKey:@"message_from"];
-    }
-    _contactFullName=[[DataLayer sharedInstance] nickName:_contactName forAccount:[NSString stringWithFormat:@"%@",[_contact objectForKey:@"account_id"]]];
-
-    if (!_contactFullName) {
-    _contactFullName=[[DataLayer sharedInstance] fullName:_contactName forAccount:[NSString stringWithFormat:@"%@",[_contact objectForKey:@"account_id"]]];
-    }
-    if (!_contactFullName) _contactFullName=_contactName;
-
-    self.accountNo=[NSString stringWithFormat:@"%ld",[[_contact objectForKey:@"account_id"] integerValue]];
     self.hidesBottomBarWhenPushed=YES;
-
-    NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
+    
+    NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.contact.accountId];
     if([accountVals count]>0)
     {
         self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
     }
-
-
+    
 }
 
--(void) setupWithContact:(NSDictionary*) contact
+-(void) setupWithContact:(MLContact*) contact
 {
-    _contact=contact;
+    self.contact=contact;
     [self setup];
-
+    
 }
 
 #pragma mark -  view lifecycle
@@ -151,22 +137,22 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) synchChat {
     dispatch_async(dispatch_get_main_queue(), ^{
 
-        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-        if(xmppAccount.supportsMam2 & !self->_isMUC) {
+        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+        if(xmppAccount.supportsMam2 & !self.contact.isGroup) {
 
             //synch point
             // if synch point < login time
-            NSDate *synch = [[DataLayer sharedInstance] synchPointForContact:self.contactName andAccount:self.accountNo];
-            NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor:self.accountNo];
+            NSDate *synch = [[DataLayer sharedInstance] synchPointForContact:self.contact.contactJid andAccount:self.contact.accountId];
+            NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor:self.contact.contactJid ];
 
             if([synch timeIntervalSinceReferenceDate]<[connectedTime timeIntervalSinceReferenceDate])
             {
                 if(self.messageList.count==0) {
-                    [xmppAccount setMAMQueryMostRecentForJid:self.contactName];
+                    [xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
                 } else  {
-                    [xmppAccount setMAMQueryFromStart:synch toDate:nil andJid:self.contactName];
+                    [xmppAccount setMAMQueryFromStart:synch toDate:nil andJid:self.contact.contactJid ];
                 }
-                [[DataLayer sharedInstance] setSynchPoint:[NSDate date] ForContact:self.contactName andAccount:self.accountNo];
+                [[DataLayer sharedInstance] setSynchPoint:[NSDate date] ForContact:self.contact.contactJid  andAccount:self.contact.accountId];
             }
         }
 
@@ -180,12 +166,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) refreshButton:(NSNotification *) notificaiton
 {
-    if(!self.accountNo) return;
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    if(!self.contact.accountId) return;
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *title = [[DataLayer sharedInstance] fullName:self.contactName forAccount:self.accountNo];
-        if(title.length==0) title=self.contactName;
-
+        NSString *title = [[DataLayer sharedInstance] fullName:self.contact.contactJid forAccount:self.contact.accountId];
+        if(title.length==0) title=self.contact.contactDisplayName;
+        
         if(xmppAccount.accountState<kStateLoggedIn)
         {
             if(!xmppAccount.airDrop) {
@@ -193,16 +179,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             }
             
             if(!title) title=@"";
-            if(self.contactName.length>0){
-                self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Logged Out"];
-            }
+            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Logged Out"];
         }
         else  {
             self.sendButton.enabled=YES;
             self.navigationItem.title=title;
-
         }
-
+        
         if(self.encryptChat){
             self.navigationItem.title = [NSString stringWithFormat:@"%@ 🔒", self.navigationItem.title];
         }
@@ -214,12 +197,12 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     [super viewWillAppear:animated];
 
-    [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
-    [MLNotificationManager sharedInstance].currentContact=self.contactName;
+    [MLNotificationManager sharedInstance].currentAccountNo=self.contact.accountId;
+    [MLNotificationManager sharedInstance].currentContact=self.contact;
 
     if(self.day) {
-        NSString *title = [[DataLayer sharedInstance] fullName:self.contactName forAccount:self.accountNo];
-        if(title.length==0) title=self.contactName;
+        NSString *title = [[DataLayer sharedInstance] fullName:self.contact.contactJid forAccount:self.contact.accountId];
+        if(title.length==0) title=self.contact.contactJid;
         self.navigationItem.title=  [NSString stringWithFormat:@"%@(%@)", self.navigationItem.title, _day];
         [[NSNotificationCenter defaultCenter] removeObserver:self];
         self.inputContainerView.hidden=YES;
@@ -228,8 +211,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         self.inputContainerView.hidden=NO;
     }
 
-    if(self.contactName && self.accountNo) {
-        self.encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:self.contactName andAccountNo:self.accountNo];
+    if(self.contact.contactJid && self.contact.accountId) {
+        self.encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
     }
     [self handleForeGround];
     [self refreshButton:nil];
@@ -243,13 +226,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    if(!self.contactName || !self.accountNo) return;
+    if(!self.contact.contactJid || !self.contact.accountId) return;
 
     [self refreshCounter];
     [self synchChat];
 #ifndef DISABLE_OMEMO
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    [xmppAccount queryOMEMODevicesFrom:self.contactName];
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+    [xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
 #endif
   //  [self scrollToBottom];
 
@@ -321,7 +304,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(void) refreshCounter
 {
     if(!_day) {
-        [[DataLayer sharedInstance] markAsReadBuddy:self.contactName forAccount:self.accountNo];
+        [[DataLayer sharedInstance] markAsReadBuddy:self.contact.contactJid forAccount:self.contact.accountId];
 
         MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
         [appDelegate updateUnread];
@@ -331,20 +314,18 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) refreshData
 {
-    if(!_contactName) return;
+    if(!self.contact.contactJid) return;
     NSMutableArray *newList;
     if(!_day) {
-        newList =[[DataLayer sharedInstance] messageHistory:_contactName forAccount: _accountNo];
-        [[DataLayer sharedInstance] countUserUnreadMessages:_contactName forAccount: _accountNo withCompletion:^(NSNumber *unread) {
+        newList =[[DataLayer sharedInstance] messageHistory:self.contact.contactJid forAccount: self.contact.accountId];
+        [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId withCompletion:^(NSNumber *unread) {
             if([unread integerValue]==0) self->_firstmsg=YES;
 
         }];
-        _isMUC=[[DataLayer sharedInstance] isBuddyMuc:_contactName forAccount: _accountNo];
-
     }
     else
     {
-        newList =[[[DataLayer sharedInstance] messageHistoryDate:_contactName forAccount: _accountNo forDate:_day] mutableCopy];
+        newList =[[[DataLayer sharedInstance] messageHistoryDate:self.contact.contactJid forAccount: self.contact.accountId forDate:_day] mutableCopy];
 
     }
 
@@ -395,13 +376,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     NSURL *url = [NSURL fileURLWithPath:path];
     NSArray *items =@[url];
-    NSArray *exclude =  @[UIActivityTypePostToTwitter, UIActivityTypePostToFacebook,
-                          UIActivityTypePostToWeibo,
-                          UIActivityTypeMessage, UIActivityTypeMail,
-                          UIActivityTypePrint, UIActivityTypeCopyToPasteboard,
-                          UIActivityTypeAssignToContact, UIActivityTypeSaveToCameraRoll,
-                          UIActivityTypeAddToReadingList, UIActivityTypePostToFlickr,
-                          UIActivityTypePostToVimeo, UIActivityTypePostToTencentWeibo];
+//    NSArray *exclude =  @[UIActivityTypePostToTwitter, UIActivityTypePostToFacebook,
+//                          UIActivityTypePostToWeibo,
+//                          UIActivityTypeMessage, UIActivityTypeMail,
+//                          UIActivityTypePrint, UIActivityTypeCopyToPasteboard,
+//                          UIActivityTypeAssignToContact, UIActivityTypeSaveToCameraRoll,
+//                          UIActivityTypeAddToReadingList, UIActivityTypePostToFlickr,
+//                          UIActivityTypePostToVimeo, UIActivityTypePostToTencentWeibo];
     UIActivityViewController *share = [[UIActivityViewController alloc] initWithActivityItems:items applicationActivities:nil];
    // share.excludedActivityTypes = exclude;
     [self presentViewController:share animated:YES completion:nil];
@@ -412,22 +393,22 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     DDLogVerbose(@"Sending message");
     NSString *newMessageID =messageID?messageID:[[NSUUID UUID] UUIDString];
     //dont readd it, use the exisitng
-    NSDictionary* settings=[[[DataLayer sharedInstance] accountVals:_accountNo] objectAtIndex:0];
+    NSDictionary* settings=[[[DataLayer sharedInstance] accountVals:self.contact.accountId] objectAtIndex:0];
     
     if(!messageID) {
-        NSString *contactNameCopy =_contactName; //prevent retail cycle
-        NSString *accountNoCopy = _accountNo;
-        BOOL isMucCopy = _isMUC;
+        NSString *contactNameCopy =self.contact.contactJid; //prevent retail cycle
+        NSString *accountNoCopy = self.contact.accountId;
+        BOOL isMucCopy = self.contact.isGroup;
         BOOL encryptChatCopy = self.encryptChat;
         
         
-        [self addMessageto:_contactName withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
+        [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
             [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
                                   withCompletionHandler:nil];
         }];
     }
     else  {
-        [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:NO messageId:newMessageID
+        [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:NO messageId:newMessageID
                               withCompletionHandler:nil];
     }
     
@@ -472,7 +453,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     {
         UINavigationController *nav = segue.destinationViewController;
         ContactDetails* details = (ContactDetails *)nav.topViewController;
-        details.contact= _contact;
+        details.contact= self.contact;
     }
 }
 
@@ -507,12 +488,17 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 - (void)restClient:(DBRestClient*)restClient loadedSharableLink:(NSString*)link
            forFile:(NSString*)path{
     NSString *newMessageID =[[NSUUID UUID] UUIDString];
-
-    [self addMessageto:_contactName withMessage:link andId:newMessageID withCompletion:^(BOOL success) {
-        [[MLXMPPManager sharedInstance] sendMessage:link toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:YES messageId:newMessageID
+    
+    NSString *contactJidCopy =self.contact.contactJid; //prevent retail cycle
+    NSString *accountNoCopy = self.contact.accountId;
+    BOOL isMucCopy = self.contact.isGroup;
+    BOOL encryptChatCopy = self.encryptChat;
+    
+    [self addMessageto:self.contact.contactJid withMessage:link andId:newMessageID withCompletion:^(BOOL success) {
+        [[MLXMPPManager sharedInstance] sendMessage:link toContact:contactJidCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:YES messageId:newMessageID
                               withCompletionHandler:nil];
     }];
-
+    
     self.uploadHUD.hidden=YES;
     self.uploadHUD=nil;
 }
@@ -528,7 +514,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 -(IBAction)attach:(id)sender
 {
     [self.chatInput resignFirstResponder];
-    xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+    xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     if(!account.supportsHTTPUpload && !self.restClient)
     {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error"
@@ -592,27 +578,31 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         [self uploadImageToDropBox:data];
     }
     else  {
-        [[MLXMPPManager sharedInstance]  httpUploadJpegData:data toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
+        [[MLXMPPManager sharedInstance]  httpUploadJpegData:data toContact:self.contact.contactJid onAccount:self.contact.accountId withCompletionHandler:^(NSString *url, NSError *error) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.uploadHUD.hidden=YES;
 
                 if(url) {
                     NSString *newMessageID =[[NSUUID UUID] UUIDString];
 
-                    [self addMessageto:_contactName withMessage:url andId:newMessageID withCompletion:^(BOOL success) {
-                        [[MLXMPPManager sharedInstance] sendMessage:url toContact:_contactName fromAccount:_accountNo isEncrypted:self.encryptChat isMUC:_isMUC isUpload:YES messageId:newMessageID
+                    NSString *contactJidCopy =self.contact.contactJid; //prevent retail cycle
+                    NSString *accountNoCopy = self.contact.accountId;
+                    BOOL isMucCopy = self.contact.isGroup;
+                    BOOL encryptChatCopy = self.encryptChat;
+                    
+                    [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID withCompletion:^(BOOL success) {
+                        [[MLXMPPManager sharedInstance] sendMessage:url toContact:contactJidCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:YES messageId:newMessageID
                                               withCompletionHandler:nil];
 
                     }];
 
                 }
                 else  {
-                    UIAlertView *addError = [[UIAlertView alloc]
-                                             initWithTitle:@"There was an error uploading the file to the server"
-                                             message:[NSString stringWithFormat:@"%@", error.localizedDescription]
-                                             delegate:nil cancelButtonTitle:@"Close"
-                                             otherButtonTitles: nil] ;
-                    [addError show];
+                    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"There was an error uploading the file to the server" message:[NSString stringWithFormat:@"%@", error.localizedDescription] preferredStyle:UIAlertControllerStyleAlert];
+                    [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                        [alert dismissViewControllerAnimated:YES completion:nil];
+                    }]];
+                    [self presentViewController:alert animated:YES completion:nil];
                 }
             });
 
@@ -660,7 +650,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         return;
     }
     
-    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:_accountNo withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString *messageType) {
+    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:self.contact.accountId withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString *messageType) {
         DDLogVerbose(@"added message");
         
         if(result) {
@@ -702,7 +692,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 	// make sure its in active
 	if(_firstmsg==YES)
 	{
-        [[DataLayer sharedInstance] addActiveBuddies:to forAccount:_accountNo withCompletion:nil];
+        [[DataLayer sharedInstance] addActiveBuddies:to forAccount:self.contact.accountId withCompletion:nil];
         _firstmsg=NO;
 	}
 
@@ -710,7 +700,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 -(void) presentMucInvite:(NSNotification *)notification
 {
-     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
+     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     NSDictionary *userDic = notification.userInfo;
     NSString *from = [userDic objectForKey:@"from"];
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -739,9 +729,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         DDLogError(@"Notification without message");
     }
     
-    if([message.accountId isEqualToString:_accountNo]
-       &&([message.from isEqualToString:_contactName]
-          || [message.to isEqualToString:_contactName] ))
+    if([message.accountId isEqualToString:self.contact.accountId]
+       &&([message.from isEqualToString:self.contact.contactJid]
+          || [message.to isEqualToString:self.contact.contactJid] ))
     {
         [[DataLayer sharedInstance] messageTypeForMessage: message.messageText withCompletion:^(NSString *messageType) {
             
@@ -1037,7 +1027,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         return cell;
     }
 
-    if(_isMUC)
+    if(self.contact.isGroup)
     {
         if([from isEqualToString:_jid])
         {
@@ -1058,7 +1048,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
             }
         }
     } else  {
-        if([from isEqualToString:self.contactName])
+        if([from isEqualToString:self.contact.contactJid])
         {
             if([row.messageType isEqualToString:kMessageTypeUrl])
             {
@@ -1082,7 +1072,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if([row.messageType isEqualToString:kMessageTypeImage])
     {
         MLChatImageCell* imageCell;
-        if([from isEqualToString:self.contactName])
+        if([from isEqualToString:self.contact.contactJid])
         {
             imageCell= (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageInCell"];
             imageCell.outBound=NO;
@@ -1107,7 +1097,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
       if([row.messageType isEqualToString:kMessageTypeUrl])
       {
           MLLinkCell *toreturn;
-          if([from isEqualToString:self.contactName]) {
+          if([from isEqualToString:self.contact.contactJid]) {
               toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
           }
           else  {
@@ -1184,7 +1174,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
     }
 
-    if(_isMUC)
+    if(self.contact.isGroup)
     {
         cell.name.hidden=NO;
         cell.name.text=from;

@@ -168,13 +168,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 #pragma mark updating user display
 
--(NSInteger) positionOfOnlineContact:(NSDictionary *) user
+-(NSInteger) positionOfOnlineContact:(MLContact *) user
 {
     NSInteger pos=0;
-    for(NSDictionary* row in self.contacts)
+    for(MLContact* row in self.contacts)
     {
-        if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-           [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        if([row.contactJid caseInsensitiveCompare:user.contactJid ]==NSOrderedSame &&
+           [row.accountId integerValue]==[user.accountId integerValue] )
         {
             return pos;
         }
@@ -185,13 +185,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
--(NSInteger) positionOfOfflineContact:(NSDictionary *) user
+-(NSInteger) positionOfOfflineContact:(MLContact *) user
 {
     NSInteger pos=0;
-    for(NSDictionary* row in self.offlineContacts)
+    for(MLContact* row in self.offlineContacts)
     {
-        if([[row objectForKey:@"buddy_name"] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-           [[row objectForKey:@"account_id"]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        if([row.contactJid caseInsensitiveCompare:user.contactJid ]==NSOrderedSame &&
+                [row.accountId integerValue]==[user.accountId integerValue] )
         {
             
             return pos;
@@ -203,25 +203,30 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
--(void)updateContactAt:(NSInteger) pos withInfo:(NSDictionary *) user
+-(BOOL) updateContactRow:(MLContact *) contactrow withContact:(MLContact *) contact
 {
-    NSMutableDictionary *contactrow =[_contacts objectAtIndex:pos];
     BOOL hasChange=NO;
-    
-    if([user objectForKey:kstateKey] && ![[user objectForKey:kstateKey] isEqualToString:[contactrow  objectForKey:kstateKey]] ) {
-        [contactrow setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+    if(contact.state && ![contact.state isEqualToString:contactrow.state] ) {
+        contactrow.state=contact.state;
         hasChange=YES;
     }
-    if([user objectForKey:kstatusKey] && ![[user objectForKey:kstatusKey] isEqualToString:[contactrow  objectForKey:kstatusKey]] ) {
-        [contactrow setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+    if(contact.statusMessage && ![contact.statusMessage isEqualToString:contactrow.statusMessage] ) {
+        contactrow.statusMessage=contact.statusMessage;
         hasChange=YES;
     }
     
-    if([user objectForKey:kfullNameKey] && ![[user objectForKey:kfullNameKey] isEqualToString:[contactrow  objectForKey:kfullNameKey]]  &&
-       [[user objectForKey:kfullNameKey] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0) {
-        [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+    if(contact.contactDisplayName && ![contact.contactDisplayName isEqualToString:contact.contactDisplayName]  &&
+       [contact.contactDisplayName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0) {
+        contactrow.contactDisplayName=contact.contactDisplayName;
         hasChange=YES;
-    } 
+    }
+    return hasChange;
+}
+
+-(void)updateContactAt:(NSInteger) pos withInfo:(MLContact *) contact
+{
+    MLContact *contactrow =[_contacts objectAtIndex:pos];
+    BOOL hasChange= [self updateContactRow:contactrow withContact:contact];
     
     if(hasChange &&  self.searchResults.count==0)
     {
@@ -236,25 +241,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     }
 }
 
--(void)updateOfflineContactAt:(NSInteger) pos withInfo:(NSDictionary *) user
+-(void)updateOfflineContactAt:(NSInteger) pos withInfo:(MLContact *) contact
 {
-    NSMutableDictionary *contactrow =[_offlineContacts objectAtIndex:pos];
-    BOOL hasChange=NO;
+    MLContact *contactrow =[_offlineContacts objectAtIndex:pos];
     
-    if([user objectForKey:kstateKey] && ![[user objectForKey:kstateKey] isEqualToString:[contactrow  objectForKey:kstateKey]] ) {
-        [contactrow setObject:[user objectForKey:kstateKey] forKey:kstateKey];
-        hasChange=YES;
-    }
-    if([user objectForKey:kstatusKey] && ![[user objectForKey:kstatusKey] isEqualToString:[contactrow  objectForKey:kstatusKey]] ) {
-        [contactrow setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
-        hasChange=YES;
-    }
-    
-    if([user objectForKey:kfullNameKey] && ![[user objectForKey:kfullNameKey] isEqualToString:[contactrow  objectForKey:kfullNameKey]]  &&
-       [[user objectForKey:kfullNameKey] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0) {
-        [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
-        hasChange=YES;
-    }
+    BOOL hasChange= [self updateContactRow:contactrow withContact:contact];
     
     if(hasChange &&  self.searchResults.count==0) {
         
@@ -271,7 +262,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) refreshContact:(NSNotification *) notification
 {
         dispatch_async(dispatch_get_main_queue(), ^{
-     NSDictionary* user = notification.userInfo;
+            MLContact* user = [notification.userInfo objectForKey:@"contact"];;
     NSInteger initalPos=-1;
     initalPos=[self positionOfOnlineContact:user];
     if(initalPos>=0)
@@ -308,18 +299,18 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             return;
         }
         NSInteger initalPos=-1;
-        initalPos=[self positionOfOnlineContact:user];
+        initalPos=[self positionOfOnlineContact:contact];
         if(initalPos>=0)
         {
-            DDLogVerbose(@"user %@ already in list updating status and nothing else",[user objectForKey:kusernameKey]);
-           [self updateContactAt:initalPos withInfo:user];
+            DDLogVerbose(@"user %@ already in list updating status and nothing else",contact.contactJid);
+           [self updateContactAt:initalPos withInfo:contact];
         }
         else
         {
           
         //insert into tableview
         // for now just online
-        [[DataLayer sharedInstance] contactForUsername:[user objectForKey:kusernameKey] forAccount:[user objectForKey:kaccountNoKey] withCompletion:^(NSArray * contactRow) {
+        [[DataLayer sharedInstance] contactForUsername:contact.contactJid forAccount:contact.accountId withCompletion:^(NSArray * contactRow) {
             
             //mutex to prevent others from modifying contacts at the same time
             dispatch_async(dispatch_get_main_queue(),
@@ -327,11 +318,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                //check if already there
                                NSInteger pos=-1;
                                NSInteger offlinepos=-1;
-                               pos=[self positionOfOnlineContact:user];
+                               pos=[self positionOfOnlineContact:contact];
                                
                                if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
                                {
-                                   offlinepos =[self positionOfOfflineContact:user];
+                                   offlinepos =[self positionOfOfflineContact:contact];
                                    if(offlinepos>=0 && offlinepos<[self.offlineContacts count])
                                    {
                                        DDLogVerbose(@"removed from offline");
@@ -366,7 +357,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                    [self.contacts sortUsingDescriptors:sortArray];
                                    
                                    //find where it is
-                                   NSInteger newpos=[self positionOfOnlineContact:user];
+                                   NSInteger newpos=[self positionOfOnlineContact:contact];
                                    
                                    DDLogVerbose(@"sorted contacts %@", self.contacts);
                                    
@@ -385,8 +376,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                                    
                                }else
                                {
-                                   DDLogVerbose(@"user %@ already in list updating status",[user objectForKey:kusernameKey]);
-                                    [self updateContactAt:pos withInfo:user];
+                                   DDLogVerbose(@"user %@ already in list updating status",contact.contactJid);
+                                    [self updateContactAt:pos withInfo:contact];
                                }
                            });
         }];

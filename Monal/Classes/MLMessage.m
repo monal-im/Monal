@@ -26,7 +26,7 @@
     message.timestamp =[formatter dateFromString:[dic objectForKey:@"thetime"]]; 
     message.messageType=[dic objectForKey:@"messageType"];
     
-    message.inbound=[(NSNumber *)[dic objectForKey:@"received"] boolValue];
+    message.hasBeenReceived=[(NSNumber *)[dic objectForKey:@"received"] boolValue];
     message.hasBeenSent=[(NSNumber *)[dic objectForKey:@"delivered"] boolValue];
     message.encrypted=[(NSNumber *)[dic objectForKey:@"encrypted"] boolValue];
   

@@ -1187,21 +1187,21 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         cell.deliveryFailed=YES;
     }
     
-    MLMessage *nexRow =nil;
+    MLMessage *nextRow =nil;
     if(indexPath.row+1<self.messageList.count)
     {
-        nexRow = [self.messageList objectAtIndex:indexPath.row+1];
+        nextRow = [self.messageList objectAtIndex:indexPath.row+1];
     }
     
     MLMessage *priorRow =nil;
     if(indexPath.row>0)
     {
-        nexRow = [self.messageList objectAtIndex:indexPath.row-1];
+        priorRow = [self.messageList objectAtIndex:indexPath.row-1];
     }
     
-    if(row.inbound==YES) {
+    if(row.hasBeenReceived==YES) {
         if(indexPath.row==self.messageList.count-1 ||
-           ![nexRow.actualFrom isEqualToString:self.jid]) {
+           ![nextRow.actualFrom isEqualToString:self.jid]) {
             cell.messageStatus.hidden=NO;
         } else  {
             cell.messageStatus.hidden=YES;

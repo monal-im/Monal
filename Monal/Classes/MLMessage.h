@@ -83,11 +83,6 @@ The of the message in the DB , should be int
  */
 @property (nonatomic, assign) BOOL hasBeenReceived;
 
-/*
- messages we received
- */
-@property (nonatomic, assign) BOOL inbound;
-
 @property (nonatomic, assign) BOOL shouldShowAlert;
 
 /*

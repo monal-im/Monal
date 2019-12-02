@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, copy) NSString *nickName;
 
-@property (nonatomic, copy) NSString *image;
+@property (nonatomic, copy) NSString *imageFile;
 
 /**
  xmpp state text
@@ -44,10 +44,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign) BOOL isOnline;
 
+@property (nonatomic, assign) BOOL isGroup;
+@property (nonatomic, copy) NSString *groupSubject;
+@property (nonatomic, copy) NSString *accountNickInGroup;
+
 /**
  picks nick, full or jid to display
  */
 -(NSString *) contactDisplayName;
+
++(MLContact *) contactFromDictionary:(NSDictionary *) dic;
+
 
 @end
 

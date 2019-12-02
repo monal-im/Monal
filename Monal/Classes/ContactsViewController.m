@@ -88,7 +88,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -161,7 +160,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 
-#pragma mark updating user display
+#pragma mark - updating user display
 
 -(NSInteger) positionOfOnlineContact:(MLContact *) user
 {
@@ -348,7 +347,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
                         [self.contacts insertObject:[contactRow objectAtIndex:0] atIndex:0];
                         
                         //sort
-                        NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"buddy_name"  ascending:YES];
+                        NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"contactJid"  ascending:YES];
                         NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
                         [self.contacts sortUsingDescriptors:sortArray];
                         
@@ -546,7 +545,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
-#pragma mark message signals
+#pragma mark - message signals
 
 -(void) refreshDisplay
 {
@@ -645,7 +644,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
 }
 
-#pragma mark chat presentation
+#pragma mark - chat presentation
 -(void) presentChat:(NSNotification *)notification
 {
     NSDictionary *userinfo = notification.userInfo;
@@ -717,7 +716,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
-#pragma mark tableview datasource
+#pragma mark - tableview datasource
 -(NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     NSString* toReturn=nil;

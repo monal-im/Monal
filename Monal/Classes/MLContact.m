@@ -18,4 +18,26 @@
     return self.contactJid;
 }
 
++(MLContact *) contactFromDictionary:(NSDictionary *) dic
+{
+    MLContact *contact =[[MLContact alloc] init];
+    contact.contactJid=[dic objectForKey:@"buddy_name"];
+    contact.nickName=[dic objectForKey:@"nick"];
+    contact.fullName=[dic objectForKey:@"full_name"];
+    contact.imageFile=[dic objectForKey:@"filename"];
+    
+    contact.accountId=[NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
+    
+    contact.isGroup=[[dic objectForKey:@"muc"] boolValue];
+    contact.groupSubject=[dic objectForKey:@"muc_subject"];
+    contact.accountNickInGroup=[dic objectForKey:@"muc_nick"];
+    
+    contact.statusMessage=[dic objectForKey:@"status"];
+    contact.state=[dic objectForKey:@"state"];
+    
+    contact.unreadCount=[[dic objectForKey:@"count"] integerValue];
+    
+    return contact;
+}
+
 @end

@@ -79,6 +79,11 @@ The of the message in the DB , should be int
 @property (nonatomic, assign) BOOL hasBeenSent;
 
 /*
+ Whether a message was recieved by the device on the other end
+ */
+@property (nonatomic, assign) BOOL hasBeenReceived;
+
+/*
  messages we received
  */
 @property (nonatomic, assign) BOOL inbound;

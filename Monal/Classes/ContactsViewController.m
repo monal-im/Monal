@@ -101,7 +101,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
     [super viewDidAppear:animated];
     
-    _lastSelectedContact=nil;
+    self.lastSelectedContact=nil;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
     [self refreshDisplay];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
@@ -144,8 +144,6 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         [self.tableView reloadData];
     }
-    
-    
 }
 
 
@@ -662,9 +660,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     if([self.lastSelectedContact.contactJid isEqualToString:row.contactJid] &&
        [self.lastSelectedContact.accountId integerValue]==[row.accountId integerValue]) {
         return;
-    } 
+    }
     
-    _lastSelectedContact=row;
+    self.lastSelectedContact=row;
     [self  performSegueWithIdentifier:@"showConversation" sender:row];
 }
 

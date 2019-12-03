@@ -52,15 +52,17 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     if([iqNode.type isEqualToString:kiqGetType])
     {
         //TODO make sure at least 1 child
+        [self processGetIq:iqNode];
     }
     else  if([iqNode.type isEqualToString:kiqSetType]) {
         //TODO make sure at least 1 child
+        [self processSetIq:iqNode];
     }
     else  if([iqNode.type isEqualToString:kiqResultType]) {
-        
+        [self processResultIq:iqNode];
     }
     else  if([iqNode.type isEqualToString:kiqErrorType]) {
-        
+        [self processErrorIq:iqNode];
     }
     else {
         DDLogError(@"invalid iq type %@", iqNode.type);
@@ -404,9 +406,9 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 //        {
 //            //RSM seems broken on servers. Tell UI there is more to fetch
 //          //  [[NSNotificationCenter defaultCenter] postNotificationName:kMLMAMMore object:nil];
-//            
+//
 //        }
-//        
+//
 //        //OMEMO
 //#ifndef DISABLE_OMEMO
 //#ifndef TARGET_IS_EXTENSION
@@ -420,23 +422,23 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 //                    NSString *source= iqNode.from;
 //                    if(iqNode.omemoDevices)
 //                    {
-//                        
+//
 //                        if(!source || [source isEqualToString:self.fulluser])
 //                        {
 //                            source=self.fulluser;
 //                            NSMutableArray *devices= [iqNode.omemoDevices mutableCopy];
 //                            NSSet *deviceSet = [NSSet setWithArray:iqNode.omemoDevices];
-//                            
+//
 //                            NSString * deviceString=[NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
 //                            if(![deviceSet containsObject:deviceString])
 //                            {
 //                                [devices addObject:deviceString];
 //                            }
-//                            
+//
 //                            [self sendOMEMODevices:devices];
 //                        }
-//                        
-//                        
+//
+//
 //                        NSArray *existingDevices=[self.monalSignalStore knownDevicesForAddressName:source];
 //                        NSSet *deviceSet = [NSSet setWithArray:existingDevices];
 //                        //only query if the device doesnt exist
@@ -446,30 +448,30 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 //                                [self queryOMEMOBundleFrom:source andDevice:device];
 //                            }
 //                        }];
-//                        
+//
 //                    }
-//                    
-//                    
+//
+//
 //                    if(iqNode.signedPreKeyPublic && self.signalContext )
 //                    {
 //                        if(!source)
 //                        {
 //                            source=self.fulluser;
 //                        }
-//                        
-//                        
+//
+//
 //                        uint32_t device =(uint32_t)[iqNode.deviceid intValue];
 //                        if(!iqNode.deviceid) return;
-//                        
+//
 //                        SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:device];
 //                        SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
 //                        NSError *error;
-//                        
+//
 //                        [iqNode.preKeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-//                            
+//
 //                            NSDictionary *row = (NSDictionary *) obj;
 //                            NSString *keyid = (NSString *)[row objectForKey:@"preKeyId"];
-//                            
+//
 //                            SignalPreKeyBundle *bundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
 //                                                                                                   deviceId:device
 //                                                                                                   preKeyId:[keyid integerValue]
@@ -479,10 +481,10 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 //                                                                                                  signature:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
 //                                                                                                identityKey:[EncodingTools dataWithBase64EncodedString:iqNode.identityKey]
 //                                                                                                      error:nil];
-//                            
+//
 //                            [builder processPreKeyBundle:bundle error:nil];
 //                        }];
-//                        
+//
 //                    }
 //                }];
 //#ifndef TARGET_IS_EXTENSION
@@ -492,20 +494,20 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 //#endif
 //#endif
 //#endif
-//        
-//        
+//
+//
 //        if([iqNode.idval isEqualToString:@"enableCarbons"])
 //        {
 //            self.usingCarbons2=YES;
 //            [self cleanEnableCarbons];
 //        }
-//        
+//
 //        if(iqNode.mam2default)
 //        {
 //            [[NSNotificationCenter defaultCenter] postNotificationName:kMLMAMPref object:@{@"mamPref":iqNode.mam2default}];
 //        }
-//        
-//        
+//
+//
 //        if(iqNode.discoItems==YES)
 //        {
 //            if(([iqNode.from isEqualToString:self.server] || [iqNode.from isEqualToString:self.domain]) && !self->_discoveredServices)
@@ -514,7 +516,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 //                {
 //                    if(!self->_discoveredServices) self->_discoveredServices=[[NSMutableArray alloc] init];
 //                    [self->_discoveredServices addObject:item];
-//                    
+//
 //                    if((![[item objectForKey:@"jid"] isEqualToString:self.server]  &&  ![[item objectForKey:@"jid"] isEqualToString:self.domain])) {
 //                        [self discoverService:[item objectForKey:@"jid"]];
 //                    }
@@ -523,16 +525,16 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 //            }
 //            else
 //            {
-//                
+//
 //            }
 //        }
 //        else if (iqNode.roster==YES)
 //        {
 //            self.rosterList=iqNode.items;
-//            
+//
 //            for(NSDictionary* contact in self.rosterList)
 //            {
-//                
+//
 //                if([[contact objectForKey:@"subscription"] isEqualToString:@"both"])
 //                {
 //                    if([contact objectForKey:@"jid"]) {
@@ -541,7 +543,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 //                                                      fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
 //                                                      nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
 //                                                withCompletion:^(BOOL success) {
-//                            
+//
 //                            if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
 //                            {
 //                                [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"] forContact:[contact objectForKey:@"jid"] andAccount:self->_accountNo ] ;
@@ -549,35 +551,35 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 //                        }];
 //                    }
 //                }
-//                
+//
 //            }
-//            
+//
 //            // iterate roster and get cards
 //            [self getVcards];
 //        }
-//        
+//
 //        //confirmation of set call after we accepted
 //        if([iqNode.idval isEqualToString:self.jingle.idval])
 //        {
 //            NSString* from= iqNode.user;
-//            
+//
 //            NSString* fullName;
 //            fullName=[[DataLayer sharedInstance] fullName:from forAccount:self->_accountNo];
 //            if(!fullName) fullName=from;
-//            
+//
 //            NSDictionary* userDic=@{@"buddy_name":from,
 //                                    @"full_name":fullName,
 //                                    kAccountID:self->_accountNo
 //            };
-//            
+//
 //            [[NSNotificationCenter defaultCenter]
 //             postNotificationName: kMonalCallStartedNotice object: userDic];
-//            
-//            
+//
+//
 //            [self.jingle rtpConnect];
 //            return;
 //        }
-//        
+//
 //    }
     
 }

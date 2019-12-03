@@ -14,6 +14,11 @@
 #import "MLPush.h"
 #endif
 
+NSString *const kiqGetType = @"get";
+NSString *const kiqSetType = @"set";
+NSString *const kiqResultType = @"result";
+NSString *const kiqErrorType = @"error";
+
 @implementation XMPPIQ
 
 

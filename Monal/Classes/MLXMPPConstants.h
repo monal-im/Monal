@@ -12,11 +12,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 #define kXMLNS @"xmlns"
 
-#define kiqGetType @"get"
-#define kiqSetType @"set"
-#define kiqResultType @"result"
-#define kiqErrorType @"error"
-
 #define kRegisterNameSpace @"jabber:iq:register"
 #define kDataNameSpace @"jabber:x:data"
 #define kBobNameSpace @"urn:xmpp:bob"

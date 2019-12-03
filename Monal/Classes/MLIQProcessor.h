@@ -7,10 +7,21 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "ParseIq.h"
+#import "MLSignalStore.h"
+#import "SignalContext.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MLIQProcessor : NSObject
+
+
+-(MLIQProcessor *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore;
+
+/**
+ Process a iq, persist any changes and post notifications
+ */
+-(void) processIq:(ParseIq *) messageNode;
 
 @end
 

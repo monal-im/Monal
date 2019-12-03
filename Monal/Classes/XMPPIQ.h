@@ -9,6 +9,11 @@
 #import "MLXMLNode.h"
 #import "MLXMPPConstants.h"
 
+FOUNDATION_EXPORT NSString *const kiqGetType;
+FOUNDATION_EXPORT NSString *const kiqSetType;
+FOUNDATION_EXPORT NSString *const kiqResultType;
+FOUNDATION_EXPORT NSString *const kiqErrorType;
+
 @interface XMPPIQ : MLXMLNode
 
 -(id) initWithId:(NSString*) sessionid andType:(NSString*) iqType;
@@ -67,7 +72,7 @@ Queries the last page of messages (most recent) for a recipient
 #pragma mark disco
 /**
  makes a disco info response for the server.
- @param the param passed is the xmpp node attribute that came in with the iq get
+ @param node param passed is the xmpp node attribute that came in with the iq get
  */
 -(void) setDiscoInfoWithFeaturesAndNode:(NSString*) node;
 

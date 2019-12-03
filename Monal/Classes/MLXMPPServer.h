@@ -28,6 +28,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 // below are properties of the server that are discovered
 
+//server details
+@property (nonatomic, strong) NSSet *serverFeatures;
+
+
 @property (nonatomic,strong)  NSMutableArray*  discoveredServices;
 @property (nonatomic,strong)  NSString*  uploadServer;
 

@@ -73,9 +73,25 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 @interface xmpp()
 {
-    BOOL _loginStarted;
-    BOOL _reconnectScheduled;
+    NSInputStream *_iStream;
+    NSOutputStream *_oStream;
+    NSMutableString* _inputBuffer;
+    NSMutableArray* _outputQueue;
+
+    NSArray* _stanzaTypes;
+
+    BOOL _startTLSComplete;
+    BOOL _streamHasSpace;
+
+    //does not reset at disconnect
+    BOOL _loggedInOnce;
+    BOOL _hasRequestedServerInfo;
+
+    BOOL _brokenServerSSL;
 }
+
+@property (nonatomic, assign) BOOL loginStarted;
+@property (nonatomic, assign) BOOL reconnectScheduled;
 
 @property (nonatomic ,strong) NSDate *loginStartTimeStamp;
 
@@ -83,37 +99,19 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 @property (nonatomic, strong) NSOperationQueue *networkQueue;
 @property (nonatomic, strong) NSOperationQueue *processQueue;
 
-@property (nonatomic, assign) BOOL supportsPush;
-@property (nonatomic, assign) BOOL supportsRosterVersion;
-
-
 //HTTP upload
 @property (nonatomic, assign) BOOL supportsHTTPUpload;
 @property (nonatomic, strong) NSMutableArray *httpUploadQueue;
 
-//ping
-@property (nonatomic, assign) BOOL supportsPing;
-@property (nonatomic, assign) BOOL supportsPubSub;
 
-//stream resumption
-@property (nonatomic, assign) BOOL supportsSM3;
 @property (nonatomic, assign) BOOL resuming;
 @property (nonatomic, strong) NSString *streamID;
 
 @property (nonatomic, assign) BOOL hasDiscoAndRoster;
 
-// client state
-@property (nonatomic, assign) BOOL supportsClientState;
-
-//message archive
-@property (nonatomic, assign) BOOL supportsMam2;
-
 //carbons
 @property (nonatomic, assign) BOOL usingCarbons2;
 @property (nonatomic, assign) BOOL pushEnabled;
-
-//server details
-@property (nonatomic, strong) NSSet *serverFeatures;
 
 /**
  h to go out in r stanza

@@ -50,25 +50,6 @@ typedef void (^xmppCompletion)(BOOL success, NSString *message);
 typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFields);
 
 @interface xmpp : NSObject <NSStreamDelegate>
-{
-    NSInputStream *_iStream;
-    NSOutputStream *_oStream;
-    NSMutableString* _inputBuffer;
-    NSMutableArray* _outputQueue;
-
-    NSArray* _stanzaTypes;
-
-    BOOL _startTLSComplete;
-    BOOL _streamHasSpace;
-
-    //does not reset at disconnect
-    BOOL _loggedInOnce;
-    BOOL _hasRequestedServerInfo;
-
-    BOOL _brokenServerSSL;
-}
-
-#pragma  mark properties
 
 @property (nonatomic,strong) NSString* pushNode;
 @property (nonatomic,strong) NSString* pushSecret;

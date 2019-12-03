@@ -458,6 +458,7 @@
 		26C4B22421B6B91300610282 /* MLDNSLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C4B22321B6B91300610282 /* MLDNSLookup.m */; };
 		26C4B22521B6B91300610282 /* MLDNSLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C4B22321B6B91300610282 /* MLDNSLookup.m */; };
 		26C836622396CB9200C9F21D /* MLIQProcessorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C836612396CB9200C9F21D /* MLIQProcessorTest.m */; };
+		26C836632396CD0600C9F21D /* ParseIq.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EAC1780DE5C002B7085 /* ParseIq.m */; };
 		26CF3EAA1780D6B7002B7085 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EA91780D6B7002B7085 /* XMPPIQ.m */; };
 		26CF3EAD1780DE5D002B7085 /* ParseIq.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EAC1780DE5C002B7085 /* ParseIq.m */; };
 		26CF3EB21780DFD9002B7085 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EB11780DFD9002B7085 /* XMPPParser.m */; };
@@ -3219,6 +3220,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				26C836622396CB9200C9F21D /* MLIQProcessorTest.m in Sources */,
+				26C836632396CD0600C9F21D /* ParseIq.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

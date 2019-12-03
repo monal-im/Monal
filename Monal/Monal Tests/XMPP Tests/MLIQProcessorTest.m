@@ -7,31 +7,41 @@
 //
 
 #import <XCTest/XCTest.h>
+#import "ParseIQ.h"
+#import "MLIQProcessor.h"
 
 @interface MLIQProcessorTest : XCTestCase
+
+@property (nonatomic, strong) NSString *accountNo;
+@property (nonatomic, strong) NSString *jid;
+@property (nonatomic, strong) NSString *resource;
 
 @end
 
 @implementation MLIQProcessorTest
 
 - (void)setUp {
-    // Put setup code here. This method is called before the invocation of each test method in the class.
+    self.accountNo=@"1";
+    self.jid=@"foo@monal.im";
+    self.resource=@"Monal-iOS.51";
 }
 
 - (void)tearDown {
     // Put teardown code here. This method is called after the invocation of each test method in the class.
 }
 
-- (void)testExample {
-    // This is an example of a functional test case.
-    // Use XCTAssert and related functions to verify your tests produce the correct results.
+- (void)testResultBind {
+    NSString  *sample= @"<iq id='C923CE5C-2FC6-4ADD-AEFE-0AE04A99FD00' type='result'><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'><jid>foo@monal.im/Monal-iOS.51</jid></bind></iq>";
+    
+    NSDictionary *stanzaToParse =@{@"stanzaType":@"iq", @"stanzaString":sample};
+    
+     ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
+    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo jid:self.jid signalContex:nil andSignalStore:nil];
+                      
+    [processor processIq:iqNode];
+    
+    
 }
 
-- (void)testPerformanceExample {
-    // This is an example of a performance test case.
-    [self measureBlock:^{
-        // Put the code you want to measure the time of here.
-    }];
-}
 
 @end

@@ -79,9 +79,6 @@ pod 'OpenSSL-Universal'
 
   # Pods for Monal-OSX
 
-  target 'Monal-OSXTests' do
-    inherit! :search_paths
-    # Pods for testing
-  end
+
 
 end

@@ -113,24 +113,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 //        [self send:auth];
 //    }
 //
-//    if(iqNode.shouldSetBind)
-//    {
-//        self->_jid=iqNode.jid;
-//        DDLogVerbose(@"Set jid %@", self->_jid);
-//
-//        if(self.supportsSM3)
-//        {
-//            MLXMLNode *enableNode =[[MLXMLNode alloc] initWithElement:@"enable"];
-//            NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"resume":@"true" };
-//            enableNode.attributes =[dic mutableCopy];
-//            [self send:enableNode];
-//        }
-//        else
-//        {
-//            //init session and query disco, roster etc.
-//            [self initSession];
-//        }
-//    }
+
 //
 //    if(iqNode.vCard && iqNode.user)
 //    {
@@ -400,6 +383,27 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 }
 
 -(void) processResultIq:(ParseIq *) iqNode {
+    
+    if(iqNode.shouldSetBind)
+    {
+        self->_jid=iqNode.jid;
+        DDLogVerbose(@"Set jid %@", self->_jid);
+        
+        if(self.supportsSM3)
+        {
+            MLXMLNode *enableNode =[[MLXMLNode alloc] initWithElement:@"enable"];
+            NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"resume":@"true" };
+            enableNode.attributes =[dic mutableCopy];
+            [self send:enableNode];
+        }
+        else
+        {
+            //init session and query disco, roster etc.
+            [self initSession];
+        }
+    }
+    
+    
 //    if ([iqNode.type isEqualToString:kiqResultType])
 //    {
 //        if(iqNode.mam2Last && !iqNode.mam2fin)

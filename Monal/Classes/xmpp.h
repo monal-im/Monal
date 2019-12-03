@@ -22,6 +22,8 @@
 #import "MLMessage.h"
 #import "MLContact.h"
 
+#import "MLXMPPConnection.h"
+
 typedef NS_ENUM (NSInteger, xmppState) {
     kStateLoggedOut =-1,
     kStateDisconnected , // has connected once
@@ -71,20 +73,7 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic,strong) NSString* pushNode;
 @property (nonatomic,strong) NSString* pushSecret;
 
-@property (nonatomic,readonly) NSString* fulluser; // combination of username@domain
-
-// connection attributes
-@property (nonatomic,strong) NSString* username;
-@property (nonatomic,strong) NSString* domain;
-@property (nonatomic,strong, readonly) NSString* jid;
-@property (nonatomic,strong) NSString* password;
-@property (nonatomic,strong) NSString* server;
-@property (nonatomic,assign) NSInteger port;
-@property (nonatomic,strong) NSString* resource;
-@property (nonatomic,assign) BOOL SSL;
-@property (nonatomic,assign) BOOL oldStyleSSL;
-@property (nonatomic,assign) BOOL selfSigned;
-@property (nonatomic,assign) BOOL oAuth;
+@property (nonatomic,strong) MLXMPPConnection* userIdentity;
 
 //reg
 @property (nonatomic,assign) BOOL registrationSubmission;
@@ -121,26 +110,12 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 
 // discovered properties
 @property (nonatomic,strong)  NSArray* discoveredServerList;
-@property (nonatomic,strong)  NSMutableArray*  discoveredServices;
+
 @property (nonatomic,strong)  NSString*  conferenceServer;
 @property (nonatomic,strong)  NSArray*  roomList;
 @property (nonatomic, strong) NSArray* rosterList;
 @property (nonatomic, assign) BOOL staleRoster; //roster is stale if it resumed in the background
 
-
-@property (nonatomic,strong)  NSString*  uploadServer;
-@property (nonatomic, readonly) BOOL supportsHTTPUpload;
-// client state
-@property (nonatomic, readonly) BOOL supportsClientState;
-
-//message archive
-@property (nonatomic, readonly) BOOL supportsMam2;
-
-@property (nonatomic, readonly) BOOL supportsSM3;
-@property (nonatomic, readonly) BOOL supportsPush;
-@property (nonatomic, readonly) BOOL pushEnabled;
-@property (nonatomic, readonly) BOOL usingCarbons2;
-@property (nonatomic, readonly) BOOL supportsRosterVersion;
 
 @property (nonatomic,assign) BOOL airDrop;
 
@@ -158,8 +133,6 @@ extern NSString *const kId;
 extern NSString *const kMessageId;
 extern NSString *const kSendTimer;
 
-
-
 extern NSString *const kXMPPError;
 extern NSString *const kXMPPSuccess;
 extern NSString *const kXMPPPresence;
@@ -168,7 +141,6 @@ extern NSString *const kXMPPPresence;
 -(void) connectWithCompletion:(xmppCompletion) completion;
 -(void) connect;
 -(void) disconnect;
-
 
 /**
  send a message to a contact with xmpp id

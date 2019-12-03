@@ -28,6 +28,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(id) initWithHost:(NSString *) host andPort:(NSNumber *) port;
 
+
+- (void) updateConnectedServer:(NSString *) server;
+
 /**
  returns the currently connected server may be host or dns one.
  */

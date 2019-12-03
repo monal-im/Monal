@@ -14,6 +14,9 @@
 @property (nonatomic) NSString *jid;
 @property (nonatomic) NSString *password;
 
+@property (nonatomic) NSString *user;
+@property (nonatomic) NSString *domain;
+
 @end
 
 @implementation MLXMPPIdentity
@@ -23,14 +26,17 @@
     self=[super init];
     self.jid=jid;
     self.password=password;
+    
+    NSArray* elements=[self.jid componentsSeparatedByString:@"@"];
+    
+    self.user=elements[0];
+    
+    if(elements.count>1) {
+        self.domain = elements[1];
+    }
+    
     return self;
 }
 
--(NSString *) user {
-    return nil;
-}
 
--(NSString *) domain {
-    return nil;
-}
 @end

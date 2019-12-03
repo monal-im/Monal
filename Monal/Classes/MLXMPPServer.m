@@ -28,8 +28,13 @@
     return self;
 }
 
+- (void) updateConnectedServer:(NSString *) server
+{
+    self.serverInUse = server;
+}
+
 - (NSString *) connectedServer {
-    return _serverInUse;
+    return self.serverInUse;
 }
 
 @end

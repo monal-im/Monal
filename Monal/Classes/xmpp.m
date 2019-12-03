@@ -149,18 +149,13 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 @implementation xmpp
 
--(id) init
+-(void) setupObjects
 {
-    self=[super init];
     _accountState = kStateLoggedOut;
 
     _discoveredServerList=[[NSMutableArray alloc] init];
     _inputBuffer=[[NSMutableString alloc] init];
     _outputQueue=[[NSMutableArray alloc] init];
-    _port=5552;
-    _SSL=YES;
-    _oldStyleSSL=NO;
-
 
     self.networkQueue =[[NSOperationQueue alloc] init];
     self.networkQueue.maxConcurrentOperationCount=1;
@@ -206,6 +201,15 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
     self.xmppCompletionHandlers = [[NSMutableDictionary alloc] init];
 
+}
+
+
+-(id) initWithServer:(nonnull MLXMPPServer *) server andIdentity:(nonnull MLXMPPIdentity *)identity {
+    self=[super init];
+    
+    self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];
+    [self setupObjects];
+    
     return self;
 }
 

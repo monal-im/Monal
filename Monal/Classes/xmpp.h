@@ -54,7 +54,7 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic,strong) NSString* pushNode;
 @property (nonatomic,strong) NSString* pushSecret;
 
-@property (nonatomic,strong) MLXMPPConnection* userIdentity;
+@property (nonatomic,strong) MLXMPPConnection* connectionProperties;
 
 //reg
 @property (nonatomic,assign) BOOL registrationSubmission;
@@ -118,6 +118,8 @@ extern NSString *const kXMPPError;
 extern NSString *const kXMPPSuccess;
 extern NSString *const kXMPPPresence;
 
+
+-(id) initWithServer:(nonnull MLXMPPServer *) server andIdentity:(nonnull MLXMPPIdentity *)identity;
 
 -(void) connectWithCompletion:(xmppCompletion) completion;
 -(void) connect;

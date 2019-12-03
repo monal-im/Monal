@@ -13,6 +13,7 @@
 
 @property (nonatomic) NSString *jid;
 @property (nonatomic) NSString *password;
+@property (nonatomic) NSString *resource;
 
 @property (nonatomic) NSString *user;
 @property (nonatomic) NSString *domain;
@@ -21,11 +22,12 @@
 
 @implementation MLXMPPIdentity
 
--(id) initWithJid:(NSString *)jid andPassword:(NSString *) password
+-(id) initWithJid:(NSString *)jid password:(NSString *) password andResource:(NSString *) resource
 {
     self=[super init];
     self.jid=jid;
     self.password=password;
+    self.resource=resource; 
     
     NSArray* elements=[self.jid componentsSeparatedByString:@"@"];
     

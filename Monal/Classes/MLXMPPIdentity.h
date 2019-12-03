@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(NSString *) user;
 -(NSString *) domain;
 
--(id) initWithJid:(NSString *)jid andPassword:(NSString *) password;
+-(id) initWithJid:(NSString *)jid password:(NSString *) password andResource:(NSString *) resource;
 
 @end
 

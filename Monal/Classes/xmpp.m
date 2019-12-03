@@ -1256,6 +1256,8 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 }
 
+
+
 -(void) processInput
 {
     //prevent reconnect attempt
@@ -1269,9 +1271,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
                 if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
                 {
-                    if(self.accountState>=kStateBound) {
-                        self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
-                    }
+                    [self incrementLastHandledStanza];
                     
                     ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
 
@@ -1282,8 +1282,8 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"message"])
                 {
-                    if(self.accountState>=kStateBound)
-                        self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
+                   [self incrementLastHandledStanza];
+                    
                     ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
 
                     MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.jid?self.jid:self->_fulluser signalContex:self.signalContext andSignalStore:self.monalSignalStore];
@@ -1357,8 +1357,8 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
                 {
-                    if(self.accountState>=kStateBound)
-                        self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
+                [self incrementLastHandledStanza];
+                    
                     ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:stanzaToParse];
 
                     NSString *recipient=presenceNode.to;
@@ -2404,6 +2404,13 @@ if(self.airDrop) {
             for(NSDictionary *dic in self.unAckedStanzas)
                 DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
     }
+}
+
+
+-(void) incrementLastHandledStanza {
+    if(self.accountState>=kStateBound) {
+                           self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
+                       }
 }
 
 -(void) initSM3

@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readonly) NSString *jid;
 @property (nonatomic, readonly) NSString* password;
+@property (nonatomic, readonly) NSString* resource;
 
 -(NSString *) user;
 -(NSString *) domain;

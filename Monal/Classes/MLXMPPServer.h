@@ -26,32 +26,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic,assign) BOOL oAuth;
 
 
-// below are properties of the server that are discovered
-
-//server details
-@property (nonatomic, strong) NSSet *serverFeatures;
-
-
-@property (nonatomic,strong)  NSMutableArray*  discoveredServices;
-@property (nonatomic,strong)  NSString*  uploadServer;
-
-@property (nonatomic, assign) BOOL supportsHTTPUpload;
-// client state
-@property (nonatomic, assign) BOOL supportsClientState;
-//message archive
-@property (nonatomic, assign) BOOL supportsMam2;
-@property (nonatomic, assign) BOOL supportsSM3;
-@property (nonatomic, assign) BOOL supportsPush;
-@property (nonatomic, assign) BOOL pushEnabled;
-@property (nonatomic, assign) BOOL usingCarbons2;
-@property (nonatomic, assign) BOOL supportsRosterVersion;
-
-@property (nonatomic, assign) BOOL supportsPing;
-@property (nonatomic, assign) BOOL supportsPubSub;
-
-
-@property (nonatomic) NSString *dnsDiscoveredHost;
-
 -(id) initWithHost:(NSString *) host andPort:(NSNumber *) port;
 
 /**

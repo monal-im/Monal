@@ -389,37 +389,39 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 -(void) processResultIq:(ParseIq *) iqNode {
     
-    if(iqNode.shouldSetBind)
-    {
-        [self.connection bindJid: iqNode.jid];
-        DDLogInfo(@"Bind jid %@", iqNode.jid);
-        
-        if(self.connection.supportsSM3)
-        {
-            MLXMLNode *enableNode =[[MLXMLNode alloc] initWithElement:@"enable"];
-            NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3",@"resume":@"true" };
-            enableNode.attributes =[dic mutableCopy];
-            if(self.completion) self.completion(enableNode);
-        }
-        else
-        {
-            //init session and query disco, roster etc.
-           // [self initSession];
-        }
-    }
-    
     //TODO maybe remove this.
     if(iqNode.mam2Last && !iqNode.mam2fin)
     {
         //RSM seems broken on servers. Tell UI there is more to fetch
         [[NSNotificationCenter defaultCenter] postNotificationName:kMLMAMMore object:nil];
+        return; 
     }
     
     // default MAM settings
     if(iqNode.mam2default)
     {
         [[NSNotificationCenter defaultCenter] postNotificationName:kMLMAMPref object:@{@"mamPref":iqNode.mam2default}];
+        return;
     }
+    
+    if(iqNode.shouldSetBind)
+      {
+          [self.connection bindJid: iqNode.jid];
+          DDLogInfo(@"Bind jid %@", iqNode.jid);
+          
+          if(self.connection.supportsSM3)
+          {
+              MLXMLNode *enableNode =[[MLXMLNode alloc] initWithElement:@"enable"];
+              NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3",@"resume":@"true" };
+              enableNode.attributes =[dic mutableCopy];
+              if(self.completion) self.completion(enableNode);
+          }
+          else
+          {
+              //init session and query disco, roster etc.
+             // [self initSession];
+          }
+      }
     
     if([iqNode.idval isEqualToString:@"enableCarbons"])
     {

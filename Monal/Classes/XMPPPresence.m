@@ -7,6 +7,7 @@
 //
 
 #import "XMPPPresence.h"
+#import "MLXMPPConstants.h"
 
 @implementation XMPPPresence
 

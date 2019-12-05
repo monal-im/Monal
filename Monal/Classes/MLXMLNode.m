@@ -51,7 +51,7 @@
 
 -(void) setXMLNS:(NSString*) xmlns
 {
-    [self.attributes setObject:xmlns forKey:@"xmlns"];
+    [self.attributes setObject:xmlns forKey:kXMLNS];
 }
 
 

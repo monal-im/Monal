@@ -392,7 +392,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         if(self.supportsSM3)
         {
             MLXMLNode *enableNode =[[MLXMLNode alloc] initWithElement:@"enable"];
-            NSDictionary *dic=@{@"xmlns":@"urn:xmpp:sm:3",@"resume":@"true" };
+            NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3",@"resume":@"true" };
             enableNode.attributes =[dic mutableCopy];
             [self send:enableNode];
         }

@@ -64,7 +64,7 @@ static const int ddLogLevel = LOG_LEVEL_INFO;
     if([elementName isEqualToString:[NSString stringWithFormat:@"%@:x",namespace]] || [elementName isEqualToString:@"x"] )
     {
         if([[attributeDict objectForKey:[NSString stringWithFormat:@"xmlns:%@",namespace]] isEqualToString:@"http://jabber.org/protocol/muc#user"]
-           || [[attributeDict objectForKey:@"xmlns" ] isEqualToString:@"http://jabber.org/protocol/muc#user"])
+           || [[attributeDict objectForKey:kXMLNS ] isEqualToString:@"http://jabber.org/protocol/muc#user"])
         {
             self.MUC=YES;
             return;

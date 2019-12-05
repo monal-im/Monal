@@ -28,13 +28,11 @@ NS_ASSUME_NONNULL_BEGIN
  The properties below are discovered after connecting and therefore are not read only
  */
 
-@property (nonatomic, strong) NSString *dnsDiscoveredHost;
-
 //server details
 @property (nonatomic, strong) NSSet *serverFeatures;
 
-@property (nonatomic,strong)  NSMutableArray*  discoveredServices;
-@property (nonatomic,strong)  NSString*  uploadServer;
+@property (nonatomic,strong)  NSMutableArray* discoveredServices;
+@property (nonatomic,strong)  NSString* uploadServer;
 
 @property (nonatomic, assign) BOOL supportsHTTPUpload;
 // client state

@@ -44,7 +44,7 @@
 {
     MLXMLNode* oob =[[MLXMLNode alloc] init];
     oob.element=@"x";
-    [oob.attributes setValue:@"jabber:x:oob" forKey:@"xmlns"];
+    [oob.attributes setValue:@"jabber:x:oob" forKey:kXMLNS];
     MLXMLNode* url =[[MLXMLNode alloc] init];
     url.element=@"url";
     url.data=link;
@@ -58,7 +58,7 @@
 {
     MLXMLNode* received =[[MLXMLNode alloc] init];
     received.element=@"received";
-    [received.attributes setValue:@"urn:xmpp:receipts" forKey:@"xmlns"];
+    [received.attributes setValue:@"urn:xmpp:receipts" forKey:kXMLNS];
     [received.attributes setValue:messageId forKey:@"id"];
     [self.children addObject:received];
 }

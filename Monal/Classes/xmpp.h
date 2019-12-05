@@ -11,6 +11,7 @@
 #import "EncodingTools.h"
 
 #import "MLConstants.h"
+#import "MLXMPPConstants.h"
 #import "jingleCall.h"
 #import "MLDNSLookup.h"
 #import "MLSignalStore.h"

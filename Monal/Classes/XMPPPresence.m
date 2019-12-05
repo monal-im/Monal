@@ -25,7 +25,7 @@
     
     MLXMLNode* c =[[MLXMLNode alloc] init];
     c.element=@"c";
-    [c.attributes setObject:@"http://jabber.org/protocol/caps" forKey:@"xmlns"];
+    [c.attributes setObject:@"http://jabber.org/protocol/caps" forKey:kXMLNS];
     [c.attributes setObject:@"http://monal.im/" forKey:@"node"];
     [c.attributes setObject:@"sha-1" forKey:@"hash"];
     [c.attributes setObject:self.versionHash forKey:@"ver"];
@@ -90,7 +90,7 @@
     
     MLXMLNode* xNode =[[MLXMLNode alloc] init];
     xNode.element=@"x";
-    [xNode.attributes setObject:@"http://jabber.org/protocol/muc" forKey:@"xmlns"];
+    [xNode.attributes setObject:@"http://jabber.org/protocol/muc" forKey:kXMLNS];
     
     MLXMLNode* historyNode =[[MLXMLNode alloc] init];
     historyNode.element=@"history";

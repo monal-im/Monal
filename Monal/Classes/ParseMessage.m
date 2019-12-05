@@ -45,7 +45,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
     }
     
-    if(([elementName isEqualToString:@"delay"]) && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:delay"])
+    if(([elementName isEqualToString:@"delay"]) && [[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:delay"])
     {
         NSDateFormatter *rfc3339DateFormatter = [[NSDateFormatter alloc] init];
         NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
@@ -68,7 +68,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         
     }
     
-    if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:sid:0"])
+    if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:sid:0"])
     {
         _stanzaId = [attributeDict objectForKey:@"id"];
         return;
@@ -145,7 +145,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
     
     
-    if(([elementName isEqualToString:@"x"])  && ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@""]))
+    if(([elementName isEqualToString:@"x"])  && ([[attributeDict objectForKey:kXMLNS] isEqualToString:@""]))
     {
         State=@"OOB";
         return;
@@ -164,7 +164,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	//message->user:X
 	if(([State isEqualToString:@"Message"]) && ( ([elementName isEqualToString: @"user:invite"]) || ([elementName isEqualToString: @"invite"]))
        // && (([[attributeDict objectForKey:@"xmlns:user"] isEqualToString:@"http://jabber.org/protocol/muc#user"]) ||
-       //  ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"http://jabber.org/protocol/muc#user"])
+       //  ([[attributeDict objectForKey:kXMLNS] isEqualToString:@"http://jabber.org/protocol/muc#user"])
        //   )
 	   )
 	{
@@ -185,7 +185,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	}
 	
 
-	if(([elementName isEqualToString:@"data"])  && ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:avatar:data"]))
+	if(([elementName isEqualToString:@"data"])  && ([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:avatar:data"]))
 	{
         State=@"AvatarData";
 		
@@ -193,7 +193,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	}
 	
     
-    if(([elementName isEqualToString:@"result"])  && ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:mam:2"]))
+    if(([elementName isEqualToString:@"result"])  && ([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:mam:2"]))
     {
         _mamResult=YES;
         return;
@@ -209,13 +209,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	}
 
     
-    if([elementName isEqualToString:@"request"]  && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:receipts"] )
+    if([elementName isEqualToString:@"request"]  && [[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:receipts"] )
     {
         _requestReceipt=YES;
         return;
     }
     
-    if([elementName isEqualToString:@"received"]  && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:receipts"] )
+    if([elementName isEqualToString:@"received"]  && [[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:receipts"] )
     {
         _receivedID =[attributeDict objectForKey:@"id"];
         return;
@@ -232,7 +232,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
     
     if(([elementName isEqualToString:@"encrypted"])
-       && [[attributeDict objectForKey:@"xmlns"] isEqualToString:@"eu.siacs.conversations.axolotl"]  )
+       && [[attributeDict objectForKey:kXMLNS] isEqualToString:@"eu.siacs.conversations.axolotl"]  )
     {
         State=@"OMEMO";
         return;

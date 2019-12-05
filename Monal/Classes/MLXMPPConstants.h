@@ -10,7 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #define kRegServer @"blabber.im"
 
-#define kXMLNS @"xmlns"
+#define kXMLNS kXMLNS
 
 #define kRegisterNameSpace @"jabber:iq:register"
 #define kDataNameSpace @"jabber:x:data"

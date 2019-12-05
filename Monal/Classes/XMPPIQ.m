@@ -80,7 +80,7 @@ NSString *const kiqErrorType = @"error";
 {
     MLXMLNode* enableNode =[[MLXMLNode alloc] init];
     enableNode.element=@"enable";
-    [enableNode.attributes setObject:@"urn:xmpp:push:0" forKey:@"xmlns"];
+    [enableNode.attributes setObject:@"urn:xmpp:push:0" forKey:kXMLNS];
     //this push jid is hardcoded and does not have to be the same hostname as the api endpoint set in MonalAppDelegate.m
     [enableNode.attributes setObject:[MLPush pushServer] forKey:@"jid"];
     [enableNode.attributes setObject:node forKey:@"node"];
@@ -88,7 +88,7 @@ NSString *const kiqErrorType = @"error";
     
     MLXMLNode* xNode =[[MLXMLNode alloc] init];
     xNode.element=@"x";
-    [xNode.attributes setObject:@"jabber:x:data" forKey:@"xmlns"];
+    [xNode.attributes setObject:@"jabber:x:data" forKey:kXMLNS];
     [xNode.attributes setObject:@"submit" forKey:@"type"];
     [enableNode.children addObject:xNode];
     
@@ -116,7 +116,7 @@ NSString *const kiqErrorType = @"error";
 {
     MLXMLNode* disableNode =[[MLXMLNode alloc] init];
     disableNode.element=@"disable";
-    [disableNode.attributes setObject:@"urn:xmpp:push:0" forKey:@"xmlns"];
+    [disableNode.attributes setObject:@"urn:xmpp:push:0" forKey:kXMLNS];
     //this push jid is hardcoded and does not have to be the same hostname as the api endpoint set in MonalAppDelegate.m
     [disableNode.attributes setObject:@"192.168.2.3" forKey:@"jid"];
     [disableNode.attributes setObject:node forKey:@"node"];
@@ -155,7 +155,7 @@ NSString *const kiqErrorType = @"error";
 
     MLXMLNode* bindNode =[[MLXMLNode alloc] init];
     bindNode.element=@"bind";
-    [bindNode.attributes setObject:@"urn:ietf:params:xml:ns:xmpp-bind" forKey:@"xmlns"];
+    [bindNode.attributes setObject:@"urn:ietf:params:xml:ns:xmpp-bind" forKey:kXMLNS];
     
     MLXMLNode* resourceNode =[[MLXMLNode alloc] init];
     resourceNode.element=@"resource";
@@ -225,7 +225,7 @@ NSString *const kiqErrorType = @"error";
 {
     MLXMLNode* pingNode =[[MLXMLNode alloc] init];
     pingNode.element=@"ping";
-    [pingNode.attributes setObject:@"urn:xmpp:ping" forKey:@"xmlns"];
+    [pingNode.attributes setObject:@"urn:xmpp:ping" forKey:kXMLNS];
     [self.children addObject:pingNode];
 
 }
@@ -236,7 +236,7 @@ NSString *const kiqErrorType = @"error";
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"prefs";
-    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:@"xmlns"];
+    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:kXMLNS];
     [self.children addObject:queryNode];
 }
 
@@ -247,7 +247,7 @@ NSString *const kiqErrorType = @"error";
      */
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"prefs";
-    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:@"xmlns"];
+    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:kXMLNS];
     [queryNode.attributes setObject:pref forKey:@"default"];
     [self.children addObject:queryNode];
 }
@@ -260,12 +260,12 @@ NSString *const kiqErrorType = @"error";
     
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
-    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:@"xmlns"];
+    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:kXMLNS];
     
     
     MLXMLNode* xnode =[[MLXMLNode alloc] init];
     xnode.element=@"x";
-    [xnode.attributes setObject:@"jabber:x:data" forKey:@"xmlns"];
+    [xnode.attributes setObject:@"jabber:x:data" forKey:kXMLNS];
     [xnode.attributes setObject:@"submit" forKey:@"type"];
     
     MLXMLNode* field1 =[[MLXMLNode alloc] init];
@@ -285,7 +285,7 @@ NSString *const kiqErrorType = @"error";
     //if we are fetching "all" limit with RSM to 100 for now
     MLXMLNode* set =[[MLXMLNode alloc] init];
     set.element=@"set";
-    [set.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:@"xmlns"];
+    [set.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:kXMLNS];
     
     MLXMLNode* max =[[MLXMLNode alloc] init];
     max.element=@"max";
@@ -325,12 +325,12 @@ NSString *const kiqErrorType = @"error";
     
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
-    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:@"xmlns"];
+    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:kXMLNS];
     
     
     MLXMLNode* xnode =[[MLXMLNode alloc] init];
     xnode.element=@"x";
-    [xnode.attributes setObject:@"jabber:x:data" forKey:@"xmlns"];
+    [xnode.attributes setObject:@"jabber:x:data" forKey:kXMLNS];
     [xnode.attributes setObject:@"submit" forKey:@"type"];
     
     MLXMLNode* field1 =[[MLXMLNode alloc] init];
@@ -377,7 +377,7 @@ NSString *const kiqErrorType = @"error";
         //if we are fetching "all" limit with RSM to 100 for now
         MLXMLNode* set =[[MLXMLNode alloc] init];
         set.element=@"set";
-        [set.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:@"xmlns"];
+        [set.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:kXMLNS];
         
         MLXMLNode* max =[[MLXMLNode alloc] init];
         max.element=@"max";
@@ -431,12 +431,12 @@ NSString *const kiqErrorType = @"error";
     
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
-    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:@"xmlns"];
+    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:kXMLNS];
     
     
     MLXMLNode* xnode =[[MLXMLNode alloc] init];
     xnode.element=@"x";
-    [xnode.attributes setObject:@"jabber:x:data" forKey:@"xmlns"];
+    [xnode.attributes setObject:@"jabber:x:data" forKey:kXMLNS];
     [xnode.attributes setObject:@"submit" forKey:@"type"];
     
     MLXMLNode* field1 =[[MLXMLNode alloc] init];
@@ -495,7 +495,7 @@ NSString *const kiqErrorType = @"error";
     
     MLXMLNode* field3 =[[MLXMLNode alloc] init];
     field3.element=@"set";
-    [field3.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:@"xmlns"];
+    [field3.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:kXMLNS];
     
     
     MLXMLNode* max =[[MLXMLNode alloc] init];
@@ -524,7 +524,7 @@ NSString *const kiqErrorType = @"error";
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
-    [queryNode.attributes setObject:@"jabber:iq:roster" forKey:@"xmlns"];
+    [queryNode.attributes setObject:@"jabber:iq:roster" forKey:kXMLNS];
     [self.children addObject:queryNode];
     
     MLXMLNode* itemNode =[[MLXMLNode alloc] init];
@@ -538,7 +538,7 @@ NSString *const kiqErrorType = @"error";
 {       
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
-    [queryNode.attributes setObject:@"jabber:iq:roster" forKey:@"xmlns"];
+    [queryNode.attributes setObject:@"jabber:iq:roster" forKey:kXMLNS];
     if(version)
     {
         [queryNode.attributes setObject:version forKey:@"ver"];
@@ -550,7 +550,7 @@ NSString *const kiqErrorType = @"error";
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
-    [queryNode.attributes setObject:@"jabber:iq:version" forKey:@"xmlns"];
+    [queryNode.attributes setObject:@"jabber:iq:version" forKey:kXMLNS];
     
     MLXMLNode* name =[[MLXMLNode alloc] init];
     name.element=@"name";
@@ -582,7 +582,7 @@ NSString *const kiqErrorType = @"error";
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
-    [queryNode.attributes setObject:@"jabber:iq:last" forKey:@"xmlns"];
+    [queryNode.attributes setObject:@"jabber:iq:last" forKey:kXMLNS];
     [queryNode.attributes setObject:@"0" forKey:@"seconds"];  // hasnt been away for 0 seconds
     [self.children addObject:queryNode];
 }
@@ -593,7 +593,7 @@ NSString *const kiqErrorType = @"error";
 {
     MLXMLNode* requestNode =[[MLXMLNode alloc] init];
     requestNode.element=@"request";
-    [requestNode.attributes setObject:@"urn:xmpp:http:upload" forKey:@"xmlns"];
+    [requestNode.attributes setObject:@"urn:xmpp:http:upload" forKey:kXMLNS];
     
     MLXMLNode* filename =[[MLXMLNode alloc] init];
     filename.element=@"filename";
@@ -648,11 +648,11 @@ NSString *const kiqErrorType = @"error";
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
-    [queryNode.attributes setObject:@"http://jabber.org/protocol/muc#owner" forKey:@"xmlns"];
+    [queryNode.attributes setObject:@"http://jabber.org/protocol/muc#owner" forKey:kXMLNS];
     
     MLXMLNode* xNode =[[MLXMLNode alloc] init];
     xNode.element=@"x";
-    [xNode.attributes setObject:@"jabber:x:data" forKey:@"xmlns"];
+    [xNode.attributes setObject:@"jabber:x:data" forKey:kXMLNS];
     [xNode.attributes setObject:@"submit" forKey:@"type"];
     
     [queryNode.children addObject:xNode];
@@ -679,7 +679,7 @@ NSString *const kiqErrorType = @"error";
     
     MLXMLNode* description =[[MLXMLNode alloc] init];
     description.element=@"description";
-    [description.attributes setObject:@"urn:xmpp:jingle:apps:rtp:1" forKey:@"xmlns"];
+    [description.attributes setObject:@"urn:xmpp:jingle:apps:rtp:1" forKey:kXMLNS];
     [description.attributes setObject:@"audio" forKey:@"media"];
 
     
@@ -694,7 +694,7 @@ NSString *const kiqErrorType = @"error";
     
     MLXMLNode* transport =[[MLXMLNode alloc] init];
     transport.element=@"transport";
-    [transport.attributes setObject:@"urn:xmpp:jingle:transports:raw-udp:1" forKey:@"xmlns"];
+    [transport.attributes setObject:@"urn:xmpp:jingle:transports:raw-udp:1" forKey:kXMLNS];
 
     
     MLXMLNode* candidate1 =[[MLXMLNode alloc] init];
@@ -758,7 +758,7 @@ NSString *const kiqErrorType = @"error";
     
     MLXMLNode* description =[[MLXMLNode alloc] init];
     description.element=@"description";
-    [description.attributes setObject:@"urn:xmpp:jingle:apps:rtp:1" forKey:@"xmlns"];
+    [description.attributes setObject:@"urn:xmpp:jingle:apps:rtp:1" forKey:kXMLNS];
     [description.attributes setObject:@"audio" forKey:@"media"];
     
     
@@ -773,7 +773,7 @@ NSString *const kiqErrorType = @"error";
     
     MLXMLNode* transport =[[MLXMLNode alloc] init];
     transport.element=@"transport";
-    [transport.attributes setObject:@"urn:xmpp:jingle:transports:raw-udp:1" forKey:@"xmlns"];
+    [transport.attributes setObject:@"urn:xmpp:jingle:transports:raw-udp:1" forKey:kXMLNS];
     
     
     MLXMLNode* candidate1 =[[MLXMLNode alloc] init];
@@ -859,7 +859,7 @@ NSString *const kiqErrorType = @"error";
 {
     MLXMLNode* pubsubNode =[[MLXMLNode alloc] init];
     pubsubNode.element=@"pubsub";
-    [pubsubNode.attributes setObject:@"http://jabber.org/protocol/pubsub" forKey:@"xmlns"];
+    [pubsubNode.attributes setObject:@"http://jabber.org/protocol/pubsub" forKey:kXMLNS];
     
     MLXMLNode* publish =[[MLXMLNode alloc] init];
     publish.element=@"publish";
@@ -870,7 +870,7 @@ NSString *const kiqErrorType = @"error";
     
     MLXMLNode* listNode =[[MLXMLNode alloc] init];
     listNode.element=@"list";
-    [listNode.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:@"xmlns"];
+    [listNode.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:kXMLNS];
     
     [devices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSString *deviceid= (NSString *)obj;
@@ -894,7 +894,7 @@ NSString *const kiqErrorType = @"error";
 {
     MLXMLNode* pubsubNode =[[MLXMLNode alloc] init];
     pubsubNode.element=@"pubsub";
-    [pubsubNode.attributes setObject:@"http://jabber.org/protocol/pubsub" forKey:@"xmlns"];
+    [pubsubNode.attributes setObject:@"http://jabber.org/protocol/pubsub" forKey:kXMLNS];
     
     MLXMLNode* publish =[[MLXMLNode alloc] init];
     publish.element=@"publish";
@@ -905,7 +905,7 @@ NSString *const kiqErrorType = @"error";
     
     MLXMLNode* bundle =[[MLXMLNode alloc] init];
     bundle.element=@"bundle";
-    [bundle.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:@"xmlns"];
+    [bundle.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:kXMLNS];
     
     MLXMLNode* signedPreKeyPublic =[[MLXMLNode alloc] init];
     signedPreKeyPublic.element=@"signedPreKeyPublic";
@@ -952,7 +952,7 @@ NSString *const kiqErrorType = @"error";
 {
     MLXMLNode* pubsubNode =[[MLXMLNode alloc] init];
     pubsubNode.element=@"pubsub";
-    [pubsubNode.attributes setObject:@"http://jabber.org/protocol/pubsub" forKey:@"xmlns"];
+    [pubsubNode.attributes setObject:@"http://jabber.org/protocol/pubsub" forKey:kXMLNS];
 
     
     MLXMLNode* subscribe =[[MLXMLNode alloc] init];

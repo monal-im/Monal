@@ -11,10 +11,17 @@
 
 @interface MLXMPPServer ()
 
+/**
+ These are the values that are set by config
+ */
 @property (nonatomic, strong) NSString *host;
 @property (nonatomic, strong) NSNumber *port;
 
+/**
+ These may be values that are set by DNS discovery. It may not match
+ */
 @property (nonatomic, strong) NSString *serverInUse;
+@property (nonatomic, strong) NSNumber *portInUse;
 
 @end
 
@@ -25,16 +32,28 @@
     self.host=host;
     self.port=port;
     
+    self.serverInUse=host;
+    self.portInUse=port;
+    
     return self;
 }
 
-- (void) updateConnectedServer:(NSString *) server
+- (void) updateConnectServer:(NSString *) server
 {
     self.serverInUse = server;
 }
 
-- (NSString *) connectedServer {
+- (NSString *) connectServer {
     return self.serverInUse;
+}
+
+- (void) updateConnectPort:(NSNumber *) port
+{
+    self.portInUse = port;
+}
+
+- (NSNumber *) connectPort {
+    return self.portInUse;
 }
 
 @end

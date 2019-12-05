@@ -27,7 +27,7 @@
     self=[super init];
     self.jid=jid;
     self.password=password;
-    self.resource=resource; 
+    self.resource=resource;
     
     NSArray* elements=[self.jid componentsSeparatedByString:@"@"];
     
@@ -38,6 +38,11 @@
     }
     
     return self;
+}
+
+-(void) updatPasswordWithOauth:(NSString *) token
+{
+    self.password=token;
 }
 
 

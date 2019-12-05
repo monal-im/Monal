@@ -57,7 +57,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         return;
     }
     
-	if(([elementName isEqualToString:@"proceed"]) && ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-tls"]) )
+	if(([elementName isEqualToString:@"proceed"]) && ([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-tls"]) )
 	{
 		DDLogVerbose(@"Got SartTLS procced");
 		//trying to switch to TLS
@@ -76,11 +76,11 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     /** stream management **/
     if(([State isEqualToString:@"Features"]) && ([elementName isEqualToString:@"sm"]))
     {
-        if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:sm:2"])
+        if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:sm:2"])
         {
         _supportsSM2=YES;
         }
-        if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:sm:3"])
+        if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:sm:3"])
         {
         _supportsSM3=YES;
         }
@@ -89,7 +89,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     
      if(([State isEqualToString:@"Features"]) && ([elementName isEqualToString:@"ver"]))
     {
-        if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:xmpp:features:rosterver"])
+        if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:features:rosterver"])
         {
             _supportsRosterVer=YES;
         }
@@ -101,7 +101,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
  
     //***** sasl success...
-	if(([elementName isEqualToString:@"success"]) &&  ([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
+	if(([elementName isEqualToString:@"success"]) &&  ([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
 	   )
 		
 	{
@@ -113,8 +113,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 	if(([State isEqualToString:@"Features"]) && [elementName isEqualToString:@"mechanisms"] )
 	{
 	
-		DDLogVerbose(@"mechanisms xmlns:%@ ", [attributeDict objectForKey:@"xmlns"]);
-		if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
+		DDLogVerbose(@"mechanisms xmlns:%@ ", [attributeDict objectForKey:kXMLNS]);
+		if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
 		{
 			DDLogVerbose(@"SASL supported");
 			_supportsSASL=YES;

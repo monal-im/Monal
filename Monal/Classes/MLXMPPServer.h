@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic,assign) BOOL SSL;
 @property (nonatomic,assign) BOOL oldStyleSSL;
-@property (nonatomic,assign) BOOL selfSigned;
+@property (nonatomic,assign) BOOL selfSignedCert;
 
 //used only for gmail login
 @property (nonatomic,assign) BOOL oAuth;
@@ -29,12 +29,19 @@ NS_ASSUME_NONNULL_BEGIN
 -(id) initWithHost:(NSString *) host andPort:(NSNumber *) port;
 
 
-- (void) updateConnectedServer:(NSString *) server;
+- (void) updateConnectServer:(NSString *) server;
+
+- (void) updateConnectPort:(NSNumber *) port;
 
 /**
  returns the currently connected server may be host or dns one.
  */
-- (NSString *) connectedServer;
+- (NSString *) connectServer;
+
+/**
+returns the currently connected port may be configured  or dns one.
+*/
+- (NSNumber *) connectPort;
 
 @end
 

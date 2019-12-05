@@ -25,7 +25,13 @@ NS_ASSUME_NONNULL_BEGIN
 -(NSString *) user;
 -(NSString *) domain;
 
--(id) initWithJid:(NSString *)jid password:(NSString *) password andResource:(NSString *) resource;
+
+/**
+ Creates a new identity. Password can be null if we plan on using oauth.
+ */
+-(id) initWithJid:(nonnull NSString *)jid password:(NSString *) password andResource:(nonnull NSString *) resource;
+
+-(void) updatPasswordWithOauth:(NSString *) token;
 
 @end
 

@@ -16,7 +16,7 @@
     
     if([elementName isEqualToString:@"challenge"])
     {
-        if([[attributeDict objectForKey:@"xmlns"] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
+        if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
            {
                _saslChallenge=YES; 
            }

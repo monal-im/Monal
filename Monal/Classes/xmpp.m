@@ -1548,17 +1548,17 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                 }
                                 else if (streamNode.SASLPlain)
                                 {
-                                    NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  self.connectionProperties.identity.jid, self.connectionProperties.identity.password ]];
+                                    NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  self.connectionProperties.identity.user, self.connectionProperties.identity.password ]];
                                     
                                     MLXMLNode* saslXML= [[MLXMLNode alloc]init];
                                     saslXML.element=@"auth";
                                     [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:kXMLNS];
                                     [saslXML.attributes setObject: @"PLAIN"forKey: @"mechanism"];
                                     
-                                    
-                                    [saslXML.attributes setObject:@"http://www.google.com/talk/protocol/auth" forKey: @"xmlns:ga"];
-                                    [saslXML.attributes setObject:@"true" forKey: @"ga:client-uses-full-bind-result"];
-                                    
+                                    if(self.connectionProperties.server.oAuth){
+                                        [saslXML.attributes setObject:@"http://www.google.com/talk/protocol/auth" forKey: @"xmlns:ga"];
+                                        [saslXML.attributes setObject:@"true" forKey: @"ga:client-uses-full-bind-result"];
+                                    }
                                     saslXML.data=saslplain;
                                     [self send:saslXML];
                                     
@@ -1580,7 +1580,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                         //[self disconnect];
                                         DDLogInfo(@"no auth mechanism. will try legacy auth");
                                         XMPPIQ* iqNode =[[XMPPIQ alloc] initWithElement:@"iq"];
-                                        [iqNode getAuthwithUserName:self.connectionProperties.identity.jid ];
+                                        [iqNode getAuthwithUserName:self.connectionProperties.identity.user ];
                                         [self send:iqNode];
                                     }
                             }
@@ -1923,7 +1923,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                             NSString* cnonce =[EncodingTools hexadecimalString:cnonce_Data];
                          
                             // ****** digest stuff going on here...
-                            NSString* X= [NSString stringWithFormat:@"%@:%@:%@", self.connectionProperties.identity.jid, realm,  self.connectionProperties.identity.password ];
+                            NSString* X= [NSString stringWithFormat:@"%@:%@:%@", self.connectionProperties.identity.user, realm,  self.connectionProperties.identity.password ];
                             DDLogVerbose(@"X: %@", X);
                             
                             NSData* Y = [EncodingTools MD5:X];
@@ -1956,7 +1956,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                             NSData* responseData=[EncodingTools MD5:KD];
                             // above this is ok
                             NSString* response=[NSString stringWithFormat:@"username=\"%@\",realm=\"%@\",nonce=\"%@\",cnonce=\"%@\",nc=00000001,qop=auth,digest-uri=\"xmpp/%@\",response=%@,charset=utf-8",
-                                                 self.connectionProperties.identity.jid,realm, nonce, cnonce, realm, [EncodingTools hexadecimalString:responseData]];
+                                                 self.connectionProperties.identity.user,realm, nonce, cnonce, realm, [EncodingTools hexadecimalString:responseData]];
                             //,authzid=\"%@@%@/%@\"  ,account,domain, resource
                             
                             DDLogVerbose(@"  response :  %@", response);

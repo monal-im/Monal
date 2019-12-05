@@ -1078,11 +1078,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     {
         if((indexPath.section==konlineSection))
         {
-            row=[self.contacts objectAtIndex:indexPath.row];
+            if(indexPath.row<self.contacts.count)
+                row=[self.contacts objectAtIndex:indexPath.row];
         }
         else if (indexPath.section==kofflineSection)
         {
-            row= [self.offlineContacts objectAtIndex:indexPath.row];
+            if(indexPath.row<self.offlineContacts.count)
+                row= [self.offlineContacts objectAtIndex:indexPath.row];
         }
         
         row.unreadCount=0;

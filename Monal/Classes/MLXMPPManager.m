@@ -185,7 +185,7 @@ An array of Dics what have timers to make sure everything was sent
     for(NSDictionary* row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-        if(xmppAccount.supportsClientState && xmppAccount.accountState>=kStateLoggedIn) {
+        if(xmppAccount.connectionProperties.supportsClientState && xmppAccount.accountState>=kStateLoggedIn) {
             [xmppAccount sendLastAck:NO];
             [xmppAccount setClientInactive];
         }
@@ -196,7 +196,7 @@ An array of Dics what have timers to make sure everything was sent
     for(NSDictionary* row in _connectedXMPP)
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-        if(xmppAccount.supportsClientState && xmppAccount.accountState>=kStateLoggedIn) {
+        if(xmppAccount.connectionProperties.supportsClientState && xmppAccount.accountState>=kStateLoggedIn) {
             [xmppAccount setClientActive];
         }
 

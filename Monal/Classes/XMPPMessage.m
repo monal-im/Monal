@@ -7,6 +7,7 @@
 //
 
 #import "XMPPMessage.h"
+#import "MLXMPPConstants.h"
 
 @implementation XMPPMessage
 

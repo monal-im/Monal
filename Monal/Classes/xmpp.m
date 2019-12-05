@@ -441,8 +441,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
             }
         }
         else if (self.accountState>=kStateLoggedIn ) {
-            NSString *accountName =[NSString stringWithFormat:@"%@@%@", self.username, self.domain];
-            NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName":accountName};
+            NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName":self.connectionProperties.identity.jid};
             [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
         }
         else {
@@ -540,7 +539,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     if(self.explicitLogout)
     {
         _unAckedStanzas=nil;
-        self.discoveredServices=nil;
+        self.connectionProperties.discoveredServices=nil;
         [self persistState];
     }
     
@@ -562,7 +561,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 -(void) sendLastAck:(BOOL) disconnecting
 {
     //send last smacks ack as required by smacks revision 1.5.2
-    if(self.supportsSM3)
+    if(self.connectionProperties.supportsSM3)
     {
         DDLogInfo(@"sending last ack");
         MLXMLNode *aNode = [[MLXMLNode alloc] initWithElement:@"a"];
@@ -599,7 +598,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         if(_accountState>=kStateBound)
         {
             //disable push for this node
-            if(self.pushNode && [self.pushNode length]>0 && self.supportsPush)
+            if(self.pushNode && [self.pushNode length]>0 && self.connectionProperties.supportsPush)
             {
                 XMPPIQ* disable=[[XMPPIQ alloc] initWithType:kiqSetType];
                 [disable setPushDisableWithNode:self.pushNode];
@@ -849,14 +848,14 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         }
         else {
             //always use smacks pings if supported (they are shorter and better than whitespace pings)
-            if(self.supportsSM3 && self.unAckedStanzas.count>0 )
+            if(self.connectionProperties.supportsSM3 && self.unAckedStanzas.count>0 )
             {
                 [self requestSMAck];
             }
             else  {
-                if(self.supportsPing) {
+                if(self.connectionProperties.supportsPing) {
                     XMPPIQ* ping =[[XMPPIQ alloc] initWithType:kiqGetType];
-                    [ping setiqTo:self->_domain];
+                    [ping setiqTo:self.connectionProperties.identity.domain];
                     [ping setPing];
                     [self send:ping];
                 } else  {
@@ -1219,22 +1218,22 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 -(void) parseFeatures
 {
-    if([self.serverFeatures containsObject:@"urn:xmpp:carbons:2"])
+    if([self.connectionProperties.serverFeatures containsObject:@"urn:xmpp:carbons:2"])
     {
         if(!self.usingCarbons2){
             [self enableCarbons];
         }
     }
     
-    if([self.serverFeatures containsObject:@"urn:xmpp:ping"])
+    if([self.connectionProperties.serverFeatures containsObject:@"urn:xmpp:ping"])
     {
-        self.supportsPing=YES;
+        self.connectionProperties.supportsPing=YES;
     }
     
-    [self.serverFeatures.allObjects enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    [self.connectionProperties.serverFeatures.allObjects enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSString *feature = (NSString *)obj;
         if([feature hasPrefix:@"http://jabber.org/protocol/pubsub"]) {
-            self.supportsPubSub=YES;
+            self.connectionProperties.supportsPubSub=YES;
             *stop=YES;
         }
     }];
@@ -1260,7 +1259,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     
                     ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
                     
-                    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo jid:self.jid?self.jid:self->_fulluser signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+                    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid signalContex:self.signalContext andSignalStore:self.monalSignalStore];
                     
                     [processor processIq:iqNode];
                     
@@ -1271,14 +1270,14 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     
                     ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
                     
-                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.jid?self.jid:self->_fulluser signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid  signalContex:self.signalContext andSignalStore:self.monalSignalStore];
                     messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
                         if(success)
                         {
                             if(messageNode.requestReceipt
                                && !messageNode.mamResult
                                && ![messageNode.from isEqualToString:
-                                    self.jid]
+                                    self.connectionProperties.identity.jid]
                                )
                             {
                                 XMPPMessage *receiptNode = [[XMPPMessage alloc] init];
@@ -1291,7 +1290,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                             [self.networkQueue addOperationWithBlock:^{
                                 
                                 if(![messageNode.from isEqualToString:
-                                     self.fulluser]) {
+                                     self.connectionProperties.identity.jid]) {
                                     [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:self->_accountNo withCompletion:nil];
                                 } else  {
                                     [[DataLayer sharedInstance] addActiveBuddies:messageNode.to forAccount:self->_accountNo withCompletion:nil];
@@ -1302,20 +1301,11 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                     NSString* actuallyFrom= messageNode.actualFrom;
                                     if(!actuallyFrom) actuallyFrom=messageNode.from;
                                     
-                                    NSArray *jidParts= [self.jid componentsSeparatedByString:@"/"];
-                                    
-                                    NSString *recipient;
-                                    if([jidParts count]>1) {
-                                        recipient= jidParts[0];
-                                    }
-                                    if(!recipient) recipient= self->_fulluser;
-                                    
-                                    
                                     MLMessage *message = [[MLMessage alloc] init];
                                     message.from=messageNode.from;
                                     message.actualFrom= actuallyFrom;
                                     message.messageText= messageNode.messageText;
-                                    message.to=messageNode.to?messageNode.to:recipient;
+                                    message.to=messageNode.to?messageNode.to:self.connectionProperties.identity.jid;
                                     message.messageId=messageNode.idval?messageNode.idval:@"";
                                     message.accountId=self.accountNo;
                                     message.encrypted=encrypted;
@@ -1350,11 +1340,11 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     
                     if(!recipient)
                     {
-                        recipient= self->_fulluser;
+                        recipient= self.connectionProperties.identity.jid;
                     }
                     
                     
-                    if([presenceNode.user isEqualToString:self->_fulluser]) {
+                    if([presenceNode.user isEqualToString:self.connectionProperties.identity.jid]) {
                         //ignore self
                     }
                     else {
@@ -1517,7 +1507,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     if(self.accountState<kStateLoggedIn )
                     {
                         
-                        if(streamNode.callStartTLS &&  self->_SSL)
+                        if(streamNode.callStartTLS && self.connectionProperties.server.SSL)
                         {
                             MLXMLNode* startTLS= [[MLXMLNode alloc] init];
                             startTLS.element=@"starttls";
@@ -1526,9 +1516,9 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                             
                         }
                         
-                        if ((self->_SSL && self->_startTLSComplete)
-                            || (!self->_SSL && !self->_startTLSComplete)
-                            || (self->_SSL && self->_oldStyleSSL))
+                        if ((self.connectionProperties.server.SSL && self->_startTLSComplete)
+                            || (!self.connectionProperties.server.SSL && !self->_startTLSComplete)
+                            || (self.connectionProperties.server.SSL && self.connectionProperties.server.oldStyleSSL))
                         {
                             if(self.registration){
                                 [self requestRegForm];
@@ -1540,9 +1530,9 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                             else {
                                 //look at menchanisms presented
                                 
-                                if(streamNode.SASLX_OAUTH2 && self.oAuth)
+                                if(streamNode.SASLX_OAUTH2 && self.connectionProperties.server.oAuth)
                                 {
-                                    NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  self->_username, self.oauthAccount.accessToken.accessToken ]];
+                                    NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  self.connectionProperties.identity.jid, self.oauthAccount.accessToken.accessToken ]];
                                     
                                     MLXMLNode* saslXML= [[MLXMLNode alloc]init];
                                     saslXML.element=@"auth";
@@ -1558,7 +1548,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                 }
                                 else if (streamNode.SASLPlain)
                                 {
-                                    NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  self->_username, self->_password ]];
+                                    NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  self.connectionProperties.identity.jid, self.connectionProperties.identity.password ]];
                                     
                                     MLXMLNode* saslXML= [[MLXMLNode alloc]init];
                                     saslXML.element=@"auth";
@@ -1590,7 +1580,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                         //[self disconnect];
                                         DDLogInfo(@"no auth mechanism. will try legacy auth");
                                         XMPPIQ* iqNode =[[XMPPIQ alloc] initWithElement:@"iq"];
-                                        [iqNode getAuthwithUserName:self.username ];
+                                        [iqNode getAuthwithUserName:self.connectionProperties.identity.jid ];
                                         [self send:iqNode];
                                     }
                             }
@@ -1601,24 +1591,24 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     {
                         if(streamNode.supportsClientState)
                         {
-                            self.supportsClientState=YES;
+                            self.connectionProperties.supportsClientState=YES;
                         }
                         
                         if(streamNode.supportsSM3)
                         {
-                            self.supportsSM3=YES;
+                            self.connectionProperties.supportsSM3=YES;
                         } else {
                             [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
                         }
                         
                         if(streamNode.supportsRosterVer)
                         {
-                            self.supportsRosterVersion=true;
+                            self.connectionProperties.supportsRosterVersion=true;
                             
                         }
                         
                         //test if smacks is supported and allows resume
-                        if(self.supportsSM3 && self.streamID) {
+                        if(self.connectionProperties.supportsSM3 && self.streamID) {
                             MLXMLNode *resumeNode=[[MLXMLNode alloc] initWithElement:@"resume"];
                             NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza], @"previd":self.streamID };
                             
@@ -1675,11 +1665,11 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         }
                     }]];
                 }
-                else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.supportsSM3 && self.accountState>=kStateBound)
+                else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
                 {
                     [self sendSMAck];
                 }
-                else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"a"] && self.supportsSM3 && self.accountState>=kStateBound)
+                else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"a"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
                 {
                     ParseA* aNode=[[ParseA alloc] initWithDictionary:stanzaToParse];
                     self.lastHandledOutboundStanza=aNode.h;
@@ -1703,7 +1693,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     [self parseFeatures];
                     
 #if TARGET_OS_IPHONE
-                    if(self.supportsPush)
+                    if(self.connectionProperties.supportsPush)
                     {
                         [self enablePush];
                     }
@@ -1753,7 +1743,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     }
                     else        //smacks enable failed
                     {
-                        self.supportsSM3=NO;
+                        self.connectionProperties.supportsSM3=NO;
                         
                         
                         //init session and query disco, roster etc.
@@ -1800,12 +1790,12 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         {
                             NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
                             
-                            if(self.oAuth) {
+                            if(self.connectionProperties.server.oAuth) {
                                 //we only support oauth on gtalk
                                 [settings setObject:[NSNull null] forKey:kCFStreamSSLPeerName];
                             }
                             else  {
-                                [settings setObject:self->_domain forKey:kCFStreamSSLPeerName];
+                                [settings setObject:self.connectionProperties.identity.domain forKey:kCFStreamSSLPeerName];
                             }
                             
                             if(self->_brokenServerSSL)
@@ -1818,7 +1808,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                 [settings addEntriesFromDictionary:@{@"kCFStreamSSLLevel":@"kCFStreamSocketSecurityLevelTLSv1"}];
                             }
                             
-                            if(self.selfSigned)
+                            if(self.connectionProperties.server.selfSignedCert)
                             {
                                 [settings  setObject:@NO forKey:kCFStreamSSLValidatesCertificateChain];
                             }
@@ -1870,7 +1860,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         [self disconnect];
                         //check for oauth
                         
-                        if(self.oAuth) {
+                        if(self.connectionProperties.server.oAuth) {
                             self.oauthAccount.oauthClient.desiredScope=[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]];
                             dispatch_async(dispatch_get_main_queue(), ^{
                                 [self.oauthAccount.oauthClient refreshAccessToken];
@@ -1931,32 +1921,13 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                             
                             NSData* cnonce_Data=[EncodingTools MD5: [NSString stringWithFormat:@"%d",arc4random()%100000]];
                             NSString* cnonce =[EncodingTools hexadecimalString:cnonce_Data];
-                            
-                            
-                            //                if([password length]==0)
-                            //                {
-                            //                    if(theTempPass!=NULL)
-                            //                        password=theTempPass;
-                            //
-                            //                }
-                            
-                            //  nonce=@"580F35C1AE408E7DA57DE4DEDC5B9CA7";
-                            //    cnonce=@"B9E01AE3-29E5-4FE5-9AA0-72F99742428A";
-                            
-                            
+                         
                             // ****** digest stuff going on here...
-                            NSString* X= [NSString stringWithFormat:@"%@:%@:%@", self.username, realm, self.password ];
+                            NSString* X= [NSString stringWithFormat:@"%@:%@:%@", self.connectionProperties.identity.jid, realm,  self.connectionProperties.identity.password ];
                             DDLogVerbose(@"X: %@", X);
                             
                             NSData* Y = [EncodingTools MD5:X];
-                            
-                            // above is correct
-                            
-                            /*
-                             NSString* A1= [NSString stringWithFormat:@"%@:%@:%@:%@@%@/%@",
-                             Y,[nonce substringWithRange:NSMakeRange(1, [nonce length]-2)],cononce,account,domain,resource];
-                             */
-                            
+                           
                             //  if you have the authzid  here you need it below too but it wont work on som servers
                             // so best not include it
                             
@@ -1970,11 +1941,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                             [HA1data appendData:A1];
                             DDLogVerbose(@" HA1data : %@",HA1data  );
                             
-                            
-                            //this hash is wrong..
                             NSData* HA1=[EncodingTools DataMD5:HA1data];
-                            
-                            //below is correct
                             
                             NSString* A2=[NSString stringWithFormat:@"AUTHENTICATE:xmpp/%@", realm];
                             DDLogVerbose(@"%@", A2);
@@ -1985,14 +1952,11 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                           cnonce,
                                           [EncodingTools hexadecimalString:HA2]];
                             
-                            // DDLogVerbose(@" ha1: %@", [self hexadecimalString:HA1] );
-                            //DDLogVerbose(@" ha2: %@", [self hexadecimalString:HA2] );
-                            
                             DDLogVerbose(@" KD: %@", KD );
                             NSData* responseData=[EncodingTools MD5:KD];
                             // above this is ok
                             NSString* response=[NSString stringWithFormat:@"username=\"%@\",realm=\"%@\",nonce=\"%@\",cnonce=\"%@\",nc=00000001,qop=auth,digest-uri=\"xmpp/%@\",response=%@,charset=utf-8",
-                                                self.username,realm, nonce, cnonce, realm, [EncodingTools hexadecimalString:responseData]];
+                                                 self.connectionProperties.identity.jid,realm, nonce, cnonce, realm, [EncodingTools hexadecimalString:responseData]];
                             //,authzid=\"%@@%@/%@\"  ,account,domain, resource
                             
                             DDLogVerbose(@"  response :  %@", response);
@@ -2048,8 +2012,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 -(void) postConnectNotification
 {
-    NSString *accountName =[NSString stringWithFormat:@"%@@%@", self.username, self.domain];
-    NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName":accountName};
+    NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName": self.connectionProperties.identity.jid};
     [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
     
@@ -2064,7 +2027,7 @@ static NSMutableArray *extracted(xmpp *object) {
 {
     if(!stanza) return;
     
-    if(self.accountState>=kStateBound && self.supportsSM3 && self.unAckedStanzas)
+    if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 && self.unAckedStanzas)
     {
         [self.networkQueue addOperation:
          [NSBlockOperation blockOperationWithBlock:^{
@@ -2106,7 +2069,7 @@ static NSMutableArray *extracted(xmpp *object) {
         [messageNode setBody:@"[This message is OMEMO encrypted]"];
         
         NSArray *devices = [self.monalSignalStore allDeviceIdsForAddressName:contact];
-        NSArray *myDevices = [self.monalSignalStore allDeviceIdsForAddressName:_fulluser];
+        NSArray *myDevices = [self.monalSignalStore allDeviceIdsForAddressName:self.connectionProperties.identity.jid];
         if(devices.count>0 ){
             
             NSData *messageBytes=[message dataUsingEncoding:NSUTF8StringEncoding];
@@ -2157,7 +2120,7 @@ static NSMutableArray *extracted(xmpp *object) {
             
             [myDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 NSNumber *device = (NSNumber *)obj;
-                SignalAddress *address = [[SignalAddress alloc] initWithName:self.fulluser deviceId:(uint32_t)device.intValue];
+                SignalAddress *address = [[SignalAddress alloc] initWithName:self.connectionProperties.identity.jid deviceId:(uint32_t)device.intValue];
                 NSData *identity=[self.monalSignalStore getIdentityForAddress:address];
                 if([self.monalSignalStore isTrustedIdentity:address identityKey:identity]) {
                     SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
@@ -2211,7 +2174,7 @@ static NSMutableArray *extracted(xmpp *object) {
         NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
         NSString *documentsDirectory = [paths objectAtIndex:0]; // Get documents directory
         
-        [messageNode.attributes setObject:_fulluser forKey:@"from"];
+        [messageNode.attributes setObject:self.connectionProperties.identity.jid forKey:@"from"];
         
         NSString  *myString =[messageNode XMLString];
         NSError *error;
@@ -2276,7 +2239,6 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(void) persistState
 {
-    
     //state dictionary
     NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
     
@@ -2288,32 +2250,32 @@ static NSMutableArray *extracted(xmpp *object) {
     [values setValue:self.streamID forKey:@"streamID"];
     [values setValue:[NSDate date] forKey:@"streamTime"];
     
-    [values setValue:[self.serverFeatures copy] forKey:@"serverFeatures"];
-    if(self.uploadServer) {
-        [values setObject:self.uploadServer forKey:@"uploadServer"];
+    [values setValue:[self.connectionProperties.serverFeatures copy] forKey:@"serverFeatures"];
+    if(self.connectionProperties.uploadServer) {
+        [values setObject:self.connectionProperties.uploadServer forKey:@"uploadServer"];
     }
     if(self.conferenceServer) {
         [values setObject:self.conferenceServer forKey:@"conferenceServer"];
     }
     
-    if(self.supportsPush)
+    if(self.connectionProperties.supportsPush)
     {
-        [values setObject:[NSNumber numberWithBool:self.supportsPush] forKey:@"supportsPush"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
     }
     
-    if(self.supportsClientState)
+    if(self.connectionProperties.supportsClientState)
     {
-        [values setObject:[NSNumber numberWithBool:self.supportsClientState] forKey:@"supportsClientState"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
     }
     
-    if(self.supportsMam2)
+    if(self.connectionProperties.supportsMam2)
     {
-        [values setObject:[NSNumber numberWithBool:self.supportsMam2] forKey:@"supportsMAM"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
     }
     
-    if(self.discoveredServices)
+    if(self.connectionProperties.discoveredServices)
     {
-        [values setObject:[self.discoveredServices copy] forKey:@"discoveredServices"];
+        [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
     }
     
     //save state dictionary
@@ -2347,12 +2309,12 @@ static NSMutableArray *extracted(xmpp *object) {
         self.unAckedStanzas=[stanzas mutableCopy];
         self.streamID=[dic objectForKey:@"streamID"];
         
-        self.serverFeatures = [dic objectForKey:@"serverFeatures"];
-        self.discoveredServices=[dic objectForKey:@"discoveredServices"];
+        self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
+        self.connectionProperties.discoveredServices=[dic objectForKey:@"discoveredServices"];
         
         
-        self.uploadServer= [dic objectForKey:@"uploadServer"];
-        if(self.uploadServer)
+        self.connectionProperties.uploadServer= [dic objectForKey:@"uploadServer"];
+        if(self.connectionProperties.uploadServer)
         {
             self.supportsHTTPUpload=YES;
         }
@@ -2361,19 +2323,19 @@ static NSMutableArray *extracted(xmpp *object) {
         if([dic objectForKey:@"supportsPush"])
         {
             NSNumber *pushNumber = [dic objectForKey:@"supportsPush"];
-            self.supportsPush = pushNumber.boolValue;
+            self.connectionProperties.supportsPush = pushNumber.boolValue;
         }
         
         if([dic objectForKey:@"supportsClientState"])
         {
             NSNumber *csiNumber = [dic objectForKey:@"supportsClientState"];
-            self.supportsClientState = csiNumber.boolValue;
+            self.connectionProperties.supportsClientState = csiNumber.boolValue;
         }
         
         if([dic objectForKey:@"supportsMAM"])
         {
             NSNumber *mamNumber = [dic objectForKey:@"supportsMAM"];
-            self.supportsMam2 = mamNumber.boolValue;
+            self.connectionProperties.supportsMam2 = mamNumber.boolValue;
         }
         
         //debug output
@@ -2412,7 +2374,7 @@ static NSMutableArray *extracted(xmpp *object) {
 -(void) bindResource
 {
     XMPPIQ* iqNode =[[XMPPIQ alloc] initWithType:kiqSetType];
-    [iqNode setBindWithResource:_resource];
+    [iqNode setBindWithResource:self.connectionProperties.identity.resource];
     [self send:iqNode];
     
     //now the app is initialized and the next smacks resume will have full disco and presence state information
@@ -2431,17 +2393,17 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(void) queryDisco
 {
-    if(self.discoveredServices) return;
+    if(self.connectionProperties.discoveredServices) return;
     
     XMPPIQ* discoItems =[[XMPPIQ alloc] initWithType:kiqGetType];
-    [discoItems setiqTo:_domain];
+    [discoItems setiqTo:self.connectionProperties.identity.domain];
     MLXMLNode* items = [[MLXMLNode alloc] initWithElement:@"query"];
     [items setXMLNS:@"http://jabber.org/protocol/disco#items"];
     [discoItems.children addObject:items];
     [self send:discoItems];
     
     XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
-    [discoInfo setiqTo:_domain];
+    [discoInfo setiqTo:self.connectionProperties.identity.domain];
     [discoInfo setDiscoInfoNode];
     [self send:discoInfo];
     
@@ -2476,7 +2438,7 @@ static NSMutableArray *extracted(xmpp *object) {
 {
     XMPPIQ* roster=[[XMPPIQ alloc] initWithType:kiqGetType];
     NSString *rosterVer;
-    if(self.supportsRosterVersion)
+    if(self.connectionProperties.supportsRosterVersion)
     {
         rosterVer=@""; //TODO fetch proper ver from db
     }
@@ -2508,7 +2470,7 @@ static NSMutableArray *extracted(xmpp *object) {
     [self sendSignalInitialStanzas];
 #endif
     
-    if(!self.supportsSM3)
+    if(!self.connectionProperties.supportsSM3)
     {
         //send out messages still in the queue, even if smacks is not supported this time
         [self sendUnAckedMessages];
@@ -2585,9 +2547,9 @@ static NSMutableArray *extracted(xmpp *object) {
     
 }
 
-#ifndef DISABLE_OMEMO
 #pragma mark - OMEMO
-
+                 
+#ifndef DISABLE_OMEMO
 -(void) setupSignal
 {
     self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:_accountNo];
@@ -2609,7 +2571,7 @@ static NSMutableArray *extracted(xmpp *object) {
         
         [self.monalSignalStore saveValues];
         
-        SignalAddress *address = [[SignalAddress alloc] initWithName:[NSString stringWithFormat:@"%@@%@", self.username, self.domain] deviceId:self.monalSignalStore.deviceid];
+        SignalAddress *address = [[SignalAddress alloc] initWithName:self.connectionProperties.identity.jid deviceId:self.monalSignalStore.deviceid];
         [self.monalSignalStore saveIdentity:address identityKey:self.monalSignalStore.identityKeyPair.publicKey];
         
     }
@@ -2635,7 +2597,7 @@ static NSMutableArray *extracted(xmpp *object) {
 
 
 -(void) sendOMEMODevices:(NSArray *) devices {
-    if(!self.supportsPubSub) return;
+    if(!self.connectionProperties.supportsPubSub) return;
     XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
     [signalDevice publishDevices:devices];
     [self send:signalDevice];
@@ -2643,11 +2605,11 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(void) sendOMEMOBundle
 {
-    if(!self.supportsPubSub) return;
+    if(!self.connectionProperties.supportsPubSub) return;
     NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
     XMPPIQ *signalKeys = [[XMPPIQ alloc] initWithType:kiqSetType];
     [signalKeys publishKeys:@{@"signedPreKeyPublic":self.monalSignalStore.signedPreKey.keyPair.publicKey, @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature, @"identityKey":self.monalSignalStore.identityKeyPair.publicKey, @"signedPreKeyId": [NSString stringWithFormat:@"%d",self.monalSignalStore.signedPreKey.preKeyId]} andPreKeys:self.monalSignalStore.preKeys withDeviceId:deviceid];
-    [signalKeys.attributes setValue:[NSString stringWithFormat:@"%@/%@",_fulluser, _resource ] forKey:@"from"];
+    [signalKeys.attributes setValue:[NSString stringWithFormat:@"%@/%@",self.connectionProperties.identity.jid, self.connectionProperties.identity.resource ] forKey:@"from"];
     [self send:signalKeys];
 }
 
@@ -2671,7 +2633,7 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
 {
-    if(!self.supportsPubSub) return;
+    if(!self.connectionProperties.supportsPubSub) return;
     XMPPIQ* query2 =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query2 setiqTo:jid];
     [query2 requestBundles:deviceid]; //[NSString stringWithFormat:@"%@", devicenum]
@@ -2680,7 +2642,7 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(void) queryOMEMODevicesFrom:(NSString *) jid
 {
-    if(!self.supportsPubSub) return;
+    if(!self.connectionProperties.supportsPubSub) return;
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query setiqTo:jid];
     [query requestDevices];
@@ -2745,13 +2707,13 @@ static NSMutableArray *extracted(xmpp *object) {
     if(_hasRequestedServerInfo)
         return;  // no need to call again on disconnect
     
-    if(!_discoveredServices)
+    if(!self.connectionProperties.discoveredServices)
     {
         DDLogInfo(@"no discovered services");
         return;
     }
     
-    for (NSDictionary *item in _discoveredServices)
+    for (NSDictionary *item in self.connectionProperties.discoveredServices)
     {
         XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
         NSString* jid =[item objectForKey:@"jid"];
@@ -2786,7 +2748,7 @@ static NSMutableArray *extracted(xmpp *object) {
 {
     NSString *uuid = [[NSUUID UUID] UUIDString];
     XMPPIQ* httpSlotRequest =[[XMPPIQ alloc] initWithId:uuid andType:kiqGetType];
-    [httpSlotRequest setiqTo:self.uploadServer];
+    [httpSlotRequest setiqTo:self.connectionProperties.uploadServer];
     NSData *data= [params objectForKey:kData];
     NSNumber *size=[NSNumber numberWithInteger: data.length];
     
@@ -2807,7 +2769,7 @@ static NSMutableArray *extracted(xmpp *object) {
 #pragma mark client state
 -(void) setClientActive
 {
-    if(!self.supportsClientState) return;
+    if(!self.connectionProperties.supportsClientState) return;
     MLXMLNode *activeNode =[[MLXMLNode alloc] initWithElement:@"active" ];
     [activeNode setXMLNS:@"urn:xmpp:csi:0"];
     [self send:activeNode];
@@ -2815,7 +2777,7 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(void) setClientInactive
 {
-    if(!self.supportsClientState) return;
+    if(!self.connectionProperties.supportsClientState) return;
     MLXMLNode *activeNode =[[MLXMLNode alloc] initWithElement:@"inactive" ];
     [activeNode setXMLNS:@"urn:xmpp:csi:0"];
     [self send:activeNode];
@@ -2865,7 +2827,7 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(void) queryMAMSinceLastStanza
 {
-    if(self.supportsMam2) {
+    if(self.connectionProperties.supportsMam2) {
         [[DataLayer sharedInstance] lastMessageSanzaForAccount:_accountNo withCompletion:^(NSString *lastStanza) {
             if(lastStanza) {
                 [self setMAMQueryFromStart:nil after:lastStanza andJid:nil];
@@ -2963,7 +2925,7 @@ static NSMutableArray *extracted(xmpp *object) {
 {
     if(self.jingle) return;
     self.jingle=[[jingleCall alloc] init];
-    self.jingle.me=[NSString stringWithFormat:@"%@/%@", self.fulluser, self.resource];
+    self.jingle.me=[NSString stringWithFormat:@"%@/%@", self.connectionProperties.identity.jid, self.connectionProperties.identity.resource];
     
     NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:contact.contactJid];
     if([resources count]>0)
@@ -3002,8 +2964,8 @@ static NSMutableArray *extracted(xmpp *object) {
 -(void) changePassword:(NSString *) newPass withCompletion:(xmppCompletion) completion
 {
     XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
-    [iq setiqTo:self.domain];
-    [iq changePasswordForUser:self.username newPassword:newPass];
+    [iq setiqTo:self.connectionProperties.identity.domain];
+    [iq changePasswordForUser:self.connectionProperties.identity.jid newPassword:newPass];
     if(completion) {
         [self.xmppCompletionHandlers setObject:completion forKey:iq.stanzaID];
     }
@@ -3013,7 +2975,7 @@ static NSMutableArray *extracted(xmpp *object) {
 -(void) requestRegForm
 {
     XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqGetType];
-    [iq setiqTo:self.domain];
+    [iq setiqTo:self.connectionProperties.identity.domain];
     [iq getRegistrationFields];
     self.registrationState=kStateRequestingForm;
     [self send:iq];
@@ -3321,7 +3283,7 @@ static NSMutableArray *extracted(xmpp *object) {
     DDLogVerbose(@"removing all objs from output ");
     [_outputQueue removeAllObjects];
     
-    if(self.accountState>=kStateBound && self.supportsSM3 && requestAck)
+    if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 && requestAck)
     {
         [self requestSMAck];
         
@@ -3405,7 +3367,7 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(void) enablePush
 {
-    if(self.accountState>=kStateBound && [self.pushNode length]>0 && [self.pushSecret length]>0 && self.supportsPush)
+    if(self.accountState>=kStateBound && [self.pushNode length]>0 && [self.pushSecret length]>0 && self.connectionProperties.supportsPush)
         //TODO there is a race condition on how this is called when fisrt logging in.
     {
         DDLogInfo(@"ENABLING PUSH: %@ < %@", self.pushNode, self.pushSecret);

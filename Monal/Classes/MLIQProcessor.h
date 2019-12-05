@@ -11,10 +11,17 @@
 #import "MLSignalStore.h"
 #import "SignalContext.h"
 #import "MLXMPPConnection.h"
+#import "XMPPIQ.h"
+#import "MLXMLNode.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef void (^iqCompletion)( MLXMLNode  * _Nullable iqResponse);
+
+
 @interface MLIQProcessor : NSObject
+
+@property (nonatomic, strong) iqCompletion completion;
 
 -(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore;
 

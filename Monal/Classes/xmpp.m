@@ -21,6 +21,8 @@
 #import "XMPPPresence.h"
 #import "XMPPMessage.h"
 
+#import "MLXMLNode.h"
+
 //parsers
 #import "ParseStream.h"
 #import "ParseIq.h"
@@ -1260,8 +1262,13 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
                     
                     MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
-                    
+                    processor.completion=^(MLXMLNode * _Nullable iqResponse) {
+                        if(iqResponse) {
+                            [self send:iqResponse];
+                        }
+                    };
                     [processor processIq:iqNode];
+                    
                     
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"message"])

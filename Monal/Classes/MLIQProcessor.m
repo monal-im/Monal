@@ -7,7 +7,7 @@
 //
 
 #import "MLIQProcessor.h"
-#import "XMPPIQ.h"
+
 
 static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
@@ -394,7 +394,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
             MLXMLNode *enableNode =[[MLXMLNode alloc] initWithElement:@"enable"];
             NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3",@"resume":@"true" };
             enableNode.attributes =[dic mutableCopy];
-           // [self send:enableNode];
+            if(self.completion) self.completion(enableNode);
         }
         else
         {

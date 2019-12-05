@@ -1385,13 +1385,10 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         
                         if(presenceNode.type ==nil)
                         {
-                            DDLogVerbose(@"presence priority notice from %@", presenceNode.user);
+                            DDLogVerbose(@"presence notice from %@", presenceNode.user);
                             
                             if((presenceNode.user!=nil) && (presenceNode.user.length >0))
                             {
-                                [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self->_accountNo];
-                                [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self->_accountNo];
-                                [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self->_accountNo];
                                 
                                 MLContact *contact = [[MLContact alloc] init];
                                 contact.accountId=self.accountNo;
@@ -1399,8 +1396,26 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                 contact.state=presenceNode.show;
                                 contact.statusMessage=presenceNode.status;
                                 
-                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:@{@"contact":contact}];
+                                [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self->_accountNo];
+                                [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self->_accountNo];
+                                [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self->_accountNo];
                                 
+                                [[DataLayer sharedInstance] addContact:[presenceNode.user copy] forAccount:self->_accountNo fullname:@"" nickname:@"" withCompletion:^(BOOL success) {
+                                    if(!success)
+                                    {
+                                        DDLogVerbose(@"Contact already in list");
+                                    }
+                                    else
+                                    {
+                                        DDLogVerbose(@"Contact not already in list");
+                                    }
+                                    
+                                    DDLogVerbose(@" showing as online from presence");
+                                    
+                                    
+                                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:@{@"contact":contact}];
+                                    
+                                }];
                                 
                                 if(!presenceNode.MUC) {
                                     // do not do this in the background
@@ -1444,26 +1459,13 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                         [[DataLayer sharedInstance]  setContactHash:presenceNode  forAccount:self->_accountNo];
                                     }
                                 }
-                                else {
-                                    [[DataLayer sharedInstance] addContact:[presenceNode.user copy] forAccount:self->_accountNo fullname:@"" nickname:@"" withCompletion:^(BOOL success) {
-                                        if(!success)
-                                        {
-                                            DDLogVerbose(@"Contact already in list");
-                                        }
-                                        else
-                                        {
-                                            DDLogVerbose(@"Contact not already in list");
-                                        }
-                                        
-                                        DDLogVerbose(@" showing as online from presence");
-                                        
-                                        
-                                    }];
-                                }
+                                
+                            
+                                
                             }
                             else
                             {
-                                DDLogError(@"ERROR: presence priority notice but no user name.");
+                                DDLogError(@"ERROR: presence notice but no user name.");
                                 
                             }
                         }

@@ -10,13 +10,13 @@
 #import "ParseIq.h"
 #import "MLSignalStore.h"
 #import "SignalContext.h"
+#import "MLXMPPConnection.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MLIQProcessor : NSObject
 
-
--(MLIQProcessor *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore;
+-(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore;
 
 /**
  Process a iq, persist any changes and post notifications

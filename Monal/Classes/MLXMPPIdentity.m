@@ -40,9 +40,9 @@
     return self;
 }
 
--(void) updatPasswordWithOauth:(NSString *) token
+-(void) updatPassword:(NSString *) newPassword
 {
-    self.password=token;
+    self.password=newPassword;
 }
 
 

@@ -283,39 +283,38 @@ An array of Dics what have timers to make sure everything was sent
         return;
     }
     DDLogVerbose(@"connecting account %@",[account objectForKey:kAccountName] );
+ 
+    NSString *password = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
+    MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@",[account objectForKey:kUsername],[account objectForKey:kDomain] ] password:password andResource:[account objectForKey:kResource]];
 
-    xmpp* xmppAccount=[[xmpp alloc] init];
+    MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort]];
+    
+    server.SSL=[[account objectForKey:kSSL] boolValue];
+    server.oldStyleSSL=[[account objectForKey:kOldSSL] boolValue];
+    server.selfSignedCert=[[account objectForKey:kSelfSigned] boolValue];
+    server.oAuth=[[account objectForKey:kOauth] boolValue];
+    
+    if(server.oldStyleSSL && !server.SSL ) server.SSL=YES; //tehcnically a config error but  understandable
+    
+    xmpp* xmppAccount=[[xmpp alloc] initWithServer:server andIdentity:identity];
     xmppAccount.explicitLogout=NO;
     xmppAccount.pushNode=self.pushNode;
     xmppAccount.pushSecret=self.pushSecret;
-
-    xmppAccount.username=[account objectForKey:kUsername];
-    xmppAccount.domain=[account objectForKey:kDomain];
-
-    xmppAccount.resource=[account objectForKey:kResource];
-
-    xmppAccount.server=[account objectForKey:kServer];
-    xmppAccount.port=[[account objectForKey:kPort] integerValue];
-    xmppAccount.SSL=[[account objectForKey:kSSL] boolValue];
-    xmppAccount.oldStyleSSL=[[account objectForKey:kOldSSL] boolValue];
-    xmppAccount.selfSigned=[[account objectForKey:kSelfSigned] boolValue];
-    xmppAccount.oAuth=[[account objectForKey:kOauth] boolValue];
+    
+    
     xmppAccount.airDrop=[[account objectForKey:kAirdrop] boolValue];
-    if(xmppAccount.oldStyleSSL && !xmppAccount.SSL ) xmppAccount.SSL=YES; //tehcnically a config error but  understandable
-
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]];
-
-    xmppAccount.password = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
-
-    if([xmppAccount.password length]==0 && !xmppAccount.oAuth) //&& ([tempPass length]==0)
-    {
-        // ask fro temp pass if not oauth
-    }
+    
+    
+    //    if([xmppAccount.password length]==0 && !xmppAccount.oAuth) //&& ([tempPass length]==0)
+    //    {
+    //        // ask fro temp pass if not oauth
+    //    }
 
     [xmppAccount setupSignal];
 
     //sepcifically look for the server since we might not be online or behind firewall
-    Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.server ] ;
+    Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.connectionProperties.server.host] ;
 
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged) name:kReachabilityChangedNotification object:nil];
@@ -437,7 +436,7 @@ An array of Dics what have timers to make sure everything was sent
 #endif
      [SAMKeychain setPassword:password forService:@"Monal" account:accountNo];
     xmpp* xmpp =[self getConnectedAccountForID:accountNo];
-    xmpp.password=password;
+    [xmpp.connectionProperties.identity updatPassword:password];
 
 }
 
@@ -456,16 +455,6 @@ An array of Dics what have timers to make sure everything was sent
 
                 //dont explicitly disconnect since it might be that there was a network inteepution
                 //ie moving through cells.  schedule a ping for 1 min and see if that results in a TCP or XMPP error
-
-
-                //                dispatch_async(_netQueue,
-                //                               ^{
-                //                                  [xmppAccount disconnect];
-                //
-                //
-                //                               });
-
-
             }
         }
         else
@@ -618,7 +607,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     if(row<[_connectedXMPP count] && row>=0) {
         NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
         xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-        toreturn= [NSString stringWithFormat:@"%@@%@",account.username, account.server];
+        toreturn= account.connectionProperties.identity.jid;
     }
     return toreturn;
 }
@@ -630,7 +619,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     if(row<[_connectedXMPP count] && row>=0) {
         NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
         xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-        toreturn= [NSString stringWithFormat:@"%@@%@",account.username, account.domain];
+        toreturn= account.connectionProperties.identity.jid;
     }
     return toreturn;
 }
@@ -886,7 +875,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         NSInteger pos=0;
         for(NSDictionary *dic in dirtySet)
         {
-            if([[dic objectForKey:kContactName] isEqualToString:xmppAccount.fulluser] )
+            if([[dic objectForKey:kContactName] isEqualToString:xmppAccount.connectionProperties.identity.jid] )
             {
                 [indexSet addIndex:pos];
             }

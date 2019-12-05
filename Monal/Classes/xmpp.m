@@ -362,7 +362,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         
         [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountDidChangeAccessTokenNotification
                                                           object:self.oauthAccount queue:nil usingBlock:^(NSNotification *note) {
-            [self.connectionProperties.identity updatPasswordWithOauth:self.oauthAccount.accessToken.accessToken];
+            [self.connectionProperties.identity updatPassword:self.oauthAccount.accessToken.accessToken];
             [self reconnect];
         }];
     }
@@ -1259,7 +1259,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     
                     ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
                     
-                    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+                    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
                     
                     [processor processIq:iqNode];
                     
@@ -1729,7 +1729,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         self.pushEnabled=NO;
 #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
-                        if(self.supportsPush)
+                        if(self.connectionProperties.supportsPush)
                         {
                             [self enablePush];
                         }
@@ -2586,7 +2586,7 @@ static NSMutableArray *extracted(xmpp *object) {
         if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
         {
 #endif
-            [self queryOMEMODevicesFrom:self->_fulluser];
+            [self queryOMEMODevicesFrom:self.connectionProperties.identity.jid];
             [self sendOMEMOBundle];
 #if TARGET_OS_IPHONE
         }

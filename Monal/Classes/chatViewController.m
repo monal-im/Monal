@@ -138,7 +138,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     dispatch_async(dispatch_get_main_queue(), ^{
         
         xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-        if(xmppAccount.supportsMam2 & !self.contact.isGroup) {
+        if(xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
             
             //synch point
             // if synch point < login time
@@ -515,7 +515,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 {
     [self.chatInput resignFirstResponder];
     xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-    if(!account.supportsHTTPUpload && !self.restClient)
+    if(!account.connectionProperties.supportsHTTPUpload && !self.restClient)
     {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error"
                                                                        message:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it. You can also link to DropBox in settings and use that to share files." preferredStyle:UIAlertControllerStyleAlert];
@@ -708,7 +708,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Group Chat Invite" message:messageString preferredStyle:UIAlertControllerStyleAlert];
         
         [alert addAction:[UIAlertAction actionWithTitle:@"Join" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            [xmppAccount joinRoom:from withNick:xmppAccount.username andPassword:nil];
+            [xmppAccount joinRoom:from withNick:xmppAccount.connectionProperties.identity.user andPassword:nil];
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {

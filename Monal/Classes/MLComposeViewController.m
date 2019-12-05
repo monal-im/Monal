@@ -66,7 +66,7 @@
             NSString *text =[self.message.text copy];
             BOOL encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:name andAccountNo:account.accountNo];
 
-            [[DataLayer sharedInstance] addMessageHistoryFrom:account.fulluser to:name forAccount:account.accountNo withMessage:text actuallyFrom:account.fulluser withId:messageID encrypted:encryptChat withCompletion:^(BOOL success, NSString *messageType) {
+            [[DataLayer sharedInstance] addMessageHistoryFrom:account.connectionProperties.identity.jid to:name forAccount:account.accountNo withMessage:text actuallyFrom:account.connectionProperties.identity.jid  withId:messageID encrypted:encryptChat withCompletion:^(BOOL success, NSString *messageType) {
                 
             }];
             

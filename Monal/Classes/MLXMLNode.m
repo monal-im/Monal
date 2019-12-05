@@ -7,6 +7,7 @@
 //
 
 #import "MLXMLNode.h"
+#import "MLXMPPConstants.h"
 
 @implementation MLXMLNode
 

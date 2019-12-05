@@ -61,15 +61,15 @@
     self.xmppAccount=[[xmpp alloc] init];
     self.xmppAccount.explicitLogout=NO;
     
-    self.xmppAccount.username=@"nothing";
-    self.xmppAccount.domain=kRegServer;
+    MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:@"nothing" password:@"nothing" andResource:@"MonalReg"];
+    MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:kRegServer andPort:[NSNumber numberWithInt:5222]];
+   
+    server.SSL=YES;
+    server.selfSignedCert=NO;
+    server.oldStyleSSL=NO;
     
-    self.xmppAccount.resource=@"MonalReg";
-    self.xmppAccount.server=kRegServer;
-    self.xmppAccount.port=5222;
-    self.xmppAccount.SSL=YES;
-    self.xmppAccount.selfSigned=NO;
-    self.xmppAccount.oldStyleSSL=NO;
+    self.xmppAccount= [[xmpp alloc] initWithServer:server andIdentity:identity];
+    
     self.xmppAccount.registration=YES;
 }
 

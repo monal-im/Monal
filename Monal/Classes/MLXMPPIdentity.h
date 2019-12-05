@@ -31,7 +31,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 -(id) initWithJid:(nonnull NSString *)jid password:(NSString *) password andResource:(nonnull NSString *) resource;
 
--(void) updatPasswordWithOauth:(NSString *) token;
+/**
+ Update password is only used when using Oauth or the password is changed in app
+ */
+-(void) updatPassword:(NSString *) newPassword;
 
 @end
 

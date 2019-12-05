@@ -186,9 +186,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             cell.imageView.hidden=NO;
             NSDictionary  *row = [MLXMPPManager sharedInstance].connectedXMPP[indexPath.row];
             xmpp *xmppAccount = [row objectForKey:@"xmppAccount"];
-            cell.textLabel.text =xmppAccount.fulluser;
+            cell.textLabel.text =xmppAccount.connectionProperties.identity.jid;
             
-            if(xmppAccount.pushEnabled) {
+            if(xmppAccount.connectionProperties.pushEnabled) {
                 cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
             }
             else  {

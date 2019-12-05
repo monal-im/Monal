@@ -15,7 +15,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 @property (nonatomic, strong) SignalContext *signalContext;
 @property (nonatomic, strong) MLSignalStore *monalSignalStore;
-@property (nonatomic, strong) NSString *jid;
+@property (nonatomic, strong) MLXMPPConnection *connection;
 @property (nonatomic, strong) NSString *accountNo;
 
 @end
@@ -26,11 +26,11 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
  */
 @implementation MLIQProcessor
 
--(MLIQProcessor *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore
+-(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore
 {
     self=[super init];
     self.accountNo = accountNo;
-    self.jid= jid;
+    self.connection= connection;
     self.signalContext=signalContext;
     self.monalSignalStore= monalSignalStore;
     return self;
@@ -386,20 +386,20 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     
     if(iqNode.shouldSetBind)
     {
-        self->_jid=iqNode.jid;
-        DDLogVerbose(@"Set jid %@", self->_jid);
+        [self.connection bindJid: iqNode.jid];
+        DDLogInfo(@"Bind jid %@", iqNode.jid);
         
-        if(self.supportsSM3)
+        if(self.connection.supportsSM3)
         {
             MLXMLNode *enableNode =[[MLXMLNode alloc] initWithElement:@"enable"];
             NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3",@"resume":@"true" };
             enableNode.attributes =[dic mutableCopy];
-            [self send:enableNode];
+           // [self send:enableNode];
         }
         else
         {
             //init session and query disco, roster etc.
-            [self initSession];
+           // [self initSession];
         }
     }
     

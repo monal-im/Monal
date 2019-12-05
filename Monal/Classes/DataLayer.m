@@ -1868,8 +1868,17 @@ static DataLayer *sharedInstance=nil;
     if(!accountNo ||! contact) return nil;
     NSString* query=[NSString stringWithFormat:@"select message, timestamp  as thetime, messageType from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 1"];
     NSArray *params=@[accountNo, contact, contact];
-    NSMutableArray* toReturn = [[self executeReader:query andArguments:params] mutableCopy];
+    NSMutableArray* results = [[self executeReader:query andArguments:params] mutableCopy];
 
+    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
+        [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    
+    NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
+                [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    NSDictionary *dic = (NSDictionary *) obj;
+                    [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:formatter]];
+                }];
+    
     if(toReturn!=nil)
     {
         DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count] );
@@ -1993,8 +2002,17 @@ static DataLayer *sharedInstance=nil;
 {
     NSString* query=[NSString stringWithFormat:@"select  distinct a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name,  a.account_id,lastMessageTime, 0 AS 'count' from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by lastMessageTime desc" ];
     //	DDLogVerbose(query);
+    
+    
      [self executeReader:query withCompletion:^(NSMutableArray *results) {
-         if(completion) completion(results);
+         
+         NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
+                [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    NSDictionary *dic = (NSDictionary *) obj;
+                    [toReturn addObject:[MLContact contactFromDictionary:dic]];
+                }];
+         
+         if(completion) completion(toReturn);
      }];
 
 

@@ -13,6 +13,9 @@
 #import "MonalAppDelegate.h"
 #import "ContactDetails.h"
 #import "MLImageManager.h"
+#import "DDLog.h"
+
+static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 @interface ActiveChatsViewController ()
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
@@ -49,7 +52,7 @@
     
     self.view=_chatListTable;
     
-    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close All",@"") style:UIBarButtonItemStyleBordered target:self action:@selector(closeAll)];
+    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close All",@"") style:UIBarButtonItemStylePlain target:self action:@selector(closeAll)];
     self.navigationItem.rightBarButtonItem=rightButton;
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
@@ -152,26 +155,15 @@
     }
     
 
-    NSDictionary* row = [_contacts objectAtIndex:indexPath.row];
+    MLContact* row = [_contacts objectAtIndex:indexPath.row];
+    [cell showDisplayName:row.contactDisplayName];
     
-    NSString* nickName=[row objectForKey:@"nick_name"];
-    if([[nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
-        [cell showDisplayName:nickName];
-    } else  {
-        NSString* fullName=[row objectForKey:@"full_name"];
-        if([[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
-            [cell showDisplayName:fullName];
-        }
-        else {
-            [cell showDisplayName:[row objectForKey:@"buddy_name"]];
-        }
-        
-    }
     
-    NSString *state= [[row objectForKey:@"state"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    NSString *state= [row.state  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 
-    if(![[row objectForKey:@"status"] isEqualToString:@"(null)"] && ![[row objectForKey:@"status"] isEqualToString:@""]) {
-       [cell showStatusText:[row objectForKey:@"status"]];
+    if(![row.statusMessage isEqualToString:@"(null)"] &&
+       ![row.statusMessage isEqualToString:@""]) {
+       [cell showStatusText:row.statusMessage];
     }
     else
     {
@@ -192,39 +184,39 @@
         cell.status=kStatusOnline;
     }
     
-    cell.accountNo=[[row objectForKey:@"account_id"] integerValue];
-    cell.username=[row objectForKey:@"buddy_name"] ;
+    cell.accountNo=row.accountId.integerValue;
+    cell.username=row.contactJid;
     
-    //cell.count=[[row objectForKey:@"count"] integerValue];
-    NSString* accountNo=[NSString stringWithFormat:@"%ld", (long)cell.accountNo];
-    [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:accountNo withCompletion:^(NSNumber *unread) {
+    [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:row.accountId withCompletion:^(NSNumber *unread) {
         dispatch_async(dispatch_get_main_queue(), ^{
             cell.count=[unread integerValue];
         });
     }];
     
-    NSMutableArray *message = [[DataLayer sharedInstance] lastMessageForContact:cell.username andAccount:accountNo];
-    if(message.count>0)
+    NSMutableArray *messages = [[DataLayer sharedInstance] lastMessageForContact:cell.username andAccount:row.accountId];
+    if(messages.count>0)
     {
-        NSDictionary *row = message[0];
+        MLMessage *messageRow = messages[0];
         //TODO chek type Message, Image, Link
-        if([[row objectForKey:@"messageType"] isEqualToString:kMessageTypeUrl])
+        if([messageRow.messageType isEqualToString:kMessageTypeUrl])
         {
             [cell showStatusText:@"🔗 A Link"];
-        } else if([[row objectForKey:@"messageType"] isEqualToString:kMessageTypeImage])
+        } else if([messageRow.messageType isEqualToString:kMessageTypeImage])
         {
             [cell showStatusText:@"📷 An Image"];
         } else  {
-        [cell showStatusText:[row objectForKey:@"message"]];
+        [cell showStatusText:messageRow.messageText];
         }
+    } else  {
+        DDLogWarn(@"Active chat bu no messages found in history for %@.", row.contactJid);
     }
     
-    [[MLImageManager sharedInstance] getIconForContact:[row objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(UIImage *image) {
+    [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
             cell.userImage.image=image;
     }];
     
-    if([row objectForKey:@"lastMessageTime"]) {
-        cell.time.text = [self formattedDateWithSource:[row objectForKey:@"lastMessageTime"]];
+    if(row.lastMessageTime) {
+        cell.time.text = [self formattedDateWithSource:row.lastMessageTime];
         cell.time.hidden=NO;
     } else  {
         cell.time.hidden=YES;
@@ -261,9 +253,9 @@
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        NSDictionary* contact= [_contacts objectAtIndex:indexPath.row];
+        MLContact* contact= [_contacts objectAtIndex:indexPath.row];
         
-        [[DataLayer sharedInstance] removeActiveBuddy:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
+        [[DataLayer sharedInstance] removeActiveBuddy:contact.contactJid forAccount:contact.accountId];
         [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
             [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -357,12 +349,8 @@
 
 #pragma mark - date
 
--(NSString*) formattedDateWithSource:(NSString*) sourceDateString
+-(NSString*) formattedDateWithSource:(NSDate*) sourceDate
 {
-    NSString* dateString;
-    
-    NSDate* sourceDate=[self.sourceDateFormat dateFromString:sourceDateString];
-    
     NSInteger msgday =[self.gregorian components:NSCalendarUnitDay fromDate:sourceDate].day;
     NSInteger msgmonth=[self.gregorian components:NSCalendarUnitMonth fromDate:sourceDate].month;
     NSInteger msgyear =[self.gregorian components:NSCalendarUnitYear fromDate:sourceDate].year;
@@ -385,7 +373,7 @@
         [self.destinationDateFormat setTimeStyle:NSDateFormatterShortStyle];
     }
     
-    dateString = [self.destinationDateFormat stringFromDate:sourceDate];
+    NSString *dateString = [self.destinationDateFormat stringFromDate:sourceDate];
     return dateString?dateString:@"";
 }
 

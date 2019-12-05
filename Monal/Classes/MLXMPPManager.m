@@ -884,9 +884,9 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     {
         xmpp *xmppAccount = [account objectForKey:@"xmppAccount"];
         NSInteger pos=0;
-        for(NSDictionary *dic in dirtySet)
+        for(MLContact *row in dirtySet)
         {
-            if([[dic objectForKey:kContactName] isEqualToString:xmppAccount.fulluser] )
+            if([row.contactJid isEqualToString:xmppAccount.fulluser] )
             {
                 [indexSet addIndex:pos];
             }

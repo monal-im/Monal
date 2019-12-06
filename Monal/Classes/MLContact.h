@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MLContact : NSObject
+@interface MLContact : NSObject <NSCoding>
 
 /**
  account number in the database should be an integer

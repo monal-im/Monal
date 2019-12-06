@@ -875,7 +875,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         NSInteger pos=0;
         for(MLContact *row in dirtySet)
         {
-            if([row.contactJid isEqualToString:xmppAccount.fulluser] )
+            if([row.contactJid isEqualToString:xmppAccount.connectionProperties.identity.jid] )
             {
                 [indexSet addIndex:pos];
             }

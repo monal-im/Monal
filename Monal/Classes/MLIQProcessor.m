@@ -419,7 +419,8 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
           else
           {
               //init session and query disco, roster etc.
-             // [self initSession];
+             
+              if(self.initSession) self.initSession();
           }
       }
     

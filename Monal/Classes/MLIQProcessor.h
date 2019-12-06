@@ -17,11 +17,12 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void (^iqCompletion)( MLXMLNode  * _Nullable iqResponse);
-
+typedef void (^processAction)(void);
 
 @interface MLIQProcessor : NSObject
 
 @property (nonatomic, strong) iqCompletion completion;
+@property (nonatomic, strong) processAction initSession;
 
 -(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore;
 

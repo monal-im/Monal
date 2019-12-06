@@ -1267,6 +1267,11 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                             [self send:iqResponse];
                         }
                     };
+                    
+                    processor.initSession = ^() {
+                        [self initSession];
+                    };
+                    
                     [processor processIq:iqNode];
                     
                     

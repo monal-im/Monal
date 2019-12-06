@@ -400,7 +400,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 {
      NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
     [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
-        [groupDefaults setObject:cleanActive forKey:@"recipients"];
+        NSData *archive = [NSKeyedArchiver archivedDataWithRootObject:cleanActive];
+        [groupDefaults setObject:archive forKey:@"recipients"];
         [groupDefaults synchronize];
     }];
     

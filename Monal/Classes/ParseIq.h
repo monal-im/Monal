@@ -74,6 +74,7 @@
 @property (nonatomic, strong, readonly) NSData* captchaData;
 @property (nonatomic, strong) NSMutableDictionary *hiddenFormFields;
 
-//pass change
+//Roster
+@property (nonatomic, strong, readonly) NSString* rosterVersion;
 
 @end

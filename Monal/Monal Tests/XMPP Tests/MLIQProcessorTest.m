@@ -44,4 +44,19 @@
 }
 
 
+- (void)testResultRoster {
+    NSString  *sample= @"<iq id='cXCMufBA' type='set'><query ver='56' xmlns='jabber:iq:roster'><item jid='foo@monal.im' ask='subscribe' subscription='none'/></query></iq>";
+    
+    NSDictionary *stanzaToParse =@{@"stanzaType":@"iq", @"stanzaString":sample};
+    
+     ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
+    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo jid:self.jid signalContex:nil andSignalStore:nil];
+                      
+    [processor processIq:iqNode];
+    
+    
+}
+
+
+
 @end

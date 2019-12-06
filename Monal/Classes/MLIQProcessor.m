@@ -8,6 +8,7 @@
 
 #import "MLIQProcessor.h"
 #import "MLConstants.h"
+#import "DataLayer.h"
 
 
 static const int ddLogLevel = LOG_LEVEL_DEBUG;
@@ -437,7 +438,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     
     if (iqNode.roster==YES)
     {
-        [self rosterResult];
+        [self rosterResult:iqNode];
     }
     
     if(iqNode.omemoDevices)
@@ -476,34 +477,36 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     }
 }
 
--(void) rosterResult {
-    //            self.rosterList=iqNode.items;
-    //
-    //            for(NSDictionary* contact in self.rosterList)
-    //            {
-    //
-    //                if([[contact objectForKey:@"subscription"] isEqualToString:@"both"])
-    //                {
-    //                    if([contact objectForKey:@"jid"]) {
-    //                        [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
-    //                                                    forAccount:self->_accountNo
-    //                                                      fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
-    //                                                      nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
-    //                                                withCompletion:^(BOOL success) {
-    //
-    //                            if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
-    //                            {
-    //                                [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"] forContact:[contact objectForKey:@"jid"] andAccount:self->_accountNo ] ;
-    //                            }
-    //                        }];
-    //                    }
-    //                }
-    //
-    //            }
-    //
-    //            // iterate roster and get cards
-    //            [self getVcards];
-
+-(void) rosterResult:(ParseIq *) iqNode {
+ 
+    for(NSDictionary* contact in iqNode.items)
+    {
+        if(iqNode.rosterVersion) {
+            [[DataLayer sharedInstance] setRosterVersion:iqNode.rosterVersion forAccount:self.accountNo];
+        }
+        
+        if([[contact objectForKey:@"subscription"] isEqualToString:@"both"])
+        {
+            if([contact objectForKey:@"jid"]) {
+                [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
+                                            forAccount:self.accountNo
+                                              fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
+                                              nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
+                                        withCompletion:^(BOOL success) {
+                    
+                    if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
+                    {
+                        [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo ] ;
+                    }
+                }];
+            }
+        }
+        
+    }
+    
+    // iterate roster and get cards
+   // [self getVcards];
+    
 }
 
 -(void) omemoResult {

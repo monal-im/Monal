@@ -69,6 +69,10 @@ extern NSString *const kMessageTypeUrl;
 -(void) executeNonQuery:(NSString*) query andArguments:(NSArray *) args  withCompletion: (void (^)(BOOL))completion;
 
 
+//Roster
+-(NSString *) getRosterVersionForAccount:(NSString*) accountNo;
+-(void) setRosterVersion:(NSString *) version forAccount: (NSString*) accountNo;
+
 // Buddy Commands
 -(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName withCompletion: (void (^)(BOOL))completion;
 -(void) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;

@@ -2454,7 +2454,7 @@ static NSMutableArray *extracted(xmpp *object) {
     NSString *rosterVer;
     if(self.connectionProperties.supportsRosterVersion)
     {
-        rosterVer=@""; //TODO fetch proper ver from db
+        rosterVer=[[DataLayer sharedInstance] getRosterVersionForAccount:self.accountNo];
     }
     [roster setRosterRequest:rosterVer];
     

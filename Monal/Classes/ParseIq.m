@@ -59,6 +59,7 @@
         if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"jabber:iq:roster"])  {
             State=@"RosterQuery";
             _roster=YES;
+            _rosterVersion = [attributeDict objectForKey:@"ver"];
         }
         
         NSString* node =[attributeDict objectForKey:@"node"];

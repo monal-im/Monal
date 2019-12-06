@@ -35,7 +35,8 @@
     [Fabric with:@[[Crashlytics class]]];
     NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
     self.accounts= [groupDefaults objectForKey:@"accounts"];
-    self.recipients = [groupDefaults objectForKey:@"recipients"];
+    NSData *data=[groupDefaults objectForKey:@"recipients"];
+    self.recipients=(NSArray *) [NSKeyedUnarchiver unarchiveObjectWithData:data];
     
     self.recipient = [groupDefaults objectForKey:@"lastRecipient"];
     self.account = [groupDefaults objectForKey:@"lastAccount"];

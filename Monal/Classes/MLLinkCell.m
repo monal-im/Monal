@@ -61,7 +61,7 @@
 -(void) loadPreviewWithCompletion:(void (^)(void))completion
 {
     self.messageTitle.text=nil;
-    self.imageUrl=@"";
+    self.imageUrl=[NSURL URLWithString:@""];
     
     if(self.link) {
         /**
@@ -77,7 +77,7 @@
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.messageTitle.text=[MLMetaInfo ogContentWithTag:@"og:title" inHTML:body] ;
-                self.imageUrl=[[MLMetaInfo ogContentWithTag:@"og:image" inHTML:body] stringByRemovingPercentEncoding];
+                self.imageUrl=[NSURL URLWithString:[[MLMetaInfo ogContentWithTag:@"og:image" inHTML:body] stringByRemovingPercentEncoding]];
                 [self loadImageWithCompletion:^{
                     if(completion) completion();
                 }];
@@ -89,7 +89,7 @@
 -(void) loadImageWithCompletion:(void (^)(void))completion
 {
     if(self.imageUrl) {
-        [self.previewImage sd_setImageWithURL:[NSURL URLWithString:self.imageUrl] completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+        [self.previewImage sd_setImageWithURL:self.imageUrl completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
             if(error) {
                 self.previewImage.image=nil;
             }

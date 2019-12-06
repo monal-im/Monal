@@ -283,29 +283,29 @@ An array of Dics what have timers to make sure everything was sent
         return;
     }
     DDLogVerbose(@"connecting account %@",[account objectForKey:kAccountName] );
- 
+
     NSString *password = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@",[account objectForKey:kUsername],[account objectForKey:kDomain] ] password:password andResource:[account objectForKey:kResource]];
 
     MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort]];
-    
+
     server.SSL=[[account objectForKey:kSSL] boolValue];
     server.oldStyleSSL=[[account objectForKey:kOldSSL] boolValue];
     server.selfSignedCert=[[account objectForKey:kSelfSigned] boolValue];
     server.oAuth=[[account objectForKey:kOauth] boolValue];
-    
+
     if(server.oldStyleSSL && !server.SSL ) server.SSL=YES; //tehcnically a config error but  understandable
-    
+
     xmpp* xmppAccount=[[xmpp alloc] initWithServer:server andIdentity:identity];
     xmppAccount.explicitLogout=NO;
     xmppAccount.pushNode=self.pushNode;
     xmppAccount.pushSecret=self.pushSecret;
-    
-    
+
+
     xmppAccount.airDrop=[[account objectForKey:kAirdrop] boolValue];
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]];
-    
-    
+
+
     //    if([xmppAccount.password length]==0 && !xmppAccount.oAuth) //&& ([tempPass length]==0)
     //    {
     //        // ask fro temp pass if not oauth
@@ -643,7 +643,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     xmpp* account =[self getConnectedAccountForID:contact.accountId];
     if(account)
     {
-        
+
         if(contact.isGroup)
         {
             //if MUC
@@ -873,9 +873,9 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     {
         xmpp *xmppAccount = [account objectForKey:@"xmppAccount"];
         NSInteger pos=0;
-        for(NSDictionary *dic in dirtySet)
+        for(MLContact *row in dirtySet)
         {
-            if([[dic objectForKey:kContactName] isEqualToString:xmppAccount.connectionProperties.identity.jid] )
+            if([row.contactJid isEqualToString:xmppAccount.fulluser] )
             {
                 [indexSet addIndex:pos];
             }

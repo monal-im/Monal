@@ -40,4 +40,11 @@
     return contact;
 }
 
++(MLContact *) contactFromDictionary:(NSDictionary *) dic withDateFormatter:(NSDateFormatter *) formatter
+{
+    MLContact *contact = [MLContact contactFromDictionary:dic];
+    contact.lastMessageTime = [formatter dateFromString:[dic objectForKey:@"lastMessageTime"]]; 
+    return contact;
+}
+
 @end

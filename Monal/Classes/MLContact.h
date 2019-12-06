@@ -36,6 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
  xmpp status message
  */
 @property (nonatomic, copy) NSString *statusMessage;
+@property (nonatomic, copy) NSDate *lastMessageTime;
 
 /**
  used to display the badge on a row
@@ -54,7 +55,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(NSString *) contactDisplayName;
 
 +(MLContact *) contactFromDictionary:(NSDictionary *) dic;
-
++(MLContact *) contactFromDictionary:(NSDictionary *) dic withDateFormatter:(NSDateFormatter *) formatter;
 
 @end
 

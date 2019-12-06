@@ -7,8 +7,8 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "ParseIQ.h"
-#import "MLIQProcessor.h"
+//#import "ParseIQ.h"
+//#import "MLIQProcessor.h"
 
 @interface MLIQProcessorTest : XCTestCase
 
@@ -35,11 +35,11 @@
     
     NSDictionary *stanzaToParse =@{@"stanzaType":@"iq", @"stanzaString":sample};
     
-     ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
-    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo jid:self.jid signalContex:nil andSignalStore:nil];
-                      
-    [processor processIq:iqNode];
-    
+//     ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
+//    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo jid:self.jid signalContex:nil andSignalStore:nil];
+//
+//    [processor processIq:iqNode];
+//
     
 }
 
@@ -49,11 +49,11 @@
     
     NSDictionary *stanzaToParse =@{@"stanzaType":@"iq", @"stanzaString":sample};
     
-     ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
-    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo jid:self.jid signalContex:nil andSignalStore:nil];
-                      
-    [processor processIq:iqNode];
-    
+//     ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
+//    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo jid:self.jid signalContex:nil andSignalStore:nil];
+//
+//    [processor processIq:iqNode];
+//
     
 }
 

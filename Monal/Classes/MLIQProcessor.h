@@ -21,7 +21,7 @@ typedef void (^processAction)(void);
 
 @interface MLIQProcessor : NSObject
 
-@property (nonatomic, strong) iqCompletion completion;
+@property (nonatomic, strong) iqCompletion sendIq;
 @property (nonatomic, strong) processAction initSession;
 
 -(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore;
@@ -30,6 +30,12 @@ typedef void (^processAction)(void);
  Process a iq, persist any changes and post notifications
  */
 -(void) processIq:(ParseIq *) messageNode;
+
+/**
+ exposed so that we can parse features loaded from disk 
+ */
+-(void) parseFeatures;
+
 
 @end
 

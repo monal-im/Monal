@@ -93,7 +93,6 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 // discovered properties
 @property (nonatomic,strong)  NSArray* discoveredServerList;
 
-@property (nonatomic,strong)  NSString*  conferenceServer;
 @property (nonatomic,strong)  NSArray*  roomList;
 @property (nonatomic, strong) NSArray* rosterList;
 @property (nonatomic, assign) BOOL staleRoster; //roster is stale if it resumed in the background

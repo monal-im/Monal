@@ -70,189 +70,117 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         DDLogError(@"invalid iq type %@", iqNode.type);
     }
     
-//    if(iqNode.discoInfo) {
-//        [self cleanDisco];
-//    }
-//
-//    if(iqNode.features && iqNode.discoInfo) {
-//        if([iqNode.from isEqualToString:self.server] || [iqNode.from isEqualToString:self.domain]) {
-//            self.serverFeatures=[iqNode.features copy];
-//            [self parseFeatures];
-//
-//#ifndef DISABLE_OMEMO
-//            [self sendSignalInitialStanzas];
-//#endif
-//        }
-//
-//        if([iqNode.features containsObject:@"urn:xmpp:http:upload"])
-//        {
-//            self.supportsHTTPUpload=YES;
-//            self.uploadServer = iqNode.from;
-//        }
-//
-//        if([iqNode.features containsObject:@"http://jabber.org/protocol/muc"])
-//        {
-//            self.conferenceServer=iqNode.from;
-//        }
-//
-//        if([iqNode.features containsObject:@"urn:xmpp:push:0"])
-//        {
-//            self.supportsPush=YES;
-//            [self enablePush];
-//        }
-//
-//        if([iqNode.features containsObject:@"urn:xmpp:mam:2"])
-//        {
-//            self.supportsMam2=YES;
-//            DDLogInfo(@" supports mam:2");
-//        }
-//    }
-//
-//    if(iqNode.legacyAuth)
-//    {
-//        XMPPIQ* auth =[[XMPPIQ alloc] initWithId:@"auth2" andType:kiqSetType];
-//        [auth setAuthWithUserName:self.username resource:self.resource andPassword:self.password];
-//        [self send:auth];
-//    }
-//
-
-//
-//    if(iqNode.vCard && iqNode.user)
-//    {
-//        NSString* fullname=iqNode.fullName;
-//        if(!fullname) fullname= iqNode.user;
-//
-//        if([fullname stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0 ) {
-//            [[DataLayer sharedInstance] setFullName:fullname forContact:iqNode.user andAccount:self->_accountNo];
-//
-//            if(iqNode.photoBinValue)
-//            {
-//                [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:self->_accountNo WithData:[iqNode.photoBinValue copy]];
-//
-//            }
-//            if(iqNode.user) {
-//                if(!fullname) fullname=iqNode.user;
-//
-//                NSDictionary* userDic=@{kusernameKey: iqNode.user,
-//                                        kfullNameKey: fullname,
-//                                        kaccountNoKey:self->_accountNo
-//                };
-//                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:userDic];
-//            }
-//        }
-//
-//    }
-//
-//    if(iqNode.ping)
-//    {
-//        XMPPIQ* pong =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-//        [pong setiqTo:self->_domain];
-//        [self send:pong];
-//    }
-//
-//    if([iqNode.idval isEqualToString:self.pingID])
-//    {
-//        //response to my ping
-//        self.pingID=nil;
-//    }
-//
-//    if(iqNode.httpUpload)
-//    {
-//        NSDictionary *matchingRow;
-//        //look up id val in upload queue array
-//        for(NSDictionary * row in self.httpUploadQueue)
-//        {
-//            if([[row objectForKey:kId] isEqualToString:iqNode.idval])
-//            {
-//                matchingRow= row;
-//                break;
-//            }
-//        }
-//
-//        if(matchingRow) {
-//
-//            //upload to put
-//            dispatch_async(dispatch_get_main_queue(), ^{
-//                [MLHTTPRequest sendWithVerb:kPut path:iqNode.putURL
-//                                    headers:@{kContentType:[matchingRow objectForKey:kContentType]}
-//                              withArguments:nil data:[matchingRow objectForKey:kData] andCompletionHandler:^(NSError *error, id result) {
-//                    void (^completion) (NSString *url,  NSError *error)  = [matchingRow objectForKey:kCompletion];
-//                    if(!error)
-//                    {
-//                        //send get to contact
-//                        if(completion)
-//                        {
-//                            completion(iqNode.getURL, nil);
-//                        }
-//                    } else  {
-//                        if(completion)
-//                        {
-//                            completion(nil, error);
-//                        }
-//                    }
-//
-//                }];
-//            });
-//
-//        }
-//    }
-//
-//
-//    if (iqNode.version)
-//    {
-//        XMPPIQ* versioniq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-//        [versioniq setiqTo:iqNode.from];
-//        [versioniq setVersion];
-//        [self send:versioniq];
-//    }
-//
-//    if (iqNode.last)
-//    {
-//        XMPPIQ* lastiq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-//        [lastiq setiqTo:iqNode.from];
-//        [lastiq setLast];
-//        [self send:lastiq];
-//    }
-//
-//    if (iqNode.time)
-//    {
-//        XMPPIQ* timeiq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-//        [timeiq setiqTo:iqNode.from];
-//        //[lastiq setLast];
-//        [self send:timeiq];
-//    }
-//
-//
-//    if([iqNode.from isEqualToString:self->_conferenceServer] && iqNode.discoItems)
-//    {
-//        self->_roomList=iqNode.items;
-//        [[NSNotificationCenter defaultCenter]
-//         postNotificationName: kMLHasRoomsNotice object: self];
-//    }
-//
-//    BOOL success= YES;
-//    if([iqNode.type isEqualToString:kiqErrorType]) success=NO;
-//    if(self.registrationState==kStateSubmittingForm && self.regFormSubmitCompletion)
-//    {
-//        self.registrationState=kStateRegistered;
-//        self.regFormSubmitCompletion(success, iqNode.errorMessage);
-//        self.regFormSubmitCompletion=nil;
-//    }
-//
-//    xmppCompletion completion = [self.xmppCompletionHandlers objectForKey:iqNode.idval];
-//    if(completion)  {
-//        [self.xmppCompletionHandlers removeObjectForKey:iqNode.idval]; // remove first to prevent an infinite loop
-//        completion(success, iqNode.errorMessage);
-//    }
-//
-//
-//    if(self.registration && [iqNode.queryXMLNS isEqualToString:kRegisterNameSpace])
-//    {
-//        if(self.regFormCompletion) {
-//            self.regFormCompletion(iqNode.captchaData, iqNode.hiddenFormFields);
-//            self.regFormCompletion=nil;
-//        }
-//    }
+    //
+    //    if(iqNode.ping)
+    //    {
+    //        XMPPIQ* pong =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+    //        [pong setiqTo:self->_domain];
+    //        [self send:pong];
+    //    }
+    //
+    //    if([iqNode.idval isEqualToString:self.pingID])
+    //    {
+    //        //response to my ping
+    //        self.pingID=nil;
+    //    }
+    //
+    //    if(iqNode.httpUpload)
+    //    {
+    //        NSDictionary *matchingRow;
+    //        //look up id val in upload queue array
+    //        for(NSDictionary * row in self.httpUploadQueue)
+    //        {
+    //            if([[row objectForKey:kId] isEqualToString:iqNode.idval])
+    //            {
+    //                matchingRow= row;
+    //                break;
+    //            }
+    //        }
+    //
+    //        if(matchingRow) {
+    //
+    //            //upload to put
+    //            dispatch_async(dispatch_get_main_queue(), ^{
+    //                [MLHTTPRequest sendWithVerb:kPut path:iqNode.putURL
+    //                                    headers:@{kContentType:[matchingRow objectForKey:kContentType]}
+    //                              withArguments:nil data:[matchingRow objectForKey:kData] andCompletionHandler:^(NSError *error, id result) {
+    //                    void (^completion) (NSString *url,  NSError *error)  = [matchingRow objectForKey:kCompletion];
+    //                    if(!error)
+    //                    {
+    //                        //send get to contact
+    //                        if(completion)
+    //                        {
+    //                            completion(iqNode.getURL, nil);
+    //                        }
+    //                    } else  {
+    //                        if(completion)
+    //                        {
+    //                            completion(nil, error);
+    //                        }
+    //                    }
+    //
+    //                }];
+    //            });
+    //
+    //        }
+    //    }
+    //
+    //
+    //    if (iqNode.version)
+    //    {
+    //        XMPPIQ* versioniq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+    //        [versioniq setiqTo:iqNode.from];
+    //        [versioniq setVersion];
+    //        [self send:versioniq];
+    //    }
+    //
+    //    if (iqNode.last)
+    //    {
+    //        XMPPIQ* lastiq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+    //        [lastiq setiqTo:iqNode.from];
+    //        [lastiq setLast];
+    //        [self send:lastiq];
+    //    }
+    //
+    //    if (iqNode.time)
+    //    {
+    //        XMPPIQ* timeiq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+    //        [timeiq setiqTo:iqNode.from];
+    //        //[lastiq setLast];
+    //        [self send:timeiq];
+    //    }
+    //
+    //
+    //    if([iqNode.from isEqualToString:self->_conferenceServer] && iqNode.discoItems)
+    //    {
+    //        self->_roomList=iqNode.items;
+    //        [[NSNotificationCenter defaultCenter]
+    //         postNotificationName: kMLHasRoomsNotice object: self];
+    //    }
+    //
+    //    BOOL success= YES;
+    //    if([iqNode.type isEqualToString:kiqErrorType]) success=NO;
+    //    if(self.registrationState==kStateSubmittingForm && self.regFormSubmitCompletion)
+    //    {
+    //        self.registrationState=kStateRegistered;
+    //        self.regFormSubmitCompletion(success, iqNode.errorMessage);
+    //        self.regFormSubmitCompletion=nil;
+    //    }
+    //
+    //    xmppCompletion completion = [self.xmppCompletionHandlers objectForKey:iqNode.idval];
+    //    if(completion)  {
+    //        [self.xmppCompletionHandlers removeObjectForKey:iqNode.idval]; // remove first to prevent an infinite loop
+    //        completion(success, iqNode.errorMessage);
+    //    }
+    //
+    //
+    //    if(self.registration && [iqNode.queryXMLNS isEqualToString:kRegisterNameSpace])
+    //    {
+    //        if(self.regFormCompletion) {
+    //            self.regFormCompletion(iqNode.captchaData, iqNode.hiddenFormFields);
+    //            self.regFormCompletion=nil;
+    //        }
+    //    }
 }
 
 -(void) processGetIq:(ParseIq *) iqNode {
@@ -265,7 +193,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
             [discoInfo setiqTo:iqNode.user];
         }
         [discoInfo setDiscoInfoWithFeaturesAndNode:iqNode.queryNode];
-      //  [self send:discoInfo];
+        if(self.sendIq) self.sendIq(discoInfo);
         
     }
 }
@@ -275,116 +203,116 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 }
 
 -(void) processSetIq:(ParseIq *) iqNode {
-//    if ([iqNode.type isEqualToString:kiqSetType]) {
-//        if(iqNode.jingleSession) {
-//
-//            //accpetance of our call
-//            if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-accept"] &&
-//               [[iqNode.jingleSession objectForKey:@"sid"] isEqualToString:self.jingle.thesid])
-//            {
-//
-//                NSDictionary* transport1;
-//                NSDictionary* transport2;
-//                for(NSDictionary* candidate in iqNode.jingleTransportCandidates) {
-//                    if([[candidate objectForKey:@"component"] isEqualToString:@"1"]) {
-//                        transport1=candidate;
-//                    }
-//                    if([[candidate objectForKey:@"component"] isEqualToString:@"2"]) {
-//                        transport2=candidate;
-//                    }
-//                }
-//
-//                NSDictionary* pcmaPayload;
-//                for(NSDictionary* payload in iqNode.jinglePayloadTypes) {
-//                    if([[payload objectForKey:@"name"] isEqualToString:@"PCMA"]) {
-//                        pcmaPayload=payload;
-//                        break;
-//                    }
-//                }
-//
-//                if (pcmaPayload && transport1) {
-//                    self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
-//                    self.jingle.destinationPort= [transport1 objectForKey:@"port"];
-//
-//                    XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-//                    [node setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user,iqNode.resource]];
-//                    [self send:node];
-//
-//                    [self.jingle rtpConnect];
-//                }
-//                return;
-//            }
-//
-//            if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-terminate"] &&  [[iqNode.jingleSession objectForKey:@"sid"] isEqualToString:self.jingle.thesid]) {
-//                XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-//                [node setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user,iqNode.resource]];
-//                [self send:node];
-//                [self.jingle rtpDisconnect];
-//            }
-//
-//            if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-initiate"]) {
-//                NSDictionary* pcmaPayload;
-//                for(NSDictionary* payload in iqNode.jinglePayloadTypes) {
-//                    if([[payload objectForKey:@"name"] isEqualToString:@"PCMA"]) {
-//                        pcmaPayload=payload;
-//                        break;
-//                    }
-//                }
-//
-//                NSDictionary* transport1;
-//                NSDictionary* transport2;
-//                for(NSDictionary* candidate in iqNode.jingleTransportCandidates) {
-//                    if([[candidate objectForKey:@"component"] isEqualToString:@"1"]) {
-//                        transport1=candidate;
-//                    }
-//                    if([[candidate objectForKey:@"component"] isEqualToString:@"2"]) {
-//                        transport2=candidate;
-//                    }
-//                }
-//
-//                if (pcmaPayload && transport1) {
-//                    self.jingle = [[jingleCall alloc] init];
-//                    self.jingle.initiator= [iqNode.jingleSession objectForKey:@"initiator"];
-//                    self.jingle.responder= [iqNode.jingleSession objectForKey:@"responder"];
-//                    if(!self.jingle.responder)
-//                    {
-//                        self.jingle.responder = [NSString stringWithFormat:@"%@/%@", iqNode.to, self.resource];
-//                    }
-//
-//                    self.jingle.thesid= [iqNode.jingleSession objectForKey:@"sid"];
-//                    self.jingle.destinationPort= [transport1 objectForKey:@"port"];
-//                    self.jingle.idval=iqNode.idval;
-//                    if(transport2) {
-//                        self.jingle.destinationPort2= [transport2 objectForKey:@"port"];
-//                    }
-//                    else {
-//                        self.jingle.destinationPort2=[transport1 objectForKey:@"port"]; // if nothing is provided just reuse..
-//                    }
-//                    self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
-//
-//
-//                    if(iqNode.user && iqNode.resource && self.fulluser) {
-//
-//                        NSDictionary *dic= @{@"from":iqNode.from,
-//                                             @"user":iqNode.user,
-//                                             @"resource":iqNode.resource,
-//                                             @"id": iqNode.idval,
-//                                             kAccountID:self->_accountNo,
-//                                             kAccountName: self.fulluser
-//                        };
-//
-//                        [[NSNotificationCenter defaultCenter]
-//                         postNotificationName: kMonalCallRequestNotice object: dic];
-//
-//                    }
-//                }
-//                else {
-//                    //does not support the same formats
-//                }
-//
-//            }
-//        }
-//    }
+    //    if ([iqNode.type isEqualToString:kiqSetType]) {
+    //        if(iqNode.jingleSession) {
+    //
+    //            //accpetance of our call
+    //            if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-accept"] &&
+    //               [[iqNode.jingleSession objectForKey:@"sid"] isEqualToString:self.jingle.thesid])
+    //            {
+    //
+    //                NSDictionary* transport1;
+    //                NSDictionary* transport2;
+    //                for(NSDictionary* candidate in iqNode.jingleTransportCandidates) {
+    //                    if([[candidate objectForKey:@"component"] isEqualToString:@"1"]) {
+    //                        transport1=candidate;
+    //                    }
+    //                    if([[candidate objectForKey:@"component"] isEqualToString:@"2"]) {
+    //                        transport2=candidate;
+    //                    }
+    //                }
+    //
+    //                NSDictionary* pcmaPayload;
+    //                for(NSDictionary* payload in iqNode.jinglePayloadTypes) {
+    //                    if([[payload objectForKey:@"name"] isEqualToString:@"PCMA"]) {
+    //                        pcmaPayload=payload;
+    //                        break;
+    //                    }
+    //                }
+    //
+    //                if (pcmaPayload && transport1) {
+    //                    self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
+    //                    self.jingle.destinationPort= [transport1 objectForKey:@"port"];
+    //
+    //                    XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+    //                    [node setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user,iqNode.resource]];
+    //                    [self send:node];
+    //
+    //                    [self.jingle rtpConnect];
+    //                }
+    //                return;
+    //            }
+    //
+    //            if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-terminate"] &&  [[iqNode.jingleSession objectForKey:@"sid"] isEqualToString:self.jingle.thesid]) {
+    //                XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+    //                [node setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user,iqNode.resource]];
+    //                [self send:node];
+    //                [self.jingle rtpDisconnect];
+    //            }
+    //
+    //            if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-initiate"]) {
+    //                NSDictionary* pcmaPayload;
+    //                for(NSDictionary* payload in iqNode.jinglePayloadTypes) {
+    //                    if([[payload objectForKey:@"name"] isEqualToString:@"PCMA"]) {
+    //                        pcmaPayload=payload;
+    //                        break;
+    //                    }
+    //                }
+    //
+    //                NSDictionary* transport1;
+    //                NSDictionary* transport2;
+    //                for(NSDictionary* candidate in iqNode.jingleTransportCandidates) {
+    //                    if([[candidate objectForKey:@"component"] isEqualToString:@"1"]) {
+    //                        transport1=candidate;
+    //                    }
+    //                    if([[candidate objectForKey:@"component"] isEqualToString:@"2"]) {
+    //                        transport2=candidate;
+    //                    }
+    //                }
+    //
+    //                if (pcmaPayload && transport1) {
+    //                    self.jingle = [[jingleCall alloc] init];
+    //                    self.jingle.initiator= [iqNode.jingleSession objectForKey:@"initiator"];
+    //                    self.jingle.responder= [iqNode.jingleSession objectForKey:@"responder"];
+    //                    if(!self.jingle.responder)
+    //                    {
+    //                        self.jingle.responder = [NSString stringWithFormat:@"%@/%@", iqNode.to, self.resource];
+    //                    }
+    //
+    //                    self.jingle.thesid= [iqNode.jingleSession objectForKey:@"sid"];
+    //                    self.jingle.destinationPort= [transport1 objectForKey:@"port"];
+    //                    self.jingle.idval=iqNode.idval;
+    //                    if(transport2) {
+    //                        self.jingle.destinationPort2= [transport2 objectForKey:@"port"];
+    //                    }
+    //                    else {
+    //                        self.jingle.destinationPort2=[transport1 objectForKey:@"port"]; // if nothing is provided just reuse..
+    //                    }
+    //                    self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
+    //
+    //
+    //                    if(iqNode.user && iqNode.resource && self.fulluser) {
+    //
+    //                        NSDictionary *dic= @{@"from":iqNode.from,
+    //                                             @"user":iqNode.user,
+    //                                             @"resource":iqNode.resource,
+    //                                             @"id": iqNode.idval,
+    //                                             kAccountID:self->_accountNo,
+    //                                             kAccountName: self.fulluser
+    //                        };
+    //
+    //                        [[NSNotificationCenter defaultCenter]
+    //                         postNotificationName: kMonalCallRequestNotice object: dic];
+    //
+    //                    }
+    //                }
+    //                else {
+    //                    //does not support the same formats
+    //                }
+    //
+    //            }
+    //        }
+    //    }
     
 }
 
@@ -395,7 +323,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     {
         //RSM seems broken on servers. Tell UI there is more to fetch
         [[NSNotificationCenter defaultCenter] postNotificationName:kMLMAMMore object:nil];
-        return; 
+        return;
     }
     
     // default MAM settings
@@ -406,24 +334,23 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     }
     
     if(iqNode.shouldSetBind)
-      {
-          [self.connection bindJid: iqNode.jid];
-          DDLogInfo(@"Bind jid %@", iqNode.jid);
-          
-          if(self.connection.supportsSM3)
-          {
-              MLXMLNode *enableNode =[[MLXMLNode alloc] initWithElement:@"enable"];
-              NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3",@"resume":@"true" };
-              enableNode.attributes =[dic mutableCopy];
-              if(self.completion) self.completion(enableNode);
-          }
-          else
-          {
-              //init session and query disco, roster etc.
-             
-              if(self.initSession) self.initSession();
-          }
-      }
+    {
+        [self.connection bindJid: iqNode.jid];
+        DDLogInfo(@"Bind jid %@", iqNode.jid);
+        
+        if(self.connection.supportsSM3)
+        {
+            MLXMLNode *enableNode =[[MLXMLNode alloc] initWithElement:@"enable"];
+            NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3",@"resume":@"true" };
+            enableNode.attributes =[dic mutableCopy];
+            if(self.sendIq) self.sendIq(enableNode);
+        }
+        else
+        {
+            //init session and query disco, roster etc.
+            if(self.initSession) self.initSession();
+        }
+    }
     
     if([iqNode.idval isEqualToString:@"enableCarbons"])
     {
@@ -447,14 +374,90 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     }
     
     
-//    if([iqNode.idval isEqualToString:self.jingle.idval]) {
-//        [self jingleResult];
-//    }
+    //    if([iqNode.idval isEqualToString:self.jingle.idval]) {
+    //        [self jingleResult];
+    //    }
     
     
 }
 
+#pragma mark - result
+
 -(void) discoResult:(ParseIq *) iqNode {
+    
+    //        if(iqNode.discoInfo) {
+    //            [self cleanDisco];
+    //        }
+    
+    if(iqNode.features && iqNode.discoInfo) {
+        if([iqNode.from isEqualToString:self.connection.server.host] ||
+           [iqNode.from isEqualToString:self.connection.identity.domain]) {
+            self.connection.serverFeatures=iqNode.features;
+            //                [self parseFeatures];
+            
+#ifndef DISABLE_OMEMO
+            //    [self sendSignalInitialStanzas];
+#endif
+        }
+        
+        if([iqNode.features containsObject:@"urn:xmpp:http:upload"])
+        {
+            self.connection.supportsHTTPUpload=YES;
+            self.connection.uploadServer = iqNode.from;
+        }
+        
+        if([iqNode.features containsObject:@"http://jabber.org/protocol/muc"])
+        {
+            self.connection.conferenceServer=iqNode.from;
+        }
+        
+        if([iqNode.features containsObject:@"urn:xmpp:push:0"])
+        {
+            self.connection.supportsPush=YES;
+            //  [self enablePush];
+        }
+        
+        if([iqNode.features containsObject:@"urn:xmpp:mam:2"])
+        {
+            self.connection.supportsMam2=YES;
+            DDLogInfo(@" supports mam:2");
+        }
+    }
+    
+    if(iqNode.legacyAuth)
+    {
+        XMPPIQ* auth =[[XMPPIQ alloc] initWithId:@"auth2" andType:kiqSetType];
+        [auth setAuthWithUserName:self.connection.identity.jid resource:self.connection.identity.resource andPassword:self.connection.identity.password];
+        self.sendIq(auth);
+        return;
+    }
+    
+    if(iqNode.vCard && iqNode.user)
+    {
+        NSString* fullname=iqNode.fullName;
+        if(!fullname) fullname= iqNode.user;
+        
+        if([fullname stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0 ) {
+            [[DataLayer sharedInstance] setFullName:fullname forContact:iqNode.user andAccount:self.accountNo];
+            
+            if(iqNode.photoBinValue)
+            {
+                //                    [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:self.accountNo WithData:[iqNode.photoBinValue copy]];
+                
+            }
+            if(iqNode.user) {
+                if(!fullname) fullname=iqNode.user;
+                
+                NSDictionary* userDic=@{kusernameKey: iqNode.user,
+                                        kfullNameKey: fullname,
+                                        kaccountNoKey:self->_accountNo
+                };
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:userDic];
+            }
+        }
+        
+    }
+    
     if(([iqNode.from isEqualToString:self.connection.server.host] ||
         [iqNode.from isEqualToString:self.connection.identity.domain]) &&
        !self.connection.discoveredServices)
@@ -466,19 +469,17 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
             
             if((![[item objectForKey:@"jid"] isEqualToString:self.connection.server.host]  &&
                 ![[item objectForKey:@"jid"] isEqualToString:self.connection.identity.domain])) {
-               // [self discoverService:[item objectForKey:@"jid"]];
+                if(self.sendIq) self.sendIq([self discoverService:[item objectForKey:@"jid"]]);
             }
         }
-       // [self discoverService:self.fulluser];   //discover push support
-    }
-    else
-    {
         
+        // send to bare jid for push etc.
+        if(self.sendIq) self.sendIq([self discoverService:self.connection.identity.jid]);
     }
 }
 
 -(void) rosterResult:(ParseIq *) iqNode {
- 
+    
     for(NSDictionary* contact in iqNode.items)
     {
         if(iqNode.rosterVersion) {
@@ -505,7 +506,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     }
     
     // iterate roster and get cards
-   // [self getVcards];
+    // [self getVcards];
     
 }
 
@@ -600,9 +601,9 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     //#endif
     //
     //
-
+    
     //
-
+    
     //
     //
 }
@@ -633,5 +634,49 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     //
     //    }
 }
+    
+#pragma mark - features
+
+-(XMPPIQ *) discoverService:(NSString *) node
+{
+    XMPPIQ *discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
+    [discoInfo setiqTo:node];
+    [discoInfo setDiscoInfoNode];
+    return discoInfo;
+}
+
+-(XMPPIQ *) enableCarbons
+{
+    XMPPIQ *carbons =[[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
+    MLXMLNode *enable =[[MLXMLNode alloc] initWithElement:@"enable"];
+    [enable setXMLNS:@"urn:xmpp:carbons:2"];
+    [carbons.children addObject:enable];
+    return carbons;
+}
+
+-(void) parseFeatures
+{
+    if([self.connection.serverFeatures containsObject:@"urn:xmpp:carbons:2"])
+    {
+        if(!self.connection.usingCarbons2){
+            if(self.sendIq) self.sendIq([self enableCarbons]);
+        }
+    }
+    
+    if([self.connection.serverFeatures containsObject:@"urn:xmpp:ping"])
+    {
+        self.connection.supportsPing=YES;
+    }
+    
+    [self.connection.serverFeatures.allObjects enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSString *feature = (NSString *)obj;
+        if([feature hasPrefix:@"http://jabber.org/protocol/pubsub"]) {
+            self.connection.supportsPubSub=YES;
+            *stop=YES;
+        }
+    }];
+    
+}
+
 
 @end

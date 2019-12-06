@@ -1209,41 +1209,6 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 #pragma mark stanza handling
 
--(void) enableCarbons
-{
-    XMPPIQ* carbons =[[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
-    MLXMLNode *enable =[[MLXMLNode alloc] initWithElement:@"enable"];
-    [enable setXMLNS:@"urn:xmpp:carbons:2"];
-    [carbons.children addObject:enable];
-    [self send:carbons];
-}
-
--(void) parseFeatures
-{
-    if([self.connectionProperties.serverFeatures containsObject:@"urn:xmpp:carbons:2"])
-    {
-        if(!self.usingCarbons2){
-            [self enableCarbons];
-        }
-    }
-    
-    if([self.connectionProperties.serverFeatures containsObject:@"urn:xmpp:ping"])
-    {
-        self.connectionProperties.supportsPing=YES;
-    }
-    
-    [self.connectionProperties.serverFeatures.allObjects enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSString *feature = (NSString *)obj;
-        if([feature hasPrefix:@"http://jabber.org/protocol/pubsub"]) {
-            self.connectionProperties.supportsPubSub=YES;
-            *stop=YES;
-        }
-    }];
-    
-}
-
-
-
 -(void) processInput
 {
     //prevent reconnect attempt
@@ -1262,7 +1227,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
                     
                     MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
-                    processor.completion=^(MLXMLNode * _Nullable iqResponse) {
+                    processor.sendIq=^(MLXMLNode * _Nullable iqResponse) {
                         if(iqResponse) {
                             [self send:iqResponse];
                         }
@@ -1464,14 +1429,10 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                         [[DataLayer sharedInstance]  setContactHash:presenceNode  forAccount:self->_accountNo];
                                     }
                                 }
-                                
-                            
-                                
                             }
                             else
                             {
                                 DDLogError(@"ERROR: presence notice but no user name.");
-                                
                             }
                         }
                         else if([presenceNode.type isEqualToString:kpresenceUnavailable])
@@ -1612,7 +1573,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         {
                             self.connectionProperties.supportsSM3=YES;
                         } else {
-                            [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
+                            [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
                         }
                         
                         if(streamNode.supportsRosterVer)
@@ -1704,7 +1665,15 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     [self removeUnAckedMessagesLessThan:resumeNode.h];
                     [self sendUnAckedMessages];
                     
-                    [self parseFeatures];
+                    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+                    
+                    processor.sendIq=^(MLXMLNode * _Nullable iqResponse) {
+                                          if(iqResponse) {
+                                              [self send:iqResponse];
+                                          }
+                                      };
+                    
+                    [processor parseFeatures];
                     
 #if TARGET_OS_IPHONE
                     if(self.connectionProperties.supportsPush)
@@ -2268,8 +2237,8 @@ static NSMutableArray *extracted(xmpp *object) {
     if(self.connectionProperties.uploadServer) {
         [values setObject:self.connectionProperties.uploadServer forKey:@"uploadServer"];
     }
-    if(self.conferenceServer) {
-        [values setObject:self.conferenceServer forKey:@"conferenceServer"];
+    if(self.connectionProperties.conferenceServer) {
+        [values setObject:self.connectionProperties.conferenceServer forKey:@"conferenceServer"];
     }
     
     if(self.connectionProperties.supportsPush)
@@ -2332,7 +2301,7 @@ static NSMutableArray *extracted(xmpp *object) {
         {
             self.supportsHTTPUpload=YES;
         }
-        self.conferenceServer = [dic objectForKey:@"conferenceServer"];
+        self.connectionProperties.conferenceServer = [dic objectForKey:@"conferenceServer"];
         
         if([dic objectForKey:@"supportsPush"])
         {
@@ -2747,14 +2716,6 @@ static NSMutableArray *extracted(xmpp *object) {
     
 }
 
--(void) discoverService:(NSString *) node
-{
-    XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
-    [discoInfo setiqTo:node];
-    [discoInfo setDiscoInfoNode];
-    [self send:discoInfo];
-}
-
 
 #pragma mark HTTP upload
 
@@ -2855,13 +2816,16 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(void) getConferenceRooms
 {
-    if(_conferenceServer && !_roomList)
+    if(self.connectionProperties.conferenceServer && !_roomList)
     {
-        [self discoverService:_conferenceServer];
+        XMPPIQ *discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
+        [discoInfo setiqTo:self.connectionProperties.conferenceServer];
+        [discoInfo setDiscoInfoNode];
+        [self send:discoInfo];
     }
     else
     {
-        if(!_conferenceServer) DDLogInfo(@"no conference server discovered");
+        if(!self.connectionProperties.conferenceServer) DDLogInfo(@"no conference server discovered");
         if(_roomList){
             [[NSNotificationCenter defaultCenter] postNotificationName: kMLHasRoomsNotice object: self];
         }
@@ -2878,7 +2842,7 @@ static NSMutableArray *extracted(xmpp *object) {
         [presence joinRoom:[parts objectAtIndex:0] withPassword:password onServer:[parts objectAtIndex:1] withName:nick];
     }
     else{
-        [presence joinRoom:room withPassword:password onServer:_conferenceServer withName:nick];
+        [presence joinRoom:room withPassword:password onServer:self.connectionProperties.conferenceServer withName:nick];
     }
     [self send:presence];
 }

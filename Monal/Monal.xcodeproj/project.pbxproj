@@ -508,6 +508,7 @@
 		26F396DC2197507200EF5720 /* GLTintButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396DA2197506F00EF5720 /* GLTintButton.m */; };
 		26F7BB431115F8DB00712672 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26F7BB441115F95000712672 /* SystemConfiguration.framework */; };
+		26F7D577239A3859008B0EEE /* MLContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661102A238F17CB0030A4EE /* MLContact.m */; };
 		26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F9794C1ACAC73A0008E005 /* MLContactCell.xib */; };
 		26FB468F18B2755A0043094F /* IPAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FB468E18B2755A0043094F /* IPAddress.m */; };
 		26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */; };
@@ -3372,6 +3373,7 @@
 				26AA70152146BBB900598605 /* ShareViewController.m in Sources */,
 				263DFAC02183D7160038E716 /* MLSelectionController.m in Sources */,
 				263BC64F218BEE9F00FA0203 /* UIColor+Theme.m in Sources */,
+				26F7D577239A3859008B0EEE /* MLContact.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

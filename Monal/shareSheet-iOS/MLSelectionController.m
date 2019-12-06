@@ -31,11 +31,15 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"option" forIndexPath:indexPath];
-   NSDictionary *row = self.options[indexPath.row];
+   id row = self.options[indexPath.row];
     
-    if([row objectForKey:@"buddy_name"]) {
-        cell.textLabel.text = [row objectForKey:@"full_name"];
-        if([[self.selection objectForKey:@"buddy_name"] isEqualToString: [row objectForKey:@"buddy_name"]]) {
+    if([row isKindOfClass:[MLContact class]]) {
+        MLContact *contact =(MLContact *)row;
+        cell.textLabel.text = contact.contactDisplayName;
+        
+        MLContact *selectedContact = (MLContact *) [self.selection objectForKey:@"contact"];
+        
+        if([selectedContact.contactJid isEqualToString: contact.contactJid]) {
             cell.accessoryType=UITableViewCellAccessoryCheckmark;
         } else {
             cell.accessoryType= UITableViewCellAccessoryNone;

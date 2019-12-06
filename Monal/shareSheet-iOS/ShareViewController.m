@@ -11,6 +11,7 @@
 @import Crashlytics;
 @import Fabric;
 #import "UIColor+Theme.h"
+#import "MLContact.h"
 
 @interface ShareViewController ()
 
@@ -128,18 +129,19 @@
         
         NSMutableArray *recipientsToShow = [[NSMutableArray alloc] init];
         
-        for (NSDictionary * dic in self.recipients) {
-            if([[dic objectForKey:@"account_id"] integerValue]==[[self.account objectForKey:@"account_id"] integerValue])
+        for (MLContact *row in self.recipients) {
+            if([row.accountId integerValue]==[[self.account objectForKey:@"account_id"] integerValue])
             {
-                [recipientsToShow addObject:dic];
+                [recipientsToShow addObject:@{@"contact":row}];
             }
         }
         
         controller.options = recipientsToShow;
         controller.completion = ^(NSDictionary *selectedRecipient)
         {
-            if(selectedRecipient) {
-                self.recipient=[selectedRecipient objectForKey:@"buddy_name"];;
+            MLContact *contact = [selectedRecipient objectForKey:@"contact"];
+            if(contact) {
+                self.recipient=contact.contactJid;
             }
             else {
                 self.recipient=@"";

@@ -111,10 +111,6 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
 @property (nonatomic, assign) BOOL hasDiscoAndRoster;
 
-//carbons
-@property (nonatomic, assign) BOOL usingCarbons2;
-@property (nonatomic, assign) BOOL pushEnabled;
-
 /**
  h to go out in r stanza
  */
@@ -677,7 +673,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         }
 #if TARGET_OS_IPHONE
         
-        if(self.pushEnabled)
+        if(self.connectionProperties.pushEnabled)
         {
             DDLogInfo(@"Using Push path for reconnct");
             
@@ -1774,7 +1770,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         
                         //if resume failed. bind  a nee resource like normal
                         [self bindResource];
-                        self.pushEnabled=NO;
+                        self.connectionProperties.pushEnabled=NO;
 #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
                         if(self.connectionProperties.supportsPush)
@@ -3599,7 +3595,7 @@ static NSMutableArray *extracted(xmpp *object) {
         XMPPIQ* enable =[[XMPPIQ alloc] initWithType:kiqSetType];
         [enable setPushEnableWithNode:self.pushNode andSecret:self.pushSecret];
         [self send:enable];
-        self.pushEnabled=YES;
+        self.connectionProperties.pushEnabled=YES;
     }
     else {
         DDLogInfo(@" NOT enabling push: %@ < %@", self.pushNode, self.pushSecret);

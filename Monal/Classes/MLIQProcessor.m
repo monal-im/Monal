@@ -358,7 +358,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         //  [self cleanEnableCarbons];
     }
     
-    if(iqNode.discoItems==YES)
+    if(iqNode.discoItems==YES || iqNode.discoInfo==YES)
     {
         [self discoResult:iqNode];
     }
@@ -393,10 +393,10 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         if([iqNode.from isEqualToString:self.connection.server.host] ||
            [iqNode.from isEqualToString:self.connection.identity.domain]) {
             self.connection.serverFeatures=iqNode.features;
-            //                [self parseFeatures];
+            [self parseFeatures];
             
 #ifndef DISABLE_OMEMO
-            //    [self sendSignalInitialStanzas];
+            if(self.sendSignalInitialStanzas) self.sendSignalInitialStanzas();
 #endif
         }
         
@@ -414,7 +414,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         if([iqNode.features containsObject:@"urn:xmpp:push:0"])
         {
             self.connection.supportsPush=YES;
-            //  [self enablePush];
+            if(self.enablePush) self.enablePush();
         }
         
         if([iqNode.features containsObject:@"urn:xmpp:mam:2"])
@@ -502,7 +502,6 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                 }];
             }
         }
-        
     }
     
     // iterate roster and get cards

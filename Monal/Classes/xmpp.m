@@ -1237,6 +1237,14 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         [self initSession];
                     };
                     
+                    processor.enablePush = ^() {
+                        [self enablePush];
+                    };
+                    
+                    processor.sendSignalInitialStanzas = ^() {
+                        [self sendSignalInitialStanzas];
+                    };
+                    
                     [processor processIq:iqNode];
                     
                     
@@ -3354,8 +3362,9 @@ static NSMutableArray *extracted(xmpp *object) {
         [self send:enable];
         self.pushEnabled=YES;
     }
-    else
+    else {
         DDLogInfo(@" NOT enabling push: %@ < %@", self.pushNode, self.pushSecret);
+    }
 }
 
 @end

@@ -23,6 +23,8 @@ typedef void (^processAction)(void);
 
 @property (nonatomic, strong) iqCompletion sendIq;
 @property (nonatomic, strong) processAction initSession;
+@property (nonatomic, strong) processAction enablePush;
+@property (nonatomic, strong) processAction sendSignalInitialStanzas;
 
 -(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore;
 

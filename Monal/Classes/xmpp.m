@@ -1245,6 +1245,10 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                         [self sendSignalInitialStanzas];
                     };
                     
+                    processor.getVcards = ^() {
+                        [self getVcards];
+                    };
+                    
                     [processor processIq:iqNode];
                     
                     

@@ -634,8 +634,7 @@ NSString *const kiqErrorType = @"error";
 -(void) getVcardTo:(NSString*) to
 {
     [self setiqTo:to];
-    [self.attributes setObject:@"v1" forKey:@"id"];
-    
+
     MLXMLNode* vcardNode =[[MLXMLNode alloc] init];
     vcardNode.element=@"vCard";
     [vcardNode setXMLNS:@"vcard-temp"];

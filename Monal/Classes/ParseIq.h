@@ -46,7 +46,6 @@
 @property (nonatomic, strong, readonly) NSString* putURL;
 
 //Misc requests
-@property (nonatomic, assign, readonly) BOOL time;
 @property (nonatomic, assign, readonly) BOOL version;
 @property (nonatomic, assign, readonly) BOOL last;
 

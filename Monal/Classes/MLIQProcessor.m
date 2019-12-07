@@ -70,13 +70,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         DDLogError(@"invalid iq type %@", iqNode.type);
     }
     
-    //
-    //    if(iqNode.ping)
-    //    {
-    //        XMPPIQ* pong =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-    //        [pong setiqTo:self->_domain];
-    //        [self send:pong];
-    //    }
+ 
     //
     //    if([iqNode.idval isEqualToString:self.pingID])
     //    {
@@ -126,29 +120,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     //    }
     //
     //
-    //    if (iqNode.version)
-    //    {
-    //        XMPPIQ* versioniq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-    //        [versioniq setiqTo:iqNode.from];
-    //        [versioniq setVersion];
-    //        [self send:versioniq];
-    //    }
-    //
-    //    if (iqNode.last)
-    //    {
-    //        XMPPIQ* lastiq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-    //        [lastiq setiqTo:iqNode.from];
-    //        [lastiq setLast];
-    //        [self send:lastiq];
-    //    }
-    //
-    //    if (iqNode.time)
-    //    {
-    //        XMPPIQ* timeiq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-    //        [timeiq setiqTo:iqNode.from];
-    //        //[lastiq setLast];
-    //        [self send:timeiq];
-    //    }
+
     //
     //
     //    if([iqNode.from isEqualToString:self->_conferenceServer] && iqNode.discoItems)
@@ -184,6 +156,31 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 }
 
 -(void) processGetIq:(ParseIq *) iqNode {
+    
+    if(iqNode.ping)
+    {
+        XMPPIQ* pong =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+        [pong setiqTo:self.connection.identity.domain];
+        if(self.sendIq) self.sendIq(pong);
+    }
+    
+    if (iqNode.version)
+    {
+        XMPPIQ* versioniq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+        [versioniq setiqTo:iqNode.from];
+        [versioniq setVersion];
+        if(self.sendIq) self.sendIq(versioniq);
+    }
+    
+    if (iqNode.last)
+    {
+        XMPPIQ* lastiq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+        [lastiq setiqTo:iqNode.from];
+        [lastiq setLast];
+        if(self.sendIq) self.sendIq(lastiq);
+    }
+    
+    
     if((iqNode.discoInfo))
     {
         XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
@@ -504,8 +501,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         }
     }
     
-    // iterate roster and get cards
-    // [self getVcards];
+    if(self.getVcards) self.getVcards();
     
 }
 

@@ -128,12 +128,7 @@
         _vCard=YES;
     }
     
-    if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:time"])
-    {
-        _time=YES;
-        return;
-    }
-    
+
     if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"jabber:iq:version"])
     {
         _version=YES;

@@ -776,6 +776,35 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     }];
 }
 
+-(void) processRegistration:(ParseIq *) iqNode
+{
+    BOOL success =YES;
+    
+    if([iqNode.type isEqualToString:kiqErrorType]) success=NO;
+    if(self.registrationState==kStateSubmittingForm && self.regFormSubmitCompletion)
+    {
+        self.registrationState=kStateRegistered;
+        self.regFormSubmitCompletion(success, iqNode.errorMessage);
+        self.regFormSubmitCompletion=nil;
+    }
+    
+    xmppCompletion completion = [self.xmppCompletionHandlers objectForKey:iqNode.idval];
+    if(completion)  {
+        [self.xmppCompletionHandlers removeObjectForKey:iqNode.idval]; // remove first to prevent an infinite loop
+        completion(success, iqNode.errorMessage);
+    }
+    
+    
+    if(self.registration && [iqNode.queryXMLNS isEqualToString:kRegisterNameSpace])
+    {
+        if(self.regFormCompletion) {
+            self.regFormCompletion(iqNode.captchaData, iqNode.hiddenFormFields);
+            self.regFormCompletion=nil;
+        }
+    }
+    
+}
+
 
 -(void)setPingTimerForID:(NSString *)pingID
 {
@@ -1270,7 +1299,9 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     
                     if([iqNode.idval isEqualToString:self.jingle.idval]) {
                         [self jingleResult:iqNode];
-                     }
+                    }
+                    
+                    [self processRegistration:iqNode];
                     
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"message"])

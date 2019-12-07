@@ -114,29 +114,6 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     //
     //
 
-    //
-    //
-
-    
-    
-    //
-    //    BOOL success= YES;
-
-    //
-    //    xmppCompletion completion = [self.xmppCompletionHandlers objectForKey:iqNode.idval];
-    //    if(completion)  {
-    //        [self.xmppCompletionHandlers removeObjectForKey:iqNode.idval]; // remove first to prevent an infinite loop
-    //        completion(success, iqNode.errorMessage);
-    //    }
-    //
-    //
-    //    if(self.registration && [iqNode.queryXMLNS isEqualToString:kRegisterNameSpace])
-    //    {
-    //        if(self.regFormCompletion) {
-    //            self.regFormCompletion(iqNode.captchaData, iqNode.hiddenFormFields);
-    //            self.regFormCompletion=nil;
-    //        }
-    //    }
 }
 
 -(void) processGetIq:(ParseIq *) iqNode {
@@ -180,13 +157,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 }
 
 -(void) processErrorIq:(ParseIq *) iqNode {
-    //    if([iqNode.type isEqualToString:kiqErrorType]) success=NO;
-    //    if(self.registrationState==kStateSubmittingForm && self.regFormSubmitCompletion)
-    //    {
-    //        self.registrationState=kStateRegistered;
-    //        self.regFormSubmitCompletion(success, iqNode.errorMessage);
-    //        self.regFormSubmitCompletion=nil;
-    //    }
+     
 }
 
 -(void) processSetIq:(ParseIq *) iqNode {

@@ -986,7 +986,7 @@ NSString *const kiqErrorType = @"error";
 }
 
 /*
- This is really hardcoded for blabber.im might work for others
+ This is really hardcoded for yax.im might work for others
  */
 -(void) registerUser:(NSString *) user withPassword:(NSString *) newPass captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields
 {

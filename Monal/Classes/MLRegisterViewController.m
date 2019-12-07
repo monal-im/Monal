@@ -183,7 +183,8 @@
 
 -(IBAction) openTos:(id)sender;
 {
-    [self openLink:@"https://blabber.im/en/nutzungsbedingungen/"];
+   // [self openLink:@"https://blabber.im/en/nutzungsbedingungen/"];
+    [self openLink:@"https://yaxim.org/yax.im/"];
 }
 
 -(void) openLink:(NSString *) link

@@ -8,7 +8,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#define kRegServer @"blabber.im"
+#define kRegServer @"yax.im"
 
 #define kXMLNS @"xmlns"
 

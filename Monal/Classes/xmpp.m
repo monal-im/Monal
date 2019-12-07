@@ -1303,6 +1303,8 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     
                     [self processRegistration:iqNode];
                     
+                    [self processHTTPIQ:iqNode];
+                    
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"message"])
                 {
@@ -2804,6 +2806,50 @@ static NSMutableArray *extracted(xmpp *object) {
     [self send:httpSlotRequest];
 }
 
+-(void) processHTTPIQ:(ParseIq *) iqNode
+{
+    if(iqNode.httpUpload)
+    {
+        NSDictionary *matchingRow;
+        //look up id val in upload queue array
+        for(NSDictionary * row in self.httpUploadQueue)
+        {
+            if([[row objectForKey:kId] isEqualToString:iqNode.idval])
+            {
+                matchingRow= row;
+                break;
+            }
+        }
+        
+        if(matchingRow) {
+            
+            //upload to put
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [MLHTTPRequest sendWithVerb:kPut path:iqNode.putURL
+                                    headers:@{kContentType:[matchingRow objectForKey:kContentType]}
+                              withArguments:nil data:[matchingRow objectForKey:kData] andCompletionHandler:^(NSError *error, id result) {
+                    void (^completion) (NSString *url,  NSError *error)  = [matchingRow objectForKey:kCompletion];
+                    if(!error)
+                    {
+                        //send get to contact
+                        if(completion)
+                        {
+                            completion(iqNode.getURL, nil);
+                        }
+                    } else  {
+                        if(completion)
+                        {
+                            completion(nil, error);
+                        }
+                    }
+                    
+                }];
+            });
+            
+        }
+    }
+}
+
 #pragma mark client state
 -(void) setClientActive
 {
@@ -3423,10 +3469,8 @@ static NSMutableArray *extracted(xmpp *object) {
         free(buf);
         return;
     }
-    
-    
+
     [self processInput];
-    
 }
 
 

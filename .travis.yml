@@ -5,3 +5,6 @@ xcode_scheme: Monal
 xcode_destination: platform=iOS Simulator,OS=13.2.2,name=iPad Pro (9.7-inch)
 osx_image: xcode11.2
 podfile: Monal/Podfile
+before_install:
+  - gem install cocoapods --pre
+  - pod install --repo-update

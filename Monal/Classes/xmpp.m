@@ -1252,6 +1252,26 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     [processor processIq:iqNode];
                     
                     
+                    //TOSO these result iq need to be moved elsewhere/refactored
+                    //kept outside intentionally
+                    if([iqNode.idval isEqualToString:self.pingID])
+                    {
+                        //response to my ping
+                        self.pingID=nil;
+                    }
+                    
+                    
+                    if([iqNode.from isEqualToString:self.connectionProperties.conferenceServer] && iqNode.discoItems)
+                    {
+                        self->_roomList=iqNode.items;
+                        [[NSNotificationCenter defaultCenter]
+                         postNotificationName: kMLHasRoomsNotice object: self];
+                    }
+                    
+                    if([iqNode.idval isEqualToString:self.jingle.idval]) {
+                        [self jingleResult:iqNode];
+                     }
+                    
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"message"])
                 {
@@ -2947,6 +2967,30 @@ static NSMutableArray *extracted(xmpp *object) {
     [self send:jingleiq];
     [self.jingle rtpDisconnect];
     self.jingle=nil;
+}
+
+-(void) jingleResult:(ParseIq *) iqNode {
+    //confirmation of set call after we accepted
+    if([iqNode.idval isEqualToString:self.jingle.idval])
+    {
+        NSString* from= iqNode.user;
+        
+        NSString* fullName;
+        fullName=[[DataLayer sharedInstance] fullName:from forAccount:self->_accountNo];
+        if(!fullName) fullName=from;
+        
+        NSDictionary* userDic=@{@"buddy_name":from,
+                                @"full_name":fullName,
+                                kAccountID:self->_accountNo
+        };
+        
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName: kMonalCallStartedNotice object: userDic];
+    
+        [self.jingle rtpConnect];
+        return;
+    }
+    
 }
 
 #pragma mark - account management

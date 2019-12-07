@@ -71,13 +71,6 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     }
     
  
-    //
-    //    if([iqNode.idval isEqualToString:self.pingID])
-    //    {
-    //        //response to my ping
-    //        self.pingID=nil;
-    //    }
-    //
     //    if(iqNode.httpUpload)
     //    {
     //        NSDictionary *matchingRow;
@@ -123,21 +116,12 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 
     //
     //
-    //    if([iqNode.from isEqualToString:self->_conferenceServer] && iqNode.discoItems)
-    //    {
-    //        self->_roomList=iqNode.items;
-    //        [[NSNotificationCenter defaultCenter]
-    //         postNotificationName: kMLHasRoomsNotice object: self];
-    //    }
+
+    
+    
     //
     //    BOOL success= YES;
-    //    if([iqNode.type isEqualToString:kiqErrorType]) success=NO;
-    //    if(self.registrationState==kStateSubmittingForm && self.regFormSubmitCompletion)
-    //    {
-    //        self.registrationState=kStateRegistered;
-    //        self.regFormSubmitCompletion(success, iqNode.errorMessage);
-    //        self.regFormSubmitCompletion=nil;
-    //    }
+
     //
     //    xmppCompletion completion = [self.xmppCompletionHandlers objectForKey:iqNode.idval];
     //    if(completion)  {
@@ -196,7 +180,13 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 }
 
 -(void) processErrorIq:(ParseIq *) iqNode {
-    
+    //    if([iqNode.type isEqualToString:kiqErrorType]) success=NO;
+    //    if(self.registrationState==kStateSubmittingForm && self.regFormSubmitCompletion)
+    //    {
+    //        self.registrationState=kStateRegistered;
+    //        self.regFormSubmitCompletion(success, iqNode.errorMessage);
+    //        self.regFormSubmitCompletion=nil;
+    //    }
 }
 
 -(void) processSetIq:(ParseIq *) iqNode {
@@ -369,12 +359,6 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     {
         [self omemoResult];
     }
-    
-    
-    //    if([iqNode.idval isEqualToString:self.jingle.idval]) {
-    //        [self jingleResult];
-    //    }
-    
     
 }
 
@@ -602,33 +586,6 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     //
     //
 }
-
--(void) jingleResult {
-    //
-    //        //confirmation of set call after we accepted
-    //        if([iqNode.idval isEqualToString:self.jingle.idval])
-    //        {
-    //            NSString* from= iqNode.user;
-    //
-    //            NSString* fullName;
-    //            fullName=[[DataLayer sharedInstance] fullName:from forAccount:self->_accountNo];
-    //            if(!fullName) fullName=from;
-    //
-    //            NSDictionary* userDic=@{@"buddy_name":from,
-    //                                    @"full_name":fullName,
-    //                                    kAccountID:self->_accountNo
-    //            };
-    //
-    //            [[NSNotificationCenter defaultCenter]
-    //             postNotificationName: kMonalCallStartedNotice object: userDic];
-    //
-    //
-    //            [self.jingle rtpConnect];
-    //            return;
-    //        }
-    //
-    //    }
-}
     
 #pragma mark - features
 
@@ -670,8 +627,6 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
             *stop=YES;
         }
     }];
-    
 }
-
 
 @end

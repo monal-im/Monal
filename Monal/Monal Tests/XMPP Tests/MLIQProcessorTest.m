@@ -59,20 +59,28 @@
     MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
 
     [processor processIq:iqNode];
+    
+    XCTAssert([self.connectionProperties.boundJid isEqualToString:@"foo@monal.im/Monal-iOS.51"]);
 
     
 }
 
 
 - (void)testResultRoster {
-    NSString  *sample= @"<iq id='cXCMufBA' type='set'><query ver='56' xmlns='jabber:iq:roster'><item jid='foo@monal.im' ask='subscribe' subscription='none'/></query></iq>";
+    NSString  *sample= @"<iq id='E9A2584E-9FD1-47D6-82AB-F9C50571D791' to='anu@yax.im/Monal-iOS.26' type='result'><query ver='56' xmlns='jabber:iq:roster'><item jid='support@404.city' subscription='none'/><item jid='monal1@xmpp.jp' subscription='both'/></query></iq>";
     
     NSDictionary *stanzaToParse =@{@"stanzaType":@"iq", @"stanzaString":sample};
+    XCTestExpectation *vcard= [[XCTestExpectation alloc] initWithDescription:@"vcard"];
     
      ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
     MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
-
+    processor.getVcards = ^{
+        [vcard fulfill];
+    };
+    
     [processor processIq:iqNode];
+    
+    [self waitForExpectations:@[vcard] timeout:5];
 
     
 }

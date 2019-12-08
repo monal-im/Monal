@@ -12,7 +12,6 @@
 #import "MLXMPPManager.h"
 #import "SAMKeychain.h"
 @import QuartzCore;
-@import Crashlytics;
 @import SafariServices;
 
 @interface MLLogInViewController ()

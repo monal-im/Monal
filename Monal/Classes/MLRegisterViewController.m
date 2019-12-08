@@ -14,7 +14,6 @@
 #import "MLRegSuccessViewController.h"
 
 @import QuartzCore;
-@import Crashlytics;
 @import SafariServices;
 
 @interface MLRegisterViewController ()

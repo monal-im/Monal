@@ -8,12 +8,12 @@
 
 #import "AESGcm.h"
 #import "EncodingTools.h"
-#import "DDLog.h"
+//#import "DDLog.h"
 
 //#include <openssl/evp.h>
 //#include <openssl/rand.h>
 
-static const int ddLogLevel = LOG_LEVEL_ERROR;
+//static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 @implementation AESGcm
 
@@ -118,7 +118,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 //
 //    EVP_CIPHER_CTX_free(ctx);
 //    return  decdata;
-    return nil; 
+    return nil;
 }
 
 

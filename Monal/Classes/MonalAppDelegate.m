@@ -16,8 +16,10 @@
 #import "MLPush.h"
 #import "MLImageManager.h"
 
+#ifndef TARGET_OS_MACCATALYST
 @import Crashlytics;
 @import Fabric;
+#endif
 
 //xmpp
 #import "MLXMPPManager.h"
@@ -244,10 +246,12 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     // should any accounts connect?
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     
+    #ifndef TARGET_OS_MACCATALYST
     BOOL optout = [[NSUserDefaults standardUserDefaults] boolForKey:@"CrashlyticsOptOut"];
     if(!optout) {
         [Fabric with:@[[Crashlytics class]]];
     }
+    #endif
     
     //update logs if needed
     if(! [[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])

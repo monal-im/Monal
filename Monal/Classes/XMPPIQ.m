@@ -282,7 +282,7 @@ NSString *const kiqErrorType = @"error";
     
 
     
-    //if we are fetching "all" limit with RSM to 100 for now
+    //if we are fetching "all" limit with RSM to 50 for now
     MLXMLNode* set =[[MLXMLNode alloc] init];
     set.element=@"set";
     [set.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:kXMLNS];

@@ -69,7 +69,7 @@
 #pragma mark tableview datasource delegate
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 5;
+    return 3;
 }
 
 
@@ -118,11 +118,7 @@
             break;
         }
             
-        case 3:
-        {
-            return @"Cloud Storage";
-            break;
-        }
+       
             
         default:
         {
@@ -156,11 +152,6 @@
             break;
         }
             
-        case 3:
-        {
-            return 1;
-            break;
-        }
             
         default:
         {
@@ -273,21 +264,6 @@
             break;
         }
            
-        case 3:
-        {
-            switch(indexPath.row)
-            {
-                case 0:
-                {
-                    cell.textLabel.text=NSLocalizedString(@"Connect DropBox", @"");
-                    cell.defaultKey=@"DropBox";
-                    cell.switchEnabled=YES;
-                    break;
-                }
-            }
-            return cell;
-            break;
-        }
             
         default:
         {

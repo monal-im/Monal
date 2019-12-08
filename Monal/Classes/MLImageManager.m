@@ -167,11 +167,11 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 
     if([[EncodingTools dataWithBase64EncodedString:data] writeToFile:writablePath atomically:NO] )
     {
-        DDLogVerbose(@"wrote file");
+        DDLogVerbose(@"wrote imgae to file");
     }
     else
     {
-        DDLogError(@"failed to write");
+        DDLogError(@"failed to write image");
     }
     
     //remove from cache if its there

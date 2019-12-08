@@ -9,6 +9,7 @@
 #import "MLIQProcessor.h"
 #import "MLConstants.h"
 #import "DataLayer.h"
+#import "MLImageManager.h"
 
 
 static const int ddLogLevel = LOG_LEVEL_DEBUG;
@@ -177,9 +178,42 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     {
         [self omemoResult];
     }
+    
+    if(iqNode.vCard)
+    {
+        [self vCardResult:iqNode];
+    }
 }
 
 #pragma mark - result
+
+-(void) vCardResult:(ParseIq *) iqNode {
+    if(!iqNode.user)  {
+        DDLogError(@"iq with vcard but not user");
+        return;
+    }
+    
+    NSString* fullname=iqNode.fullName;
+    if(!fullname) fullname= iqNode.user;
+    
+    if([fullname stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0 ) {
+        [[DataLayer sharedInstance] setFullName:fullname forContact:iqNode.user andAccount:self.accountNo];
+        
+        if(iqNode.photoBinValue)
+        {
+            [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:self.accountNo WithData:[iqNode.photoBinValue copy]];
+        }
+        
+        if(!fullname) fullname=iqNode.user;
+        
+        MLContact *contact =[MLContact alloc];
+        contact.contactJid=iqNode.user;
+        contact.fullName= fullname;
+        contact.accountId=self.accountNo;
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":contact}];
+    }
+}
 
 -(void) discoResult:(ParseIq *) iqNode {
     
@@ -230,32 +264,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         return;
     }
     
-    if(iqNode.vCard && iqNode.user)
-    {
-        NSString* fullname=iqNode.fullName;
-        if(!fullname) fullname= iqNode.user;
-        
-        if([fullname stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0 ) {
-            [[DataLayer sharedInstance] setFullName:fullname forContact:iqNode.user andAccount:self.accountNo];
-            
-            if(iqNode.photoBinValue)
-            {
-                //                    [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:self.accountNo WithData:[iqNode.photoBinValue copy]];
-                
-            }
-            if(iqNode.user) {
-                if(!fullname) fullname=iqNode.user;
-                
-                NSDictionary* userDic=@{kusernameKey: iqNode.user,
-                                        kfullNameKey: fullname,
-                                        kaccountNoKey:self->_accountNo
-                };
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:userDic];
-            }
-        }
-        
-    }
-    
+
     if(([iqNode.from isEqualToString:self.connection.server.host] ||
         [iqNode.from isEqualToString:self.connection.identity.domain]) &&
        !self.connection.discoveredServices)

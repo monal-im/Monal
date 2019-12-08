@@ -31,6 +31,9 @@
     // A little trick for removing the cell separators
     self.tableView.tableFooterView = [UIView new];
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    #ifdef TARGET_OS_MACCATALYST
+      self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
+      #endif
 
 }
 

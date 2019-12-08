@@ -43,6 +43,9 @@ NS_ENUM(NSInteger, kSettingSection)
     self.aboutRows=@[@"Rate Monal", @"Open Source", @"Privacy", @"Crash Logging", @"About", @"Version"];
 #endif
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    #ifdef TARGET_OS_MACCATALYST
+      self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
+      #endif
     
     
 }

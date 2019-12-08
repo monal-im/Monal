@@ -1528,8 +1528,10 @@ static DataLayer *sharedInstance=nil;
         if(completion) completion(NO,nil);
         return;
     }
-    //TODO messageid vs stanzaid .
-    [self hasMessageForId:messageid toContact:actualfrom onAccount:accountNo andCompletion:^(BOOL exists) {
+
+    NSString *idToUse=stanzaid?stanzaid:messageid;
+  
+    [self hasMessageForStanzaId:idToUse toContact:actualfrom onAccount:accountNo andCompletion:^(BOOL exists) {
         if(!exists)
         {
             //this is always from a contact
@@ -1595,8 +1597,33 @@ static DataLayer *sharedInstance=nil;
                 }];
             }
         }
+        else {
+            DDLogError(@"Message or stanza Id duplicated %@", idToUse);
+        }
     }];
     
+    
+}
+
+-(void) hasMessageForStanzaId:(NSString*) stanzaId toContact:(NSString *) contact onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion
+{
+    if(!accountNo || !contact) return;
+    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? and message_from=? and stanzaid=? limit 1"];
+    NSArray *params=@[accountNo, contact, stanzaId];
+    
+    [self executeScalar:query andArguments:params withCompletion:^(NSObject* result) {
+        
+        BOOL exists=NO;
+        if(result)
+        {
+            exists=YES;
+        }
+        
+        if(completion)
+        {
+            completion(exists);
+        }
+    }];
     
 }
 

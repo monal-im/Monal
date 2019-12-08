@@ -461,7 +461,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     if(!account.connectionProperties.supportsHTTPUpload )
     {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error"
-                                                                       message:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it. You can also link to DropBox in settings and use that to share files." preferredStyle:UIAlertControllerStyleAlert];
+                                                                       message:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it." preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];

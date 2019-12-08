@@ -1277,7 +1277,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     [processor processIq:iqNode];
                     
                     
-                    //TOSO these result iq need to be moved elsewhere/refactored
+                    //TODO these result iq need to be moved elsewhere/refactored
                     //kept outside intentionally
                     if([iqNode.idval isEqualToString:self.pingID])
                     {

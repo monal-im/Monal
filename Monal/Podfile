@@ -30,7 +30,7 @@ target 'NotificaionService' do
   # use_frameworks!
 pod 'SignalProtocolObjC'
 pod 'SignalProtocolC'
-pod 'OpenSSL-Universal'
+# pod 'OpenSSL-Universal'
 pod 'SAMKeychain'
 pod 'TPCircularBuffer'
 end
@@ -49,7 +49,7 @@ pod 'IDMPhotoBrowser'
 pod 'SDWebImage', '~> 4.3.3'
 pod 'SignalProtocolObjC'
 pod 'SignalProtocolC'
-pod 'OpenSSL-Universal'
+# pod 'OpenSSL-Universal'
 pod 'DZNEmptyDataSet'
 pod 'EAIntroView'
   # Pods for Monal

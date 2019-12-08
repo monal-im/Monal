@@ -14,7 +14,7 @@
 #import "MLConstants.h"
 #import "MonalAppDelegate.h"
 #import "MBProgressHUD.h"
-#import <DropBoxSDK/DropBoxSDK.h>
+
 
 #import "IDMPhotoBrowser.h"
 #import "ContactDetails.h"
@@ -26,7 +26,7 @@
 
 static const int ddLogLevel = LOG_LEVEL_ERROR;
 
-@interface chatViewController()<DBRestClientDelegate, IDMPhotoBrowserDelegate>
+@interface chatViewController()<IDMPhotoBrowserDelegate>
 
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
 @property (nonatomic, strong)  NSDateFormatter* sourceDateFormat;
@@ -39,7 +39,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
 @property (nonatomic, strong) NSMutableArray* messageList;
 @property (nonatomic, strong) NSMutableArray* photos;
 
-@property (nonatomic, strong) DBRestClient *restClient;
+
 @property (nonatomic, assign) BOOL encryptChat;
 
 @property (nonatomic, strong) NSDate* lastMamDate;
@@ -113,12 +113,7 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     //    self.inputContainerView.layer.borderColor=[UIColor lightGrayColor].CGColor;
     //    self.inputContainerView.layer.borderWidth=0.5f;
-    
-    if ([DBSession sharedSession].isLinked) {
-        self.restClient = [[DBRestClient alloc] initWithSession:[DBSession sharedSession]];
-        self.restClient.delegate = self;
-    }
-    
+
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight=UITableViewAutomaticDimension;
     
@@ -457,65 +452,13 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     }
 }
 
-#pragma mark - Dropbox upload and delegate
-
-- (void) uploadImageToDropBox:(NSData *) imageData {
-    
-    NSString *fileName = [NSString stringWithFormat:@"%@.jpg",[NSUUID UUID].UUIDString];
-    NSString *tempDir = NSTemporaryDirectory();
-    NSString *imagePath = [tempDir stringByAppendingPathComponent:fileName];
-    [imageData writeToFile:imagePath atomically:YES];
-    
-    [self.restClient uploadFile:fileName toPath:@"/" withParentRev:nil fromPath:imagePath];
-}
-
-- (void)restClient:(DBRestClient *)client uploadedFile:(NSString *)destPath
-              from:(NSString *)srcPath metadata:(DBMetadata *)metadata {
-    DDLogVerbose(@"File uploaded successfully to dropbox path: %@", metadata.path);
-    [self.restClient loadSharableLinkForFile:metadata.path];
-}
-
-- (void)restClient:(DBRestClient *)client uploadFileFailedWithError:(NSError *)error {
-    DDLogVerbose(@"File upload to dropbox failed with error: %@", error);
-}
-
-- (void)restClient:(DBRestClient*)client uploadProgress:(CGFloat)progress
-           forFile:(NSString*)destPath from:(NSString*)srcPat
-{
-    self.uploadHUD.progress=progress;
-}
-
-- (void)restClient:(DBRestClient*)restClient loadedSharableLink:(NSString*)link
-           forFile:(NSString*)path{
-    NSString *newMessageID =[[NSUUID UUID] UUIDString];
-    
-    NSString *contactJidCopy =self.contact.contactJid; //prevent retail cycle
-    NSString *accountNoCopy = self.contact.accountId;
-    BOOL isMucCopy = self.contact.isGroup;
-    BOOL encryptChatCopy = self.encryptChat;
-    
-    [self addMessageto:self.contact.contactJid withMessage:link andId:newMessageID withCompletion:^(BOOL success) {
-        [[MLXMPPManager sharedInstance] sendMessage:link toContact:contactJidCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:YES messageId:newMessageID
-                              withCompletionHandler:nil];
-    }];
-    
-    self.uploadHUD.hidden=YES;
-    self.uploadHUD=nil;
-}
-
-- (void)restClient:(DBRestClient*)restClient loadSharableLinkFailedWithError:(NSError*)error{
-    self.uploadHUD.hidden=YES;
-    self.uploadHUD=nil;
-    DDLogVerbose(@"Failed to get Dropbox link with error: %@", error);
-}
-
 #pragma mark - image picker
 
 -(IBAction)attach:(id)sender
 {
     [self.chatInput resignFirstResponder];
     xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-    if(!account.connectionProperties.supportsHTTPUpload && !self.restClient)
+    if(!account.connectionProperties.supportsHTTPUpload )
     {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error"
                                                                        message:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it. You can also link to DropBox in settings and use that to share files." preferredStyle:UIAlertControllerStyleAlert];
@@ -570,44 +513,37 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         
     }
     
-    //if you have configured it, defer to dropbox
-    if(self.restClient)
-    {
-        self.uploadHUD.mode=MBProgressHUDModeDeterminate;
-        self.uploadHUD.progress=0;
-        [self uploadImageToDropBox:data];
-    }
-    else  {
-        [[MLXMPPManager sharedInstance]  httpUploadJpegData:data toContact:self.contact.contactJid onAccount:self.contact.accountId withCompletionHandler:^(NSString *url, NSError *error) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.uploadHUD.hidden=YES;
-                
-                if(url) {
-                    NSString *newMessageID =[[NSUUID UUID] UUIDString];
-                    
-                    NSString *contactJidCopy =self.contact.contactJid; //prevent retail cycle
-                    NSString *accountNoCopy = self.contact.accountId;
-                    BOOL isMucCopy = self.contact.isGroup;
-                    BOOL encryptChatCopy = self.encryptChat;
-                    
-                    [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID withCompletion:^(BOOL success) {
-                        [[MLXMPPManager sharedInstance] sendMessage:url toContact:contactJidCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:YES messageId:newMessageID
-                                              withCompletionHandler:nil];
-                        
-                    }];
-                    
-                }
-                else  {
-                    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"There was an error uploading the file to the server" message:[NSString stringWithFormat:@"%@", error.localizedDescription] preferredStyle:UIAlertControllerStyleAlert];
-                    [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                        [alert dismissViewControllerAnimated:YES completion:nil];
-                    }]];
-                    [self presentViewController:alert animated:YES completion:nil];
-                }
-            });
+    
+    [[MLXMPPManager sharedInstance]  httpUploadJpegData:data toContact:self.contact.contactJid onAccount:self.contact.accountId withCompletionHandler:^(NSString *url, NSError *error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.uploadHUD.hidden=YES;
             
-        }];
-    }
+            if(url) {
+                NSString *newMessageID =[[NSUUID UUID] UUIDString];
+                
+                NSString *contactJidCopy =self.contact.contactJid; //prevent retail cycle
+                NSString *accountNoCopy = self.contact.accountId;
+                BOOL isMucCopy = self.contact.isGroup;
+                BOOL encryptChatCopy = self.encryptChat;
+                
+                [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID withCompletion:^(BOOL success) {
+                    [[MLXMPPManager sharedInstance] sendMessage:url toContact:contactJidCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:YES messageId:newMessageID
+                                          withCompletionHandler:nil];
+                    
+                }];
+                
+            }
+            else  {
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"There was an error uploading the file to the server" message:[NSString stringWithFormat:@"%@", error.localizedDescription] preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                    [alert dismissViewControllerAnimated:YES completion:nil];
+                }]];
+                [self presentViewController:alert animated:YES completion:nil];
+            }
+        });
+        
+    }];
+    
     
 }
 

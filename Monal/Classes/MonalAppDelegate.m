@@ -18,7 +18,6 @@
 
 @import Crashlytics;
 @import Fabric;
-#import <DropboxSDK/DropboxSDK.h>
 
 //xmpp
 #import "MLXMPPManager.h"
@@ -252,13 +251,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [[DataLayer sharedInstance] messageHistoryCleanAll];
     }
     
-    //Dropbox
-    DBSession *dbSession = [[DBSession alloc]
-                            initWithAppKey:@"a134q2ecj1hqa59"
-                            appSecret:@"vqsf5vt6guedlrs"
-                            root:kDBRootAppFolder];
-    [DBSession setSharedSession:dbSession];
-    
+
     DDLogInfo(@"App started");
     return YES;
 }
@@ -292,17 +285,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         [[NXOAuth2AccountStore sharedStore] handleRedirectURL:url];
         return YES;
     }
-    else  {
-        
-        if ([[DBSession sharedSession] handleOpenURL:url]) {
-            if ([[DBSession sharedSession] isLinked]) {
-                DDLogVerbose(@"App linked successfully!");
-                // At this point you can start making API calls
-            }
-            return YES;
-        }
-    }
-    
+  
     return NO;
 }
 

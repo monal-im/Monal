@@ -3,8 +3,6 @@ PODS:
     - Fabric (~> 1.10.2)
   - CWStatusBarNotification (2.3.5)
   - DACircularProgress (2.3.1)
-  - Dropbox-iOS-SDK (1.3.13)
-  - Dropbox-OSX-SDK (1.3.13)
   - DZNEmptyDataSet (1.8.1)
   - EAIntroView (2.12.0):
     - EARestrictedScrollView (~> 1.1.0)
@@ -32,8 +30,6 @@ PODS:
 DEPENDENCIES:
   - Crashlytics
   - CWStatusBarNotification (~> 2.3.5)
-  - Dropbox-iOS-SDK
-  - Dropbox-OSX-SDK
   - DZNEmptyDataSet
   - EAIntroView
   - Fabric
@@ -52,8 +48,6 @@ SPEC REPOS:
     - Crashlytics
     - CWStatusBarNotification
     - DACircularProgress
-    - Dropbox-iOS-SDK
-    - Dropbox-OSX-SDK
     - DZNEmptyDataSet
     - EAIntroView
     - EARestrictedScrollView
@@ -73,8 +67,6 @@ SPEC CHECKSUMS:
   Crashlytics: 540b7e5f5da5a042647227a5e3ac51d85eed06df
   CWStatusBarNotification: 3d2738b25c3207f60cc50201388d3c96182545ff
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
-  Dropbox-iOS-SDK: e0c9b08d1604b39cb78c1d0333251de0f6bdec60
-  Dropbox-OSX-SDK: 7558b741dfb8eac3d2352ad95bd4078debcf0e13
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   EAIntroView: 249559079ddfdbe80e5bcb755c04c3b964b2ac27
   EARestrictedScrollView: b0c2a3f92fb2610bb44d71c5e4893777c89e45ef
@@ -90,6 +82,6 @@ SPEC CHECKSUMS:
   Sparkle: 3f75576db8b0265adef36c43249d747f22d0b708
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 
-PODFILE CHECKSUM: c0638c408f125149d8f096cf421f3733db63de70
+PODFILE CHECKSUM: 4db792bff739d18b8aa822db5cd9f53b556bf1f7
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.5.2

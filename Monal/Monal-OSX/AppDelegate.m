@@ -23,7 +23,6 @@
 #import "DDLog.h"
 #import "DataLayer.h"
 
-#import <DropboxOSX/DropboxOSX.h>
 
 static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 

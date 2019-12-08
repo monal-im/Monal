@@ -15,7 +15,7 @@
 #import "MLImageManager.h"
 #import "MLPreviewObject.h"
 
-#import <DropboxOSX/DropboxOSX.h>
+
 
 #import "MLMainWindow.h"
 #import "MLLinkViewCell.h"
@@ -42,7 +42,6 @@
 @property (nonatomic, strong) QLPreviewPanel *QLPreview;
 @property (nonatomic, strong) NSData *tmpPreviewImageData;
 
-@property (nonatomic, strong) DBRestClient *restClient;
 @property (nonatomic, assign) BOOL encryptChat;
 @property (nonatomic, weak)  NSToolbarItem *encryptButton;
 

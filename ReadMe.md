@@ -1,5 +1,6 @@
 # Monal
 ## A cross platform, modern XMPP client for iOS and MacOS
+![Build](https://travis-ci.org/anurodhp/Monal.svg?branch=develop)
 
 This is the Monal XMPP client as found in the app store.  If you want to  use the latest stable versions, search for Monal in the iOS or OSX app store. Visit my blog to read about the development: www.monal.im
 

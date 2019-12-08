@@ -1274,39 +1274,6 @@ static DataLayer *sharedInstance=nil;
 }
 
 
--(NSDate*) synchPointForContact:(NSString*) contact andAccount:(NSString*) accountNo
-{
-    NSString* query=[NSString stringWithFormat:@"select synchPoint from buddylist where account_id=? and buddy_name=?"];
-    NSArray * params=@[accountNo, contact];
-    NSString* synch= (NSString*)[self executeScalar:query andArguments:params];
-    
-    NSDate *synchDate;
-    if(synch){
-        NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-        [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-        synchDate=  [formatter dateFromString:synch];
-    }
-    
-    
-    return synchDate;
-}
-
--(void) setSynchPoint:(NSDate *) synchPoint ForContact:(NSString*) contact andAccount:(NSString*) accountNo
-{
-    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    
-    NSString *dateString=[formatter stringFromDate:synchPoint];
-    
-    NSString* query=[NSString stringWithFormat:@"update buddylist set synchPoint=? where account_id=? and  buddy_name=?;"];
-    NSArray *params=@[dateString,
-                      accountNo, contact];
-    [self executeNonQuery:query  andArguments:params withCompletion:nil];
-    
-}
-
-
-
 
 -(void) setContactHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo
 {
@@ -2027,17 +1994,7 @@ static DataLayer *sharedInstance=nil;
     }];
 }
 
--(void) lastMessageTimeStampForAccount:(NSString*) accountNo withCompletion: (void (^)(NSString *))completion
-{
-    NSString* query=[NSString stringWithFormat:@"select timestamp from  message_history where account_id=? order by timestamp desc limit 1"];
-    
-    [self executeScalar:query andArguments:@[accountNo] withCompletion:^(NSObject* result) {
-        if(completion)
-        {
-            completion((NSString *) result);
-        }
-    }];
-}
+
 
 #pragma mark active chats
 -(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion

@@ -169,25 +169,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 -(void) synchChat
 {
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    if(xmppAccount.supportsMam2 & !self.isMUC) {
-
-        //synch point
-        // if synch point < login time
-        NSDate *synch = [[DataLayer sharedInstance] synchPointForContact:self.contactName andAccount:self.accountNo];
-        NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor:self.accountNo];
-
-        if([synch timeIntervalSinceReferenceDate]<[connectedTime timeIntervalSinceReferenceDate])
-        {
+      xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+        if(xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
             if(self.messageList.count==0) {
-                [xmppAccount setMAMQueryMostRecentForJid:self.contactName];
-            } else  {
-                [xmppAccount setMAMQueryFromStart:synch toDate:nil andJid:self.contactName];
+                [xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
             }
-            
-            [[DataLayer sharedInstance] setSynchPoint:[NSDate date] ForContact:self.contactName andAccount:self.accountNo];
-            
         }
-    }
+    });
 }
 
 

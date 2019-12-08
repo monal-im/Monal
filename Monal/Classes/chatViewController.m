@@ -129,28 +129,18 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     [self refreshCounter];
 }
 
+/**
+ gets recent messages  to fill an empty chat
+ */
 -(void) synchChat {
     dispatch_async(dispatch_get_main_queue(), ^{
         
         xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
         if(xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
-            
-            //synch point
-            // if synch point < login time
-            NSDate *synch = [[DataLayer sharedInstance] synchPointForContact:self.contact.contactJid andAccount:self.contact.accountId];
-            NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor:self.contact.contactJid ];
-            
-            if([synch timeIntervalSinceReferenceDate]<[connectedTime timeIntervalSinceReferenceDate])
-            {
-                if(self.messageList.count==0) {
-                    [xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
-                } else  {
-                    [xmppAccount setMAMQueryFromStart:synch toDate:nil andJid:self.contact.contactJid ];
-                }
-                [[DataLayer sharedInstance] setSynchPoint:[NSDate date] ForContact:self.contact.contactJid  andAccount:self.contact.accountId];
+            if(self.messageList.count==0) {
+                [xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
             }
         }
-        
     });
 }
 

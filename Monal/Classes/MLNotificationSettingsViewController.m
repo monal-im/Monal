@@ -11,7 +11,9 @@
 #import "MLXMPPManager.h"
 #import "MLPush.h"
 
+#ifndef TARGET_OS_MACCATALYST
 @import UserNotificationsUI;
+#endif
 
 NS_ENUM(NSInteger, kNotificationSettingSection)
 {

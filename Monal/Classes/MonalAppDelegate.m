@@ -66,7 +66,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 #pragma mark - VOIP notification
-
+#ifndef TARGET_OS_MACCATALYST
 -(void) voipRegistration
 {
     DDLogInfo(@"registering for voip APNS...");
@@ -112,6 +112,8 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         });
     }
 }
+
+#endif
 
 #pragma mark - notification actions
 -(void) showCallScreen:(NSNotification*) userInfo
@@ -223,7 +225,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
             [[UIApplication sharedApplication] registerForRemoteNotifications];
            }
            else {
+               #ifndef TARGET_OS_MACCATALYST
                       [self voipRegistration];
+            #endif
            }
     }
     else  {
@@ -293,6 +297,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 
 #pragma mark  - user notifications
+
 -(void) application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
 {
     DDLogVerbose(@"did register for local notifications");

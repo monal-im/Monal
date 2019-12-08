@@ -117,116 +117,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
 }
 
 -(void) processSetIq:(ParseIq *) iqNode {
-    //    if ([iqNode.type isEqualToString:kiqSetType]) {
-    //        if(iqNode.jingleSession) {
-    //
-    //            //accpetance of our call
-    //            if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-accept"] &&
-    //               [[iqNode.jingleSession objectForKey:@"sid"] isEqualToString:self.jingle.thesid])
-    //            {
-    //
-    //                NSDictionary* transport1;
-    //                NSDictionary* transport2;
-    //                for(NSDictionary* candidate in iqNode.jingleTransportCandidates) {
-    //                    if([[candidate objectForKey:@"component"] isEqualToString:@"1"]) {
-    //                        transport1=candidate;
-    //                    }
-    //                    if([[candidate objectForKey:@"component"] isEqualToString:@"2"]) {
-    //                        transport2=candidate;
-    //                    }
-    //                }
-    //
-    //                NSDictionary* pcmaPayload;
-    //                for(NSDictionary* payload in iqNode.jinglePayloadTypes) {
-    //                    if([[payload objectForKey:@"name"] isEqualToString:@"PCMA"]) {
-    //                        pcmaPayload=payload;
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                if (pcmaPayload && transport1) {
-    //                    self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
-    //                    self.jingle.destinationPort= [transport1 objectForKey:@"port"];
-    //
-    //                    XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-    //                    [node setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user,iqNode.resource]];
-    //                    [self send:node];
-    //
-    //                    [self.jingle rtpConnect];
-    //                }
-    //                return;
-    //            }
-    //
-    //            if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-terminate"] &&  [[iqNode.jingleSession objectForKey:@"sid"] isEqualToString:self.jingle.thesid]) {
-    //                XMPPIQ* node = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-    //                [node setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user,iqNode.resource]];
-    //                [self send:node];
-    //                [self.jingle rtpDisconnect];
-    //            }
-    //
-    //            if([[iqNode.jingleSession objectForKey:@"action"] isEqualToString:@"session-initiate"]) {
-    //                NSDictionary* pcmaPayload;
-    //                for(NSDictionary* payload in iqNode.jinglePayloadTypes) {
-    //                    if([[payload objectForKey:@"name"] isEqualToString:@"PCMA"]) {
-    //                        pcmaPayload=payload;
-    //                        break;
-    //                    }
-    //                }
-    //
-    //                NSDictionary* transport1;
-    //                NSDictionary* transport2;
-    //                for(NSDictionary* candidate in iqNode.jingleTransportCandidates) {
-    //                    if([[candidate objectForKey:@"component"] isEqualToString:@"1"]) {
-    //                        transport1=candidate;
-    //                    }
-    //                    if([[candidate objectForKey:@"component"] isEqualToString:@"2"]) {
-    //                        transport2=candidate;
-    //                    }
-    //                }
-    //
-    //                if (pcmaPayload && transport1) {
-    //                    self.jingle = [[jingleCall alloc] init];
-    //                    self.jingle.initiator= [iqNode.jingleSession objectForKey:@"initiator"];
-    //                    self.jingle.responder= [iqNode.jingleSession objectForKey:@"responder"];
-    //                    if(!self.jingle.responder)
-    //                    {
-    //                        self.jingle.responder = [NSString stringWithFormat:@"%@/%@", iqNode.to, self.resource];
-    //                    }
-    //
-    //                    self.jingle.thesid= [iqNode.jingleSession objectForKey:@"sid"];
-    //                    self.jingle.destinationPort= [transport1 objectForKey:@"port"];
-    //                    self.jingle.idval=iqNode.idval;
-    //                    if(transport2) {
-    //                        self.jingle.destinationPort2= [transport2 objectForKey:@"port"];
-    //                    }
-    //                    else {
-    //                        self.jingle.destinationPort2=[transport1 objectForKey:@"port"]; // if nothing is provided just reuse..
-    //                    }
-    //                    self.jingle.recipientIP=[transport1 objectForKey:@"ip"];
-    //
-    //
-    //                    if(iqNode.user && iqNode.resource && self.fulluser) {
-    //
-    //                        NSDictionary *dic= @{@"from":iqNode.from,
-    //                                             @"user":iqNode.user,
-    //                                             @"resource":iqNode.resource,
-    //                                             @"id": iqNode.idval,
-    //                                             kAccountID:self->_accountNo,
-    //                                             kAccountName: self.fulluser
-    //                        };
-    //
-    //                        [[NSNotificationCenter defaultCenter]
-    //                         postNotificationName: kMonalCallRequestNotice object: dic];
-    //
-    //                    }
-    //                }
-    //                else {
-    //                    //does not support the same formats
-    //                }
-    //
-    //            }
-    //        }
-    //    }
+    
     
 }
 
@@ -235,7 +126,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     //TODO maybe remove this.
     if(iqNode.mam2Last && !iqNode.mam2fin)
     {
-        //RSM seems broken on servers. Tell UI there is more to fetch
+        //RSM seems broken on servers. Indicate  there is more to fetch
         [[NSNotificationCenter defaultCenter] postNotificationName:kMLMAMMore object:nil];
         return;
     }

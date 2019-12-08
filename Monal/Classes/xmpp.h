@@ -296,8 +296,6 @@ Decline a call request
 
 -(void) changePassword:(NSString *) newPass withCompletion:(xmppCompletion) completion;
 
--(void) requestRegFormWithCompletion:(xmppDataCompletion) completion;
-
 -(void) registerUser:(NSString *) username withPassword:(NSString *) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion) completion;
 
 @end

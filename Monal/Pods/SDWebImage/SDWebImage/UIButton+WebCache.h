@@ -17,12 +17,12 @@
  */
 @interface UIButton (WebCache)
 
-#pragma mark - Image
-
 /**
  * Get the current image URL.
  */
 - (nullable NSURL *)sd_currentImageURL;
+
+#pragma mark - Image
 
 /**
  * Get the image URL for a control state.
@@ -40,7 +40,7 @@
  * @param state The state that uses the specified title. The values are described in UIControlState.
  */
 - (void)sd_setImageWithURL:(nullable NSURL *)url
-                  forState:(UIControlState)state NS_REFINED_FOR_SWIFT;
+                  forState:(UIControlState)state;
 
 /**
  * Set the imageView `image` with an `url` and a placeholder.
@@ -54,7 +54,7 @@
  */
 - (void)sd_setImageWithURL:(nullable NSURL *)url
                   forState:(UIControlState)state
-          placeholderImage:(nullable UIImage *)placeholder NS_REFINED_FOR_SWIFT;
+          placeholderImage:(nullable UIImage *)placeholder;
 
 /**
  * Set the imageView `image` with an `url`, placeholder and custom options.
@@ -69,7 +69,7 @@
 - (void)sd_setImageWithURL:(nullable NSURL *)url
                   forState:(UIControlState)state
           placeholderImage:(nullable UIImage *)placeholder
-                   options:(SDWebImageOptions)options NS_REFINED_FOR_SWIFT;
+                   options:(SDWebImageOptions)options;
 
 /**
  * Set the imageView `image` with an `url`.
@@ -105,7 +105,7 @@
 - (void)sd_setImageWithURL:(nullable NSURL *)url
                   forState:(UIControlState)state
           placeholderImage:(nullable UIImage *)placeholder
-                 completed:(nullable SDExternalCompletionBlock)completedBlock NS_REFINED_FOR_SWIFT;
+                 completed:(nullable SDExternalCompletionBlock)completedBlock;
 
 /**
  * Set the imageView `image` with an `url`, placeholder and custom options.
@@ -128,19 +128,7 @@
                    options:(SDWebImageOptions)options
                  completed:(nullable SDExternalCompletionBlock)completedBlock;
 
-#pragma mark - Background Image
-
-/**
- * Get the current background image URL.
- */
-- (nullable NSURL *)sd_currentBackgroundImageURL;
-
-/**
- * Get the background image URL for a control state.
- * 
- * @param state Which state you want to know the URL for. The values are described in UIControlState.
- */
-- (nullable NSURL *)sd_backgroundImageURLForState:(UIControlState)state;
+#pragma mark - Background image
 
 /**
  * Set the backgroundImageView `image` with an `url`.
@@ -151,7 +139,7 @@
  * @param state The state that uses the specified title. The values are described in UIControlState.
  */
 - (void)sd_setBackgroundImageWithURL:(nullable NSURL *)url
-                            forState:(UIControlState)state NS_REFINED_FOR_SWIFT;
+                            forState:(UIControlState)state;
 
 /**
  * Set the backgroundImageView `image` with an `url` and a placeholder.
@@ -165,7 +153,7 @@
  */
 - (void)sd_setBackgroundImageWithURL:(nullable NSURL *)url
                             forState:(UIControlState)state
-                    placeholderImage:(nullable UIImage *)placeholder NS_REFINED_FOR_SWIFT;
+                    placeholderImage:(nullable UIImage *)placeholder;
 
 /**
  * Set the backgroundImageView `image` with an `url`, placeholder and custom options.
@@ -180,7 +168,7 @@
 - (void)sd_setBackgroundImageWithURL:(nullable NSURL *)url
                             forState:(UIControlState)state
                     placeholderImage:(nullable UIImage *)placeholder
-                             options:(SDWebImageOptions)options NS_REFINED_FOR_SWIFT;
+                             options:(SDWebImageOptions)options;
 
 /**
  * Set the backgroundImageView `image` with an `url`.
@@ -216,7 +204,7 @@
 - (void)sd_setBackgroundImageWithURL:(nullable NSURL *)url
                             forState:(UIControlState)state
                     placeholderImage:(nullable UIImage *)placeholder
-                           completed:(nullable SDExternalCompletionBlock)completedBlock NS_REFINED_FOR_SWIFT;
+                           completed:(nullable SDExternalCompletionBlock)completedBlock;
 
 /**
  * Set the backgroundImageView `image` with an `url`, placeholder and custom options.

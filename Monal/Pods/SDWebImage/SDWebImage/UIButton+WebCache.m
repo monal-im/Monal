@@ -16,41 +16,25 @@
 
 static char imageURLStorageKey;
 
-typedef NSMutableDictionary<NSString *, NSURL *> SDStateImageURLDictionary;
-
-static inline NSString * imageURLKeyForState(UIControlState state) {
-    return [NSString stringWithFormat:@"image_%lu", (unsigned long)state];
-}
-
-static inline NSString * backgroundImageURLKeyForState(UIControlState state) {
-    return [NSString stringWithFormat:@"backgroundImage_%lu", (unsigned long)state];
-}
-
-static inline NSString * imageOperationKeyForState(UIControlState state) {
-    return [NSString stringWithFormat:@"UIButtonImageOperation%lu", (unsigned long)state];
-}
-
-static inline NSString * backgroundImageOperationKeyForState(UIControlState state) {
-    return [NSString stringWithFormat:@"UIButtonBackgroundImageOperation%lu", (unsigned long)state];
-}
+typedef NSMutableDictionary<NSNumber *, NSURL *> SDStateImageURLDictionary;
 
 @implementation UIButton (WebCache)
 
-#pragma mark - Image
-
 - (nullable NSURL *)sd_currentImageURL {
-    NSURL *url = self.sd_imageURLStorage[imageURLKeyForState(self.state)];
+    NSURL *url = self.imageURLStorage[@(self.state)];
 
     if (!url) {
-        url = self.sd_imageURLStorage[imageURLKeyForState(UIControlStateNormal)];
+        url = self.imageURLStorage[@(UIControlStateNormal)];
     }
 
     return url;
 }
 
 - (nullable NSURL *)sd_imageURLForState:(UIControlState)state {
-    return self.sd_imageURLStorage[imageURLKeyForState(state)];
+    return self.imageURLStorage[@(state)];
 }
+
+#pragma mark - Image
 
 - (void)sd_setImageWithURL:(nullable NSURL *)url forState:(UIControlState)state {
     [self sd_setImageWithURL:url forState:state placeholderImage:nil options:0 completed:nil];
@@ -78,16 +62,17 @@ static inline NSString * backgroundImageOperationKeyForState(UIControlState stat
                    options:(SDWebImageOptions)options
                  completed:(nullable SDExternalCompletionBlock)completedBlock {
     if (!url) {
-        [self.sd_imageURLStorage removeObjectForKey:imageURLKeyForState(state)];
-    } else {
-        self.sd_imageURLStorage[imageURLKeyForState(state)] = url;
+        [self.imageURLStorage removeObjectForKey:@(state)];
+        return;
     }
+    
+    self.imageURLStorage[@(state)] = url;
     
     __weak typeof(self)weakSelf = self;
     [self sd_internalSetImageWithURL:url
                     placeholderImage:placeholder
                              options:options
-                        operationKey:imageOperationKeyForState(state)
+                        operationKey:[NSString stringWithFormat:@"UIButtonImageOperation%@", @(state)]
                        setImageBlock:^(UIImage *image, NSData *imageData) {
                            [weakSelf setImage:image forState:state];
                        }
@@ -95,21 +80,7 @@ static inline NSString * backgroundImageOperationKeyForState(UIControlState stat
                            completed:completedBlock];
 }
 
-#pragma mark - Background Image
-
-- (nullable NSURL *)sd_currentBackgroundImageURL {
-    NSURL *url = self.sd_imageURLStorage[backgroundImageURLKeyForState(self.state)];
-    
-    if (!url) {
-        url = self.sd_imageURLStorage[backgroundImageURLKeyForState(UIControlStateNormal)];
-    }
-    
-    return url;
-}
-
-- (nullable NSURL *)sd_backgroundImageURLForState:(UIControlState)state {
-    return self.sd_imageURLStorage[backgroundImageURLKeyForState(state)];
-}
+#pragma mark - Background image
 
 - (void)sd_setBackgroundImageWithURL:(nullable NSURL *)url forState:(UIControlState)state {
     [self sd_setBackgroundImageWithURL:url forState:state placeholderImage:nil options:0 completed:nil];
@@ -137,16 +108,17 @@ static inline NSString * backgroundImageOperationKeyForState(UIControlState stat
                              options:(SDWebImageOptions)options
                            completed:(nullable SDExternalCompletionBlock)completedBlock {
     if (!url) {
-        [self.sd_imageURLStorage removeObjectForKey:backgroundImageURLKeyForState(state)];
-    } else {
-        self.sd_imageURLStorage[backgroundImageURLKeyForState(state)] = url;
+        [self.imageURLStorage removeObjectForKey:@(state)];
+        return;
     }
+    
+    self.imageURLStorage[@(state)] = url;
     
     __weak typeof(self)weakSelf = self;
     [self sd_internalSetImageWithURL:url
                     placeholderImage:placeholder
                              options:options
-                        operationKey:backgroundImageOperationKeyForState(state)
+                        operationKey:[NSString stringWithFormat:@"UIButtonBackgroundImageOperation%@", @(state)]
                        setImageBlock:^(UIImage *image, NSData *imageData) {
                            [weakSelf setBackgroundImage:image forState:state];
                        }
@@ -154,19 +126,23 @@ static inline NSString * backgroundImageOperationKeyForState(UIControlState stat
                            completed:completedBlock];
 }
 
-#pragma mark - Cancel
+- (void)sd_setImageLoadOperation:(id<SDWebImageOperation>)operation forState:(UIControlState)state {
+    [self sd_setImageLoadOperation:operation forKey:[NSString stringWithFormat:@"UIButtonImageOperation%@", @(state)]];
+}
 
 - (void)sd_cancelImageLoadForState:(UIControlState)state {
-    [self sd_cancelImageLoadOperationWithKey:imageOperationKeyForState(state)];
+    [self sd_cancelImageLoadOperationWithKey:[NSString stringWithFormat:@"UIButtonImageOperation%@", @(state)]];
+}
+
+- (void)sd_setBackgroundImageLoadOperation:(id<SDWebImageOperation>)operation forState:(UIControlState)state {
+    [self sd_setImageLoadOperation:operation forKey:[NSString stringWithFormat:@"UIButtonBackgroundImageOperation%@", @(state)]];
 }
 
 - (void)sd_cancelBackgroundImageLoadForState:(UIControlState)state {
-    [self sd_cancelImageLoadOperationWithKey:backgroundImageOperationKeyForState(state)];
+    [self sd_cancelImageLoadOperationWithKey:[NSString stringWithFormat:@"UIButtonBackgroundImageOperation%@", @(state)]];
 }
 
-#pragma mark - Private
-
-- (SDStateImageURLDictionary *)sd_imageURLStorage {
+- (SDStateImageURLDictionary *)imageURLStorage {
     SDStateImageURLDictionary *storage = objc_getAssociatedObject(self, &imageURLStorageKey);
     if (!storage) {
         storage = [NSMutableDictionary dictionary];

@@ -1,0 +1,9 @@
+CONFIGURATION_BUILD_DIR = ${PODS_CONFIGURATION_BUILD_DIR}/SignalProtocolC-iOS13.0
+GCC_PREPROCESSOR_DEFINITIONS = $(inherited) COCOAPODS=1
+HEADER_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/Headers/Private" "${PODS_ROOT}/Headers/Private/SignalProtocolC" "${PODS_ROOT}/Headers/Public" "${PODS_ROOT}/Headers/Public/SignalProtocolC" $(PODS_ROOT)/SignalProtocolC/src $(PODS_ROOT)/SignalProtocolC/src/curve25519 $(PODS_ROOT)/SignalProtocolC/src/curve25519/ed25519 $(PODS_ROOT)/SignalProtocolC/src/protobuf-c
+PODS_BUILD_DIR = ${BUILD_DIR}
+PODS_CONFIGURATION_BUILD_DIR = ${PODS_BUILD_DIR}/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)
+PODS_ROOT = ${SRCROOT}
+PODS_TARGET_SRCROOT = ${PODS_ROOT}/SignalProtocolC
+PRODUCT_BUNDLE_IDENTIFIER = org.cocoapods.${PRODUCT_NAME:rfc1034identifier}
+SKIP_INSTALL = YES

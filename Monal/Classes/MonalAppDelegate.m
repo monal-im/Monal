@@ -19,6 +19,7 @@
 @import Crashlytics;
 @import Fabric;
 
+
 //xmpp
 #import "MLXMPPManager.h"
 #import "UIColor+Theme.h"
@@ -166,10 +167,13 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    
 #ifdef  DEBUG
-    [DDLog addLogger:[DDASLLogger sharedInstance]];
-    [DDLog addLogger:[DDTTYLogger sharedInstance]];
+    if (@available(iOS 10.0, *)) {
+         [DDLog addLogger:[DDOSLogger sharedInstance]];
+     } else {
+         [DDLog addLogger:[DDASLLogger sharedInstance]];
+         [DDLog addLogger:[DDTTYLogger sharedInstance]];
+     }
     self.fileLogger = [[DDFileLogger alloc] init];
     self.fileLogger.rollingFrequency = 60 * 60 * 24; // 24 hour rolling
     self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;

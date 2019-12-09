@@ -1111,6 +1111,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     if(!row.hasBeenSent){
         cell.deliveryFailed=YES;
+    } else {
+        cell.deliveryFailed=NO;
     }
     
     MLMessage *nextRow =nil;

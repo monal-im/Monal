@@ -1022,6 +1022,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                                                             message.timestamp =[NSDate date];
                                                             message.shouldShowAlert= showAlert;
                                                             message.messageType=kMessageTypeText;
+                                                            
 
                                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
                             }

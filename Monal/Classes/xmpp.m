@@ -71,7 +71,7 @@ NSString *const kXMPPSuccess =@"success";
 NSString *const kXMPPPresence = @"presence";
 
 
-static const int ddLogLevel = LOG_LEVEL_DEBUG;
+
 
 @interface xmpp()
 {

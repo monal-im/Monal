@@ -13,9 +13,9 @@
 #import "MBProgressHUD.h"
 #import "CWStatusBarNotification.h"
 #import "xmpp.h"
-#import "DDlog.h"
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
+
 
 
 @interface AccountsViewController ()

@@ -30,7 +30,7 @@
 
 @end
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 
 @implementation MonalAppDelegate
 
@@ -167,22 +167,23 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-#ifdef  DEBUG
-    if (@available(iOS 10.0, *)) {
-         [DDLog addLogger:[DDOSLogger sharedInstance]];
-     } else {
-         [DDLog addLogger:[DDASLLogger sharedInstance]];
-         [DDLog addLogger:[DDTTYLogger sharedInstance]];
-     }
 
- #ifndef TARGET_IPHONE_SIMULATOR
+    if (@available(iOS 10.0, *)) {
+        [DDLog addLogger:[DDOSLogger sharedInstance]];
+    } else {
+        [DDLog addLogger:[DDASLLogger sharedInstance]];
+        [DDLog addLogger:[DDTTYLogger sharedInstance]];
+    }
+#ifdef  DEBUG
+    
+#ifndef TARGET_IPHONE_SIMULATOR
     self.fileLogger = [[DDFileLogger alloc] init];
     self.fileLogger.rollingFrequency = 60 * 60 * 24; // 24 hour rolling
     self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
     self.fileLogger.maximumFileSize=1024 * 500;
     [DDLog addLogger:self.fileLogger];
 #endif
-
+    
 #endif
     
     if (@available(iOS 10.0, *)) {

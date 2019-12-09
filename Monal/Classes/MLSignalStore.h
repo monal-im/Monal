@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <SignalProtocolObjC/SignalProtocolObjC.h>
+@import SignalProtocolObjC;
 
 @interface MLSignalStore : NSObject <SignalStore>
 @property (nonatomic, assign) u_int32_t deviceid;

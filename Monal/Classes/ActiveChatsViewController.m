@@ -13,9 +13,8 @@
 #import "MonalAppDelegate.h"
 #import "ContactDetails.h"
 #import "MLImageManager.h"
-#import "DDLog.h"
 
-static const int ddLogLevel = LOG_LEVEL_ERROR;
+
 
 @interface ActiveChatsViewController ()
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;

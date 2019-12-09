@@ -11,7 +11,7 @@
 #import "MLConstants.h"
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
-#import "DDLog.h"
+
 #import "MLMainWindow.h"
 #import "MLImageManager.h"
 
@@ -50,7 +50,7 @@
 
 @implementation MLContactsViewController
 
-static const int ddLogLevel = LOG_LEVEL_DEBUG;
+
 
 - (void)viewDidLoad {
     [super viewDidLoad];

@@ -20,11 +20,11 @@
 
 #import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
-#import "DDLog.h"
+
 #import "DataLayer.h"
 
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 
 @interface AppDelegate ()
 

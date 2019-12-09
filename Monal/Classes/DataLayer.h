@@ -11,6 +11,7 @@
 #import "ParsePresence.h"
 #import "MLMessage.h"
 #import "MLContact.h"
+#import "MLConstants.h"
 
 #define kMonalDBQueue "im.monal.dbQueue"
 

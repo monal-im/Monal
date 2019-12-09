@@ -13,7 +13,7 @@
 #import "EncodingTools.h"
 
 
-static const int ddLogLevel = LOG_LEVEL_DEBUG;
+
 
 @interface MLIQProcessor()
 

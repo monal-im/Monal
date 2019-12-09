@@ -9,7 +9,7 @@
 #import "XMPPParser.h"
 
 
-static const int ddLogLevel = LOG_LEVEL_INFO;
+
 
 @implementation XMPPParser
 

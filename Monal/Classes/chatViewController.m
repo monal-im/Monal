@@ -24,7 +24,7 @@
 @import QuartzCore;
 @import MobileCoreServices;
 
-static const int ddLogLevel = LOG_LEVEL_ERROR;
+
 
 @interface chatViewController()<IDMPhotoBrowserDelegate>
 

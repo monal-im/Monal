@@ -7,7 +7,7 @@
 //
 
 #import "DataLayer.h"
-#import "DDLog.h"
+
 
 
 @interface DataLayer()
@@ -16,7 +16,6 @@
 
 @implementation DataLayer
 
-static const int ddLogLevel = LOG_LEVEL_INFO;
 
 NSString *const kAccountID= @"account_id";
 

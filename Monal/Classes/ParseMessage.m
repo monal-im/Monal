@@ -16,7 +16,7 @@
 
 @implementation ParseMessage
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 
 #pragma mark NSXMLParser delegate
 

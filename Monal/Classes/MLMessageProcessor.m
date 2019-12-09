@@ -14,7 +14,7 @@
 #import "MLConstants.h"
 #import "MLImageManager.h"
 
-static const int ddLogLevel = LOG_LEVEL_DEBUG;
+
 
 @interface MLMessageProcessor ()
 @property (nonatomic, strong) SignalContext *signalContext;

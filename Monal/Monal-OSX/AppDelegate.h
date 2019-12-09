@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-#import "DDLog.h"
+
 #import "DDASLLogger.h"
 #import "DDFileLogger.h"
 #import "DDTTYLogger.h"

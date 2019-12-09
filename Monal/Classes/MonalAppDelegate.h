@@ -12,7 +12,7 @@
 #import "DataLayer.h"
 #import "MLTabBarController.h"
 
-#import <CocoaLumberjack/CocoaLumberjack.h>
+
 @import UserNotifications;
 
 

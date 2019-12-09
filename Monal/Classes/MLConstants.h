@@ -7,7 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "DDLog.h"
+
+@import CocoaLumberjack;
+
+static const DDLogLevel ddLogLevel = DDLogLevelInfo;
 
 //used in OSX only really
 #define kMonalWindowVisible @"kMonalWindowVisible"

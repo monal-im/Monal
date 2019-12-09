@@ -8,12 +8,10 @@
 
 #import "AESGcm.h"
 #import "EncodingTools.h"
-#import "DDLog.h"
+
 
 #include <openssl/evp.h>
 #include <openssl/rand.h>
-
-static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 @implementation AESGcm
 

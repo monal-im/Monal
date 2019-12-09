@@ -157,8 +157,10 @@
     if(messageNode.encryptedPayload)
     {
         SignalAddress *address = [[SignalAddress alloc] initWithName:messageNode.from deviceId:(uint32_t)messageNode.sid.intValue];
-        if(!self.signalContext) return nil;
-        
+        if(!self.signalContext) {
+            DDLogError(@"Missing signal context");
+            return nil;
+        }
         
         __block NSDictionary *messageKey;
         [messageNode.signalKeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {

@@ -20,7 +20,7 @@
 #import "DDFileLogger+Buffering.h"
 #import "DDFileLogger.h"
 #import "DDLog+LOGV.h"
-#import "DDLog.h"
+
 #import "DDLoggerNames.h"
 #import "DDLogMacros.h"
 #import "DDMultiFormatter.h"

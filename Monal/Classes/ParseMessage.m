@@ -95,7 +95,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
         }
         
         _idval =[attributeDict objectForKey:@"id"] ;
-        
+        _stanzaId = [attributeDict objectForKey:@"id"]; //default to this, may be overridden by urn:xmpp:sid:0 inside message
         State=@"Message";
 	}
     

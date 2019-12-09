@@ -19,8 +19,6 @@
 @import Crashlytics;
 @import Fabric;
 
-
-//xmpp
 #import "MLXMPPManager.h"
 #import "UIColor+Theme.h"
 
@@ -40,7 +38,15 @@
     UIColor *monalGreen = [UIColor monalGreen];
     UIColor *monaldarkGreen =[UIColor monaldarkGreen];
     [[UINavigationBar appearance] setTintColor:monalGreen];
-
+    if (@available(iOS 13.0, *)) {
+        UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
+        [appearance configureWithTransparentBackground];
+        appearance.backgroundColor=[UIColor systemBackgroundColor];
+        
+        [[UINavigationBar appearance] setScrollEdgeAppearance:appearance];
+        [[UINavigationBar appearance] setStandardAppearance:appearance];
+    }
+    
     if (@available(iOS 11.0, *)) {
         [[UINavigationBar appearance] setPrefersLargeTitles:YES];
     }

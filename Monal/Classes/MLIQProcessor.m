@@ -10,6 +10,7 @@
 #import "MLConstants.h"
 #import "DataLayer.h"
 #import "MLImageManager.h"
+#import "EncodingTools.h"
 
 
 static const int ddLogLevel = LOG_LEVEL_DEBUG;
@@ -176,7 +177,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     
     if(iqNode.omemoDevices)
     {
-        [self omemoResult];
+        [self omemoResult:iqNode];
     }
     
     if(iqNode.vCard)
@@ -315,102 +316,111 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     
 }
 
--(void) omemoResult {
-    //    if ([iqNode.type isEqualToString:kiqResultType])
-    //    {
-    //
-    //        //OMEMO
-    //#ifndef DISABLE_OMEMO
-    //#ifndef TARGET_IS_EXTENSION
-    //#if TARGET_OS_IPHONE
-    //        dispatch_async(dispatch_get_main_queue(), ^{
-    //            if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
-    //            {
-    //#endif
-    //#endif
-    //                [self.processQueue addOperationWithBlock:^{
-    //                    NSString *source= iqNode.from;
-    //                    if(iqNode.omemoDevices)
-    //                    {
-    //
-    //                        if(!source || [source isEqualToString:self.fulluser])
-    //                        {
-    //                            source=self.fulluser;
-    //                            NSMutableArray *devices= [iqNode.omemoDevices mutableCopy];
-    //                            NSSet *deviceSet = [NSSet setWithArray:iqNode.omemoDevices];
-    //
-    //                            NSString * deviceString=[NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
-    //                            if(![deviceSet containsObject:deviceString])
-    //                            {
-    //                                [devices addObject:deviceString];
-    //                            }
-    //
-    //                            [self sendOMEMODevices:devices];
-    //                        }
-    //
-    //
-    //                        NSArray *existingDevices=[self.monalSignalStore knownDevicesForAddressName:source];
-    //                        NSSet *deviceSet = [NSSet setWithArray:existingDevices];
-    //                        //only query if the device doesnt exist
-    //                        [iqNode.omemoDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-    //                            NSString *device  =(NSString *)obj;
-    //                            if(![deviceSet containsObject:[NSNumber numberWithInt: device.integerValue]]) {
-    //                                [self queryOMEMOBundleFrom:source andDevice:device];
-    //                            }
-    //                        }];
-    //
-    //                    }
-    //
-    //
-    //                    if(iqNode.signedPreKeyPublic && self.signalContext )
-    //                    {
-    //                        if(!source)
-    //                        {
-    //                            source=self.fulluser;
-    //                        }
-    //
-    //
-    //                        uint32_t device =(uint32_t)[iqNode.deviceid intValue];
-    //                        if(!iqNode.deviceid) return;
-    //
-    //                        SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:device];
-    //                        SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
-    //                        NSError *error;
-    //
-    //                        [iqNode.preKeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-    //
-    //                            NSDictionary *row = (NSDictionary *) obj;
-    //                            NSString *keyid = (NSString *)[row objectForKey:@"preKeyId"];
-    //
-    //                            SignalPreKeyBundle *bundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
-    //                                                                                                   deviceId:device
-    //                                                                                                   preKeyId:[keyid integerValue]
-    //                                                                                               preKeyPublic:[EncodingTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]]
-    //                                                                                             signedPreKeyId:iqNode.signedPreKeyId.integerValue
-    //                                                                                         signedPreKeyPublic:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
-    //                                                                                                  signature:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
-    //                                                                                                identityKey:[EncodingTools dataWithBase64EncodedString:iqNode.identityKey]
-    //                                                                                                      error:nil];
-    //
-    //                            [builder processPreKeyBundle:bundle error:nil];
-    //                        }];
-    //
-    //                    }
-    //                }];
-    //#ifndef TARGET_IS_EXTENSION
-    //#if TARGET_OS_IPHONE
-    //            }
-    //        });
-    //#endif
-    //#endif
-    //#endif
-    //
-    //
+-(void) sendOMEMODevices:(NSArray *) devices {
+    if(!self.connection.supportsPubSub) return;
     
-    //
+    XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [signalDevice publishDevices:devices];
+    if(self.sendIq) self.sendIq(signalDevice);
+}
+
+
+-(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
+{
+    if(!self.connection.supportsPubSub) return;
+    XMPPIQ* query2 =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
+    [query2 setiqTo:jid];
+    [query2 requestBundles:deviceid]; //[NSString stringWithFormat:@"%@", devicenum]
+    if(self.sendIq) self.sendIq(query2);
+}
+
+-(void) omemoResult:(ParseIq *) iqNode {
+#ifndef DISABLE_OMEMO
     
-    //
-    //
+    
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+        {
+#endif
+#endif
+            NSString *source= iqNode.from;
+            if(iqNode.omemoDevices)
+            {
+                
+                if(!source || [source isEqualToString:self.connection.identity.jid])
+                {
+                    source=self.connection.identity.jid;
+                    NSMutableArray *devices= [iqNode.omemoDevices mutableCopy];
+                    NSSet *deviceSet = [NSSet setWithArray:iqNode.omemoDevices];
+                    
+                    NSString * deviceString=[NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
+                    if(![deviceSet containsObject:deviceString])
+                    {
+                        [devices addObject:deviceString];
+                    }
+                    
+                    [self sendOMEMODevices:devices];
+                }
+                
+                
+                NSArray *existingDevices=[self.monalSignalStore knownDevicesForAddressName:source];
+                NSSet *deviceSet = [NSSet setWithArray:existingDevices];
+                //only query if the device doesnt exist
+                [iqNode.omemoDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    NSString *device  =(NSString *)obj;
+                    if(![deviceSet containsObject:[NSNumber numberWithInteger: device.integerValue]]) {
+                        [self queryOMEMOBundleFrom:source andDevice:device];
+                    }
+                }];
+                
+            }
+            
+            
+            if(iqNode.signedPreKeyPublic && self.signalContext )
+            {
+                if(!source)
+                {
+                    source=self.connection.identity.jid;
+                }
+                
+                uint32_t device =(uint32_t)[iqNode.deviceid intValue];
+                if(!iqNode.deviceid) return;
+                
+                SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:device];
+                SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
+
+                [iqNode.preKeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    
+                    NSDictionary *row = (NSDictionary *) obj;
+                    NSString *keyid = (NSString *)[row objectForKey:@"preKeyId"];
+                    
+                    SignalPreKeyBundle *bundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
+                                                                                           deviceId:device
+                                                                                           preKeyId:[keyid intValue]
+                                                                                       preKeyPublic:[EncodingTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]]
+                                                                                     signedPreKeyId:iqNode.signedPreKeyId.intValue
+                                                                                 signedPreKeyPublic:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
+                                                                                          signature:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
+                                                                                        identityKey:[EncodingTools dataWithBase64EncodedString:iqNode.identityKey]
+                                                                                              error:nil];
+                    
+                    [builder processPreKeyBundle:bundle error:nil];
+                }];
+                
+            }
+            
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
+        }
+    });
+#endif
+#endif
+    
+    
+#endif
+
 }
 
 #pragma mark - features

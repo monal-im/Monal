@@ -2641,12 +2641,6 @@ static NSMutableArray *extracted(xmpp *object) {
 }
 
 
--(void) sendOMEMODevices:(NSArray *) devices {
-    if(!self.connectionProperties.supportsPubSub) return;
-    XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [signalDevice publishDevices:devices];
-    [self send:signalDevice];
-}
 
 -(void) sendOMEMOBundle
 {
@@ -2676,14 +2670,7 @@ static NSMutableArray *extracted(xmpp *object) {
     [self sendOMEMOBundle];
 }
 
--(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
-{
-    if(!self.connectionProperties.supportsPubSub) return;
-    XMPPIQ* query2 =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
-    [query2 setiqTo:jid];
-    [query2 requestBundles:deviceid]; //[NSString stringWithFormat:@"%@", devicenum]
-    [self send:query2];
-}
+
 
 -(void) queryOMEMODevicesFrom:(NSString *) jid
 {

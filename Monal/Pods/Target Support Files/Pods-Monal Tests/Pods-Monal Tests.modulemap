@@ -1,0 +1,6 @@
+framework module Pods_Monal_Tests {
+  umbrella header "Pods-Monal Tests-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -1,0 +1,6 @@
+framework module SAMKeychain {
+  umbrella header "SAMKeychain-iOS9.3-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -1,1 +1,0 @@
-../../../SignalProtocolObjC/Classes/Models/SignalCiphertext.h

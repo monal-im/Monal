@@ -1,0 +1,6 @@
+framework module SAMKeychain {
+  umbrella header "SAMKeychain-macOS10.10-umbrella.h"
+
+  export *
+  module * { export * }
+}

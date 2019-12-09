@@ -9,8 +9,11 @@
 #import <Foundation/Foundation.h>
 
 @import CocoaLumberjack;
-
+#ifdef  DEBUG
+static const DDLogLevel ddLogLevel = DDLogLevelDebug;
+#else
 static const DDLogLevel ddLogLevel = DDLogLevelInfo;
+#endif
 
 //used in OSX only really
 #define kMonalWindowVisible @"kMonalWindowVisible"

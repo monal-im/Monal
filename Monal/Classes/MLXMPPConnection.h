@@ -31,7 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
 //server details
 @property (nonatomic, strong) NSSet *serverFeatures;
 
-@property (nonatomic,strong)  NSMutableArray* discoveredServices;
+@property (nonatomic,strong)  NSMutableArray* _Nullable discoveredServices;
 @property (nonatomic,strong)  NSString* uploadServer;
 
 @property (nonatomic,strong)  NSString*  conferenceServer;

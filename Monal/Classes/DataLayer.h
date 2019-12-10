@@ -81,7 +81,7 @@ extern NSString *const kMessageTypeUrl;
 -(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion;
 
 /**
- called when an account goes offline. removes all of its contacts state info
+ should be called when a new session needs to be established
  */
 -(BOOL) resetContactsForAccount:(NSString*) accountNo;
 

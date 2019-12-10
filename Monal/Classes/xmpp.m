@@ -539,9 +539,10 @@ NSString *const kXMPPPresence = @"presence";
         _unAckedStanzas=nil;
         self.connectionProperties.discoveredServices=nil;
         [self persistState];
+        [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
     }
     
-    [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
+  
     
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
     if(_accountNo)

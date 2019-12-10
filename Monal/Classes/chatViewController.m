@@ -439,6 +439,9 @@
         UINavigationController *nav = segue.destinationViewController;
         ContactDetails* details = (ContactDetails *)nav.topViewController;
         details.contact= self.contact;
+        details.completion=^{
+            [self viewWillAppear:YES];
+        };
     }
 }
 

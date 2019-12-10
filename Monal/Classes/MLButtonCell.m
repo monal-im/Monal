@@ -11,6 +11,7 @@
 @implementation MLButtonCell
 
 - (void)awakeFromNib {
+    [super awakeFromNib];
     // Initialization code
 }
 

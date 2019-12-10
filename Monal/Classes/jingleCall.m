@@ -45,8 +45,8 @@
     
     
     dispatch_async(self.netReadQueue, ^{
-        rtp =[[RTP alloc] init];
-        [rtp RTPConnectAddress:self.recipientIP onRemotePort:[self.destinationPort intValue] withLocalPort:[self.localPort intValue]];
+        self->rtp =[[RTP alloc] init];
+        [self->rtp RTPConnectAddress:self.recipientIP onRemotePort:[self.destinationPort intValue] withLocalPort:[self.localPort intValue]];
     });
    return 0;
 }
@@ -56,7 +56,7 @@
     if(!self.netReadQueue) return;
     
     dispatch_async(self.netReadQueue, ^{
-        [rtp RTPDisconnect];
+        [self->rtp RTPDisconnect];
     });
 }
 

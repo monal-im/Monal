@@ -126,10 +126,9 @@ char *ConvertDomainNameToCString_withescape(const domainname *const name, char *
 // print arbitrary rdata in a readable manned
 void print_rdata(int type, int len, const u_char *rdata, void* context)
 {
-    int i;
     srv_rdata *srv;
     char targetstr[MAX_CSTRING];
-    struct in_addr in;
+
     
     MLDNSLookup *caller = (__bridge MLDNSLookup *) context;
     

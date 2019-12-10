@@ -34,7 +34,7 @@ pod 'Fabric'
 pod 'Crashlytics'
 pod 'SignalProtocolObjC'
 pod 'SignalProtocolC'
-pod 'OpenSSL-Universal','~> 1.0.2.18'
+
 pod 'SAMKeychain'
 pod 'TPCircularBuffer'
 pod 'CocoaLumberjack'
@@ -56,7 +56,7 @@ pod 'IDMPhotoBrowser'
 pod 'SDWebImage', '~> 4.3.3'
 pod 'SignalProtocolObjC'
 pod 'SignalProtocolC'
-pod 'OpenSSL-Universal','~> 1.0.2.18'
+
 pod 'DZNEmptyDataSet'
 pod 'EAIntroView'
   # Pods for Monal
@@ -83,7 +83,7 @@ pod 'TPCircularBuffer'
 pod 'Sparkle'
 pod 'SignalProtocolObjC'
 pod 'SignalProtocolC'
-pod 'OpenSSL-Universal','~> 1.0.2.18'
+
 
   # Pods for Monal-OSX
 

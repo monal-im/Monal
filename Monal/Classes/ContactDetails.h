@@ -10,10 +10,12 @@
 #import "DataLayer.h"
 #import "IDMPhotoBrowser.h"
 
+typedef void (^controllerCompletion)(void);
 
 @interface ContactDetails : UITableViewController <UITextFieldDelegate, IDMPhotoBrowserDelegate>
 
 @property (nonatomic, strong) MLContact *contact;
+@property (nonatomic, strong) controllerCompletion completion;
 
 -(IBAction) callContact:(id)sender;
 -(IBAction) muteContact:(id)sender;

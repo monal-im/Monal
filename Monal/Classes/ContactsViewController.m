@@ -16,7 +16,7 @@
 #import "CallViewController.h"
 #import "MonalAppDelegate.h"
 #import "UIColor+Theme.h"
-#import "DDLog.h"
+
 
 #define konlineSection 1
 #define kofflineSection 2
@@ -33,7 +33,7 @@
 
 @implementation ContactsViewController
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 
 #pragma mark view life cycle
 - (void)viewDidLoad

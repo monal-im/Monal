@@ -1,1 +1,0 @@
-../../../SignalProtocolC/src/curve25519/ed25519/d2.h

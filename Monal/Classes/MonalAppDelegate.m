@@ -21,7 +21,6 @@
 @import Fabric;
 #endif
 
-//xmpp
 #import "MLXMPPManager.h"
 #import "UIColor+Theme.h"
 
@@ -31,7 +30,7 @@
 
 @end
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 
 @implementation MonalAppDelegate
 
@@ -41,7 +40,15 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     UIColor *monalGreen = [UIColor monalGreen];
     UIColor *monaldarkGreen =[UIColor monaldarkGreen];
     [[UINavigationBar appearance] setTintColor:monalGreen];
-
+    if (@available(iOS 13.0, *)) {
+        UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
+        [appearance configureWithTransparentBackground];
+        appearance.backgroundColor=[UIColor systemBackgroundColor];
+        
+        [[UINavigationBar appearance] setScrollEdgeAppearance:appearance];
+        [[UINavigationBar appearance] setStandardAppearance:appearance];
+    }
+    
     if (@available(iOS 11.0, *)) {
         [[UINavigationBar appearance] setPrefersLargeTitles:YES];
     }
@@ -170,10 +177,16 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    
+
+    if (@available(iOS 10.0, *)) {
+        [DDLog addLogger:[DDOSLogger sharedInstance]];
+    } else {
+        [DDLog addLogger:[DDASLLogger sharedInstance]];
+        [DDLog addLogger:[DDTTYLogger sharedInstance]];
+    }
 #ifdef  DEBUG
-    [DDLog addLogger:[DDASLLogger sharedInstance]];
-    [DDLog addLogger:[DDTTYLogger sharedInstance]];
+    
+#ifndef TARGET_IPHONE_SIMULATOR
     self.fileLogger = [[DDFileLogger alloc] init];
     self.fileLogger.rollingFrequency = 60 * 60 * 24; // 24 hour rolling
     self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
@@ -181,7 +194,9 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
     [DDLog addLogger:self.fileLogger];
 #endif
     
-    if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"10.0")){
+#endif
+    
+    if (@available(iOS 10.0, *)) {
         [UNUserNotificationCenter currentNotificationCenter].delegate=self;
     }
     
@@ -322,7 +337,7 @@ static const int ddLogLevel = LOG_LEVEL_VERBOSE;
 }
 
 
--(void) application:(UIApplication *)application handleActionWithIdentifier:(nullable NSString *)identifier forLocalNotification:(nonnull UILocalNotification *)notification withResponseInfo:(nonnull NSDictionary *)responseInfo completionHandler:(nonnull void (^)())completionHandler
+-(void) application:(UIApplication *)application handleActionWithIdentifier:(nullable NSString *)identifier forLocalNotification:(nonnull UILocalNotification *)notification withResponseInfo:(nonnull NSDictionary *)responseInfo completionHandler:(nonnull void (^)(void))completionHandler
 {
     if ([notification.category isEqualToString:@"Reply"]) {
         if ([identifier isEqualToString:@"ReplyButton"]) {

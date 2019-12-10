@@ -21,9 +21,7 @@
 @import MobileCoreServices;
 #endif
 
-#import "SAMKeychain.h"
-
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+@import SAMKeychain;
 
 #if TARGET_OS_IPHONE
 static const int pingFreqencyMinutes =10;
@@ -1022,6 +1020,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                                                             message.timestamp =[NSDate date];
                                                             message.shouldShowAlert= showAlert;
                                                             message.messageType=kMessageTypeText;
+                                                            
 
                                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
                             }

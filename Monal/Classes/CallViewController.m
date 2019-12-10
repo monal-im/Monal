@@ -9,13 +9,13 @@
 #import "CallViewController.h"
 #import "MLImageManager.h"
 #import "MLXMPPManager.h"
-#import "DDLog.h"
+
 
 @interface CallViewController ()
 
 @end
 
-static const int ddLogLevel = LOG_LEVEL_ERROR;
+
 
 @implementation CallViewController
 

@@ -1,4 +1,7 @@
 PODS:
+  - CocoaLumberjack (3.6.0):
+    - CocoaLumberjack/Core (= 3.6.0)
+  - CocoaLumberjack/Core (3.6.0)
   - Crashlytics (3.14.0):
     - Fabric (~> 1.10.2)
   - CWStatusBarNotification (2.3.5)
@@ -28,6 +31,7 @@ PODS:
   - TPCircularBuffer (1.6.1)
 
 DEPENDENCIES:
+  - CocoaLumberjack
   - Crashlytics
   - CWStatusBarNotification (~> 2.3.5)
   - DZNEmptyDataSet
@@ -35,7 +39,7 @@ DEPENDENCIES:
   - Fabric
   - IDMPhotoBrowser
   - MBProgressHUD (~> 1.1.0)
-  - OpenSSL-Universal
+  - OpenSSL-Universal (~> 1.0.2.18)
   - SAMKeychain
   - SDWebImage (~> 4.3.3)
   - SignalProtocolC
@@ -45,6 +49,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
+    - CocoaLumberjack
     - Crashlytics
     - CWStatusBarNotification
     - DACircularProgress
@@ -64,6 +69,7 @@ SPEC REPOS:
     - TPCircularBuffer
 
 SPEC CHECKSUMS:
+  CocoaLumberjack: 78b0c238666f4f58db069738ec176f4519557516
   Crashlytics: 540b7e5f5da5a042647227a5e3ac51d85eed06df
   CWStatusBarNotification: 3d2738b25c3207f60cc50201388d3c96182545ff
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
@@ -82,6 +88,6 @@ SPEC CHECKSUMS:
   Sparkle: 3f75576db8b0265adef36c43249d747f22d0b708
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 
-PODFILE CHECKSUM: d789c3ff3ca4f7d928819794ea30a489cbed971f
+PODFILE CHECKSUM: e028646904e82106ee442403f3956a60b63b440b
 
 COCOAPODS: 1.5.2

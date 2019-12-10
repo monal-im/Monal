@@ -68,12 +68,12 @@ The of the message in the DB , should be int
 @property (nonatomic, copy) NSDate *delayTimeStamp;
 @property (nonatomic, copy) NSDate *timestamp;
 
-/**
+/*
  usually used to indicate if the message was  encrypted on the wire, not in this payload
  */
 @property (nonatomic, assign) BOOL encrypted;
 
-/**
+/*
  whether the text was sent out on the wire not if it was delivered to the recipient
  */
 @property (nonatomic, assign) BOOL hasBeenSent;

@@ -1,0 +1,6 @@
+framework module TPCircularBuffer {
+  umbrella header "TPCircularBuffer-iOS9.3-umbrella.h"
+
+  export *
+  module * { export * }
+}

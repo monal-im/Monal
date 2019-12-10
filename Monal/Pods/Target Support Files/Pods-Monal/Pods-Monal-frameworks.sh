@@ -141,6 +141,70 @@ strip_invalid_archs() {
   STRIP_BINARY_RETVAL=1
 }
 
+
+if [[ "$CONFIGURATION" == "Debug" ]]; then
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS9.3/CocoaLumberjack.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS9.3/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS9.3/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS9.3/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS9.3/TPCircularBuffer.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/CWStatusBarNotification/CWStatusBarNotification.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/DACircularProgress/DACircularProgress.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/EAIntroView/EAIntroView.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/EARestrictedScrollView/EARestrictedScrollView.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/IDMPhotoBrowser/IDMPhotoBrowser.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/MBProgressHUD/MBProgressHUD.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/pop/pop.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS13.0/CocoaLumberjack.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS13.0/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS13.0/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS13.0/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS13.0/TPCircularBuffer.framework"
+fi
+if [[ "$CONFIGURATION" == "Adhoc" ]]; then
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS9.3/CocoaLumberjack.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS9.3/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS9.3/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS9.3/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS9.3/TPCircularBuffer.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/CWStatusBarNotification/CWStatusBarNotification.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/DACircularProgress/DACircularProgress.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/EAIntroView/EAIntroView.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/EARestrictedScrollView/EARestrictedScrollView.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/IDMPhotoBrowser/IDMPhotoBrowser.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/MBProgressHUD/MBProgressHUD.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/pop/pop.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS13.0/CocoaLumberjack.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS13.0/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS13.0/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS13.0/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS13.0/TPCircularBuffer.framework"
+fi
+if [[ "$CONFIGURATION" == "AppStore" ]]; then
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS9.3/CocoaLumberjack.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS9.3/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS9.3/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS9.3/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS9.3/TPCircularBuffer.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/CWStatusBarNotification/CWStatusBarNotification.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/DACircularProgress/DACircularProgress.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/EAIntroView/EAIntroView.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/EARestrictedScrollView/EARestrictedScrollView.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/IDMPhotoBrowser/IDMPhotoBrowser.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/MBProgressHUD/MBProgressHUD.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/pop/pop.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS13.0/CocoaLumberjack.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS13.0/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS13.0/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS13.0/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS13.0/TPCircularBuffer.framework"
+fi
 if [ "${COCOAPODS_PARALLEL_CODE_SIGN}" == "true" ]; then
   wait
 fi

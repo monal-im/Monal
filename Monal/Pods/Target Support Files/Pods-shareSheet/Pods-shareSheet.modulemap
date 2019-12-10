@@ -1,0 +1,6 @@
+framework module Pods_shareSheet {
+  umbrella header "Pods-shareSheet-umbrella.h"
+
+  export *
+  module * { export * }
+}

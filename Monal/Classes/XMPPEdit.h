@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "DataLayer.h"
-#import "SAMKeychain.h"
+@import SAMKeychain;
 #import "MLXMPPManager.h"
 
 

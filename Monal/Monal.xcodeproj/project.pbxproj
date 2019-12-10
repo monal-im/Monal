@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		135896A7336BA00266B55A98 /* libPods-jrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00CD52DF53F94AC491D7404B /* libPods-jrtplib-static.a */; };
 		1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* MonalAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		1E779E002AE14108CB07C10A /* Pods_jrtplib_static.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 25CAD84C2B49BA56A354B822 /* Pods_jrtplib_static.framework */; };
 		2601D9B00FBF255D004DB939 /* DataLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A70FBF255D004DB939 /* DataLayer.m */; };
 		2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CA0FBF25EF004DB939 /* sworim.sqlite */; };
 		2601D9D40FBF262E004DB939 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2601D9D30FBF262E004DB939 /* libsqlite3.dylib */; };
@@ -160,15 +160,6 @@
 		26189CE2238B987D00EAD70C /* NXOAuth2PostBodyPart.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC31E2674D700141E04 /* NXOAuth2PostBodyPart.m */; };
 		26189CE3238B987D00EAD70C /* NXOAuth2PostBodyStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC51E2674D700141E04 /* NXOAuth2PostBodyStream.m */; };
 		26189CE4238B987D00EAD70C /* NXOAuth2Request.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC71E2674D700141E04 /* NXOAuth2Request.m */; };
-		26189CE5238B989400EAD70C /* DDAbstractDatabaseLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4D31B73097500272E63 /* DDAbstractDatabaseLogger.m */; };
-		26189CE6238B989400EAD70C /* DDASLLogCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4D51B73097500272E63 /* DDASLLogCapture.m */; };
-		26189CE7238B989400EAD70C /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4D71B73097500272E63 /* DDASLLogger.m */; };
-		26189CE8238B989400EAD70C /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4DA1B73097500272E63 /* DDFileLogger.m */; };
-		26189CE9238B989400EAD70C /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4DE1B73097500272E63 /* DDLog.m */; };
-		26189CEA238B989400EAD70C /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E11B73097500272E63 /* DDTTYLogger.m */; };
-		26189CEB238B989B00EAD70C /* DDContextFilterLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E41B73097500272E63 /* DDContextFilterLogFormatter.m */; };
-		26189CEC238B989B00EAD70C /* DDDispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E61B73097500272E63 /* DDDispatchQueueLogFormatter.m */; };
-		26189CED238B989B00EAD70C /* DDMultiFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E81B73097500272E63 /* DDMultiFormatter.m */; };
 		26189CEE238B98C300EAD70C /* MLMessageProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB42231CB816006D0277 /* MLMessageProcessor.m */; };
 		26189CEF238B98C300EAD70C /* jingleCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC918693634006A6C12 /* jingleCall.m */; };
 		26189CF0238B98C300EAD70C /* RTP.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC618693626006A6C12 /* RTP.mm */; };
@@ -423,26 +414,6 @@
 		26B2A4BC1B7306C000272E63 /* sworim.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CA0FBF25EF004DB939 /* sworim.sqlite */; };
 		26B2A4BE1B7306E500272E63 /* DataLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A70FBF255D004DB939 /* DataLayer.m */; };
 		26B2A4CB1B73084800272E63 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B2A4CA1B73084800272E63 /* AppKit.framework */; };
-		26B2A4E91B73097500272E63 /* CLIColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4CF1B73097500272E63 /* CLIColor.m */; };
-		26B2A4EA1B73097500272E63 /* CLIColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4CF1B73097500272E63 /* CLIColor.m */; };
-		26B2A4ED1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4D31B73097500272E63 /* DDAbstractDatabaseLogger.m */; };
-		26B2A4EE1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4D31B73097500272E63 /* DDAbstractDatabaseLogger.m */; };
-		26B2A4EF1B73097500272E63 /* DDASLLogCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4D51B73097500272E63 /* DDASLLogCapture.m */; };
-		26B2A4F01B73097500272E63 /* DDASLLogCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4D51B73097500272E63 /* DDASLLogCapture.m */; };
-		26B2A4F11B73097500272E63 /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4D71B73097500272E63 /* DDASLLogger.m */; };
-		26B2A4F21B73097500272E63 /* DDASLLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4D71B73097500272E63 /* DDASLLogger.m */; };
-		26B2A4F31B73097500272E63 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4DA1B73097500272E63 /* DDFileLogger.m */; };
-		26B2A4F41B73097500272E63 /* DDFileLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4DA1B73097500272E63 /* DDFileLogger.m */; };
-		26B2A4F51B73097500272E63 /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4DE1B73097500272E63 /* DDLog.m */; };
-		26B2A4F61B73097500272E63 /* DDLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4DE1B73097500272E63 /* DDLog.m */; };
-		26B2A4F71B73097500272E63 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E11B73097500272E63 /* DDTTYLogger.m */; };
-		26B2A4F81B73097500272E63 /* DDTTYLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E11B73097500272E63 /* DDTTYLogger.m */; };
-		26B2A4F91B73097500272E63 /* DDContextFilterLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E41B73097500272E63 /* DDContextFilterLogFormatter.m */; };
-		26B2A4FA1B73097500272E63 /* DDContextFilterLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E41B73097500272E63 /* DDContextFilterLogFormatter.m */; };
-		26B2A4FB1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E61B73097500272E63 /* DDDispatchQueueLogFormatter.m */; };
-		26B2A4FC1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E61B73097500272E63 /* DDDispatchQueueLogFormatter.m */; };
-		26B2A4FD1B73097500272E63 /* DDMultiFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E81B73097500272E63 /* DDMultiFormatter.m */; };
-		26B2A4FE1B73097500272E63 /* DDMultiFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B2A4E81B73097500272E63 /* DDMultiFormatter.m */; };
 		26B2A5021B730AE100272E63 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		26B51C4918654D98002134C3 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B51C4718654D98002134C3 /* LogViewController.m */; };
 		26B69A75131C522F002FCBEB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B69A74131C522F002FCBEB /* Security.framework */; };
@@ -512,12 +483,12 @@
 		26FB468F18B2755A0043094F /* IPAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FB468E18B2755A0043094F /* IPAddress.m */; };
 		26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */; };
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
-		36A6441E0A4DD56BD134DEF9 /* libPods-Monal Tests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 93EF15C78FDC163B4A72ACA8 /* libPods-Monal Tests.a */; };
-		7B0741173BCE3577462F5625 /* libPods-NotificaionService.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 06E897287B5489F7A88AD804 /* libPods-NotificaionService.a */; };
-		BC4F1B4138C5CF66C168F2FF /* libPods-shareSheet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FB8D12C36D97EF3DFF73E7BB /* libPods-shareSheet.a */; };
-		CAAF78ACC86D0E2D59659974 /* libPods-jrtplib-static-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B878F234C6D75087415906A /* libPods-jrtplib-static-OSX.a */; };
-		CCA5CE526F2297872025AA74 /* libPods-Monal.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A548DB6E50EC39897FEA6E40 /* libPods-Monal.a */; };
-		EC748DC2933B3CC35A0C9F07 /* libPods-Monal-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 52ED8290F66D5A1541DD2B0B /* libPods-Monal-OSX.a */; };
+		2AA6B81BDF005CFFBED37AAC /* Pods_jrtplib_static_OSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF9482F030E43311100BC741 /* Pods_jrtplib_static_OSX.framework */; };
+		322AD0CC78815E4551793930 /* Pods_Monal_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F59B43550E822D135D1127E /* Pods_Monal_Tests.framework */; };
+		3517ED822FCB1456A8D492B1 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C40CE7301D792181A28A1F8 /* Pods_Monal.framework */; };
+		8C56FAA9FC72C01E0AF98EFE /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C28AE0807330E8B6F972591 /* Pods_NotificaionService.framework */; };
+		A97BB56A74395876C98A21B9 /* Pods_Monal_OSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04A27909A4CEFD3AEB9E267A /* Pods_Monal_OSX.framework */; };
+		FE9BEACD951D0F8D3EBE264D /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99727E17D81471E803966620 /* Pods_shareSheet.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -600,14 +571,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		00CD52DF53F94AC491D7404B /* libPods-jrtplib-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-jrtplib-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		06E897287B5489F7A88AD804 /* libPods-NotificaionService.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-NotificaionService.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		0B878F234C6D75087415906A /* libPods-jrtplib-static-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-jrtplib-static-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		04A27909A4CEFD3AEB9E267A /* Pods_Monal_OSX.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal_OSX.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1CB94D0245DE1717B2AA3064 /* Pods-Monal.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-Monal/Pods-Monal.adhoc.xcconfig"; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* MonalAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MonalAppDelegate.h; path = Classes/MonalAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* MonalAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MonalAppDelegate.m; path = Classes/MonalAppDelegate.m; sourceTree = "<group>"; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		25CAD84C2B49BA56A354B822 /* Pods_jrtplib_static.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_jrtplib_static.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2601D9A70FBF255D004DB939 /* DataLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataLayer.m; sourceTree = "<group>"; };
 		2601D9A80FBF255D004DB939 /* DataLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataLayer.h; sourceTree = "<group>"; };
 		2601D9CA0FBF25EF004DB939 /* sworim.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = sworim.sqlite; sourceTree = "<group>"; };
@@ -946,31 +916,6 @@
 		26B2A4BA1B73061400272E63 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		26B2A4C81B73084100272E63 /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/usr/lib/libsqlite3.0.dylib; sourceTree = DEVELOPER_DIR; };
 		26B2A4CA1B73084800272E63 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AppKit.framework; sourceTree = DEVELOPER_DIR; };
-		26B2A4CE1B73097500272E63 /* CLIColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CLIColor.h; sourceTree = "<group>"; };
-		26B2A4CF1B73097500272E63 /* CLIColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CLIColor.m; sourceTree = "<group>"; };
-		26B2A4D01B73097500272E63 /* CocoaLumberjack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CocoaLumberjack.h; sourceTree = "<group>"; };
-		26B2A4D21B73097500272E63 /* DDAbstractDatabaseLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDAbstractDatabaseLogger.h; sourceTree = "<group>"; };
-		26B2A4D31B73097500272E63 /* DDAbstractDatabaseLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDAbstractDatabaseLogger.m; sourceTree = "<group>"; };
-		26B2A4D41B73097500272E63 /* DDASLLogCapture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDASLLogCapture.h; sourceTree = "<group>"; };
-		26B2A4D51B73097500272E63 /* DDASLLogCapture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDASLLogCapture.m; sourceTree = "<group>"; };
-		26B2A4D61B73097500272E63 /* DDASLLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDASLLogger.h; sourceTree = "<group>"; };
-		26B2A4D71B73097500272E63 /* DDASLLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDASLLogger.m; sourceTree = "<group>"; };
-		26B2A4D81B73097500272E63 /* DDAssertMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDAssertMacros.h; sourceTree = "<group>"; };
-		26B2A4D91B73097500272E63 /* DDFileLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDFileLogger.h; sourceTree = "<group>"; };
-		26B2A4DA1B73097500272E63 /* DDFileLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDFileLogger.m; sourceTree = "<group>"; };
-		26B2A4DB1B73097500272E63 /* DDLegacyMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLegacyMacros.h; sourceTree = "<group>"; };
-		26B2A4DC1B73097500272E63 /* DDLog+LOGV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DDLog+LOGV.h"; sourceTree = "<group>"; };
-		26B2A4DD1B73097500272E63 /* DDLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLog.h; sourceTree = "<group>"; };
-		26B2A4DE1B73097500272E63 /* DDLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDLog.m; sourceTree = "<group>"; };
-		26B2A4DF1B73097500272E63 /* DDLogMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDLogMacros.h; sourceTree = "<group>"; };
-		26B2A4E01B73097500272E63 /* DDTTYLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDTTYLogger.h; sourceTree = "<group>"; };
-		26B2A4E11B73097500272E63 /* DDTTYLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDTTYLogger.m; sourceTree = "<group>"; };
-		26B2A4E31B73097500272E63 /* DDContextFilterLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDContextFilterLogFormatter.h; sourceTree = "<group>"; };
-		26B2A4E41B73097500272E63 /* DDContextFilterLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDContextFilterLogFormatter.m; sourceTree = "<group>"; };
-		26B2A4E51B73097500272E63 /* DDDispatchQueueLogFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDDispatchQueueLogFormatter.h; sourceTree = "<group>"; };
-		26B2A4E61B73097500272E63 /* DDDispatchQueueLogFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDDispatchQueueLogFormatter.m; sourceTree = "<group>"; };
-		26B2A4E71B73097500272E63 /* DDMultiFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DDMultiFormatter.h; sourceTree = "<group>"; };
-		26B2A4E81B73097500272E63 /* DDMultiFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDMultiFormatter.m; sourceTree = "<group>"; };
 		26B51C4618654D98002134C3 /* LogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogViewController.h; sourceTree = "<group>"; };
 		26B51C4718654D98002134C3 /* LogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LogViewController.m; sourceTree = "<group>"; };
 		26B69A74131C522F002FCBEB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
@@ -1085,22 +1030,23 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		31A80863B17A9EB9D4C08364 /* Pods-jrtplib-static.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static.adhoc.xcconfig"; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* SworIM_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SworIM_Prefix.pch; sourceTree = "<group>"; };
+		3C40CE7301D792181A28A1F8 /* Pods_Monal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3EDC0EB6935929A159956EB5 /* Pods-Monal-OSXTests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSXTests.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSXTests/Pods-Monal-OSXTests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		428F57D57919ACB0B97869A6 /* Pods-jrtplib-static-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
 		4425FD9C1F3AFFA64619FF67 /* Pods-jrtplib-static-OSX.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.appstore.xcconfig"; sourceTree = "<group>"; };
-		52ED8290F66D5A1541DD2B0B /* libPods-Monal-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Monal-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C28AE0807330E8B6F972591 /* Pods_NotificaionService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NotificaionService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5ED93030541F175E7BEB1FC2 /* Pods-NotificaionService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NotificaionService/Pods-NotificaionService.debug.xcconfig"; sourceTree = "<group>"; };
+		5F59B43550E822D135D1127E /* Pods_Monal_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6253B2B3FE987619C2714CF5 /* Pods-Monal Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		67334C3FACBBF127DFE076DF /* Pods-jrtplib-static.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static.debug.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static.debug.xcconfig"; sourceTree = "<group>"; };
 		6D9328A93187B01B20E88F29 /* Pods-Monal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Monal/Pods-Monal.debug.xcconfig"; sourceTree = "<group>"; };
 		861E9C836D3317B11641B333 /* Pods-jrtplib-static.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static.appstore.xcconfig"; sourceTree = "<group>"; };
 		8A54C0030602B177997D366B /* Pods-Monal-OSXTests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSXTests.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSXTests/Pods-Monal-OSXTests.appstore.xcconfig"; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Monal-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Monal-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
-		93EF15C78FDC163B4A72ACA8 /* libPods-Monal Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Monal Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		99727E17D81471E803966620 /* Pods_shareSheet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_shareSheet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9D4B7A0FB4CCDAAA5EEC8690 /* Pods-jrtplib-static-OSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.debug.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.debug.xcconfig"; sourceTree = "<group>"; };
 		A0FA7061BCF979AE4AE0E558 /* Pods-NotificaionService.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-NotificaionService/Pods-NotificaionService.appstore.xcconfig"; sourceTree = "<group>"; };
 		A1F5E44F27B64591044FB28E /* Pods-Monal-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSX.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
-		A548DB6E50EC39897FEA6E40 /* libPods-Monal.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Monal.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ADFC4F2D8AFC07D6C84B0961 /* Pods-Monal.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-Monal/Pods-Monal.appstore.xcconfig"; sourceTree = "<group>"; };
 		AEE82B918E1D2978170F5151 /* Pods-Monal-OSXTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSXTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSXTests/Pods-Monal-OSXTests.debug.xcconfig"; sourceTree = "<group>"; };
 		B14247E40468E759E0E3A5C6 /* Pods-shareSheet.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-shareSheet/Pods-shareSheet.appstore.xcconfig"; sourceTree = "<group>"; };
@@ -1111,8 +1057,8 @@
 		E141DB69283EC3EA1A55B30F /* libPods-Monal-OSXTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Monal-OSXTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB7F14851D3C002B88ABBBF2 /* Pods-Monal Tests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests.appstore.xcconfig"; sourceTree = "<group>"; };
 		F5BECCAF4500573C1631F09F /* Pods-shareSheet.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-shareSheet/Pods-shareSheet.adhoc.xcconfig"; sourceTree = "<group>"; };
-		FB8D12C36D97EF3DFF73E7BB /* libPods-shareSheet.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-shareSheet.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FEB13B684255D50BCF0CE6C6 /* Pods-Monal-OSX.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSX.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX.appstore.xcconfig"; sourceTree = "<group>"; };
+		FF9482F030E43311100BC741 /* Pods_jrtplib_static_OSX.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_jrtplib_static_OSX.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1135,7 +1081,7 @@
 				263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */,
 				26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */,
 				26B69A75131C522F002FCBEB /* Security.framework in Frameworks */,
-				CCA5CE526F2297872025AA74 /* libPods-Monal.a in Frameworks */,
+				3517ED822FCB1456A8D492B1 /* Pods_Monal.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1143,7 +1089,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CAAF78ACC86D0E2D59659974 /* libPods-jrtplib-static-OSX.a in Frameworks */,
+				2AA6B81BDF005CFFBED37AAC /* Pods_jrtplib_static_OSX.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1152,7 +1098,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				26189D0B238C7BFF00EAD70C /* libjrtplib-static.a in Frameworks */,
-				7B0741173BCE3577462F5625 /* libPods-NotificaionService.a in Frameworks */,
+				8C56FAA9FC72C01E0AF98EFE /* Pods_NotificaionService.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1160,7 +1106,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				36A6441E0A4DD56BD134DEF9 /* libPods-Monal Tests.a in Frameworks */,
+				322AD0CC78815E4551793930 /* Pods_Monal_Tests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1179,7 +1125,7 @@
 				26049A5B1B73163300D11866 /* AVFoundation.framework in Frameworks */,
 				26049A511B73156300D11866 /* libjrtplib-static-OSX.a in Frameworks */,
 				26B2A4CB1B73084800272E63 /* AppKit.framework in Frameworks */,
-				EC748DC2933B3CC35A0C9F07 /* libPods-Monal-OSX.a in Frameworks */,
+				A97BB56A74395876C98A21B9 /* Pods_Monal_OSX.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1187,7 +1133,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				135896A7336BA00266B55A98 /* libPods-jrtplib-static.a in Frameworks */,
+				1E779E002AE14108CB07C10A /* Pods_jrtplib_static.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1195,7 +1141,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BC4F1B4138C5CF66C168F2FF /* libPods-shareSheet.a in Frameworks */,
+				FE9BEACD951D0F8D3EBE264D /* Pods_shareSheet.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1789,7 +1735,6 @@
 			children = (
 				26D51CA81E2674D700141E04 /* Oauth2 */,
 				268BCCFD140B23E10025E4D1 /* jrtplib-static */,
-				26B2A4CC1B73097500272E63 /* DDLog */,
 			);
 			name = External;
 			path = ..;
@@ -1813,55 +1758,6 @@
 				26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */,
 			);
 			name = Notifications;
-			sourceTree = "<group>";
-		};
-		26B2A4CC1B73097500272E63 /* DDLog */ = {
-			isa = PBXGroup;
-			children = (
-				26B2A4CD1B73097500272E63 /* CLI */,
-				26B2A4D01B73097500272E63 /* CocoaLumberjack.h */,
-				26B2A4D21B73097500272E63 /* DDAbstractDatabaseLogger.h */,
-				26B2A4D31B73097500272E63 /* DDAbstractDatabaseLogger.m */,
-				26B2A4D41B73097500272E63 /* DDASLLogCapture.h */,
-				26B2A4D51B73097500272E63 /* DDASLLogCapture.m */,
-				26B2A4D61B73097500272E63 /* DDASLLogger.h */,
-				26B2A4D71B73097500272E63 /* DDASLLogger.m */,
-				26B2A4D81B73097500272E63 /* DDAssertMacros.h */,
-				26B2A4D91B73097500272E63 /* DDFileLogger.h */,
-				26B2A4DA1B73097500272E63 /* DDFileLogger.m */,
-				26B2A4DB1B73097500272E63 /* DDLegacyMacros.h */,
-				26B2A4DC1B73097500272E63 /* DDLog+LOGV.h */,
-				26B2A4DD1B73097500272E63 /* DDLog.h */,
-				26B2A4DE1B73097500272E63 /* DDLog.m */,
-				26B2A4DF1B73097500272E63 /* DDLogMacros.h */,
-				26B2A4E01B73097500272E63 /* DDTTYLogger.h */,
-				26B2A4E11B73097500272E63 /* DDTTYLogger.m */,
-				26B2A4E21B73097500272E63 /* Extensions */,
-			);
-			name = DDLog;
-			path = "Shared External/DDLog";
-			sourceTree = "<group>";
-		};
-		26B2A4CD1B73097500272E63 /* CLI */ = {
-			isa = PBXGroup;
-			children = (
-				26B2A4CE1B73097500272E63 /* CLIColor.h */,
-				26B2A4CF1B73097500272E63 /* CLIColor.m */,
-			);
-			path = CLI;
-			sourceTree = "<group>";
-		};
-		26B2A4E21B73097500272E63 /* Extensions */ = {
-			isa = PBXGroup;
-			children = (
-				26B2A4E31B73097500272E63 /* DDContextFilterLogFormatter.h */,
-				26B2A4E41B73097500272E63 /* DDContextFilterLogFormatter.m */,
-				26B2A4E51B73097500272E63 /* DDDispatchQueueLogFormatter.h */,
-				26B2A4E61B73097500272E63 /* DDDispatchQueueLogFormatter.m */,
-				26B2A4E71B73097500272E63 /* DDMultiFormatter.h */,
-				26B2A4E81B73097500272E63 /* DDMultiFormatter.m */,
-			);
-			path = Extensions;
 			sourceTree = "<group>";
 		};
 		26B2A4FF1B730A0900272E63 /* iOS */ = {
@@ -2083,7 +1979,7 @@
 			name = tools;
 			sourceTree = "<group>";
 		};
-		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
+		29B97314FDCFA39411CA2CEA = {
 			isa = PBXGroup;
 			children = (
 				26AA70222146E2B900598605 /* shareSheet.entitlements */,
@@ -2140,14 +2036,14 @@
 				262FE9351D821CD000A70506 /* WebKit.framework */,
 				26B2A5001B730A0D00272E63 /* OSX */,
 				26B2A4FF1B730A0900272E63 /* iOS */,
-				00CD52DF53F94AC491D7404B /* libPods-jrtplib-static.a */,
-				0B878F234C6D75087415906A /* libPods-jrtplib-static-OSX.a */,
-				52ED8290F66D5A1541DD2B0B /* libPods-Monal-OSX.a */,
 				E141DB69283EC3EA1A55B30F /* libPods-Monal-OSXTests.a */,
-				A548DB6E50EC39897FEA6E40 /* libPods-Monal.a */,
-				93EF15C78FDC163B4A72ACA8 /* libPods-Monal Tests.a */,
-				FB8D12C36D97EF3DFF73E7BB /* libPods-shareSheet.a */,
-				06E897287B5489F7A88AD804 /* libPods-NotificaionService.a */,
+				3C40CE7301D792181A28A1F8 /* Pods_Monal.framework */,
+				5F59B43550E822D135D1127E /* Pods_Monal_Tests.framework */,
+				04A27909A4CEFD3AEB9E267A /* Pods_Monal_OSX.framework */,
+				4C28AE0807330E8B6F972591 /* Pods_NotificaionService.framework */,
+				25CAD84C2B49BA56A354B822 /* Pods_jrtplib_static.framework */,
+				FF9482F030E43311100BC741 /* Pods_jrtplib_static_OSX.framework */,
+				99727E17D81471E803966620 /* Pods_shareSheet.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -2315,8 +2211,8 @@
 				26B3F1EC17BAED3A0028EA88 /* Crashlytics */,
 				2665C11C1C4ABF7100CC9A04 /* Remove Build number */,
 				2665C11D1C4ABFB500CC9A04 /* Tag Git */,
-				009C719E4F0BF68E742BA67B /* [CP] Copy Pods Resources */,
 				26AA70212146BBB900598605 /* Embed App Extensions */,
+				1F803E9D8411BA33D0C0AE27 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -2356,7 +2252,6 @@
 				260773BC232FC4E800BFD50F /* Sources */,
 				260773BD232FC4E800BFD50F /* Frameworks */,
 				260773BE232FC4E800BFD50F /* Resources */,
-				6301C1CA2C4E4C975EB6079B /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -2400,7 +2295,6 @@
 				26E456CE1B8421AF004BD74C /* CopyFiles */,
 				2649CE501C4DE4A300CD1E80 /* Remove Build Number */,
 				2649CE511C4DE4A500CD1E80 /* Tag Git */,
-				85961DD6C0DB7B0B37F708BF /* [CP] Copy Pods Resources */,
 				26AA703A2146E2EB00598605 /* Embed App Extensions */,
 				83AC0D4EA8554769B423A13A /* [CP] Embed Pods Frameworks */,
 			);
@@ -2572,7 +2466,7 @@
 				"zh-Hant",
 				Base,
 			);
-			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
+			mainGroup = 29B97314FDCFA39411CA2CEA;
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -2659,28 +2553,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		009C719E4F0BF68E742BA67B /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-Monal/Pods-Monal-resources.sh",
-				"${PODS_ROOT}/SAMKeychain/Support/SAMKeychain.bundle",
-				"${PODS_ROOT}/IDMPhotoBrowser/Classes/IDMPhotoBrowser.bundle",
-				"${PODS_ROOT}/IDMPhotoBrowser/Classes/IDMPBLocalizations.bundle",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/SAMKeychain.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/IDMPhotoBrowser.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/IDMPBLocalizations.bundle",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal/Pods-Monal-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		025AA15AC879260E0740BB9D /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2697,6 +2569,55 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		1F803E9D8411BA33D0C0AE27 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS9.3/CocoaLumberjack.framework",
+				"${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS9.3/SAMKeychain.framework",
+				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS9.3/SignalProtocolC.framework",
+				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS9.3/SignalProtocolObjC.framework",
+				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS9.3/TPCircularBuffer.framework",
+				"${BUILT_PRODUCTS_DIR}/CWStatusBarNotification/CWStatusBarNotification.framework",
+				"${BUILT_PRODUCTS_DIR}/DACircularProgress/DACircularProgress.framework",
+				"${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework",
+				"${BUILT_PRODUCTS_DIR}/EAIntroView/EAIntroView.framework",
+				"${BUILT_PRODUCTS_DIR}/EARestrictedScrollView/EARestrictedScrollView.framework",
+				"${BUILT_PRODUCTS_DIR}/IDMPhotoBrowser/IDMPhotoBrowser.framework",
+				"${BUILT_PRODUCTS_DIR}/MBProgressHUD/MBProgressHUD.framework",
+				"${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework",
+				"${BUILT_PRODUCTS_DIR}/pop/pop.framework",
+				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS13.0/CocoaLumberjack.framework",
+				"${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS13.0/SAMKeychain.framework",
+				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS13.0/SignalProtocolC.framework",
+				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS13.0/SignalProtocolObjC.framework",
+				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS13.0/TPCircularBuffer.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CocoaLumberjack.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SAMKeychain.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SignalProtocolC.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SignalProtocolObjC.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TPCircularBuffer.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CWStatusBarNotification.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DACircularProgress.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DZNEmptyDataSet.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/EAIntroView.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/EARestrictedScrollView.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IDMPhotoBrowser.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MBProgressHUD.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SDWebImage.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/pop.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		24612D6D814D34634030DF43 /* [CP] Check Pods Manifest.lock */ = {
@@ -2828,24 +2749,6 @@
 			shellPath = /bin/sh;
 			shellScript = "if [ \"${CONFIGURATION}\" == \"AppStore\" ]; then\n./Pods/Fabric/iOS/Fabric.framework/run 6e807cf86986312a050437809e762656b44b197c d082f9c014f0bce40ebff3a62eb566eb101232f02d7beab5396912a9efcc8caa\nfi\n";
 		};
-		6301C1CA2C4E4C975EB6079B /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-NotificaionService/Pods-NotificaionService-resources.sh",
-				"${PODS_ROOT}/SAMKeychain/Support/SAMKeychain.bundle",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/SAMKeychain.bundle",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-NotificaionService/Pods-NotificaionService-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		70921ECBDF172CEC71CF4732 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2889,35 +2792,25 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS10.10/SAMKeychain.framework",
+				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS10.10/SignalProtocolC.framework",
+				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-macOS10.10/SignalProtocolObjC.framework",
+				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer-macOS10.10/TPCircularBuffer.framework",
 				"${PODS_ROOT}/Sparkle/Sparkle.framework",
 				"${PODS_ROOT}/Sparkle/Sparkle.framework.dSYM",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SAMKeychain.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SignalProtocolC.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SignalProtocolObjC.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TPCircularBuffer.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Sparkle.framework",
 				"${DWARF_DSYM_FOLDER_PATH}/Sparkle.framework.dSYM",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		85961DD6C0DB7B0B37F708BF /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-resources.sh",
-				"${PODS_ROOT}/SAMKeychain/Support/SAMKeychain.bundle",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/SAMKeychain.bundle",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		B1FC64CB20BFE29A46BF0152 /* [CP] Check Pods Manifest.lock */ = {
@@ -2994,7 +2887,6 @@
 				2633CB43231CB816006D0277 /* MLMessageProcessor.m in Sources */,
 				26B51C4918654D98002134C3 /* LogViewController.m in Sources */,
 				2642EBC718693626006A6C12 /* RTP.mm in Sources */,
-				26B2A4F11B73097500272E63 /* DDASLLogger.m in Sources */,
 				26529F5217FA7B260057F199 /* addContact.m in Sources */,
 				262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */,
 				26C3EDFD1A807E76000E6331 /* ParseA.m in Sources */,
@@ -3010,7 +2902,6 @@
 				2602A70922A5431B006D3E72 /* MLRegSuccessViewController.m in Sources */,
 				26F396DC2197507200EF5720 /* GLTintButton.m in Sources */,
 				26D51CDC1E2674D700141E04 /* NXOAuth2FileStreamWrapper.m in Sources */,
-				26B2A4F31B73097500272E63 /* DDFileLogger.m in Sources */,
 				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,
 				261A6288176C157D00059090 /* MLDisplaySettingsViewController.m in Sources */,
 				2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */,
@@ -3019,7 +2910,6 @@
 				26FB468F18B2755A0043094F /* IPAddress.m in Sources */,
 				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
 				2673CAC321D9244B00256507 /* MLResourcesTableViewController.m in Sources */,
-				26B2A4ED1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */,
 				26D51CD41E2674D700141E04 /* NXOAuth2AccountStore.m in Sources */,
 				26D51CD01E2674D700141E04 /* NXOAuth2AccessToken.m in Sources */,
 				268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */,
@@ -3046,7 +2936,6 @@
 				261B29341FECBBF1001C5CF4 /* ParseFailed.m in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */,
-				26B2A4E91B73097500272E63 /* CLIColor.m in Sources */,
 				26D51CDE1E2674D700141E04 /* NXOAuth2PostBodyPart.m in Sources */,
 				2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */,
 				26C3456E1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */,
@@ -3054,8 +2943,6 @@
 				26C1EA681FF937040085547A /* MLOptOutSettingsViewController.m in Sources */,
 				2661101C238F10360030A4EE /* MLIQProcessor.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
-				26B2A4FB1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */,
-				26B2A4F71B73097500272E63 /* DDTTYLogger.m in Sources */,
 				26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */,
 				262D9EA717921169009292B4 /* ParseMessage.m in Sources */,
 				262D9EAA17921E82009292B4 /* XMPPMessage.m in Sources */,
@@ -3065,7 +2952,6 @@
 				26D59D9020711969006F1DEE /* MLEditGroupViewController.m in Sources */,
 				26EE8B1C179B55D2006781F3 /* ParseChallenge.m in Sources */,
 				26C3EDF71A8072D5000E6331 /* ParseEnabled.m in Sources */,
-				26B2A4F91B73097500272E63 /* DDContextFilterLogFormatter.m in Sources */,
 				26EE8B1F179B67FA006781F3 /* MLNotificationManager.m in Sources */,
 				26D51CE21E2674D700141E04 /* NXOAuth2Request.m in Sources */,
 				26611012238F08980030A4EE /* MLXMPPIdentity.m in Sources */,
@@ -3076,7 +2962,6 @@
 				2633CB4723215558006D0277 /* MLXMPPActivityItem.m in Sources */,
 				262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */,
 				261E672B179E27BE00CB493E /* ParseFailure.m in Sources */,
-				26B2A4F51B73097500272E63 /* DDLog.m in Sources */,
 				26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */,
 				26EC411317BDE39E0031304D /* MLImageManager.m in Sources */,
 				265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */,
@@ -3088,10 +2973,8 @@
 				2661100D238F08820030A4EE /* MLXMPPServer.m in Sources */,
 				26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */,
 				26D51CCC1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */,
-				26B2A4EF1B73097500272E63 /* DDASLLogCapture.m in Sources */,
 				26D0940C22A33E9B009C7AEF /* MLRegisterViewController.m in Sources */,
 				26611026238F17B20030A4EE /* MLMessage.m in Sources */,
-				26B2A4FD1B73097500272E63 /* DDMultiFormatter.m in Sources */,
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
 				26C4B22421B6B91300610282 /* MLDNSLookup.m in Sources */,
 				26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */,
@@ -3152,14 +3035,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26189CE6238B989400EAD70C /* DDASLLogCapture.m in Sources */,
 				26189CD8238B986800EAD70C /* NSData+NXOAuth2.m in Sources */,
 				26189CD7238B985C00EAD70C /* MLHTTPRequest.m in Sources */,
 				26611023238F104B0030A4EE /* MLPresenceProcessor.m in Sources */,
 				26189D03238B9A9300EAD70C /* MLXMPPManager.m in Sources */,
 				26189D07238C792800EAD70C /* Reachability.m in Sources */,
 				26189CE2238B987D00EAD70C /* NXOAuth2PostBodyPart.m in Sources */,
-				26189CE7238B989400EAD70C /* DDASLLogger.m in Sources */,
 				26189CDD238B987D00EAD70C /* NXOAuth2AccountStore.m in Sources */,
 				26189D0D238C7C5C00EAD70C /* MLImageManager.m in Sources */,
 				26189CE4238B987D00EAD70C /* NXOAuth2Request.m in Sources */,
@@ -3169,8 +3050,6 @@
 				26189CF6238B98C300EAD70C /* ParsePresence.m in Sources */,
 				26189CEF238B98C300EAD70C /* jingleCall.m in Sources */,
 				26189CF4238B98C300EAD70C /* ParseIq.m in Sources */,
-				26189CEA238B989400EAD70C /* DDTTYLogger.m in Sources */,
-				26189CEB238B989B00EAD70C /* DDContextFilterLogFormatter.m in Sources */,
 				26189CF7238B98C300EAD70C /* ParseMessage.m in Sources */,
 				26189CF1238B98C300EAD70C /* IPAddress.m in Sources */,
 				26189CDF238B987D00EAD70C /* NXOAuth2Connection.m in Sources */,
@@ -3178,9 +3057,7 @@
 				26189D00238B98CD00EAD70C /* XMPPMessage.m in Sources */,
 				26611019238F08AC0030A4EE /* MLXMPPConnection.m in Sources */,
 				2661102D238F17CB0030A4EE /* MLContact.m in Sources */,
-				26189CEC238B989B00EAD70C /* DDDispatchQueueLogFormatter.m in Sources */,
 				26189CF3238B98C300EAD70C /* ParseStream.m in Sources */,
-				26189CE8238B989400EAD70C /* DDFileLogger.m in Sources */,
 				26189D0E238C7C8100EAD70C /* MLSignalStore.m in Sources */,
 				26189D0C238C7C5300EAD70C /* DataLayer.m in Sources */,
 				260773C4232FC4E800BFD50F /* NotificationService.m in Sources */,
@@ -3190,7 +3067,6 @@
 				26189CD6238B985500EAD70C /* MLEncryptedPayload.m in Sources */,
 				26189CFA238B98C300EAD70C /* ParseEnabled.m in Sources */,
 				26189CFF238B98CD00EAD70C /* XMPPPresence.m in Sources */,
-				26189CE9238B989400EAD70C /* DDLog.m in Sources */,
 				26189CF9238B98C300EAD70C /* ParseFailure.m in Sources */,
 				26189CF8238B98C300EAD70C /* ParseChallenge.m in Sources */,
 				26189CFE238B98CD00EAD70C /* XMPPIQ.m in Sources */,
@@ -3200,11 +3076,9 @@
 				2661101E238F10360030A4EE /* MLIQProcessor.m in Sources */,
 				26189CF0238B98C300EAD70C /* RTP.mm in Sources */,
 				26189CFD238B98CD00EAD70C /* MLXMLNode.m in Sources */,
-				26189CED238B989B00EAD70C /* DDMultiFormatter.m in Sources */,
 				26611028238F17B20030A4EE /* MLMessage.m in Sources */,
 				26189CE3238B987D00EAD70C /* NXOAuth2PostBodyStream.m in Sources */,
 				26189D01238B98D300EAD70C /* xmpp.m in Sources */,
-				26189CE5238B989400EAD70C /* DDAbstractDatabaseLogger.m in Sources */,
 				26189CD9238B986800EAD70C /* NSString+NXOAuth2.m in Sources */,
 				2661100F238F08820030A4EE /* MLXMPPServer.m in Sources */,
 				26189CEE238B98C300EAD70C /* MLMessageProcessor.m in Sources */,
@@ -3229,7 +3103,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				265FF0D51C7FDAC100E2CCE1 /* MLCloudStorageSettings.m in Sources */,
-				26B2A4F01B73097500272E63 /* DDASLLogCapture.m in Sources */,
 				260499E21B730E9000D11866 /* xmpp.m in Sources */,
 				26611018238F08AC0030A4EE /* MLXMPPConnection.m in Sources */,
 				26611022238F104B0030A4EE /* MLPresenceProcessor.m in Sources */,
@@ -3243,7 +3116,6 @@
 				26020B3821B957A0009A9735 /* MLMetaInfo.m in Sources */,
 				26D51CE11E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */,
 				2661D34D1B407ED400EC51BA /* MLContactsCell.m in Sources */,
-				26B2A4F21B73097500272E63 /* DDASLLogger.m in Sources */,
 				2661100E238F08820030A4EE /* MLXMPPServer.m in Sources */,
 				2632EA472006ADFE00191EEB /* MLGroupChatViewController.m in Sources */,
 				2638DAEF1B68F3EF00DF05AC /* MLDisplaySettings.m in Sources */,
@@ -3252,8 +3124,6 @@
 				269574E51C37482A00544A60 /* MLOAuthViewController.m in Sources */,
 				2651AF551B409906008D025C /* MLMainWindow.m in Sources */,
 				26E3ED8B1FEC395D008ABDA5 /* MLServerDetailsVC.m in Sources */,
-				26B2A4F81B73097500272E63 /* DDTTYLogger.m in Sources */,
-				26B2A4FA1B73097500272E63 /* DDContextFilterLogFormatter.m in Sources */,
 				26D51CDF1E2674D700141E04 /* NXOAuth2PostBodyPart.m in Sources */,
 				261B29351FECBBF1001C5CF4 /* ParseFailed.m in Sources */,
 				26D51CCB1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */,
@@ -3276,9 +3146,7 @@
 				260499EC1B7313EA00D11866 /* ParseMessage.m in Sources */,
 				26D51CD71E2674D700141E04 /* NXOAuth2Client.m in Sources */,
 				26D51CCD1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */,
-				26B2A4FC1B73097500272E63 /* DDDispatchQueueLogFormatter.m in Sources */,
 				260499E91B7313E100D11866 /* ParseEnabled.m in Sources */,
-				26B2A4F41B73097500272E63 /* DDFileLogger.m in Sources */,
 				260499F11B73141500D11866 /* EncodingTools.m in Sources */,
 				2626800221E839E400DB7B54 /* MLKeyViewController.m in Sources */,
 				26D51CCF1E2674D700141E04 /* NSURL+NXOAuth2.m in Sources */,
@@ -3296,20 +3164,16 @@
 				2626800621E839FC00DB7B54 /* MLResourcesViewController.m in Sources */,
 				260499EA1B7313E500D11866 /* ParseFailure.m in Sources */,
 				2632EA4220040D2C00191EEB /* MLCallScreen.m in Sources */,
-				26B2A4F61B73097500272E63 /* DDLog.m in Sources */,
-				26B2A4FE1B73097500272E63 /* DDMultiFormatter.m in Sources */,
 				267ECD691B7467B30025337F /* MLXMPPManager.m in Sources */,
 				267B6722226A222E003DB850 /* MLEncryptedPayload.m in Sources */,
 				26020B3421B9565C009A9735 /* MLLinkViewCell.m in Sources */,
 				260499E71B7313DB00D11866 /* ParseResumed.m in Sources */,
-				26B2A4EA1B73097500272E63 /* CLIColor.m in Sources */,
 				260499EF1B7313F300D11866 /* ParseIq.m in Sources */,
 				26D51CDD1E2674D700141E04 /* NXOAuth2FileStreamWrapper.m in Sources */,
 				26C3456F1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */,
 				267B671D226A200D003DB850 /* AESGcm.m in Sources */,
 				263BFBCC22033CA80055A051 /* MLOptOutSettings.m in Sources */,
 				26D51CD91E2674D700141E04 /* NXOAuth2Connection.m in Sources */,
-				26B2A4EE1B73097500272E63 /* DDAbstractDatabaseLogger.m in Sources */,
 				2626800A21E8406900DB7B54 /* MLKeyRow.m in Sources */,
 				26277CE41B7C57670094E4D0 /* MLContactDetails.m in Sources */,
 				2638DAE71B68F3AB00DF05AC /* MLPresenceSettings.m in Sources */,

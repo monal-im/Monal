@@ -20,7 +20,7 @@
 #import "tools.h"
 
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 
 NSString *const kGtalk = @"Gtalk";
 

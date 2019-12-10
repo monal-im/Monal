@@ -1,0 +1,6 @@
+framework module IDMPhotoBrowser {
+  umbrella header "IDMPhotoBrowser-umbrella.h"
+
+  export *
+  module * { export * }
+}

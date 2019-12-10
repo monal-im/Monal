@@ -8,9 +8,9 @@
 
 #import "jingleCall.h"
 
-#import "DDLog.h"
 
-static const int ddLogLevel = LOG_LEVEL_WARN;
+
+
 
 @interface jingleCall()
 
@@ -45,8 +45,8 @@ static const int ddLogLevel = LOG_LEVEL_WARN;
     
     
     dispatch_async(self.netReadQueue, ^{
-        rtp =[[RTP alloc] init];
-        [rtp RTPConnectAddress:self.recipientIP onRemotePort:[self.destinationPort intValue] withLocalPort:[self.localPort intValue]];
+        self->rtp =[[RTP alloc] init];
+        [self->rtp RTPConnectAddress:self.recipientIP onRemotePort:[self.destinationPort intValue] withLocalPort:[self.localPort intValue]];
     });
    return 0;
 }
@@ -56,7 +56,7 @@ static const int ddLogLevel = LOG_LEVEL_WARN;
     if(!self.netReadQueue) return;
     
     dispatch_async(self.netReadQueue, ^{
-        [rtp RTPDisconnect];
+        [self->rtp RTPDisconnect];
     });
 }
 

@@ -56,8 +56,8 @@
 
 #import "Reachability.h"
 
-#import "DDLog.h"
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
+
 
 #define kShouldPrintReachabilityFlags 1
 

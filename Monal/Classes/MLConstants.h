@@ -7,7 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "DDLog.h"
+
+@import CocoaLumberjack;
+#ifdef  DEBUG
+static const DDLogLevel ddLogLevel = DDLogLevelDebug;
+#else
+static const DDLogLevel ddLogLevel = DDLogLevelInfo;
+#endif
 
 //used in OSX only really
 #define kMonalWindowVisible @"kMonalWindowVisible"
@@ -68,9 +74,9 @@
 #endif
 
 //temp not for relase
-#ifndef DEBUG
-#define DEBUG 1
-#endif
+//#ifndef DEBUG
+//#define DEBUG 1
+//#endif
 
 //temp for  a release
 //#ifndef DISABLE_OMEMO

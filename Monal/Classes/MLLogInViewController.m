@@ -10,7 +10,7 @@
 #import "MBProgressHUD.h"
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
-#import "SAMKeychain.h"
+@import SAMKeychain;
 @import QuartzCore;
 @import SafariServices;
 

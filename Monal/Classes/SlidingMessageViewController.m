@@ -8,10 +8,9 @@
 
 #import "SlidingMessageViewController.h"
 #import "MLImageManager.h"
+#import "MLConstants.h"
 
-#import "DDLog.h"
 
-static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

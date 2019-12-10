@@ -25,7 +25,7 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
     kNotificationSettingSectionCount
 };
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 
 @interface MLNotificationSettingsViewController ()
 @property (nonatomic, strong) NSArray *sectionsHeaders;

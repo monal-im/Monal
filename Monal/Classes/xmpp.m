@@ -71,7 +71,7 @@ NSString *const kXMPPSuccess =@"success";
 NSString *const kXMPPPresence = @"presence";
 
 
-static const int ddLogLevel = LOG_LEVEL_DEBUG;
+
 
 @interface xmpp()
 {
@@ -539,9 +539,10 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
         _unAckedStanzas=nil;
         self.connectionProperties.discoveredServices=nil;
         [self persistState];
+        [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
     }
     
-    [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
+  
     
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
     if(_accountNo)
@@ -1252,6 +1253,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
                     
                     MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+                    processor.proceesQueue=self.processQueue;
                     processor.sendIq=^(MLXMLNode * _Nullable iqResponse) {
                         if(iqResponse) {
                             [self send:iqResponse];
@@ -1342,7 +1344,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                     MLMessage *message = [[MLMessage alloc] init];
                                     message.from=messageNode.from;
                                     message.actualFrom= actuallyFrom;
-                                    message.messageText= messageNode.messageText;
+                                    message.messageText= body; //this need to be the processed value since it may be decrypted
                                     message.to=messageNode.to?messageNode.to:self.connectionProperties.identity.jid;
                                     message.messageId=messageNode.idval?messageNode.idval:@"";
                                     message.accountId=self.accountNo;
@@ -1351,6 +1353,7 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                                     message.timestamp =[NSDate date];
                                     message.shouldShowAlert= showAlert;
                                     message.messageType=kMessageTypeText;
+                                    message.hasBeenSent=YES; //if it came in it has been sent to the server
                                     
                                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
                                 }
@@ -2640,12 +2643,6 @@ static NSMutableArray *extracted(xmpp *object) {
 }
 
 
--(void) sendOMEMODevices:(NSArray *) devices {
-    if(!self.connectionProperties.supportsPubSub) return;
-    XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [signalDevice publishDevices:devices];
-    [self send:signalDevice];
-}
 
 -(void) sendOMEMOBundle
 {
@@ -2675,14 +2672,7 @@ static NSMutableArray *extracted(xmpp *object) {
     [self sendOMEMOBundle];
 }
 
--(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
-{
-    if(!self.connectionProperties.supportsPubSub) return;
-    XMPPIQ* query2 =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
-    [query2 setiqTo:jid];
-    [query2 requestBundles:deviceid]; //[NSString stringWithFormat:@"%@", devicenum]
-    [self send:query2];
-}
+
 
 -(void) queryOMEMODevicesFrom:(NSString *) jid
 {

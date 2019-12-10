@@ -17,7 +17,7 @@
 
 @end
 
-static const int ddLogLevel = LOG_LEVEL_VERBOSE;
+
 
 @implementation MLNotificationManager
 

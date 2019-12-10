@@ -1,0 +1,6 @@
+framework module Pods_jrtplib_static {
+  umbrella header "Pods-jrtplib-static-umbrella.h"
+
+  export *
+  module * { export * }
+}

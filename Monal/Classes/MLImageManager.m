@@ -16,7 +16,6 @@
 #import <Cocoa/Cocoa.h>
 #endif
 
-static const int ddLogLevel = LOG_LEVEL_ERROR;
 
 @interface MLImageManager()
 

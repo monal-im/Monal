@@ -24,7 +24,7 @@
 @import QuartzCore;
 @import MobileCoreServices;
 
-static const int ddLogLevel = LOG_LEVEL_ERROR;
+
 
 @interface chatViewController()<IDMPhotoBrowserDelegate>
 
@@ -442,6 +442,9 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
         UINavigationController *nav = segue.destinationViewController;
         ContactDetails* details = (ContactDetails *)nav.topViewController;
         details.contact= self.contact;
+        details.completion=^{
+            [self viewWillAppear:YES];
+        };
     }
 }
 
@@ -1114,6 +1117,8 @@ static const int ddLogLevel = LOG_LEVEL_ERROR;
     
     if(!row.hasBeenSent){
         cell.deliveryFailed=YES;
+    } else {
+        cell.deliveryFailed=NO;
     }
     
     MLMessage *nextRow =nil;

@@ -14,7 +14,7 @@
 #import "MLConstants.h"
 #import "MLImageManager.h"
 
-static const int ddLogLevel = LOG_LEVEL_DEBUG;
+
 
 @interface MLMessageProcessor ()
 @property (nonatomic, strong) SignalContext *signalContext;
@@ -87,10 +87,22 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                 showAlert=NO;
             }
             
-            NSString *body=messageNode.messageText;
-            if(decrypted) body=decrypted;
-            
             NSString *messageType=nil;
+            BOOL encrypted=NO;
+            NSString *body=messageNode.messageText;
+            
+            if(messageNode.oobURL)
+            {
+                messageType=kMessageTypeImage;
+                body=messageNode.oobURL;
+            }
+            
+            if(decrypted) {
+                body=decrypted;
+                encrypted=YES;
+            }
+            
+         
             if(!body  && messageNode.subject)
             {
                 //TODO when we want o handle subject changes
@@ -99,27 +111,17 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                 return;
             }
             
-            if(messageNode.oobURL)
-            {
-                messageType=kMessageTypeImage;
-                body=messageNode.oobURL;
-            }
-            if(!body) body=@"";
-            
-            BOOL encrypted=NO;
-            if(decrypted) encrypted=YES;
-            
             NSString *messageId=messageNode.idval;
             if(messageId.length==0)
             {
-                NSLog(@"Empty ID using guid");
+                DDLogError(@"Empty ID using guid");
                 messageId=[[NSUUID UUID] UUIDString];
             }
             
             [[DataLayer sharedInstance] addMessageFrom:messageNode.from
                                                     to:recipient
                                             forAccount:self->_accountNo
-                                              withBody:body
+                                              withBody:[body copy]
                                           actuallyfrom:messageNode.actualFrom
                                              delivered:YES
                                                 unread:unread
@@ -157,14 +159,16 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
     if(messageNode.encryptedPayload)
     {
         SignalAddress *address = [[SignalAddress alloc] initWithName:messageNode.from deviceId:(uint32_t)messageNode.sid.intValue];
-        if(!self.signalContext) return nil;
-        
+        if(!self.signalContext) {
+            DDLogError(@"Missing signal context");
+            return @"Error decrypting message";
+        }
         
         __block NSDictionary *messageKey;
         [messageNode.signalKeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSDictionary *currentKey = (NSDictionary *) obj;
             NSString* rid=[currentKey objectForKey:@"rid"];
-            if(rid.integerValue==self.monalSignalStore.deviceid)
+            if(rid.intValue==self.monalSignalStore.deviceid)
             {
                 messageKey=currentKey;
                 *stop=YES;
@@ -222,7 +226,14 @@ static const int ddLogLevel = LOG_LEVEL_DEBUG;
                     NSData *decodedPayload = [EncodingTools dataWithBase64EncodedString:messageNode.encryptedPayload];
                     
                     NSData *decData = [AESGcm decrypt:decodedPayload withKey:key andIv:iv withAuth:auth];
-                    return [[NSString alloc] initWithData:decData encoding:NSUTF8StringEncoding];
+                    if(!decData) {
+                        DDLogError(@"could not decrypt message");
+                    }
+                    else  {
+                        DDLogInfo(@"Decrypted message passing bask string.");
+                    }
+                    NSString *messageString= [[NSString alloc] initWithData:decData encoding:NSUTF8StringEncoding];
+                    return messageString;
                     
                 } else  {
                     DDLogError(@"Could not get key");

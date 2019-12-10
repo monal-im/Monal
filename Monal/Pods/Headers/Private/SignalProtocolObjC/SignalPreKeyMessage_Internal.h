@@ -1,1 +1,0 @@
-../../../SignalProtocolObjC/Classes/Models/SignalPreKeyMessage_Internal.h

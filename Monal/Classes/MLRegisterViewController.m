@@ -10,11 +10,12 @@
 #import "MBProgressHUD.h"
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
-#import "SAMKeychain.h"
+
 #import "MLRegSuccessViewController.h"
 
 @import QuartzCore;
 @import SafariServices;
+@import SAMKeychain;
 
 @interface MLRegisterViewController ()
 @property (nonatomic, strong) MBProgressHUD *loginHUD;

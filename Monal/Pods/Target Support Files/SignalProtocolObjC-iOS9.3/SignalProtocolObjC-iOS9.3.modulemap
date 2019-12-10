@@ -1,0 +1,6 @@
+framework module SignalProtocolObjC {
+  umbrella header "SignalProtocolObjC-iOS9.3-umbrella.h"
+
+  export *
+  module * { export * }
+}

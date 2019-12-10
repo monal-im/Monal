@@ -276,6 +276,7 @@
 
 -(IBAction)close:(id)sender
 {
+    if(self.completion) self.completion();
     [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 }
 

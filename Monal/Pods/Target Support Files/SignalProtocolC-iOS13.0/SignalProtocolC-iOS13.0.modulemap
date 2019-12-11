@@ -1,6 +1,0 @@
-framework module SignalProtocolC {
-  umbrella header "SignalProtocolC-iOS13.0-umbrella.h"
-
-  export *
-  module * { export * }
-}

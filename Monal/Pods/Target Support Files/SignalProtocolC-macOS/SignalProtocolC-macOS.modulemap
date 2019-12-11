@@ -1,0 +1,6 @@
+framework module SignalProtocolC {
+  umbrella header "SignalProtocolC-macOS-umbrella.h"
+
+  export *
+  module * { export * }
+}

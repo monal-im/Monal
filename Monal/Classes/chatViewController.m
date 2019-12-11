@@ -103,6 +103,9 @@
     [nc addObserver:self selector:@selector(fetchMoreMessages) name:kMLMAMMore object:nil];
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    #ifdef TARGET_OS_MACCATALYST
+    self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
+    #endif
     
     self.hidesBottomBarWhenPushed=YES;
     

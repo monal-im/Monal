@@ -13,7 +13,6 @@
 #import "EncodingTools.h"
 #import "MLXMPPManager.h"
 
-#import "SAMKeychain.h"
 #import "MLImageManager.h"
 
 //XMPP objects

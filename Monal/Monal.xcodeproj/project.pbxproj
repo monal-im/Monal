@@ -12,34 +12,14 @@
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		1E779E002AE14108CB07C10A /* Pods_jrtplib_static.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 25CAD84C2B49BA56A354B822 /* Pods_jrtplib_static.framework */; };
-		2601D9B00FBF255D004DB939 /* DataLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A70FBF255D004DB939 /* DataLayer.m */; };
 		2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CA0FBF25EF004DB939 /* sworim.sqlite */; };
 		2601D9D40FBF262E004DB939 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2601D9D30FBF262E004DB939 /* libsqlite3.dylib */; };
 		26020B3421B9565C009A9735 /* MLLinkViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26020B3321B9565C009A9735 /* MLLinkViewCell.m */; };
-		26020B3721B957A0009A9735 /* MLMetaInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 26020B3621B957A0009A9735 /* MLMetaInfo.m */; };
-		26020B3821B957A0009A9735 /* MLMetaInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 26020B3621B957A0009A9735 /* MLMetaInfo.m */; };
 		2602837D1D8DD30E001DD6B8 /* QuickLook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2602837C1D8DD30E001DD6B8 /* QuickLook.framework */; };
 		2602837F1D8DD56B001DD6B8 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2602837E1D8DD56B001DD6B8 /* Quartz.framework */; };
 		260283861D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 260283851D8DEFC1001DD6B8 /* MLPreviewObject.m */; };
 		260283871D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 260283851D8DEFC1001DD6B8 /* MLPreviewObject.m */; };
 		2602A70922A5431B006D3E72 /* MLRegSuccessViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2602A70822A5431A006D3E72 /* MLRegSuccessViewController.m */; };
-		260499E21B730E9000D11866 /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
-		260499E31B730E9500D11866 /* MLXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* MLXMLNode.m */; };
-		260499E41B730E9800D11866 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EA91780D6B7002B7085 /* XMPPIQ.m */; };
-		260499E51B730E9B00D11866 /* XMPPPresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 264E345A1787BAB100BC7BD0 /* XMPPPresence.m */; };
-		260499E61B730E9E00D11866 /* XMPPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA917921E82009292B4 /* XMPPMessage.m */; };
-		260499E71B7313DB00D11866 /* ParseResumed.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFF1A819A38000E6331 /* ParseResumed.m */; };
-		260499E81B7313DF00D11866 /* ParseA.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFC1A807E76000E6331 /* ParseA.m */; };
-		260499E91B7313E100D11866 /* ParseEnabled.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDF61A8072D5000E6331 /* ParseEnabled.m */; };
-		260499EA1B7313E500D11866 /* ParseFailure.m in Sources */ = {isa = PBXBuildFile; fileRef = 261E672A179E27BE00CB493E /* ParseFailure.m */; };
-		260499EB1B7313E800D11866 /* ParseChallenge.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1B179B55D2006781F3 /* ParseChallenge.m */; };
-		260499EC1B7313EA00D11866 /* ParseMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA617921169009292B4 /* ParseMessage.m */; };
-		260499ED1B7313ED00D11866 /* ParsePresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 261AC91C1788A49C00E05657 /* ParsePresence.m */; };
-		260499EE1B7313F000D11866 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EB11780DFD9002B7085 /* XMPPParser.m */; };
-		260499EF1B7313F300D11866 /* ParseIq.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EAC1780DE5C002B7085 /* ParseIq.m */; };
-		260499F01B7313F600D11866 /* ParseStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 263F1279177F867B0025B235 /* ParseStream.m */; };
-		260499F11B73141500D11866 /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
-		260499F21B7314D600D11866 /* jingleCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC918693634006A6C12 /* jingleCall.m */; };
 		260499F51B7314F400D11866 /* rtcpapppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006BB140B43BB00CF1107 /* rtcpapppacket.cpp */; };
 		260499F61B7314F400D11866 /* rtcpbyepacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006BD140B43BB00CF1107 /* rtcpbyepacket.cpp */; };
 		260499F71B7314F400D11866 /* rtcpcompoundpacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006BF140B43BB00CF1107 /* rtcpcompoundpacket.cpp */; };
@@ -126,16 +106,11 @@
 		26049A4A1B7314F400D11866 /* rtpudpv4transmitter.hh in Headers */ = {isa = PBXBuildFile; fileRef = 2640070F140B43BB00CF1107 /* rtpudpv4transmitter.hh */; };
 		26049A4B1B7314F400D11866 /* rtpudpv6transmitter.hh in Headers */ = {isa = PBXBuildFile; fileRef = 26400711140B43BB00CF1107 /* rtpudpv6transmitter.hh */; };
 		26049A511B73156300D11866 /* libjrtplib-static-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 26049A501B7314F400D11866 /* libjrtplib-static-OSX.a */; };
-		26049A561B7315A000D11866 /* RTP.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC618693626006A6C12 /* RTP.mm */; };
-		26049A571B7315C800D11866 /* IPAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FB468E18B2755A0043094F /* IPAddress.m */; };
 		26049A5B1B73163300D11866 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26049A5A1B73163300D11866 /* AVFoundation.framework */; };
 		260773C4232FC4E800BFD50F /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = 260773C3232FC4E800BFD50F /* NotificationService.m */; };
 		260870D81B7034460036539B /* MLAccountEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 260870D71B7034460036539B /* MLAccountEdit.m */; };
 		2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */; };
 		260C20C021B4D02F0031399F /* Settings.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 260C20BF21B4D02F0031399F /* Settings.storyboard */; };
-		260C51D1177F08F50039634B /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
-		260C51D4177F44AD0039634B /* MLXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* MLXMLNode.m */; };
-		260C6C94178080730004E2E1 /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
 		2613BECF1EA41C8600C9F4C5 /* PushKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2613BECE1EA41C8600C9F4C5 /* PushKit.framework */; };
 		2614B64F1C54095D004FF2FA /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2614B64E1C54095D004FF2FA /* libz.tbd */; };
 		261528C51869CE5300BF62D6 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 261528C41869CE5300BF62D6 /* AudioToolbox.framework */; };
@@ -144,60 +119,11 @@
 		26158AF51FFA8A6A00E53BDC /* opensource.html in Resources */ = {isa = PBXBuildFile; fileRef = 26158AF31FFA8A6A00E53BDC /* opensource.html */; };
 		261894921B40483000C957C3 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
 		26189C8B238A526500EAD70C /* MLSubscriptionTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26189C8A238A526500EAD70C /* MLSubscriptionTableViewController.m */; };
-		26189CD5238B985500EAD70C /* AESGcm.m in Sources */ = {isa = PBXBuildFile; fileRef = 267B671B226A200D003DB850 /* AESGcm.m */; };
-		26189CD6238B985500EAD70C /* MLEncryptedPayload.m in Sources */ = {isa = PBXBuildFile; fileRef = 267B6720226A222E003DB850 /* MLEncryptedPayload.m */; };
-		26189CD7238B985C00EAD70C /* MLHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */; };
-		26189CD8238B986800EAD70C /* NSData+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAA1E2674D700141E04 /* NSData+NXOAuth2.m */; };
-		26189CD9238B986800EAD70C /* NSString+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAC1E2674D700141E04 /* NSString+NXOAuth2.m */; };
-		26189CDA238B986800EAD70C /* NSURL+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAE1E2674D700141E04 /* NSURL+NXOAuth2.m */; };
-		26189CDB238B987D00EAD70C /* NXOAuth2AccessToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB31E2674D700141E04 /* NXOAuth2AccessToken.m */; };
-		26189CDC238B987D00EAD70C /* NXOAuth2Account.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB51E2674D700141E04 /* NXOAuth2Account.m */; };
-		26189CDD238B987D00EAD70C /* NXOAuth2AccountStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB71E2674D700141E04 /* NXOAuth2AccountStore.m */; };
-		26189CDE238B987D00EAD70C /* NXOAuth2Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB91E2674D700141E04 /* NXOAuth2Client.m */; };
-		26189CDF238B987D00EAD70C /* NXOAuth2Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CBC1E2674D700141E04 /* NXOAuth2Connection.m */; };
-		26189CE0238B987D00EAD70C /* NXOAuth2Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CBF1E2674D700141E04 /* NXOAuth2Constants.m */; };
-		26189CE1238B987D00EAD70C /* NXOAuth2FileStreamWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC11E2674D700141E04 /* NXOAuth2FileStreamWrapper.m */; };
-		26189CE2238B987D00EAD70C /* NXOAuth2PostBodyPart.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC31E2674D700141E04 /* NXOAuth2PostBodyPart.m */; };
-		26189CE3238B987D00EAD70C /* NXOAuth2PostBodyStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC51E2674D700141E04 /* NXOAuth2PostBodyStream.m */; };
-		26189CE4238B987D00EAD70C /* NXOAuth2Request.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC71E2674D700141E04 /* NXOAuth2Request.m */; };
-		26189CEE238B98C300EAD70C /* MLMessageProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB42231CB816006D0277 /* MLMessageProcessor.m */; };
-		26189CEF238B98C300EAD70C /* jingleCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC918693634006A6C12 /* jingleCall.m */; };
-		26189CF0238B98C300EAD70C /* RTP.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC618693626006A6C12 /* RTP.mm */; };
-		26189CF1238B98C300EAD70C /* IPAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FB468E18B2755A0043094F /* IPAddress.m */; };
-		26189CF2238B98C300EAD70C /* ParseFailed.m in Sources */ = {isa = PBXBuildFile; fileRef = 261B29321FECBBF0001C5CF4 /* ParseFailed.m */; };
-		26189CF3238B98C300EAD70C /* ParseStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 263F1279177F867B0025B235 /* ParseStream.m */; };
-		26189CF4238B98C300EAD70C /* ParseIq.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EAC1780DE5C002B7085 /* ParseIq.m */; };
-		26189CF5238B98C300EAD70C /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EB11780DFD9002B7085 /* XMPPParser.m */; };
-		26189CF6238B98C300EAD70C /* ParsePresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 261AC91C1788A49C00E05657 /* ParsePresence.m */; };
-		26189CF7238B98C300EAD70C /* ParseMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA617921169009292B4 /* ParseMessage.m */; };
-		26189CF8238B98C300EAD70C /* ParseChallenge.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1B179B55D2006781F3 /* ParseChallenge.m */; };
-		26189CF9238B98C300EAD70C /* ParseFailure.m in Sources */ = {isa = PBXBuildFile; fileRef = 261E672A179E27BE00CB493E /* ParseFailure.m */; };
-		26189CFA238B98C300EAD70C /* ParseEnabled.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDF61A8072D5000E6331 /* ParseEnabled.m */; };
-		26189CFB238B98C300EAD70C /* ParseA.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFC1A807E76000E6331 /* ParseA.m */; };
-		26189CFC238B98C300EAD70C /* ParseResumed.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFF1A819A38000E6331 /* ParseResumed.m */; };
-		26189CFD238B98CD00EAD70C /* MLXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* MLXMLNode.m */; };
-		26189CFE238B98CD00EAD70C /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EA91780D6B7002B7085 /* XMPPIQ.m */; };
-		26189CFF238B98CD00EAD70C /* XMPPPresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 264E345A1787BAB100BC7BD0 /* XMPPPresence.m */; };
-		26189D00238B98CD00EAD70C /* XMPPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA917921E82009292B4 /* XMPPMessage.m */; };
-		26189D01238B98D300EAD70C /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
-		26189D02238B98D300EAD70C /* MLDNSLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C4B22321B6B91300610282 /* MLDNSLookup.m */; };
-		26189D03238B9A9300EAD70C /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
-		26189D06238C790C00EAD70C /* MLPush.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C01306233025DA001D411D /* MLPush.m */; };
-		26189D07238C792800EAD70C /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; };
-		26189D08238C793100EAD70C /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
-		26189D0B238C7BFF00EAD70C /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
-		26189D0C238C7C5300EAD70C /* DataLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A70FBF255D004DB939 /* DataLayer.m */; };
-		26189D0D238C7C5C00EAD70C /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
-		26189D0E238C7C8100EAD70C /* MLSignalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 263AFDFB209B3B35007F9CEE /* MLSignalStore.m */; };
 		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
 		261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
 		261A6288176C157D00059090 /* MLDisplaySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6287176C157D00059090 /* MLDisplaySettingsViewController.m */; };
 		261A628B176C159000059090 /* AccountsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A628A176C159000059090 /* AccountsViewController.m */; };
 		261A628E176C15AD00059090 /* ChatLogsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A628D176C15AD00059090 /* ChatLogsViewController.m */; };
-		261AC91D1788A49C00E05657 /* ParsePresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 261AC91C1788A49C00E05657 /* ParsePresence.m */; };
-		261B29341FECBBF1001C5CF4 /* ParseFailed.m in Sources */ = {isa = PBXBuildFile; fileRef = 261B29321FECBBF0001C5CF4 /* ParseFailed.m */; };
-		261B29351FECBBF1001C5CF4 /* ParseFailed.m in Sources */ = {isa = PBXBuildFile; fileRef = 261B29321FECBBF0001C5CF4 /* ParseFailed.m */; };
-		261E672B179E27BE00CB493E /* ParseFailure.m in Sources */ = {isa = PBXBuildFile; fileRef = 261E672A179E27BE00CB493E /* ParseFailure.m */; };
 		2626800221E839E400DB7B54 /* MLKeyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2626800121E839E400DB7B54 /* MLKeyViewController.m */; };
 		2626800621E839FC00DB7B54 /* MLResourcesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2626800421E839FC00DB7B54 /* MLResourcesViewController.m */; };
 		2626800A21E8406900DB7B54 /* MLKeyRow.m in Sources */ = {isa = PBXBuildFile; fileRef = 2626800921E8406900DB7B54 /* MLKeyRow.m */; };
@@ -206,8 +132,6 @@
 		262797AF178A577300B85D94 /* MLContactCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262797AE178A577300B85D94 /* MLContactCell.m */; };
 		26292F4F1309CAE100097280 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26292F4E1309CAE100097280 /* CFNetwork.framework */; };
 		262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 262AEFE720AE756800498F82 /* MLMAMPrefTableViewController.m */; };
-		262D9EA717921169009292B4 /* ParseMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA617921169009292B4 /* ParseMessage.m */; };
-		262D9EAA17921E82009292B4 /* XMPPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA917921E82009292B4 /* XMPPMessage.m */; };
 		262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262E51901AD8CAC600788351 /* MLButtonCell.m */; };
 		262E51931AD8CAC600788351 /* MLButtonCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 262E51911AD8CAC600788351 /* MLButtonCell.xib */; };
 		262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262E51951AD8CB7200788351 /* MLTextInputCell.m */; };
@@ -217,23 +141,17 @@
 		2632EA4220040D2C00191EEB /* MLCallScreen.m in Sources */ = {isa = PBXBuildFile; fileRef = 2632EA4120040D2C00191EEB /* MLCallScreen.m */; };
 		2632EA472006ADFE00191EEB /* MLGroupChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2632EA452006ADFD00191EEB /* MLGroupChatViewController.m */; };
 		2632EA4B20080C2C00191EEB /* MLGroupChatFavoritesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2632EA4A20080C2C00191EEB /* MLGroupChatFavoritesViewController.m */; };
-		2633CB43231CB816006D0277 /* MLMessageProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB42231CB816006D0277 /* MLMessageProcessor.m */; };
-		2633CB44231CB816006D0277 /* MLMessageProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB42231CB816006D0277 /* MLMessageProcessor.m */; };
 		2633CB4723215558006D0277 /* MLXMPPActivityItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB4623215558006D0277 /* MLXMPPActivityItem.m */; };
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
-		26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
 		2638008B2374816D00144929 /* NotificaionService.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 260773C0232FC4E800BFD50F /* NotificaionService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		2638DAE71B68F3AB00DF05AC /* MLPresenceSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 2638DAE61B68F3AB00DF05AC /* MLPresenceSettings.m */; };
 		2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 2638DAE91B68F3D400DF05AC /* MLAccountSettings.m */; };
 		2638DAEF1B68F3EF00DF05AC /* MLDisplaySettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 2638DAEE1B68F3EF00DF05AC /* MLDisplaySettings.m */; };
-		263AFDFC209B3B35007F9CEE /* MLSignalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 263AFDFB209B3B35007F9CEE /* MLSignalStore.m */; };
-		263AFDFD209B3B35007F9CEE /* MLSignalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 263AFDFB209B3B35007F9CEE /* MLSignalStore.m */; };
 		263BC64F218BEE9F00FA0203 /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
 		263BFBCC22033CA80055A051 /* MLOptOutSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 263BFBCB22033CA80055A051 /* MLOptOutSettings.m */; };
 		263DFAC02183D7160038E716 /* MLSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 263DFABE2183A59B0038E716 /* MLSelectionController.m */; };
 		263DFAC32187D0E00038E716 /* MLLinkCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 263DFAC22187D0E00038E716 /* MLLinkCell.m */; };
-		263F127A177F867B0025B235 /* ParseStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 263F1279177F867B0025B235 /* ParseStream.m */; };
 		263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 263F568C121B5E970027D85D /* MediaPlayer.framework */; };
 		26400712140B43BB00CF1107 /* rtcpapppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006BB140B43BB00CF1107 /* rtcpapppacket.cpp */; };
 		26400713140B43BB00CF1107 /* rtcpapppacket.hh in Headers */ = {isa = PBXBuildFile; fileRef = 264006BC140B43BB00CF1107 /* rtcpapppacket.hh */; };
@@ -320,8 +238,6 @@
 		26400766140B43BB00CF1107 /* rtpudpv4transmitter.hh in Headers */ = {isa = PBXBuildFile; fileRef = 2640070F140B43BB00CF1107 /* rtpudpv4transmitter.hh */; };
 		26400767140B43BB00CF1107 /* rtpudpv6transmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26400710140B43BB00CF1107 /* rtpudpv6transmitter.cpp */; };
 		26400768140B43BB00CF1107 /* rtpudpv6transmitter.hh in Headers */ = {isa = PBXBuildFile; fileRef = 26400711140B43BB00CF1107 /* rtpudpv6transmitter.hh */; };
-		2642EBC718693626006A6C12 /* RTP.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC618693626006A6C12 /* RTP.mm */; };
-		2642EBCA18693634006A6C12 /* jingleCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC918693634006A6C12 /* jingleCall.m */; };
 		2642EBD01869425D006A6C12 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2642EBCF1869425D006A6C12 /* CoreAudio.framework */; };
 		2644D48E1FEFAF2F00F46AB5 /* dsa_pub.pem in Resources */ = {isa = PBXBuildFile; fileRef = 2644D48D1FEFAF2E00F46AB5 /* dsa_pub.pem */; };
 		2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2644D4911FF0064C00F46AB5 /* MLChatImageCell.m */; };
@@ -330,36 +246,13 @@
 		26470F521835C4080069E3E0 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
 		2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */; };
 		264A7E751AA7263600E860E3 /* MLSwitchCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264A7E741AA7263600E860E3 /* MLSwitchCell.xib */; };
-		264E345B1787BAB100BC7BD0 /* XMPPPresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 264E345A1787BAB100BC7BD0 /* XMPPPresence.m */; };
 		2651AF551B409906008D025C /* MLMainWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 2651AF541B409906008D025C /* MLMainWindow.m */; };
 		26529F5217FA7B260057F199 /* addContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FE17BDD85F0031304D /* addContact.m */; };
 		2653EAE61C5B243400ED97F7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2653EAE51C5B243400ED97F7 /* Main.storyboard */; };
 		265802851B785B8900C35014 /* MLDisabledScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 265802841B785B8900C35014 /* MLDisabledScrollView.m */; };
 		265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */; };
 		265F0B631B75719E00A63F20 /* MLAccountRow.m in Sources */ = {isa = PBXBuildFile; fileRef = 265F0B621B75719E00A63F20 /* MLAccountRow.m */; };
-		265F6BA21B7B0040006B8EBA /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
 		265FF0D51C7FDAC100E2CCE1 /* MLCloudStorageSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 265FF0D41C7FDAC100E2CCE1 /* MLCloudStorageSettings.m */; };
-		2661100D238F08820030A4EE /* MLXMPPServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661100C238F08820030A4EE /* MLXMPPServer.m */; };
-		2661100E238F08820030A4EE /* MLXMPPServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661100C238F08820030A4EE /* MLXMPPServer.m */; };
-		2661100F238F08820030A4EE /* MLXMPPServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661100C238F08820030A4EE /* MLXMPPServer.m */; };
-		26611012238F08980030A4EE /* MLXMPPIdentity.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611011238F08980030A4EE /* MLXMPPIdentity.m */; };
-		26611013238F08980030A4EE /* MLXMPPIdentity.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611011238F08980030A4EE /* MLXMPPIdentity.m */; };
-		26611014238F08980030A4EE /* MLXMPPIdentity.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611011238F08980030A4EE /* MLXMPPIdentity.m */; };
-		26611017238F08AC0030A4EE /* MLXMPPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611016238F08AC0030A4EE /* MLXMPPConnection.m */; };
-		26611018238F08AC0030A4EE /* MLXMPPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611016238F08AC0030A4EE /* MLXMPPConnection.m */; };
-		26611019238F08AC0030A4EE /* MLXMPPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611016238F08AC0030A4EE /* MLXMPPConnection.m */; };
-		2661101C238F10360030A4EE /* MLIQProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661101B238F10360030A4EE /* MLIQProcessor.m */; };
-		2661101D238F10360030A4EE /* MLIQProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661101B238F10360030A4EE /* MLIQProcessor.m */; };
-		2661101E238F10360030A4EE /* MLIQProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661101B238F10360030A4EE /* MLIQProcessor.m */; };
-		26611021238F104B0030A4EE /* MLPresenceProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611020238F104B0030A4EE /* MLPresenceProcessor.m */; };
-		26611022238F104B0030A4EE /* MLPresenceProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611020238F104B0030A4EE /* MLPresenceProcessor.m */; };
-		26611023238F104B0030A4EE /* MLPresenceProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611020238F104B0030A4EE /* MLPresenceProcessor.m */; };
-		26611026238F17B20030A4EE /* MLMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611025238F17B20030A4EE /* MLMessage.m */; };
-		26611027238F17B20030A4EE /* MLMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611025238F17B20030A4EE /* MLMessage.m */; };
-		26611028238F17B20030A4EE /* MLMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611025238F17B20030A4EE /* MLMessage.m */; };
-		2661102B238F17CB0030A4EE /* MLContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661102A238F17CB0030A4EE /* MLContact.m */; };
-		2661102C238F17CB0030A4EE /* MLContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661102A238F17CB0030A4EE /* MLContact.m */; };
-		2661102D238F17CB0030A4EE /* MLContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661102A238F17CB0030A4EE /* MLContact.m */; };
 		2661D3411B40765A00EC51BA /* MLContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3401B40765A00EC51BA /* MLContactsViewController.m */; };
 		2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D3431B40766F00EC51BA /* MLChatViewController.m */; };
 		2661D34D1B407ED400EC51BA /* MLContactsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661D34C1B407ED400EC51BA /* MLContactsCell.m */; };
@@ -378,17 +271,11 @@
 		267710261E21923600464002 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 267710231E21923600464002 /* README.md */; };
 		2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */; };
 		2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98D185AB739003AF53B /* ChatLogContactViewController.m */; };
-		267B671C226A200D003DB850 /* AESGcm.m in Sources */ = {isa = PBXBuildFile; fileRef = 267B671B226A200D003DB850 /* AESGcm.m */; };
-		267B671D226A200D003DB850 /* AESGcm.m in Sources */ = {isa = PBXBuildFile; fileRef = 267B671B226A200D003DB850 /* AESGcm.m */; };
-		267B6721226A222E003DB850 /* MLEncryptedPayload.m in Sources */ = {isa = PBXBuildFile; fileRef = 267B6720226A222E003DB850 /* MLEncryptedPayload.m */; };
-		267B6722226A222E003DB850 /* MLEncryptedPayload.m in Sources */ = {isa = PBXBuildFile; fileRef = 267B6720226A222E003DB850 /* MLEncryptedPayload.m */; };
 		267C99082067D7BE00AB876C /* MLGroupChatTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 267C99072067D7BE00AB876C /* MLGroupChatTableViewController.m */; };
 		267C9921206DE23100AB876C /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267C9920206DE23100AB876C /* UserNotifications.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
-		267ECD691B7467B30025337F /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		267ECD6B1B746C340025337F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6A1B746C340025337F /* Security.framework */; };
 		267ECD6D1B746C660025337F /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6C1B746C660025337F /* CFNetwork.framework */; };
 		268130181BFD8ECA0074C8EE /* MLAddContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 268130171BFD8ECA0074C8EE /* MLAddContact.m */; };
-		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
 		268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 264FF3E4158A855D00D97B86 /* AVFoundation.framework */; };
@@ -412,53 +299,71 @@
 		26B0CA8B21AE410E0080B133 /* AlertSounds in Resources */ = {isa = PBXBuildFile; fileRef = 26B0CA8A21AE410E0080B133 /* AlertSounds */; };
 		26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26B2A4BA1B73061400272E63 /* Images.xcassets */; };
 		26B2A4BC1B7306C000272E63 /* sworim.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CA0FBF25EF004DB939 /* sworim.sqlite */; };
-		26B2A4BE1B7306E500272E63 /* DataLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A70FBF255D004DB939 /* DataLayer.m */; };
 		26B2A4CB1B73084800272E63 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B2A4CA1B73084800272E63 /* AppKit.framework */; };
-		26B2A5021B730AE100272E63 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		26B51C4918654D98002134C3 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B51C4718654D98002134C3 /* LogViewController.m */; };
 		26B69A75131C522F002FCBEB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B69A74131C522F002FCBEB /* Security.framework */; };
 		26BDECDC1867B7790018670D /* CallViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26BDECDA1867B7790018670D /* CallViewController.m */; };
-		26C01307233025DA001D411D /* MLPush.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C01306233025DA001D411D /* MLPush.m */; };
 		26C1EA681FF937040085547A /* MLOptOutSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C1EA671FF937040085547A /* MLOptOutSettingsViewController.m */; };
 		26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */; };
-		26C3456E1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */; };
-		26C3456F1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */; };
-		26C3EDF71A8072D5000E6331 /* ParseEnabled.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDF61A8072D5000E6331 /* ParseEnabled.m */; };
-		26C3EDFD1A807E76000E6331 /* ParseA.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFC1A807E76000E6331 /* ParseA.m */; };
-		26C3EE001A819A38000E6331 /* ParseResumed.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFF1A819A38000E6331 /* ParseResumed.m */; };
-		26C4B22421B6B91300610282 /* MLDNSLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C4B22321B6B91300610282 /* MLDNSLookup.m */; };
-		26C4B22521B6B91300610282 /* MLDNSLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C4B22321B6B91300610282 /* MLDNSLookup.m */; };
 		26C836622396CB9200C9F21D /* MLIQProcessorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C836612396CB9200C9F21D /* MLIQProcessorTest.m */; };
-		26CF3EAA1780D6B7002B7085 /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EA91780D6B7002B7085 /* XMPPIQ.m */; };
-		26CF3EAD1780DE5D002B7085 /* ParseIq.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EAC1780DE5C002B7085 /* ParseIq.m */; };
-		26CF3EB21780DFD9002B7085 /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EB11780DFD9002B7085 /* XMPPParser.m */; };
+		26CC579623A0867400ABB92A /* monalxmpp.h in Headers */ = {isa = PBXBuildFile; fileRef = 26CC579423A0867400ABB92A /* monalxmpp.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		26CC579923A0867400ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
+		26CC57A023A0868200ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
+		26CC57A223A086AA00ABB92A /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
+		26CC57A323A086AA00ABB92A /* MLDNSLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C4B22321B6B91300610282 /* MLDNSLookup.m */; };
+		26CC57A423A086AA00ABB92A /* MLXMPPServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661100C238F08820030A4EE /* MLXMPPServer.m */; };
+		26CC57A523A086AA00ABB92A /* MLXMPPIdentity.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611011238F08980030A4EE /* MLXMPPIdentity.m */; };
+		26CC57A623A086AA00ABB92A /* MLXMPPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611016238F08AC0030A4EE /* MLXMPPConnection.m */; };
+		26CC57A723A086C000ABB92A /* ParseFailed.m in Sources */ = {isa = PBXBuildFile; fileRef = 261B29321FECBBF0001C5CF4 /* ParseFailed.m */; };
+		26CC57A823A086C000ABB92A /* ParseStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 263F1279177F867B0025B235 /* ParseStream.m */; };
+		26CC57A923A086C000ABB92A /* ParseIq.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EAC1780DE5C002B7085 /* ParseIq.m */; };
+		26CC57AA23A086C000ABB92A /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EB11780DFD9002B7085 /* XMPPParser.m */; };
+		26CC57AB23A086C000ABB92A /* ParsePresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 261AC91C1788A49C00E05657 /* ParsePresence.m */; };
+		26CC57AC23A086C000ABB92A /* ParseMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA617921169009292B4 /* ParseMessage.m */; };
+		26CC57AD23A086C000ABB92A /* ParseChallenge.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1B179B55D2006781F3 /* ParseChallenge.m */; };
+		26CC57AE23A086C000ABB92A /* ParseFailure.m in Sources */ = {isa = PBXBuildFile; fileRef = 261E672A179E27BE00CB493E /* ParseFailure.m */; };
+		26CC57AF23A086C000ABB92A /* ParseEnabled.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDF61A8072D5000E6331 /* ParseEnabled.m */; };
+		26CC57B023A086C000ABB92A /* ParseA.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFC1A807E76000E6331 /* ParseA.m */; };
+		26CC57B123A086C000ABB92A /* ParseResumed.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFF1A819A38000E6331 /* ParseResumed.m */; };
+		26CC57B223A086CC00ABB92A /* MLXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* MLXMLNode.m */; };
+		26CC57B323A086CC00ABB92A /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EA91780D6B7002B7085 /* XMPPIQ.m */; };
+		26CC57B423A086CC00ABB92A /* XMPPPresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 264E345A1787BAB100BC7BD0 /* XMPPPresence.m */; };
+		26CC57B523A086CC00ABB92A /* XMPPMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA917921E82009292B4 /* XMPPMessage.m */; };
+		26CC57B623A0876300ABB92A /* AESGcm.m in Sources */ = {isa = PBXBuildFile; fileRef = 267B671B226A200D003DB850 /* AESGcm.m */; };
+		26CC57B723A0876300ABB92A /* MLEncryptedPayload.m in Sources */ = {isa = PBXBuildFile; fileRef = 267B6720226A222E003DB850 /* MLEncryptedPayload.m */; };
+		26CC57B823A0876300ABB92A /* MLHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */; };
+		26CC57B923A0876B00ABB92A /* NSData+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAA1E2674D700141E04 /* NSData+NXOAuth2.m */; };
+		26CC57BA23A0876B00ABB92A /* NSString+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAC1E2674D700141E04 /* NSString+NXOAuth2.m */; };
+		26CC57BB23A0876B00ABB92A /* NSURL+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAE1E2674D700141E04 /* NSURL+NXOAuth2.m */; };
+		26CC57BC23A0877D00ABB92A /* NXOAuth2AccessToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB31E2674D700141E04 /* NXOAuth2AccessToken.m */; };
+		26CC57BD23A0877D00ABB92A /* NXOAuth2Account.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB51E2674D700141E04 /* NXOAuth2Account.m */; };
+		26CC57BE23A0877D00ABB92A /* NXOAuth2AccountStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB71E2674D700141E04 /* NXOAuth2AccountStore.m */; };
+		26CC57BF23A0877D00ABB92A /* NXOAuth2Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB91E2674D700141E04 /* NXOAuth2Client.m */; };
+		26CC57C023A0877D00ABB92A /* NXOAuth2Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CBC1E2674D700141E04 /* NXOAuth2Connection.m */; };
+		26CC57C123A0877D00ABB92A /* NXOAuth2Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CBF1E2674D700141E04 /* NXOAuth2Constants.m */; };
+		26CC57C223A0877D00ABB92A /* NXOAuth2FileStreamWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC11E2674D700141E04 /* NXOAuth2FileStreamWrapper.m */; };
+		26CC57C323A0877D00ABB92A /* NXOAuth2PostBodyPart.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC31E2674D700141E04 /* NXOAuth2PostBodyPart.m */; };
+		26CC57C423A0877D00ABB92A /* NXOAuth2PostBodyStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC51E2674D700141E04 /* NXOAuth2PostBodyStream.m */; };
+		26CC57C523A0877D00ABB92A /* NXOAuth2Request.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC71E2674D700141E04 /* NXOAuth2Request.m */; };
+		26CC57C723A0892100ABB92A /* MLContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661102A238F17CB0030A4EE /* MLContact.m */; };
+		26CC57C823A0892100ABB92A /* MLMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611025238F17B20030A4EE /* MLMessage.m */; };
+		26CC57C923A0892800ABB92A /* MLMessageProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB42231CB816006D0277 /* MLMessageProcessor.m */; };
+		26CC57CA23A0892800ABB92A /* MLIQProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661101B238F10360030A4EE /* MLIQProcessor.m */; };
+		26CC57CB23A0892800ABB92A /* MLPresenceProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611020238F104B0030A4EE /* MLPresenceProcessor.m */; };
+		26CC57CF23A08D5B00ABB92A /* jingleCall.m in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC918693634006A6C12 /* jingleCall.m */; };
+		26CC57D023A08D5B00ABB92A /* RTP.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2642EBC618693626006A6C12 /* RTP.mm */; };
+		26CC57D123A08D5B00ABB92A /* IPAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FB468E18B2755A0043094F /* IPAddress.m */; };
+		26CC57D323A08D7100ABB92A /* DataLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A70FBF255D004DB939 /* DataLayer.m */; };
+		26CC57D423A08D7100ABB92A /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
+		26CC57D523A08D7100ABB92A /* MLSignalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 263AFDFB209B3B35007F9CEE /* MLSignalStore.m */; };
+		26CC57D623A08D7100ABB92A /* MLMetaInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 26020B3621B957A0009A9735 /* MLMetaInfo.m */; };
+		26CC57D723A08D9B00ABB92A /* MLPush.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C01306233025DA001D411D /* MLPush.m */; };
+		26CC57DA23A08DD800ABB92A /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
+		26CC57E423A08E4B00ABB92A /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
+		26CC57E523A08E5300ABB92A /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; };
+		26CC57E623A08EAA00ABB92A /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
+		26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		26D0940C22A33E9B009C7AEF /* MLRegisterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */; };
-		26D51CCA1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAA1E2674D700141E04 /* NSData+NXOAuth2.m */; };
-		26D51CCB1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAA1E2674D700141E04 /* NSData+NXOAuth2.m */; };
-		26D51CCC1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAC1E2674D700141E04 /* NSString+NXOAuth2.m */; };
-		26D51CCD1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAC1E2674D700141E04 /* NSString+NXOAuth2.m */; };
-		26D51CCE1E2674D700141E04 /* NSURL+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAE1E2674D700141E04 /* NSURL+NXOAuth2.m */; };
-		26D51CCF1E2674D700141E04 /* NSURL+NXOAuth2.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CAE1E2674D700141E04 /* NSURL+NXOAuth2.m */; };
-		26D51CD01E2674D700141E04 /* NXOAuth2AccessToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB31E2674D700141E04 /* NXOAuth2AccessToken.m */; };
-		26D51CD11E2674D700141E04 /* NXOAuth2AccessToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB31E2674D700141E04 /* NXOAuth2AccessToken.m */; };
-		26D51CD21E2674D700141E04 /* NXOAuth2Account.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB51E2674D700141E04 /* NXOAuth2Account.m */; };
-		26D51CD31E2674D700141E04 /* NXOAuth2Account.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB51E2674D700141E04 /* NXOAuth2Account.m */; };
-		26D51CD41E2674D700141E04 /* NXOAuth2AccountStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB71E2674D700141E04 /* NXOAuth2AccountStore.m */; };
-		26D51CD51E2674D700141E04 /* NXOAuth2AccountStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB71E2674D700141E04 /* NXOAuth2AccountStore.m */; };
-		26D51CD61E2674D700141E04 /* NXOAuth2Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB91E2674D700141E04 /* NXOAuth2Client.m */; };
-		26D51CD71E2674D700141E04 /* NXOAuth2Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CB91E2674D700141E04 /* NXOAuth2Client.m */; };
-		26D51CD81E2674D700141E04 /* NXOAuth2Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CBC1E2674D700141E04 /* NXOAuth2Connection.m */; };
-		26D51CD91E2674D700141E04 /* NXOAuth2Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CBC1E2674D700141E04 /* NXOAuth2Connection.m */; };
-		26D51CDA1E2674D700141E04 /* NXOAuth2Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CBF1E2674D700141E04 /* NXOAuth2Constants.m */; };
-		26D51CDB1E2674D700141E04 /* NXOAuth2Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CBF1E2674D700141E04 /* NXOAuth2Constants.m */; };
-		26D51CDC1E2674D700141E04 /* NXOAuth2FileStreamWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC11E2674D700141E04 /* NXOAuth2FileStreamWrapper.m */; };
-		26D51CDD1E2674D700141E04 /* NXOAuth2FileStreamWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC11E2674D700141E04 /* NXOAuth2FileStreamWrapper.m */; };
-		26D51CDE1E2674D700141E04 /* NXOAuth2PostBodyPart.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC31E2674D700141E04 /* NXOAuth2PostBodyPart.m */; };
-		26D51CDF1E2674D700141E04 /* NXOAuth2PostBodyPart.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC31E2674D700141E04 /* NXOAuth2PostBodyPart.m */; };
-		26D51CE01E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC51E2674D700141E04 /* NXOAuth2PostBodyStream.m */; };
-		26D51CE11E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC51E2674D700141E04 /* NXOAuth2PostBodyStream.m */; };
-		26D51CE21E2674D700141E04 /* NXOAuth2Request.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC71E2674D700141E04 /* NXOAuth2Request.m */; };
-		26D51CE31E2674D700141E04 /* NXOAuth2Request.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D51CC71E2674D700141E04 /* NXOAuth2Request.m */; };
 		26D56EE720B59FB000BF7C97 /* MLTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D56EE620B59FB000BF7C97 /* MLTextView.m */; };
 		26D59D9020711969006F1DEE /* MLEditGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D8F20711969006F1DEE /* MLEditGroupViewController.m */; };
 		26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
@@ -466,9 +371,7 @@
 		26E2F7DA17C6FD9400C3C8EF /* MLTabBarController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */; };
 		26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */; };
 		26E3ED8B1FEC395D008ABDA5 /* MLServerDetailsVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E3ED8A1FEC395D008ABDA5 /* MLServerDetailsVC.m */; };
-		26EC411317BDE39E0031304D /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
 		26EE1B0C21A8F3CE00264B95 /* MLWelcomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE1B0B21A8F3CE00264B95 /* MLWelcomeViewController.m */; };
-		26EE8B1C179B55D2006781F3 /* ParseChallenge.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1B179B55D2006781F3 /* ParseChallenge.m */; };
 		26EE8B1F179B67FA006781F3 /* MLNotificationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */; };
 		26EE8B22179B7B0E006781F3 /* SlidingMessageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B21179B7B0D006781F3 /* SlidingMessageViewController.m */; };
 		26F396D12196836700EF5720 /* MLLogInViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D02196836700EF5720 /* MLLogInViewController.m */; };
@@ -476,11 +379,8 @@
 		26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D421968A4100EF5720 /* GLCapsuleView.m */; };
 		26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D821968A8600EF5720 /* GLRoundedView.m */; };
 		26F396DC2197507200EF5720 /* GLTintButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396DA2197506F00EF5720 /* GLTintButton.m */; };
-		26F7BB431115F8DB00712672 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26F7BB441115F95000712672 /* SystemConfiguration.framework */; };
-		26F7D577239A3859008B0EEE /* MLContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661102A238F17CB0030A4EE /* MLContact.m */; };
 		26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 26F9794C1ACAC73A0008E005 /* MLContactCell.xib */; };
-		26FB468F18B2755A0043094F /* IPAddress.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FB468E18B2755A0043094F /* IPAddress.m */; };
 		26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */; };
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
 		2AA6B81BDF005CFFBED37AAC /* Pods_jrtplib_static_OSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF9482F030E43311100BC741 /* Pods_jrtplib_static_OSX.framework */; };
@@ -488,6 +388,7 @@
 		3517ED822FCB1456A8D492B1 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C40CE7301D792181A28A1F8 /* Pods_Monal.framework */; };
 		8C56FAA9FC72C01E0AF98EFE /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C28AE0807330E8B6F972591 /* Pods_NotificaionService.framework */; };
 		A97BB56A74395876C98A21B9 /* Pods_Monal_OSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04A27909A4CEFD3AEB9E267A /* Pods_Monal_OSX.framework */; };
+		D838DFA541E4102BCA92A60E /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC355146D687D83135E2BBF7 /* Pods_monalxmpp.framework */; };
 		FE9BEACD951D0F8D3EBE264D /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99727E17D81471E803966620 /* Pods_shareSheet.framework */; };
 /* End PBXBuildFile section */
 
@@ -498,13 +399,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 260499F31B7314F400D11866;
 			remoteInfo = "jrtplib-static-OSX";
-		};
-		26189D09238C7BC200EAD70C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 268BCD55140B25CC0025E4D1;
-			remoteInfo = "jrtplib-static";
 		};
 		2630FE351AD550C00079F5C0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -520,19 +414,40 @@
 			remoteGlobalIDString = 260773BF232FC4E800BFD50F;
 			remoteInfo = NotificaionService;
 		};
-		2675EF5718B989170059C5C3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 268BCD55140B25CC0025E4D1;
-			remoteInfo = "jrtplib-static";
-		};
 		26AA701A2146BBB900598605 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 26AA70102146BBB800598605;
 			remoteInfo = shareSheet;
+		};
+		26CC579723A0867400ABB92A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 26CC579123A0867400ABB92A;
+			remoteInfo = monalxmpp;
+		};
+		26CC57D823A08DA300ABB92A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 268BCD55140B25CC0025E4D1;
+			remoteInfo = "jrtplib-static";
+		};
+		26CC57E723A08F3A00ABB92A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 26CC579123A0867400ABB92A;
+			remoteInfo = monalxmpp;
+		};
+		26CC57E923A08F3F00ABB92A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 26CC579123A0867400ABB92A;
+			remoteInfo = monalxmpp;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -938,6 +853,9 @@
 		26C4B22221B6B91300610282 /* MLDNSLookup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDNSLookup.h; sourceTree = "<group>"; };
 		26C4B22321B6B91300610282 /* MLDNSLookup.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDNSLookup.m; sourceTree = "<group>"; };
 		26C836612396CB9200C9F21D /* MLIQProcessorTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLIQProcessorTest.m; sourceTree = "<group>"; };
+		26CC579223A0867400ABB92A /* monalxmpp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = monalxmpp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		26CC579423A0867400ABB92A /* monalxmpp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = monalxmpp.h; sourceTree = "<group>"; };
+		26CC579523A0867400ABB92A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		26CF3EA81780D6B7002B7085 /* XMPPIQ.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPIQ.h; sourceTree = "<group>"; };
 		26CF3EA91780D6B7002B7085 /* XMPPIQ.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPIQ.m; sourceTree = "<group>"; };
 		26CF3EAB1780DE5C002B7085 /* ParseIq.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseIq.h; sourceTree = "<group>"; };
@@ -1028,6 +946,7 @@
 		26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLResizingTextView.m; sourceTree = "<group>"; };
 		288765A40DF7441C002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		2B13C0878F8FA2F0DABB9F0A /* Pods-monalxmpp.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-monalxmpp/Pods-monalxmpp.appstore.xcconfig"; sourceTree = "<group>"; };
 		31A80863B17A9EB9D4C08364 /* Pods-jrtplib-static.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static.adhoc.xcconfig"; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* SworIM_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SworIM_Prefix.pch; sourceTree = "<group>"; };
 		3C40CE7301D792181A28A1F8 /* Pods_Monal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1039,6 +958,7 @@
 		5F59B43550E822D135D1127E /* Pods_Monal_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6253B2B3FE987619C2714CF5 /* Pods-Monal Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		67334C3FACBBF127DFE076DF /* Pods-jrtplib-static.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static.debug.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static.debug.xcconfig"; sourceTree = "<group>"; };
+		67BD5F27C043F196A88D9241 /* Pods-monalxmpp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.debug.xcconfig"; path = "Pods/Target Support Files/Pods-monalxmpp/Pods-monalxmpp.debug.xcconfig"; sourceTree = "<group>"; };
 		6D9328A93187B01B20E88F29 /* Pods-Monal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Monal/Pods-Monal.debug.xcconfig"; sourceTree = "<group>"; };
 		861E9C836D3317B11641B333 /* Pods-jrtplib-static.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static.appstore.xcconfig"; sourceTree = "<group>"; };
 		8A54C0030602B177997D366B /* Pods-Monal-OSXTests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSXTests.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSXTests/Pods-Monal-OSXTests.appstore.xcconfig"; sourceTree = "<group>"; };
@@ -1047,6 +967,8 @@
 		9D4B7A0FB4CCDAAA5EEC8690 /* Pods-jrtplib-static-OSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.debug.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.debug.xcconfig"; sourceTree = "<group>"; };
 		A0FA7061BCF979AE4AE0E558 /* Pods-NotificaionService.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-NotificaionService/Pods-NotificaionService.appstore.xcconfig"; sourceTree = "<group>"; };
 		A1F5E44F27B64591044FB28E /* Pods-Monal-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSX.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
+		A8C31DD80551F41EE933896F /* Pods-monalxmpp.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-monalxmpp/Pods-monalxmpp.adhoc.xcconfig"; sourceTree = "<group>"; };
+		AC355146D687D83135E2BBF7 /* Pods_monalxmpp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_monalxmpp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ADFC4F2D8AFC07D6C84B0961 /* Pods-Monal.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-Monal/Pods-Monal.appstore.xcconfig"; sourceTree = "<group>"; };
 		AEE82B918E1D2978170F5151 /* Pods-Monal-OSXTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSXTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSXTests/Pods-Monal-OSXTests.debug.xcconfig"; sourceTree = "<group>"; };
 		B14247E40468E759E0E3A5C6 /* Pods-shareSheet.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-shareSheet/Pods-shareSheet.appstore.xcconfig"; sourceTree = "<group>"; };
@@ -1072,9 +994,9 @@
 				261528C51869CE5300BF62D6 /* AudioToolbox.framework in Frameworks */,
 				2642EBD01869425D006A6C12 /* CoreAudio.framework in Frameworks */,
 				268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */,
-				268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
+				26CC579923A0867400ABB92A /* monalxmpp.framework in Frameworks */,
 				288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */,
 				2601D9D40FBF262E004DB939 /* libsqlite3.dylib in Frameworks */,
 				26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */,
@@ -1097,7 +1019,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26189D0B238C7BFF00EAD70C /* libjrtplib-static.a in Frameworks */,
+				26CC57A023A0868200ABB92A /* monalxmpp.framework in Frameworks */,
 				8C56FAA9FC72C01E0AF98EFE /* Pods_NotificaionService.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1141,6 +1063,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */,
 				FE9BEACD951D0F8D3EBE264D /* Pods_shareSheet.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1149,6 +1072,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		26CC578F23A0867400ABB92A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				26CC57E623A08EAA00ABB92A /* libjrtplib-static.a in Frameworks */,
+				D838DFA541E4102BCA92A60E /* Pods_monalxmpp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1189,6 +1121,7 @@
 				26AA70112146BBB800598605 /* shareSheet.appex */,
 				26AA70422146E43E00598605 /* Share in Monal.appex */,
 				260773C0232FC4E800BFD50F /* NotificaionService.appex */,
+				26CC579223A0867400ABB92A /* monalxmpp.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1812,6 +1745,15 @@
 			path = "XMPP Tests";
 			sourceTree = "<group>";
 		};
+		26CC579323A0867400ABB92A /* monalxmpp */ = {
+			isa = PBXGroup;
+			children = (
+				26CC579423A0867400ABB92A /* monalxmpp.h */,
+				26CC579523A0867400ABB92A /* Info.plist */,
+			);
+			path = monalxmpp;
+			sourceTree = "<group>";
+		};
 		26CF3EAE1780DF86002B7085 /* Nodes */ = {
 			isa = PBXGroup;
 			children = (
@@ -1979,7 +1921,7 @@
 			name = tools;
 			sourceTree = "<group>";
 		};
-		29B97314FDCFA39411CA2CEA = {
+		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
 				26AA70222146E2B900598605 /* shareSheet.entitlements */,
@@ -1993,6 +1935,7 @@
 				26AA70122146BBB900598605 /* shareSheet-iOS */,
 				26AA70432146E43E00598605 /* shareSheet-OSX */,
 				260773C1232FC4E800BFD50F /* NotificaionService */,
+				26CC579323A0867400ABB92A /* monalxmpp */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 				8E499B2EE45BEF75226B5B32 /* Pods */,
@@ -2044,6 +1987,7 @@
 				25CAD84C2B49BA56A354B822 /* Pods_jrtplib_static.framework */,
 				FF9482F030E43311100BC741 /* Pods_jrtplib_static_OSX.framework */,
 				99727E17D81471E803966620 /* Pods_shareSheet.framework */,
+				AC355146D687D83135E2BBF7 /* Pods_monalxmpp.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -2075,6 +2019,9 @@
 				5ED93030541F175E7BEB1FC2 /* Pods-NotificaionService.debug.xcconfig */,
 				B7CF94A039065B2420A65087 /* Pods-NotificaionService.adhoc.xcconfig */,
 				A0FA7061BCF979AE4AE0E558 /* Pods-NotificaionService.appstore.xcconfig */,
+				67BD5F27C043F196A88D9241 /* Pods-monalxmpp.debug.xcconfig */,
+				A8C31DD80551F41EE933896F /* Pods-monalxmpp.adhoc.xcconfig */,
+				2B13C0878F8FA2F0DABB9F0A /* Pods-monalxmpp.appstore.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -2196,6 +2143,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		26CC578D23A0867400ABB92A /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				26CC579623A0867400ABB92A /* monalxmpp.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
@@ -2217,8 +2172,8 @@
 			buildRules = (
 			);
 			dependencies = (
+				26CC579823A0867400ABB92A /* PBXTargetDependency */,
 				2638008A2374814000144929 /* PBXTargetDependency */,
-				2675EF5818B989170059C5C3 /* PBXTargetDependency */,
 				26AA701B2146BBB900598605 /* PBXTargetDependency */,
 			);
 			name = Monal;
@@ -2256,7 +2211,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				26189D0A238C7BC200EAD70C /* PBXTargetDependency */,
+				26CC57E823A08F3A00ABB92A /* PBXTargetDependency */,
 			);
 			name = NotificaionService;
 			productName = NotificaionService;
@@ -2338,6 +2293,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				26CC57EA23A08F3F00ABB92A /* PBXTargetDependency */,
 			);
 			name = shareSheet;
 			productName = shareSheet;
@@ -2360,6 +2316,26 @@
 			productName = "shareSheet-OSX";
 			productReference = 26AA70422146E43E00598605 /* Share in Monal.appex */;
 			productType = "com.apple.product-type.app-extension";
+		};
+		26CC579123A0867400ABB92A /* monalxmpp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 26CC579F23A0867400ABB92A /* Build configuration list for PBXNativeTarget "monalxmpp" */;
+			buildPhases = (
+				2C2F76B3D7BFA8599420658A /* [CP] Check Pods Manifest.lock */,
+				26CC578D23A0867400ABB92A /* Headers */,
+				26CC578E23A0867400ABB92A /* Sources */,
+				26CC578F23A0867400ABB92A /* Frameworks */,
+				26CC579023A0867400ABB92A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				26CC57D923A08DA300ABB92A /* PBXTargetDependency */,
+			);
+			name = monalxmpp;
+			productName = monalxmpp;
+			productReference = 26CC579223A0867400ABB92A /* monalxmpp.framework */;
+			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
 
@@ -2437,6 +2413,10 @@
 							};
 						};
 					};
+					26CC579123A0867400ABB92A = {
+						CreatedOnToolsVersion = 11.2.1;
+						ProvisioningStyle = Manual;
+					};
 				};
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Monal" */;
@@ -2466,7 +2446,7 @@
 				"zh-Hant",
 				Base,
 			);
-			mainGroup = 29B97314FDCFA39411CA2CEA;
+			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -2479,6 +2459,7 @@
 				26AA70102146BBB800598605 /* shareSheet */,
 				26AA70412146E43E00598605 /* Share in Monal */,
 				260773BF232FC4E800BFD50F /* NotificaionService */,
+				26CC579123A0867400ABB92A /* monalxmpp */,
 			);
 		};
 /* End PBXProject section */
@@ -2550,6 +2531,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		26CC579023A0867400ABB92A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -2579,10 +2567,6 @@
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS9.3/CocoaLumberjack.framework",
-				"${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS9.3/SAMKeychain.framework",
-				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS9.3/SignalProtocolC.framework",
-				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS9.3/SignalProtocolObjC.framework",
-				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS9.3/TPCircularBuffer.framework",
 				"${BUILT_PRODUCTS_DIR}/CWStatusBarNotification/CWStatusBarNotification.framework",
 				"${BUILT_PRODUCTS_DIR}/DACircularProgress/DACircularProgress.framework",
 				"${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework",
@@ -2593,18 +2577,14 @@
 				"${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework",
 				"${BUILT_PRODUCTS_DIR}/pop/pop.framework",
 				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS13.0/CocoaLumberjack.framework",
-				"${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS13.0/SAMKeychain.framework",
-				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS13.0/SignalProtocolC.framework",
-				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS13.0/SignalProtocolObjC.framework",
-				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS13.0/TPCircularBuffer.framework",
+				"${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS/SAMKeychain.framework",
+				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS/SignalProtocolC.framework",
+				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS/SignalProtocolObjC.framework",
+				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS/TPCircularBuffer.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CocoaLumberjack.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SAMKeychain.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SignalProtocolC.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SignalProtocolObjC.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TPCircularBuffer.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CWStatusBarNotification.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DACircularProgress.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DZNEmptyDataSet.framework",
@@ -2614,6 +2594,10 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MBProgressHUD.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SDWebImage.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/pop.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SAMKeychain.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SignalProtocolC.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SignalProtocolObjC.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TPCircularBuffer.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2749,6 +2733,24 @@
 			shellPath = /bin/sh;
 			shellScript = "if [ \"${CONFIGURATION}\" == \"AppStore\" ]; then\n./Pods/Fabric/iOS/Fabric.framework/run 6e807cf86986312a050437809e762656b44b197c d082f9c014f0bce40ebff3a62eb566eb101232f02d7beab5396912a9efcc8caa\nfi\n";
 		};
+		2C2F76B3D7BFA8599420658A /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-monalxmpp-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		70921ECBDF172CEC71CF4732 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2792,10 +2794,10 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS10.10/SAMKeychain.framework",
-				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS10.10/SignalProtocolC.framework",
-				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-macOS10.10/SignalProtocolObjC.framework",
-				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer-macOS10.10/TPCircularBuffer.framework",
+				"${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS/SAMKeychain.framework",
+				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS/SignalProtocolC.framework",
+				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-macOS/SignalProtocolObjC.framework",
+				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer-macOS/TPCircularBuffer.framework",
 				"${PODS_ROOT}/Sparkle/Sparkle.framework",
 				"${PODS_ROOT}/Sparkle/Sparkle.framework.dSYM",
 			);
@@ -2874,115 +2876,63 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26611021238F104B0030A4EE /* MLPresenceProcessor.m in Sources */,
 				26D89F061A890672009B147C /* MLSwitchCell.m in Sources */,
-				26D51CDA1E2674D700141E04 /* NXOAuth2Constants.m in Sources */,
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */,
-				2601D9B00FBF255D004DB939 /* DataLayer.m in Sources */,
 				26277888110179D100023C8A /* tools.m in Sources */,
 				26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */,
-				26F7BB431115F8DB00712672 /* Reachability.m in Sources */,
-				26D51CD61E2674D700141E04 /* NXOAuth2Client.m in Sources */,
-				2633CB43231CB816006D0277 /* MLMessageProcessor.m in Sources */,
 				26B51C4918654D98002134C3 /* LogViewController.m in Sources */,
-				2642EBC718693626006A6C12 /* RTP.mm in Sources */,
 				26529F5217FA7B260057F199 /* addContact.m in Sources */,
 				262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */,
-				26C3EDFD1A807E76000E6331 /* ParseA.m in Sources */,
-				26C01307233025DA001D411D /* MLPush.m in Sources */,
-				2642EBCA18693634006A6C12 /* jingleCall.m in Sources */,
-				26D51CD81E2674D700141E04 /* NXOAuth2Connection.m in Sources */,
 				26724D9321B4C1E700F1F46F /* MLComposeViewController.m in Sources */,
-				267B6721226A222E003DB850 /* MLEncryptedPayload.m in Sources */,
 				263DFAC32187D0E00038E716 /* MLLinkCell.m in Sources */,
 				261A6281176C055400059090 /* ContactsViewController.m in Sources */,
 				26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */,
 				261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */,
 				2602A70922A5431B006D3E72 /* MLRegSuccessViewController.m in Sources */,
 				26F396DC2197507200EF5720 /* GLTintButton.m in Sources */,
-				26D51CDC1E2674D700141E04 /* NXOAuth2FileStreamWrapper.m in Sources */,
 				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,
 				261A6288176C157D00059090 /* MLDisplaySettingsViewController.m in Sources */,
 				2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */,
 				261A628B176C159000059090 /* AccountsViewController.m in Sources */,
 				261A628E176C15AD00059090 /* ChatLogsViewController.m in Sources */,
-				26FB468F18B2755A0043094F /* IPAddress.m in Sources */,
 				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
 				2673CAC321D9244B00256507 /* MLResourcesTableViewController.m in Sources */,
-				26D51CD41E2674D700141E04 /* NXOAuth2AccountStore.m in Sources */,
-				26D51CD01E2674D700141E04 /* NXOAuth2AccessToken.m in Sources */,
 				268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */,
-				26611017238F08AC0030A4EE /* MLXMPPConnection.m in Sources */,
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				26EE1B0C21A8F3CE00264B95 /* MLWelcomeViewController.m in Sources */,
-				26352EA8177D222600E2C8FF /* MLXMPPManager.m in Sources */,
 				26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */,
-				2661102B238F17CB0030A4EE /* MLContact.m in Sources */,
 				2673CAC621D9D3F700256507 /* MLKeyCell.m in Sources */,
-				260C51D1177F08F50039634B /* xmpp.m in Sources */,
-				263AFDFC209B3B35007F9CEE /* MLSignalStore.m in Sources */,
-				260C51D4177F44AD0039634B /* MLXMLNode.m in Sources */,
-				26C3EE001A819A38000E6331 /* ParseResumed.m in Sources */,
-				263F127A177F867B0025B235 /* ParseStream.m in Sources */,
-				260C6C94178080730004E2E1 /* EncodingTools.m in Sources */,
-				26CF3EAA1780D6B7002B7085 /* XMPPIQ.m in Sources */,
-				26CF3EAD1780DE5D002B7085 /* ParseIq.m in Sources */,
 				267C99082067D7BE00AB876C /* MLGroupChatTableViewController.m in Sources */,
-				26CF3EB21780DFD9002B7085 /* XMPPParser.m in Sources */,
-				264E345B1787BAB100BC7BD0 /* XMPPPresence.m in Sources */,
 				26BDECDC1867B7790018670D /* CallViewController.m in Sources */,
-				261AC91D1788A49C00E05657 /* ParsePresence.m in Sources */,
-				261B29341FECBBF1001C5CF4 /* ParseFailed.m in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */,
-				26D51CDE1E2674D700141E04 /* NXOAuth2PostBodyPart.m in Sources */,
 				2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */,
-				26C3456E1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */,
-				26020B3721B957A0009A9735 /* MLMetaInfo.m in Sources */,
 				26C1EA681FF937040085547A /* MLOptOutSettingsViewController.m in Sources */,
-				2661101C238F10360030A4EE /* MLIQProcessor.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */,
-				262D9EA717921169009292B4 /* ParseMessage.m in Sources */,
-				262D9EAA17921E82009292B4 /* XMPPMessage.m in Sources */,
 				260283861D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */,
 				26189C8B238A526500EAD70C /* MLSubscriptionTableViewController.m in Sources */,
-				26D51CCE1E2674D700141E04 /* NSURL+NXOAuth2.m in Sources */,
 				26D59D9020711969006F1DEE /* MLEditGroupViewController.m in Sources */,
-				26EE8B1C179B55D2006781F3 /* ParseChallenge.m in Sources */,
-				26C3EDF71A8072D5000E6331 /* ParseEnabled.m in Sources */,
 				26EE8B1F179B67FA006781F3 /* MLNotificationManager.m in Sources */,
-				26D51CE21E2674D700141E04 /* NXOAuth2Request.m in Sources */,
-				26611012238F08980030A4EE /* MLXMPPIdentity.m in Sources */,
 				26EE8B22179B7B0E006781F3 /* SlidingMessageViewController.m in Sources */,
-				26D51CCA1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */,
 				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,
-				267B671C226A200D003DB850 /* AESGcm.m in Sources */,
 				2633CB4723215558006D0277 /* MLXMPPActivityItem.m in Sources */,
 				262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */,
-				261E672B179E27BE00CB493E /* ParseFailure.m in Sources */,
 				26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */,
-				26EC411317BDE39E0031304D /* MLImageManager.m in Sources */,
 				265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */,
 				26F396D12196836700EF5720 /* MLLogInViewController.m in Sources */,
 				26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */,
 				2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */,
 				26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */,
 				2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */,
-				2661100D238F08820030A4EE /* MLXMPPServer.m in Sources */,
 				26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */,
-				26D51CCC1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */,
 				26D0940C22A33E9B009C7AEF /* MLRegisterViewController.m in Sources */,
-				26611026238F17B20030A4EE /* MLMessage.m in Sources */,
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
-				26C4B22421B6B91300610282 /* MLDNSLookup.m in Sources */,
 				26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */,
 				2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */,
 				2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */,
-				26D51CE01E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */,
 				268DD58617C4541000C673A9 /* MLChatCell.m in Sources */,
-				26D51CD21E2674D700141E04 /* NXOAuth2Account.m in Sources */,
 				2644D4991FF29E5600F46AB5 /* MLSettingsTableViewController.m in Sources */,
 				26E2F7DA17C6FD9400C3C8EF /* MLTabBarController.m in Sources */,
 			);
@@ -3021,7 +2971,6 @@
 				26049A0F1B7314F400D11866 /* rtprandomurandom.cpp in Sources */,
 				26049A101B7314F400D11866 /* rtpsession.cpp in Sources */,
 				26049A111B7314F400D11866 /* rtpsessionparams.cpp in Sources */,
-				26049A571B7315C800D11866 /* IPAddress.m in Sources */,
 				26049A121B7314F400D11866 /* rtpsessionsources.cpp in Sources */,
 				26049A131B7314F400D11866 /* rtpsourcedata.cpp in Sources */,
 				26049A141B7314F400D11866 /* rtpsources.cpp in Sources */,
@@ -3035,58 +2984,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26189CD8238B986800EAD70C /* NSData+NXOAuth2.m in Sources */,
-				26189CD7238B985C00EAD70C /* MLHTTPRequest.m in Sources */,
-				26611023238F104B0030A4EE /* MLPresenceProcessor.m in Sources */,
-				26189D03238B9A9300EAD70C /* MLXMPPManager.m in Sources */,
-				26189D07238C792800EAD70C /* Reachability.m in Sources */,
-				26189CE2238B987D00EAD70C /* NXOAuth2PostBodyPart.m in Sources */,
-				26189CDD238B987D00EAD70C /* NXOAuth2AccountStore.m in Sources */,
-				26189D0D238C7C5C00EAD70C /* MLImageManager.m in Sources */,
-				26189CE4238B987D00EAD70C /* NXOAuth2Request.m in Sources */,
-				26189CFB238B98C300EAD70C /* ParseA.m in Sources */,
-				26189D02238B98D300EAD70C /* MLDNSLookup.m in Sources */,
-				26189CDE238B987D00EAD70C /* NXOAuth2Client.m in Sources */,
-				26189CF6238B98C300EAD70C /* ParsePresence.m in Sources */,
-				26189CEF238B98C300EAD70C /* jingleCall.m in Sources */,
-				26189CF4238B98C300EAD70C /* ParseIq.m in Sources */,
-				26189CF7238B98C300EAD70C /* ParseMessage.m in Sources */,
-				26189CF1238B98C300EAD70C /* IPAddress.m in Sources */,
-				26189CDF238B987D00EAD70C /* NXOAuth2Connection.m in Sources */,
-				26189CDA238B986800EAD70C /* NSURL+NXOAuth2.m in Sources */,
-				26189D00238B98CD00EAD70C /* XMPPMessage.m in Sources */,
-				26611019238F08AC0030A4EE /* MLXMPPConnection.m in Sources */,
-				2661102D238F17CB0030A4EE /* MLContact.m in Sources */,
-				26189CF3238B98C300EAD70C /* ParseStream.m in Sources */,
-				26189D0E238C7C8100EAD70C /* MLSignalStore.m in Sources */,
-				26189D0C238C7C5300EAD70C /* DataLayer.m in Sources */,
 				260773C4232FC4E800BFD50F /* NotificationService.m in Sources */,
-				26189CE0238B987D00EAD70C /* NXOAuth2Constants.m in Sources */,
-				26189CE1238B987D00EAD70C /* NXOAuth2FileStreamWrapper.m in Sources */,
-				26189CDB238B987D00EAD70C /* NXOAuth2AccessToken.m in Sources */,
-				26189CD6238B985500EAD70C /* MLEncryptedPayload.m in Sources */,
-				26189CFA238B98C300EAD70C /* ParseEnabled.m in Sources */,
-				26189CFF238B98CD00EAD70C /* XMPPPresence.m in Sources */,
-				26189CF9238B98C300EAD70C /* ParseFailure.m in Sources */,
-				26189CF8238B98C300EAD70C /* ParseChallenge.m in Sources */,
-				26189CFE238B98CD00EAD70C /* XMPPIQ.m in Sources */,
-				26189CF2238B98C300EAD70C /* ParseFailed.m in Sources */,
-				26189CFC238B98C300EAD70C /* ParseResumed.m in Sources */,
-				26189CF5238B98C300EAD70C /* XMPPParser.m in Sources */,
-				2661101E238F10360030A4EE /* MLIQProcessor.m in Sources */,
-				26189CF0238B98C300EAD70C /* RTP.mm in Sources */,
-				26189CFD238B98CD00EAD70C /* MLXMLNode.m in Sources */,
-				26611028238F17B20030A4EE /* MLMessage.m in Sources */,
-				26189CE3238B987D00EAD70C /* NXOAuth2PostBodyStream.m in Sources */,
-				26189D01238B98D300EAD70C /* xmpp.m in Sources */,
-				26189CD9238B986800EAD70C /* NSString+NXOAuth2.m in Sources */,
-				2661100F238F08820030A4EE /* MLXMPPServer.m in Sources */,
-				26189CEE238B98C300EAD70C /* MLMessageProcessor.m in Sources */,
-				26611014238F08980030A4EE /* MLXMPPIdentity.m in Sources */,
-				26189CDC238B987D00EAD70C /* NXOAuth2Account.m in Sources */,
-				26189D08238C793100EAD70C /* EncodingTools.m in Sources */,
-				26189CD5238B985500EAD70C /* AESGcm.m in Sources */,
-				26189D06238C790C00EAD70C /* MLPush.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3103,87 +3001,37 @@
 			buildActionMask = 2147483647;
 			files = (
 				265FF0D51C7FDAC100E2CCE1 /* MLCloudStorageSettings.m in Sources */,
-				260499E21B730E9000D11866 /* xmpp.m in Sources */,
-				26611018238F08AC0030A4EE /* MLXMPPConnection.m in Sources */,
-				26611022238F104B0030A4EE /* MLPresenceProcessor.m in Sources */,
-				2661101D238F10360030A4EE /* MLIQProcessor.m in Sources */,
-				260499E51B730E9B00D11866 /* XMPPPresence.m in Sources */,
-				26D51CD51E2674D700141E04 /* NXOAuth2AccountStore.m in Sources */,
 				2638DAEB1B68F3D400DF05AC /* MLAccountSettings.m in Sources */,
-				26611027238F17B20030A4EE /* MLMessage.m in Sources */,
-				260499F21B7314D600D11866 /* jingleCall.m in Sources */,
-				2633CB44231CB816006D0277 /* MLMessageProcessor.m in Sources */,
-				26020B3821B957A0009A9735 /* MLMetaInfo.m in Sources */,
-				26D51CE11E2674D700141E04 /* NXOAuth2PostBodyStream.m in Sources */,
 				2661D34D1B407ED400EC51BA /* MLContactsCell.m in Sources */,
-				2661100E238F08820030A4EE /* MLXMPPServer.m in Sources */,
 				2632EA472006ADFE00191EEB /* MLGroupChatViewController.m in Sources */,
 				2638DAEF1B68F3EF00DF05AC /* MLDisplaySettings.m in Sources */,
-				260499EE1B7313F000D11866 /* XMPPParser.m in Sources */,
-				260499EB1B7313E800D11866 /* ParseChallenge.m in Sources */,
 				269574E51C37482A00544A60 /* MLOAuthViewController.m in Sources */,
 				2651AF551B409906008D025C /* MLMainWindow.m in Sources */,
 				26E3ED8B1FEC395D008ABDA5 /* MLServerDetailsVC.m in Sources */,
-				26D51CDF1E2674D700141E04 /* NXOAuth2PostBodyPart.m in Sources */,
-				261B29351FECBBF1001C5CF4 /* ParseFailed.m in Sources */,
-				26D51CCB1E2674D700141E04 /* NSData+NXOAuth2.m in Sources */,
 				266272B91B27DB8000C1CD49 /* main.m in Sources */,
-				26049A561B7315A000D11866 /* RTP.mm in Sources */,
-				2661102C238F17CB0030A4EE /* MLContact.m in Sources */,
 				2632EA4B20080C2C00191EEB /* MLGroupChatFavoritesViewController.m in Sources */,
-				260499ED1B7313ED00D11866 /* ParsePresence.m in Sources */,
-				260499E41B730E9800D11866 /* XMPPIQ.m in Sources */,
 				265802851B785B8900C35014 /* MLDisabledScrollView.m in Sources */,
 				268130181BFD8ECA0074C8EE /* MLAddContact.m in Sources */,
 				260870D81B7034460036539B /* MLAccountEdit.m in Sources */,
-				260499E31B730E9500D11866 /* MLXMLNode.m in Sources */,
-				260499F01B7313F600D11866 /* ParseStream.m in Sources */,
-				26D51CD31E2674D700141E04 /* NXOAuth2Account.m in Sources */,
 				265F0B631B75719E00A63F20 /* MLAccountRow.m in Sources */,
-				26D51CE31E2674D700141E04 /* NXOAuth2Request.m in Sources */,
-				26D51CD11E2674D700141E04 /* NXOAuth2AccessToken.m in Sources */,
 				26AA41051D9FCBF6005A77ED /* MLImageView.m in Sources */,
-				260499EC1B7313EA00D11866 /* ParseMessage.m in Sources */,
-				26D51CD71E2674D700141E04 /* NXOAuth2Client.m in Sources */,
-				26D51CCD1E2674D700141E04 /* NSString+NXOAuth2.m in Sources */,
-				260499E91B7313E100D11866 /* ParseEnabled.m in Sources */,
-				260499F11B73141500D11866 /* EncodingTools.m in Sources */,
 				2626800221E839E400DB7B54 /* MLKeyViewController.m in Sources */,
-				26D51CCF1E2674D700141E04 /* NSURL+NXOAuth2.m in Sources */,
 				267710251E21923600464002 /* MASPreferencesWindowController.m in Sources */,
-				263AFDFD209B3B35007F9CEE /* MLSignalStore.m in Sources */,
-				260499E61B730E9E00D11866 /* XMPPMessage.m in Sources */,
 				260283871D8DEFC1001DD6B8 /* MLPreviewObject.m in Sources */,
 				26A6EE73208CC321005992E4 /* MLMAMPref.m in Sources */,
-				265F6BA21B7B0040006B8EBA /* MLImageManager.m in Sources */,
 				2661D3441B40766F00EC51BA /* MLChatViewController.m in Sources */,
 				267710261E21923600464002 /* README.md in Sources */,
-				26D51CDB1E2674D700141E04 /* NXOAuth2Constants.m in Sources */,
-				26B2A4BE1B7306E500272E63 /* DataLayer.m in Sources */,
 				266272B71B27DB8000C1CD49 /* AppDelegate.m in Sources */,
 				2626800621E839FC00DB7B54 /* MLResourcesViewController.m in Sources */,
-				260499EA1B7313E500D11866 /* ParseFailure.m in Sources */,
 				2632EA4220040D2C00191EEB /* MLCallScreen.m in Sources */,
-				267ECD691B7467B30025337F /* MLXMPPManager.m in Sources */,
-				267B6722226A222E003DB850 /* MLEncryptedPayload.m in Sources */,
 				26020B3421B9565C009A9735 /* MLLinkViewCell.m in Sources */,
-				260499E71B7313DB00D11866 /* ParseResumed.m in Sources */,
-				260499EF1B7313F300D11866 /* ParseIq.m in Sources */,
-				26D51CDD1E2674D700141E04 /* NXOAuth2FileStreamWrapper.m in Sources */,
-				26C3456F1C68F9F0007F4BEC /* MLHTTPRequest.m in Sources */,
-				267B671D226A200D003DB850 /* AESGcm.m in Sources */,
 				263BFBCC22033CA80055A051 /* MLOptOutSettings.m in Sources */,
-				26D51CD91E2674D700141E04 /* NXOAuth2Connection.m in Sources */,
 				2626800A21E8406900DB7B54 /* MLKeyRow.m in Sources */,
 				26277CE41B7C57670094E4D0 /* MLContactDetails.m in Sources */,
 				2638DAE71B68F3AB00DF05AC /* MLPresenceSettings.m in Sources */,
 				26D56EE720B59FB000BF7C97 /* MLTextView.m in Sources */,
 				2661D3411B40765A00EC51BA /* MLContactsViewController.m in Sources */,
-				26B2A5021B730AE100272E63 /* Reachability.m in Sources */,
-				26611013238F08980030A4EE /* MLXMPPIdentity.m in Sources */,
-				26C4B22521B6B91300610282 /* MLDNSLookup.m in Sources */,
 				2661D3501B407EDD00EC51BA /* MLChatViewCell.m in Sources */,
-				260499E81B7313DF00D11866 /* ParseA.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3236,7 +3084,6 @@
 				26AA70152146BBB900598605 /* ShareViewController.m in Sources */,
 				263DFAC02183D7160038E716 /* MLSelectionController.m in Sources */,
 				263BC64F218BEE9F00FA0203 /* UIColor+Theme.m in Sources */,
-				26F7D577239A3859008B0EEE /* MLContact.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3248,6 +3095,65 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		26CC578E23A0867400ABB92A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				26CC57B323A086CC00ABB92A /* XMPPIQ.m in Sources */,
+				26CC57AA23A086C000ABB92A /* XMPPParser.m in Sources */,
+				26CC57CB23A0892800ABB92A /* MLPresenceProcessor.m in Sources */,
+				26CC57C523A0877D00ABB92A /* NXOAuth2Request.m in Sources */,
+				26CC57A423A086AA00ABB92A /* MLXMPPServer.m in Sources */,
+				26CC57BB23A0876B00ABB92A /* NSURL+NXOAuth2.m in Sources */,
+				26CC57CA23A0892800ABB92A /* MLIQProcessor.m in Sources */,
+				26CC57C423A0877D00ABB92A /* NXOAuth2PostBodyStream.m in Sources */,
+				26CC57D323A08D7100ABB92A /* DataLayer.m in Sources */,
+				26CC57C123A0877D00ABB92A /* NXOAuth2Constants.m in Sources */,
+				26CC57B023A086C000ABB92A /* ParseA.m in Sources */,
+				26CC57A923A086C000ABB92A /* ParseIq.m in Sources */,
+				26CC57A323A086AA00ABB92A /* MLDNSLookup.m in Sources */,
+				26CC57BC23A0877D00ABB92A /* NXOAuth2AccessToken.m in Sources */,
+				26CC57D423A08D7100ABB92A /* MLImageManager.m in Sources */,
+				26CC57A723A086C000ABB92A /* ParseFailed.m in Sources */,
+				26CC57AC23A086C000ABB92A /* ParseMessage.m in Sources */,
+				26CC57A823A086C000ABB92A /* ParseStream.m in Sources */,
+				26CC57C823A0892100ABB92A /* MLMessage.m in Sources */,
+				26CC57BE23A0877D00ABB92A /* NXOAuth2AccountStore.m in Sources */,
+				26CC57A623A086AA00ABB92A /* MLXMPPConnection.m in Sources */,
+				26CC57BA23A0876B00ABB92A /* NSString+NXOAuth2.m in Sources */,
+				26CC57B123A086C000ABB92A /* ParseResumed.m in Sources */,
+				26CC57B923A0876B00ABB92A /* NSData+NXOAuth2.m in Sources */,
+				26CC57CF23A08D5B00ABB92A /* jingleCall.m in Sources */,
+				26CC57DA23A08DD800ABB92A /* MLXMPPManager.m in Sources */,
+				26CC57E523A08E5300ABB92A /* Reachability.m in Sources */,
+				26CC57C323A0877D00ABB92A /* NXOAuth2PostBodyPart.m in Sources */,
+				26CC57AE23A086C000ABB92A /* ParseFailure.m in Sources */,
+				26CC57D123A08D5B00ABB92A /* IPAddress.m in Sources */,
+				26CC57D023A08D5B00ABB92A /* RTP.mm in Sources */,
+				26CC57B823A0876300ABB92A /* MLHTTPRequest.m in Sources */,
+				26CC57A223A086AA00ABB92A /* xmpp.m in Sources */,
+				26CC57AD23A086C000ABB92A /* ParseChallenge.m in Sources */,
+				26CC57B423A086CC00ABB92A /* XMPPPresence.m in Sources */,
+				26CC57BF23A0877D00ABB92A /* NXOAuth2Client.m in Sources */,
+				26CC57C923A0892800ABB92A /* MLMessageProcessor.m in Sources */,
+				26CC57D623A08D7100ABB92A /* MLMetaInfo.m in Sources */,
+				26CC57C223A0877D00ABB92A /* NXOAuth2FileStreamWrapper.m in Sources */,
+				26CC57AB23A086C000ABB92A /* ParsePresence.m in Sources */,
+				26CC57D523A08D7100ABB92A /* MLSignalStore.m in Sources */,
+				26CC57C023A0877D00ABB92A /* NXOAuth2Connection.m in Sources */,
+				26CC57B223A086CC00ABB92A /* MLXMLNode.m in Sources */,
+				26CC57A523A086AA00ABB92A /* MLXMPPIdentity.m in Sources */,
+				26CC57B723A0876300ABB92A /* MLEncryptedPayload.m in Sources */,
+				26CC57B523A086CC00ABB92A /* XMPPMessage.m in Sources */,
+				26CC57B623A0876300ABB92A /* AESGcm.m in Sources */,
+				26CC57BD23A0877D00ABB92A /* NXOAuth2Account.m in Sources */,
+				26CC57C723A0892100ABB92A /* MLContact.m in Sources */,
+				26CC57E423A08E4B00ABB92A /* EncodingTools.m in Sources */,
+				26CC57AF23A086C000ABB92A /* ParseEnabled.m in Sources */,
+				26CC57D723A08D9B00ABB92A /* MLPush.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -3255,11 +3161,6 @@
 			isa = PBXTargetDependency;
 			target = 260499F31B7314F400D11866 /* jrtplib-static-OSX */;
 			targetProxy = 26049A541B73157D00D11866 /* PBXContainerItemProxy */;
-		};
-		26189D0A238C7BC200EAD70C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 268BCD55140B25CC0025E4D1 /* jrtplib-static */;
-			targetProxy = 26189D09238C7BC200EAD70C /* PBXContainerItemProxy */;
 		};
 		2630FE361AD550C00079F5C0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3271,15 +3172,30 @@
 			target = 260773BF232FC4E800BFD50F /* NotificaionService */;
 			targetProxy = 263800892374814000144929 /* PBXContainerItemProxy */;
 		};
-		2675EF5818B989170059C5C3 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 268BCD55140B25CC0025E4D1 /* jrtplib-static */;
-			targetProxy = 2675EF5718B989170059C5C3 /* PBXContainerItemProxy */;
-		};
 		26AA701B2146BBB900598605 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 26AA70102146BBB800598605 /* shareSheet */;
 			targetProxy = 26AA701A2146BBB900598605 /* PBXContainerItemProxy */;
+		};
+		26CC579823A0867400ABB92A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 26CC579123A0867400ABB92A /* monalxmpp */;
+			targetProxy = 26CC579723A0867400ABB92A /* PBXContainerItemProxy */;
+		};
+		26CC57D923A08DA300ABB92A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 268BCD55140B25CC0025E4D1 /* jrtplib-static */;
+			targetProxy = 26CC57D823A08DA300ABB92A /* PBXContainerItemProxy */;
+		};
+		26CC57E823A08F3A00ABB92A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 26CC579123A0867400ABB92A /* monalxmpp */;
+			targetProxy = 26CC57E723A08F3A00ABB92A /* PBXContainerItemProxy */;
+		};
+		26CC57EA23A08F3F00ABB92A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 26CC579123A0867400ABB92A /* monalxmpp */;
+			targetProxy = 26CC57E923A08F3F00ABB92A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -3325,8 +3241,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = NO;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 33XS7DE5NZ;
-				ENABLE_BITCODE = NO;
+				ENABLE_BITCODE = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)",
@@ -3343,6 +3260,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Monal-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Pods/OpenSSL-Universal/lib-macos",
@@ -3355,6 +3273,7 @@
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTS_MACCATALYST = YES;
 			};
 			name = Debug;
 		};
@@ -3480,7 +3399,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 33XS7DE5NZ;
+				ENABLE_BITCODE = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -3501,6 +3422,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -3544,7 +3466,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 33XS7DE5NZ;
+				ENABLE_BITCODE = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -3572,6 +3496,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -3616,7 +3541,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 33XS7DE5NZ;
+				ENABLE_BITCODE = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -3644,6 +3571,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -3995,8 +3923,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = NO;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 33XS7DE5NZ;
-				ENABLE_BITCODE = NO;
+				ENABLE_BITCODE = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)",
@@ -4008,6 +3937,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Monal-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Pods/OpenSSL-Universal/lib-macos",
@@ -4020,6 +3950,7 @@
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTS_MACCATALYST = YES;
 			};
 			name = AppStore;
 		};
@@ -4031,6 +3962,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_BITCODE = YES;
 				EXECUTABLE_PREFIX = lib;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -4060,6 +3992,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_BITCODE = YES;
 				EXECUTABLE_PREFIX = lib;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -4107,7 +4040,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 33XS7DE5NZ;
+				ENABLE_BITCODE = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -4127,6 +4062,7 @@
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -4170,7 +4106,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 33XS7DE5NZ;
+				ENABLE_BITCODE = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -4192,6 +4130,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -4236,7 +4175,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 33XS7DE5NZ;
+				ENABLE_BITCODE = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -4258,6 +4199,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -4433,6 +4375,207 @@
 			};
 			name = AppStore;
 		};
+		26CC579C23A0867400ABB92A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 67BD5F27C043F196A88D9241 /* Pods-monalxmpp.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_BITCODE = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				INFOPLIST_FILE = monalxmpp/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		26CC579D23A0867400ABB92A /* Adhoc */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A8C31DD80551F41EE933896F /* Pods-monalxmpp.adhoc.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_BITCODE = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = monalxmpp/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Adhoc;
+		};
+		26CC579E23A0867400ABB92A /* AppStore */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2B13C0878F8FA2F0DABB9F0A /* Pods-monalxmpp.appstore.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_BITCODE = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = monalxmpp/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = AppStore;
+		};
 		26E74FBD17B06D2200FD91AE /* Adhoc */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -4494,8 +4637,9 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = NO;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 33XS7DE5NZ;
-				ENABLE_BITCODE = NO;
+				ENABLE_BITCODE = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)",
@@ -4507,6 +4651,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Monal-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Pods/OpenSSL-Universal/lib-macos",
@@ -4519,6 +4664,7 @@
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				SUPPORTS_MACCATALYST = YES;
 			};
 			name = Adhoc;
 		};
@@ -4530,6 +4676,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_BITCODE = YES;
 				EXECUTABLE_PREFIX = lib;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -4679,6 +4826,16 @@
 				26AA70522146E43E00598605 /* Debug */,
 				26AA70532146E43E00598605 /* Adhoc */,
 				26AA70542146E43E00598605 /* AppStore */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		26CC579F23A0867400ABB92A /* Build configuration list for PBXNativeTarget "monalxmpp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				26CC579C23A0867400ABB92A /* Debug */,
+				26CC579D23A0867400ABB92A /* Adhoc */,
+				26CC579E23A0867400ABB92A /* AppStore */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

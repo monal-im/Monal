@@ -11,12 +11,16 @@
 //  the full licence.
 //
 
+
+
 #ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
+
+#ifndef TARGET_OS_MAC
 #import <UIKit/UIKit.h>
 #else
 #import <Cocoa/Cocoa.h>
 #endif
+
 #else
 #import <UIKit/UIKit.h>
 #endif

@@ -39,7 +39,7 @@ DEPENDENCIES:
   - Fabric
   - IDMPhotoBrowser
   - MBProgressHUD (~> 1.1.0)
-  - OpenSSL-Universal (~> 1.0.2.18)
+  - OpenSSL-Universal (= 1.0.2.18)
   - SAMKeychain
   - SDWebImage (~> 4.3.3)
   - SignalProtocolC
@@ -88,6 +88,6 @@ SPEC CHECKSUMS:
   Sparkle: 3f75576db8b0265adef36c43249d747f22d0b708
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 
-PODFILE CHECKSUM: e028646904e82106ee442403f3956a60b63b440b
+PODFILE CHECKSUM: 98ddc8814c9c1a8efecae97ad19da524e400217a
 
 COCOAPODS: 1.5.2

@@ -32,11 +32,6 @@ target 'NotificaionService' do
    inhibit_all_warnings!
 pod 'Fabric'
 pod 'Crashlytics'
-pod 'SignalProtocolObjC'
-pod 'SignalProtocolC'
-
-pod 'SAMKeychain'
-pod 'TPCircularBuffer'
 pod 'CocoaLumberjack'
 end
 

@@ -143,26 +143,26 @@ strip_invalid_archs() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS10.10/SAMKeychain.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS10.10/SignalProtocolC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-macOS10.10/SignalProtocolObjC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-macOS10.10/TPCircularBuffer.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-macOS/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-macOS/TPCircularBuffer.framework"
   install_framework "${PODS_ROOT}/Sparkle/Sparkle.framework"
   install_dsym "${PODS_ROOT}/Sparkle/Sparkle.framework.dSYM"
 fi
 if [[ "$CONFIGURATION" == "Adhoc" ]]; then
-  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS10.10/SAMKeychain.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS10.10/SignalProtocolC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-macOS10.10/SignalProtocolObjC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-macOS10.10/TPCircularBuffer.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-macOS/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-macOS/TPCircularBuffer.framework"
   install_framework "${PODS_ROOT}/Sparkle/Sparkle.framework"
   install_dsym "${PODS_ROOT}/Sparkle/Sparkle.framework.dSYM"
 fi
 if [[ "$CONFIGURATION" == "AppStore" ]]; then
-  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS10.10/SAMKeychain.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS10.10/SignalProtocolC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-macOS10.10/SignalProtocolObjC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-macOS10.10/TPCircularBuffer.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-macOS/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-macOS/TPCircularBuffer.framework"
   install_framework "${PODS_ROOT}/Sparkle/Sparkle.framework"
   install_dsym "${PODS_ROOT}/Sparkle/Sparkle.framework.dSYM"
 fi

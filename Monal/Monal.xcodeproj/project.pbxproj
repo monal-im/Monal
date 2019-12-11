@@ -119,7 +119,6 @@
 		26158AF51FFA8A6A00E53BDC /* opensource.html in Resources */ = {isa = PBXBuildFile; fileRef = 26158AF31FFA8A6A00E53BDC /* opensource.html */; };
 		261894921B40483000C957C3 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
 		26189C8B238A526500EAD70C /* MLSubscriptionTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26189C8A238A526500EAD70C /* MLSubscriptionTableViewController.m */; };
-		26189D0B238C7BFF00EAD70C /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
 		261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
 		261A6288176C157D00059090 /* MLDisplaySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6287176C157D00059090 /* MLDisplaySettingsViewController.m */; };
@@ -277,7 +276,6 @@
 		267ECD6B1B746C340025337F /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6A1B746C340025337F /* Security.framework */; };
 		267ECD6D1B746C660025337F /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267ECD6C1B746C660025337F /* CFNetwork.framework */; };
 		268130181BFD8ECA0074C8EE /* MLAddContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 268130171BFD8ECA0074C8EE /* MLAddContact.m */; };
-		268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
 		268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 264FF3E4158A855D00D97B86 /* AVFoundation.framework */; };
@@ -312,7 +310,6 @@
 		26CC579923A0867400ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		26CC579B23A0867400ABB92A /* monalxmpp.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		26CC57A023A0868200ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
-		26CC57A123A0868600ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		26CC57A223A086AA00ABB92A /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		26CC57A323A086AA00ABB92A /* MLDNSLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C4B22321B6B91300610282 /* MLDNSLookup.m */; };
 		26CC57A423A086AA00ABB92A /* MLXMPPServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661100C238F08820030A4EE /* MLXMPPServer.m */; };
@@ -366,6 +363,7 @@
 		26CC57E423A08E4B00ABB92A /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
 		26CC57E523A08E5300ABB92A /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; };
 		26CC57E623A08EAA00ABB92A /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
+		26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		26D0940C22A33E9B009C7AEF /* MLRegisterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */; };
 		26D56EE720B59FB000BF7C97 /* MLTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D56EE620B59FB000BF7C97 /* MLTextView.m */; };
 		26D59D9020711969006F1DEE /* MLEditGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D8F20711969006F1DEE /* MLEditGroupViewController.m */; };
@@ -403,13 +401,6 @@
 			remoteGlobalIDString = 260499F31B7314F400D11866;
 			remoteInfo = "jrtplib-static-OSX";
 		};
-		26189D09238C7BC200EAD70C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 268BCD55140B25CC0025E4D1;
-			remoteInfo = "jrtplib-static";
-		};
 		2630FE351AD550C00079F5C0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -423,13 +414,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 260773BF232FC4E800BFD50F;
 			remoteInfo = NotificaionService;
-		};
-		2675EF5718B989170059C5C3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 268BCD55140B25CC0025E4D1;
-			remoteInfo = "jrtplib-static";
 		};
 		26AA701A2146BBB900598605 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -451,6 +435,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 268BCD55140B25CC0025E4D1;
 			remoteInfo = "jrtplib-static";
+		};
+		26CC57E723A08F3A00ABB92A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 26CC579123A0867400ABB92A;
+			remoteInfo = monalxmpp;
+		};
+		26CC57E923A08F3F00ABB92A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 26CC579123A0867400ABB92A;
+			remoteInfo = monalxmpp;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -1008,7 +1006,6 @@
 				261528C51869CE5300BF62D6 /* AudioToolbox.framework in Frameworks */,
 				2642EBD01869425D006A6C12 /* CoreAudio.framework in Frameworks */,
 				268E700515D0D979002E63CD /* AVFoundation.framework in Frameworks */,
-				268BCF12140B29180025E4D1 /* libjrtplib-static.a in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				26CC579923A0867400ABB92A /* monalxmpp.framework in Frameworks */,
@@ -1035,7 +1032,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				26CC57A023A0868200ABB92A /* monalxmpp.framework in Frameworks */,
-				26189D0B238C7BFF00EAD70C /* libjrtplib-static.a in Frameworks */,
 				8C56FAA9FC72C01E0AF98EFE /* Pods_NotificaionService.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1079,7 +1075,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26CC57A123A0868600ABB92A /* monalxmpp.framework in Frameworks */,
+				26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */,
 				FE9BEACD951D0F8D3EBE264D /* Pods_shareSheet.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1937,7 +1933,7 @@
 			name = tools;
 			sourceTree = "<group>";
 		};
-		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
+		29B97314FDCFA39411CA2CEA = {
 			isa = PBXGroup;
 			children = (
 				26AA70222146E2B900598605 /* shareSheet.entitlements */,
@@ -2190,7 +2186,6 @@
 			);
 			dependencies = (
 				2638008A2374814000144929 /* PBXTargetDependency */,
-				2675EF5818B989170059C5C3 /* PBXTargetDependency */,
 				26AA701B2146BBB900598605 /* PBXTargetDependency */,
 				26CC579823A0867400ABB92A /* PBXTargetDependency */,
 			);
@@ -2229,7 +2224,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				26189D0A238C7BC200EAD70C /* PBXTargetDependency */,
+				26CC57E823A08F3A00ABB92A /* PBXTargetDependency */,
 			);
 			name = NotificaionService;
 			productName = NotificaionService;
@@ -2311,6 +2306,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				26CC57EA23A08F3F00ABB92A /* PBXTargetDependency */,
 			);
 			name = shareSheet;
 			productName = shareSheet;
@@ -2464,7 +2460,7 @@
 				"zh-Hant",
 				Base,
 			);
-			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
+			mainGroup = 29B97314FDCFA39411CA2CEA;
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -2595,15 +2591,10 @@
 				"${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework",
 				"${BUILT_PRODUCTS_DIR}/pop/pop.framework",
 				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS13.0/CocoaLumberjack.framework",
-				"${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS13.0/SAMKeychain.framework",
-				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS13.0/SignalProtocolC.framework",
-				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS13.0/SignalProtocolObjC.framework",
-				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS13.0/TPCircularBuffer.framework",
-				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS13.2/CocoaLumberjack.framework",
-				"${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS13.2/SAMKeychain.framework",
-				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS13.2/SignalProtocolC.framework",
-				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS13.2/SignalProtocolObjC.framework",
-				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS13.2/TPCircularBuffer.framework",
+				"${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS/SAMKeychain.framework",
+				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS/SignalProtocolC.framework",
+				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS/SignalProtocolObjC.framework",
+				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS/TPCircularBuffer.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
@@ -2817,10 +2808,10 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS10.10/SAMKeychain.framework",
-				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS10.10/SignalProtocolC.framework",
-				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-macOS10.10/SignalProtocolObjC.framework",
-				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer-macOS10.10/TPCircularBuffer.framework",
+				"${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS/SAMKeychain.framework",
+				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS/SignalProtocolC.framework",
+				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-macOS/SignalProtocolObjC.framework",
+				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer-macOS/TPCircularBuffer.framework",
 				"${PODS_ROOT}/Sparkle/Sparkle.framework",
 				"${PODS_ROOT}/Sparkle/Sparkle.framework.dSYM",
 			);
@@ -3185,11 +3176,6 @@
 			target = 260499F31B7314F400D11866 /* jrtplib-static-OSX */;
 			targetProxy = 26049A541B73157D00D11866 /* PBXContainerItemProxy */;
 		};
-		26189D0A238C7BC200EAD70C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 268BCD55140B25CC0025E4D1 /* jrtplib-static */;
-			targetProxy = 26189D09238C7BC200EAD70C /* PBXContainerItemProxy */;
-		};
 		2630FE361AD550C00079F5C0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 1D6058900D05DD3D006BFB54 /* Monal */;
@@ -3199,11 +3185,6 @@
 			isa = PBXTargetDependency;
 			target = 260773BF232FC4E800BFD50F /* NotificaionService */;
 			targetProxy = 263800892374814000144929 /* PBXContainerItemProxy */;
-		};
-		2675EF5818B989170059C5C3 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 268BCD55140B25CC0025E4D1 /* jrtplib-static */;
-			targetProxy = 2675EF5718B989170059C5C3 /* PBXContainerItemProxy */;
 		};
 		26AA701B2146BBB900598605 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3219,6 +3200,16 @@
 			isa = PBXTargetDependency;
 			target = 268BCD55140B25CC0025E4D1 /* jrtplib-static */;
 			targetProxy = 26CC57D823A08DA300ABB92A /* PBXContainerItemProxy */;
+		};
+		26CC57E823A08F3A00ABB92A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 26CC579123A0867400ABB92A /* monalxmpp */;
+			targetProxy = 26CC57E723A08F3A00ABB92A /* PBXContainerItemProxy */;
+		};
+		26CC57EA23A08F3F00ABB92A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 26CC579123A0867400ABB92A /* monalxmpp */;
+			targetProxy = 26CC57E923A08F3F00ABB92A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

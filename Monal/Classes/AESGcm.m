@@ -9,13 +9,15 @@
 #import "AESGcm.h"
 #import "EncodingTools.h"
 
-
+#ifndef TARGET_OS_MACCATALYST
 #include <openssl/evp.h>
 #include <openssl/rand.h>
+#endif
 
 @implementation AESGcm
 
 + (MLEncryptedPayload *) encrypt:(NSData *)body {
+   #ifndef TARGET_OS_MACCATALYST
     EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
     int outlen;
     unsigned char outbuf[body.length];
@@ -70,9 +72,14 @@
     MLEncryptedPayload *toreturn = [[MLEncryptedPayload alloc] initWithBody:encryptedMessage key:combinedKey iv:gcmiv];
     
     return  toreturn;
+#else
+    return nil;
+#endif
+    
 }
 
 + (NSData *) decrypt:(NSData *)body withKey:(NSData *) key andIv:(NSData *)iv withAuth:( NSData * _Nullable )  auth {
+   #ifndef TARGET_OS_MACCATALYST
     int outlen, rv;
     unsigned char outbuf[key.length];
     EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
@@ -116,6 +123,9 @@
  
     EVP_CIPHER_CTX_free(ctx);
     return  decdata;
+#else
+    return nil; 
+#endif
 }
 
 

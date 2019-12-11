@@ -126,6 +126,7 @@
 		261A628E176C15AD00059090 /* ChatLogsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A628D176C15AD00059090 /* ChatLogsViewController.m */; };
 		261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		261E542623A0A1D300394F59 /* monalxmpp.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		261E542823A0A4CF00394F59 /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		2626800221E839E400DB7B54 /* MLKeyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2626800121E839E400DB7B54 /* MLKeyViewController.m */; };
 		2626800621E839FC00DB7B54 /* MLResourcesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2626800421E839FC00DB7B54 /* MLResourcesViewController.m */; };
 		2626800A21E8406900DB7B54 /* MLKeyRow.m in Sources */ = {isa = PBXBuildFile; fileRef = 2626800921E8406900DB7B54 /* MLKeyRow.m */; };
@@ -1040,6 +1041,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				261E542823A0A4CF00394F59 /* monalxmpp.framework in Frameworks */,
 				322AD0CC78815E4551793930 /* Pods_Monal_Tests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

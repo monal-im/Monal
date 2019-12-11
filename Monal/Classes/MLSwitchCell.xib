@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15510"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -27,18 +27,18 @@
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <textInputTraits key="textInputTraits"/>
                     </textField>
-                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="4FD-Uj-Ib9">
-                        <rect key="frame" x="240" y="9" width="51" height="31"/>
+                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="4FD-Uj-Ib9">
+                        <rect key="frame" x="240" y="6" width="51" height="31"/>
                     </switch>
                 </subviews>
                 <constraints>
-                    <constraint firstItem="ZDH-II-Cc8" firstAttribute="trailing" secondItem="DMi-LI-zqm" secondAttribute="trailingMargin" id="LTg-m3-oEl"/>
+                    <constraint firstItem="ZDH-II-Cc8" firstAttribute="trailing" secondItem="DMi-LI-zqm" secondAttribute="trailingMargin" constant="8" id="LTg-m3-oEl"/>
                     <constraint firstItem="ZDH-II-Cc8" firstAttribute="leading" secondItem="r8c-Jr-MKH" secondAttribute="trailing" constant="8" id="WTa-SO-XVZ"/>
-                    <constraint firstItem="4FD-Uj-Ib9" firstAttribute="trailing" secondItem="DMi-LI-zqm" secondAttribute="trailingMargin" constant="-16" id="ai5-3X-WHK"/>
-                    <constraint firstItem="r8c-Jr-MKH" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" constant="3" id="dkM-Bb-bcG"/>
-                    <constraint firstItem="r8c-Jr-MKH" firstAttribute="leading" secondItem="DMi-LI-zqm" secondAttribute="leadingMargin" id="eLK-Ws-Cos"/>
-                    <constraint firstItem="ZDH-II-Cc8" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" constant="3" id="gL0-U4-7jo"/>
-                    <constraint firstItem="4FD-Uj-Ib9" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" constant="-2" id="qN3-vA-V8h"/>
+                    <constraint firstItem="4FD-Uj-Ib9" firstAttribute="trailing" secondItem="DMi-LI-zqm" secondAttribute="trailingMargin" constant="-15" id="ai5-3X-WHK"/>
+                    <constraint firstItem="r8c-Jr-MKH" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" id="dkM-Bb-bcG"/>
+                    <constraint firstItem="r8c-Jr-MKH" firstAttribute="leading" secondItem="DMi-LI-zqm" secondAttribute="leadingMargin" constant="-8" id="eLK-Ws-Cos"/>
+                    <constraint firstItem="ZDH-II-Cc8" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" id="gL0-U4-7jo"/>
+                    <constraint firstItem="4FD-Uj-Ib9" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" constant="-5" id="qN3-vA-V8h"/>
                 </constraints>
             </tableViewCellContentView>
             <connections>

@@ -16,9 +16,9 @@ PODS:
     - pop
     - SDWebImage
   - MBProgressHUD (1.1.0)
-  - OpenSSL-Universal (1.0.2.19):
-    - OpenSSL-Universal/Static (= 1.0.2.19)
-  - OpenSSL-Universal/Static (1.0.2.19)
+  - OpenSSL-Universal (1.0.2.18):
+    - OpenSSL-Universal/Static (= 1.0.2.18)
+  - OpenSSL-Universal/Static (1.0.2.18)
   - pop (1.0.12)
   - SAMKeychain (1.5.3)
   - SDWebImage (4.3.3):
@@ -39,7 +39,7 @@ DEPENDENCIES:
   - Fabric
   - IDMPhotoBrowser
   - MBProgressHUD (~> 1.1.0)
-  - OpenSSL-Universal (~> 1.0.2.18)
+  - OpenSSL-Universal (= 1.0.2.18)
   - SAMKeychain
   - SDWebImage (~> 4.3.3)
   - SignalProtocolC
@@ -79,7 +79,7 @@ SPEC CHECKSUMS:
   Fabric: 706c8b8098fff96c33c0db69cbf81f9c551d0d74
   IDMPhotoBrowser: 4bb459b1faffc228e92bccdf7c54ad6d6b7e8c37
   MBProgressHUD: e7baa36a220447d8aeb12769bf0585582f3866d9
-  OpenSSL-Universal: 8b48cc0d10c1b2923617dfe5c178aa9ed2689355
+  OpenSSL-Universal: d10ab08e0b258023e5184f77660b1b9f4ec93926
   pop: d582054913807fd11fd50bfe6a539d91c7e1a55a
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
   SDWebImage: de4d90b5bff3571eae7bd16202b1f43135409fa5
@@ -88,6 +88,6 @@ SPEC CHECKSUMS:
   Sparkle: 3f75576db8b0265adef36c43249d747f22d0b708
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 
-PODFILE CHECKSUM: 31f3698dab67d0d73f18e991b4f1fc61f83b9eff
+PODFILE CHECKSUM: 98ddc8814c9c1a8efecae97ad19da524e400217a
 
 COCOAPODS: 1.5.2

@@ -990,11 +990,11 @@
 /* Begin PBXFileReference section */
 		0045D3DB7E32537E127B31A4689330B0 /* SDWebImageDownloader.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SDWebImageDownloader.m; path = SDWebImage/SDWebImageDownloader.m; sourceTree = "<group>"; };
 		00A788C0CFB57FB60F8E732A7549161B /* Pods-NotificaionService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-NotificaionService.debug.xcconfig"; sourceTree = "<group>"; };
+		00C9F44F44F16DE81D30FCEFBF86528C /* des.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = des.h; path = ios/include/openssl/des.h; sourceTree = "<group>"; };
 		0122BD5E07ED516795FA62E1BB431D56 /* UnitBezier.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = UnitBezier.h; path = pop/WebCore/UnitBezier.h; sourceTree = "<group>"; };
 		015F7B618414422C8AEE8C582CFDB313 /* SDWebImageCodersManager.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SDWebImageCodersManager.h; path = SDWebImage/SDWebImageCodersManager.h; sourceTree = "<group>"; };
 		016F7AD27F0C1383FD76C8CDDFBAB08A /* base.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = base.h; path = src/curve25519/ed25519/base.h; sourceTree = "<group>"; };
 		01BAE8F0871FAFDEE36D9D82646218C9 /* Pods_NotificaionService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_NotificaionService.framework; path = "Pods-NotificaionService.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
-		01D21D319A0101E3AA47347C272BB203 /* conf.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = conf.h; path = ios/include/openssl/conf.h; sourceTree = "<group>"; };
 		02921FD981042B7AA2C3150D1EED2585 /* POPSpringAnimation.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPSpringAnimation.h; path = pop/POPSpringAnimation.h; sourceTree = "<group>"; };
 		02DBDB0AA21CDC368477B1DEBBD49934 /* SDWebImageGIFCoder.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SDWebImageGIFCoder.h; path = SDWebImage/SDWebImageGIFCoder.h; sourceTree = "<group>"; };
 		03561CAD58F148F960712DE4D446B031 /* DZNEmptyDataSet-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DZNEmptyDataSet-umbrella.h"; sourceTree = "<group>"; };
@@ -1010,56 +1010,51 @@
 		06C8584A0D4E864D167507F13F31A3B6 /* signal_protocol_internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = signal_protocol_internal.h; path = src/signal_protocol_internal.h; sourceTree = "<group>"; };
 		06DEB42C8938435260C32BC78266E6DD /* SDWebImageDownloaderOperation.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SDWebImageDownloaderOperation.h; path = SDWebImage/SDWebImageDownloaderOperation.h; sourceTree = "<group>"; };
 		07055B95FEB1D16DD304BE980702FCE1 /* curve_sigs.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = curve_sigs.h; path = src/curve25519/ed25519/additions/curve_sigs.h; sourceTree = "<group>"; };
-		077ECA6FE87285F48F5E7548E781776A /* stack.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = stack.h; path = ios/include/openssl/stack.h; sourceTree = "<group>"; };
-		07EA7277994C5C1AD8D411E2DE494D4F /* ecdh.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ecdh.h; path = ios/include/openssl/ecdh.h; sourceTree = "<group>"; };
 		0831302468CA46779329960C4AA8CC05 /* UIImage+ForceDecode.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIImage+ForceDecode.m"; path = "SDWebImage/UIImage+ForceDecode.m"; sourceTree = "<group>"; };
 		083136E28DC9E641EC6BEF90F7F57713 /* POPAnimator.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPAnimator.h; path = pop/POPAnimator.h; sourceTree = "<group>"; };
 		0931DCD8489AE412B44A8ABE645F067F /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		093895EAA491780B22BB903C15C92588 /* MBProgressHUD-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "MBProgressHUD-prefix.pch"; sourceTree = "<group>"; };
 		09A8EBC25B5751466BDE102B288A66CE /* ge_p3_tobytes.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_p3_tobytes.c; path = src/curve25519/ed25519/ge_p3_tobytes.c; sourceTree = "<group>"; };
 		0A43109B013B535D0F5AD01C7CD3423D /* ge_tobytes.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_tobytes.c; path = src/curve25519/ed25519/ge_tobytes.c; sourceTree = "<group>"; };
-		0A66C4B30B66098BE74D701DC578BA75 /* modes.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = modes.h; path = ios/include/openssl/modes.h; sourceTree = "<group>"; };
 		0BE79CD6A3312F86105446F2EB713AE4 /* DZNEmptyDataSet.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = DZNEmptyDataSet.xcconfig; sourceTree = "<group>"; };
-		0BF9A2A298C7639F72D859DE106FE7F4 /* engine.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = engine.h; path = ios/include/openssl/engine.h; sourceTree = "<group>"; };
 		0BFFF7E51C1D976C18BDCB2FC09363FF /* UIView+WebCacheOperation.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIView+WebCacheOperation.m"; path = "SDWebImage/UIView+WebCacheOperation.m"; sourceTree = "<group>"; };
 		0C168BE7915B4A6170489555A255F1E4 /* fe_invert.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_invert.c; path = src/curve25519/ed25519/fe_invert.c; sourceTree = "<group>"; };
 		0C2EB9F0882F820FD8187278A86396B1 /* SignalIdentityKeyPair.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalIdentityKeyPair.h; path = Classes/Models/SignalIdentityKeyPair.h; sourceTree = "<group>"; };
 		0CA0B8E48EDB5388AD84A4DE04F2DD07 /* SAMKeychain-iOS.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "SAMKeychain-iOS.modulemap"; sourceTree = "<group>"; };
 		0CC2584661BA14366E95B8F033231632 /* gen_x.c */ = {isa = PBXFileReference; includeInIndex = 1; name = gen_x.c; path = src/curve25519/ed25519/additions/generalized/gen_x.c; sourceTree = "<group>"; };
+		0D93BC6768F282479ACAD39DDEBFCA8B /* lhash.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = lhash.h; path = ios/include/openssl/lhash.h; sourceTree = "<group>"; };
 		0DC504CCC0F905C79D043A42FE803F63 /* EARestrictedScrollView-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "EARestrictedScrollView-prefix.pch"; sourceTree = "<group>"; };
 		0E703003BA138C5291B417B36CA8F85D /* fe_sub.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_sub.c; path = src/curve25519/ed25519/fe_sub.c; sourceTree = "<group>"; };
+		0E90FF4D69C2B406D3BBA1DFC99B0B7A /* asn1.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = asn1.h; path = ios/include/openssl/asn1.h; sourceTree = "<group>"; };
 		0EA8B5B112129AC6B3CDEF04A15088D4 /* Pods-monalxmpp-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-monalxmpp-resources.sh"; sourceTree = "<group>"; };
-		0EAC55CB902CE5972DF1A1674A3190F9 /* dso.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = dso.h; path = ios/include/openssl/dso.h; sourceTree = "<group>"; };
-		0EBA400314E25C97BF7BB40180679181 /* opensslconf-arm64.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "opensslconf-arm64.h"; path = "ios/include/openssl/opensslconf-arm64.h"; sourceTree = "<group>"; };
 		0ECA7DB1380B6EBF5BD24497BF989986 /* CWStatusBarNotification.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = CWStatusBarNotification.modulemap; sourceTree = "<group>"; };
 		0F60D426071B636F51DA4064D0F84F14 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.3.sdk/System/Library/Frameworks/CoreGraphics.framework; sourceTree = DEVELOPER_DIR; };
 		0FBAABE20ADA563BBB869A83EC07F93B /* session_pre_key.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = session_pre_key.h; path = src/session_pre_key.h; sourceTree = "<group>"; };
 		118C2FFCC02CDFB496C82054F5E54A77 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = Info.plist; path = "../SignalProtocolC-macOS/Info.plist"; sourceTree = "<group>"; };
 		11B1D17DFC88B740530460C49B08AC7D /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.3.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
 		11B50D61D0F2A303350041038AEF86C3 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		11ECA12B7A24EDACEB9454B36E93EFD4 /* engine.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = engine.h; path = ios/include/openssl/engine.h; sourceTree = "<group>"; };
 		1219B723C2A0D6EDEEFECDC6BCDBC24E /* SignalMessage.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SignalMessage.m; path = Classes/Models/SignalMessage.m; sourceTree = "<group>"; };
 		122F275FC2F18410BB3CF28BB5C51DE8 /* fe_frombytes.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_frombytes.c; path = src/curve25519/ed25519/fe_frombytes.c; sourceTree = "<group>"; };
 		12DEC192C256EC66C447C12D38C5D98A /* SignalProtocolC-macOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "SignalProtocolC-macOS-umbrella.h"; path = "../SignalProtocolC-macOS/SignalProtocolC-macOS-umbrella.h"; sourceTree = "<group>"; };
-		136AA8EA2ED4433F9B5F2E898BA966B4 /* ssl23.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ssl23.h; path = ios/include/openssl/ssl23.h; sourceTree = "<group>"; };
 		136D2375050195A59011B8FFD4F3D27F /* SignalPreKey.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalPreKey.h; path = Classes/Models/SignalPreKey.h; sourceTree = "<group>"; };
 		1386BA174E8810FBD57B7EF6E331148D /* key_helper.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = key_helper.h; path = src/key_helper.h; sourceTree = "<group>"; };
-		13CEFE2E5A9B70FECF75B8E3D52087B0 /* mdc2.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = mdc2.h; path = ios/include/openssl/mdc2.h; sourceTree = "<group>"; };
 		13E254064A050BBB7EF8163E463B51C4 /* POPBasicAnimationInternal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPBasicAnimationInternal.h; path = pop/POPBasicAnimationInternal.h; sourceTree = "<group>"; };
-		14163E6BD48656E3E18A0EC9AFFE941C /* cast.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = cast.h; path = ios/include/openssl/cast.h; sourceTree = "<group>"; };
 		1431683D46A592E2ABAD89C3084C13AC /* SDWebImageCoderHelper.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SDWebImageCoderHelper.m; path = SDWebImage/SDWebImageCoderHelper.m; sourceTree = "<group>"; };
 		144ADDC1B6291E5F8C9202AC98588A47 /* DALabeledCircularProgressView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DALabeledCircularProgressView.h; path = DACircularProgress/DALabeledCircularProgressView.h; sourceTree = "<group>"; };
 		14A0869730EE4025F6563F636C8CA7CB /* POPCustomAnimation.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPCustomAnimation.h; path = pop/POPCustomAnimation.h; sourceTree = "<group>"; };
-		14AA219031A7EEBB4D05E44FDB0393E7 /* pem.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = pem.h; path = ios/include/openssl/pem.h; sourceTree = "<group>"; };
+		154ACC25BF21803BC545C8FAD8697F2D /* des_old.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = des_old.h; path = ios/include/openssl/des_old.h; sourceTree = "<group>"; };
 		156E92C9C1F23F4289F436AA52594027 /* NSImage+WebCache.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSImage+WebCache.h"; path = "SDWebImage/NSImage+WebCache.h"; sourceTree = "<group>"; };
 		15C5EDC579F2D4EE65A559053C922F8A /* SignalProtocolC-iOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SignalProtocolC-iOS-dummy.m"; sourceTree = "<group>"; };
 		15F7C6022CDC138C9509A45C39C89E07 /* Pods-shareSheet-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-shareSheet-acknowledgements.plist"; sourceTree = "<group>"; };
 		163A813115A90C0C6D7CF46ADA913F5A /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		167D19F731455464109EEBE870E76D85 /* rand.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = rand.h; path = ios/include/openssl/rand.h; sourceTree = "<group>"; };
 		16E0FB8825B861565CE1D809BC45139F /* POPDecayAnimation.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPDecayAnimation.h; path = pop/POPDecayAnimation.h; sourceTree = "<group>"; };
 		1754C040607D411416D566ED54A52786 /* SignalProtocolC-iOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SignalProtocolC-iOS-umbrella.h"; sourceTree = "<group>"; };
 		176EACA450A69D153B9A3EB28CCBDD37 /* UIButton+WebCache.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIButton+WebCache.m"; path = "SDWebImage/UIButton+WebCache.m"; sourceTree = "<group>"; };
+		1787BE0ACE9B18D52FF98BF587DE5565 /* cast.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = cast.h; path = ios/include/openssl/cast.h; sourceTree = "<group>"; };
 		18113A5DFD49DBCB80458F098629ACFC /* UIImageView+HighlightedWebCache.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIImageView+HighlightedWebCache.h"; path = "SDWebImage/UIImageView+HighlightedWebCache.h"; sourceTree = "<group>"; };
 		18D13893666ED57491E4061E825CADD8 /* SDWebImageImageIOCoder.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SDWebImageImageIOCoder.h; path = SDWebImage/SDWebImageImageIOCoder.h; sourceTree = "<group>"; };
-		18FB6F2AC5BB1F73B040C63B1D115EE8 /* tls1.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = tls1.h; path = ios/include/openssl/tls1.h; sourceTree = "<group>"; };
 		190BFDE2C3D670516312D9BBD5697A17 /* session_cipher.c */ = {isa = PBXFileReference; includeInIndex = 1; name = session_cipher.c; path = src/session_cipher.c; sourceTree = "<group>"; };
 		19B7F59D24DF52A05840E5D80C877E3E /* ge_montx_to_p3.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_montx_to_p3.c; path = src/curve25519/ed25519/additions/ge_montx_to_p3.c; sourceTree = "<group>"; };
 		1A655495F54BAE62484BB76C2AF02AE5 /* Pods-Monal-OSX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSX.release.xcconfig"; sourceTree = "<group>"; };
@@ -1068,15 +1063,16 @@
 		1AF27210E471796A61C546206EFD872E /* Pods-Monal Tests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal Tests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		1B62E293FB7F5671196FF0863B88E587 /* CWStatusBarNotification.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = CWStatusBarNotification.xcconfig; sourceTree = "<group>"; };
 		1B96AC661A86F01B45DDDD93A5B75D4F /* SUStandardVersionComparator.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SUStandardVersionComparator.h; path = Sparkle.framework/Versions/A/Headers/SUStandardVersionComparator.h; sourceTree = "<group>"; };
+		1BDC9FDEC49B53FF1F4999AE91215378 /* txt_db.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = txt_db.h; path = ios/include/openssl/txt_db.h; sourceTree = "<group>"; };
 		1C2B535980284895249A5CD3DF0DE703 /* Pods_Monal_OSX.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_Monal_OSX.framework; path = "Pods-Monal-OSX.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C2BC5245D540616F896B3673BADB006 /* EAIntroView-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "EAIntroView-dummy.m"; sourceTree = "<group>"; };
 		1C7B7657ACA9BEAD46D7DE94E8713DA6 /* DACircularProgress-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "DACircularProgress-dummy.m"; sourceTree = "<group>"; };
+		1CF08613FB7AEFA32311359CC0981D11 /* rc4.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = rc4.h; path = ios/include/openssl/rc4.h; sourceTree = "<group>"; };
 		1D1BDA672C44F9AF77F70FE6DC70A608 /* DDOSLogger.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DDOSLogger.h; path = Sources/CocoaLumberjack/include/DDOSLogger.h; sourceTree = "<group>"; };
 		1D1CF7CB1320A63648A954F00378F8F9 /* CLSAttributes.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSAttributes.h; path = OSX/Crashlytics.framework/Versions/A/Headers/CLSAttributes.h; sourceTree = "<group>"; };
 		1D421AAC58093CDBDD21936A5A73E4A7 /* sender_key.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = sender_key.h; path = src/sender_key.h; sourceTree = "<group>"; };
+		1DB0DE4AA5175824FFC90310456ABEBE /* opensslv.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = opensslv.h; path = ios/include/openssl/opensslv.h; sourceTree = "<group>"; };
 		1DE67405613F8010EC42A25CA46885F8 /* UIImageView+WebCache.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIImageView+WebCache.h"; path = "SDWebImage/UIImageView+WebCache.h"; sourceTree = "<group>"; };
-		1E6566A37CC3202DB6ED89F8391C543A /* bio.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = bio.h; path = ios/include/openssl/bio.h; sourceTree = "<group>"; };
-		1E9307640DFC37B3F008ED9CA20401C7 /* x509v3.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = x509v3.h; path = ios/include/openssl/x509v3.h; sourceTree = "<group>"; };
 		1F0DABAF927CC35280F34C86A40C9D07 /* Pods-Monal-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
 		1F0EC08B582647391F8787D213076482 /* Pods-shareSheet.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-shareSheet.release.xcconfig"; sourceTree = "<group>"; };
 		1F15F85247E82DD277B2DDA14749A861 /* SignalIdentityKeyPair.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SignalIdentityKeyPair.m; path = Classes/Models/SignalIdentityKeyPair.m; sourceTree = "<group>"; };
@@ -1092,11 +1088,10 @@
 		229064147675B4D80EDA35278FB436A7 /* SignalSessionBuilder.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalSessionBuilder.h; path = Classes/SignalSessionBuilder.h; sourceTree = "<group>"; };
 		22F5BBA6C886200756E479B739BB49A7 /* Pods-Monal-OSX.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSX.appstore.xcconfig"; sourceTree = "<group>"; };
 		230FE5A8A3CF0C3FC3CA0B06428FF0A9 /* DDContextFilterLogFormatter.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DDContextFilterLogFormatter.m; path = Sources/CocoaLumberjack/Extensions/DDContextFilterLogFormatter.m; sourceTree = "<group>"; };
-		231900E749DE5FD4484D78850CF7DB3F /* conf_api.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = conf_api.h; path = ios/include/openssl/conf_api.h; sourceTree = "<group>"; };
 		2366CDC5F6F6080FA1E700FDBD68552B /* SignalIdentityKeyStore.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalIdentityKeyStore.h; path = Classes/Storage/SignalIdentityKeyStore.h; sourceTree = "<group>"; };
 		238052B06D1B06E8DC8E9C5F67521970 /* WhisperTextProtocol.pb-c.c */ = {isa = PBXFileReference; includeInIndex = 1; name = "WhisperTextProtocol.pb-c.c"; path = "src/WhisperTextProtocol.pb-c.c"; sourceTree = "<group>"; };
-		23985AC7201397BD28F8FBAA9CE6C5B0 /* x509.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = x509.h; path = ios/include/openssl/x509.h; sourceTree = "<group>"; };
 		239D8FB4A0127200456F13CA03E86D32 /* Pods-Monal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal.debug.xcconfig"; sourceTree = "<group>"; };
+		23D287FB83A1E45BDFB038E7F5B25C00 /* ui_compat.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ui_compat.h; path = ios/include/openssl/ui_compat.h; sourceTree = "<group>"; };
 		23DB6F1442B8E54E0FC496D9376C26FE /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		23DE672EF340EF5E0A4123F031616FD2 /* SAMKeychain-macOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "SAMKeychain-macOS-prefix.pch"; path = "../SAMKeychain-macOS/SAMKeychain-macOS-prefix.pch"; sourceTree = "<group>"; };
 		23E3A15A63C84166EC36DDB72B02A8FB /* internal_slow_tests.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = internal_slow_tests.h; path = src/curve25519/ed25519/tests/internal_slow_tests.h; sourceTree = "<group>"; };
@@ -1108,13 +1103,13 @@
 		248F0979C4FBFFE77F6CE05A7708AEA5 /* Pods-monalxmpp.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-monalxmpp.appstore.xcconfig"; sourceTree = "<group>"; };
 		253269860B5AE9ECE1211D91CCDC1C92 /* SPUDownloadData.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SPUDownloadData.h; path = Sparkle.framework/Versions/A/Headers/SPUDownloadData.h; sourceTree = "<group>"; };
 		257B306F93E4DBBDD0A6ABB20D2835A6 /* SDWebImageTransition.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SDWebImageTransition.m; path = SDWebImage/SDWebImageTransition.m; sourceTree = "<group>"; };
-		25AD21070696ED156596F0C4BE7FA077 /* asn1t.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = asn1t.h; path = ios/include/openssl/asn1t.h; sourceTree = "<group>"; };
 		25C63EC46CEE5451BB0BED2FA0096AF2 /* SUUpdaterDelegate.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SUUpdaterDelegate.h; path = Sparkle.framework/Versions/A/Headers/SUUpdaterDelegate.h; sourceTree = "<group>"; };
 		261A437EAD014B936EC017FA9D15FFA4 /* Pods-Monal-OSX.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-Monal-OSX.modulemap"; sourceTree = "<group>"; };
 		2664EFB044B12B93BA8616EBD4B70CFF /* Pods-NotificaionService-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-NotificaionService-dummy.m"; sourceTree = "<group>"; };
 		26B089B6EFBE27328A0DBBA78B382470 /* pop.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = pop.modulemap; sourceTree = "<group>"; };
 		26B1FFD7CB64012B71029543E606139B /* sc_muladd.c */ = {isa = PBXFileReference; includeInIndex = 1; name = sc_muladd.c; path = src/curve25519/ed25519/sc_muladd.c; sourceTree = "<group>"; };
 		26DFAC977EBF42DC17125FDCA195B6FD /* TPCircularBuffer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = TPCircularBuffer.framework; path = "TPCircularBuffer-macOS.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		26ECF33E857DAD90C7D719946717FE32 /* bn.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = bn.h; path = ios/include/openssl/bn.h; sourceTree = "<group>"; };
 		28762B38BE7D48459B3FAEAB05977319 /* SignalAddress_Internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalAddress_Internal.h; path = Classes/Models/SignalAddress_Internal.h; sourceTree = "<group>"; };
 		28DDD7AEA1572425B0722911B17C2D6E /* Pods-jrtplib-static-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-jrtplib-static-acknowledgements.markdown"; sourceTree = "<group>"; };
 		28FC3D0AA6C4232782E86B8DDACBAEBB /* protobuf-c.c */ = {isa = PBXFileReference; includeInIndex = 1; name = "protobuf-c.c"; path = "src/protobuf-c/protobuf-c.c"; sourceTree = "<group>"; };
@@ -1122,31 +1117,29 @@
 		29A2F4A21FF6CC548FE97F7F4E845848 /* MBProgressHUD-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "MBProgressHUD-umbrella.h"; sourceTree = "<group>"; };
 		29AE231248404EC6871368293DB14743 /* Pods-monalxmpp.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-monalxmpp.adhoc.xcconfig"; sourceTree = "<group>"; };
 		29B11A74705AD1241469426DD4370641 /* session_cipher.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = session_cipher.h; path = src/session_cipher.h; sourceTree = "<group>"; };
+		29D06C72AB3BA02AAFC8E880D36DDABE /* e_os2.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = e_os2.h; path = ios/include/openssl/e_os2.h; sourceTree = "<group>"; };
+		29DB4EED24E24EB9FF04C407D4CE1343 /* buffer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = buffer.h; path = ios/include/openssl/buffer.h; sourceTree = "<group>"; };
 		29FB9F93A72380250F1E750058CF8BF8 /* CWStatusBarNotification-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "CWStatusBarNotification-umbrella.h"; sourceTree = "<group>"; };
 		2A570D1063676CCE9C3F0CB53EEB75E9 /* ge_add.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_add.c; path = src/curve25519/ed25519/ge_add.c; sourceTree = "<group>"; };
 		2AFBF15767E6C63E027F2B0C8EF05079 /* CocoaLumberjack-iOS9.3.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; name = "CocoaLumberjack-iOS9.3.modulemap"; path = "../CocoaLumberjack-iOS9.3/CocoaLumberjack-iOS9.3.modulemap"; sourceTree = "<group>"; };
-		2BEE8269D252111AC8F22EE23B6CEC15 /* hmac.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = hmac.h; path = ios/include/openssl/hmac.h; sourceTree = "<group>"; };
 		2C47CE605FE241A00D5FC0838805B0FD /* SignalProtocolC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SignalProtocolC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C525AB1D8C8E37BC464BC12D431105A /* DDLoggerNames.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DDLoggerNames.h; path = Sources/CocoaLumberjack/include/DDLoggerNames.h; sourceTree = "<group>"; };
 		2CB1992173D8DF1C0FE6999CFF721A26 /* SignalSessionCipher.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalSessionCipher.h; path = Classes/SignalSessionCipher.h; sourceTree = "<group>"; };
 		2CD24CC584BF563C05C29B3245203CEE /* POPCustomAnimation.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = POPCustomAnimation.mm; path = pop/POPCustomAnimation.mm; sourceTree = "<group>"; };
 		2CD3B25AEB630A37FA134A4106260CF9 /* SignalSignedPreKey.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalSignedPreKey.h; path = Classes/Models/SignalSignedPreKey.h; sourceTree = "<group>"; };
-		2CE48B777BC95C008C097E2D734850D8 /* txt_db.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = txt_db.h; path = ios/include/openssl/txt_db.h; sourceTree = "<group>"; };
 		2CF3447DC574286425C40FA7AE2033EF /* SignalProtocolObjC-iOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SignalProtocolObjC-iOS-dummy.m"; sourceTree = "<group>"; };
+		2CF9667438324BEFF6D4B89B4815022B /* pkcs7.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = pkcs7.h; path = ios/include/openssl/pkcs7.h; sourceTree = "<group>"; };
 		2CFB6A8E18F7872F62A980DB6CD38C40 /* SUExport.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SUExport.h; path = Sparkle.framework/Versions/A/Headers/SUExport.h; sourceTree = "<group>"; };
 		2D28E2223FD75D1FC9070FC8B9BCCA22 /* sc.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = sc.h; path = src/curve25519/ed25519/sc.h; sourceTree = "<group>"; };
 		2D2E955A56D546256DB702F91BF2B60E /* DDASLLogCapture.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DDASLLogCapture.h; path = Sources/CocoaLumberjack/include/DDASLLogCapture.h; sourceTree = "<group>"; };
 		2D6A73F297F73206CB8A972490C9EBC7 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.3.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
-		2EF05410EC934EAC4D00B35C9CF4F913 /* dsa.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = dsa.h; path = ios/include/openssl/dsa.h; sourceTree = "<group>"; };
 		2F161BD196FF4E94E4F1AFC7AC42D406 /* DDASLLogger.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DDASLLogger.h; path = Sources/CocoaLumberjack/include/DDASLLogger.h; sourceTree = "<group>"; };
 		2FF6948293BA370358EA69D1F0766833 /* ge_p3_to_cached.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_p3_to_cached.c; path = src/curve25519/ed25519/ge_p3_to_cached.c; sourceTree = "<group>"; };
-		301BB1A6E164710C027547EDD7E70696 /* seed.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = seed.h; path = ios/include/openssl/seed.h; sourceTree = "<group>"; };
 		30371EEE14DFCA13CCB6B2715B58880E /* ge_msub.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ge_msub.h; path = src/curve25519/ed25519/ge_msub.h; sourceTree = "<group>"; };
 		305859E8C134AB95CEAA07A5E3DE8472 /* ge_precomp_0.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_precomp_0.c; path = src/curve25519/ed25519/ge_precomp_0.c; sourceTree = "<group>"; };
 		307E9A8F912E85B942086C8730D7516B /* SDWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = SDWebImage.framework; path = SDWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		308562CD0A98D8104A3D1439ADF1269F /* fe_isnegative.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_isnegative.c; path = src/curve25519/ed25519/fe_isnegative.c; sourceTree = "<group>"; };
 		30B4EF56D3CF2B118CDD08726F29C4F6 /* group_cipher.c */ = {isa = PBXFileReference; includeInIndex = 1; name = group_cipher.c; path = src/group_cipher.c; sourceTree = "<group>"; };
-		30E4AA5863E53AC559024A9EEFAEAA77 /* ui_compat.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ui_compat.h; path = ios/include/openssl/ui_compat.h; sourceTree = "<group>"; };
 		3103E14B785B6ADD7E5108FA3029E2B2 /* ge_isneutral.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_isneutral.c; path = src/curve25519/ed25519/additions/ge_isneutral.c; sourceTree = "<group>"; };
 		310804EE80635955F88F38CEF6E405D8 /* POPAnimatableProperty.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = POPAnimatableProperty.mm; path = pop/POPAnimatableProperty.mm; sourceTree = "<group>"; };
 		310E2A29552F1488E160F86AC618F5D2 /* POPAnimator.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = POPAnimator.mm; path = pop/POPAnimator.mm; sourceTree = "<group>"; };
@@ -1154,29 +1147,23 @@
 		311E063B5BC45B4C676BDD94C6B98B20 /* SignalProtocolObjC-iOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SignalProtocolObjC-iOS-umbrella.h"; sourceTree = "<group>"; };
 		3138C68FC074DBE704132A91165860FF /* gen_crypto_additions.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = gen_crypto_additions.h; path = src/curve25519/ed25519/additions/generalized/gen_crypto_additions.h; sourceTree = "<group>"; };
 		317A97948577F4405AC6875DC4E11FF5 /* DDDispatchQueueLogFormatter.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DDDispatchQueueLogFormatter.m; path = Sources/CocoaLumberjack/Extensions/DDDispatchQueueLogFormatter.m; sourceTree = "<group>"; };
-		319850B3CC5042BF25604CCDBBAAC7E7 /* opensslconf.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = opensslconf.h; path = ios/include/openssl/opensslconf.h; sourceTree = "<group>"; };
 		31D5A5E672B6A2B10EB99818D5A57A47 /* curve25519-donna.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "curve25519-donna.h"; path = "src/curve25519/curve25519-donna.h"; sourceTree = "<group>"; };
-		3274FB3C121C700324299202EE07CBB6 /* ssl.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ssl.h; path = ios/include/openssl/ssl.h; sourceTree = "<group>"; };
 		33615899AD2E99629401D4044C2AF0D2 /* NSData+ImageContentType.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSData+ImageContentType.h"; path = "SDWebImage/NSData+ImageContentType.h"; sourceTree = "<group>"; };
 		34733ED156261FFAD1A22B9AA972CECA /* CocoaLumberjack-iOS13.0.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "CocoaLumberjack-iOS13.0.modulemap"; sourceTree = "<group>"; };
 		34855EAD3B42991B75605C068CD50646 /* uthash.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = uthash.h; path = src/uthash.h; sourceTree = "<group>"; };
-		3490F95979359321DF89EAF025B693C6 /* cms.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = cms.h; path = ios/include/openssl/cms.h; sourceTree = "<group>"; };
 		34E39AAE15CEEB312E8F90053E15B824 /* SignalCiphertext.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalCiphertext.h; path = Classes/Models/SignalCiphertext.h; sourceTree = "<group>"; };
 		350486E05ED0B1CC8E02A064D70754F0 /* fe_tobytes.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_tobytes.c; path = src/curve25519/ed25519/fe_tobytes.c; sourceTree = "<group>"; };
 		3506421026B9DC6B8F14418E7AF2F803 /* fe_sqrt.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_sqrt.c; path = src/curve25519/ed25519/additions/fe_sqrt.c; sourceTree = "<group>"; };
 		35173D16D93DB2BFECC7D915F3232284 /* Pods-monalxmpp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-monalxmpp.release.xcconfig"; sourceTree = "<group>"; };
 		35489BF921E5D40A21D8033CF0BE6176 /* pop-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "pop-umbrella.h"; sourceTree = "<group>"; };
-		35C911B8D61E9BFDDBBDC5775C5ED06A /* comp.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = comp.h; path = ios/include/openssl/comp.h; sourceTree = "<group>"; };
-		3628A3293687B3AD3B006D3DEF4A0FF9 /* ssl3.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ssl3.h; path = ios/include/openssl/ssl3.h; sourceTree = "<group>"; };
 		3631D7FC0984B2C21EA436DA427C67E2 /* session_builder.c */ = {isa = PBXFileReference; includeInIndex = 1; name = session_builder.c; path = src/session_builder.c; sourceTree = "<group>"; };
 		36421330D368FB5BB0B6EC6A7F2FC075 /* UIView+WebCache.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIView+WebCache.h"; path = "SDWebImage/UIView+WebCache.h"; sourceTree = "<group>"; };
 		3646F1C4A86F9BE4CBAD5A08A8DE97E3 /* EAIntroView.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = EAIntroView.xcconfig; sourceTree = "<group>"; };
 		36BA8137C61D498E5BCD6D2F21510BE8 /* open.c */ = {isa = PBXFileReference; includeInIndex = 1; name = open.c; path = src/curve25519/ed25519/open.c; sourceTree = "<group>"; };
 		376E20DB626C2D33C5CE95BB0A67A704 /* SDAnimatedImageRep.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SDAnimatedImageRep.h; path = SDWebImage/SDAnimatedImageRep.h; sourceTree = "<group>"; };
-		377A3204E21713D55DE5CC50B5D88CC8 /* opensslconf-armv7.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "opensslconf-armv7.h"; path = "ios/include/openssl/opensslconf-armv7.h"; sourceTree = "<group>"; };
 		3803F18CE81D3B4ECE6F07DF4A12C6FF /* utarray.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = utarray.h; path = src/utarray.h; sourceTree = "<group>"; };
+		387913C9E34FCC3BD6B4A4704AA07137 /* dsa.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = dsa.h; path = ios/include/openssl/dsa.h; sourceTree = "<group>"; };
 		38C40E530AE2C3670969EBE182D5C2D6 /* EARestrictedScrollView-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "EARestrictedScrollView-umbrella.h"; sourceTree = "<group>"; };
-		38E47FFF2BABF78A315D8643AFC08186 /* rsa.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = rsa.h; path = ios/include/openssl/rsa.h; sourceTree = "<group>"; };
 		3938F10EC10C63C5E44808FB406C7345 /* ge_neg.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_neg.c; path = src/curve25519/ed25519/additions/ge_neg.c; sourceTree = "<group>"; };
 		39B2BDBDB670BE3EE8719AC029E2376E /* EARestrictedScrollView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = EARestrictedScrollView.framework; path = EARestrictedScrollView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3A507DD4493CFCF88929671CF4DB3FE8 /* SignalPreKeyStore.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalPreKeyStore.h; path = Classes/Storage/SignalPreKeyStore.h; sourceTree = "<group>"; };
@@ -1191,14 +1178,14 @@
 		3C3CCD7FBEE3D9215A735ACBDDB036FD /* SAMKeychain-iOS.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "SAMKeychain-iOS.xcconfig"; sourceTree = "<group>"; };
 		3C4BCBC30E68427A7BF1732B33B5E6BA /* DDTTYLogger.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DDTTYLogger.h; path = Sources/CocoaLumberjack/include/DDTTYLogger.h; sourceTree = "<group>"; };
 		3CA6BB96D6FCDF1C64FEFF14E9D39D48 /* crypto_int64.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = crypto_int64.h; path = src/curve25519/ed25519/nacl_includes/crypto_int64.h; sourceTree = "<group>"; };
-		3CC3A22DD4C6F435A217CFCA28D10C5F /* ripemd.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ripemd.h; path = ios/include/openssl/ripemd.h; sourceTree = "<group>"; };
 		3D298F156F0E94C0AC41C9CBEA1BE527 /* open_modified.c */ = {isa = PBXFileReference; includeInIndex = 1; name = open_modified.c; path = src/curve25519/ed25519/additions/open_modified.c; sourceTree = "<group>"; };
 		3D4A85B64EBE826C61DD1D5E7BA5D0F8 /* sc_clamp.c */ = {isa = PBXFileReference; includeInIndex = 1; name = sc_clamp.c; path = src/curve25519/ed25519/additions/sc_clamp.c; sourceTree = "<group>"; };
 		3E01050C0BB541B07DF84FA49F2D6FA5 /* CocoaLumberjack-iOS13.0-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "CocoaLumberjack-iOS13.0-umbrella.h"; sourceTree = "<group>"; };
 		3E0C05AC06E52E8B920744025E645672 /* IDMPBConstants.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IDMPBConstants.h; path = Classes/IDMPBConstants.h; sourceTree = "<group>"; };
 		3F03BAB592AD9F278B2CF81492FB0CE1 /* fingerprint.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = fingerprint.h; path = src/fingerprint.h; sourceTree = "<group>"; };
+		404D675DEA84F54C5A9E4A5E813FD38C /* dh.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = dh.h; path = ios/include/openssl/dh.h; sourceTree = "<group>"; };
+		410C533756B1D28EAE5576982D1E7D6F /* md5.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = md5.h; path = ios/include/openssl/md5.h; sourceTree = "<group>"; };
 		41BC3394B3AAD645656270280C358379 /* ge_scalarmult_base.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_scalarmult_base.c; path = src/curve25519/ed25519/ge_scalarmult_base.c; sourceTree = "<group>"; };
-		41D99279649B719207C0B2EEF6F6A620 /* camellia.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = camellia.h; path = ios/include/openssl/camellia.h; sourceTree = "<group>"; };
 		41E91C98531D3D0D7FB3D5C185BFB5AA /* Pods-Monal Tests-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-Monal Tests-umbrella.h"; sourceTree = "<group>"; };
 		420C91E6844D2E1112346C25CD7BA1F4 /* POPAnimatablePropertyTypes.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPAnimatablePropertyTypes.h; path = pop/POPAnimatablePropertyTypes.h; sourceTree = "<group>"; };
 		4272F6463D50F94884F4C934FAE15C5E /* Sparkle.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = Sparkle.h; path = Sparkle.framework/Versions/A/Headers/Sparkle.h; sourceTree = "<group>"; };
@@ -1209,11 +1196,11 @@
 		43EA6DC2F2929DAE8AC41F7FA9447A5C /* group_session_builder.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = group_session_builder.h; path = src/group_session_builder.h; sourceTree = "<group>"; };
 		43FE6DC69D29934417092AF9C1B46EB4 /* ge_p3_to_montx.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_p3_to_montx.c; path = src/curve25519/ed25519/additions/ge_p3_to_montx.c; sourceTree = "<group>"; };
 		4404E9CD40E78A1D220116BDC4F0C9E4 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		442A54D6AE68CB4FF13FF7C132FBD85E /* asn1t.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = asn1t.h; path = ios/include/openssl/asn1t.h; sourceTree = "<group>"; };
 		4496011DD56507E2B99A6110CCFBBCAE /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		44D53A2A39E2F5F89E181316A0CCEE96 /* SignalProtocolObjC-iOS.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "SignalProtocolObjC-iOS.modulemap"; sourceTree = "<group>"; };
 		4566DCA15A501A73F990D830FACCBAF4 /* SignalPreKeyMessage_Internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalPreKeyMessage_Internal.h; path = Classes/Models/SignalPreKeyMessage_Internal.h; sourceTree = "<group>"; };
 		458736CD82418B364BAABA34E8D914AD /* SPUDownloaderDeprecated.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SPUDownloaderDeprecated.h; path = Sparkle.framework/Versions/A/Headers/SPUDownloaderDeprecated.h; sourceTree = "<group>"; };
-		45C47DEA20B3789FD962C774F86238F6 /* shim.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = shim.h; path = ios/include/openssl/shim.h; sourceTree = "<group>"; };
 		4636F2DBDD5A3294C8F746C9DBF5FB03 /* fe_mul.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_mul.c; path = src/curve25519/ed25519/fe_mul.c; sourceTree = "<group>"; };
 		4779C6054A4E76127DFF6BFFCC5F0A98 /* WhisperTextProtocol.pb-c.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "WhisperTextProtocol.pb-c.h"; path = "src/WhisperTextProtocol.pb-c.h"; sourceTree = "<group>"; };
 		47D58D96E914E2069A553B0132024D93 /* NSImage+WebCache.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSImage+WebCache.m"; path = "SDWebImage/NSImage+WebCache.m"; sourceTree = "<group>"; };
@@ -1221,15 +1208,12 @@
 		48308B5FA2EC4C9A51AD4BF300C5FF62 /* SignalError.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SignalError.m; path = Classes/Utility/SignalError.m; sourceTree = "<group>"; };
 		484E0E5A945B6634DC794B547896874D /* POPDecayAnimationInternal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPDecayAnimationInternal.h; path = pop/POPDecayAnimationInternal.h; sourceTree = "<group>"; };
 		489215B8DDEA218A08671DAFBF8A0395 /* Pods-Monal.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal.appstore.xcconfig"; sourceTree = "<group>"; };
-		48A9C08A822CA84FFDFD1E6F4368189E /* safestack.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = safestack.h; path = ios/include/openssl/safestack.h; sourceTree = "<group>"; };
 		49B24A2FCCC9244C78E59ECB762BAFA0 /* SignalPreKeyMessage.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SignalPreKeyMessage.m; path = Classes/Models/SignalPreKeyMessage.m; sourceTree = "<group>"; };
 		4A025D9BE7EB00B5ABC33B1F571DFC3B /* ge_p3_dbl.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_p3_dbl.c; path = src/curve25519/ed25519/ge_p3_dbl.c; sourceTree = "<group>"; };
-		4A123798491D5D1663E09D39E3CEEEEA /* dtls1.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = dtls1.h; path = ios/include/openssl/dtls1.h; sourceTree = "<group>"; };
 		4A780A958E4B1C0EECD2DB4934ABB839 /* DDFileLogger+Internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "DDFileLogger+Internal.h"; path = "Sources/CocoaLumberjack/DDFileLogger+Internal.h"; sourceTree = "<group>"; };
 		4AC85CD1D4E164F178C9BAE9875B58B5 /* POPAnimatableProperty.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPAnimatableProperty.h; path = pop/POPAnimatableProperty.h; sourceTree = "<group>"; };
-		4B903DF395431F738E94E799F9151577 /* md4.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = md4.h; path = ios/include/openssl/md4.h; sourceTree = "<group>"; };
 		4BF18E7886F87EE3E1E728702AA69B5E /* IDMPhotoProtocol.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IDMPhotoProtocol.h; path = Classes/IDMPhotoProtocol.h; sourceTree = "<group>"; };
-		4CB6F1E34C721CC48B1597D443BE88CF /* opensslv.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = opensslv.h; path = ios/include/openssl/opensslv.h; sourceTree = "<group>"; };
+		4D74B57E1C998AF09B28E569BBF0CA2C /* ssl23.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ssl23.h; path = ios/include/openssl/ssl23.h; sourceTree = "<group>"; };
 		4D77979F96FD03F8A810BD85D7DE35B8 /* SignalAddress.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalAddress.h; path = Classes/Models/SignalAddress.h; sourceTree = "<group>"; };
 		4DA7DA65CCC2ED301803562A4C16C841 /* DZNEmptyDataSet-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "DZNEmptyDataSet-dummy.m"; sourceTree = "<group>"; };
 		4DC7FC6FCBFA1C25894E50D6CA65934B /* fe_cmov.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_cmov.c; path = src/curve25519/ed25519/fe_cmov.c; sourceTree = "<group>"; };
@@ -1238,6 +1222,7 @@
 		4EE65DF320363C6CCCD2483C33CD53D4 /* SAMKeychain-macOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "SAMKeychain-macOS-umbrella.h"; path = "../SAMKeychain-macOS/SAMKeychain-macOS-umbrella.h"; sourceTree = "<group>"; };
 		4F147A42D2D1E97F650C2E4BBB4E64BC /* TPCircularBuffer.c */ = {isa = PBXFileReference; includeInIndex = 1; path = TPCircularBuffer.c; sourceTree = "<group>"; };
 		4F201E078914D6A0CAAC67784405E706 /* SignalProtocolC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = SignalProtocolC.framework; path = "SignalProtocolC-iOS.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F6BD4720F0F147123B0FDFD0A881593 /* ssl3.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ssl3.h; path = ios/include/openssl/ssl3.h; sourceTree = "<group>"; };
 		4F6EED6E3FBE6A8F89E3276294E80DA6 /* UIButton+WebCache.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIButton+WebCache.h"; path = "SDWebImage/UIButton+WebCache.h"; sourceTree = "<group>"; };
 		4F84C56E113264659D053E7CAAC04223 /* UIScrollView+EmptyDataSet.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIScrollView+EmptyDataSet.m"; path = "Source/UIScrollView+EmptyDataSet.m"; sourceTree = "<group>"; };
 		506672C7FC66914F579BF0017C041208 /* DDFileLogger.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DDFileLogger.h; path = Sources/CocoaLumberjack/include/DDFileLogger.h; sourceTree = "<group>"; };
@@ -1247,9 +1232,9 @@
 		52B23792147340A61DE7865F5A421A21 /* gen_labelset.c */ = {isa = PBXFileReference; includeInIndex = 1; name = gen_labelset.c; path = src/curve25519/ed25519/additions/generalized/gen_labelset.c; sourceTree = "<group>"; };
 		52F8FE176C79D21BF6F85E682174E905 /* crypto_uint64.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = crypto_uint64.h; path = src/curve25519/ed25519/nacl_includes/crypto_uint64.h; sourceTree = "<group>"; };
 		53235FE15CC9AFE1B8AD34C2EFFEE100 /* ge_p1p1_to_p2.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_p1p1_to_p2.c; path = src/curve25519/ed25519/ge_p1p1_to_p2.c; sourceTree = "<group>"; };
-		535A839315335E99145BCCA0C1950100 /* pkcs7.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = pkcs7.h; path = ios/include/openssl/pkcs7.h; sourceTree = "<group>"; };
 		53CD6F5D94C1A4D83A6E79F009B30100 /* DDASLLogCapture.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DDASLLogCapture.m; path = Sources/CocoaLumberjack/DDASLLogCapture.m; sourceTree = "<group>"; };
 		5465DC5EE492F0209FCBC32AABFCE871 /* SignalProtocolObjC-macOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "SignalProtocolObjC-macOS-dummy.m"; path = "../SignalProtocolObjC-macOS/SignalProtocolObjC-macOS-dummy.m"; sourceTree = "<group>"; };
+		5477BEF273EDF71FF77E96B8B2A62EE1 /* err.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = err.h; path = ios/include/openssl/err.h; sourceTree = "<group>"; };
 		5482A6E4E6B3ACB2D41EFAD7DFF5FD1E /* group_session_builder.c */ = {isa = PBXFileReference; includeInIndex = 1; name = group_session_builder.c; path = src/group_session_builder.c; sourceTree = "<group>"; };
 		54C2C0537919B6F4C802492427A794A3 /* Pods-NotificaionService-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-NotificaionService-acknowledgements.plist"; sourceTree = "<group>"; };
 		55049ACE9C7D63625CAD1F3FF30CB938 /* ge_p2_dbl.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ge_p2_dbl.h; path = src/curve25519/ed25519/ge_p2_dbl.h; sourceTree = "<group>"; };
@@ -1257,32 +1242,32 @@
 		558167289255288821AB582B5B92B8FA /* DALabeledCircularProgressView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DALabeledCircularProgressView.m; path = DACircularProgress/DALabeledCircularProgressView.m; sourceTree = "<group>"; };
 		56E047021F1FA683E79FEADC70D27FA0 /* SDWebImageImageIOCoder.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SDWebImageImageIOCoder.m; path = SDWebImage/SDWebImageImageIOCoder.m; sourceTree = "<group>"; };
 		56F32718F3A61B5CB65FCFD1BB19889D /* TPCircularBuffer+AudioBufferList.c */ = {isa = PBXFileReference; includeInIndex = 1; path = "TPCircularBuffer+AudioBufferList.c"; sourceTree = "<group>"; };
-		576EB621422D741EE3C5F83A3C5BF8ED /* evp.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = evp.h; path = ios/include/openssl/evp.h; sourceTree = "<group>"; };
+		577ECA8E5F2EE770ABDBC999D8B48FAE /* dso.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = dso.h; path = ios/include/openssl/dso.h; sourceTree = "<group>"; };
 		57A4A0349F0E1E858CB8AFA4F4A0E299 /* IDMTapDetectingView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = IDMTapDetectingView.m; path = Classes/IDMTapDetectingView.m; sourceTree = "<group>"; };
 		5825B195690499849143AFC11324DCE3 /* crypto_uint32.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = crypto_uint32.h; path = src/curve25519/ed25519/nacl_includes/crypto_uint32.h; sourceTree = "<group>"; };
 		58513A82597E940A1752B37F3588DF5C /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		58595C23CBEBD15A5DE625112739A543 /* des.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = des.h; path = ios/include/openssl/des.h; sourceTree = "<group>"; };
 		5867657CCEA3129B234093F04FB39B6B /* SDWebImageFrame.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SDWebImageFrame.m; path = SDWebImage/SDWebImageFrame.m; sourceTree = "<group>"; };
-		5877A4445D9BA57BFA033AA32F7F7971 /* md5.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = md5.h; path = ios/include/openssl/md5.h; sourceTree = "<group>"; };
 		58A47D2A5E73734EA509ED84CDEB9879 /* Pods-jrtplib-static-OSX-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-jrtplib-static-OSX-dummy.m"; sourceTree = "<group>"; };
 		5988A123F35AE580D3BE34A7A514662A /* SAMKeychain-macOS.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; name = "SAMKeychain-macOS.modulemap"; path = "../SAMKeychain-macOS/SAMKeychain-macOS.modulemap"; sourceTree = "<group>"; };
 		59EA822A31F3821D55A1139F14B591CB /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = Info.plist; path = "../CocoaLumberjack-iOS9.3/Info.plist"; sourceTree = "<group>"; };
-		5A04A5DD547FD7DD69EC040D563F3C55 /* asn1_mac.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = asn1_mac.h; path = ios/include/openssl/asn1_mac.h; sourceTree = "<group>"; };
+		5A63ED80B91FD6E4BF712C7115546606 /* kssl.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = kssl.h; path = ios/include/openssl/kssl.h; sourceTree = "<group>"; };
 		5A9A7230A6447530E562EA9C29DE0D19 /* Pods-jrtplib-static-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
 		5B1C10E6B643BD26AD597A6BE69452F0 /* sc_reduce.c */ = {isa = PBXFileReference; includeInIndex = 1; name = sc_reduce.c; path = src/curve25519/ed25519/sc_reduce.c; sourceTree = "<group>"; };
 		5B4389A616217BB290E8256576B80A9B /* IDMCaptionView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IDMCaptionView.h; path = Classes/IDMCaptionView.h; sourceTree = "<group>"; };
 		5B89CCB04CD8F35AA3940CE354B96A94 /* keygen.c */ = {isa = PBXFileReference; includeInIndex = 1; name = keygen.c; path = src/curve25519/ed25519/additions/keygen.c; sourceTree = "<group>"; };
-		5C52931CC70DE075C414AD00C1AA449C /* pem2.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = pem2.h; path = ios/include/openssl/pem2.h; sourceTree = "<group>"; };
 		5C842C5D1F1D62C8BC1BD2F976AE1D6B /* SUErrors.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SUErrors.h; path = Sparkle.framework/Versions/A/Headers/SUErrors.h; sourceTree = "<group>"; };
 		5D154E0A0D75EE417877132A5786DC3F /* Pods-Monal Tests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal Tests.appstore.xcconfig"; sourceTree = "<group>"; };
 		5D36702732142DFEE04F42033219755B /* Pods-Monal-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Monal-acknowledgements.plist"; sourceTree = "<group>"; };
 		5D79DA35C1FFB8A020A587986781C8A9 /* gen_eddsa.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = gen_eddsa.h; path = src/curve25519/ed25519/additions/generalized/gen_eddsa.h; sourceTree = "<group>"; };
+		5E663EEACA01EEC9900D02E54627595B /* crypto.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = crypto.h; path = ios/include/openssl/crypto.h; sourceTree = "<group>"; };
 		5E7D5FEC7DDC750617DC3773D211EC4E /* CocoaLumberjack-iOS9.3-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "CocoaLumberjack-iOS9.3-dummy.m"; path = "../CocoaLumberjack-iOS9.3/CocoaLumberjack-iOS9.3-dummy.m"; sourceTree = "<group>"; };
 		5ECF2396CCE3D6A68FA7DF1105853482 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5F030A756B5561B678CD806EAF8D1E6E /* Pods-Monal-OSX-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-OSX-frameworks.sh"; sourceTree = "<group>"; };
+		5F052EFF3BEB35A8429094EB04558557 /* objects.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = objects.h; path = ios/include/openssl/objects.h; sourceTree = "<group>"; };
 		5FD1B98CF4A2D6DEA7BD6A3C441E6ED4 /* Pods-monalxmpp-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-monalxmpp-acknowledgements.markdown"; sourceTree = "<group>"; };
 		6039029D8AE548CF5BD5E818C1436092 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		607388DEE9490348201293AF222AB7AB /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.3.sdk/System/Library/Frameworks/ImageIO.framework; sourceTree = DEVELOPER_DIR; };
+		614BCAC24BA22778BCCCEC02A32962DE /* evp.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = evp.h; path = ios/include/openssl/evp.h; sourceTree = "<group>"; };
 		618B8ED5C49687011741F049E7915148 /* DACircularProgress-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DACircularProgress-umbrella.h"; sourceTree = "<group>"; };
 		61DB8CEBBDC4B87CDE65255166AF2665 /* SignalPreKeyBundle.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalPreKeyBundle.h; path = Classes/Models/SignalPreKeyBundle.h; sourceTree = "<group>"; };
 		62965E863299D94F084BFE183CB8C676 /* SPUDownloaderDelegate.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SPUDownloaderDelegate.h; path = Sparkle.framework/Versions/A/Headers/SPUDownloaderDelegate.h; sourceTree = "<group>"; };
@@ -1292,12 +1277,13 @@
 		6321E19F697448B84051DC546AC315D2 /* DDAbstractDatabaseLogger.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DDAbstractDatabaseLogger.m; path = Sources/CocoaLumberjack/DDAbstractDatabaseLogger.m; sourceTree = "<group>"; };
 		638F277FCD2CFCBC571C172F81E5ABE4 /* POPAnimationInternal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPAnimationInternal.h; path = pop/POPAnimationInternal.h; sourceTree = "<group>"; };
 		63ADF2211145326450B741D4A308E0C1 /* IDMPhotoBrowser-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "IDMPhotoBrowser-dummy.m"; sourceTree = "<group>"; };
-		64A9112CFDE506AA512759E75B464316 /* e_os2.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = e_os2.h; path = ios/include/openssl/e_os2.h; sourceTree = "<group>"; };
+		63DBE20457E9274BBD8778751181F37C /* ts.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ts.h; path = ios/include/openssl/ts.h; sourceTree = "<group>"; };
 		654D9A7318D78F3C462FBAF63114135F /* IDMPhoto.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IDMPhoto.h; path = Classes/IDMPhoto.h; sourceTree = "<group>"; };
 		6552AF8516630051DF18525A3B351113 /* SignalProtocolC-macOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "SignalProtocolC-macOS-dummy.m"; path = "../SignalProtocolC-macOS/SignalProtocolC-macOS-dummy.m"; sourceTree = "<group>"; };
 		66A3EC5817BCA521F5E9F0732ECB2C6F /* SignalProtocolC-iOS.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "SignalProtocolC-iOS.xcconfig"; sourceTree = "<group>"; };
 		66C4C78EB7F15EEEF2CF4CDEE43C729C /* SDWebImage-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SDWebImage-dummy.m"; sourceTree = "<group>"; };
 		66E99E950CEE4085BAF5309BBA32769D /* SignalPreKeyBundle_Internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalPreKeyBundle_Internal.h; path = Classes/Models/SignalPreKeyBundle_Internal.h; sourceTree = "<group>"; };
+		679999AA64EE175C55B2F5B994446054 /* hmac.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = hmac.h; path = ios/include/openssl/hmac.h; sourceTree = "<group>"; };
 		68638FA6C8D85F4012B093AE7B368BD1 /* TPCircularBuffer-macOS.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "TPCircularBuffer-macOS.xcconfig"; path = "../TPCircularBuffer-macOS/TPCircularBuffer-macOS.xcconfig"; sourceTree = "<group>"; };
 		68680126F3BBFFB87A05A3F50883B17B /* ge_p3_0.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_p3_0.c; path = src/curve25519/ed25519/ge_p3_0.c; sourceTree = "<group>"; };
 		68A09B219CB4E7C9C139AD5AC73E78DD /* Crashlytics.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = Crashlytics.h; path = OSX/Crashlytics.framework/Versions/A/Headers/Crashlytics.h; sourceTree = "<group>"; };
@@ -1306,11 +1292,9 @@
 		69DDC410AB048427B9598AC3F0A58267 /* POPVector.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = POPVector.mm; path = pop/POPVector.mm; sourceTree = "<group>"; };
 		6A3A75A07F15B67A305B6DBC9BEB0A61 /* EAIntroView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = EAIntroView.framework; path = EAIntroView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6B102547F1F3EBBE7BE428FC63C932A3 /* pop-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "pop-dummy.m"; sourceTree = "<group>"; };
-		6B2FE3C7D91FC943F6490A8AC97125F8 /* aes.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = aes.h; path = ios/include/openssl/aes.h; sourceTree = "<group>"; };
 		6B5C4A9D497340722511158CA00B5311 /* Pods-monalxmpp-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-monalxmpp-dummy.m"; sourceTree = "<group>"; };
 		6C09D8E0B8BDACCEEF8E506B128120BE /* SignalCommonCryptoProvider.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SignalCommonCryptoProvider.m; path = Classes/Crypto/SignalCommonCryptoProvider.m; sourceTree = "<group>"; };
 		6CD8A294C8003451BACD4AF83890A171 /* ge_p3_to_p2.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_p3_to_p2.c; path = src/curve25519/ed25519/ge_p3_to_p2.c; sourceTree = "<group>"; };
-		6CF347FD941CF51B8C69F95FB44F755E /* cmac.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = cmac.h; path = ios/include/openssl/cmac.h; sourceTree = "<group>"; };
 		6D581BCEC79B0994E48443E787336AAE /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6DFAE0C0D837900948355336E6899AB4 /* SDWebImagePrefetcher.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SDWebImagePrefetcher.h; path = SDWebImage/SDWebImagePrefetcher.h; sourceTree = "<group>"; };
 		6E1D2DD59AD411B42D34536756506052 /* POPVector.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPVector.h; path = pop/POPVector.h; sourceTree = "<group>"; };
@@ -1318,16 +1302,15 @@
 		6E626B36C81BB32AC6AFCE4EC4C33CB1 /* ge_madd.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ge_madd.h; path = src/curve25519/ed25519/ge_madd.h; sourceTree = "<group>"; };
 		6E96C2DFA8758F2BE02C7D31C06AE1A8 /* SDWebImageOperation.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SDWebImageOperation.h; path = SDWebImage/SDWebImageOperation.h; sourceTree = "<group>"; };
 		6F32DAD1BC339B053EB394A8853C6135 /* SDWebImageCodersManager.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SDWebImageCodersManager.m; path = SDWebImage/SDWebImageCodersManager.m; sourceTree = "<group>"; };
-		6F4FB0A9C18AE9A87AD2360146905C88 /* pqueue.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = pqueue.h; path = ios/include/openssl/pqueue.h; sourceTree = "<group>"; };
 		6F59816CFD1FFF84C1C19D13B0F27936 /* Pods-Monal.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-Monal.modulemap"; sourceTree = "<group>"; };
 		6F79B13134378B6B70614DBB56AEC8A1 /* SignalKeyHelper_Internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalKeyHelper_Internal.h; path = Classes/SignalKeyHelper_Internal.h; sourceTree = "<group>"; };
 		6F8D97177830BA9FE130926958947103 /* crypto_int32.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = crypto_int32.h; path = src/curve25519/ed25519/nacl_includes/crypto_int32.h; sourceTree = "<group>"; };
+		6FB443400FB5950213D03E426DBF0B7C /* comp.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = comp.h; path = ios/include/openssl/comp.h; sourceTree = "<group>"; };
 		6FBC9BC3556E59EB0296E9D2C797B50D /* SignalCiphertext.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SignalCiphertext.m; path = Classes/Models/SignalCiphertext.m; sourceTree = "<group>"; };
 		70A8A0BA90AE54B6E75A7F95B94C5B8D /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.3.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		71294A9D54111755105E71412BC43535 /* EARestrictedScrollView.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = EARestrictedScrollView.modulemap; sourceTree = "<group>"; };
 		71566A1E387816FA5DA03E30A042FFEB /* DDLog+LOGV.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "DDLog+LOGV.h"; path = "Sources/CocoaLumberjack/include/DDLog+LOGV.h"; sourceTree = "<group>"; };
 		71C4CA9AC5B91918D56015846FCEBC44 /* SignalProtocolObjC-macOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "SignalProtocolObjC-macOS-umbrella.h"; path = "../SignalProtocolObjC-macOS/SignalProtocolObjC-macOS-umbrella.h"; sourceTree = "<group>"; };
-		71EA16EE9D5C37178EB495748533EC0A /* obj_mac.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = obj_mac.h; path = ios/include/openssl/obj_mac.h; sourceTree = "<group>"; };
 		722A1360647F2A6B0B60DA65C3C9FD21 /* Pods-monalxmpp-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-monalxmpp-umbrella.h"; sourceTree = "<group>"; };
 		72739D17022ACF228E6187E87144A61A /* POPAction.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPAction.h; path = pop/POPAction.h; sourceTree = "<group>"; };
 		7285C82B7500494356221859E5D376EC /* Pods-NotificaionService.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-NotificaionService.adhoc.xcconfig"; sourceTree = "<group>"; };
@@ -1341,6 +1324,7 @@
 		7438090F77D4E14363603F32E2577BD0 /* DZNEmptyDataSet-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DZNEmptyDataSet-prefix.pch"; sourceTree = "<group>"; };
 		747755A908450C214399FB9017F7AD3A /* fe_1.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_1.c; path = src/curve25519/ed25519/fe_1.c; sourceTree = "<group>"; };
 		74785D2880F8CEE417081006EF785E27 /* DDAssertMacros.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DDAssertMacros.h; path = Sources/CocoaLumberjack/include/DDAssertMacros.h; sourceTree = "<group>"; };
+		747A9B684F2B5EE1B62EE10C7760CA7C /* opensslconf.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = opensslconf.h; path = ios/include/openssl/opensslconf.h; sourceTree = "<group>"; };
 		750FBDE3548540970A7704572642E726 /* session_state.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = session_state.h; path = src/session_state.h; sourceTree = "<group>"; };
 		75703A3725E430A503DC7B0769734FCE /* ge_add.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ge_add.h; path = src/curve25519/ed25519/ge_add.h; sourceTree = "<group>"; };
 		75C0FBDF4AAEFC404AE486E8CD2B65AD /* TPCircularBuffer+AudioBufferList.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "TPCircularBuffer+AudioBufferList.h"; sourceTree = "<group>"; };
@@ -1351,27 +1335,30 @@
 		78EDF756682E9E0EEDF05955ACCDE9A4 /* SignalContext.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SignalContext.m; path = Classes/SignalContext.m; sourceTree = "<group>"; };
 		793529151352332CA889CD8351737CEF /* sc_isreduced.c */ = {isa = PBXFileReference; includeInIndex = 1; name = sc_isreduced.c; path = src/curve25519/ed25519/additions/generalized/sc_isreduced.c; sourceTree = "<group>"; };
 		79945BB2A8039175D73E76B2A91BF2D5 /* SDWebImageGIFCoder.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SDWebImageGIFCoder.m; path = SDWebImage/SDWebImageGIFCoder.m; sourceTree = "<group>"; };
-		7A0F9CF93F4B42934005256CAC4E0FED /* des_old.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = des_old.h; path = ios/include/openssl/des_old.h; sourceTree = "<group>"; };
+		79BFAAB2DD24FAE130476A9238BE27EF /* safestack.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = safestack.h; path = ios/include/openssl/safestack.h; sourceTree = "<group>"; };
 		7A336894DAF5F9E2A455E627951DFDD4 /* EAIntroPage.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = EAIntroPage.h; path = EAIntroView/EAIntroPage.h; sourceTree = "<group>"; };
+		7A53D1DC771E56DBCFE77A4B40C96F40 /* md4.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = md4.h; path = ios/include/openssl/md4.h; sourceTree = "<group>"; };
 		7A6E6C3CF6501ACC7768341FB6151FD1 /* Pods-monalxmpp.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-monalxmpp.modulemap"; sourceTree = "<group>"; };
 		7AE9FA17021ECFF336BCAFA5AFA1B005 /* Pods-NotificaionService-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-NotificaionService-resources.sh"; sourceTree = "<group>"; };
 		7AECB2961560756B0DC1AD6849625FC9 /* SignalProtocolObjC-macOS.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "SignalProtocolObjC-macOS.xcconfig"; path = "../SignalProtocolObjC-macOS/SignalProtocolObjC-macOS.xcconfig"; sourceTree = "<group>"; };
 		7B0E0EFCDD67893E5EC442BF4FB9913F /* SignalKeyPair.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalKeyPair.h; path = Classes/Models/SignalKeyPair.h; sourceTree = "<group>"; };
 		7B2773BBF30B5ED0A78B4863F990C1AB /* fe_mont_rhs.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_mont_rhs.c; path = src/curve25519/ed25519/additions/fe_mont_rhs.c; sourceTree = "<group>"; };
 		7B5EBAF545976B46F207675092C690BB /* SPUDownloaderSession.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SPUDownloaderSession.h; path = Sparkle.framework/Versions/A/Headers/SPUDownloaderSession.h; sourceTree = "<group>"; };
+		7B8675BC63A5E2BB0FCB09C717F26AC4 /* libcrypto.a */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = archive.ar; name = libcrypto.a; path = ios/lib/libcrypto.a; sourceTree = "<group>"; };
 		7BA1857577ECE7B9BF691C109C3686AE /* EAIntroView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = EAIntroView.m; path = EAIntroView/EAIntroView.m; sourceTree = "<group>"; };
 		7BA1F935E32F05C4075311EBF6F74739 /* Fabric.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = Fabric.h; path = OSX/Fabric.framework/Versions/A/Headers/Fabric.h; sourceTree = "<group>"; };
 		7C26AD3443194FFFC8EC706BF2D782B0 /* Pods-Monal Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal Tests.release.xcconfig"; sourceTree = "<group>"; };
-		7C32A216195FF772E430400D6B23A58F /* asn1.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = asn1.h; path = ios/include/openssl/asn1.h; sourceTree = "<group>"; };
 		7C9FAF0E12B7667EFCD6EC52C5933908 /* POPSpringAnimationInternal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPSpringAnimationInternal.h; path = pop/POPSpringAnimationInternal.h; sourceTree = "<group>"; };
 		7D25D776CF9F025B42391204FE8AE939 /* SPUURLRequest.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SPUURLRequest.h; path = Sparkle.framework/Versions/A/Headers/SPUURLRequest.h; sourceTree = "<group>"; };
 		7DC78FB632321022E3DB1301697BF3C3 /* POPDecayAnimation.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = POPDecayAnimation.mm; path = pop/POPDecayAnimation.mm; sourceTree = "<group>"; };
-		7DF21B760C92D2F66826130FBDAE51D0 /* symhacks.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = symhacks.h; path = ios/include/openssl/symhacks.h; sourceTree = "<group>"; };
+		7E616596CEE4E96A32E44CB0835CF6EF /* srp.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = srp.h; path = ios/include/openssl/srp.h; sourceTree = "<group>"; };
+		7E8FF1FB200D0D11295C454BDD8381B5 /* ossl_typ.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ossl_typ.h; path = ios/include/openssl/ossl_typ.h; sourceTree = "<group>"; };
 		7EA53B69DC545A2DBB3203187ED1A881 /* SUAppcast.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SUAppcast.h; path = Sparkle.framework/Versions/A/Headers/SUAppcast.h; sourceTree = "<group>"; };
 		7F24B7EDC00387F44DD2C8EA276C516C /* POPBasicAnimation.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPBasicAnimation.h; path = pop/POPBasicAnimation.h; sourceTree = "<group>"; };
 		7F314601C354EC49408BD0A26CEA9395 /* Pods-Monal.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal.release.xcconfig"; sourceTree = "<group>"; };
+		7F383B0AD9A1D7CB14C971B3E8FA7FE9 /* asn1_mac.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = asn1_mac.h; path = ios/include/openssl/asn1_mac.h; sourceTree = "<group>"; };
+		80467ECBF354B6ED3DFE4D09F12FB78D /* pem2.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = pem2.h; path = ios/include/openssl/pem2.h; sourceTree = "<group>"; };
 		80D1137CCAC305F343A73ABC538CC4BC /* crypto_verify_32.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = crypto_verify_32.h; path = src/curve25519/ed25519/nacl_includes/crypto_verify_32.h; sourceTree = "<group>"; };
-		80D45039D6BEEBE8267F7953B14B6ACD /* idea.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = idea.h; path = ios/include/openssl/idea.h; sourceTree = "<group>"; };
 		8137798452E861D2C0117D71CC9B26B2 /* SDWebImage-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SDWebImage-umbrella.h"; sourceTree = "<group>"; };
 		81666F456BF8F823D49CDB35B1F8D4E4 /* fe_0.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_0.c; path = src/curve25519/ed25519/fe_0.c; sourceTree = "<group>"; };
 		818905720E313AFE177B6007AFC50F2B /* FABAttributes.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FABAttributes.h; path = OSX/Fabric.framework/Versions/A/Headers/FABAttributes.h; sourceTree = "<group>"; };
@@ -1379,7 +1366,6 @@
 		81D0CCD13F61961226C03C758051D59C /* CLSLogging.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSLogging.h; path = OSX/Crashlytics.framework/Versions/A/Headers/CLSLogging.h; sourceTree = "<group>"; };
 		821CCB40BD4D94F9B0C933D393B4011A /* SignalMessage.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalMessage.h; path = Classes/Models/SignalMessage.h; sourceTree = "<group>"; };
 		8236D72A15CEF9C7C076D43F27C488DC /* gen_x.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = gen_x.h; path = src/curve25519/ed25519/additions/generalized/gen_x.h; sourceTree = "<group>"; };
-		826B8F6AC8277681CEF862CFC8A8C4C5 /* rc4.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = rc4.h; path = ios/include/openssl/rc4.h; sourceTree = "<group>"; };
 		82950630FA59ECA99898DCFC65C2CEB7 /* compare.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = compare.h; path = src/curve25519/ed25519/additions/compare.h; sourceTree = "<group>"; };
 		837CF018E8DF826E531175C776114537 /* ge_madd.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_madd.c; path = src/curve25519/ed25519/ge_madd.c; sourceTree = "<group>"; };
 		839A17AAD006417E7AE042E97072992E /* SignalKeyPair_Internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalKeyPair_Internal.h; path = Classes/Models/SignalKeyPair_Internal.h; sourceTree = "<group>"; };
@@ -1397,20 +1383,19 @@
 		87A64FE18931AECFD87626614D6CE2D4 /* IDMPhotoBrowser-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "IDMPhotoBrowser-umbrella.h"; sourceTree = "<group>"; };
 		87F85BC539BA0CDCD894A3FA18C242F8 /* IDMZoomingScrollView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = IDMZoomingScrollView.m; path = Classes/IDMZoomingScrollView.m; sourceTree = "<group>"; };
 		880996128A33E20C9B4AC0CBE35F3543 /* SignalProtocolC-macOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "SignalProtocolC-macOS-prefix.pch"; path = "../SignalProtocolC-macOS/SignalProtocolC-macOS-prefix.pch"; sourceTree = "<group>"; };
+		8823B89EB05FB242E8E995A99BE7B196 /* pem.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = pem.h; path = ios/include/openssl/pem.h; sourceTree = "<group>"; };
 		885A1833527C78BF66E7C1F8C383DC76 /* CocoaLumberjack.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CocoaLumberjack.h; path = "Sources/CocoaLumberjack/Supporting Files/CocoaLumberjack.h"; sourceTree = "<group>"; };
 		88C736137B06F9EFCFD38F7B995ECB75 /* ANSCompatibility.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ANSCompatibility.h; path = OSX/Crashlytics.framework/Versions/A/Headers/ANSCompatibility.h; sourceTree = "<group>"; };
 		8901C9DB641B1584322A6D9D275AB932 /* CocoaLumberjack.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = CocoaLumberjack.framework; path = "CocoaLumberjack-iOS13.0.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
 		894F09BF26665D187D6AED756FEAAE3E /* SignalProtocolObjC-macOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "SignalProtocolObjC-macOS-prefix.pch"; path = "../SignalProtocolObjC-macOS/SignalProtocolObjC-macOS-prefix.pch"; sourceTree = "<group>"; };
 		896D54A3A2D36970E49B49F16B2A24A2 /* DDMultiFormatter.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DDMultiFormatter.h; path = Sources/CocoaLumberjack/include/DDMultiFormatter.h; sourceTree = "<group>"; };
 		89B2DE5048C5D9041F860D33C2B34F4F /* curve.c */ = {isa = PBXFileReference; includeInIndex = 1; name = curve.c; path = src/curve.c; sourceTree = "<group>"; };
+		8A89289C254B64C72B702C135ECA64AE /* mdc2.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = mdc2.h; path = ios/include/openssl/mdc2.h; sourceTree = "<group>"; };
 		8ACC7A634EBA18B33103B3DF4F1C4D0D /* crypto_additions.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = crypto_additions.h; path = src/curve25519/ed25519/additions/crypto_additions.h; sourceTree = "<group>"; };
 		8B064C5B76416AB7BBE7CE78ABAD85A5 /* SignalProtocolObjC-iOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SignalProtocolObjC-iOS-prefix.pch"; sourceTree = "<group>"; };
 		8B48AE56AE5C5DC9C2A7AF6F272CC0D4 /* fe_pow22523.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_pow22523.c; path = src/curve25519/ed25519/fe_pow22523.c; sourceTree = "<group>"; };
 		8BAF1A8ED9A0654A7B315F7CC1A091A5 /* session_record.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = session_record.h; path = src/session_record.h; sourceTree = "<group>"; };
-		8BCFA35EB97F9DE6054BB2B996CB7AB2 /* ocsp.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ocsp.h; path = ios/include/openssl/ocsp.h; sourceTree = "<group>"; };
 		8C1768B1A19730678AA4E77FB9D24AB6 /* protocol.c */ = {isa = PBXFileReference; includeInIndex = 1; name = protocol.c; path = src/protocol.c; sourceTree = "<group>"; };
-		8C1C58A0DB0E500833A986AB16000B1F /* blowfish.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = blowfish.h; path = ios/include/openssl/blowfish.h; sourceTree = "<group>"; };
-		8C63313FD768EB30D4275606810AF67C /* buffer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = buffer.h; path = ios/include/openssl/buffer.h; sourceTree = "<group>"; };
 		8C694D4861A9F2AA5348338C4062B689 /* LocalStorageProtocol.pb-c.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "LocalStorageProtocol.pb-c.h"; path = "src/LocalStorageProtocol.pb-c.h"; sourceTree = "<group>"; };
 		8CE82F5B9E802D5DB0C54A128A35E649 /* device_consistency.c */ = {isa = PBXFileReference; includeInIndex = 1; name = device_consistency.c; path = src/device_consistency.c; sourceTree = "<group>"; };
 		8D025B17EB46100258CD800918647EDF /* POPAnimationEventInternal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPAnimationEventInternal.h; path = pop/POPAnimationEventInternal.h; sourceTree = "<group>"; };
@@ -1421,12 +1406,14 @@
 		8E7736C24D15A910A6F89B33A6122556 /* SignalProtocolObjC.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalProtocolObjC.h; path = Classes/SignalProtocolObjC.h; sourceTree = "<group>"; };
 		8F8F96DDFB59FD78BAE05A611BE19A37 /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Fabric.framework; path = OSX/Fabric.framework; sourceTree = "<group>"; };
 		8F909134B670CB8BA322FDC52796BE61 /* DDLegacyMacros.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DDLegacyMacros.h; path = "Sources/CocoaLumberjack/Supporting Files/DDLegacyMacros.h"; sourceTree = "<group>"; };
+		903B1A9AC3C5B82BB7386ACBA9EDA061 /* obj_mac.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = obj_mac.h; path = ios/include/openssl/obj_mac.h; sourceTree = "<group>"; };
 		90645EBDA70F25AADBFE333CB64653BD /* POPAnimationExtras.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = POPAnimationExtras.mm; path = pop/POPAnimationExtras.mm; sourceTree = "<group>"; };
 		906B4C3E5F69FE5196ECEA5970181413 /* Pods-jrtplib-static.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static.appstore.xcconfig"; sourceTree = "<group>"; };
 		90E5AC6BA18B89AC1439AB97E8FB3E40 /* UIScrollView+EmptyDataSet.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIScrollView+EmptyDataSet.h"; path = "Source/UIScrollView+EmptyDataSet.h"; sourceTree = "<group>"; };
 		919CE2DB707196A00F65B3B02914241D /* SDWebImageCoderHelper.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SDWebImageCoderHelper.h; path = SDWebImage/SDWebImageCoderHelper.h; sourceTree = "<group>"; };
 		91C79C28D2510F7B6C494B56635EAA18 /* elligator.c */ = {isa = PBXFileReference; includeInIndex = 1; name = elligator.c; path = src/curve25519/ed25519/additions/elligator.c; sourceTree = "<group>"; };
 		91E079762284E75E5FCF9FCA1E05169B /* pop.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = pop.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		91E704E56713ACBDE7D3CA6493D66C36 /* idea.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = idea.h; path = ios/include/openssl/idea.h; sourceTree = "<group>"; };
 		91F650FC7166D5E46311FB41C662CA0B /* crypto_sign_edwards25519sha512batch.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = crypto_sign_edwards25519sha512batch.h; path = src/curve25519/ed25519/nacl_includes/crypto_sign_edwards25519sha512batch.h; sourceTree = "<group>"; };
 		92BCC72DB94025A8F08B0475DA84825A /* SignalSessionCipher.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SignalSessionCipher.m; path = Classes/SignalSessionCipher.m; sourceTree = "<group>"; };
 		92C69431F02A5BA0103606D27425715B /* Pods-Monal-OSX-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-OSX-resources.sh"; sourceTree = "<group>"; };
@@ -1435,7 +1422,10 @@
 		9368C9A9349FB0E5ED22354C874AD33B /* DACircularProgress.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = DACircularProgress.framework; path = DACircularProgress.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		93A4A3777CF96A4AAC1D13BA6DCCEA73 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		93B2371BBB31F91F904CF32980E53807 /* keygen.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = keygen.h; path = src/curve25519/ed25519/additions/keygen.h; sourceTree = "<group>"; };
+		943BAD02A6FA302B57E1FE05D420BFFE /* ripemd.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ripemd.h; path = ios/include/openssl/ripemd.h; sourceTree = "<group>"; };
+		944797F54F1AF6FE944BBBC5A81D9D26 /* ec.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ec.h; path = ios/include/openssl/ec.h; sourceTree = "<group>"; };
 		9451945631E07934525C41910440758F /* Pods-NotificaionService.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-NotificaionService.modulemap"; sourceTree = "<group>"; };
+		94A98ABBB15A7CAF55D0312F2B1DB5E5 /* ecdsa.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ecdsa.h; path = ios/include/openssl/ecdsa.h; sourceTree = "<group>"; };
 		94CDF13AA1FC6CDCD8B7C6E937E131E1 /* DDLog.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DDLog.m; path = Sources/CocoaLumberjack/DDLog.m; sourceTree = "<group>"; };
 		95087A2C629AD17F2F715AB47694EDD6 /* CLIColor.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLIColor.h; path = Sources/CocoaLumberjack/include/CLIColor.h; sourceTree = "<group>"; };
 		95388D2FEEED7E0C09349F3A3FDC86BA /* EAIntroView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = EAIntroView.h; path = EAIntroView/EAIntroView.h; sourceTree = "<group>"; };
@@ -1443,6 +1433,7 @@
 		95C20D36DE28A82CDFCEE040BAF822E5 /* CLIColor.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = CLIColor.m; path = Sources/CocoaLumberjack/CLI/CLIColor.m; sourceTree = "<group>"; };
 		9771F979029007AEAE8D6D74CA3F4066 /* ge_scalarmult.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_scalarmult.c; path = src/curve25519/ed25519/additions/ge_scalarmult.c; sourceTree = "<group>"; };
 		97CCAF71F23F3BA344C738F1AEB31D26 /* TPCircularBuffer-iOS.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "TPCircularBuffer-iOS.xcconfig"; sourceTree = "<group>"; };
+		97E693180478F8E33BE3DEA384A8CEA0 /* stack.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = stack.h; path = ios/include/openssl/stack.h; sourceTree = "<group>"; };
 		98206C923C263B264255A6FF38CAC2B5 /* TPCircularBuffer-macOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "TPCircularBuffer-macOS-dummy.m"; path = "../TPCircularBuffer-macOS/TPCircularBuffer-macOS-dummy.m"; sourceTree = "<group>"; };
 		989958F1F46632F0463CD80DD47133E3 /* fe_neg.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_neg.c; path = src/curve25519/ed25519/fe_neg.c; sourceTree = "<group>"; };
 		991A5C6A53127AAEC9F1C4E8A2342C8A /* curve_sigs.c */ = {isa = PBXFileReference; includeInIndex = 1; name = curve_sigs.c; path = src/curve25519/ed25519/additions/curve_sigs.c; sourceTree = "<group>"; };
@@ -1450,7 +1441,6 @@
 		9945B1BE85FB732F986439A252653632 /* SDWebImageCoder.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SDWebImageCoder.m; path = SDWebImage/SDWebImageCoder.m; sourceTree = "<group>"; };
 		99A06BA06A3F8C0A5323FC35C9D22884 /* SignalStorage_Internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalStorage_Internal.h; path = Classes/Storage/SignalStorage_Internal.h; sourceTree = "<group>"; };
 		9A0D142DB26D29A0B8222131680E5B35 /* session_state.c */ = {isa = PBXFileReference; includeInIndex = 1; name = session_state.c; path = src/session_state.c; sourceTree = "<group>"; };
-		9A7EDCF864200D91F5BFC0E14997B790 /* rand.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = rand.h; path = ios/include/openssl/rand.h; sourceTree = "<group>"; };
 		9B11B31874C7C8079E51E02CE7820CAA /* POPAnimationExtras.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPAnimationExtras.h; path = pop/POPAnimationExtras.h; sourceTree = "<group>"; };
 		9B137C1CF939BF7535D75C4D75E30366 /* EAIntroView.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = EAIntroView.modulemap; sourceTree = "<group>"; };
 		9B14AE88F7C80B0E68017DDFC3F49A7C /* utility.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = utility.h; path = src/curve25519/ed25519/additions/utility.h; sourceTree = "<group>"; };
@@ -1459,76 +1449,77 @@
 		9C0428AD17AC8572ECF5AB890B1442A6 /* fe_isnonzero.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_isnonzero.c; path = src/curve25519/ed25519/fe_isnonzero.c; sourceTree = "<group>"; };
 		9C2179D6E6617780AEB6A43E4F0E2BDF /* vpool.c */ = {isa = PBXFileReference; includeInIndex = 1; name = vpool.c; path = src/vpool.c; sourceTree = "<group>"; };
 		9C9F083791EA77896B57C778AA23302D /* DDMultiFormatter.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DDMultiFormatter.m; path = Sources/CocoaLumberjack/Extensions/DDMultiFormatter.m; sourceTree = "<group>"; };
-		9CB57237EE170414B5F10D1C3A513636 /* ossl_typ.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ossl_typ.h; path = ios/include/openssl/ossl_typ.h; sourceTree = "<group>"; };
 		9CFDC2466AFD81172C1C3A7968980B58 /* Pods-jrtplib-static-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-jrtplib-static-resources.sh"; sourceTree = "<group>"; };
 		9D6CAD06117CA2E47B17F32E1B514404 /* SignalProtocolObjC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = SignalProtocolObjC.framework; path = "SignalProtocolObjC-iOS.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9DB0597815F2A6D94C0D17A71621BE8F /* Pods-jrtplib-static-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-jrtplib-static-dummy.m"; sourceTree = "<group>"; };
 		9E60DC9ED8B0F1AFC2C0DCECCCA42175 /* sender_key_record.c */ = {isa = PBXFileReference; includeInIndex = 1; name = sender_key_record.c; path = src/sender_key_record.c; sourceTree = "<group>"; };
 		9E6F852DFFB1756CFEC793FB1E4211CE /* SAMKeychain-iOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SAMKeychain-iOS-umbrella.h"; sourceTree = "<group>"; };
+		9EB7F10F6E9475D070875643091AD1A1 /* opensslconf-x86_64.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "opensslconf-x86_64.h"; path = "ios/include/openssl/opensslconf-x86_64.h"; sourceTree = "<group>"; };
 		9EBF07E555D1792994531209C1BD5BD5 /* POPAnimation.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = POPAnimation.mm; path = pop/POPAnimation.mm; sourceTree = "<group>"; };
 		9ECEAA25E8E91F2CCFC0EB9C090F9737 /* Pods-Monal Tests.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-Monal Tests.modulemap"; sourceTree = "<group>"; };
 		9FCB0288C6BAF3CDDBE1F2D0F7A7A6AC /* POPAnimationEvent.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = POPAnimationEvent.mm; path = pop/POPAnimationEvent.mm; sourceTree = "<group>"; };
+		9FEEA9B3C2D4CA516136D1860CC6E6E8 /* x509_vfy.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = x509_vfy.h; path = ios/include/openssl/x509_vfy.h; sourceTree = "<group>"; };
 		9FFEC78165340030D6C40CC8C517E88D /* POPAnimationTracerInternal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPAnimationTracerInternal.h; path = pop/POPAnimationTracerInternal.h; sourceTree = "<group>"; };
-		A0311FF094DA55165C3262986E5A0B2D /* krb5_asn.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = krb5_asn.h; path = ios/include/openssl/krb5_asn.h; sourceTree = "<group>"; };
+		A0D70088CFEA1FFD7C71367B6FC05721 /* srtp.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = srtp.h; path = ios/include/openssl/srtp.h; sourceTree = "<group>"; };
 		A0E7AB4A55DA2BD749983C54612FE3AC /* FingerprintProtocol.pb-c.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "FingerprintProtocol.pb-c.h"; path = "src/FingerprintProtocol.pb-c.h"; sourceTree = "<group>"; };
 		A0F751BC0532EA1E55A5800B2C613A1D /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A211EAFBA0534592797F2B441E17FECA /* POPGeometry.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPGeometry.h; path = pop/POPGeometry.h; sourceTree = "<group>"; };
 		A23EB2C225D57E610A6750C66F03AF69 /* CocoaLumberjack-iOS13.0-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "CocoaLumberjack-iOS13.0-prefix.pch"; sourceTree = "<group>"; };
 		A289F75048CD2BB6C50DF1A71DD68EAE /* POPPropertyAnimation.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = POPPropertyAnimation.mm; path = pop/POPPropertyAnimation.mm; sourceTree = "<group>"; };
 		A2BE60BB19E7F952DB0AED7F5FE97C26 /* SignalMessage_Internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalMessage_Internal.h; path = Classes/Models/SignalMessage_Internal.h; sourceTree = "<group>"; };
+		A2FA1AC1B8E0B233D8F5D51E55D4E69D /* cms.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = cms.h; path = ios/include/openssl/cms.h; sourceTree = "<group>"; };
 		A314CC0D7929C14D10657B4191394973 /* sc_cmov.c */ = {isa = PBXFileReference; includeInIndex = 1; name = sc_cmov.c; path = src/curve25519/ed25519/additions/sc_cmov.c; sourceTree = "<group>"; };
 		A3671AC352B1832E4C507C2C2160195B /* SDWebImageCompat.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SDWebImageCompat.m; path = SDWebImage/SDWebImageCompat.m; sourceTree = "<group>"; };
 		A3DB709248A193522F157C142DBDC8E6 /* Pods_Monal_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_Monal_Tests.framework; path = "Pods-Monal Tests.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A4156E92B51F3D46C8EC3BACDDA254F8 /* UIImage+GIF.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIImage+GIF.h"; path = "SDWebImage/UIImage+GIF.h"; sourceTree = "<group>"; };
 		A43A64478116BBAEAE97D3E7E2AD64F4 /* Pods-Monal Tests-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Monal Tests-acknowledgements.plist"; sourceTree = "<group>"; };
 		A44C74F66E9F383F2B293A2FB1CC6D2C /* sign.c */ = {isa = PBXFileReference; includeInIndex = 1; name = sign.c; path = src/curve25519/ed25519/sign.c; sourceTree = "<group>"; };
-		A4B19A39851D3B63437C2807201456E2 /* ec.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ec.h; path = ios/include/openssl/ec.h; sourceTree = "<group>"; };
 		A4F3AFA7CF7577D48026D28B5387AD15 /* SAMKeychain-iOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SAMKeychain-iOS-dummy.m"; sourceTree = "<group>"; };
 		A4F5C9586EF18B11644F73A32A8E39AB /* pop.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = pop.xcconfig; sourceTree = "<group>"; };
+		A52BCCB1467E5C1F79104D5D6D90EA37 /* ecdh.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ecdh.h; path = ios/include/openssl/ecdh.h; sourceTree = "<group>"; };
+		A54A729628E7F39C05A6A277B43D7959 /* rsa.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = rsa.h; path = ios/include/openssl/rsa.h; sourceTree = "<group>"; };
 		A579DC2F75E933EE036530601A8F0A3B /* SignalCommonCryptoProvider.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalCommonCryptoProvider.h; path = Classes/Crypto/SignalCommonCryptoProvider.h; sourceTree = "<group>"; };
 		A588E834B356D9852859ABF413E30ABD /* Pods-jrtplib-static-OSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static-OSX.debug.xcconfig"; sourceTree = "<group>"; };
 		A5A65D910AE9244694DEA30109813832 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
-		A60994E846F30D4E750E33FB2BD93123 /* ui.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ui.h; path = ios/include/openssl/ui.h; sourceTree = "<group>"; };
 		A60D685843F07BCDB4827230C9F7769E /* Pods-shareSheet-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-shareSheet-umbrella.h"; sourceTree = "<group>"; };
 		A6B43375B68499CD666CC3DBF17A117E /* SAMKeychain.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = SAMKeychain.bundle; path = Support/SAMKeychain.bundle; sourceTree = "<group>"; };
 		A72938719802A13D67CF217E754F06EC /* NSButton+WebCache.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSButton+WebCache.m"; path = "SDWebImage/NSButton+WebCache.m"; sourceTree = "<group>"; };
 		A779AA905A7D3CF4183E01F6AB654B14 /* SignalProtocolC-macOS.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "SignalProtocolC-macOS.xcconfig"; path = "../SignalProtocolC-macOS/SignalProtocolC-macOS.xcconfig"; sourceTree = "<group>"; };
+		A87EFC3B0EA9A3502734E57F54770DF6 /* sha.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = sha.h; path = ios/include/openssl/sha.h; sourceTree = "<group>"; };
 		A894FFB648065CDB7AF0F0B1807E41AA /* CocoaLumberjack-iOS13.0-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "CocoaLumberjack-iOS13.0-dummy.m"; sourceTree = "<group>"; };
 		A91B8DAEEA4BDB76C67625A5B163328D /* TPCircularBuffer-iOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "TPCircularBuffer-iOS-prefix.pch"; sourceTree = "<group>"; };
 		A96EEA2353BE375A056DB9CBD9AEE292 /* IDMTapDetectingImageView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IDMTapDetectingImageView.h; path = Classes/IDMTapDetectingImageView.h; sourceTree = "<group>"; };
-		A9788C8AAFE6CB5ABE66CE3B39032AE7 /* pkcs12.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = pkcs12.h; path = ios/include/openssl/pkcs12.h; sourceTree = "<group>"; };
 		A99CC1ED0CD0174E63524E588291263A /* Pods-Monal.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal.adhoc.xcconfig"; sourceTree = "<group>"; };
 		AA38B0A0723ECA166316C5B4885EBF7F /* SPUDownloader.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SPUDownloader.h; path = Sparkle.framework/Versions/A/Headers/SPUDownloader.h; sourceTree = "<group>"; };
 		AAEFBAA94080F1690042C6FD7191A611 /* Pods-shareSheet.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-shareSheet.adhoc.xcconfig"; sourceTree = "<group>"; };
 		AB797F25CE048403EA0EADD8EB6194B1 /* hkdf.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = hkdf.h; path = src/hkdf.h; sourceTree = "<group>"; };
 		ACE1FEA2236614951A7B0E801DAB3B23 /* SignalProtocolC-macOS.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; name = "SignalProtocolC-macOS.modulemap"; path = "../SignalProtocolC-macOS/SignalProtocolC-macOS.modulemap"; sourceTree = "<group>"; };
 		ACE45D64AB96166B43661E4D0F02DED2 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = Info.plist; path = "../SAMKeychain-macOS/Info.plist"; sourceTree = "<group>"; };
-		AD0BFD71E048FDD09E843ECB07C8E5E9 /* opensslconf-armv7s.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "opensslconf-armv7s.h"; path = "ios/include/openssl/opensslconf-armv7s.h"; sourceTree = "<group>"; };
 		AE3150DBE8FAB0EA70A07BF49A2DF4B7 /* Pods-shareSheet.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-shareSheet.modulemap"; sourceTree = "<group>"; };
-		AEFC1BF665F86A2AA944DFDAD108838D /* whrlpool.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = whrlpool.h; path = ios/include/openssl/whrlpool.h; sourceTree = "<group>"; };
 		AF676FE1B4727C575D65B58CF1FB80F5 /* fe_sq.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_sq.c; path = src/curve25519/ed25519/fe_sq.c; sourceTree = "<group>"; };
-		B014845D7640B806283697DB744B0D87 /* sha.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = sha.h; path = ios/include/openssl/sha.h; sourceTree = "<group>"; };
 		B03C71FFD0CD8A06656241366680041B /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B047608B8FB89B1F4CEFA44E64431FCF /* fingerprint.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fingerprint.c; path = src/fingerprint.c; sourceTree = "<group>"; };
 		B0A771E112D40C0E2B433CAA953AB2CD /* DACircularProgress.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DACircularProgress.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B0CE8475A6C4CDE11F477C87DEE16D2A /* opensslconf-armv7s.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "opensslconf-armv7s.h"; path = "ios/include/openssl/opensslconf-armv7s.h"; sourceTree = "<group>"; };
 		B0FEB86830D11D2760F09DB54ADA28DE /* crypto_hash_sha512.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = crypto_hash_sha512.h; path = src/curve25519/ed25519/additions/crypto_hash_sha512.h; sourceTree = "<group>"; };
 		B159330371B4EC13E8CFC27EFA4283D8 /* DDFileLogger.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DDFileLogger.m; path = Sources/CocoaLumberjack/DDFileLogger.m; sourceTree = "<group>"; };
-		B1859E59BDC83AB4A1B5E4467F469487 /* lhash.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = lhash.h; path = ios/include/openssl/lhash.h; sourceTree = "<group>"; };
 		B1C7DE30ECD7BED9577C4C0B1E20A974 /* Pods-shareSheet-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-shareSheet-resources.sh"; sourceTree = "<group>"; };
 		B255D51440CB842C16B7E66767FF383E /* POPSpringAnimation.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = POPSpringAnimation.mm; path = pop/POPSpringAnimation.mm; sourceTree = "<group>"; };
 		B2D51EF79F1EB8C1DB8DAA023F0528DE /* IDMPhotoBrowser.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = IDMPhotoBrowser.framework; path = IDMPhotoBrowser.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B3619F31A7D4A8C7783121E7834FEF88 /* NSData+ImageContentType.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSData+ImageContentType.m"; path = "SDWebImage/NSData+ImageContentType.m"; sourceTree = "<group>"; };
+		B3DFB1DCB8E3CA9CBB022DE282B5BD2B /* x509v3.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = x509v3.h; path = ios/include/openssl/x509v3.h; sourceTree = "<group>"; };
 		B490EC1EAE8752B24227C3A1726D530E /* POPAnimationRuntime.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = POPAnimationRuntime.mm; path = pop/POPAnimationRuntime.mm; sourceTree = "<group>"; };
 		B4A31058737648E5CE4C4C0AF39EA1B9 /* Pods-Monal Tests-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal Tests-frameworks.sh"; sourceTree = "<group>"; };
 		B4B940EF5FB6F35D2E60CD900F0730BA /* IDMCaptionView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = IDMCaptionView.m; path = Classes/IDMCaptionView.m; sourceTree = "<group>"; };
-		B50330CD8E5F0A0F41283FCF42E84F7E /* opensslconf-x86_64.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "opensslconf-x86_64.h"; path = "ios/include/openssl/opensslconf-x86_64.h"; sourceTree = "<group>"; };
 		B54B863404771582FEE4CDB34DEC3FDA /* CWStatusBarNotification-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "CWStatusBarNotification-prefix.pch"; sourceTree = "<group>"; };
 		B574754D3B5BFC5BAA3B2DCC76E4996A /* DACircularProgress.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = DACircularProgress.xcconfig; sourceTree = "<group>"; };
+		B5C230F68CA1FDAA9EFF0E3DCD096F2D /* rc2.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = rc2.h; path = ios/include/openssl/rc2.h; sourceTree = "<group>"; };
 		B6512A000C0ABB7EB39633A0187D96A1 /* ge_p2_dbl.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_p2_dbl.c; path = src/curve25519/ed25519/ge_p2_dbl.c; sourceTree = "<group>"; };
 		B6DB7E13C2D1C74B597B2691616D65AC /* IDMPhotoBrowser.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = IDMPhotoBrowser.xcconfig; sourceTree = "<group>"; };
 		B6FED452081CD54210CB61A8F0E2DBB9 /* TPCircularBuffer-iOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "TPCircularBuffer-iOS-umbrella.h"; sourceTree = "<group>"; };
 		B7453E456E194DED39E15C77A8B98FB6 /* sc_neg.c */ = {isa = PBXFileReference; includeInIndex = 1; name = sc_neg.c; path = src/curve25519/ed25519/additions/sc_neg.c; sourceTree = "<group>"; };
 		B747E40B16C21F3F5EB9B656143A44DA /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B74E7F7F9AB154D72F3786B13FEBFBAE /* ssl2.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ssl2.h; path = ios/include/openssl/ssl2.h; sourceTree = "<group>"; };
 		B76799B3BD1AE1E73188DEC16B2D3726 /* SAMKeychain-iOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SAMKeychain-iOS-prefix.pch"; sourceTree = "<group>"; };
 		B7D68A2CA2EBFA79570B8DF8410052D6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.3.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		B88DE5BD6B301EFA0740850305DA6108 /* POPAnimationRuntime.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPAnimationRuntime.h; path = pop/POPAnimationRuntime.h; sourceTree = "<group>"; };
@@ -1537,14 +1528,14 @@
 		B9B937FA0C4DECBC858B7FD4D38590C2 /* ge_sub.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ge_sub.h; path = src/curve25519/ed25519/ge_sub.h; sourceTree = "<group>"; };
 		B9D859289F9927890B097EA55E00365C /* Pods-shareSheet.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-shareSheet.appstore.xcconfig"; sourceTree = "<group>"; };
 		BA16C15E4F523F17FBA08E0F85FB70AA /* Pods-jrtplib-static.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static.release.xcconfig"; sourceTree = "<group>"; };
-		BA316500182115571A2C53FAD3E8B9E8 /* rc2.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = rc2.h; path = ios/include/openssl/rc2.h; sourceTree = "<group>"; };
 		BA66F311E68E88260C3E676AAF145790 /* DDLogMacros.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DDLogMacros.h; path = Sources/CocoaLumberjack/include/DDLogMacros.h; sourceTree = "<group>"; };
+		BA9FAE16DE15E656758CD98D3F247762 /* whrlpool.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = whrlpool.h; path = ios/include/openssl/whrlpool.h; sourceTree = "<group>"; };
 		BAC5B2F09DDF20046930A0D649466FE2 /* xeddsa.c */ = {isa = PBXFileReference; includeInIndex = 1; name = xeddsa.c; path = src/curve25519/ed25519/additions/xeddsa.c; sourceTree = "<group>"; };
 		BB37157648C0E2689359E907F431A1D4 /* LocalStorageProtocol.pb-c.c */ = {isa = PBXFileReference; includeInIndex = 1; name = "LocalStorageProtocol.pb-c.c"; path = "src/LocalStorageProtocol.pb-c.c"; sourceTree = "<group>"; };
 		BB46A6E0618717E07A29D0A22665D72C /* SignalProtocolC-iOS.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "SignalProtocolC-iOS.modulemap"; sourceTree = "<group>"; };
 		BC15341629020338B4778565E711302B /* UIView+WebCache.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIView+WebCache.m"; path = "SDWebImage/UIView+WebCache.m"; sourceTree = "<group>"; };
+		BC5584A9A779750AA32EDCC8785FF046 /* ui.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ui.h; path = ios/include/openssl/ui.h; sourceTree = "<group>"; };
 		BC7648C564C7FC0E11D75012C9F7AED7 /* POPMath.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = POPMath.mm; path = pop/POPMath.mm; sourceTree = "<group>"; };
-		BC8362B9ACFE1785EF822E313619EE38 /* objects.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = objects.h; path = ios/include/openssl/objects.h; sourceTree = "<group>"; };
 		BCAB9FE1A9F78499FB6A6A7B18A72E42 /* FingerprintProtocol.pb-c.c */ = {isa = PBXFileReference; includeInIndex = 1; name = "FingerprintProtocol.pb-c.c"; path = "src/FingerprintProtocol.pb-c.c"; sourceTree = "<group>"; };
 		BCC1E23A67751FF69E1457AC61F230AF /* protobuf-c.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "protobuf-c.h"; path = "src/protobuf-c/protobuf-c.h"; sourceTree = "<group>"; };
 		BCE142D4F935BAD1532EC0356A1A59AB /* Pods-NotificaionService.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-NotificaionService.appstore.xcconfig"; sourceTree = "<group>"; };
@@ -1555,6 +1546,7 @@
 		BE238883738459D4707CDE33D7E0D1EF /* SignalProtocolC-iOS-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SignalProtocolC-iOS-prefix.pch"; sourceTree = "<group>"; };
 		BE59B6D1A5539EBBBE6DA38BFBB4134A /* CLSStackFrame.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSStackFrame.h; path = OSX/Crashlytics.framework/Versions/A/Headers/CLSStackFrame.h; sourceTree = "<group>"; };
 		BEB10FC96162E537B7436F5396CF21C9 /* DACircularProgressView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DACircularProgressView.h; path = DACircularProgress/DACircularProgressView.h; sourceTree = "<group>"; };
+		BFB6A25AE0F40EE54458B6B87B15369B /* seed.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = seed.h; path = ios/include/openssl/seed.h; sourceTree = "<group>"; };
 		BFE9102314D8F417137BD3F565B1B1CB /* POPAnimationTracer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPAnimationTracer.h; path = pop/POPAnimationTracer.h; sourceTree = "<group>"; };
 		C002EB4E426DAB99DE40C513ECF37771 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C00C31ED16702ABE2D12BDB7E6548306 /* fe.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = fe.h; path = src/curve25519/ed25519/fe.h; sourceTree = "<group>"; };
@@ -1562,15 +1554,17 @@
 		C0AFC1155455CECAA1ED0ECA36EA2FCC /* utlist.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = utlist.h; path = src/utlist.h; sourceTree = "<group>"; };
 		C0BE16304E9FB7D589C52B1CDBD1469C /* session_builder.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = session_builder.h; path = src/session_builder.h; sourceTree = "<group>"; };
 		C19AE239898AD45C275113532C57B370 /* DACircularProgressView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DACircularProgressView.m; path = DACircularProgress/DACircularProgressView.m; sourceTree = "<group>"; };
-		C19FCB91C45F5D8B5ACBAFABF2AA3167 /* libssl.a */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = archive.ar; name = libssl.a; path = ios/lib/libssl.a; sourceTree = "<group>"; };
 		C1B935AD67EFE204D19A6EC431A2181C /* CocoaLumberjack-iOS9.3-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "CocoaLumberjack-iOS9.3-prefix.pch"; path = "../CocoaLumberjack-iOS9.3/CocoaLumberjack-iOS9.3-prefix.pch"; sourceTree = "<group>"; };
 		C2253249CFA5A49AC96FC12F381AEAEF /* SignalSessionBuilder.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SignalSessionBuilder.m; path = Classes/SignalSessionBuilder.m; sourceTree = "<group>"; };
 		C22BA98DFA4084ADF9315CF832864BFF /* base2.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = base2.h; path = src/curve25519/ed25519/base2.h; sourceTree = "<group>"; };
+		C26363C499DC5D22746AB5470C53D746 /* libssl.a */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = archive.ar; name = libssl.a; path = ios/lib/libssl.a; sourceTree = "<group>"; };
 		C268DE526FE14B3EDC8FC39F33CAEF9E /* SignalProtocolObjC-iOS.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "SignalProtocolObjC-iOS.xcconfig"; sourceTree = "<group>"; };
+		C34B7BCD744707483F9821C645B6E79A /* blowfish.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = blowfish.h; path = ios/include/openssl/blowfish.h; sourceTree = "<group>"; };
 		C34E1521285F9244EAE2E473A4EDD267 /* UIImage+MultiFormat.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIImage+MultiFormat.h"; path = "SDWebImage/UIImage+MultiFormat.h"; sourceTree = "<group>"; };
 		C35B784FABBD5634DF8A8D9E0BC8E2F3 /* SUVersionComparisonProtocol.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SUVersionComparisonProtocol.h; path = Sparkle.framework/Versions/A/Headers/SUVersionComparisonProtocol.h; sourceTree = "<group>"; };
 		C37810F242EEC1AF5891062FA3AA984D /* POPMath.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPMath.h; path = pop/POPMath.h; sourceTree = "<group>"; };
 		C3923307431E86ED78DBE7C2983027A7 /* DDAbstractDatabaseLogger.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DDAbstractDatabaseLogger.h; path = Sources/CocoaLumberjack/include/DDAbstractDatabaseLogger.h; sourceTree = "<group>"; };
+		C3D4097EB97B87A30BEF2D7444899041 /* tls1.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = tls1.h; path = ios/include/openssl/tls1.h; sourceTree = "<group>"; };
 		C44AAF7602E6CE21BC393DDC2B8DD1CB /* gen_veddsa.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = gen_veddsa.h; path = src/curve25519/ed25519/additions/generalized/gen_veddsa.h; sourceTree = "<group>"; };
 		C5118C930056E551F9633ECD6F2951B4 /* SignalStorage.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalStorage.h; path = Classes/Storage/SignalStorage.h; sourceTree = "<group>"; };
 		C59BC25CEB5C9152131D9DD2EBEAEA3B /* SAMKeychain.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SAMKeychain.h; path = Sources/SAMKeychain.h; sourceTree = "<group>"; };
@@ -1579,20 +1573,18 @@
 		C5E3041EA543E1AE19F01990356D13AF /* UIImage+MultiFormat.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIImage+MultiFormat.m"; path = "SDWebImage/UIImage+MultiFormat.m"; sourceTree = "<group>"; };
 		C6300D4FFE0B3388E4AF1521AA2ADBE8 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS11.3.sdk/System/Library/Frameworks/SystemConfiguration.framework; sourceTree = DEVELOPER_DIR; };
 		C64807D208EA2D2D438A2C2FAA7B3741 /* Pods-Monal-OSX-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-Monal-OSX-acknowledgements.markdown"; sourceTree = "<group>"; };
+		C68AF82C1F6DD0AED314D291A4ECC9EF /* cmac.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = cmac.h; path = ios/include/openssl/cmac.h; sourceTree = "<group>"; };
 		C705CC6AA2EF688D0EA38FE627BB634E /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C710C1944573E1F01606A0E5C52A16EB /* internal_fast_tests.c */ = {isa = PBXFileReference; includeInIndex = 1; name = internal_fast_tests.c; path = src/curve25519/ed25519/tests/internal_fast_tests.c; sourceTree = "<group>"; };
 		C7506C6B57402311FBFF75CB2B4D364F /* TPCircularBuffer-macOS-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "TPCircularBuffer-macOS-umbrella.h"; path = "../TPCircularBuffer-macOS/TPCircularBuffer-macOS-umbrella.h"; sourceTree = "<group>"; };
 		C77F5743801BC3FF585E5FC62BD513A1 /* SignalSessionStore.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalSessionStore.h; path = Classes/Storage/SignalSessionStore.h; sourceTree = "<group>"; };
 		C7AB9152BF2DF21F00A03F08990BACAF /* gen_constants.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = gen_constants.h; path = src/curve25519/ed25519/additions/generalized/gen_constants.h; sourceTree = "<group>"; };
 		C90AAE9AF960B890B1A102B69C75D7CF /* group_cipher.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = group_cipher.h; path = src/group_cipher.h; sourceTree = "<group>"; };
-		C9118752ED47FF46FB7395EA859982FC /* dh.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = dh.h; path = ios/include/openssl/dh.h; sourceTree = "<group>"; };
 		C98D879BDAED7EB6BCC0F114FA2FE674 /* SignalSignedPreKey_Internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalSignedPreKey_Internal.h; path = Classes/Models/SignalSignedPreKey_Internal.h; sourceTree = "<group>"; };
 		C98F9EB5C2F63FE63305C7AA8F2A937A /* gen_eddsa.c */ = {isa = PBXFileReference; includeInIndex = 1; name = gen_eddsa.c; path = src/curve25519/ed25519/additions/generalized/gen_eddsa.c; sourceTree = "<group>"; };
 		CA3D4511170B0984EDD96D371C75E261 /* ge_msub.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_msub.c; path = src/curve25519/ed25519/ge_msub.c; sourceTree = "<group>"; };
 		CB65A7790DF19D2DA2AD488BB40C51C3 /* Pods_jrtplib_static.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_jrtplib_static.framework; path = "Pods-jrtplib-static.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC5D903FFA63DB1AF1CD54741E35CF4E /* Pods-NotificaionService-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-NotificaionService-acknowledgements.markdown"; sourceTree = "<group>"; };
-		CCF34E051E20CD9A6BE3CFEF3DECC6AF /* bn.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = bn.h; path = ios/include/openssl/bn.h; sourceTree = "<group>"; };
-		CD77D1337F380955041F62150F61E214 /* srp.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = srp.h; path = ios/include/openssl/srp.h; sourceTree = "<group>"; };
 		CDA55B34CA06F152AA0F21A4AB8CE956 /* POPSpringSolver.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPSpringSolver.h; path = pop/POPSpringSolver.h; sourceTree = "<group>"; };
 		CDEC7A66AE30C7620C1E22EDB94D0932 /* Pods-Monal-OSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal-OSX.debug.xcconfig"; sourceTree = "<group>"; };
 		CE3C69C3A48F8E466F8AD5006697A96C /* SUAppcastItem.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SUAppcastItem.h; path = Sparkle.framework/Versions/A/Headers/SUAppcastItem.h; sourceTree = "<group>"; };
@@ -1602,18 +1594,22 @@
 		CF390B066FA372AA6059B4CD9A3EAFAB /* Pods-jrtplib-static-OSX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static-OSX.release.xcconfig"; sourceTree = "<group>"; };
 		CFA801AFA9DA7E3D15C7CF8D4A93C921 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CFC4DAF72B3DB6B112D807F0E25C77FF /* DDTTYLogger.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DDTTYLogger.m; path = Sources/CocoaLumberjack/DDTTYLogger.m; sourceTree = "<group>"; };
+		D08E9900A61034CE476D55F498D80404 /* krb5_asn.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = krb5_asn.h; path = ios/include/openssl/krb5_asn.h; sourceTree = "<group>"; };
 		D0A7E1FE79519D6B42094924D4B4C196 /* pow225521.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = pow225521.h; path = src/curve25519/ed25519/pow225521.h; sourceTree = "<group>"; };
 		D127EA703AF7AFB6559525D8842F8F96 /* Pods-Monal-OSX-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-Monal-OSX-acknowledgements.plist"; sourceTree = "<group>"; };
 		D160B14D41FF56C09A4C695F7CD74695 /* Pods-Monal Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-Monal Tests.debug.xcconfig"; sourceTree = "<group>"; };
+		D16B8C3979FF5CD08085AFB9CCB28540 /* bio.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = bio.h; path = ios/include/openssl/bio.h; sourceTree = "<group>"; };
 		D16DE2C22FD26576D04F8B3B2C7F922B /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D18495250A60DFA4EE379BDF32752823 /* IDMPhotoBrowser.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = IDMPhotoBrowser.m; path = Classes/IDMPhotoBrowser.m; sourceTree = "<group>"; };
 		D1FB5CFDEB96E0DE358BC46D5756D69C /* POPDefines.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPDefines.h; path = pop/POPDefines.h; sourceTree = "<group>"; };
 		D24645CA4A468861D77E82AEE03ADBE0 /* CWStatusBarNotification.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = CWStatusBarNotification.framework; path = CWStatusBarNotification.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2BDE9C93DA26D329AC097A11625A802 /* EARestrictedScrollView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = EARestrictedScrollView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2C18E7F42CAC670562F69E366E50100 /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Sparkle.framework; sourceTree = "<group>"; };
+		D3282AF21798BA80A7CB19C71CDEF69B /* opensslconf-armv7.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "opensslconf-armv7.h"; path = "ios/include/openssl/opensslconf-armv7.h"; sourceTree = "<group>"; };
 		D3B89A6DEDCED4F2B4815D4FFF9736F4 /* SignalIdentityKeyPair_Internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalIdentityKeyPair_Internal.h; path = Classes/Models/SignalIdentityKeyPair_Internal.h; sourceTree = "<group>"; };
 		D3BF36262D62F72D6353ED75CDE2567A /* Pods-Monal-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-Monal-umbrella.h"; sourceTree = "<group>"; };
 		D3ED71282DFD8D281E3EAD4BA947DD22 /* Pods-jrtplib-static-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-jrtplib-static-umbrella.h"; sourceTree = "<group>"; };
+		D3F80AE29366CA71E684149662B17930 /* conf.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = conf.h; path = ios/include/openssl/conf.h; sourceTree = "<group>"; };
 		D3FB03856814551E3E2CDCBDECE80434 /* SignalPreKey_Internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalPreKey_Internal.h; path = Classes/Models/SignalPreKey_Internal.h; sourceTree = "<group>"; };
 		D46403F9297B72704249EBB27276F291 /* SDImageCacheConfig.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SDImageCacheConfig.m; path = SDWebImage/SDImageCacheConfig.m; sourceTree = "<group>"; };
 		D4A998FB6978EE830806528791FF898B /* Pods-jrtplib-static-OSX.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-jrtplib-static-OSX.appstore.xcconfig"; sourceTree = "<group>"; };
@@ -1630,12 +1626,13 @@
 		D8CFD3667BE689722EBD0AFF2B7E4F7A /* zeroize.c */ = {isa = PBXFileReference; includeInIndex = 1; name = zeroize.c; path = src/curve25519/ed25519/additions/zeroize.c; sourceTree = "<group>"; };
 		D9012D27A54756FC5E9EC647F9AB7D31 /* POPLayerExtras.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPLayerExtras.h; path = pop/POPLayerExtras.h; sourceTree = "<group>"; };
 		D9104D9F05332D77FAD8AFA0AD12CBC4 /* sign_modified.c */ = {isa = PBXFileReference; includeInIndex = 1; name = sign_modified.c; path = src/curve25519/ed25519/additions/sign_modified.c; sourceTree = "<group>"; };
-		D948163CFA6F581931EB1485D7E6D44E /* ecdsa.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ecdsa.h; path = ios/include/openssl/ecdsa.h; sourceTree = "<group>"; };
 		D9685E5685FD61D774AF94E643D13972 /* POPPropertyAnimationInternal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPPropertyAnimationInternal.h; path = pop/POPPropertyAnimationInternal.h; sourceTree = "<group>"; };
 		D9DFDCCED037EF44EE79F20F6B4D99D1 /* Pods-Monal Tests-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal Tests-resources.sh"; sourceTree = "<group>"; };
 		D9F3E9B1280B7D914052A199977FA0E2 /* Pods-jrtplib-static-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-jrtplib-static-acknowledgements.plist"; sourceTree = "<group>"; };
 		DA898C6F410E83F39ABFA2E70D1DA0A0 /* DZNEmptyDataSet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = DZNEmptyDataSet.framework; path = DZNEmptyDataSet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DAA476780BC11872BA77CFD03BC3A7C2 /* SignalPreKey.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SignalPreKey.m; path = Classes/Models/SignalPreKey.m; sourceTree = "<group>"; };
+		DAFEB460B65868B7AD36C7CAFBC62E43 /* ebcdic.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ebcdic.h; path = ios/include/openssl/ebcdic.h; sourceTree = "<group>"; };
+		DB7DE18537FF5544CF90B1B8B72AB90B /* opensslconf-arm64.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "opensslconf-arm64.h"; path = "ios/include/openssl/opensslconf-arm64.h"; sourceTree = "<group>"; };
 		DBED8A5C6EAC4B546F57953E36A48079 /* ratchet.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ratchet.h; path = src/ratchet.h; sourceTree = "<group>"; };
 		DD0EDB2F79A356C94DC21B1A2FB795FB /* zeroize.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = zeroize.h; path = src/curve25519/ed25519/additions/zeroize.h; sourceTree = "<group>"; };
 		DD71E1913C5CF74BC9A7E3434B4250AB /* EAIntroPage.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = EAIntroPage.m; path = EAIntroView/EAIntroPage.m; sourceTree = "<group>"; };
@@ -1645,11 +1642,13 @@
 		DE7C8F37D6D906781A585183F3937CC8 /* TPCircularBuffer-iOS.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "TPCircularBuffer-iOS.modulemap"; sourceTree = "<group>"; };
 		DE85E52F1699463BC2DE6830CC470A96 /* IDMPhotoBrowser-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "IDMPhotoBrowser-prefix.pch"; sourceTree = "<group>"; };
 		DE96DE0F7CE355F87AADFCC62AA8C726 /* ge_p2_0.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_p2_0.c; path = src/curve25519/ed25519/ge_p2_0.c; sourceTree = "<group>"; };
+		DE9FFA1DC71EFF265404DF799F98D88D /* aes.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = aes.h; path = ios/include/openssl/aes.h; sourceTree = "<group>"; };
 		DEBC095CB2F651F6EE9FE0B0E9B3D3BF /* UIView+WebCacheOperation.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIView+WebCacheOperation.h"; path = "SDWebImage/UIView+WebCacheOperation.h"; sourceTree = "<group>"; };
 		DEC612A8E0C23FE50E9A39D7600344BD /* IDMPBLocalizations.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = IDMPBLocalizations.bundle; path = Classes/IDMPBLocalizations.bundle; sourceTree = "<group>"; };
 		DF1F65F783C9F9FBC420611A5AA47483 /* IDMPhotoBrowser.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = IDMPhotoBrowser.bundle; path = Classes/IDMPhotoBrowser.bundle; sourceTree = "<group>"; };
 		DF98522E2AAA259B4CBC35BC2FE3FFAA /* fe_copy.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_copy.c; path = src/curve25519/ed25519/fe_copy.c; sourceTree = "<group>"; };
 		E0064AEF8A0545CA737193C7A2A3D86B /* Pods-Monal-OSX-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-Monal-OSX-umbrella.h"; sourceTree = "<group>"; };
+		E00C972F5D82D7636CAA601CCDB95869 /* pkcs12.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = pkcs12.h; path = ios/include/openssl/pkcs12.h; sourceTree = "<group>"; };
 		E00FA58A4BBE368F3A1968217E739087 /* POPAnimatorPrivate.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPAnimatorPrivate.h; path = pop/POPAnimatorPrivate.h; sourceTree = "<group>"; };
 		E015ADCB49185301DE9622382C3E3D69 /* SDWebImageManager.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SDWebImageManager.h; path = SDWebImage/SDWebImageManager.h; sourceTree = "<group>"; };
 		E0B78488D6C1AA89841E8A12A053CFEF /* Pods-Monal-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-Monal-dummy.m"; sourceTree = "<group>"; };
@@ -1661,37 +1660,33 @@
 		E373D4EE88F982B736D5B03A9F7C9CF5 /* DDContextFilterLogFormatter.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DDContextFilterLogFormatter.h; path = Sources/CocoaLumberjack/include/DDContextFilterLogFormatter.h; sourceTree = "<group>"; };
 		E39ADB24F7AA0C9A24E6C9B4F44009D9 /* Pods-jrtplib-static.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-jrtplib-static.modulemap"; sourceTree = "<group>"; };
 		E3C6F7277B4EA08DFED62F229171F13B /* IDMTapDetectingView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IDMTapDetectingView.h; path = Classes/IDMTapDetectingView.h; sourceTree = "<group>"; };
-		E45391035B85266AC533344F58B1AE48 /* srtp.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = srtp.h; path = ios/include/openssl/srtp.h; sourceTree = "<group>"; };
 		E4595CED2172876BA0BA7CBE37316768 /* curve25519-donna.c */ = {isa = PBXFileReference; includeInIndex = 1; name = "curve25519-donna.c"; path = "src/curve25519/curve25519-donna.c"; sourceTree = "<group>"; };
 		E4A111181BA22B5D82CFD7406888CB55 /* UIImageView+HighlightedWebCache.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIImageView+HighlightedWebCache.m"; path = "SDWebImage/UIImageView+HighlightedWebCache.m"; sourceTree = "<group>"; };
-		E4AAFFE6AC8DBC51C64CC491170C28E6 /* libcrypto.a */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = archive.ar; name = libcrypto.a; path = ios/lib/libcrypto.a; sourceTree = "<group>"; };
 		E50007A41B78819B314985F6AACCA2EE /* Pods-Monal-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-Monal-resources.sh"; sourceTree = "<group>"; };
 		E54C1F14C5D4B9A1D31175273951CD87 /* SignalSignedPreKeyStore.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalSignedPreKeyStore.h; path = Classes/Storage/SignalSignedPreKeyStore.h; sourceTree = "<group>"; };
 		E5690E2E44595DB357F74248686041BA /* key_helper.c */ = {isa = PBXFileReference; includeInIndex = 1; name = key_helper.c; path = src/key_helper.c; sourceTree = "<group>"; };
+		E5CB380D7B5AE85A6E862F8A44BA407D /* symhacks.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = symhacks.h; path = ios/include/openssl/symhacks.h; sourceTree = "<group>"; };
 		E5DE1BC38177D0E935BE3898B1C1D419 /* SignalKeyHelper.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalKeyHelper.h; path = Classes/SignalKeyHelper.h; sourceTree = "<group>"; };
 		E5E93EB5A6E6F9D3676B9CA2CA70D13C /* EARestrictedScrollView-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "EARestrictedScrollView-dummy.m"; sourceTree = "<group>"; };
 		E600AE3B64D99CD23387AD7561302691 /* DZNEmptyDataSet.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = DZNEmptyDataSet.modulemap; sourceTree = "<group>"; };
-		E6331BC28F98A0AC74238484FE5FC0A2 /* ssl2.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ssl2.h; path = ios/include/openssl/ssl2.h; sourceTree = "<group>"; };
 		E658C6FB9D6E62E63FF9BCD7408E9699 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E6858E749B08160C2C064E9BB466F314 /* POPAnimationPrivate.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPAnimationPrivate.h; path = pop/POPAnimationPrivate.h; sourceTree = "<group>"; };
 		E74BDB9D142F5A74035173CD4CC9126C /* internal_fast_tests.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = internal_fast_tests.h; path = src/curve25519/ed25519/tests/internal_fast_tests.h; sourceTree = "<group>"; };
-		E751B5A56E1C85A1A93054214795D2DC /* ebcdic.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ebcdic.h; path = ios/include/openssl/ebcdic.h; sourceTree = "<group>"; };
-		E77378D9E7F211D328B1391E0A161DA9 /* err.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = err.h; path = ios/include/openssl/err.h; sourceTree = "<group>"; };
 		E78C31750734AD786B34A2686B9A8B92 /* Answers.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = Answers.h; path = OSX/Crashlytics.framework/Versions/A/Headers/Answers.h; sourceTree = "<group>"; };
 		E7B0CF250F6847C8C0A81E5DFFCFA09B /* Pods-shareSheet-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-shareSheet-acknowledgements.markdown"; sourceTree = "<group>"; };
 		E87DDF89B755EA478D01A9F265DB38DC /* CocoaLumberjack-iOS13.0.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "CocoaLumberjack-iOS13.0.xcconfig"; sourceTree = "<group>"; };
 		E8BC5FD631C70C69062811E475AA020B /* fe_isequal.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_isequal.c; path = src/curve25519/ed25519/additions/fe_isequal.c; sourceTree = "<group>"; };
 		E8E4A1509FD537A906920689E56B2370 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Crashlytics.framework; path = OSX/Crashlytics.framework; sourceTree = "<group>"; };
 		E95A4911320DE13062B23EA1EEA94CD1 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E966CD819D1D42AC3BC4AB99E85F0706 /* ts.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ts.h; path = ios/include/openssl/ts.h; sourceTree = "<group>"; };
 		EA03777975C65DA3472EF0299903CD3B /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		EA6A7CFE4661A8C93438314066F80F3E /* d2.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = d2.h; path = src/curve25519/ed25519/d2.h; sourceTree = "<group>"; };
 		EB058C820154836B674C6C2B43F391D0 /* NSButton+WebCache.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSButton+WebCache.h"; path = "SDWebImage/NSButton+WebCache.h"; sourceTree = "<group>"; };
-		EBA6D7B810E35D009905EB174E8B5B9D /* x509_vfy.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = x509_vfy.h; path = ios/include/openssl/x509_vfy.h; sourceTree = "<group>"; };
 		EBC300CE0044C1A504D7E0E72432F757 /* DDASLLogger.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DDASLLogger.m; path = Sources/CocoaLumberjack/DDASLLogger.m; sourceTree = "<group>"; };
 		EBF6288CEC328C64A5090410499E4401 /* SignalProtocolObjC-macOS.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; name = "SignalProtocolObjC-macOS.modulemap"; path = "../SignalProtocolObjC-macOS/SignalProtocolObjC-macOS.modulemap"; sourceTree = "<group>"; };
 		EC4922FD06CC2854DF45B433D33ADE67 /* session_pre_key.c */ = {isa = PBXFileReference; includeInIndex = 1; name = session_pre_key.c; path = src/session_pre_key.c; sourceTree = "<group>"; };
 		ECE4F81584E5C506A11B6BBC858675D7 /* SignalPreKeyBundle.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SignalPreKeyBundle.m; path = Classes/Models/SignalPreKeyBundle.m; sourceTree = "<group>"; };
+		ED6AD4A5A23D1449E79E4AEDC93B3CC9 /* dtls1.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = dtls1.h; path = ios/include/openssl/dtls1.h; sourceTree = "<group>"; };
+		EDA964E20D79AABEDA9A03CA6404574A /* conf_api.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = conf_api.h; path = ios/include/openssl/conf_api.h; sourceTree = "<group>"; };
 		EDC0F3937122C40FA7319FF1FFA2B78D /* Pods_monalxmpp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_monalxmpp.framework; path = "Pods-monalxmpp.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EDFB2358EE998914570CD8A484679C99 /* SDWebImageCoder.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SDWebImageCoder.h; path = SDWebImage/SDWebImageCoder.h; sourceTree = "<group>"; };
 		EE9AB9C59918F406647885C01C26379A /* EARestrictedScrollView.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = EARestrictedScrollView.xcconfig; sourceTree = "<group>"; };
@@ -1700,10 +1695,10 @@
 		EF49B98B9647A1BC66369BB82445BA9E /* FloatConversion.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = FloatConversion.h; path = pop/WebCore/FloatConversion.h; sourceTree = "<group>"; };
 		EF4F93332F706C6BEB3C299E6DED04A6 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = Info.plist; path = "../TPCircularBuffer-macOS/Info.plist"; sourceTree = "<group>"; };
 		EFC541AEFD794C1DB86E387536C44018 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		EFDEA8F2F0A147A58DA3BDA1511D1FFA /* opensslconf-i386.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "opensslconf-i386.h"; path = "ios/include/openssl/opensslconf-i386.h"; sourceTree = "<group>"; };
 		F042EBEEB8C03A74D96C9E68E49B87B4 /* SDWebImageTransition.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SDWebImageTransition.h; path = SDWebImage/SDWebImageTransition.h; sourceTree = "<group>"; };
 		F05C8072519B7E995153DBD2DFF23EE8 /* MBProgressHUD.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = MBProgressHUD.modulemap; sourceTree = "<group>"; };
 		F06380975D191B51DC05D2A3C92D85F0 /* POPAnimationTracer.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = POPAnimationTracer.mm; path = pop/POPAnimationTracer.mm; sourceTree = "<group>"; };
+		F0F632F808E051DA1835A15F7F28A10E /* modes.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = modes.h; path = ios/include/openssl/modes.h; sourceTree = "<group>"; };
 		F18F264C94DA3869840C778AE16450C4 /* SignalError.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalError.h; path = Classes/Utility/SignalError.h; sourceTree = "<group>"; };
 		F1901044A665E47F9AC248FBBCE5F953 /* EARestrictedScrollView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = EARestrictedScrollView.m; path = EARestrictedScrollView/EARestrictedScrollView.m; sourceTree = "<group>"; };
 		F19AA35076428964F4487A9D1E9C651D /* SAMKeychainQuery.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SAMKeychainQuery.m; path = Sources/SAMKeychainQuery.m; sourceTree = "<group>"; };
@@ -1711,13 +1706,14 @@
 		F1CE3D038EBBA8D5E2148C1249C23822 /* Pods-Monal Tests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-Monal Tests-dummy.m"; sourceTree = "<group>"; };
 		F1D450F00641B1CF552E7F51D170C1F7 /* CLSReport.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CLSReport.h; path = OSX/Crashlytics.framework/Versions/A/Headers/CLSReport.h; sourceTree = "<group>"; };
 		F282FFE26C841404340DAA64E9BADC90 /* SignalPreKeyMessage.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SignalPreKeyMessage.h; path = Classes/Models/SignalPreKeyMessage.h; sourceTree = "<group>"; };
+		F2A4DA4DA164AFD79C28CC6C543F2E34 /* shim.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = shim.h; path = ios/include/openssl/shim.h; sourceTree = "<group>"; };
 		F2C2D15AF2E3C3229FD075F8715D6CE4 /* Pods_shareSheet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_shareSheet.framework; path = "Pods-shareSheet.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F2D3B09927B588098530FAEFF3BE48E5 /* MBProgressHUD.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = MBProgressHUD.xcconfig; sourceTree = "<group>"; };
 		F3A376D16CEC847EFD99478E69E6145A /* d.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = d.h; path = src/curve25519/ed25519/d.h; sourceTree = "<group>"; };
 		F3B906CA4E7CFD17912F01D94A4C16DD /* Pods-jrtplib-static-OSX-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-jrtplib-static-OSX-acknowledgements.plist"; sourceTree = "<group>"; };
 		F3CBC9824DA252F98309869E61F909FC /* Pods-shareSheet.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-shareSheet.debug.xcconfig"; sourceTree = "<group>"; };
-		F3EA5357A50D806DC3E827C24766923F /* crypto.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = crypto.h; path = ios/include/openssl/crypto.h; sourceTree = "<group>"; };
 		F3FDB23464A3CA8BE797424A7608F969 /* SDImageCache.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SDImageCache.m; path = SDWebImage/SDImageCache.m; sourceTree = "<group>"; };
+		F4A7EB0F8C50494D3D424A83C6508880 /* x509.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = x509.h; path = ios/include/openssl/x509.h; sourceTree = "<group>"; };
 		F5258244B174EC8B43FC81B18976AEF5 /* sender_key_state.c */ = {isa = PBXFileReference; includeInIndex = 1; name = sender_key_state.c; path = src/sender_key_state.c; sourceTree = "<group>"; };
 		F5DF56C88FF9C3B9ADFC2C31B44CA248 /* SignalStorage.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = SignalStorage.m; path = Classes/Storage/SignalStorage.m; sourceTree = "<group>"; };
 		F726B4D108DFFE767B52D2EDA3CCBED6 /* EARestrictedScrollView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = EARestrictedScrollView.h; path = EARestrictedScrollView/EARestrictedScrollView.h; sourceTree = "<group>"; };
@@ -1727,7 +1723,6 @@
 		F87DE269296AEBEC490FF013BAF6D4D5 /* utility.c */ = {isa = PBXFileReference; includeInIndex = 1; name = utility.c; path = src/curve25519/ed25519/additions/utility.c; sourceTree = "<group>"; };
 		F8C61C0AEAC9BB7FE9AB52594A40A2D1 /* CocoaLumberjack-iOS9.3-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "CocoaLumberjack-iOS9.3-umbrella.h"; path = "../CocoaLumberjack-iOS9.3/CocoaLumberjack-iOS9.3-umbrella.h"; sourceTree = "<group>"; };
 		F9CE59A6D27B960982259F7C0EFB149D /* POPAnimation.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = POPAnimation.h; path = pop/POPAnimation.h; sourceTree = "<group>"; };
-		F9ED5F3882766795F383754C82405A11 /* kssl.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = kssl.h; path = ios/include/openssl/kssl.h; sourceTree = "<group>"; };
 		FA7253257AA3807242674CF69CC918B3 /* MBProgressHUD-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "MBProgressHUD-dummy.m"; sourceTree = "<group>"; };
 		FA9857AACB8544A34DC1C703ABAB5274 /* ge_p3_add.c */ = {isa = PBXFileReference; includeInIndex = 1; name = ge_p3_add.c; path = src/curve25519/ed25519/additions/generalized/ge_p3_add.c; sourceTree = "<group>"; };
 		FADAA11973BBB9E7F4DAAE744FBD1EB8 /* signal_protocol_types.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = signal_protocol_types.h; path = src/signal_protocol_types.h; sourceTree = "<group>"; };
@@ -1735,8 +1730,12 @@
 		FB75817026E9FF809E3B7E9CDD39D5BB /* internal_slow_tests.c */ = {isa = PBXFileReference; includeInIndex = 1; name = internal_slow_tests.c; path = src/curve25519/ed25519/tests/internal_slow_tests.c; sourceTree = "<group>"; };
 		FB9149927305928795A891B7D8BE2266 /* POPCGUtils.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = POPCGUtils.mm; path = pop/POPCGUtils.mm; sourceTree = "<group>"; };
 		FBE421701EB53645B61757CCC7E6BCB5 /* Pods-NotificaionService.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-NotificaionService.release.xcconfig"; sourceTree = "<group>"; };
+		FBF80D8D3D867FE93E95F499C7D547B6 /* ocsp.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ocsp.h; path = ios/include/openssl/ocsp.h; sourceTree = "<group>"; };
 		FC23E40163A4525572740180300C9801 /* sqrtm1.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = sqrtm1.h; path = src/curve25519/ed25519/sqrtm1.h; sourceTree = "<group>"; };
+		FC6BEDF349E2AE705A458EC7AAD746B7 /* camellia.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = camellia.h; path = ios/include/openssl/camellia.h; sourceTree = "<group>"; };
 		FC76B8F542092AF06665E26CE0507C6D /* Pods-shareSheet-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-shareSheet-dummy.m"; sourceTree = "<group>"; };
+		FC982AA2686AD8C622F95E36D2660037 /* ssl.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = ssl.h; path = ios/include/openssl/ssl.h; sourceTree = "<group>"; };
+		FCCEB20E58B3331F024B27F0A295B89A /* pqueue.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = pqueue.h; path = ios/include/openssl/pqueue.h; sourceTree = "<group>"; };
 		FCDD733D05D28D411F7A4316BD280913 /* CWStatusBarNotification.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CWStatusBarNotification.h; path = CWStatusBarNotification/CWStatusBarNotification.h; sourceTree = "<group>"; };
 		FCFF683CDE661669F14B6C36912EF5C4 /* SAMKeychain-macOS-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "SAMKeychain-macOS-dummy.m"; path = "../SAMKeychain-macOS/SAMKeychain-macOS-dummy.m"; sourceTree = "<group>"; };
 		FE31A9E3FA01717E55010447C9B7059A /* fe_add.c */ = {isa = PBXFileReference; includeInIndex = 1; name = fe_add.c; path = src/curve25519/ed25519/fe_add.c; sourceTree = "<group>"; };
@@ -2136,7 +2135,7 @@
 				FDFFFAAF0246EE9EAB1E3200BA47735F /* Fabric */,
 				13EDA68BA7DA7BEDA47827CD8348CDA5 /* IDMPhotoBrowser */,
 				63EA44BFA66699DDFC7E28C2C7DFD25A /* MBProgressHUD */,
-				6ACEEFAD8B6C6F7D8B5FAB7DC5CA5ACB /* OpenSSL-Universal */,
+				99E70838B053A8B2AD3026E28593AFBC /* OpenSSL-Universal */,
 				F563975EB345135E34A09CE64DF407D5 /* pop */,
 				D569BFC67079524917B37F9E56768179 /* SAMKeychain */,
 				B938B9A816D2E44C80D7EE6AEC0415FD /* SDWebImage */,
@@ -2506,6 +2505,15 @@
 			path = "Target Support Files/Pods-NotificaionService";
 			sourceTree = "<group>";
 		};
+		615DA494C72020CB4A438874A8159766 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7B8675BC63A5E2BB0FCB09C717F26AC4 /* libcrypto.a */,
+				C26363C499DC5D22746AB5470C53D746 /* libssl.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		63EA44BFA66699DDFC7E28C2C7DFD25A /* MBProgressHUD */ = {
 			isa = PBXGroup;
 			children = (
@@ -2576,15 +2584,6 @@
 			path = SignalProtocolObjC;
 			sourceTree = "<group>";
 		};
-		6ACEEFAD8B6C6F7D8B5FAB7DC5CA5ACB /* OpenSSL-Universal */ = {
-			isa = PBXGroup;
-			children = (
-				91EDCC0915976279054D459E1951AB23 /* Static */,
-			);
-			name = "OpenSSL-Universal";
-			path = "OpenSSL-Universal";
-			sourceTree = "<group>";
-		};
 		6E2CAE1798BF838A3D7F627E6CAC1511 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
@@ -2636,6 +2635,94 @@
 			);
 			sourceTree = "<group>";
 		};
+		85F772F6C8DF430038C2CF6948FE38BE /* Static */ = {
+			isa = PBXGroup;
+			children = (
+				DE9FFA1DC71EFF265404DF799F98D88D /* aes.h */,
+				0E90FF4D69C2B406D3BBA1DFC99B0B7A /* asn1.h */,
+				7F383B0AD9A1D7CB14C971B3E8FA7FE9 /* asn1_mac.h */,
+				442A54D6AE68CB4FF13FF7C132FBD85E /* asn1t.h */,
+				D16B8C3979FF5CD08085AFB9CCB28540 /* bio.h */,
+				C34B7BCD744707483F9821C645B6E79A /* blowfish.h */,
+				26ECF33E857DAD90C7D719946717FE32 /* bn.h */,
+				29DB4EED24E24EB9FF04C407D4CE1343 /* buffer.h */,
+				FC6BEDF349E2AE705A458EC7AAD746B7 /* camellia.h */,
+				1787BE0ACE9B18D52FF98BF587DE5565 /* cast.h */,
+				C68AF82C1F6DD0AED314D291A4ECC9EF /* cmac.h */,
+				A2FA1AC1B8E0B233D8F5D51E55D4E69D /* cms.h */,
+				6FB443400FB5950213D03E426DBF0B7C /* comp.h */,
+				D3F80AE29366CA71E684149662B17930 /* conf.h */,
+				EDA964E20D79AABEDA9A03CA6404574A /* conf_api.h */,
+				5E663EEACA01EEC9900D02E54627595B /* crypto.h */,
+				00C9F44F44F16DE81D30FCEFBF86528C /* des.h */,
+				154ACC25BF21803BC545C8FAD8697F2D /* des_old.h */,
+				404D675DEA84F54C5A9E4A5E813FD38C /* dh.h */,
+				387913C9E34FCC3BD6B4A4704AA07137 /* dsa.h */,
+				577ECA8E5F2EE770ABDBC999D8B48FAE /* dso.h */,
+				ED6AD4A5A23D1449E79E4AEDC93B3CC9 /* dtls1.h */,
+				29D06C72AB3BA02AAFC8E880D36DDABE /* e_os2.h */,
+				DAFEB460B65868B7AD36C7CAFBC62E43 /* ebcdic.h */,
+				944797F54F1AF6FE944BBBC5A81D9D26 /* ec.h */,
+				A52BCCB1467E5C1F79104D5D6D90EA37 /* ecdh.h */,
+				94A98ABBB15A7CAF55D0312F2B1DB5E5 /* ecdsa.h */,
+				11ECA12B7A24EDACEB9454B36E93EFD4 /* engine.h */,
+				5477BEF273EDF71FF77E96B8B2A62EE1 /* err.h */,
+				614BCAC24BA22778BCCCEC02A32962DE /* evp.h */,
+				679999AA64EE175C55B2F5B994446054 /* hmac.h */,
+				91E704E56713ACBDE7D3CA6493D66C36 /* idea.h */,
+				D08E9900A61034CE476D55F498D80404 /* krb5_asn.h */,
+				5A63ED80B91FD6E4BF712C7115546606 /* kssl.h */,
+				0D93BC6768F282479ACAD39DDEBFCA8B /* lhash.h */,
+				7A53D1DC771E56DBCFE77A4B40C96F40 /* md4.h */,
+				410C533756B1D28EAE5576982D1E7D6F /* md5.h */,
+				8A89289C254B64C72B702C135ECA64AE /* mdc2.h */,
+				F0F632F808E051DA1835A15F7F28A10E /* modes.h */,
+				903B1A9AC3C5B82BB7386ACBA9EDA061 /* obj_mac.h */,
+				5F052EFF3BEB35A8429094EB04558557 /* objects.h */,
+				FBF80D8D3D867FE93E95F499C7D547B6 /* ocsp.h */,
+				747A9B684F2B5EE1B62EE10C7760CA7C /* opensslconf.h */,
+				DB7DE18537FF5544CF90B1B8B72AB90B /* opensslconf-arm64.h */,
+				D3282AF21798BA80A7CB19C71CDEF69B /* opensslconf-armv7.h */,
+				B0CE8475A6C4CDE11F477C87DEE16D2A /* opensslconf-armv7s.h */,
+				9EB7F10F6E9475D070875643091AD1A1 /* opensslconf-x86_64.h */,
+				1DB0DE4AA5175824FFC90310456ABEBE /* opensslv.h */,
+				7E8FF1FB200D0D11295C454BDD8381B5 /* ossl_typ.h */,
+				8823B89EB05FB242E8E995A99BE7B196 /* pem.h */,
+				80467ECBF354B6ED3DFE4D09F12FB78D /* pem2.h */,
+				E00C972F5D82D7636CAA601CCDB95869 /* pkcs12.h */,
+				2CF9667438324BEFF6D4B89B4815022B /* pkcs7.h */,
+				FCCEB20E58B3331F024B27F0A295B89A /* pqueue.h */,
+				167D19F731455464109EEBE870E76D85 /* rand.h */,
+				B5C230F68CA1FDAA9EFF0E3DCD096F2D /* rc2.h */,
+				1CF08613FB7AEFA32311359CC0981D11 /* rc4.h */,
+				943BAD02A6FA302B57E1FE05D420BFFE /* ripemd.h */,
+				A54A729628E7F39C05A6A277B43D7959 /* rsa.h */,
+				79BFAAB2DD24FAE130476A9238BE27EF /* safestack.h */,
+				BFB6A25AE0F40EE54458B6B87B15369B /* seed.h */,
+				A87EFC3B0EA9A3502734E57F54770DF6 /* sha.h */,
+				F2A4DA4DA164AFD79C28CC6C543F2E34 /* shim.h */,
+				7E616596CEE4E96A32E44CB0835CF6EF /* srp.h */,
+				A0D70088CFEA1FFD7C71367B6FC05721 /* srtp.h */,
+				FC982AA2686AD8C622F95E36D2660037 /* ssl.h */,
+				B74E7F7F9AB154D72F3786B13FEBFBAE /* ssl2.h */,
+				4D74B57E1C998AF09B28E569BBF0CA2C /* ssl23.h */,
+				4F6BD4720F0F147123B0FDFD0A881593 /* ssl3.h */,
+				97E693180478F8E33BE3DEA384A8CEA0 /* stack.h */,
+				E5CB380D7B5AE85A6E862F8A44BA407D /* symhacks.h */,
+				C3D4097EB97B87A30BEF2D7444899041 /* tls1.h */,
+				63DBE20457E9274BBD8778751181F37C /* ts.h */,
+				1BDC9FDEC49B53FF1F4999AE91215378 /* txt_db.h */,
+				BC5584A9A779750AA32EDCC8785FF046 /* ui.h */,
+				23D287FB83A1E45BDFB038E7F5B25C00 /* ui_compat.h */,
+				BA9FAE16DE15E656758CD98D3F247762 /* whrlpool.h */,
+				F4A7EB0F8C50494D3D424A83C6508880 /* x509.h */,
+				9FEEA9B3C2D4CA516136D1860CC6E6E8 /* x509_vfy.h */,
+				B3DFB1DCB8E3CA9CBB022DE282B5BD2B /* x509v3.h */,
+				615DA494C72020CB4A438874A8159766 /* Frameworks */,
+			);
+			name = Static;
+			sourceTree = "<group>";
+		};
 		8CB611D6008306C8513464375F27A0E5 /* Sparkle */ = {
 			isa = PBXGroup;
 			children = (
@@ -2660,95 +2747,6 @@
 			);
 			name = Sparkle;
 			path = Sparkle;
-			sourceTree = "<group>";
-		};
-		91EDCC0915976279054D459E1951AB23 /* Static */ = {
-			isa = PBXGroup;
-			children = (
-				6B2FE3C7D91FC943F6490A8AC97125F8 /* aes.h */,
-				7C32A216195FF772E430400D6B23A58F /* asn1.h */,
-				5A04A5DD547FD7DD69EC040D563F3C55 /* asn1_mac.h */,
-				25AD21070696ED156596F0C4BE7FA077 /* asn1t.h */,
-				1E6566A37CC3202DB6ED89F8391C543A /* bio.h */,
-				8C1C58A0DB0E500833A986AB16000B1F /* blowfish.h */,
-				CCF34E051E20CD9A6BE3CFEF3DECC6AF /* bn.h */,
-				8C63313FD768EB30D4275606810AF67C /* buffer.h */,
-				41D99279649B719207C0B2EEF6F6A620 /* camellia.h */,
-				14163E6BD48656E3E18A0EC9AFFE941C /* cast.h */,
-				6CF347FD941CF51B8C69F95FB44F755E /* cmac.h */,
-				3490F95979359321DF89EAF025B693C6 /* cms.h */,
-				35C911B8D61E9BFDDBBDC5775C5ED06A /* comp.h */,
-				01D21D319A0101E3AA47347C272BB203 /* conf.h */,
-				231900E749DE5FD4484D78850CF7DB3F /* conf_api.h */,
-				F3EA5357A50D806DC3E827C24766923F /* crypto.h */,
-				58595C23CBEBD15A5DE625112739A543 /* des.h */,
-				7A0F9CF93F4B42934005256CAC4E0FED /* des_old.h */,
-				C9118752ED47FF46FB7395EA859982FC /* dh.h */,
-				2EF05410EC934EAC4D00B35C9CF4F913 /* dsa.h */,
-				0EAC55CB902CE5972DF1A1674A3190F9 /* dso.h */,
-				4A123798491D5D1663E09D39E3CEEEEA /* dtls1.h */,
-				64A9112CFDE506AA512759E75B464316 /* e_os2.h */,
-				E751B5A56E1C85A1A93054214795D2DC /* ebcdic.h */,
-				A4B19A39851D3B63437C2807201456E2 /* ec.h */,
-				07EA7277994C5C1AD8D411E2DE494D4F /* ecdh.h */,
-				D948163CFA6F581931EB1485D7E6D44E /* ecdsa.h */,
-				0BF9A2A298C7639F72D859DE106FE7F4 /* engine.h */,
-				E77378D9E7F211D328B1391E0A161DA9 /* err.h */,
-				576EB621422D741EE3C5F83A3C5BF8ED /* evp.h */,
-				2BEE8269D252111AC8F22EE23B6CEC15 /* hmac.h */,
-				80D45039D6BEEBE8267F7953B14B6ACD /* idea.h */,
-				A0311FF094DA55165C3262986E5A0B2D /* krb5_asn.h */,
-				F9ED5F3882766795F383754C82405A11 /* kssl.h */,
-				B1859E59BDC83AB4A1B5E4467F469487 /* lhash.h */,
-				4B903DF395431F738E94E799F9151577 /* md4.h */,
-				5877A4445D9BA57BFA033AA32F7F7971 /* md5.h */,
-				13CEFE2E5A9B70FECF75B8E3D52087B0 /* mdc2.h */,
-				0A66C4B30B66098BE74D701DC578BA75 /* modes.h */,
-				71EA16EE9D5C37178EB495748533EC0A /* obj_mac.h */,
-				BC8362B9ACFE1785EF822E313619EE38 /* objects.h */,
-				8BCFA35EB97F9DE6054BB2B996CB7AB2 /* ocsp.h */,
-				319850B3CC5042BF25604CCDBBAAC7E7 /* opensslconf.h */,
-				0EBA400314E25C97BF7BB40180679181 /* opensslconf-arm64.h */,
-				377A3204E21713D55DE5CC50B5D88CC8 /* opensslconf-armv7.h */,
-				AD0BFD71E048FDD09E843ECB07C8E5E9 /* opensslconf-armv7s.h */,
-				EFDEA8F2F0A147A58DA3BDA1511D1FFA /* opensslconf-i386.h */,
-				B50330CD8E5F0A0F41283FCF42E84F7E /* opensslconf-x86_64.h */,
-				4CB6F1E34C721CC48B1597D443BE88CF /* opensslv.h */,
-				9CB57237EE170414B5F10D1C3A513636 /* ossl_typ.h */,
-				14AA219031A7EEBB4D05E44FDB0393E7 /* pem.h */,
-				5C52931CC70DE075C414AD00C1AA449C /* pem2.h */,
-				A9788C8AAFE6CB5ABE66CE3B39032AE7 /* pkcs12.h */,
-				535A839315335E99145BCCA0C1950100 /* pkcs7.h */,
-				6F4FB0A9C18AE9A87AD2360146905C88 /* pqueue.h */,
-				9A7EDCF864200D91F5BFC0E14997B790 /* rand.h */,
-				BA316500182115571A2C53FAD3E8B9E8 /* rc2.h */,
-				826B8F6AC8277681CEF862CFC8A8C4C5 /* rc4.h */,
-				3CC3A22DD4C6F435A217CFCA28D10C5F /* ripemd.h */,
-				38E47FFF2BABF78A315D8643AFC08186 /* rsa.h */,
-				48A9C08A822CA84FFDFD1E6F4368189E /* safestack.h */,
-				301BB1A6E164710C027547EDD7E70696 /* seed.h */,
-				B014845D7640B806283697DB744B0D87 /* sha.h */,
-				45C47DEA20B3789FD962C774F86238F6 /* shim.h */,
-				CD77D1337F380955041F62150F61E214 /* srp.h */,
-				E45391035B85266AC533344F58B1AE48 /* srtp.h */,
-				3274FB3C121C700324299202EE07CBB6 /* ssl.h */,
-				E6331BC28F98A0AC74238484FE5FC0A2 /* ssl2.h */,
-				136AA8EA2ED4433F9B5F2E898BA966B4 /* ssl23.h */,
-				3628A3293687B3AD3B006D3DEF4A0FF9 /* ssl3.h */,
-				077ECA6FE87285F48F5E7548E781776A /* stack.h */,
-				7DF21B760C92D2F66826130FBDAE51D0 /* symhacks.h */,
-				18FB6F2AC5BB1F73B040C63B1D115EE8 /* tls1.h */,
-				E966CD819D1D42AC3BC4AB99E85F0706 /* ts.h */,
-				2CE48B777BC95C008C097E2D734850D8 /* txt_db.h */,
-				A60994E846F30D4E750E33FB2BD93123 /* ui.h */,
-				30E4AA5863E53AC559024A9EEFAEAA77 /* ui_compat.h */,
-				AEFC1BF665F86A2AA944DFDAD108838D /* whrlpool.h */,
-				23985AC7201397BD28F8FBAA9CE6C5B0 /* x509.h */,
-				EBA6D7B810E35D009905EB174E8B5B9D /* x509_vfy.h */,
-				1E9307640DFC37B3F008ED9CA20401C7 /* x509v3.h */,
-				FD2F004A67407C6B7044E902C3C9059A /* Frameworks */,
-			);
-			name = Static;
 			sourceTree = "<group>";
 		};
 		92DBA6FD6FC6EF6819CF239991C4B11A /* Frameworks */ = {
@@ -2782,6 +2780,15 @@
 				A6B43375B68499CD666CC3DBF17A117E /* SAMKeychain.bundle */,
 			);
 			name = Resources;
+			sourceTree = "<group>";
+		};
+		99E70838B053A8B2AD3026E28593AFBC /* OpenSSL-Universal */ = {
+			isa = PBXGroup;
+			children = (
+				85F772F6C8DF430038C2CF6948FE38BE /* Static */,
+			);
+			name = "OpenSSL-Universal";
+			path = "OpenSSL-Universal";
 			sourceTree = "<group>";
 		};
 		9CCD66164C1A598F9E268721B2A09703 /* Support Files */ = {
@@ -3209,15 +3216,6 @@
 				0BFFF7E51C1D976C18BDCB2FC09363FF /* UIView+WebCacheOperation.m */,
 			);
 			name = Core;
-			sourceTree = "<group>";
-		};
-		FD2F004A67407C6B7044E902C3C9059A /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				E4AAFFE6AC8DBC51C64CC491170C28E6 /* libcrypto.a */,
-				C19FCB91C45F5D8B5ACBAFABF2AA3167 /* libssl.a */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		FDFFFAAF0246EE9EAB1E3200BA47735F /* Fabric */ = {

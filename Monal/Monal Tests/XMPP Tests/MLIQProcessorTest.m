@@ -7,7 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "ParseIQ.h"
+#import "ParseIq.h"
 #import "MLIQProcessor.h"
 #import "MLXMPPConnection.h"
 #import "MLConstants.h"

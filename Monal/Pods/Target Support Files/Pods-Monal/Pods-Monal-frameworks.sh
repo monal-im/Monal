@@ -144,10 +144,6 @@ strip_invalid_archs() {
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS9.3/CocoaLumberjack.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS9.3/SAMKeychain.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS9.3/SignalProtocolC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS9.3/SignalProtocolObjC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS9.3/TPCircularBuffer.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/CWStatusBarNotification/CWStatusBarNotification.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/DACircularProgress/DACircularProgress.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework"
@@ -162,13 +158,14 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS13.0/SignalProtocolC.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS13.0/SignalProtocolObjC.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS13.0/TPCircularBuffer.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS13.2/CocoaLumberjack.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS13.2/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS13.2/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS13.2/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS13.2/TPCircularBuffer.framework"
 fi
 if [[ "$CONFIGURATION" == "Adhoc" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS9.3/CocoaLumberjack.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS9.3/SAMKeychain.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS9.3/SignalProtocolC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS9.3/SignalProtocolObjC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS9.3/TPCircularBuffer.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/CWStatusBarNotification/CWStatusBarNotification.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/DACircularProgress/DACircularProgress.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework"
@@ -183,13 +180,14 @@ if [[ "$CONFIGURATION" == "Adhoc" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS13.0/SignalProtocolC.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS13.0/SignalProtocolObjC.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS13.0/TPCircularBuffer.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS13.2/CocoaLumberjack.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS13.2/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS13.2/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS13.2/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS13.2/TPCircularBuffer.framework"
 fi
 if [[ "$CONFIGURATION" == "AppStore" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS9.3/CocoaLumberjack.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS9.3/SAMKeychain.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS9.3/SignalProtocolC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS9.3/SignalProtocolObjC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS9.3/TPCircularBuffer.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/CWStatusBarNotification/CWStatusBarNotification.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/DACircularProgress/DACircularProgress.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework"
@@ -204,6 +202,11 @@ if [[ "$CONFIGURATION" == "AppStore" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS13.0/SignalProtocolC.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS13.0/SignalProtocolObjC.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS13.0/TPCircularBuffer.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS13.2/CocoaLumberjack.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS13.2/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS13.2/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS13.2/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS13.2/TPCircularBuffer.framework"
 fi
 if [ "${COCOAPODS_PARALLEL_CODE_SIGN}" == "true" ]; then
   wait

@@ -233,7 +233,8 @@
 #endif
         }
         
-        if([iqNode.features containsObject:@"urn:xmpp:http:upload"])
+        if([iqNode.features containsObject:@"urn:xmpp:http:upload"]  ||
+          [iqNode.features containsObject:@"urn:xmpp:http:upload:0"] )
         {
             self.connection.supportsHTTPUpload=YES;
             self.connection.uploadServer = iqNode.from;

@@ -62,7 +62,7 @@
     if(messageNode.hasBody || messageNode.subject|| decrypted)
     {
         NSString *ownNick;
-        //TODO if muc find own nick to see if echo
+     
         if(messageNode.type==kMessageGroupChatType)
         {
             ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.from forAccount:self.accountNo];
@@ -71,7 +71,8 @@
         if ([messageNode.type isEqualToString:kMessageGroupChatType]
             && [messageNode.actualFrom isEqualToString:ownNick])
         {
-            //this is just a muc echo
+            DDLogDebug(@"Dropping muc eco");
+            return;
         }
         else
         {
@@ -108,6 +109,11 @@
                 
                 [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
                 body=messageNode.subject;
+                
+                if(self.postPersistAction) {
+                    self.postPersistAction(YES, encrypted, showAlert, body, messageType);
+                }
+                return;
             }
             
             NSString *messageId=messageNode.idval;

@@ -64,7 +64,9 @@
     
 }
 
-
+/*
+ <message from='monal_muc@chat.yax.im/sim' to='anu@yax.im/Monal-iOS.31' id='4A2BAC34-EF67-4E73-960C-433B3D9E21C6' type='groupchat'><body>Odd</body><store xmlns='urn:xmpp:hints'/><stanza-id id='3j1b3NLEdPyOZDSs' by='monal_muc@chat.yax.im' xmlns='urn:xmpp:sid:0'/></message>
+ */
 
 
 @end

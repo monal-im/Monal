@@ -982,7 +982,7 @@
 
 -(void) deleteRowAtIndexPath:(NSIndexPath *) indexPath
 {
-    NSDictionary* contact;
+    MLContact* contact;
     if ((indexPath.section==1) && (indexPath.row<=[self.contacts count]) ) {
         contact=[self.contacts objectAtIndex:indexPath.row];
     }
@@ -994,9 +994,9 @@
         return;
     }
     
-    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),[contact objectForKey:@"full_name"] ];
+    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),contact.fullName ];
     
-    BOOL isMUC=[[DataLayer sharedInstance] isBuddyMuc:[contact objectForKey:@"buddy_name"] forAccount:[contact objectForKey:@"account_id"]];
+    BOOL isMUC=[[DataLayer sharedInstance] isBuddyMuc:contact.contactJid forAccount:contact.accountId];
     if(isMUC)
     {
         messageString =@"Leave this converstion?";
@@ -1010,7 +1010,7 @@
     
     [alert addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         if(isMUC) {
-            [[MLXMPPManager sharedInstance] leaveRoom:[contact objectForKey:@"buddy_name"] withNick:[contact objectForKey:@"muc_nick"] forAccountId: [NSString stringWithFormat:@"%@",[contact objectForKey:@"account_id"]]];
+            [[MLXMPPManager sharedInstance] leaveRoom:contact.contactJid withNick:contact.accountNickInGroup forAccountId:contact.accountId ];
         }
         else  {
             [[MLXMPPManager sharedInstance] removeContact:contact];

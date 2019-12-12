@@ -52,7 +52,7 @@ extern NSString *const kXmppAccount;
 /**
  Remove a contact from an account
  */
--(void) removeContact:(NSDictionary*) contact;
+-(void) removeContact:(MLContact *) contact;
 
 /**
  Add a contact from an account

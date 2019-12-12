@@ -107,8 +107,7 @@
                 messageType=kMessageTypeStatus;
                 
                 [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
-                
-                return;
+                body=messageNode.subject;
             }
             
             NSString *messageId=messageNode.idval;

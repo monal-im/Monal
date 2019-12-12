@@ -828,7 +828,7 @@ static DataLayer *sharedInstance=nil;
         actualfull=contact;
     }
     
-    NSString *query=[NSString stringWithFormat:@"insert into buddylist ('account_id', 'buddy_name', 'full_name' , 'nick_name', 'new', 'online', 'dirty', 'Muc') values( ?, ?, ?,?,1, 0, 0, 0);"];
+    NSString *query=[NSString stringWithFormat:@"insert into buddylist ('account_id', 'buddy_name', 'full_name' , 'nick_name', 'new', 'online', 'dirty') values( ?, ?, ?,?,1, 0, 0);"];
     
     if(!(accountNo && contact && actualfull && nickName)) {
         if(completion)

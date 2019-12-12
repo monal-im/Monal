@@ -28,9 +28,11 @@
     
     contact.accountId=[NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
     
-    contact.isGroup=[[dic objectForKey:@"muc"] boolValue];
     contact.groupSubject=[dic objectForKey:@"muc_subject"];
     contact.accountNickInGroup=[dic objectForKey:@"muc_nick"];
+    
+    if(contact.groupSubject || contact.accountNickInGroup)
+        contact.isGroup=YES;
     
     contact.statusMessage=[dic objectForKey:@"status"];
     contact.state=[dic objectForKey:@"state"];

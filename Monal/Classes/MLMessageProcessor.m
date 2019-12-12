@@ -56,10 +56,7 @@
         recipient= self.jid;
     }
     
-    if(messageNode.subject && messageNode.type==kMessageGroupChatType)
-    {
-        [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
-    }
+  
     NSString *decrypted =[self decryptMessage:messageNode];
     
     if(messageNode.hasBody || messageNode.subject|| decrypted)
@@ -108,6 +105,9 @@
                 //TODO when we want o handle subject changes
                 //                                body =[NSString stringWithFormat:@"%@ changed the subject to: %@", messageNode.actualFrom, messageNode.subject];
                 messageType=kMessageTypeStatus;
+                
+                [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
+                
                 return;
             }
             

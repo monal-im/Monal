@@ -44,7 +44,11 @@ NS_ENUM(NSInteger, kSettingSection)
 #endif
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     #ifdef TARGET_OS_MACCATALYST
-      self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
+    if (@available(iOS 13.0, *)) {
+        self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
+    } else {
+        // Fallback on earlier versions
+    }
       #endif
     
     

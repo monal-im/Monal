@@ -71,7 +71,7 @@
         if ([messageNode.type isEqualToString:kMessageGroupChatType]
             && [messageNode.actualFrom isEqualToString:ownNick])
         {
-            DDLogDebug(@"Dropping muc eco");
+            DDLogDebug(@"Dropping muc echo");
             return;
         }
         else

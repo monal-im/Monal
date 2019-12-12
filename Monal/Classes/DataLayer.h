@@ -190,7 +190,7 @@ extern NSString *const kMessageTypeUrl;
 /**
   checks to see if there is a message with the provided messageid. will return YES if the messageid exists for this account and contact
  */
--(void) hasMessageForId:(NSString*) messageid toContact:(NSString *) contact onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion;
+-(void) hasMessageForId:(NSString*) messageid  onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion;
 
 /*
  Marks a message as delivered. When we know its been sent out on the wire

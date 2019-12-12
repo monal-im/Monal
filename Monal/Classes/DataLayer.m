@@ -1497,76 +1497,82 @@ static DataLayer *sharedInstance=nil;
 
     NSString *idToUse=stanzaid?stanzaid:messageid;
   
-    [self hasMessageForStanzaId:idToUse toContact:actualfrom onAccount:accountNo andCompletion:^(BOOL exists) {
-        if(!exists)
-        {
-            //this is always from a contact
-            NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-            [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-            NSDate* sourceDate=[NSDate date];
-            NSDate* destinationDate;
-            if(messageDate) {
-                //already GMT no need for conversion
-                
-                destinationDate= messageDate;
-                [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-            }
-            else {
-                
-                NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
-                NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
-                
-                NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
-                NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
-                NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
-                
-                destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
-            }
-            // note: if it isnt the same day we want to show the full  day
-            
-            NSString* dateString = [formatter stringFromDate:destinationDate];
-            
-            if(messageType)
-            {
-                NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?,?,?,?, ?, ?, ?);"];
-                NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",messageType,[NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
-                DDLogVerbose(@"%@",query);
-                [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
-                    if(completion)
-                    {
-                        [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:nil];
-                        completion(success, messageType);
-                    }
-                }];
-            }
-            else  {
-                // in the event it is a message from the room
-                [self messageTypeForMessage:message withCompletion:^(NSString *foundMessageType) {
-                    
-                    //all messages default to unread
-                    NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?,?,?,?,?,?,?,?,?,?,?, ?);"];
-                    NSArray *params=@[accountNo, from, to, 	dateString, message, actualfrom,[NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",foundMessageType, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@""];
-                    DDLogVerbose(@"%@",query);
-                    [self executeNonQuery:query andArguments:params  withCompletion:^(BOOL success) {
-                        
-                        if(!success)
-                        {
-                            DDLogError(@"failed to insert ");
-                        }
-                        
-                        if(completion)
-                        {
-                            [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:nil];
-                            completion(success, foundMessageType);
-                        }
-                    }];
-                }];
-            }
-        }
-        else {
-            DDLogError(@"Message or stanza Id duplicated %@", idToUse);
-        }
+    [self hasMessageForId:messageid onAccount:accountNo andCompletion:^(BOOL exists) {
+        if(exists) return; //used to catch muc echos if we dont know our own nickok
+        [self hasMessageForStanzaId:idToUse toContact:actualfrom onAccount:accountNo andCompletion:^(BOOL exists) {
+              if(!exists)
+              {
+                  //this is always from a contact
+                  NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
+                  [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+                  NSDate* sourceDate=[NSDate date];
+                  NSDate* destinationDate;
+                  if(messageDate) {
+                      //already GMT no need for conversion
+                      
+                      destinationDate= messageDate;
+                      [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+                  }
+                  else {
+                      
+                      NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
+                      NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+                      
+                      NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
+                      NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
+                      NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
+                      
+                      destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
+                  }
+                  // note: if it isnt the same day we want to show the full  day
+                  
+                  NSString* dateString = [formatter stringFromDate:destinationDate];
+                  
+                  if(messageType)
+                  {
+                      NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?,?,?,?, ?, ?, ?);"];
+                      NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",messageType,[NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
+                      DDLogVerbose(@"%@",query);
+                      [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
+                          if(completion)
+                          {
+                              [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:nil];
+                              completion(success, messageType);
+                          }
+                      }];
+                  }
+                  else  {
+                      // in the event it is a message from the room
+                      [self messageTypeForMessage:message withCompletion:^(NSString *foundMessageType) {
+                          
+                          //all messages default to unread
+                          NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?,?,?,?,?,?,?,?,?,?,?, ?);"];
+                          NSArray *params=@[accountNo, from, to,     dateString, message, actualfrom,[NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",foundMessageType, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@""];
+                          DDLogVerbose(@"%@",query);
+                          [self executeNonQuery:query andArguments:params  withCompletion:^(BOOL success) {
+                              
+                              if(!success)
+                              {
+                                  DDLogError(@"failed to insert ");
+                              }
+                              
+                              if(completion)
+                              {
+                                  [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:nil];
+                                  completion(success, foundMessageType);
+                              }
+                          }];
+                      }];
+                  }
+              }
+              else {
+                  DDLogError(@"Message or stanza Id duplicated %@", idToUse);
+              }
+          }];
+        
     }];
+    
+  
     
     
 }
@@ -1593,11 +1599,11 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(void) hasMessageForId:(NSString*) messageid toContact:(NSString *) contact onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion
+-(void) hasMessageForId:(NSString*) messageid onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion
 {
-    if(!accountNo || !contact) return;
-    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? and message_from=? and messageid=? limit 1"];
-    NSArray *params=@[accountNo, contact, messageid?messageid:@""];
+    if(!accountNo ) return;
+    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? and messageid=? limit 1"];
+    NSArray *params=@[accountNo, messageid?messageid:@""];
     
     [self executeScalar:query andArguments:params withCompletion:^(NSObject* result) {
         

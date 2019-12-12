@@ -130,6 +130,7 @@
 		261E543323A1CD1700394F59 /* MLMessageProcessorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 261E543223A1CD1700394F59 /* MLMessageProcessorTest.m */; };
 		261E543723A1ED1E00394F59 /* MLMessageProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB42231CB816006D0277 /* MLMessageProcessor.m */; };
 		261E543823A1ED1E00394F59 /* MLPresenceProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611020238F104B0030A4EE /* MLPresenceProcessor.m */; };
+		261E543923A1ED3E00394F59 /* MLIQProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661101B238F10360030A4EE /* MLIQProcessor.m */; };
 		2626800221E839E400DB7B54 /* MLKeyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2626800121E839E400DB7B54 /* MLKeyViewController.m */; };
 		2626800621E839FC00DB7B54 /* MLResourcesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2626800421E839FC00DB7B54 /* MLResourcesViewController.m */; };
 		2626800A21E8406900DB7B54 /* MLKeyRow.m in Sources */ = {isa = PBXBuildFile; fileRef = 2626800921E8406900DB7B54 /* MLKeyRow.m */; };
@@ -3020,6 +3021,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				261E543923A1ED3E00394F59 /* MLIQProcessor.m in Sources */,
 				261E543723A1ED1E00394F59 /* MLMessageProcessor.m in Sources */,
 				26C836622396CB9200C9F21D /* MLIQProcessorTest.m in Sources */,
 				261E543823A1ED1E00394F59 /* MLPresenceProcessor.m in Sources */,

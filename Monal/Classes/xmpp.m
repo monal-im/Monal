@@ -1351,7 +1351,7 @@ NSString *const kXMPPPresence = @"presence";
                                     message.delayTimeStamp=messageNode.delayTimeStamp;
                                     message.timestamp =[NSDate date];
                                     message.shouldShowAlert= showAlert;
-                                    message.messageType=kMessageTypeText;
+                                    message.messageType=newMessageType;
                                     message.hasBeenSent=YES; //if it came in it has been sent to the server
                                     
                                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];

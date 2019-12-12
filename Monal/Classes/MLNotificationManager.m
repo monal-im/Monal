@@ -44,7 +44,6 @@
 
 -(void) handleNewMessage:(NSNotification *)notification
 {
-    
     MLMessage *message =[notification.userInfo objectForKey:@"message"];
     
     if([message.messageType isEqualToString:kMessageTypeStatus]) return;
@@ -217,8 +216,8 @@
     else
     {
           MLMessage *message =[notification.userInfo objectForKey:@"message"];
-        if(!([message.from isEqualToString:self.currentContact]) &&
-           !([message.to isEqualToString:self.currentContact] ) )
+        if(!([message.from isEqualToString:self.currentContact.contactJid]) &&
+           !([message.to isEqualToString:self.currentContact.contactJid] ) )
             //  &&![[notification.userInfo objectForKey:@"from"] isEqualToString:@"Info"]
         {
             if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"10.0")){

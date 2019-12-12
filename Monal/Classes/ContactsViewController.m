@@ -859,7 +859,7 @@
     else
     {
         if(indexPath.section==konlineSection)
-        {f
+        {
             row = [self.contacts objectAtIndex:indexPath.row];
         }
         else if(indexPath.section==kofflineSection)

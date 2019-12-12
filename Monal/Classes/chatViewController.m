@@ -1243,13 +1243,13 @@
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        NSDictionary* message= [self.messageList objectAtIndex:indexPath.row];
+        MLMessage* message= [self.messageList objectAtIndex:indexPath.row];
         
         DDLogVerbose(@"%@", message);
         
-        if([message objectForKey:@"message_history_id"])
+        if(message.messageId)
         {
-            [[DataLayer sharedInstance] deleteMessageHistory:[NSString stringWithFormat:@"%@",[message objectForKey:@"message_history_id"]]];
+            [[DataLayer sharedInstance] deleteMessageHistory:[NSString stringWithFormat:message.messageId]];
         }
         else
         {

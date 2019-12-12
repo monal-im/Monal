@@ -12,7 +12,7 @@
 
 -(NSString *) contactDisplayName
 {
-    if(self.nickName) return self.nickName;
+    if (self.nickName) return self.nickName;
     if (self.fullName) return self.fullName;
     
     return self.contactJid;

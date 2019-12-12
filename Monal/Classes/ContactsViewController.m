@@ -889,6 +889,11 @@
     else {
         [cell showStatusText:nil];
     }
+    
+    if(row.isGroup && row.groupSubject) {
+        [cell showStatusText:row.groupSubject];
+    }
+    
     if(tableView ==self.view) {
         if(indexPath.section==konlineSection)
         {

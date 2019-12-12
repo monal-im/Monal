@@ -12,10 +12,16 @@
 
 -(NSString *) contactDisplayName
 {
-    if (self.nickName && self.nickName.length>0) return self.nickName;
-    if (self.fullName && self.fullName.length>0) return self.fullName;
+    NSString *toreturn=self.contactJid;
+    if(self.isGroup) {
+       
+    }
+    else  {
+        if (self.nickName && self.nickName.length>0) toreturn=self.nickName;
+        if (self.fullName && self.fullName.length>0) toreturn=self.fullName;
+    }
     
-    return self.contactJid;
+    return toreturn;
 }
 
 +(MLContact *) contactFromDictionary:(NSDictionary *) dic

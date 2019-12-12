@@ -108,18 +108,22 @@
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-       NSDictionary *dic = self.favorites[indexPath.row];
+    NSDictionary *dic = self.favorites[indexPath.row];
     
     NSNumber *account=[dic objectForKey:@"account_id"];
     [[MLXMPPManager sharedInstance] joinRoom:[dic objectForKey:@"room"] withNick:[dic objectForKey:@"nick"]  andPassword:@"" forAccounId:account.integerValue ];
-    [[DataLayer sharedInstance] addContact:[dic objectForKey:@"room"] forAccount:[NSString stringWithFormat:@"%@", account] fullname:@"" nickname:[dic objectForKey:@"nick"] withCompletion:^(BOOL success) {
-        
-        [[DataLayer sharedInstance] updateOwnNickName:[dic objectForKey:@"nick"] forMuc:[dic objectForKey:@"room"] forAccount:[NSString stringWithFormat:@"%@", account]];
+    
+    xmpp* xmppAccount =[[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%@",account]];
+    
+    [[DataLayer sharedInstance] addContact:[dic objectForKey:@"room"] forAccount:[NSString stringWithFormat:@"%@", account] fullname:@"" nickname:@"" andMucNick:[dic objectForKey:@"nick"] withCompletion:^(BOOL success) {
+        if(success)
+        [[DataLayer sharedInstance] updateOwnNickName:[dic objectForKey:@"nick"] forMuc:[dic objectForKey:@"room"] andServer:xmppAccount.connectionProperties.conferenceServer forAccount:[NSString stringWithFormat:@"%@", account] withCompletion:^(BOOL success) {
+            
+        }];
         
     }];
     
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-
 }
 
 -(void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath

@@ -63,9 +63,10 @@
     {
         NSString *ownNick;
      
-        if(messageNode.type==kMessageGroupChatType)
+        //processed messages already have server name
+        if([messageNode.type isEqualToString:kMessageGroupChatType])
         {
-            ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.from forAccount:self.accountNo];
+            ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.from andServer:@"" forAccount:self.accountNo];
         }
         
         if ([messageNode.type isEqualToString:kMessageGroupChatType]

@@ -75,7 +75,7 @@ extern NSString *const kMessageTypeUrl;
 -(void) setRosterVersion:(NSString *) version forAccount: (NSString*) accountNo;
 
 // Buddy Commands
--(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName withCompletion: (void (^)(BOOL))completion;
+-(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName andMucNick:(NSString *) mucNick withCompletion: (void (^)(BOOL))completion;
 -(void) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(BOOL) clearBuddies:(NSString*) accountNo;
 -(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion;
@@ -130,8 +130,8 @@ extern NSString *const kMessageTypeUrl;
 
 #pragma mark - MUC
 
--(NSString *) ownNickNameforMuc:(NSString*) room forAccount:(NSString*) accountNo;
--(void) updateOwnNickName:(NSString *) nick forMuc:(NSString*) room forAccount:(NSString*) accountNo;
+-(NSString *) ownNickNameforMuc:(NSString*) room andServer:(NSString*) server forAccount:(NSString*) accountNo;
+-(void) updateOwnNickName:(NSString *) nick forMuc:(NSString*) room andServer:(NSString*) server forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 
 
 -(BOOL) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo;

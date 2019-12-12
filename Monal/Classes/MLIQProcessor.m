@@ -302,6 +302,7 @@
                                             forAccount:self.accountNo
                                               fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
                                               nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
+                                            andMucNick:nil
                                         withCompletion:^(BOOL success) {
                     
                     if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)

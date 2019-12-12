@@ -1002,7 +1002,7 @@
     
     NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),contact.fullName ];
     
-    BOOL isMUC=[[DataLayer sharedInstance] isBuddyMuc:contact.contactJid forAccount:contact.accountId];
+    BOOL isMUC=contact.isGroup;
     if(isMUC)
     {
         messageString =@"Leave this converstion?";

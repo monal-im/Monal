@@ -327,22 +327,27 @@
             [[DataLayer sharedInstance] addMucFavoriteForAccount:account.accountNo withRoom:self.roomField.text nick:self.nickField.text autoJoin:autoJoinValue andCompletion:nil];
         }
 
-        [[MLXMPPManager sharedInstance] joinRoom:self.roomField.text withNick:self.nickField.text andPassword:self.passField.text forAccountRow:[self.accountPicker selectedRowInComponent:0]];
-
-        NSString *nick=self.nickField.text;
-        NSString *room =self.roomField.text;
+        NSString *nick=[self.nickField.text copy];
+        NSString *room =[self.roomField.text copy];
+        NSString *pass=[self.passField.text copy];
+        NSInteger accountRow=[self.accountPicker selectedRowInComponent:0];
         
+        NSString *combinedRoom = room;
+         if([combinedRoom componentsSeparatedByString:@"@"].count==1) {
+             combinedRoom = [NSString stringWithFormat:@"%@@%@", room, account.connectionProperties.conferenceServer];
+         }
+         
         
-        [[DataLayer sharedInstance] addContact:self.roomField.text forAccount:account.accountNo fullname:@"" nickname:self.nickField.text  withCompletion:^(BOOL success) {
+        [[DataLayer sharedInstance] addContact:combinedRoom forAccount:account.accountNo fullname:@"" nickname:@"" andMucNick:nick  withCompletion:^(BOOL success) {
+            //race condition on creation otherwise
+            [[MLXMPPManager sharedInstance] joinRoom:combinedRoom withNick:nick andPassword:pass forAccountRow:accountRow];
             
-                [[DataLayer sharedInstance] updateOwnNickName:nick forMuc:room forAccount:account.accountNo];
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self closeView];
             });
             
+            
         }];
-        
-        
     }
 }
 

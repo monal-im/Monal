@@ -51,10 +51,9 @@
     
     self.navigationItem.title=self.contact.contactDisplayName;
     
-    
     self.accountNo=self.contact.accountId;
     //if not in buddylist, add.
-    [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" withCompletion:^(BOOL success) {
+    [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" andMucNick:nil  withCompletion:^(BOOL success) {
     }];
     
     

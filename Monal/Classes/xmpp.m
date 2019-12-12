@@ -1433,7 +1433,7 @@ NSString *const kXMPPPresence = @"presence";
                                 [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self->_accountNo];
                                 [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self->_accountNo];
                                 
-                                [[DataLayer sharedInstance] addContact:[presenceNode.user copy] forAccount:self->_accountNo fullname:@"" nickname:@"" withCompletion:^(BOOL success) {
+                                [[DataLayer sharedInstance] addContact:[presenceNode.user copy] forAccount:self->_accountNo fullname:@"" nickname:@"" andMucNick:nil withCompletion:^(BOOL success) {
                                     if(!success)
                                     {
                                         DDLogVerbose(@"Contact already in list");

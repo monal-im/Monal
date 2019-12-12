@@ -298,6 +298,7 @@
 
 -(void) closeView
 {
+    if(self.completion) self.completion();
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -336,7 +337,7 @@
             
                 [[DataLayer sharedInstance] updateOwnNickName:nick forMuc:room forAccount:account.accountNo];
             dispatch_async(dispatch_get_main_queue(), ^{
-                [self dismissViewControllerAnimated:YES completion:nil];
+                [self closeView];
             });
             
         }];

@@ -12,8 +12,8 @@
 
 -(NSString *) contactDisplayName
 {
-    if (self.nickName) return self.nickName;
-    if (self.fullName) return self.fullName;
+    if (self.nickName && self.nickName.length>0) return self.nickName;
+    if (self.fullName && self.fullName.length>0) return self.fullName;
     
     return self.contactJid;
 }
@@ -22,7 +22,7 @@
 {
     MLContact *contact =[[MLContact alloc] init];
     contact.contactJid=[dic objectForKey:@"buddy_name"];
-    contact.nickName=[dic objectForKey:@"nick"];
+    contact.nickName=[dic objectForKey:@"nick_name"];
     contact.fullName=[dic objectForKey:@"full_name"];
     contact.imageFile=[dic objectForKey:@"filename"];
     

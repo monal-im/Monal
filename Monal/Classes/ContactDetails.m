@@ -276,6 +276,7 @@
 
 -(IBAction)close:(id)sender
 {
+    [self textFieldShouldEndEditing:self.currentTextField];
     if(self.completion) self.completion();
     [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 }
@@ -353,6 +354,7 @@
     else
         self.navigationItem.title=self.contact.fullName;
     
+    self.contact.nickName=textField.text;
     
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
     

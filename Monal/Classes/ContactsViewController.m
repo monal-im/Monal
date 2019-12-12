@@ -223,7 +223,8 @@
     MLContact *contactrow =[self.contacts objectAtIndex:pos];
     BOOL hasChange= [self updateContactRow:contactrow withContact:contact];
     
-    if(hasChange &&  self.searchResults.count==0)
+    //When they are the same its been modified , probably at details
+    if((hasChange || contact==contactrow) &&  self.searchResults.count==0)
     {
         
         [self.contactsTable beginUpdates];
@@ -858,7 +859,7 @@
     else
     {
         if(indexPath.section==konlineSection)
-        {
+        {f
             row = [self.contacts objectAtIndex:indexPath.row];
         }
         else if(indexPath.section==kofflineSection)

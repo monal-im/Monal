@@ -141,6 +141,28 @@ strip_invalid_archs() {
   STRIP_BINARY_RETVAL=1
 }
 
+
+if [[ "$CONFIGURATION" == "Debug" ]]; then
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS9.3/CocoaLumberjack.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS/TPCircularBuffer.framework"
+fi
+if [[ "$CONFIGURATION" == "Adhoc" ]]; then
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS9.3/CocoaLumberjack.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS/TPCircularBuffer.framework"
+fi
+if [[ "$CONFIGURATION" == "AppStore" ]]; then
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS9.3/CocoaLumberjack.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS/TPCircularBuffer.framework"
+fi
 if [ "${COCOAPODS_PARALLEL_CODE_SIGN}" == "true" ]; then
   wait
 fi

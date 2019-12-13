@@ -195,7 +195,7 @@
                 alarm.soundName=UILocalNotificationDefaultSoundName;
             }
         }
-        alarm.userInfo=notification.userInfo;
+       // alarm.userInfo=notification.userInfo;
         [app scheduleLocalNotification:alarm];
         DDLogVerbose(@"Scheduled local message alert ");
     }

@@ -17,18 +17,21 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r8c-Jr-MKH">
-                        <rect key="frame" x="8" y="11" width="131" height="21"/>
+                        <rect key="frame" x="8" y="11" width="218" height="21"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ZDH-II-Cc8">
-                        <rect key="frame" x="147" y="11" width="165" height="21"/>
+                        <rect key="frame" x="234" y="11" width="78" height="21"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <textInputTraits key="textInputTraits"/>
                     </textField>
-                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="4FD-Uj-Ib9">
-                        <rect key="frame" x="240" y="6" width="51" height="31"/>
+                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="4FD-Uj-Ib9">
+                        <rect key="frame" x="241" y="6" width="51" height="31"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="49" id="sJa-cB-ur2"/>
+                        </constraints>
                     </switch>
                 </subviews>
                 <constraints>
@@ -46,7 +49,7 @@
                 <outlet property="textInputField" destination="ZDH-II-Cc8" id="XuF-cf-PQ0"/>
                 <outlet property="toggleSwitch" destination="4FD-Uj-Ib9" id="01q-Cf-jRH"/>
             </connections>
-            <point key="canvasLocation" x="225" y="50"/>
+            <point key="canvasLocation" x="224" y="49.475262368815599"/>
         </tableViewCell>
     </objects>
 </document>

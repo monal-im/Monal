@@ -236,13 +236,50 @@
                     <connections>
                         <outlet property="delegate" destination="qac-2e-fgp" id="GDg-K1-dOE"/>
                         <segue destination="hMh-kj-2DY" kind="relationship" relationship="masterViewController" id="XWq-7G-tUz"/>
-                        <segue destination="Dhn-Pm-OVk" kind="relationship" relationship="detailViewController" id="x51-ex-qWM"/>
+                        <segue destination="iM6-Fx-aHL" kind="relationship" relationship="detailViewController" id="hZ4-Os-eHo"/>
                     </connections>
                 </splitViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="hSl-QX-t2S" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <customObject id="qac-2e-fgp" customClass="MLSplitViewDelegate"/>
             </objects>
             <point key="canvasLocation" x="11" y="-489"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="ian-aI-Nym">
+            <objects>
+                <viewController id="iM6-Fx-aHL" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="oLo-mA-PUv"/>
+                        <viewControllerLayoutGuide type="bottom" id="6ba-eK-Rv2"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Kkf-cA-1XK">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Tie_My_Boat_by_Ray_García" translatesAutoresizingMaskIntoConstraints="NO" id="mSj-cI-xo2">
+                                <rect key="frame" x="-20" y="29" width="454" height="838"/>
+                            </imageView>
+                            <view alpha="0.25" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kLJ-ds-UJ6">
+                                <rect key="frame" x="-20" y="29" width="454" height="838"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="kLJ-ds-UJ6" secondAttribute="trailing" constant="-20" id="7zd-0p-M1A"/>
+                            <constraint firstItem="mSj-cI-xo2" firstAttribute="leading" secondItem="Kkf-cA-1XK" secondAttribute="leading" constant="-20" id="DbE-MV-Gco"/>
+                            <constraint firstItem="mSj-cI-xo2" firstAttribute="top" secondItem="Kkf-cA-1XK" secondAttribute="top" constant="29" id="LN0-ep-dyg"/>
+                            <constraint firstAttribute="trailing" secondItem="mSj-cI-xo2" secondAttribute="trailing" constant="-20" id="SZl-rm-jau"/>
+                            <constraint firstItem="kLJ-ds-UJ6" firstAttribute="leading" secondItem="Kkf-cA-1XK" secondAttribute="leading" constant="-20" id="ViH-se-FWs"/>
+                            <constraint firstAttribute="bottom" secondItem="kLJ-ds-UJ6" secondAttribute="bottom" constant="29" id="VqY-QK-6ML"/>
+                            <constraint firstItem="kLJ-ds-UJ6" firstAttribute="top" secondItem="Kkf-cA-1XK" secondAttribute="top" constant="29" id="tLa-QD-UL5"/>
+                            <constraint firstAttribute="bottom" secondItem="mSj-cI-xo2" secondAttribute="bottom" constant="29" id="tMp-Od-ics"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="N6F-F8-vjp" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="367" y="208"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="f58-D2-BRy">
@@ -481,7 +518,7 @@
                     <connections>
                         <outlet property="delegate" destination="9w2-zK-zQT" id="yKV-F1-4VF"/>
                         <segue destination="PjQ-9S-4Zq" kind="relationship" relationship="masterViewController" id="01i-T3-g3x"/>
-                        <segue destination="RjC-T7-BwN" kind="relationship" relationship="detailViewController" id="mq9-9z-0ZK"/>
+                        <segue destination="iM6-Fx-aHL" kind="relationship" relationship="detailViewController" id="Whw-ul-BdL"/>
                     </connections>
                 </splitViewController>
                 <customObject id="9w2-zK-zQT" customClass="MLSplitViewDelegate"/>
@@ -513,7 +550,7 @@
                     <connections>
                         <outlet property="delegate" destination="ncC-uM-uuw" id="L3K-5f-uMh"/>
                         <segue destination="rFS-eK-Dxd" kind="relationship" relationship="masterViewController" id="O9T-Gg-eaS"/>
-                        <segue destination="Dhn-Pm-OVk" kind="relationship" relationship="detailViewController" id="QlH-d5-Lhg"/>
+                        <segue destination="iM6-Fx-aHL" kind="relationship" relationship="detailViewController" id="D1Q-JS-32d"/>
                     </connections>
                 </splitViewController>
                 <customObject id="ncC-uM-uuw" customClass="MLSplitViewDelegate"/>
@@ -1322,7 +1359,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tvb-fM-fJc" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2876.811594202899" y="209.59821428571428"/>
+            <point key="canvasLocation" x="2877" y="210"/>
         </scene>
         <!--Send A Message -->
         <scene sceneID="vwP-ns-Kg8">
@@ -1404,9 +1441,9 @@
         <image name="Tie_My_Boat_by_Ray_García" width="563" height="1218"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="qaB-BP-OcO"/>
         <segue reference="N41-wN-KNl"/>
         <segue reference="wmf-tk-2CN"/>
+        <segue reference="Whw-ul-BdL"/>
         <segue reference="cuS-c5-MTy"/>
     </inferredMetricsTieBreakers>
 </document>

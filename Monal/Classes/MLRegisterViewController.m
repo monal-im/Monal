@@ -61,7 +61,8 @@
     self.xmppAccount=[[xmpp alloc] init];
     self.xmppAccount.explicitLogout=NO;
     
-    MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:@"nothing" password:@"nothing" andResource:@"MonalReg"];
+    MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:@"nothing@yax.im" password:@"nothing" andResource:@"MonalReg"];
+    
     MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:kRegServer andPort:[NSNumber numberWithInt:5222]];
    
     server.SSL=YES;
@@ -75,9 +76,9 @@
 
 -(IBAction)registerAccount:(id)sender {
     
-    if(self.jid.text.length==0 || self.password.text.length==0 || self.captcha.text.length==0)
+    if(self.jid.text.length==0 || self.password.text.length==0)
         {
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"No Empty Values" message:@"Please make sure you have entered a username, password and code." preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"No Empty Values" message:@"Please make sure you have entered a username, password." preferredStyle:UIAlertControllerStyleAlert];
             [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];

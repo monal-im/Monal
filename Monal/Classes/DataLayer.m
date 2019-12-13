@@ -937,7 +937,14 @@ static DataLayer *sharedInstance=nil;
     NSArray *params = @[likeString,likeString];
     
     //DDLogVerbose(query);
-    NSArray* toReturn = [self executeReader:query andArguments:params];
+    NSArray* results = [self executeReader:query andArguments:params];
+    
+    NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
+          [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+              NSDictionary *dic = (NSDictionary *) obj;
+              [toReturn addObject:[MLContact contactFromDictionary:dic]];
+          }];
+          
     
     if(toReturn!=nil)
     {

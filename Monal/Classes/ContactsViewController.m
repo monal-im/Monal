@@ -1056,7 +1056,7 @@
 
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
-    NSDictionary *contactDic;
+    MLContact *contactDic;
     if(self.searchResults.count>0)
     {
         contactDic=  [self.searchResults objectAtIndex:indexPath.row];

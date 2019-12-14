@@ -36,10 +36,10 @@
     self.resource=@"Monal-iOS.51";
     
     MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:self.jid  password:@"" andResource:self.resource];
-
+    
     MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:@"monal.im" andPort:@5222];
     server.SSL=YES;
- 
+    
     self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];
     
     self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:_accountNo];
@@ -63,25 +63,36 @@
 
 
 -(void) testCarbonValid {
-     NSString  *sample= @"<message xmlns='jabber:client' from='romeo@montague.example' to='romeo@montague.example/home' type='chat'>  <received xmlns='urn:xmpp:carbons:2'><forwarded xmlns='urn:xmpp:forward:0'><message xmlns='jabber:client' from='juliet@capulet.example/balcony' to='romeo@montague.example/garden' type='chat'><body>Thou shall meet me tonite, at our house's hall!</body></message></forwarded></received></message>";
-      
-      NSDictionary *stanzaToParse =@{@"stanzaType":@"message", @"stanzaString":sample};
-      ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
+    NSString  *sample= @"<message xmlns='jabber:client' from='romeo@montague.example' to='romeo@montague.example/home' type='chat'>  <received xmlns='urn:xmpp:carbons:2'><forwarded xmlns='urn:xmpp:forward:0'><message xmlns='jabber:client' from='juliet@capulet.example/balcony' to='romeo@montague.example/garden' type='chat'><body>Thou shall meet me tonite, at our house's hall!</body></message></forwarded></received></message>";
+    
+    NSDictionary *stanzaToParse =@{@"stanzaType":@"message", @"stanzaString":sample};
+    ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
     XCTAssert([messageNode.from isEqualToString:@"juliet@capulet.example"], @"Valid Carbon not processed");
-      
+    
 }
 
 
 -(void) testCarbonImpersonation {
-     NSString  *sample= @"<message xmlns='jabber:client' from='tybalt@capulet.example/home' to='romeo@montague.example' type='chat'>  <received xmlns='urn:xmpp:carbons:2'><forwarded xmlns='urn:xmpp:forward:0'><message xmlns='jabber:client' from='juliet@capulet.example/balcony' to='romeo@montague.example/garden' type='chat'><body>Thou shall meet me tonite, at our house's hall!</body></message></forwarded></received></message>";
-      
-      NSDictionary *stanzaToParse =@{@"stanzaType":@"message", @"stanzaString":sample};
-      ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
+    NSString  *sample= @"<message xmlns='jabber:client' from='tybalt@capulet.example/home' to='romeo@montague.example' type='chat'>  <received xmlns='urn:xmpp:carbons:2'><forwarded xmlns='urn:xmpp:forward:0'><message xmlns='jabber:client' from='juliet@capulet.example/balcony' to='romeo@montague.example/garden' type='chat'><body>Thou shall meet me tonite, at our house's hall!</body></message></forwarded></received></message>";
+    
+    NSDictionary *stanzaToParse =@{@"stanzaType":@"message", @"stanzaString":sample};
+    ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
     XCTAssert([messageNode.from isEqualToString:@"tybalt@capulet.example"], @"Carbon impersonation");
-
-    //  [self waitForExpectations:@[expectation] timeout:5];
-      
+    
 }
+
+
+-(void) testMamImpersonation {
+    NSString  *sample= @"<message to='victim@example.com' from='attacker@example.com/r' type='chat'> <result xmlns='urn:xmpp:mam:2' queryid='0' id='whatever'> <forwarded xmlns='urn:xmpp:forward:0'> <message xmlns='jabber:client' to='victim@example.com' from='so@example.com'><delay xmlns='urn:xmpp:delay' stamp='2019-09-12T23:42:05Z'/><body>I have a surprise for you.</body></message></forwarded></result></message>";
+    
+    NSDictionary *stanzaToParse =@{@"stanzaType":@"message", @"stanzaString":sample};
+    ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
+    XCTAssert([messageNode.from isEqualToString:@"attacker@example.com"], @"Valid Carbon not processed");
+    
+}
+
+
+
 
 
 @end

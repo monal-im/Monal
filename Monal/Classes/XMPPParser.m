@@ -53,6 +53,7 @@
     
     if([attributeDict objectForKey:@"from"])
     {
+        if(!_from) {
         _from =[attributeDict objectForKey:@"from"];
         NSArray *parts=[_from componentsSeparatedByString:@"/"];
         _user =[parts objectAtIndex:0];
@@ -62,14 +63,23 @@
         }
         
         _from = [_from lowercaseString]; // intedned to not break code that expects lowercase
+            
+        }
+    } else  {
+        DDLogError(@"Attempt to overwrite from");
     }
     
     _idval =[attributeDict objectForKey:@"id"] ;
     
     if([attributeDict objectForKey:@"to"])
     {
+        if(!_to) {
         _to =[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-        _to=[_to lowercaseString];
+            _to=[_to lowercaseString];
+            
+        }
+    }else  {
+        DDLogError(@"Attempt to overwrite to");
     }
     
     //remove any  resource markers and get user
@@ -81,7 +91,7 @@
 {
     if(!_messageBuffer)
     {
-           _messageBuffer=[[NSMutableString alloc] init];
+       _messageBuffer=[[NSMutableString alloc] init];
     }
     
     [_messageBuffer appendString:string];

@@ -22,7 +22,7 @@
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
-    
+    [super parser:parser didStartElement:elementName namespaceURI:namespaceURI qualifiedName:qName attributes:attributeDict];
      _messageBuffer=nil;
     
     if(([elementName isEqualToString:@"forwarded"])  )
@@ -138,10 +138,19 @@
 	else
         if([elementName isEqualToString:@"message"])
         {
-            _from=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-            _to=[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-            DDLogVerbose(@"message from %@ to %@", _from, _to);
-            return;
+            NSArray *toParts = [_to componentsSeparatedByString:@"/"];
+                NSString *cleanTo =[toParts objectAtIndex:0];
+                // carbons are only from myself 
+                if([cleanTo isEqualToString:_from]) {
+                    _from=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+                    _to=[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+                    DDLogVerbose(@"message from %@ to %@", _from, _to);
+                    return;
+                } else {
+                    DDLogError(@"message impersonation");
+                    return;
+                }
+            
         }
     
     

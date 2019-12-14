@@ -115,7 +115,8 @@
     
     
     
-    if(([elementName isEqualToString:@"message"])  && ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageGroupChatType]))
+    if(([elementName isEqualToString:@"message"])
+       && ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageGroupChatType]))
 	{
 	
 		NSArray*  parts=[[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/"];
@@ -136,21 +137,22 @@
 		return;
 	}
 	else
-        if([elementName isEqualToString:@"message"])
+        if([elementName isEqualToString:@"message"] &&
+           ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageChatType]) )
         {
-            NSArray *toParts = [_to componentsSeparatedByString:@"/"];
-                NSString *cleanTo =[toParts objectAtIndex:0];
-                // carbons are only from myself 
-                if([cleanTo isEqualToString:_from]) {
-                    _from=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-                    _to=[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-                    DDLogVerbose(@"message from %@ to %@", _from, _to);
-                    return;
-                } else {
-                    DDLogError(@"message impersonation");
-                    return;
-                }
+            _from=[[_from componentsSeparatedByString:@"/" ] objectAtIndex:0];
+            _to=[[_to  componentsSeparatedByString:@"/" ] objectAtIndex:0];
             
+            // carbons are only from myself 
+            if([_to isEqualToString:_from]) {
+                _from=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+                _to=[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+                DDLogVerbose(@"message from %@ to %@", _from, _to);
+                return;
+            } else {
+                DDLogError(@"message impersonation");
+                return;
+            }
         }
     
     

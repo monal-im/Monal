@@ -588,13 +588,13 @@
     });
 }
 
--(NSInteger) positionOfOnlineContact:(NSDictionary *) user
+-(NSInteger) positionOfOnlineContact:(MLContact *) user
 {
     NSInteger pos=0;
     for(MLContact* row in self.contacts)
     {
-        if([row.contactJid caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-           [row.accountId  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        if([row.contactJid caseInsensitiveCompare:user.contactJid]==NSOrderedSame &&
+           [row.accountId  integerValue]==[user.accountId integerValue] )
         {
             return pos;
         }
@@ -606,13 +606,13 @@
 }
 
 
--(NSInteger) positionOfOfflineContact:(NSDictionary *) user
+-(NSInteger) positionOfOfflineContact:(MLContact *) user
 {
     NSInteger pos=0;
-    for(NSDictionary* row in self.offlineContacts)
+    for(MLContact* row in self.offlineContacts)
     {
-        if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-           [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        if([row.contactJid caseInsensitiveCompare:user.contactJid]==NSOrderedSame &&
+           [row.accountId  integerValue]==[user.accountId integerValue] )
         {
             
             return pos;
@@ -625,13 +625,13 @@
 }
 
 
--(NSInteger) positionOfActiveContact:(NSDictionary *) user
+-(NSInteger) positionOfActiveContact:(MLContact *) user
 {
     NSInteger pos=0;
-    for(NSDictionary* row in self.activeChat)
+    for(MLContact* row in self.activeChat)
     {
-        if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:@"from"] ]==NSOrderedSame &&
-           [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        if([row.contactJid caseInsensitiveCompare:user.contactJid]==NSOrderedSame &&
+                 [row.accountId  integerValue]==[user.accountId integerValue] )
         {
             return pos;
         }
@@ -644,28 +644,24 @@
 
 
 
--(void)updateContactAt:(NSInteger) pos withInfo:(NSDictionary *) user
+-(void)updateContactAt:(NSInteger) pos withInfo:(MLContact *) contact
 {
-    NSMutableDictionary *contactrow =[_contacts objectAtIndex:pos];
+    MLContact *contactrow =[_contacts objectAtIndex:pos];
     BOOL hasChange=NO;
     
-    if([user objectForKey:kstateKey] && ![[user objectForKey:kstateKey] isEqualToString:[contactrow  objectForKey:kstateKey]] ) {
-        [contactrow setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+    if(contactrow.state && ![contactrow.state isEqualToString:contact.state] ) {
+        contactrow.state=contact.state;
         hasChange=YES;
     }
-    if([user objectForKey:kstatusKey] && ![[user objectForKey:kstatusKey] isEqualToString:[contactrow  objectForKey:kstatusKey]] ) {
-        [contactrow setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
-        hasChange=YES;
-    }
-    
-    if([user objectForKey:kfullNameKey] && ![[user objectForKey:kfullNameKey] isEqualToString:[contactrow  objectForKey:kfullNameKey]] &&
-       [[user objectForKey:kfullNameKey] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0
-       ) {
-        [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+  if(contactrow.statusMessage && ![contactrow.statusMessage isEqualToString:contact.statusMessage] ) {
+        contactrow.statusMessage=contact.statusMessage;
         hasChange=YES;
     }
     
-    if([user objectForKey:@"force"]) hasChange=YES;
+    if(contactrow.fullName && ![contactrow.fullName isEqualToString:contact.fullName] ) {
+          contactrow.fullName=contact.fullName;
+          hasChange=YES;
+      }
     
     if(hasChange) {
         if(self.searchResults || self.activeChat){
@@ -685,24 +681,22 @@
 }
 
 
--(void)updateOfflineContactAt:(NSInteger) pos withInfo:(NSDictionary *) user
+-(void)updateOfflineContactAt:(NSInteger) pos withInfo:(MLContact *) contact
 {
-    NSMutableDictionary *contactrow =[_offlineContacts objectAtIndex:pos];
+    MLContact *contactrow =[_offlineContacts objectAtIndex:pos];
     BOOL hasChange=NO;
     
-    if([user objectForKey:kstateKey] && ![[user objectForKey:kstateKey] isEqualToString:[contactrow  objectForKey:kstateKey]] ) {
-        [contactrow setObject:[user objectForKey:kstateKey] forKey:kstateKey];
+    if(contactrow.state && ![contactrow.state isEqualToString:contact.state] ) {
+        contactrow.state=contact.state;
         hasChange=YES;
     }
-    if([user objectForKey:kstatusKey] && ![[user objectForKey:kstatusKey] isEqualToString:[contactrow  objectForKey:kstatusKey]] ) {
-        [contactrow setObject:[user objectForKey:kstatusKey] forKey:kstatusKey];
+    if(contactrow.statusMessage && ![contactrow.statusMessage isEqualToString:contact.statusMessage] ) {
+        contactrow.statusMessage=contact.statusMessage;
         hasChange=YES;
     }
     
-    if([user objectForKey:kfullNameKey] && ![[user objectForKey:kfullNameKey] isEqualToString:[contactrow  objectForKey:kfullNameKey]] &&
-       [[user objectForKey:kfullNameKey] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0
-       ) {
-        [contactrow setObject:[user objectForKey:kfullNameKey] forKey:@"full_name"];
+    if(contactrow.fullName && ![contactrow.fullName isEqualToString:contact.fullName] ) {
+        contactrow.fullName=contact.fullName;
         hasChange=YES;
     }
     
@@ -725,14 +719,14 @@
 
 -(void) addOnlineUser:(NSNotification *) notification
 {
-    NSDictionary* user = notification.userInfo;
+    MLContact* user = [notification.userInfo objectForKey:@"contact"];
     
     dispatch_async(dispatch_get_main_queue(), ^{
         NSInteger initalPos=-1;
         initalPos=[self positionOfOnlineContact:user];
         if(initalPos>=0)
         {
-            DDLogVerbose(@"user %@ already in list updating status and nothing else",[user objectForKey:kusernameKey]);
+            DDLogVerbose(@"user %@ already in list updating status and nothing else",user.contactJid);
             [self updateContactAt:initalPos withInfo:user];
             return;
         }
@@ -797,14 +791,14 @@
 
 -(void) removeOnlineUser:(NSNotification *) notification
 {
-    NSDictionary* user = notification.userInfo;
+    MLContact* user = [notification.userInfo objectForKey:@"contact"];
     
     dispatch_async(dispatch_get_main_queue(), ^{
         NSInteger initalPos=-1;
         initalPos=[self positionOfOnlineContact:user];
         if(initalPos>=0)
         {
-            DDLogVerbose(@"user %@ already in list updating status and nothing else",[user objectForKey:kusernameKey]);
+            DDLogVerbose(@"user %@ already in list updating status and nothing else",user.contactJid);
             [self updateContactAt:initalPos withInfo:user];
             
             
@@ -884,9 +878,9 @@
                        NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
                        
                        NSInteger counter=0;
-                       for(NSDictionary* row in self.contacts)
+                       for(MLContact* row in self.contacts)
                        {
-                           if([[row objectForKey:@"account_id"]  integerValue]==[accountNo integerValue] )
+                           if([row.contactJid integerValue]==[accountNo integerValue] )
                            {
                                DDLogVerbose(@"removing  pos %ld", counter);
                                [indexSet addIndex:counter];
@@ -903,9 +897,9 @@
                            offlineIndexSet = [[NSMutableIndexSet alloc] init];
                            counter=0;
                            
-                           for(NSDictionary* row in self.offlineContacts)
+                           for(MLContact* row in self.offlineContacts)
                            {
-                               if([[row objectForKey:@"account_id"]  integerValue]==[accountNo integerValue] )
+                               if([row.accountId  integerValue]==[accountNo integerValue] )
                                {
                                    DDLogVerbose(@"removing  offline pos %ld", counter);
                                    [offlineIndexSet addIndex:counter];
@@ -989,33 +983,33 @@
 
 -(void) showCallRequest:(NSNotification *) notification
 {
-    NSDictionary *dic = notification.object;
+    MLContact *dic = [notification.userInfo objectForKey:@"contact"];
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *contactName=[dic objectForKey:@"user"];
-        NSString *userName=[dic objectForKey:kAccountName];
-        NSAlert *userAddAlert = [[NSAlert alloc] init];
-        userAddAlert.messageText =[NSString stringWithFormat:@"Incoming audio call to %@ from %@ ",userName,  contactName];
-        userAddAlert.alertStyle=NSInformationalAlertStyle;
-        [userAddAlert addButtonWithTitle:@"Decline"];
-        [userAddAlert addButtonWithTitle:@"Accept"];
-        
-        
-        [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
-            
-            BOOL allowed=NO;
-            
-            if(returnCode ==1001) {
-                allowed=YES;
-            }
-            [[MLXMPPManager sharedInstance] handleCall:dic withResponse:allowed];
-           
-            if(allowed)
-            {
-                  [self performSegueWithIdentifier:@"CallScreen" sender:dic];
-            }
-        }];
-    });
+//    dispatch_async(dispatch_get_main_queue(), ^{
+//        NSString *contactName=[dic objectForKey:@"user"];
+//        NSString *userName=[dic objectForKey:kAccountName];
+//        NSAlert *userAddAlert = [[NSAlert alloc] init];
+//        userAddAlert.messageText =[NSString stringWithFormat:@"Incoming audio call to %@ from %@ ",userName,  contactName];
+//        userAddAlert.alertStyle=NSInformationalAlertStyle;
+//        [userAddAlert addButtonWithTitle:@"Decline"];
+//        [userAddAlert addButtonWithTitle:@"Accept"];
+//
+//
+//        [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+//
+//            BOOL allowed=NO;
+//
+//            if(returnCode ==1001) {
+//                allowed=YES;
+//            }
+//            [[MLXMPPManager sharedInstance] handleCall:dic withResponse:allowed];
+//
+//            if(allowed)
+//            {
+//                  [self performSegueWithIdentifier:@"CallScreen" sender:dic];
+//            }
+//        }];
+//    });
 
 }
 
@@ -1025,7 +1019,7 @@
 
 -(void) handleNewMessage:(NSNotification *)notification
 {
-  
+    MLMessage *message = [notification.userInfo objectForKey:@"message"];
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
  
     dispatch_async(dispatch_get_main_queue(),
@@ -1033,7 +1027,7 @@
                     NSInteger pos=-1;
                        
                        //if current converstion, mark as read if window is visible
-                       NSDictionary *contactRow = nil;
+                       MLContact *contactRow = nil;
                        
                        NSArray *activeArray=self.contacts;
                        if(self.currentSegment==kActiveTab)
@@ -1055,9 +1049,6 @@
                                        [self.contactsTable endUpdates];
                                    }
                                }
-                            
-                               
-                               
                            });
                            
                            return;
@@ -1069,11 +1060,11 @@
                                }
                        }
                        
-                       if([[contactRow objectForKey:kContactName] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
-                          [[contactRow objectForKey:kAccountID]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] ) {
+                       if([contactRow.contactJid caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
+                          [contactRow.accountId  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] ) {
                            
                            if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
-                               [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
+                               [[DataLayer sharedInstance] markAsReadBuddy:contactRow.contactJid forAccount:contactRow.accountId];
                                [self updateAppBadge];
                            }
                            
@@ -1083,10 +1074,10 @@
                        else  {
      
                            int counter=0;
-                           for(NSDictionary* row in activeArray)
+                           for(MLContact* row in activeArray)
                            {
-                               if([[row objectForKey:kContactName] caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
-                                  [[row objectForKey:kAccountID]  integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
+                               if([row.contactJid caseInsensitiveCompare:[notification.userInfo objectForKey:@"from"] ]==NSOrderedSame &&
+                                  [row.accountId integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
                                {
                                    pos=counter;
                                    NSDictionary *dic = self.contacts[pos];

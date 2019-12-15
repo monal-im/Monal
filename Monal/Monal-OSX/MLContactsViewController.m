@@ -8,9 +8,7 @@
 
 #import "MLContactsViewController.h"
 #import "MLContactsCell.h"
-#import "MLConstants.h"
-#import "DataLayer.h"
-#import "MLXMPPManager.h"
+#import "monalxmppmac.h"
 
 #import "MLMainWindow.h"
 #import "MLImageManager.h"
@@ -457,9 +455,9 @@
     {
         [self.activeChat enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop)
          {
-             NSDictionary *row = (NSDictionary *) obj;
-             if([[row objectForKey:kContactName] caseInsensitiveCompare:self.chatViewController.contact.contactDisplayName] ==NSOrderedSame &&
-                [[row objectForKey:kAccountID]  integerValue]==[self.chatViewController.contact.accountId integerValue] )
+             MLContact *row = (MLContact *) obj;
+             if([row.contactJid caseInsensitiveCompare:self.chatViewController.contact.contactDisplayName] ==NSOrderedSame &&
+                [row.accountId  integerValue]==[self.chatViewController.contact.accountId integerValue] )
              {
                  NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:idx];
                  [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];
@@ -593,10 +591,10 @@
 -(NSInteger) positionOfOnlineContact:(NSDictionary *) user
 {
     NSInteger pos=0;
-    for(NSDictionary* row in self.contacts)
+    for(MLContact* row in self.contacts)
     {
-        if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
-           [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        if([row.contactJid caseInsensitiveCompare:[user objectForKey:kusernameKey] ]==NSOrderedSame &&
+           [row.accountId  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
         {
             return pos;
         }
@@ -1248,18 +1246,15 @@
         
     }
     
-    NSDictionary *contactRow =item;
+    MLContact *contactRow =item;
     
     MLContactsCell *cell = [outlineView makeViewWithIdentifier:@"contactCell" owner:self];
     cell.name.backgroundColor =[NSColor clearColor];
     cell.status.backgroundColor= [NSColor clearColor];
+     
+    cell.name.stringValue=contactRow.contactDisplayName;
     
-    if([[contactRow objectForKey:kFullName]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0) {
-        cell.name.stringValue = [contactRow objectForKey:kFullName];
-    } else  if([contactRow objectForKey:kContactName] ){
-        cell.name.stringValue=[contactRow objectForKey:kContactName] ;
-    }
-    cell.accountNo= [[contactRow objectForKey:kAccountID] integerValue];
+    cell.accountNo= contactRow.accountId;
     
     if(cell.username)
     {
@@ -1267,30 +1262,26 @@
     }
     
     NSString *statusText ;
-    NSNumber *muc=[contactRow objectForKey:@"Muc"];
-     cell.username =[contactRow objectForKey:kContactName] ;
+ 
+    cell.username =contactRow.contactJid;
     
-    if(muc.boolValue ==YES)
+    if(contactRow.isGroup ==YES)
     {
-        NSString * subject =[contactRow objectForKey:@"muc_subject"];
-        if(subject.length>0) {
-            subject=[contactRow objectForKey:kContactName] ;
-        }
-        
-        cell.name.stringValue = subject ;
-        statusText = [contactRow objectForKey:@"muc_nick"];
+        cell.name.stringValue = contactRow.contactJid ;
+        cell.status.stringValue =contactRow.groupSubject;
     }
     else  {
-        statusText = [contactRow objectForKey:@"status"];
+        statusText = contactRow.statusMessage;
         if(statusText) {
             if( [statusText isEqualToString:@"(null)"])  {
                 statusText = @"";
             }
         }
+        cell.status.stringValue=statusText;
     }
-    cell.status.stringValue =statusText;
+   
     
-    NSString *state= [[contactRow objectForKey:@"state"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    NSString *state= [contactRow.state stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     
     if(([state isEqualToString:@"away"]) ||
        ([state isEqualToString:@"dnd"])||
@@ -1308,28 +1299,28 @@
     
     [cell setOrb];
 
-    NSString* accountNo=[NSString stringWithFormat:@"%ld", (long)cell.accountNo];
-    NSString *cellUser = [contactRow objectForKey:kContactName];
+    NSString* accountNo=contactRow.accountId;
+    NSString *cellUser = contactRow.contactJid;
     
     if(self.currentSegment==kActiveTab) {
         NSMutableArray *message = [[DataLayer sharedInstance] lastMessageForContact:cell.username andAccount:accountNo];
         if(message.count>0)
         {
-            NSDictionary *row = message[0];
-            if([[row objectForKey:@"messageType"] isEqualToString:kMessageTypeUrl])
+            MLMessage *row = message[0];
+            if([row.messageType isEqualToString:kMessageTypeUrl])
             {
                 cell.status.stringValue =@"🔗 A Link";
-            } else if([[row objectForKey:@"messageType"] isEqualToString:kMessageTypeImage])
+            } else if([row.messageType isEqualToString:kMessageTypeImage])
             {
                 cell.status.stringValue =@"📷 An Image";
             } else  {
-                cell.status.stringValue =[row objectForKey:@"message"];
+                cell.status.stringValue =row.messageText;
             }
         }
     }
     
-    if([contactRow objectForKey:@"lastMessageTime"]) {
-        cell.time.stringValue = [self formattedDateWithSource:[contactRow objectForKey:@"lastMessageTime"]];
+    if(contactRow.lastMessageTime) {
+        cell.time.stringValue = [self formattedDateWithSource:contactRow.lastMessageTime];
         cell.time.hidden=NO;
     } else  {
         cell.time.hidden=YES;
@@ -1349,7 +1340,7 @@
         });
     }];
 
-    [[DataLayer sharedInstance] isMutedJid:[contactRow objectForKey:@"buddy_name"]  withCompletion:^(BOOL muted) {
+    [[DataLayer sharedInstance] isMutedJid:contactRow.contactJid  withCompletion:^(BOOL muted) {
         dispatch_async(dispatch_get_main_queue(), ^{
             cell.muteBadge.hidden=!muted;
         });
@@ -1534,13 +1525,10 @@
 
 #pragma mark - date
 
--(NSString*) formattedDateWithSource:(NSString*) sourceDateString
+-(NSString*) formattedDateWithSource:(NSDate*) sourceDate
 {
     NSString* dateString;
-  
-    NSDate* sourceDate=[self.sourceDateFormat dateFromString:sourceDateString];
-    if(!sourceDate) return @"";
-    
+
     NSInteger msgday =[self.gregorian components:NSCalendarUnitDay fromDate:sourceDate].day;
     NSInteger msgmonth=[self.gregorian components:NSCalendarUnitMonth fromDate:sourceDate].month;
     NSInteger msgyear =[self.gregorian components:NSCalendarUnitYear fromDate:sourceDate].year;

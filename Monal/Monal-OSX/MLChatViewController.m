@@ -689,16 +689,16 @@
 
 -(BOOL) shouldShowTimeForRow:(NSInteger) row
 {
-     NSDictionary *previousMessage =nil;
-    NSDictionary *messageRow = [self.messageList objectAtIndex:row];
+    MLMessage *previousMessage =nil;
+    MLMessage *messageRow = [self.messageList objectAtIndex:row];
     if(row>0) {
         previousMessage=[self.messageList objectAtIndex:row-1];
     }
     BOOL showTime=NO;
     if(previousMessage)
     {
-        NSDate *previousTime=[self.sourceDateFormat dateFromString:[previousMessage objectForKey:@"thetime"]];
-        NSDate *currenTime=[self.sourceDateFormat dateFromString:[messageRow objectForKey:@"thetime"]];
+        NSDate *previousTime=previousMessage.timestamp;
+        NSDate *currenTime=messageRow.timestamp;
         if([currenTime timeIntervalSinceDate:previousTime]>=60*60){
             showTime=YES;
         }
@@ -713,11 +713,11 @@
 
 - (NSView *)tableView:(NSTableView *)tableView viewForTableColumn:(NSTableColumn *)tableColumn  row:(NSInteger)row
 {
-    NSDictionary *messageRow = [self.messageList objectAtIndex:row];
+    MLMessage *messageRow = [self.messageList objectAtIndex:row];
     MLChatViewCell *cell;
     
-    NSString *messageString = [messageRow objectForKey:@"message"];
-    NSString *messageType =[messageRow objectForKey:kMessageType];
+    NSString *messageString = messageRow.messageText;
+    NSString *messageType =messageRow.messageType;
     cell.timeStamp.stringValue=@""; //remove template values to not break voice over
     
     if([messageType isEqualToString:kMessageTypeStatus])
@@ -732,7 +732,7 @@
     [accessibility appendString:@""];
     
     if([messageType isEqualToString:kMessageTypeText]) {
-        if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
+        if([messageRow.actualFrom isEqualToString:self.jid]) {
             cell = [tableView makeViewWithIdentifier:@"OutboundTextCell" owner:self];
             cell.isInbound= NO;
             cell.messageText.textColor = [NSColor whiteColor];
@@ -762,7 +762,7 @@
      if([messageType isEqualToString:kMessageTypeImage])
     {
         NSString* cellDirectionID = @"InboundImageCell";
-        if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
+        if([messageRow.actualFrom  isEqualToString:self.jid]) {
             cellDirectionID=@"OutboundImageCell";
         }
         
@@ -783,7 +783,7 @@
     if([messageType isEqualToString:kMessageTypeUrl])
     {
         NSString* cellDirectionID = @"InboundLinkCell";
-        if([[messageRow objectForKey:@"af"] isEqualToString:self.jid]) {
+        if([messageRow.actualFrom  isEqualToString:self.jid]) {
             cellDirectionID=@"OutboundLinkCell";
         }
         MLLinkViewCell *linkCell = [tableView makeViewWithIdentifier:cellDirectionID owner:self];
@@ -791,37 +791,36 @@
         cell.attachmentImage.canDrawSubviewsIntoLayer=YES;
         linkCell.link=messageString;
       
-        if([(NSString *)[messageRow objectForKey:@"previewImage"] length]>0
-           || [(NSString *)[messageRow objectForKey:@"previewText"] length]>0)
+        if(messageRow.previewImage
+           || [messageRow.previewText length]>0)
         {
             linkCell.link=messageString;
             linkCell.webURL=messageString;
-            linkCell.previewText.stringValue = [messageRow objectForKey:@"previewText"];
+            linkCell.previewText.stringValue = messageRow.previewText ;
             linkCell.website.stringValue=messageString; 
-            [linkCell loadImage:[messageRow objectForKey:@"previewImage"] WithCompletion:nil];
+            [linkCell loadImage:messageRow.previewImage.absoluteString WithCompletion:nil];
         }  else {
             [linkCell loadPreviewWithCompletion:^{
                 if(linkCell.previewText.stringValue.length==0) (linkCell.previewText.stringValue=@" "); // prevent repeated calls
-                [[DataLayer sharedInstance] setMessageId:[messageRow objectForKey:@"messageid"] previewText:linkCell.previewText.stringValue  andPreviewImage:linkCell.imageUrl];
+                [[DataLayer sharedInstance] setMessageId:messageRow.messageId previewText:linkCell.previewText.stringValue  andPreviewImage:linkCell.imageUrl];
             }];
         }
         
         cell=linkCell;
     }
    
-    if([[messageRow objectForKey:@"delivered"] boolValue]!=YES)
+    if(messageRow.hasBeenSent!=YES)
     {
         cell.deliveryFailed=YES;
         cell.retry.accessibilityLabel=@"Retry Sending";
-        cell.retry.tag= [[messageRow objectForKey:@"message_history_id"] integerValue];
+        cell.retry.tag= [messageRow.messageId integerValue];
     }
     else  {
         cell.deliveryFailed=NO;
     }
  
     cell.messageStatus.accessibilityLabel=@"Delivered";
-    NSNumber *received = [messageRow objectForKey:kReceived];
-    if(received.boolValue==YES) {
+    if(messageRow.hasBeenReceived==YES) {
         NSDictionary *prior =nil;
         if(row>0)
         {
@@ -837,7 +836,7 @@
         cell.messageStatus.hidden=YES;
     }
     
-    if([[messageRow objectForKey:@"encrypted"] boolValue]==YES)
+    if(messageRow.encrypted==YES)
     {
         cell.lockImage.hidden=NO;
         cell.lockImage.accessibilityLabel=@"encrypted";
@@ -849,14 +848,14 @@
     
     BOOL showTime=[self shouldShowTimeForRow:row];
     
-    NSString *dateString=[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
+    NSString *dateString=[self formattedDateWithSource:messageRow.timestamp];
     cell.toolTip=dateString;
    
     if(showTime) {
         cell.timeStamp.hidden=NO;
         cell.timeStampHeight.constant=kCellTimeStampHeight;
         cell.timeStampVeritcalOffset.constant = kCellDefaultPadding;
-        cell.timeStamp.stringValue =[self formattedDateWithSource:[messageRow objectForKey:@"thetime"]];
+        cell.timeStamp.stringValue =[self formattedDateWithSource:messageRow.timestamp];
     } else  {
         cell.timeStamp.hidden=YES;
         cell.timeStampHeight.constant=0.0f;
@@ -872,13 +871,13 @@
     cell.scrollArea.accessibilityLabel=accessibility;
    
     
-   [[MLImageManager sharedInstance] getIconForContact:[messageRow objectForKey:@"af"] andAccount:self.contact.accountId withCompletion:^(NSImage *icon) {
+   [[MLImageManager sharedInstance] getIconForContact:messageRow.actualFrom andAccount:self.contact.accountId withCompletion:^(NSImage *icon) {
        cell.senderIcon.image=icon;
    }];
 
     if(self.isMUC && cell.isInbound)
     {
-        cell.senderName.stringValue=[messageRow objectForKey:@"af"];
+        cell.senderName.stringValue=messageRow.actualFrom;
         cell.senderName.hidden=NO;
         cell.nameHeight.constant=kCellTimeStampHeight;
         cell.timeStampHeight.constant=kCellTimeStampHeight;
@@ -895,9 +894,9 @@
 
 - (CGFloat)tableView:(NSTableView *)tableView heightOfRow:(NSInteger)row
 {
-    NSDictionary *messageRow = [self.messageList objectAtIndex:row];
-    NSString *messageString =[messageRow objectForKey:@"message"];
-    NSString *messageType =[messageRow objectForKey:kMessageType];
+    MLMessage *messageRow = [self.messageList objectAtIndex:row];
+    NSString *messageString =messageRow.messageText;
+    NSString *messageType =messageRow.messageType;
     if([messageType isEqualToString:kMessageTypeStatus])
     {
         return 45;
@@ -966,19 +965,13 @@
     return [self.sourceDateFormat stringFromDate:sourceDate];
 }
 
--(NSString*) formattedDateWithSource:(NSString*) sourceDateString
+-(NSString*) formattedDateWithSource:(NSDate*) sourceDate
 {
     NSString* dateString;
     
-    if(sourceDateString!=nil)
-    {
-        
-        NSDate* sourceDate=[self.sourceDateFormat dateFromString:sourceDateString];
-        
         [self.destinationDateFormat setTimeStyle:NSDateFormatterShortStyle];
         [self.destinationDateFormat setDateStyle:NSDateFormatterMediumStyle];
         dateString = [ self.destinationDateFormat stringFromDate:sourceDate];
-    }
     
     return dateString;
 }

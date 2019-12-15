@@ -370,6 +370,8 @@
 		26CC57E623A08EAA00ABB92A /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
 		26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		26D0940C22A33E9B009C7AEF /* MLRegisterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */; };
+		26D3476C23A54E67004D6D75 /* MLMessageParserTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D3476B23A54E67004D6D75 /* MLMessageParserTest.m */; };
+		26D437FB23A5643A00242AAA /* MLIQParserTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D437FA23A5643A00242AAA /* MLIQParserTest.m */; };
 		26D56EE720B59FB000BF7C97 /* MLTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D56EE620B59FB000BF7C97 /* MLTextView.m */; };
 		26D59D9020711969006F1DEE /* MLEditGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D8F20711969006F1DEE /* MLEditGroupViewController.m */; };
 		26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
@@ -496,15 +498,6 @@
 			files = (
 			);
 			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		26E456CE1B8421AF004BD74C /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -890,6 +883,8 @@
 		26D0940622A14D03009C7AEF /* MLXMPPConstants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLXMPPConstants.h; sourceTree = "<group>"; };
 		26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLRegisterViewController.m; sourceTree = "<group>"; };
 		26D0940B22A33E9B009C7AEF /* MLRegisterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLRegisterViewController.h; sourceTree = "<group>"; };
+		26D3476B23A54E67004D6D75 /* MLMessageParserTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMessageParserTest.m; sourceTree = "<group>"; };
+		26D437FA23A5643A00242AAA /* MLIQParserTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLIQParserTest.m; sourceTree = "<group>"; };
 		26D51CA91E2674D700141E04 /* NSData+NXOAuth2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+NXOAuth2.h"; sourceTree = "<group>"; };
 		26D51CAA1E2674D700141E04 /* NSData+NXOAuth2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+NXOAuth2.m"; sourceTree = "<group>"; };
 		26D51CAB1E2674D700141E04 /* NSString+NXOAuth2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+NXOAuth2.h"; sourceTree = "<group>"; };
@@ -1768,6 +1763,8 @@
 			children = (
 				26C836612396CB9200C9F21D /* MLIQProcessorTest.m */,
 				261E543223A1CD1700394F59 /* MLMessageProcessorTest.m */,
+				26D3476B23A54E67004D6D75 /* MLMessageParserTest.m */,
+				26D437FA23A5643A00242AAA /* MLIQParserTest.m */,
 			);
 			path = "XMPP Tests";
 			sourceTree = "<group>";
@@ -2277,7 +2274,6 @@
 				266272AE1B27DB8000C1CD49 /* Frameworks */,
 				266272AF1B27DB8000C1CD49 /* Resources */,
 				265F6BA81B7B08AC006B8EBA /* ShellScript */,
-				26E456CE1B8421AF004BD74C /* CopyFiles */,
 				2649CE501C4DE4A300CD1E80 /* Remove Build Number */,
 				2649CE511C4DE4A500CD1E80 /* Tag Git */,
 				26AA703A2146E2EB00598605 /* Embed App Extensions */,
@@ -2850,6 +2846,7 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-macOS10.10/CocoaLumberjack.framework",
 				"${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS/SAMKeychain.framework",
 				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS/SignalProtocolC.framework",
 				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-macOS/SignalProtocolObjC.framework",
@@ -2859,6 +2856,7 @@
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CocoaLumberjack.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SAMKeychain.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SignalProtocolC.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SignalProtocolObjC.framework",
@@ -3049,8 +3047,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				261E543923A1ED3E00394F59 /* MLIQProcessor.m in Sources */,
+				26D437FB23A5643A00242AAA /* MLIQParserTest.m in Sources */,
 				261E543723A1ED1E00394F59 /* MLMessageProcessor.m in Sources */,
 				26C836622396CB9200C9F21D /* MLIQProcessorTest.m in Sources */,
+				26D3476C23A54E67004D6D75 /* MLMessageParserTest.m in Sources */,
 				261E543823A1ED1E00394F59 /* MLPresenceProcessor.m in Sources */,
 				261E543323A1CD1700394F59 /* MLMessageProcessorTest.m in Sources */,
 			);
@@ -3671,6 +3671,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				SDKROOT = iphoneos;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Monal.app/Monal";
 			};
 			name = Debug;

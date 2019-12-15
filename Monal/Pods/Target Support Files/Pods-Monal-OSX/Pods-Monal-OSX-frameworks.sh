@@ -143,6 +143,7 @@ strip_invalid_archs() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-macOS10.10/CocoaLumberjack.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS/SAMKeychain.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS/SignalProtocolC.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-macOS/SignalProtocolObjC.framework"
@@ -151,6 +152,7 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_dsym "${PODS_ROOT}/Sparkle/Sparkle.framework.dSYM"
 fi
 if [[ "$CONFIGURATION" == "Adhoc" ]]; then
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-macOS10.10/CocoaLumberjack.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS/SAMKeychain.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS/SignalProtocolC.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-macOS/SignalProtocolObjC.framework"
@@ -159,6 +161,7 @@ if [[ "$CONFIGURATION" == "Adhoc" ]]; then
   install_dsym "${PODS_ROOT}/Sparkle/Sparkle.framework.dSYM"
 fi
 if [[ "$CONFIGURATION" == "AppStore" ]]; then
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-macOS10.10/CocoaLumberjack.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS/SAMKeychain.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS/SignalProtocolC.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-macOS/SignalProtocolObjC.framework"

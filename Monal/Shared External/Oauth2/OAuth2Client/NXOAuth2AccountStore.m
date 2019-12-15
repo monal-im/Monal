@@ -13,9 +13,9 @@
 
 
 
-#ifndef TARGET_IS_EXTENSION
+#if TARGET_IS_EXTENSION
 
-#ifndef TARGET_OS_MAC
+#if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
 #else
 #import <Cocoa/Cocoa.h>

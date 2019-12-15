@@ -18,12 +18,10 @@
 
 #import "NXOAuth2.h"
 
-#import <Fabric/Fabric.h>
-#import <Crashlytics/Crashlytics.h>
+@import Fabric;
+@import Crashlytics;
 
 #import "DataLayer.h"
-
-
 
 
 @interface AppDelegate ()
@@ -41,16 +39,21 @@
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
-  
-
-    [DDLog addLogger:[DDASLLogger sharedInstance]];
-    [DDLog addLogger:[DDTTYLogger sharedInstance]];
+    
+    if (@available(iOS 10.12, *)) {
+        [DDLog addLogger:[DDOSLogger sharedInstance]];
+    } else {
+        [DDLog addLogger:[DDASLLogger sharedInstance]];
+        [DDLog addLogger:[DDTTYLogger sharedInstance]];
+    }
 #ifdef  DEBUG
+    
     self.fileLogger = [[DDFileLogger alloc] init];
     self.fileLogger.rollingFrequency = 60 * 60 * 24; // 24 hour rolling
     self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
     self.fileLogger.maximumFileSize=1024 * 500;
     [DDLog addLogger:self.fileLogger];
+    
 #endif
     
     [[MLXMPPManager sharedInstance] connectIfNecessary];
@@ -67,13 +70,7 @@
                                                                name: NSWorkspaceDidWakeNotification object: NULL];
    
     [[NSAppleEventManager sharedAppleEventManager] setEventHandler:self andSelector:@selector(handleURLEvent:withReplyEvent:) forEventClass:kInternetEventClass andEventID:kAEGetURL];
-    
-    //Dropbox
-    DBSession *dbSession = [[DBSession alloc]
-                            initWithAppKey:@"a134q2ecj1hqa59"
-                            appSecret:@"vqsf5vt6guedlrs"
-                            root:kDBRootAppFolder];
-    [DBSession setSharedSession:dbSession];
+
 
 
     NSActivityOptions options = NSActivityUserInitiatedAllowingIdleSystemSleep;
@@ -204,7 +201,8 @@
                     if(xmppAccount) {
                         NSMenuItem *item =[template copy];
                         
-                        item.title=xmppAccount.fulluser;
+                        item.title=xmppAccount.connectionProperties.identity.jid
+                        ;
                         item.tag=3000+accountId.integerValue;
                         
                         [self.encryptionKeys.submenu addItem:item];
@@ -224,7 +222,7 @@
                     if(xmppAccount) {
                         NSMenuItem *item =[template copy];
                         
-                        item.title=xmppAccount.server;
+                        item.title=xmppAccount.connectionProperties.server.host;
                         item.tag=1000+accountId.integerValue;
                         
                         [self.serverDetails.submenu addItem:item];
@@ -245,7 +243,7 @@
                         if(xmppAccount) {
                             NSMenuItem *item =[template copy];
                             
-                            item.title=xmppAccount.server;
+                            item.title=xmppAccount.connectionProperties.server.host;
                             item.tag=2000+accountId.integerValue;
                             
                             [self.mamPrefs.submenu addItem:item];

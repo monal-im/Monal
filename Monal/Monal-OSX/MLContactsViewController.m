@@ -488,10 +488,10 @@
                 while(rowCounter<[self.contactsTable numberOfChildrenOfItem:item]) {
                     id childObject = [self outlineView:self.contactsTable child:rowCounter ofItem:item];
                     if([childObject isKindOfClass:[NSDictionary class]]) {
-                        NSDictionary *row= (NSDictionary *) childObject;
+                        MLContact *row= (MLContact *) childObject;
                         
-                        if([[row objectForKey:kContactName] caseInsensitiveCompare:self.chatViewController.contact.contactDisplayName] ==NSOrderedSame &&
-                           [[row objectForKey:kAccountID]  integerValue]==[self.chatViewController.contact.accountId integerValue] )
+                        if([row.contactJid caseInsensitiveCompare:self.chatViewController.contact.contactJid] ==NSOrderedSame &&
+                           [row.accountId  integerValue]==[self.chatViewController.contact.accountId integerValue] )
                         {
                             NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:rowCounter+group+offset];
                             dispatch_async(dispatch_get_main_queue(), ^{
@@ -506,9 +506,9 @@
                 }
                 
             } else  {
-                NSDictionary *row=item;
-                  if([[row objectForKey:kContactName] caseInsensitiveCompare:self.chatViewController.contact.contactDisplayName] ==NSOrderedSame &&
-                          [[row objectForKey:kAccountID]  integerValue]==[self.chatViewController.contact.accountId integerValue] )
+                MLContact *row=(MLContact *)item;
+                  if([row.contactJid caseInsensitiveCompare:self.chatViewController.contact.contactJid] ==NSOrderedSame &&
+                          [row.accountId  integerValue]==[self.chatViewController.contact.accountId integerValue] )
                 {
                     NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:group+offset];
                     [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];

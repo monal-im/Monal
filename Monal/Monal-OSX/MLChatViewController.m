@@ -310,63 +310,41 @@
 -(void) handleNewMessage:(NSNotification *)notification
 {
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
-    MLMessage *contact = [notification.userInfo objectForKey:@"message"];
+    MLMessage *message = [notification.userInfo objectForKey:@"message"];
+    if(!message) {
+        DDLogError(@"Notification without message");
+    }
     
     if([[notification.userInfo objectForKey:kMessageType] isEqualToString:kMessageTypeStatus])
     {
-//        NSMutableDictionary *mutableContact = [self.contactDic mutableCopy];
-//        [mutableContact setObject:[notification.userInfo objectForKey:@"muc_subject"]  forKey:@"muc_subject"];
-//        self.contactDic= [mutableContact copy];
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            [self updateWindowForContact:self.contactDic];
-//
-//        });
+        //        NSMutableDictionary *mutableContact = [self.contactDic mutableCopy];
+        //        [mutableContact setObject:[notification.userInfo objectForKey:@"muc_subject"]  forKey:@"muc_subject"];
+        //        self.contactDic= [mutableContact copy];
+        //        dispatch_async(dispatch_get_main_queue(), ^{
+        //            [self updateWindowForContact:self.contactDic];
+        //
+        //        });
         
     }
     
-    NSNumber *shouldRefresh =[notification.userInfo objectForKey:@"shouldRefresh"];
-    if (shouldRefresh.boolValue) {
-        dispatch_async(dispatch_get_main_queue(),
-                       ^{
-                           [self refreshData];
-                       });
-        return;
-    }
-    
-    
-    if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:self.contact.accountId]
-       &&( ( [[notification.userInfo objectForKey:@"from"] isEqualToString:self.contact.contactJid]) || ([[notification.userInfo objectForKey:@"to"] isEqualToString:self.contact.contactJid] ))
+    if([message.accountId isEqualToString:self.contact.accountId]
+       &&( ( [message.actualFrom isEqualToString:self.contact.contactJid])
+          || ([message.to isEqualToString:self.contact.contactJid] ))
        )
     {
         dispatch_async(dispatch_get_main_queue(),
                        ^{
-                          
-                           NSDictionary* userInfo;
-                           if([[notification.userInfo objectForKey:@"to"] isEqualToString:self.contact.contactJid])
-                           {
-                               userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
-                                            @"message": [notification.userInfo objectForKey:@"messageText"],
-                                             @"messageid": [notification.userInfo objectForKey:@"messageid"],
-                                            @"thetime": [self currentGMTTime],   @"delivered":@YES};
-                               
-                           } else  {
-                               userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
-                                            @"message": [notification.userInfo objectForKey:@"messageText"],
-                                             @"messageid": [notification.userInfo objectForKey:@"messageid"],
-                                            @"thetime": [self currentGMTTime]
-                                            };
-                           }
-                           
-                           [self.messageList addObject:[userInfo mutableCopy]];
-                         
-                           if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
-                               [self refreshData];
-                               [self markAsRead];
-                           }
-                       });
+            
+            [self.messageList addObject:message];
+            
+            if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
+                [self refreshData];
+                [self markAsRead];
+            }
+        });
     }
-
-  
+    
+    
     
     
 }
@@ -455,25 +433,26 @@
     if(result){
         DDLogVerbose(@"added message %@, %@ %@", message, messageId, [self currentGMTTime]);
         
-        NSDictionary* userInfo = @{@"af": self.jid,
-                                   @"message": message ,
-                                   @"thetime": [self currentGMTTime],
-                                   kDelivered:@YES,
-                                   @"messageid": messageId,
-                                   kMessageType: messageType,
-                                   @"encrypted":[NSNumber numberWithBool:self.encryptChat]
-                                   };
+          MLMessage *messageObj = [[MLMessage alloc] init];
+                      messageObj.actualFrom=self.jid;
+                      messageObj.timestamp=[NSDate date];
+                      messageObj.hasBeenSent=YES;
+                      messageObj.messageId=messageId;
+                      messageObj.encrypted=self.encryptChat;
+                      messageObj.messageType=messageType;
+                      messageObj.messageText=message;
         
         dispatch_async(dispatch_get_main_queue(),
                        ^{
                            
                            NSString *lastMessageId;
                            if(self.messageList.count>0) {
-                               lastMessageId=[[self.messageList objectAtIndex:self.messageList.count-1] objectForKey:@"messageid"];
+                               MLMessage *lastMessage= [self.messageList objectAtIndex:self.messageList.count-1];
+                               lastMessageId=lastMessage.messageId;
                            }
-                           NSString *nextMessageId = [userInfo objectForKey:kMessageId];
+                           NSString *nextMessageId = messageObj.messageId;
                            if(![lastMessageId isEqualToString:nextMessageId]) {
-                               [self.messageList addObject:[userInfo mutableCopy]];
+                               [self.messageList addObject:messageObj];
                                [self.chatTable reloadData];
                            }
                            
@@ -524,10 +503,10 @@
     dispatch_async(dispatch_get_main_queue(),
                    ^{
                        int row=0;
-                       for(NSMutableDictionary *rowDic in self.messageList)
+                       for(MLMessage *message in self.messageList)
                        {
-                           if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
-                               [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:kDelivered];
+                           if([message.messageId isEqualToString:messageId]) {
+                               message.hasBeenSent=YES;
                               
                                [self.chatTable beginUpdates];
                                NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:row] ;
@@ -595,7 +574,7 @@
          CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)ext, NULL);
          NSString *mimeType = (__bridge_transfer NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
          if(!mimeType) mimeType=@"application/octet-stream";
-         CFRelease(UTI);
+     //    CFRelease(UTI);
          if(attachmentData)
          {
              [self uploadFile:filename andType:mimeType withData:attachmentData];
@@ -667,8 +646,8 @@
             
             NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
             if([messageArray count]>0) {
-                NSDictionary *dic= [messageArray objectAtIndex:0];
-                [self sendMessage:[dic objectForKey:@"message"] andMessageID:[dic objectForKey:@"messageid"] isUpload:NO];
+                MLMessage *dic= [messageArray objectAtIndex:0];
+                [self sendMessage:dic.messageText andMessageID:dic.messageId isUpload:NO];
             }
             
         }

@@ -289,6 +289,12 @@
 
 -(void) rosterResult:(ParseIq *) iqNode {
     
+    if(iqNode.from != self.connection.identity.jid
+       || iqNode.from != self.connection.server.host ){
+        DDLogError(@"invalid sender for roster. Rejecintg. ");
+        return;
+    }
+    
     for(NSDictionary* contact in iqNode.items)
     {
         if(iqNode.rosterVersion) {

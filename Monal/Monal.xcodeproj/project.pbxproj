@@ -424,6 +424,10 @@
 		26D4388E23A5E9EE00242AAA /* DataLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A70FBF255D004DB939 /* DataLayer.m */; };
 		26D4388F23A5E9F800242AAA /* MLSignalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 263AFDFB209B3B35007F9CEE /* MLSignalStore.m */; };
 		26D4389023A5E9FB00242AAA /* MLMetaInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 26020B3621B957A0009A9735 /* MLMetaInfo.m */; };
+		26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = 262D9EAB17924532009292B4 /* MLConstants.h */; };
+		26D4389223A5EB6C00242AAA /* MLConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = 262D9EAB17924532009292B4 /* MLConstants.h */; };
+		26D4389323A5EC0900242AAA /* monalxmppmac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26D4385423A5E60200242AAA /* monalxmppmac.framework */; };
+		26D4389423A5EC0900242AAA /* monalxmppmac.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26D4385423A5E60200242AAA /* monalxmppmac.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		26D56EE720B59FB000BF7C97 /* MLTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D56EE620B59FB000BF7C97 /* MLTextView.m */; };
 		26D59D9020711969006F1DEE /* MLEditGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D8F20711969006F1DEE /* MLEditGroupViewController.m */; };
 		26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
@@ -510,6 +514,13 @@
 			remoteGlobalIDString = 26CC579123A0867400ABB92A;
 			remoteInfo = monalxmpp;
 		};
+		26D4389523A5EC0900242AAA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 26D4385323A5E60200242AAA;
+			remoteInfo = monalxmppmac;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -552,6 +563,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				26D4389423A5EC0900242AAA /* monalxmppmac.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1123,6 +1135,7 @@
 				2602837F1D8DD56B001DD6B8 /* Quartz.framework in Frameworks */,
 				2602837D1D8DD30E001DD6B8 /* QuickLook.framework in Frameworks */,
 				262FE9361D821CD000A70506 /* WebKit.framework in Frameworks */,
+				26D4389323A5EC0900242AAA /* monalxmppmac.framework in Frameworks */,
 				269574E21C37307300544A60 /* libsqlite3.tbd in Frameworks */,
 				269574E01C37301600544A60 /* libz.tbd in Frameworks */,
 				269574DE1C372FD200544A60 /* Security.framework in Frameworks */,
@@ -2258,6 +2271,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				26CC579623A0867400ABB92A /* monalxmpp.h in Headers */,
+				26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2266,6 +2280,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				26D4385823A5E60200242AAA /* monalxmppmac.h in Headers */,
+				26D4389223A5EB6C00242AAA /* MLConstants.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2377,6 +2392,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				26D4389623A5EC0900242AAA /* PBXTargetDependency */,
 			);
 			name = "Monal-OSX";
 			productName = "Monal-OSX";
@@ -3459,6 +3475,11 @@
 			isa = PBXTargetDependency;
 			target = 26CC579123A0867400ABB92A /* monalxmpp */;
 			targetProxy = 26CC57E923A08F3F00ABB92A /* PBXContainerItemProxy */;
+		};
+		26D4389623A5EC0900242AAA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 26D4385323A5E60200242AAA /* monalxmppmac */;
+			targetProxy = 26D4389523A5EC0900242AAA /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

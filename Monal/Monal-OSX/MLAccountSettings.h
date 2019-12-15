@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "monalxmppmac.h"
 #import "MASPreferencesViewController.h"
 
 @interface MLAccountSettings : NSViewController <MASPreferencesViewController, NSTableViewDataSource, NSTableViewDelegate>

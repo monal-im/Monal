@@ -426,7 +426,6 @@
 		26D4383823A5D90D00242AAA /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
 		26D4383923A5D90D00242AAA /* ParseEnabled.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDF61A8072D5000E6331 /* ParseEnabled.m */; };
 		26D4383A23A5D90D00242AAA /* MLPush.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C01306233025DA001D411D /* MLPush.m */; };
-		26D4383D23A5D90D00242AAA /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC355146D687D83135E2BBF7 /* Pods_monalxmpp.framework */; };
 		26D4384523A5DC4E00242AAA /* libjrtplib-static-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 26049A501B7314F400D11866 /* libjrtplib-static-OSX.a */; };
 		26D56EE720B59FB000BF7C97 /* MLTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D56EE620B59FB000BF7C97 /* MLTextView.m */; };
 		26D59D9020711969006F1DEE /* MLEditGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D8F20711969006F1DEE /* MLEditGroupViewController.m */; };
@@ -1178,7 +1177,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26D4383D23A5D90D00242AAA /* Pods_monalxmpp.framework in Frameworks */,
 				0733B734D4A6C76BEE9B944A /* Pods_monalxmppmac.framework in Frameworks */,
 				26D4384523A5DC4E00242AAA /* libjrtplib-static-OSX.a in Frameworks */,
 			);

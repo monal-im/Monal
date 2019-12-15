@@ -352,23 +352,23 @@
 
 -(void) refreshMessage:(NSNotification *)notification
 {
-    NSDictionary *dic =notification.userInfo;
-    [self setMessageId:[dic objectForKey:kMessageId]  received:YES];
+    MLMessage *message =[notification.userInfo objectForKey:@"message"];
+    [self setMessageId:message.messageId  received:YES];
     [self endProgressUpdate];
 }
 
 
 -(void) handleSendFailedMessage:(NSNotification *)notification
 {
-    NSDictionary *dic =notification.userInfo;
-    [self setMessageId:[dic objectForKey:kMessageId]  delivered:NO];
+    MLMessage *message =[notification.userInfo objectForKey:@"message"];
+    [self setMessageId:message.messageId   delivered:NO];
      [self endProgressUpdate];
 }
 
 -(void) handleSentMessage:(NSNotification *)notification
 {
-    NSDictionary *dic =notification.userInfo;
-    [self setMessageId:[dic objectForKey:kMessageId]  delivered:YES];
+    MLMessage *message =[notification.userInfo objectForKey:@"message"];
+    [self setMessageId:message.messageId  delivered:YES];
     
     dispatch_async( dispatch_get_main_queue(), ^{
         self.progressIndicator.doubleValue=100;
@@ -480,11 +480,11 @@
     dispatch_async(dispatch_get_main_queue(),
                    ^{
                        int row=0;
-                       for(NSMutableDictionary *rowDic in self.messageList)
+                       for(MLMessage *rowDic in self.messageList)
                        {
-                           if([[rowDic objectForKey:@"messageid"] isEqualToString:messageId]) {
+                           if([rowDic.messageId isEqualToString:messageId]) {
                                
-                               [rowDic setObject:[NSNumber numberWithBool:delivered] forKey:kReceived];
+                               rowDic.hasBeenReceived=YES;
                                [self.chatTable beginUpdates];
                                NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:row] ;
                                NSIndexSet *columnIndexSet =[[NSIndexSet alloc] initWithIndex:0] ;

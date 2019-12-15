@@ -18,6 +18,10 @@
 #import "MLMAMPref.h"
 
 #import "MLKeyViewController.h"
+#import "DataLayer.h"
+
+#import "MLXMPPManager.h"
+
 
 #define konlineSection 1
 #define kofflineSection 2

@@ -8,6 +8,8 @@
 
 #import <Cocoa/Cocoa.h>
 #import "MLTextView.h"
+#import "MLContact.h"
+#import "MLMessage.h"
 @import Quartz;
 @import QuickLook;
 
@@ -20,11 +22,16 @@
 @property (nonatomic, strong) IBOutlet NSScrollView *tableScroll;
 @property (nonatomic, strong) IBOutlet NSTableView *chatTable;
 @property (nonatomic, weak) IBOutlet NSProgressIndicator *progressIndicator;
-@property (nonatomic, strong) NSDictionary *contactDic;
-@property (nonatomic, strong, readonly) NSString *contactName;
+@property (nonatomic, strong) MLContact *contact; 
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *inputContainerHeight;
 
 @property (nonatomic, assign, readonly) BOOL encryptChat;
+
+/**
+ full own username with domain e.g. aa@gmail.com
+ */
+@property (nonatomic, strong) NSString* jid;
+
 
 -(IBAction)sendText:(id)sender;
 -(IBAction)emojiPicker:(id)sender;

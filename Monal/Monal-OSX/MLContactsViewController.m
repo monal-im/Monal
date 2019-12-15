@@ -458,8 +458,8 @@
         [self.activeChat enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop)
          {
              NSDictionary *row = (NSDictionary *) obj;
-             if([[row objectForKey:kContactName] caseInsensitiveCompare:[self.chatViewController.contactDic objectForKey:kContactName] ]==NSOrderedSame &&
-                [[row objectForKey:kAccountID]  integerValue]==[[self.chatViewController.contactDic objectForKey:kAccountID] integerValue] )
+             if([[row objectForKey:kContactName] caseInsensitiveCompare:self.chatViewController.contact.contactDisplayName] ==NSOrderedSame &&
+                [[row objectForKey:kAccountID]  integerValue]==[self.chatViewController.contact.accountId integerValue] )
              {
                  NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:idx];
                  [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];
@@ -469,7 +469,7 @@
         return;
     }
     
-    if(self.chatViewController.contactDic)
+    if(self.chatViewController.contact)
     {
         NSInteger offset=0;
        
@@ -488,14 +488,14 @@
                     if([childObject isKindOfClass:[NSDictionary class]]) {
                         NSDictionary *row= (NSDictionary *) childObject;
                         
-                        if([[row objectForKey:kContactName] caseInsensitiveCompare:[self.chatViewController.contactDic objectForKey:kContactName] ]==NSOrderedSame &&
-                           [[row objectForKey:kAccountID]  integerValue]==[[self.chatViewController.contactDic objectForKey:kAccountID] integerValue] )
+                        if([[row objectForKey:kContactName] caseInsensitiveCompare:self.chatViewController.contact.contactDisplayName] ==NSOrderedSame &&
+                           [[row objectForKey:kAccountID]  integerValue]==[self.chatViewController.contact.accountId integerValue] )
                         {
                             NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:rowCounter+group+offset];
                             dispatch_async(dispatch_get_main_queue(), ^{
-                                  [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];
+                                [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];
                             });
-                          
+                            
                             break;
                         }
                         
@@ -505,8 +505,8 @@
                 
             } else  {
                 NSDictionary *row=item;
-                if([[row objectForKey:kContactName] caseInsensitiveCompare:[self.chatViewController.contactDic objectForKey:kContactName] ]==NSOrderedSame &&
-                   [[row objectForKey:kAccountID]  integerValue]==[[self.chatViewController.contactDic objectForKey:kAccountID] integerValue] )
+                  if([[row objectForKey:kContactName] caseInsensitiveCompare:self.chatViewController.contact.contactDisplayName] ==NSOrderedSame &&
+                          [[row objectForKey:kAccountID]  integerValue]==[self.chatViewController.contact.accountId integerValue] )
                 {
                     NSIndexSet *indexSet = [NSIndexSet indexSetWithIndex:group+offset];
                     [self.contactsTable selectRowIndexes:indexSet byExtendingSelection:NO];
@@ -1504,7 +1504,7 @@
         
         MLKeyViewController *keys = (MLKeyViewController *)segue.destinationController;
         keys.ownKeys=YES;
-        keys.contact =@{@"buddy_name":xmppAccount.fulluser, @"account_id":[NSNumber numberWithInt:accountNo]};
+        keys.contact =@{@"buddy_name":xmppAccount.connectionProperties.identity.jid, @"account_id":[NSNumber numberWithInt:accountNo]};
     }
     
     if([segue.identifier isEqualToString:@"CallScreen"])

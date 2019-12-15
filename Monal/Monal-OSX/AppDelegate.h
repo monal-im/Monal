@@ -7,11 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-
-
-#import "DDASLLogger.h"
-#import "DDFileLogger.h"
-#import "DDTTYLogger.h"
+@import CocoaLumberjack;
 
 @interface AppDelegate : NSObject <NSApplicationDelegate, NSMenuDelegate>
 

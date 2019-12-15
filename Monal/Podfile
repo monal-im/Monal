@@ -95,6 +95,12 @@ target 'Monal-OSX' do
 #pod 'MASPreferences'
 pod 'SAMKeychain'
 #pod 'NXOAuth2Client', '~> 1.2.8'
+pod 'SAMKeychain'
+pod 'TPCircularBuffer'
+pod 'CocoaLumberjack'
+pod 'SignalProtocolObjC'
+pod 'SignalProtocolC'
+pod 'OpenSSL-Universal', '1.0.2.18'
 
 pod 'Sparkle'
 

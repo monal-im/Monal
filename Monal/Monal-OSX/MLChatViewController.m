@@ -15,14 +15,12 @@
 #import "MLImageManager.h"
 #import "MLPreviewObject.h"
 
-
-
 #import "MLMainWindow.h"
 #import "MLLinkViewCell.h"
 
 @import Quartz;
 
-@interface MLChatViewController () <DBRestClientDelegate>
+@interface MLChatViewController ()
 
 @property (nonatomic, strong) NSMutableArray *messageList;
 
@@ -33,10 +31,6 @@
 @property (nonatomic, assign) NSInteger thismonth;
 @property (nonatomic, assign) NSInteger thisday;
 
-
-@property (nonatomic, strong) NSString *accountNo;
-@property (nonatomic, strong) NSString *contactName;
-@property (nonatomic, strong) NSString *jid;
 @property (nonatomic, assign) BOOL isMUC;
 
 @property (nonatomic, strong) QLPreviewPanel *QLPreview;
@@ -81,14 +75,14 @@
 -(void) viewWillAppear
 {
     [super viewWillAppear];
-    if(!self.contactName) {
+    if(!self.contact) {
         self.inputBar.hidden=YES;
         self.tableScroll.hidden=YES;
         return;
     }
  
     [self refreshData];
-    [self updateWindowForContact:self.contactDic];
+    [self updateWindowForContact:self.contact];
     [self updateInputViewSize];
 }
 
@@ -111,7 +105,7 @@
 
 -(void) refreshData
 {
-    if(!self.contactName) {
+    if(!self.contact) {
         self.inputBar.hidden=YES;
         self.tableScroll.hidden=YES;
         return;
@@ -119,33 +113,31 @@
     
     self.inputBar.hidden=NO;
     self.tableScroll.hidden=NO;
-    self.messageList =[[DataLayer sharedInstance] messageHistory:self.contactName forAccount: self.accountNo];
+    self.messageList =[[DataLayer sharedInstance] messageHistory:self.contact.contactJid forAccount: self.contact.accountId];
     if(!self.messageList)  {
         self.messageList = [[NSMutableArray alloc] init];
     }
     [self.chatTable reloadData];
     [self scrollToBottom];
     
-    self.encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:self.contactName andAccountNo:self.accountNo];
+    self.encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid  andAccountNo: self.contact.accountId];
     
 }
 
--(void) showConversationForContact:(NSDictionary *) contact
+-(void) showConversationForContact:(MLContact *) contact
 {
-    if([self.accountNo isEqualToString:[NSString stringWithFormat:@"%@",[contact objectForKey:kAccountID]]] && [self.contactName isEqualToString: [contact objectForKey:kContactName]])
+    if([ self.contact.accountId isEqualToString:contact.accountId]
+       && [self.contact.contactJid isEqualToString: contact.contactJid])
     {
         return;
     }
   
-//    [MLNotificationManager sharedInstance].currentAccountNo=self.accountNo;
-//    [MLNotificationManager sharedInstance].currentContact=self.contactName;
-
-    self.accountNo = [NSString stringWithFormat:@"%@",[contact objectForKey:kAccountID]];
-    self.contactName = [contact objectForKey:kContactName];
-    self.contactDic= contact;
-     self.isMUC = [[DataLayer sharedInstance] isBuddyMuc:self.contactName forAccount:self.accountNo];
-   
-    NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.accountNo];
+//    [MLNotificationManager sharedInstance].currentAccountNo=self.contact.accountId;
+//    [MLNotificationManager sharedInstance].currentContact=self.contact.contactJid;
+    self.contact= contact;
+    self.isMUC = contact.isGroup;
+    
+    NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.contact.accountId];
     if([accountVals count]>0)
     {
         self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:kUsername], [[accountVals objectAtIndex:0] objectForKey:kDomain]];
@@ -159,8 +151,8 @@
     [self synchChat];
     
 #ifndef DISABLE_OMEMO
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    [xmppAccount queryOMEMODevicesFrom:self.contactName];
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+    [xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
 #endif
 }
 
@@ -168,14 +160,12 @@
 
 -(void) synchChat
 {
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-      xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
         if(xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
             if(self.messageList.count==0) {
                 [xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
             }
         }
-    });
 }
 
 
@@ -197,7 +187,7 @@
     [[NSApplication sharedApplication] orderFrontCharacterPalette:nil];
 }
 
--(void) updateWindowForContact:(NSDictionary *)contact
+-(void) updateWindowForContact:(MLContact *)contact
 {
     NSMutableDictionary *dic = [contact mutableCopy];
     [dic setObject:[NSNumber numberWithBool:self.encryptChat] forKey:@"encrypt"];
@@ -205,10 +195,7 @@
     MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
     [window updateCurrentContact:dic];
     
-    NSString *fullName= (NSString *) [contact objectForKey:kFullName];
-    if(!fullName) fullName =(NSString *) [contact objectForKey:kContactName];
-    
-    self.chatTable.accessibilityLabel=[NSString stringWithFormat:@"Chat with %@", fullName];
+    self.chatTable.accessibilityLabel=[NSString stringWithFormat:@"Chat with %@", contact.contactDisplayName];
 }
 
 
@@ -220,44 +207,6 @@
     });
 }
 
-#pragma mark - Dropbox upload and delegate
-
-- (void) uploadImageToDropBox:(NSData *) imageData {
-    
-    NSString *fileName = [NSString stringWithFormat:@"%@.png",[NSUUID UUID].UUIDString];
-    NSString *tempDir = NSTemporaryDirectory();
-    NSString *imagePath = [tempDir stringByAppendingPathComponent:fileName];
-    [imageData writeToFile:imagePath atomically:YES];
-    
-    [self.restClient uploadFile:fileName toPath:@"/" withParentRev:nil fromPath:imagePath];
-}
-
-- (void)restClient:(DBRestClient *)client uploadedFile:(NSString *)destPath
-              from:(NSString *)srcPath metadata:(DBMetadata *)metadata {
-    DDLogVerbose(@"File uploaded successfully to dropbox path: %@", metadata.path);
-    [self.restClient loadSharableLinkForFile:metadata.path];
-}
-
-- (void)restClient:(DBRestClient *)client uploadFileFailedWithError:(NSError *)error {
-    DDLogVerbose(@"File upload to dropbox failed with error: %@", error);
-}
-
-- (void)restClient:(DBRestClient*)client uploadProgress:(CGFloat)progress
-           forFile:(NSString*)destPath from:(NSString*)srcPat
-{
-    self.progressIndicator.doubleValue=progress*100;
-}
-
-- (void)restClient:(DBRestClient*)restClient loadedSharableLink:(NSString*)link
-           forFile:(NSString*)path{
-    self.messageBox.string=link;
-    [self endProgressUpdate];
-}
-
-- (void)restClient:(DBRestClient*)restClient loadSharableLinkFailedWithError:(NSError*)error{
-   [self endProgressUpdate];
-    DDLogVerbose(@"Failed to get Dropbox link with error: %@", error);
-}
 
 #pragma mark uploading attachments
 
@@ -278,13 +227,8 @@
 
 -(void) uploadFile:(NSString *)filename andType: (NSString*) mimeType withData:(NSData *) data
 {
-    if ([DBSession sharedSession].isLinked && !self.restClient) {
-        self.restClient = [[DBRestClient alloc] initWithSession:[DBSession sharedSession]];
-        self.restClient.delegate = self;
-    }
-    
-    xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    if(!account.supportsHTTPUpload && !self.restClient)
+    xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+    if(!account.connectionProperties.supportsHTTPUpload)
     {
         [self showNoUploadAlert];
         
@@ -293,36 +237,31 @@
     
     self.progressIndicator.doubleValue=0;
     self.progressIndicator.hidden=NO;
-    if(self.restClient)
-    {
-        [self uploadImageToDropBox:data];
-    }
-    else {
+    
+    // start http upload XMPP
+    self.progressIndicator.doubleValue=50;
+    [[MLXMPPManager sharedInstance] httpUploadData:data withFilename:filename andType:mimeType                                                 toContact:self.contact.contactJid onAccount:self.contact.accountId withCompletionHandler:^(NSString *url, NSError *error) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self endProgressUpdate];
+            if(url) {
+                self.messageBox.string= url;
+                [self sendTextWithUpload:YES];
+            }
+            else  {
+                NSAlert *userAddAlert = [[NSAlert alloc] init];
+                userAddAlert.messageText = @"There was an error uploading the file to the server.";
+                userAddAlert.informativeText =[NSString stringWithFormat:@"%@", error.localizedDescription];
+                userAddAlert.alertStyle=NSInformationalAlertStyle;
+                [userAddAlert addButtonWithTitle:@"Close"];
+                
+                [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
+                    [self dismissController:self];
+                }];
+            }
+        });
         
-        // start http upload XMPP
-        self.progressIndicator.doubleValue=50;
-        [[MLXMPPManager sharedInstance] httpUploadData:data withFilename:filename andType:mimeType                                                 toContact:self.contactName onAccount:self.accountNo withCompletionHandler:^(NSString *url, NSError *error) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self endProgressUpdate];
-                if(url) {
-                    self.messageBox.string= url;
-                    [self sendTextWithUpload:YES];
-                }
-                else  {
-                    NSAlert *userAddAlert = [[NSAlert alloc] init];
-                    userAddAlert.messageText = @"There was an error uploading the file to the server.";
-                    userAddAlert.informativeText =[NSString stringWithFormat:@"%@", error.localizedDescription];
-                    userAddAlert.alertStyle=NSInformationalAlertStyle;
-                    [userAddAlert addButtonWithTitle:@"Close"];
-                    
-                    [userAddAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
-                        [self dismissController:self];
-                    }];
-                }
-            });
-            
-        }];
-    }
+    }];
+    
 }
 
 -(void) uploadFile:(NSURL *) fileURL
@@ -343,14 +282,8 @@
 
 -(IBAction)attach:(id)sender
 {
-    
-    if ([DBSession sharedSession].isLinked && !self.restClient) {
-        self.restClient = [[DBRestClient alloc] initWithSession:[DBSession sharedSession]];
-        self.restClient.delegate = self;
-    }
- 
-    xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    if(!account.supportsHTTPUpload && !self.restClient)
+    xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+    if(!account.connectionProperties.supportsHTTPUpload )
     {
         [self showNoUploadAlert];
     }
@@ -377,16 +310,17 @@
 -(void) handleNewMessage:(NSNotification *)notification
 {
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
+    MLMessage *contact = [notification.userInfo objectForKey:@"message"];
     
     if([[notification.userInfo objectForKey:kMessageType] isEqualToString:kMessageTypeStatus])
     {
-        NSMutableDictionary *mutableContact = [self.contactDic mutableCopy];
-        [mutableContact setObject:[notification.userInfo objectForKey:@"muc_subject"]  forKey:@"muc_subject"];
-        self.contactDic= [mutableContact copy];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self updateWindowForContact:self.contactDic];
-            
-        });
+//        NSMutableDictionary *mutableContact = [self.contactDic mutableCopy];
+//        [mutableContact setObject:[notification.userInfo objectForKey:@"muc_subject"]  forKey:@"muc_subject"];
+//        self.contactDic= [mutableContact copy];
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            [self updateWindowForContact:self.contactDic];
+//
+//        });
         
     }
     
@@ -400,15 +334,15 @@
     }
     
     
-    if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:_accountNo]
-       &&( ( [[notification.userInfo objectForKey:@"from"] isEqualToString:_contactName]) || ([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName] ))
+    if([[notification.userInfo objectForKey:@"accountNo"] isEqualToString:self.contact.accountId]
+       &&( ( [[notification.userInfo objectForKey:@"from"] isEqualToString:self.contact.contactJid]) || ([[notification.userInfo objectForKey:@"to"] isEqualToString:self.contact.contactJid] ))
        )
     {
         dispatch_async(dispatch_get_main_queue(),
                        ^{
                           
                            NSDictionary* userInfo;
-                           if([[notification.userInfo objectForKey:@"to"] isEqualToString:_contactName])
+                           if([[notification.userInfo objectForKey:@"to"] isEqualToString:self.contact.contactJid])
                            {
                                userInfo = @{@"af": [notification.userInfo objectForKey:@"actuallyfrom"],
                                             @"message": [notification.userInfo objectForKey:@"messageText"],
@@ -471,7 +405,7 @@
 -(void) markAsRead
 {
     //mark as read
-    [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
+    [[DataLayer sharedInstance] markAsReadBuddy:self.contact.contactJid forAccount:self.contact.accountId];
     
     [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber * result) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -494,13 +428,13 @@
     
     // ask if disabling encryption
     if(self.encryptChat==YES) {
-        [[DataLayer sharedInstance] disableEncryptForJid:self.contactName andAccountNo:self.accountNo];
+        [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
         self.encryptButton =(NSToolbarItem *)sender;
         self.encryptButton.image = [NSImage imageNamed:@"745-unlocked"];
         self.encryptChat=NO;
     }
     else {
-        [[DataLayer sharedInstance] encryptForJid:self.contactName andAccountNo:self.accountNo];
+        [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
         self.encryptButton =(NSToolbarItem *)sender;
         self.encryptButton.image = [NSImage imageNamed:@"744-locked-selected"];
         self.encryptChat=YES; 
@@ -517,7 +451,7 @@
         return;
     }
     
-    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:[NSString stringWithFormat:@"%@",self.accountNo] withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString *messageType) {
+    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:[NSString stringWithFormat:@"%@",self.contact.accountId] withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString *messageType) {
     if(result){
         DDLogVerbose(@"added message %@, %@ %@", message, messageId, [self currentGMTTime]);
         
@@ -553,9 +487,9 @@
     }
     }];
     
-    [[DataLayer sharedInstance] isActiveBuddy:to forAccount:self.accountNo withCompletion:^(BOOL isActive) {
+    [[DataLayer sharedInstance] isActiveBuddy:to forAccount:self.contact.accountId withCompletion:^(BOOL isActive) {
         if(!isActive) {
-            [[DataLayer sharedInstance] addActiveBuddies:to forAccount:self.accountNo withCompletion:nil];
+            [[DataLayer sharedInstance] addActiveBuddies:to forAccount:self.contact.accountId withCompletion:nil];
 
         }
     }];
@@ -613,7 +547,7 @@
     DDLogVerbose(@"Sending message %@", messageText);
     NSString *newMessageID =[[NSUUID UUID] UUIDString];
     [self.progressIndicator incrementBy:25];
-    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contactName fromAccount:self.accountNo isEncrypted:self.encryptChat isMUC:self.isMUC isUpload:isUpload messageId:newMessageID
+    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.isMUC isUpload:isUpload messageId:newMessageID
      withCompletionHandler:^(BOOL success, NSString *messageId) {
          if(success)
          {
@@ -627,7 +561,7 @@
     
     //dont readd it, use the exisitng
     if(!messageID) {
-        [self addMessageto:_contactName withMessage:messageText andId:newMessageID];
+        [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID];
     }
     
 
@@ -938,7 +872,7 @@
     cell.scrollArea.accessibilityLabel=accessibility;
    
     
-   [[MLImageManager sharedInstance] getIconForContact:[messageRow objectForKey:@"af"] andAccount:self.accountNo withCompletion:^(NSImage *icon) {
+   [[MLImageManager sharedInstance] getIconForContact:[messageRow objectForKey:@"af"] andAccount:self.contact.accountId withCompletion:^(NSImage *icon) {
        cell.senderIcon.image=icon;
    }];
 

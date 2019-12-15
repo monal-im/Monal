@@ -41,6 +41,10 @@
 @property (nonatomic, strong) NSString* day;
 @property (nonatomic, strong) MLContact* contact;
 
+/**
+ full own username with domain e.g. aa@gmail.com
+ */
+@property (nonatomic, strong) NSString* jid;
 
 -(IBAction)sendMessageText:(id)sender;
 -(IBAction)attach:(id)sender;
@@ -63,10 +67,7 @@
 
 -(void) reloadTable; 
 
-/**
- full own username with domain e.g. aa@gmail.com
- */
-@property (nonatomic, strong) NSString* jid;
+
 
 
 

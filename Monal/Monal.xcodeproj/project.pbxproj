@@ -420,6 +420,10 @@
 		26D4388A23A5E73F00242AAA /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		26D4388B23A5E74500242AAA /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F7BB411115F8DB00712672 /* Reachability.m */; };
 		26D4388C23A5E74500242AAA /* EncodingTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C6C93178080730004E2E1 /* EncodingTools.m */; };
+		26D4388D23A5E9E200242AAA /* MLImageManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC411217BDE39E0031304D /* MLImageManager.m */; };
+		26D4388E23A5E9EE00242AAA /* DataLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2601D9A70FBF255D004DB939 /* DataLayer.m */; };
+		26D4388F23A5E9F800242AAA /* MLSignalStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 263AFDFB209B3B35007F9CEE /* MLSignalStore.m */; };
+		26D4389023A5E9FB00242AAA /* MLMetaInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 26020B3621B957A0009A9735 /* MLMetaInfo.m */; };
 		26D56EE720B59FB000BF7C97 /* MLTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D56EE620B59FB000BF7C97 /* MLTextView.m */; };
 		26D59D9020711969006F1DEE /* MLEditGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D8F20711969006F1DEE /* MLEditGroupViewController.m */; };
 		26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
@@ -3366,6 +3370,7 @@
 				26D4385F23A5E6DE00242AAA /* MLEncryptedPayload.m in Sources */,
 				26D4386A23A5E70200242AAA /* NXOAuth2FileStreamWrapper.m in Sources */,
 				26D4388C23A5E74500242AAA /* EncodingTools.m in Sources */,
+				26D4388E23A5E9EE00242AAA /* DataLayer.m in Sources */,
 				26D4387F23A5E73200242AAA /* ParsePresence.m in Sources */,
 				26D4387723A5E71C00242AAA /* MLPresenceProcessor.m in Sources */,
 				26D4387123A5E71600242AAA /* MLDNSLookup.m in Sources */,
@@ -3377,8 +3382,10 @@
 				26D4386F23A5E70F00242AAA /* MLMessage.m in Sources */,
 				26D4388823A5E73A00242AAA /* XMPPPresence.m in Sources */,
 				26D4387A23A5E72300242AAA /* IPAddress.m in Sources */,
+				26D4388D23A5E9E200242AAA /* MLImageManager.m in Sources */,
 				26D4387823A5E72300242AAA /* jingleCall.m in Sources */,
 				26D4388023A5E73200242AAA /* ParseMessage.m in Sources */,
+				26D4388F23A5E9F800242AAA /* MLSignalStore.m in Sources */,
 				26D4387223A5E71600242AAA /* MLXMPPServer.m in Sources */,
 				26D4388523A5E73200242AAA /* ParseResumed.m in Sources */,
 				26D4388323A5E73200242AAA /* ParseEnabled.m in Sources */,
@@ -3391,6 +3398,7 @@
 				26D4388623A5E73A00242AAA /* MLXMLNode.m in Sources */,
 				26D4387623A5E71C00242AAA /* MLIQProcessor.m in Sources */,
 				26D4388A23A5E73F00242AAA /* MLXMPPManager.m in Sources */,
+				26D4389023A5E9FB00242AAA /* MLMetaInfo.m in Sources */,
 				26D4387B23A5E73200242AAA /* ParseFailed.m in Sources */,
 				26D4388423A5E73200242AAA /* ParseA.m in Sources */,
 				26D4385E23A5E6DE00242AAA /* AESGcm.m in Sources */,

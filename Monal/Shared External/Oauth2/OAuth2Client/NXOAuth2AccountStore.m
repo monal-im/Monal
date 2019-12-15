@@ -12,8 +12,9 @@
 //
 
 
-
-#if TARGET_IS_EXTENSION
+#ifdef TARGET_IS_EXTENSION
+#import <UIKit/UIKit.h>
+#else
 
 #if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
@@ -21,8 +22,6 @@
 #import <Cocoa/Cocoa.h>
 #endif
 
-#else
-#import <UIKit/UIKit.h>
 #endif
 
 

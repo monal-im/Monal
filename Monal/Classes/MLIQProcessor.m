@@ -289,8 +289,8 @@
 
 -(void) rosterResult:(ParseIq *) iqNode {
     
-    if(iqNode.from != self.connection.identity.jid
-       || iqNode.from != self.connection.server.host ){
+    if(iqNode.from != nil
+      && iqNode.from != self.connection.identity.domain) {
         DDLogError(@"invalid sender for roster. Rejecintg. ");
         return;
     }

@@ -126,7 +126,7 @@
    // NSError *error =payload[2];
     xmpp *xmppAccount= payload.firstObject;
     
-    NSString *accountName = [NSString stringWithFormat:@"%@@%@", xmppAccount.username, xmppAccount.domain];
+    NSString *accountName = xmppAccount.connectionProperties.identity.jid; 
     
     dispatch_async(dispatch_get_main_queue(), ^{
         NSUserNotification *alert =[[NSUserNotification alloc] init];
@@ -273,8 +273,8 @@
         
     }
     else  {
-        [[MLXMPPManager sharedInstance].contactVC toggleActiveChatTab];
-        [[MLXMPPManager sharedInstance].contactVC showConversationForContact:notification.userInfo];
+       // [[MLXMPPManager sharedInstance].contactVC toggleActiveChatTab];
+       // [[MLXMPPManager sharedInstance].contactVC showConversationForContact:notification.userInfo];
         [self showWindow:self];
     }
 }

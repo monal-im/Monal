@@ -86,12 +86,19 @@
         NSNumber *account=[dic objectForKey:@"account_id"];
         [[MLXMPPManager sharedInstance] joinRoom:[dic objectForKey:@"room"] withNick:[dic objectForKey:@"nick"]  andPassword:@"" forAccounId:account.integerValue ];
    
+        xmpp *connectedAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%@", account]];
         
-        [[DataLayer sharedInstance] addContact:[dic objectForKey:@"room"] forAccount:[NSString stringWithFormat:@"%@", account] fullname:@"" nickname:@"" withCompletion:^(BOOL success) {
-            
-            [[DataLayer sharedInstance] updateOwnNickName:[dic objectForKey:@"nick"] forMuc:[dic objectForKey:@"room"] forAccount:[NSString stringWithFormat:@"%@", account]];
-            
-        }];
+     
+        NSString *nick=[dic objectForKey:@"nick"];
+        NSString *room =[dic objectForKey:@"room"];
+        
+        [[DataLayer sharedInstance] addContact:room forAccount:[NSString stringWithFormat:@"%@", account] fullname:@"" nickname:@"" andMucNick:nick withCompletion:^(BOOL success) {
+             if(success)
+             [[DataLayer sharedInstance] updateOwnNickName:nick forMuc:room andServer:connectedAccount.connectionProperties.conferenceServer forAccount:[NSString stringWithFormat:@"%@", account] withCompletion:^(BOOL success) {
+                 
+             }];
+             
+         }];
         
     }
 }

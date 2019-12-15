@@ -10,7 +10,7 @@
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
 #import "MLAccountSettings.h"
-#import "SAMKeychain.h"
+@import SAMKeychain;
 
 #import "NXOAuth2.h"
 #import "MLOAuthViewController.h"

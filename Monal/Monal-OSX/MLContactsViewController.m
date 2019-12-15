@@ -76,7 +76,6 @@
     self.offlineContacts=[[NSMutableArray alloc] init] ;
     self.infoCells=[[NSMutableArray alloc] init] ;
     
-    [MLXMPPManager sharedInstance].contactVC=self;
     self.currentSegment= kContactTab;
     
 }

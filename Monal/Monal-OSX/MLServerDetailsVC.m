@@ -31,36 +31,36 @@
     [super viewWillAppear];
     
     self.serverCaps =[[NSMutableArray alloc] init];
-    if(self.xmppAccount.server) {
-        self.view.window.title= self.xmppAccount.server;
+    if(self.xmppAccount.connectionProperties.server) {
+        self.view.window.title= self.xmppAccount.connectionProperties.server;
     }
     
-    if(self.xmppAccount.supportsSM3)
+    if(self.xmppAccount.connectionProperties.supportsSM3)
     {
         [self.serverCaps addObject:@{@"Title":@"XEP-0198: Stream Management", @"Description":@"Resume a stream when disconnected. Results in faster reconnect and saves battery life."}];
     }
     
-    if(self.xmppAccount.supportsPush)
+    if(self.xmppAccount.connectionProperties.supportsPush)
     {
         [self.serverCaps addObject:@{@"Title":@"XEP-0357: Push Notifications", @"Description":@"Receive push notifications from via Apple even when disconnected. Vastly improves reliability. "}];
     }
     
-    if(self.xmppAccount.usingCarbons2)
+    if(self.xmppAccount.connectionProperties.usingCarbons2)
     {
         [self.serverCaps addObject:@{@"Title":@"XEP-0280: Message Carbons", @"Description":@"Synchronize your messages on all loggedin devices."}];
     }
     
-    if(self.xmppAccount.supportsMam2)
+    if(self.xmppAccount.connectionProperties.supportsMam2)
     {
         [self.serverCaps addObject:@{@"Title":@"XEP-0313: Message Archive Management", @"Description":@"Access message archives on the server."}];
     }
     
-    if(self.xmppAccount.supportsHTTPUpload)
+    if(self.xmppAccount.connectionProperties.supportsHTTPUpload)
     {
         [self.serverCaps addObject:@{@"Title":@"XEP-0363: HTTP File Upload", @"Description":@"Upload files to the server to share with others."}];
     }
     
-    if(self.xmppAccount.supportsClientState)
+    if(self.xmppAccount.connectionProperties.supportsClientState)
     {
         [self.serverCaps addObject:@{@"Title":@"XEP-0352: Client State Indication", @"Description":@"Indicate when a particular device is active or inactive. Saves battery. "}];
     }

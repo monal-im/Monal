@@ -7,7 +7,7 @@
 //
 
 #import "MLCloudStorageSettings.h"
-#import <DropBoxOSX/DropBoxOSX.h>
+
 
 @interface MLCloudStorageSettings ()
 
@@ -22,35 +22,11 @@
 
 -(void) viewWillAppear
 {
-    self.dropBox.state= [DBSession sharedSession].isLinked;
+ 
 }
 
 -(void) checkDropBox{
-    if([[DBSession sharedSession] isLinked])
-    {
-        self.dropBox.state=YES;
-        self.dropBox.enabled= YES;
-    } else
-    {
-        if(![DBAuthHelperOSX sharedHelper].isLoading) {
-            self.dropBox.state=NO;
-            self.dropBox.enabled= YES;
-             [self.progressIndicator stopAnimation:self];
-        }
-    }
-}
-
--(IBAction)toggleDropBox:(id)sender
-{
-    if (![[DBSession sharedSession] isLinked]) {
-        [self.progressIndicator startAnimation:self];
-        self.dropBox.enabled=NO;
-         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(checkDropBox) name:DBAuthHelperOSXStateChangedNotification object:nil];
-        [[DBAuthHelperOSX sharedHelper] authenticate];
-    }
-    else {
-        [[DBSession sharedSession] unlinkAll];
-    }
+  
 }
 
 -(void) dealloc

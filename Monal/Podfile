@@ -86,6 +86,7 @@ pod 'TPCircularBuffer'
 pod 'Sparkle'
 pod 'SignalProtocolObjC'
 pod 'SignalProtocolC'
+pod 'CocoaLumberjack'
 
 
   # Pods for Monal-OSX

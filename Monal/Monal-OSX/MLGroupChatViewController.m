@@ -65,11 +65,13 @@
     NSString *nick=self.nick.stringValue;
     NSString *room =self.room.stringValue;
     
-    [[DataLayer sharedInstance] addContact:self.room.stringValue forAccount:account.accountNo fullname:@"" nickname:@"" withCompletion:^(BOOL success) {
-      
-            [[DataLayer sharedInstance] updateOwnNickName:nick forMuc:room forAccount:account.accountNo];
-       
-    }];
+    [[DataLayer sharedInstance] addContact:room forAccount:[NSString stringWithFormat:@"%@", account] fullname:@"" nickname:@"" andMucNick:nick withCompletion:^(BOOL success) {
+         if(success)
+         [[DataLayer sharedInstance] updateOwnNickName:nick forMuc:room andServer:account.connectionProperties.conferenceServer forAccount:[NSString stringWithFormat:@"%@", account] withCompletion:^(BOOL success) {
+             
+         }];
+         
+     }];
 }
 
 @end

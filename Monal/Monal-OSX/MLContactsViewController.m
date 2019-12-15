@@ -517,11 +517,11 @@
     }
 }
 
--(void) showConversationForContact:(NSDictionary *) user
+-(void) showConversationForContact:(MLContact *) user
 {
     NSInteger counter=0;
     NSInteger pos=-1;
-    NSDictionary *selectedRow;
+    MLContact *selectedRow;
     
     NSArray *currentTableData= self.contacts;
     if(self.activeChat)
@@ -529,10 +529,10 @@
         currentTableData=self.activeChat;
     }
     
-    for(NSDictionary* row in currentTableData)
+    for(MLContact* row in currentTableData)
     {
-        if([[row objectForKey:kContactName] caseInsensitiveCompare:[user objectForKey:@"actuallyfrom"] ]==NSOrderedSame &&
-           [[row objectForKey:kAccountID]  integerValue]==[[user objectForKey:kaccountNoKey] integerValue] )
+        if([row.contactJid caseInsensitiveCompare:user.contactJid ]==NSOrderedSame &&
+           [row.accountId  integerValue]==[user.accountId integerValue] )
         {
             pos= counter;
             selectedRow=row;
@@ -1393,15 +1393,13 @@
         }
         else  {
             
-            id item =[self.contactsTable itemAtRow:self.contactsTable.selectedRow];
+            MLContact* contactRow =[self.contactsTable itemAtRow:self.contactsTable.selectedRow];
             
-            if([item isKindOfClass:[NSDictionary class]]) {
-                NSDictionary *contactRow = (NSDictionary *)item;
                 [self.chatViewController showConversationForContact:contactRow];
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
                     if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
                         if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
-                            [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
+                            [[DataLayer sharedInstance] markAsReadBuddy:contactRow.contactJid forAccount:contactRow.accountId];
                             [self updateAppBadge];
                         }
                         
@@ -1412,7 +1410,7 @@
                         [self.contactsTable endUpdates];
                     }
                 });
-            }
+            
         }
 }
 

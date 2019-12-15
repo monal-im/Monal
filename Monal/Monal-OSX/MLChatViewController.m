@@ -189,11 +189,11 @@
 
 -(void) updateWindowForContact:(MLContact *)contact
 {
-    NSMutableDictionary *dic = [contact mutableCopy];
-    [dic setObject:[NSNumber numberWithBool:self.encryptChat] forKey:@"encrypt"];
-  
-    MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
-    [window updateCurrentContact:dic];
+//    NSMutableDictionary *dic = [contact mutableCopy];
+//    [dic setObject:[NSNumber numberWithBool:self.encryptChat] forKey:@"encrypt"];
+//
+//    MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
+//    [window updateCurrentContact:dic];
     
     self.chatTable.accessibilityLabel=[NSString stringWithFormat:@"Chat with %@", contact.contactDisplayName];
 }
@@ -821,12 +821,12 @@
  
     cell.messageStatus.accessibilityLabel=@"Delivered";
     if(messageRow.hasBeenReceived==YES) {
-        NSDictionary *prior =nil;
+        MLMessage *prior =nil;
         if(row>0)
         {
             prior = [self.messageList objectAtIndex:row-1];
         }
-        if(row==self.messageList.count-1 || ![[prior objectForKey:@"af"] isEqualToString:self.jid]) {
+        if(row==self.messageList.count-1 || ![prior.actualFrom isEqualToString:self.jid]) {
             cell.messageStatus.hidden=NO;
         } else  {
             cell.messageStatus.hidden=YES;

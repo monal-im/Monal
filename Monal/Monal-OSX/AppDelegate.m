@@ -12,7 +12,6 @@
 #import "MLAccountSettings.h"
 #import "MLDisplaySettings.h"
 #import "MLPresenceSettings.h"
-#import "MLCloudStorageSettings.h"
 #import "MLOptOutSettings.h"
 #import "MLXMPPManager.h"
 
@@ -30,7 +29,6 @@
 @property (nonatomic , weak)  MLAccountSettings *accountsVC;
 @property (nonatomic , weak)  MLPresenceSettings *presenceVC;
 @property (nonatomic , weak)  MLDisplaySettings *displayVC;
-@property (nonatomic , weak)  MLCloudStorageSettings *cloudVC;
 @property (nonatomic , weak)  MLOptOutSettings *optOutVC;
 @property (nonatomic , strong) id <NSObject> activity;
 
@@ -156,12 +154,7 @@
     {
         self.displayVC = [storyboard instantiateControllerWithIdentifier:@"display"];
     }
-    
-    if(!self.cloudVC)
-    {
-        self.cloudVC = [storyboard instantiateControllerWithIdentifier:@"cloudStorage"];
-    }
-    
+
     if(!self.optOutVC)
     {
         self.optOutVC = [storyboard instantiateControllerWithIdentifier:@"optOutSettings"];
@@ -173,7 +166,7 @@
 {
     [self linkVCs];
     if(!self.preferencesWindow) {
-        NSArray *array = @[self.accountsVC, self.presenceVC, self.displayVC, self.cloudVC, self.optOutVC];
+        NSArray *array = @[self.accountsVC, self.presenceVC, self.displayVC, self.optOutVC];
         self.preferencesWindow = [[MASPreferencesWindowController alloc] initWithViewControllers:array];
     }
     [self.preferencesWindow showWindow:self];

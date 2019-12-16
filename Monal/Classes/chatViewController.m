@@ -592,7 +592,14 @@
         if(result) {
             dispatch_async(dispatch_get_main_queue(),
                            ^{
-              
+              MLMessage *messageObj = [[MLMessage alloc] init];
+                             messageObj.actualFrom=self.jid;
+                             messageObj.timestamp=[NSDate date];
+                             messageObj.hasBeenSent=YES;
+                             messageObj.messageId=messageId;
+                             messageObj.encrypted=self.encryptChat;
+                             messageObj.messageType=messageType;
+                             messageObj.messageText=message;
                 
                 if(!self.messageList) self.messageList =[[NSMutableArray alloc] init];
                 [self.messageList addObject:messageObj];

@@ -16,7 +16,7 @@
 
 @property (nonatomic, weak) MLChatViewController *chatViewController;
 
--(void) showConversationForContact:(NSDictionary *) user;
+-(void) showConversationForContact:(MLContact *) user;
 
 // methods requied for XMPP accont to call back  should be protocol
 

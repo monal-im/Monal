@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "MLContact.h"
 
 @interface MLContactDetails : NSViewController
 
@@ -19,6 +20,6 @@
 @property (nonatomic,weak) IBOutlet NSTextField* subscription;
 @property (nonatomic,strong) IBOutlet NSTextView* resourcesTextView;
 
-@property (nonatomic,strong) NSDictionary *contact;
+@property (nonatomic,strong) MLContact *contact;
 
 @end

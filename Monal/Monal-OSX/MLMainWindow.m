@@ -18,7 +18,7 @@
 
 @interface MLMainWindow ()
 
-@property (nonatomic, strong) NSDictionary *contactInfo;
+@property (nonatomic, strong) MLContact *contactInfo;
 
 @end
 
@@ -41,27 +41,17 @@
     
 }
 
--(void) updateCurrentContact:(NSDictionary *) contact;
+-(void) updateCurrentContact:(MLContact *) contact;
 {
     self.contactInfo= contact;
-    NSString *fullName= (NSString *) [self.contactInfo objectForKey:kFullName];
-    NSNumber *muc=[self.contactInfo objectForKey:@"Muc"];
-    
-    if(muc.boolValue ==YES)
+    if(contact.isGroup ==YES)
     {
-        self.contactNameField.stringValue =(NSString *) [self.contactInfo objectForKey:@"muc_subject"];
+        self.contactNameField.stringValue =contact.groupSubject;
     }
     
-    else if(fullName.length>0){
-        self.contactNameField.stringValue= [self.contactInfo objectForKey:kFullName];
-    } else  {
-        if([self.contactInfo objectForKey:kContactName]){
-            self.contactNameField.stringValue= [self.contactInfo objectForKey:kContactName];
-        }
-    }
-    
-    BOOL encrypt = [(NSNumber *)[contact objectForKey:@"encrypt"] boolValue];
-    if(!encrypt) {
+    self.contactNameField.stringValue=contact.contactDisplayName;
+    BOOL encrypted =[[DataLayer sharedInstance] shouldEncryptForJid:contact.contactJid andAccountNo:contact.accountId];
+   if(!encrypted) {
         self.lock.image = [NSImage imageNamed:@"745-unlocked"];
     }
     else {
@@ -152,7 +142,7 @@
                 NSString* nameToShow=[notification.userInfo objectForKey:@"from"];
                 if(self.window.occlusionState & NSWindowOcclusionStateVisible) {
                     if(self.window.isKeyWindow) {
-                        if([nameToShow isEqualToString:[self.contactInfo objectForKey:kContactName]])
+                        if([nameToShow isEqualToString:self.contactInfo.contactJid])
                         {
                             showNotification= NO;
                         }

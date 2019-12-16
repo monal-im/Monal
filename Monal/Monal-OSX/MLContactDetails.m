@@ -28,16 +28,17 @@
 -(void) viewWillAppear
 {
     [super viewWillAppear];
-     [[MLXMPPManager sharedInstance] getVCard:_contact];
-    self.buddyName.stringValue =[_contact objectForKey:@"buddy_name"];
+     [[MLXMPPManager sharedInstance] getVCard:self.contact];
+    self.buddyName.stringValue =self.contact.contactJid;
+ 
     
-    self.buddyMessage.stringValue=[_contact objectForKey:@"status"];
+    self.buddyMessage.stringValue= self.contact.statusMessage;
     if([self.buddyMessage.stringValue isEqualToString:@"(null)"])  self.buddyMessage.stringValue=@"";
     
-    self.buddyStatus.stringValue=[_contact objectForKey:@"state"];
+    self.buddyStatus.stringValue=     self.contact.state;
     if([self.buddyStatus.stringValue isEqualToString:@"(null)"])  self.buddyStatus.stringValue=@"";
     
-    self.fullName.stringValue=[_contact objectForKey:@"full_name"];
+    self.fullName.stringValue=self.contact.contactDisplayName;
     if([self.fullName.stringValue isEqualToString:@"(null)"])  self.fullName.stringValue=@"";
     
     self.buddyIconView.wantsLayer=YES;
@@ -45,10 +46,10 @@
     self.buddyIconView.layer.borderColor=[NSColor whiteColor].CGColor;
     self.buddyIconView.layer.borderWidth=2.0f;
     
-     NSString* accountNo=[NSString stringWithFormat:@"%@", [_contact objectForKey:@"account_id"]];
-//    [[DataLayer sharedInstance] contactForUsername:[_contact objectForKey:@"buddy_name"] forAccount:accountNo withCompletion:^(NSArray *result) {
+     NSString* accountNo=self.contact.accountId;
+//    [[DataLayer sharedInstance] contactForUsername: self.contact.contactJid forAccount:accountNo withCompletion:^(NSArray *result) {
 //
-//     self.subscription.stringValue=[_contact objectForKey:@"full_name"];
+//     self.subscription.stringValue=[self.contact objectForKey:@"full_name"];
 //        if([self.subscription.stringValue isEqualToString:@"(null)"])  self.subscription.stringValue=@"";
 //
 //
@@ -72,15 +73,15 @@
  
 #ifndef DISABLE_OMEMO
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountNo];
-    [self.xmppAccount queryOMEMODevicesFrom:[self.contact objectForKey:@"buddy_name"]];
+    [self.xmppAccount queryOMEMODevicesFrom: self.contact.contactJid];
 #endif
     
-  [[MLImageManager sharedInstance] getIconForContact:[_contact objectForKey:@"buddy_name"] andAccount:accountNo withCompletion:^(NSImage *contactImage) {
+  [[MLImageManager sharedInstance] getIconForContact: self.contact.contactJid andAccount:accountNo withCompletion:^(NSImage *contactImage) {
         self.buddyIconView.image=contactImage;
   }];
   
     
-    NSArray* resources= [[DataLayer sharedInstance] resourcesForContact:[_contact objectForKey:@"buddy_name"]];
+    NSArray* resources= [[DataLayer sharedInstance] resourcesForContact: self.contact.contactJid];
     self.resourcesTextView.string=@"";
     for(NSDictionary* row in resources)
     {

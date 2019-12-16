@@ -25,7 +25,7 @@
 /**
  Allows  the window to know what contact is currently selected
  */
--(void) updateCurrentContact:(NSDictionary *) contact;
+-(void) updateCurrentContact:(MLContact *) contact;
 
 -(IBAction)showContactsTab:(id)sender;
 -(IBAction)showActiveChatTab:(id)sender;

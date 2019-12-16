@@ -102,16 +102,7 @@
 - (void)handleURLEvent:(NSAppleEventDescriptor*)event
         withReplyEvent:(NSAppleEventDescriptor*)replyEvent
 {
-//    if ([[DBSession sharedSession] handleOpenURL:[event paramDescriptorForKeyword:keyDirectObject]]) {
-//        if ([[DBSession sharedSession] isLinked]) {
-//            DDLogVerbose(@"App linked successfully!");
-//            // At this point you can start making API calls
-//        }
-    
- //   }
-    // Add whatever other url handling code your app requires here
- 
-    
+
 }
 
 

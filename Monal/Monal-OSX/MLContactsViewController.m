@@ -563,14 +563,14 @@
 
 -(void) refreshContact:(NSNotification *) notification
 {
-     NSDictionary* user = notification.userInfo;
+     MLContact* user = [notification.userInfo objectForKey:@"contact"];
     [self refreshRowWithUser:user];
     
     [self updateAccessabilityCount];
 }
 
 
--(void) refreshRowWithUser:(NSDictionary *) user
+-(void) refreshRowWithUser:(MLContact *) user
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         NSInteger initalPos=-1;

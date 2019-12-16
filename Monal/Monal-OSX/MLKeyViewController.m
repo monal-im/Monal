@@ -30,9 +30,9 @@
         self.view.window.title=@"Encryption Keys";
     }
     
-    self.account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%@",[self.contact objectForKey:@"account_id"]]];
-    self.devices= [self.account.monalSignalStore allDeviceIdsForAddressName:[self.contact objectForKey:@"buddy_name"]];
-    self.jid.stringValue =[self.contact objectForKey:@"buddy_name"];
+    self.account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+    self.devices= [self.account.monalSignalStore allDeviceIdsForAddressName:self.contact.contactJid];
+    self.jid.stringValue =self.contact.contactJid;
     [self.table reloadData];
     
     if(self.ownKeys) {
@@ -57,7 +57,7 @@
     MLKeyRow *cell = [tableView makeViewWithIdentifier:@"KeyRow" owner:nil];
     
     NSNumber *device =[self.devices objectAtIndex:row];
-    SignalAddress *address = [[SignalAddress alloc] initWithName:[self.contact objectForKey:@"buddy_name"] deviceId:(int) device.integerValue];
+    SignalAddress *address = [[SignalAddress alloc] initWithName:self.contact.contactJid deviceId:(int) device.integerValue];
     
     NSData *identity=[self.account.monalSignalStore getIdentityForAddress:address];
     if(identity) {
@@ -90,7 +90,7 @@
     NSInteger row = button.tag-100;
     
     NSNumber *device =[self.devices objectAtIndex:row];
-    SignalAddress *address = [[SignalAddress alloc] initWithName:[self.contact objectForKey:@"buddy_name"] deviceId:(int) device.integerValue];
+    SignalAddress *address = [[SignalAddress alloc] initWithName:self.contact.contactJid deviceId:(int) device.integerValue];
     
     NSData *identity=[self.account.monalSignalStore getIdentityForAddress:address];
     

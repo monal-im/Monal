@@ -7,12 +7,13 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "MLContact.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MLKeyViewController : NSViewController <NSTableViewDataSource, NSTableViewDelegate>
 @property (nonatomic, assign) BOOL ownKeys;
-@property (nonatomic, strong) NSDictionary *contact;
+@property (nonatomic, strong) MLContact *contact;
 @property (nonatomic, weak) IBOutlet NSTableView *table; 
 @property (nonatomic, weak) IBOutlet NSTextField *jid;
 @property (nonatomic, weak) IBOutlet NSTextField *topText;

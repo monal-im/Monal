@@ -30,13 +30,13 @@
 
     self.view.window.title=@"Resources";
     
-    self.account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%@",[self.contact objectForKey:@"account_id"]]];
+    self.account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
   
-    self.jid.stringValue =[self.contact objectForKey:@"buddy_name"];
+    self.jid.stringValue =self.contact.contactJid;
     [self.table reloadData];
     
 
-    self.resources = [[DataLayer sharedInstance] resourcesForContact:[self.contact objectForKey:@"buddy_name"]];
+    self.resources = [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
     [self.table reloadData];
 }
 

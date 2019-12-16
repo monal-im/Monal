@@ -189,11 +189,8 @@
 
 -(void) updateWindowForContact:(MLContact *)contact
 {
-//    NSMutableDictionary *dic = [contact mutableCopy];
-//    [dic setObject:[NSNumber numberWithBool:self.encryptChat] forKey:@"encrypt"];
-//
-//    MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
-//    [window updateCurrentContact:dic];
+    MLMainWindow *window =(MLMainWindow *)self.view.window.windowController;
+    [window updateCurrentContact:contact];
     
     self.chatTable.accessibilityLabel=[NSString stringWithFormat:@"Chat with %@", contact.contactDisplayName];
 }

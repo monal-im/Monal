@@ -43,7 +43,7 @@
 
 -(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID isUpload:(BOOL) isUpload;
 
--(void) showConversationForContact:(NSDictionary *)contact;
+-(void) showConversationForContact:(MLContact *)contact;
 
 /**
  mark as conversation as read and update teh application badge

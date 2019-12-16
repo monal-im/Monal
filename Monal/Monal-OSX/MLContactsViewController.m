@@ -1031,7 +1031,9 @@
                     NSInteger pos=-1;
                        
                        //if current converstion, mark as read if window is visible
-                       MLContact *contactRow = nil;
+                       MLContact *contactRow = [[MLContact alloc] init];
+        contactRow.accountId = message.accountId;
+        contactRow.contactJid=message.from;
                        
                        NSArray *activeArray=self.contacts;
                        if(self.currentSegment==kActiveTab)
@@ -1040,7 +1042,7 @@
                            //add 0.2 delay to allow DB to write since this is called at the same time as db write notification
                            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC), dispatch_get_main_queue(),  ^{
                            
-                               NSInteger activePos =  [self positionOfActiveContact:notification.userInfo];
+                               NSInteger activePos =  [self positionOfActiveContact:contactRow];
                                
                                if(activePos>=0)
                                {
@@ -1249,7 +1251,7 @@
      
     cell.name.stringValue=contactRow.contactDisplayName;
     
-    cell.accountNo= contactRow.accountId;
+    cell.accountNo= contactRow.accountId.integerValue;
     
     if(cell.username)
     {
@@ -1272,7 +1274,7 @@
                 statusText = @"";
             }
         }
-        cell.status.stringValue=statusText;
+        cell.status.stringValue=statusText?statusText:@"";
     }
    
     
@@ -1347,6 +1349,7 @@
 
 - (void)outlineViewSelectionDidChange:(NSNotification *)notification
 {
+    MLContact* contact = [notification.userInfo objectForKey:@"contact"];
     if(self.searchResults && self.contactsTable.selectedRow<self.searchResults.count)
     {
         NSDictionary *contactRow = [self.searchResults objectAtIndex:self.contactsTable.selectedRow];
@@ -1369,12 +1372,12 @@
         if(self.currentSegment==kActiveTab)
         {
             if(self.contactsTable.selectedRow<self.activeChat.count) {
-                NSDictionary *contactRow = [self.activeChat objectAtIndex:self.contactsTable.selectedRow];
+                MLContact *contactRow = [self.activeChat objectAtIndex:self.contactsTable.selectedRow];
                 [self.chatViewController showConversationForContact:contactRow];
                 
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC), dispatch_get_main_queue(),^{
                     if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
-                        [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
+                        [[DataLayer sharedInstance] markAsReadBuddy:contact.contactJid forAccount:contact.accountId];
                         [self updateAppBadge];
                     }
                     

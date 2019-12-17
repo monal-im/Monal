@@ -184,7 +184,7 @@
         
         if(self.contact.isGroup) {
            NSArray *members= [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
-            self.navigationItem.title=[NSString stringWithFormat:@"%@ (%d)", self.navigationItem.title, members.count];
+            self.navigationItem.title=[NSString stringWithFormat:@"%@ (%ld)", self.navigationItem.title, members.count];
             
         }
         
@@ -1251,7 +1251,7 @@
         
         if(message.messageId)
         {
-            [[DataLayer sharedInstance] deleteMessageHistory:[NSString stringWithFormat:message.messageId]];
+            [[DataLayer sharedInstance] deleteMessageHistory:message.messageId];
         }
         else
         {

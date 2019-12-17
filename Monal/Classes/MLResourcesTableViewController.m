@@ -17,7 +17,11 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-     self.navigationItem.title=@"Resources";
+    if(self.contact.isGroup) {
+        self.navigationItem.title=@"Participants";
+    } else {
+        self.navigationItem.title=@"Resources";
+    }
     
 }
 

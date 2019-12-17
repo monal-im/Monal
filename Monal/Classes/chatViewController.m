@@ -181,6 +181,13 @@
         if(self.encryptChat){
             self.navigationItem.title = [NSString stringWithFormat:@"%@ 🔒", self.navigationItem.title];
         }
+        
+        if(self.contact.isGroup) {
+           NSArray *members= [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
+            self.navigationItem.title=[NSString stringWithFormat:@"%@ (%d)", self.navigationItem.title, members.count];
+            
+        }
+        
     });
 }
 

@@ -27,6 +27,7 @@
 @property (nonatomic, strong) xmpp* xmppAccount;
 @property (nonatomic, weak) UITextField* currentTextField;
 @property (nonatomic, strong) NSMutableArray * photos;
+@property (nonatomic, assign) NSInteger groupMemberCount;
 
 @end
 
@@ -51,8 +52,14 @@
     
     self.navigationItem.title=self.contact.contactDisplayName;
     
+    if(self.contact.isGroup) {
+       NSArray *members= [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
+        self.groupMemberCount=members.count;
+        self.navigationItem.title =@"Group Chat";
+        
+    }
+    
     self.accountNo=self.contact.accountId;
-    //if not in buddylist, add.
     [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" andMucNick:nil  withCompletion:^(BOOL success) {
     }];
     
@@ -111,13 +118,11 @@
     switch(indexPath.section) {
         case 0: {
             MLContactDetailHeader *detailCell=  (MLContactDetailHeader *)[tableView dequeueReusableCellWithIdentifier:@"headerCell"];
-            
-            detailCell.jid.text=self.contact.contactJid;
-            //            thecell.fullName.text=[self.contact objectForKey:@"full_name"];
-            //            thecell.buddyStatus.text=[self.contact objectForKey:@"state"];
-            
-            //            if([thecell.buddyStatus.text isEqualToString:@"(null)"])  thecell.buddyStatus.text=@"";
-            //            if([thecell.fullName.text isEqualToString:@"(null)"])  thecell.fullName.text=@"";
+            if(self.contact.isGroup) {
+               detailCell.jid.text=[NSString stringWithFormat:@"%@ (%lu)", self.contact.contactJid, self.groupMemberCount];
+            } else {
+                detailCell.jid.text=self.contact.contactJid;
+            }
             
             [[MLImageManager sharedInstance] getIconForContact:self.contact.contactJid andAccount:self.contact.accountId withCompletion:^(UIImage *image) {
                 detailCell.buddyIconView.image=image;
@@ -145,21 +150,30 @@
             if(indexPath.row==0)
             {
                 MLTextInputCell *cell=  (MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-                NSString* nickName=self.contact.nickName;
-                if([[nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
-                    cell.textInput.text=nickName;
-                } else {
-                    cell.textInput.text=self.contact.fullName;
+                if(self.contact.isGroup) {
+                    cell.textInput.enabled=NO;
+                    cell.textInput.text=self.contact.accountNickInGroup;
+                } else  {
+                    NSString* nickName=self.contact.nickName;
+                    if([[nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
+                        cell.textInput.text=nickName;
+                    } else {
+                        cell.textInput.text=self.contact.fullName;
+                    }
+                    if([cell.textInput.text isEqualToString:@"(null)"])  cell.textInput.text=@"";
+                    cell.textInput.placeholder=@"Set a nickname";
+                    cell.textInput.delegate=self;
                 }
-                if([cell.textInput.text isEqualToString:@"(null)"])  cell.textInput.text=@"";
-                cell.textInput.placeholder=@"Set a nickname";
-                cell.textInput.delegate=self;
                 thecell=cell;
             }
             else if(indexPath.row==1) {
                 MLDetailsTableViewCell *cell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"MessageCell"];
-                cell.cellDetails.text=self.contact.statusMessage;
-                if([cell.cellDetails.text isEqualToString:@"(null)"])  cell.cellDetails.text=@"";
+                if(self.contact.isGroup) {
+                    cell.cellDetails.text=self.contact.groupSubject;
+                } else  {
+                    cell.cellDetails.text=self.contact.statusMessage;
+                    if([cell.cellDetails.text isEqualToString:@"(null)"])  cell.cellDetails.text=@"";
+                }
                 thecell=cell;
             }
             else {
@@ -172,9 +186,13 @@
         case 2: {
             thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Sub"];
             if(indexPath.row==1) {
-                thecell.textLabel.text=@"Resources"; //if muc change to participants
+                if(self.contact.isGroup) {
+                    thecell.textLabel.text=@"Participants";
+                } else {
+                    thecell.textLabel.text=@"Resources";
+                }
             } else  {
-                thecell.textLabel.text=@"Encryption Keys"; //if muc change to participants
+                thecell.textLabel.text=@"Encryption Keys";
             }
             thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             break;

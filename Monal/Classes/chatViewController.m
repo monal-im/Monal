@@ -181,6 +181,13 @@
         if(self.encryptChat){
             self.navigationItem.title = [NSString stringWithFormat:@"%@ 🔒", self.navigationItem.title];
         }
+        
+        if(self.contact.isGroup) {
+           NSArray *members= [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
+            self.navigationItem.title=[NSString stringWithFormat:@"%@ (%ld)", self.navigationItem.title, members.count];
+            
+        }
+        
     });
 }
 
@@ -594,6 +601,7 @@
                            ^{
               MLMessage *messageObj = [[MLMessage alloc] init];
                              messageObj.actualFrom=self.jid;
+                             messageObj.from=self.jid;
                              messageObj.timestamp=[NSDate date];
                              messageObj.hasBeenSent=YES;
                              messageObj.messageId=messageId;
@@ -947,13 +955,7 @@
         DDLogError(@"Attempt to access beyond bounds");
     }
     
-    NSString *from =row.actualFrom;
-    
-    //intended to correct for bad data. Can be removed later probably.
-    if([from isEqualToString:@"(null)"])
-    {
-        from=row.from;
-    }
+    NSString *from=row.from;
     
     if([row.messageType isEqualToString:kMessageTypeStatus])
     {
@@ -965,16 +967,7 @@
     
     if(self.contact.isGroup)
     {
-        if([from isEqualToString:_jid])
-        {
-            if([row.messageType isEqualToString:kMessageTypeUrl])
-            {
-                cell=[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
-            } else  {
-                cell=[tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
-            }
-        }
-        else
+        if([from isEqualToString:self.contact.contactJid])
         {
             if([row.messageType isEqualToString:kMessageTypeUrl])
             {
@@ -982,6 +975,16 @@
             } else  {
                 cell=[tableView dequeueReusableCellWithIdentifier:@"textInCell"];
             }
+        }
+        else
+        {
+            if([row.messageType isEqualToString:kMessageTypeUrl])
+            {
+                cell=[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
+            } else  {
+                cell=[tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
+            }
+            
         }
     } else  {
         if([from isEqualToString:self.contact.contactJid])
@@ -1113,7 +1116,7 @@
     if(self.contact.isGroup)
     {
         cell.name.hidden=NO;
-        cell.name.text=from;
+        cell.name.text=row.actualFrom;
     } else  {
         cell.name.text=@"";
         cell.name.hidden=YES;
@@ -1153,13 +1156,8 @@
     BOOL newSender=NO;
     if(indexPath.row>0)
     {
-        NSString *priorSender =priorRow.actualFrom;
-        //intended to correct for bad data. Can be removed later probably.
-        if([priorSender isEqualToString:@"(null)"])
-        {
-            priorSender=priorRow.from;
-        }
-        if(![priorSender isEqualToString:from])
+        NSString *priorSender =priorRow.from;
+        if(![priorSender isEqualToString:row.from])
         {
             newSender=YES;
         }
@@ -1177,7 +1175,7 @@
         cell.lockImage.hidden=YES;
     }
     
-    if([from isEqualToString:_jid])
+    if([row.from isEqualToString:_jid])
     {
         cell.outBound=YES;
     }
@@ -1253,7 +1251,7 @@
         
         if(message.messageId)
         {
-            [[DataLayer sharedInstance] deleteMessageHistory:[NSString stringWithFormat:message.messageId]];
+            [[DataLayer sharedInstance] deleteMessageHistory:message.messageId];
         }
         else
         {

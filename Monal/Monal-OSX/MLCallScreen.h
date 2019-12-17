@@ -7,10 +7,11 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "MLContact.h"
 
 @interface MLCallScreen : NSViewController
 
-@property (nonatomic, strong) NSDictionary *contact;
+@property (nonatomic, strong) MLContact *contact;
 
 @property (nonatomic, weak) IBOutlet NSTextField  *contactName;
 @property (nonatomic, weak) IBOutlet NSButton  *callButton;

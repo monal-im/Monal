@@ -71,31 +71,13 @@
     if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:sid:0"])
     {
         _stanzaId = [attributeDict objectForKey:@"id"];
-        return;
     }
     
    
 	if(([elementName isEqualToString:@"message"])  )
 	{
-		DDLogVerbose(@" message type check");
-		
-        if ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageErrorType])
-        {
-            _type=kMessageErrorType;
-        }
-        
-        if ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageGroupChatType])
-        {
-            _type=kMessageGroupChatType;
-        }
-        
-        if ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageChatType])
-        {
-            _type=kMessageChatType;
-        }
-        
-        _idval =[attributeDict objectForKey:@"id"] ;
-        _stanzaId = [attributeDict objectForKey:@"id"]; //default to this, may be overridden by urn:xmpp:sid:0 inside message
+		DDLogVerbose(@" message type check");        
+        if(!_stanzaId) _stanzaId = [attributeDict objectForKey:@"id"]; //default to this, may be overridden by urn:xmpp:sid:0 inside message
         State=@"Message";
 	}
     

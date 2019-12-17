@@ -82,14 +82,18 @@
 }
 
 
--(void) testMamImpersonation {
-    NSString  *sample= @"<message to='victim@example.com' from='attacker@example.com/r' type='chat'> <result xmlns='urn:xmpp:mam:2' queryid='0' id='whatever'> <forwarded xmlns='urn:xmpp:forward:0'> <message xmlns='jabber:client' to='victim@example.com' from='so@example.com'><delay xmlns='urn:xmpp:delay' stamp='2019-09-12T23:42:05Z'/><body>I have a surprise for you.</body></message></forwarded></result></message>";
+-(void) testMucMessage {
+    NSString  *sample= @"<message id='B3AF01E4-026A-4C0E-B183-A1273B585C07' to='anu@yax.im/Monal-iOS.51' from='monal_muc2@chat.yax.im/sim' type='groupchat'><body>Ok</body><store xmlns='urn:xmpp:hints'/><stanza-id id='LvW2gRGIhjrL_OTD' by='monal_muc2@chat.yax.im' xmlns='urn:xmpp:sid:0'/></message>";
     
     NSDictionary *stanzaToParse =@{@"stanzaType":@"message", @"stanzaString":sample};
     ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
-    XCTAssert([messageNode.from isEqualToString:@"attacker@example.com"], @"Valid Carbon not processed");
-    
+    XCTAssert([messageNode.type isEqualToString:kMessageGroupChatType], @"did not identify group chat");
+    XCTAssert([messageNode.from isEqualToString:@"monal_muc2@chat.yax.im"], @"did not identify room");
+    XCTAssert([messageNode.actualFrom isEqualToString:@"sim"], @"did not identify sender nick");
+
 }
+
+
 
 
 

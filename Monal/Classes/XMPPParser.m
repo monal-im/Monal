@@ -49,7 +49,7 @@
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
     _messageBuffer=nil;
-    _type=[attributeDict objectForKey:@"type"];
+    if(!_type) _type=[attributeDict objectForKey:@"type"];
     
     if([attributeDict objectForKey:@"from"])
     {
@@ -69,7 +69,7 @@
         DDLogError(@"Attempt to overwrite from");
     }
     
-    _idval =[attributeDict objectForKey:@"id"] ;
+    if(!_idval) _idval =[attributeDict objectForKey:@"id"] ;
     
     if([attributeDict objectForKey:@"to"])
     {

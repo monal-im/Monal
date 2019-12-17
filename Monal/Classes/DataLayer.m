@@ -1481,7 +1481,7 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(void) mucSubject:(NSString *) subject forAccount:(NSString*) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(NSString* ))completion
+-(void) mucSubjectforAccount:(NSString*) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(NSString* ))completion
 {
     NSString* query=[NSString stringWithFormat:@"select muc_subject from buddylist where account_id=? and buddy_name=?"];
     

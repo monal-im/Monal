@@ -142,7 +142,7 @@ extern NSString *const kMessageTypeUrl;
 -(void) deleteMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo withCompletion:(void (^)(BOOL))completion;
 -(void) updateMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo autoJoin:(BOOL) autoJoin andCompletion:(void (^)(BOOL))completion;
 -(void) updateMucSubject:(NSString *) subject forAccount:(NSString *) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(BOOL))completion;
--(void) mucSubject:(NSString *) subject forAccount:(NSString *) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(NSString *))completion;
+-(void) mucSubjectforAccount:(NSString *) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(NSString *))completion;
 
 
 /**

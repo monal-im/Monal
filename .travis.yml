@@ -7,8 +7,8 @@ osx_image: xcode11.2
 podfile: Podfile
 before_install:
   - cd Monal
-  - gem install cocoapods --pre
-  - pod install --repo-update
+  - gem install cocoapods 
+  - pod install
 notifications:
   email:
     on_success: never # default: change

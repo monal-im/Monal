@@ -81,7 +81,8 @@
             
             BOOL unread=YES;
             BOOL showAlert=YES;
-            if( [messageNode.from isEqualToString:jidWithoutResource] || messageNode.mamResult ) {
+            if( [messageNode.from isEqualToString:jidWithoutResource]
+               || messageNode.mamResult ) {
                 unread=NO;
                 showAlert=NO;
             }
@@ -104,16 +105,18 @@
          
             if(!body  && messageNode.subject)
             {
-                //TODO when we want o handle subject changes
-                //                                body =[NSString stringWithFormat:@"%@ changed the subject to: %@", messageNode.actualFrom, messageNode.subject];
                 messageType=kMessageTypeStatus;
                 
-                [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
-                body=messageNode.subject;
+                [[DataLayer sharedInstance] mucSubjectforAccount:self.accountNo andRoom:messageNode.from withCompletion:^(NSString *currentSubject) {
+                    if(![messageNode.subject isEqualToString:currentSubject]) {
+                        [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
+                        
+                        if(self.postPersistAction) {
+                            self.postPersistAction(YES, encrypted, showAlert, messageNode.subject, messageType);
+                        }
+                    }
+                }];
                 
-                if(self.postPersistAction) {
-                    self.postPersistAction(YES, encrypted, showAlert, body, messageType);
-                }
                 return;
             }
             

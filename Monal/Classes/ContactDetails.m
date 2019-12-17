@@ -186,9 +186,13 @@
         case 2: {
             thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Sub"];
             if(indexPath.row==1) {
-                thecell.textLabel.text=@"Resources"; //if muc change to participants
+                if(self.contact.isGroup) {
+                    thecell.textLabel.text=@"Participants";
+                } else {
+                    thecell.textLabel.text=@"Resources";
+                }
             } else  {
-                thecell.textLabel.text=@"Encryption Keys"; //if muc change to participants
+                thecell.textLabel.text=@"Encryption Keys";
             }
             thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             break;

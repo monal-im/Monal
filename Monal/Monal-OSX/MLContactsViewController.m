@@ -292,7 +292,7 @@
     if(self.searchResults)
     {
         if(self.contactsTable.selectedRow <self.searchResults.count) {
-            NSDictionary *contact =[self.searchResults objectAtIndex:self.contactsTable.selectedRow];
+            MLContact *contact =[self.searchResults objectAtIndex:self.contactsTable.selectedRow];
             
             [userDelAlert beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse returnCode) {
                 
@@ -303,19 +303,15 @@
                     
                     [self.contactsTable reloadData];
                     
-                    NSMutableDictionary *mContact=[contact mutableCopy];
-                    [mContact setObject:[mContact objectForKey:kAccountID] forKey:kaccountNoKey];
-                    [mContact setObject:[mContact objectForKey:kContactName] forKey:kusernameKey];
-                    
                     //remove from contacts as well
-                    NSInteger pos = [self positionOfOnlineContact:mContact];
+                    NSInteger pos = [self positionOfOnlineContact:contact];
                     if(pos>=0)
                     {
                         [self.contacts removeObjectAtIndex:pos];
                     }
                     else
                     {
-                        pos = [self positionOfOfflineContact:mContact];
+                        pos = [self positionOfOfflineContact:contact];
                         if(pos>=0)
                         {
                             [self.offlineContacts removeObjectAtIndex:pos];
@@ -333,9 +329,9 @@
     else if(self.activeChat)
     {
         if(self.contactsTable.selectedRow <self.activeChat.count) {
-            NSDictionary *contact =[self.activeChat objectAtIndex:self.contactsTable.selectedRow];
+            MLContact *contact =[self.activeChat objectAtIndex:self.contactsTable.selectedRow];
             
-            [[DataLayer sharedInstance] removeActiveBuddy:[contact objectForKey:kContactName] forAccount:[contact objectForKey:kAccountID]];
+            [[DataLayer sharedInstance] removeActiveBuddy:contact.contactJid forAccount:contact.accountId];
 
             [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
                 [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
@@ -348,15 +344,11 @@
         }
     }
     else  {
-        id item =[self.contactsTable itemAtRow:self.contactsTable.selectedRow];
-        
-        if([item isKindOfClass:[NSDictionary class]]) {
-            NSDictionary *contact =(NSDictionary *) item;
+        MLContact* contact =[self.contactsTable itemAtRow:self.contactsTable.selectedRow];
             
-            BOOL isMUC= [[DataLayer sharedInstance] isBuddyMuc:[contact objectForKey:@"buddy_name"]  forAccount:[contact objectForKey:@"account_id"]];
+            BOOL isMUC= [[DataLayer sharedInstance] isBuddyMuc:contact.contactJid  forAccount:contact.accountId];
             
-            
-            if(isMUC){
+            if(isMUC) {
                 userDelAlert.messageText =[NSString stringWithFormat:@"Are you sure you want to leave this group chat?"];
             }
             
@@ -366,7 +358,7 @@
                 {
                     
                     if(isMUC) {
-                         [[MLXMPPManager sharedInstance] leaveRoom:[contact objectForKey:@"buddy_name"] withNick:[contact objectForKey:@"muc_nick"] forAccountId: [NSString stringWithFormat:@"%@",[contact objectForKey:@"account_id"]]];
+                         [[MLXMPPManager sharedInstance] leaveRoom:contact.contactJid withNick:contact.accountNickInGroup forAccountId: contact.accountId];
                     } else {
                         [[MLXMPPManager sharedInstance] removeContact:contact];
                     }
@@ -386,26 +378,22 @@
                 
                 
             }];
-        }
+        
     }
     
 }
 
--(void) toggleMute:(NSDictionary *)contact
+-(void) toggleMute:(MLContact *)contact
 {
-    [[DataLayer sharedInstance] isMutedJid:[contact objectForKey:kContactName] withCompletion:^(BOOL muted) {
+    [[DataLayer sharedInstance] isMutedJid:contact.contactJid withCompletion:^(BOOL muted) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if(muted) {
-                [[DataLayer sharedInstance] unMuteJid:[contact objectForKey:kContactName]];
+                [[DataLayer sharedInstance] unMuteJid:contact.contactJid];
             }
             else {
-                [[DataLayer sharedInstance] muteJid:[contact objectForKey:kContactName]];
+                [[DataLayer sharedInstance] muteJid:contact.contactJid];
             }
-            NSDictionary *user = @{kusernameKey:[contact objectForKey:kContactName],
-                                   kaccountNoKey:[contact objectForKey:kAccountID],
-                                   @"force":@YES
-                                   };
-            [self refreshRowWithUser:user];
+            [self refreshRowWithUser:contact];
         });
     }];
 }
@@ -432,17 +420,13 @@
     else if(self.activeChat)
     {
         if(self.contactsTable.selectedRow <self.activeChat.count) {
-            NSDictionary *contact =[self.activeChat objectAtIndex:self.contactsTable.selectedRow];
+            MLContact *contact =[self.activeChat objectAtIndex:self.contactsTable.selectedRow];
             [self toggleMute:contact];
         }
     }
     else  {
-        id item =[self.contactsTable itemAtRow:self.contactsTable.selectedRow];
-        
-        if([item isKindOfClass:[NSDictionary class]]) {
-            NSDictionary *contact =(NSDictionary *) item;
+        MLContact *contact =[self.contactsTable itemAtRow:self.contactsTable.selectedRow];
             [self toggleMute:contact];
-        }
     }
     
 }
@@ -481,7 +465,7 @@
         while(group < [self.contactsTable numberOfChildrenOfItem:0])
         {
             
-            NSDictionary *item = [self.contactsTable itemAtRow:group];
+            MLContact *item = [self.contactsTable itemAtRow:group];
             if([self outlineView:self.contactsTable isItemExpandable:item])
             {
                 NSInteger rowCounter =0;
@@ -1086,11 +1070,11 @@
                                   [row.accountId integerValue]==[[notification.userInfo objectForKey:kaccountNoKey] integerValue] )
                                {
                                    pos=counter;
-                                   NSDictionary *dic = self.contacts[pos];
-                                   NSNumber *muc=[dic objectForKey:@"Muc"];
-                                   if(muc.boolValue ==YES)
+                                   MLContact *dic = self.contacts[pos];
+                                  
+                                   if(dic.isGroup)
                                    {
-                                       [dic setValue:[notification.userInfo objectForKey:@"muc_subject"] forKey:@"muc_subject"];
+                                       dic.groupSubject=[notification.userInfo objectForKey:@"muc_subject"];
                                    }
                                    [self refreshContact:notification];
                                    break;
@@ -1352,12 +1336,12 @@
     MLContact* contact = [notification.userInfo objectForKey:@"contact"];
     if(self.searchResults && self.contactsTable.selectedRow<self.searchResults.count)
     {
-        NSDictionary *contactRow = [self.searchResults objectAtIndex:self.contactsTable.selectedRow];
+        MLContact *contactRow = [self.searchResults objectAtIndex:self.contactsTable.selectedRow];
         [self.chatViewController showConversationForContact:contactRow];
      
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
             if((self.view.window.occlusionState & NSWindowOcclusionStateVisible)) {
-                [[DataLayer sharedInstance] markAsReadBuddy:[contactRow objectForKey:kContactName] forAccount:[contactRow objectForKey:kAccountID]];
+                [[DataLayer sharedInstance] markAsReadBuddy:contactRow.contactJid forAccount:contactRow.accountId];
                 [self updateAppBadge];
                 [self.contactsTable beginUpdates];
                 NSIndexSet *indexSet =[[NSIndexSet alloc] initWithIndex:self.contactsTable.selectedRow] ;
@@ -1491,12 +1475,14 @@
         
         MLKeyViewController *keys = (MLKeyViewController *)segue.destinationController;
         keys.ownKeys=YES;
-        keys.contact =@{@"buddy_name":xmppAccount.connectionProperties.identity.jid, @"account_id":[NSNumber numberWithInt:accountNo]};
+        MLContact *me = [[MLContact alloc] init];
+        me.contactJid=xmppAccount.connectionProperties.identity.jid;
+        me.accountId= [NSString stringWithFormat:@"%ld", accountNo];
     }
     
     if([segue.identifier isEqualToString:@"CallScreen"])
     {
-        NSDictionary *dic= (NSDictionary *) sender;
+        MLContact *dic= sender;
         MLCallScreen *call =  (MLCallScreen *)segue.destinationController;
         call.contact=dic;
     }

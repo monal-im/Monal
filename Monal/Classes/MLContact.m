@@ -36,8 +36,10 @@
     
     contact.groupSubject=[dic objectForKey:@"muc_subject"];
     contact.accountNickInGroup=[dic objectForKey:@"muc_nick"];
+    contact.isGroup=[[dic objectForKey:@"Muc"] boolValue];
     
-    if(contact.groupSubject.length>0 || contact.accountNickInGroup.length>0)
+    if(contact.groupSubject.length>0 ||
+       contact.accountNickInGroup.length>0)
         contact.isGroup=YES;
     
     contact.statusMessage=[dic objectForKey:@"status"];

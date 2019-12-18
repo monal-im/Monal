@@ -60,18 +60,25 @@
     }
 
     [[MLXMPPManager sharedInstance] joinRoom:self.room.stringValue withNick:self.nick.stringValue andPassword:self.password.stringValue forAccountRow:self.accounts.indexOfSelectedItem];
+        
     
-
-    NSString *nick=self.nick.stringValue;
-    NSString *room =self.room.stringValue;
+    NSString *nick=[self.nick.stringValue copy];
+    NSString *room =[self.room.stringValue copy];
+    NSString *pass=[self.password.stringValue copy];
+    NSInteger accountRow=self.accounts.indexOfSelectedItem;
     
-    [[DataLayer sharedInstance] addContact:room forAccount:[NSString stringWithFormat:@"%@", account] fullname:@"" nickname:@"" andMucNick:nick withCompletion:^(BOOL success) {
-         if(success)
-         [[DataLayer sharedInstance] updateOwnNickName:nick forMuc:room andServer:account.connectionProperties.conferenceServer forAccount:[NSString stringWithFormat:@"%@", account] withCompletion:^(BOOL success) {
-             
-         }];
-         
-     }];
+    NSString *combinedRoom = room;
+    if([combinedRoom componentsSeparatedByString:@"@"].count==1) {
+        combinedRoom = [NSString stringWithFormat:@"%@@%@", room, account.connectionProperties.conferenceServer];
+    }
+    
+    
+    [[DataLayer sharedInstance] addContact:combinedRoom forAccount:account.accountNo fullname:@"" nickname:@"" andMucNick:nick  withCompletion:^(BOOL success) {
+        //race condition on creation otherwise
+        [[MLXMPPManager sharedInstance] joinRoom:combinedRoom withNick:nick andPassword:pass forAccountRow:accountRow];
+        
+    }];
+    
 }
 
 @end

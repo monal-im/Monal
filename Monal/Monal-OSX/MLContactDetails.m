@@ -32,7 +32,7 @@
     self.buddyName.stringValue =self.contact.contactJid;
  
     
-    self.buddyMessage.stringValue= self.contact.statusMessage;
+    self.buddyMessage.stringValue= self.contact.statusMessage?self.contact.statusMessage:@"";
     if([self.buddyMessage.stringValue isEqualToString:@"(null)"])  self.buddyMessage.stringValue=@"";
     
     self.buddyStatus.stringValue=     self.contact.state;

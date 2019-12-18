@@ -31,8 +31,6 @@
 @property (nonatomic, assign) NSInteger thismonth;
 @property (nonatomic, assign) NSInteger thisday;
 
-@property (nonatomic, assign) BOOL isMUC;
-
 @property (nonatomic, strong) QLPreviewPanel *QLPreview;
 @property (nonatomic, strong) NSData *tmpPreviewImageData;
 
@@ -135,7 +133,6 @@
 //    [MLNotificationManager sharedInstance].currentAccountNo=self.contact.accountId;
 //    [MLNotificationManager sharedInstance].currentContact=self.contact.contactJid;
     self.contact= contact;
-    self.isMUC = contact.isGroup;
     
     NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.contact.accountId];
     if([accountVals count]>0)
@@ -212,7 +209,7 @@
 
     NSAlert *userAddAlert = [[NSAlert alloc] init];
     userAddAlert.messageText = @"Error";
-    userAddAlert.informativeText =[NSString stringWithFormat:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it. You can also link to DropBox in settings and use that to share files."];
+    userAddAlert.informativeText =[NSString stringWithFormat:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it."];
     userAddAlert.alertStyle=NSInformationalAlertStyle;
     [userAddAlert addButtonWithTitle:@"Close"];
     
@@ -523,7 +520,7 @@
     DDLogVerbose(@"Sending message %@", messageText);
     NSString *newMessageID =[[NSUUID UUID] UUIDString];
     [self.progressIndicator incrementBy:25];
-    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.isMUC isUpload:isUpload messageId:newMessageID
+    [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:isUpload messageId:newMessageID
      withCompletionHandler:^(BOOL success, NSString *messageId) {
          if(success)
          {
@@ -851,7 +848,7 @@
        cell.senderIcon.image=icon;
    }];
 
-    if(self.isMUC && cell.isInbound)
+    if(self.contact.isGroup && cell.isInbound)
     {
         cell.senderName.stringValue=messageRow.actualFrom;
         cell.senderName.hidden=NO;
@@ -892,7 +889,7 @@
         
         BOOL showTime=[self shouldShowTimeForRow:row];
         NSInteger timeOffset =0;
-        if(!showTime && !self.isMUC) timeOffset = kCellTimeStampHeight+kCellDefaultPadding;
+        if(!showTime && !self.contact.isGroup) timeOffset = kCellTimeStampHeight+kCellDefaultPadding;
         
         if(rect.size.height<44 )  { // 44 is doublie line height
             return  kCellMinHeight-timeOffset;

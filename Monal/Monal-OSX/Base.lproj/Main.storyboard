@@ -2959,69 +2959,6 @@ Gw
             <point key="canvasLocation" x="-365" y="-449"/>
         </scene>
         <!--Preferences-Display-->
-        <scene sceneID="Wmh-tx-gcD">
-            <objects>
-                <viewController title="Cloud Storage" storyboardIdentifier="cloudStorage" id="att-OF-UKh" userLabel="Preferences-Display" customClass="MLCloudStorageSettings" sceneMemberID="viewController">
-                    <view key="view" id="G7r-V2-PmX">
-                        <rect key="frame" x="0.0" y="0.0" width="357" height="160"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <subviews>
-                            <box autoresizesSubviews="NO" fixedFrame="YES" borderType="line" title="Select one storage option for attachments" translatesAutoresizingMaskIntoConstraints="NO" id="qE4-2L-v5l">
-                                <rect key="frame" x="17" y="16" width="315" height="124"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <view key="contentView" id="xF4-gl-Kjx">
-                                    <rect key="frame" x="3" y="3" width="309" height="106"/>
-                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                    <subviews>
-                                        <button hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="O3e-IW-gdb">
-                                            <rect key="frame" x="16" y="53" width="147" height="18"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Box" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="Y4n-dd-fgc">
-                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                <font key="font" metaFont="system"/>
-                                            </buttonCell>
-                                        </button>
-                                        <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kJG-2p-iIB">
-                                            <rect key="frame" x="16" y="80" width="86" height="18"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="DropBox" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="cCj-YY-s1D">
-                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                <font key="font" metaFont="system"/>
-                                            </buttonCell>
-                                            <connections>
-                                                <action selector="toggleDropBox:" target="att-OF-UKh" id="9PB-Au-H0X"/>
-                                            </connections>
-                                        </button>
-                                        <button hidden="YES" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wdt-KV-OJU">
-                                            <rect key="frame" x="16" y="25" width="147" height="18"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="ownCloud" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="i75-Z1-bsY">
-                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
-                                                <font key="font" metaFont="system"/>
-                                            </buttonCell>
-                                        </button>
-                                        <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="Url-NZ-Mq2">
-                                            <rect key="frame" x="94" y="80" width="16" height="16"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                        </progressIndicator>
-                                    </subviews>
-                                </view>
-                            </box>
-                        </subviews>
-                    </view>
-                    <connections>
-                        <outlet property="box" destination="O3e-IW-gdb" id="ghF-iN-6dR"/>
-                        <outlet property="dropBox" destination="kJG-2p-iIB" id="vhj-5S-2mc"/>
-                        <outlet property="ownCloud" destination="wdt-KV-OJU" id="kaJ-uh-RTH"/>
-                        <outlet property="progressIndicator" destination="Url-NZ-Mq2" id="ntq-Bc-eLn"/>
-                        <outlet property="view" destination="G7r-V2-PmX" id="C1a-1T-g6A"/>
-                    </connections>
-                </viewController>
-                <customObject id="4As-mx-bUt" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="265.5" y="-883"/>
-        </scene>
-        <!--Preferences-Display-->
         <scene sceneID="9lU-WJ-X19">
             <objects>
                 <viewController title="Display" storyboardIdentifier="display" id="t3n-LA-K5d" userLabel="Preferences-Display" customClass="MLDisplaySettings" sceneMemberID="viewController">

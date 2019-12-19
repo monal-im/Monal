@@ -163,21 +163,7 @@
            !([message.to isEqualToString:self.currentContact.contactJid] ) )
             //  &&![[notification.userInfo objectForKey:@"from"] isEqualToString:@"Info"]
         {
-            if(SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"10.0")){
                 [self showModernNotificaion:notification];
-            } else  {
-                NSString* acctString =message.accountId;
-                NSString* fullName =[[DataLayer sharedInstance] fullName:message.from forAccount:acctString];
-                
-                NSString* nameToShow=message.from;
-                if([fullName length]>0) nameToShow=fullName;
-               
-                SlidingMessageViewController* slidingView= [[SlidingMessageViewController alloc] correctSliderWithTitle:nameToShow message:message.messageText user:message.from account:message.accountId];
-                
-                [self.window addSubview:slidingView.view];
-                
-                [slidingView showMsg];
-            }
         }
     }
     

@@ -64,9 +64,9 @@
         
         _from = [_from lowercaseString]; // intedned to not break code that expects lowercase
             
+        }else  {
+            DDLogError(@"Attempt to overwrite from");
         }
-    } else  {
-        DDLogError(@"Attempt to overwrite from");
     }
     
     if(!_idval) _idval =[attributeDict objectForKey:@"id"] ;
@@ -74,12 +74,13 @@
     if([attributeDict objectForKey:@"to"])
     {
         if(!_to) {
-        _to =[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+            _to =[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
             _to=[_to lowercaseString];
             
         }
-    }else  {
-        DDLogError(@"Attempt to overwrite to");
+        else  {
+            DDLogError(@"Attempt to overwrite to");
+        }
     }
     
     //remove any  resource markers and get user

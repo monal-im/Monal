@@ -179,13 +179,8 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-
-    if (@available(iOS 10.0, *)) {
         [DDLog addLogger:[DDOSLogger sharedInstance]];
-    } else {
-        [DDLog addLogger:[DDASLLogger sharedInstance]];
-        [DDLog addLogger:[DDTTYLogger sharedInstance]];
-    }
+   
 #ifdef  DEBUG
     
 #ifndef TARGET_IPHONE_SIMULATOR
@@ -198,9 +193,7 @@
     
 #endif
     
-    if (@available(iOS 10.0, *)) {
         [UNUserNotificationCenter currentNotificationCenter].delegate=self;
-    }
     
        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateState:) name:kMLHasConnectedNotice object:nil];
     
@@ -439,12 +432,6 @@
 {
     [self updateUnread];
     [[NSUserDefaults standardUserDefaults] synchronize];
-}
-
-#pragma mark - splitview controller delegate
-- (BOOL)splitViewController:(UISplitViewController *)svc shouldHideViewController:(UIViewController *)vc inOrientation:(UIInterfaceOrientation)orientation
-{
-    return NO;
 }
 
 #pragma mark - error feedback

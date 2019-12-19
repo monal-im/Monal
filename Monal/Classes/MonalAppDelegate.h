@@ -16,7 +16,7 @@
 @import UserNotifications;
 
 
-@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UISplitViewControllerDelegate, PKPushRegistryDelegate, UNUserNotificationCenterDelegate >
+@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, PKPushRegistryDelegate, UNUserNotificationCenterDelegate >
 
 
 @property (nonatomic, strong) UIWindow* window;

@@ -11,11 +11,7 @@
 #import "XMPPEdit.h"
 #import "tools.h"
 #import "MBProgressHUD.h"
-#import "CWStatusBarNotification.h"
 #import "xmpp.h"
-
-
-
 
 
 @interface AccountsViewController ()
@@ -23,7 +19,6 @@
 @property (nonatomic , strong) NSDateFormatter *uptimeFormatter;
 
 @property (nonatomic, strong) NSIndexPath  *selected;
-@property (nonatomic, strong) CWStatusBarNotification * sliding;
 
 @property (nonatomic, strong) NSArray* accountList;
 @property (nonatomic, strong) NSArray* protocolList;
@@ -63,11 +58,8 @@
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(refreshAccountList) name:kMonalAccountStatusChanged object:nil];
-    [nc addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
-    
+  
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
-    self.sliding = [CWStatusBarNotification new];
-    
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -101,30 +93,7 @@
     }];
 }
 
-#pragma mark - error feedback
 
--(void) showConnectionStatus:(NSNotification *) notification
-{
-    NSArray *payload= [notification.object copy];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-           || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))
-        {
-            DDLogDebug(@"not surfacing errors in the background because they are super common");
-        } else  {
-            self.sliding.notificationLabelBackgroundColor = [UIColor redColor];
-            self.sliding.notificationLabelTextColor = [UIColor whiteColor];
-            
-            NSString *message = payload[1]; // this is just the way i set it up a dic might better
-            xmpp *xmppAccount= payload.firstObject;
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self.sliding displayNotificationWithMessage:[NSString stringWithFormat:@"%@: %@",xmppAccount.connectionProperties.identity.jid , message]
-                                                 forDuration:3.0f];
-            });
-        }
-    });
-}
 
 #pragma mark button actions
 

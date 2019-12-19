@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
-#import "SlidingMessageViewController.h"
 #import "DataLayer.h"
 
 /**

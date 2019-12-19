@@ -32,7 +32,7 @@
     
     self.serverCaps =[[NSMutableArray alloc] init];
     if(self.xmppAccount.connectionProperties.server) {
-        self.view.window.title= self.xmppAccount.connectionProperties.server;
+        self.view.window.title= self.xmppAccount.connectionProperties.server.host;
     }
     
     if(self.xmppAccount.connectionProperties.supportsSM3)

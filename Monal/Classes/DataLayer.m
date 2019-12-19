@@ -1379,6 +1379,11 @@ static DataLayer *sharedInstance=nil;
     NSString* query=[NSString stringWithFormat:@"SELECT muc_nick from buddylist where account_id=?  and buddy_name=? "];
     NSArray *params=@[ accountNo, combinedRoom];
     NSString * nick=(NSString*)[self executeScalar:query andArguments:params];
+    if(nick.length==0) {
+        NSString* query2=[NSString stringWithFormat:@"SELECT nick from muc_favorites where account_id=?  and room=? "];
+        NSArray *params2=@[ accountNo, combinedRoom];
+        nick=(NSString*)[self executeScalar:query2 andArguments:params2];
+    }
     return nick;
 }
 

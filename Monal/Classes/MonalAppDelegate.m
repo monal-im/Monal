@@ -434,12 +434,6 @@
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
-#pragma mark - splitview controller delegate
-- (BOOL)splitViewController:(UISplitViewController *)svc shouldHideViewController:(UIViewController *)vc inOrientation:(UIInterfaceOrientation)orientation
-{
-    return NO;
-}
-
 #pragma mark - error feedback
 
 -(void) showConnectionStatus:(NSNotification *) notification

@@ -21,6 +21,8 @@
 @import Fabric;
 //#endif
 
+@import NotificationBannerSwift;
+
 #import "MLXMPPManager.h"
 #import "UIColor+Theme.h"
 
@@ -201,6 +203,9 @@
     }
     
        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateState:) name:kMLHasConnectedNotice object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
+    
     
     //ios8 register for local notifications and badges
     if([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)])
@@ -440,6 +445,30 @@
 - (BOOL)splitViewController:(UISplitViewController *)svc shouldHideViewController:(UIViewController *)vc inOrientation:(UIInterfaceOrientation)orientation
 {
     return NO;
+}
+
+#pragma mark - error feedback
+
+-(void) showConnectionStatus:(NSNotification *) notification
+{
+    NSArray *payload= [notification.object copy];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+           || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))
+        {
+            DDLogDebug(@"not surfacing errors in the background because they are super common");
+        } else  {
+            NSString *message = payload[1]; // this is just the way i set it up a dic might better
+            xmpp *xmppAccount= payload.firstObject;
+
+            NotificationBanner *banner =[[NotificationBanner alloc] initWithTitle:xmppAccount.connectionProperties.identity.jid subtitle:message leftView:nil rightView:nil style:BannerStyleInfo colors:nil];
+           
+            NotificationBannerQueue *queue = [[NotificationBannerQueue alloc] initWithMaxBannersOnScreenSimultaneously:2];
+            
+            [banner showWithQueuePosition:QueuePositionFront bannerPosition:BannerPositionTop queue:queue on:nil];
+            
+        }
+    });
 }
 
 @end

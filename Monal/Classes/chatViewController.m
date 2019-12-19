@@ -608,23 +608,37 @@
                              messageObj.encrypted=self.encryptChat;
                              messageObj.messageType=messageType;
                              messageObj.messageText=message;
-                
-                if(!self.messageList) self.messageList =[[NSMutableArray alloc] init];
-                [self.messageList addObject:messageObj];
-                
-                NSIndexPath *path1;
-                [self->_messageTable beginUpdates];
-                NSInteger bottom = [self.messageList count]-1;
-                if(bottom>=0) {
-                    path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
-                    [self->_messageTable insertRowsAtIndexPaths:@[path1]
-                                               withRowAnimation:UITableViewRowAnimationFade];
+    
+                if (@available(iOS 11.0, *)) {
+                    [self.messageTable performBatchUpdates:^{
+                        if(!self.messageList) self.messageList =[[NSMutableArray alloc] init];
+                        [self.messageList addObject:messageObj];
+                        NSInteger bottom = [self.messageList count]-1;
+                        if(bottom>=0) {
+                            NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
+                            [self->_messageTable insertRowsAtIndexPaths:@[path1]
+                                                       withRowAnimation:UITableViewRowAnimationFade];
+                        }
+                    } completion:^(BOOL finished) {
+                        if(completion) completion(result);
+                        
+                        [self scrollToBottom];
+                    }];
+                } else  {
+                    if(!self.messageList) self.messageList =[[NSMutableArray alloc] init];
+                    [self.messageList addObject:messageObj];
+                    [self->_messageTable beginUpdates];
+                    NSInteger bottom = [self.messageList count]-1;
+                    if(bottom>=0) {
+                        NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
+                        [self->_messageTable insertRowsAtIndexPaths:@[path1]
+                                                   withRowAnimation:UITableViewRowAnimationFade];
+                    }
+                    [self->_messageTable endUpdates];
+                    if(completion) completion(result);
+                    
+                    [self scrollToBottom];
                 }
-                [self->_messageTable endUpdates];
-                if(completion) completion(result);
-                
-                [self scrollToBottom];
-                
                 
             });
         }

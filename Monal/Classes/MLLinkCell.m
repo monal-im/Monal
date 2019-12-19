@@ -78,9 +78,11 @@
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.messageTitle.text=[MLMetaInfo ogContentWithTag:@"og:title" inHTML:body] ;
                 self.imageUrl=[NSURL URLWithString:[[MLMetaInfo ogContentWithTag:@"og:image" inHTML:body] stringByRemovingPercentEncoding]];
-                [self loadImageWithCompletion:^{
-                    if(completion) completion();
-                }];
+                if(self.imageUrl) {
+                    [self loadImageWithCompletion:^{
+                        if(completion) completion();
+                    }];
+                }
             });
         }] resume];
     } else  if(completion) completion();

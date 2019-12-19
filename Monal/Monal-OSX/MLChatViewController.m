@@ -322,7 +322,7 @@
     }
     
     if([message.accountId isEqualToString:self.contact.accountId]
-       &&( ( [message.actualFrom isEqualToString:self.contact.contactJid])
+       &&( ( [message.from isEqualToString:self.contact.contactJid])
           || ([message.to isEqualToString:self.contact.contactJid] ))
        )
     {

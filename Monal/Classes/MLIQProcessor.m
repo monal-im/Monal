@@ -222,7 +222,7 @@
     //            [self cleanDisco];
     //        }
     
-    if(iqNode.features && iqNode.discoInfo) {
+    if(iqNode.features) {
         if([iqNode.from isEqualToString:self.connection.server.host] ||
            [iqNode.from isEqualToString:self.connection.identity.domain]) {
             self.connection.serverFeatures=iqNode.features;

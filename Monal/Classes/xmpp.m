@@ -101,7 +101,6 @@ NSString *const kXMPPPresence = @"presence";
 @property (nonatomic, strong) NSOperationQueue *processQueue;
 
 //HTTP upload
-@property (nonatomic, assign) BOOL supportsHTTPUpload;
 @property (nonatomic, strong) NSMutableArray *httpUploadQueue;
 
 
@@ -2362,7 +2361,7 @@ static NSMutableArray *extracted(xmpp *object) {
         self.connectionProperties.uploadServer= [dic objectForKey:@"uploadServer"];
         if(self.connectionProperties.uploadServer)
         {
-            self.supportsHTTPUpload=YES;
+            self.connectionProperties.supportsHTTPUpload=YES;
         }
         self.connectionProperties.conferenceServer = [dic objectForKey:@"conferenceServer"];
         

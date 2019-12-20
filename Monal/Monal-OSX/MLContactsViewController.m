@@ -1192,7 +1192,7 @@
                         } else return @"";
                     }
                 }  else  {
-                    return 0;
+                    return @"";
                 }
                 
             }

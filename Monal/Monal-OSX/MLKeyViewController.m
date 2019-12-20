@@ -63,7 +63,8 @@
     if(identity) {
     cell.key.stringValue = [EncodingTools signalHexKeyWithData:identity];
     }
-    if( [self.account.monalSignalStore isTrustedIdentity:address identityKey:identity])
+    
+    if( identity!=nil && [self.account.monalSignalStore isTrustedIdentity:address identityKey:identity])
     {
         [cell.toggle setState:NSControlStateValueOn];
     } else  {

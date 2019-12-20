@@ -69,7 +69,7 @@
             ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.from andServer:@"" forAccount:self.accountNo];
         }
         
-        if ([messageNode.type isEqualToString:kMessageGroupChatType]
+        if (ownNick!=nil
             && [messageNode.actualFrom isEqualToString:ownNick])
         {
             DDLogDebug(@"Dropping muc echo");

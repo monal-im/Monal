@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Retrieves opengraph meta tag from provided body
  */
-+ (NSString *) ogContentWithTag:(NSString *) tag inHTML:(NSString *) body;
++ (NSString * _Nullable) ogContentWithTag:(NSString *) tag inHTML:(NSString *) body;
 
 @end
 

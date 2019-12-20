@@ -81,7 +81,7 @@ An array of Dics what have timers to make sure everything was sent
     //on upgrade this one needs to be set to yes. Can be removed later.
     NSNumber *imagesTest= [[NSUserDefaults standardUserDefaults] objectForKey: @"ShowImages"];
 
-    if(!imagesTest)
+    if(imagesTest==nil)
     {
           [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ShowImages"];
           [[NSUserDefaults standardUserDefaults] synchronize];
@@ -89,14 +89,14 @@ An array of Dics what have timers to make sure everything was sent
 
     //upgrade
     NSNumber *background =   [[NSUserDefaults standardUserDefaults] objectForKey: @"ChatBackgrounds"];
-    if(!background)
+    if(background==nil)
     {
         [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ChatBackgrounds"];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
 
     NSNumber *sounds =  [[NSUserDefaults standardUserDefaults] objectForKey: @"AlertSoundFile"];
-    if(!sounds)
+    if(sounds==nil)
     {
         [[NSUserDefaults standardUserDefaults] setObject:@"alert2" forKey:@"AlertSoundFile"];
         [[NSUserDefaults standardUserDefaults] synchronize];

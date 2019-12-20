@@ -10,7 +10,7 @@
 
 @implementation MLMetaInfo
 
-+ (NSString *) ogContentWithTag:(NSString *) tag inHTML:(NSString *) body
++ (NSString * _Nullable) ogContentWithTag:(NSString *) tag inHTML:(NSString *) body
 {
     NSRange titlePos = [body rangeOfString:tag];
     if(titlePos.location==NSNotFound) return nil;

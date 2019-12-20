@@ -95,17 +95,18 @@
 #pragma mark - notifications
 -(void) handleConnect:(NSNotification *)notification
 {
-    if(self.window.isKeyWindow) {
-         [[MLXMPPManager sharedInstance] setClientsActive]; 
-    }
-    else  {
-        NSString* nameToShow=[notification.object objectForKey:@"AccountName"];
-        NSUserNotification *alert =[[NSUserNotification alloc] init];
-        NSString* messageString =[NSString stringWithFormat:@"Account %@ has connected.", nameToShow];
-        alert.informativeText =messageString;
-        [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
-    }
-    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(self.window.isKeyWindow) {
+               [[MLXMPPManager sharedInstance] setClientsActive];
+          }
+          else  {
+              NSString* nameToShow=[notification.object objectForKey:@"AccountName"];
+              NSUserNotification *alert =[[NSUserNotification alloc] init];
+              NSString* messageString =[NSString stringWithFormat:@"Account %@ has connected.", nameToShow];
+              alert.informativeText =messageString;
+              [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:alert];
+          }
+    });    
 }
 
 -(void) showConnectionStatus:(NSNotification *) notification

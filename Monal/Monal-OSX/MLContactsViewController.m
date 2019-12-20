@@ -1478,6 +1478,7 @@
         MLContact *me = [[MLContact alloc] init];
         me.contactJid=xmppAccount.connectionProperties.identity.jid;
         me.accountId= [NSString stringWithFormat:@"%ld", accountNo];
+        keys.contact=me; 
     }
     
     if([segue.identifier isEqualToString:@"CallScreen"])

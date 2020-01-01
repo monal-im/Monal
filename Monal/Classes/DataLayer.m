@@ -1733,6 +1733,7 @@ static DataLayer *sharedInstance=nil;
     
     NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
     [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     
     NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
     [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -1872,6 +1873,7 @@ static DataLayer *sharedInstance=nil;
     
     NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
     [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     
     NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:rawArray.count];
     [rawArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -1901,6 +1903,7 @@ static DataLayer *sharedInstance=nil;
     
     NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
     [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     
     NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
     [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {

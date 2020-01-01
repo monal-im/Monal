@@ -58,14 +58,16 @@
     [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
         if(!granted)
         {
-            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Please Allow Audio Access" message:@"If you want to use VOIP you will need to allow access in Settings->Privacy->Microphone." preferredStyle:UIAlertControllerStyleAlert];
-            
-            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Please Allow Audio Access" message:@"If you want to use VOIP you will need to allow access in Settings->Privacy->Microphone." preferredStyle:UIAlertControllerStyleAlert];
                 
-            }];
-            
-            [messageAlert addAction:closeAction];
-            [self presentViewController:messageAlert animated:YES completion:nil];
+                UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                    
+                }];
+                
+                [messageAlert addAction:closeAction];
+                [self presentViewController:messageAlert animated:YES completion:nil];
+            });
         }
     }];
 }

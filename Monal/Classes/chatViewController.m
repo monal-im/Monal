@@ -29,7 +29,6 @@
 @interface chatViewController()<IDMPhotoBrowserDelegate>
 
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
-@property (nonatomic, strong)  NSDateFormatter* sourceDateFormat;
 @property (nonatomic, strong)  NSCalendar *gregorian;
 @property (nonatomic, assign)  NSInteger thisyear;
 @property (nonatomic, assign)  NSInteger thismonth;
@@ -823,11 +822,7 @@
     self.destinationDateFormat = [[NSDateFormatter alloc] init];
     [self.destinationDateFormat setLocale:[NSLocale currentLocale]];
     [self.destinationDateFormat setDoesRelativeDateFormatting:YES];
-    
-    self.sourceDateFormat = [[NSDateFormatter alloc] init];
-    [self.sourceDateFormat setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-    [self.sourceDateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    
+
     self.gregorian = [[NSCalendar alloc]
                       initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     
@@ -837,34 +832,16 @@
     self.thisyear =[self.gregorian components:NSCalendarUnitYear fromDate:now].year;
 }
 
--(NSString*) currentGMTTime
-{
-    NSDate* sourceDate =[NSDate date];
-    return [self.sourceDateFormat stringFromDate:sourceDate];
-}
 
--(NSString*) formattedDateWithSource:(NSObject *) sourceDateString andPriorDate:(NSObject *) priorDateString
+-(NSString*) formattedDateWithSource:(NSDate *) sourceDate  andPriorDate:(NSDate *) priorDate
 {
     NSString* dateString;
-    if(sourceDateString!=nil)
+    if(sourceDate!=nil)
     {
-        NSDate* sourceDate;
-        if([sourceDateString isKindOfClass:[NSDate class]]){
-            sourceDate=(NSDate *)sourceDateString;
-        } else  {
-            sourceDate= [self.sourceDateFormat dateFromString: (NSString *)sourceDateString];
-        }
         
         NSInteger msgday =[self.gregorian components:NSCalendarUnitDay fromDate:sourceDate].day;
         NSInteger msgmonth=[self.gregorian components:NSCalendarUnitMonth fromDate:sourceDate].month;
         NSInteger msgyear =[self.gregorian components:NSCalendarUnitYear fromDate:sourceDate].year;
-        
-        NSDate* priorDate;
-        if([priorDateString isKindOfClass:[NSDate class]]){
-            priorDate=(NSDate *)priorDateString;
-        } else  {
-            priorDate= [self.sourceDateFormat dateFromString: (NSString *)priorDateString];
-        }
         
         NSInteger priorDay=0;
         NSInteger priorMonth=0;
@@ -889,18 +866,11 @@
     return dateString;
 }
 
--(NSString*) formattedTimeStampWithSource:(NSObject *) sourceDateString
+-(NSString*) formattedTimeStampWithSource:(NSDate *) sourceDate
 {
     NSString* dateString;
-    if(sourceDateString!=nil)
+    if(sourceDate!=nil)
     {
-        NSDate* sourceDate;
-        if([sourceDateString isKindOfClass:[NSDate class]]){
-            sourceDate=(NSDate *)sourceDateString;
-        } else  {
-            sourceDate= [self.sourceDateFormat dateFromString: (NSString *)sourceDateString];
-        }
-        
         [self.destinationDateFormat setDateStyle:NSDateFormatterNoStyle];
         [self.destinationDateFormat setTimeStyle:NSDateFormatterShortStyle];
         

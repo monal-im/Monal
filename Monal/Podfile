@@ -30,7 +30,6 @@ target 'NotificaionService' do
    use_frameworks!
    inhibit_all_warnings!
 
-pod 'CocoaLumberjack'
 end
 
 target 'Monal' do
@@ -99,7 +98,7 @@ pod 'TPCircularBuffer'
 pod 'CocoaLumberjack'
 pod 'SignalProtocolObjC'
 pod 'SignalProtocolC'
-pod 'OpenSSL-Universal' 
+pod 'OpenSSL-Universal'
 
 pod 'Sparkle'
 

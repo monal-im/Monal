@@ -2029,7 +2029,7 @@
 			name = tools;
 			sourceTree = "<group>";
 		};
-		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
+		29B97314FDCFA39411CA2CEA = {
 			isa = PBXGroup;
 			children = (
 				26AA70222146E2B900598605 /* shareSheet.entitlements */,
@@ -2597,7 +2597,7 @@
 				"zh-Hant",
 				Base,
 			);
-			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
+			mainGroup = 29B97314FDCFA39411CA2CEA;
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -2725,7 +2725,7 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS9.3/CocoaLumberjack.framework",
+				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS/CocoaLumberjack.framework",
 				"${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS/SAMKeychain.framework",
 				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS/SignalProtocolC.framework",
 				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS/SignalProtocolObjC.framework",
@@ -2751,7 +2751,7 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS10.0/CocoaLumberjack.framework",
+				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS/CocoaLumberjack.framework",
 				"${BUILT_PRODUCTS_DIR}/DACircularProgress/DACircularProgress.framework",
 				"${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework",
 				"${BUILT_PRODUCTS_DIR}/EAIntroView/EAIntroView.framework",
@@ -2763,8 +2763,6 @@
 				"${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework",
 				"${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework",
 				"${BUILT_PRODUCTS_DIR}/pop/pop.framework",
-				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS13.0/CocoaLumberjack.framework",
-				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS9.3/CocoaLumberjack.framework",
 				"${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS/SAMKeychain.framework",
 				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS/SignalProtocolC.framework",
 				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS/SignalProtocolObjC.framework",
@@ -3002,7 +3000,7 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-macOS10.10/CocoaLumberjack.framework",
+				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-macOS/CocoaLumberjack.framework",
 				"${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS/SAMKeychain.framework",
 				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS/SignalProtocolC.framework",
 				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-macOS/SignalProtocolObjC.framework",

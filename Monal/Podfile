@@ -67,7 +67,7 @@ target 'monalxmpp' do
   pod 'CocoaLumberjack'
   pod 'SignalProtocolObjC'
   pod 'SignalProtocolC'
-  pod 'OpenSSL-Universal'
+  # pod 'OpenSSL-Universal'
 
 end
 
@@ -99,7 +99,7 @@ pod 'TPCircularBuffer'
 pod 'CocoaLumberjack'
 pod 'SignalProtocolObjC'
 pod 'SignalProtocolC'
-pod 'OpenSSL-Universal' 
+pod 'OpenSSL-Universal'
 
 pod 'Sparkle'
 

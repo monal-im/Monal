@@ -82,7 +82,14 @@
     appDelegate.splitViewController= self.splitViewController;
     appDelegate.tabBarController = (MLTabBarController *) self.tabBarController;
     
-    
+       #if TARGET_OS_MACCATALYST
+        if (@available(iOS 13.0, *)) {
+            self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
+        } else {
+            // Fallback on earlier versions
+        }
+    #endif
+
 }
 
 -(void) dealloc

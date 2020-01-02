@@ -16,6 +16,7 @@
 @property (nonatomic, strong) NSMutableArray *photos;
 @property (nonatomic, strong) NSArray *imageList;
 @property (nonatomic, assign) NSUInteger selectedIndex;
+@property (nonatomic, assign) NSUInteger displayedPhotoIndex;
 @end
 
 @implementation MLBackgroundSettings
@@ -152,6 +153,8 @@
     IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
     browser.navigationItem.title=@"Select a Background";
     browser.delegate=self;
+    UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStyleDone target:self action:@selector(close)];
+    browser.navigationItem.rightBarButtonItem=close;
     
     UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
 
@@ -159,26 +162,15 @@
     [self.navigationController presentViewController:nav animated:YES completion:nil];
 }
 
+-(void) close {
+    [[NSUserDefaults standardUserDefaults] setObject:[self.imageList objectAtIndex:self.displayedPhotoIndex] forKey:@"BackgroundImage"];
+    [self.navigationController dismissViewControllerAnimated:YES completion:nil];
+}
 
 #pragma mark - photo browser delegate
-
-- (NSUInteger)numberOfPhotosInPhotoBrowser:(IDMPhotoBrowser *)photoBrowser {
-    return self.photos.count;
-}
-
-- (id <IDMPhoto>)photoBrowser:(IDMPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index {
-    if (index < self.photos.count) {
-        return [self.photos objectAtIndex:index];
-    }
-    return nil;
-}
-
-- (id <IDMPhoto>)photoBrowser:(IDMPhotoBrowser *)photoBrowser thumbPhotoAtIndex:(NSUInteger)index;
+- (void)photoBrowser:(IDMPhotoBrowser *)photoBrowser didShowPhotoAtIndex:(NSUInteger)index
 {
-    if (index < self.photos.count) {
-        return [self.photos objectAtIndex:index];
-    }
-    return nil;
+   self.displayedPhotoIndex=index;
 }
 
 - (void)photoBrowser:(IDMPhotoBrowser *)photoBrowser didDismissAtPageIndex:(NSUInteger)index

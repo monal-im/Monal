@@ -43,15 +43,17 @@
   {
     _toggleSwitch.on=  [[NSUserDefaults standardUserDefaults] boolForKey: _defaultKey];
       [ _toggleSwitch addTarget:self action:@selector(switchChange) forControlEvents:UIControlEventValueChanged];
+      CGRect frame=CGRectMake(self.frame.size.width-50-padding,
+                                textLabelFrame.origin.y+9,
+                                0,
+                                0);
+      _toggleSwitch.frame=frame;
     [self.contentView addSubview: _toggleSwitch ];
-      
     
   }
     
     if(self.textEnabled)
     {
-        
-        
         CGRect frame=CGRectMake(self.frame.size.width-79-padding,
                                 textLabelFrame.origin.y+9,79,
                                 textLabelFrame.size.height*2/3);

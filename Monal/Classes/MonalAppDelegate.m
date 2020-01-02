@@ -16,10 +16,10 @@
 #import "MLPush.h"
 #import "MLImageManager.h"
 
-//#if TARGET_OS_MACCATALYST
+#if !TARGET_OS_MACCATALYST
 @import Crashlytics;
 @import Fabric;
-//#endif
+#endif
 
 @import NotificationBannerSwift;
 
@@ -77,7 +77,7 @@
 
 
 #pragma mark - VOIP notification
-//#if TARGET_OS_MACCATALYST
+#if !TARGET_OS_MACCATALYST
 -(void) voipRegistration
 {
     DDLogInfo(@"registering for voip APNS...");
@@ -124,7 +124,7 @@
     }
 }
 
-//#endif
+#endif
 
 #pragma mark - notification actions
 -(void) showCallScreen:(NSNotification*) userInfo
@@ -240,9 +240,9 @@
             [[UIApplication sharedApplication] registerForRemoteNotifications];
            }
            else {
-         //     #if TARGET_OS_MACCATALYST
+             #if !TARGET_OS_MACCATALYST
                       [self voipRegistration];
-          //  #endif
+           #endif
            }
     }
     else  {
@@ -259,12 +259,12 @@
     // should any accounts connect?
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     
-    //#if TARGET_OS_MACCATALYST
+    #if !TARGET_OS_MACCATALYST
     BOOL optout = [[NSUserDefaults standardUserDefaults] boolForKey:@"CrashlyticsOptOut"];
     if(!optout) {
         [Fabric with:@[[Crashlytics class]]];
     }
-    //#endif
+    #endif
     
     //update logs if needed
     if(! [[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])

@@ -273,7 +273,8 @@
         if(self.photos.count>0) {
             IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
             browser.delegate=self;
-            browser.displayDoneButton=YES;
+            UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStyleDone target:self action:@selector(closePhotos)];
+                          browser.navigationItem.rightBarButtonItem=close;
             
             UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
             
@@ -289,6 +290,10 @@
         
     });
     
+}
+
+-(void) closePhotos {
+    [self.navigationController dismissViewControllerAnimated:YES completion:nil];
 }
 
 -(IBAction)close:(id)sender

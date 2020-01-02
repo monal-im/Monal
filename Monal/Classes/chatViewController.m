@@ -1195,6 +1195,9 @@
             if(self.photos.count>0) {
                 IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
                 browser.delegate=self;
+               
+                UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStyleDone target:self action:@selector(closePhotos)];
+                browser.navigationItem.rightBarButtonItem=close;
                 
                 //                browser.displayActionButton = YES; // Show action button to allow sharing, copying, etc (defaults to YES)
                 //                browser.displayNavArrows = NO; // Whether to display left and right nav arrows on toolbar (defaults to NO)
@@ -1212,6 +1215,10 @@
         });
         
     }
+}
+
+-(void) closePhotos {
+    [self.navigationController dismissViewControllerAnimated:YES completion:nil];
 }
 
 #pragma mark tableview datasource

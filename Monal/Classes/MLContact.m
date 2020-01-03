@@ -46,7 +46,6 @@
     contact.state=[dic objectForKey:@"state"];
     
     contact.unreadCount=[[dic objectForKey:@"count"] integerValue];
-    
     return contact;
 }
 

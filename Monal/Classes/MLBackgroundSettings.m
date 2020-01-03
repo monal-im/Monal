@@ -17,6 +17,9 @@
 @property (nonatomic, strong) NSArray *imageList;
 @property (nonatomic, assign) NSUInteger selectedIndex;
 @property (nonatomic, assign) NSUInteger displayedPhotoIndex;
+@property (nonatomic, strong) UIImage *leftImage;
+@property (nonatomic, strong) UIImage *rightImage;
+
 @end
 
 @implementation MLBackgroundSettings
@@ -156,15 +159,26 @@
     UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStyleDone target:self action:@selector(close)];
     browser.navigationItem.rightBarButtonItem=close;
     
+    browser.autoHideInterface=NO;
+    browser.displayArrowButton = YES;
+    browser.displayCounterLabel = YES;
+    browser.displayActionButton=YES;
+    browser.displayToolbar=YES;
+    
+    self.leftImage=[UIImage imageNamed:@"IDMPhotoBrowser_arrowLeft"];
+    self.rightImage=[UIImage imageNamed:@"IDMPhotoBrowser_arrowRight"];
+    browser.leftArrowImage =self.leftImage;
+    browser.rightArrowImage =self.rightImage;
+
     UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
 
     // Present
-    [self.navigationController presentViewController:nav animated:YES completion:nil];
+    [self presentViewController:nav animated:YES completion:nil];
 }
 
 -(void) close {
     [[NSUserDefaults standardUserDefaults] setObject:[self.imageList objectAtIndex:self.displayedPhotoIndex] forKey:@"BackgroundImage"];
-    [self.navigationController dismissViewControllerAnimated:YES completion:nil];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 #pragma mark - photo browser delegate

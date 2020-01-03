@@ -240,9 +240,9 @@
             [[UIApplication sharedApplication] registerForRemoteNotifications];
            }
            else {
-             #if !TARGET_OS_MACCATALYST
+              #if !TARGET_OS_MACCATALYST
                       [self voipRegistration];
-           #endif
+            #endif
            }
     }
     else  {

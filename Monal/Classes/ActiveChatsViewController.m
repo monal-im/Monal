@@ -64,7 +64,7 @@
          forCellReuseIdentifier:@"ContactCell"];
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
-    #if TARGET_OS_MACCATALYST
+    #if !TARGET_OS_MACCATALYST
     if (@available(iOS 13.0, *)) {
         self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
     } else {
@@ -203,7 +203,6 @@
     if(messages.count>0)
     {
         MLMessage *messageRow = messages[0];
-        //TODO chek type Message, Image, Link
         if([messageRow.messageType isEqualToString:kMessageTypeUrl])
         {
             [cell showStatusText:@"🔗 A Link"];
@@ -211,10 +210,10 @@
         {
             [cell showStatusText:@"📷 An Image"];
         } else  {
-        [cell showStatusText:messageRow.messageText];
+            [cell showStatusText:messageRow.messageText];
         }
     } else  {
-        DDLogWarn(@"Active chat bu no messages found in history for %@.", row.contactJid);
+        DDLogWarn(@"Active chat but no messages found in history for %@.", row.contactJid);
     }
     
     [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {

@@ -217,7 +217,7 @@
     
     [self updateBackground];
     
-    
+    self.placeHolderText.text=[NSString stringWithFormat:@"New Message using %@", self.jid];
 }
 
 
@@ -1329,6 +1329,11 @@
 
 - (void)textViewDidChange:(UITextView *)textView
 {
+    if(textView.text.length>0)
+        self.placeHolderText.hidden=YES;
+    else
+        self.placeHolderText.hidden=NO;
+    
     [self updateInputViewSize];
 }
 

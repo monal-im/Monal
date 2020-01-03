@@ -30,6 +30,7 @@
 
 @property (nonatomic, weak) IBOutlet UITableView* messageTable;
 @property (nonatomic, weak) IBOutlet MLResizingTextView* chatInput;
+@property (nonatomic, weak) IBOutlet UILabel* placeHolderText;
 @property (nonatomic, weak) IBOutlet UIButton* sendButton;
 @property (nonatomic, weak) IBOutlet UIView* inputContainerView;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint* inputContainerHeight;

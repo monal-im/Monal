@@ -1299,12 +1299,19 @@
                                             <action selector="attach:" destination="5nR-Q5-dQD" eventType="touchUpInside" id="7Vw-VD-VgI"/>
                                         </connections>
                                     </button>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Send Message" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KUa-bA-cQb">
+                                        <rect key="frame" x="150.66666666666666" y="11" width="112.99999999999997" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" systemColor="separatorColor" red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.28999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                 </subviews>
                                 <color key="backgroundColor" systemColor="tertiarySystemGroupedBackgroundColor" red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <gestureRecognizers/>
                                 <constraints>
                                     <constraint firstItem="jiV-U5-fDl" firstAttribute="leading" secondItem="c6B-5o-sqL" secondAttribute="trailing" constant="17" id="0iI-zp-5bF"/>
                                     <constraint firstAttribute="bottom" secondItem="jiV-U5-fDl" secondAttribute="bottom" constant="10" id="1Ym-FP-VS3"/>
+                                    <constraint firstItem="KUa-bA-cQb" firstAttribute="centerY" secondItem="eXr-Xg-TCZ" secondAttribute="centerY" id="4Lk-hH-BND"/>
                                     <constraint firstAttribute="bottom" secondItem="c6B-5o-sqL" secondAttribute="bottom" constant="9" id="9Nx-w1-7jR"/>
                                     <constraint firstItem="c6B-5o-sqL" firstAttribute="leading" secondItem="eXr-Xg-TCZ" secondAttribute="leading" constant="17" id="AhS-4k-DS6"/>
                                     <constraint firstAttribute="bottom" secondItem="kYa-y4-X5Z" secondAttribute="bottom" constant="6" id="B7L-s4-GeB"/>
@@ -1312,6 +1319,7 @@
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="320" id="EWy-UE-gfz"/>
                                     <constraint firstItem="jiV-U5-fDl" firstAttribute="top" secondItem="eXr-Xg-TCZ" secondAttribute="top" constant="8" id="JfN-2V-Vou"/>
                                     <constraint firstItem="kYa-y4-X5Z" firstAttribute="leading" secondItem="jiV-U5-fDl" secondAttribute="trailing" constant="8" id="L32-zc-2Qr"/>
+                                    <constraint firstItem="KUa-bA-cQb" firstAttribute="centerX" secondItem="eXr-Xg-TCZ" secondAttribute="centerX" id="gbH-bz-Ce5"/>
                                     <constraint firstAttribute="height" constant="43" id="lfT-Yz-Z8o"/>
                                 </constraints>
                             </view>
@@ -1351,6 +1359,7 @@
                         <outlet property="inputContainerHeight" destination="lfT-Yz-Z8o" id="H6p-ZZ-ih1"/>
                         <outlet property="inputContainerView" destination="eXr-Xg-TCZ" id="cve-rB-fhR"/>
                         <outlet property="messageTable" destination="Kkq-aZ-5fP" id="RhH-Dt-heG"/>
+                        <outlet property="placeHolderText" destination="KUa-bA-cQb" id="62v-fn-lf2"/>
                         <outlet property="sendButton" destination="kYa-y4-X5Z" id="efC-cC-umG"/>
                         <outlet property="transparentLayer" destination="cUR-xM-Mq7" id="0Fl-vg-WUH"/>
                         <outlet property="view" destination="Riz-2Q-bcU" id="d0E-AR-8aA"/>

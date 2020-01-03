@@ -93,6 +93,8 @@
 	<string>Monal uses the microphone to transmit your voice in audio calls.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Monal allows users to upload photos to recipients in a conversation</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Monal allows users to save photos received in conversations.</string>
 	<key>SBUsesNetwork</key>
 	<true/>
 	<key>UIBackgroundModes</key>

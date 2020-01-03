@@ -504,6 +504,7 @@
     [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
         [alert dismissViewControllerAnimated:YES completion:nil];
     }]];
+    alert.popoverPresentationController.sourceView=sender;
     [self presentViewController:alert animated:YES completion:nil];
     
 }

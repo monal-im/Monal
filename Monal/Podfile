@@ -36,8 +36,8 @@ target 'Monal' do
   # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
   use_frameworks!
   inhibit_all_warnings!
-  pod 'Fabric'
-  pod 'Crashlytics'
+  # pod 'Fabric'
+  # pod 'Crashlytics'
 pod 'CocoaLumberjack'
 pod 'MBProgressHUD', '~> 1.1.0'
 
@@ -66,7 +66,7 @@ target 'monalxmpp' do
   pod 'CocoaLumberjack'
   pod 'SignalProtocolObjC'
   pod 'SignalProtocolC'
-  pod 'OpenSSL-Universal'
+  # pod 'OpenSSL-Universal'
 
 end
 
@@ -79,7 +79,7 @@ target 'monalxmppmac' do
   pod 'CocoaLumberjack'
   pod 'SignalProtocolObjC'
   pod 'SignalProtocolC'
-  pod 'OpenSSL-Universal'
+  # pod 'OpenSSL-Universal'
 end
 
 
@@ -88,8 +88,8 @@ target 'Monal-OSX' do
   # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
   use_frameworks!
   inhibit_all_warnings!
-  pod 'Fabric'
-  pod 'Crashlytics'
+  # pod 'Fabric'
+  # pod 'Crashlytics'
 #pod 'MASPreferences'
 pod 'SAMKeychain'
 #pod 'NXOAuth2Client', '~> 1.2.8'
@@ -98,7 +98,7 @@ pod 'TPCircularBuffer'
 pod 'CocoaLumberjack'
 pod 'SignalProtocolObjC'
 pod 'SignalProtocolC'
-pod 'OpenSSL-Universal'
+# pod 'OpenSSL-Universal'
 
 pod 'Sparkle'
 

@@ -2,14 +2,11 @@ PODS:
   - CocoaLumberjack (3.6.0):
     - CocoaLumberjack/Core (= 3.6.0)
   - CocoaLumberjack/Core (3.6.0)
-  - Crashlytics (3.14.0):
-    - Fabric (~> 1.10.2)
   - DACircularProgress (2.3.1)
   - DZNEmptyDataSet (1.8.1)
   - EAIntroView (2.12.0):
     - EARestrictedScrollView (~> 1.1.0)
   - EARestrictedScrollView (1.1.0)
-  - Fabric (1.10.2)
   - IDMPhotoBrowser (1.10.2):
     - DACircularProgress
     - pop
@@ -19,9 +16,6 @@ PODS:
   - NotificationBannerSwift (3.0.2):
     - MarqueeLabel (~> 4.0.0)
     - SnapKit (~> 5.0.0)
-  - OpenSSL-Universal (1.0.2.18):
-    - OpenSSL-Universal/Static (= 1.0.2.18)
-  - OpenSSL-Universal/Static (1.0.2.18)
   - pop (1.0.12)
   - SAMKeychain (1.5.3)
   - SDWebImage (4.3.3):
@@ -36,14 +30,11 @@ PODS:
 
 DEPENDENCIES:
   - CocoaLumberjack
-  - Crashlytics
   - DZNEmptyDataSet
   - EAIntroView
-  - Fabric
   - IDMPhotoBrowser
   - MBProgressHUD (~> 1.1.0)
   - NotificationBannerSwift (~> 3.0.0)
-  - OpenSSL-Universal (= 1.0.2.18)
   - SAMKeychain
   - SDWebImage (~> 4.3.3)
   - SignalProtocolC
@@ -54,17 +45,14 @@ DEPENDENCIES:
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
     - CocoaLumberjack
-    - Crashlytics
     - DACircularProgress
     - DZNEmptyDataSet
     - EAIntroView
     - EARestrictedScrollView
-    - Fabric
     - IDMPhotoBrowser
     - MarqueeLabel
     - MBProgressHUD
     - NotificationBannerSwift
-    - OpenSSL-Universal
     - pop
     - SAMKeychain
     - SDWebImage
@@ -76,17 +64,14 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   CocoaLumberjack: 78b0c238666f4f58db069738ec176f4519557516
-  Crashlytics: 540b7e5f5da5a042647227a5e3ac51d85eed06df
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   EAIntroView: 249559079ddfdbe80e5bcb755c04c3b964b2ac27
   EARestrictedScrollView: b0c2a3f92fb2610bb44d71c5e4893777c89e45ef
-  Fabric: 706c8b8098fff96c33c0db69cbf81f9c551d0d74
   IDMPhotoBrowser: 4bb459b1faffc228e92bccdf7c54ad6d6b7e8c37
   MarqueeLabel: b55b26e690b6ad41faedd95cbf5eae6f1d1735b4
   MBProgressHUD: e7baa36a220447d8aeb12769bf0585582f3866d9
   NotificationBannerSwift: 713e20f21b6105f4a36a00e5d9fa414a930d3d8e
-  OpenSSL-Universal: d10ab08e0b258023e5184f77660b1b9f4ec93926
   pop: d582054913807fd11fd50bfe6a539d91c7e1a55a
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
   SDWebImage: de4d90b5bff3571eae7bd16202b1f43135409fa5
@@ -96,6 +81,6 @@ SPEC CHECKSUMS:
   Sparkle: 3f75576db8b0265adef36c43249d747f22d0b708
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 
-PODFILE CHECKSUM: 68ce94d3a9b4f11eb75982c26fd761aeda5500cd
+PODFILE CHECKSUM: 5a4b2dd162f1c3823c02130c0443856d2f91e452
 
 COCOAPODS: 1.5.2

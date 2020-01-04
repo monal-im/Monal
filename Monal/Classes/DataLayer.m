@@ -2005,11 +2005,11 @@ static DataLayer *sharedInstance=nil;
     }];
 }
 
--(void) lastMessageSanzaForAccount:(NSString*) accountNo withCompletion: (void (^)(NSString *))completion
+-(void) lastMessageSanzaForAccount:(NSString*) accountNo andJid:(NSString*) jid withCompletion: (void (^)(NSString *))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select stanzaid from  message_history where account_id=? and stanzaid not null and stanzaid!='' order by timestamp desc limit 1"];
+    NSString* query=[NSString stringWithFormat:@"select stanzaid from  message_history where account_id=? and message_from!=? and stanzaid not null and stanzaid!='' order by timestamp desc limit 1"];
     
-    [self executeScalar:query andArguments:@[accountNo] withCompletion:^(NSObject* result) {
+    [self executeScalar:query andArguments:@[accountNo, jid] withCompletion:^(NSObject* result) {
         if(completion)
         {
             completion((NSString *) result);

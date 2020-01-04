@@ -2896,7 +2896,7 @@ static NSMutableArray *extracted(xmpp *object) {
 -(void) queryMAMSinceLastStanza
 {
     if(self.connectionProperties.supportsMam2) {
-        [[DataLayer sharedInstance] lastMessageSanzaForAccount:_accountNo withCompletion:^(NSString *lastStanza) {
+        [[DataLayer sharedInstance] lastMessageSanzaForAccount:_accountNo  andJid:self.connectionProperties.identity.jid withCompletion:^(NSString *lastStanza) {
             if(lastStanza) {
                 [self setMAMQueryFromStart:nil after:lastStanza andJid:nil];
             }

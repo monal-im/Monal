@@ -1320,6 +1320,7 @@ NSString *const kXMPPPresence = @"presence";
                                 [receiptNode.attributes setObject:messageNode.from forKey:@"to"];
                                 [receiptNode setXmppId:[[NSUUID UUID] UUIDString]];
                                 [receiptNode setReceipt:messageNode.idval];
+                                [receiptNode setStoreHint];
                                 [self send:receiptNode];
                             }
                             

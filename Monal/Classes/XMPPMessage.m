@@ -68,4 +68,11 @@
 }
 
 
+-(void) setStoreHint {
+    MLXMLNode* store =[[MLXMLNode alloc] init];
+       store.element=@"store";
+       [store.attributes setValue:@"urn:xmpp:hints" forKey:kXMLNS];
+       [self.children addObject:store];
+}
+
 @end

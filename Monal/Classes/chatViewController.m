@@ -102,13 +102,7 @@
     [nc addObserver:self selector:@selector(fetchMoreMessages) name:kMLMAMMore object:nil];
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
-    #if !TARGET_OS_MACCATALYST
-    if (@available(iOS 13.0, *)) {
-        self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
-    } else {
-        // Fallback on earlier versions
-    }
-    #endif
+
     
     self.hidesBottomBarWhenPushed=YES;
     

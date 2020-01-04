@@ -1725,7 +1725,7 @@ static DataLayer *sharedInstance=nil;
 -(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date
 {
     
-    NSString* query=[NSString stringWithFormat:@"select af, message, thetime, delivered, message_history_id from (select ifnull(actual_from, message_from) as af, message, delivered,    timestamp  as thetime, message_history_id, previewImage, previewText from message_history where account_id=? and (message_from=? or message_to=?) and date(timestamp)=? order by message_history_id desc) order by message_history_id asc"];
+    NSString* query=[NSString stringWithFormat:@"select af, message_from, message_to,  message, thetime, delivered, message_history_id from (select ifnull(actual_from, message_from) as af,message_from, message_to, message, delivered,    timestamp  as thetime, message_history_id, previewImage, previewText from message_history where account_id=? and (message_from=? or message_to=?) and date(timestamp)=? order by message_history_id desc) order by message_history_id asc"];
     NSArray *params=@[accountNo, buddy, buddy, date];
     
     DDLogVerbose(@"%@",query);

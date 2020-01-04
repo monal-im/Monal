@@ -83,7 +83,15 @@ The of the message in the DB , should be int
  */
 @property (nonatomic, assign) BOOL hasBeenReceived;
 
+
 @property (nonatomic, assign) BOOL shouldShowAlert;
+
+/**
+ values only set if in a response the message was marked as error.
+ if hasBeenReceived is true, these should be ignored
+ */
+@property (nonatomic, copy) NSString *errorType;
+@property (nonatomic, copy) NSString *errorReason;
 
 /*
  the message has not been marked as read in the db

@@ -86,6 +86,19 @@
     //remove any  resource markers and get user
     _user=[[_user lowercaseString] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     
+    if([elementName isEqualToString:@"error"])
+    {
+        _errorType=[attributeDict objectForKey:@"type"];
+        return;
+    }
+    
+    
+    if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-stanzas"])
+    {
+        if(!_errorReason) _errorReason=elementName;
+        return;
+    }
+    
 }
 
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string

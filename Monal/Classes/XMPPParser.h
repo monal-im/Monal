@@ -24,6 +24,9 @@
     NSString* _resource;
     NSString* _idval;
     
+    NSString* _errorType;
+    NSString* _errorReason;
+    
 }
 
 
@@ -52,6 +55,16 @@
  node id
  */
 @property (nonatomic, strong, readonly) NSString* idval;
+
+/**
+ if error, the type
+ */
+@property (nonatomic, strong, readonly) NSString* errorType;
+
+/**
+if error, the reason
+*/
+@property (nonatomic, strong, readonly) NSString* errorReason;
 
 
 - (id) initWithDictionary:(NSDictionary*) dictionary;

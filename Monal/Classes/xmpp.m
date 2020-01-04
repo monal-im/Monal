@@ -2208,9 +2208,7 @@ static NSMutableArray *extracted(xmpp *object) {
     }
     
     //for MAM
-    MLXMLNode *request =[[MLXMLNode alloc] initWithElement:@"store"];
-    [request.attributes setObject:@"urn:xmpp:hints" forKey:kXMLNS];
-    [messageNode.children addObject:request];
+    [messageNode setStoreHint];
     
     if(self.airDrop) {
         DDLogInfo(@"Writing to file for Airdop");

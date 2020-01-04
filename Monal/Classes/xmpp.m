@@ -1312,9 +1312,7 @@ NSString *const kXMPPPresence = @"presence";
                     messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
                         if(success)
                         {
-                            if(messageNode.requestReceipt
-                               && !messageNode.mamResult
-                               && ![messageNode.from isEqualToString:
+                            if(messageNode.requestReceipt && ![messageNode.from isEqualToString:
                                     self.connectionProperties.identity.jid]
                                )
                             {

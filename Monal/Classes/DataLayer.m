@@ -1652,6 +1652,13 @@ static DataLayer *sharedInstance=nil;
     [self executeNonQuery:query withCompletion:nil];
 }
 
+-(void) setMessageId:(NSString*) messageid errorType:(NSString *) errorType errorReason:(NSString *)errorReason
+{
+    NSString* query=[NSString stringWithFormat:@"update message_history set errorType=?, errorReason=? where messageid=?"];
+    DDLogVerbose(@" setting message Error %@",query);
+    [self executeNonQuery:query  andArguments:@[errorType, errorReason, messageid]  withCompletion:nil];
+}
+
 
 -(void) setMessageId:(NSString*) messageid messageType:(NSString *) messageType
 {
@@ -2684,6 +2691,19 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Upgrade to 3.9  success ");
         
     }
+    
+    if([dbversion doubleValue]<4.0)
+     {
+         DDLogVerbose(@"Database version <4.0 detected. Performing upgrade on accounts. ");
+         
+         [self executeNonQuery:@"alter table message_history add column errorType varchar(50);" andArguments:nil];
+         [self executeNonQuery:@"alter table message_history add column errorReason varchar(50);" andArguments:nil];
+         
+         [self executeNonQuery:@"update dbversion set dbversion='4.0'; " andArguments:nil];
+         DDLogVerbose(@"Upgrade to 4.0  success ");
+         
+     }
+     
     
     
     [dbversionCheck unlock];

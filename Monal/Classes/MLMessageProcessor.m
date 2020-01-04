@@ -42,6 +42,11 @@
     if([messageNode.type isEqualToString:kMessageErrorType])
     {
         DDLogError(@"Error type message received");
+        //update db
+        
+        //fetch message
+        
+        //post persist
         return;
     }
     

@@ -86,6 +86,8 @@
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSendFailedMessage:) name:kMonalSendFailedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
+    [nc addObserver:self selector:@selector(handleMessageError:) name:kMonalMessageErrorNotice object:nil];
+    
     
     [nc addObserver:self selector:@selector(dismissKeyboard:) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
@@ -102,13 +104,7 @@
     [nc addObserver:self selector:@selector(fetchMoreMessages) name:kMLMAMMore object:nil];
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
-    #if !TARGET_OS_MACCATALYST
-    if (@available(iOS 13.0, *)) {
-        self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
-    } else {
-        // Fallback on earlier versions
-    }
-    #endif
+
     
     self.hidesBottomBarWhenPushed=YES;
     
@@ -217,7 +213,8 @@
     
     [self updateBackground];
     
-    
+    self.placeHolderText.text=[NSString stringWithFormat:@"Message from %@", self.jid];
+    self.hardwareKeyboardPresent = YES; //default to YES and when keybaord will appears is called, this may be set to NO
 }
 
 
@@ -315,7 +312,7 @@
     if(!self.contact.contactJid) return;
     NSMutableArray *newList;
     if(!_day) {
-        newList =[[DataLayer sharedInstance] messageHistory:self.contact.contactJid forAccount: self.contact.accountId];
+        newList =[[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId];
         [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId withCompletion:^(NSNumber *unread) {
             if([unread integerValue]==0) self->_firstmsg=YES;
             
@@ -359,7 +356,7 @@
 
 
 
-#pragma mark textview
+#pragma mark - textview
 -(void) sendMessage:(NSString *) messageText
 {
     [self sendMessage:messageText andMessageID:nil];
@@ -391,7 +388,12 @@
     DDLogVerbose(@"Sending message");
     NSString *newMessageID =messageID?messageID:[[NSUUID UUID] UUIDString];
     //dont readd it, use the exisitng
-    NSDictionary* settings=[[[DataLayer sharedInstance] accountVals:self.contact.accountId] objectAtIndex:0];
+    NSArray *accounts = [[DataLayer sharedInstance] accountVals:self.contact.accountId];
+    if(accounts.count==0) {
+        DDLogError(@"Account sbould be >0");
+        return;
+    }
+    NSDictionary* settings=[accounts objectAtIndex:0];
     
     if(!messageID) {
         NSString *contactNameCopy =self.contact.contactJid; //prevent retail cycle
@@ -766,7 +768,6 @@
             if([message.messageId isEqualToString:messageId]) {
                 message.hasBeenReceived=received;
                 indexPath =[NSIndexPath indexPathForRow:row inSection:0];
-                
                 break;
             }
             row++;
@@ -794,10 +795,38 @@
 }
 
 
+-(void) handleMessageError:(NSNotification *)notification
+{
+    NSDictionary *dic =notification.userInfo;
+    NSString *messageId= [dic objectForKey:kMessageId];
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground) return;
+        
+        int row=0;
+        NSIndexPath *indexPath;
+        for(MLMessage *message in self.messageList)
+        {
+            if([message.messageId isEqualToString:messageId] && !message.hasBeenReceived) {
+                message.errorType=[dic objectForKey:@"errorType"];
+                message.errorReason=[dic objectForKey:@"errorReason"];
+                indexPath =[NSIndexPath indexPathForRow:row inSection:0];
+                break;
+            }
+            row++;
+        }
+        if(indexPath) {
+            [self->_messageTable beginUpdates];
+            [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            [self->_messageTable endUpdates];
+        }
+    });
+}
+
 -(void) refreshMessage:(NSNotification *)notification
 {
     NSDictionary *dic =notification.userInfo;
-    [self setMessageId:[dic objectForKey:kMessageId]  received:YES];
+    [self setMessageId:[dic  objectForKey:kMessageId]  received:YES];
 }
 
 
@@ -1126,6 +1155,7 @@
     }
     
     if(row.hasBeenReceived==YES) {
+        cell.messageStatus.text=@"Received";
         if(indexPath.row==self.messageList.count-1 ||
            ![nextRow.actualFrom isEqualToString:self.jid]) {
             cell.messageStatus.hidden=NO;
@@ -1169,6 +1199,13 @@
     }
     
     cell.parent=self;
+    
+    if(!row.hasBeenReceived) {
+        if(row.errorType.length>0) {
+            cell.messageStatus.text =[NSString stringWithFormat:@"Error:%@ - %@", row.errorType, row.errorReason];
+            cell.messageStatus.hidden=NO;
+        }
+    }
     
     [cell updateCellWithNewSender:newSender];
     
@@ -1329,6 +1366,11 @@
 
 - (void)textViewDidChange:(UITextView *)textView
 {
+    if(textView.text.length>0)
+        self.placeHolderText.hidden=YES;
+    else
+        self.placeHolderText.hidden=NO;
+    
     [self updateInputViewSize];
 }
 

@@ -1652,6 +1652,13 @@ static DataLayer *sharedInstance=nil;
     [self executeNonQuery:query withCompletion:nil];
 }
 
+-(void) setMessageId:(NSString*) messageid errorType:(NSString *) errorType errorReason:(NSString *)errorReason
+{
+    NSString* query=[NSString stringWithFormat:@"update message_history set errorType=?, errorReason=? where messageid=?"];
+    DDLogVerbose(@" setting message Error %@",query);
+    [self executeNonQuery:query  andArguments:@[errorType, errorReason, messageid]  withCompletion:nil];
+}
+
 
 -(void) setMessageId:(NSString*) messageid messageType:(NSString *) messageType
 {
@@ -1725,7 +1732,7 @@ static DataLayer *sharedInstance=nil;
 -(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date
 {
     
-    NSString* query=[NSString stringWithFormat:@"select af, message, thetime, delivered, message_history_id from (select ifnull(actual_from, message_from) as af, message, delivered,    timestamp  as thetime, message_history_id, previewImage, previewText from message_history where account_id=? and (message_from=? or message_to=?) and date(timestamp)=? order by message_history_id desc) order by message_history_id asc"];
+    NSString* query=[NSString stringWithFormat:@"select af, message_from, message_to,  message, thetime, delivered, message_history_id from (select ifnull(actual_from, message_from) as af,message_from, message_to, message, delivered,    timestamp  as thetime, message_history_id, previewImage, previewText from message_history where account_id=? and (message_from=? or message_to=?) and date(timestamp)=? order by message_history_id desc) order by message_history_id asc"];
     NSArray *params=@[accountNo, buddy, buddy, date];
     
     DDLogVerbose(@"%@",query);
@@ -1758,7 +1765,7 @@ static DataLayer *sharedInstance=nil;
 
 
 
--(NSArray*) messageHistoryAll:(NSString*) buddy forAccount:(NSString*) accountNo
+-(NSArray*) allMessagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     //returns a buddy's message history
     
@@ -1864,10 +1871,10 @@ static DataLayer *sharedInstance=nil;
 
 
 //message history
--(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
+-(NSMutableArray*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     if(!accountNo ||! buddy) return nil;
-    NSString* query=[NSString stringWithFormat:@"select af,message_from, message_to, account_id,  message, thetime, message_history_id, delivered, messageid, messageType, received,encrypted,previewImage, previewText, unread  from (select ifnull(actual_from, message_from) as af, message_from, message_to, account_id,   message, received, encrypted,   timestamp  as thetime, message_history_id, delivered,messageid, messageType, previewImage, previewText, unread from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 250) order by thetime asc"];
+    NSString* query=[NSString stringWithFormat:@"select af,message_from, message_to, account_id,  message, thetime, message_history_id, delivered, messageid, messageType, received,encrypted,previewImage, previewText, unread, errorType, errorReason  from (select ifnull(actual_from, message_from) as af, message_from, message_to, account_id,   message, received, encrypted,   timestamp  as thetime, message_history_id, delivered,messageid, messageType, previewImage, previewText, unread, errorType, errorReason from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 250) order by thetime asc"];
     NSArray *params=@[accountNo, buddy, buddy];
     NSArray* rawArray = [self executeReader:query andArguments:params];
     
@@ -2005,11 +2012,11 @@ static DataLayer *sharedInstance=nil;
     }];
 }
 
--(void) lastMessageSanzaForAccount:(NSString*) accountNo withCompletion: (void (^)(NSString *))completion
+-(void) lastMessageSanzaForAccount:(NSString*) accountNo andJid:(NSString*) jid withCompletion: (void (^)(NSString *))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select stanzaid from  message_history where account_id=? and stanzaid not null and stanzaid!='' order by timestamp desc limit 1"];
+    NSString* query=[NSString stringWithFormat:@"select stanzaid from  message_history where account_id=? and message_from!=? and stanzaid not null and stanzaid!='' order by timestamp desc limit 1"];
     
-    [self executeScalar:query andArguments:@[accountNo] withCompletion:^(NSObject* result) {
+    [self executeScalar:query andArguments:@[accountNo, jid] withCompletion:^(NSObject* result) {
         if(completion)
         {
             completion((NSString *) result);
@@ -2684,6 +2691,19 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Upgrade to 3.9  success ");
         
     }
+    
+    if([dbversion doubleValue]<4.0)
+     {
+         DDLogVerbose(@"Database version <4.0 detected. Performing upgrade on accounts. ");
+         
+         [self executeNonQuery:@"alter table message_history add column errorType varchar(50);" andArguments:nil];
+         [self executeNonQuery:@"alter table message_history add column errorReason varchar(50);" andArguments:nil];
+         
+         [self executeNonQuery:@"update dbversion set dbversion='4.0'; " andArguments:nil];
+         DDLogVerbose(@"Upgrade to 4.0  success ");
+         
+     }
+     
     
     
     [dbversionCheck unlock];

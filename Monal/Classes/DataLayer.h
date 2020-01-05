@@ -203,6 +203,11 @@ extern NSString *const kMessageTypeUrl;
 -(void) setMessageId:(NSString*) messageid received:(BOOL) received;
 
 /**
+ if the server replies with an error for a message, store it
+ */
+-(void) setMessageId:(NSString*) messageid errorType:(NSString *) errorType errorReason:(NSString *)errorReason;
+
+/**
  sets a preview info for a specified message
  */
 -(void) setMessageId:(NSString*) messageid previewText:(NSString *) text andPreviewImage:(NSString *) image;
@@ -210,9 +215,9 @@ extern NSString *const kMessageTypeUrl;
 -(void) clearMessages:(NSString*) accountNo;
 -(void) deleteMessageHistory:(NSString*) messageNo;
 
-#pragma mark message history
--(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo;
--(NSArray*) messageHistoryAll:(NSString*) buddy forAccount:(NSString*) accountNo;
+#pragma mark - message history
+-(NSMutableArray*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(NSArray*) allMessagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(NSMutableArray*) lastMessageForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 
 -(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo;
@@ -226,7 +231,8 @@ extern NSString *const kMessageTypeUrl;
 /**
  retrieves the stanzaid of the last message
  */
--(void) lastMessageSanzaForAccount:(NSString*) accountNo withCompletion: (void (^)(NSString *))completion;;
+-(void) lastMessageSanzaForAccount:(NSString*) accountNo andJid:(NSString*) jid withCompletion: (void (^)(NSString *))completion;
+
 
 -(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo;
 -(BOOL) messageHistoryCleanAll;

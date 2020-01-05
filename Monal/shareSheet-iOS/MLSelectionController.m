@@ -31,10 +31,11 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"option" forIndexPath:indexPath];
-   id row = self.options[indexPath.row];
+   NSDictionary* row = self.options[indexPath.row];
+    MLContact *item =[row objectForKey:@"contact"];
     
-    if([row isKindOfClass:[MLContact class]]) {
-        MLContact *contact =(MLContact *)row;
+    if(item) {
+        MLContact *contact =(MLContact *)item;
         cell.textLabel.text = contact.contactDisplayName;
         
         MLContact *selectedContact = (MLContact *) [self.selection objectForKey:@"contact"];

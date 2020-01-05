@@ -162,7 +162,7 @@
     browser.autoHideInterface=NO;
     browser.displayArrowButton = YES;
     browser.displayCounterLabel = YES;
-    browser.displayActionButton=YES;
+    browser.displayActionButton=NO;
     browser.displayToolbar=YES;
     
     self.leftImage=[UIImage imageNamed:@"IDMPhotoBrowser_arrowLeft"];

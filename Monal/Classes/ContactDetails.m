@@ -28,6 +28,8 @@
 @property (nonatomic, weak) UITextField* currentTextField;
 @property (nonatomic, strong) NSMutableArray * photos;
 @property (nonatomic, assign) NSInteger groupMemberCount;
+@property (nonatomic, strong) UIImage *leftImage;
+@property (nonatomic, strong) UIImage *rightImage;
 
 @end
 
@@ -273,6 +275,16 @@
         if(self.photos.count>0) {
             IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
             browser.delegate=self;
+            browser.autoHideInterface=NO;
+            browser.displayArrowButton = YES;
+            browser.displayCounterLabel = YES;
+            browser.displayActionButton=YES;
+            browser.displayToolbar=YES;
+            
+            self.leftImage=[UIImage imageNamed:@"IDMPhotoBrowser_arrowLeft"];
+            self.rightImage=[UIImage imageNamed:@"IDMPhotoBrowser_arrowRight"];
+            browser.leftArrowImage =self.leftImage;
+            browser.rightArrowImage =self.rightImage;
             UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStyleDone target:self action:@selector(closePhotos)];
                           browser.navigationItem.rightBarButtonItem=close;
             

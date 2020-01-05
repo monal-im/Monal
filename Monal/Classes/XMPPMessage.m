@@ -55,6 +55,9 @@
     [self setBody:link]; // fallback
 }
 
+/**
+ @see https://xmpp.org/extensions/xep-0184.html
+ */
 -(void) setReceipt:(NSString*) messageId
 {
     MLXMLNode* received =[[MLXMLNode alloc] init];
@@ -64,5 +67,12 @@
     [self.children addObject:received];
 }
 
+
+-(void) setStoreHint {
+    MLXMLNode* store =[[MLXMLNode alloc] init];
+       store.element=@"store";
+       [store.attributes setValue:@"urn:xmpp:hints" forKey:kXMLNS];
+       [self.children addObject:store];
+}
 
 @end

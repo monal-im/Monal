@@ -111,7 +111,7 @@
     
     self.inputBar.hidden=NO;
     self.tableScroll.hidden=NO;
-    self.messageList =[[DataLayer sharedInstance] messageHistory:self.contact.contactJid forAccount: self.contact.accountId];
+    self.messageList =[[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId];
     if(!self.messageList)  {
         self.messageList = [[NSMutableArray alloc] init];
     }

@@ -1314,9 +1314,7 @@ NSString *const kXMPPPresence = @"presence";
                     messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
                         if(success)
                         {
-                            if(messageNode.requestReceipt
-                               && !messageNode.mamResult
-                               && ![messageNode.from isEqualToString:
+                            if(messageNode.requestReceipt && ![messageNode.from isEqualToString:
                                     self.connectionProperties.identity.jid]
                                )
                             {
@@ -1324,6 +1322,7 @@ NSString *const kXMPPPresence = @"presence";
                                 [receiptNode.attributes setObject:messageNode.from forKey:@"to"];
                                 [receiptNode setXmppId:[[NSUUID UUID] UUIDString]];
                                 [receiptNode setReceipt:messageNode.idval];
+                                [receiptNode setStoreHint];
                                 [self send:receiptNode];
                             }
                             
@@ -2211,9 +2210,7 @@ static NSMutableArray *extracted(xmpp *object) {
     }
     
     //for MAM
-    MLXMLNode *request =[[MLXMLNode alloc] initWithElement:@"store"];
-    [request.attributes setObject:@"urn:xmpp:hints" forKey:kXMLNS];
-    [messageNode.children addObject:request];
+    [messageNode setStoreHint];
     
     if(self.airDrop) {
         DDLogInfo(@"Writing to file for Airdop");
@@ -2898,7 +2895,7 @@ static NSMutableArray *extracted(xmpp *object) {
 -(void) queryMAMSinceLastStanza
 {
     if(self.connectionProperties.supportsMam2) {
-        [[DataLayer sharedInstance] lastMessageSanzaForAccount:_accountNo withCompletion:^(NSString *lastStanza) {
+        [[DataLayer sharedInstance] lastMessageSanzaForAccount:_accountNo  andJid:self.connectionProperties.identity.jid withCompletion:^(NSString *lastStanza) {
             if(lastStanza) {
                 [self setMAMQueryFromStart:nil after:lastStanza andJid:nil];
             }

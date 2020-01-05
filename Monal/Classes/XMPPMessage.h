@@ -42,6 +42,11 @@ extern NSString* const kMessageNormalType;
  */
 -(void) setReceipt:(NSString*) messageId;
 
+/**
+ Hint saying the message should be stored
+ @see https://xmpp.org/extensions/xep-0334.html
+ */
+-(void) setStoreHint;
 
 
 @end

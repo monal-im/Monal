@@ -1125,6 +1125,7 @@
     }
     
     if(row.hasBeenReceived==YES) {
+        cell.messageStatus.text=@"Received";
         if(indexPath.row==self.messageList.count-1 ||
            ![nextRow.actualFrom isEqualToString:self.jid]) {
             cell.messageStatus.hidden=NO;

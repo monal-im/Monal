@@ -46,9 +46,6 @@ static const DDLogLevel ddLogLevel = DDLogLevelInfo;
 #define kMonalContactRefresh @"kMonalContactRefresh"
 #define kMonalRefreshContacts @"kMonalRefreshContacts"
 
-#define kDelivered @"delivered"
-#define kReceived @"received"
-
 //contact cells
 #define kusernameKey @"username"
 #define kfullNameKey @"fullName"

@@ -1169,6 +1169,13 @@
     
     cell.parent=self;
     
+    if(!row.hasBeenReceived) {
+        if(row.errorType.length>0) {
+            cell.messageStatus.text =[NSString stringWithFormat:@"Error:%@ - %@", row.errorType, row.errorReason];
+            cell.messageStatus.hidden=NO;
+        }
+    }
+    
     [cell updateCellWithNewSender:newSender];
     
     return cell;

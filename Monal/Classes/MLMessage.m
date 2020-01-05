@@ -33,6 +33,9 @@
     message.previewText=[dic objectForKey:@"previewText"];
     message.previewImage=[NSURL URLWithString:[dic objectForKey:@"previewImage"]];
     
+    message.errorType=[dic objectForKey:@"errorType"];
+    message.errorReason=[dic objectForKey:@"errorReason"];
+    
     return message;
 }
 

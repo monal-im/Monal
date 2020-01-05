@@ -386,7 +386,7 @@
     NSString *newMessageID =messageID?messageID:[[NSUUID UUID] UUIDString];
     //dont readd it, use the exisitng
     NSArray *accounts = [[DataLayer sharedInstance] accountVals:self.contact.accountId];
-    if(accounts.count>0) {
+    if(accounts.count==0) {
         DDLogError(@"Account sbould be >0");
         return;
     }

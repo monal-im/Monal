@@ -214,6 +214,7 @@
     [self updateBackground];
     
     self.placeHolderText.text=[NSString stringWithFormat:@"Message from %@", self.jid];
+    self.hardwareKeyboardPresent = YES; //default to YES and when keybaord will appears is called, this may be set to NO
 }
 
 
@@ -355,7 +356,7 @@
 
 
 
-#pragma mark textview
+#pragma mark - textview
 -(void) sendMessage:(NSString *) messageText
 {
     [self sendMessage:messageText andMessageID:nil];

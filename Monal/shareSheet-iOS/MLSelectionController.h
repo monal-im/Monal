@@ -15,7 +15,7 @@ typedef void(^selectionResult)(NSDictionary *);
 @interface MLSelectionController : UITableViewController
 
 @property (nonatomic, copy) selectionResult completion;
-@property (nonatomic, strong) NSArray *options; // an Array of stirngs
+@property (nonatomic, strong) NSArray *options; // an Array of MlContact
 @property (nonatomic, strong) NSDictionary *selection;
 @end
 

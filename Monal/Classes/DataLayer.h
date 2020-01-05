@@ -215,9 +215,9 @@ extern NSString *const kMessageTypeUrl;
 -(void) clearMessages:(NSString*) accountNo;
 -(void) deleteMessageHistory:(NSString*) messageNo;
 
-#pragma mark message history
--(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo;
--(NSArray*) messageHistoryAll:(NSString*) buddy forAccount:(NSString*) accountNo;
+#pragma mark - message history
+-(NSMutableArray*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(NSArray*) allMessagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(NSMutableArray*) lastMessageForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 
 -(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo;

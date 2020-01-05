@@ -1765,7 +1765,7 @@ static DataLayer *sharedInstance=nil;
 
 
 
--(NSArray*) messageHistoryAll:(NSString*) buddy forAccount:(NSString*) accountNo
+-(NSArray*) allMessagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     //returns a buddy's message history
     
@@ -1871,7 +1871,7 @@ static DataLayer *sharedInstance=nil;
 
 
 //message history
--(NSMutableArray*) messageHistory:(NSString*) buddy forAccount:(NSString*) accountNo
+-(NSMutableArray*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     if(!accountNo ||! buddy) return nil;
     NSString* query=[NSString stringWithFormat:@"select af,message_from, message_to, account_id,  message, thetime, message_history_id, delivered, messageid, messageType, received,encrypted,previewImage, previewText, unread  from (select ifnull(actual_from, message_from) as af, message_from, message_to, account_id,   message, received, encrypted,   timestamp  as thetime, message_history_id, delivered,messageid, messageType, previewImage, previewText, unread from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 250) order by thetime asc"];

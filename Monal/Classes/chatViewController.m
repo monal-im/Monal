@@ -309,7 +309,7 @@
     if(!self.contact.contactJid) return;
     NSMutableArray *newList;
     if(!_day) {
-        newList =[[DataLayer sharedInstance] messageHistory:self.contact.contactJid forAccount: self.contact.accountId];
+        newList =[[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId];
         [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId withCompletion:^(NSNumber *unread) {
             if([unread integerValue]==0) self->_firstmsg=YES;
             

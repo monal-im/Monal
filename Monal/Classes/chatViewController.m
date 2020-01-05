@@ -86,6 +86,8 @@
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSendFailedMessage:) name:kMonalSendFailedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
+    [nc addObserver:self selector:@selector(handleMessageError:) name:kMonalMessageErrorNotice object:nil];
+    
     
     [nc addObserver:self selector:@selector(dismissKeyboard:) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
@@ -765,7 +767,6 @@
             if([message.messageId isEqualToString:messageId]) {
                 message.hasBeenReceived=received;
                 indexPath =[NSIndexPath indexPathForRow:row inSection:0];
-                
                 break;
             }
             row++;
@@ -793,10 +794,38 @@
 }
 
 
+-(void) handleMessageError:(NSNotification *)notification
+{
+    NSDictionary *dic =notification.userInfo;
+    NSString *messageId= [dic objectForKey:kMessageId];
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground) return;
+        
+        int row=0;
+        NSIndexPath *indexPath;
+        for(MLMessage *message in self.messageList)
+        {
+            if([message.messageId isEqualToString:messageId] && !message.hasBeenReceived) {
+                message.errorType=[dic objectForKey:@"errorType"];
+                message.errorReason=[dic objectForKey:@"errorReason"];
+                indexPath =[NSIndexPath indexPathForRow:row inSection:0];
+                break;
+            }
+            row++;
+        }
+        if(indexPath) {
+            [self->_messageTable beginUpdates];
+            [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            [self->_messageTable endUpdates];
+        }
+    });
+}
+
 -(void) refreshMessage:(NSNotification *)notification
 {
     NSDictionary *dic =notification.userInfo;
-    [self setMessageId:[dic objectForKey:kMessageId]  received:YES];
+    [self setMessageId:[dic  objectForKey:kMessageId]  received:YES];
 }
 
 

@@ -44,10 +44,9 @@
         DDLogError(@"Error type message received");
         //update db
         [[DataLayer sharedInstance] setMessageId:messageNode.idval errorType:messageNode.errorType errorReason:messageNode.errorReason];
-        
-        //fetch message
-        
-        //post persist
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageErrorNotice object:nil  userInfo:@{@"MessageID":messageNode.idval,@"errorType":messageNode.errorType,@"errorReason":messageNode.errorReason
+        }];
+
         return;
     }
     

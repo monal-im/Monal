@@ -23,6 +23,7 @@ static const DDLogLevel ddLogLevel = DDLogLevelInfo;
 #define kMonalSendFailedMessageNotice @"kMonalSendFailedMessageNotice"
 
 #define kMonalMessageReceivedNotice @"kMonalMessageReceivedNotice"
+#define kMonalMessageErrorNotice @"kMonalMessageErrorNotice"
 #define kMonalReceivedMucInviteNotice @"kMonalReceivedMucInviteNotice"
 
 #define kMonalContactOnlineNotice @"kMLContactOnlineNotice"

@@ -1300,7 +1300,7 @@
                                         </connections>
                                     </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Send Message" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KUa-bA-cQb">
-                                        <rect key="frame" x="150.66666666666666" y="11" width="112.99999999999997" height="21"/>
+                                        <rect key="frame" x="62" y="11" width="300" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" systemColor="separatorColor" red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.28999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
@@ -1319,7 +1319,8 @@
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="320" id="EWy-UE-gfz"/>
                                     <constraint firstItem="jiV-U5-fDl" firstAttribute="top" secondItem="eXr-Xg-TCZ" secondAttribute="top" constant="8" id="JfN-2V-Vou"/>
                                     <constraint firstItem="kYa-y4-X5Z" firstAttribute="leading" secondItem="jiV-U5-fDl" secondAttribute="trailing" constant="8" id="L32-zc-2Qr"/>
-                                    <constraint firstItem="KUa-bA-cQb" firstAttribute="centerX" secondItem="eXr-Xg-TCZ" secondAttribute="centerX" id="gbH-bz-Ce5"/>
+                                    <constraint firstItem="kYa-y4-X5Z" firstAttribute="leading" secondItem="KUa-bA-cQb" secondAttribute="trailing" constant="8" id="P2F-qy-tYi"/>
+                                    <constraint firstItem="KUa-bA-cQb" firstAttribute="leading" secondItem="c6B-5o-sqL" secondAttribute="trailing" constant="17" id="aBt-68-bBk"/>
                                     <constraint firstAttribute="height" constant="43" id="lfT-Yz-Z8o"/>
                                 </constraints>
                             </view>
@@ -1368,7 +1369,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tvb-fM-fJc" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2877" y="210"/>
+            <point key="canvasLocation" x="2876.811594202899" y="209.59821428571428"/>
         </scene>
         <!--Send A Message -->
         <scene sceneID="vwP-ns-Kg8">
@@ -1452,7 +1453,7 @@
     <inferredMetricsTieBreakers>
         <segue reference="N41-wN-KNl"/>
         <segue reference="wmf-tk-2CN"/>
-        <segue reference="Whw-ul-BdL"/>
+        <segue reference="D1Q-JS-32d"/>
         <segue reference="cuS-c5-MTy"/>
     </inferredMetricsTieBreakers>
 </document>

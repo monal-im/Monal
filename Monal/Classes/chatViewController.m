@@ -211,7 +211,7 @@
     
     [self updateBackground];
     
-    self.placeHolderText.text=[NSString stringWithFormat:@"New Message using %@", self.jid];
+    self.placeHolderText.text=[NSString stringWithFormat:@"Message from %@", self.jid];
 }
 
 

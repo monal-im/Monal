@@ -203,6 +203,11 @@ extern NSString *const kMessageTypeUrl;
 -(void) setMessageId:(NSString*) messageid received:(BOOL) received;
 
 /**
+ if the server replies with an error for a message, store it
+ */
+-(void) setMessageId:(NSString*) messageid errorType:(NSString *) errorType errorReason:(NSString *)errorReason;
+
+/**
  sets a preview info for a specified message
  */
 -(void) setMessageId:(NSString*) messageid previewText:(NSString *) text andPreviewImage:(NSString *) image;

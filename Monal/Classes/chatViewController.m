@@ -385,7 +385,12 @@
     DDLogVerbose(@"Sending message");
     NSString *newMessageID =messageID?messageID:[[NSUUID UUID] UUIDString];
     //dont readd it, use the exisitng
-    NSDictionary* settings=[[[DataLayer sharedInstance] accountVals:self.contact.accountId] objectAtIndex:0];
+    NSArray *accounts = [[DataLayer sharedInstance] accountVals:self.contact.accountId];
+    if(accounts.count>0) {
+        DDLogError(@"Account sbould be >0");
+        return;
+    }
+    NSDictionary* settings=[accounts objectAtIndex:0];
     
     if(!messageID) {
         NSString *contactNameCopy =self.contact.contactJid; //prevent retail cycle

@@ -20,6 +20,7 @@
 #import "ContactDetails.h"
 #import "MLXMPPActivityItem.h"
 #import "MLImageManager.h"
+#import "DataLayer.h"
 
 @import QuartzCore;
 @import MobileCoreServices;
@@ -56,12 +57,16 @@
 -(void) setup
 {
     self.hidesBottomBarWhenPushed=YES;
+  
+    [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId withCompletion:^(NSArray *result) {
+        NSArray* accountVals = result;
+        if([accountVals count]>0)
+         {
+             self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
+         }
+    }];
     
-    NSArray* accountVals =[[DataLayer sharedInstance] accountVals:self.contact.accountId];
-    if([accountVals count]>0)
-    {
-        self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
-    }
+ 
     
 }
 
@@ -406,37 +411,41 @@
     DDLogVerbose(@"Sending message");
     NSString *newMessageID =messageID?messageID:[[NSUUID UUID] UUIDString];
     //dont readd it, use the exisitng
-    NSArray *accounts = [[DataLayer sharedInstance] accountVals:self.contact.accountId];
-    if(accounts.count==0) {
-        DDLogError(@"Account sbould be >0");
-        return;
-    }
-    NSDictionary* settings=[accounts objectAtIndex:0];
     
-    if(!messageID) {
-        NSString *contactNameCopy =self.contact.contactJid; //prevent retail cycle
-        NSString *accountNoCopy = self.contact.accountId;
-        BOOL isMucCopy = self.contact.isGroup;
-        BOOL encryptChatCopy = self.encryptChat;
-        
-        
-        [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
-            [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
-                                  withCompletionHandler:nil];
-        }];
-    }
-    else  {
-        [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:NO messageId:newMessageID
-                              withCompletionHandler:nil];
-    }
-    
-    
-    if([[settings objectForKey:kAirdrop] boolValue])
-    {
-        DDLogInfo(@"Sending Via share sheet");
-        [self sendWithShareSheet];
-        
-    }
+    [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId withCompletion:^(NSArray *result) {
+        NSArray *accounts = result;
+         if(accounts.count==0) {
+             DDLogError(@"Account sbould be >0");
+             return;
+         }
+         NSDictionary* settings=[accounts objectAtIndex:0];
+         
+         if(!messageID) {
+             NSString *contactNameCopy =self.contact.contactJid; //prevent retail cycle
+             NSString *accountNoCopy = self.contact.accountId;
+             BOOL isMucCopy = self.contact.isGroup;
+             BOOL encryptChatCopy = self.encryptChat;
+             
+             
+             [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
+                 [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
+                                       withCompletionHandler:nil];
+             }];
+         }
+         else  {
+             [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:NO messageId:newMessageID
+                                   withCompletionHandler:nil];
+         }
+         
+         
+         if([[settings objectForKey:kAirdrop] boolValue])
+         {
+             DDLogInfo(@"Sending Via share sheet");
+             [self sendWithShareSheet];
+             
+         }
+    }];
+ 
 }
 
 -(void)resignTextView

@@ -707,25 +707,23 @@ static DataLayer *sharedInstance=nil;
     }];
 }
 
--(NSArray*) accountVals:(NSString*) accountNo
+-(void) detailsForAccount:(NSString*) accountNo withCompletion:(void (^)(NSArray* result))completion
 {
-    if(!accountNo) return nil;
+    if(!accountNo) return;
     NSString* query=[NSString stringWithFormat:@"select * from account where  account_id=? "];
     NSArray *params=@[accountNo];
-    NSArray* toReturn = [self executeReader:query andArguments:params];
-    
-    if(toReturn!=nil)
-    {
+    [self executeReader:query andArguments:params withCompletion:^(NSMutableArray *result) {
+        if(result!=nil)
+        {
+            DDLogVerbose(@" count: %lu",  (unsigned long)[result count] );
+        }
+        else
+        {
+            DDLogError(@"account list  is empty or failed to read");
+        }
         
-        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
-        return toReturn;
-    }
-    else
-    {
-        DDLogError(@"account list  is empty or failed to read");
-        return nil;
-    }
-    
+        if(completion) completion(result);
+    }];
 }
 
 

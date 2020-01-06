@@ -59,79 +59,82 @@ NSString *const kGtalk = @"Gtalk";
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-
+    
     [self.tableView registerNib:[UINib nibWithNibName:@"MLSwitchCell"
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"AccountCell"];
-
-
+    
+    
     [self.tableView registerNib:[UINib nibWithNibName:@"MLButtonCell"
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"ButtonCell"];
-
+    
     _db= [DataLayer sharedInstance];
-
+    
     if(![_accountno isEqualToString:@"-1"])
     {
         self.editMode=true;
     }
-
+    
     DDLogVerbose(@"got account number %@", _accountno);
-
+    
     UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)]; // hides the kkyeboard when you tap outside the editing area
     gestureRecognizer.cancelsTouchesInView=false; //this prevents it from blocking the button
     [self.tableView addGestureRecognizer:gestureRecognizer];
-
-
+    
+    
     if(_originIndex.section==0)
     {
         //edit
         DDLogVerbose(@"reading account number %@", _accountno);
-        if([_db accountVals:_accountno].count==0 )
-        {
-            //present another UI here.
-            return;
-
-        }
-        NSDictionary* settings=[[_db accountVals:_accountno] objectAtIndex:0]; //only one row
-        self.initialSettings=settings;
-        
-        //allow blank domains.. dont show @ if so
-        if([[settings objectForKey:@"domain"] length]>0) {
-            self.jid=[NSString stringWithFormat:@"%@@%@",[settings objectForKey:@"username"],[settings objectForKey:@"domain"]];
-        }
-        else {
-            self.jid=[NSString stringWithFormat:@"%@",[settings objectForKey:@"username"]];
-        }
-
-        NSString*pass= [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",self.accountno]];
-
-        if(pass) {
-            self.password =pass;
-        }
-
-        self.server=[settings objectForKey:@"server"];
-
-        self.port=[NSString stringWithFormat:@"%@", [settings objectForKey:@"other_port"]];
-       // self.resource=[settings objectForKey:@"resource"];
-
-        self.useSSL=[[settings objectForKey:@"secure"] boolValue];
-        self.enabled=[[settings objectForKey:kEnabled] boolValue];
-
-        self.oldStyleSSL=[[settings objectForKey:@"oldstyleSSL"] boolValue];
-        self.selfSignedSSL=[[settings objectForKey:@"selfsigned"] boolValue];
-        self.airDrop = [[settings objectForKey:kAirdrop] boolValue];
-
-        if([[settings objectForKey:@"domain"] isEqualToString:@"gmail.com"])
-        {
-            JIDLabel.text=@"GTalk ID";
-            self.accountType=kGtalk;
-        }
-
+        [_db detailsForAccount:_accountno withCompletion:^(NSArray *result) {
+            
+            if(result.count==0 )
+            {
+                //present another UI here.
+                return;
+                
+            }
+            
+            NSDictionary* settings=[result objectAtIndex:0]; //only one row
+            self.initialSettings=settings;
+            
+            //allow blank domains.. dont show @ if so
+            if([[settings objectForKey:@"domain"] length]>0) {
+                self.jid=[NSString stringWithFormat:@"%@@%@",[settings objectForKey:@"username"],[settings objectForKey:@"domain"]];
+            }
+            else {
+                self.jid=[NSString stringWithFormat:@"%@",[settings objectForKey:@"username"]];
+            }
+            
+            NSString*pass= [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",self.accountno]];
+            
+            if(pass) {
+                self.password =pass;
+            }
+            
+            self.server=[settings objectForKey:@"server"];
+            
+            self.port=[NSString stringWithFormat:@"%@", [settings objectForKey:@"other_port"]];
+            // self.resource=[settings objectForKey:@"resource"];
+            
+            self.useSSL=[[settings objectForKey:@"secure"] boolValue];
+            self.enabled=[[settings objectForKey:kEnabled] boolValue];
+            
+            self.oldStyleSSL=[[settings objectForKey:@"oldstyleSSL"] boolValue];
+            self.selfSignedSSL=[[settings objectForKey:@"selfsigned"] boolValue];
+            self.airDrop = [[settings objectForKey:kAirdrop] boolValue];
+            
+            if([[settings objectForKey:@"domain"] isEqualToString:@"gmail.com"])
+            {
+                self->JIDLabel.text=@"GTalk ID";
+                self.accountType=kGtalk;
+            }
+        }];
     }
     else
     {
-
+        
         if(_originIndex.row==1)
         {
             JIDLabel.text=@"GTalk ID";
@@ -139,43 +142,44 @@ NSString *const kGtalk = @"Gtalk";
             self.jid=@"@gmail.com";
             self.accountType=kGtalk;
         }
-
+        
         self.port=@"5222";
         self.useSSL=true;
         srand([[NSDate date] timeIntervalSince1970]);
         self.resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
-
-
+        
+        
         self.oldStyleSSL=NO;
         self.selfSignedSSL=NO;
-
+        
     }
-
+    
     self.sectionArray = @[@"Account", @"Advanced Settings",@""];
-
-
+    
+    
     [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountStoreAccountsDidChangeNotification
                                                       object:[NXOAuth2AccountStore sharedStore]
                                                        queue:nil
                                                   usingBlock:^(NSNotification *aNotification){
-
-                                                      for (NXOAuth2Account *account in [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.jid]) {
-
-                                                          self.password= account.accessToken.accessToken;
-
-                                                      };
-
-                                                  }];
-
+        
+        for (NXOAuth2Account *account in [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.jid]) {
+            
+            self.password= account.accessToken.accessToken;
+            
+        };
+        
+    }];
+    
     [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountStoreDidFailToRequestAccessNotification
                                                       object:[NXOAuth2AccountStore sharedStore]
                                                        queue:nil
                                                   usingBlock:^(NSNotification *aNotification){
-                                                     //NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
-                                                      // Do something with the error
-                                                  }];
-
-
+        //NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
+        // Do something with the error
+    }];
+    
+    
+    
 }
 
 - (void)viewWillAppear:(BOOL)animated

@@ -162,7 +162,7 @@ extern NSString *const kMessageTypeUrl;
 -(void) doesAccountExistUser:(NSString*) user andDomain:(NSString *) domain withCompletion:(void (^)(BOOL result))completion;
 -(void) accountForUser:(NSString*) user andDomain:(NSString *) domain withCompletion:(void (^)(NSString* result))completion;
 
--(NSArray*) accountVals:(NSString*) accountNo;
+-(void) detailsForAccount:(NSString*) accountNo withCompletion:(void (^)(NSArray* result))completion;
 
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
 -(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion;

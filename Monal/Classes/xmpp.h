@@ -263,7 +263,7 @@ Decline a call request
 /*
  query message archive.
  */
--(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid;
+-(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) after  andJid:(NSString *)jid;
 
 
 -(void) setMAMPrefs:(NSString *) preference;

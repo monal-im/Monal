@@ -1751,6 +1751,8 @@ NSString *const kXMPPPresence = @"presence";
                         self.loginCompletion=nil;
                     }
                     
+                     [self queryMAMSinceLastStanza];
+                    
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"]) // stream resume failed
                 {

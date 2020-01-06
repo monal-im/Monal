@@ -106,7 +106,7 @@
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
     [nc addObserver:self selector:@selector(refreshButton:) name:kMonalAccountStatusChanged object:nil];
-    [nc addObserver:self selector:@selector(fetchMessages) name:kMLMAMMore object:nil];
+  //  [nc addObserver:self selector:@selector(fetchMessages) name:kMLMAMMore object:nil];
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 
@@ -156,9 +156,11 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
         if(xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
-            if(self.messageList.count==0) {
-                [xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
-            }
+            [[DataLayer sharedInstance] lastMessageSanzaForAccount:self.contact.accountId  andJid:self.contact.contactJid  withCompletion:^(NSString *lastStanza) {
+                if(lastStanza) {
+                    [xmppAccount setMAMQueryFromStart:nil after:lastStanza andJid:self.contact.contactJid ];
+                }
+            }];
         }
     });
 }
@@ -235,6 +237,7 @@
     
     self.placeHolderText.text=[NSString stringWithFormat:@"Message from %@", self.jid];
     self.hardwareKeyboardPresent = YES; //default to YES and when keybaord will appears is called, this may be set to NO
+    
 }
 
 

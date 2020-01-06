@@ -101,7 +101,7 @@
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
     [nc addObserver:self selector:@selector(refreshButton:) name:kMonalAccountStatusChanged object:nil];
-    [nc addObserver:self selector:@selector(fetchMoreMessages) name:kMLMAMMore object:nil];
+    [nc addObserver:self selector:@selector(fetchMessages) name:kMLMAMMore object:nil];
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 

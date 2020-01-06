@@ -101,7 +101,7 @@
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
     [nc addObserver:self selector:@selector(refreshButton:) name:kMonalAccountStatusChanged object:nil];
-    [nc addObserver:self selector:@selector(fetchMoreMessages) name:kMLMAMMore object:nil];
+    [nc addObserver:self selector:@selector(fetchMessages) name:kMLMAMMore object:nil];
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 
@@ -146,9 +146,16 @@
     });
 }
 
--(void) fetchMoreMessages
+-(void) fetchMessages
 {
-    [self synchChat];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+        if(xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
+            if(self.messageList.count==0) {
+                [xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
+            }
+        }
+    });
 }
 
 -(void) refreshButton:(NSNotification *) notificaiton
@@ -354,7 +361,7 @@
         unreadPos--; //move up the list
     }
     
-    if(unreadPos<=newList.count-1){
+    if(unreadPos<=newList.count-1 && unreadPos>0) {
         [newList insertObject:unreadStatus atIndex:unreadPos];
     }
     

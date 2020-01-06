@@ -340,7 +340,6 @@
 {
     [self presentChatWithRow:[self.contacts objectAtIndex:indexPath.row] ];
     self.lastSelectedUser=[self.contacts objectAtIndex:indexPath.row];
-    [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
 }
 
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath

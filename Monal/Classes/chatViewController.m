@@ -169,38 +169,33 @@
 {
     if(!self.contact.accountId) return;
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-    
-    [[DataLayer sharedInstance] fullNameForContact:self.contact.contactJid inAccount:self.contact.accountId withCompeltion:^(NSString * name) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *title=name;
-            if(title.length==0) title=self.contact.contactDisplayName;
-            
-            if(xmppAccount.accountState<kStateLoggedIn)
-            {
-                if(!xmppAccount.airDrop) {
-                    self.sendButton.enabled=NO;
-                }
-                
-                if(!title) title=@"";
-                self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Logged Out"];
-            }
-            else  {
-                self.sendButton.enabled=YES;
-                self.navigationItem.title=title;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *title=self.contact.contactDisplayName;
+        
+        if(xmppAccount.accountState<kStateLoggedIn)
+        {
+            if(!xmppAccount.airDrop) {
+                self.sendButton.enabled=NO;
             }
             
-            if(self.encryptChat){
-                self.navigationItem.title = [NSString stringWithFormat:@"%@ 🔒", self.navigationItem.title];
-            }
+            if(!title) title=@"";
+            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Logged Out"];
+        }
+        else  {
+            self.sendButton.enabled=YES;
+            self.navigationItem.title=title;
+        }
+        
+        if(self.encryptChat){
+            self.navigationItem.title = [NSString stringWithFormat:@"%@ 🔒", self.navigationItem.title];
+        }
+        
+        if(self.contact.isGroup) {
+            NSArray *members= [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
+            self.navigationItem.title=[NSString stringWithFormat:@"%@ (%ld)", self.navigationItem.title, members.count];
             
-            if(self.contact.isGroup) {
-                NSArray *members= [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
-                self.navigationItem.title=[NSString stringWithFormat:@"%@ (%ld)", self.navigationItem.title, members.count];
-                
-            }
-        });
-    }];
-
+        }
+    });
 }
 
 

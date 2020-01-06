@@ -120,8 +120,7 @@ extern NSString *const kMessageTypeUrl;
 #pragma mark Contact info
 
 -(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSString*) accountNo;
--(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo;
-//-(BOOL) setFileName:(NSString*) fileName forBuddy:(NSString*) buddy andAccount:(NSString*) accountNo;
+-(void) fullNameForContact:(NSString*) contact inAccount:(NSString*) accountNo withCompeltion: (void (^)(NSString *))completion;
 
 -(void) setContactHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 -(void) contactHash:(NSString*) contact forAccount:(NSString*) accountNo withCompeltion: (void (^)(NSString *))completion;
@@ -218,7 +217,7 @@ extern NSString *const kMessageTypeUrl;
 #pragma mark - message history
 -(NSMutableArray*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(NSArray*) allMessagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
--(NSMutableArray*) lastMessageForContact:(NSString*) contact andAccount:(NSString*) accountNo;
+-(void) lastMessageForContact:(NSString*) contact forAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion;
 
 -(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo;
 -(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date;

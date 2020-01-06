@@ -30,6 +30,8 @@
     message.hasBeenSent=[(NSNumber *)[dic objectForKey:@"delivered"] boolValue];
     message.encrypted=[(NSNumber *)[dic objectForKey:@"encrypted"] boolValue];
   
+    message.unread=[(NSNumber *)[dic objectForKey:@"unread"] boolValue];
+    
     message.previewText=[dic objectForKey:@"previewText"];
     message.previewImage=[NSURL URLWithString:[dic objectForKey:@"previewImage"]];
     

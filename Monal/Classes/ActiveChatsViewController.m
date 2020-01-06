@@ -23,6 +23,10 @@
 @property (nonatomic, assign)  NSInteger thisyear;
 @property (nonatomic, assign)  NSInteger thismonth;
 @property (nonatomic, assign)  NSInteger thisday;
+
+@property (nonatomic, strong) NSArray* contacts;
+@property (nonatomic, strong) MLContact* lastSelectedUser;
+
 @end
 
 @implementation ActiveChatsViewController
@@ -45,11 +49,11 @@
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     
-    _chatListTable=[[UITableView alloc] init];
-    _chatListTable.delegate=self;
-    _chatListTable.dataSource=self;
+     self.chatListTable=[[UITableView alloc] init];
+     self.chatListTable.delegate=self;
+     self.chatListTable.dataSource=self;
     
-    self.view=_chatListTable;
+    self.view= self.chatListTable;
     
     UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close All",@"") style:UIBarButtonItemStylePlain target:self action:@selector(closeAll)];
     self.navigationItem.rightBarButtonItem=rightButton;
@@ -58,6 +62,8 @@
         [nc addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalAccountStatusChanged object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name: kMonalContactRefresh object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     
     [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell"
                                                bundle:[NSBundle mainBundle]]
@@ -84,12 +90,69 @@
     [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
-            self->_contacts=cleanActive;
+            self.contacts=cleanActive;
             [self->_chatListTable reloadData];
             MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
             [appDelegate updateUnread];
         });
     }];
+}
+
+-(void) refreshContact:(NSNotification *) notification
+{
+    MLContact* user = [notification.userInfo objectForKey:@"contact"];;
+    [self refreshRowForContact:user];
+}
+
+
+-(void) handleNewMessage:(NSNotification *)notification
+{
+    MLMessage *message =[notification.userInfo objectForKey:@"message"];
+    
+    if([message.messageType isEqualToString:kMessageTypeStatus]) return;
+    
+    dispatch_async(dispatch_get_main_queue(),^{
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || !message.shouldShowAlert)
+        {
+            return;
+        }
+        
+        if([self.lastSelectedUser.contactJid isEqualToString:message.from])  return;
+        
+        __block BOOL contactInList=NO;
+        [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            MLContact *rowContact = (MLContact *) obj;
+            if([rowContact.contactJid isEqualToString:message.from]) {
+                contactInList=YES;
+                NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
+                    [self.chatListTable beginUpdates];
+                    [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                    [self.chatListTable endUpdates];
+            }
+        }];
+        
+        if(!contactInList) {
+            [self refreshDisplay];
+        }
+        
+    });
+
+}
+
+-(void) refreshRowForContact:(MLContact *) contact {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            MLContact *rowContact = (MLContact *) obj;
+            if([rowContact.contactJid isEqualToString:contact.contactJid]) {
+                NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
+                [self.chatListTable beginUpdates];
+                [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                [self.chatListTable endUpdates];
+                *stop=YES;
+                return;
+            }
+        }];
+    });
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -140,7 +203,7 @@
 
 
 
-#pragma mark tableview datasource
+#pragma mark - tableview datasource
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -149,7 +212,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-   return [_contacts count];
+   return [self.contacts count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -161,7 +224,7 @@
     }
     
 
-    MLContact* row = [_contacts objectAtIndex:indexPath.row];
+    MLContact* row = [self.contacts objectAtIndex:indexPath.row];
     [cell showDisplayName:row.contactDisplayName];
     
     
@@ -199,23 +262,26 @@
         });
     }];
     
-    NSMutableArray *messages = [[DataLayer sharedInstance] lastMessageForContact:cell.username andAccount:row.accountId];
-    if(messages.count>0)
-    {
-        MLMessage *messageRow = messages[0];
-        if([messageRow.messageType isEqualToString:kMessageTypeUrl])
-        {
-            [cell showStatusText:@"🔗 A Link"];
-        } else if([messageRow.messageType isEqualToString:kMessageTypeImage])
-        {
-            [cell showStatusText:@"📷 An Image"];
-        } else  {
-            [cell showStatusText:messageRow.messageText];
-        }
-    } else  {
-        DDLogWarn(@"Active chat but no messages found in history for %@.", row.contactJid);
-    }
-    
+    [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:row.accountId withCompletion:^(NSMutableArray *messages) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if(messages.count>0)
+            {
+                MLMessage *messageRow = messages[0];
+                if([messageRow.messageType isEqualToString:kMessageTypeUrl])
+                {
+                    [cell showStatusText:@"🔗 A Link"];
+                } else if([messageRow.messageType isEqualToString:kMessageTypeImage])
+                {
+                    [cell showStatusText:@"📷 An Image"];
+                } else  {
+                    [cell showStatusText:messageRow.messageText];
+                }
+            } else  {
+                DDLogWarn(@"Active chat but no messages found in history for %@.", row.contactJid);
+            }
+        });
+    }];
+                       
     [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
             cell.userImage.image=image;
     }];
@@ -226,14 +292,13 @@
     } else  {
         cell.time.hidden=YES;
     }
-    
-    
+        
     [cell setOrb];
     return cell;
 }
 
 
-#pragma mark tableview delegate
+#pragma mark - tableview delegate
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -258,14 +323,14 @@
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        MLContact* contact= [_contacts objectAtIndex:indexPath.row];
+        MLContact* contact= [self.contacts objectAtIndex:indexPath.row];
         
         [[DataLayer sharedInstance] removeActiveBuddy:contact.contactJid forAccount:contact.accountId];
         [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
             [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
             dispatch_async(dispatch_get_main_queue(), ^{
-                self->_contacts=cleanActive;
-                [self->_chatListTable deleteRowsAtIndexPaths:@[indexPath]
+                self.contacts=cleanActive;
+                [self.chatListTable deleteRowsAtIndexPaths:@[indexPath]
                                       withRowAnimation:UITableViewRowAnimationAutomatic];
             });
         }];
@@ -275,25 +340,16 @@
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    [tableView deselectRowAtIndexPath:indexPath animated:NO];
-      
-    // [[_contacts objectAtIndex:indexPath.row] setObject:[NSNumber numberWithInt:0] forKey:@"count"];
- 
-    [self presentChatWithRow:[_contacts objectAtIndex:indexPath.row] ];
+    MLContact *selected = self.contacts[indexPath.row];
+    if(selected.contactJid==self.lastSelectedUser.contactJid) return;
     
-        [tableView reloadRowsAtIndexPaths:@[indexPath]
-                         withRowAnimation:UITableViewRowAnimationNone];
-        
-        
-        _lastSelectedUser=[_contacts objectAtIndex:indexPath.row];
-//    }
-    
-    
+    [self presentChatWithRow:[self.contacts objectAtIndex:indexPath.row] ];
+    self.lastSelectedUser=[self.contacts objectAtIndex:indexPath.row];
 }
 
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
-    NSDictionary *contactDic = [_contacts objectAtIndex:indexPath.row];
+    NSDictionary *contactDic = [self.contacts objectAtIndex:indexPath.row];
 
     [self performSegueWithIdentifier:@"showDetails" sender:contactDic];
 }
@@ -343,7 +399,7 @@
 
 - (BOOL)emptyDataSetShouldDisplay:(UIScrollView *)scrollView
 {
-    BOOL toreturn = (_contacts.count==0)?YES:NO;
+    BOOL toreturn = (self.contacts.count==0)?YES:NO;
     if(toreturn)
     {
         // A little trick for removing the cell separators

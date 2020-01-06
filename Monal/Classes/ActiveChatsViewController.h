@@ -10,10 +10,6 @@
 #import <DZNEmptyDataSet/UIScrollView+EmptyDataSet.h>
 
 @interface ActiveChatsViewController : UITableViewController  <DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
-{
-    NSArray* _contacts;
-    NSDictionary* _lastSelectedUser;
-}
 
 @property (nonatomic, strong) UITableView* chatListTable;
 

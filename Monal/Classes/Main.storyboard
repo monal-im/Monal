@@ -244,10 +244,10 @@
             </objects>
             <point key="canvasLocation" x="11" y="-489"/>
         </scene>
-        <!--View Controller-->
+        <!--Placeholder View Controller-->
         <scene sceneID="ian-aI-Nym">
             <objects>
-                <viewController id="iM6-Fx-aHL" sceneMemberID="viewController">
+                <viewController id="iM6-Fx-aHL" customClass="MLPlaceholderViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="oLo-mA-PUv"/>
                         <viewControllerLayoutGuide type="bottom" id="6ba-eK-Rv2"/>

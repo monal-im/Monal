@@ -82,69 +82,70 @@
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     NSString* acctString = message.accountId;
     
-    NSString *displayName = [[DataLayer sharedInstance] fullName:message.from forAccount:acctString];
-    
-    content.title = displayName.length>0?displayName:message.from;
-    
-    if(![message.from isEqualToString:message.actualFrom])
-    {
-        content.subtitle =[NSString stringWithFormat:@"%@ says:",message.actualFrom];
-    }
-    
-    NSString *idval = [NSString stringWithFormat:@"%@_%@", [self identifierWithNotification:notification],message.messageId];
-    
-    content.body = message.messageText;
-   // content.userInfo= notification.userInfo;
-    content.threadIdentifier =[self identifierWithNotification:notification];
-    content.categoryIdentifier=@"Reply";
-    
-    if( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true)
-    {
-        NSString *filename = [[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"];
-        if(filename) {
-            content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif",filename]];
-        } else  {
-            content.sound = [UNNotificationSound defaultSound];
+    [[DataLayer sharedInstance] fullNameForContact:message.from inAccount:acctString withCompeltion:^(NSString *displayName) {
+        
+        content.title = displayName.length>0?displayName:message.from;
+        
+        if(![message.from isEqualToString:message.actualFrom])
+        {
+            content.subtitle =[NSString stringWithFormat:@"%@ says:",message.actualFrom];
         }
-    }
-    
-    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-    if([message.messageType isEqualToString:kMessageTypeImage])
-    {
-        [[MLImageManager sharedInstance] imageURLForAttachmentLink:message.messageText withCompletion:^(NSURL * _Nullable url) {
-            if(url) {
-                NSError *error;
-                UNNotificationAttachment* attachment= [UNNotificationAttachment attachmentWithIdentifier:idval URL:url options:@{UNNotificationAttachmentOptionsTypeHintKey:(NSString*) kUTTypePNG} error:&error];
-                if(attachment) content.attachments=@[attachment];
-                if(error) {
-                    DDLogError(@"Error %@", error);
+        
+        NSString *idval = [NSString stringWithFormat:@"%@_%@", [self identifierWithNotification:notification],message.messageId];
+        
+        content.body = message.messageText;
+        // content.userInfo= notification.userInfo;
+        content.threadIdentifier =[self identifierWithNotification:notification];
+        content.categoryIdentifier=@"Reply";
+        
+        if( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true)
+        {
+            NSString *filename = [[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"];
+            if(filename) {
+                content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif",filename]];
+            } else  {
+                content.sound = [UNNotificationSound defaultSound];
+            }
+        }
+        
+        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+        if([message.messageType isEqualToString:kMessageTypeImage])
+        {
+            [[MLImageManager sharedInstance] imageURLForAttachmentLink:message.messageText withCompletion:^(NSURL * _Nullable url) {
+                if(url) {
+                    NSError *error;
+                    UNNotificationAttachment* attachment= [UNNotificationAttachment attachmentWithIdentifier:idval URL:url options:@{UNNotificationAttachmentOptionsTypeHintKey:(NSString*) kUTTypePNG} error:&error];
+                    if(attachment) content.attachments=@[attachment];
+                    if(error) {
+                        DDLogError(@"Error %@", error);
+                    }
                 }
-            }
-            
-            if(!content.attachments)  {
-                content.body =@"Sent an Image 📷";
-            }else  {
-                content.body=@"";
-            }
-            UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval
-                                                                                  content:content trigger:nil];
-            [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+                
+                if(!content.attachments)  {
+                    content.body =@"Sent an Image 📷";
+                }else  {
+                    content.body=@"";
+                }
+                UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval
+                                                                                      content:content trigger:nil];
+                [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+                    
+                }];
                 
             }];
+            return;
+            
+        }
+        else if([message.messageType isEqualToString:kMessageTypeUrl])
+        {
+            content.body =@"Sent a Link 🔗";
+        }
+        
+        UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval
+                                                                              content:content trigger:nil];
+        [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
             
         }];
-        return;
-        
-    }
-    else if([message.messageType isEqualToString:kMessageTypeUrl])
-    {
-        content.body =@"Sent a Link 🔗";
-    }
-    
-    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval
-                                                                          content:content trigger:nil];
-    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-        
     }];
 }
 

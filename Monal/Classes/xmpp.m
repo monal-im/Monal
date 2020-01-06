@@ -1328,34 +1328,36 @@ NSString *const kXMPPPresence = @"presence";
                             
                             [self.networkQueue addOperationWithBlock:^{
                                 
+                                void(^notify)(BOOL) = ^(BOOL success) {
+                                    if(messageNode.from  ) {
+                                        NSString* actuallyFrom= messageNode.actualFrom;
+                                        if(!actuallyFrom) actuallyFrom=messageNode.from;
+                                        
+                                        MLMessage *message = [[MLMessage alloc] init];
+                                        message.from=messageNode.from;
+                                        message.actualFrom= actuallyFrom;
+                                        message.messageText= body; //this need to be the processed value since it may be decrypted
+                                        message.to=messageNode.to?messageNode.to:self.connectionProperties.identity.jid;
+                                        message.messageId=messageNode.idval?messageNode.idval:@"";
+                                        message.accountId=self.accountNo;
+                                        message.encrypted=encrypted;
+                                        message.delayTimeStamp=messageNode.delayTimeStamp;
+                                        message.timestamp =[NSDate date];
+                                        message.shouldShowAlert= showAlert;
+                                        message.messageType=newMessageType;
+                                        message.hasBeenSent=YES; //if it came in it has been sent to the server
+                                        
+                                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
+                                    }
+                                };
+                                
                                 if(![messageNode.from isEqualToString:
                                      self.connectionProperties.identity.jid]) {
-                                    [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:self->_accountNo withCompletion:nil];
+                                    [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:self->_accountNo withCompletion:notify];
                                 } else  {
-                                    [[DataLayer sharedInstance] addActiveBuddies:messageNode.to forAccount:self->_accountNo withCompletion:nil];
+                                    [[DataLayer sharedInstance] addActiveBuddies:messageNode.to forAccount:self->_accountNo withCompletion:notify];
                                 }
                                 
-                                
-                                if(messageNode.from  ) {
-                                    NSString* actuallyFrom= messageNode.actualFrom;
-                                    if(!actuallyFrom) actuallyFrom=messageNode.from;
-                                    
-                                    MLMessage *message = [[MLMessage alloc] init];
-                                    message.from=messageNode.from;
-                                    message.actualFrom= actuallyFrom;
-                                    message.messageText= body; //this need to be the processed value since it may be decrypted
-                                    message.to=messageNode.to?messageNode.to:self.connectionProperties.identity.jid;
-                                    message.messageId=messageNode.idval?messageNode.idval:@"";
-                                    message.accountId=self.accountNo;
-                                    message.encrypted=encrypted;
-                                    message.delayTimeStamp=messageNode.delayTimeStamp;
-                                    message.timestamp =[NSDate date];
-                                    message.shouldShowAlert= showAlert;
-                                    message.messageType=newMessageType;
-                                    message.hasBeenSent=YES; //if it came in it has been sent to the server
-                                    
-                                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
-                                }
                             }];
                         }
                         else {
@@ -3034,20 +3036,20 @@ static NSMutableArray *extracted(xmpp *object) {
     if([iqNode.idval isEqualToString:self.jingle.idval])
     {
         NSString* from= iqNode.user;
-        
-        NSString* fullName;
-        fullName=[[DataLayer sharedInstance] fullName:from forAccount:self->_accountNo];
-        if(!fullName) fullName=from;
-        
-        NSDictionary* userDic=@{@"buddy_name":from,
-                                @"full_name":fullName,
-                                kAccountID:self->_accountNo
-        };
-        
-        [[NSNotificationCenter defaultCenter]
-         postNotificationName: kMonalCallStartedNotice object: userDic];
-    
-        [self.jingle rtpConnect];
+        [[DataLayer sharedInstance] fullNameForContact:from inAccount:self.accountNo withCompeltion:^(NSString *name) {
+            NSString *fullName=name;
+            if(!fullName) fullName=from;
+            
+            NSDictionary* userDic=@{@"buddy_name":from,
+                                    @"full_name":fullName,
+                                    kAccountID:self->_accountNo
+            };
+            
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName: kMonalCallStartedNotice object: userDic];
+            
+            [self.jingle rtpConnect];
+        }];
         return;
     }
     

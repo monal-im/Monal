@@ -1270,13 +1270,14 @@ static DataLayer *sharedInstance=nil;
     return fullname;
 }
 
--(NSString*) fullName:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(void) fullNameForContact:(NSString*) contact inAccount:(NSString*) accountNo withCompeltion: (void (^)(NSString *))completion;
 {
-    if(!accountNo  || !buddy) return nil;
+    if(!accountNo  || !contact) return ;
     NSString* query=[NSString stringWithFormat:@"select full_name from buddylist where account_id=? and buddy_name=?"];
-    NSArray * params=@[accountNo, buddy];
-    NSString* fullname= (NSString*)[self executeScalar:query andArguments:params];
-    return fullname;
+    NSArray * params=@[accountNo, contact];
+    [self executeScalar:query andArguments:params withCompletion:^(NSObject *name) {
+        if(completion) completion((NSString *)name);
+    }];
 }
 
 
@@ -1293,7 +1294,7 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(void) contactHash:(NSString*) buddy forAccount:(NSString*) accountNo withCompeltion: (void (^)(NSString *))completion;
+-(void) contactHash:(NSString*) buddy forAccount:(NSString*) accountNo withCompeltion: (void (^)(NSString *))completion
 {
     NSString* query=[NSString stringWithFormat:@"select iconhash from buddylist where account_id=? and buddy_name=?"];
     NSArray *params=@[accountNo, buddy];
@@ -1901,33 +1902,34 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(NSMutableArray *) lastMessageForContact:(NSString *) contact andAccount:(NSString *) accountNo
+-(void) lastMessageForContact:(NSString*) contact forAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion
 {
-    if(!accountNo ||! contact) return nil;
+    if(!accountNo ||! contact) return;
     NSString* query=[NSString stringWithFormat:@"select message, timestamp  as thetime, messageType from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 1"];
     NSArray *params=@[accountNo, contact, contact];
-    NSMutableArray* results = [[self executeReader:query andArguments:params] mutableCopy];
     
-    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-    
-    NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
-    [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSDictionary *dic = (NSDictionary *) obj;
-        [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:formatter]];
+    [self executeReader:query andArguments:params withCompletion:^(NSMutableArray *results) {
+        NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
+        [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+        [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+        
+        NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
+        [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSDictionary *dic = (NSDictionary *) obj;
+            [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:formatter]];
+        }];
+        
+        if(toReturn!=nil)
+        {
+            DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count] );
+        }
+        else
+        {
+            DDLogError(@"message history is empty or failed to read");
+        }
+        
+        if(completion) completion(toReturn);
     }];
-    
-    if(toReturn!=nil)
-    {
-        DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count] );
-        return toReturn;
-    }
-    else
-    {
-        DDLogError(@"message history is empty or failed to read");
-        return nil;
-    }
 }
 
 

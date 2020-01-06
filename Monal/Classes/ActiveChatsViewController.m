@@ -25,7 +25,7 @@
 @property (nonatomic, assign)  NSInteger thisday;
 
 @property (nonatomic, strong) NSArray* contacts;
-@property (nonatomic, strong) NSDictionary* lastSelectedUser;
+@property (nonatomic, strong) MLContact* lastSelectedUser;
 
 @end
 
@@ -111,14 +111,32 @@
     
     if([message.messageType isEqualToString:kMessageTypeStatus]) return;
     
-    dispatch_sync(dispatch_get_main_queue(),^{
+    dispatch_async(dispatch_get_main_queue(),^{
         if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || !message.shouldShowAlert)
         {
             return;
         }
-    });
         
-    //refresh unread count for contact
+        if([self.lastSelectedUser.contactJid isEqualToString:message.from])  return;
+        
+        __block BOOL contactInList=NO;
+        [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            MLContact *rowContact = (MLContact *) obj;
+            if([rowContact.contactJid isEqualToString:message.from]) {
+                contactInList=YES;
+                NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
+                    [self.chatListTable beginUpdates];
+                    [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                    [self.chatListTable endUpdates];
+            }
+        }];
+        
+        if(!contactInList) {
+            [self refreshDisplay];
+        }
+        
+    });
+
 }
 
 -(void) refreshRowForContact:(MLContact *) contact {
@@ -130,6 +148,8 @@
                 [self.chatListTable beginUpdates];
                 [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                 [self.chatListTable endUpdates];
+                *stop=YES;
+                return;
             }
         }];
     });
@@ -319,7 +339,8 @@
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [self presentChatWithRow:[self.contacts objectAtIndex:indexPath.row] ];
-    self.lastSelectedUser=[self.contacts objectAtIndex:indexPath.row];   
+    self.lastSelectedUser=[self.contacts objectAtIndex:indexPath.row];
+    [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
 }
 
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath

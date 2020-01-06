@@ -303,6 +303,9 @@
         
         MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
         [appDelegate updateUnread];
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+          
     }
     
 }

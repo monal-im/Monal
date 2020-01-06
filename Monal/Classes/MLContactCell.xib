@@ -17,7 +17,7 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OhQ-Fk-Czf" userLabel="name">
-                        <rect key="frame" x="70" y="6" width="90" height="20"/>
+                        <rect key="frame" x="70" y="6" width="98" height="20"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="highlightedColor"/>
                     </label>
@@ -63,7 +63,7 @@
                         </constraints>
                     </imageView>
                     <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Mar 24, 2019" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7IF-Xp-ziQ">
-                        <rect key="frame" x="168" y="1" width="86" height="16"/>
+                        <rect key="frame" x="176" y="1" width="86" height="16"/>
                         <constraints>
                             <constraint firstAttribute="width" constant="86" id="7Sj-WB-6yb"/>
                         </constraints>
@@ -80,7 +80,7 @@
                     <constraint firstItem="OhQ-Fk-Czf" firstAttribute="leading" secondItem="Awx-9U-LWt" secondAttribute="trailing" constant="11" id="A34-Th-lrX"/>
                     <constraint firstItem="orC-ej-MKC" firstAttribute="leading" secondItem="Qx8-80-HZA" secondAttribute="leadingMargin" constant="25" id="DlZ-Xq-SUj"/>
                     <constraint firstItem="WBM-UR-4hu" firstAttribute="leading" secondItem="Awx-9U-LWt" secondAttribute="trailing" constant="11" id="NLB-2x-gIU"/>
-                    <constraint firstAttribute="trailing" secondItem="7IF-Xp-ziQ" secondAttribute="trailing" constant="8" id="O80-bf-FqK"/>
+                    <constraint firstAttribute="trailing" secondItem="7IF-Xp-ziQ" secondAttribute="trailing" id="O80-bf-FqK"/>
                     <constraint firstItem="IrL-yc-gYp" firstAttribute="leading" secondItem="orC-ej-MKC" secondAttribute="trailing" constant="8" symbolic="YES" id="UjI-tr-Iz7"/>
                     <constraint firstItem="orC-ej-MKC" firstAttribute="top" secondItem="Qx8-80-HZA" secondAttribute="top" id="XS7-Wv-cqt"/>
                     <constraint firstAttribute="trailingMargin" secondItem="WBM-UR-4hu" secondAttribute="trailing" constant="-8" id="bdd-iy-yff"/>

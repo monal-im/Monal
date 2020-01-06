@@ -18,7 +18,7 @@
     }
     else  {
         if (self.nickName && self.nickName.length>0) toreturn=self.nickName;
-        if (self.fullName && self.fullName.length>0) toreturn=self.fullName;
+        else if (self.fullName && self.fullName.length>0) toreturn=self.fullName;
     }
     
     return toreturn;

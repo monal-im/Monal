@@ -106,7 +106,7 @@
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
     [nc addObserver:self selector:@selector(refreshButton:) name:kMonalAccountStatusChanged object:nil];
-    [nc addObserver:self selector:@selector(fetchMessages) name:kMLMAMMore object:nil];
+  //  [nc addObserver:self selector:@selector(fetchMessages) name:kMLMAMMore object:nil];
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 
@@ -156,9 +156,11 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
         if(xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
-            if(self.messageList.count==0) {
-                [xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
-            }
+            [[DataLayer sharedInstance] lastMessageSanzaForAccount:self.contact.accountId  andJid:self.contact.contactJid  withCompletion:^(NSString *lastStanza) {
+                if(lastStanza) {
+                    [xmppAccount setMAMQueryFromStart:nil after:lastStanza andJid:self.contact.contactJid ];
+                }
+            }];
         }
     });
 }
@@ -167,38 +169,33 @@
 {
     if(!self.contact.accountId) return;
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-    
-    [[DataLayer sharedInstance] fullNameForContact:self.contact.contactJid inAccount:self.contact.accountId withCompeltion:^(NSString * name) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *title=name;
-            if(title.length==0) title=self.contact.contactDisplayName;
-            
-            if(xmppAccount.accountState<kStateLoggedIn)
-            {
-                if(!xmppAccount.airDrop) {
-                    self.sendButton.enabled=NO;
-                }
-                
-                if(!title) title=@"";
-                self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Logged Out"];
-            }
-            else  {
-                self.sendButton.enabled=YES;
-                self.navigationItem.title=title;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *title=self.contact.contactDisplayName;
+        
+        if(xmppAccount.accountState<kStateLoggedIn)
+        {
+            if(!xmppAccount.airDrop) {
+                self.sendButton.enabled=NO;
             }
             
-            if(self.encryptChat){
-                self.navigationItem.title = [NSString stringWithFormat:@"%@ 🔒", self.navigationItem.title];
-            }
+            if(!title) title=@"";
+            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Logged Out"];
+        }
+        else  {
+            self.sendButton.enabled=YES;
+            self.navigationItem.title=title;
+        }
+        
+        if(self.encryptChat){
+            self.navigationItem.title = [NSString stringWithFormat:@"%@ 🔒", self.navigationItem.title];
+        }
+        
+        if(self.contact.isGroup) {
+            NSArray *members= [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
+            self.navigationItem.title=[NSString stringWithFormat:@"%@ (%ld)", self.navigationItem.title, members.count];
             
-            if(self.contact.isGroup) {
-                NSArray *members= [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
-                self.navigationItem.title=[NSString stringWithFormat:@"%@ (%ld)", self.navigationItem.title, members.count];
-                
-            }
-        });
-    }];
-
+        }
+    });
 }
 
 
@@ -235,6 +232,7 @@
     
     self.placeHolderText.text=[NSString stringWithFormat:@"Message from %@", self.jid];
     self.hardwareKeyboardPresent = YES; //default to YES and when keybaord will appears is called, this may be set to NO
+    
 }
 
 

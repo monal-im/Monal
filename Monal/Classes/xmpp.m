@@ -3034,20 +3034,20 @@ static NSMutableArray *extracted(xmpp *object) {
     if([iqNode.idval isEqualToString:self.jingle.idval])
     {
         NSString* from= iqNode.user;
-        
-        NSString* fullName;
-        fullName=[[DataLayer sharedInstance] fullName:from forAccount:self->_accountNo];
-        if(!fullName) fullName=from;
-        
-        NSDictionary* userDic=@{@"buddy_name":from,
-                                @"full_name":fullName,
-                                kAccountID:self->_accountNo
-        };
-        
-        [[NSNotificationCenter defaultCenter]
-         postNotificationName: kMonalCallStartedNotice object: userDic];
-    
-        [self.jingle rtpConnect];
+        [[DataLayer sharedInstance] fullNameForContact:from inAccount:self.accountNo withCompeltion:^(NSString *name) {
+            NSString *fullName=name;
+            if(!fullName) fullName=from;
+            
+            NSDictionary* userDic=@{@"buddy_name":from,
+                                    @"full_name":fullName,
+                                    kAccountID:self->_accountNo
+            };
+            
+            [[NSNotificationCenter defaultCenter]
+             postNotificationName: kMonalCallStartedNotice object: userDic];
+            
+            [self.jingle rtpConnect];
+        }];
         return;
     }
     

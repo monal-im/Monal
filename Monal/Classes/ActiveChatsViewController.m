@@ -262,23 +262,26 @@
         });
     }];
     
-    NSMutableArray *messages = [[DataLayer sharedInstance] lastMessageForContact:cell.username andAccount:row.accountId];
-    if(messages.count>0)
-    {
-        MLMessage *messageRow = messages[0];
-        if([messageRow.messageType isEqualToString:kMessageTypeUrl])
-        {
-            [cell showStatusText:@"🔗 A Link"];
-        } else if([messageRow.messageType isEqualToString:kMessageTypeImage])
-        {
-            [cell showStatusText:@"📷 An Image"];
-        } else  {
-            [cell showStatusText:messageRow.messageText];
-        }
-    } else  {
-        DDLogWarn(@"Active chat but no messages found in history for %@.", row.contactJid);
-    }
-    
+    [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:row.accountId withCompletion:^(NSMutableArray *messages) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if(messages.count>0)
+            {
+                MLMessage *messageRow = messages[0];
+                if([messageRow.messageType isEqualToString:kMessageTypeUrl])
+                {
+                    [cell showStatusText:@"🔗 A Link"];
+                } else if([messageRow.messageType isEqualToString:kMessageTypeImage])
+                {
+                    [cell showStatusText:@"📷 An Image"];
+                } else  {
+                    [cell showStatusText:messageRow.messageText];
+                }
+            } else  {
+                DDLogWarn(@"Active chat but no messages found in history for %@.", row.contactJid);
+            }
+        });
+    }];
+                       
     [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
             cell.userImage.image=image;
     }];

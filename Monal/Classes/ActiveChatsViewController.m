@@ -49,11 +49,11 @@
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     
-    _chatListTable=[[UITableView alloc] init];
-    _chatListTable.delegate=self;
-    _chatListTable.dataSource=self;
+     self.chatListTable=[[UITableView alloc] init];
+     self.chatListTable.delegate=self;
+     self.chatListTable.dataSource=self;
     
-    self.view=_chatListTable;
+    self.view= self.chatListTable;
     
     UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close All",@"") style:UIBarButtonItemStylePlain target:self action:@selector(closeAll)];
     self.navigationItem.rightBarButtonItem=rightButton;
@@ -203,7 +203,7 @@
 
 
 
-#pragma mark tableview datasource
+#pragma mark - tableview datasource
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -289,14 +289,13 @@
     } else  {
         cell.time.hidden=YES;
     }
-    
-    
+        
     [cell setOrb];
     return cell;
 }
 
 
-#pragma mark tableview delegate
+#pragma mark - tableview delegate
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -338,6 +337,9 @@
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    MLContact *selected = self.contacts[indexPath.row];
+    if(selected.contactJid==self.lastSelectedUser.contactJid) return;
+    
     [self presentChatWithRow:[self.contacts objectAtIndex:indexPath.row] ];
     self.lastSelectedUser=[self.contacts objectAtIndex:indexPath.row];
 }

@@ -18,7 +18,7 @@
 + (MLEncryptedPayload *) encrypt:(NSData *)body {
     
     MLCrypto *crypto = [[MLCrypto alloc] init];
-    [crypto encryptGCM];
+ 
     
     EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
     int outlen;

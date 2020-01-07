@@ -11,6 +11,7 @@
 		26A711CC23C4D67300FC6A86 /* MLCryptoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26A711CB23C4D67300FC6A86 /* MLCryptoTests.swift */; };
 		26A711CE23C4D67300FC6A86 /* MLCrypto.h in Headers */ = {isa = PBXBuildFile; fileRef = 26A711C023C4D67300FC6A86 /* MLCrypto.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		26A711E123C4D68F00FC6A86 /* MLCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26A711E023C4D68F00FC6A86 /* MLCrypto.swift */; };
+		26A711E923C4E25200FC6A86 /* EncryptedPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26A711E823C4E25200FC6A86 /* EncryptedPayload.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,6 +32,7 @@
 		26A711CB23C4D67300FC6A86 /* MLCryptoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLCryptoTests.swift; sourceTree = "<group>"; };
 		26A711CD23C4D67300FC6A86 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		26A711E023C4D68F00FC6A86 /* MLCrypto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLCrypto.swift; sourceTree = "<group>"; };
+		26A711E823C4E25200FC6A86 /* EncryptedPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptedPayload.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +78,7 @@
 				26A711E023C4D68F00FC6A86 /* MLCrypto.swift */,
 				26A711C023C4D67300FC6A86 /* MLCrypto.h */,
 				26A711C123C4D67300FC6A86 /* Info.plist */,
+				26A711E823C4E25200FC6A86 /* EncryptedPayload.swift */,
 			);
 			path = MLCrypto;
 			sourceTree = "<group>";
@@ -200,6 +203,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				26A711E123C4D68F00FC6A86 /* MLCrypto.swift in Sources */,
+				26A711E923C4E25200FC6A86 /* EncryptedPayload.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

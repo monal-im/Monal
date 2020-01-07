@@ -9,17 +9,28 @@
 import UIKit
 import CryptoKit
 
-@objc
+@objcMembers
 public class MLCrypto: NSObject {
-    @objc
-    public func encryptGCM ()
+   
+    public func encryptGCM (decryptedContent:Data) -> Data?
     {
-        
+        let key =  SymmetricKey(size: .bits128)
+        let iv = AES.GCM.Nonce()
+        do {
+            let encrypted = try AES.GCM.seal(decryptedContent, using: key, nonce: iv)
+            return encrypted.combined
+        } catch  {
+            return nil;
+        }
     }
     
-    @objc
-    public func decryptGCM()
+    
+   public func decryptGCM (key: Data, encryptedContent:Data) -> Data?
     {
+        let sealedBoxToOpen = try! AES.GCM.SealedBox(combined: encryptedContent)
+        let gcmKey = SymmetricKey.init(data: key)
+        let decryptedData = try? AES.GCM.open(sealedBoxToOpen, using: gcmKey)
         
+        return decryptedData
     }
 }

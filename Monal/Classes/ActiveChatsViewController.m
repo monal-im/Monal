@@ -87,14 +87,14 @@
 
 -(void) refreshDisplay
 {
-    if (@available(iOS 11.0, *)) {
-        if(self.chatListTable.hasUncommittedUpdates) return;
-    } else {
-        // Fallback on earlier versions
-    }
-    
     [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
         dispatch_async(dispatch_get_main_queue(), ^{
+            if (@available(iOS 11.0, *)) {
+                 if(self.chatListTable.hasUncommittedUpdates) return;
+             } else {
+                 // Fallback on earlier versions
+             }
+            
             [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
             self.contacts=cleanActive;
             [self.chatListTable reloadData];

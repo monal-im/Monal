@@ -87,11 +87,17 @@
 
 -(void) refreshDisplay
 {
+    if (@available(iOS 11.0, *)) {
+        if(self.chatListTable.hasUncommittedUpdates) return;
+    } else {
+        // Fallback on earlier versions
+    }
+    
     [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
             self.contacts=cleanActive;
-            [self->_chatListTable reloadData];
+            [self.chatListTable reloadData];
             MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
             [appDelegate updateUnread];
         });
@@ -120,38 +126,75 @@
         if([self.lastSelectedUser.contactJid isEqualToString:message.from])  return;
         
         __block BOOL contactInList=NO;
-        [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            MLContact *rowContact = (MLContact *) obj;
-            if([rowContact.contactJid isEqualToString:message.from]) {
-                contactInList=YES;
-                NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
+        if (@available(iOS 11.0, *)) {
+            [self.chatListTable performBatchUpdates:^{
+                __block BOOL contactInList=NO;
+                [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    MLContact *rowContact = (MLContact *) obj;
+                    if([rowContact.contactJid isEqualToString:message.from]) {
+                        contactInList=YES;
+                        NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
+                        [self.chatListTable beginUpdates];
+                        [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                        [self.chatListTable endUpdates];
+                    }
+                }];
+            }
+             completion:^(BOOL finished){
+                if(!contactInList) {
+                    [self refreshDisplay];
+                }
+            }];
+        } else  { //TODO remove when ios 10 is dropped
+
+            [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                MLContact *rowContact = (MLContact *) obj;
+                if([rowContact.contactJid isEqualToString:message.from]) {
+                    contactInList=YES;
+                    NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
                     [self.chatListTable beginUpdates];
                     [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                     [self.chatListTable endUpdates];
+                }
+            }];
+            
+            if(!contactInList) {
+                [self refreshDisplay];
             }
-        }];
-        
-        if(!contactInList) {
-            [self refreshDisplay];
         }
-        
     });
-
+    
 }
 
 -(void) refreshRowForContact:(MLContact *) contact {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            MLContact *rowContact = (MLContact *) obj;
-            if([rowContact.contactJid isEqualToString:contact.contactJid]) {
-                NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
-                [self.chatListTable beginUpdates];
-                [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                [self.chatListTable endUpdates];
-                *stop=YES;
-                return;
-            }
-        }];
+        if (@available(iOS 11.0, *)) {
+            [self.chatListTable performBatchUpdates:^{
+                [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                    MLContact *rowContact = (MLContact *) obj;
+                    if([rowContact.contactJid isEqualToString:contact.contactJid]) {
+                        NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
+                        [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                        *stop=YES;
+                        return;
+                    }
+                }];
+            } completion:^(BOOL finished){
+                
+            } ];
+        } else  { //TODO remove when ios 10 is dropped
+            [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                MLContact *rowContact = (MLContact *) obj;
+                if([rowContact.contactJid isEqualToString:contact.contactJid]) {
+                    NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
+                    [self.chatListTable beginUpdates];
+                    [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                    [self.chatListTable endUpdates];
+                    *stop=YES;
+                    return;
+                }
+            }];
+        }
     });
 }
 

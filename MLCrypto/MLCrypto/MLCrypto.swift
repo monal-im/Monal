@@ -25,12 +25,15 @@ public class MLCrypto: NSObject {
     }
     
     
-   public func decryptGCM (key: Data, encryptedContent:Data) -> Data?
+    public func decryptGCM (key: Data, encryptedContent:Data) -> Data?
     {
         let sealedBoxToOpen = try! AES.GCM.SealedBox(combined: encryptedContent)
         let gcmKey = SymmetricKey.init(data: key)
-        let decryptedData = try? AES.GCM.open(sealedBoxToOpen, using: gcmKey)
-        
-        return decryptedData
+        do {
+            let decryptedData = try AES.GCM.open(sealedBoxToOpen, using: gcmKey)
+            return decryptedData
+        } catch {
+            return nil;
+        }
     }
 }

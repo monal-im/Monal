@@ -141,7 +141,7 @@
     
     if(self.contacts.count+self.offlineContacts.count==0)
     {
-        [self.tableView reloadData];
+    [self reloadTable];
     }
 }
 
@@ -548,6 +548,16 @@
 
 #pragma mark - message signals
 
+-(void) reloadTable
+{
+    if (@available(iOS 11.0, *)) {
+           if(self.contactsTable.hasUncommittedUpdates) return;
+       } else {
+           // Fallback on earlier versions
+       }
+     [self.contactsTable reloadData];
+}
+
 -(void) refreshDisplay
 {
     if([[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"]) //sort by status
@@ -555,7 +565,7 @@
         [[DataLayer sharedInstance] onlineContactsSortedBy:@"Status" withCompeltion:^(NSMutableArray *results) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.contacts= results;
-                [self.contactsTable reloadData];
+                [self reloadTable];
             });
         }];
     }
@@ -563,7 +573,7 @@
         [[DataLayer sharedInstance] onlineContactsSortedBy:@"Name" withCompeltion:^(NSMutableArray *results) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.contacts= results;
-                [self.contactsTable reloadData];
+             [self reloadTable];
             });
         }];
     }
@@ -573,7 +583,7 @@
         [[DataLayer sharedInstance] offlineContactsWithCompletion:^(NSMutableArray *results) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.offlineContacts= results;
-                [self.contactsTable reloadData];
+               [self reloadTable];
             });
         }];
     }
@@ -581,7 +591,7 @@
     if(self.searchResults.count==0)
     {
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self.contactsTable reloadData];
+          [self reloadTable];
         });
     }
     
@@ -699,7 +709,7 @@
 - (void)didDismissSearchController:(UISearchController *)searchController;
 {
     self.searchResults=nil;
-    [self.tableView reloadData];
+  [self reloadTable];
 }
 
 
@@ -713,7 +723,7 @@
     } else  {
         self.searchResults=nil;
     }
-    [self.tableView reloadData];
+  [self reloadTable];
 }
 
 

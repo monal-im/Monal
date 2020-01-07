@@ -8,7 +8,7 @@
 
 #import "AESGcm.h"
 #import "EncodingTools.h"
-
+@import MLCrypto;
 
 #include <openssl/evp.h>
 #include <openssl/rand.h>
@@ -16,6 +16,10 @@
 @implementation AESGcm
 
 + (MLEncryptedPayload *) encrypt:(NSData *)body {
+    
+    MLCrypto *crypto = [[MLCrypto alloc] init];
+    [crypto encryptGCM];
+    
     EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
     int outlen;
     unsigned char outbuf[body.length];

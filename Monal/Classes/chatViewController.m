@@ -609,7 +609,13 @@
 
 -(void) reloadTable
 {
-    [_messageTable reloadData];
+    if (@available(iOS 11.0, *)) {
+         if(self.messageTable.hasUncommittedUpdates) return;
+     } else {
+         // Fallback on earlier versions
+     }
+    
+    [self.messageTable reloadData];
 }
 
 //always messages going out

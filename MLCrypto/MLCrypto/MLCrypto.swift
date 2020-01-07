@@ -12,12 +12,12 @@ import CryptoKit
 @objcMembers
 public class MLCrypto: NSObject {
    
-    public func encryptGCM (decryptedContent:Data) -> Data?
+    public func encryptGCM (key: Data, decryptedContent:Data) -> Data?
     {
-        let key =  SymmetricKey(size: .bits128)
+        let gcmKey = SymmetricKey.init(data: key)
         let iv = AES.GCM.Nonce()
         do {
-            let encrypted = try AES.GCM.seal(decryptedContent, using: key, nonce: iv)
+            let encrypted = try AES.GCM.seal(decryptedContent, using: gcmKey, nonce: iv)
             return encrypted.combined
         } catch  {
             return nil;

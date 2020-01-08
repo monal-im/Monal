@@ -434,6 +434,8 @@
 		26D59D9020711969006F1DEE /* MLEditGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D8F20711969006F1DEE /* MLEditGroupViewController.m */; };
 		26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
 		26D89F061A890672009B147C /* MLSwitchCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D89F051A890672009B147C /* MLSwitchCell.m */; };
+		26DCCE7E23C665B800233F6B /* MLCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; };
+		26DCCE7F23C665B800233F6B /* MLCrypto.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		26E2F7DA17C6FD9400C3C8EF /* MLTabBarController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */; };
 		26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */; };
 		26E3ED8B1FEC395D008ABDA5 /* MLServerDetailsVC.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E3ED8A1FEC395D008ABDA5 /* MLServerDetailsVC.m */; };
@@ -587,6 +589,17 @@
 			dstSubfolderSpec = 10;
 			files = (
 				26D4389423A5EC0900242AAA /* monalxmppmac.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		26DCCE8023C665B800233F6B /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				26DCCE7F23C665B800233F6B /* MLCrypto.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1200,6 +1213,7 @@
 			files = (
 				26CC57E623A08EAA00ABB92A /* libjrtplib-static.a in Frameworks */,
 				D838DFA541E4102BCA92A60E /* Pods_monalxmpp.framework in Frameworks */,
+				26DCCE7E23C665B800233F6B /* MLCrypto.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2493,6 +2507,7 @@
 				26CC578E23A0867400ABB92A /* Sources */,
 				26CC578F23A0867400ABB92A /* Frameworks */,
 				26CC579023A0867400ABB92A /* Resources */,
+				26DCCE8023C665B800233F6B /* Embed Frameworks */,
 			);
 			buildRules = (
 			);

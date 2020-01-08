@@ -79,7 +79,7 @@
     if (@available(iOS 13.0, *)) {
         page4.descColor=[UIColor labelColor];
     } else {
-        // Fallback on earlier versions
+        page4.descColor=[UIColor blackColor];
     }
     page4.titleIconView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"PeterRabbit24"]];
     page4.titleIconPositionY=100.f;

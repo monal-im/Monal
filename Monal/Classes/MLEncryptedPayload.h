@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLEncryptedPayload : NSObject
 @property (nonatomic, strong, readonly) NSData* body;
-@property (nonatomic, strong, readonly) NSData* key;
+@property (nonatomic, strong, readonly) NSData* key; //key and tag as needed by OMEMO
 @property (nonatomic, strong, readonly) NSData* iv;
 
 -(MLEncryptedPayload *) initWithBody:(NSData *) body key:(NSData *) key iv:(NSData *) iv;

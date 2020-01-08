@@ -290,6 +290,9 @@
 		269574E51C37482A00544A60 /* MLOAuthViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 269574E41C37482A00544A60 /* MLOAuthViewController.m */; };
 		2696EED21791245A00BC54B8 /* chatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2696EED11791245A00BC54B8 /* chatViewController.m */; };
 		26A6EE73208CC321005992E4 /* MLMAMPref.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A6EE72208CC321005992E4 /* MLMAMPref.m */; };
+		26A711E223C4D6A900FC6A86 /* MLCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; };
+		26A711E323C4D6A900FC6A86 /* MLCrypto.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		26A711EE23C5635900FC6A86 /* AESGCMTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A711ED23C5635900FC6A86 /* AESGCMTest.m */; };
 		26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A78ED723C2B59400C7CF40 /* MLPlaceholderViewController.m */; };
 		26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FB17BDD8560031304D /* ContactDetails.m */; };
 		26AA41051D9FCBF6005A77ED /* MLImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AA41041D9FCBF6005A77ED /* MLImageView.m */; };
@@ -478,6 +481,20 @@
 			remoteGlobalIDString = 260773BF232FC4E800BFD50F;
 			remoteInfo = NotificaionService;
 		};
+		26A711DC23C4D67400FC6A86 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 26A711D723C4D67300FC6A86 /* MLCrypto.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 26A711BD23C4D67300FC6A86;
+			remoteInfo = MLCrypto;
+		};
+		26A711DE23C4D67400FC6A86 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 26A711D723C4D67300FC6A86 /* MLCrypto.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 26A711C623C4D67300FC6A86;
+			remoteInfo = MLCryptoTests;
+		};
 		26AA701A2146BBB900598605 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -530,6 +547,17 @@
 			dstSubfolderSpec = 10;
 			files = (
 				261E542623A0A1D300394F59 /* monalxmpp.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		26A711E423C4D6A900FC6A86 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				26A711E323C4D6A900FC6A86 /* MLCrypto.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -890,6 +918,8 @@
 		2696EED11791245A00BC54B8 /* chatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = chatViewController.m; sourceTree = "<group>"; };
 		26A6EE71208CC321005992E4 /* MLMAMPref.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLMAMPref.h; sourceTree = "<group>"; };
 		26A6EE72208CC321005992E4 /* MLMAMPref.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMAMPref.m; sourceTree = "<group>"; };
+		26A711D723C4D67300FC6A86 /* MLCrypto.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MLCrypto.xcodeproj; path = ../MLCrypto/MLCrypto.xcodeproj; sourceTree = "<group>"; };
+		26A711ED23C5635900FC6A86 /* AESGCMTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AESGCMTest.m; sourceTree = "<group>"; };
 		26A78ED623C2B59400C7CF40 /* MLPlaceholderViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPlaceholderViewController.h; sourceTree = "<group>"; };
 		26A78ED723C2B59400C7CF40 /* MLPlaceholderViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPlaceholderViewController.m; sourceTree = "<group>"; };
 		26AA41031D9FCBF6005A77ED /* MLImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLImageView.h; sourceTree = "<group>"; };
@@ -1174,6 +1204,7 @@
 			files = (
 				26CC57E623A08EAA00ABB92A /* libjrtplib-static.a in Frameworks */,
 				D838DFA541E4102BCA92A60E /* Pods_monalxmpp.framework in Frameworks */,
+				26A711E223C4D6A900FC6A86 /* MLCrypto.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1575,6 +1606,7 @@
 				267B671B226A200D003DB850 /* AESGcm.m */,
 				267B671F226A222E003DB850 /* MLEncryptedPayload.h */,
 				267B6720226A222E003DB850 /* MLEncryptedPayload.m */,
+				26A711ED23C5635900FC6A86 /* AESGCMTest.m */,
 			);
 			name = Crypto;
 			sourceTree = "<group>";
@@ -1700,6 +1732,15 @@
 				2673CAC521D9D3F700256507 /* MLKeyCell.m */,
 			);
 			name = "Contact Details";
+			sourceTree = "<group>";
+		};
+		26A711D823C4D67300FC6A86 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				26A711DD23C4D67400FC6A86 /* MLCrypto.framework */,
+				26A711DF23C4D67400FC6A86 /* MLCryptoTests.xctest */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		26AA41021D9FC61C005A77ED /* Chatview */ = {
@@ -2037,6 +2078,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				26A711D723C4D67300FC6A86 /* MLCrypto.xcodeproj */,
 				26AA70222146E2B900598605 /* shareSheet.entitlements */,
 				26FDB4341DC16A9800A129E0 /* Monal.entitlements */,
 				29B97315FDCFA39411CA2CEA /* Root Sources */,
@@ -2456,6 +2498,7 @@
 				26CC578E23A0867400ABB92A /* Sources */,
 				26CC578F23A0867400ABB92A /* Frameworks */,
 				26CC579023A0867400ABB92A /* Resources */,
+				26A711E423C4D6A900FC6A86 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -2604,6 +2647,12 @@
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 26A711D823C4D67300FC6A86 /* Products */;
+					ProjectRef = 26A711D723C4D67300FC6A86 /* MLCrypto.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				268BCD55140B25CC0025E4D1 /* jrtplib-static */,
@@ -2619,6 +2668,23 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		26A711DD23C4D67400FC6A86 /* MLCrypto.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = MLCrypto.framework;
+			remoteRef = 26A711DC23C4D67400FC6A86 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		26A711DF23C4D67400FC6A86 /* MLCryptoTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = MLCryptoTests.xctest;
+			remoteRef = 26A711DE23C4D67400FC6A86 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		1D60588D0D05DD3D006BFB54 /* Resources */ = {
@@ -3197,6 +3263,7 @@
 				26D3476C23A54E67004D6D75 /* MLMessageParserTest.m in Sources */,
 				261E543823A1ED1E00394F59 /* MLPresenceProcessor.m in Sources */,
 				261E543323A1CD1700394F59 /* MLMessageProcessorTest.m in Sources */,
+				26A711EE23C5635900FC6A86 /* AESGCMTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

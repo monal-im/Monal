@@ -113,10 +113,11 @@
             [self pushConfigurationViewController:controller];
         };
         [toreturn addObject:account];
-    } else  {
-        if(self.accounts.count>0) {
-            self.account = [self.accounts objectAtIndex:0];
-        }
+    }
+    
+    if(!self.account && self.accounts.count>0) {
+        self.account = [self.accounts objectAtIndex:0];
+        
     }
     
     SLComposeSheetConfigurationItem *recipient = [[SLComposeSheetConfigurationItem alloc] init];

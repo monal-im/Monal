@@ -27,7 +27,7 @@
     unsigned char key[16];
     RAND_bytes(key, sizeof(key));
 
-    unsigned char iv[16];
+    unsigned char iv[12];
     RAND_bytes(iv, sizeof(iv));
 
     NSData *gcmKey = [[NSData alloc] initWithBytes:key length:16];

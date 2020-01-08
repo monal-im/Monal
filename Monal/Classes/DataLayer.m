@@ -1551,30 +1551,45 @@ static DataLayer *sharedInstance=nil;
             if(!typeToUse) typeToUse=kMessageTypeText; //default to insert
             
             
-            //check for link prefix, if so make link
-            
-            
-            NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?,?,?,?, ?, ?, ?);"];
-            NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",typeToUse,[NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
-            DDLogVerbose(@"%@",query);
-            [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
+          //do not do this in MUC
+            if(!messageType && [actualfrom isEqualToString:from]) {
                 
-                if(success) {
-                    [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:nil];
-                    if(!messageType) {
-                        // in the event it is a message from the room
-                        [self messageTypeForMessage:message withCompletion:^(NSString *foundMessageType) {
-                            //update type here
-                        }];
+                [self messageTypeForMessage:message withCompletion:^(NSString *foundMessageType) {
+                         NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?,?,?,?, ?, ?, ?);"];
+                          NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",foundMessageType,[NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
+                          DDLogVerbose(@"%@",query);
+                          [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
+                              
+                              if(success) {
+                                  [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:nil];
+                                 
+                              }
+                              
+                              if(completion)
+                              {
+                                  completion(success, messageType);
+                              }
+                          }];
+                }];
+                
+                
+            } else  {
+                NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?,?,?,?, ?, ?, ?);"];
+                NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",typeToUse,[NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
+                DDLogVerbose(@"%@",query);
+                [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
+                    
+                    if(success) {
+                        [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:nil];
+                        
                     }
-                }
-                
-                if(completion)
-                {
-                    completion(success, messageType);
-                }
-            }];
-            
+                    
+                    if(completion)
+                    {
+                        completion(success, messageType);
+                    }
+                }];
+            }
             
             
         }

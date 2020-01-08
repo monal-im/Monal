@@ -1516,9 +1516,9 @@ static DataLayer *sharedInstance=nil;
         return;
     }
 
-    NSString *idToUse=stanzaid?stanzaid:messageid;
+    NSString *idToUse=stanzaid?stanzaid:messageid; //just ensures stanzaid is not null
     
-    [self hasMessageForStanzaId:idToUse toContact:actualfrom onAccount:accountNo andCompletion:^(BOOL exists) {
+    [self hasMessageForStanzaId:idToUse orMessageID:messageid toContact:actualfrom onAccount:accountNo andCompletion:^(BOOL exists) {
         if(!exists)
         {
             //this is always from a contact
@@ -1547,42 +1547,36 @@ static DataLayer *sharedInstance=nil;
             
             NSString* dateString = [formatter stringFromDate:destinationDate];
             
-            if(messageType)
-            {
-                NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?,?,?,?, ?, ?, ?);"];
-                NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",messageType,[NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
-                DDLogVerbose(@"%@",query);
-                [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
-                    if(completion)
-                    {
-                        [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:nil];
-                        completion(success, messageType);
+            NSString* typeToUse=messageType;
+            if(!typeToUse) typeToUse=kMessageTypeText; //default to insert
+            
+            
+            //check for link prefix, if so make link
+            
+            
+            NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?,?,?,?, ?, ?, ?);"];
+            NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",typeToUse,[NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
+            DDLogVerbose(@"%@",query);
+            [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
+                
+                if(success) {
+                    [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:nil];
+                    if(!messageType) {
+                        // in the event it is a message from the room
+                        [self messageTypeForMessage:message withCompletion:^(NSString *foundMessageType) {
+                            //update type here
+                        }];
                     }
-                }];
-            }
-            else  {
-                // in the event it is a message from the room
-                [self messageTypeForMessage:message withCompletion:^(NSString *foundMessageType) {
-                    
-                    //all messages default to unread
-                    NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?,?,?,?,?,?,?,?,?,?,?, ?);"];
-                    NSArray *params=@[accountNo, from, to,     dateString, message, actualfrom,[NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",foundMessageType, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@""];
-                    DDLogVerbose(@"%@",query);
-                    [self executeNonQuery:query andArguments:params  withCompletion:^(BOOL success) {
-                        
-                        if(!success)
-                        {
-                            DDLogError(@"failed to insert ");
-                        }
-                        
-                        if(completion)
-                        {
-                            [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:nil];
-                            completion(success, foundMessageType);
-                        }
-                    }];
-                }];
-            }
+                }
+                
+                if(completion)
+                {
+                    completion(success, messageType);
+                }
+            }];
+            
+            
+            
         }
         else {
             DDLogError(@"Message or stanza Id duplicated %@", idToUse);
@@ -1591,11 +1585,11 @@ static DataLayer *sharedInstance=nil;
     
 }
 
--(void) hasMessageForStanzaId:(NSString*) stanzaId toContact:(NSString *) contact onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion
+-(void) hasMessageForStanzaId:(NSString *) stanzaId orMessageID:(NSString *) messageId toContact:(NSString *) contact onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion
 {
     if(!accountNo || !contact) return;
-    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? and message_from=? and stanzaid=? limit 1"];
-    NSArray *params=@[accountNo, contact, stanzaId];
+    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? and message_from=? and stanzaid=? or messageid=? limit 1"];
+    NSArray *params=@[accountNo, contact, stanzaId, messageId];
     
     [self executeScalar:query andArguments:params withCompletion:^(NSObject* result) {
         
@@ -2132,12 +2126,22 @@ static DataLayer *sharedInstance=nil;
 
 -(void) updateActiveBuddy:(NSString*) buddyname setTime:(NSString *)timestamp forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
 {
-    NSString* query=[NSString stringWithFormat:@"update activechats set lastMessageTime=? where account_id=? and buddy_name=? "];
-    [self executeNonQuery:query andArguments:@[timestamp, accountNo, buddyname] withCompletion:^(BOOL success) {
-        if(completion) completion(success);
-    }];
+    NSString* query=[NSString stringWithFormat:@"select lastMessageTime from  activechats where account_id=? and buddy_name=?"];
     
+    [self executeScalar:query andArguments:@[accountNo, buddyname] withCompletion:^(NSObject *result) {
+        NSNumber *lastTime= (NSNumber *) result;
+        if(lastTime.intValue<timestamp.intValue) {
+            NSString* query=[NSString stringWithFormat:@"update activechats set lastMessageTime=? where account_id=? and buddy_name=? "];
+            [self executeNonQuery:query andArguments:@[timestamp, accountNo, buddyname] withCompletion:^(BOOL success) {
+                if(completion) completion(success);
+            }];
+        } else  if(completion) completion(NO);
+        
+    }];
 }
+
+
+
 
 
 #pragma mark chat properties

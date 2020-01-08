@@ -25,7 +25,9 @@ public class MLCrypto: NSObject {
             let ivData = combined?.subdata(in: 0..<12)
             let range = 12+ciphertext.count..<28+ciphertext.count
             let tagData = combined?.subdata(in:range)
+            
             encryptedPayload.updateValues(body:ciphertext, iv: ivData!, key:key, tag:tagData!)
+            encryptedPayload.combined = combined
             return encryptedPayload
         } catch  {
             return nil

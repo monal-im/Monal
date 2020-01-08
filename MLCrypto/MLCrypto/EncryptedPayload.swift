@@ -14,6 +14,7 @@ public class EncryptedPayload: NSObject {
     public var iv : Data?
     public var key: Data?
     public var tag: Data?
+    public var combined: Data?
     
     @objc
     public func updateValues(body:Data, iv: Data, key: Data, tag: Data)

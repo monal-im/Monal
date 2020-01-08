@@ -2627,17 +2627,8 @@ static NSMutableArray *extracted(xmpp *object) {
 -(void) sendSignalInitialStanzas
 {
 #ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
-        {
-#endif
-            [self queryOMEMODevicesFrom:self.connectionProperties.identity.jid];
-            [self sendOMEMOBundle];
-#if TARGET_OS_IPHONE
-        }
-    });
-#endif
+    [self queryOMEMODevicesFrom:self.connectionProperties.identity.jid];
+    [self sendOMEMOBundle];
 #endif
 }
 

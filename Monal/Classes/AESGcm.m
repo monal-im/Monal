@@ -16,35 +16,32 @@
 @implementation AESGcm
 
 + (MLEncryptedPayload *) encrypt:(NSData *)body {
-    
-    MLCrypto *crypto = [[MLCrypto alloc] init];
- 
-    
+  
     EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
     int outlen;
     unsigned char outbuf[body.length];
     unsigned char tag[16];
-    
+
     //genreate key and iv
-    
+
     unsigned char key[16];
     RAND_bytes(key, sizeof(key));
-    
+
     unsigned char iv[16];
     RAND_bytes(iv, sizeof(iv));
-    
+
     NSData *gcmKey = [[NSData alloc] initWithBytes:key length:16];
-    
+
     NSData *gcmiv= [[NSData alloc] initWithBytes:iv length:16];
-    
+
     NSMutableData *encryptedMessage;
-    
+
     ctx = EVP_CIPHER_CTX_new();
     /* Set cipher type and mode */
     // if(key.length==16) {
     EVP_EncryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
     // }
-    
+
 //     if(key.length==32) {
 //     EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL);
 //     }
@@ -55,24 +52,24 @@
     EVP_CIPHER_CTX_set_padding(ctx,1);
     /* Encrypt plaintext */
     EVP_EncryptUpdate(ctx, outbuf, &outlen,body.bytes,(int)body.length);
-    
+
     encryptedMessage = [NSMutableData dataWithBytes:outbuf length:outlen];
-    
+
     /* Finalise: note get no output for GCM */
     EVP_EncryptFinal_ex(ctx, outbuf, &outlen);
-    
-    
+
+
     /* Get tag */
     EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag);
     //[encryptedMessage appendBytes:tag length:16];
-    
+
     NSMutableData *combinedKey  = [NSMutableData dataWithData:gcmKey];
     [combinedKey appendBytes:tag length:16];
-    
-    
+
+
     EVP_CIPHER_CTX_free(ctx);
     MLEncryptedPayload *toreturn = [[MLEncryptedPayload alloc] initWithBody:encryptedMessage key:combinedKey iv:gcmiv];
-    
+
     return  toreturn;
 }
 
@@ -83,12 +80,12 @@
 //    NSMutableData *combined = [[NSMutableData alloc] init];
 //    [combined appendData:iv];
 //    [combined appendData:body];
-//   if(auth) [combined appendData:auth];
+//    [combined appendData:auth];
 //
 //    NSData *toReturn =[crypto decryptGCMWithKey:key encryptedContent:combined];
 //    return toReturn;
-    
-  
+//    
+//  
     
     int outlen, rv;
     unsigned char outbuf[key.length];
@@ -96,7 +93,7 @@
 
     /* Select cipher */
     if(key.length==16) {
-    EVP_DecryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
+        EVP_DecryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
     }
 
     if(key.length==32) {

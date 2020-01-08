@@ -12,15 +12,23 @@ import CryptoKit
 @objcMembers
 public class MLCrypto: NSObject {
    
-    public func encryptGCM (key: Data, decryptedContent:Data) -> Data?
+    public func encryptGCM (key: Data, decryptedContent:Data) -> EncryptedPayload?
     {
         let gcmKey = SymmetricKey.init(data: key)
         let iv = AES.GCM.Nonce()
+        
         do {
             let encrypted = try AES.GCM.seal(decryptedContent, using: gcmKey, nonce: iv)
-            return encrypted.combined
+            let encryptedPayload = EncryptedPayload()
+            let combined = encrypted.combined
+            let ciphertext = encrypted.ciphertext
+            let ivData = combined?.subdata(in: 0..<12)
+            let range = 12+ciphertext.count..<28+ciphertext.count
+            let tagData = combined?.subdata(in:range)
+            encryptedPayload.updateValues(body:ciphertext, iv: ivData!, key:key, tag:tagData!)
+            return encryptedPayload
         } catch  {
-            return nil;
+            return nil
         }
     }
     

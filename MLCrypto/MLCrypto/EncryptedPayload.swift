@@ -10,14 +10,17 @@ import UIKit
 
 @objcMembers
 public class EncryptedPayload: NSObject {
-    var data: Data?
-    var iv : Data?
-    var key: Data?
+    public var body: Data?
+    public var iv : Data?
+    public var key: Data?
+    public var tag: Data?
     
-    public func setValues(data:Data, iv: Data, key: Data)
+    @objc
+    public func updateValues(body:Data, iv: Data, key: Data, tag: Data)
     {
-        self.data=data
+        self.body=body
         self.iv=iv
         self.key=key
+        self.tag=tag
     }
 }

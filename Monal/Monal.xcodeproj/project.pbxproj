@@ -293,6 +293,7 @@
 		26A711E223C4D6A900FC6A86 /* MLCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; };
 		26A711E323C4D6A900FC6A86 /* MLCrypto.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		26A711EE23C5635900FC6A86 /* AESGCMTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A711ED23C5635900FC6A86 /* AESGCMTest.m */; };
+		26A7120623C58DEE00FC6A86 /* MLCrypto.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A78ED723C2B59400C7CF40 /* MLPlaceholderViewController.m */; };
 		26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FB17BDD8560031304D /* ContactDetails.m */; };
 		26AA41051D9FCBF6005A77ED /* MLImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AA41041D9FCBF6005A77ED /* MLImageView.m */; };
@@ -495,6 +496,13 @@
 			remoteGlobalIDString = 26A711C623C4D67300FC6A86;
 			remoteInfo = MLCryptoTests;
 		};
+		26A7120223C58C1100FC6A86 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 26A711D723C4D67300FC6A86 /* MLCrypto.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 26A711BC23C4D67300FC6A86;
+			remoteInfo = MLCrypto;
+		};
 		26AA701A2146BBB900598605 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -546,6 +554,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				26A7120623C58DEE00FC6A86 /* MLCrypto.framework in Embed Frameworks */,
 				261E542623A0A1D300394F59 /* monalxmpp.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -2503,6 +2512,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				26A7120323C58C1100FC6A86 /* PBXTargetDependency */,
 				26CC57D923A08DA300ABB92A /* PBXTargetDependency */,
 			);
 			name = monalxmpp;
@@ -3500,6 +3510,11 @@
 			target = 260773BF232FC4E800BFD50F /* NotificaionService */;
 			targetProxy = 263800892374814000144929 /* PBXContainerItemProxy */;
 		};
+		26A7120323C58C1100FC6A86 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = MLCrypto;
+			targetProxy = 26A7120223C58C1100FC6A86 /* PBXContainerItemProxy */;
+		};
 		26AA701B2146BBB900598605 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 26AA70102146BBB800598605 /* shareSheet */;
@@ -3592,7 +3607,7 @@
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Monal-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3746,7 +3761,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = NotificaionService/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = 4.2.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -3818,7 +3833,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = NotificaionService/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = 4.2.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -3893,7 +3908,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = NotificaionService/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = 4.2.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -4232,7 +4247,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PROVISIONING_PROFILE = "C87D7BC2-2AC9-4ED4-945E-692EB563956A";
@@ -4269,7 +4284,7 @@
 				GCC_PREFIX_HEADER = SworIM_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Monal-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -4386,7 +4401,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = "$(SRCROOT)/shareSheet-iOS/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = 4.2.2;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -4453,7 +4468,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/shareSheet-iOS/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = 4.2.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -4522,7 +4537,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/shareSheet-iOS/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = 4.2.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -4747,13 +4762,14 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = monalxmpp/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MARKETING_VERSION = 4.2.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SKIP_INSTALL = YES;
@@ -4826,13 +4842,14 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = monalxmpp/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MARKETING_VERSION = 4.2.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SDKROOT = iphoneos;
@@ -4880,12 +4897,13 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 33XS7DE5NZ;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -4907,13 +4925,14 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = monalxmpp/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MARKETING_VERSION = 4.2.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SDKROOT = iphoneos;
@@ -5160,7 +5179,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				PROVISIONING_PROFILE = "85C76911-58E8-4598-8FDE-6FFEB6E3ACFB";
@@ -5197,7 +5216,7 @@
 				GCC_PREFIX_HEADER = SworIM_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Monal-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -5284,7 +5303,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				ONLY_ACTIVE_ARCH = YES;

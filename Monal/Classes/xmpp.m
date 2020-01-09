@@ -880,11 +880,7 @@ NSString *const kXMPPPresence = @"presence";
                 }
             }
         }
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-    });
-#endif
-#endif
+
 }
 
 -(void) sendWhiteSpacePing

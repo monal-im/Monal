@@ -841,16 +841,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) sendPing
 {
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-           || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )) {
-            return;
-        }
-#endif
-#endif
-        
+      
         if(self.accountState<kStateReconnecting  && !self->_reconnectScheduled)
         {
             DDLogInfo(@" ping calling reconnect");
@@ -889,11 +880,7 @@ NSString *const kXMPPPresence = @"presence";
                 }
             }
         }
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-    });
-#endif
-#endif
+
 }
 
 -(void) sendWhiteSpacePing
@@ -1149,36 +1136,24 @@ NSString *const kXMPPPresence = @"presence";
         [self.unAckedStanzas removeAllObjects];
         [self persistState];
     }
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
-        {
-#endif
-#endif
-            /**
-             Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
-             It may also result in mutation on iteration
-             */
-            
-            DDLogInfo(@"sending unacked messages" );
-            [self.networkQueue addOperation:
-             [NSBlockOperation blockOperationWithBlock:^{
-                NSMutableArray *sendCopy = [self.unAckedStanzas mutableCopy];
-                [self.unAckedStanzas removeAllObjects]; // do not grow
-                [sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                    NSDictionary *dic= (NSDictionary *) obj;
-                    [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
-                }];
-                [self persistState];
-            }]];
-            
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-        }
-    });
-#endif
-#endif
+
+    /**
+     Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
+     It may also result in mutation on iteration
+     */
+    
+    DDLogInfo(@"sending unacked messages" );
+    [self.networkQueue addOperation:
+     [NSBlockOperation blockOperationWithBlock:^{
+        NSMutableArray *sendCopy = [self.unAckedStanzas mutableCopy];
+        [self.unAckedStanzas removeAllObjects]; // do not grow
+        [sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSDictionary *dic= (NSDictionary *) obj;
+            [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
+        }];
+        [self persistState];
+    }]];
+    
 }
 /**
  This is actually less than or equal to since it is the last handled stanza
@@ -1456,18 +1431,7 @@ NSString *const kXMPPPresence = @"presence";
                                     // do not do this in the background
                                     
                                     __block  BOOL checkChange = YES;
-#ifndef TARGET_IS_EXTENSION
                                     
-#if TARGET_OS_IPHONE
-                                    //TODO maybe not a good idea to do this. but bad to crash as well.  fix later.
-                                    dispatch_sync(dispatch_get_main_queue(), ^{
-                                        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-                                        {
-                                            checkChange=NO;
-                                        }
-                                    });
-#endif
-#endif
                                     if(checkChange)
                                     {
                                         //check for vcard change
@@ -2470,7 +2434,7 @@ static NSMutableArray *extracted(xmpp *object) {
 #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
     dispatch_async(dispatch_get_main_queue(), ^{
-        if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
         {
 #endif
             [self setClientInactive];

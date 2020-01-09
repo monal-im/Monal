@@ -65,7 +65,7 @@
         _from = [_from lowercaseString]; // intedned to not break code that expects lowercase
             
         }else  {
-            DDLogError(@"Attempt to overwrite from");
+            //DDLogError(@"Attempt to overwrite from");
         }
     }
     
@@ -79,7 +79,7 @@
             
         }
         else  {
-            DDLogError(@"Attempt to overwrite to");
+           //DDLogError(@"Attempt to overwrite to");
         }
     }
     

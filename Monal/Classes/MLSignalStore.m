@@ -340,6 +340,11 @@
     [[DataLayer sharedInstance] executeNonQuery:@"update signalContactIdentity set trusted=?  where account_id=? and contactDeviceId=? and contactName=?" andArguments:@[[NSNumber numberWithBool:trust], self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
 }
 
+-(void) deleteDeviceforAddress:(SignalAddress*)address
+{
+    [[DataLayer sharedInstance] executeNonQuery:@"delete from signalContactIdentity where account_id=? and contactDeviceId=? and contactName=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+}
+
 /**
  is it explicity not trusted?
  */

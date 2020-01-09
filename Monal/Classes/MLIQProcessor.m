@@ -392,9 +392,24 @@
         NSSet *deviceSet = [NSSet setWithArray:existingDevices];
         //only query if the device doesnt exist
         [iqNode.omemoDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSString *device  =(NSString *)obj;
-            if(![deviceSet containsObject:[NSNumber numberWithInteger: device.integerValue]]) {
-                [self queryOMEMOBundleFrom:source andDevice:device];
+            NSString *deviceString  =(NSString *)obj;
+            NSNumber *deviceNumber = [NSNumber numberWithInt:deviceString.intValue];
+            if(![deviceSet containsObject:deviceNumber]) {
+                [self queryOMEMOBundleFrom:source andDevice:deviceString];
+            } else  {
+               
+            }
+        }];
+        
+        //if not in device list remove from  knowndevices
+        NSSet *iqSet = [NSSet setWithArray:iqNode.omemoDevices];
+        [existingDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSNumber *device  =(NSNumber *)obj;
+            NSString *deviceString  =[NSString stringWithFormat:@"%@", device];
+            if(![iqSet containsObject:deviceString]) {
+                //device was removed
+                SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:(int) device.integerValue];
+                [self.monalSignalStore deleteDeviceforAddress:address];
             }
         }];
         

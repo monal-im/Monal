@@ -1594,7 +1594,7 @@ static DataLayer *sharedInstance=nil;
             
         }
         else {
-            DDLogError(@"Message or stanza Id duplicated %@", idToUse);
+            DDLogError(@"Message %@ or stanza Id %@ duplicated,, id in use %@", messageid, stanzaid,  idToUse);
         }
     }];
     
@@ -1603,7 +1603,7 @@ static DataLayer *sharedInstance=nil;
 -(void) hasMessageForStanzaId:(NSString *) stanzaId orMessageID:(NSString *) messageId toContact:(NSString *) contact onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion
 {
     if(!accountNo || !contact) return;
-    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? and message_from=? and stanzaid=? or messageid=? limit 1"];
+    NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? and message_from=? and (stanzaid=? or messageid=?) limit 1"];
     NSArray *params=@[accountNo, contact, stanzaId, messageId];
     
     [self executeScalar:query andArguments:params withCompletion:^(NSObject* result) {

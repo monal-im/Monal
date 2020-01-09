@@ -25,4 +25,5 @@
 - (NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*)addressName;
 -(NSMutableArray *) readPreKeys;
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
+-(void) deleteDeviceforAddress:(SignalAddress*)address;
 @end

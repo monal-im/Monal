@@ -132,7 +132,7 @@
                 DDLogVerbose(@"message from %@ to %@", _from, _to);
                 return;
             } else {
-                DDLogError(@"message impersonation");
+                //DDLogError(@"message impersonation");
                 return;
             }
         }

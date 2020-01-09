@@ -2033,6 +2033,47 @@ static DataLayer *sharedInstance=nil;
     }];
 }
 
+-(void) lastMessageDateForAccount:(NSString*) accountNo andContact:(NSString*) contact withCompletion: (void (^)(NSDate *))completion
+{
+    NSString* query=[NSString stringWithFormat:@"select timestamp from  message_history where account_id=? and message_from=?  order by timestamp desc limit 1"];
+    
+    [self executeScalar:query andArguments:@[accountNo, contact] withCompletion:^(NSObject* result) {
+        if(completion)
+        {
+            NSDateFormatter *dateFromatter = [[NSDateFormatter alloc] init];
+            NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+            
+            [dateFromatter setLocale:enUSPOSIXLocale];
+            [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
+            [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+            
+            NSDate *datetoReturn =[dateFromatter dateFromString:(NSString *)result];
+            
+            completion(datetoReturn);
+        }
+    }];
+}
+
+-(void) lastMessageDateAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion
+{
+    NSString* query=[NSString stringWithFormat:@"select timestamp from  message_history where account_id=? order by timestamp desc limit 1"];
+    
+    [self executeScalar:query andArguments:@[accountNo] withCompletion:^(NSObject* result) {
+        if(completion)
+        {
+            NSDateFormatter *dateFromatter = [[NSDateFormatter alloc] init];
+            NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+            
+            [dateFromatter setLocale:enUSPOSIXLocale];
+            [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
+            [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+            
+            NSDate *datetoReturn =[dateFromatter dateFromString:(NSString *)result];
+            
+            completion(datetoReturn);
+        }
+    }];
+}
 
 
 #pragma mark active chats

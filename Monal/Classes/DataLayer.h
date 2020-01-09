@@ -230,7 +230,12 @@ extern NSString *const kMessageTypeUrl;
 /**
  retrieves the stanzaid of the last message
  */
--(void) lastMessageSanzaForAccount:(NSString*) accountNo andJid:(NSString*) jid withCompletion: (void (^)(NSString *))completion;
+-(void) lastMessageDateForAccount:(NSString*) accountNo andContact:(NSString*) contact withCompletion: (void (^)(NSDate *))completion;
+
+-(void) lastMessageSanzaForAccount:(NSString*) accountNo andContact:(NSString*) contact withCompletion: (void (^)(NSString *))completion;
+
+
+-(void) lastMessageDateAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion;
 
 
 -(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo;

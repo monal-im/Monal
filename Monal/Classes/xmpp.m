@@ -1715,7 +1715,7 @@ NSString *const kXMPPPresence = @"presence";
                         self.loginCompletion=nil;
                     }
                     
-                     [self queryMAMSinceLastStanza];
+                     [self queryMAMSinceLastMessageDate];
                     
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"]) // stream resume failed
@@ -2496,7 +2496,7 @@ static NSMutableArray *extracted(xmpp *object) {
         }]];
     }
     
-    [self queryMAMSinceLastStanza];
+    [self queryMAMSinceLastMessageDate];
 }
 
 -(void) setStatusMessageText:(NSString*) message
@@ -2849,15 +2849,37 @@ static NSMutableArray *extracted(xmpp *object) {
     [self send:query];
 }
 
--(void) queryMAMSinceLastStanza
+//-(void) queryMAMSinceLastStanza
+//{
+//    if(self.connectionProperties.supportsMam2) {
+//        [[DataLayer sharedInstance] lastMessageSanzaForAccount:_accountNo  andJid:self.connectionProperties.identity.jid withCompletion:^(NSString *lastStanza) {
+//            if(lastStanza) {
+//                [self setMAMQueryFromStart:nil after:lastStanza andJid:nil];
+//            }
+//        }];
+//    }
+//}
+
+
+-(void) queryMAMSinceLastMessageDateForContact:(NSString *) contactJid
 {
     if(self.connectionProperties.supportsMam2) {
-        [[DataLayer sharedInstance] lastMessageSanzaForAccount:_accountNo  andJid:self.connectionProperties.identity.jid withCompletion:^(NSString *lastStanza) {
-            if(lastStanza) {
-                [self setMAMQueryFromStart:nil after:lastStanza andJid:nil];
+        [[DataLayer sharedInstance] lastMessageDateForAccount:_accountNo  andContact:contactJid withCompletion:^(NSDate *lastDate) {
+            if(lastDate) {
+                [self setMAMQueryFromStart:lastDate toDate:nil andJid:contactJid];
             }
         }];
     }
+}
+
+-(void) queryMAMSinceLastMessageDate
+{
+    if(self.connectionProperties.supportsMam2) {
+        [[DataLayer sharedInstance] lastMessageDateAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
+            [self setMAMQueryFromStart:lastDate toDate:nil andJid:nil];
+        }];
+    }
+        
 }
 
 

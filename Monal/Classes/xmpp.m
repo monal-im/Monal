@@ -2295,6 +2295,11 @@ static NSMutableArray *extracted(xmpp *object) {
         [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
     }
     
+    if(self.connectionProperties.supportsPubSub)
+    {
+        [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"supportsPubSub"];
+    }
+    
     //save state dictionary
     NSData *data =[NSKeyedArchiver archivedDataWithRootObject:values];
     [[NSUserDefaults standardUserDefaults] setObject:data forKey:[NSString stringWithFormat:@"stream_state_v1_%@",self.accountNo]];
@@ -2353,6 +2358,12 @@ static NSMutableArray *extracted(xmpp *object) {
         {
             NSNumber *mamNumber = [dic objectForKey:@"supportsMAM"];
             self.connectionProperties.supportsMam2 = mamNumber.boolValue;
+        }
+        
+        if([dic objectForKey:@"supportsPubSub"])
+        {
+            NSNumber *supportsPubSub = [dic objectForKey:@"supportsPubSub"];
+            self.connectionProperties.supportsPubSub = supportsPubSub.boolValue;
         }
         
         //debug output

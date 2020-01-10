@@ -1748,9 +1748,7 @@ static DataLayer *sharedInstance=nil;
     DDLogVerbose(@"%@",query);
     NSArray* results = [self executeReader:query andArguments:params];
     
-    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    NSDateFormatter* formatter = self.dbFormatter;
     
     NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
     [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -1888,9 +1886,7 @@ static DataLayer *sharedInstance=nil;
     NSArray *params=@[accountNo, buddy, buddy];
     NSArray* rawArray = [self executeReader:query andArguments:params];
     
-    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    NSDateFormatter* formatter = self.dbFormatter;
     
     NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:rawArray.count];
     [rawArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -1918,9 +1914,7 @@ static DataLayer *sharedInstance=nil;
     NSArray *params=@[accountNo, contact, contact];
     
     [self executeReader:query andArguments:params withCompletion:^(NSMutableArray *results) {
-        NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-        [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-        [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+        NSDateFormatter* formatter = self.dbFormatter;
         
         NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
         [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {

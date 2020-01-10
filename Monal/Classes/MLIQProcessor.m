@@ -402,16 +402,16 @@
         }];
         
         //if not in device list remove from  knowndevices
-        NSSet *iqSet = [NSSet setWithArray:iqNode.omemoDevices];
-        [existingDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSNumber *device  =(NSNumber *)obj;
-            NSString *deviceString  =[NSString stringWithFormat:@"%@", device];
-            if(![iqSet containsObject:deviceString]) {
-                //device was removed
-                SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:(int) device.integerValue];
-                [self.monalSignalStore deleteDeviceforAddress:address];
-            }
-        }];
+//        NSSet *iqSet = [NSSet setWithArray:iqNode.omemoDevices];
+//        [existingDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//            NSNumber *device  =(NSNumber *)obj;
+//            NSString *deviceString  =[NSString stringWithFormat:@"%@", device];
+//            if(![iqSet containsObject:deviceString]) {
+//                //device was removed
+//                SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:(int) device.integerValue];
+//                [self.monalSignalStore deleteDeviceforAddress:address];
+//            }
+//        }];
         
     }
     

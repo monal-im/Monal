@@ -11,6 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 #define kRegServer @"yax.im"
 
 #define kXMLNS @"xmlns"
+#define kId @"id"
 
 #define kRegisterNameSpace @"jabber:iq:register"
 #define kDataNameSpace @"jabber:x:data"

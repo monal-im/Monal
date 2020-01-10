@@ -901,6 +901,7 @@ NSString *const kiqErrorType = @"error";
     
     MLXMLNode* itemNode =[[MLXMLNode alloc] init];
     itemNode.element=@"item";
+    [itemNode.attributes setObject:@"current" forKey:kId];
     
     MLXMLNode* bundle =[[MLXMLNode alloc] init];
     bundle.element=@"bundle";

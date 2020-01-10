@@ -12,6 +12,8 @@
 
 @interface DataLayer()
 
+@property (nonatomic, strong) NSDateFormatter *dbFormatter;
+
 @end
 
 @implementation DataLayer
@@ -2185,8 +2187,12 @@ static DataLayer *sharedInstance=nil;
     NSString* query=[NSString stringWithFormat:@"select lastMessageTime from  activechats where account_id=? and buddy_name=?"];
     
     [self executeScalar:query andArguments:@[accountNo, buddyname] withCompletion:^(NSObject *result) {
-        NSNumber *lastTime= (NSNumber *) result;
-        if(lastTime.intValue<timestamp.intValue) {
+        NSString *lastTime= (NSString *) result;
+        
+        NSDate *lastDate = [self.dbFormatter dateFromString:lastTime];
+        NSDate *newDate = [self.dbFormatter dateFromString:timestamp];
+        
+        if(lastDate.timeIntervalSince1970<newDate.timeIntervalSince1970) {
             NSString* query=[NSString stringWithFormat:@"update activechats set lastMessageTime=? where account_id=? and buddy_name=? "];
             [self executeNonQuery:query andArguments:@[timestamp, accountNo, buddyname] withCompletion:^(BOOL success) {
                 if(completion) completion(success);
@@ -2276,6 +2282,12 @@ static DataLayer *sharedInstance=nil;
     [self executeNonQuery:@"pragma truncate;" andArguments:nil];
     
     dbversionCheck=[NSLock new];
+    
+    self.dbFormatter = [[NSDateFormatter alloc] init];
+     [self.dbFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+     [self.dbFormatter  setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+     
+    
     [self version];
     
     

@@ -2297,7 +2297,7 @@ static NSMutableArray *extracted(xmpp *object) {
     
     if(self.connectionProperties.supportsPubSub)
     {
-        [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"supportsPubSub"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
     }
     
     //save state dictionary

@@ -12,6 +12,8 @@
 
 @interface DataLayer()
 
+@property (nonatomic, strong) NSDateFormatter *dbFormatter;
+
 @end
 
 @implementation DataLayer
@@ -1746,9 +1748,7 @@ static DataLayer *sharedInstance=nil;
     DDLogVerbose(@"%@",query);
     NSArray* results = [self executeReader:query andArguments:params];
     
-    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    NSDateFormatter* formatter = self.dbFormatter;
     
     NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
     [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -1886,9 +1886,7 @@ static DataLayer *sharedInstance=nil;
     NSArray *params=@[accountNo, buddy, buddy];
     NSArray* rawArray = [self executeReader:query andArguments:params];
     
-    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    NSDateFormatter* formatter = self.dbFormatter;
     
     NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:rawArray.count];
     [rawArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -1916,9 +1914,7 @@ static DataLayer *sharedInstance=nil;
     NSArray *params=@[accountNo, contact, contact];
     
     [self executeReader:query andArguments:params withCompletion:^(NSMutableArray *results) {
-        NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-        [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-        [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+        NSDateFormatter* formatter = self.dbFormatter;
         
         NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
         [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -2033,6 +2029,47 @@ static DataLayer *sharedInstance=nil;
     }];
 }
 
+-(void) lastMessageDateForAccount:(NSString*) accountNo andContact:(NSString*) contact withCompletion: (void (^)(NSDate *))completion
+{
+    NSString* query=[NSString stringWithFormat:@"select timestamp from  message_history where account_id=? and message_from=?  order by timestamp desc limit 1"];
+    
+    [self executeScalar:query andArguments:@[accountNo, contact] withCompletion:^(NSObject* result) {
+        if(completion)
+        {
+            NSDateFormatter *dateFromatter = [[NSDateFormatter alloc] init];
+            NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+            
+            [dateFromatter setLocale:enUSPOSIXLocale];
+            [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
+            [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+            
+            NSDate *datetoReturn =[dateFromatter dateFromString:(NSString *)result];
+            
+            completion(datetoReturn);
+        }
+    }];
+}
+
+-(void) lastMessageDateAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion
+{
+    NSString* query=[NSString stringWithFormat:@"select timestamp from  message_history where account_id=? order by timestamp desc limit 1"];
+    
+    [self executeScalar:query andArguments:@[accountNo] withCompletion:^(NSObject* result) {
+        if(completion)
+        {
+            NSDateFormatter *dateFromatter = [[NSDateFormatter alloc] init];
+            NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+            
+            [dateFromatter setLocale:enUSPOSIXLocale];
+            [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
+            [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+            
+            NSDate *datetoReturn =[dateFromatter dateFromString:(NSString *)result];
+            
+            completion(datetoReturn);
+        }
+    }];
+}
 
 
 #pragma mark active chats
@@ -2144,8 +2181,12 @@ static DataLayer *sharedInstance=nil;
     NSString* query=[NSString stringWithFormat:@"select lastMessageTime from  activechats where account_id=? and buddy_name=?"];
     
     [self executeScalar:query andArguments:@[accountNo, buddyname] withCompletion:^(NSObject *result) {
-        NSNumber *lastTime= (NSNumber *) result;
-        if(lastTime.intValue<timestamp.intValue) {
+        NSString *lastTime= (NSString *) result;
+        
+        NSDate *lastDate = [self.dbFormatter dateFromString:lastTime];
+        NSDate *newDate = [self.dbFormatter dateFromString:timestamp];
+        
+        if(lastDate.timeIntervalSince1970<newDate.timeIntervalSince1970) {
             NSString* query=[NSString stringWithFormat:@"update activechats set lastMessageTime=? where account_id=? and buddy_name=? "];
             [self executeNonQuery:query andArguments:@[timestamp, accountNo, buddyname] withCompletion:^(BOOL success) {
                 if(completion) completion(success);
@@ -2235,6 +2276,12 @@ static DataLayer *sharedInstance=nil;
     [self executeNonQuery:@"pragma truncate;" andArguments:nil];
     
     dbversionCheck=[NSLock new];
+    
+    self.dbFormatter = [[NSDateFormatter alloc] init];
+     [self.dbFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+     [self.dbFormatter  setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+     
+    
     [self version];
     
     

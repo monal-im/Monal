@@ -146,21 +146,9 @@
         if(xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
             if(self.messageList.count==0) {
                 [xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
+            }  else  {
+                [xmppAccount queryMAMSinceLastMessageDateForContact:self.contact.contactJid];
             }
-        }
-    });
-}
-
--(void) fetchMessages
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-        if(xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
-            [[DataLayer sharedInstance] lastMessageSanzaForAccount:self.contact.accountId  andJid:self.contact.contactJid  withCompletion:^(NSString *lastStanza) {
-                if(lastStanza) {
-                    [xmppAccount setMAMQueryFromStart:nil after:lastStanza andJid:self.contact.contactJid ];
-                }
-            }];
         }
     });
 }

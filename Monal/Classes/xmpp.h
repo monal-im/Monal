@@ -266,6 +266,9 @@ Decline a call request
 -(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) after  andJid:(NSString *)jid;
 
 
+//-(void) queryMAMSinceLastStanzaForContact:(NSString *) contactJid;
+-(void) queryMAMSinceLastMessageDateForContact:(NSString *) contactJid; 
+
 -(void) setMAMPrefs:(NSString *) preference;
 -(void) getMAMPrefs;
 

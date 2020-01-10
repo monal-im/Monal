@@ -49,7 +49,7 @@
 #define kPingTimeout 120ull //seconds
 
 
-NSString *const kId=@"id";
+
 NSString *const kMessageId=@"MessageID";
 NSString *const kSendTimer=@"SendTimer";
 

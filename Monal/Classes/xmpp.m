@@ -1746,12 +1746,16 @@ NSString *const kXMPPPresence = @"presence";
                             [self enablePush];
                         }
 #endif
-#endif
-                        
                         
 #ifndef DISABLE_OMEMO
                         [self sendSignalInitialStanzas];
 #endif
+                        
+                        
+#endif
+                        
+                        
+
                     }
                     else        //smacks enable failed
                     {

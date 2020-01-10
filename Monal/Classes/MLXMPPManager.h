@@ -134,6 +134,8 @@ Returns the server set name of the conencted account
 -(void) hangupContact:(NSDictionary*) contact;
 
 
+-(void) approveContact:(MLContact*) contact;
+
 /**
  respond to call with either accept or not. Passes back the notifiaction dictionary
  */

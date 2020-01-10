@@ -112,6 +112,8 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeOnlineUser:) name: kMonalContactOfflineNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showCallRequest:) name:kMonalCallRequestNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showAuthRequest:) name:kMonalAccountAuthRequest object:nil];
+       
     
     [[MLXMPPManager sharedInstance] handleNewMessage:nil];
     
@@ -509,6 +511,31 @@
         [self.contactsTable deleteRowsAtIndexPaths:indexPaths
                                   withRowAnimation:UITableViewRowAnimationAutomatic];
         [self.contactsTable endUpdates];
+        
+    });
+    
+}
+
+-(void) showAuthRequest:(NSNotification *) notification
+{
+    NSDictionary *dic = notification.object;
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        MLContact *contact = [dic objectForKey:@"contact"];
+        
+        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"A New Contact" message:[NSString stringWithFormat:@"%@ Added you as a contact. Adding a contact will let them see when you are active and is needed for secure chat.",  contact.contactJid] preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:@"Add Back" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            
+            [[MLXMPPManager sharedInstance] approveContact:contact];
+        }];
+        
+        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            [[MLXMPPManager sharedInstance] handleCall:dic withResponse:NO];
+        }];
+        [messageAlert addAction:closeAction];
+        [messageAlert addAction:acceptAction];
+        
+        [self.tabBarController presentViewController:messageAlert animated:YES completion:nil];
         
     });
     

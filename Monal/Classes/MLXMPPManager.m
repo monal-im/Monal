@@ -208,6 +208,12 @@ An array of Dics what have timers to make sure everything was sent
     }
 }
 
+-(void) approveContact:(MLContact*) contact
+{
+    xmpp* account =[self getConnectedAccountForID:contact.accountId];
+    [account approveToRoster:contact.contactJid];
+}
+
 
 
 -(void) resetForeground

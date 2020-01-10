@@ -49,7 +49,7 @@
 #define kPingTimeout 120ull //seconds
 
 
-NSString *const kId=@"id";
+
 NSString *const kMessageId=@"MessageID";
 NSString *const kSendTimer=@"SendTimer";
 
@@ -138,6 +138,11 @@ NSString *const kXMPPPresence = @"presence";
 @property (nonatomic, strong) NSMutableDictionary *xmppCompletionHandlers;
 @property (nonatomic, strong) xmppCompletion loginCompletion;
 @property (nonatomic, strong) xmppCompletion regFormSubmitCompletion;
+
+/**
+ ID of the signal device query
+ */
+@property (nonatomic, strong) NSString *deviceQueryId;
 
 @end
 
@@ -1254,6 +1259,18 @@ NSString *const kXMPPPresence = @"presence";
                     [processor processIq:iqNode];
                     
                     
+                    if([iqNode.idval isEqualToString:self.deviceQueryId])
+                    {
+                        if([iqNode.type isEqualToString:kiqErrorType]) {
+                            //there are no devices published yet
+                            DDLogInfo(@"No signal device items. Adding new to pubsub");
+                            XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
+                            NSString * deviceString=[NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
+                            [signalDevice publishDevices:@[deviceString]];
+                            [self send:signalDevice];
+                        }
+                    }
+                    
                     //TODO these result iq need to be moved elsewhere/refactored
                     //kept outside intentionally
                     if([iqNode.idval isEqualToString:self.pingID])
@@ -1368,8 +1385,11 @@ NSString *const kXMPPPresence = @"presence";
                         if([presenceNode.type isEqualToString:kpresencesSubscribe])
                         {
                             //TODO notify the sub screen
-                            //                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountClearContacts object:@{@"account":[self->_accountNo copy], @"from":[presenceNode.from copy]}];
+                            MLContact *contact = [[MLContact alloc] init];
+                            contact.accountId=self.accountNo;
+                            contact.contactJid=presenceNode.user;
                             
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountAuthRequest object:@{@"contact":contact}];
                         }
                         
                         if(presenceNode.MUC)
@@ -2294,6 +2314,11 @@ static NSMutableArray *extracted(xmpp *object) {
         [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
     }
     
+    if(self.connectionProperties.supportsPubSub)
+    {
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
+    }
+    
     //save state dictionary
     NSData *data =[NSKeyedArchiver archivedDataWithRootObject:values];
     [[NSUserDefaults standardUserDefaults] setObject:data forKey:[NSString stringWithFormat:@"stream_state_v1_%@",self.accountNo]];
@@ -2352,6 +2377,12 @@ static NSMutableArray *extracted(xmpp *object) {
         {
             NSNumber *mamNumber = [dic objectForKey:@"supportsMAM"];
             self.connectionProperties.supportsMam2 = mamNumber.boolValue;
+        }
+        
+        if([dic objectForKey:@"supportsPubSub"])
+        {
+            NSNumber *supportsPubSub = [dic objectForKey:@"supportsPubSub"];
+            self.connectionProperties.supportsPubSub = supportsPubSub.boolValue;
         }
         
         //debug output
@@ -2481,11 +2512,7 @@ static NSMutableArray *extracted(xmpp *object) {
     [self queryDisco];
     [self fetchRoster];
     [self sendInitalPresence];
-    
-#ifndef DISABLE_OMEMO
-    [self sendSignalInitialStanzas];
-#endif
-    
+        
     if(!self.connectionProperties.supportsSM3)
     {
         //send out messages still in the queue, even if smacks is not supported this time
@@ -2640,6 +2667,8 @@ static NSMutableArray *extracted(xmpp *object) {
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query setiqTo:jid];
     [query requestDevices];
+    self.deviceQueryId=query.stanzaID;
+    
     [self send:query];
     
 }

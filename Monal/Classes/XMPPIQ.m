@@ -864,8 +864,8 @@ NSString *const kiqErrorType = @"error";
     publish.element=@"publish";
     [publish.attributes setObject:@"eu.siacs.conversations.axolotl.devicelist" forKey:@"node"];
     
-    MLXMLNode* itemNode =[[MLXMLNode alloc] init];
-    itemNode.element=@"item";
+    MLXMLNode* itemNode =[[MLXMLNode alloc] initWithElement:@"item"];
+    [itemNode.attributes setObject:@"current" forKey:kId];
     
     MLXMLNode* listNode =[[MLXMLNode alloc] init];
     listNode.element=@"list";
@@ -875,7 +875,7 @@ NSString *const kiqErrorType = @"error";
         NSString *deviceid= (NSString *)obj;
         MLXMLNode* device =[[MLXMLNode alloc] init];
         device.element=@"device";
-        [device.attributes setObject:deviceid forKey:@"id"];
+        [device.attributes setObject:deviceid forKey:kId];
         [listNode.children addObject:device];
     }];
   
@@ -901,6 +901,7 @@ NSString *const kiqErrorType = @"error";
     
     MLXMLNode* itemNode =[[MLXMLNode alloc] init];
     itemNode.element=@"item";
+    [itemNode.attributes setObject:@"current" forKey:kId];
     
     MLXMLNode* bundle =[[MLXMLNode alloc] init];
     bundle.element=@"bundle";

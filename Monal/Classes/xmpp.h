@@ -110,7 +110,6 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, strong) MLSignalStore *monalSignalStore;
 #endif
 
-extern NSString *const kId;
 extern NSString *const kMessageId;
 extern NSString *const kSendTimer;
 

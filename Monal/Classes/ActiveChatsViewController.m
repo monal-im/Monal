@@ -201,6 +201,7 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    self.lastSelectedUser=nil;
 }
 
 -(void) viewDidAppear:(BOOL)animated

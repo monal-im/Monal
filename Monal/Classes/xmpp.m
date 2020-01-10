@@ -139,6 +139,11 @@ NSString *const kXMPPPresence = @"presence";
 @property (nonatomic, strong) xmppCompletion loginCompletion;
 @property (nonatomic, strong) xmppCompletion regFormSubmitCompletion;
 
+/**
+ ID of the signal device query
+ */
+@property (nonatomic, strong) NSString *deviceQueryId;
+
 @end
 
 
@@ -1251,6 +1256,18 @@ NSString *const kXMPPPresence = @"presence";
                     
                     [processor processIq:iqNode];
                     
+                    
+                    if([iqNode.idval isEqualToString:self.deviceQueryId])
+                    {
+                        if([iqNode.type isEqualToString:kiqErrorType]) {
+                            //there are no devices published yet
+                            DDLogInfo(@"No signal device items. Adding new to pubsub");
+                            XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
+                            NSString * deviceString=[NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
+                            [signalDevice publishDevices:@[deviceString]];
+                            [self send:signalDevice];
+                        }
+                    }
                     
                     //TODO these result iq need to be moved elsewhere/refactored
                     //kept outside intentionally
@@ -2493,11 +2510,7 @@ static NSMutableArray *extracted(xmpp *object) {
     [self queryDisco];
     [self fetchRoster];
     [self sendInitalPresence];
-    
-#ifndef DISABLE_OMEMO
-    [self sendSignalInitialStanzas];
-#endif
-    
+        
     if(!self.connectionProperties.supportsSM3)
     {
         //send out messages still in the queue, even if smacks is not supported this time
@@ -2652,6 +2665,8 @@ static NSMutableArray *extracted(xmpp *object) {
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query setiqTo:jid];
     [query requestDevices];
+    self.deviceQueryId=query.stanzaID;
+    
     [self send:query];
     
 }

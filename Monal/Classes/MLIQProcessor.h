@@ -40,6 +40,11 @@ typedef void (^processAction)(void);
  */
 -(void) parseFeatures;
 
+/**
+ process a node and send out devices
+ */
+-(void) processOMEMODevices:(ParseIq *) iqNode;
+
 
 @end
 

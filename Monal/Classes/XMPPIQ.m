@@ -854,6 +854,21 @@ NSString *const kiqErrorType = @"error";
 
 #pragma mark - signal
 
+-(void) subscribeDevices:(NSString*) jid
+{
+    MLXMLNode* pubsubNode =[[MLXMLNode alloc] init];
+    pubsubNode.element=@"pubsub";
+    [pubsubNode.attributes setObject:@"http://jabber.org/protocol/pubsub" forKey:kXMLNS];
+    
+    MLXMLNode* publish =[[MLXMLNode alloc] init];
+    publish.element=@"subscribe";
+    [publish.attributes setObject:@"eu.siacs.conversations.axolotl.devicelist" forKey:@"node"];
+    [publish.attributes setObject:jid forKey:@"jid"];
+    
+    [self.children addObject:pubsubNode];
+}
+
+
 -(void) publishDevices:(NSArray*) devices
 {
     MLXMLNode* pubsubNode =[[MLXMLNode alloc] init];

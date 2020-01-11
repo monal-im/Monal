@@ -158,6 +158,9 @@ removes a contact from the roster
 
 
 #pragma mark Signal
+
+-(void) subscribeDevices:(NSString*) jid;
+
 /**
  publishes a device.
  */

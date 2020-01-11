@@ -230,10 +230,10 @@
     if(!self.contact.contactJid || !self.contact.accountId) return;
     
     [self synchChat];
-#ifndef DISABLE_OMEMO
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-    [xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
-#endif
+//#ifndef DISABLE_OMEMO
+//    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+//    [xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
+//#endif
     //  [self scrollToBottom];
     
 }

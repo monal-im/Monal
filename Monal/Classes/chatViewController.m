@@ -229,7 +229,6 @@
     [super viewDidAppear:animated];
     if(!self.contact.contactJid || !self.contact.accountId) return;
     
-    [self refreshCounter];
     [self synchChat];
 #ifndef DISABLE_OMEMO
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];

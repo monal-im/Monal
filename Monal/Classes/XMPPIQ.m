@@ -860,10 +860,11 @@ NSString *const kiqErrorType = @"error";
     pubsubNode.element=@"pubsub";
     [pubsubNode.attributes setObject:@"http://jabber.org/protocol/pubsub" forKey:kXMLNS];
     
-    MLXMLNode* publish =[[MLXMLNode alloc] init];
-    publish.element=@"subscribe";
-    [publish.attributes setObject:@"eu.siacs.conversations.axolotl.devicelist" forKey:@"node"];
-    [publish.attributes setObject:jid forKey:@"jid"];
+    MLXMLNode* subscribe =[[MLXMLNode alloc] init];
+    subscribe.element=@"subscribe";
+    [subscribe.attributes setObject:@"eu.siacs.conversations.axolotl.devicelist" forKey:@"node"];
+    [subscribe.attributes setObject:jid forKey:@"jid"];
+    [pubsubNode.children addObject:subscribe];
     
     [self.children addObject:pubsubNode];
 }

@@ -2661,7 +2661,7 @@ static NSMutableArray *extracted(xmpp *object) {
 {
     if(!self.connectionProperties.supportsPubSub) return;
        XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-       [query setiqTo:jid];//pubsub
+       [query setiqTo:self.connectionProperties.server.host];//pubsub
        [query subscribeDevices:jid];
      
        [self send:query];

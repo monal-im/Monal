@@ -290,12 +290,15 @@
     
     cell.accountNo=row.accountId.integerValue;
     cell.username=row.contactJid;
+    cell.count=0;
     
     [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:row.accountId withCompletion:^(NSNumber *unread) {
         dispatch_async(dispatch_get_main_queue(), ^{
             cell.count=[unread integerValue];
         });
     }];
+    
+    [cell showStatusText:nil];
     
     [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:row.accountId withCompletion:^(NSMutableArray *messages) {
         dispatch_async(dispatch_get_main_queue(), ^{

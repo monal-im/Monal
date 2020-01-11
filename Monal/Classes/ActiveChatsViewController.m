@@ -273,15 +273,6 @@
     
     
     NSString *state= [row.state  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-
-    if(![row.statusMessage isEqualToString:@"(null)"] &&
-       ![row.statusMessage isEqualToString:@""]) {
-       [cell showStatusText:row.statusMessage];
-    }
-    else
-    {
-        [cell showStatusText:nil];
-    }
     
     if(([state isEqualToString:@"away"]) ||
        ([state isEqualToString:@"dnd"])||

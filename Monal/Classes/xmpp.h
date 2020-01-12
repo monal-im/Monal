@@ -282,6 +282,8 @@ Decline a call request
 -(void) getVCard:(NSString *) user;
 
 #ifndef DISABLE_OMEMO
+
+-(void) subscribeOMEMODevicesFrom:(NSString *) jid;
 /** OMEMO */
 -(void) queryOMEMODevicesFrom:(NSString *) jid;
 #endif

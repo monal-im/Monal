@@ -2659,7 +2659,15 @@ static NSMutableArray *extracted(xmpp *object) {
     [self sendOMEMOBundle];
 }
 
-
+-(void) subscribeOMEMODevicesFrom:(NSString *) jid
+{
+    if(!self.connectionProperties.supportsPubSub) return;
+       XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+       [query setiqTo:self.connectionProperties.server.host];//pubsub
+       [query subscribeDevices:jid];
+     
+       [self send:query];
+}
 
 -(void) queryOMEMODevicesFrom:(NSString *) jid
 {

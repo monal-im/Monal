@@ -2905,7 +2905,7 @@ static NSMutableArray *extracted(xmpp *object) {
 -(void) queryMAMSinceLastMessageDateForContact:(NSString *) contactJid
 {
     if(self.connectionProperties.supportsMam2) {
-        [[DataLayer sharedInstance] lastMessageDateForAccount:_accountNo  andContact:contactJid withCompletion:^(NSDate *lastDate) {
+        [[DataLayer sharedInstance] lastMessageDateForContact:contactJid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
             if(lastDate) {
                 [self setMAMQueryFromStart:lastDate toDate:nil andJid:contactJid];
             }

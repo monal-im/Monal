@@ -1329,15 +1329,15 @@
 }
 
 
-//-(BOOL) canBecomeFirstResponder
-//{
-//    return YES;
-//}
-//
-//-(UIView *) inputAccessoryView
-//{
-//    return self.inputContainerView;
-//}
+-(BOOL) canBecomeFirstResponder
+{
+    return YES;
+}
+
+-(UIView *) inputAccessoryView
+{
+    return self.inputContainerView;
+}
 
 
 # pragma mark - Textview delegate functions

@@ -701,6 +701,7 @@
                                             <outlet property="dayTop" destination="8vg-DJ-u88" id="2AR-GT-8Du"/>
                                             <outlet property="dividerDate" destination="zsJ-nd-h6v" id="qRq-pb-Q5s"/>
                                             <outlet property="dividerHeight" destination="ntS-dH-vd9" id="u9Y-At-tYC"/>
+                                            <outlet property="lockImage" destination="TBb-pL-IcL" id="ddb-0j-lVS"/>
                                             <outlet property="messageBody" destination="4KG-8d-uoj" id="EjQ-BD-Pwd"/>
                                             <outlet property="messageTitle" destination="loD-fs-EW7" id="4a4-WZ-aSR"/>
                                             <outlet property="name" destination="b15-Tl-ako" id="2Et-Yt-Tkf"/>
@@ -1038,7 +1039,7 @@
                                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                                     <nil key="highlightedColor"/>
                                                                 </label>
-                                                                <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="744-locked-selected" translatesAutoresizingMaskIntoConstraints="NO" id="eJr-P4-DsR">
+                                                                <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="744-locked-received" translatesAutoresizingMaskIntoConstraints="NO" id="eJr-P4-DsR">
                                                                     <rect key="frame" x="237" y="53" width="11" height="11"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" constant="11" id="Kbj-mb-ap8"/>
@@ -1130,6 +1131,7 @@
                                             <outlet property="dayTop" destination="lu2-Qq-DcJ" id="7yA-XB-1jq"/>
                                             <outlet property="dividerDate" destination="ZQL-lx-CcO" id="LoE-5Y-Qnq"/>
                                             <outlet property="dividerHeight" destination="HG0-FY-m2q" id="Zyk-me-0yM"/>
+                                            <outlet property="lockImage" destination="eJr-P4-DsR" id="E3H-3M-ouH"/>
                                             <outlet property="messageBody" destination="Vgy-m0-M8n" id="9op-R8-oUa"/>
                                             <outlet property="messageStatus" destination="vAj-sV-yOx" id="w4f-qO-ShE"/>
                                             <outlet property="messageTitle" destination="WyS-w8-jKs" id="WuR-gS-lny"/>

@@ -287,10 +287,10 @@ NSString *const kiqErrorType = @"error";
     set.element=@"set";
     [set.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:kXMLNS];
     
-//    MLXMLNode* max =[[MLXMLNode alloc] init];
-//    max.element=@"max";
-//    max.data=@"50";
-//    [set.children addObject:max];
+    MLXMLNode* max =[[MLXMLNode alloc] init];
+    max.element=@"max";
+    max.data=@"50";
+    [set.children addObject:max];
     
     MLXMLNode* before =[[MLXMLNode alloc] init];
     before.element=@"before";

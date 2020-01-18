@@ -125,6 +125,7 @@
     
     if(iqNode.mam2Last && !iqNode.mam2fin)
     {
+        //RSM paging
         XMPPIQ* pageQuery =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
         [pageQuery setMAMQueryFromStart:nil after:iqNode.mam2Last withMax:nil andJid:nil];
         if(self.sendIq) self.sendIq(pageQuery);

@@ -139,18 +139,14 @@
  gets recent messages  to fill an empty chat
  */
 -(void) synchChat {
-    return;
-//    dispatch_async(dispatch_get_main_queue(), ^{
-//
-//        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-//        if(xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
-//            if(self.messageList.count==0) {
-//                [xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
-//            }  else  {
-//                [xmppAccount queryMAMSinceLastMessageDateForContact:self.contact.contactJid];
-//            }
-//        }
-//    });
+    dispatch_async(dispatch_get_main_queue(), ^{
+        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+        if(xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
+            if(self.messageList.count==0) {
+                [xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
+            }
+        }
+    });
 }
 
 -(void) refreshButton:(NSNotification *) notificaiton

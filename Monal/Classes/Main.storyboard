@@ -15,7 +15,7 @@
                 </viewControllerPlaceholder>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xDM-mH-2uQ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-2072" y="3141"/>
+            <point key="canvasLocation" x="-2876" y="-1307"/>
         </scene>
         <!--Add Contact-->
         <scene sceneID="c6l-mN-YrO">
@@ -85,7 +85,7 @@
                     </items>
                 </toolbar>
             </objects>
-            <point key="canvasLocation" x="2878" y="-1798"/>
+            <point key="canvasLocation" x="958" y="-1627"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="ypm-9L-YMe">
@@ -101,7 +101,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="g6z-bl-oue" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2056" y="-1798"/>
+            <point key="canvasLocation" x="136" y="-1627"/>
         </scene>
         <!--Contacts -->
         <scene sceneID="i7L-1h-zmZ">
@@ -117,28 +117,17 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Contacts" id="qsR-dX-TO1">
-                        <barButtonItem key="leftBarButtonItem" systemItem="add" id="2ji-VW-Qvv">
-                            <connections>
-                                <segue destination="elF-QS-Bpm" kind="presentation" modalPresentationStyle="formSheet" id="lpa-8n-0fe"/>
-                            </connections>
-                        </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" image="704-compose" id="Vb4-E0-HTo">
-                            <connections>
-                                <segue destination="c9l-5p-HeT" kind="presentation" identifier="showCompose" modalPresentationStyle="formSheet" id="xeu-Qv-uKG"/>
-                            </connections>
-                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" image="704-compose" id="Vb4-E0-HTo"/>
                     </navigationItem>
                     <connections>
                         <outlet property="view" destination="4Ri-hX-ob8" id="nLc-h6-Jwi"/>
                         <segue destination="Dhn-Pm-OVk" kind="showDetail" identifier="showConversation" id="wmf-tk-2CN"/>
-                        <segue destination="DkD-PA-Cmm" kind="presentation" identifier="showLogin" modalPresentationStyle="formSheet" id="0RU-Rt-FFr"/>
-                        <segue destination="2g1-pP-Xxv" kind="presentation" identifier="showIntro" modalPresentationStyle="formSheet" id="jaD-g8-KSk"/>
                         <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" modalPresentationStyle="formSheet" id="hqW-lo-9tZ"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="vxj-qR-bK8" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1190" y="-640"/>
+            <point key="canvasLocation" x="-67" y="280"/>
         </scene>
         <!--introScreen-->
         <scene sceneID="K7X-dP-kqM">
@@ -178,7 +167,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cXK-V1-EEa" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="329" y="-640"/>
+            <point key="canvasLocation" x="-1496" y="-733"/>
         </scene>
         <!--Contacts-->
         <scene sceneID="IUh-IV-wXI">
@@ -194,7 +183,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="hSl-QX-t2S" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <customObject id="qac-2e-fgp" customClass="MLSplitViewDelegate"/>
             </objects>
-            <point key="canvasLocation" x="-475" y="-640"/>
+            <point key="canvasLocation" x="-1468" y="21"/>
         </scene>
         <!--Placeholder View Controller-->
         <scene sceneID="ian-aI-Nym">
@@ -272,7 +261,25 @@
                             <outlet property="delegate" destination="wDx-jI-G7L" id="VQl-ok-BfC"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Chats" id="RRa-hC-xrf"/>
+                    <navigationItem key="navigationItem" title="Chats" id="RRa-hC-xrf">
+                        <barButtonItem key="leftBarButtonItem" image="person.crop.circle" catalog="system" id="BWH-2I-fSI">
+                            <connections>
+                                <segue destination="cmS-oG-cv1" kind="presentation" id="zkg-JY-Otv"/>
+                            </connections>
+                        </barButtonItem>
+                        <rightBarButtonItems>
+                            <barButtonItem title="New" image="square.and.pencil" catalog="system" id="wNA-vF-ohQ">
+                                <connections>
+                                    <segue destination="elF-QS-Bpm" kind="presentation" id="tor-VM-YxS"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem image="plus" catalog="system" id="pyP-qb-mfr">
+                                <connections>
+                                    <segue destination="c9l-5p-HeT" kind="presentation" id="WwV-ES-iFU"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
+                    </navigationItem>
                     <connections>
                         <segue destination="Dhn-Pm-OVk" kind="showDetail" identifier="showConversation" id="RLU-kt-b8r"/>
                         <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" modalPresentationStyle="formSheet" id="RNX-bQ-8Zb"/>
@@ -470,13 +477,12 @@
                     <connections>
                         <outlet property="delegate" destination="9w2-zK-zQT" id="yKV-F1-4VF"/>
                         <segue destination="PjQ-9S-4Zq" kind="relationship" relationship="masterViewController" id="01i-T3-g3x"/>
-                        <segue destination="iM6-Fx-aHL" kind="relationship" relationship="detailViewController" id="Whw-ul-BdL"/>
                     </connections>
                 </splitViewController>
                 <customObject id="9w2-zK-zQT" customClass="MLSplitViewDelegate"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Rmd-7z-NCq" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-3052" y="1258"/>
+            <point key="canvasLocation" x="-2170" y="1661"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="ia2-90-6Fa">
@@ -1367,7 +1373,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Q5t-24-y4S" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4073.913043478261" y="997.76785714285711"/>
+            <point key="canvasLocation" x="-1012" y="-1727"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="Syg-Lv-SSZ">
@@ -1383,7 +1389,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Fui-z9-gwJ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3163" y="998"/>
+            <point key="canvasLocation" x="-1923" y="-1727"/>
         </scene>
         <!--Split View Controller-->
         <scene sceneID="phy-iH-zBF">
@@ -1409,12 +1415,15 @@
         <image name="973-user" width="28" height="24"/>
         <image name="974-users" width="28" height="18"/>
         <image name="Tie_My_Boat_by_Ray_García" width="563" height="1218"/>
+        <image name="person.crop.circle" catalog="system" width="64" height="60"/>
+        <image name="plus" catalog="system" width="64" height="56"/>
+        <image name="square.and.pencil" catalog="system" width="64" height="58"/>
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="N41-wN-KNl"/>
         <segue reference="PqE-8J-Reh"/>
         <segue reference="RLU-kt-b8r"/>
-        <segue reference="D1Q-JS-32d"/>
+        <segue reference="hZ4-Os-eHo"/>
         <segue reference="RNX-bQ-8Zb"/>
     </inferredMetricsTieBreakers>
 </document>

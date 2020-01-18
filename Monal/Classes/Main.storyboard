@@ -862,11 +862,13 @@
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="p0Q-oV-3Pb">
                                                     <rect key="frame" x="29" y="46" width="28" height="28"/>
                                                     <constraints>
+                                                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="28" id="IQh-ND-xsf"/>
                                                         <constraint firstAttribute="height" constant="28" id="Otl-16-4pe"/>
+                                                        <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="28" id="QrV-Rg-PJ7"/>
                                                         <constraint firstAttribute="width" constant="28" id="awC-8S-WeQ"/>
                                                     </constraints>
                                                     <color key="tintColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                    <state key="normal" image="724-info"/>
+                                                    <state key="normal" image="info.circle" catalog="system"/>
                                                 </button>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DZU-Tx-2ba">
                                                     <rect key="frame" x="325.33333333333331" y="26" width="73.666666666666686" height="93"/>

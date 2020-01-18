@@ -55,8 +55,6 @@
     
     self.view= self.chatListTable;
     
-//    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close All",@"") style:UIBarButtonItemStylePlain target:self action:@selector(closeAll)];
-//    self.navigationItem.rightBarButtonItem=rightButton;
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
         [nc addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
@@ -215,12 +213,6 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-}
-
--(void) closeAll
-{
-    [[DataLayer sharedInstance] removeAllActiveBuddies];
-    [self refreshDisplay];
 }
 
 -(void) presentChatWithRow:(NSDictionary *)row

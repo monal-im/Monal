@@ -528,11 +528,11 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Tie_My_Boat_by_Ray_García" translatesAutoresizingMaskIntoConstraints="NO" id="SEk-WZ-Rcm">
-                                <rect key="frame" x="0.0" y="24" width="454" height="1218"/>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" insetsLayoutMarginsFromSafeArea="NO" image="Tie_My_Boat_by_Ray_García" translatesAutoresizingMaskIntoConstraints="NO" id="SEk-WZ-Rcm">
+                                <rect key="frame" x="0.0" y="20" width="414" height="856"/>
                             </imageView>
-                            <view alpha="0.25" contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cUR-xM-Mq7">
-                                <rect key="frame" x="0.0" y="24" width="454" height="838"/>
+                            <view alpha="0.25" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cUR-xM-Mq7">
+                                <rect key="frame" x="0.0" y="24" width="414" height="838"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" keyboardDismissMode="interactive" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Kkq-aZ-5fP">
@@ -712,9 +712,8 @@
                                                         <constraint firstAttribute="width" constant="11" id="xyJ-nN-uwq"/>
                                                     </constraints>
                                                 </imageView>
-                                                <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="hbE-2h-gWQ">
+                                                <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="hbE-2h-gWQ">
                                                     <rect key="frame" x="248" y="212" width="20" height="20"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 </activityIndicatorView>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -724,6 +723,8 @@
                                                 <constraint firstItem="Xld-jv-Isd" firstAttribute="leading" secondItem="GlC-dn-bvj" secondAttribute="trailing" constant="8" id="KfI-xa-pYR"/>
                                                 <constraint firstItem="1wW-PP-jdj" firstAttribute="top" secondItem="h9a-ua-MIo" secondAttribute="bottom" id="OIS-8B-eWE"/>
                                                 <constraint firstItem="GlC-dn-bvj" firstAttribute="leading" secondItem="GA8-Q5-xRV" secondAttribute="leadingMargin" id="OKS-P8-7wv"/>
+                                                <constraint firstItem="vGy-8U-lGI" firstAttribute="leading" secondItem="hbE-2h-gWQ" secondAttribute="trailing" constant="7" id="QCl-sg-hkL"/>
+                                                <constraint firstAttribute="bottomMargin" secondItem="hbE-2h-gWQ" secondAttribute="bottom" constant="-1" id="Sfa-56-bTD"/>
                                                 <constraint firstItem="GlC-dn-bvj" firstAttribute="bottom" secondItem="GA8-Q5-xRV" secondAttribute="bottomMargin" id="XBa-00-tqZ"/>
                                                 <constraint firstAttribute="trailingMargin" secondItem="vGy-8U-lGI" secondAttribute="trailing" constant="108" id="ZnX-fA-uYx"/>
                                                 <constraint firstItem="h9a-ua-MIo" firstAttribute="centerX" secondItem="GA8-Q5-xRV" secondAttribute="centerX" id="csJ-kO-zNL"/>
@@ -1228,19 +1229,21 @@
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="cUR-xM-Mq7" firstAttribute="top" secondItem="HiA-3m-fJs" secondAttribute="bottom" constant="-64" id="5fs-Nr-GdT"/>
+                            <constraint firstItem="cUR-xM-Mq7" firstAttribute="bottom" secondItem="si5-od-Uah" secondAttribute="top" id="6xU-rf-RyY"/>
                             <constraint firstItem="SEk-WZ-Rcm" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" constant="-20" id="FL9-Tl-rIX"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="SEk-WZ-Rcm" secondAttribute="trailing" constant="-60" id="Fwo-dk-iuw"/>
                             <constraint firstAttribute="bottom" secondItem="Kkq-aZ-5fP" secondAttribute="bottom" constant="34" id="Iwu-bN-lxd"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="cUR-xM-Mq7" secondAttribute="trailing" constant="-60" id="OyZ-VO-0b4"/>
+                            <constraint firstItem="SEk-WZ-Rcm" firstAttribute="top" secondItem="Riz-2Q-bcU" secondAttribute="top" constant="20" symbolic="YES" id="JBl-HT-76g"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="cUR-xM-Mq7" secondAttribute="trailing" constant="-20" id="OyZ-VO-0b4"/>
                             <constraint firstItem="Kkq-aZ-5fP" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leading" id="SIK-A8-KjT"/>
                             <constraint firstItem="Kkq-aZ-5fP" firstAttribute="top" secondItem="Riz-2Q-bcU" secondAttribute="top" id="T8K-jc-eWo"/>
-                            <constraint firstItem="SEk-WZ-Rcm" firstAttribute="top" secondItem="HiA-3m-fJs" secondAttribute="bottom" constant="-64" id="n1F-vU-19M"/>
+                            <constraint firstAttribute="trailing" secondItem="SEk-WZ-Rcm" secondAttribute="trailing" id="Vxx-8b-Xhg"/>
                             <constraint firstItem="cUR-xM-Mq7" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" constant="-20" id="nxB-c0-v3z"/>
                             <constraint firstAttribute="trailing" secondItem="Kkq-aZ-5fP" secondAttribute="trailing" id="xwD-cC-ws0"/>
+                            <constraint firstAttribute="bottom" secondItem="SEk-WZ-Rcm" secondAttribute="bottom" constant="20" symbolic="YES" id="y5H-Ps-mKI"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="tgd-HR-Cbd">
-                        <barButtonItem key="rightBarButtonItem" image="724-info" id="C9Q-7y-bRl">
+                        <barButtonItem key="rightBarButtonItem" image="info.circle" catalog="system" id="C9Q-7y-bRl">
                             <connections>
                                 <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" modalPresentationStyle="formSheet" id="0Dv-wk-JlQ"/>
                             </connections>
@@ -1273,14 +1276,13 @@
                                 <outlet property="delegate" destination="5nR-Q5-dQD" id="s6z-b4-uwm"/>
                             </connections>
                         </textView>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kYa-y4-X5Z">
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kYa-y4-X5Z">
                             <rect key="frame" x="370" y="7" width="36" height="30"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="36" id="NRJ-Qj-1DA"/>
                                 <constraint firstAttribute="height" constant="30" id="ZPw-Mb-D1d"/>
                             </constraints>
-                            <fontDescription key="fontDescription" type="system" pointSize="15"/>
-                            <state key="normal" title="Send"/>
+                            <state key="normal" image="paperplane.fill" catalog="system"/>
                             <connections>
                                 <action selector="sendMessageText:" destination="5nR-Q5-dQD" eventType="touchUpInside" id="QRx-TH-CI3"/>
                             </connections>
@@ -1291,7 +1293,7 @@
                                 <constraint firstAttribute="width" constant="28" id="r5D-N5-kFE"/>
                                 <constraint firstAttribute="height" constant="27" id="yNE-7P-Ml5"/>
                             </constraints>
-                            <state key="normal" image="770-paper-clip"/>
+                            <state key="normal" image="camera" catalog="system"/>
                             <connections>
                                 <action selector="attach:" destination="5nR-Q5-dQD" eventType="touchUpInside" id="7Vw-VD-VgI"/>
                             </connections>
@@ -1410,11 +1412,13 @@
         <image name="724-info" width="28" height="28"/>
         <image name="744-locked-received" width="21" height="28"/>
         <image name="744-locked-selected" width="21" height="28"/>
-        <image name="770-paper-clip" width="28" height="27"/>
         <image name="906-chat-3" width="28" height="26"/>
         <image name="973-user" width="28" height="24"/>
         <image name="974-users" width="28" height="18"/>
         <image name="Tie_My_Boat_by_Ray_García" width="563" height="1218"/>
+        <image name="camera" catalog="system" width="64" height="48"/>
+        <image name="info.circle" catalog="system" width="64" height="60"/>
+        <image name="paperplane.fill" catalog="system" width="64" height="60"/>
         <image name="person.crop.circle" catalog="system" width="64" height="60"/>
         <image name="plus" catalog="system" width="64" height="56"/>
         <image name="square.and.pencil" catalog="system" width="64" height="58"/>
@@ -1424,6 +1428,6 @@
         <segue reference="PqE-8J-Reh"/>
         <segue reference="RLU-kt-b8r"/>
         <segue reference="hZ4-Os-eHo"/>
-        <segue reference="RNX-bQ-8Zb"/>
+        <segue reference="cuS-c5-MTy"/>
     </inferredMetricsTieBreakers>
 </document>

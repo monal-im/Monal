@@ -106,8 +106,7 @@
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
     [nc addObserver:self selector:@selector(refreshButton:) name:kMonalAccountStatusChanged object:nil];
-  //  [nc addObserver:self selector:@selector(fetchMessages) name:kMLMAMMore object:nil];
-    
+  
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 
     
@@ -140,17 +139,18 @@
  gets recent messages  to fill an empty chat
  */
 -(void) synchChat {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        
-        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-        if(xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
-            if(self.messageList.count==0) {
-                [xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
-            }  else  {
-                [xmppAccount queryMAMSinceLastMessageDateForContact:self.contact.contactJid];
-            }
-        }
-    });
+    return;
+//    dispatch_async(dispatch_get_main_queue(), ^{
+//
+//        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+//        if(xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
+//            if(self.messageList.count==0) {
+//                [xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
+//            }  else  {
+//                [xmppAccount queryMAMSinceLastMessageDateForContact:self.contact.contactJid];
+//            }
+//        }
+//    });
 }
 
 -(void) refreshButton:(NSNotification *) notificaiton

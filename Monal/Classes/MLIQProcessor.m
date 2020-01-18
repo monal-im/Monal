@@ -13,8 +13,6 @@
 #import "EncodingTools.h"
 
 
-
-
 @interface MLIQProcessor()
 
 @property (nonatomic, strong) SignalContext *signalContext;
@@ -125,11 +123,11 @@
 
 -(void) processResultIq:(ParseIq *) iqNode {
     
-    //TODO maybe remove this.
     if(iqNode.mam2Last && !iqNode.mam2fin)
     {
-        //RSM seems broken on servers. Indicate  there is more to fetch
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMLMAMMore object:nil];
+        XMPPIQ* pageQuery =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+        [pageQuery setMAMQueryFromStart:nil after:iqNode.mam2Last withMax:nil andJid:nil];
+        if(self.sendIq) self.sendIq(pageQuery);
         return;
     }
     
@@ -255,6 +253,16 @@
         {
             self.connection.supportsMam2=YES;
             DDLogInfo(@" supports mam:2");
+            
+            [[DataLayer sharedInstance] lastMessageDateForContact:self.connection.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
+                
+                if(lastDate) { // if no last date, there are no messages yet. Will fetch when in chat 
+                    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+                    [query setMAMQueryFromStart:lastDate toDate:nil withMax:nil andJid:nil];
+                    if(self.sendIq) self.sendIq(query);
+                }
+            }];
+            
         }
     }
     

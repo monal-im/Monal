@@ -34,7 +34,7 @@ static const DDLogLevel ddLogLevel = DDLogLevelInfo;
 #define kMonalPresentChat @"kMonalPresentChat"
 
 #define kMLMAMPref @"kMLMAMPref"
-#define kMLMAMMore @"kMLMAMMore"
+
 
 #define kMonalCallStartedNotice @"kMonalCallStartedNotice"
 #define kMonalCallRequestNotice @"kMonalCallRequestNotice"

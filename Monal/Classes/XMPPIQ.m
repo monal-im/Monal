@@ -287,10 +287,10 @@ NSString *const kiqErrorType = @"error";
     set.element=@"set";
     [set.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:kXMLNS];
     
-    MLXMLNode* max =[[MLXMLNode alloc] init];
-    max.element=@"max";
-    max.data=@"50";
-    [set.children addObject:max];
+//    MLXMLNode* max =[[MLXMLNode alloc] init];
+//    max.element=@"max";
+//    max.data=@"50";
+//    [set.children addObject:max];
     
     MLXMLNode* before =[[MLXMLNode alloc] init];
     before.element=@"before";
@@ -317,10 +317,12 @@ NSString *const kiqErrorType = @"error";
     [self.children addObject:queryNode];
     
 }
+
 /**
- You can send just start or just jid. End alone doesnt make sense
+ You can send just start or just jid. Setting  endDate alone doesnt make sense.
+ If querying all good idea to set a max
  */
--(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid
+-(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate withMax:(NSString *) maxResults  andJid:(NSString *)jid
 {
     
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
@@ -372,16 +374,16 @@ NSString *const kiqErrorType = @"error";
         [field2.children addObject:value2];
         [xnode.children addObject:field2];
     }
-    else
+    
+    if(maxResults)
     {
-        //if we are fetching "all" limit with RSM to 100 for now
         MLXMLNode* set =[[MLXMLNode alloc] init];
         set.element=@"set";
         [set.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:kXMLNS];
         
         MLXMLNode* max =[[MLXMLNode alloc] init];
         max.element=@"max";
-        max.data=@"50";
+        max.data=maxResults;
         [set.children addObject:max];
         [queryNode.children addObject:set];
         
@@ -426,7 +428,10 @@ NSString *const kiqErrorType = @"error";
 }
 
 
--(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) uid  andJid:(NSString *)jid
+/**
+ The after here is the id usually received in the last stanza of the mam page
+ */
+-(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) uid withMax:(NSString *) maxResults  andJid:(NSString *)jid
 {
     
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
@@ -497,11 +502,12 @@ NSString *const kiqErrorType = @"error";
     field3.element=@"set";
     [field3.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:kXMLNS];
     
-    
-    MLXMLNode* max =[[MLXMLNode alloc] init];
-    max.element=@"max";
-    max.data=@"50"; 
-    [field3.children addObject:max];
+    if(maxResults) {
+        MLXMLNode* max =[[MLXMLNode alloc] init];
+        max.element=@"max";
+        max.data=maxResults;
+        [field3.children addObject:max];
+    }
     
     if(uid) {
    

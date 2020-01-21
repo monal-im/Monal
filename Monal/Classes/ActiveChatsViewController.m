@@ -13,8 +13,7 @@
 #import "MonalAppDelegate.h"
 #import "ContactDetails.h"
 #import "MLImageManager.h"
-
-
+#import "MLWelcomeViewController.h"
 
 @interface ActiveChatsViewController ()
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
@@ -211,12 +210,7 @@
     if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenIntro"]) {
         [self performSegueWithIdentifier:@"showIntro" sender:self];
     }
-    else if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
-    {
-        if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenLogin"]) {
-            [self performSegueWithIdentifier:@"showLogin" sender:self];
-        }
-    } else  {
+    else  {
         //for 3->4 release remove later
         if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeeniOS13Message"]) {
             
@@ -247,7 +241,19 @@
 
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    if([segue.identifier isEqualToString:@"showConversation"])
+    if([segue.identifier isEqualToString:@"showIntro"])
+    {
+        MLWelcomeViewController* welcome = (MLWelcomeViewController *) segue.destinationViewController;
+        welcome.completion = ^(){
+            if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
+            {
+                if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenLogin"]) {
+                    [self performSegueWithIdentifier:@"showLogin" sender:self];
+                }
+            }
+        };
+    }
+    else if([segue.identifier isEqualToString:@"showConversation"])
     {
         UINavigationController *nav = segue.destinationViewController;
         chatViewController *chatVC = (chatViewController *)nav.topViewController;
@@ -259,7 +265,6 @@
         ContactDetails* details = (ContactDetails *)nav.topViewController;
         details.contact= sender;
     }
-    
 }
 
 

@@ -86,11 +86,7 @@
 {
     [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            if (@available(iOS 11.0, *)) {
-                 if(self.chatListTable.hasUncommittedUpdates) return;
-             } else {
-                 // Fallback on earlier versions
-             }
+            if(self.chatListTable.hasUncommittedUpdates) return;
             
             [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
             self.contacts=cleanActive;
@@ -123,27 +119,9 @@
         if([self.lastSelectedUser.contactJid isEqualToString:message.from])  return;
         
         __block BOOL contactInList=NO;
-        if (@available(iOS 11.0, *)) {
-            [self.chatListTable performBatchUpdates:^{
-                __block BOOL contactInList=NO;
-                [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                    MLContact *rowContact = (MLContact *) obj;
-                    if([rowContact.contactJid isEqualToString:message.from]) {
-                        contactInList=YES;
-                        NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
-                        [self.chatListTable beginUpdates];
-                        [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                        [self.chatListTable endUpdates];
-                    }
-                }];
-            }
-             completion:^(BOOL finished){
-                if(!contactInList) {
-                    [self refreshDisplay];
-                }
-            }];
-        } else  { //TODO remove when ios 10 is dropped
-
+        
+        [self.chatListTable performBatchUpdates:^{
+            __block BOOL contactInList=NO;
             [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 MLContact *rowContact = (MLContact *) obj;
                 if([rowContact.contactJid isEqualToString:message.from]) {
@@ -154,44 +132,32 @@
                     [self.chatListTable endUpdates];
                 }
             }];
-            
+        }
+                                     completion:^(BOOL finished){
             if(!contactInList) {
                 [self refreshDisplay];
             }
-        }
+        }];
+        
     });
     
 }
 
 -(void) refreshRowForContact:(MLContact *) contact {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (@available(iOS 11.0, *)) {
-            [self.chatListTable performBatchUpdates:^{
-                [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                    MLContact *rowContact = (MLContact *) obj;
-                    if([rowContact.contactJid isEqualToString:contact.contactJid]) {
-                        NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
-                        [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                        *stop=YES;
-                        return;
-                    }
-                }];
-            } completion:^(BOOL finished){
-                
-            } ];
-        } else  { //TODO remove when ios 10 is dropped
+        [self.chatListTable performBatchUpdates:^{
             [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 MLContact *rowContact = (MLContact *) obj;
                 if([rowContact.contactJid isEqualToString:contact.contactJid]) {
                     NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
-                    [self.chatListTable beginUpdates];
                     [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                    [self.chatListTable endUpdates];
                     *stop=YES;
                     return;
                 }
             }];
-        }
+        } completion:^(BOOL finished){
+            
+        } ];
     });
 }
 
@@ -449,12 +415,7 @@
 
 - (UIColor *)backgroundColorForEmptyDataSet:(UIScrollView *)scrollView
 {
-    if (@available(iOS 11.0, *)) {
-        return [UIColor colorNamed:@"chats"];
-    } else {
-       return [UIColor colorWithRed:239/255.0 green:238/255.0 blue:233/255.0 alpha:1];
-    }
-    
+    return [UIColor colorNamed:@"chats"];
 }
 
 - (BOOL)emptyDataSetShouldDisplay:(UIScrollView *)scrollView

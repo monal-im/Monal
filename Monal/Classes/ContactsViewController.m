@@ -66,14 +66,7 @@
     self.searchController.dimsBackgroundDuringPresentation = NO;
     self.definesPresentationContext = YES;
     
-    if (@available(iOS 11.0, *)) {
-        self.navigationItem.searchController= self.searchController;
-    }
-    else  {
-        // Install the search bar as the table header.
-        UITableView *tableView = (UITableView *)self.view;
-        tableView.tableHeaderView = self.searchController.searchBar;
-    }
+    self.navigationItem.searchController= self.searchController;
     
     self.tableView.emptyDataSetSource = self;
     self.tableView.emptyDataSetDelegate = self;
@@ -553,12 +546,9 @@
 
 -(void) reloadTable
 {
-    if (@available(iOS 11.0, *)) {
-           if(self.contactsTable.hasUncommittedUpdates) return;
-       } else {
-           // Fallback on earlier versions
-       }
-     [self.contactsTable reloadData];
+    if(self.contactsTable.hasUncommittedUpdates) return;
+    
+    [self.contactsTable reloadData];
 }
 
 -(void) refreshDisplay
@@ -1147,11 +1137,7 @@
 
 - (UIColor *)backgroundColorForEmptyDataSet:(UIScrollView *)scrollView
 {
-    if (@available(iOS 11.0, *)) {
-        return [UIColor colorNamed:@"contacts"];
-    } else {
-        return [UIColor colorWithRed:228/255.0 green:222/255.0 blue:204/255.0 alpha:1];
-    }
+    return [UIColor colorNamed:@"contacts"];
 }
 
 - (BOOL)emptyDataSetShouldDisplay:(UIScrollView *)scrollView

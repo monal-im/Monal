@@ -237,7 +237,6 @@
     self.scrollView.scrollIndicatorInsets = contentInsets;
     
     // If active text field is hidden by keyboard, scroll it so it's visible
-    // Your app might not need or want this behavior.
     CGRect aRect = self.view.frame;
     aRect.size.height -= kbSize.height;
     if (!CGRectContainsPoint(aRect, self.activeField.frame.origin) ) {

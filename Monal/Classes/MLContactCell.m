@@ -78,18 +78,18 @@
 {
     if(_count!=count) {
         _count=count;
-        
         if(_count>0)
         {
             self.badge.hidden=NO;
             [self.badge setTitle:[NSString stringWithFormat:@"%ld", (long)_count] forState:UIControlStateNormal];
         }
-        else
-        {
+    }
+    else{
+        if(!self.badge.hidden) { //handle initial load
             self.badge.hidden=YES;
             [self.badge setTitle:@"" forState:UIControlStateNormal];
         }
-    }    
+    }
 }
 
 

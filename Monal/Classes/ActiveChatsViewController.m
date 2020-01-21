@@ -79,7 +79,7 @@
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;
     [self setupDateObjects];
-    
+
 }
 
 
@@ -207,6 +207,31 @@
     [super viewDidAppear:animated];
     [self refreshDisplay];
     [[MLXMPPManager sharedInstance] handleNewMessage:nil];
+    
+    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenIntro"]) {
+        [self performSegueWithIdentifier:@"showIntro" sender:self];
+    }
+    else if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
+    {
+        if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenLogin"]) {
+            [self performSegueWithIdentifier:@"showLogin" sender:self];
+        }
+    } else  {
+        //for 3->4 release remove later
+        if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeeniOS13Message"]) {
+            
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Notification Changes" message:[NSString stringWithFormat:@"Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old expereince back."] preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:@"Got it!" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                [self dismissViewControllerAnimated:YES completion:nil];
+                
+            }];
+            
+            [messageAlert addAction:acceptAction];
+            [self.tabBarController presentViewController:messageAlert animated:YES completion:nil];
+            [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasSeeniOS13Message"];
+        }
+    }
+    
 }
 
 - (void)didReceiveMemoryWarning

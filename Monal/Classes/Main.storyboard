@@ -135,7 +135,7 @@
                 <viewControllerPlaceholder storyboardName="Login" referencedIdentifier="introScreen" id="2g1-pP-Xxv" sceneMemberID="viewController"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3Ud-b3-yrt" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2191" y="-1075"/>
+            <point key="canvasLocation" x="-2825" y="-1426"/>
         </scene>
         <!--Login-->
         <scene sceneID="VNB-KG-5f7">
@@ -143,7 +143,7 @@
                 <viewControllerPlaceholder storyboardIdentifier="Login" storyboardName="Login" id="DkD-PA-Cmm" sceneMemberID="viewController"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ccl-9E-t0H" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2276" y="-897"/>
+            <point key="canvasLocation" x="-2628" y="-1383"/>
         </scene>
         <!--ContactDetails-->
         <scene sceneID="t0V-UK-nzF">
@@ -283,6 +283,8 @@
                     <connections>
                         <segue destination="Dhn-Pm-OVk" kind="showDetail" identifier="showConversation" id="RLU-kt-b8r"/>
                         <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" modalPresentationStyle="formSheet" id="RNX-bQ-8Zb"/>
+                        <segue destination="2g1-pP-Xxv" kind="presentation" identifier="showIntro" id="nUl-6E-4GO"/>
+                        <segue destination="DkD-PA-Cmm" kind="presentation" identifier="showLogin" id="sv2-wf-aN0"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ENC-uh-UXW" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -364,7 +366,7 @@
             <objects>
                 <tableViewController title="Edit Group Chat" id="GpF-k7-Z6D" customClass="MLEditGroupViewController" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="9LZ-0p-JU3">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
@@ -1426,7 +1428,7 @@
         <image name="square.and.pencil" catalog="system" width="64" height="58"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="N41-wN-KNl"/>
+        <segue reference="K87-fm-axG"/>
         <segue reference="PqE-8J-Reh"/>
         <segue reference="RLU-kt-b8r"/>
         <segue reference="hZ4-Os-eHo"/>

@@ -30,6 +30,11 @@ NS_ENUM(NSInteger, kSettingSection)
 @implementation MLSettingsTableViewController 
 
 
+- (IBAction)close:(id)sender
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     

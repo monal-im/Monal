@@ -98,9 +98,16 @@
     [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleBackground) name:UIApplicationWillResignActiveNotification object:nil];
     
-    [nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
-    [nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
-    [nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
+    [nc addObserver:self selector:@selector(keyboardWasShown:)
+                                                 name:UIKeyboardDidShowNotification object:nil];
+    
+    [nc addObserver:self selector:@selector(keyboardWillBeHidden:)
+                                                 name:UIKeyboardWillHideNotification object:nil];
+    
+    [nc addObserver:self selector:@selector(keyboardWillBeShown:)
+                                                 name:UIKeyboardWillShowNotification object:nil];
+    
+    
     
     [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
@@ -122,7 +129,7 @@
 
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight=UITableViewAutomaticDimension;
-    
+        
 }
 
 -(void) handleForeGround {
@@ -835,7 +842,7 @@
         if(bottom>0)
         {
             NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
-            if(![self.messageTable.indexPathsForVisibleRows containsObject:path1])
+          //  if(![self.messageTable.indexPathsForVisibleRows containsObject:path1])
             {
                 [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
             }
@@ -1387,70 +1394,34 @@
 
 #pragma mark - Keyboard
 
--(void) keyboardDidHide: (NSNotification *)notif
+- (void)keyboardWasShown:(NSNotification*)aNotification
 {
-    DDLogVerbose(@"kbd did hide ");
-}
-
--(void) keyboardWillHide:(NSNotification *) notification
-{
-    if(self.blockAnimations) return;
+      //TODO grab animation info
+    NSDictionary* info = [aNotification userInfo];
+    CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
     
-    NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-    [UIView animateWithDuration:animationDuration
-                     animations:^{
-        self.inputContainerBottom.constant=0;
-        if([self.messageList count]>0)
-        {
-            [self scrollToBottom];
-        }
-        
-    } completion:^(BOOL finished) {
-        
-        
-    }
-     ];
+    UIEdgeInsets contentInsets = UIEdgeInsetsMake(0.0, 0.0, kbSize.height, 0.0);
+    self.messageTable.contentInset = contentInsets;
+    self.messageTable.scrollIndicatorInsets = contentInsets;
     
-    _keyboardVisible=NO;
-    DDLogVerbose(@"kbd will hide scroll: %f", oldFrame.size.height);
-}
-
--(void) keyboardDidShow:(NSNotification *) notification
-{
-    if(self.blockAnimations) return;
-    CGRect keyboardframe =[[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    CGSize keyboardSize = keyboardframe.size;
-    self.inputContainerBottom.constant= keyboardSize.height-self.tabBarController.tabBar.frame.size.height;
     [self scrollToBottom];
     
 }
 
--(void) keyboardWillShow:(NSNotification *) notification
+- (void)keyboardWillBeHidden:(NSNotification*)aNotification
 {
-    CGRect keyboardFrame = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    keyboardFrame = [self.view convertRect:keyboardFrame fromView:nil]; // convert orientation
-    self.hardwareKeyboardPresent = NO;
-    if ((keyboardFrame.size.height ) < 100) {
-        self.hardwareKeyboardPresent = YES;
-    }
-    
-    if(self.blockAnimations) return;
-    //    CGRect keyboardframe =[[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    //    CGSize keyboardSize = keyboardframe.size;
-    //
-    //    NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-    //    [UIView animateWithDuration:animationDuration
-    //                     animations:^{
-    //                         self.inputContainerBottom.constant= keyboardSize.height-self.tabBarController.tabBar.frame.size.height;
-    //
-    //                     } completion:^(BOOL finished) {
-    //
-    //                         [self scrollToBottom];
-    //                     }
-    //     ];
-    //
+    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
+    self.messageTable.contentInset = contentInsets;
+    self.messageTable.scrollIndicatorInsets = contentInsets;
 }
 
+- (void)keyboardWillBeShown:(NSNotification*)aNotification
+{
+    //TODO grab animation info
+    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
+//    self.messageTable.contentInset = contentInsets;
+//    self.messageTable.scrollIndicatorInsets = contentInsets;
+}
 
 
 

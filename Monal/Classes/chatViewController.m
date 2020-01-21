@@ -458,8 +458,6 @@
 -(IBAction)sendMessageText:(id)sender
 {
     [self resignTextView];
-    [self updateInputViewSize];
-    
 }
 
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
@@ -1334,23 +1332,6 @@
 
 # pragma mark - Textview delegate functions
 
--(void) updateInputViewSize
-{
-    
-    if(self.chatInput.intrinsicContentSize.height>43) {
-        self.inputContainerHeight.constant= self.chatInput.intrinsicContentSize.height+16+10;
-        self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 5, 0);
-    } else
-    {
-        self.inputContainerHeight.constant=43.0f;
-        self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 5, 0);
-    }
-    [self.chatInput setScrollEnabled:NO];
-    [self.inputContainerView layoutIfNeeded];
-    [self.chatInput setScrollEnabled:YES];
-    [self.chatInput scrollRangeToVisible:NSMakeRange(0, 0)];
-}
-
 - (void)textViewDidBeginEditing:(UITextView *)textView
 {
     [self scrollToBottom];
@@ -1365,7 +1346,6 @@
     {
         [self resignTextView];
         shouldinsert=NO;
-        [self updateInputViewSize];
     }
     
     return shouldinsert;
@@ -1377,8 +1357,6 @@
         self.placeHolderText.hidden=YES;
     else
         self.placeHolderText.hidden=NO;
-    
-    [self updateInputViewSize];
 }
 
 
@@ -1404,7 +1382,7 @@
     NSDictionary* info = [aNotification userInfo];
     CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
     
-    UIEdgeInsets contentInsets = UIEdgeInsetsMake(0.0, 0.0, kbSize.height-self.inputContainerView.frame.size.height+16, 0.0);
+    UIEdgeInsets contentInsets = UIEdgeInsetsMake(0.0, 0.0, kbSize.height-10, 0.0);
     self.messageTable.contentInset = contentInsets;
     self.messageTable.scrollIndicatorInsets = contentInsets;
     
@@ -1424,7 +1402,7 @@
 {
      if(self.blockAnimations) return;
     //TODO grab animation info
-    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
+//    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
 //    self.messageTable.contentInset = contentInsets;
 //    self.messageTable.scrollIndicatorInsets = contentInsets;
 }

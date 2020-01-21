@@ -1256,7 +1256,6 @@
                     <connections>
                         <outlet property="backgroundImage" destination="SEk-WZ-Rcm" id="KCn-y5-DRl"/>
                         <outlet property="chatInput" destination="jiV-U5-fDl" id="gQc-PG-STp"/>
-                        <outlet property="inputContainerHeight" destination="lfT-Yz-Z8o" id="H6p-ZZ-ih1"/>
                         <outlet property="inputContainerView" destination="eXr-Xg-TCZ" id="cve-rB-fhR"/>
                         <outlet property="messageTable" destination="Kkq-aZ-5fP" id="RhH-Dt-heG"/>
                         <outlet property="placeHolderText" destination="KUa-bA-cQb" id="62v-fn-lf2"/>
@@ -1267,8 +1266,9 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tvb-fM-fJc" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eXr-Xg-TCZ">
+                <view contentMode="scaleToFill" id="eXr-Xg-TCZ" customClass="MLChatInputContainer">
                     <rect key="frame" x="0.0" y="0.0" width="414" height="43"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     <subviews>
                         <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" showsHorizontalScrollIndicator="NO" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="jiV-U5-fDl" customClass="MLResizingTextView">
                             <rect key="frame" x="62" y="8" width="300" height="25"/>
@@ -1324,8 +1324,10 @@
                         <constraint firstItem="kYa-y4-X5Z" firstAttribute="leading" secondItem="jiV-U5-fDl" secondAttribute="trailing" constant="8" id="L32-zc-2Qr"/>
                         <constraint firstItem="kYa-y4-X5Z" firstAttribute="leading" secondItem="KUa-bA-cQb" secondAttribute="trailing" constant="8" id="P2F-qy-tYi"/>
                         <constraint firstItem="KUa-bA-cQb" firstAttribute="leading" secondItem="c6B-5o-sqL" secondAttribute="trailing" constant="22" id="aBt-68-bBk"/>
-                        <constraint firstAttribute="height" constant="43" id="lfT-Yz-Z8o"/>
                     </constraints>
+                    <connections>
+                        <outlet property="chatInput" destination="jiV-U5-fDl" id="NEN-pM-TFM"/>
+                    </connections>
                 </view>
             </objects>
             <point key="canvasLocation" x="2876.811594202899" y="209.59821428571428"/>

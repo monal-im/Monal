@@ -432,6 +432,7 @@
 		26D56EE720B59FB000BF7C97 /* MLTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D56EE620B59FB000BF7C97 /* MLTextView.m */; };
 		26D59D9020711969006F1DEE /* MLEditGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D8F20711969006F1DEE /* MLEditGroupViewController.m */; };
 		26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
+		26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */; };
 		26D89F061A890672009B147C /* MLSwitchCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D89F051A890672009B147C /* MLSwitchCell.m */; };
 		26E2F7DA17C6FD9400C3C8EF /* MLTabBarController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E2F7D917C6FD9400C3C8EF /* MLTabBarController.m */; };
 		26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */; };
@@ -1011,6 +1012,8 @@
 		26D59D8F20711969006F1DEE /* MLEditGroupViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLEditGroupViewController.m; sourceTree = "<group>"; };
 		26D59D9120714F32006F1DEE /* UIColor+Theme.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIColor+Theme.h"; sourceTree = "<group>"; };
 		26D59D9220714F32006F1DEE /* UIColor+Theme.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIColor+Theme.m"; sourceTree = "<group>"; };
+		26D7C05C23D6AFD800CA123C /* MLChatInputContainer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatInputContainer.h; sourceTree = "<group>"; };
+		26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatInputContainer.m; sourceTree = "<group>"; };
 		26D89F041A890672009B147C /* MLSwitchCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSwitchCell.h; sourceTree = "<group>"; };
 		26D89F051A890672009B147C /* MLSwitchCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSwitchCell.m; sourceTree = "<group>"; };
 		26DE9C050FEEFD00000596F6 /* DB definitions */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "DB definitions"; sourceTree = "<group>"; };
@@ -1428,6 +1431,8 @@
 				263DFAC22187D0E00038E716 /* MLLinkCell.m */,
 				26724D9121B4C1E700F1F46F /* MLComposeViewController.h */,
 				26724D9221B4C1E700F1F46F /* MLComposeViewController.m */,
+				26D7C05C23D6AFD800CA123C /* MLChatInputContainer.h */,
+				26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */,
 			);
 			name = ChatViews;
 			sourceTree = "<group>";
@@ -3181,6 +3186,7 @@
 				26D59D9020711969006F1DEE /* MLEditGroupViewController.m in Sources */,
 				26EE8B1F179B67FA006781F3 /* MLNotificationManager.m in Sources */,
 				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,
+				26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */,
 				2633CB4723215558006D0277 /* MLXMPPActivityItem.m in Sources */,
 				262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */,
 				26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */,

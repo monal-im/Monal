@@ -2907,7 +2907,7 @@ static NSMutableArray *extracted(xmpp *object) {
     if(self.connectionProperties.supportsMam2) {
         [[DataLayer sharedInstance] lastMessageDateForContact:contactJid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
             if(lastDate) {
-                [self setMAMQueryFromStart:lastDate toDate:nil  withMax:nil andJid:contactJid];
+                [self setMAMQueryFromStart:[lastDate dateByAddingTimeInterval:1] toDate:nil  withMax:nil andJid:contactJid];
             }
         }];
     }
@@ -2918,7 +2918,7 @@ static NSMutableArray *extracted(xmpp *object) {
     if(self.connectionProperties.supportsMam2) {
         [[DataLayer sharedInstance] lastMessageDateForContact:self.connectionProperties.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
             if(lastDate) { // if there is no last date, there are no messages yet.
-                [self setMAMQueryFromStart:lastDate toDate:nil withMax:nil andJid:nil];
+                [self setMAMQueryFromStart:[lastDate dateByAddingTimeInterval:1] toDate:nil withMax:nil andJid:nil];
             }
         }];
     }

@@ -45,11 +45,6 @@
 @property (nonatomic, strong) NSDate* lastMamDate;
 @property (nonatomic, assign) BOOL hardwareKeyboardPresent;
 
-/**
- if set to yes will prevent scrolling and resizing. useful for resigning first responder just to set auto correct
- */
-@property (nonatomic, assign) BOOL blockAnimations;
-
 @end
 
 @implementation chatViewController
@@ -442,13 +437,6 @@
     NSString *cleanstring = [self.chatInput.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if(cleanstring.length>0)
     {
-        self.blockAnimations=YES;
-        if(self.chatInput.isFirstResponder) {
-            [self.chatInput resignFirstResponder];//apply autocorrect
-            [self.chatInput becomeFirstResponder];
-        }
-        self.blockAnimations=NO;
-        
         [self sendMessage:cleanstring];
         
         [self.chatInput setText:@""];
@@ -639,8 +627,7 @@
                     }
                 } completion:^(BOOL finished) {
                     if(completion) completion(result);
-                    
-                    self.blockAnimations=NO;
+
                     [self scrollToBottom];
                 }];
                 
@@ -835,7 +822,6 @@
 
 -(void) scrollToBottom
 {
-    if(self.blockAnimations) return;
     if(self.messageList.count==0) return;
     dispatch_async(dispatch_get_main_queue(), ^{
         NSInteger bottom = [self.messageTable numberOfRowsInSection:0];
@@ -1377,7 +1363,6 @@
 
 - (void)keyboardDidShow:(NSNotification*)aNotification
 {
-     if(self.blockAnimations) return;
       //TODO grab animation info
     NSDictionary* info = [aNotification userInfo];
     CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
@@ -1392,7 +1377,6 @@
 
 - (void)keyboardDidHide:(NSNotification*)aNotification
 {
-    if(self.blockAnimations) return;
     UIEdgeInsets contentInsets = UIEdgeInsetsZero;
     self.messageTable.contentInset = contentInsets;
     self.messageTable.scrollIndicatorInsets = contentInsets;
@@ -1400,7 +1384,6 @@
 
 - (void)keyboardWillShow:(NSNotification*)aNotification
 {
-     if(self.blockAnimations) return;
     //TODO grab animation info
 //    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
 //    self.messageTable.contentInset = contentInsets;

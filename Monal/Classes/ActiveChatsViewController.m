@@ -170,8 +170,12 @@
 -(void) viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    [self refreshDisplay];
-    [[MLXMPPManager sharedInstance] handleNewMessage:nil];
+    if(self.contacts.count==0) {
+        [self refreshDisplay];
+    }
+  
+
+   // [[MLXMPPManager sharedInstance] handleNewMessage:nil];
     
     if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenIntro"]) {
         [self performSegueWithIdentifier:@"showIntro" sender:self];

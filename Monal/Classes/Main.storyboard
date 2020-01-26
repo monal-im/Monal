@@ -119,6 +119,7 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Contacts" id="qsR-dX-TO1">
+                        <barButtonItem key="leftBarButtonItem" title="Close" id="NyY-WQ-3hC"/>
                         <barButtonItem key="rightBarButtonItem" image="person.3.fill" catalog="system" id="2vX-Wb-Pa6">
                             <connections>
                                 <segue destination="nW7-fq-iEr" kind="show" id="U4S-rm-QvZ"/>
@@ -127,7 +128,6 @@
                     </navigationItem>
                     <connections>
                         <outlet property="view" destination="4Ri-hX-ob8" id="nLc-h6-Jwi"/>
-                        <segue destination="Dhn-Pm-OVk" kind="showDetail" identifier="showConversation" id="wmf-tk-2CN"/>
                         <segue destination="cC0-5a-Jvb" kind="show" identifier="showDetails" id="hqW-lo-9tZ"/>
                         <segue destination="WjA-je-Xez" kind="show" id="VUd-OI-qpm"/>
                     </connections>
@@ -217,7 +217,7 @@
             <objects>
                 <navigationController id="Dhn-Pm-OVk" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="tNI-7A-0dR">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="56"/>
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -444,18 +444,18 @@
             <objects>
                 <viewController storyboardIdentifier="chatViewController" id="5nR-Q5-dQD" customClass="chatViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Riz-2Q-bcU">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" insetsLayoutMarginsFromSafeArea="NO" image="Tie_My_Boat_by_Ray_García" translatesAutoresizingMaskIntoConstraints="NO" id="SEk-WZ-Rcm">
-                                <rect key="frame" x="0.0" y="20" width="414" height="802"/>
+                                <rect key="frame" x="0.0" y="20" width="414" height="856"/>
                             </imageView>
                             <view alpha="0.25" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cUR-xM-Mq7">
-                                <rect key="frame" x="0.0" y="-8" width="414" height="816"/>
+                                <rect key="frame" x="0.0" y="24" width="414" height="838"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" keyboardDismissMode="interactive" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Kkq-aZ-5fP">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="808"/>
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="862"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <gestureRecognizers/>
                                 <constraints>
@@ -1332,7 +1332,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="PqE-8J-Reh"/>
-        <segue reference="wmf-tk-2CN"/>
         <segue reference="hqW-lo-9tZ"/>
     </inferredMetricsTieBreakers>
 </document>

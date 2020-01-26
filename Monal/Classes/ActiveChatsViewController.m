@@ -13,8 +13,7 @@
 #import "MonalAppDelegate.h"
 #import "ContactDetails.h"
 #import "MLImageManager.h"
-
-
+#import "MLWelcomeViewController.h"
 
 @interface ActiveChatsViewController ()
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
@@ -55,8 +54,6 @@
     
     self.view= self.chatListTable;
     
-    UIBarButtonItem* rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close All",@"") style:UIBarButtonItemStylePlain target:self action:@selector(closeAll)];
-    self.navigationItem.rightBarButtonItem=rightButton;
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
         [nc addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
@@ -81,7 +78,7 @@
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;
     [self setupDateObjects];
-    
+
 }
 
 
@@ -89,11 +86,7 @@
 {
     [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            if (@available(iOS 11.0, *)) {
-                 if(self.chatListTable.hasUncommittedUpdates) return;
-             } else {
-                 // Fallback on earlier versions
-             }
+            if(self.chatListTable.hasUncommittedUpdates) return;
             
             [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
             self.contacts=cleanActive;
@@ -126,27 +119,9 @@
         if([self.lastSelectedUser.contactJid isEqualToString:message.from])  return;
         
         __block BOOL contactInList=NO;
-        if (@available(iOS 11.0, *)) {
-            [self.chatListTable performBatchUpdates:^{
-                __block BOOL contactInList=NO;
-                [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                    MLContact *rowContact = (MLContact *) obj;
-                    if([rowContact.contactJid isEqualToString:message.from]) {
-                        contactInList=YES;
-                        NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
-                        [self.chatListTable beginUpdates];
-                        [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                        [self.chatListTable endUpdates];
-                    }
-                }];
-            }
-             completion:^(BOOL finished){
-                if(!contactInList) {
-                    [self refreshDisplay];
-                }
-            }];
-        } else  { //TODO remove when ios 10 is dropped
-
+        
+        [self.chatListTable performBatchUpdates:^{
+            __block BOOL contactInList=NO;
             [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 MLContact *rowContact = (MLContact *) obj;
                 if([rowContact.contactJid isEqualToString:message.from]) {
@@ -157,44 +132,32 @@
                     [self.chatListTable endUpdates];
                 }
             }];
-            
+        }
+                                     completion:^(BOOL finished){
             if(!contactInList) {
                 [self refreshDisplay];
             }
-        }
+        }];
+        
     });
     
 }
 
 -(void) refreshRowForContact:(MLContact *) contact {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if (@available(iOS 11.0, *)) {
-            [self.chatListTable performBatchUpdates:^{
-                [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                    MLContact *rowContact = (MLContact *) obj;
-                    if([rowContact.contactJid isEqualToString:contact.contactJid]) {
-                        NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
-                        [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                        *stop=YES;
-                        return;
-                    }
-                }];
-            } completion:^(BOOL finished){
-                
-            } ];
-        } else  { //TODO remove when ios 10 is dropped
+        [self.chatListTable performBatchUpdates:^{
             [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 MLContact *rowContact = (MLContact *) obj;
                 if([rowContact.contactJid isEqualToString:contact.contactJid]) {
                     NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
-                    [self.chatListTable beginUpdates];
                     [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                    [self.chatListTable endUpdates];
                     *stop=YES;
                     return;
                 }
             }];
-        }
+        } completion:^(BOOL finished){
+            
+        } ];
     });
 }
 
@@ -207,20 +170,38 @@
 -(void) viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    [self refreshDisplay];
-    [[MLXMPPManager sharedInstance] handleNewMessage:nil];
+    if(self.contacts.count==0) {
+        [self refreshDisplay];
+    }
+  
+
+   // [[MLXMPPManager sharedInstance] handleNewMessage:nil];
+    
+    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenIntro"]) {
+        [self performSegueWithIdentifier:@"showIntro" sender:self];
+    }
+    else  {
+        //for 3->4 release remove later
+        if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeeniOS13Message"]) {
+            
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Notification Changes" message:[NSString stringWithFormat:@"Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old expereince back."] preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:@"Got it!" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+                [self dismissViewControllerAnimated:YES completion:nil];
+                
+            }];
+            
+            [messageAlert addAction:acceptAction];
+            [self.tabBarController presentViewController:messageAlert animated:YES completion:nil];
+            [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasSeeniOS13Message"];
+        }
+    }
+    
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-}
-
--(void) closeAll
-{
-    [[DataLayer sharedInstance] removeAllActiveBuddies];
-    [self refreshDisplay];
 }
 
 -(void) presentChatWithRow:(NSDictionary *)row
@@ -230,7 +211,19 @@
 
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    if([segue.identifier isEqualToString:@"showConversation"])
+    if([segue.identifier isEqualToString:@"showIntro"])
+    {
+        MLWelcomeViewController* welcome = (MLWelcomeViewController *) segue.destinationViewController;
+        welcome.completion = ^(){
+            if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
+            {
+                if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenLogin"]) {
+                    [self performSegueWithIdentifier:@"showLogin" sender:self];
+                }
+            }
+        };
+    }
+    else if([segue.identifier isEqualToString:@"showConversation"])
     {
         UINavigationController *nav = segue.destinationViewController;
         chatViewController *chatVC = (chatViewController *)nav.topViewController;
@@ -242,7 +235,6 @@
         ContactDetails* details = (ContactDetails *)nav.topViewController;
         details.contact= sender;
     }
-    
 }
 
 
@@ -427,12 +419,7 @@
 
 - (UIColor *)backgroundColorForEmptyDataSet:(UIScrollView *)scrollView
 {
-    if (@available(iOS 11.0, *)) {
-        return [UIColor colorNamed:@"chats"];
-    } else {
-       return [UIColor colorWithRed:239/255.0 green:238/255.0 blue:233/255.0 alpha:1];
-    }
-    
+    return [UIColor colorNamed:@"chats"];
 }
 
 - (BOOL)emptyDataSetShouldDisplay:(UIScrollView *)scrollView

@@ -45,11 +45,6 @@
 @property (nonatomic, strong) NSDate* lastMamDate;
 @property (nonatomic, assign) BOOL hardwareKeyboardPresent;
 
-/**
- if set to yes will prevent scrolling and resizing. useful for resigning first responder just to set auto correct
- */
-@property (nonatomic, assign) BOOL blockAnimations;
-
 @end
 
 @implementation chatViewController
@@ -98,16 +93,22 @@
     [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleBackground) name:UIApplicationWillResignActiveNotification object:nil];
     
-    [nc addObserver:self selector:@selector(keyboardWillShow:) name: UIKeyboardWillShowNotification object:nil];
-    [nc addObserver:self selector:@selector(keyboardWillHide:) name: UIKeyboardWillHideNotification object:nil];
-    [nc addObserver:self selector:@selector(keyboardDidShow:) name: UIKeyboardDidShowNotification object:nil];
+    [nc addObserver:self selector:@selector(keyboardDidShow:)
+                                                 name:UIKeyboardDidShowNotification object:nil];
+    
+    [nc addObserver:self selector:@selector(keyboardDidHide:)
+                                                 name:UIKeyboardDidHideNotification object:nil];
+    
+    [nc addObserver:self selector:@selector(keyboardWillShow:)
+                                                 name:UIKeyboardWillShowNotification object:nil];
+    
+    
     
     [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
     [nc addObserver:self selector:@selector(refreshButton:) name:kMonalAccountStatusChanged object:nil];
-  //  [nc addObserver:self selector:@selector(fetchMessages) name:kMLMAMMore object:nil];
-    
+  
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 
     
@@ -123,7 +124,7 @@
 
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight=UITableViewAutomaticDimension;
-    
+        
 }
 
 -(void) handleForeGround {
@@ -141,13 +142,10 @@
  */
 -(void) synchChat {
     dispatch_async(dispatch_get_main_queue(), ^{
-        
         xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
         if(xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
             if(self.messageList.count==0) {
                 [xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
-            }  else  {
-                [xmppAccount queryMAMSinceLastMessageDateForContact:self.contact.contactJid];
             }
         }
     });
@@ -439,25 +437,15 @@
     NSString *cleanstring = [self.chatInput.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if(cleanstring.length>0)
     {
-        self.blockAnimations=YES;
-        if(self.chatInput.isFirstResponder) {
-            [self.chatInput resignFirstResponder];//apply autocorrect
-            [self.chatInput becomeFirstResponder];
-        }
-        self.blockAnimations=NO;
-        
         [self sendMessage:cleanstring];
         
         [self.chatInput setText:@""];
-        [self scrollToBottom];
     }
 }
 
 -(IBAction)sendMessageText:(id)sender
 {
     [self resignTextView];
-    [self updateInputViewSize];
-    
 }
 
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
@@ -597,11 +585,7 @@
 
 -(void) reloadTable
 {
-    if (@available(iOS 11.0, *)) {
-         if(self.messageTable.hasUncommittedUpdates) return;
-     } else {
-         // Fallback on earlier versions
-     }
+    if(self.messageTable.hasUncommittedUpdates) return;
     
     [self.messageTable reloadData];
 }
@@ -630,36 +614,23 @@
                              messageObj.messageType=messageType;
                              messageObj.messageText=message;
     
-                if (@available(iOS 11.0, *)) {
-                    [self.messageTable performBatchUpdates:^{
-                        if(!self.messageList) self.messageList =[[NSMutableArray alloc] init];
-                        [self.messageList addObject:messageObj];
-                        NSInteger bottom = [self.messageList count]-1;
-                        if(bottom>=0) {
-                            NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
-                            [self->_messageTable insertRowsAtIndexPaths:@[path1]
-                                                       withRowAnimation:UITableViewRowAnimationFade];
-                        }
-                    } completion:^(BOOL finished) {
-                        if(completion) completion(result);
-                        
-                        [self scrollToBottom];
-                    }];
-                } else  {
-                    if(!self.messageList) self.messageList =[[NSMutableArray alloc] init];
+
+                [self.messageTable performBatchUpdates:^{
+                    if(!self.messageList) self.messageList = [[NSMutableArray alloc] init];
                     [self.messageList addObject:messageObj];
-                    [self->_messageTable beginUpdates];
                     NSInteger bottom = [self.messageList count]-1;
                     if(bottom>=0) {
                         NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
                         [self->_messageTable insertRowsAtIndexPaths:@[path1]
                                                    withRowAnimation:UITableViewRowAnimationFade];
+                        
                     }
-                    [self->_messageTable endUpdates];
+                } completion:^(BOOL finished) {
                     if(completion) completion(result);
-                    
+
                     [self scrollToBottom];
-                }
+                }];
+                
                 
             });
         }
@@ -857,13 +828,14 @@
         if(bottom>0)
         {
             NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
-            if(![self.messageTable.indexPathsForVisibleRows containsObject:path1])
+          //  if(![self.messageTable.indexPathsForVisibleRows containsObject:path1])
             {
                 [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
             }
         }
     });
 }
+
 #pragma mark date time
 
 -(void) setupDateObjects
@@ -1197,10 +1169,10 @@
         }
     }
     
-    cell.date.text= [self formattedTimeStampWithSource:row.timestamp];
+    cell.date.text= [self formattedTimeStampWithSource:row.delayTimeStamp?row.delayTimeStamp:row.timestamp];
     cell.selectionStyle=UITableViewCellSelectionStyleNone;
     
-    cell.dividerDate.text = [self formattedDateWithSource:row.timestamp andPriorDate:priorRow.timestamp];
+    cell.dividerDate.text = [self formattedDateWithSource:row.delayTimeStamp?row.delayTimeStamp:row.timestamp andPriorDate:priorRow.timestamp];
     
     if(row.encrypted)
     {
@@ -1333,35 +1305,18 @@
 }
 
 
-//-(BOOL) canBecomeFirstResponder
-//{
-//    return YES;
-//}
-//
-//-(UIView *) inputAccessoryView
-//{
-//    return self.inputContainerView;
-//}
+-(BOOL) canBecomeFirstResponder
+{
+    return YES;
+}
+
+-(UIView *) inputAccessoryView
+{
+    return self.inputContainerView;
+}
 
 
 # pragma mark - Textview delegate functions
-
--(void) updateInputViewSize
-{
-    
-    if(self.chatInput.intrinsicContentSize.height>43) {
-        self.inputContainerHeight.constant= self.chatInput.intrinsicContentSize.height+16+10;
-        self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 5, 0);
-    } else
-    {
-        self.inputContainerHeight.constant=43.0f;
-        self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 5, 0);
-    }
-    [self.chatInput setScrollEnabled:NO];
-    [self.inputContainerView layoutIfNeeded];
-    [self.chatInput setScrollEnabled:YES];
-    [self.chatInput scrollRangeToVisible:NSMakeRange(0, 0)];
-}
 
 - (void)textViewDidBeginEditing:(UITextView *)textView
 {
@@ -1377,7 +1332,6 @@
     {
         [self resignTextView];
         shouldinsert=NO;
-        [self updateInputViewSize];
     }
     
     return shouldinsert;
@@ -1389,8 +1343,6 @@
         self.placeHolderText.hidden=YES;
     else
         self.placeHolderText.hidden=NO;
-    
-    [self updateInputViewSize];
 }
 
 
@@ -1409,70 +1361,34 @@
 
 #pragma mark - Keyboard
 
--(void) keyboardDidHide: (NSNotification *)notif
+- (void)keyboardDidShow:(NSNotification*)aNotification
 {
-    DDLogVerbose(@"kbd did hide ");
-}
-
--(void) keyboardWillHide:(NSNotification *) notification
-{
-    if(self.blockAnimations) return;
+      //TODO grab animation info
+    NSDictionary* info = [aNotification userInfo];
+    CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
     
-    NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-    [UIView animateWithDuration:animationDuration
-                     animations:^{
-        self.inputContainerBottom.constant=0;
-        if([self.messageList count]>0)
-        {
-            [self scrollToBottom];
-        }
-        
-    } completion:^(BOOL finished) {
-        
-        
-    }
-     ];
+    UIEdgeInsets contentInsets = UIEdgeInsetsMake(0.0, 0.0, kbSize.height-10, 0.0);
+    self.messageTable.contentInset = contentInsets;
+    self.messageTable.scrollIndicatorInsets = contentInsets;
     
-    _keyboardVisible=NO;
-    DDLogVerbose(@"kbd will hide scroll: %f", oldFrame.size.height);
-}
-
--(void) keyboardDidShow:(NSNotification *) notification
-{
-    if(self.blockAnimations) return;
-    CGRect keyboardframe =[[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    CGSize keyboardSize = keyboardframe.size;
-    self.inputContainerBottom.constant= keyboardSize.height-self.tabBarController.tabBar.frame.size.height;
     [self scrollToBottom];
     
 }
 
--(void) keyboardWillShow:(NSNotification *) notification
+- (void)keyboardDidHide:(NSNotification*)aNotification
 {
-    CGRect keyboardFrame = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    keyboardFrame = [self.view convertRect:keyboardFrame fromView:nil]; // convert orientation
-    self.hardwareKeyboardPresent = NO;
-    if ((keyboardFrame.size.height ) < 100) {
-        self.hardwareKeyboardPresent = YES;
-    }
-    
-    if(self.blockAnimations) return;
-    //    CGRect keyboardframe =[[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    //    CGSize keyboardSize = keyboardframe.size;
-    //
-    //    NSTimeInterval animationDuration =[[[notification userInfo] objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-    //    [UIView animateWithDuration:animationDuration
-    //                     animations:^{
-    //                         self.inputContainerBottom.constant= keyboardSize.height-self.tabBarController.tabBar.frame.size.height;
-    //
-    //                     } completion:^(BOOL finished) {
-    //
-    //                         [self scrollToBottom];
-    //                     }
-    //     ];
-    //
+    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
+    self.messageTable.contentInset = contentInsets;
+    self.messageTable.scrollIndicatorInsets = contentInsets;
 }
 
+- (void)keyboardWillShow:(NSNotification*)aNotification
+{
+    //TODO grab animation info
+//    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
+//    self.messageTable.contentInset = contentInsets;
+//    self.messageTable.scrollIndicatorInsets = contentInsets;
+}
 
 
 

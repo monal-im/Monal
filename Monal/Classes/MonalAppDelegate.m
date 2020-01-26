@@ -51,9 +51,9 @@
         [[UINavigationBar appearance] setStandardAppearance:appearance];
     }
     
-    if (@available(iOS 11.0, *)) {
-        [[UINavigationBar appearance] setPrefersLargeTitles:YES];
-    }
+    
+    [[UINavigationBar appearance] setPrefersLargeTitles:YES];
+    
     
     [[UITabBar appearance] setTintColor:monaldarkGreen];
 }

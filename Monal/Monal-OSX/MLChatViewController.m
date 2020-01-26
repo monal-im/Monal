@@ -54,9 +54,7 @@
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     [nc addObserver:self selector:@selector(refreshData) name:kMonalWindowVisible object:nil];
     [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
-    [nc addObserver:self selector:@selector(fetchMoreMessages) name:kMLMAMMore object:nil];
-    
-    
+  
     [self setupDateObjects];
     
     self.progressIndicator.bezeled=NO;
@@ -165,11 +163,6 @@
         }
 }
 
-
--(void) fetchMoreMessages
-{
-    [self synchChat];
-}
 
 -(void) scrollToBottom
 {

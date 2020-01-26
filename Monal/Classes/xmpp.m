@@ -672,9 +672,9 @@ NSString *const kXMPPPresence = @"presence";
         self->_loginStarted=YES;
         
         NSTimeInterval wait=scheduleWait;
-        if(!self->_loggedInOnce) {
-            wait=0;
-        }
+//        if(!self->_loggedInOnce) {
+//            wait=0;
+//        }
 #if TARGET_OS_IPHONE
         
         if(self.connectionProperties.pushEnabled)
@@ -2876,19 +2876,19 @@ static NSMutableArray *extracted(xmpp *object) {
     [self send:query];
 }
 
--(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid
+-(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate withMax:(NSString *) max andJid:(NSString *)jid
 {
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-    [query setMAMQueryFromStart:startDate toDate:endDate andJid:jid];
+    [query setMAMQueryFromStart:startDate toDate:endDate withMax:max andJid:jid];
     [self send:query];
 }
 
 /* query everything after a certain sanza id
  */
--(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) after  andJid:(NSString *)jid
+-(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) after  withMax:(NSString *) max andJid:(NSString *)jid
 {
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-    [query setMAMQueryFromStart:startDate after:after andJid:jid];
+    [query setMAMQueryFromStart:startDate after:after withMax:max andJid:jid];
     [self send:query];
 }
 
@@ -2907,9 +2907,9 @@ static NSMutableArray *extracted(xmpp *object) {
 -(void) queryMAMSinceLastMessageDateForContact:(NSString *) contactJid
 {
     if(self.connectionProperties.supportsMam2) {
-        [[DataLayer sharedInstance] lastMessageDateForAccount:_accountNo  andContact:contactJid withCompletion:^(NSDate *lastDate) {
+        [[DataLayer sharedInstance] lastMessageDateForContact:contactJid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
             if(lastDate) {
-                [self setMAMQueryFromStart:lastDate toDate:nil andJid:contactJid];
+                [self setMAMQueryFromStart:[lastDate dateByAddingTimeInterval:1] toDate:nil  withMax:nil andJid:contactJid];
             }
         }];
     }
@@ -2918,11 +2918,13 @@ static NSMutableArray *extracted(xmpp *object) {
 -(void) queryMAMSinceLastMessageDate
 {
     if(self.connectionProperties.supportsMam2) {
-        [[DataLayer sharedInstance] lastMessageDateAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
-            [self setMAMQueryFromStart:lastDate toDate:nil andJid:nil];
+        [[DataLayer sharedInstance] lastMessageDateForContact:self.connectionProperties.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
+            if(lastDate) { // if there is no last date, there are no messages yet.
+                [self setMAMQueryFromStart:[lastDate dateByAddingTimeInterval:1] toDate:nil withMax:nil andJid:nil];
+            }
         }];
     }
-        
+    
 }
 
 

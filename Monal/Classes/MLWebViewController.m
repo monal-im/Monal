@@ -35,10 +35,8 @@
         [self.webview loadRequest:nsrequest];
     }
     
-    if(@available(iOS 11.0, *))
-    {
-        self.navigationItem.largeTitleDisplayMode=UINavigationItemLargeTitleDisplayModeNever;
-    }
+    self.navigationItem.largeTitleDisplayMode=UINavigationItemLargeTitleDisplayModeNever;
+    
 }
 
 - (void)didReceiveMemoryWarning {

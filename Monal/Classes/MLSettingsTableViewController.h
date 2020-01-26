@@ -13,4 +13,6 @@
 
 @interface MLSettingsTableViewController : UITableViewController <MFMailComposeViewControllerDelegate, SKStoreProductViewControllerDelegate>
 
+- (IBAction)close:(id)sender;
+
 @end

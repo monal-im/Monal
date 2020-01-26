@@ -13,9 +13,5 @@
 
 @property (nonatomic, strong) UITableView* chatListTable;
 
-/**
- Closes all active chats
- */
--(void) closeAll;
 
 @end

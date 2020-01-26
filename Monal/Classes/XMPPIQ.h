@@ -61,12 +61,12 @@ Queries the last page of messages (most recent) for a recipient
 /**
  makes iq for mam query since a date and time for jid. If no date is provided, will query all. If no jid is provided it will query all
  */
--(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate  andJid:(NSString *)jid;
+-(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate   withMax:(NSString *) maxResults andJid:(NSString *)jid;
 
 /*
  @param after  stanza id (uid)
 */
- -(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) uid  andJid:(NSString *)jid;
+ -(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) uid  withMax:(NSString *) maxResults  andJid:(NSString *)jid;
 
 
 #pragma mark disco

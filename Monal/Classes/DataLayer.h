@@ -227,11 +227,6 @@ extern NSString *const kMessageTypeUrl;
  */
 -(void) lastMessageDateForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion;;
 
-/**
- retrieves the stanzaid of the last message
- */
--(void) lastMessageDateForAccount:(NSString*) accountNo andContact:(NSString*) contact withCompletion: (void (^)(NSDate *))completion;
-
 -(void) lastMessageSanzaForAccount:(NSString*) accountNo andContact:(NSString*) contact withCompletion: (void (^)(NSString *))completion;
 
 

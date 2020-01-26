@@ -14,6 +14,7 @@
 #import "ContactDetails.h"
 #import "MLImageManager.h"
 #import "MLWelcomeViewController.h"
+#import "ContactsViewController.h"
 
 @interface ActiveChatsViewController ()
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
@@ -204,7 +205,7 @@
     // Dispose of any resources that can be recreated.
 }
 
--(void) presentChatWithRow:(NSDictionary *)row
+-(void) presentChatWithRow:(MLContact *)row
 {
     [self  performSegueWithIdentifier:@"showConversation" sender:row];
 }
@@ -234,6 +235,14 @@
         UINavigationController *nav = segue.destinationViewController;
         ContactDetails* details = (ContactDetails *)nav.topViewController;
         details.contact= sender;
+    }
+    else if([segue.identifier isEqualToString:@"showContacts"])
+    {
+        UINavigationController *nav = segue.destinationViewController;
+        ContactsViewController* contacts = (ContactsViewController *)nav.topViewController;
+        contacts.selectContact = ^(MLContact *selectedContact) {
+            [self presentChatWithRow:selectedContact];
+        };
     }
 }
 

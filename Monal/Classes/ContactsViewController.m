@@ -610,7 +610,9 @@
         row.unreadCount=0;
     }
     
-//  call completion with contact
+    [self dismissViewControllerAnimated:YES completion:^{
+        if(self.selectContact) self.selectContact(row);
+    }];
     
 }
 
@@ -664,5 +666,9 @@
     return toreturn;
 }
 
+-(IBAction) close:(id)sender
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
 
 @end

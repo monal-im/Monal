@@ -65,7 +65,7 @@
     
 }
 
--(void) setupWithContact:(MLContact*) contact
+-(void) setupWithContact:(MLContact* ) contact
 {
     self.contact=contact;
     [self setup];

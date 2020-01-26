@@ -119,7 +119,11 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Contacts" id="qsR-dX-TO1">
-                        <barButtonItem key="leftBarButtonItem" title="Close" id="NyY-WQ-3hC"/>
+                        <barButtonItem key="leftBarButtonItem" title="Close" id="NyY-WQ-3hC">
+                            <connections>
+                                <action selector="close:" destination="6Ao-6z-tB7" id="JZL-x6-OVB"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" image="person.3.fill" catalog="system" id="2vX-Wb-Pa6">
                             <connections>
                                 <segue destination="nW7-fq-iEr" kind="show" id="U4S-rm-QvZ"/>
@@ -260,7 +264,7 @@
                         <rightBarButtonItems>
                             <barButtonItem image="square.and.pencil" catalog="system" id="pyP-qb-mfr">
                                 <connections>
-                                    <segue destination="hMh-kj-2DY" kind="popoverPresentation" popoverAnchorBarButtonItem="pyP-qb-mfr" id="lBM-pO-Hdw">
+                                    <segue destination="hMh-kj-2DY" kind="popoverPresentation" identifier="showContacts" popoverAnchorBarButtonItem="pyP-qb-mfr" id="lBM-pO-Hdw">
                                         <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
                                     </segue>
                                 </connections>

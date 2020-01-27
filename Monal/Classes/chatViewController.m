@@ -124,6 +124,15 @@
 
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight=UITableViewAutomaticDimension;
+    
+    #if TARGET_OS_MACCATALYST
+        //does not become first responder like in iOS
+        [self.view addSubview:self.inputContainerView];
+        [self.inputContainerView.leadingAnchor constraintEqualToAnchor:self.inputContainerView.superview.leadingAnchor].active=YES;
+        [self.inputContainerView.bottomAnchor constraintEqualToAnchor:self.inputContainerView.superview.bottomAnchor].active=YES;
+        [self.inputContainerView.trailingAnchor constraintEqualToAnchor:self.inputContainerView.superview.trailingAnchor].active=YES;
+        self.tableviewBottom.constant+=20;
+    #endif
         
 }
 
@@ -218,7 +227,7 @@
     
     self.placeHolderText.text=[NSString stringWithFormat:@"Message from %@", self.jid];
     self.hardwareKeyboardPresent = YES; //default to YES and when keybaord will appears is called, this may be set to NO
-    
+    [self scrollToBottom];
 }
 
 
@@ -233,8 +242,8 @@
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     [xmppAccount subscribeOMEMODevicesFrom:self.contact.contactJid];
 #endif
-    //  [self scrollToBottom];
-    
+
+
 }
 
 -(void) viewWillDisappear:(BOOL)animated

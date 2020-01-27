@@ -33,8 +33,7 @@
 @property (nonatomic, weak) IBOutlet UILabel* placeHolderText;
 @property (nonatomic, weak) IBOutlet UIButton* sendButton;
 @property (nonatomic, weak) IBOutlet UIView* inputContainerView;
-@property (nonatomic, weak) IBOutlet NSLayoutConstraint* inputContainerHeight;
-@property (nonatomic, weak) IBOutlet NSLayoutConstraint* inputContainerBottom;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint* tableviewBottom;
 
 @property (nonatomic, weak) IBOutlet UIImageView* backgroundImage;
 @property (nonatomic, weak) IBOutlet UIView* transparentLayer;

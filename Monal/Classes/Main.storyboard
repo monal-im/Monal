@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="VdU-pG-4OS">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="dqD-Rt-bEF">
     <device id="retina6_5" orientation="portrait" appearance="dark"/>
     <dependencies>
-        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -441,7 +440,7 @@
                 <customObject id="ncC-uM-uuw" customClass="MLSplitViewDelegate"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="sOm-vm-Z12" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-4964" y="167"/>
+            <point key="canvasLocation" x="-5594" y="-630"/>
         </scene>
         <!--Chat View Controller-->
         <scene sceneID="5Rt-f0-mRM">
@@ -1306,19 +1305,6 @@
             </objects>
             <point key="canvasLocation" x="591" y="-2583"/>
         </scene>
-        <!--Split View Controller-->
-        <scene sceneID="phy-iH-zBF">
-            <objects>
-                <splitViewController id="VdU-pG-4OS" sceneMemberID="viewController">
-                    <connections>
-                        <segue destination="rFS-eK-Dxd" kind="relationship" relationship="masterViewController" id="PqE-8J-Reh"/>
-                        <segue destination="dqD-Rt-bEF" kind="relationship" relationship="detailViewController" id="ERO-uz-Rvi"/>
-                    </connections>
-                </splitViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="B7F-Z8-p9j" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-4965" y="-808"/>
-        </scene>
     </scenes>
     <resources>
         <image name="724-info" width="28" height="28"/>
@@ -1335,7 +1321,6 @@
         <image name="square.and.pencil" catalog="system" width="64" height="58"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="PqE-8J-Reh"/>
         <segue reference="hqW-lo-9tZ"/>
     </inferredMetricsTieBreakers>
 </document>

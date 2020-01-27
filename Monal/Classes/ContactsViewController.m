@@ -63,26 +63,15 @@
     
     self.searchController.searchResultsUpdater = self;
     self.searchController.delegate=self;
-    self.searchController.dimsBackgroundDuringPresentation = NO;
+    self.searchController.obscuresBackgroundDuringPresentation = NO;
     self.definesPresentationContext = YES;
     
     self.navigationItem.searchController= self.searchController;
     
     self.tableView.emptyDataSetSource = self;
     self.tableView.emptyDataSetDelegate = self;
+        
     
-    MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-    appDelegate.splitViewController= self.splitViewController;
-    appDelegate.tabBarController = (MLTabBarController *) self.tabBarController;
-    
-       #if TARGET_OS_MACCATALYST
-        if (@available(iOS 13.0, *)) {
-            self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
-        } else {
-            // Fallback on earlier versions
-        }
-    #endif
-
 }
 
 -(void) dealloc
@@ -103,23 +92,10 @@
     self.lastSelectedContact=nil;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
     [self refreshDisplay];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(addOnlineUser:) name: kMonalContactOnlineNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalAccountStatusChanged object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(clearAccount:) name:kMonalAccountClearContacts object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name: kMonalContactRefresh object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(presentChat:) name:kMonalPresentChat object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(removeOnlineUser:) name: kMonalContactOfflineNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showCallRequest:) name:kMonalCallRequestNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showAuthRequest:) name:kMonalAccountAuthRequest object:nil];
-       
-    
-
     
     if(self.contacts.count+self.offlineContacts.count==0)
     {
-    [self reloadTable];
+        [self reloadTable];
     }
 }
 
@@ -136,386 +112,6 @@
     // Dispose of any resources that can be recreated.
 }
 
-
-
-#pragma mark - updating user display
-
--(NSInteger) positionOfOnlineContact:(MLContact *) user
-{
-    NSInteger pos=0;
-    for(MLContact* row in self.contacts)
-    {
-        if([row.contactJid caseInsensitiveCompare:user.contactJid ]==NSOrderedSame &&
-           [row.accountId integerValue]==[user.accountId integerValue] )
-        {
-            return pos;
-        }
-        pos++;
-    }
-    
-    return -1;
-    
-}
-
--(NSInteger) positionOfOfflineContact:(MLContact *) user
-{
-    NSInteger pos=0;
-    for(MLContact* row in self.offlineContacts)
-    {
-        if([row.contactJid caseInsensitiveCompare:user.contactJid ]==NSOrderedSame &&
-           [row.accountId integerValue]==[user.accountId integerValue] )
-        {
-            
-            return pos;
-        }
-        pos++;
-    }
-    
-    return  -1;
-    
-}
-
--(BOOL) updateContactRow:(MLContact *) contactrow withContact:(MLContact *) contact
-{
-    BOOL hasChange=NO;
-    if(contact.state && ![contact.state isEqualToString:contactrow.state] ) {
-        contactrow.state=contact.state;
-        hasChange=YES;
-    }
-    if(contact.statusMessage && ![contact.statusMessage isEqualToString:contactrow.statusMessage] ) {
-        contactrow.statusMessage=contact.statusMessage;
-        hasChange=YES;
-    }
-    
-    if(contact.contactDisplayName && ![contact.contactDisplayName isEqualToString:contactrow.contactDisplayName]  &&
-       [contact.contactDisplayName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0) {
-        contactrow.nickName=contact.nickName;
-        contactrow.fullName=contact.fullName;
-        hasChange=YES;
-    }
-    return hasChange;
-}
-
--(void)updateContactAt:(NSInteger) pos withInfo:(MLContact *) contact
-{
-    MLContact *contactrow =[self.contacts objectAtIndex:pos];
-    BOOL hasChange= [self updateContactRow:contactrow withContact:contact];
-    
-    //When they are the same its been modified , probably at details
-    if((hasChange || contact==contactrow) &&  self.searchResults.count==0)
-    {
-        
-        [self.contactsTable beginUpdates];
-        NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
-        [self.contactsTable reloadRowsAtIndexPaths:@[path1]
-                                  withRowAnimation:UITableViewRowAnimationNone];
-        [self.contactsTable endUpdates];
-    } else  {
-        
-    }
-}
-
--(void)updateOfflineContactAt:(NSInteger) pos withInfo:(MLContact *) contact
-{
-    MLContact *contactrow =[self.offlineContacts objectAtIndex:pos];
-    
-    BOOL hasChange= [self updateContactRow:contactrow withContact:contact];
-    
-    if(hasChange &&  self.searchResults.count==0) {
-        
-        [self.contactsTable beginUpdates];
-        NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:kofflineSection];
-        [self.contactsTable reloadRowsAtIndexPaths:@[path1]
-                                  withRowAnimation:UITableViewRowAnimationNone];
-        [self.contactsTable endUpdates];
-    } else  {
-        
-    }
-}
-
--(void) refreshContact:(NSNotification *) notification
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        MLContact* user = [notification.userInfo objectForKey:@"contact"];;
-        NSInteger initalPos=-1;
-        initalPos=[self positionOfOnlineContact:user];
-        if(initalPos>=0)
-        {
-            [self updateContactAt:initalPos withInfo:user];
-        }
-        else
-        {
-            //offline?
-            initalPos=[self positionOfOfflineContact:user];
-            
-            if(initalPos>=0)
-            {
-                [self updateOfflineContactAt:initalPos withInfo:user];
-            }
-            
-        }
-    });
-}
-
-
--(void) addOnlineUser:(NSNotification *) notification
-{
-    MLContact *contact = [notification.userInfo objectForKey:@"contact"];
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-        {
-            return;
-        }
-        
-        if (self.navigationController.topViewController!=self)
-        {
-            return;
-        }
-        NSInteger initalPos=-1;
-        initalPos=[self positionOfOnlineContact:contact];
-        if(initalPos>=0)
-        {
-            DDLogVerbose(@"user %@ already in list updating status and nothing else",contact.contactJid);
-            [self updateContactAt:initalPos withInfo:contact];
-        }
-        else
-        {
-            
-            //insert into tableview
-            // for now just online
-            [[DataLayer sharedInstance] contactForUsername:contact.contactJid forAccount:contact.accountId withCompletion:^(NSArray * contactRow) {
-                
-                //mutex to prevent others from modifying contacts at the same time
-                dispatch_async(dispatch_get_main_queue(),
-                               ^{
-                    //check if already there
-                    NSInteger pos=-1;
-                    NSInteger offlinepos=-1;
-                    pos=[self positionOfOnlineContact:contact];
-                    
-                    if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
-                    {
-                        offlinepos =[self positionOfOfflineContact:contact];
-                        if(offlinepos>=0 && offlinepos<[self.offlineContacts count])
-                        {
-                            DDLogVerbose(@"removed from offline");
-                            
-                            [self.offlineContacts removeObjectAtIndex:offlinepos];
-                            if(self.searchResults.count==0) {
-                                [self.contactsTable beginUpdates];
-                                NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
-                                [self.contactsTable deleteRowsAtIndexPaths:@[path2]
-                                                          withRowAnimation:UITableViewRowAnimationFade];
-                                [self.contactsTable endUpdates];
-                            }
-                        }
-                    }
-                    
-                    
-                    //not already in online list
-                    if(pos<0)
-                    {
-                        if(!(contactRow.count>=1))
-                        {
-                            DDLogError(@"ERROR:could not find contact row");
-                            return;
-                        }
-                        //insert into datasource
-                        DDLogVerbose(@"inserted into contacts");
-                        [self.contacts insertObject:[contactRow objectAtIndex:0] atIndex:0];
-                        
-                        //sort
-                        NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"contactJid"  ascending:YES];
-                        NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
-                        [self.contacts sortUsingDescriptors:sortArray];
-                        
-                        //find where it is
-                        NSInteger newpos=[self positionOfOnlineContact:contact];
-                        
-                        DDLogVerbose(@"sorted contacts %@", self.contacts);
-                        
-                        DDLogVerbose(@"inserting %@ st sorted  pos %ld", [self.contacts objectAtIndex:newpos], (long)newpos);
-                        
-                        if(self.searchResults.count==0) {
-                            [self.contactsTable beginUpdates];
-                            
-                            NSIndexPath *path1 = [NSIndexPath indexPathForRow:newpos inSection:konlineSection];
-                            [self.contactsTable insertRowsAtIndexPaths:@[path1]
-                                                      withRowAnimation:UITableViewRowAnimationAutomatic];
-                            
-                            [self.contactsTable endUpdates];
-                        }
-                        
-                        
-                    }else
-                    {
-                        DDLogVerbose(@"user %@ already in list updating status",contact.contactJid);
-                        [self updateContactAt:pos withInfo:contact];
-                    }
-                });
-            }];
-        }
-    });
-    
-}
-
--(void) removeOnlineUser:(NSNotification *) notification
-{
-    MLContact* contact = [notification.userInfo objectForKey:@"contact"];
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-        {
-            return;
-        }
-        
-        if (self.navigationController.topViewController!=self)
-        {
-            return;
-        }
-        
-        [[DataLayer sharedInstance] contactForUsername:contact.contactJid forAccount:contact.accountId withCompletion:^(NSArray* contactRow) {
-            
-            dispatch_async(dispatch_get_main_queue(),
-                           ^{
-                //mutex to prevent others from modifying contacts at the same time
-                
-                //check if  there
-                NSInteger  pos=-1;
-                NSInteger  counter=0;
-                NSInteger  offlinepos=-1;
-                pos=[self positionOfOnlineContact:contact];
-                
-                
-                if((contactRow.count<1))
-                {
-                    DDLogError(@"ERROR:could not find contact row");
-                    return;
-                }
-                
-                if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
-                {
-                    
-                    counter=0;
-                    offlinepos =[self positionOfOfflineContact:contact];
-                    //in contacts but not in offline.. (not in roster this shouldnt happen)
-                    if((offlinepos==-1) &&(pos>=0)    && self.searchResults.count==0)
-                    {
-                        NSMutableDictionary* row= [contactRow objectAtIndex:0] ;
-                        [self.offlineContacts insertObject:row atIndex:0];
-                        
-                        //sort
-                        NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"contactJid"  ascending:YES];
-                        NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
-                        [self.offlineContacts sortUsingDescriptors:sortArray];
-                        
-                        //find where it is
-                        
-                        counter=0;
-                        offlinepos = [self positionOfOfflineContact:contact];
-                        DDLogVerbose(@"sorted contacts %@", self.offlineContacts);
-                        [self.contactsTable beginUpdates];
-                        NSIndexPath *path2 = [NSIndexPath indexPathForRow:offlinepos inSection:kofflineSection];
-                        DDLogVerbose(@"inserting offline at %ld", (long)offlinepos);
-                        [self.contactsTable insertRowsAtIndexPaths:@[path2]
-                                                  withRowAnimation:UITableViewRowAnimationFade];
-                        [self.contactsTable endUpdates];
-                    }
-                }
-                
-                // it exists
-                if(pos>=0  && self.searchResults.count==0)
-                {
-                    [self.contacts removeObjectAtIndex:pos];
-                    DDLogVerbose(@"removing %@ at pos %ld", contact.contactJid, (long)pos);
-                    [self.contactsTable beginUpdates];
-                    NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
-                    [self.contactsTable deleteRowsAtIndexPaths:@[path1]
-                                              withRowAnimation:UITableViewRowAnimationAutomatic];
-                    
-                    
-                    [self.contactsTable endUpdates];
-                }
-                
-            });
-        }];
-    });
-    
-}
-
--(void) clearAccount:(NSNotification *) notification
-{
-    NSDictionary* user = notification.userInfo;
-    NSString *accountNo = [user objectForKey:kAccountID];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self clearContactsForAccount:accountNo];
-    });
-    
-}
-
--(void) clearContactsForAccount: (NSString*) accountNo
-{
-    //mutex to prevent others from modifying contacts at the same time
-    dispatch_async(dispatch_get_main_queue(),
-                   ^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-        {
-            return;
-        }
-        
-        NSMutableArray* indexPaths =[[NSMutableArray alloc] init];
-        NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
-        
-        int counter=0;
-        for(MLContact* row in self.contacts)
-        {
-            if([row.accountId  integerValue]==[accountNo integerValue] )
-            {
-                DDLogVerbose(@"removing  pos %d", counter);
-                NSIndexPath *path1 = [NSIndexPath indexPathForRow:counter inSection:konlineSection];
-                [indexPaths addObject:path1];
-                [indexSet addIndex:counter];
-                
-            }
-            counter++;
-        }
-        
-        [self.contacts removeObjectsAtIndexes:indexSet];
-        [self.contactsTable beginUpdates];
-        [self.contactsTable deleteRowsAtIndexPaths:indexPaths
-                                  withRowAnimation:UITableViewRowAnimationAutomatic];
-        [self.contactsTable endUpdates];
-        
-    });
-    
-}
-
--(void) showAuthRequest:(NSNotification *) notification
-{
-    NSDictionary *dic = notification.object;
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        MLContact *contact = [dic objectForKey:@"contact"];
-        
-        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"A New Contact" message:[NSString stringWithFormat:@"%@ Added you as a contact. Adding a contact will let them see when you are active and is needed for secure chat.",  contact.contactJid] preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:@"Add Back" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-            
-            [[MLXMPPManager sharedInstance] approveContact:contact];
-        }];
-        
-        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-            [[MLXMPPManager sharedInstance] handleCall:dic withResponse:NO];
-        }];
-        [messageAlert addAction:closeAction];
-        [messageAlert addAction:acceptAction];
-        
-        [self.tabBarController presentViewController:messageAlert animated:YES completion:nil];
-        
-    });
-    
-}
 
 
 #pragma mark - jingle
@@ -598,108 +194,16 @@
 }
 
 
--(void) handleNewMessage:(NSNotification *)notification
-{
-    MLMessage *message =[notification.userInfo objectForKey:@"message"];
-    
-    if([message.messageType isEqualToString:kMessageTypeStatus]) return;
-    
-    dispatch_sync(dispatch_get_main_queue(),^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || !message.shouldShowAlert)
-        {
-            return;
-        }
-    });
-    
-    DDLogVerbose(@"contats view got new message notice %@", notification.userInfo);
-    if([[self.currentNavController topViewController] isKindOfClass:[chatViewController class]]) {
-        chatViewController* currentTop=(chatViewController*)[self.currentNavController topViewController];
-        if( (([currentTop.contact.contactJid isEqualToString:message.from] )|| ([currentTop.contact.contactJid isEqualToString:message.to] )) &&
-           [currentTop.contact.accountId isEqualToString:message.accountId]
-           )
-        {
-            return;
-        }
-    }
-    dispatch_async(dispatch_get_main_queue(), ^{
-        int pos=-1;
-        int counter=0;
-        for(MLContact* row in self.contacts)
-        {
-            if([row.contactJid caseInsensitiveCompare:message.from]==NSOrderedSame &&
-               [row.accountId  integerValue]==[message.accountId integerValue])
-            {
-                pos=counter;
-                break;
-            }
-            counter++;
-        }
-        
-        if(pos>=0)
-        {
-            
-            //                          int unreadCount=[[[self.contacts objectAtIndex:pos] objectForKey:@"count"] integerValue];
-            //                          unreadCount++;
-            //                         int unreadCount= [[DataLayer sharedInstance] countUserUnreadMessages:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:kaccountNoKey]];
-            //                          [[self.contacts objectAtIndex:pos] setObject: [NSNumber numberWithInt:unreadCount] forKey:@"count"];
-            
-            
-            
-            NSIndexPath *path1 = [NSIndexPath indexPathForRow:pos inSection:konlineSection];
-            [self.contactsTable beginUpdates];
-            [self.contactsTable reloadRowsAtIndexPaths:@[path1]
-                                      withRowAnimation:UITableViewRowAnimationNone];
-            [self.contactsTable endUpdates];
-        }
-    });
-    
-}
-
 #pragma mark - chat presentation
--(void) presentChat:(NSNotification *)notification
-{
-    NSDictionary *userinfo = notification.userInfo;
-    MLContact *row = [userinfo objectForKey:@"contact"];
-    
-    [self presentChatWithRow:row];
-    
-}
-
--(void) presentChatWithRow:(MLContact *)row
-{
-    if([self.lastSelectedContact.contactJid isEqualToString:row.contactJid] &&
-       [self.lastSelectedContact.accountId integerValue]==[row.accountId integerValue]) {
-        return;
-    }
-    
-    self.lastSelectedContact=row;
-    [self  performSegueWithIdentifier:@"showConversation" sender:row];
-}
-
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    if([segue.identifier isEqualToString:@"showConversation"])
-    {
-        UINavigationController *nav = segue.destinationViewController;
-        chatViewController* chatVC = (chatViewController *)nav.topViewController;
-        [chatVC setupWithContact:sender];
-    }
-    else if([segue.identifier isEqualToString:@"showDetails"])
+   if([segue.identifier isEqualToString:@"showDetails"])
     {
         UINavigationController *nav = segue.destinationViewController;
         ContactDetails* details = (ContactDetails *)nav.topViewController;
         details.contact= sender;
     }
-    else  if([segue.identifier isEqualToString:@"showCall"])
-    {
-        
-        CallViewController* details = (CallViewController *)segue.destinationViewController;
-        details.contact= sender;
-    }
-    
-    
-    
-    
+
 }
 
 
@@ -1106,7 +610,9 @@
         row.unreadCount=0;
     }
     
-    [self presentChatWithRow:row];
+    [self dismissViewControllerAnimated:YES completion:^{
+        if(self.selectContact) self.selectContact(row);
+    }];
     
 }
 
@@ -1160,5 +666,9 @@
     return toreturn;
 }
 
+-(IBAction) close:(id)sender
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
 
 @end

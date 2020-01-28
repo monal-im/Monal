@@ -237,10 +237,10 @@
     NSString* toReturn=nil;
     switch (section) {
         case konlineSection:
-            toReturn= NSLocalizedString(@"Online", "");
+            toReturn= NSLocalizedString(@"Recently Seen", "");
             break;
         case kofflineSection:
-            toReturn= NSLocalizedString(@"Offline", "");
+            toReturn= NSLocalizedString(@"Away", "");
             break;
         default:
             break;

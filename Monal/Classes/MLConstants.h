@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MLContact.h"
 
 @import CocoaLumberjack;
 #ifdef  DEBUG
@@ -14,6 +15,9 @@ static const DDLogLevel ddLogLevel = DDLogLevelDebug;
 #else
 static const DDLogLevel ddLogLevel = DDLogLevelInfo;
 #endif
+
+
+typedef void (^contactCompletion)(MLContact *selectedContact);
 
 //used in OSX only really
 #define kMonalWindowVisible @"kMonalWindowVisible"

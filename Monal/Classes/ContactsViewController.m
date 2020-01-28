@@ -16,6 +16,7 @@
 #import "CallViewController.h"
 #import "MonalAppDelegate.h"
 #import "UIColor+Theme.h"
+#import "MLGroupChatFavoritesViewController.h"
 
 
 #define konlineSection 1
@@ -203,6 +204,17 @@
         ContactDetails* details = (ContactDetails *)nav.topViewController;
         details.contact= sender;
     }
+    else if([segue.identifier isEqualToString:@"showGroups"])
+       {
+           MLGroupChatFavoritesViewController* groups = (MLGroupChatFavoritesViewController *)segue.destinationViewController;
+          // groups.groupCompletion
+           groups.selectGroup = ^(MLContact *selectedContact) {
+              
+               if(self.selectContact) self.selectContact(selectedContact);
+               [self close:nil];
+           };
+           
+       }
 
 }
 

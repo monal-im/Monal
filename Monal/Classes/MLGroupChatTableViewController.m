@@ -123,6 +123,16 @@
         
     }];
     
+    MLContact *group = [[MLContact alloc] init];
+    group.isGroup=YES;
+    group.accountId=[NSString stringWithFormat:@"%@", account];
+    group.accountNickInGroup=[dic objectForKey:@"nick"] ;
+    group.contactJid=[dic objectForKey:@"room"];
+    
+        if(self.selectGroup) {
+            self.selectGroup(group);
+        }
+    
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 

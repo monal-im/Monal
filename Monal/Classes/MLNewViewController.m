@@ -7,6 +7,8 @@
 //
 
 #import "MLNewViewController.h"
+#import "MLEditGroupViewController.h"
+#import "addContact.h"
 
 @interface MLNewViewController ()
 
@@ -16,12 +18,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
-    
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
 }
 
 #pragma mark - Table view data source
@@ -37,6 +33,24 @@
 -(IBAction) close:(id)sender
 {
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+-(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"newContact"])
+       {
+           addContact* newScreen = (addContact *)segue.destinationViewController;
+           newScreen.completion = ^(MLContact *selectedContact) {
+               if(self.selectContact) self.selectContact(selectedContact);
+           };
+       } else
+    if([segue.identifier isEqualToString:@"newGroup"])
+    {
+        MLEditGroupViewController* newScreen = (MLEditGroupViewController *)segue.destinationViewController;
+        newScreen.completion = ^(MLContact *selectedContact) {
+            if(self.selectContact) self.selectContact(selectedContact);
+        };
+    }
 }
 
 @end

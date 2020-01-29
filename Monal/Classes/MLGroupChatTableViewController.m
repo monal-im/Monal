@@ -188,7 +188,7 @@
     {
         editor.groupData=self.toEdit;
     }
-    editor.completion = ^{
+    editor.completion = ^(MLContact *contact){
         [self refresh];
     };
 }

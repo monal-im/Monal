@@ -34,8 +34,6 @@
 @property (nonatomic, strong) UIBarButtonItem* closeButton;
 
 -(IBAction) addPress:(id)sender;
--(void) closeView;
-
 
 - (IBAction)toolbarDone:(id)sender;
 - (IBAction)toolbarPrevious:(id)sender;
@@ -47,11 +45,6 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    if(!self.groupData) {
-    self.closeButton =[[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStylePlain target:self action:@selector(closeView)];
-    self.navigationItem.rightBarButtonItem=_closeButton;
-    }
-
     self.accountPicker = [[ UIPickerView alloc] init];
     self.accountPickerView= [[UIView alloc] initWithFrame: _accountPicker.frame];
     self.accountPickerView.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
@@ -296,12 +289,6 @@
 
 #pragma mark actions
 
--(void) closeView
-{
-    if(self.completion) self.completion();
-    [self dismissViewControllerAnimated:YES completion:nil];
-}
-
 -(IBAction) addPress:(id)sender
 {
     if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
@@ -337,15 +324,20 @@
              combinedRoom = [NSString stringWithFormat:@"%@@%@", room, account.connectionProperties.conferenceServer];
          }
          
+        MLContact *group = [[MLContact alloc] init];
+        group.isGroup=YES;
+        group.accountId=account.accountNo;
+        group.accountNickInGroup=nick;
+        group.contactJid=room;
         
         [[DataLayer sharedInstance] addContact:combinedRoom forAccount:account.accountNo fullname:@"" nickname:@"" andMucNick:nick  withCompletion:^(BOOL success) {
             //race condition on creation otherwise
             [[MLXMPPManager sharedInstance] joinRoom:combinedRoom withNick:nick andPassword:pass forAccountRow:accountRow];
             
             dispatch_async(dispatch_get_main_queue(), ^{
-                [self closeView];
+                if(self.completion) self.completion(group);
+                [self dismissViewControllerAnimated:YES completion:nil];
             });
-            
             
         }];
     }

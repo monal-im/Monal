@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "MLConstants.h"
 
 @interface addContact : UITableViewController<UIPickerViewDataSource, UIPickerViewDelegate, UITextFieldDelegate>
 {
@@ -23,6 +23,7 @@
 @property (nonatomic, weak)  UITextField* contactName;
 @property (nonatomic, weak)  UITextField* accountName;
 @property (nonatomic, weak) IBOutlet UIToolbar* keyboardToolbar;
+@property (nonatomic, strong) contactCompletion completion;
 
 -(IBAction) addPress:(id)sender;
 -(void) closeView;

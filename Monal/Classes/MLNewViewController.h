@@ -7,12 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MLConstants.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MLNewViewController : UITableViewController
 -(IBAction) close:(id)sender;
-
+@property (nonatomic, strong) contactCompletion selectContact;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -15,6 +15,7 @@
 #import "MLImageManager.h"
 #import "MLWelcomeViewController.h"
 #import "ContactsViewController.h"
+#import "MLNewViewController.h"
 
 @interface ActiveChatsViewController ()
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
@@ -244,6 +245,21 @@
             [self presentChatWithRow:selectedContact];
         };
     }
+    
+    else if([segue.identifier isEqualToString:@"showNew"])
+      {
+          UINavigationController *nav = segue.destinationViewController;
+          MLNewViewController* newScreen = (MLNewViewController *)nav.topViewController;
+          newScreen.selectContact = ^(MLContact *selectedContact) {
+              [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId withCompletion:^(BOOL success) {
+                  //no success may mean its already there
+                  dispatch_async(dispatch_get_main_queue(), ^{
+                        [self presentChatWithRow:selectedContact];
+                  });
+              }];
+            
+          };
+      }
 }
 
 

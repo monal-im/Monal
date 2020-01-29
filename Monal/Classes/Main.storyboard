@@ -21,7 +21,7 @@
         <!--New-->
         <scene sceneID="EiA-w1-e0D">
             <objects>
-                <tableViewController id="NFY-nW-WDm" sceneMemberID="viewController">
+                <tableViewController id="NFY-nW-WDm" customClass="MLNewViewController" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="cJF-tD-k0r">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -66,7 +66,7 @@
                                             </subviews>
                                         </tableViewCellContentView>
                                         <connections>
-                                            <segue destination="GpF-k7-Z6D" kind="show" trigger="accessoryAction" id="qb0-1P-3OV"/>
+                                            <segue destination="GpF-k7-Z6D" kind="show" id="5bM-w5-CYw"/>
                                         </connections>
                                     </tableViewCell>
                                 </cells>
@@ -77,7 +77,15 @@
                             <outlet property="delegate" destination="NFY-nW-WDm" id="eKI-Pa-RBT"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="New" id="Msw-bP-HIu"/>
+                    <toolbarItems/>
+                    <navigationItem key="navigationItem" title="New" id="Msw-bP-HIu">
+                        <barButtonItem key="rightBarButtonItem" title="Close" id="IGd-kM-9BO">
+                            <connections>
+                                <action selector="close:" destination="NFY-nW-WDm" id="UTN-eO-MHz"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="nAt-MP-Xfz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -493,7 +501,7 @@
                 </toolbar>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="zeF-qp-qgY" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2532" y="-2688"/>
+            <point key="canvasLocation" x="2606" y="-2316"/>
         </scene>
         <!--Chats-->
         <scene sceneID="vAl-ec-NFW">
@@ -1390,7 +1398,7 @@
         <image name="square.and.pencil" catalog="system" width="64" height="58"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="qb0-1P-3OV"/>
+        <segue reference="ndm-rg-MfL"/>
         <segue reference="hqW-lo-9tZ"/>
     </inferredMetricsTieBreakers>
 </document>

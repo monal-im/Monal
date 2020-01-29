@@ -60,16 +60,8 @@
 -(void) handleNewMessage:(NSNotification *)notification;
 -(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId withCompletion:(void (^)(BOOL success))completion;
 
-//notification
--(void) keyboardWillShow:(NSNotification *) note;
--(void) keyboardWillHide:(NSNotification *) note;
-
 -(void) retry:(id) sender;
 
 -(void) reloadTable; 
-
-
-
-
 
 @end

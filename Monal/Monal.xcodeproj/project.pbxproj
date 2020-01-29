@@ -252,6 +252,7 @@
 		26470F521835C4080069E3E0 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26470F511835C4080069E3E0 /* Media.xcassets */; };
 		2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */; };
 		264A7E751AA7263600E860E3 /* MLSwitchCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264A7E741AA7263600E860E3 /* MLSwitchCell.xib */; };
+		264DCF9C23E11483004105CE /* MLNewViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 264DCF9B23E11483004105CE /* MLNewViewController.m */; };
 		2651AF551B409906008D025C /* MLMainWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 2651AF541B409906008D025C /* MLMainWindow.m */; };
 		26529F5217FA7B260057F199 /* addContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FE17BDD85F0031304D /* addContact.m */; };
 		2653EAE61C5B243400ED97F7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2653EAE51C5B243400ED97F7 /* Main.storyboard */; };
@@ -820,6 +821,8 @@
 		26470F511835C4080069E3E0 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
 		2649CE521C51B84C00CD1E80 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Launch Screen.storyboard"; path = "Monal-iOS/Launch Screen.storyboard"; sourceTree = "<group>"; };
 		264A7E741AA7263600E860E3 /* MLSwitchCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLSwitchCell.xib; sourceTree = "<group>"; };
+		264DCF9A23E11483004105CE /* MLNewViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLNewViewController.h; sourceTree = "<group>"; };
+		264DCF9B23E11483004105CE /* MLNewViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLNewViewController.m; sourceTree = "<group>"; };
 		264E34591787BAB100BC7BD0 /* XMPPPresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPresence.h; sourceTree = "<group>"; };
 		264E345A1787BAB100BC7BD0 /* XMPPPresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPresence.m; sourceTree = "<group>"; };
 		264FF3E4158A855D00D97B86 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -1560,6 +1563,8 @@
 				26189C8A238A526500EAD70C /* MLSubscriptionTableViewController.m */,
 				26A78ED623C2B59400C7CF40 /* MLPlaceholderViewController.h */,
 				26A78ED723C2B59400C7CF40 /* MLPlaceholderViewController.m */,
+				264DCF9A23E11483004105CE /* MLNewViewController.h */,
+				264DCF9B23E11483004105CE /* MLNewViewController.m */,
 			);
 			name = "View Controllers";
 			path = Classes;
@@ -3167,6 +3172,7 @@
 				261A628E176C15AD00059090 /* ChatLogsViewController.m in Sources */,
 				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
 				2673CAC321D9244B00256507 /* MLResourcesTableViewController.m in Sources */,
+				264DCF9C23E11483004105CE /* MLNewViewController.m in Sources */,
 				268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */,
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				26EE1B0C21A8F3CE00264B95 /* MLWelcomeViewController.m in Sources */,

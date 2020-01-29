@@ -16,7 +16,7 @@
 #import "CallViewController.h"
 #import "MonalAppDelegate.h"
 #import "UIColor+Theme.h"
-#import "MLGroupChatFavoritesViewController.h"
+#import "MLGroupChatTableViewController.h"
 
 
 #define konlineSection 1
@@ -206,8 +206,7 @@
     }
     else if([segue.identifier isEqualToString:@"showGroups"])
        {
-           MLGroupChatFavoritesViewController* groups = (MLGroupChatFavoritesViewController *)segue.destinationViewController;
-          // groups.groupCompletion
+           MLGroupChatTableViewController* groups = (MLGroupChatTableViewController *)segue.destinationViewController;
            groups.selectGroup = ^(MLContact *selectedContact) {
               
                if(self.selectContact) self.selectContact(selectedContact);

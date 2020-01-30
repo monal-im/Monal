@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="dqD-Rt-bEF">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="dqD-Rt-bEF">
     <device id="retina6_5" orientation="portrait" appearance="dark"/>
     <dependencies>
-        <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15704"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -1258,6 +1257,7 @@
                         <outlet property="messageTable" destination="Kkq-aZ-5fP" id="RhH-Dt-heG"/>
                         <outlet property="placeHolderText" destination="KUa-bA-cQb" id="62v-fn-lf2"/>
                         <outlet property="sendButton" destination="kYa-y4-X5Z" id="efC-cC-umG"/>
+                        <outlet property="tableviewBottom" destination="Iwu-bN-lxd" id="Bck-ET-9Ea"/>
                         <outlet property="transparentLayer" destination="cUR-xM-Mq7" id="0Fl-vg-WUH"/>
                         <outlet property="view" destination="Riz-2Q-bcU" id="d0E-AR-8aA"/>
                         <segue destination="cC0-5a-Jvb" kind="presentation" modalPresentationStyle="formSheet" id="cuS-c5-MTy"/>
@@ -1399,6 +1399,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="5bM-w5-CYw"/>
-        <segue reference="hqW-lo-9tZ"/>
+        <segue reference="0Dv-wk-JlQ"/>
     </inferredMetricsTieBreakers>
 </document>

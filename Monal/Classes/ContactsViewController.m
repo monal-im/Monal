@@ -77,7 +77,7 @@
 
 -(void) dealloc
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+   
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -91,7 +91,6 @@
     [super viewDidAppear:animated];
     
     self.lastSelectedContact=nil;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
     [self refreshDisplay];
     
     if(self.contacts.count+self.offlineContacts.count==0)
@@ -104,7 +103,6 @@
 -(void) viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)didReceiveMemoryWarning
@@ -112,8 +110,6 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
-
-
 
 #pragma mark - jingle
 

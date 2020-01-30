@@ -70,7 +70,7 @@
     } else {
         // Fallback on earlier versions
     }
-      #endif
+    #endif
     
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;
@@ -171,9 +171,6 @@
         [self refreshDisplay];
     }
   
-
-   // [[MLXMPPManager sharedInstance] handleNewMessage:nil];
-    
     if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenIntro"]) {
         [self performSegueWithIdentifier:@"showIntro" sender:self];
     }

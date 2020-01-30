@@ -60,9 +60,7 @@
              self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
          }
     }];
-    
- 
-    
+        
 }
 
 -(void) setupWithContact:(MLContact* ) contact

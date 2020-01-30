@@ -7,11 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
-typedef void (^controllerCompletion)(void);
+#import "MLConstants.h"
 
 @interface MLEditGroupViewController : UITableViewController <UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource>
 
 @property (nonatomic, strong) NSDictionary *groupData;
-@property (nonatomic, strong) controllerCompletion completion;
+@property (nonatomic, strong) contactCompletion completion;
 
 @end

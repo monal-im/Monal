@@ -39,8 +39,16 @@
             NSDictionary* contact =@{@"row":[NSNumber numberWithInteger:_selectedRow],@"buddy_name":self.contactName.text};
             [[MLXMPPManager sharedInstance] addContact:contact];
             
+            NSDictionary* datarow= [[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:_selectedRow];
+            xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+            
+            MLContact *contactObj = [[MLContact alloc] init];
+            contactObj.contactJid=self.contactName.text;
+            contactObj.accountId= account.accountNo;
+            
             UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Permission Requested" message:@"The new contact will be added to your contacts list when the person you've added has approved your request." preferredStyle:UIAlertControllerStyleAlert];
             UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                if(self.completion) self.completion(contactObj);
                 [self dismissViewControllerAnimated:YES completion:nil];
             }];
             [messageAlert addAction:closeAction];

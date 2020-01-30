@@ -15,6 +15,7 @@
 #import "MLImageManager.h"
 #import "MLWelcomeViewController.h"
 #import "ContactsViewController.h"
+#import "MLNewViewController.h"
 
 @interface ActiveChatsViewController ()
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
@@ -24,7 +25,7 @@
 @property (nonatomic, assign)  NSInteger thismonth;
 @property (nonatomic, assign)  NSInteger thisday;
 
-@property (nonatomic, strong) NSArray* contacts;
+@property (nonatomic, strong) NSMutableArray* contacts;
 @property (nonatomic, strong) MLContact* lastSelectedUser;
 
 @end
@@ -55,11 +56,6 @@
     
     self.view= self.chatListTable;
     
-    
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-        [nc addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalAccountStatusChanged object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name: kMonalContactRefresh object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     
@@ -74,7 +70,7 @@
     } else {
         // Fallback on earlier versions
     }
-      #endif
+    #endif
     
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;
@@ -175,9 +171,6 @@
         [self refreshDisplay];
     }
   
-
-   // [[MLXMPPManager sharedInstance] handleNewMessage:nil];
-    
     if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenIntro"]) {
         [self performSegueWithIdentifier:@"showIntro" sender:self];
     }
@@ -244,6 +237,22 @@
             [self presentChatWithRow:selectedContact];
         };
     }
+    
+    else if([segue.identifier isEqualToString:@"showNew"])
+      {
+          UINavigationController *nav = segue.destinationViewController;
+          MLNewViewController* newScreen = (MLNewViewController *)nav.topViewController;
+          newScreen.selectContact = ^(MLContact *selectedContact) {
+              [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId withCompletion:^(BOOL success) {
+                  //no success may mean its already there
+                  dispatch_async(dispatch_get_main_queue(), ^{
+                        [self presentChatWithRow:selectedContact];
+                      [self refreshDisplay];
+                  });
+              }];
+            
+          };
+      }
 }
 
 
@@ -268,10 +277,8 @@
         cell =[[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
     }
     
-
     MLContact* row = [self.contacts objectAtIndex:indexPath.row];
     [cell showDisplayName:row.contactDisplayName];
-    
     
     NSString *state= [row.state  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     
@@ -365,14 +372,8 @@
         MLContact* contact= [self.contacts objectAtIndex:indexPath.row];
         
         [[DataLayer sharedInstance] removeActiveBuddy:contact.contactJid forAccount:contact.accountId];
-        [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
-            [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.contacts=cleanActive;
-                [self.chatListTable deleteRowsAtIndexPaths:@[indexPath]
-                                      withRowAnimation:UITableViewRowAnimationAutomatic];
-            });
-        }];
+        [self.contacts removeObjectAtIndex:indexPath.row];
+        [self.chatListTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
         
     }
 }

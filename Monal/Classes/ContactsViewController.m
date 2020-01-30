@@ -16,6 +16,7 @@
 #import "CallViewController.h"
 #import "MonalAppDelegate.h"
 #import "UIColor+Theme.h"
+#import "MLGroupChatTableViewController.h"
 
 
 #define konlineSection 1
@@ -76,7 +77,7 @@
 
 -(void) dealloc
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+   
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -90,7 +91,6 @@
     [super viewDidAppear:animated];
     
     self.lastSelectedContact=nil;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:UIApplicationWillEnterForegroundNotification object:nil];
     [self refreshDisplay];
     
     if(self.contacts.count+self.offlineContacts.count==0)
@@ -103,7 +103,6 @@
 -(void) viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (void)didReceiveMemoryWarning
@@ -111,8 +110,6 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
-
-
 
 #pragma mark - jingle
 
@@ -203,6 +200,16 @@
         ContactDetails* details = (ContactDetails *)nav.topViewController;
         details.contact= sender;
     }
+    else if([segue.identifier isEqualToString:@"showGroups"])
+       {
+           MLGroupChatTableViewController* groups = (MLGroupChatTableViewController *)segue.destinationViewController;
+           groups.selectGroup = ^(MLContact *selectedContact) {
+              
+               if(self.selectContact) self.selectContact(selectedContact);
+               [self close:nil];
+           };
+           
+       }
 
 }
 
@@ -237,10 +244,10 @@
     NSString* toReturn=nil;
     switch (section) {
         case konlineSection:
-            toReturn= NSLocalizedString(@"Online", "");
+            toReturn= NSLocalizedString(@"Recently Seen", "");
             break;
         case kofflineSection:
-            toReturn= NSLocalizedString(@"Offline", "");
+            toReturn= NSLocalizedString(@"Away", "");
             break;
         default:
             break;

@@ -12,8 +12,6 @@
 #import "MLContact.h"
 #import <DZNEmptyDataSet/UIScrollView+EmptyDataSet.h>
 
-typedef void (^contactCompletion)(MLContact *selectedContact);
-
 @interface ContactsViewController : UITableViewController  <UISearchResultsUpdating, UISearchControllerDelegate
 ,DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
 

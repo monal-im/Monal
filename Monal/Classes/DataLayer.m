@@ -8,8 +8,6 @@
 
 #import "DataLayer.h"
 
-
-
 @interface DataLayer()
 
 @property (nonatomic, strong) NSDateFormatter *dbFormatter;

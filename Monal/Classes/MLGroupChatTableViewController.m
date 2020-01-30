@@ -123,6 +123,16 @@
         
     }];
     
+    MLContact *group = [[MLContact alloc] init];
+    group.isGroup=YES;
+    group.accountId=[NSString stringWithFormat:@"%@", account];
+    group.accountNickInGroup=[dic objectForKey:@"nick"] ;
+    group.contactJid=[dic objectForKey:@"room"];
+    
+        if(self.selectGroup) {
+            self.selectGroup(group);
+        }
+    
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
@@ -172,14 +182,13 @@
 
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    UINavigationController *nav=segue.destinationViewController;
-    MLEditGroupViewController *editor = (MLEditGroupViewController *)nav.topViewController;
+    MLEditGroupViewController *editor = (MLEditGroupViewController *)segue.destinationViewController;
     
     if([segue.identifier isEqualToString:@"editGroup"])
     {
         editor.groupData=self.toEdit;
     }
-    editor.completion = ^{
+    editor.completion = ^(MLContact *contact){
         [self refresh];
     };
 }

@@ -7,8 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MLConstants.h"
 #import <DZNEmptyDataSet/UIScrollView+EmptyDataSet.h>
 
 @interface MLGroupChatTableViewController : UITableViewController <DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
+
+@property (nonatomic, strong) contactCompletion selectGroup;
 
 @end

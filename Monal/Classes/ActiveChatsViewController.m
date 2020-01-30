@@ -285,10 +285,8 @@
         cell =[[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
     }
     
-
     MLContact* row = [self.contacts objectAtIndex:indexPath.row];
     [cell showDisplayName:row.contactDisplayName];
-    
     
     NSString *state= [row.state  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     

@@ -89,13 +89,10 @@
                 BOOL unread=YES;
                 BOOL showAlert=YES;
                 
-                if(lastDate.timeIntervalSince1970>messageNode.delayTimeStamp.timeIntervalSince1970)
-                {
-                    if( [messageNode.from isEqualToString:jidWithoutResource]
-                       || messageNode.mamResult ) {
-                        unread=NO;
-                        showAlert=NO;
-                    }
+                if ([messageNode.from isEqualToString:jidWithoutResource]
+                    || (messageNode.mamResult && lastDate.timeIntervalSince1970>messageNode.delayTimeStamp.timeIntervalSince1970)) {
+                    unread=NO;
+                    showAlert=NO;
                 }
               
                 NSString *messageType=nil;

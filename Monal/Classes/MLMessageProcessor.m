@@ -43,8 +43,9 @@
     {
         DDLogError(@"Error type message received");
         //update db
-        [[DataLayer sharedInstance] setMessageId:messageNode.idval errorType:messageNode.errorType errorReason:messageNode.errorReason];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageErrorNotice object:nil  userInfo:@{@"MessageID":messageNode.idval,@"errorType":messageNode.errorType,@"errorReason":messageNode.errorReason
+        [[DataLayer sharedInstance] setMessageId:messageNode.idval errorType:messageNode.errorType?messageNode.errorType:@""
+                                     errorReason:messageNode.errorReason?messageNode.errorReason:@""];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageErrorNotice object:nil  userInfo:@{@"MessageID":messageNode.idval,@"errorType":messageNode.errorType?messageNode.errorType:@"",@"errorReason":messageNode.errorReason?messageNode.errorReason:@""
         }];
 
         return;

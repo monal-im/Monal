@@ -24,7 +24,7 @@
 @property (nonatomic, assign)  NSInteger thismonth;
 @property (nonatomic, assign)  NSInteger thisday;
 
-@property (nonatomic, strong) NSArray* contacts;
+@property (nonatomic, strong) NSMutableArray* contacts;
 @property (nonatomic, strong) MLContact* lastSelectedUser;
 
 @end
@@ -364,14 +364,8 @@
         MLContact* contact= [self.contacts objectAtIndex:indexPath.row];
         
         [[DataLayer sharedInstance] removeActiveBuddy:contact.contactJid forAccount:contact.accountId];
-        [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
-            [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.contacts=cleanActive;
-                [self.chatListTable deleteRowsAtIndexPaths:@[indexPath]
-                                      withRowAnimation:UITableViewRowAnimationAutomatic];
-            });
-        }];
+        [self.contacts removeObjectAtIndex:indexPath.row];
+        [self.chatListTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
         
     }
 }

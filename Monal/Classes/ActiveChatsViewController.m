@@ -118,7 +118,6 @@
         __block BOOL contactInList=NO;
         
         [self.chatListTable performBatchUpdates:^{
-            __block BOOL contactInList=NO;
             [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 MLContact *rowContact = (MLContact *) obj;
                 if([rowContact.contactJid isEqualToString:message.from]) {
@@ -127,6 +126,7 @@
                     [self.chatListTable beginUpdates];
                     [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                     [self.chatListTable endUpdates];
+                    *stop=YES;
                 }
             }];
         }

@@ -222,7 +222,10 @@
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     [xmppAccount subscribeOMEMODevicesFrom:self.contact.contactJid];
 #endif
-    //  [self scrollToBottom];
+   
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self refreshCounter];
+    });
     
 }
 

@@ -12,6 +12,9 @@
 @interface ActiveChatsViewController : UITableViewController  <DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>
 
 @property (nonatomic, strong) UITableView* chatListTable;
+@property (nonatomic, weak) IBOutlet UIBarButtonItem *settingsButton;
+@property (nonatomic, weak) IBOutlet UIBarButtonItem *addButton;
+@property (nonatomic, weak) IBOutlet UIBarButtonItem *composeButton;
 
 
 @end

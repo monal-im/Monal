@@ -87,7 +87,7 @@
                                             <tableColumns>
                                                 <tableColumn width="315" minWidth="40" maxWidth="1000" id="AB2-Am-EKl">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border">
-                                                        <font key="font" metaFont="message" size="11"/>
+                                                        <font key="font" metaFont="menu" size="11"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                         <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                                     </tableHeaderCell>
@@ -1621,8 +1621,8 @@ Gw
         <scene sceneID="CGi-CN-lI2">
             <objects>
                 <viewController id="qLp-oS-WKI" customClass="MLChatViewController" sceneMemberID="viewController">
-                    <view key="view" id="kDf-fM-OV9">
-                        <rect key="frame" x="0.0" y="0.0" width="493" height="673"/>
+                    <view key="view" misplaced="YES" id="kDf-fM-OV9">
+                        <rect key="frame" x="0.0" y="0.0" width="493" height="908"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="mUJ-xh-yCG">
@@ -1725,9 +1725,9 @@ Gw
                                 <accessibility description="Input Bar"/>
                             </customView>
                             <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="237" horizontalPageScroll="10" verticalLineScroll="237" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eNE-em-qs3">
-                                <rect key="frame" x="0.0" y="46" width="493" height="627"/>
+                                <rect key="frame" x="0.0" y="46" width="493" height="862"/>
                                 <clipView key="contentView" id="hQs-06-XXl">
-                                    <rect key="frame" x="0.0" y="0.0" width="493" height="627"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="493" height="862"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" rowHeight="235" rowSizeStyle="automatic" viewBased="YES" id="Rsm-HI-GDG">

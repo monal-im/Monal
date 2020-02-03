@@ -2,13 +2,13 @@
   "images" : [
     {
       "idiom" : "universal",
-      "scale" : "1x",
-      "filename" : "739-question.png"
+      "filename" : "IDMPhotoBrowser_arrowRight.png",
+      "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "scale" : "2x",
-      "filename" : "739-question@2x.png"
+      "filename" : "IDMPhotoBrowser_arrowRight@2x.png",
+      "scale" : "2x"
     },
     {
       "idiom" : "universal",

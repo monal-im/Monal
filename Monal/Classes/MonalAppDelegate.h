@@ -10,8 +10,6 @@
 @import PushKit;
 
 #import "DataLayer.h"
-#import "MLTabBarController.h"
-
 
 @import UserNotifications;
 
@@ -21,7 +19,6 @@
 
 @property (nonatomic, strong) UIWindow* window;
 @property (nonatomic, strong) UINavigationController* chatNav;
-@property (nonatomic, strong) MLTabBarController* tabBarController;
 @property (nonatomic, strong) UISplitViewController* splitViewController;
 @property (nonatomic, strong) DDFileLogger *fileLogger;
 

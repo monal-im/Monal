@@ -2,13 +2,13 @@
   "images" : [
     {
       "idiom" : "universal",
-      "scale" : "1x",
-      "filename" : "973-user.png"
+      "filename" : "IDMPhotoBrowser_arrowLeft.png",
+      "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "scale" : "2x",
-      "filename" : "973-user@2x.png"
+      "filename" : "IDMPhotoBrowser_arrowLeft@2x.png",
+      "scale" : "2x"
     },
     {
       "idiom" : "universal",

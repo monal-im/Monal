@@ -68,7 +68,9 @@
     if (@available(iOS 13.0, *)) {
         self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
     } else {
-        // Fallback on earlier versions
+        self.settingsButton.image=[UIImage imageNamed:@""];
+        self.addButton.image=[UIImage imageNamed:@""];
+        self.composeButton.image=[UIImage imageNamed:@"704-compose"];
     }
     #endif
     

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="dqD-Rt-bEF">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="dqD-Rt-bEF">
     <device id="retina6_5" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15704"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -329,20 +329,20 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Chats" id="RRa-hC-xrf">
-                        <barButtonItem key="leftBarButtonItem" image="person.crop.circle" catalog="system" id="BWH-2I-fSI">
+                        <barButtonItem key="leftBarButtonItem" title="Settings" image="person.crop.circle" catalog="system" id="BWH-2I-fSI">
                             <connections>
                                 <segue destination="cmS-oG-cv1" kind="presentation" id="zkg-JY-Otv"/>
                             </connections>
                         </barButtonItem>
                         <rightBarButtonItems>
-                            <barButtonItem title="Item" image="square.and.pencil" catalog="system" id="pyP-qb-mfr">
+                            <barButtonItem title="Compose" image="square.and.pencil" catalog="system" id="pyP-qb-mfr">
                                 <connections>
                                     <segue destination="hMh-kj-2DY" kind="popoverPresentation" identifier="showContacts" popoverAnchorBarButtonItem="pyP-qb-mfr" id="lBM-pO-Hdw">
                                         <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
                                     </segue>
                                 </connections>
                             </barButtonItem>
-                            <barButtonItem title="New" image="plus" catalog="system" id="wNA-vF-ohQ">
+                            <barButtonItem title="Add" image="plus" catalog="system" id="wNA-vF-ohQ">
                                 <connections>
                                     <segue destination="elF-QS-Bpm" kind="presentation" identifier="showNew" id="tor-VM-YxS"/>
                                 </connections>
@@ -1245,7 +1245,7 @@
                         <viewLayoutGuide key="safeArea" id="ZKQ-3D-6NG"/>
                     </view>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="tgd-HR-Cbd">
-                        <barButtonItem key="rightBarButtonItem" image="info.circle" catalog="system" id="C9Q-7y-bRl">
+                        <barButtonItem key="rightBarButtonItem" title="Info" image="info.circle" catalog="system" id="C9Q-7y-bRl">
                             <connections>
                                 <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" modalPresentationStyle="formSheet" id="0Dv-wk-JlQ"/>
                             </connections>
@@ -1280,6 +1280,7 @@
                         </textView>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kYa-y4-X5Z">
                             <rect key="frame" x="370" y="6" width="36" height="30"/>
+                            <accessibility key="accessibilityConfiguration" label="Send"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="36" id="NRJ-Qj-1DA"/>
                                 <constraint firstAttribute="height" constant="30" id="ZPw-Mb-D1d"/>
@@ -1291,6 +1292,7 @@
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="c6B-5o-sqL">
                             <rect key="frame" x="17" y="6" width="28" height="27"/>
+                            <accessibility key="accessibilityConfiguration" label="Attach"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="28" id="r5D-N5-kFE"/>
                                 <constraint firstAttribute="height" constant="27" id="yNE-7P-Ml5"/>
@@ -1399,6 +1401,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="5bM-w5-CYw"/>
-        <segue reference="hqW-lo-9tZ"/>
+        <segue reference="RNX-bQ-8Zb"/>
     </inferredMetricsTieBreakers>
 </document>

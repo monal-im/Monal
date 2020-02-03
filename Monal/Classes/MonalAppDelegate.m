@@ -327,8 +327,6 @@
     //iphone
     //make sure tab 0 for chat
     if([notification.userInfo objectForKey:@"from"]) {
-        [self.tabBarController setSelectedIndex:0];
-
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalPresentChat object:nil  userInfo:notification.userInfo];
         
     }

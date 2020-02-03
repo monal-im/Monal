@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="dqD-Rt-bEF">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="dqD-Rt-bEF">
     <device id="retina6_5" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15704"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -350,6 +350,9 @@
                         </rightBarButtonItems>
                     </navigationItem>
                     <connections>
+                        <outlet property="addButton" destination="wNA-vF-ohQ" id="hpI-lN-ZNu"/>
+                        <outlet property="composeButton" destination="pyP-qb-mfr" id="j5k-6a-lBi"/>
+                        <outlet property="settingsButton" destination="BWH-2I-fSI" id="SMS-5d-HUX"/>
                         <segue destination="Dhn-Pm-OVk" kind="showDetail" identifier="showConversation" id="RLU-kt-b8r"/>
                         <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" modalPresentationStyle="formSheet" id="RNX-bQ-8Zb"/>
                         <segue destination="2g1-pP-Xxv" kind="presentation" identifier="showIntro" id="nUl-6E-4GO"/>
@@ -1256,6 +1259,7 @@
                         <outlet property="chatInput" destination="jiV-U5-fDl" id="gQc-PG-STp"/>
                         <outlet property="inputContainerView" destination="eXr-Xg-TCZ" id="cve-rB-fhR"/>
                         <outlet property="messageTable" destination="Kkq-aZ-5fP" id="RhH-Dt-heG"/>
+                        <outlet property="pictureButton" destination="c6B-5o-sqL" id="iSm-Wv-SC6"/>
                         <outlet property="placeHolderText" destination="KUa-bA-cQb" id="62v-fn-lf2"/>
                         <outlet property="sendButton" destination="kYa-y4-X5Z" id="efC-cC-umG"/>
                         <outlet property="transparentLayer" destination="cUR-xM-Mq7" id="0Fl-vg-WUH"/>
@@ -1401,6 +1405,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="5bM-w5-CYw"/>
-        <segue reference="RNX-bQ-8Zb"/>
+        <segue reference="cuS-c5-MTy"/>
     </inferredMetricsTieBreakers>
 </document>

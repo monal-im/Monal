@@ -99,8 +99,6 @@
     [nc addObserver:self selector:@selector(keyboardWillShow:)
                                                  name:UIKeyboardWillShowNotification object:nil];
     
-    
-    
     [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
@@ -108,7 +106,6 @@
   
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 
-    
     self.hidesBottomBarWhenPushed=YES;
     
     self.chatInput.layer.borderColor=[UIColor lightGrayColor].CGColor;
@@ -118,7 +115,16 @@
 
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight=UITableViewAutomaticDimension;
-        
+
+    #if !TARGET_OS_MACCATALYST
+     if (@available(iOS 13.0, *)) {
+         
+     } else {
+         [self.sendButton setImage:[UIImage imageNamed:@"648-paper-airplane"] forState:UIControlStateNormal];
+         [self.pictureButton setImage:[UIImage imageNamed:@"714-camera"] forState:UIControlStateNormal];
+     }
+     #endif
+    
 }
 
 -(void) handleForeGround {

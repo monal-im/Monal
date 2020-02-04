@@ -88,7 +88,6 @@ NSString *const kXMPPPresence = @"presence";
     BOOL _loggedInOnce;
     BOOL _hasRequestedServerInfo;
     
-    BOOL _brokenServerSSL;
 }
 
 @property (nonatomic, assign) BOOL loginStarted;
@@ -1834,15 +1833,9 @@ NSString *const kXMPPPresence = @"presence";
                                 [settings setObject:self.connectionProperties.identity.domain forKey:kCFStreamSSLPeerName];
                             }
                             
-                            if(self->_brokenServerSSL)
-                            {
-                                DDLogInfo(@"recovering from broken SSL implemtation limit to ss3-tl1");
-                                [settings addEntriesFromDictionary:@{@"kCFStreamSSLLevel":@"kCFStreamSocketSecurityLevelTLSv1_0SSLv3"}];
-                            }
-                            else
-                            {
-                                [settings addEntriesFromDictionary:@{@"kCFStreamSSLLevel":@"kCFStreamSocketSecurityLevelTLSv1"}];
-                            }
+                             [settings setObject:kCFStreamSocketSecurityLevelTLSv1 forKey:kCFStreamSSLLevel];
+                    
+                            
                             
                             if(self.connectionProperties.server.selfSignedCert)
                             {
@@ -3403,18 +3396,7 @@ static NSMutableArray *extracted(xmpp *object) {
                 return;
             }
             
-            if(st_error.code==-9820)// Could not complete operation. SSL broken on server
-            {
-                DDLogInfo(@"setting broken ssl on server. retrying");
-                _brokenServerSSL=YES;
-                _loginStarted=NO;
-                _accountState=kStateReconnecting;
-                [self reconnect:0];
-                
-                return;
-            }
-            
-            
+      
             DDLogInfo(@"unhandled stream error");
             [self disconnectWithCompletion:^{
                 [self reconnect:5];

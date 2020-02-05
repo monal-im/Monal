@@ -2785,7 +2785,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-Monal Tests/Pods-Monal Tests-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS/CocoaLumberjack.framework",
 				"${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS/SAMKeychain.framework",
 				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS/SignalProtocolC.framework",
@@ -2802,7 +2802,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Monal Tests/Pods-Monal Tests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		1F803E9D8411BA33D0C0AE27 /* [CP] Embed Pods Frameworks */ = {
@@ -2811,7 +2811,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS/CocoaLumberjack.framework",
 				"${BUILT_PRODUCTS_DIR}/DACircularProgress/DACircularProgress.framework",
 				"${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework",
@@ -2850,7 +2850,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		24612D6D814D34634030DF43 /* [CP] Check Pods Manifest.lock */ = {
@@ -3060,7 +3060,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack-macOS/CocoaLumberjack.framework",
 				"${BUILT_PRODUCTS_DIR}/SAMKeychain-macOS/SAMKeychain.framework",
 				"${BUILT_PRODUCTS_DIR}/SignalProtocolC-macOS/SignalProtocolC.framework",
@@ -3081,7 +3081,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		B1FC64CB20BFE29A46BF0152 /* [CP] Check Pods Manifest.lock */ = {

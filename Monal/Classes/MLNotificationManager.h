@@ -20,8 +20,6 @@
 
 + (MLNotificationManager* )sharedInstance;
 
-@property (nonatomic, weak) UIWindow* window;
-
 /**
  if in chat with this user then dont push messages for this user when not locked
  */

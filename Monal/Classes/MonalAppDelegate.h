@@ -10,16 +10,14 @@
 @import PushKit;
 
 #import "DataLayer.h"
+#import "ActiveChatsViewController.h"
 
 @import UserNotifications;
 
 
 @interface MonalAppDelegate : UIResponder <UIApplicationDelegate, PKPushRegistryDelegate, UNUserNotificationCenterDelegate >
 
-
-@property (nonatomic, strong) UIWindow* window;
-@property (nonatomic, strong) UINavigationController* chatNav;
-@property (nonatomic, strong) UISplitViewController* splitViewController;
+@property (nonatomic, weak) ActiveChatsViewController* activeChats;
 @property (nonatomic, strong) DDFileLogger *fileLogger;
 
 -(void) updateUnread;

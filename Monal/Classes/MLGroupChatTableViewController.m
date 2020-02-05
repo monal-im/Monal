@@ -111,7 +111,7 @@
     NSDictionary *dic = self.favorites[indexPath.row];
     
     NSNumber *account=[dic objectForKey:@"account_id"];
-    [[MLXMPPManager sharedInstance] joinRoom:[dic objectForKey:@"room"] withNick:[dic objectForKey:@"nick"]  andPassword:@"" forAccounId:account.integerValue ];
+    [[MLXMPPManager sharedInstance] joinRoom:[dic objectForKey:@"room"] withNick:[dic objectForKey:@"nick"]  andPassword:@"" forAccounId:account];
     
     xmpp* xmppAccount =[[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%@",account]];
     

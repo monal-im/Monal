@@ -16,6 +16,7 @@
 #import "MLWelcomeViewController.h"
 #import "ContactsViewController.h"
 #import "MLNewViewController.h"
+#import "MonalAppDelegate.h"
 
 @interface ActiveChatsViewController ()
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
@@ -45,10 +46,11 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view.
-    self.navigationItem.title=NSLocalizedString(@"Chats",@"");
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+    
+    MonalAppDelegate *appDelegte = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+    appDelegte.activeChats=self;
     
      self.chatListTable=[[UITableView alloc] init];
      self.chatListTable.delegate=self;

@@ -15,6 +15,7 @@
 #import "NXOAuth2AccountStore.h"
 #import "MLPush.h"
 #import "MLImageManager.h"
+#import "ActiveChatsViewController.h"
 
 #if !TARGET_OS_MACCATALYST
 @import Crashlytics;
@@ -295,7 +296,7 @@
             [[MLXMPPManager sharedInstance] joinRoom:contact.contactJid withNick:account.connectionProperties.identity.user andPassword:mucPassword forAccounId:contact.accountId];
         }
         
-        [self.activeChats presentChatWithRow:contact];
+        [(ActiveChatsViewController *) self.activeChats presentChatWithRow:contact];
     }
 }
 

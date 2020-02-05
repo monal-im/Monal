@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MLContact.h"
 #import <DZNEmptyDataSet/UIScrollView+EmptyDataSet.h>
 
 @interface ActiveChatsViewController : UITableViewController  <DZNEmptyDataSetSource, DZNEmptyDataSetDelegate>

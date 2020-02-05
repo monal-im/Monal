@@ -18,5 +18,6 @@
 @property (nonatomic, weak) IBOutlet UIBarButtonItem *composeButton;
 
 -(void) presentChatWithRow:(MLContact *)row;
+-(void) refreshDisplay;
 
 @end

@@ -251,7 +251,7 @@
                   //no success may mean its already there
                   dispatch_async(dispatch_get_main_queue(), ^{
                         [self presentChatWithRow:selectedContact];
-                      [self refreshDisplay];
+                  
                   });
               }];
             

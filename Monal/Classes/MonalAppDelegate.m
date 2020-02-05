@@ -271,7 +271,7 @@
  */
 -(void) handleURL:(NSURL *) url {
     //TODO just uses fist account. maybe change in the future
-    xmpp *account=[MLXMPPManager sharedInstance].connectedXMPP.firstObject;
+    xmpp *account=[[MLXMPPManager sharedInstance].connectedXMPP.firstObject objectForKey:@"xmppAccount"];;
     if(account) {
         NSURLComponents *components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
         __block MLContact *contact = [[MLContact alloc] init];
@@ -293,7 +293,13 @@
             [[MLXMPPManager sharedInstance] joinRoom:contact.contactJid withNick:account.connectionProperties.identity.user andPassword:mucPassword forAccounId:contact.accountId];
         }
         
-        [(ActiveChatsViewController *) self.activeChats presentChatWithRow:contact];
+        [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId withCompletion:^(BOOL success) {
+            //no success may mean its already there
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [(ActiveChatsViewController *) self.activeChats presentChatWithRow:contact];
+                [(ActiveChatsViewController *) self.activeChats  refreshDisplay];
+            });
+        }];
     }
 }
 

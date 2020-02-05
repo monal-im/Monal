@@ -52,11 +52,10 @@ DEPENDENCIES:
   - TPCircularBuffer
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  https://github.com/CocoaPods/Specs.git:
     - CocoaLumberjack
     - Crashlytics
     - DACircularProgress
-    - DZNEmptyDataSet
     - EAIntroView
     - EARestrictedScrollView
     - Fabric
@@ -73,6 +72,8 @@ SPEC REPOS:
     - SnapKit
     - Sparkle
     - TPCircularBuffer
+  trunk:
+    - DZNEmptyDataSet
 
 SPEC CHECKSUMS:
   CocoaLumberjack: 78b0c238666f4f58db069738ec176f4519557516
@@ -98,4 +99,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 19e46038228df7a272d8160b9aa5f0e1347275c8
 
-COCOAPODS: 1.5.2
+COCOAPODS: 1.8.4

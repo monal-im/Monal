@@ -172,11 +172,8 @@
 #endif
     
     [UNUserNotificationCenter currentNotificationCenter].delegate=self;
-    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateState:) name:kMLHasConnectedNotice object:nil];
-    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
-    
     
     //ios8 register for local notifications and badges
     if([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)])

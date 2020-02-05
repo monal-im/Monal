@@ -16,6 +16,7 @@
 
 @interface MonalAppDelegate : UIResponder <UIApplicationDelegate, PKPushRegistryDelegate, UNUserNotificationCenterDelegate >
 
+@property (nonatomic, strong) UIWindow* window;
 @property (nonatomic, weak) UIViewController* activeChats;
 @property (nonatomic, strong) DDFileLogger *fileLogger;
 

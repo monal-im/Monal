@@ -21,6 +21,7 @@
 @property (nonatomic, strong) DDFileLogger *fileLogger;
 
 -(void) updateUnread;
+-(void) handleURL:(NSURL *) url;
 
 @end
 

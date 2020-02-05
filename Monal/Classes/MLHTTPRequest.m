@@ -89,16 +89,6 @@
             if(!(httpResponse.statusCode>=200 && httpResponse.statusCode<=399))
             {
                 errorReply=[NSError errorWithDomain:@"HTTP" code:httpResponse.statusCode userInfo:@{@"result":[NSHTTPURLResponse localizedStringForStatusCode:httpResponse.statusCode]}];
-#ifdef DEBUG
-//                NSString *response=@"";
-//                
-//                if(data)
-//                {
-//                    response = [NSString stringWithUTF8String:data.bytes];
-//                }
-//                
-//                DDLogError(@"Error: %@ %@", errorReply, response);
-#endif
             }
             else {
                 if([data length]>0) {
@@ -127,7 +117,6 @@
         completion(errorReply,dataReply);
         
     };
-    
     
     if(([verb isEqualToString:kPost]||[verb isEqualToString:kPut])&& dataToSubmit) {
         [[session uploadTaskWithRequest:theRequest fromData:dataToSubmit

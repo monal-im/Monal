@@ -2771,6 +2771,11 @@ static DataLayer *sharedInstance=nil;
         }
         return;
     }
+    
+    if ([messageString hasPrefix:@"xmpp:"]) {
+           messageType=kMessageTypeUrl;
+    }
+    
     if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"]) {
         
         if ([messageString hasPrefix:@"HTTPS://"] ||

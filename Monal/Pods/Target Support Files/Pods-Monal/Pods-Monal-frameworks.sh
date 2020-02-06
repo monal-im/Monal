@@ -143,7 +143,7 @@ strip_invalid_archs() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS/CocoaLumberjack.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack/CocoaLumberjack.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/DACircularProgress/DACircularProgress.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/EAIntroView/EAIntroView.framework"
@@ -155,13 +155,13 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/pop/pop.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS/SAMKeychain.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS/SignalProtocolC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS/SignalProtocolObjC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS/TPCircularBuffer.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer/TPCircularBuffer.framework"
 fi
 if [[ "$CONFIGURATION" == "Adhoc" ]]; then
-  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS/CocoaLumberjack.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack/CocoaLumberjack.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/DACircularProgress/DACircularProgress.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/EAIntroView/EAIntroView.framework"
@@ -173,13 +173,13 @@ if [[ "$CONFIGURATION" == "Adhoc" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/pop/pop.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS/SAMKeychain.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS/SignalProtocolC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS/SignalProtocolObjC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS/TPCircularBuffer.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer/TPCircularBuffer.framework"
 fi
 if [[ "$CONFIGURATION" == "AppStore" ]]; then
-  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack-iOS/CocoaLumberjack.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack/CocoaLumberjack.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/DACircularProgress/DACircularProgress.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/EAIntroView/EAIntroView.framework"
@@ -191,10 +191,10 @@ if [[ "$CONFIGURATION" == "AppStore" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/pop/pop.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain-iOS/SAMKeychain.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC-iOS/SignalProtocolC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC-iOS/SignalProtocolObjC.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer-iOS/TPCircularBuffer.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SAMKeychain/SAMKeychain.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolC/SignalProtocolC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/SignalProtocolObjC/SignalProtocolObjC.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/TPCircularBuffer/TPCircularBuffer.framework"
 fi
 if [ "${COCOAPODS_PARALLEL_CODE_SIGN}" == "true" ]; then
   wait

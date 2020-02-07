@@ -707,14 +707,11 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 }
 
--(void)  joinRoom:(NSString*) roomName  withNick:(NSString *)nick andPassword:(NSString*) password forAccounId:(NSInteger) accountId
+-(void)  joinRoom:(NSString*) roomName  withNick:(NSString *)nick andPassword:(NSString*) password forAccounId:(NSString *) accountId
 {
-    xmpp* account= [self getConnectedAccountForID:[NSString stringWithFormat:@"%ld",accountId]];
+    xmpp* account= [self getConnectedAccountForID:accountId];
     [account joinRoom:roomName withNick:nick andPassword:password];
-
 }
-
-
 
 
 -(void)  joinRoom:(NSString*) roomName  withNick:(NSString *)nick andPassword:(NSString*) password forAccountRow:(NSInteger) row
@@ -743,7 +740,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         {
             NSNumber *autoJoin =[row objectForKey:@"autojoin"] ;
             if(autoJoin.boolValue) {
-                [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[[row objectForKey:@"account_id"] integerValue]];
+                [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[row objectForKey:@"account_id"]];
             }
         }
 

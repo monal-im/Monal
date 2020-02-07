@@ -16,6 +16,7 @@
 #import "MLWelcomeViewController.h"
 #import "ContactsViewController.h"
 #import "MLNewViewController.h"
+#import "MonalAppDelegate.h"
 
 @interface ActiveChatsViewController ()
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
@@ -45,10 +46,11 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view.
-    self.navigationItem.title=NSLocalizedString(@"Chats",@"");
     self.view.backgroundColor=[UIColor lightGrayColor];
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+    
+    MonalAppDelegate *appDelegte = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
+    appDelegte.activeChats=self;
     
      self.chatListTable=[[UITableView alloc] init];
      self.chatListTable.delegate=self;
@@ -68,7 +70,9 @@
     if (@available(iOS 13.0, *)) {
         self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
     } else {
-        // Fallback on earlier versions
+        self.settingsButton.image=[UIImage imageNamed:@"973-user"];
+        self.addButton.image=[UIImage imageNamed:@"907-plus-rounded-square"];
+        self.composeButton.image=[UIImage imageNamed:@"704-compose"];
     }
     #endif
     
@@ -118,7 +122,6 @@
         __block BOOL contactInList=NO;
         
         [self.chatListTable performBatchUpdates:^{
-            __block BOOL contactInList=NO;
             [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 MLContact *rowContact = (MLContact *) obj;
                 if([rowContact.contactJid isEqualToString:message.from]) {
@@ -127,6 +130,7 @@
                     [self.chatListTable beginUpdates];
                     [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                     [self.chatListTable endUpdates];
+                    *stop=YES;
                 }
             }];
         }
@@ -247,7 +251,7 @@
                   //no success may mean its already there
                   dispatch_async(dispatch_get_main_queue(), ^{
                         [self presentChatWithRow:selectedContact];
-                      [self refreshDisplay];
+                  
                   });
               }];
             

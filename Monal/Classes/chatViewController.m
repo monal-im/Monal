@@ -21,6 +21,8 @@
 #import "MLXMPPActivityItem.h"
 #import "MLImageManager.h"
 #import "DataLayer.h"
+#import "AESGcm.h"
+#import "EncodingTools.h"
 
 @import QuartzCore;
 @import MobileCoreServices;
@@ -89,7 +91,6 @@
     
     [nc addObserver:self selector:@selector(dismissKeyboard:) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
-    [nc addObserver:self selector:@selector(handleBackground) name:UIApplicationWillResignActiveNotification object:nil];
     
     [nc addObserver:self selector:@selector(keyboardDidShow:)
                                                  name:UIKeyboardDidShowNotification object:nil];
@@ -100,8 +101,6 @@
     [nc addObserver:self selector:@selector(keyboardWillShow:)
                                                  name:UIKeyboardWillShowNotification object:nil];
     
-    
-    
     [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
@@ -109,16 +108,12 @@
   
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 
-    
     self.hidesBottomBarWhenPushed=YES;
     
     self.chatInput.layer.borderColor=[UIColor lightGrayColor].CGColor;
     self.chatInput.layer.cornerRadius=3.0f;
     self.chatInput.layer.borderWidth=0.5f;
     self.chatInput.textContainerInset=UIEdgeInsetsMake(5, 0, 5, 0);
-    
-    //    self.inputContainerView.layer.borderColor=[UIColor lightGrayColor].CGColor;
-    //    self.inputContainerView.layer.borderWidth=0.5f;
 
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight=UITableViewAutomaticDimension;
@@ -132,16 +127,21 @@
         self.tableviewBottom.constant+=20;
     #endif
         
+
+    #if !TARGET_OS_MACCATALYST
+     if (@available(iOS 13.0, *)) {
+         
+     } else {
+         [self.sendButton setImage:[UIImage imageNamed:@"648-paper-airplane"] forState:UIControlStateNormal];
+         [self.pictureButton setImage:[UIImage imageNamed:@"714-camera"] forState:UIControlStateNormal];
+     }
+     #endif
+    
 }
 
 -(void) handleForeGround {
     [self refreshData];
     [self reloadTable];
-}
-
-
--(void) handleBackground {
-    [self refreshCounter];
 }
 
 /**
@@ -240,8 +240,11 @@
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     [xmppAccount subscribeOMEMODevicesFrom:self.contact.contactJid];
 #endif
-
-
+   
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self refreshCounter];
+    });
+    
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -249,9 +252,7 @@
     [super viewWillDisappear:animated];
     [MLNotificationManager sharedInstance].currentAccountNo=nil;
     [MLNotificationManager sharedInstance].currentContact=nil;
-    
-    [self refreshCounter];
-    
+        
 }
 
 - (void)viewDidLayoutSubviews {
@@ -316,9 +317,7 @@
         [appDelegate updateUnread];
         
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
-          
     }
-    
 }
 
 -(void) refreshData
@@ -529,9 +528,21 @@
         self.uploadHUD.detailsLabel.text =@"Uploading file to server";
         
     }
+    NSData *decryptedData= data;
+    NSData *dataToPass= data;
+    MLEncryptedPayload *encrypted;
     
+    int keySize=32;
+    if(self.encryptChat) {
+        encrypted = [AESGcm encrypt:decryptedData keySize:keySize];
+        if(encrypted) {
+            dataToPass = encrypted.body;
+        } else  {
+            DDLogError(@"Could not encrypt attachment");
+        }
+    }
     
-    [[MLXMPPManager sharedInstance]  httpUploadJpegData:data toContact:self.contact.contactJid onAccount:self.contact.accountId withCompletionHandler:^(NSString *url, NSError *error) {
+    [[MLXMPPManager sharedInstance]  httpUploadJpegData:dataToPass toContact:self.contact.contactJid onAccount:self.contact.accountId withCompletionHandler:^(NSString *url, NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
             self.uploadHUD.hidden=YES;
             
@@ -543,8 +554,25 @@
                 BOOL isMucCopy = self.contact.isGroup;
                 BOOL encryptChatCopy = self.encryptChat;
                 
-                [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID withCompletion:^(BOOL success) {
-                    [[MLXMPPManager sharedInstance] sendMessage:url toContact:contactJidCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:YES messageId:newMessageID
+                NSString *urlToPass=url;
+                
+                if(encrypted) {
+                    NSURLComponents *urlComponents = [NSURLComponents componentsWithURL:[NSURL URLWithString:urlToPass] resolvingAgainstBaseURL:NO];
+                    if(urlComponents) {
+                    urlComponents.scheme = @"aesgcm";
+                    urlComponents.fragment = [NSString stringWithFormat:@"%@%@",
+                                              [EncodingTools hexadecimalString:encrypted.iv],
+                                              [EncodingTools hexadecimalString:[encrypted.key subdataWithRange:NSMakeRange(0, keySize)]]];
+                        urlToPass=urlComponents.string;
+                    } else  {
+                        DDLogError(@"Could not parse url for aesgcm conversion");
+                    }
+                }
+                
+                [[MLImageManager sharedInstance] saveImageData:decryptedData forLink:urlToPass];
+                
+                [self addMessageto:self.contact.contactJid withMessage:urlToPass andId:newMessageID withCompletion:^(BOOL success) {
+                    [[MLXMPPManager sharedInstance] sendMessage:urlToPass toContact:contactJidCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:YES messageId:newMessageID
                                           withCompletionHandler:nil];
                     
                 }];
@@ -1278,7 +1306,7 @@
         
         if(message.messageId)
         {
-            [[DataLayer sharedInstance] deleteMessageHistory:message.messageId];
+            [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
         }
         else
         {

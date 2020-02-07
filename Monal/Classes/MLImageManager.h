@@ -67,4 +67,6 @@
  Purge cache in the event of  a memory warning
  */
 -(void) purgeCache;
+
+-(void) saveImageData:(NSData *) data forLink:(NSString *) link;
 @end

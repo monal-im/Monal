@@ -9,6 +9,7 @@
 #import "MLLinkCell.h"
 #import "MLMetaInfo.h"
 #import "UIImageView+WebCache.h"
+#import "MonalAppDelegate.h"
 @import SafariServices;
 
 
@@ -34,8 +35,14 @@
     if(self.link)
     {
         NSURL *url= [NSURL URLWithString:self.link];
+        if([url.scheme isEqualToString:@"xmpp"] )
+        {
+            MonalAppDelegate* delegate =(MonalAppDelegate*) [UIApplication sharedApplication].delegate;
+            [delegate handleURL:url];
+        }
         
-        if ([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"]) {
+        else if ([url.scheme isEqualToString:@"http"] ||
+                 [url.scheme isEqualToString:@"https"]) {
             SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:url];
             [self.parent presentViewController:safariView animated:YES completion:nil];
         }

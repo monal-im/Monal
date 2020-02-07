@@ -15,6 +15,7 @@
 #import "NXOAuth2AccountStore.h"
 #import "MLPush.h"
 #import "MLImageManager.h"
+#import "ActiveChatsViewController.h"
 
 #if !TARGET_OS_MACCATALYST
 @import Crashlytics;
@@ -25,14 +26,6 @@
 
 #import "MLXMPPManager.h"
 #import "UIColor+Theme.h"
-
-@interface MonalAppDelegate ()
-
-@property (nonatomic, strong)  UITabBarItem* activeTab;
-
-@end
-
-
 
 @implementation MonalAppDelegate
 
@@ -50,15 +43,9 @@
         [[UINavigationBar appearance] setScrollEdgeAppearance:appearance];
         [[UINavigationBar appearance] setStandardAppearance:appearance];
     }
-    
-    
     [[UINavigationBar appearance] setPrefersLargeTitles:YES];
-    
-    
     [[UITabBar appearance] setTintColor:monaldarkGreen];
 }
-
-
 
 #pragma mark -  APNS notificaion
 
@@ -74,7 +61,6 @@
     DDLogError(@"push reg error %@", error);
     
 }
-
 
 #pragma mark - VOIP notification
 #if !TARGET_OS_MACCATALYST
@@ -143,29 +129,21 @@
 -(void) updateUnread
 {
     //make sure unread badge matches application badge
-    
     [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber *result) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            
-            NSInteger unread =0;
-            if(result)
-            {
-                unread= [result integerValue];
+            NSInteger unread = 0;
+            if(result) {
+                unread = [result integerValue];
             }
             
-            if(unread>0)
-            {
-                self->_activeTab.badgeValue=[NSString stringWithFormat:@"%ld",(long)unread];
-                [UIApplication sharedApplication].applicationIconBadgeNumber =unread;
+            if(unread>0) {
+                [UIApplication sharedApplication].applicationIconBadgeNumber = unread;
             }
-            else
-            {
-                self->_activeTab.badgeValue=nil;
-                [UIApplication sharedApplication].applicationIconBadgeNumber =0;
+            else {
+                [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
             }
         });
     }];
-    
 }
 
 #pragma mark - app life cycle
@@ -179,8 +157,8 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-        [DDLog addLogger:[DDOSLogger sharedInstance]];
-   
+    [DDLog addLogger:[DDOSLogger sharedInstance]];
+    
 #ifdef  DEBUG
     
 #ifndef TARGET_IPHONE_SIMULATOR
@@ -193,12 +171,9 @@
     
 #endif
     
-        [UNUserNotificationCenter currentNotificationCenter].delegate=self;
-    
-       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateState:) name:kMLHasConnectedNotice object:nil];
-    
+    [UNUserNotificationCenter currentNotificationCenter].delegate=self;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateState:) name:kMLHasConnectedNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
-    
     
     //ios8 register for local notifications and badges
     if([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)])
@@ -219,7 +194,7 @@
         
         UIMutableUserNotificationCategory *extensionCategory = [[UIMutableUserNotificationCategory alloc] init];
         extensionCategory.identifier = @"Extension";
-             
+        
         categories = [NSSet setWithObjects:actionCategory,extensionCategory,nil];
         
         UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge categories:nil];
@@ -228,7 +203,7 @@
     
     //register for voip push using pushkit
     if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) {
-          // if we are launched in the background, it was from a push. dont do this again.
+        // if we are launched in the background, it was from a push. dont do this again.
         if (@available(iOS 13.0, *)) {
             //no more voip mode after ios 13
             if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasUpgradedPushiOS13"]) {
@@ -236,35 +211,33 @@
                 [push unregisterVOIPPush];
                 [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasUpgradedPushiOS13"];
             }
-
+            
             [[UIApplication sharedApplication] registerForRemoteNotifications];
-           }
-           else {
-              #if !TARGET_OS_MACCATALYST
-                      [self voipRegistration];
-            #endif
-           }
+        }
+        else {
+#if !TARGET_OS_MACCATALYST
+            [self voipRegistration];
+#endif
+        }
     }
     else  {
         [MLXMPPManager sharedInstance].pushNode = [[NSUserDefaults standardUserDefaults] objectForKey:@"pushNode"];
         [MLXMPPManager sharedInstance].pushSecret=[[NSUserDefaults standardUserDefaults] objectForKey:@"pushSecret"];
         [MLXMPPManager sharedInstance].hasAPNSToken=YES;
-           NSLog(@"push node %@", [MLXMPPManager sharedInstance].pushNode); 
+        NSLog(@"push node %@", [MLXMPPManager sharedInstance].pushNode);
     }
     
     [self setUISettings];
-    
-    [MLNotificationManager sharedInstance].window=self.window;
-    
+
     // should any accounts connect?
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     
-    #if !TARGET_OS_MACCATALYST
+#if !TARGET_OS_MACCATALYST
     BOOL optout = [[NSUserDefaults standardUserDefaults] boolForKey:@"CrashlyticsOptOut"];
     if(!optout) {
         [Fabric with:@[[Crashlytics class]]];
     }
-    #endif
+#endif
     
     //update logs if needed
     if(! [[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])
@@ -272,7 +245,6 @@
         [[DataLayer sharedInstance] messageHistoryCleanAll];
     }
     
-
     DDLogInfo(@"App started");
     return YES;
 }
@@ -290,17 +262,59 @@
     return data?YES:NO;
 }
 
+/**
+ xmpp:romeo@montague.net?message;subject=Test%20Message;body=Here%27s%20a%20test%20message
+          or
+ xmpp:coven@chat.shakespeare.lit?join;password=cauldronburn
+         
+ @link https://xmpp.org/extensions/xep-0147.html
+ */
+-(void) handleURL:(NSURL *) url {
+    //TODO just uses fist account. maybe change in the future
+    xmpp *account=[[MLXMPPManager sharedInstance].connectedXMPP.firstObject objectForKey:@"xmppAccount"];;
+    if(account) {
+        NSURLComponents *components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
+        __block MLContact *contact = [[MLContact alloc] init];
+        contact.contactJid= components.path;
+        contact.accountId=account.accountNo;
+        __block NSString *mucPassword;
+        
+        [components.queryItems enumerateObjectsUsingBlock:^(NSURLQueryItem * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if([obj.name isEqualToString:@"join"]) {
+                contact.isGroup=YES;
+            }
+            if([obj.name isEqualToString:@"password"]) {
+                mucPassword=obj.value;
+            }
+        }];
+        
+        if(contact.isGroup) {
+            //TODO maybe default nick once we have defined one
+            [[MLXMPPManager sharedInstance] joinRoom:contact.contactJid withNick:account.connectionProperties.identity.user andPassword:mucPassword forAccounId:contact.accountId];
+        }
+        
+        [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId withCompletion:^(BOOL success) {
+            //no success may mean its already there
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [(ActiveChatsViewController *) self.activeChats presentChatWithRow:contact];
+                [(ActiveChatsViewController *) self.activeChats  refreshDisplay];
+            });
+        }];
+    }
+}
 
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
 {
-    if([url.scheme isEqualToString:@"file"])
+    if([url.scheme isEqualToString:@"file"]) // for airdrop
     {
         return [self openFile:url];
     }
-    if([url.scheme isEqualToString:@"xmpp"])
+    if([url.scheme isEqualToString:@"xmpp"]) //for links
     {
+        [self handleURL:url];
         return YES;
     }
+    //TODO remove when we remove google support
     if([url.scheme isEqualToString:@"com.googleusercontent.apps.472865344000-invcngpma1psmiek5imc1gb8u7mef8l9"])
     {
         [[NXOAuth2AccountStore sharedStore] handleRedirectURL:url];
@@ -327,8 +341,6 @@
     //iphone
     //make sure tab 0 for chat
     if([notification.userInfo objectForKey:@"from"]) {
-        [self.tabBarController setSelectedIndex:0];
-
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalPresentChat object:nil  userInfo:notification.userInfo];
         
     }

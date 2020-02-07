@@ -209,18 +209,18 @@ extern NSString *const kMessageTypeUrl;
 /**
  sets a preview info for a specified message
  */
--(void) setMessageId:(NSString*) messageid previewText:(NSString *) text andPreviewImage:(NSString *) image;
+-(void) setMessageId:(NSString *) messageid previewText:(NSString *) text andPreviewImage:(NSString *) image;
 
--(void) clearMessages:(NSString*) accountNo;
--(void) deleteMessageHistory:(NSString*) messageNo;
+-(void) clearMessages:(NSString *) accountNo;
+-(void) deleteMessageHistory:(NSNumber *) messageNo;
 
 #pragma mark - message history
--(NSMutableArray*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
--(NSArray*) allMessagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
--(void) lastMessageForContact:(NSString*) contact forAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion;
+-(NSMutableArray *) messagesForContact:(NSString *) buddy forAccount:(NSString *) accountNo;
+-(NSArray *) allMessagesForContact:(NSString* ) buddy forAccount:(NSString *) accountNo;
+-(void) lastMessageForContact:(NSString *) contact forAccount:(NSString *) accountNo withCompletion:(void (^)(NSMutableArray *))completion;
 
--(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo;
--(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date;
+-(NSArray *) messageHistoryListDates:(NSString *) buddy forAccount: (NSString *) accountNo;
+-(NSArray *) messageHistoryDate:(NSString *) buddy forAccount:(NSString *) accountNo forDate:(NSString*) date;
 
 /**
  retrieves the date of the the last message to or from this contact

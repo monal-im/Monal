@@ -32,11 +32,14 @@
 @property (nonatomic, weak) IBOutlet MLResizingTextView* chatInput;
 @property (nonatomic, weak) IBOutlet UILabel* placeHolderText;
 @property (nonatomic, weak) IBOutlet UIButton* sendButton;
+@property (nonatomic, weak) IBOutlet UIButton *pictureButton;
+
 @property (nonatomic, weak) IBOutlet UIView* inputContainerView;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint* tableviewBottom;
 
 @property (nonatomic, weak) IBOutlet UIImageView* backgroundImage;
 @property (nonatomic, weak) IBOutlet UIView* transparentLayer;
+
 
 @property (nonatomic, strong) NSString* day;
 @property (nonatomic, strong) MLContact* contact;

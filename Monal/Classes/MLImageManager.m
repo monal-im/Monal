@@ -21,6 +21,7 @@
 
 @property  (nonatomic, strong) NSCache *iconCache;
 @property  (nonatomic, strong) NSCache *imageCache;
+
 @property  (nonatomic, strong) NSOperationQueue *fileQueue;
 #if TARGET_OS_IPHONE
 @property  (nonatomic, strong) UIImage *noIcon;
@@ -467,6 +468,14 @@ Provides temp url
     }];
 }
 
+-(void) saveImageData:(NSData *) data forLink:(NSString *) link
+{
+    [self.fileQueue addOperationWithBlock:^{
+        NSString *path =  [self savefilePathforURL:link];
+        [data writeToFile:path atomically:YES];
+        [self.imageCache setObject:data forKey:link];
+    }];
+}
 
 - (void) attachmentDataFromEncryptedLink:(NSString *) link withCompletion:(void (^)(NSData * _Nullable data)) completionHandler {
     if ([link hasPrefix:@"aesgcm://"])
@@ -476,10 +485,14 @@ Provides temp url
         if(parts.count>1) {
             NSString *url = parts[0];
             NSString *crypto = parts[1];
-            if(crypto.length>=96) {
+            if(crypto.length>=88) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    NSString *ivHex =[crypto substringToIndex:32];
-                    NSString *keyHex =[crypto substringWithRange:NSMakeRange(32, 64)];
+                    
+                    int ivLength=24; //note wont work on catalyst
+                    if(crypto.length==96) ivLength=32;
+                    
+                    NSString *ivHex =[crypto substringToIndex:ivLength];
+                    NSString *keyHex =[crypto substringWithRange:NSMakeRange(ivLength, 64)];
                     NSURLSession *session = [NSURLSession sharedSession];
                     [[session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
                         
@@ -489,17 +502,17 @@ Provides temp url
                         
                         NSData *decrypted;
                         NSData *downloaded= [NSData dataWithContentsOfURL:location];
-                        if(downloaded && downloaded.length>0) {
+                        if(downloaded && downloaded.length>0 && key && iv) {
                             decrypted=[AESGcm decrypt:downloaded withKey:key andIv:iv withAuth:nil];
+                            [self.fileQueue addOperationWithBlock:^{
+                                                   NSString *path =  [self savefilePathforURL:link];
+                                                   [decrypted writeToFile:path atomically:YES];
+                                                   if(decrypted) [self.imageCache setObject:decrypted forKey:link];
+                                                   if(completionHandler) completionHandler(decrypted);
+                                                    }];
                         } else {
                             DDLogError(@"no data from aesgcm link, error %@", error);
                         }
-                         [self.fileQueue addOperationWithBlock:^{
-                        NSString *path =  [self savefilePathforURL:link];
-                        [decrypted writeToFile:path atomically:YES];
-                        if(downloaded) [self.imageCache setObject:downloaded forKey:link];
-                        if(completionHandler) completionHandler(decrypted);
-                         }];
                         
                     }] resume];
                 });

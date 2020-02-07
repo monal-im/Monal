@@ -1695,7 +1695,7 @@ static DataLayer *sharedInstance=nil;
 
 
 
--(void) deleteMessageHistory:(NSString*) messageNo
+-(void) deleteMessageHistory:(NSNumber*) messageNo
 {
     NSString* query=[NSString stringWithFormat:@"delete from message_history where message_history_id=%@", messageNo];
     [self executeNonQuery:query withCompletion:nil];
@@ -2771,6 +2771,11 @@ static DataLayer *sharedInstance=nil;
         }
         return;
     }
+    
+    if ([messageString hasPrefix:@"xmpp:"]) {
+           messageType=kMessageTypeUrl;
+    }
+    
     if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"]) {
         
         if ([messageString hasPrefix:@"HTTPS://"] ||

@@ -26,7 +26,7 @@
 -(void) testEncrypt {
     NSString *decrypted = @"Hi";
     NSData *data = [decrypted dataUsingEncoding:NSUTF8StringEncoding];
-    MLEncryptedPayload *payload = [AESGcm encrypt:data];
+    MLEncryptedPayload *payload = [AESGcm encrypt:data keySize:16];
     
     NSData *key=[payload.key subdataWithRange:NSMakeRange(0,16)];
     NSData *auth=[payload.key subdataWithRange:NSMakeRange(16,16)];

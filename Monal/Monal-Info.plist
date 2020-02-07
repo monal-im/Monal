@@ -44,15 +44,13 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.472865344000-invcngpma1psmiek5imc1gb8u7mef8l9</string>
+				<string>xmpp</string>
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>db-a134q2ecj1hqa59</string>
+				<string>com.googleusercontent.apps.472865344000-invcngpma1psmiek5imc1gb8u7mef8l9</string>
 			</array>
 		</dict>
 	</array>

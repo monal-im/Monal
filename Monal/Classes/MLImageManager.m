@@ -21,6 +21,7 @@
 
 @property  (nonatomic, strong) NSCache *iconCache;
 @property  (nonatomic, strong) NSCache *imageCache;
+
 @property  (nonatomic, strong) NSOperationQueue *fileQueue;
 #if TARGET_OS_IPHONE
 @property  (nonatomic, strong) UIImage *noIcon;
@@ -467,6 +468,14 @@ Provides temp url
     }];
 }
 
+-(void) saveImageData:(NSData *) data forLink:(NSString *) link
+{
+    [self.fileQueue addOperationWithBlock:^{
+        NSString *path =  [self savefilePathforURL:link];
+        [data writeToFile:path atomically:YES];
+        [self.imageCache setObject:data forKey:link];
+    }];
+}
 
 - (void) attachmentDataFromEncryptedLink:(NSString *) link withCompletion:(void (^)(NSData * _Nullable data)) completionHandler {
     if ([link hasPrefix:@"aesgcm://"])

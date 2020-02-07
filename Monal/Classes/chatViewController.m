@@ -518,18 +518,20 @@
         self.uploadHUD.detailsLabel.text =@"Uploading file to server";
         
     }
+    NSData *decryptedData= data;
+    NSData *dataToPass= data;
     MLEncryptedPayload *encrypted;
     
     if(self.encryptChat) {
-        encrypted = [AESGcm encrypt:data];
+        encrypted = [AESGcm encrypt:decryptedData];
         if(encrypted) {
-            data = encrypted.body;
+            dataToPass = encrypted.body;
         } else  {
             DDLogError(@"Could not encrypt attachment");
         }
     }
     
-    [[MLXMPPManager sharedInstance]  httpUploadJpegData:data toContact:self.contact.contactJid onAccount:self.contact.accountId withCompletionHandler:^(NSString *url, NSError *error) {
+    [[MLXMPPManager sharedInstance]  httpUploadJpegData:dataToPass toContact:self.contact.contactJid onAccount:self.contact.accountId withCompletionHandler:^(NSString *url, NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
             self.uploadHUD.hidden=YES;
             
@@ -555,6 +557,8 @@
                         DDLogError(@"Could not parse url for aesgcm conversion");
                     }
                 }
+                
+                [[MLImageManager sharedInstance] saveImageData:decryptedData forLink:urlToPass];
                 
                 [self addMessageto:self.contact.contactJid withMessage:urlToPass andId:newMessageID withCompletion:^(BOOL success) {
                     [[MLXMPPManager sharedInstance] sendMessage:urlToPass toContact:contactJidCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:YES messageId:newMessageID

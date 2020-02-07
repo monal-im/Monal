@@ -476,10 +476,14 @@ Provides temp url
         if(parts.count>1) {
             NSString *url = parts[0];
             NSString *crypto = parts[1];
-            if(crypto.length>=96) {
+            if(crypto.length>=88) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    NSString *ivHex =[crypto substringToIndex:32];
-                    NSString *keyHex =[crypto substringWithRange:NSMakeRange(32, 64)];
+                    
+                    int ivLength=24; //note wont work on catalyst
+                    if(crypto.length==96) ivLength=32;
+                    
+                    NSString *ivHex =[crypto substringToIndex:ivLength];
+                    NSString *keyHex =[crypto substringWithRange:NSMakeRange(ivLength, 64)];
                     NSURLSession *session = [NSURLSession sharedSession];
                     [[session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
                         

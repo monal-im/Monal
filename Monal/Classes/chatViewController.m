@@ -1291,7 +1291,7 @@
         
         if(message.messageId)
         {
-            [[DataLayer sharedInstance] deleteMessageHistory:message.messageId];
+            [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
         }
         else
         {

@@ -54,13 +54,13 @@
 
     ctx = EVP_CIPHER_CTX_new();
     /* Set cipher type and mode */
-    // if(key.length==16) {
-    EVP_EncryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
-    // }
-
-//     if(key.length==32) {
-//     EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL);
-//     }
+    if(keySize==16) {
+        EVP_EncryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
+    }
+    
+    if(keySize==32) {
+        EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL);
+    }
     /* Set IV length if default 96 bits is not approp riate */
     EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, (int) gcmiv.length, NULL);
     /* Initialise key and IV */

@@ -559,7 +559,7 @@
                     }
                 }
                 
-               // [[MLImageManager sharedInstance] saveImageData:decryptedData forLink:urlToPass];
+                [[MLImageManager sharedInstance] saveImageData:decryptedData forLink:urlToPass];
                 
                 [self addMessageto:self.contact.contactJid withMessage:urlToPass andId:newMessageID withCompletion:^(BOOL success) {
                     [[MLXMPPManager sharedInstance] sendMessage:urlToPass toContact:contactJidCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:YES messageId:newMessageID

@@ -46,6 +46,8 @@
 		262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 262E51961AD8CB7200788351 /* MLTextInputCell.xib */; };
 		2633CB4723215558006D0277 /* MLXMPPActivityItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB4623215558006D0277 /* MLXMPPActivityItem.m */; };
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
+		2635BB5723EE0FE9005E8401 /* MLCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; };
+		2635BB5823EE0FE9005E8401 /* MLCrypto.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
 		2638008B2374816D00144929 /* NotificaionService.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 260773C0232FC4E800BFD50F /* NotificaionService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		263BC64F218BEE9F00FA0203 /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
@@ -277,6 +279,13 @@
 			remoteGlobalIDString = 1D6058900D05DD3D006BFB54;
 			remoteInfo = Monal;
 		};
+		2635BB5323EE0FDB005E8401 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 26A711D723C4D67300FC6A86 /* MLCrypto.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 26A711BC23C4D67300FC6A86;
+			remoteInfo = MLCrypto;
+		};
 		263800892374814000144929 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -342,6 +351,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				2635BB5823EE0FE9005E8401 /* MLCrypto.framework in Embed Frameworks */,
 				261E542623A0A1D300394F59 /* monalxmpp.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -807,6 +817,7 @@
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */,
+				2635BB5723EE0FE9005E8401 /* MLCrypto.framework in Frameworks */,
 				2601D9D40FBF262E004DB939 /* libsqlite3.dylib in Frameworks */,
 				26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */,
 				261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */,
@@ -1748,6 +1759,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				2635BB5423EE0FDB005E8401 /* PBXTargetDependency */,
 				26CC579823A0867400ABB92A /* PBXTargetDependency */,
 				2638008A2374814000144929 /* PBXTargetDependency */,
 				26AA701B2146BBB900598605 /* PBXTargetDependency */,
@@ -2037,7 +2049,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-Monal Tests/Pods-Monal Tests-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack/CocoaLumberjack.framework",
 				"${BUILT_PRODUCTS_DIR}/SAMKeychain/SAMKeychain.framework",
 				"${BUILT_PRODUCTS_DIR}/SignalProtocolC/SignalProtocolC.framework",
@@ -2054,7 +2066,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Monal Tests/Pods-Monal Tests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		1F803E9D8411BA33D0C0AE27 /* [CP] Embed Pods Frameworks */ = {
@@ -2063,10 +2075,9 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack/CocoaLumberjack.framework",
 				"${BUILT_PRODUCTS_DIR}/DACircularProgress/DACircularProgress.framework",
-				"${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework",
 				"${BUILT_PRODUCTS_DIR}/EAIntroView/EAIntroView.framework",
 				"${BUILT_PRODUCTS_DIR}/EARestrictedScrollView/EARestrictedScrollView.framework",
 				"${BUILT_PRODUCTS_DIR}/IDMPhotoBrowser/IDMPhotoBrowser.framework",
@@ -2085,7 +2096,6 @@
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CocoaLumberjack.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DACircularProgress.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DZNEmptyDataSet.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/EAIntroView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/EARestrictedScrollView.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IDMPhotoBrowser.framework",
@@ -2102,7 +2112,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		24612D6D814D34634030DF43 /* [CP] Check Pods Manifest.lock */ = {
@@ -2484,6 +2494,11 @@
 			isa = PBXTargetDependency;
 			target = 1D6058900D05DD3D006BFB54 /* Monal */;
 			targetProxy = 261E542B23A0A5F700394F59 /* PBXContainerItemProxy */;
+		};
+		2635BB5423EE0FDB005E8401 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = MLCrypto;
+			targetProxy = 2635BB5323EE0FDB005E8401 /* PBXContainerItemProxy */;
 		};
 		2638008A2374814000144929 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

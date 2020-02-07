@@ -21,6 +21,8 @@
 #import "MLXMPPActivityItem.h"
 #import "MLImageManager.h"
 #import "DataLayer.h"
+#import "AESGcm.h"
+#import "EncodingTools.h"
 
 @import QuartzCore;
 @import MobileCoreServices;
@@ -516,7 +518,16 @@
         self.uploadHUD.detailsLabel.text =@"Uploading file to server";
         
     }
+    MLEncryptedPayload *encrypted;
     
+    if(self.encryptChat) {
+        encrypted = [AESGcm encrypt:data];
+        if(encrypted) {
+            data = encrypted.body;
+        } else  {
+            DDLogError(@"Could not encrypt attachment");
+        }
+    }
     
     [[MLXMPPManager sharedInstance]  httpUploadJpegData:data toContact:self.contact.contactJid onAccount:self.contact.accountId withCompletionHandler:^(NSString *url, NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -530,7 +541,22 @@
                 BOOL isMucCopy = self.contact.isGroup;
                 BOOL encryptChatCopy = self.encryptChat;
                 
-                [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID withCompletion:^(BOOL success) {
+                NSString *urlToPass=url;
+                
+                if(encrypted) {
+                    NSURLComponents *urlComponents = [NSURLComponents componentsWithURL:[NSURL URLWithString:urlToPass] resolvingAgainstBaseURL:NO];
+                    if(urlComponents) {
+                    urlComponents.scheme = @"aesgcm";
+                    urlComponents.fragment = [NSString stringWithFormat:@"%@%@",
+                                              [EncodingTools hexadecimalString:  encrypted.iv],
+                                              [EncodingTools hexadecimalString:encrypted.key]];
+                        urlToPass=urlComponents.string;
+                    } else  {
+                        DDLogError(@"Could not parse url for aesgcm conversion");
+                    }
+                }
+                
+                [self addMessageto:self.contact.contactJid withMessage:urlToPass andId:newMessageID withCompletion:^(BOOL success) {
                     [[MLXMPPManager sharedInstance] sendMessage:url toContact:contactJidCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:YES messageId:newMessageID
                                           withCompletionHandler:nil];
                     

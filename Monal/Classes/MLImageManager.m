@@ -489,17 +489,17 @@ Provides temp url
                         
                         NSData *decrypted;
                         NSData *downloaded= [NSData dataWithContentsOfURL:location];
-                        if(downloaded && downloaded.length>0) {
+                        if(downloaded && downloaded.length>0 && key && iv) {
                             decrypted=[AESGcm decrypt:downloaded withKey:key andIv:iv withAuth:nil];
+                            [self.fileQueue addOperationWithBlock:^{
+                                                   NSString *path =  [self savefilePathforURL:link];
+                                                   [decrypted writeToFile:path atomically:YES];
+                                                   if(downloaded) [self.imageCache setObject:downloaded forKey:link];
+                                                   if(completionHandler) completionHandler(decrypted);
+                                                    }];
                         } else {
                             DDLogError(@"no data from aesgcm link, error %@", error);
                         }
-                         [self.fileQueue addOperationWithBlock:^{
-                        NSString *path =  [self savefilePathforURL:link];
-                        [decrypted writeToFile:path atomically:YES];
-                        if(downloaded) [self.imageCache setObject:downloaded forKey:link];
-                        if(completionHandler) completionHandler(decrypted);
-                         }];
                         
                     }] resume];
                 });

@@ -507,7 +507,7 @@ Provides temp url
                             [self.fileQueue addOperationWithBlock:^{
                                                    NSString *path =  [self savefilePathforURL:link];
                                                    [decrypted writeToFile:path atomically:YES];
-                                                   if(downloaded) [self.imageCache setObject:downloaded forKey:link];
+                                                   if(decrypted) [self.imageCache setObject:decrypted forKey:link];
                                                    if(completionHandler) completionHandler(decrypted);
                                                     }];
                         } else {

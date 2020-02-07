@@ -2103,7 +2103,7 @@ static NSMutableArray *extracted(xmpp *object) {
             
             NSData *messageBytes=[message dataUsingEncoding:NSUTF8StringEncoding];
             
-            MLEncryptedPayload *encryptedPayload = [AESGcm encrypt:messageBytes];
+            MLEncryptedPayload *encryptedPayload = [AESGcm encrypt:messageBytes keySize:16];
             
             MLXMLNode *encrypted =[[MLXMLNode alloc] initWithElement:@"encrypted"];
             [encrypted.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:kXMLNS];

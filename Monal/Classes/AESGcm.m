@@ -15,7 +15,7 @@
 
 @implementation AESGcm
 
-+ (MLEncryptedPayload *) encrypt:(NSData *)body {
++ (MLEncryptedPayload *) encrypt:(NSData *)body keySize:(int) keySize {
   
 //    MLCrypto *crypto = [[MLCrypto alloc] init];
 //
@@ -40,13 +40,13 @@
 
     //genreate key and iv
 
-    unsigned char key[16];
+    unsigned char key[keySize];
     RAND_bytes(key, sizeof(key));
 
     unsigned char iv[12];
     RAND_bytes(iv, sizeof(iv));
 
-    NSData *gcmKey = [[NSData alloc] initWithBytes:key length:16];
+    NSData *gcmKey = [[NSData alloc] initWithBytes:key length:keySize];
 
     NSData *gcmiv= [[NSData alloc] initWithBytes:iv length:12];
 

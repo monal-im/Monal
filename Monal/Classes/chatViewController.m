@@ -522,8 +522,9 @@
     NSData *dataToPass= data;
     MLEncryptedPayload *encrypted;
     
+    int keySize=32;
     if(self.encryptChat) {
-        encrypted = [AESGcm encrypt:decryptedData];
+        encrypted = [AESGcm encrypt:decryptedData keySize:keySize];
         if(encrypted) {
             dataToPass = encrypted.body;
         } else  {
@@ -550,15 +551,15 @@
                     if(urlComponents) {
                     urlComponents.scheme = @"aesgcm";
                     urlComponents.fragment = [NSString stringWithFormat:@"%@%@",
-                                              [EncodingTools hexadecimalString:  encrypted.iv],
-                                              [EncodingTools hexadecimalString:encrypted.key]];
+                                              [EncodingTools hexadecimalString:encrypted.iv],
+                                              [EncodingTools hexadecimalString:[encrypted.key subdataWithRange:NSMakeRange(0, keySize)]]];
                         urlToPass=urlComponents.string;
                     } else  {
                         DDLogError(@"Could not parse url for aesgcm conversion");
                     }
                 }
                 
-                [[MLImageManager sharedInstance] saveImageData:decryptedData forLink:urlToPass];
+               // [[MLImageManager sharedInstance] saveImageData:decryptedData forLink:urlToPass];
                 
                 [self addMessageto:self.contact.contactJid withMessage:urlToPass andId:newMessageID withCompletion:^(BOOL success) {
                     [[MLXMPPManager sharedInstance] sendMessage:urlToPass toContact:contactJidCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:YES messageId:newMessageID

@@ -50,7 +50,7 @@ DEPENDENCIES:
   - TPCircularBuffer
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  https://github.com/CocoaPods/Specs.git:
     - CocoaLumberjack
     - Crashlytics
     - DACircularProgress
@@ -94,4 +94,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 0a5199205b313e1136eb05129fc4bcfce007fac8
 
-COCOAPODS: 1.5.2
+COCOAPODS: 1.8.4

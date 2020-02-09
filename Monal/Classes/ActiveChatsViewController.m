@@ -50,7 +50,7 @@
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     
     MonalAppDelegate *appDelegte = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-    appDelegte.activeChats=self;
+    [appDelegte setActiveChatsController:self];
     
      self.chatListTable=[[UITableView alloc] init];
      self.chatListTable.delegate=self;
@@ -495,6 +495,24 @@
     self.thisyear =[self.gregorian components:NSCalendarUnitYear fromDate:now].year;
     
     
+}
+
+#pragma mark -mac menu
+-(void) showNew {
+    [self performSegueWithIdentifier:@"showContacts" sender:self];
+}
+
+-(void) showDetails {
+    MLContact *selected;
+    [self performSegueWithIdentifier:@"showDetails" sender:selected];
+}
+
+-(void) deleteConversation {
+   
+}
+
+-(void) showSettings {
+   [self performSegueWithIdentifier:@"showSettings" sender:self];
 }
 
 @end

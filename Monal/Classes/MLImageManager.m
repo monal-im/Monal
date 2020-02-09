@@ -415,11 +415,8 @@
             }
       
     }];
-    
-//    if (@available(iOS 11.0, *)) {
-//        return task.progress;
-//
-//    }
+
+      //  return task.progress;
 }
 
 /**

@@ -27,6 +27,10 @@
 #import "MLXMPPManager.h"
 #import "UIColor+Theme.h"
 
+@interface MonalAppDelegate()
+@property (nonatomic, weak) ActiveChatsViewController* activeChats;
+@end
+
 @implementation MonalAppDelegate
 
 
@@ -256,6 +260,11 @@
     //  [UIApplication sharedApplication].applicationIconBadgeNumber=0;
 }
 
+-(void) setActiveChatsController: (UIViewController *) activeChats
+{
+    self.activeChats=activeChats;
+}
+
 #pragma mark - handling urls
 
 -(BOOL) openFile:(NSURL *) file {
@@ -470,6 +479,54 @@
             
         }
     });
+}
+
+#pragma mark - mac menu
+- (void)buildMenuWithBuilder:(id<UIMenuBuilder>)builder
+{
+    [super buildMenuWithBuilder:builder];
+    if (@available(iOS 13.0, *)) {
+        
+        //monal
+        UIKeyCommand *preferencesCommand = [UIKeyCommand commandWithTitle:@"Preferences..." image:nil action:@selector(showSettings) input:@"," modifierFlags:UIKeyModifierCommand propertyList:nil];
+        
+        UIMenu * preferencesMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.preferences" options:UIMenuOptionsDisplayInline children:@[preferencesCommand]];
+        [builder insertSiblingMenu:preferencesMenu afterMenuForIdentifier:UIMenuAbout];
+        
+        //file
+        UIKeyCommand *newCommand = [UIKeyCommand commandWithTitle:@"New Message" image:nil action:@selector(showNew) input:@"N" modifierFlags:UIKeyModifierCommand propertyList:nil];
+ 
+        UIMenu *newMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.new" options:UIMenuOptionsDisplayInline children:@[newCommand]];
+        [builder insertChildMenu:newMenu atStartOfMenuForIdentifier:UIMenuFile];
+        
+        UIKeyCommand *detailsCommand = [UIKeyCommand commandWithTitle:@"Details..." image:nil action:@selector(showDetails) input:@"I" modifierFlags:UIKeyModifierCommand propertyList:nil];
+        
+        UIMenu *detailsMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.detail" options:UIMenuOptionsDisplayInline children:@[detailsCommand]];
+        [builder insertSiblingMenu:detailsMenu afterMenuForIdentifier:@"im.monal.new"];
+        
+        
+       UIKeyCommand *deleteCommand = [UIKeyCommand commandWithTitle:@"Delete Conversation" image:nil action:@selector(deleteConversation) input:@"\b" modifierFlags:UIKeyModifierCommand propertyList:nil];
+        
+        UIMenu *deleteMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.delete" options:UIMenuOptionsDisplayInline children:@[deleteCommand]];
+        [builder insertSiblingMenu:deleteMenu afterMenuForIdentifier:@"im.monal.detail"];
+    }
+}
+
+
+-(void) showNew {
+    [self.activeChats showNew];
+}
+
+-(void) deleteConversation {
+    [self.activeChats deleteConversation];
+}
+
+-(void) showSettings {
+    [self.activeChats showSettings];
+}
+
+-(void) showDetails {
+    [self.activeChats showDetails];
 }
 
 @end

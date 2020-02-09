@@ -28,6 +28,8 @@
 
 @property (nonatomic, strong) NSMutableArray* contacts;
 @property (nonatomic, strong) MLContact* lastSelectedUser;
+@property (nonatomic, strong) NSIndexPath *lastSelectedIndexPath;
+
 
 @end
 
@@ -384,6 +386,7 @@
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    self.lastSelectedIndexPath=indexPath;
     MLContact *selected = self.contacts[indexPath.row];
     if(selected.contactJid==self.lastSelectedUser.contactJid) return;
     
@@ -503,12 +506,13 @@
 }
 
 -(void) showDetails {
-    MLContact *selected;
-    [self performSegueWithIdentifier:@"showDetails" sender:selected];
+    if(self.lastSelectedUser)
+        [self performSegueWithIdentifier:@"showDetails" sender:self.lastSelectedUser];
 }
 
 -(void) deleteConversation {
-   
+    if(self.lastSelectedIndexPath)
+        [self tableView:self.chatListTable commitEditingStyle:UITableViewCellEditingStyleDelete forRowAtIndexPath:self.lastSelectedIndexPath];
 }
 
 -(void) showSettings {

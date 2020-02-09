@@ -187,14 +187,22 @@
         }
         case 2: {
             thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Sub"];
+            if(indexPath.row==0) {
+               thecell.textLabel.text=@"Encryption Keys";
+           } else
             if(indexPath.row==1) {
                 if(self.contact.isGroup) {
                     thecell.textLabel.text=@"Participants";
                 } else {
                     thecell.textLabel.text=@"Resources";
                 }
-            } else  {
-                thecell.textLabel.text=@"Encryption Keys";
+            }
+            else if(indexPath.row==2) {
+                if(self.contact.isGroup) {
+                     thecell.textLabel.text=@"Leave Conversation";
+                } else  {
+                    thecell.textLabel.text=@"Remove Contact";
+                }
             }
             thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             break;
@@ -206,10 +214,11 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
 {
-    if(section==0)   return 1;
+    if(section==0)  return 1;
     if(section==1)  return 3;
+    if(section==2)  return 3;
     
-    return 2;
+    return 0; //some default shouldnt reach this
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -251,8 +260,44 @@
                 [self performSegueWithIdentifier:@"showResources" sender:self];
                 break;
             }
+            case 2:  {
+                [self removeContact];
+                break;
+            }
         }
     }
+}
+
+-(void) removeContact {
+    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),self.contact.fullName ];
+    NSString* detailString =@"They will no longer see when you are online. They may not be able to access your encryption keys.";
+       
+    BOOL isMUC=self.contact.isGroup;
+    if(isMUC)
+    {
+        messageString =@"Leave this converstion?";
+        detailString=nil;
+    }
+    
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
+                                                                   message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
+    [alert addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert dismissViewControllerAnimated:YES completion:nil];
+    }]];
+    
+    [alert addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+        if(isMUC) {
+            [[MLXMPPManager sharedInstance] leaveRoom:self.contact.contactJid withNick:self.contact.accountNickInGroup forAccountId:self.contact.accountId ];
+        }
+        else  {
+            [[MLXMPPManager sharedInstance] removeContact:self.contact];
+        }
+   
+    }]];
+    
+    alert.popoverPresentationController.sourceView=self.tableView;
+    
+    [self presentViewController:alert animated:YES completion:nil];
 }
 
 -(void) showChatImges{

@@ -522,15 +522,17 @@
     }
     
     NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),contact.fullName ];
+    NSString* detailString =@"They will no longer see when you are online. They may not be able to access your encryption keys.";
     
     BOOL isMUC=contact.isGroup;
     if(isMUC)
     {
         messageString =@"Leave this converstion?";
+        detailString=nil;
     }
     
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
-                                                                   message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+                                                                   message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
     [alert addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [alert dismissViewControllerAnimated:YES completion:nil];
     }]];

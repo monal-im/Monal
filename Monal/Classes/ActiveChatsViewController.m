@@ -357,7 +357,7 @@
 
 
 -(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return @"Close";
+    return @"Hide Chat";
 }
 
 

@@ -21,10 +21,10 @@
  #if TARGET_OS_MACCATALYST
     MLCrypto *crypto = [[MLCrypto alloc] init];
 
-    uint8_t randomBytes[16];
-    int result = SecRandomCopyBytes(kSecRandomDefault, 16, randomBytes);
+    uint8_t randomBytes[keySize];
+    int result = SecRandomCopyBytes(kSecRandomDefault, keySize, randomBytes);
     if(result!=0) return nil;
-    NSData *gcmKey = [[NSData alloc] initWithBytes:randomBytes length:16];
+    NSData *gcmKey = [[NSData alloc] initWithBytes:randomBytes length:keySize];
 
     EncryptedPayload *payload = [crypto encryptGCMWithKey:gcmKey decryptedContent:body];
 

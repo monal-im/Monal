@@ -62,6 +62,8 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name: kMonalContactRefresh object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageSent:) name:kMLMessageSentToContact object:nil];
+       
     
     [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell"
                                                bundle:[NSBundle mainBundle]]
@@ -119,8 +121,7 @@
             return;
         }
         
-        if([self.lastSelectedUser.contactJid isEqualToString:message.from])  return;
-        
+
         __block MLContact *messageContact;
         
         [self.chatListTable performBatchUpdates:^{
@@ -144,6 +145,14 @@
         
     });
     
+}
+
+-(void) messageSent:(NSNotification *) notification
+{
+    MLContact* contact = [notification.userInfo objectForKey:@"contact"];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self insertOrMoveContact:contact];
+    });
 }
 
 -(void) insertOrMoveContact:(MLContact *) contact {

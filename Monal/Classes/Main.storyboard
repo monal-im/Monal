@@ -1174,10 +1174,10 @@
                                                 <constraint firstItem="x5i-Ok-Bwi" firstAttribute="top" secondItem="uMC-3d-1aS" secondAttribute="top" id="j1W-Yd-KEV"/>
                                                 <constraint firstItem="W0m-OG-Q8V" firstAttribute="leading" secondItem="0C4-4V-7mE" secondAttribute="trailing" constant="8" id="lEM-ku-voK"/>
                                                 <constraint firstAttribute="bottomMargin" secondItem="s7C-97-zi4" secondAttribute="bottom" constant="1" id="ltE-6K-Tw4"/>
-                                                <constraint firstItem="s7C-97-zi4" firstAttribute="leading" secondItem="uMC-3d-1aS" secondAttribute="leadingMargin" constant="115" id="pbc-hw-472"/>
                                                 <constraint firstItem="0C4-4V-7mE" firstAttribute="leading" secondItem="uMC-3d-1aS" secondAttribute="leadingMargin" constant="50" id="sPI-RE-hJC"/>
                                                 <constraint firstItem="17e-q1-qh5" firstAttribute="leading" secondItem="uMC-3d-1aS" secondAttribute="leadingMargin" constant="9" id="vm0-8d-euU"/>
                                                 <constraint firstItem="WlK-KG-Z5M" firstAttribute="top" secondItem="x5i-Ok-Bwi" secondAttribute="bottom" id="y9y-s1-4N2"/>
+                                                <constraint firstAttribute="trailingMargin" secondItem="s7C-97-zi4" secondAttribute="trailing" constant="248" id="yX5-n0-zYL"/>
                                                 <constraint firstItem="W0m-OG-Q8V" firstAttribute="bottom" secondItem="uMC-3d-1aS" secondAttribute="bottom" constant="3" id="z7i-q9-uax"/>
                                             </constraints>
                                         </tableViewCellContentView>

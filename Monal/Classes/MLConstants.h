@@ -23,6 +23,7 @@ typedef void (^contactCompletion)(MLContact *selectedContact);
 #define kMonalWindowVisible @"kMonalWindowVisible"
 
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
+#define kMLMessageSentToContact @"kMLMessageSentToContact"
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"
 #define kMonalSendFailedMessageNotice @"kMonalSendFailedMessageNotice"
 

@@ -444,6 +444,8 @@
              [self sendWithShareSheet];
              
          }
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":self.contact}];
     }];
  
 }

@@ -267,6 +267,8 @@
                 //no success may mean its already there
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [self insertContact:selectedContact];
+                    NSIndexPath *path =[NSIndexPath indexPathForRow:0 inSection:0];
+                    [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionTop];
                     [self presentChatWithRow:selectedContact];
                 });
             }];
@@ -281,11 +283,13 @@
               [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId withCompletion:^(BOOL success) {
                   //no success may mean its already there
                   dispatch_async(dispatch_get_main_queue(), ^{
-                        [self insertContact:selectedContact];
-                        [self presentChatWithRow:selectedContact];
+                      [self insertContact:selectedContact];
+                      NSIndexPath *path =[NSIndexPath indexPathForRow:0 inSection:0];
+                      [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionTop];
+                      [self presentChatWithRow:selectedContact];
                   });
               }];
-            
+              
           };
       }
 }

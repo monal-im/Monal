@@ -168,21 +168,21 @@
 
 -(void) refreshRowForContact:(MLContact *) contact {
     dispatch_async(dispatch_get_main_queue(), ^{
+        __block NSIndexPath *indexPath;
         [self.chatListTable performBatchUpdates:^{
             [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 MLContact *rowContact = (MLContact *) obj;
                 if([rowContact.contactJid isEqualToString:contact.contactJid]) {
-                    NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
+                    indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
                     [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                    if(indexPath.row==self.lastSelectedIndexPath.row && !self.navigationController.splitViewController.collapsed) {
-                        [self.tableView selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionTop];
-                    }
                     *stop=YES;
                     return;
                 }
             }];
         } completion:^(BOOL finished){
-            
+            if(indexPath.row==self.lastSelectedIndexPath.row && !self.navigationController.splitViewController.collapsed) {
+                [self.tableView selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionTop];
+            }
         } ];
     });
 }

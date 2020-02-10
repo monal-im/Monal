@@ -16,7 +16,7 @@
 #import "MLResizingTextView.h"
 
 
-@interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate>
+@interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate>
 {
     UIView *containerView;
 	CGRect oldFrame;
@@ -35,6 +35,7 @@
 @property (nonatomic, weak) IBOutlet UIButton *pictureButton;
 
 @property (nonatomic, weak) IBOutlet UIView* inputContainerView;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint* tableviewBottom;
 
 @property (nonatomic, weak) IBOutlet UIImageView* backgroundImage;
 @property (nonatomic, weak) IBOutlet UIView* transparentLayer;

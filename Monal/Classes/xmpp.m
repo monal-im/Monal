@@ -1244,10 +1244,12 @@ NSString *const kXMPPPresence = @"presence";
                     processor.enablePush = ^() {
                         [self enablePush];
                     };
-                    
+
+                    #ifndef DISABLE_OMEMO
                     processor.sendSignalInitialStanzas = ^() {
                         [self sendSignalInitialStanzas];
                     };
+                    #endif
                     
                     processor.getVcards = ^() {
                         [self getVcards];

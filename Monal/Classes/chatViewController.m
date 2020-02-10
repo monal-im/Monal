@@ -40,6 +40,7 @@
 
 @property (nonatomic, strong) NSMutableArray* messageList;
 @property (nonatomic, strong) NSMutableArray* photos;
+@property (nonatomic, strong) UIDocumentPickerViewController *imagePicker;
 
 
 @property (nonatomic, assign) BOOL encryptChat;
@@ -54,15 +55,15 @@
 -(void) setup
 {
     self.hidesBottomBarWhenPushed=YES;
-  
+    
     [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId withCompletion:^(NSArray *result) {
         NSArray* accountVals = result;
         if([accountVals count]>0)
-         {
-             self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
-         }
+        {
+            self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
+        }
     }];
-        
+    
 }
 
 -(void) setupWithContact:(MLContact* ) contact
@@ -93,40 +94,59 @@
     [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
     
     [nc addObserver:self selector:@selector(keyboardDidShow:)
-                                                 name:UIKeyboardDidShowNotification object:nil];
+               name:UIKeyboardDidShowNotification object:nil];
     
     [nc addObserver:self selector:@selector(keyboardDidHide:)
-                                                 name:UIKeyboardDidHideNotification object:nil];
+               name:UIKeyboardDidHideNotification object:nil];
     
     [nc addObserver:self selector:@selector(keyboardWillShow:)
-                                                 name:UIKeyboardWillShowNotification object:nil];
+               name:UIKeyboardWillShowNotification object:nil];
     
     [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
     [nc addObserver:self selector:@selector(refreshButton:) name:kMonalAccountStatusChanged object:nil];
-  
+    
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
-
+    
     self.hidesBottomBarWhenPushed=YES;
     
     self.chatInput.layer.borderColor=[UIColor lightGrayColor].CGColor;
     self.chatInput.layer.cornerRadius=3.0f;
     self.chatInput.layer.borderWidth=0.5f;
     self.chatInput.textContainerInset=UIEdgeInsetsMake(5, 0, 5, 0);
-
+    
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight=UITableViewAutomaticDimension;
-
-    #if !TARGET_OS_MACCATALYST
-     if (@available(iOS 13.0, *)) {
-         
-     } else {
-         [self.sendButton setImage:[UIImage imageNamed:@"648-paper-airplane"] forState:UIControlStateNormal];
-         [self.pictureButton setImage:[UIImage imageNamed:@"714-camera"] forState:UIControlStateNormal];
-     }
-     #endif
     
+#if TARGET_OS_MACCATALYST
+    //does not become first responder like in iOS
+    [self.view addSubview:self.inputContainerView];
+    [self.inputContainerView.leadingAnchor constraintEqualToAnchor:self.inputContainerView.superview.leadingAnchor].active=YES;
+    [self.inputContainerView.bottomAnchor constraintEqualToAnchor:self.inputContainerView.superview.bottomAnchor].active=YES;
+    [self.inputContainerView.trailingAnchor constraintEqualToAnchor:self.inputContainerView.superview.trailingAnchor].active=YES;
+    self.tableviewBottom.constant+=20;
+    
+    //UTI @"public.data" for everything
+    NSString *images = (NSString *)kUTTypeImage;
+    self.imagePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images] inMode:UIDocumentPickerModeImport];
+    self.imagePicker.allowsMultipleSelection=NO;
+    self.imagePicker.delegate=self;
+    
+#endif
+    
+    
+#if !TARGET_OS_MACCATALYST
+    if (@available(iOS 13.0, *)) {
+        
+    } else {
+        [self.sendButton setImage:[UIImage imageNamed:@"648-paper-airplane"] forState:UIControlStateNormal];
+        [self.pictureButton setImage:[UIImage imageNamed:@"714-camera"] forState:UIControlStateNormal];
+    }
+#endif
+    
+    
+
 }
 
 -(void) handleForeGround {
@@ -215,7 +235,7 @@
     
     self.placeHolderText.text=[NSString stringWithFormat:@"Message from %@", self.jid];
     self.hardwareKeyboardPresent = YES; //default to YES and when keybaord will appears is called, this may be set to NO
-    
+    [self scrollToBottom];
 }
 
 
@@ -457,13 +477,24 @@
     }
 }
 
+
+#pragma mark - doc picker
 -(IBAction)attachfile:(id)sender
 {
     [self.chatInput resignFirstResponder];
-    UIDocumentPickerViewController *docs = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.data"] inMode:UIDocumentPickerModeOpen];
-    [self presentViewController:docs animated:YES completion:nil];
+
+    [self presentViewController:self.imagePicker animated:YES completion:nil];
 
     return;
+}
+
+- (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls
+{
+    NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] init];
+    [coordinator coordinateReadingItemAtURL:urls.firstObject options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
+        NSData *data =[NSData dataWithContentsOfURL:newURL];
+        [self uploadData:data];
+    }];
 }
 
 #pragma mark - image picker
@@ -483,6 +514,10 @@
         
         return;
     }
+    
+#if TARGET_OS_MACCATALYST
+    [self attachfile:sender];
+#else
     
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
     imagePicker.delegate =self;
@@ -514,7 +549,7 @@
     }]];
     alert.popoverPresentationController.sourceView=sender;
     [self presentViewController:alert animated:YES completion:nil];
-    
+#endif
 }
 
 

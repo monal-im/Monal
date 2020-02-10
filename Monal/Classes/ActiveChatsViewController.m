@@ -28,6 +28,8 @@
 
 @property (nonatomic, strong) NSMutableArray* contacts;
 @property (nonatomic, strong) MLContact* lastSelectedUser;
+@property (nonatomic, strong) NSIndexPath *lastSelectedIndexPath;
+
 
 @end
 
@@ -50,7 +52,7 @@
     self.view.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
     
     MonalAppDelegate *appDelegte = (MonalAppDelegate *)[[UIApplication sharedApplication] delegate];
-    appDelegte.activeChats=self;
+    [appDelegte setActiveChatsController:self];
     
      self.chatListTable=[[UITableView alloc] init];
      self.chatListTable.delegate=self;
@@ -384,6 +386,7 @@
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    self.lastSelectedIndexPath=indexPath;
     MLContact *selected = self.contacts[indexPath.row];
     if(selected.contactJid==self.lastSelectedUser.contactJid) return;
     
@@ -495,6 +498,25 @@
     self.thisyear =[self.gregorian components:NSCalendarUnitYear fromDate:now].year;
     
     
+}
+
+#pragma mark -mac menu
+-(void) showNew {
+    [self performSegueWithIdentifier:@"showContacts" sender:self];
+}
+
+-(void) showDetails {
+    if(self.lastSelectedUser)
+        [self performSegueWithIdentifier:@"showDetails" sender:self.lastSelectedUser];
+}
+
+-(void) deleteConversation {
+    if(self.lastSelectedIndexPath)
+        [self tableView:self.chatListTable commitEditingStyle:UITableViewCellEditingStyleDelete forRowAtIndexPath:self.lastSelectedIndexPath];
+}
+
+-(void) showSettings {
+   [self performSegueWithIdentifier:@"showSettings" sender:self];
 }
 
 @end

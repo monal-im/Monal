@@ -331,7 +331,7 @@
                     <navigationItem key="navigationItem" title="Chats" id="RRa-hC-xrf">
                         <barButtonItem key="leftBarButtonItem" title="Settings" image="person.crop.circle" catalog="system" id="BWH-2I-fSI">
                             <connections>
-                                <segue destination="cmS-oG-cv1" kind="presentation" id="zkg-JY-Otv"/>
+                                <segue destination="cmS-oG-cv1" kind="presentation" identifier="showSettings" id="zkg-JY-Otv"/>
                             </connections>
                         </barButtonItem>
                         <rightBarButtonItems>
@@ -1263,6 +1263,7 @@
                         <outlet property="pictureButton" destination="c6B-5o-sqL" id="iSm-Wv-SC6"/>
                         <outlet property="placeHolderText" destination="KUa-bA-cQb" id="62v-fn-lf2"/>
                         <outlet property="sendButton" destination="kYa-y4-X5Z" id="efC-cC-umG"/>
+                        <outlet property="tableviewBottom" destination="Iwu-bN-lxd" id="6KW-KJ-mpd"/>
                         <outlet property="transparentLayer" destination="cUR-xM-Mq7" id="0Fl-vg-WUH"/>
                         <outlet property="view" destination="Riz-2Q-bcU" id="d0E-AR-8aA"/>
                         <segue destination="cC0-5a-Jvb" kind="presentation" modalPresentationStyle="formSheet" id="cuS-c5-MTy"/>
@@ -1406,6 +1407,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="5bM-w5-CYw"/>
-        <segue reference="cuS-c5-MTy"/>
+        <segue reference="RNX-bQ-8Zb"/>
     </inferredMetricsTieBreakers>
 </document>

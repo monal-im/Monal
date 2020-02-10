@@ -35,8 +35,6 @@
 @property (nonatomic, weak) IBOutlet UIButton *pictureButton;
 
 @property (nonatomic, weak) IBOutlet UIView* inputContainerView;
-@property (nonatomic, weak) IBOutlet NSLayoutConstraint* inputContainerHeight;
-@property (nonatomic, weak) IBOutlet NSLayoutConstraint* inputContainerBottom;
 
 @property (nonatomic, weak) IBOutlet UIImageView* backgroundImage;
 @property (nonatomic, weak) IBOutlet UIView* transparentLayer;

@@ -1,6 +1,0 @@
-framework module CocoaLumberjack {
-  umbrella header "CocoaLumberjack-iOS9.3-umbrella.h"
-
-  export *
-  module * { export * }
-}

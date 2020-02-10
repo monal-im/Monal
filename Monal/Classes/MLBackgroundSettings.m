@@ -86,7 +86,11 @@
             
         case 2: {
             UITableViewCell* cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SelectCell"];
+#if TARGET_OS_MACCATALYST
+            cell.textLabel.text=@"Select File";
+#else
             cell.textLabel.text=@"Select From Photos";
+#endif
             cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             toreturn=cell;
             break;
@@ -121,16 +125,26 @@
 
 -(void) showPhotos
 {
+#if TARGET_OS_MACCATALYST
+    //UTI @"public.data" for everything
+    NSString *images = (NSString *)kUTTypeImage;
+   UIDocumentPickerViewController *imagePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images] inMode:UIDocumentPickerModeImport];
+    imagePicker.allowsMultipleSelection=NO;
+    imagePicker.delegate=self;
+    [self presentViewController:imagePicker animated:YES completion:nil];
+#else
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
     imagePicker.delegate =self;
-     imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
         if(granted)
         {
             [self presentViewController:imagePicker animated:YES completion:nil];
         }
     }];
+#endif
 }
+
 
 -(void) showImages
 {
@@ -179,6 +193,17 @@
 -(void) close {
     [[NSUserDefaults standardUserDefaults] setObject:[self.imageList objectAtIndex:self.displayedPhotoIndex] forKey:@"BackgroundImage"];
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls
+{
+    NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] init];
+    [coordinator coordinateReadingItemAtURL:urls.firstObject options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
+        NSData *data =[NSData dataWithContentsOfURL:newURL];
+        if([[MLImageManager sharedInstance] saveBackgroundImageData:data]) {
+            [[NSUserDefaults standardUserDefaults] setObject:@"CUSTOM" forKey:@"BackgroundImage"];
+        }
+    }];
 }
 
 #pragma mark - photo browser delegate

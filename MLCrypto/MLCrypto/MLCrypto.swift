@@ -9,6 +9,7 @@
 import UIKit
 import CryptoKit
 
+@available(iOS 13.0, *)
 @objcMembers
 public class MLCrypto: NSObject {
    

@@ -1258,6 +1258,7 @@
                     <connections>
                         <outlet property="backgroundImage" destination="SEk-WZ-Rcm" id="KCn-y5-DRl"/>
                         <outlet property="chatInput" destination="jiV-U5-fDl" id="gQc-PG-STp"/>
+                        <outlet property="inputContainerBottom" destination="Iwu-bN-lxd" id="bPa-yJ-duS"/>
                         <outlet property="inputContainerView" destination="eXr-Xg-TCZ" id="cve-rB-fhR"/>
                         <outlet property="messageTable" destination="Kkq-aZ-5fP" id="RhH-Dt-heG"/>
                         <outlet property="pictureButton" destination="c6B-5o-sqL" id="iSm-Wv-SC6"/>

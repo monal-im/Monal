@@ -51,7 +51,10 @@
 @property (nonatomic, strong) NSString* jid;
 
 -(IBAction)sendMessageText:(id)sender;
+// attach image
 -(IBAction)attach:(id)sender;
+//attach file
+-(IBAction)attachfile:(id)sender;
 
 -(IBAction)dismissKeyboard:(id)sender;
 

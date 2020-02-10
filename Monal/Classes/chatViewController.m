@@ -457,6 +457,15 @@
     }
 }
 
+-(IBAction)attachfile:(id)sender
+{
+    [self.chatInput resignFirstResponder];
+    UIDocumentPickerViewController *docs = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.data"] inMode:UIDocumentPickerModeOpen];
+    [self presentViewController:docs animated:YES completion:nil];
+
+    return;
+}
+
 #pragma mark - image picker
 
 -(IBAction)attach:(id)sender

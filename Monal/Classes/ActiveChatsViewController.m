@@ -121,13 +121,13 @@
         
         if([self.lastSelectedUser.contactJid isEqualToString:message.from])  return;
         
-        __block BOOL contactInList=NO;
+        __block MLContact *messageContact;
         
         [self.chatListTable performBatchUpdates:^{
             [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 MLContact *rowContact = (MLContact *) obj;
                 if([rowContact.contactJid isEqualToString:message.from]) {
-                    contactInList=YES;
+                    messageContact=rowContact;
                     NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
                     [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                     *stop=YES;
@@ -135,8 +135,10 @@
             }];
         }
                                      completion:^(BOOL finished){
-            if(!contactInList) {
+            if(!messageContact) {
                 [self refreshDisplay];
+            } else  {
+                [self insertOrMoveContact:messageContact];
             }
         }];
         
@@ -144,8 +146,9 @@
     
 }
 
--(void) insertContact:(MLContact *) contact {
+-(void) insertOrMoveContact:(MLContact *) contact {
     //check for membership
+  NSIndexPath *newPath = [NSIndexPath indexPathForRow:0 inSection:0];
     __block NSIndexPath *indexPath;
     [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         MLContact *rowContact = (MLContact *) obj;
@@ -155,11 +158,21 @@
         }
     }];
     
-    if(!indexPath) {
+    if(indexPath) {
+        if(indexPath.row!=0) {
+            [self.chatListTable performBatchUpdates:^{
+                [self.contacts removeObjectAtIndex:indexPath.row];
+                [self.contacts insertObject:contact atIndex:0];
+                [self.chatListTable moveRowAtIndexPath:indexPath toIndexPath:newPath];
+            } completion:^(BOOL finished) {
+                
+            }];
+        }
+    }
+    else{
         [self.chatListTable performBatchUpdates:^{
             [self.contacts insertObject:contact atIndex:0];
-            NSIndexPath *path = [NSIndexPath indexPathForRow:0 inSection:0];
-            [self.chatListTable insertRowsAtIndexPaths:@[path] withRowAnimation:UITableViewRowAnimationAutomatic];
+            [self.chatListTable insertRowsAtIndexPaths:@[newPath] withRowAnimation:UITableViewRowAnimationAutomatic];
         } completion:^(BOOL finished) {
             
         }];
@@ -266,7 +279,7 @@
             [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId withCompletion:^(BOOL success) {
                 //no success may mean its already there
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [self insertContact:selectedContact];
+                    [self insertOrMoveContact:selectedContact];
                     NSIndexPath *path =[NSIndexPath indexPathForRow:0 inSection:0];
                     [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionTop];
                     [self presentChatWithRow:selectedContact];
@@ -283,7 +296,7 @@
               [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId withCompletion:^(BOOL success) {
                   //no success may mean its already there
                   dispatch_async(dispatch_get_main_queue(), ^{
-                      [self insertContact:selectedContact];
+                      [self insertOrMoveContact:selectedContact];
                       NSIndexPath *path =[NSIndexPath indexPathForRow:0 inSection:0];
                       [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionTop];
                       [self presentChatWithRow:selectedContact];

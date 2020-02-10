@@ -467,13 +467,28 @@
     }
 }
 
+
+#pragma mark - doc picker
 -(IBAction)attachfile:(id)sender
 {
     [self.chatInput resignFirstResponder];
-    UIDocumentPickerViewController *docs = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[@"public.data"] inMode:UIDocumentPickerModeOpen];
+    //UTI @"public.data" for everything
+    NSString *images = (NSString *)kUTTypeImage;
+    UIDocumentPickerViewController *docs = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images] inMode:UIDocumentPickerModeOpen];
+    docs.allowsMultipleSelection=NO;
+    docs.delegate=self;
     [self presentViewController:docs animated:YES completion:nil];
 
     return;
+}
+
+- (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls
+{
+    NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] init];
+    [coordinator coordinateReadingItemAtURL:urls.firstObject options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
+        NSData *data =[NSData dataWithContentsOfURL:newURL];
+        [self uploadData:data];
+    }];
 }
 
 #pragma mark - image picker
@@ -493,6 +508,10 @@
         
         return;
     }
+    
+#if TARGET_OS_MACCATALYST
+    [self attachfile:sender];
+#else
     
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
     imagePicker.delegate =self;
@@ -524,7 +543,7 @@
     }]];
     alert.popoverPresentationController.sourceView=sender;
     [self presentViewController:alert animated:YES completion:nil];
-    
+#endif
 }
 
 

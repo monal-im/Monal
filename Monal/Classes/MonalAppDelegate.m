@@ -46,9 +46,9 @@
         
         [[UINavigationBar appearance] setScrollEdgeAppearance:appearance];
         [[UINavigationBar appearance] setStandardAppearance:appearance];
-        #if TARGET_OS_MACCATALYST
+#if TARGET_OS_MACCATALYST
         self.window.windowScene.titlebar.titleVisibility=UITitlebarTitleVisibilityHidden;
-        #endif
+#endif
     }
     [[UINavigationBar appearance] setPrefersLargeTitles:YES];
     [[UITabBar appearance] setTintColor:monaldarkGreen];

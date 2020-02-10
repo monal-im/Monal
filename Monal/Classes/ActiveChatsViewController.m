@@ -129,9 +129,7 @@
                 if([rowContact.contactJid isEqualToString:message.from]) {
                     contactInList=YES;
                     NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
-                    [self.chatListTable beginUpdates];
                     [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                    [self.chatListTable endUpdates];
                     *stop=YES;
                 }
             }];
@@ -146,6 +144,28 @@
     
 }
 
+-(void) insertContact:(MLContact *) contact {
+    //check for membership
+    __block NSIndexPath *indexPath;
+    [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        MLContact *rowContact = (MLContact *) obj;
+        if([rowContact.contactJid isEqualToString:contact.contactJid]) {
+            indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
+            *stop=YES;
+        }
+    }];
+    
+    if(!indexPath) {
+        [self.chatListTable performBatchUpdates:^{
+            [self.contacts insertObject:contact atIndex:0];
+            NSIndexPath *path = [NSIndexPath indexPathForRow:0 inSection:0];
+            [self.chatListTable insertRowsAtIndexPaths:@[path] withRowAnimation:UITableViewRowAnimationAutomatic];
+        } completion:^(BOOL finished) {
+            
+        }];
+    }
+}
+
 -(void) refreshRowForContact:(MLContact *) contact {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.chatListTable performBatchUpdates:^{
@@ -154,6 +174,9 @@
                 if([rowContact.contactJid isEqualToString:contact.contactJid]) {
                     NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
                     [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                    if(indexPath.row==self.lastSelectedIndexPath.row && !self.navigationController.splitViewController.collapsed) {
+                        [self.tableView selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionTop];
+                    }
                     *stop=YES;
                     return;
                 }
@@ -240,7 +263,13 @@
         UINavigationController *nav = segue.destinationViewController;
         ContactsViewController* contacts = (ContactsViewController *)nav.topViewController;
         contacts.selectContact = ^(MLContact *selectedContact) {
-            [self presentChatWithRow:selectedContact];
+            [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId withCompletion:^(BOOL success) {
+                //no success may mean its already there
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self insertContact:selectedContact];
+                    [self presentChatWithRow:selectedContact];
+                });
+            }];
         };
     }
     
@@ -252,8 +281,8 @@
               [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId withCompletion:^(BOOL success) {
                   //no success may mean its already there
                   dispatch_async(dispatch_get_main_queue(), ^{
+                        [self insertContact:selectedContact];
                         [self presentChatWithRow:selectedContact];
-                  
                   });
               }];
             

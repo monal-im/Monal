@@ -857,6 +857,10 @@
 -(void) handleMessageError:(NSNotification *)notification
 {
     NSDictionary *dic =notification.userInfo;
+    if([[dic objectForKey:@"errorReason"] isEqualToString:@"recipient-unavailable"]) {
+        //ignore becasue with push this is moot
+        return;
+    }
     NSString *messageId= [dic objectForKey:kMessageId];
     dispatch_async(dispatch_get_main_queue(),
                    ^{

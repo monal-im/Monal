@@ -1151,7 +1151,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="744-locked-selected" translatesAutoresizingMaskIntoConstraints="NO" id="s7C-97-zi4">
-                                                    <rect key="frame" x="378" y="200" width="11" height="11"/>
+                                                    <rect key="frame" x="135" y="211" width="11" height="11"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="11" id="RTJ-Lj-jc6"/>
                                                         <constraint firstAttribute="height" constant="11" id="n6r-09-T5H"/>
@@ -1163,10 +1163,8 @@
                                                 <constraint firstItem="17e-q1-qh5" firstAttribute="centerY" secondItem="uMC-3d-1aS" secondAttribute="centerY" id="1RJ-x3-Wcd"/>
                                                 <constraint firstItem="WlK-KG-Z5M" firstAttribute="leading" secondItem="uMC-3d-1aS" secondAttribute="leadingMargin" constant="2" id="2FG-Qm-FCf"/>
                                                 <constraint firstItem="17e-q1-qh5" firstAttribute="centerY" secondItem="uMC-3d-1aS" secondAttribute="centerY" id="8Gb-3Y-YcA"/>
-                                                <constraint firstAttribute="trailing" secondItem="s7C-97-zi4" secondAttribute="trailing" constant="25" id="Bgd-05-lLB"/>
                                                 <constraint firstItem="W0m-OG-Q8V" firstAttribute="top" secondItem="x5i-Ok-Bwi" secondAttribute="bottom" id="EXy-7a-Ne7"/>
                                                 <constraint firstItem="W0m-OG-Q8V" firstAttribute="leading" secondItem="WlK-KG-Z5M" secondAttribute="trailing" constant="8" id="Jpv-QC-RFb"/>
-                                                <constraint firstItem="s7C-97-zi4" firstAttribute="top" secondItem="x5i-Ok-Bwi" secondAttribute="bottom" constant="180" id="Ne5-3z-kLn"/>
                                                 <constraint firstItem="0C4-4V-7mE" firstAttribute="bottom" secondItem="W0m-OG-Q8V" secondAttribute="bottom" constant="7" id="Pg0-vi-BRk"/>
                                                 <constraint firstItem="x5i-Ok-Bwi" firstAttribute="centerX" secondItem="uMC-3d-1aS" secondAttribute="centerX" id="ROb-oG-TWe"/>
                                                 <constraint firstAttribute="bottomMargin" secondItem="0C4-4V-7mE" secondAttribute="bottom" constant="6" id="T05-9t-C5D"/>
@@ -1175,6 +1173,8 @@
                                                 <constraint firstItem="W0m-OG-Q8V" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="17e-q1-qh5" secondAttribute="trailing" constant="67" id="hBl-tk-9Lw"/>
                                                 <constraint firstItem="x5i-Ok-Bwi" firstAttribute="top" secondItem="uMC-3d-1aS" secondAttribute="top" id="j1W-Yd-KEV"/>
                                                 <constraint firstItem="W0m-OG-Q8V" firstAttribute="leading" secondItem="0C4-4V-7mE" secondAttribute="trailing" constant="8" id="lEM-ku-voK"/>
+                                                <constraint firstAttribute="bottomMargin" secondItem="s7C-97-zi4" secondAttribute="bottom" constant="1" id="ltE-6K-Tw4"/>
+                                                <constraint firstItem="s7C-97-zi4" firstAttribute="leading" secondItem="uMC-3d-1aS" secondAttribute="leadingMargin" constant="115" id="pbc-hw-472"/>
                                                 <constraint firstItem="0C4-4V-7mE" firstAttribute="leading" secondItem="uMC-3d-1aS" secondAttribute="leadingMargin" constant="50" id="sPI-RE-hJC"/>
                                                 <constraint firstItem="17e-q1-qh5" firstAttribute="leading" secondItem="uMC-3d-1aS" secondAttribute="leadingMargin" constant="9" id="vm0-8d-euU"/>
                                                 <constraint firstItem="WlK-KG-Z5M" firstAttribute="top" secondItem="x5i-Ok-Bwi" secondAttribute="bottom" id="y9y-s1-4N2"/>
@@ -1189,6 +1189,7 @@
                                             <outlet property="dividerDate" destination="x5i-Ok-Bwi" id="bes-aj-7Oc"/>
                                             <outlet property="dividerHeight" destination="u3j-d0-YON" id="tuR-gt-4aN"/>
                                             <outlet property="imageHeight" destination="RiZ-ui-Y0E" id="AGX-f4-SYW"/>
+                                            <outlet property="lockImage" destination="s7C-97-zi4" id="guw-Kq-Cuk"/>
                                             <outlet property="messageStatus" destination="0C4-4V-7mE" id="9C2-5c-gGF"/>
                                             <outlet property="retry" destination="17e-q1-qh5" id="6F1-We-2nj"/>
                                             <outlet property="thumbnailImage" destination="W0m-OG-Q8V" id="Ze2-T0-Z5z"/>
@@ -1407,6 +1408,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="5bM-w5-CYw"/>
-        <segue reference="RNX-bQ-8Zb"/>
+        <segue reference="cuS-c5-MTy"/>
     </inferredMetricsTieBreakers>
 </document>

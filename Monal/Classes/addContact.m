@@ -11,6 +11,7 @@
 #import "MLXMPPManager.h"
 #import "MLButtonCell.h"
 #import "MLTextInputCell.h"
+#import "MLAccountPickerViewController.h"
 
 @implementation addContact
 
@@ -97,17 +98,6 @@
     _closeButton =[[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStylePlain target:self action:@selector(closeView)];
     self.navigationItem.rightBarButtonItem=_closeButton;
         
-    _accountPicker = [[ UIPickerView alloc] init];
-    _accountPickerView= [[UIView alloc] initWithFrame: _accountPicker.frame];
-    _accountPickerView.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
-    
-    
-    [_accountPickerView addSubview:_accountPicker];
-    _accountPicker.delegate=self;
-    _accountPicker.dataSource=self;
-    _accountPicker.autoresizingMask=UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin;
-    
-    
     [self.tableView registerNib:[UINib nibWithNibName:@"MLTextInputCell"
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"TextCell"];
@@ -118,13 +108,11 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [_accountPicker reloadAllComponents];
     
     if([[MLXMPPManager sharedInstance].connectedXMPP count]==1)
     {
-        [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:0 ];
-        [_accountPicker selectedRowInComponent:0];
-        
+        [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:0];
+        _selectedRow=0;
     }
 }
 
@@ -168,126 +156,52 @@
   
     switch (indexPath.section) {
         case 0: {
-            MLTextInputCell *textCell =[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
             if(indexPath.row ==0){
-                
-                if([[MLXMPPManager sharedInstance].connectedXMPP count]==1)
-                {
-                    self.accountName.text=[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:0];
+                UITableViewCell *accountCell =[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+                if([[MLXMPPManager sharedInstance].connectedXMPP count]==1) {
+                    accountCell.textLabel.text=[NSString stringWithFormat:@"Using Account: %@", [[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:0]];
                 }
-                
-                if([[MLXMPPManager sharedInstance].connectedXMPP count]>1){
-                    self.accountName =textCell.textInput;
-                    self.accountName.placeholder = @"Account";
-                    self.accountName.inputView=_accountPickerView;
-                    self.accountName.delegate=self;
-                } else  {
-                    cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"blank"];
-                    cell.contentView.backgroundColor= [UIColor groupTableViewBackgroundColor];
-                    break;
-                }
-                
-                }
-                else   if(indexPath.row ==1){
-                    self.contactName =textCell.textInput;
-                    self.contactName.placeholder = @"Contact Name";
-                    self.contactName.delegate=self;
-                }
-                textCell.textInput.inputAccessoryView =_keyboardToolbar;
-                
-                cell= textCell; 
+                cell=accountCell;
+            }
+            else   if(indexPath.row ==1){
+                MLTextInputCell *textCell =[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
+                self.contactName =textCell.textInput;
+                self.contactName.placeholder = @"Contact Name";
+                self.contactName.delegate=self;
+                cell= textCell;
+            }
+            
             break;
         }
         case 1: {
-           
             cell =[tableView dequeueReusableCellWithIdentifier:@"addButton"];
-    
-            
             break;
         }
         default:
             break;
     }
-    
   return cell;
-    
 }
 
 #pragma mark tableview delegate
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  
-}
-
-
-#pragma mark picker view delegate
-- (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
-{
-    _selectedRow=row;
-    _accountName.text=[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:row];
-    
-    [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:row ];
-    
-}
-
-- (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
-{
-    if(row< [[MLXMPPManager sharedInstance].connectedXMPP count])
-    {
-        NSString* name =[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:row];
-        if(name)
-            return name;
+    switch (indexPath.section) {
+        case 0: {
+            if(indexPath.row ==0){
+                [self performSegueWithIdentifier:@"showAccountPicker" sender:self];
+            }
+        }
     }
-    return @"Unnamed";
 }
 
-#pragma mark picker view datasource
-- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
-{
-    return 1;
-}
-
-- (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component
-{
-    return [[MLXMPPManager sharedInstance].connectedXMPP count];
-}
-
-#pragma mark toolbar actions
-
--(IBAction)toolbarDone:(id)sender
-{
-    if(_currentTextField ==self.contactName)
+- (void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    if([segue.identifier isEqualToString:@"showAccountPicker"])
     {
-        [self.contactName resignFirstResponder];
-    }
-    else {
-        [self.accountName resignFirstResponder];
+        MLAccountPickerViewController *accountPicker = (MLAccountPickerViewController *) segue.destinationViewController;
+        
     }
     
 }
-
-- (IBAction)toolbarPrevious:(id)sender
-{
-    if(_currentTextField ==self.contactName)
-    {
-        [self.accountName becomeFirstResponder];
-    }
-    else {
-        [self.contactName becomeFirstResponder];
-    }
-}
-
-- (IBAction)toolbarNext:(id)sender
-{
-    if(_currentTextField ==self.contactName)
-    {
-        [self.accountName becomeFirstResponder];
-    }
-    else {
-        [self.contactName becomeFirstResponder];
-    }
-}
-
-
 
 @end

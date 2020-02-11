@@ -9,28 +9,18 @@
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
 
-@interface addContact : UITableViewController<UIPickerViewDataSource, UIPickerViewDelegate, UITextFieldDelegate>
+@interface addContact : UITableViewController <UITextFieldDelegate>
 {
-
     UITextField* _currentTextField;
-    UIPickerView* _accountPicker;
-    UIView* _accountPickerView; 
     NSInteger _selectedRow;
     UIBarButtonItem* _closeButton;
-
 }
 
 @property (nonatomic, weak)  UITextField* contactName;
-@property (nonatomic, weak)  UITextField* accountName;
-@property (nonatomic, weak) IBOutlet UIToolbar* keyboardToolbar;
 @property (nonatomic, strong) contactCompletion completion;
 
 -(IBAction) addPress:(id)sender;
 -(void) closeView;
 
-
-- (IBAction)toolbarDone:(id)sender;
-- (IBAction)toolbarPrevious:(id)sender;
-- (IBAction)toolbarNext:(id)sender;
 
 @end

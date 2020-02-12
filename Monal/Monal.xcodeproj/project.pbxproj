@@ -46,7 +46,6 @@
 		262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 262E51961AD8CB7200788351 /* MLTextInputCell.xib */; };
 		2633CB4723215558006D0277 /* MLXMPPActivityItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB4623215558006D0277 /* MLXMPPActivityItem.m */; };
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
-		2635BB5B23EE1035005E8401 /* MLCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; };
 		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
 		2638008B2374816D00144929 /* NotificaionService.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 260773C0232FC4E800BFD50F /* NotificaionService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		263BC64F218BEE9F00FA0203 /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
@@ -866,7 +865,6 @@
 			files = (
 				26CC57E623A08EAA00ABB92A /* libjrtplib-static.a in Frameworks */,
 				D838DFA541E4102BCA92A60E /* Pods_monalxmpp.framework in Frameworks */,
-				2635BB5B23EE1035005E8401 /* MLCrypto.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

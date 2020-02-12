@@ -158,9 +158,10 @@
         case 0: {
             if(indexPath.row ==0){
                 UITableViewCell *accountCell =[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
-                if([[MLXMPPManager sharedInstance].connectedXMPP count]==1) {
-                    accountCell.textLabel.text=[NSString stringWithFormat:@"Using Account: %@", [[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:0]];
-                }
+               //default to first one
+                //TODO in the future maybe rememebr last used
+                accountCell.textLabel.text=[NSString stringWithFormat:@"Using Account: %@", [[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:0]];
+                accountCell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
                 cell=accountCell;
             }
             else   if(indexPath.row ==1){

@@ -139,7 +139,7 @@
             if(!messageContact) {
                 [self refreshDisplay];
             } else  {
-                [self insertOrMoveContact:messageContact];
+                [self insertOrMoveContact:messageContact completion:nil];
             }
         }];
         
@@ -151,11 +151,11 @@
 {
     MLContact* contact = [notification.userInfo objectForKey:@"contact"];
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self insertOrMoveContact:contact];
+        [self insertOrMoveContact:contact completion:nil];
     });
 }
 
--(void) insertOrMoveContact:(MLContact *) contact {
+-(void) insertOrMoveContact:(MLContact *) contact completion:(void (^ _Nullable)(BOOL finished))completion {
     //check for membership
   NSIndexPath *newPath = [NSIndexPath indexPathForRow:0 inSection:0];
     __block NSIndexPath *indexPath;
@@ -174,7 +174,7 @@
                 [self.contacts insertObject:contact atIndex:0];
                 [self.chatListTable moveRowAtIndexPath:indexPath toIndexPath:newPath];
             } completion:^(BOOL finished) {
-                
+                if(completion) completion(finished);
             }];
         }
     }
@@ -183,7 +183,7 @@
             [self.contacts insertObject:contact atIndex:0];
             [self.chatListTable insertRowsAtIndexPaths:@[newPath] withRowAnimation:UITableViewRowAnimationAutomatic];
         } completion:^(BOOL finished) {
-            
+             if(completion) completion(finished);
         }];
     }
 }
@@ -288,10 +288,11 @@
             [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId withCompletion:^(BOOL success) {
                 //no success may mean its already there
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [self insertOrMoveContact:selectedContact];
-                    NSIndexPath *path =[NSIndexPath indexPathForRow:0 inSection:0];
-                    [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionTop];
-                    [self presentChatWithRow:selectedContact];
+                    [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
+                        NSIndexPath *path =[NSIndexPath indexPathForRow:0 inSection:0];
+                        [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionTop];
+                        [self presentChatWithRow:selectedContact];
+                    }];
                 });
             }];
         };
@@ -305,10 +306,11 @@
               [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId withCompletion:^(BOOL success) {
                   //no success may mean its already there
                   dispatch_async(dispatch_get_main_queue(), ^{
-                      [self insertOrMoveContact:selectedContact];
-                      NSIndexPath *path =[NSIndexPath indexPathForRow:0 inSection:0];
-                      [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionTop];
-                      [self presentChatWithRow:selectedContact];
+                      [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
+                          NSIndexPath *path =[NSIndexPath indexPathForRow:0 inSection:0];
+                                              [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionTop];
+                                              [self presentChatWithRow:selectedContact];
+                      }];
                   });
               }];
               
@@ -476,7 +478,7 @@
 
 - (NSAttributedString *)descriptionForEmptyDataSet:(UIScrollView *)scrollView
 {
-    NSString *text = @"When you start talking to someone from the contacts screen, they will show up here.";
+    NSString *text = @"When you start talking to someone,\n they will show up here.";
     
     NSMutableParagraphStyle *paragraph = [NSMutableParagraphStyle new];
     paragraph.lineBreakMode = NSLineBreakByWordWrapping;

@@ -18,6 +18,8 @@ static const DDLogLevel ddLogLevel = DDLogLevelInfo;
 
 
 typedef void (^contactCompletion)(MLContact *selectedContact);
+typedef void (^accountCompletion)(NSInteger accountRow);
+
 
 //used in OSX only really
 #define kMonalWindowVisible @"kMonalWindowVisible"

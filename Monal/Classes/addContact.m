@@ -102,7 +102,7 @@
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"TextCell"];
     
-    
+    _selectedRow=0; //TODO in the future maybe remember least used 
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -158,9 +158,7 @@
         case 0: {
             if(indexPath.row ==0){
                 UITableViewCell *accountCell =[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
-               //default to first one
-                //TODO in the future maybe rememebr last used
-                accountCell.textLabel.text=[NSString stringWithFormat:@"Using Account: %@", [[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:0]];
+                accountCell.textLabel.text=[NSString stringWithFormat:@"Using Account: %@", [[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:_selectedRow]];
                 accountCell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
                 cell=accountCell;
             }
@@ -200,7 +198,11 @@
     if([segue.identifier isEqualToString:@"showAccountPicker"])
     {
         MLAccountPickerViewController *accountPicker = (MLAccountPickerViewController *) segue.destinationViewController;
-        
+        accountPicker.completion = ^(NSInteger accountRow) {
+            self->_selectedRow=accountRow;
+            NSIndexPath *indexpath = [NSIndexPath indexPathForRow:0 inSection:0];
+            [self.tableView reloadRowsAtIndexPaths:@[indexpath] withRowAnimation:UITableViewRowAnimationNone];
+        };
     }
     
 }

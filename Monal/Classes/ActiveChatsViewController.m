@@ -156,7 +156,6 @@
 }
 
 -(void) insertOrMoveContact:(MLContact *) contact completion:(void (^ _Nullable)(BOOL finished))completion {
-    //check for membership
   NSIndexPath *newPath = [NSIndexPath indexPathForRow:0 inSection:0];
     __block NSIndexPath *indexPath;
     [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -183,6 +182,7 @@
             [self.contacts insertObject:contact atIndex:0];
             [self.chatListTable insertRowsAtIndexPaths:@[newPath] withRowAnimation:UITableViewRowAnimationAutomatic];
         } completion:^(BOOL finished) {
+                   [self refreshDisplay]; //to remove empty dataset 
              if(completion) completion(finished);
         }];
     }

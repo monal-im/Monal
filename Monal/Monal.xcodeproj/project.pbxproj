@@ -245,6 +245,9 @@
 		26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */; };
 		26D89F061A890672009B147C /* MLSwitchCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D89F051A890672009B147C /* MLSwitchCell.m */; };
 		26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */; };
+		26E88CDA23F3C6B8001E9478 /* MLCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; };
+		26E88CDD23F3C740001E9478 /* MLCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; };
+		26E88CDE23F3C740001E9478 /* MLCrypto.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		26EE1B0C21A8F3CE00264B95 /* MLWelcomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE1B0B21A8F3CE00264B95 /* MLWelcomeViewController.m */; };
 		26EE8B1F179B67FA006781F3 /* MLNotificationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */; };
 		26F396D12196836700EF5720 /* MLLogInViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D02196836700EF5720 /* MLLogInViewController.m */; };
@@ -277,13 +280,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 1D6058900D05DD3D006BFB54;
 			remoteInfo = Monal;
-		};
-		2635BB5923EE102F005E8401 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 26A711D723C4D67300FC6A86 /* MLCrypto.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 26A711BC23C4D67300FC6A86;
-			remoteInfo = MLCrypto;
 		};
 		263800892374814000144929 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -341,6 +337,20 @@
 			remoteGlobalIDString = 26CC579123A0867400ABB92A;
 			remoteInfo = monalxmpp;
 		};
+		26E88CD823F3C6B0001E9478 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 26A711D723C4D67300FC6A86 /* MLCrypto.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 26A711BC23C4D67300FC6A86;
+			remoteInfo = MLCrypto;
+		};
+		26E88CDF23F3C755001E9478 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 26A711D723C4D67300FC6A86 /* MLCrypto.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 26A711BC23C4D67300FC6A86;
+			remoteInfo = MLCrypto;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -350,6 +360,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				26E88CDE23F3C740001E9478 /* MLCrypto.framework in Embed Frameworks */,
 				261E542623A0A1D300394F59 /* monalxmpp.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -817,6 +828,7 @@
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */,
+				26E88CDD23F3C740001E9478 /* MLCrypto.framework in Frameworks */,
 				2601D9D40FBF262E004DB939 /* libsqlite3.dylib in Frameworks */,
 				26F7BB451115F95000712672 /* SystemConfiguration.framework in Frameworks */,
 				261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */,
@@ -868,6 +880,7 @@
 			files = (
 				26CC57E623A08EAA00ABB92A /* libjrtplib-static.a in Frameworks */,
 				D838DFA541E4102BCA92A60E /* Pods_monalxmpp.framework in Frameworks */,
+				26E88CDA23F3C6B8001E9478 /* MLCrypto.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1751,6 +1764,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				26E88CE023F3C755001E9478 /* PBXTargetDependency */,
 				26CC579823A0867400ABB92A /* PBXTargetDependency */,
 				2638008A2374814000144929 /* PBXTargetDependency */,
 				26AA701B2146BBB900598605 /* PBXTargetDependency */,
@@ -1850,7 +1864,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				2635BB5A23EE102F005E8401 /* PBXTargetDependency */,
+				26E88CD923F3C6B0001E9478 /* PBXTargetDependency */,
 				26CC57D923A08DA300ABB92A /* PBXTargetDependency */,
 			);
 			name = monalxmpp;
@@ -2436,11 +2450,6 @@
 			target = 1D6058900D05DD3D006BFB54 /* Monal */;
 			targetProxy = 261E542B23A0A5F700394F59 /* PBXContainerItemProxy */;
 		};
-		2635BB5A23EE102F005E8401 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = MLCrypto;
-			targetProxy = 2635BB5923EE102F005E8401 /* PBXContainerItemProxy */;
-		};
 		2638008A2374814000144929 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 260773BF232FC4E800BFD50F /* NotificaionService */;
@@ -2472,6 +2481,16 @@
 			platformFilter = ios;
 			target = 26CC579123A0867400ABB92A /* monalxmpp */;
 			targetProxy = 26CC57E923A08F3F00ABB92A /* PBXContainerItemProxy */;
+		};
+		26E88CD923F3C6B0001E9478 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = MLCrypto;
+			targetProxy = 26E88CD823F3C6B0001E9478 /* PBXContainerItemProxy */;
+		};
+		26E88CE023F3C755001E9478 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = MLCrypto;
+			targetProxy = 26E88CDF23F3C755001E9478 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

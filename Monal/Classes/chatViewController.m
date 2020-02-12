@@ -782,12 +782,10 @@
                 
                 [self scrollToBottom];
                 
-                //mark as read
-                // [[DataLayer sharedInstance] markAsReadBuddy:_contactName forAccount:_accountNo];
+                [self refreshCounter];
             });
             
         }];
-        
     }
 }
 

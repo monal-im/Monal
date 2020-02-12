@@ -14,6 +14,7 @@
 #import "UIColor+Theme.h"
 #import "MLButtonCell.h"
 #import "MLXMPPManager.h"
+#import "MLAccountPickerViewController.h"
 
 @interface MLEditGroupViewController ()
 @property (nonatomic, weak)  UITextField* accountName;
@@ -21,7 +22,6 @@
 
 @property (nonatomic, weak) UITextField* currentTextField;
 
-@property (nonatomic, weak) UITextField* accountsField;
 @property (nonatomic, weak) UITextField* roomField;
 @property (nonatomic, weak) UITextField* nickField;
 @property (nonatomic, weak) UITextField* passField;
@@ -29,8 +29,6 @@
 @property (nonatomic, weak) UISwitch* favSwitch;
 @property (nonatomic, weak) UISwitch* autoSwitch;
 
-@property (nonatomic, strong) UIPickerView* accountPicker;
-@property (nonatomic, strong) UIView* accountPickerView;
 @property (nonatomic, strong) UIBarButtonItem* closeButton;
 
 -(IBAction) addPress:(id)sender;
@@ -45,16 +43,6 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.accountPicker = [[ UIPickerView alloc] init];
-    self.accountPickerView= [[UIView alloc] initWithFrame: _accountPicker.frame];
-    self.accountPickerView.autoresizingMask=UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
-    
-    
-    [self.accountPickerView addSubview:_accountPicker];
-    self.accountPicker.delegate=self;
-    self.accountPicker.dataSource=self;
-    self.accountPicker.autoresizingMask=UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin;
-
     [self.tableView registerNib:[UINib nibWithNibName:@"MLSwitchCell"
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"AccountCell"];
@@ -74,10 +62,7 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [_accountPicker reloadAllComponents];
-    
     [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:0 ];
-    [_accountPicker selectedRowInComponent:0];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -158,33 +143,16 @@
     {
         case 0:
         {
-            if([[MLXMPPManager sharedInstance].connectedXMPP count]>1){
-                MLTextInputCell *textCell =[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-                
-                self.accountName =textCell.textInput;
-                self.accountName.placeholder = @"Account";
-                self.accountName.inputView=_accountPickerView;
-                self.accountName.delegate=self;
-                textCell.textInput.tag=10;
-                
-                if([[MLXMPPManager sharedInstance].connectedXMPP count]==1)
-                {
-                    self.accountName.text=[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:0];
-                }
-                textCell.textInput.inputAccessoryView =self.keyboardToolbar;
-                self.accountsField= textCell.textInput;
-                toreturn=textCell;
-            } else  {
-                toreturn = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"blank"];
-                toreturn.contentView.backgroundColor= [UIColor groupTableViewBackgroundColor];
-            }
+            UITableViewCell *accountCell =[tableView dequeueReusableCellWithIdentifier:@"AccountPickerCell"];
+            accountCell.textLabel.text=[NSString stringWithFormat:@"Using Account: %@", [[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:_selectedRow]];
+            accountCell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+            toreturn=accountCell;
             break;
         }
             
         case 1:
         {
-            
-            
+
             switch (indexPath.row)
             {
                 case 0:{
@@ -267,6 +235,20 @@
     return toreturn;
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    switch (indexPath.section) {
+        case 0: {
+            if(indexPath.row ==0){
+                [self performSegueWithIdentifier:@"showAccountPicker" sender:self];
+            }
+        }
+    }
+}
+
+
+#pragma  mark - toggle
+
 -(void) toggleFav {
     if(self.groupData) {
         NSNumber *account=[self.groupData objectForKey:@"account_id"];
@@ -302,9 +284,7 @@
         [self presentViewController:messageAlert animated:YES completion:nil];
     }
     else  {
-        if([MLXMPPManager sharedInstance].connectedXMPP.count<=[self.accountPicker selectedRowInComponent:0]) return;
-        
-        NSDictionary *accountrow = [MLXMPPManager sharedInstance].connectedXMPP[[self.accountPicker selectedRowInComponent:0]];
+        NSDictionary *accountrow = [MLXMPPManager sharedInstance].connectedXMPP[_selectedRow];
         xmpp* account= (xmpp*)[accountrow objectForKey:kXmppAccount];
         
         if(self.favSwitch.on && !self.groupData){
@@ -317,7 +297,6 @@
         NSString *nick=[self.nickField.text copy];
         NSString *room =[self.roomField.text copy];
         NSString *pass=[self.passField.text copy];
-        NSInteger accountRow=[self.accountPicker selectedRowInComponent:0];
         
         NSString *combinedRoom = room;
          if([combinedRoom componentsSeparatedByString:@"@"].count==1) {
@@ -332,7 +311,7 @@
         
         [[DataLayer sharedInstance] addContact:combinedRoom forAccount:account.accountNo fullname:@"" nickname:@"" andMucNick:nick  withCompletion:^(BOOL success) {
             //race condition on creation otherwise
-            [[MLXMPPManager sharedInstance] joinRoom:combinedRoom withNick:nick andPassword:pass forAccountRow:accountRow];
+            [[MLXMPPManager sharedInstance] joinRoom:combinedRoom withNick:nick andPassword:pass forAccountRow:self->_selectedRow];
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 if(self.completion) self.completion(group);
@@ -343,39 +322,6 @@
     }
 }
 
-
-#pragma mark picker view delegate
-- (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
-{
-   // _selectedRow=row;
-    _accountName.text=[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:row];
-    
-    [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:row ];
-    
-}
-
-- (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
-{
-    if(row< [[MLXMPPManager sharedInstance].connectedXMPP count])
-    {
-        NSString* name =[[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:row];
-        if(name)
-            return name;
-    }
-    return @"Unnamed";
-}
-
-
-#pragma mark picker view datasource
-- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
-{
-    return 1;
-}
-
-- (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component
-{
-    return [[MLXMPPManager sharedInstance].connectedXMPP count];
-}
 
 #pragma mark - textfield delegate
 
@@ -402,13 +348,9 @@
 
 - (IBAction)toolbarPrevious:(id)sender
 {
-    if(_currentTextField ==self.accountsField)
+     if(_currentTextField ==self.roomField)
     {
-         [self.currentTextField resignFirstResponder];
-    }
-    else  if(_currentTextField ==self.roomField)
-    {
-        [self.accountsField becomeFirstResponder];
+        [self.passField becomeFirstResponder];
     }
     else if(_currentTextField ==self.passField)
     {
@@ -424,11 +366,7 @@
 
 - (IBAction)toolbarNext:(id)sender
 {
-    if(_currentTextField ==self.accountsField)
-    {
-        [self.roomField becomeFirstResponder];
-    }
-    else  if(_currentTextField ==self.roomField)
+     if(_currentTextField ==self.roomField)
     {
         [self.nickField becomeFirstResponder];
     }
@@ -440,6 +378,22 @@
     {
         [self.currentTextField resignFirstResponder];
     }
+}
+
+
+
+
+- (void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    if([segue.identifier isEqualToString:@"showAccountPicker"])
+    {
+        MLAccountPickerViewController *accountPicker = (MLAccountPickerViewController *) segue.destinationViewController;
+        accountPicker.completion = ^(NSInteger accountRow) {
+            self->_selectedRow=accountRow;
+            NSIndexPath *indexpath = [NSIndexPath indexPathForRow:0 inSection:0];
+            [self.tableView reloadRowsAtIndexPaths:@[indexpath] withRowAnimation:UITableViewRowAnimationNone];
+        };
+    }
+    
 }
 
 @end

@@ -10,6 +10,9 @@
 #import "MLConstants.h"
 
 @interface MLEditGroupViewController : UITableViewController <UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource>
+{
+      NSInteger _selectedRow;
+}
 
 @property (nonatomic, strong) NSDictionary *groupData;
 @property (nonatomic, strong) contactCompletion completion;

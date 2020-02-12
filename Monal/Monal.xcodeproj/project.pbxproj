@@ -148,6 +148,7 @@
 		26529F5217FA7B260057F199 /* addContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FE17BDD85F0031304D /* addContact.m */; };
 		2653EAE61C5B243400ED97F7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2653EAE51C5B243400ED97F7 /* Main.storyboard */; };
 		265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */; };
+		2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2664D28423F2312400CD4085 /* MLAccountPickerViewController.m */; };
 		26724D9321B4C1E700F1F46F /* MLComposeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26724D9221B4C1E700F1F46F /* MLComposeViewController.m */; };
 		2673CABA21D851E600256507 /* ContactDetails.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2673CAB921D851E600256507 /* ContactDetails.storyboard */; };
 		2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABC21D8617300256507 /* MLContactDetailHeader.m */; };
@@ -595,6 +596,8 @@
 		26611025238F17B20030A4EE /* MLMessage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMessage.m; sourceTree = "<group>"; };
 		26611029238F17CA0030A4EE /* MLContact.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContact.h; sourceTree = "<group>"; };
 		2661102A238F17CB0030A4EE /* MLContact.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContact.m; sourceTree = "<group>"; };
+		2664D28323F2312400CD4085 /* MLAccountPickerViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLAccountPickerViewController.h; sourceTree = "<group>"; };
+		2664D28423F2312400CD4085 /* MLAccountPickerViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAccountPickerViewController.m; sourceTree = "<group>"; };
 		26724D9121B4C1E700F1F46F /* MLComposeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLComposeViewController.h; sourceTree = "<group>"; };
 		26724D9221B4C1E700F1F46F /* MLComposeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLComposeViewController.m; sourceTree = "<group>"; };
 		2673CAB921D851E600256507 /* ContactDetails.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = ContactDetails.storyboard; sourceTree = "<group>"; };
@@ -1001,13 +1004,6 @@
 				26352EA7177D222600E2C8FF /* MLXMPPManager.m */,
 			);
 			name = Managers;
-			sourceTree = "<group>";
-		};
-		2636C440177BD595001CA71F /* Older UI code */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = "Older UI code";
 			sourceTree = "<group>";
 		};
 		2642EBC418693615006A6C12 /* Jingle */ = {
@@ -1512,13 +1508,14 @@
 				268C1E471FDACDD300BD6921 /* Contact Details */,
 				2665C1191C4AA22700CC9A04 /* Accounts */,
 				262797AC178A573F00B85D94 /* Tableviewcells */,
-				2636C440177BD595001CA71F /* Older UI code */,
 				261A627E176C055400059090 /* ContactsViewController.h */,
 				261A627F176C055400059090 /* ContactsViewController.m */,
 				261A6283176C156500059090 /* ActiveChatsViewController.h */,
 				261A6284176C156500059090 /* ActiveChatsViewController.m */,
 				2609B5271FD5B26800F09FA1 /* MLSplitViewDelegate.h */,
 				2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */,
+				2664D28323F2312400CD4085 /* MLAccountPickerViewController.h */,
+				2664D28423F2312400CD4085 /* MLAccountPickerViewController.m */,
 			);
 			name = "Tab views";
 			sourceTree = "<group>";
@@ -2274,6 +2271,7 @@
 				2633CB4723215558006D0277 /* MLXMPPActivityItem.m in Sources */,
 				262AEFE820AE756800498F82 /* MLMAMPrefTableViewController.m in Sources */,
 				26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */,
+				2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */,
 				265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */,
 				26F396D12196836700EF5720 /* MLLogInViewController.m in Sources */,
 				26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */,

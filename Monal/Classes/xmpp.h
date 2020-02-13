@@ -164,6 +164,8 @@ extern NSString *const kXMPPPresence;
  */
 -(void) approveToRoster:(NSString*) contact;
 
+-(void) rejectFromRoster:(NSString*) contact;
+
 /**
  sets up a background task to reconnect if needed. dEfault wait of 5s
  */

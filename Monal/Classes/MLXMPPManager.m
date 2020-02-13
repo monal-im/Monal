@@ -208,6 +208,12 @@ An array of Dics what have timers to make sure everything was sent
     }
 }
 
+-(void) rejectContact:(MLContact*) contact
+{
+    xmpp* account =[self getConnectedAccountForID:contact.accountId];
+    [account rejectFromRoster:contact.contactJid];
+}
+
 -(void) approveContact:(MLContact*) contact
 {
     xmpp* account =[self getConnectedAccountForID:contact.accountId];
@@ -659,8 +665,6 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         [[DataLayer sharedInstance] removeBuddy:contact.contactJid forAccount:contact.accountId];
     }
 }
-
-
 
 -(void) addContact:(NSDictionary*) contact
 {

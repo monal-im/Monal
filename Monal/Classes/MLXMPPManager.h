@@ -136,6 +136,8 @@ Returns the server set name of the conencted account
 
 -(void) approveContact:(MLContact*) contact;
 
+-(void) rejectContact:(MLContact*) contact;
+
 /**
  respond to call with either accept or not. Passes back the notifiaction dictionary
  */

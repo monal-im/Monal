@@ -2975,11 +2975,6 @@ static NSMutableArray *extracted(xmpp *object) {
     [presence unsubscribeContact:contact];
     [self send:presence];
     
-    
-    XMPPPresence* presence2 =[[XMPPPresence alloc] init];
-    [presence2 unsubscribedContact:contact];
-    [self send:presence2];
-    
 }
 
 -(void) rejectFromRoster:(NSString*) contact

@@ -1186,6 +1186,33 @@ static DataLayer *sharedInstance=nil;
     return state;
 }
 
+-(void) contactRequestsForAccountWithCompletion:(void (^)(NSMutableArray *))completion
+{
+    NSString* query=[NSString stringWithFormat:@"select account_id, buddy_name from subscriptionRequests"];
+     
+     [self executeReader:query withCompletion:^(NSMutableArray *results) {
+         
+         NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
+         [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+             NSDictionary *dic = (NSDictionary *) obj;
+             [toReturn addObject:[MLContact contactFromDictionary:dic]];
+         }];
+         
+         if(completion) completion(toReturn);
+     }];
+}
+
+-(void) addContactRequest:(MLContact *) requestor;
+{
+    NSString* query2=[NSString stringWithFormat:@"insert into subscriptionRequests (buddy_name,account_id) values (?,?) "];
+    [self executeNonQuery:query2 andArguments:@[requestor.contactJid,requestor.accountId] ];
+}
+
+-(void) deleteContactRequest:(MLContact *) requestor
+{
+    NSString* query2=[NSString stringWithFormat:@"delete from subscriptionRequests where buddy_name=? and account_id=? "];
+    [self executeNonQuery:query2 andArguments:@[requestor.contactJid,requestor.accountId] ];
+}
 
 -(void) setBuddyStatus:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo
 {
@@ -2747,6 +2774,16 @@ static DataLayer *sharedInstance=nil;
          
      }
      
+    if([dbversion doubleValue]<4.1)
+     {
+         DDLogVerbose(@"Database version <4.1 detected. Performing upgrade on accounts. ");
+         
+         [self executeNonQuery:@"CREATE TABLE subscriptionRequests(requestid integer not null primary key AUTOINCREMENT,account_id integer not null,buddy_name varchar(50) collate nocase, UNIQUE(account_id,buddy_name))" andArguments:nil];
+        
+         [self executeNonQuery:@"update dbversion set dbversion='4.1'; " andArguments:nil];
+         DDLogVerbose(@"Upgrade to 4.1  success ");
+         
+     }
     
     
     [dbversionCheck unlock];

@@ -8,6 +8,7 @@
 
 #import "MLNewViewController.h"
 #import "MLEditGroupViewController.h"
+#import "MLSubscriptionTableViewController.h"
 #import "addContact.h"
 
 @interface MLNewViewController ()
@@ -27,7 +28,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return 2;
+    return 3;
 }
 
 -(IBAction) close:(id)sender
@@ -51,6 +52,10 @@
             if(self.selectContact) self.selectContact(selectedContact);
         };
     }
+    if([segue.identifier isEqualToString:@"acceptContact"])
+      {
+          MLSubscriptionTableViewController* newScreen = (MLSubscriptionTableViewController *)segue.destinationViewController;
+      }
 }
 
 @end

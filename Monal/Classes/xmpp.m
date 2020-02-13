@@ -1383,12 +1383,12 @@ NSString *const kXMPPPresence = @"presence";
                     else {
                         if([presenceNode.type isEqualToString:kpresencesSubscribe])
                         {
-                            //TODO notify the sub screen
                             MLContact *contact = [[MLContact alloc] init];
                             contact.accountId=self.accountNo;
                             contact.contactJid=presenceNode.user;
                             
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountAuthRequest object:@{@"contact":contact}];
+                            [[DataLayer sharedInstance] addContactRequest:contact];
+                            
                         }
                         
                         if(presenceNode.MUC)

@@ -116,6 +116,9 @@ extern NSString *const kMessageTypeUrl;
 -(void) setBuddyState:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 -(NSString*) buddyState:(NSString*) buddy forAccount:(NSString*) accountNo;
 
+-(void) contactRequestsForAccountWithCompletion:(void (^)(NSMutableArray *))completion;
+-(void) addContactRequest:(MLContact *) requestor;
+-(void) deleteContactRequest:(MLContact *) requestor; 
 
 #pragma mark Contact info
 

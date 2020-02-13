@@ -320,13 +320,20 @@
 
 -(void) refreshCounter
 {
-    if(!_day) {
-        [[DataLayer sharedInstance] markAsReadBuddy:self.contact.contactJid forAccount:self.contact.accountId];
+    if(self.navigationController.topViewController==self)
+    {
+        if([MLNotificationManager sharedInstance].currentContact!=self.contact) {
+            return;
+        }
         
-        MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-        [appDelegate updateUnread];
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+        if(!_day) {
+            [[DataLayer sharedInstance] markAsReadBuddy:self.contact.contactJid forAccount:self.contact.accountId];
+            
+            MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
+            [appDelegate updateUnread];
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+        }
     }
 }
 
@@ -873,6 +880,7 @@
             if([message.messageId isEqualToString:messageId] && !message.hasBeenReceived) {
                 message.errorType=[dic objectForKey:@"errorType"];
                 message.errorReason=[dic objectForKey:@"errorReason"];
+                message.hasBeenSent = NO;
                 indexPath =[NSIndexPath indexPathForRow:row inSection:0];
                 break;
             }
@@ -909,7 +917,7 @@
     });
 }
 
-#pragma mark date time
+#pragma mark - date time
 
 -(void) setupDateObjects
 {

@@ -203,7 +203,7 @@
             }];
         } completion:^(BOOL finished){
             if(indexPath.row==self.lastSelectedIndexPath.row && !self.navigationController.splitViewController.collapsed) {
-                [self.tableView selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionTop];
+                [self.tableView selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
             }
         } ];
     });
@@ -290,7 +290,7 @@
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
                         NSIndexPath *path =[NSIndexPath indexPathForRow:0 inSection:0];
-                        [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionTop];
+                        [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
                         [self presentChatWithRow:selectedContact];
                     }];
                 });
@@ -308,7 +308,7 @@
                   dispatch_async(dispatch_get_main_queue(), ^{
                       [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
                           NSIndexPath *path =[NSIndexPath indexPathForRow:0 inSection:0];
-                                              [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionTop];
+                                              [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
                                               [self presentChatWithRow:selectedContact];
                       }];
                   });

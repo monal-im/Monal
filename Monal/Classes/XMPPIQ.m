@@ -534,10 +534,10 @@ NSString *const kiqErrorType = @"error";
     [self.children addObject:queryNode];
     
     MLXMLNode* itemNode =[[MLXMLNode alloc] init];
-    itemNode.element=@"query";
+    itemNode.element=@"item";
     [itemNode.attributes setObject:jid forKey:@"jid"];
     [itemNode.attributes setObject:@"remove" forKey:@"subscription"];
-    [self.children addObject:itemNode];
+    [queryNode.children addObject:itemNode];
 }
 
 -(void) setRosterRequest:(NSString *) version

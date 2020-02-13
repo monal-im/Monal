@@ -57,7 +57,7 @@ extern NSString *const kXmppAccount;
 /**
  Add a contact from an account
  */
--(void) addContact:(NSDictionary*) contact;
+-(void) addContact:(MLContact *) contact;
 
 /**
  Gets service details for account

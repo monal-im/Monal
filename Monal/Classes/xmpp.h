@@ -147,24 +147,24 @@ extern NSString *const kXMPPPresence;
 /**
  Adds the stanza to the output Queue
  */
--(void) send:(MLXMLNode*) stanza;
+-(void) send:(MLXMLNode *_Nonnull) stanza;
 
 /**
  removes a contact from the roster
  */
--(void) removeFromRoster:(NSString*) contact;
+-(void) removeFromRoster:(NSString *_Nonnull) contact;
 
 /**
  adds a new contact to the roster
  */
--(void) addToRoster:(NSString*) contact;
+-(void) addToRoster:(NSString *_Nonnull) contact;
 
 /**
  adds a new contact to the roster
  */
--(void) approveToRoster:(NSString*) contact;
+-(void) approveToRoster:(NSString *_Nonnull) contact;
 
--(void) rejectFromRoster:(NSString*) contact;
+-(void) rejectFromRoster:(NSString *_Nonnull) contact;
 
 /**
  sets up a background task to reconnect if needed. dEfault wait of 5s
@@ -182,7 +182,7 @@ extern NSString *const kXMPPPresence;
 /**
 sets the status message. makes xmpp call
  */
--(void) setStatusMessageText:(NSString*) message;
+-(void) setStatusMessageText:(NSString *) message;
 
 /**
 sets away xmpp call.

@@ -666,18 +666,10 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     }
 }
 
--(void) addContact:(NSDictionary*) contact
+-(void) addContact:(MLContact *) contact
 {
-    NSNumber* row =[contact objectForKey:@"row"];
-    NSInteger pos= [row integerValue];
-    if(pos<[_connectedXMPP count] && pos>=0) {
-        NSDictionary* datarow= [_connectedXMPP objectAtIndex:pos];
-        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-        if( account)
-        {
-            [account addToRoster:[contact objectForKey:@"buddy_name"]];
-        }
-    }
+    xmpp* account =[self getConnectedAccountForID:contact.accountId];
+     [account addToRoster:contact.contactJid];
 }
 
 -(void) getVCard:(MLContact *) contact

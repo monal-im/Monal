@@ -59,7 +59,11 @@
 
 
 
-// Override to support editing the table view.
+-(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    return @"Allowing someone to add you as a contact lets them see when you online. It also allows you to send encrypted messages.  Tap to approve. Swipe to reject.";
+}
+
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         MLContact *contact = self.requests[indexPath.row];
@@ -68,6 +72,16 @@
         [self.requests removeObjectAtIndex:indexPath.row];
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
     }
+}
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    MLContact *contact = self.requests[indexPath.row];
+    [[MLXMPPManager sharedInstance] approveContact:contact];
+    [[DataLayer sharedInstance] deleteContactRequest:contact];
+     [[MLXMPPManager sharedInstance] addContact:contact];
+    [self.requests removeObjectAtIndex:indexPath.row];
+    [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
 }
 
 

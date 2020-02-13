@@ -48,7 +48,7 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
                      @"If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission.  Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'. ",
                      @"If Monal push is off, your device could not talk to push.monal.im. This should also never be off. It requires Apple push service to work first. ",
                      @"",
-                            @"Rebuilding is useful if you are not expereicing problems. This will require an app restart to work."];
+                            @"Rebuilding is useful if you are  expereicing problems. This will require an app restart to work."];
     
     self.sectionsHeaders =@[@"",
                             @"",

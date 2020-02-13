@@ -79,7 +79,7 @@
     MLContact *contact = self.requests[indexPath.row];
     [[MLXMPPManager sharedInstance] approveContact:contact];
     [[DataLayer sharedInstance] deleteContactRequest:contact];
-     [[MLXMPPManager sharedInstance] addContact:contact];
+    [[MLXMPPManager sharedInstance] addContact:contact];
     [self.requests removeObjectAtIndex:indexPath.row];
     [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
 }

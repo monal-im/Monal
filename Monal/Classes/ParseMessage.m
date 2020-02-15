@@ -40,8 +40,10 @@
             _to=[_to lowercaseString];
         }
         
-        //this is the id of the forwarded message and overwrites the main message stanza's id. 
-        _idval =[attributeDict objectForKey:@"id"];
+        if([(NSString *)[attributeDict objectForKey:@"id"] length]>0) {
+            //this is the id of the forwarded message and overwrites the main message stanza's id.
+            _idval =[attributeDict objectForKey:@"id"];
+        }
         
     }
     
@@ -189,6 +191,7 @@
     if(([elementName isEqualToString:@"result"])  && ([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:mam:2"]))
     {
         _mamResult=YES;
+        _idval=[attributeDict objectForKey:kId];
         return;
     }
     

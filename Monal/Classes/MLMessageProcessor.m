@@ -91,7 +91,8 @@
                 BOOL showAlert=YES;
                 
                 if ([messageNode.from isEqualToString:jidWithoutResource]
-                    || (messageNode.mamResult && lastDate.timeIntervalSince1970>messageNode.delayTimeStamp.timeIntervalSince1970)) {
+                    || (messageNode.mamResult
+                        && lastDate.timeIntervalSince1970>messageNode.delayTimeStamp.timeIntervalSince1970)) {
                     unread=NO;
                     showAlert=NO;
                 }

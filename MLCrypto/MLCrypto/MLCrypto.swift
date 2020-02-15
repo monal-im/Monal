@@ -9,42 +9,50 @@
 import UIKit
 import CryptoKit
 
-@available(iOS 13.0, *)
 @objcMembers
 public class MLCrypto: NSObject {
    
     public func encryptGCM (key: Data, decryptedContent:Data) -> EncryptedPayload?
     {
-        let gcmKey = SymmetricKey.init(data: key)
-        let iv = AES.GCM.Nonce()
-        
-        do {
-            let encrypted = try AES.GCM.seal(decryptedContent, using: gcmKey, nonce: iv)
-            let encryptedPayload = EncryptedPayload()
-            let combined = encrypted.combined
-            let ciphertext = encrypted.ciphertext
-            let ivData = combined?.subdata(in: 0..<12)
-            let range = 12+ciphertext.count..<28+ciphertext.count
-            let tagData = combined?.subdata(in:range)
+        if #available(iOS 13.0, *) {
+            let gcmKey = SymmetricKey.init(data: key)
             
-            encryptedPayload.updateValues(body:ciphertext, iv: ivData!, key:key, tag:tagData!)
-            encryptedPayload.combined = combined
-            return encryptedPayload
-        } catch  {
-            return nil
+            let iv = AES.GCM.Nonce()
+            
+            do {
+                let encrypted = try AES.GCM.seal(decryptedContent, using: gcmKey, nonce: iv)
+                let encryptedPayload = EncryptedPayload()
+                let combined = encrypted.combined
+                let ciphertext = encrypted.ciphertext
+                let ivData = combined?.subdata(in: 0..<12)
+                let range = 12+ciphertext.count..<28+ciphertext.count
+                let tagData = combined?.subdata(in:range)
+                
+                encryptedPayload.updateValues(body:ciphertext, iv: ivData!, key:key, tag:tagData!)
+                encryptedPayload.combined = combined
+                return encryptedPayload
+            } catch  {
+                return nil
+            }
+        } else {
+            return nil;
         }
     }
     
     
     public func decryptGCM (key: Data, encryptedContent:Data) -> Data?
     {
-        let sealedBoxToOpen = try! AES.GCM.SealedBox(combined: encryptedContent)
-        let gcmKey = SymmetricKey.init(data: key)
-        do {
-            let decryptedData = try AES.GCM.open(sealedBoxToOpen, using: gcmKey)
-            return decryptedData
-        } catch {
-            return nil;
+        if #available(iOS 13.0, *) {
+            let sealedBoxToOpen = try! AES.GCM.SealedBox(combined: encryptedContent)
+            let gcmKey = SymmetricKey.init(data: key)
+            do {
+                let decryptedData = try AES.GCM.open(sealedBoxToOpen, using: gcmKey)
+                return decryptedData
+            } catch {
+                return nil;
+            }
+        } else {
+            return nil 
         }
     }
 }

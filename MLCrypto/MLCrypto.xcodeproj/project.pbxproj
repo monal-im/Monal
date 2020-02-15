@@ -366,6 +366,10 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				OTHER_LDFLAGS = (
+					"-weak_framework",
+					CryptoKit,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = im.monal.MLCrypto;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -396,6 +400,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"-weak_framework",
+					CryptoKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = im.monal.MLCrypto;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -521,6 +529,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"-weak_framework",
+					CryptoKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = im.monal.MLCrypto;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";

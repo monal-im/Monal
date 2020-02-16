@@ -24,13 +24,20 @@ public class MLCrypto: NSObject {
                 let encryptedPayload = EncryptedPayload()
                 let combined = encrypted.combined
                 let ciphertext = encrypted.ciphertext
-                let ivData = combined?.subdata(in: 0..<12)
-                let range = 12+ciphertext.count..<12+16+ciphertext.count //16 is tag size apple uses
-                let tagData = combined?.subdata(in:range)
                 
-                encryptedPayload.updateValues(body:ciphertext, iv: ivData!, key:key, tag:tagData!)
+                if let combined = combined {
+                let ivData = combined.subdata(in: 0..<12)
+                //combined is in the format
+                //iv+body+auth
+                let range = 12+ciphertext.count..<combined.count //16 is gnereally tag size apple uses
+                let tagData = combined.subdata(in:range)
+                
+                encryptedPayload.updateValues(body:ciphertext, iv: ivData, key:key, tag:tagData)
                 encryptedPayload.combined = combined
                 return encryptedPayload
+                } else  {
+                    return nil;
+                }
             } catch  {
                 return nil
             }

@@ -605,10 +605,10 @@
                     urlComponents.scheme = @"aesgcm";
                     urlComponents.fragment = [NSString stringWithFormat:@"%@%@",
                                               [EncodingTools hexadecimalString:encrypted.iv],
-                                              [EncodingTools hexadecimalString:[encrypted.key subdataWithRange:NSMakeRange(0, keySize)]]];
+                                              [EncodingTools hexadecimalString:[encrypted.keyonly subdataWithRange:NSMakeRange(0, keySize)]]];
                         urlToPass=urlComponents.string;
                     } else  {
-                        DDLogError(@"Could not parse url for aesgcm conversion");
+                        DDLogError(@"Could not parse url for conversion to aesgcm:");
                     }
                 }
                 

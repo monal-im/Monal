@@ -489,6 +489,8 @@ Provides temp url
                     if(crypto.length==96) ivLength=32; //note 16 byte wont wont work on catalyst
                     
                     NSString *ivHex =[crypto substringToIndex:ivLength];
+                    //format is
+                   //iv+32byte key
                     NSString *keyHex =[crypto substringWithRange:NSMakeRange(ivLength, 64)];
                     NSURLSession *session = [NSURLSession sharedSession];
                     [[session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {

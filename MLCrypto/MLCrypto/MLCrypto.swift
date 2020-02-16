@@ -25,7 +25,7 @@ public class MLCrypto: NSObject {
                 let combined = encrypted.combined
                 let ciphertext = encrypted.ciphertext
                 let ivData = combined?.subdata(in: 0..<12)
-                let range = 12+ciphertext.count..<28+ciphertext.count
+                let range = 12+ciphertext.count..<12+16+ciphertext.count //16 is tag size apple uses
                 let tagData = combined?.subdata(in:range)
                 
                 encryptedPayload.updateValues(body:ciphertext, iv: ivData!, key:key, tag:tagData!)

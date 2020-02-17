@@ -12,16 +12,18 @@
 @property (nonatomic, strong) NSData* body;
 @property (nonatomic, strong) NSData* key;
 @property (nonatomic, strong) NSData* iv;
+@property (nonatomic, strong) NSData* authTag;
 @end
 
 @implementation MLEncryptedPayload
 
--(MLEncryptedPayload *) initWithBody:(NSData*) body key:(NSData *) key iv:(NSData *) iv
+-(MLEncryptedPayload *) initWithBody:(NSData *) body key:(NSData *) key iv:(NSData *) iv aauthTag:(NSData *) authTag
 {
     self=[super init];
     self.body=body;
     self.key= key;
     self.iv= iv;
+    self.authTag=authTag;
     return self;
 }
 

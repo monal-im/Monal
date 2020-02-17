@@ -579,7 +579,9 @@
     if(self.encryptChat) {
         encrypted = [AESGcm encrypt:decryptedData keySize:keySize];
         if(encrypted) {
-            dataToPass = encrypted.body;
+            NSMutableData *mutableBody = [encrypted.body mutableCopy];
+            [mutableBody appendData:encrypted.authTag];
+            dataToPass = [mutableBody copy];
         } else  {
             DDLogError(@"Could not encrypt attachment");
         }

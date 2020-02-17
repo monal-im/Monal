@@ -486,7 +486,7 @@ Provides temp url
                 dispatch_async(dispatch_get_main_queue(), ^{
                     
                     int ivLength=24;
-                    if(crypto.length==96) ivLength=32; //note 16 byte wont wont work on catalyst
+                    if(crypto.length==96) ivLength=32; //note 32 aka, 16 byte iv wont wont work on catalyst
                     
                     NSString *ivHex =[crypto substringToIndex:ivLength];
                     //format is

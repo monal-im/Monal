@@ -45,7 +45,11 @@
     NSData *key=[payload.key subdataWithRange:NSMakeRange(0,32)];
     NSData *auth=[payload.key subdataWithRange:NSMakeRange(32,16)];
     
-    NSData *decryptedResult = [AESGcm decrypt:payload.body withKey:key andIv:payload.iv withAuth:auth];
+    NSMutableData *mData = [[NSMutableData alloc] init];
+    [mData appendData:payload.body];
+    [mData appendData:auth];
+    
+    NSData *decryptedResult = [AESGcm decrypt:mData  withKey:key andIv:payload.iv withAuth:nil];
     NSString *decryptedResultString = [[NSString alloc] initWithData:decryptedResult encoding:NSUTF8StringEncoding];
     XCTAssert([decryptedResultString isEqualToString:decrypted]);
     

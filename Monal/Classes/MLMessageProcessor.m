@@ -42,6 +42,12 @@
     if([messageNode.type isEqualToString:kMessageErrorType])
     {
         DDLogError(@"Error type message received");
+        
+        if([messageNode.errorReason isEqualToString:@"recipient-unavailable"]) {
+               //ignore becasue with push this is moot
+               return;
+           }
+        
         //update db
         [[DataLayer sharedInstance] setMessageId:messageNode.idval errorType:messageNode.errorType?messageNode.errorType:@""
                                      errorReason:messageNode.errorReason?messageNode.errorReason:@""];

@@ -249,7 +249,7 @@
                     NSData *decData = [AESGcm decrypt:decodedPayload withKey:key andIv:iv withAuth:auth];
                     if(!decData) {
                         DDLogError(@"Could not decrypt message with key  that was decrypted.");
-                         return @"Encrypted message was sent in an older format Monal can't decrypt. Please ask them to update thier client. (GCM error)";
+                         return @"Encrypted message was sent in an older format Monal can't decrypt. Please ask them to update their client. (GCM error)";
                     }
                     else  {
                         DDLogInfo(@"Decrypted message passing bask string.");

@@ -17,7 +17,7 @@
 
 @implementation MLEncryptedPayload
 
--(MLEncryptedPayload *) initWithBody:(NSData *) body key:(NSData *) key iv:(NSData *) iv aauthTag:(NSData *) authTag
+-(MLEncryptedPayload *) initWithBody:(NSData *) body key:(NSData *) key iv:(NSData *) iv authTag:(NSData *) authTag
 {
     self=[super init];
     self.body=body;

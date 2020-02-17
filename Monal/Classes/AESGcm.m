@@ -29,7 +29,7 @@
 
         NSMutableData *combinedKey  = [NSMutableData dataWithData:gcmKey];
         [combinedKey appendData:payload.tag];
-        MLEncryptedPayload *toreturn = [[MLEncryptedPayload alloc] initWithBody:payload.body key:combinedKey iv:payload.iv aauthTag:payload.tag];
+        MLEncryptedPayload *toreturn = [[MLEncryptedPayload alloc] initWithBody:payload.body key:combinedKey iv:payload.iv authTag:payload.tag];
 
         return  toreturn;
 
@@ -88,7 +88,7 @@
         
         
         EVP_CIPHER_CTX_free(ctx);
-        MLEncryptedPayload *toreturn = [[MLEncryptedPayload alloc] initWithBody:encryptedMessage key:combinedKey iv:gcmiv];
+        MLEncryptedPayload *toreturn = [[MLEncryptedPayload alloc] initWithBody:encryptedMessage key:combinedKey iv:gcmiv authTag:[NSData dataWithBytes:tag length:16]];
         
         return  toreturn;
 #else

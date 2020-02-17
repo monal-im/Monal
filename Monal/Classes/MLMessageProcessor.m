@@ -200,7 +200,7 @@
         if(!messageKey)
         {
             DDLogError(@"Message was not encrypted for this device: %d", self.monalSignalStore.deviceid);
-            return [NSString stringWithFormat:@"Message was not encrypted for this device. Please make sure the sender trusts deviceid %d",self.monalSignalStore.deviceid];
+            return [NSString stringWithFormat:@"Message was not encrypted for this device. Please make sure the sender trusts deviceid %d and that they have you as a contact.",self.monalSignalStore.deviceid];
         }
         else {
             SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];

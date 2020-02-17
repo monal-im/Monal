@@ -229,7 +229,7 @@
             
             if(!decryptedKey){
                 DDLogError(@"Could not decrypt to obtain key.");
-                return @"There was an error decrypting this encrypted message (Signal error). Try sending a message to repair.";
+                return @"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person.";
             }
             else  {
                 

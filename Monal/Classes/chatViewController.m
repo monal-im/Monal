@@ -602,10 +602,10 @@
                 if(encrypted) {
                     NSURLComponents *urlComponents = [NSURLComponents componentsWithURL:[NSURL URLWithString:urlToPass] resolvingAgainstBaseURL:NO];
                     if(urlComponents) {
-                    urlComponents.scheme = @"aesgcm";
-                    urlComponents.fragment = [NSString stringWithFormat:@"%@%@",
-                                              [EncodingTools hexadecimalString:encrypted.iv],
-                                              [EncodingTools hexadecimalString:[encrypted.keyonly subdataWithRange:NSMakeRange(0, keySize)]]];
+                        urlComponents.scheme = @"aesgcm";
+                        urlComponents.fragment = [NSString stringWithFormat:@"%@%@",
+                                                  [EncodingTools hexadecimalString:encrypted.iv],
+                                                  [EncodingTools hexadecimalString:[encrypted.key subdataWithRange:NSMakeRange(0, keySize)]]];
                         urlToPass=urlComponents.string;
                     } else  {
                         DDLogError(@"Could not parse url for conversion to aesgcm:");

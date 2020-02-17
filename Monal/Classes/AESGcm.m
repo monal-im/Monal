@@ -24,17 +24,18 @@
         int result = SecRandomCopyBytes(kSecRandomDefault, keySize, randomBytes);
         if(result!=0) return nil;
         NSData *gcmKey = [[NSData alloc] initWithBytes:randomBytes length:keySize];
-        
+
         EncryptedPayload *payload = [crypto encryptGCMWithKey:gcmKey decryptedContent:body];
-        
+
         NSMutableData *combinedKey  = [NSMutableData dataWithData:gcmKey];
         [combinedKey appendData:payload.tag];
         MLEncryptedPayload *toreturn = [[MLEncryptedPayload alloc] initWithBody:payload.body key:combinedKey iv:payload.iv];
-        
+
         return  toreturn;
-        
+
     }
-    else {
+    else
+    {
 #if !TARGET_OS_MACCATALYST
         EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
         int outlen;
@@ -97,18 +98,19 @@
 }
 
 + (NSData *) decrypt:(NSData *)body withKey:(NSData *) key andIv:(NSData *)iv withAuth:( NSData * _Nullable )  auth {
-    if (@available(iOS 13.0, *)) {
-        
-        MLCrypto *crypto = [[MLCrypto alloc] init];
-        
-        NSMutableData *combined = [[NSMutableData alloc] init];
-        [combined appendData:iv];
-        [combined appendData:body];
-        [combined appendData:auth];
-        
-        NSData *toReturn =[crypto decryptGCMWithKey:key encryptedContent:combined];
-        return toReturn;
-    } else  {
+//    if (@available(iOS 13.0, *)) {
+//        
+//        MLCrypto *crypto = [[MLCrypto alloc] init];
+//        
+//        NSMutableData *combined = [[NSMutableData alloc] init];
+//        [combined appendData:iv];
+//        [combined appendData:body];
+//        [combined appendData:auth];
+//        
+//        NSData *toReturn =[crypto decryptGCMWithKey:key encryptedContent:combined];
+//        return toReturn;
+//    } else
+    {
 #if !TARGET_OS_MACCATALYST
         int outlen, rv;
         unsigned char outbuf[key.length];

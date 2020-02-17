@@ -446,18 +446,22 @@
             
             NSDictionary *row = (NSDictionary *) obj;
             NSString *keyid = (NSString *)[row objectForKey:@"preKeyId"];
-            
-            SignalPreKeyBundle *bundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
-                                                                                   deviceId:device
-                                                                                   preKeyId:[keyid intValue]
-                                                                               preKeyPublic:[EncodingTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]]
-                                                                             signedPreKeyId:iqNode.signedPreKeyId.intValue
-                                                                         signedPreKeyPublic:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
-                                                                                  signature:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
-                                                                                identityKey:[EncodingTools dataWithBase64EncodedString:iqNode.identityKey]
-                                                                                      error:nil];
-            
-            [builder processPreKeyBundle:bundle error:nil];
+            NSData *preKeyData = [EncodingTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]];
+            if(preKeyData) {
+                SignalPreKeyBundle *bundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
+                                                                                       deviceId:device
+                                                                                       preKeyId:[keyid intValue]
+                                                                                   preKeyPublic:preKeyData
+                                                                                 signedPreKeyId:iqNode.signedPreKeyId.intValue
+                                                                             signedPreKeyPublic:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
+                                                                                      signature:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
+                                                                                    identityKey:[EncodingTools dataWithBase64EncodedString:iqNode.identityKey]
+                                                                                          error:nil];
+                
+                [builder processPreKeyBundle:bundle error:nil];
+            } else  {
+                DDLogError(@"Could not decode base64 prekey %@", row);
+            }
         }];
         
     }

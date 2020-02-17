@@ -229,7 +229,7 @@
             
             if(!decryptedKey){
                 DDLogError(@"Could not decrypt to obtain key.");
-                return @"There was an error decrypting this encrypted message. (Signal error)";
+                return @"There was an error decrypting this encrypted message (Signal error). Try sending a message to repair.";
             }
             else  {
                 
@@ -249,7 +249,7 @@
                     NSData *decData = [AESGcm decrypt:decodedPayload withKey:key andIv:iv withAuth:auth];
                     if(!decData) {
                         DDLogError(@"Could not decrypt message with key  that was decrypted.");
-                         return @"Encrypted but message was sent in an older format Monal can't decrypt. Please ask them to update thier client. (GCM error)";
+                         return @"Encrypted message was sent in an older format Monal can't decrypt. Please ask them to update thier client. (GCM error)";
                     }
                     else  {
                         DDLogInfo(@"Decrypted message passing bask string.");

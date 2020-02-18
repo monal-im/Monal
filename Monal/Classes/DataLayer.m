@@ -2800,7 +2800,22 @@ static DataLayer *sharedInstance=nil;
                       ]];
          }];
          
+          NSArray *dupeMessageids= [self executeReader:@"select * from (select messageid, count(messageid) as c from message_history   group by messageid) where c>1" andArguments:nil];
          
+         
+         [dupeMessageids enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                 NSArray *dupeMessages= [self executeReader:@"select * from message_history where messageid=? order by message_history_id asc " andArguments:@[[obj objectForKey:@"messageid"]]];
+            //hopefully this is quick and doesnt grow..
+             [dupeMessages enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull message, NSUInteger idx, BOOL * _Nonnull stop) {
+                 //keep first one
+                 if(idx>0) {
+                      [self executeNonQuery:@"delete from message_history where message_history_id=?" andArguments:@[[message objectForKey:@"message_history_id"]]];
+                 }
+             }];
+         }];
+         
+         [self executeNonQuery:@"CREATE UNIQUE INDEX ux_account_messageid ON message_history(account_id, messageid)" andArguments:nil];
+                
          [self executeNonQuery:@"alter table activechats add column lastMesssage blob;" andArguments:nil];
          [self executeNonQuery:@"CREATE UNIQUE INDEX ux_account_buddy ON activechats(account_id, buddy_name)" andArguments:nil];
         

@@ -2785,6 +2785,30 @@ static DataLayer *sharedInstance=nil;
          
      }
     
+    if([dbversion doubleValue]<4.2)
+     {
+         DDLogVerbose(@"Database version <4.2 detected. Performing upgrade on accounts. ");
+         
+         NSArray *contacts= [self executeReader:@"select distinct account_id, buddy_name, lastMessageTime from activechats;" andArguments:nil];
+          [self executeNonQuery:@"delete from activechats;" andArguments:nil];
+         [contacts enumerateObjectsUsingBlock:^(NSDictionary * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+             [self executeNonQuery:@"insert into activechats (account_id, buddy_name, lastMessageTime) values (?,?,?);"
+                      andArguments:@[
+                      [obj objectForKey:@"account_id"],
+                       [obj objectForKey:@"buddy_name"],
+                       [obj objectForKey:@"lastMessageTime"]
+                      ]];
+         }];
+         
+         
+         [self executeNonQuery:@"alter table activechats add column lastMesssage blob;" andArguments:nil];
+         [self executeNonQuery:@"CREATE UNIQUE INDEX ux_account_buddy ON activechats(account_id, buddy_name)" andArguments:nil];
+        
+         [self executeNonQuery:@"update dbversion set dbversion='4.2'; " andArguments:nil];
+         DDLogVerbose(@"Upgrade to 4.2  success ");
+         
+     }
+    
     
     [dbversionCheck unlock];
     return;

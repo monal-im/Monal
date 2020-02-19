@@ -290,7 +290,7 @@
                 if(self.sendIq) self.sendIq([self discoverService:[item objectForKey:@"jid"]]);
             }
         }
-        
+    
         // send to bare jid for push etc.
         if(self.sendIq) self.sendIq([self discoverService:self.connection.identity.jid]);
     }

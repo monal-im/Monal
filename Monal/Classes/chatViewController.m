@@ -765,9 +765,11 @@
     {
         //getting encrypted chat turns it on. nto the other way
         if(message.encrypted) {
-            [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.contactJid];
-            self.encryptChat=YES;
-            [self refreshButton:notification];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.contactJid];
+                self.encryptChat=YES;
+                [self refreshButton:notification];
+            });
         }
         
         [[DataLayer sharedInstance] messageTypeForMessage: message.messageText withCompletion:^(NSString *messageType) {

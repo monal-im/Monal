@@ -758,11 +758,17 @@
     if(!message) {
         DDLogError(@"Notification without message");
     }
-    
+        
     if([message.accountId isEqualToString:self.contact.accountId]
-       &&([message.from isEqualToString:self.contact.contactJid]
+       && ([message.from isEqualToString:self.contact.contactJid]
           || [message.to isEqualToString:self.contact.contactJid] ))
     {
+        //getting encrypted chat turns it on. nto the other way
+        if(message.encrypted) {
+            self.encryptChat=YES;
+            [self refreshButton:notification];
+        }
+        
         [[DataLayer sharedInstance] messageTypeForMessage: message.messageText withCompletion:^(NSString *messageType) {
             
             dispatch_async(dispatch_get_main_queue(),

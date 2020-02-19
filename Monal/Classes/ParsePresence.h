@@ -14,23 +14,23 @@
 /**
  the text inside of show tags e.g. away
  */
-@property (nonatomic, strong, readonly) NSString* show;
+@property (nonatomic, copy, readonly) NSString* show;
 /**
  text inside of status tags. e.g. this is a status message
  */
-@property (nonatomic, strong, readonly) NSString* status;
+@property (nonatomic, copy, readonly) NSString* status;
 
 /**
 the hash inside the photo tag
  */
-@property (nonatomic, strong, readonly) NSString* photoHash;
+@property (nonatomic, copy, readonly) NSString* photoHash;
 
 /**
  Status codes that come back e.g. when you join a group chat.
  */
-@property (nonatomic,strong) NSMutableArray* statusCodes;
+@property (nonatomic ,copy) NSMutableArray* statusCodes;
 
-@property (nonatomic,assign) BOOL MUC;
+@property (nonatomic,copy) BOOL MUC;
 
 
 @end

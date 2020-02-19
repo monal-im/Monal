@@ -13,6 +13,6 @@
 /**
 last handled value
  */
-@property (nonatomic, strong, readonly) NSNumber *h;
+@property (nonatomic, copy, readonly) NSNumber *h;
 
 @end

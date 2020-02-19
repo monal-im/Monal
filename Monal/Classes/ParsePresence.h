@@ -30,7 +30,7 @@ the hash inside the photo tag
  */
 @property (nonatomic ,copy) NSMutableArray* statusCodes;
 
-@property (nonatomic,copy) BOOL MUC;
+@property (nonatomic, assign) BOOL MUC;
 
 
 @end

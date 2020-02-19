@@ -20,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic,weak) IBOutlet UIButton* muteButton;
 @property (nonatomic,weak) IBOutlet UIButton* lockButton;
+@property (nonatomic,weak) IBOutlet UIButton* phoneButton;
 
 
 @end

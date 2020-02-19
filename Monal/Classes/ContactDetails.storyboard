@@ -146,6 +146,7 @@
                                     <outlet property="jid" destination="6bI-Lh-Qhb" id="cn9-kH-x83"/>
                                     <outlet property="lockButton" destination="Wab-aR-CcG" id="YXj-do-fWx"/>
                                     <outlet property="muteButton" destination="ShO-Bj-tyf" id="xZ7-Cz-p7Y"/>
+                                    <outlet property="phoneButton" destination="LF0-E8-Mzg" id="L08-ty-4bH"/>
                                 </connections>
                             </tableViewCell>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" reuseIdentifier="MessageCell" rowHeight="126" id="MBV-nz-BH1" userLabel="bottomcell" customClass="MLDetailsTableViewCell">

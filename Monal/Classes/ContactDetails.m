@@ -122,6 +122,9 @@
             MLContactDetailHeader *detailCell=  (MLContactDetailHeader *)[tableView dequeueReusableCellWithIdentifier:@"headerCell"];
             if(self.contact.isGroup) {
                detailCell.jid.text=[NSString stringWithFormat:@"%@ (%lu)", self.contact.contactJid, self.groupMemberCount];
+                //for how hide things that arent relevant
+                detailCell.lockButton.hidden=YES;
+                detailCell.phoneButton.hidden=YES;
             } else {
                 detailCell.jid.text=self.contact.contactJid;
             }

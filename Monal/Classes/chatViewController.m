@@ -766,7 +766,7 @@
         //getting encrypted chat turns it on. nto the other way
         if(message.encrypted) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.contactJid];
+                [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
                 self.encryptChat=YES;
                 [self refreshButton:notification];
             });

@@ -2989,14 +2989,12 @@ static NSMutableArray *extracted(xmpp *object) {
 {
     XMPPPresence* presence =[[XMPPPresence alloc] init];
     [presence subscribeContact:contact];
-    [self send:presence];
-    
+    [self send:presence]; //add them
     
 }
 
 -(void) approveToRoster:(NSString*) contact
 {
-    
     XMPPPresence* presence2 =[[XMPPPresence alloc] init];
     [presence2 subscribedContact:contact];
     [self send:presence2];

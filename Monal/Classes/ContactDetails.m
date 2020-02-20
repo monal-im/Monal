@@ -23,6 +23,7 @@
 @property (nonatomic, assign) BOOL isBlocked;
 @property (nonatomic, assign) BOOL isEncrypted;
 @property (nonatomic, assign) BOOL isSubscribed;
+@property (nonatomic, strong) NSString *subMessage;
 
 @property (nonatomic, strong) NSString *accountNo;
 @property (nonatomic, strong) xmpp* xmppAccount;
@@ -63,6 +64,7 @@
     }
     
     self.accountNo=self.contact.accountId;
+    //making sure there is an entry at least
     [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" andMucNick:nil  withCompletion:^(BOOL success) {
     }];
     
@@ -70,10 +72,24 @@
     NSDictionary *dic = [[DataLayer sharedInstance] getSubscriptionForContact:self.contact.contactJid andAccount:self.accountNo];
     if(!dic || ![[dic objectForKey:@"subscription"] isEqualToString:@"both"]) {
         self.isSubscribed=NO;
-    } else  {
+       
+        if([[dic objectForKey:@"subscription"] isEqualToString:@"none"]){
+            self.subMessage=@"Neither can see the other's keys";
+        }
         
-    }  self.isSubscribed=YES;
-    
+        else  if([[dic objectForKey:@"subscription"] isEqualToString:@"to"]){
+             self.subMessage=@"You can see their keys. They can't see yours.";
+        }
+        
+        else if([[dic objectForKey:@"subscription"] isEqualToString:@"from"]){
+             self.subMessage=@"They can see your keys. You can't see thiers.";
+        } else {
+              self.subMessage=@"Not a contact. Neither can see keys.";
+        }
+        
+    } else  {
+        self.isSubscribed=YES;
+    }
     
 #ifndef DISABLE_OMEMO
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
@@ -136,6 +152,7 @@
             } else {
                 detailCell.jid.text=self.contact.contactJid;
                 detailCell.isContact.hidden=self.isSubscribed;
+                detailCell.isContact.text=self.subMessage;
             }
             
             if(self.contact.isGroup || !self.isSubscribed) {
@@ -281,16 +298,40 @@
                 break;
             }
             case 2:  {
-                [self removeContact];
+                if(self.isSubscribed) {
+                    [self removeContact];
+                }  else  {
+                    [self addContact];
+                }
                 break;
             }
         }
     }
 }
 
+-(void) addContact {
+    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Add %@ to your contacts?", nil),self.contact.fullName ];
+    NSString* detailString =@"They will see when you are online. They will be able to send you encrypted messages.";
+
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
+                                                                   message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
+    [alert addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert dismissViewControllerAnimated:YES completion:nil];
+    }]];
+    
+    [alert addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+            [[MLXMPPManager sharedInstance] addContact:self.contact];
+           [[MLXMPPManager sharedInstance] approveContact:self.contact]; //incase there was a pending request
+    }]];
+    
+    alert.popoverPresentationController.sourceView=self.tableView;
+    
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
 -(void) removeContact {
     NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),self.contact.fullName ];
-    NSString* detailString =@"They will no longer see when you are online. They may not be able to access your encryption keys.";
+    NSString* detailString =@"They will no longer see when you are online. They may not be able to send you encrypted messages.";
        
     BOOL isMUC=self.contact.isGroup;
     if(isMUC)

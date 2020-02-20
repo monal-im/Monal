@@ -118,6 +118,11 @@
 
 -(void) processSetIq:(ParseIq *) iqNode {
     
+    //its  a roster push
+    if (iqNode.roster==YES)
+    {
+        [self rosterResult:iqNode];
+    }
     
 }
 
@@ -310,6 +315,10 @@
             [[DataLayer sharedInstance] setRosterVersion:iqNode.rosterVersion forAccount:self.accountNo];
         }
         
+        if([[contact objectForKey:@"subscription"] isEqualToString:@"to"])
+        {
+            // roster approval
+        }
         
         [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
                                     forAccount:self.accountNo
@@ -319,7 +328,7 @@
                                 withCompletion:^(BOOL success) {
             
             [[DataLayer sharedInstance] setSubscription:[contact objectForKey:@"subscription"]
-                                                 andAsk:[contact objectForKey:@"ask"] forContact:[contact objectForKey:@"name"] andAccount:self.accountNo];
+                                                 andAsk:[contact objectForKey:@"ask"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo];
             
             if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
             {

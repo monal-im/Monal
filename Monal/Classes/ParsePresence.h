@@ -28,7 +28,7 @@ the hash inside the photo tag
 /**
  Status codes that come back e.g. when you join a group chat.
  */
-@property (nonatomic ,copy) NSMutableArray* statusCodes;
+@property (nonatomic ,strong) NSMutableArray* statusCodes;
 
 @property (nonatomic, assign) BOOL MUC;
 

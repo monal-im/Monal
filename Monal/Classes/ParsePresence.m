@@ -39,9 +39,9 @@
         if([elementName isEqualToString:@"status"])
         {
             if(!self.statusCodes) self.statusCodes=[[NSMutableArray alloc] init];
-            NSString * code= [attributeDict objectForKey:@"code"];
+            NSString * code= [[attributeDict objectForKey:@"code"] copy];
             if(code) {
-                [self.statusCodes addObject:[attributeDict objectForKey:@"code"]];
+                [self.statusCodes addObject:code];
             }
         }
     }

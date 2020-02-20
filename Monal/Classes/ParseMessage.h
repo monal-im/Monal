@@ -42,6 +42,6 @@
 @property (nonatomic, copy, readonly) NSString* sid; // sender device id
 @property (nonatomic, copy, readonly) NSString* encryptedPayload;
 @property (nonatomic, copy, readonly) NSString* iv;
-@property (nonatomic, copy, readonly) NSMutableArray *signalKeys; 
+@property (nonatomic, strong, readonly) NSMutableArray *signalKeys; 
 
 @end

@@ -113,13 +113,24 @@
                                                             <constraint firstItem="ShO-Bj-tyf" firstAttribute="bottom" secondItem="Wab-aR-CcG" secondAttribute="bottom" id="zq2-sS-C6J"/>
                                                         </constraints>
                                                     </view>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Not a Contact, can't see keys" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hFV-Qh-Uid">
+                                                        <rect key="frame" x="75.5" y="222" width="224" height="21"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" constant="21" id="chr-LT-SJy"/>
+                                                        </constraints>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
                                                 </subviews>
                                                 <constraints>
                                                     <constraint firstAttribute="trailing" secondItem="6bI-Lh-Qhb" secondAttribute="trailing" constant="8" id="3rp-f9-4g5"/>
                                                     <constraint firstItem="6bI-Lh-Qhb" firstAttribute="top" secondItem="Vhk-QO-bAB" secondAttribute="bottom" constant="8" id="44U-fg-zIE"/>
                                                     <constraint firstItem="H38-G7-DM8" firstAttribute="top" secondItem="6bI-Lh-Qhb" secondAttribute="bottom" constant="25.5" id="G5q-oS-2Fy"/>
                                                     <constraint firstItem="H38-G7-DM8" firstAttribute="centerX" secondItem="DKM-65-0Zv" secondAttribute="centerX" id="cJY-vJ-DMA"/>
+                                                    <constraint firstAttribute="bottom" secondItem="hFV-Qh-Uid" secondAttribute="bottom" constant="7.5" id="qXr-Zj-W5K"/>
                                                     <constraint firstItem="6bI-Lh-Qhb" firstAttribute="leading" secondItem="DKM-65-0Zv" secondAttribute="leading" constant="8" id="rDb-Ou-GS0"/>
+                                                    <constraint firstItem="hFV-Qh-Uid" firstAttribute="centerX" secondItem="DKM-65-0Zv" secondAttribute="centerX" id="sUV-wr-Ohl"/>
                                                     <constraint firstItem="Vhk-QO-bAB" firstAttribute="top" secondItem="DKM-65-0Zv" secondAttribute="top" constant="20" id="ySW-tP-qCs"/>
                                                     <constraint firstItem="Vhk-QO-bAB" firstAttribute="centerX" secondItem="DKM-65-0Zv" secondAttribute="centerX" id="yoo-Rq-5bH"/>
                                                 </constraints>
@@ -143,6 +154,7 @@
                                 <connections>
                                     <outlet property="background" destination="BPC-ir-Idx" id="czg-Jq-bsh"/>
                                     <outlet property="buddyIconView" destination="Vhk-QO-bAB" id="Duh-ht-AUs"/>
+                                    <outlet property="isContact" destination="hFV-Qh-Uid" id="hOQ-bC-BTS"/>
                                     <outlet property="jid" destination="6bI-Lh-Qhb" id="cn9-kH-x83"/>
                                     <outlet property="lockButton" destination="Wab-aR-CcG" id="YXj-do-fWx"/>
                                     <outlet property="muteButton" destination="ShO-Bj-tyf" id="xZ7-Cz-p7Y"/>

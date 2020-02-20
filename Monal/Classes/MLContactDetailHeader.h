@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic,weak) IBOutlet UIImageView* background;
 @property (nonatomic,weak) IBOutlet UILabel* jid;
 @property (nonatomic,weak) IBOutlet UILabel* buddyStatus;
+@property (nonatomic,weak) IBOutlet UILabel* isContact;
 
 @property (nonatomic,weak) IBOutlet UIButton* muteButton;
 @property (nonatomic,weak) IBOutlet UIButton* lockButton;

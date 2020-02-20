@@ -22,6 +22,7 @@
 @property (nonatomic, assign) BOOL isMuted;
 @property (nonatomic, assign) BOOL isBlocked;
 @property (nonatomic, assign) BOOL isEncrypted;
+@property (nonatomic, assign) BOOL isSubscribed;
 
 @property (nonatomic, strong) NSString *accountNo;
 @property (nonatomic, strong) xmpp* xmppAccount;
@@ -64,6 +65,14 @@
     self.accountNo=self.contact.accountId;
     [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" andMucNick:nil  withCompletion:^(BOOL success) {
     }];
+    
+    
+    NSDictionary *dic = [[DataLayer sharedInstance] getSubscriptionForContact:self.contact.contactJid andAccount:self.accountNo];
+    if(!dic || ![[dic objectForKey:@"subscription"] isEqualToString:@"both"]) {
+        self.isSubscribed=NO;
+    } else  {
+        
+    }  self.isSubscribed=YES;
     
     
 #ifndef DISABLE_OMEMO
@@ -123,10 +132,14 @@
             if(self.contact.isGroup) {
                detailCell.jid.text=[NSString stringWithFormat:@"%@ (%lu)", self.contact.contactJid, self.groupMemberCount];
                 //for how hide things that arent relevant
-                detailCell.lockButton.hidden=YES;
                 detailCell.phoneButton.hidden=YES;
             } else {
                 detailCell.jid.text=self.contact.contactJid;
+                detailCell.isContact.hidden=self.isSubscribed;
+            }
+            
+            if(self.contact.isGroup || !self.isSubscribed) {
+                detailCell.lockButton.hidden=YES;
             }
             
             [[MLImageManager sharedInstance] getIconForContact:self.contact.contactJid andAccount:self.contact.accountId withCompletion:^(UIImage *image) {
@@ -202,9 +215,13 @@
             }
             else if(indexPath.row==2) {
                 if(self.contact.isGroup) {
-                     thecell.textLabel.text=@"Leave Conversation";
+                    thecell.textLabel.text=@"Leave Conversation";
                 } else  {
-                    thecell.textLabel.text=@"Remove Contact";
+                    if(self.isSubscribed) {
+                        thecell.textLabel.text=@"Remove Contact";
+                    } else  {
+                        thecell.textLabel.text=@"Add Contact";
+                    }
                 }
             }
             thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;

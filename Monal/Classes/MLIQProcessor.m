@@ -310,23 +310,26 @@
             [[DataLayer sharedInstance] setRosterVersion:iqNode.rosterVersion forAccount:self.accountNo];
         }
         
-        if([[contact objectForKey:@"subscription"] isEqualToString:@"both"])
-        {
-            if([contact objectForKey:@"jid"]) {
-                [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
-                                            forAccount:self.accountNo
-                                              fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
-                                              nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
-                                            andMucNick:nil
-                                        withCompletion:^(BOOL success) {
-                    
-                    if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
-                    {
-                        [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo ] ;
-                    }
-                }];
+        
+        [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
+                                    forAccount:self.accountNo
+                                      fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
+                                      nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
+                                    andMucNick:nil
+                                withCompletion:^(BOOL success) {
+            
+            [[DataLayer sharedInstance] setSubscription:[contact objectForKey:@"subscription"]
+                                                 andAsk:[contact objectForKey:@"ask"] forContact:[contact objectForKey:@"name"] andAccount:self.accountNo];
+            
+            if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
+            {
+                [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo ] ;
             }
-        }
+        }];
+        
+        
+        
+        
     }
     
     if(self.getVcards) self.getVcards();

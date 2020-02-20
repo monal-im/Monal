@@ -963,12 +963,12 @@ static DataLayer *sharedInstance=nil;
     
     if([sort isEqualToString:@"Name"])
     {
-        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name,nick_name,  MUC, muc_subject, muc_nick, account_id from buddylist where online=1    order by full_name COLLATE NOCASE asc "];
+        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name,nick_name,  MUC, muc_subject, muc_nick, account_id from buddylist where online=1  and subscription='both'  order by full_name COLLATE NOCASE asc "];
     }
     
     if([sort isEqualToString:@"Status"])
     {
-        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count', ifnull(full_name, buddy_name) as full_name,nick_name,  MUC, muc_subject, muc_nick, account_id from buddylist where   online=1   order by state,full_name COLLATE NOCASE  asc "];
+        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count', ifnull(full_name, buddy_name) as full_name,nick_name,  MUC, muc_subject, muc_nick, account_id from buddylist where   online=1 and subscription='both'  order by state,full_name COLLATE NOCASE  asc "];
     }
     
     
@@ -1252,6 +1252,25 @@ static DataLayer *sharedInstance=nil;
     NSArray *params=@[version , accountNo];
     [self executeNonQuery:query  andArguments:params withCompletion:nil];
 }
+
+
+-(NSDictionary *) getSubscriptionForContact:(NSString*) contact andAccount:(NSString*) accountNo
+{
+    if(!contact || !accountNo) return nil;
+    NSString* query=[NSString stringWithFormat:@"SELECT subscription, ask from buddylist where buddy_name=? and account_id=?"];
+    NSArray *params=@[contact, accountNo];
+    NSArray* version=[self executeReader:query andArguments:params];
+    return version.firstObject;
+}
+
+-(void) setSubscription:(NSString *)sub andAsk:(NSString*) ask forContact:(NSString*) contact andAccount:(NSString*) accountNo
+{
+    if(!contact || !accountNo || !sub) return;
+    NSString* query=[NSString stringWithFormat:@"update buddylist set subscription=?, ask=? where account_id=? and buddy_name=?"];
+    NSArray *params=@[sub ,ask?ask:@"", accountNo, contact];
+    [self executeNonQuery:query  andArguments:params withCompletion:nil];
+}
+
 
 
 #pragma mark Contact info
@@ -2823,6 +2842,10 @@ static DataLayer *sharedInstance=nil;
          DDLogVerbose(@"Upgrade to 4.2  success ");
          
      }
+    
+    [self executeNonQuery:@"alter table buddylist add column subscription varchar(50)" andArguments:nil];
+    [self executeNonQuery:@"alter table buddylist add column ask varchar(50)" andArguments:nil];
+    [self executeNonQuery:@"update buddylist set subscription='both'; " andArguments:nil];
     
     
     [dbversionCheck unlock];

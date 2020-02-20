@@ -763,8 +763,8 @@
        && ([message.from isEqualToString:self.contact.contactJid]
           || [message.to isEqualToString:self.contact.contactJid] ))
     {
-        //getting encrypted chat turns it on. nto the other way
-        if(message.encrypted) {
+        //getting encrypted chat turns it on. not the other way around
+        if(message.encrypted && !self.encryptChat) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
                 self.encryptChat=YES;

@@ -149,6 +149,7 @@
                detailCell.jid.text=[NSString stringWithFormat:@"%@ (%lu)", self.contact.contactJid, self.groupMemberCount];
                 //for how hide things that arent relevant
                 detailCell.phoneButton.hidden=YES;
+                detailCell.isContact.hidden=YES;
             } else {
                 detailCell.jid.text=self.contact.contactJid;
                 detailCell.isContact.hidden=self.isSubscribed;

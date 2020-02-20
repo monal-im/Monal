@@ -2668,7 +2668,9 @@ static NSMutableArray *extracted(xmpp *object) {
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query setiqTo:jid];
     [query requestDevices];
-    self.deviceQueryId=query.stanzaID;
+    if([jid isEqualToString:self.connectionProperties.identity.jid]) {
+        self.deviceQueryId=query.stanzaID;
+    }
     
     [self send:query];
     

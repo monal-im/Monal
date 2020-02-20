@@ -82,7 +82,7 @@
         }
         
         else if([[dic objectForKey:@"subscription"] isEqualToString:@"from"]){
-             self.subMessage=@"They can see your keys. You can't see thiers.";
+             self.subMessage=@"They can see your keys. You can't see theirs.";
         } else {
               self.subMessage=@"Not a contact. Neither can see keys.";
         }

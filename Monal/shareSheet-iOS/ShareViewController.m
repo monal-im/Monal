@@ -35,7 +35,9 @@
     NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
     self.accounts= [groupDefaults objectForKey:@"accounts"];
     NSData *data=[groupDefaults objectForKey:@"recipients"];
-    self.recipients=(NSArray *) [NSKeyedUnarchiver unarchiveObjectWithData:data];
+    
+    NSError *error;
+    self.recipients=[NSKeyedUnarchiver unarchivedObjectOfClass:[NSArray class] fromData:data error:&error];
     
     self.recipient = [groupDefaults objectForKey:@"lastRecipient"];
     self.account = [groupDefaults objectForKey:@"lastAccount"];

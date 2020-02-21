@@ -429,7 +429,7 @@
 {
      NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
     [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
-        NSData *archive = [NSKeyedArchiver archivedDataWithRootObject:cleanActive];
+        NSData *archive = [NSKeyedArchiver archivedDataWithRootObject:cleanActive requiringSecureCoding:YES error:nil];
         [groupDefaults setObject:archive forKey:@"recipients"];
         [groupDefaults synchronize];
     }];

@@ -329,6 +329,14 @@
                 [[DataLayer sharedInstance] addContactRequest:contactObj];
             }
             
+            if([[contact objectForKey:@"subscription"] isEqualToString:kSubFrom]) //already subscribed
+            {
+                MLContact *contactObj = [[MLContact alloc] init];
+                contactObj.contactJid=[contact objectForKey:@"jid"];
+                contactObj.accountId=self.accountNo;
+                [[DataLayer sharedInstance] deleteContactRequest:contactObj];
+            }
+            
             [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
                                         forAccount:self.accountNo
                                           fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""

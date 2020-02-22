@@ -1221,7 +1221,7 @@ NSString *const kXMPPPresence = @"presence";
         while (stanzaToParse)
         {
             [self.processQueue addOperationWithBlock:^{
-                DDLogDebug(@"got stanza %@", stanzaToParse);
+                DDLogDebug(@"RECV: %@", stanzaToParse);
                 
                 if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
                 {

@@ -68,6 +68,9 @@
     [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" andMucNick:nil  withCompletion:^(BOOL success) {
     }];
     
+    NSDictionary *newSub=[[DataLayer sharedInstance] getSubscriptionForContact:self.contact.contactJid andAccount:self.contact.accountId];
+    self.contact.ask= [newSub objectForKey:@"ask"];
+    self.contact.subscription= [newSub objectForKey:@"subscription"];
     
     if(!self.contact.subscription || ![self.contact.subscription isEqualToString:kSubBoth]) {
         self.isSubscribed=NO;
@@ -325,8 +328,10 @@
     }]];
     
     [alert addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
-            [[MLXMPPManager sharedInstance] addContact:self.contact];
-           [[MLXMPPManager sharedInstance] approveContact:self.contact]; //incase there was a pending request
+        [[MLXMPPManager sharedInstance] addContact:self.contact];
+        if([self.contact.state isEqualToString:kSubTo]  || [self.contact.state isEqualToString:kSubNone] ) {
+            [[MLXMPPManager sharedInstance] approveContact:self.contact]; //incase there was a pending request
+        }
     }]];
     
     alert.popoverPresentationController.sourceView=self.tableView;

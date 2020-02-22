@@ -73,7 +73,7 @@
         self.isSubscribed=NO;
        
         if([self.contact.subscription isEqualToString:kSubNone]){
-            self.subMessage=@"Neither can see the other's keys";
+            self.subMessage=@"Can't see the other's keys";
         }
         
         else  if([self.contact.subscription isEqualToString:kSubTo]){
@@ -84,6 +84,11 @@
              self.subMessage=@"They can see your keys. You can't see theirs.";
         } else {
               self.subMessage=@"Not a contact. Neither can see keys.";
+        }
+        
+        if([self.contact.ask isEqualToString:kAskSubscribe])
+        {
+            self.subMessage =[NSString  stringWithFormat:@"%@ (Pending Approval)", self.subMessage];
         }
         
     } else  {

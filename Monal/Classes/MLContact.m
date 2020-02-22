@@ -13,6 +13,7 @@ NSString *const kSubBoth=@"both";
 NSString *const kSubNone=@"none";
 NSString *const kSubTo=@"to";
 NSString *const kSubFrom=@"from";
+NSString *const kAskSubscribe=@"subscribe";
 
 
 @implementation MLContact
@@ -39,6 +40,7 @@ NSString *const kSubFrom=@"from";
     contact.fullName=[dic objectForKey:@"full_name"];
     contact.imageFile=[dic objectForKey:@"filename"];
     contact.subscription=[dic objectForKey:@"subscription"];
+    contact.ask=[dic objectForKey:@"ask"];
     
     contact.accountId=[NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
     

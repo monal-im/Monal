@@ -315,28 +315,36 @@
             [[DataLayer sharedInstance] setRosterVersion:iqNode.rosterVersion forAccount:self.accountNo];
         }
         
-        if([[contact objectForKey:@"subscription"] isEqualToString:@"to"])
+        if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove])
         {
-            // roster approval
-        }
-        
-        [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
-                                    forAccount:self.accountNo
-                                      fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
-                                      nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
-                                    andMucNick:nil
-                                withCompletion:^(BOOL success) {
+            [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"jid"] forAccount:self.accountNo];
+        } else  {
             
-            [[DataLayer sharedInstance] setSubscription:[contact objectForKey:@"subscription"]
-                                                 andAsk:[contact objectForKey:@"ask"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo];
-            
-            if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
+            if([[contact objectForKey:@"subscription"] isEqualToString:kSubTo])
             {
-                [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo ] ;
+                MLContact *contactObj = [[MLContact alloc] init];
+                contactObj.contactJid=[contact objectForKey:@"jid"];
+                contactObj.accountId=self.accountNo;
+                [[DataLayer sharedInstance] addContactRequest:contactObj];
             }
-        }];
-        
-        
+            
+            [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
+                                        forAccount:self.accountNo
+                                          fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
+                                          nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
+                                        andMucNick:nil
+                                    withCompletion:^(BOOL success) {
+                
+                [[DataLayer sharedInstance] setSubscription:[contact objectForKey:@"subscription"]
+                                                     andAsk:[contact objectForKey:@"ask"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo];
+                
+                if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
+                {
+                    [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo ] ;
+                }
+            }];
+            
+        }
         
         
     }

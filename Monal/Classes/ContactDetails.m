@@ -73,7 +73,7 @@
         self.isSubscribed=NO;
        
         if([self.contact.subscription isEqualToString:kSubNone]){
-            self.subMessage=@"Can't see the other's keys";
+            self.subMessage=@"Neither can see keys.";
         }
         
         else  if([self.contact.subscription isEqualToString:kSubTo]){
@@ -83,7 +83,7 @@
         else if([self.contact.subscription isEqualToString:kSubFrom]){
              self.subMessage=@"They can see your keys. You can't see theirs";
         } else {
-              self.subMessage=@"Can't see the other's keys";
+              self.subMessage=@"Unknown Subcription";
         }
         
         if([self.contact.ask isEqualToString:kAskSubscribe])

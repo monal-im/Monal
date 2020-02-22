@@ -856,6 +856,8 @@ static DataLayer *sharedInstance=nil;
     
     [self executeNonQuery:query andArguments:params withCompletion:nil];
     
+    [self setSubscription:kSubNone andAsk:@"" forContact:buddy andAccount:accountNo];
+    
 }
 -(BOOL) clearBuddies:(NSString*) accountNo
 {

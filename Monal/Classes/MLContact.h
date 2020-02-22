@@ -12,6 +12,8 @@ FOUNDATION_EXPORT NSString *const kSubBoth;
 FOUNDATION_EXPORT NSString *const kSubNone;
 FOUNDATION_EXPORT NSString *const kSubTo;
 FOUNDATION_EXPORT NSString *const kSubFrom;
+FOUNDATION_EXPORT NSString *const kSubRemove;
+
 FOUNDATION_EXPORT NSString *const kAskSubscribe;
 
 NS_ASSUME_NONNULL_BEGIN

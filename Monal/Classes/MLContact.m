@@ -13,6 +13,7 @@ NSString *const kSubBoth=@"both";
 NSString *const kSubNone=@"none";
 NSString *const kSubTo=@"to";
 NSString *const kSubFrom=@"from";
+NSString *const kSubRemove=@"remove";
 NSString *const kAskSubscribe=@"subscribe";
 
 

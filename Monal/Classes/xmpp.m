@@ -1301,7 +1301,14 @@ NSString *const kXMPPPresence = @"presence";
                     
                     ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
                     
-                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid  signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+                    
+                    messageProcessor.sendStanza=^(MLXMLNode * _Nullable nodeResponse) {
+                        if(nodeResponse) {
+                            [self send:nodeResponse];
+                        }
+                    };
+                    
                     messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
                         if(success)
                         {
@@ -1366,9 +1373,7 @@ NSString *const kXMPPPresence = @"presence";
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
                 {
                     [self incrementLastHandledStanza];
-                    
                     ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:stanzaToParse];
-                    
                     NSString *recipient=presenceNode.to;
                     
                     if(!recipient)
@@ -1715,9 +1720,10 @@ NSString *const kXMPPPresence = @"presence";
                     
                     MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
                     
-                    processor.sendIq=^(MLXMLNode * _Nullable iqResponse) {
-                                          if(iqResponse) {
-                                              [self send:iqResponse];
+                   
+                    processor.sendIq=^(MLXMLNode * _Nullable nodeResponse) {
+                                          if(nodeResponse) {
+                                              [self send:nodeResponse];
                                           }
                                       };
                     

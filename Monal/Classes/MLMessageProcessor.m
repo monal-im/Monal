@@ -13,7 +13,7 @@
 #import "AESGcm.h"
 #import "MLConstants.h"
 #import "MLImageManager.h"
-
+#import "XMPPIQ.h"
 
 
 @interface MLMessageProcessor ()
@@ -21,18 +21,19 @@
 @property (nonatomic, strong) MLSignalStore *monalSignalStore;
 @property (nonatomic, strong) NSString *jid;
 @property (nonatomic, strong) NSString *accountNo;
-
+@property (nonatomic, strong) MLXMPPConnection *connection;
 @end
 
 
 @implementation MLMessageProcessor
 
--(MLMessageProcessor *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore {
+-(MLMessageProcessor *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid connection:(MLXMPPConnection *) connection   signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore {
     self=[super init];
     self.accountNo = accountNo;
     self.jid= jid;
     self.signalContext=signalContext;
     self.monalSignalStore= monalSignalStore;
+    self.connection= connection;
     return self;
 }
 
@@ -178,8 +179,88 @@
         //Post notice
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageReceivedNotice object:self userInfo:@{@"MessageID":messageNode.receivedID}];
     }
+    
+    if([messageNode.type isEqualToString:kMessageHeadlineType])
+    {
+        [self processHeadline:messageNode];
+    }
+    
 }
     
+-(void) processHeadline:(ParseMessage *) messageNode
+{
+     if(messageNode.devices)
+     {
+         [self processOMEMODevices:messageNode.devices from:messageNode.from];
+     }
+}
+
+
+-(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
+{
+    if(!self.connection.supportsPubSub) return;
+    XMPPIQ* query2 =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
+    [query2 setiqTo:jid];
+    [query2 requestBundles:deviceid];
+    if(self.sendStanza) self.sendStanza(query2);
+}
+
+-(void) sendOMEMODevices:(NSArray *) devices {
+    if(!self.connection.supportsPubSub) return;
+    
+    XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [signalDevice publishDevices:devices];
+    if(self.sendStanza) self.sendStanza(signalDevice);
+}
+
+-(void) processOMEMODevices:(NSArray *) receivedDevices from:(NSString *) source {
+    if(receivedDevices)
+    {
+        if(!source || [source isEqualToString:self.connection.identity.jid])
+        {
+            source=self.connection.identity.jid;
+            NSMutableArray *devices= [receivedDevices mutableCopy];
+            NSSet *deviceSet = [NSSet setWithArray:receivedDevices];
+            
+            NSString * deviceString=[NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
+            BOOL hasAddedDevice=NO;
+            if(![deviceSet containsObject:deviceString])
+            {
+                [devices addObject:deviceString];
+                hasAddedDevice=YES;
+            }
+            if(hasAddedDevice) //prevent infinte loop 
+                [self sendOMEMODevices:devices];
+        }
+        
+        NSArray *existingDevices=[self.monalSignalStore knownDevicesForAddressName:source];
+        NSSet *deviceSet = [NSSet setWithArray:existingDevices];
+        //only query if the device doesnt exist
+        [receivedDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSString *deviceString  =(NSString *)obj;
+            NSNumber *deviceNumber = [NSNumber numberWithInt:deviceString.intValue];
+            if(![deviceSet containsObject:deviceNumber]) {
+                [self queryOMEMOBundleFrom:source andDevice:deviceString];
+            } else  {
+               
+            }
+        }];
+        
+        //if not in device list remove from  knowndevices
+        NSSet *iqSet = [NSSet setWithArray:receivedDevices];
+        [existingDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSNumber *device  =(NSNumber *)obj;
+            NSString *deviceString  =[NSString stringWithFormat:@"%@", device];
+            if(![iqSet containsObject:deviceString]) {
+                //device was removed
+                SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:(int) device.integerValue];
+                [self.monalSignalStore deleteDeviceforAddress:address];
+            }
+        }];
+        
+    }
+    
+}
     
 -(NSString *) decryptMessage:(ParseMessage *) messageNode {
 #ifndef DISABLE_OMEMO

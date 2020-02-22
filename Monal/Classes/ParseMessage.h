@@ -38,6 +38,7 @@
 @property (nonatomic, assign, readonly) BOOL mamResult;
 
 /** OMEMO */
+@property (nonatomic, strong, readonly) NSMutableArray *devices;
 
 @property (nonatomic, copy, readonly) NSString* sid; // sender device id
 @property (nonatomic, copy, readonly) NSString* encryptedPayload;

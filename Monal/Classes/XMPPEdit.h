@@ -17,7 +17,7 @@
 	IBOutlet UILabel *JIDLabel;
 }
 
-extern NSString *const kGtalk;
+FOUNDATION_EXPORT NSString *const kGtalk;
 
 @property (nonatomic, strong) DataLayer *db;
 @property (nonatomic, strong ) 	NSArray *sectionArray;

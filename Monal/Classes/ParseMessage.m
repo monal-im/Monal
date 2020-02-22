@@ -221,7 +221,7 @@
     
     if(([elementName isEqualToString:@"encryption"]) )
     {
-        State=@"Encryption"; //TODO figure out the poing of this
+        State=@"Encryption"; 
         
         return;
     }

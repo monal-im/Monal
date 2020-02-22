@@ -48,6 +48,8 @@
     
     MLContact *contact = self.requests[indexPath.row];
     cell.textLabel.text= contact.contactJid;
+    xmpp* account =[[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
+    cell.detailTextLabel.text=[NSString stringWithFormat:@"Account: %@",account.connectionProperties.identity.jid];
     
     return cell;
 }

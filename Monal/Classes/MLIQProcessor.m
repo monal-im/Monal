@@ -318,7 +318,8 @@
         if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove])
         {
             [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"jid"] forAccount:self.accountNo];
-        } else  {
+        }
+        else {
             
             if([[contact objectForKey:@"subscription"] isEqualToString:kSubTo])
             {
@@ -345,8 +346,6 @@
             }];
             
         }
-        
-        
     }
     
     if(self.getVcards) self.getVcards();

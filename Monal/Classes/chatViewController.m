@@ -246,11 +246,12 @@
     
     [self synchChat];
 #ifndef DISABLE_OMEMO
-    //cehck fro sub id.
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-    [xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
+    if(![self.contact.subscription isEqualToString:kSubBoth]) {
+        [xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
+    }
 #endif
-   
+    
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [self refreshCounter];
     });
@@ -763,13 +764,15 @@
        && ([message.from isEqualToString:self.contact.contactJid]
           || [message.to isEqualToString:self.contact.contactJid] ))
     {
-        //getting encrypted chat turns it on. not the other way around
-        if(message.encrypted && !self.encryptChat) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
-                self.encryptChat=YES;
-                [self refreshButton:notification];
-            });
+        if([self.contact.subscription isEqualToString:kSubBoth]) {
+            //getting encrypted chat turns it on. not the other way around
+            if(message.encrypted && !self.encryptChat) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+                    self.encryptChat=YES;
+                    [self refreshButton:notification];
+                });
+            }
         }
         
         [[DataLayer sharedInstance] messageTypeForMessage: message.messageText withCompletion:^(NSString *messageType) {

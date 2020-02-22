@@ -898,7 +898,7 @@ static DataLayer *sharedInstance=nil;
 -(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion
 {
     if(!username || !accountNo) return;
-    NSString* query= query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, nick_name, account_id, MUC, muc_subject, muc_nick , full_name as raw_full from buddylist where buddy_name=? and account_id=?"];
+    NSString* query= query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, nick_name, account_id, MUC, muc_subject, muc_nick , full_name as raw_full, subscription from buddylist where buddy_name=? and account_id=?"];
     NSArray *params= @[username, accountNo];
     
     [self executeReader:query andArguments:params  withCompletion:^(NSArray * results) {
@@ -2098,14 +2098,14 @@ static DataLayer *sharedInstance=nil;
 #pragma mark active chats
 -(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select  distinct a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id,lastMessageTime, 0 AS 'count' from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by lastMessageTime desc" ];
-
+    NSString* query=[NSString stringWithFormat:@"select  distinct a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id,lastMessageTime, 0 AS 'count', subscription from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by lastMessageTime desc" ];
+    
     NSDateFormatter *dateFromatter = [[NSDateFormatter alloc] init];
-           NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-           
-           [dateFromatter setLocale:enUSPOSIXLocale];
-           [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
-           [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+    
+    [dateFromatter setLocale:enUSPOSIXLocale];
+    [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
+    [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     
     [self executeReader:query withCompletion:^(NSMutableArray *results) {
         
@@ -2117,9 +2117,6 @@ static DataLayer *sharedInstance=nil;
         
         if(completion) completion(toReturn);
     }];
-    
-    
-    
 }
 
 -(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo

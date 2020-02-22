@@ -8,6 +8,13 @@
 
 #import "MLContact.h"
 
+
+NSString *const kSubBoth=@"both";
+NSString *const kSubNone=@"none";
+NSString *const kSubTo=@"to";
+NSString *const kSubFrom=@"from";
+
+
 @implementation MLContact
 
 -(NSString *) contactDisplayName
@@ -31,6 +38,7 @@
     contact.nickName=[dic objectForKey:@"nick_name"];
     contact.fullName=[dic objectForKey:@"full_name"];
     contact.imageFile=[dic objectForKey:@"filename"];
+    contact.subscription=[dic objectForKey:@"subscription"];
     
     contact.accountId=[NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
     

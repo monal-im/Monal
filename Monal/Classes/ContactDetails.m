@@ -69,19 +69,18 @@
     }];
     
     
-    NSDictionary *dic = [[DataLayer sharedInstance] getSubscriptionForContact:self.contact.contactJid andAccount:self.accountNo];
-    if(!dic || ![[dic objectForKey:@"subscription"] isEqualToString:@"both"]) {
+    if(!self.contact.subscription || ![self.contact.subscription isEqualToString:kSubBoth]) {
         self.isSubscribed=NO;
        
-        if([[dic objectForKey:@"subscription"] isEqualToString:@"none"]){
+        if([self.contact.subscription isEqualToString:kSubNone]){
             self.subMessage=@"Neither can see the other's keys";
         }
         
-        else  if([[dic objectForKey:@"subscription"] isEqualToString:@"to"]){
+        else  if([self.contact.subscription isEqualToString:kSubTo]){
              self.subMessage=@"You can see their keys. They can't see yours.";
         }
         
-        else if([[dic objectForKey:@"subscription"] isEqualToString:@"from"]){
+        else if([self.contact.subscription isEqualToString:kSubFrom]){
              self.subMessage=@"They can see your keys. You can't see theirs.";
         } else {
               self.subMessage=@"Not a contact. Neither can see keys.";

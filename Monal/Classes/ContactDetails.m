@@ -77,13 +77,13 @@
         }
         
         else  if([self.contact.subscription isEqualToString:kSubTo]){
-             self.subMessage=@"You can see their keys. They can't see yours.";
+             self.subMessage=@"You can see their keys. They can't see yours";
         }
         
         else if([self.contact.subscription isEqualToString:kSubFrom]){
-             self.subMessage=@"They can see your keys. You can't see theirs.";
+             self.subMessage=@"They can see your keys. You can't see theirs";
         } else {
-              self.subMessage=@"Not a contact. Neither can see keys.";
+              self.subMessage=@"Can't see the other's keys";
         }
         
         if([self.contact.ask isEqualToString:kAskSubscribe])

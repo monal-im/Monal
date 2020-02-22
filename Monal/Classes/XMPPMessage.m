@@ -15,7 +15,7 @@
  NSString* const kMessageGroupChatType=@"groupchat";
  NSString* const kMessageErrorType=@"error";
  NSString* const kMessageNormalType =@"normal";
- NSString* const kMessageHeadlineType;
+NSString* const kMessageHeadlineType@="headline";
 
 -(id) init
 {

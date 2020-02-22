@@ -9,7 +9,7 @@
 
 #import "MLXMLNode.h"
 
-extern NSString* const kMessageChatType;
+FOUNDATION_EXPORT NSString* const kMessageChatType;
 FOUNDATION_EXPORT NSString* const kMessageGroupChatType;
 FOUNDATION_EXPORT NSString* const kMessageErrorType;
 FOUNDATION_EXPORT NSString* const kMessageNormalType;

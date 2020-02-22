@@ -2845,10 +2845,16 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Database version <4.3 detected. Performing upgrade on accounts. ");
         [self executeNonQuery:@"alter table buddylist add column subscription varchar(50)" andArguments:nil];
         [self executeNonQuery:@"alter table buddylist add column ask varchar(50)" andArguments:nil];
-        [self executeNonQuery:@"update buddylist set subscription='both'; " andArguments:nil];
         [self executeNonQuery:@"update dbversion set dbversion='4.3'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.3  success ");
     }
+    
+    if([dbversion doubleValue]<4.4)
+     {
+         DDLogVerbose(@"Database version <4.4 detected. Performing upgrade on accounts. ");
+         [self executeNonQuery:@"update account set rosterVersion='0'; " andArguments:nil];
+         DDLogVerbose(@"Upgrade to 4.4  success ");
+     }
     
     [dbversionCheck unlock];
     return;

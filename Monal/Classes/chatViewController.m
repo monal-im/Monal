@@ -47,6 +47,7 @@
 
 @property (nonatomic, strong) NSDate* lastMamDate;
 @property (nonatomic, assign) BOOL hardwareKeyboardPresent;
+@property (nonatomic, strong) xmpp* xmppAccount ;
 
 @end
 
@@ -159,10 +160,9 @@
  */
 -(void) synchChat {
     dispatch_async(dispatch_get_main_queue(), ^{
-        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-        if(xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
+        if(self.xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
             if(self.messageList.count==0) {
-                [xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
+                [self.xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
             }
         }
     });
@@ -243,12 +243,11 @@
 {
     [super viewDidAppear:animated];
     if(!self.contact.contactJid || !self.contact.accountId) return;
-    
+    self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     [self synchChat];
 #ifndef DISABLE_OMEMO
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     if(![self.contact.subscription isEqualToString:kSubBoth]) {
-        [xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
+        [self.xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
     }
 #endif
     
@@ -762,16 +761,19 @@
         
     if([message.accountId isEqualToString:self.contact.accountId]
        && ([message.from isEqualToString:self.contact.contactJid]
-          || [message.to isEqualToString:self.contact.contactJid] ))
+           || [message.to isEqualToString:self.contact.contactJid] ))
     {
         if([self.contact.subscription isEqualToString:kSubBoth]) {
             //getting encrypted chat turns it on. not the other way around
             if(message.encrypted && !self.encryptChat) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
-                    self.encryptChat=YES;
-                    [self refreshButton:notification];
-                });
+                NSArray *devices= [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
+                if(devices.count>0) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+                        self.encryptChat=YES;
+                        [self refreshButton:notification];
+                    });
+                }
             }
         }
         

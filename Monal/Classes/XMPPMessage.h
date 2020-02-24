@@ -9,10 +9,11 @@
 
 #import "MLXMLNode.h"
 
-extern NSString* const kMessageChatType;
-extern NSString* const kMessageGroupChatType;
-extern NSString* const kMessageErrorType;
-extern NSString* const kMessageNormalType;
+FOUNDATION_EXPORT NSString* const kMessageChatType;
+FOUNDATION_EXPORT NSString* const kMessageGroupChatType;
+FOUNDATION_EXPORT NSString* const kMessageErrorType;
+FOUNDATION_EXPORT NSString* const kMessageNormalType;
+FOUNDATION_EXPORT NSString* const kMessageHeadlineType;
 
 @interface XMPPMessage : MLXMLNode
 

@@ -856,6 +856,8 @@ static DataLayer *sharedInstance=nil;
     
     [self executeNonQuery:query andArguments:params withCompletion:nil];
     
+    [self setSubscription:kSubNone andAsk:@"" forContact:buddy andAccount:accountNo];
+    
 }
 -(BOOL) clearBuddies:(NSString*) accountNo
 {
@@ -898,7 +900,7 @@ static DataLayer *sharedInstance=nil;
 -(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion
 {
     if(!username || !accountNo) return;
-    NSString* query= query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, nick_name, account_id, MUC, muc_subject, muc_nick , full_name as raw_full from buddylist where buddy_name=? and account_id=?"];
+    NSString* query= query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, nick_name, account_id, MUC, muc_subject, muc_nick , full_name as raw_full, subscription, ask  from buddylist where buddy_name=? and account_id=?"];
     NSArray *params= @[username, accountNo];
     
     [self executeReader:query andArguments:params  withCompletion:^(NSArray * results) {
@@ -963,12 +965,12 @@ static DataLayer *sharedInstance=nil;
     
     if([sort isEqualToString:@"Name"])
     {
-        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name,nick_name,  MUC, muc_subject, muc_nick, account_id from buddylist where online=1    order by full_name COLLATE NOCASE asc "];
+        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name,nick_name,  MUC, muc_subject, muc_nick, account_id from buddylist where online=1  and subscription='both'  order by full_name COLLATE NOCASE asc "];
     }
     
     if([sort isEqualToString:@"Status"])
     {
-        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count', ifnull(full_name, buddy_name) as full_name,nick_name,  MUC, muc_subject, muc_nick, account_id from buddylist where   online=1   order by state,full_name COLLATE NOCASE  asc "];
+        query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count', ifnull(full_name, buddy_name) as full_name,nick_name,  MUC, muc_subject, muc_nick, account_id from buddylist where   online=1 and subscription='both'  order by state,full_name COLLATE NOCASE  asc "];
     }
     
     
@@ -1252,6 +1254,25 @@ static DataLayer *sharedInstance=nil;
     NSArray *params=@[version , accountNo];
     [self executeNonQuery:query  andArguments:params withCompletion:nil];
 }
+
+
+-(NSDictionary *) getSubscriptionForContact:(NSString*) contact andAccount:(NSString*) accountNo
+{
+    if(!contact || !accountNo) return nil;
+    NSString* query=[NSString stringWithFormat:@"SELECT subscription, ask from buddylist where buddy_name=? and account_id=?"];
+    NSArray *params=@[contact, accountNo];
+    NSArray* version=[self executeReader:query andArguments:params];
+    return version.firstObject;
+}
+
+-(void) setSubscription:(NSString *)sub andAsk:(NSString*) ask forContact:(NSString*) contact andAccount:(NSString*) accountNo
+{
+    if(!contact || !accountNo || !sub) return;
+    NSString* query=[NSString stringWithFormat:@"update buddylist set subscription=?, ask=? where account_id=? and buddy_name=?"];
+    NSArray *params=@[sub ,ask?ask:@"", accountNo, contact];
+    [self executeNonQuery:query  andArguments:params withCompletion:nil];
+}
+
 
 
 #pragma mark Contact info
@@ -2079,14 +2100,14 @@ static DataLayer *sharedInstance=nil;
 #pragma mark active chats
 -(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select  distinct a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id,lastMessageTime, 0 AS 'count' from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by lastMessageTime desc" ];
-
+    NSString* query=[NSString stringWithFormat:@"select  distinct a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id,lastMessageTime, 0 AS 'count', subscription, ask from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by lastMessageTime desc" ];
+    
     NSDateFormatter *dateFromatter = [[NSDateFormatter alloc] init];
-           NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-           
-           [dateFromatter setLocale:enUSPOSIXLocale];
-           [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
-           [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+    
+    [dateFromatter setLocale:enUSPOSIXLocale];
+    [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
+    [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     
     [self executeReader:query withCompletion:^(NSMutableArray *results) {
         
@@ -2098,9 +2119,6 @@ static DataLayer *sharedInstance=nil;
         
         if(completion) completion(toReturn);
     }];
-    
-    
-    
 }
 
 -(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo
@@ -2785,6 +2803,60 @@ static DataLayer *sharedInstance=nil;
          
      }
     
+    if([dbversion doubleValue]<4.2)
+     {
+         DDLogVerbose(@"Database version <4.2 detected. Performing upgrade on accounts. ");
+         
+         NSArray *contacts= [self executeReader:@"select distinct account_id, buddy_name, lastMessageTime from activechats;" andArguments:nil];
+          [self executeNonQuery:@"delete from activechats;" andArguments:nil];
+         [contacts enumerateObjectsUsingBlock:^(NSDictionary * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+             [self executeNonQuery:@"insert into activechats (account_id, buddy_name, lastMessageTime) values (?,?,?);"
+                      andArguments:@[
+                      [obj objectForKey:@"account_id"],
+                       [obj objectForKey:@"buddy_name"],
+                       [obj objectForKey:@"lastMessageTime"]
+                      ]];
+         }];
+         
+          NSArray *dupeMessageids= [self executeReader:@"select * from (select messageid, count(messageid) as c from message_history   group by messageid) where c>1" andArguments:nil];
+         
+         
+         [dupeMessageids enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                 NSArray *dupeMessages= [self executeReader:@"select * from message_history where messageid=? order by message_history_id asc " andArguments:@[[obj objectForKey:@"messageid"]]];
+            //hopefully this is quick and doesnt grow..
+             [dupeMessages enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull message, NSUInteger idx, BOOL * _Nonnull stop) {
+                 //keep first one
+                 if(idx>0) {
+                      [self executeNonQuery:@"delete from message_history where message_history_id=?" andArguments:@[[message objectForKey:@"message_history_id"]]];
+                 }
+             }];
+         }];
+         
+         [self executeNonQuery:@"CREATE UNIQUE INDEX ux_account_messageid ON message_history(account_id, messageid)" andArguments:nil];
+                
+         [self executeNonQuery:@"alter table activechats add column lastMesssage blob;" andArguments:nil];
+         [self executeNonQuery:@"CREATE UNIQUE INDEX ux_account_buddy ON activechats(account_id, buddy_name)" andArguments:nil];
+        
+         [self executeNonQuery:@"update dbversion set dbversion='4.2'; " andArguments:nil];
+         DDLogVerbose(@"Upgrade to 4.2  success ");
+         
+     }
+
+    if([dbversion doubleValue]<4.3)
+    {
+        DDLogVerbose(@"Database version <4.3 detected. Performing upgrade on accounts. ");
+        [self executeNonQuery:@"alter table buddylist add column subscription varchar(50)" andArguments:nil];
+        [self executeNonQuery:@"alter table buddylist add column ask varchar(50)" andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='4.3'; " andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.3  success ");
+    }
+    
+    if([dbversion doubleValue]<4.4)
+     {
+         DDLogVerbose(@"Database version <4.4 detected. Performing upgrade on accounts. ");
+         [self executeNonQuery:@"update account set rosterVersion='0'; " andArguments:nil];
+         DDLogVerbose(@"Upgrade to 4.4  success ");
+     }
     
     [dbversionCheck unlock];
     return;

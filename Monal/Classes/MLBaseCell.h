@@ -17,7 +17,6 @@ FOUNDATION_EXPORT NSString *const kRead;
 
 @interface MLBaseCell : UITableViewCell
 
-@property (nonatomic, strong) IBOutlet NSString* time;
 @property (nonatomic, assign) BOOL outBound;
 @property (nonatomic, assign) BOOL MUC;
 

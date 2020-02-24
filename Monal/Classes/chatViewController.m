@@ -47,6 +47,7 @@
 
 @property (nonatomic, strong) NSDate* lastMamDate;
 @property (nonatomic, assign) BOOL hardwareKeyboardPresent;
+@property (nonatomic, strong) xmpp* xmppAccount ;
 
 @end
 
@@ -159,10 +160,9 @@
  */
 -(void) synchChat {
     dispatch_async(dispatch_get_main_queue(), ^{
-        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-        if(xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
+        if(self.xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
             if(self.messageList.count==0) {
-                [xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
+                [self.xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
             }
         }
     });
@@ -243,14 +243,14 @@
 {
     [super viewDidAppear:animated];
     if(!self.contact.contactJid || !self.contact.accountId) return;
-    
+    self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     [self synchChat];
 #ifndef DISABLE_OMEMO
-    //cehck fro sub id.
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-    [xmppAccount subscribeOMEMODevicesFrom:self.contact.contactJid];
+    if(![self.contact.subscription isEqualToString:kSubBoth]) {
+        [self.xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
+    }
 #endif
-   
+    
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [self refreshCounter];
     });
@@ -758,11 +758,25 @@
     if(!message) {
         DDLogError(@"Notification without message");
     }
-    
+        
     if([message.accountId isEqualToString:self.contact.accountId]
-       &&([message.from isEqualToString:self.contact.contactJid]
-          || [message.to isEqualToString:self.contact.contactJid] ))
+       && ([message.from isEqualToString:self.contact.contactJid]
+           || [message.to isEqualToString:self.contact.contactJid] ))
     {
+        if([self.contact.subscription isEqualToString:kSubBoth]) {
+            //getting encrypted chat turns it on. not the other way around
+            if(message.encrypted && !self.encryptChat) {
+                NSArray *devices= [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
+                if(devices.count>0) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+                        self.encryptChat=YES;
+                        [self refreshButton:notification];
+                    });
+                }
+            }
+        }
+        
         [[DataLayer sharedInstance] messageTypeForMessage: message.messageText withCompletion:^(NSString *messageType) {
             
             dispatch_async(dispatch_get_main_queue(),

@@ -14,17 +14,17 @@
  supports resume on server
  */
 @property (nonatomic, assign, readonly) BOOL resume;
-@property (nonatomic, strong, readonly) NSString *streamID;
+@property (nonatomic, copy, readonly) NSString *streamID;
 
 /**
  server's max resumption time 
  */
-@property (nonatomic, strong, readonly) NSNumber *max;
+@property (nonatomic, copy, readonly) NSNumber *max;
 
 /**
  where to reconnect to -- not implemented
  */
-@property (nonatomic, strong, readonly) NSString *location;
+@property (nonatomic, copy, readonly) NSString *location;
 
 
 @end

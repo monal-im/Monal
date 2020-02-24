@@ -48,6 +48,8 @@
     
     MLContact *contact = self.requests[indexPath.row];
     cell.textLabel.text= contact.contactJid;
+    xmpp* account =[[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
+    cell.detailTextLabel.text=[NSString stringWithFormat:@"Account: %@",account.connectionProperties.identity.jid];
     
     return cell;
 }
@@ -79,7 +81,9 @@
     MLContact *contact = self.requests[indexPath.row];
     [[MLXMPPManager sharedInstance] approveContact:contact];
     [[DataLayer sharedInstance] deleteContactRequest:contact];
-    [[MLXMPPManager sharedInstance] addContact:contact];
+    if([contact.subscription isEqualToString:kSubFrom]  || [contact.subscription isEqualToString:kSubNone] ) {
+        [[MLXMPPManager sharedInstance] addContact:contact];
+    }
     [self.requests removeObjectAtIndex:indexPath.row];
     [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
 }

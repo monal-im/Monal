@@ -1221,7 +1221,7 @@ NSString *const kXMPPPresence = @"presence";
         while (stanzaToParse)
         {
             [self.processQueue addOperationWithBlock:^{
-                DDLogDebug(@"got stanza %@", stanzaToParse);
+                DDLogDebug(@"RECV: %@", stanzaToParse);
                 
                 if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"iq"])
                 {
@@ -1301,7 +1301,14 @@ NSString *const kXMPPPresence = @"presence";
                     
                     ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
                     
-                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid  signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+                    
+                    messageProcessor.sendStanza=^(MLXMLNode * _Nullable nodeResponse) {
+                        if(nodeResponse) {
+                            [self send:nodeResponse];
+                        }
+                    };
+                    
                     messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
                         if(success)
                         {
@@ -1366,9 +1373,7 @@ NSString *const kXMPPPresence = @"presence";
                 else  if([[stanzaToParse objectForKey:@"stanzaType"]  isEqualToString:@"presence"])
                 {
                     [self incrementLastHandledStanza];
-                    
                     ParsePresence* presenceNode= [[ParsePresence alloc]  initWithDictionary:stanzaToParse];
-                    
                     NSString *recipient=presenceNode.to;
                     
                     if(!recipient)
@@ -1715,9 +1720,10 @@ NSString *const kXMPPPresence = @"presence";
                     
                     MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
                     
-                    processor.sendIq=^(MLXMLNode * _Nullable iqResponse) {
-                                          if(iqResponse) {
-                                              [self send:iqResponse];
+                   
+                    processor.sendIq=^(MLXMLNode * _Nullable nodeResponse) {
+                                          if(nodeResponse) {
+                                              [self send:nodeResponse];
                                           }
                                       };
                     
@@ -2668,7 +2674,9 @@ static NSMutableArray *extracted(xmpp *object) {
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query setiqTo:jid];
     [query requestDevices];
-    self.deviceQueryId=query.stanzaID;
+    if([jid isEqualToString:self.connectionProperties.identity.jid]) {
+        self.deviceQueryId=query.stanzaID;
+    }
     
     [self send:query];
     
@@ -2989,14 +2997,12 @@ static NSMutableArray *extracted(xmpp *object) {
 {
     XMPPPresence* presence =[[XMPPPresence alloc] init];
     [presence subscribeContact:contact];
-    [self send:presence];
-    
+    [self send:presence]; //add them
     
 }
 
 -(void) approveToRoster:(NSString*) contact
 {
-    
     XMPPPresence* presence2 =[[XMPPPresence alloc] init];
     [presence2 subscribedContact:contact];
     [self send:presence2];

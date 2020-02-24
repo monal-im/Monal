@@ -22,6 +22,8 @@
 @property (nonatomic, assign) BOOL isMuted;
 @property (nonatomic, assign) BOOL isBlocked;
 @property (nonatomic, assign) BOOL isEncrypted;
+@property (nonatomic, assign) BOOL isSubscribed;
+@property (nonatomic, strong) NSString *subMessage;
 
 @property (nonatomic, strong) NSString *accountNo;
 @property (nonatomic, strong) xmpp* xmppAccount;
@@ -62,9 +64,39 @@
     }
     
     self.accountNo=self.contact.accountId;
+    //making sure there is an entry at least
     [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" andMucNick:nil  withCompletion:^(BOOL success) {
     }];
     
+    NSDictionary *newSub=[[DataLayer sharedInstance] getSubscriptionForContact:self.contact.contactJid andAccount:self.contact.accountId];
+    self.contact.ask= [newSub objectForKey:@"ask"];
+    self.contact.subscription= [newSub objectForKey:@"subscription"];
+    
+    if(!self.contact.subscription || ![self.contact.subscription isEqualToString:kSubBoth]) {
+        self.isSubscribed=NO;
+       
+        if([self.contact.subscription isEqualToString:kSubNone]){
+            self.subMessage=@"Neither can see keys.";
+        }
+        
+        else  if([self.contact.subscription isEqualToString:kSubTo]){
+             self.subMessage=@"You can see their keys. They can't see yours";
+        }
+        
+        else if([self.contact.subscription isEqualToString:kSubFrom]){
+             self.subMessage=@"They can see your keys. You can't see theirs";
+        } else {
+              self.subMessage=@"Unknown Subcription";
+        }
+        
+        if([self.contact.ask isEqualToString:kAskSubscribe])
+        {
+            self.subMessage =[NSString  stringWithFormat:@"%@ (Pending Approval)", self.subMessage];
+        }
+        
+    } else  {
+        self.isSubscribed=YES;
+    }
     
 #ifndef DISABLE_OMEMO
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
@@ -122,8 +154,17 @@
             MLContactDetailHeader *detailCell=  (MLContactDetailHeader *)[tableView dequeueReusableCellWithIdentifier:@"headerCell"];
             if(self.contact.isGroup) {
                detailCell.jid.text=[NSString stringWithFormat:@"%@ (%lu)", self.contact.contactJid, self.groupMemberCount];
+                //for how hide things that arent relevant
+                detailCell.phoneButton.hidden=YES;
+                detailCell.isContact.hidden=YES;
             } else {
                 detailCell.jid.text=self.contact.contactJid;
+                detailCell.isContact.hidden=self.isSubscribed;
+                detailCell.isContact.text=self.subMessage;
+            }
+            
+            if(self.contact.isGroup || !self.isSubscribed) {
+                detailCell.lockButton.hidden=YES;
             }
             
             [[MLImageManager sharedInstance] getIconForContact:self.contact.contactJid andAccount:self.contact.accountId withCompletion:^(UIImage *image) {
@@ -199,9 +240,13 @@
             }
             else if(indexPath.row==2) {
                 if(self.contact.isGroup) {
-                     thecell.textLabel.text=@"Leave Conversation";
+                    thecell.textLabel.text=@"Leave Conversation";
                 } else  {
-                    thecell.textLabel.text=@"Remove Contact";
+                    if(self.isSubscribed) {
+                        thecell.textLabel.text=@"Remove Contact";
+                    } else  {
+                        thecell.textLabel.text=@"Add Contact";
+                    }
                 }
             }
             thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
@@ -261,16 +306,42 @@
                 break;
             }
             case 2:  {
-                [self removeContact];
+                if(self.isSubscribed) {
+                    [self removeContact];
+                }  else  {
+                    [self addContact];
+                }
                 break;
             }
         }
     }
 }
 
+-(void) addContact {
+    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Add %@ to your contacts?", nil),self.contact.fullName ];
+    NSString* detailString =@"They will see when you are online. They will be able to send you encrypted messages.";
+
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
+                                                                   message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
+    [alert addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert dismissViewControllerAnimated:YES completion:nil];
+    }]];
+    
+    [alert addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+        [[MLXMPPManager sharedInstance] addContact:self.contact];
+        if([self.contact.state isEqualToString:kSubTo]  || [self.contact.state isEqualToString:kSubNone] ) {
+            [[MLXMPPManager sharedInstance] approveContact:self.contact]; //incase there was a pending request
+        }
+    }]];
+    
+    alert.popoverPresentationController.sourceView=self.tableView;
+    
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
 -(void) removeContact {
     NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),self.contact.fullName ];
-    NSString* detailString =@"They will no longer see when you are online. They may not be able to access your encryption keys.";
+    NSString* detailString =@"They will no longer see when you are online. They may not be able to send you encrypted messages.";
        
     BOOL isMUC=self.contact.isGroup;
     if(isMUC)

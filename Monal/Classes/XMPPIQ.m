@@ -43,7 +43,7 @@ NSString *const kiqErrorType = @"error";
      static dispatch_once_t onceToken;
      dispatch_once(&onceToken, ^{
          //This list must be in aphabetical order
-    featuresArray=@[@"eu.siacs.conversations.axolotl.devicelist",
+    featuresArray=@[@"eu.siacs.conversations.axolotl.devicelist+notify",
                     @"http://jabber.org/protocol/caps",
                         @"http://jabber.org/protocol/disco#info",
                         @"http://jabber.org/protocol/disco#items",

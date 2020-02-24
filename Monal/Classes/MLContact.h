@@ -8,6 +8,14 @@
 
 #import <Foundation/Foundation.h>
 
+FOUNDATION_EXPORT NSString *const kSubBoth;
+FOUNDATION_EXPORT NSString *const kSubNone;
+FOUNDATION_EXPORT NSString *const kSubTo;
+FOUNDATION_EXPORT NSString *const kSubFrom;
+FOUNDATION_EXPORT NSString *const kSubRemove;
+
+FOUNDATION_EXPORT NSString *const kAskSubscribe;
+
 NS_ASSUME_NONNULL_BEGIN
 
 
@@ -49,6 +57,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL isGroup;
 @property (nonatomic, copy) NSString *groupSubject;
 @property (nonatomic, copy) NSString *accountNickInGroup;
+
+@property (nonatomic, copy) NSString *subscription; //roster subbscription state
+@property (nonatomic, copy) NSString *ask; //whether we have tried to subscribe 
 
 /**
  picks nick, full or jid to display

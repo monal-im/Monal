@@ -983,7 +983,9 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                     SignalContext *signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
 
                     //process message
-                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:accountNo jid:jid signalContex:signalContext andSignalStore:monalSignalStore];
+                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:accountNo jid:jid
+                                                                                          connection: nil
+                                                                                          signalContex:signalContext andSignalStore:monalSignalStore];
                     messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
                         if(success)
                         {

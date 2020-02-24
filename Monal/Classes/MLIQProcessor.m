@@ -118,6 +118,11 @@
 
 -(void) processSetIq:(ParseIq *) iqNode {
     
+    //its  a roster push
+    if (iqNode.roster==YES)
+    {
+        [self rosterResult:iqNode];
+    }
     
 }
 
@@ -290,7 +295,7 @@
                 if(self.sendIq) self.sendIq([self discoverService:[item objectForKey:@"jid"]]);
             }
         }
-        
+    
         // send to bare jid for push etc.
         if(self.sendIq) self.sendIq([self discoverService:self.connection.identity.jid]);
     }
@@ -310,22 +315,44 @@
             [[DataLayer sharedInstance] setRosterVersion:iqNode.rosterVersion forAccount:self.accountNo];
         }
         
-        if([[contact objectForKey:@"subscription"] isEqualToString:@"both"])
+        if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove])
         {
-            if([contact objectForKey:@"jid"]) {
-                [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
-                                            forAccount:self.accountNo
-                                              fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
-                                              nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
-                                            andMucNick:nil
-                                        withCompletion:^(BOOL success) {
-                    
-                    if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
-                    {
-                        [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo ] ;
-                    }
-                }];
+            [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"jid"] forAccount:self.accountNo];
+        }
+        else {
+            
+            if([[contact objectForKey:@"subscription"] isEqualToString:kSubTo])
+            {
+                MLContact *contactObj = [[MLContact alloc] init];
+                contactObj.contactJid=[contact objectForKey:@"jid"];
+                contactObj.accountId=self.accountNo;
+                [[DataLayer sharedInstance] addContactRequest:contactObj];
             }
+            
+            if([[contact objectForKey:@"subscription"] isEqualToString:kSubFrom]) //already subscribed
+            {
+                MLContact *contactObj = [[MLContact alloc] init];
+                contactObj.contactJid=[contact objectForKey:@"jid"];
+                contactObj.accountId=self.accountNo;
+                [[DataLayer sharedInstance] deleteContactRequest:contactObj];
+            }
+            
+            [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
+                                        forAccount:self.accountNo
+                                          fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
+                                          nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
+                                        andMucNick:nil
+                                    withCompletion:^(BOOL success) {
+                
+                [[DataLayer sharedInstance] setSubscription:[contact objectForKey:@"subscription"]
+                                                     andAsk:[contact objectForKey:@"ask"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo];
+                
+                if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
+                {
+                    [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo ] ;
+                }
+            }];
+            
         }
     }
     
@@ -411,16 +438,16 @@
         }];
         
         //if not in device list remove from  knowndevices
-//        NSSet *iqSet = [NSSet setWithArray:iqNode.omemoDevices];
-//        [existingDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-//            NSNumber *device  =(NSNumber *)obj;
-//            NSString *deviceString  =[NSString stringWithFormat:@"%@", device];
-//            if(![iqSet containsObject:deviceString]) {
-//                //device was removed
-//                SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:(int) device.integerValue];
-//                [self.monalSignalStore deleteDeviceforAddress:address];
-//            }
-//        }];
+        NSSet *iqSet = [NSSet setWithArray:iqNode.omemoDevices];
+        [existingDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSNumber *device  =(NSNumber *)obj;
+            NSString *deviceString  =[NSString stringWithFormat:@"%@", device];
+            if(![iqSet containsObject:deviceString]) {
+                //device was removed
+                SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:(int) device.integerValue];
+                [self.monalSignalStore deleteDeviceforAddress:address];
+            }
+        }];
         
     }
     

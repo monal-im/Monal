@@ -20,28 +20,29 @@
 /**
  In the event of MUC this is ths user who really sent the message and from is the group name.
  */
-@property (nonatomic, strong, readonly) NSString* actualFrom;
-@property (nonatomic, strong, readonly) NSString* messageText;
-@property (nonatomic, strong, readonly) NSString* messagHTML;
-@property (nonatomic, strong, readonly) NSString* subject;
+@property (nonatomic, copy, readonly) NSString* actualFrom;
+@property (nonatomic, copy, readonly) NSString* messageText;
+@property (nonatomic, copy, readonly) NSString* messagHTML;
+@property (nonatomic, copy, readonly) NSString* subject;
 @property (nonatomic, assign, readonly) BOOL hasBody; 
-@property (nonatomic, strong, readonly) NSDate *delayTimeStamp;
-@property (nonatomic, strong, readonly) NSString* avatarData;
-@property (nonatomic, strong, readonly) NSString* oobURL;
+@property (nonatomic, copy, readonly) NSDate *delayTimeStamp;
+@property (nonatomic, copy, readonly) NSString* avatarData;
+@property (nonatomic, copy, readonly) NSString* oobURL;
 
 /** Messages that are requesting a resposne */
 @property (nonatomic, assign, readonly) BOOL requestReceipt;
 /** Messages that are the resposne */
-@property (nonatomic, strong, readonly) NSString* receivedID;
+@property (nonatomic, copy, readonly) NSString* receivedID;
 
 @property (nonatomic, assign, readonly) BOOL mucInvite;
 @property (nonatomic, assign, readonly) BOOL mamResult;
 
 /** OMEMO */
+@property (nonatomic, strong, readonly) NSMutableArray *devices;
 
-@property (nonatomic, strong, readonly) NSString* sid; // sender device id
-@property (nonatomic, strong, readonly) NSString* encryptedPayload;
-@property (nonatomic, strong, readonly) NSString* iv;
+@property (nonatomic, copy, readonly) NSString* sid; // sender device id
+@property (nonatomic, copy, readonly) NSString* encryptedPayload;
+@property (nonatomic, copy, readonly) NSString* iv;
 @property (nonatomic, strong, readonly) NSMutableArray *signalKeys; 
 
 @end

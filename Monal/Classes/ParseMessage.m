@@ -10,7 +10,8 @@
 #import "MLSignalStore.h"
 
 @interface ParseMessage()
-@property (nonatomic, strong) NSMutableDictionary *currentKey; 
+@property (nonatomic, strong) NSMutableDictionary *currentKey;
+@property (nonatomic, strong) NSMutableArray *devices;
 
 @end
 
@@ -96,48 +97,49 @@
 		_hasBody=YES;
 		return;
 	}
-    
-    
-    
+
     if(([elementName isEqualToString:@"message"])
        && ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageGroupChatType]))
-	{
-	
-		NSArray*  parts=[[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/"];
-		
-		if([parts count]>1)
-		{
+    {
+        NSArray*  parts=[[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/"];
+        if([parts count]>1)
+        {
             DDLogVerbose(@"group chat message");
             _actualFrom=[parts objectAtIndex:1]; // the user name
-			_from=[parts objectAtIndex:0]; // should be group name
-		}
+            _from=[parts objectAtIndex:0]; // should be group name
+        }
         else
-            
         {
             DDLogVerbose(@"group chat message from a room ");
             _from=[attributeDict objectForKey:@"from"];
-		}
-
-		return;
-	}
-	else
-        if([elementName isEqualToString:@"message"] &&
-           ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageChatType]) )
-        {
-            _from=[[_from componentsSeparatedByString:@"/" ] objectAtIndex:0];
-            _to=[[_to  componentsSeparatedByString:@"/" ] objectAtIndex:0];
-            
-            // carbons are only from myself 
-            if([_to isEqualToString:_from]) {
-                _from=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-                _to=[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-                DDLogVerbose(@"message from %@ to %@", _from, _to);
-                return;
-            } else {
-                //DDLogError(@"message impersonation");
-                return;
-            }
         }
+        return;
+    }
+    else if([elementName isEqualToString:@"message"] &&
+            ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageChatType]) )
+    {
+        _from=[[_from componentsSeparatedByString:@"/" ] objectAtIndex:0];
+        _to=[[_to  componentsSeparatedByString:@"/" ] objectAtIndex:0];
+        
+        // carbons are only from myself
+        if([_to isEqualToString:_from]) {
+            _from=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+            _to=[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+            DDLogVerbose(@"message from %@ to %@", _from, _to);
+            return;
+        } else {
+            //DDLogError(@"message impersonation");
+            return;
+        }
+    }
+    if([elementName isEqualToString:@"message"] &&
+       ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageHeadlineType]) )
+    {
+        _from=[[_from componentsSeparatedByString:@"/" ] objectAtIndex:0];
+        _to=[[_to  componentsSeparatedByString:@"/" ] objectAtIndex:0];
+        State=@"Headline";
+        return;
+    }
     
     
     if(([elementName isEqualToString:@"x"])  && ([[attributeDict objectForKey:kXMLNS] isEqualToString:@""]))
@@ -219,12 +221,33 @@
     
     
     
-    if(([elementName isEqualToString:@"encryption"]) )
+    if([State isEqualToString:@"Headline"] &&
+        [elementName isEqualToString:@"items"]
+       && [[attributeDict objectForKey:@"node"] isEqualToString:@"eu.siacs.conversations.axolotl.devicelist"]  )
     {
-        State=@"Encryption"; //TODO figure out the poing of this
-        
+        State =@"OMEMODevices";
+        self.devices=[[NSMutableArray alloc] init];
         return;
     }
+    
+    if([State isEqualToString:@"OMEMODevices"] &&
+       [elementName isEqualToString:@"list"]
+       && [[attributeDict objectForKey:kXMLNS] isEqualToString:@"eu.siacs.conversations.axolotl"]  )
+    {
+        State =@"OMEMODeviceList";
+        self.devices=[[NSMutableArray alloc] init];
+        return;
+    }
+    
+    if([State isEqualToString:@"OMEMODeviceList"] &&
+       [elementName isEqualToString:@"device"])
+    {
+        if([attributeDict objectForKey:@"id"]) {
+            [self.devices addObject:[attributeDict objectForKey:@"id"]];
+        }
+        return;
+    }
+    
     
     
     if(([elementName isEqualToString:@"encrypted"])

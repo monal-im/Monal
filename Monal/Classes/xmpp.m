@@ -1123,7 +1123,7 @@ NSString *const kXMPPPresence = @"presence";
      */
     
     DDLogInfo(@"sending unacked messages and block this thread until finished" );
-    [self.networkQueue addOperation:
+    [self.networkQueue addOperations: @[
      [NSBlockOperation blockOperationWithBlock:^{
         NSMutableArray *sendCopy = [self.unAckedStanzas mutableCopy];
         [self.unAckedStanzas removeAllObjects]; // do not grow
@@ -1132,7 +1132,8 @@ NSString *const kXMPPPresence = @"presence";
             [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
         }];
         [self persistState];
-    }] waitUntilFinished:YES];		//block until finished because we don't want to reorder stanzas
+    }]
+    ] waitUntilFinished:YES];		//block until finished because we don't want to reorder stanzas
     
 }
 
@@ -1677,15 +1678,16 @@ NSString *const kXMPPPresence = @"presence";
                     [self initSession];
                     
                     //resend unacked stanzas saved above (this happens only if the server provides smacks support without resumption support)
-                    [self.networkQueue addOperation:
-                     [NSBlockOperation blockOperationWithBlock:^{
+                    [self.networkQueue addOperations:@[
+                        [NSBlockOperation blockOperationWithBlock:^{
                         if(stanzas) {
                             for(NSDictionary *dic in stanzas) {
                                 [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
                                 
                             }
                         }
-                    }] waitUntilFinished:YES];
+                    }]
+                    ] waitUntilFinished:YES];
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
                 {
@@ -1792,7 +1794,7 @@ NSString *const kXMPPPresence = @"presence";
                         //resend stanzas still in the outgoing queue and clear it afterwards
                         //this happens if the server has internal problems and advertises smacks support but ceases to enable it
                         //message duplicates are possible in this scenario, but that's better than dropping messages
-                        [self.networkQueue addOperation:
+                        [self.networkQueue addOperations:@[
                          [NSBlockOperation blockOperationWithBlock:^{
                             if(self.unAckedStanzas)
                             {
@@ -1806,7 +1808,8 @@ NSString *const kXMPPPresence = @"presence";
                                 //persist these changes
                                 [self persistState];
                             }
-                        }] waitUntilFinished:YES];
+                        }]
+                        ] waitUntilFinished:YES];
                     }
                     
                     if(self.loginCompletion) {
@@ -2515,14 +2518,15 @@ static NSMutableArray *extracted(xmpp *object) {
         [self sendUnAckedMessages];
         
         //clear queue afterwards (we don't want to repeat this)
-        [self.networkQueue addOperation:
+        [self.networkQueue addOperations: @[
          [NSBlockOperation blockOperationWithBlock:^{
             if(self.unAckedStanzas)
             {
                 [self.unAckedStanzas removeAllObjects];
                 [self persistState];
             }
-        }]waitUntilFinished:YES];		//wait until the queue is empty, we don't want to remove stanzas added later on
+        }]
+        ] waitUntilFinished:YES];		//wait until the queue is empty, we don't want to remove stanzas added later on
     }
     
     [self queryMAMSinceLastMessageDate];

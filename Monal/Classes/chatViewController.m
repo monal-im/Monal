@@ -765,16 +765,16 @@
     {
         if([self.contact.subscription isEqualToString:kSubBoth]) {
             //getting encrypted chat turns it on. not the other way around
-            if(message.encrypted && !self.encryptChat) {
-                NSArray *devices= [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
-                if(devices.count>0) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
-                        self.encryptChat=YES;
-                        [self refreshButton:notification];
-                    });
-                }
-            }
+//            if(message.encrypted && !self.encryptChat) {
+//                NSArray *devices= [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
+//                if(devices.count>0) {
+//                    dispatch_async(dispatch_get_main_queue(), ^{
+//                        [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+//                        self.encryptChat=YES;
+//                        [self refreshButton:notification];
+//                    });
+//                }
+//            }
         }
         
         [[DataLayer sharedInstance] messageTypeForMessage: message.messageText withCompletion:^(NSString *messageType) {

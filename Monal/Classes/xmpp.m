@@ -90,6 +90,8 @@ NSString *const kXMPPPresence = @"presence";
     
 }
 
+@property (nonatomic, assign) BOOL smacksRequestInFlight;
+
 @property (nonatomic, assign) BOOL loginStarted;
 @property (nonatomic, assign) BOOL reconnectScheduled;
 
@@ -557,23 +559,6 @@ NSString *const kXMPPPresence = @"presence";
     
     DDLogInfo(@"All closed and cleaned up");
     
-}
-
--(void) sendLastAck:(BOOL) disconnecting
-{
-    //send last smacks ack as required by smacks revision 1.5.2
-    if(self.connectionProperties.supportsSM3)
-    {
-        DDLogInfo(@"sending last ack");
-        MLXMLNode *aNode = [[MLXMLNode alloc] initWithElement:@"a"];
-        NSDictionary *dic= @{kXMLNS:@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza] };
-        aNode.attributes = [dic mutableCopy];
-        if(!disconnecting) {
-            [self send:aNode];
-        } else  {
-            [self writeToStream:aNode.XMLString]; // dont even bother queueing
-        }
-    }
 }
 
 -(void) disconnectWithCompletion:(void(^)(void))completion
@@ -1132,21 +1117,12 @@ NSString *const kXMPPPresence = @"presence";
 #pragma mark message ACK
 -(void) sendUnAckedMessages
 {
-    
-    //This addresses a bug in Aug 2019. Remove later if seen fit
-    //something is wrogn if it grows this big
-    if(self.unAckedStanzas.count>25)
-    {
-        [self.unAckedStanzas removeAllObjects];
-        [self persistState];
-    }
-
     /**
      Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
      It may also result in mutation on iteration
      */
     
-    DDLogInfo(@"sending unacked messages" );
+    DDLogInfo(@"sending unacked messages and block this thread until finished" );
     [self.networkQueue addOperation:
      [NSBlockOperation blockOperationWithBlock:^{
         NSMutableArray *sendCopy = [self.unAckedStanzas mutableCopy];
@@ -1156,12 +1132,10 @@ NSString *const kXMPPPresence = @"presence";
             [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
         }];
         [self persistState];
-    }]];
+    }] waitUntilFinished:YES];		//block until finished because we don't want to reorder stanzas
     
 }
-/**
- This is actually less than or equal to since it is the last handled stanza
- */
+
 -(void) removeUnAckedMessagesLessThan:(NSNumber*) hvalue
 {
     [self.networkQueue addOperation:
@@ -1174,7 +1148,9 @@ NSString *const kXMPPPresence = @"presence";
             for(NSDictionary *dic in iterationArray)
             {
                 NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
-                if([stanzaNumber integerValue]<=[hvalue integerValue])
+				//*** I think this should not be <= but < (having a h value of 1 means the first stanza was acked and the first
+				//*** stanza has a kStanzaID of 0
+                if([stanzaNumber integerValue]<[hvalue integerValue])
                 {
                     [discard addObject:dic];
                 }
@@ -1191,22 +1167,39 @@ NSString *const kXMPPPresence = @"presence";
 }
 
 -(void) requestSMAck {
-    if(self.unAckedStanzas.count>0 ) {
+    if(!self.smacksRequestInFlight && self.unAckedStanzas.count>0 ) {
         DDLogVerbose(@"requesting smacks ack...");
         MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
         NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3"};
         rNode.attributes =[dic mutableCopy];
         [self send:rNode];
+		self.smacksRequestInFlight=YES;
     } else  {
-        DDLogDebug(@"no smacks ack when there is nothing pending...");
+        DDLogDebug(@"no smacks ack when there is nothing pending or a request already in flight...");
     }
 }
 
--(void) sendSMAck {
-    MLXMLNode *aNode=[[MLXMLNode alloc] initWithElement:@"a"];
-    NSDictionary *dic=@{kXMLNS: @"urn:xmpp:sm:3", @"h": [NSString stringWithFormat:@"%@", self.lastHandledInboundStanza]};
-    aNode.attributes=[dic mutableCopy];
-    [self send:aNode];
+-(void) sendLastAck:(BOOL) disconnecting
+{
+    //send last smacks ack as required by smacks revision 1.5.2
+	if(self.connectionProperties.supportsSM3)
+		DDLogInfo(@"sending last ack");
+    [self sendSMAck:!disconnecting];
+}
+
+-(void) sendSMAck:(BOOL) queuedSend
+{
+    if(self.connectionProperties.supportsSM3)
+    {
+        MLXMLNode *aNode = [[MLXMLNode alloc] initWithElement:@"a"];
+        NSDictionary *dic= @{kXMLNS:@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza] };
+        aNode.attributes = [dic mutableCopy];
+        if(queuedSend) {
+            [self send:aNode];
+        } else  {
+            [self writeToStream:aNode.XMLString]; // dont even bother queueing
+        }
+    }
 }
 
 
@@ -1631,7 +1624,7 @@ NSString *const kXMPPPresence = @"presence";
                         
                         if(streamNode.supportsRosterVer)
                         {
-                            self.connectionProperties.supportsRosterVersion=true;
+                            self.connectionProperties.supportsRosterVersion=YES;
                             
                         }
                         
@@ -1691,19 +1684,22 @@ NSString *const kXMPPPresence = @"presence";
                                 
                             }
                         }
-                    }]];
+                    }] waitUntilFinished:YES];
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
                 {
-                    [self sendSMAck];
+                    [self sendSMAck:YES];
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"a"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
                 {
                     ParseA* aNode=[[ParseA alloc] initWithDictionary:stanzaToParse];
-                    self.lastHandledOutboundStanza=aNode.h;
+                    self.lastHandledOutboundStanza=aNode.h;			//lastHandledOutboundStanza is just for logging purposes
                     
                     //remove acked messages
                     [self removeUnAckedMessagesLessThan:aNode.h];
+
+                    self.smacksRequestInFlight=NO;		//ack returned
+                    [self requestSMAck];				//request ack again (will only happen if queue is not empty)
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"resumed"])
                 {
@@ -1809,7 +1805,7 @@ NSString *const kXMPPPresence = @"presence";
                                 //persist these changes
                                 [self persistState];
                             }
-                        }]];
+                        }] waitUntilFinished:YES];
                     }
                     
                     if(self.loginCompletion) {
@@ -2401,7 +2397,7 @@ static NSMutableArray *extracted(xmpp *object) {
 
 
 -(void) incrementLastHandledStanza {
-    if(self.accountState>=kStateBound) {
+    if(self.connectionProperties.supportsSM3 && self.accountState>=kStateBound) {
         self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
     }
 }
@@ -2525,7 +2521,7 @@ static NSMutableArray *extracted(xmpp *object) {
                 [self.unAckedStanzas removeAllObjects];
                 [self persistState];
             }
-        }]];
+        }]waitUntilFinished:YES];		//wait until the queue is empty, we don't want to remove stanzas added later on
     }
     
     [self queryMAMSinceLastMessageDate];

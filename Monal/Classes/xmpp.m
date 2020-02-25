@@ -1182,9 +1182,10 @@ NSString *const kXMPPPresence = @"presence";
 -(void) sendLastAck:(BOOL) disconnecting
 {
     //send last smacks ack as required by smacks revision 1.5.2
-	if(self.connectionProperties.supportsSM3)
-		DDLogInfo(@"sending last ack");
-    [self sendSMAck:!disconnecting];
+    if(self.connectionProperties.supportsSM3) {
+        DDLogInfo(@"sending last ack");
+        [self sendSMAck:!disconnecting];
+    }
 }
 
 -(void) sendSMAck:(BOOL) queuedSend

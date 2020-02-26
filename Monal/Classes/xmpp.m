@@ -2578,10 +2578,10 @@ static NSMutableArray *extracted(xmpp *object) {
         
         //load up from db (combined list)
         keys= [self.monalSignalStore readPreKeys];
+        self.monalSignalStore.preKeys = keys;
+        [self sendOMEMOBundle];
     }
     
-    self.monalSignalStore.preKeys = keys;
-    [self sendOMEMOBundle];
 }
 
 -(void) subscribeOMEMODevicesFrom:(NSString *) jid

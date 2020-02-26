@@ -315,11 +315,6 @@
             
             cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             
-            if([protocol isEqualToString:@"GTalk"])
-            {
-                cell.detailTextLabel.text=@"Google Talk, Google apps etc. ";
-            }
-            
             if([protocol isEqualToString:@"XMPP"])
             {
                  cell.detailTextLabel.text=@"Jabber, Openfire, Prosody etc.   ";

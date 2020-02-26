@@ -628,7 +628,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) protocolListWithCompletion: (void (^)(NSArray *result))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select * from protocol where protocol_id<=3 or protocol_id=5 order by protocol_id asc"];
+    NSString* query=[NSString stringWithFormat:@"select * from protocol where protocol_id=1"]; //only xmpp now 
     [self executeReader:query withCompletion:^(NSMutableArray * result) {
         if(completion) completion(result);
         

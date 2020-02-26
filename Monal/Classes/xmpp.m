@@ -1638,13 +1638,15 @@ NSString *const kXMPPPresence = @"presence";
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"a"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
                 {
                     ParseA* aNode=[[ParseA alloc] initWithDictionary:stanzaToParse];
-                    self.lastHandledOutboundStanza=aNode.h;			//lastHandledOutboundStanza is just for logging purposes
-                    
-                    //remove acked messages
-                    [self removeUnAckedMessagesLessThan:aNode.h];
-
-                    self.smacksRequestInFlight=NO;		//ack returned
-                    [self requestSMAck];				//request ack again (will only happen if queue is not empty)
+                    if(self.lastHandledOutboundStanza!=aNode.h) {
+                        self.lastHandledOutboundStanza=aNode.h;			//lastHandledOutboundStanza is just for logging purposes
+                        
+                        //remove acked messages
+                        [self removeUnAckedMessagesLessThan:aNode.h];
+                        
+                        self.smacksRequestInFlight=NO;		//ack returned
+                        [self requestSMAck];				//request ack again (will only happen if queue is not empty)
+                    }
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"resumed"])
                 {
@@ -2845,13 +2847,20 @@ static NSMutableArray *extracted(xmpp *object) {
 -(void) queryMAMSinceLastMessageDate
 {
     if(self.connectionProperties.supportsMam2) {
-        [[DataLayer sharedInstance] lastMessageDateForContact:self.connectionProperties.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
-            if(lastDate) { // if there is no last date, there are no messages yet.
-                [self setMAMQueryFromStart:[lastDate dateByAddingTimeInterval:1] toDate:nil withMax:nil andJid:nil];
+        [[DataLayer sharedInstance] synchPointforAccount:self.accountNo  withCompletion:^(NSDate *synchDate) {
+            if(!synchDate) {
+                [[DataLayer sharedInstance] lastMessageDateForContact:self.connectionProperties.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
+                    if(lastDate) { // if there is no last date, there are no messages yet.
+                        [self setMAMQueryFromStart:[lastDate dateByAddingTimeInterval:1] toDate:nil withMax:nil andJid:nil];
+                    }
+                    [[DataLayer sharedInstance] setSynchpointforAccount:self.accountNo];
+                }];
+            } else  {
+                [self setMAMQueryFromStart:synchDate toDate:nil withMax:nil andJid:nil];
+                [[DataLayer sharedInstance] setSynchpointforAccount:self.accountNo];
             }
         }];
     }
-    
 }
 
 

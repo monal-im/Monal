@@ -30,10 +30,6 @@
     return self;
 }
 
--(NSString*) getGoogleInfo:(NSString*) theidval
-{
-    return  [NSString stringWithFormat:@"<iq type='get' id='%@'  > <query xmlns='google:jingleinfo'/> </iq>", theidval];
-}
 
 -(int) rtpConnect
 {

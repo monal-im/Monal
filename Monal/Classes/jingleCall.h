@@ -31,7 +31,6 @@
     
     // jingle object elements
 }
--(NSString*) getGoogleInfo:(NSString*) idval;
 
 -(XMPPIQ*) acceptJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;
 -(XMPPIQ*) rejectJingleTo:(NSString*) to  withId:(NSString*)iqid andResource:(NSString*) resource;

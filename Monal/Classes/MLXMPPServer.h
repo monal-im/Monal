@@ -22,10 +22,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic,assign) BOOL oldStyleSSL;
 @property (nonatomic,assign) BOOL selfSignedCert;
 
-//used only for gmail login
-@property (nonatomic,assign) BOOL oAuth;
-
-
 -(id) initWithHost:(NSString *) host andPort:(NSNumber *) port;
 
 

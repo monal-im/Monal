@@ -302,8 +302,7 @@ An array of Dics what have timers to make sure everything was sent
     server.SSL=[[account objectForKey:kSSL] boolValue];
     server.oldStyleSSL=[[account objectForKey:kOldSSL] boolValue];
     server.selfSignedCert=[[account objectForKey:kSelfSigned] boolValue];
-    server.oAuth=[[account objectForKey:kOauth] boolValue];
-
+ 
     if(server.oldStyleSSL && !server.SSL ) server.SSL=YES; //tehcnically a config error but  understandable
 
     xmpp* xmppAccount=[[xmpp alloc] initWithServer:server andIdentity:identity];

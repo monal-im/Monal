@@ -9,8 +9,6 @@
 #import "XMPPEdit.h"
 #import "MLSwitchCell.h"
 #import "MLButtonCell.h"
-#import "NXOAuth2.h"
-#import "NXOAuth2AccountStore.h"
 #import "MBProgressHUD.h"
 #import "MLServerDetails.h"
 #import "MLMAMPrefTableViewController.h"
@@ -155,30 +153,6 @@ NSString *const kGtalk = @"Gtalk";
     }
     
     self.sectionArray = @[@"Account", @"Advanced Settings",@""];
-    
-    
-    [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountStoreAccountsDidChangeNotification
-                                                      object:[NXOAuth2AccountStore sharedStore]
-                                                       queue:nil
-                                                  usingBlock:^(NSNotification *aNotification){
-        
-        for (NXOAuth2Account *account in [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.jid]) {
-            
-            self.password= account.accessToken.accessToken;
-            
-        };
-        
-    }];
-    
-    [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountStoreDidFailToRequestAccessNotification
-                                                      object:[NXOAuth2AccountStore sharedStore]
-                                                       queue:nil
-                                                  usingBlock:^(NSNotification *aNotification){
-        //NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
-        // Do something with the error
-    }];
-    
-    
     
 }
 
@@ -399,12 +373,6 @@ NSString *const kGtalk = @"Gtalk";
 
     UIAlertAction *yesAction =[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
 
-        NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.jid];
-        NXOAuth2AccountStore *store = [NXOAuth2AccountStore sharedStore];
-        for(NXOAuth2Account *oauthAccount in accounts ) {
-            [store removeAccount:oauthAccount];
-        }
-
         [SAMKeychain deletePasswordForService:@"Monal"  account:[NSString stringWithFormat:@"%@",self.accountno]];
         [self.db removeAccount:self.accountno];
         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
@@ -432,25 +400,6 @@ NSString *const kGtalk = @"Gtalk";
     [self presentViewController:questionAlert animated:YES completion:nil];
 
 }
-
-
-
--(void)authenticateWithOAuth
-{
-    self.password=@"";
-    [[NXOAuth2AccountStore sharedStore] setClientID:@"472865344000-invcngpma1psmiek5imc1gb8u7mef8l9.apps.googleusercontent.com"
-                                             secret:@""
-                                              scope:[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]]
-                                   authorizationURL:[NSURL URLWithString:@"https://accounts.google.com/o/oauth2/auth"]
-                                           tokenURL:[NSURL URLWithString:@"https://www.googleapis.com/oauth2/v3/token"]
-                                        redirectURL:[NSURL URLWithString:@"com.googleusercontent.apps.472865344000-invcngpma1psmiek5imc1gb8u7mef8l9://"]
-                                      keyChainGroup:@"MonalGTalk"
-                                     forAccountType:self.jid];
-
-    [[NXOAuth2AccountStore sharedStore] requestAccessToAccountWithType:self.jid];
-
-}
-
 
 #pragma mark table view datasource methods
 

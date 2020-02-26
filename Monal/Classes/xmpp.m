@@ -39,7 +39,6 @@
 #import "MLIQProcessor.h"
 #import "MLPresenceProcessor.h"
 
-#import "NXOAuth2.h"
 #import "MLHTTPRequest.h"
 #import "AESGcm.h"
 
@@ -130,8 +129,6 @@ NSString *const kXMPPPresence = @"presence";
  NSDic {stanzaID, stanza}
  */
 @property (nonatomic, strong) NSMutableArray *unAckedStanzas;
-
-@property (nonatomic, strong) NXOAuth2Account *oauthAccount;
 
 @property (nonatomic, strong) dispatch_source_t loginCancelOperation;
 
@@ -334,41 +331,6 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) connectionTask
 {
-    
-    if(self.connectionProperties.server.oAuth) {
-        
-        [[NXOAuth2AccountStore sharedStore] setClientID:@"472865344000-q63msgarcfs3ggiabdobkkis31ehtbug.apps.googleusercontent.com"
-                                                 secret:@"IGo7ocGYBYXf4znad5Qhumjt"
-                                                  scope:[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]]
-                                       authorizationURL:[NSURL URLWithString:@"https://accounts.google.com/o/oauth2/auth"]
-                                               tokenURL:[NSURL URLWithString:@"https://www.googleapis.com/oauth2/v3/token"]
-                                            redirectURL:[NSURL URLWithString:@"urn:ietf:wg:oauth:2.0:oob:auto"]
-                                          keyChainGroup:@"MonalGTalk"
-                                         forAccountType:self.connectionProperties.identity.jid];
-        
-        
-        [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountStoreDidFailToRequestAccessNotification
-                                                          object:[NXOAuth2AccountStore sharedStore]
-                                                           queue:nil
-                                                      usingBlock:^(NSNotification *aNotification){
-            //                                                          NSError *error = [aNotification.userInfo objectForKey:NXOAuth2AccountStoreErrorKey];
-            // Do something with the error
-        }];
-        
-        NSArray *accounts= [[NXOAuth2AccountStore sharedStore] accountsWithAccountType:self.connectionProperties.identity.jid];
-        
-        if([accounts count]>0)
-        {
-            self.oauthAccount= [accounts objectAtIndex:0];
-        }
-        
-        [[NSNotificationCenter defaultCenter] addObserverForName:NXOAuth2AccountDidChangeAccessTokenNotification
-                                                          object:self.oauthAccount queue:nil usingBlock:^(NSNotification *note) {
-            [self.connectionProperties.identity updatPassword:self.oauthAccount.accessToken.accessToken];
-            [self reconnect];
-        }];
-    }
-    
     if(self.connectionProperties.server.oldStyleSSL==NO) {
         // do DNS discovery if it hasn't already been set
         if([_discoveredServerList count]==0) {
@@ -1553,23 +1515,7 @@ NSString *const kXMPPPresence = @"presence";
                             else {
                                 //look at menchanisms presented
                                 
-                                if(streamNode.SASLX_OAUTH2 && self.connectionProperties.server.oAuth)
-                                {
-                                    NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  self.connectionProperties.identity.jid, self.oauthAccount.accessToken.accessToken ]];
-                                    
-                                    MLXMLNode* saslXML= [[MLXMLNode alloc]init];
-                                    saslXML.element=@"auth";
-                                    [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:kXMLNS];
-                                    [saslXML.attributes setObject: @"X-OAUTH2"forKey: @"mechanism"];
-                                    [saslXML.attributes setObject: @"auth:service"forKey: @"oauth2"];
-                                    
-                                    [saslXML.attributes setObject:@"http://www.google.com/talk/protocol/auth" forKey: @"xmlns:auth"];
-                                    
-                                    saslXML.data=saslplain;
-                                    [self send:saslXML];
-                                    
-                                }
-                                else if (streamNode.SASLPlain)
+                               if (streamNode.SASLPlain)
                                 {
                                     NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  self.connectionProperties.identity.user, self.connectionProperties.identity.password ]];
                                     
@@ -1578,10 +1524,6 @@ NSString *const kXMPPPresence = @"presence";
                                     [saslXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:kXMLNS];
                                     [saslXML.attributes setObject: @"PLAIN"forKey: @"mechanism"];
                                     
-                                    if(self.connectionProperties.server.oAuth){
-                                        [saslXML.attributes setObject:@"http://www.google.com/talk/protocol/auth" forKey: @"xmlns:ga"];
-                                        [saslXML.attributes setObject:@"true" forKey: @"ga:client-uses-full-bind-result"];
-                                    }
                                     saslXML.data=saslplain;
                                     [self send:saslXML];
                                     
@@ -1832,18 +1774,9 @@ NSString *const kXMPPPresence = @"presence";
                         if(streamNode.startTLSProceed)
                         {
                             NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
+                            [settings setObject:self.connectionProperties.identity.domain forKey:kCFStreamSSLPeerName];
                             
-                            if(self.connectionProperties.server.oAuth) {
-                                //we only support oauth on gtalk
-                                [settings setObject:[NSNull null] forKey:kCFStreamSSLPeerName];
-                            }
-                            else  {
-                                [settings setObject:self.connectionProperties.identity.domain forKey:kCFStreamSSLPeerName];
-                            }
-                            
-                             [settings setObject:kCFStreamSocketSecurityLevelTLSv1 forKey:kCFStreamSSLLevel];
-                    
-                            
+                            [settings setObject:kCFStreamSocketSecurityLevelTLSv1 forKey:kCFStreamSSLLevel];
                             
                             if(self.connectionProperties.server.selfSignedCert)
                             {
@@ -1895,15 +1828,7 @@ NSString *const kXMPPPresence = @"presence";
                     {
                         self->_loginError=YES;
                         [self disconnect];
-                        //check for oauth
-                        
-                        if(self.connectionProperties.server.oAuth) {
-                            self.oauthAccount.oauthClient.desiredScope=[NSSet setWithArray:@[@"https://www.googleapis.com/auth/googletalk"]];
-                            dispatch_async(dispatch_get_main_queue(), ^{
-                                [self.oauthAccount.oauthClient refreshAccessToken];
-                            });
-                        }
-                        
+                
                     }
                     
                 }
@@ -3429,22 +3354,7 @@ static NSMutableArray *extracted(xmpp *object) {
                 }];
                 
             }
-            else  if(self.oauthAccount)
-            {
-                //allow failure to process an oauth to be refreshed
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC), dispatch_get_main_queue(),  ^{
-                    DDLogInfo(@"%@ Stream end encoutered.. on oauth acct. Wait for refresh.", [stream class] );
-                    if(self->_accountState<kStateHasStream) {
-                        [self disconnectWithCompletion:^{
-                            [self reconnect:5];
-                        }];
-                    } else  {
-                        DDLogVerbose(@"already connected/connecting .doing nothimg");
-                    }
-                });
-            }
-            
-            
+         
             break;
             
         }

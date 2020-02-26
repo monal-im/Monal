@@ -12,7 +12,6 @@
 
 #import "MLNotificationManager.h"
 #import "DataLayer.h"
-#import "NXOAuth2AccountStore.h"
 #import "MLPush.h"
 #import "MLImageManager.h"
 #import "ActiveChatsViewController.h"
@@ -326,13 +325,7 @@
         [self handleURL:url];
         return YES;
     }
-    //TODO remove when we remove google support
-    if([url.scheme isEqualToString:@"com.googleusercontent.apps.472865344000-invcngpma1psmiek5imc1gb8u7mef8l9"])
-    {
-        [[NXOAuth2AccountStore sharedStore] handleRedirectURL:url];
-        return YES;
-    }
-  
+ 
     return NO;
 }
 

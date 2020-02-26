@@ -15,6 +15,7 @@
 {
     self=[super init];
     self.element=@"presence";
+    [self.attributes setObject:[[NSUUID UUID] UUIDString] forKey:@"id"];
     return self;
 }
 

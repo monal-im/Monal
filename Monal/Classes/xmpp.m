@@ -1715,9 +1715,9 @@ NSString *const kXMPPPresence = @"presence";
                         }
 #endif
                         
-#ifndef DISABLE_OMEMO
-                        [self sendSignalInitialStanzas];
-#endif
+//#ifndef DISABLE_OMEMO
+//                        [self sendSignalInitialStanzas];
+//#endif
                         
                         
 #endif

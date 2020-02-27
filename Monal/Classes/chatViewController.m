@@ -236,6 +236,8 @@
     self.placeHolderText.text=[NSString stringWithFormat:@"Message from %@", self.jid];
     self.hardwareKeyboardPresent = YES; //default to YES and when keybaord will appears is called, this may be set to NO
     [self scrollToBottom];
+    
+    
 }
 
 
@@ -248,6 +250,7 @@
 #ifndef DISABLE_OMEMO
     if(![self.contact.subscription isEqualToString:kSubBoth]) {
         [self.xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
+        
     }
 #endif
     
@@ -255,6 +258,14 @@
         [self refreshCounter];
     });
     
+    NSArray *devices= [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
+    if(devices.count==0) {
+        if(self.encryptChat) {
+            self.encryptChat=NO;
+            [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+        }
+        
+    }
 }
 
 -(void) viewWillDisappear:(BOOL)animated

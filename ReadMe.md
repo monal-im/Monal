@@ -5,20 +5,24 @@
 This is the Monal XMPP client as found in the app store.  If you want to  use the latest stable versions, search for Monal in the iOS or OSX app store. Visit my blog to read about the development: www.monal.im
 
 <p align="center">
-<img src ="https://monal.im/wp-content/uploads/2018/11/Simulator-Screen-Shot-iPhone-X-2018-11-10-at-13.46.33.png" width=250 >
+<img src ="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.58.26-1.png" width=250 >
 </p>
 
+You can get the current releases in the App Store;
+
+* [iOS](https://itunes.apple.com/us/app/monal-free-xmpp-chat/id317711500?mt=8)
+
+* [Mac](https://apps.apple.com/app/id1499227291?mt=12)
 
 ### Impressions from the iOS version
 
-<img src="https://monal.im/wp-content/uploads/2018/12/Simulator-Screen-Shot-iPhone-X-2018-12-02-at-23.26.50.png" width="280"> <img src="https://monal.im/wp-content/uploads/2018/12/Simulator-Screen-Shot-iPhone-XR-2018-12-29-at-23.18.13-473x1024.png" width="280"> <img src="https://monal.im/wp-content/uploads/2018/12/Simulator-Screen-Shot-iPhone-X-2018-12-23-at-00.15.08-473x1024.png" width="280">
+<img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.56.17-4.png" width="280"> <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPad-Pro-12.9-inch-3rd-generation-2020-02-17-at-20.17.16-2-767x1024.png" width="280"> <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-14.59.51-1.png" width="280">
+<img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-14.59.56-1.png" width="280">
 
 
 ### Impressions from the MacOS version
 
-<img src="https://monal.im/wp-content/uploads/2018/04/Screen-Shot-2018-04-12-at-12.33.34-PM.png" width="600">
-<img src="https://monal.im/wp-content/uploads/2018/01/Screen-Shot-2018-01-16-at-12.11.44-AM.png" width="600">
-<img src="https://monal.im/wp-content/uploads/2018/11/Screen-Shot-2018-11-14-at-8.47.52-PM.png" width="600">
+<img src="https://monal.im/wp-content/uploads/2020/02/Screen-Shot-2020-02-15-at-10.28.38-PM-1.png" width="600">
 
 
 ### Platform information
@@ -30,11 +34,3 @@ Monal is licensed under the BSD license. Any code contributions should be compat
 
 ### Pull Requests
 I take pull requests. Please  use the develop branch to make changes.
-
-### Current Releases ###
-
-You can get the current releases in the App Store;
-
-* [iOS](https://itunes.apple.com/us/app/monal-free-xmpp-chat/id317711500?mt=8)
-
-* [Mac](https://itunes.apple.com/us/app/monal-free-xmpp-chat/id1060957067?mt=12)

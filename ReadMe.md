@@ -4,10 +4,6 @@
 
 This is the Monal XMPP client as found in the app store.  If you want to  use the latest stable versions, search for Monal in the iOS or OSX app store. Visit my blog to read about the development: www.monal.im
 
-<p align="center">
-<img src ="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.58.26-1.png" width=250 >
-</p>
-
 You can get the current releases in the App Store;
 
 * [iOS](https://itunes.apple.com/us/app/monal-free-xmpp-chat/id317711500?mt=8)
@@ -15,7 +11,7 @@ You can get the current releases in the App Store;
 * [Mac](https://apps.apple.com/app/id1499227291?mt=12)
 
 ### Impressions from the iOS version
-
+<img src ="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.58.26-1.png" width=250 >
 <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.56.17-4.png" width="280">  <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-14.59.51-1.png" width="280">
 <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-14.59.56-1.png" width="280">
 <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPad-Pro-12.9-inch-3rd-generation-2020-02-17-at-20.17.16-2-767x1024.png" width="400">

@@ -248,7 +248,7 @@
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     [self synchChat];
 #ifndef DISABLE_OMEMO
-    if(![self.contact.subscription isEqualToString:kSubBoth]) {
+    if(![self.contact.subscription isEqualToString:kSubBoth] && !self.contact.isGroup) {
         [self.xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
         
     }

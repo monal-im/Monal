@@ -735,7 +735,9 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         {
             NSNumber *autoJoin =[row objectForKey:@"autojoin"] ;
             if(autoJoin.boolValue) {
-                [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[row objectForKey:@"account_id"]];
+                dispatch_async(self->_netQueue, ^{
+                         [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[NSString stringWithFormat:@"%@",[row objectForKey:@"account_id"]]];
+                });
             }
         }
 

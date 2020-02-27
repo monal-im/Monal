@@ -1478,6 +1478,7 @@
 
 - (void)keyboardWillShow:(NSNotification*)aNotification
 {
+    self.hardwareKeyboardPresent=NO;
     //TODO grab animation info
 //    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
 //    self.messageTable.contentInset = contentInsets;

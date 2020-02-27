@@ -1095,7 +1095,7 @@ NSString *const kXMPPPresence = @"presence";
         }];
         [self persistState];
     }]
-    ] waitUntilFinished:YES];		//block until finished because we don't want to reorder stanzas
+    ] waitUntilFinished:NO];		//block until finished because we don't want to reorder stanzas
     
 }
 
@@ -1629,7 +1629,7 @@ NSString *const kXMPPPresence = @"presence";
                             }
                         }
                     }]
-                    ] waitUntilFinished:YES];
+                    ] waitUntilFinished:NO];
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
                 {
@@ -1753,7 +1753,7 @@ NSString *const kXMPPPresence = @"presence";
                                 [self persistState];
                             }
                         }]
-                        ] waitUntilFinished:YES];
+                        ] waitUntilFinished:NO];
                     }
                     
                     if(self.loginCompletion) {
@@ -2453,7 +2453,7 @@ static NSMutableArray *extracted(xmpp *object) {
                 [self persistState];
             }
         }]
-        ] waitUntilFinished:YES];		//wait until the queue is empty, we don't want to remove stanzas added later on
+        ] waitUntilFinished:NO];		//wait until the queue is empty, we don't want to remove stanzas added later on
     }
     
     [self queryMAMSinceLastMessageDate];

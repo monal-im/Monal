@@ -11,9 +11,10 @@ You can get the current releases in the App Store;
 * [Mac](https://apps.apple.com/app/id1499227291?mt=12)
 
 ### Impressions from the iOS version
-
+<p float="left">
 <img src ="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.58.26-1.png" width=280 >
 <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.56.17-4.png" width="280">  <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-14.59.51-1.png" width="280">
+</p>
 
 ### Impressions from the MacOS version
 

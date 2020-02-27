@@ -23,7 +23,7 @@ You can get the current releases in the App Store;
 
 ### Platform information
 
-Monal works for iOS from version 9 and for MacOS from version 10.10
+Monal requires at least iOS 12 and macOS 10.15 (Catalina)
 
 ### License
 Monal is licensed under the BSD license. Any code contributions should be compatible with that license.  ** NO GPL ** .  By contributing to this project, you agree that your code is not GPL or any similarly restrictive license. You agree that your code can be used to publish in App stores such as Apple's that use DRM.

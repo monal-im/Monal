@@ -2848,17 +2848,15 @@ static NSMutableArray *extracted(xmpp *object) {
 {
     if(self.connectionProperties.supportsMam2) {
         [[DataLayer sharedInstance] synchPointforAccount:self.accountNo  withCompletion:^(NSDate *synchDate) {
-            if(!synchDate) {
-                [[DataLayer sharedInstance] lastMessageDateForContact:self.connectionProperties.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
-                    if(lastDate) { // if there is no last date, there are no messages yet.
-                        [self setMAMQueryFromStart:[lastDate dateByAddingTimeInterval:1] toDate:nil withMax:nil andJid:nil];
-                    }
-                    [[DataLayer sharedInstance] setSynchpointforAccount:self.accountNo];
-                }];
-            } else  {
-                [self setMAMQueryFromStart:synchDate toDate:nil withMax:nil andJid:nil];
+            [[DataLayer sharedInstance] lastMessageDateForContact:self.connectionProperties.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
+                if(lastDate.timeIntervalSince1970>synchDate.timeIntervalSince1970) { // if there is no last date, there are no messages yet.
+                    [self setMAMQueryFromStart:[lastDate dateByAddingTimeInterval:1] toDate:nil withMax:nil andJid:nil];
+                }
+                else  {
+                    [self setMAMQueryFromStart:synchDate toDate:nil withMax:nil andJid:nil];
+                }
                 [[DataLayer sharedInstance] setSynchpointforAccount:self.accountNo];
-            }
+            }];
         }];
     }
 }

@@ -1460,7 +1460,9 @@
       //TODO grab animation info
     NSDictionary* info = [aNotification userInfo];
     CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
-    
+    if(kbSize.height>100) { //my inputbar +any other
+        self.hardwareKeyboardPresent=NO;
+    }
     UIEdgeInsets contentInsets = UIEdgeInsetsMake(0.0, 0.0, kbSize.height-10, 0.0);
     self.messageTable.contentInset = contentInsets;
     self.messageTable.scrollIndicatorInsets = contentInsets;
@@ -1478,7 +1480,7 @@
 
 - (void)keyboardWillShow:(NSNotification*)aNotification
 {
-    self.hardwareKeyboardPresent=NO;
+
     //TODO grab animation info
 //    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
 //    self.messageTable.contentInset = contentInsets;

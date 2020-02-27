@@ -16,9 +16,9 @@ You can get the current releases in the App Store;
 
 ### Impressions from the iOS version
 
-<img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.56.17-4.png" width="280"> <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPad-Pro-12.9-inch-3rd-generation-2020-02-17-at-20.17.16-2-767x1024.png" width="280"> <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-14.59.51-1.png" width="280">
+<img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-15.56.17-4.png" width="280">  <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-14.59.51-1.png" width="280">
 <img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPhone-8-2020-02-17-at-14.59.56-1.png" width="280">
-
+<img src="https://monal.im/wp-content/uploads/2020/02/Simulator-Screen-Shot-iPad-Pro-12.9-inch-3rd-generation-2020-02-17-at-20.17.16-2-767x1024.png" width="400">
 
 ### Impressions from the MacOS version
 

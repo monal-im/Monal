@@ -227,16 +227,24 @@
     //        }
     
     if(iqNode.features) {
+        [self parseFeatures:iqNode];
         if([iqNode.from isEqualToString:self.connection.server.host] ||
            [iqNode.from isEqualToString:self.connection.identity.domain]) {
             self.connection.serverFeatures=iqNode.features;
-            [self parseFeatures];
-            
-#ifndef DISABLE_OMEMO
-            if(self.sendSignalInitialStanzas) self.sendSignalInitialStanzas();
-#endif
         }
         
+        [iqNode.features.allObjects enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSString *feature = (NSString *)obj;
+            if([feature isEqualToString:@"http://jabber.org/protocol/pubsub#publish"]) {
+                self.connection.supportsPubSub=YES;
+                self.connection.pubSubHost=iqNode.from;
+                *stop=YES;
+#ifndef DISABLE_OMEMO
+                if(self.sendSignalInitialStanzas) self.sendSignalInitialStanzas();
+#endif
+            }
+        }];
+
         if([iqNode.features containsObject:@"urn:xmpp:http:upload"]  ||
           [iqNode.features containsObject:@"urn:xmpp:http:upload:0"] )
         {
@@ -513,7 +521,7 @@
     return carbons;
 }
 
--(void) parseFeatures
+-(void) parseFeatures:(ParseIq *) iqNode
 {
     if([self.connection.serverFeatures containsObject:@"urn:xmpp:carbons:2"])
     {
@@ -527,13 +535,6 @@
         self.connection.supportsPing=YES;
     }
     
-    [self.connection.serverFeatures.allObjects enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSString *feature = (NSString *)obj;
-        if([feature hasPrefix:@"http://jabber.org/protocol/pubsub"]) {
-            self.connection.supportsPubSub=YES;
-            *stop=YES;
-        }
-    }];
 }
 
 @end

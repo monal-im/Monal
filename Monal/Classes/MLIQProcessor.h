@@ -38,7 +38,7 @@ typedef void (^processAction)(void);
 /**
  exposed so that we can parse features loaded from disk 
  */
--(void) parseFeatures;
+-(void) parseFeatures:(ParseIq * _Nullable) messageNode;
 
 /**
  process a node and send out devices

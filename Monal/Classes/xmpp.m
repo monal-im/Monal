@@ -1670,7 +1670,7 @@ NSString *const kXMPPPresence = @"presence";
                                           }
                                       };
                     
-                    [processor parseFeatures];
+                    [processor parseFeatures:nil];
                     
 #if TARGET_OS_IPHONE
                     if(self.connectionProperties.supportsPush)
@@ -1717,9 +1717,9 @@ NSString *const kXMPPPresence = @"presence";
                         }
 #endif
                         
-//#ifndef DISABLE_OMEMO
-//                        [self sendSignalInitialStanzas];
-//#endif
+#ifndef DISABLE_OMEMO
+                        [self sendSignalInitialStanzas];
+#endif
                         
                         
 #endif
@@ -2245,6 +2245,10 @@ static NSMutableArray *extracted(xmpp *object) {
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
     }
     
+    if(self.connectionProperties.pubSubHost)
+     {
+         [values setObject:[NSNumber numberWithBool:self.connectionProperties.pubSubHost] forKey:@"pubSubHost"];
+     }
     //save state dictionary
     NSData *data =[NSKeyedArchiver archivedDataWithRootObject:values];
     [[NSUserDefaults standardUserDefaults] setObject:data forKey:[NSString stringWithFormat:@"stream_state_v1_%@",self.accountNo]];
@@ -2309,6 +2313,12 @@ static NSMutableArray *extracted(xmpp *object) {
         {
             NSNumber *supportsPubSub = [dic objectForKey:@"supportsPubSub"];
             self.connectionProperties.supportsPubSub = supportsPubSub.boolValue;
+        }
+        
+        if([dic objectForKey:@"pubSubHost"])
+        {
+            NSString *pubSubHost = [dic objectForKey:@"pubSubHost"];
+            self.connectionProperties.pubSubHost = pubSubHost;
         }
         
         //debug output
@@ -2590,7 +2600,7 @@ static NSMutableArray *extracted(xmpp *object) {
 {
     if(!self.connectionProperties.supportsPubSub) return;
        XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-       [query setiqTo:self.connectionProperties.server.host];//pubsub
+       [query setiqTo:self.connectionProperties.pubSubHost];
        [query subscribeDevices:jid];
      
        [self send:query];

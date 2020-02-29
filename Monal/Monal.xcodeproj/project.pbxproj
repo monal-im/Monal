@@ -2439,7 +2439,7 @@
 					"$(PROJECT_DIR)/Pods/OpenSSL-Universal/lib-macos",
 				);
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 4.4;
+				MARKETING_VERSION = 4.5;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -2491,7 +2491,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 4.4;
+				MARKETING_VERSION = 4.5;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
@@ -2568,7 +2568,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 4.4;
+				MARKETING_VERSION = 4.5;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
@@ -2648,7 +2648,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 4.4;
+				MARKETING_VERSION = 4.5;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
@@ -2891,7 +2891,7 @@
 					"$(PROJECT_DIR)/Pods/OpenSSL-Universal/lib-macos",
 				);
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 4.4;
+				MARKETING_VERSION = 4.5;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -3007,7 +3007,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 4.4;
+				MARKETING_VERSION = 4.5;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3078,7 +3078,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 4.4;
+				MARKETING_VERSION = 4.5;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3151,7 +3151,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 4.4;
+				MARKETING_VERSION = 4.5;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3210,7 +3210,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 4.4;
+				MARKETING_VERSION = 4.5;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
@@ -3293,7 +3293,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 4.4;
+				MARKETING_VERSION = 4.5;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
@@ -3378,7 +3378,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 4.4;
+				MARKETING_VERSION = 4.5;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
@@ -3479,7 +3479,7 @@
 					"$(PROJECT_DIR)/Pods/OpenSSL-Universal/lib-macos",
 				);
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 4.4;
+				MARKETING_VERSION = 4.5;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;

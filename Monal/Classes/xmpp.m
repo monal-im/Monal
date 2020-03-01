@@ -1778,7 +1778,7 @@ NSString *const kXMPPPresence = @"presence";
                             NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
                             [settings setObject:self.connectionProperties.identity.domain forKey:kCFStreamSSLPeerName];
                             
-                            [settings setObject:kCFStreamSocketSecurityLevelTLSv1 forKey:kCFStreamSSLLevel];
+                            [settings setObject:kCFStreamSocketSecurityLevelNegotiatedSSL forKey:kCFStreamSSLLevel];
                             
                             if(self.connectionProperties.server.selfSignedCert)
                             {

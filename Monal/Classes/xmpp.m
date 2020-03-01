@@ -1274,6 +1274,13 @@ NSString *const kXMPPPresence = @"presence";
                                )
                             {
                                 XMPPMessage *receiptNode = [[XMPPMessage alloc] init];
+                                //this is needed so that the store hint is accepted by the server
+                                if(messageNode.isMUC)
+                                {
+                                    [messageNode.attributes setObject:kMessageGroupChatType forKey:@"type"];
+                                } else if(messageNode.isChat) {
+                                    [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
+                                }
                                 [receiptNode.attributes setObject:messageNode.from forKey:@"to"];
                                 [receiptNode setXmppId:[[NSUUID UUID] UUIDString]];
                                 [receiptNode setReceipt:messageNode.idval];

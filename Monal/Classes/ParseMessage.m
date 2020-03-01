@@ -101,6 +101,7 @@
     if(([elementName isEqualToString:@"message"])
        && ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageGroupChatType]))
     {
+        _isMUC=YES;
         NSArray*  parts=[[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/"];
         if([parts count]>1)
         {
@@ -118,6 +119,7 @@
     else if([elementName isEqualToString:@"message"] &&
             ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageChatType]) )
     {
+        _isChat=YES;
         _from=[[_from componentsSeparatedByString:@"/" ] objectAtIndex:0];
         _to=[[_to  componentsSeparatedByString:@"/" ] objectAtIndex:0];
         

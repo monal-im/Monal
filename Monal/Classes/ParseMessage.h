@@ -24,7 +24,9 @@
 @property (nonatomic, copy, readonly) NSString* messageText;
 @property (nonatomic, copy, readonly) NSString* messagHTML;
 @property (nonatomic, copy, readonly) NSString* subject;
-@property (nonatomic, assign, readonly) BOOL hasBody; 
+@property (nonatomic, assign, readonly) BOOL hasBody;
+@property (nonatomic, assign, readonly) BOOL isMUC;
+@property (nonatomic, assign, readonly) BOOL isChat;
 @property (nonatomic, copy, readonly) NSDate *delayTimeStamp;
 @property (nonatomic, copy, readonly) NSString* avatarData;
 @property (nonatomic, copy, readonly) NSString* oobURL;

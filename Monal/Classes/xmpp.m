@@ -1678,12 +1678,14 @@ NSString *const kXMPPPresence = @"presence";
                                       };
                     
                     [processor parseFeatures:nil];
-                    
+                    self.connectionProperties.pushEnabled=NO;
+#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
                     if(self.connectionProperties.supportsPush)
                     {
                         [self enablePush];
                     }
+#endif
 #endif
                     
                     [self sendInitalPresence];
@@ -1713,7 +1715,7 @@ NSString *const kXMPPPresence = @"presence";
                         DDLogInfo(@"++++++++++++++++++++++++ failed resume: h=%@", failedNode.h);
                         [self removeUnAckedMessagesLessThan:failedNode.h];
                         
-                        //if resume failed. bind  a nee resource like normal
+                        //if resume failed. bind  a new resource like normal
                         [self bindResource];
                         self.connectionProperties.pushEnabled=NO;
 #ifndef TARGET_IS_EXTENSION

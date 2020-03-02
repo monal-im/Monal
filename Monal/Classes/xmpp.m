@@ -816,7 +816,7 @@ NSString *const kXMPPPresence = @"presence";
         }
         else {
             //always use smacks pings if supported (they are shorter and better than whitespace pings)
-            if(self.connectionProperties.supportsSM3 && self.unAckedStanzas.count>0 )
+            if(self.connectionProperties.supportsSM3 )
             {
                 [self requestSMAck];
             }
@@ -1095,13 +1095,13 @@ NSString *const kXMPPPresence = @"presence";
         }];
         [self persistState];
     }]
-    ] waitUntilFinished:NO];		//block until finished because we don't want to reorder stanzas
+    ] waitUntilFinished:YES];		//block until finished because we don't want to reorder stanzas
     
 }
 
 -(void) removeUnAckedMessagesLessThan:(NSNumber*) hvalue
 {
-    [self.networkQueue addOperation:
+    [self.networkQueue addOperations: @[
      [NSBlockOperation blockOperationWithBlock:^{
         if(self.unAckedStanzas.count>0)
         {
@@ -1126,7 +1126,8 @@ NSString *const kXMPPPresence = @"presence";
             [self persistState];
         }
         
-    }]];
+    }]
+    ] waitUntilFinished:YES];		//block until finished because we don't want to race with operations adding something to the queue
 }
 
 -(void) requestSMAck {
@@ -1636,7 +1637,7 @@ NSString *const kXMPPPresence = @"presence";
                             }
                         }
                     }]
-                    ] waitUntilFinished:NO];
+                    ] waitUntilFinished:YES];		//prevent message reordering
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
                 {
@@ -1645,15 +1646,13 @@ NSString *const kXMPPPresence = @"presence";
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"a"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
                 {
                     ParseA* aNode=[[ParseA alloc] initWithDictionary:stanzaToParse];
-                    if(self.lastHandledOutboundStanza!=aNode.h) {
-                        self.lastHandledOutboundStanza=aNode.h;			//lastHandledOutboundStanza is just for logging purposes
-                        
-                        //remove acked messages
-                        [self removeUnAckedMessagesLessThan:aNode.h];
-                        
-                        self.smacksRequestInFlight=NO;		//ack returned
-                        [self requestSMAck];				//request ack again (will only happen if queue is not empty)
-                    }
+					self.lastHandledOutboundStanza=aNode.h;
+					
+					//remove acked messages
+					[self removeUnAckedMessagesLessThan:aNode.h];
+					
+					self.smacksRequestInFlight=NO;		//ack returned
+					[self requestSMAck];				//request ack again (will only happen if queue is not empty)
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"resumed"])
                 {
@@ -1762,7 +1761,7 @@ NSString *const kXMPPPresence = @"presence";
                                 [self persistState];
                             }
                         }]
-                        ] waitUntilFinished:NO];
+                        ] waitUntilFinished:YES];		//prevent message reordering
                     }
                     
                     if(self.loginCompletion) {
@@ -2472,7 +2471,7 @@ static NSMutableArray *extracted(xmpp *object) {
                 [self persistState];
             }
         }]
-        ] waitUntilFinished:NO];		//wait until the queue is empty, we don't want to remove stanzas added later on
+        ] waitUntilFinished:YES];		//wait until the queue is empty, we don't want to remove stanzas added from another thread
     }
     
     [self queryMAMSinceLastMessageDate];

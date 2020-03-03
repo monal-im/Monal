@@ -2364,8 +2364,6 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(void) queryDisco
 {
-    if(self.connectionProperties.discoveredServices) return;
-    
     XMPPIQ* discoItems =[[XMPPIQ alloc] initWithType:kiqGetType];
     [discoItems setiqTo:self.connectionProperties.identity.domain];
     MLXMLNode* items = [[MLXMLNode alloc] initWithElement:@"query"];
@@ -2377,7 +2375,6 @@ static NSMutableArray *extracted(xmpp *object) {
     [discoInfo setiqTo:self.connectionProperties.identity.domain];
     [discoInfo setDiscoInfoNode];
     [self send:discoInfo];
-    
 }
 
 
@@ -2433,6 +2430,10 @@ static NSMutableArray *extracted(xmpp *object) {
     [sessionQuery.children addObject:session];
     [self send:sessionQuery];
     
+    //force new disco queries because we landed here because of a failed smacks resume
+    //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)
+    //--> all of this reasons imply that we had to start a new xmpp stream and our old cached disco data is stale now
+    self.connectionProperties.discoveredServices=nil;
     [self queryDisco];
     [self fetchRoster];
     [self sendInitalPresence];
@@ -3512,7 +3513,6 @@ static NSMutableArray *extracted(xmpp *object) {
 -(void) enablePush
 {
     if(self.accountState>=kStateBound && [self.pushNode length]>0 && [self.pushSecret length]>0 && self.connectionProperties.supportsPush)
-        //TODO there is a race condition on how this is called when fisrt logging in.
     {
         DDLogInfo(@"ENABLING PUSH: %@ < %@", self.pushNode, self.pushSecret);
         XMPPIQ* enable =[[XMPPIQ alloc] initWithType:kiqSetType];

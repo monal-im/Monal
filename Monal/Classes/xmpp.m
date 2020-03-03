@@ -1686,14 +1686,14 @@ NSString *const kXMPPPresence = @"presence";
                     }
 #endif
 #endif
-                    
+                     if(self.loginCompletion) {
+						self.loginCompletion(YES, @"");
+						self.loginCompletion=nil;
+					}
+					
                     [self sendInitalPresence];
-                    if(self.loginCompletion) {
-                        self.loginCompletion(YES, @"");
-                        self.loginCompletion=nil;
-                    }
                     
-                     [self queryMAMSinceLastMessageDate];
+                    [self queryMAMSinceLastMessageDate];
                     
                 }
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"]) // stream resume failed
@@ -1716,29 +1716,15 @@ NSString *const kXMPPPresence = @"presence";
                         
                         //if resume failed. bind  a new resource like normal
                         [self bindResource];
-                        self.connectionProperties.pushEnabled=NO;
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-                        if(self.connectionProperties.supportsPush)
-                        {
-                            [self enablePush];
-                        }
-#endif
                         
-#ifndef DISABLE_OMEMO
-                        [self sendSignalInitialStanzas];
-#endif
-                        
-                        
-#endif
-                        
-                        
-
+                        if(self.loginCompletion) {
+							self.loginCompletion(YES, @"");
+							self.loginCompletion=nil;
+						}
                     }
                     else        //smacks enable failed
                     {
                         self.connectionProperties.supportsSM3=NO;
-                        
                         
                         //init session and query disco, roster etc.
                         [self initSession];
@@ -1763,12 +1749,6 @@ NSString *const kXMPPPresence = @"presence";
                         }]
                         ] waitUntilFinished:YES];		//prevent message reordering
                     }
-                    
-                    if(self.loginCompletion) {
-                        self.loginCompletion(YES, @"");
-                        self.loginCompletion=nil;
-                    }
-                    
                 }
                 
                 else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"features"])
@@ -2456,7 +2436,20 @@ static NSMutableArray *extracted(xmpp *object) {
     [self queryDisco];
     [self fetchRoster];
     [self sendInitalPresence];
-        
+    
+    self.connectionProperties.pushEnabled=NO;
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
+	if(self.connectionProperties.supportsPush)
+	{
+		[self enablePush];
+	}
+#endif
+#ifndef DISABLE_OMEMO
+	[self sendSignalInitialStanzas];
+#endif
+#endif
+    
     if(!self.connectionProperties.supportsSM3)
     {
         //send out messages still in the queue, even if smacks is not supported this time

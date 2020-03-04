@@ -156,10 +156,13 @@ NSString *const kXMPPPresence = @"presence";
     _inputBuffer=[[NSMutableString alloc] init];
     _outputQueue=[[NSMutableArray alloc] init];
     
-    self.networkQueue =[[NSOperationQueue alloc] init];
+    self.networkQueue=[[NSOperationQueue alloc] init];
+    self.networkQueue.qualityOfService=NSQualityOfServiceUtility;
     self.networkQueue.maxConcurrentOperationCount=1;
     
-    self.processQueue =[[NSOperationQueue alloc] init];
+    self.processQueue=[[NSOperationQueue alloc] init];
+    self.processQueue.qualityOfService=NSQualityOfServiceUtility;
+    self.processQueue.maxConcurrentOperationCount=1;
     
     //placing more common at top to reduce iteration
     _stanzaTypes=[NSArray arrayWithObjects:

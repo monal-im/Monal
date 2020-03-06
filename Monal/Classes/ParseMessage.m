@@ -79,7 +79,8 @@
    
 	if(([elementName isEqualToString:@"message"])  )
 	{
-		DDLogVerbose(@" message type check");        
+		DDLogVerbose(@" message type check");
+		_type = [attributeDict objectForKey:@"type"];
         if(!_stanzaId) _stanzaId = [attributeDict objectForKey:@"id"]; //default to this, may be overridden by urn:xmpp:sid:0 inside message
         State=@"Message";
 	}

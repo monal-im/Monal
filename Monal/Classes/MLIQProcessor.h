@@ -26,7 +26,6 @@ typedef void (^processAction)(void);
 @property (nonatomic, strong) processAction enablePush;
 @property (nonatomic, strong) processAction sendSignalInitialStanzas;
 @property (nonatomic, strong) processAction getVcards;
-@property (nonatomic, strong) NSOperationQueue *proceesQueue; 
 
 -(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore;
 

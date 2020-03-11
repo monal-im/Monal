@@ -8,4 +8,4 @@ assignees: ''
 ---
 
 ___________________________________
-[ ] I have cross-check this overview https://github.com/anurodhp/Monal/issues/322 as well as filtered for regarding labels https://github.com/anurodhp/Monal/labels
+[ ] I have checked the overiew (https://github.com/anurodhp/Monal/issues/322) for duplicates as well as applied a label (https://github.com/anurodhp/Monal/labels)

@@ -178,6 +178,9 @@ extern NSString *const kMessageTypeUrl;
  */
 -(BOOL) disableEnabledAccount:(NSString*) accountNo;
 
+-(NSMutableDictionary *) readStateForAccount:(NSString*) accountNo;
+-(void) persistState:(NSMutableDictionary *) state forAccount:(NSString*) accountNo;
+
 #pragma mark - message Commands
 /**
  returns messages with the provided local id number

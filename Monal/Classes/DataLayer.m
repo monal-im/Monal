@@ -816,6 +816,27 @@ static DataLayer *sharedInstance=nil;
     }
 }
 
+-(NSMutableDictionary *) readStateForAccount:(NSString*) accountNo
+{
+    NSString* query=[NSString stringWithFormat:@"SELECT state from account where account_id=?"];
+    NSArray *params=@[accountNo];
+    NSData * data=(NSData*)[self executeScalar:query andArguments:params];
+    if(data)
+    {
+        NSMutableDictionary* dic=(NSMutableDictionary *) [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        return dic;
+    }
+    return nil;
+}
+
+-(void) persistState:(NSMutableDictionary *) state forAccount:(NSString*) accountNo
+{
+    if(!accountNo || !state) return;
+    NSString* query=[NSString stringWithFormat:@"update account set state=? where account_id=?"];
+    NSArray *params=@[[NSKeyedArchiver archivedDataWithRootObject:state], accountNo];
+    [self executeNonQuery:query andArguments:params withCompletion:nil];
+}
+
 #pragma mark contact Commands
 
 -(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName andMucNick:(NSString *) mucNick withCompletion: (void (^)(BOOL))completion
@@ -872,7 +893,6 @@ static DataLayer *sharedInstance=nil;
         return NO;
     }
 }
-
 
 #pragma mark Buddy Property commands
 
@@ -2886,11 +2906,20 @@ static DataLayer *sharedInstance=nil;
     }
     
     if([dbversion doubleValue]<4.4)
-     {
-         DDLogVerbose(@"Database version <4.4 detected. Performing upgrade on accounts. ");
-         [self executeNonQuery:@"update account set rosterVersion='0'; " andArguments:nil];
-         DDLogVerbose(@"Upgrade to 4.4  success ");
-     }
+    {
+        DDLogVerbose(@"Database version <4.4 detected. Performing upgrade on accounts. ");
+        [self executeNonQuery:@"update account set rosterVersion='0'; " andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='4.4'; " andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.4  success ");
+    }
+    
+    if([dbversion doubleValue]<4.5)
+    {
+        DDLogVerbose(@"Database version <4.5 detected. Performing upgrade on accounts. ");
+        [self executeNonQuery:@"alter table account add column state blob;" andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='4.5'; " andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.5  success ");
+    }
     
     [dbversionCheck unlock];
     return;

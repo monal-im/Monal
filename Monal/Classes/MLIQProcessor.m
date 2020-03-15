@@ -396,10 +396,9 @@
         {
 #endif
 #endif
-            [self.proceesQueue addOperationWithBlock:^{
-                [self processOMEMODevices:iqNode];
-                [self processOMEMOKeys:iqNode];
-            }];
+			//these are done synchronously in the receiverQueue like everything else, too
+			[self processOMEMODevices:iqNode];
+			[self processOMEMOKeys:iqNode];
 #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
         }

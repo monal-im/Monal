@@ -841,7 +841,7 @@ NSString *const kXMPPPresence = @"presence";
             //always use smacks pings if supported (they are shorter and better than whitespace pings)
             if(self.connectionProperties.supportsSM3 )
             {
-                [self requestSMAck:YES];
+                [self requestSMAck];
             }
             else  {
                 if(self.connectionProperties.supportsPing) {
@@ -1143,18 +1143,14 @@ NSString *const kXMPPPresence = @"presence";
 	}
 }
 
--(void) requestSMAck:(BOOL) queuedSend
+-(void) requestSMAck
 {
     if(!self.smacksRequestInFlight && self.unAckedStanzas.count>0 ) {
         DDLogVerbose(@"requesting smacks ack...");
         MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
-        NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3", @"debugh":[NSString stringWithFormat:@"%d", self.unAckedStanzas.count]};
+        NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3"};
         rNode.attributes=[dic mutableCopy];
-        if(queuedSend) {
-            [self send:rNode];
-        } else  {		//this should only be done from sendQueue (e.g. by writeFromQueue())
-            [self writeToStream:rNode.XMLString];		// dont even bother queueing
-        }
+		[self send:rNode];
 		self.smacksRequestInFlight=YES;
     } else  {
         DDLogDebug(@"no smacks ack when there is nothing pending or a request already in flight...");
@@ -1649,8 +1645,8 @@ NSString *const kXMPPPresence = @"presence";
 			//remove acked messages
 			[self removeAckedStanzasFromQueue:aNode.h];
 			
-			self.smacksRequestInFlight=NO;		//ack returned
-			[self requestSMAck:YES];				//request ack again (will only happen if queue is not empty)
+			self.smacksRequestInFlight=NO;			//ack returned
+			[self requestSMAck];					//request ack again (will only happen if queue is not empty)
 		}
 		else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"resumed"])
 		{
@@ -3417,8 +3413,15 @@ static NSMutableArray *extracted(xmpp *object) {
     
     if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 && requestAck)
     {
-		DDLogVerbose(@"requesting smacks ack...");
-        [self requestSMAck:NO];		//directly write to stream
+		//adding the smacks request to the receiveQueue will make sure that we send the request
+		//*after* processing an incoming burst of stanzas (potentially causing an outgoing burst of stanzas)
+		//this reduces the requests to an absolute minimum while still maintaining the rule to request an ack
+		//for every stanza (e.g. until the smacks queue is empty) and not sending an ack if one is already in flight
+		DDLogVerbose(@"adding smacks request to receiveQueue...");
+		[self.receiveQueue addOperationWithBlock: ^{
+			DDLogVerbose(@"requesting smacks ack...");
+			[self requestSMAck];
+		}];
         
     } else  {
         DDLogVerbose(@"NOT requesting smacks ack...");

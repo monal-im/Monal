@@ -178,6 +178,7 @@ An array of Dics what have timers to make sure everything was sent
     {
         xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
         if(xmppAccount.connectionProperties.supportsClientState && xmppAccount.accountState>=kStateLoggedIn) {
+            [xmppAccount sendLastAck];
             [xmppAccount setClientInactive];
         }
     }

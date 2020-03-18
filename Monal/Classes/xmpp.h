@@ -139,6 +139,10 @@ extern NSString *const kXMPPPresence;
  */
 -(void) sendPing;
 
+/**
+ ack any stanzas we have
+ */
+-(void) sendLastAck;
 
 /**
  Adds the stanza to the output Queue

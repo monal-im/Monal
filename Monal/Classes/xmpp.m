@@ -1148,7 +1148,7 @@ NSString *const kXMPPPresence = @"presence";
     if(!self.smacksRequestInFlight && self.unAckedStanzas.count>0 ) {
         DDLogVerbose(@"requesting smacks ack...");
         MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
-        NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3", @"debugh":[NSString stringWithFormat:@"%@", self.unAckedStanzas.count]};
+        NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3", @"debugh":[NSString stringWithFormat:@"%d", self.unAckedStanzas.count]};
         rNode.attributes=[dic mutableCopy];
         if(queuedSend) {
             [self send:rNode];

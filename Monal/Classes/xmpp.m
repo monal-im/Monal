@@ -1705,6 +1705,8 @@ NSString *const kXMPPPresence = @"presence";
 			[self sendInitalPresence];
 			
 			[processor parseFeatures:nil];
+			
+			//force push (re)enable on session resumption
 			self.connectionProperties.pushEnabled=NO;
 #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
@@ -2389,14 +2391,7 @@ static NSMutableArray *extracted(xmpp *object) {
     [self fetchRoster];
     [self sendInitalPresence];
     
-    self.connectionProperties.pushEnabled=NO;
 #ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-	if(self.connectionProperties.supportsPush)
-	{
-		[self enablePush];
-	}
-#endif
 #ifndef DISABLE_OMEMO
 	[self sendSignalInitialStanzas];
 #endif
@@ -2799,6 +2794,8 @@ static NSMutableArray *extracted(xmpp *object) {
                     [self setMAMQueryFromStart:[lastDate dateByAddingTimeInterval:1] toDate:nil withMax:nil andJid:nil];
                 }
                 else  {
+					//TODO: this has a race condition here and doesnt play well with changing the time on the phone
+					//use the date of the last message received instead!!
                     [self setMAMQueryFromStart:synchDate toDate:nil withMax:nil andJid:nil];
                 }
                 [[DataLayer sharedInstance] setSynchpointforAccount:self.accountNo];

@@ -1113,7 +1113,29 @@ NSString *const kXMPPPresence = @"presence";
 		[self send:(MLXMLNode*)[dic objectForKey:kStanza]];
 	}];
 	[self persistState];
-    
+}
+
+-(void) resendUnackedMessageStanzasOnly:(NSMutableArray*) stanzas
+{
+    /**
+     Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
+     It may also result in mutation on iteration
+	*/
+	if(stanzas)
+	{
+		NSMutableArray *sendCopy = [[NSMutableArray alloc] initWithArray:stanzas];
+		//clear queue because we don't want to repeat resending these stanzas later if the var stanzas points to self.unAckedStanzas here
+		[stanzas removeAllObjects];
+		[sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+			NSDictionary *dic= (NSDictionary *) obj;
+			MLXMLNode *stanza=[dic objectForKey:kStanza];
+			if([stanza.element isEqualToString:@"message"])		//only resend message stanzas because of the smacks error condition
+				[self send:stanza];
+		}];
+		//persist these changes (the queue can now be empty because smacks enable failed
+		//or contain all the resent stanzas (e.g. only resume failed))
+		[self persistState];
+	}
 }
 
 -(void) removeAckedStanzasFromQueue:(NSNumber*) hvalue
@@ -1207,8 +1229,22 @@ NSString *const kXMPPPresence = @"presence";
 				}
 			};
 			
+			//this will be called after bind
 			processor.initSession = ^() {
+				//init session and query disco, roster etc.
 				[self initSession];
+				
+				//only do this if smacks is not supported because handling of the old queue will be already done on smacks enable/failed enable
+				if(!self.connectionProperties.supportsSM3)
+				{
+					//resend stanzas still in the outgoing queue and clear it afterwards
+					//this happens if the server has internal problems and advertises smacks support
+					//but failes to resume the stream as well as to enable smacks on the new stream
+					//clean up those stanzas to only include message stanzas because iqs don't survive a session change
+					//message duplicates are possible in this scenario, but that's better than dropping messages
+					//the self.unAckedStanzas queue is not touched by initSession() above because smacks is disabled at this point
+					[self resendUnackedMessageStanzasOnly:self.unAckedStanzas];
+				}
 			};
 			
 			processor.enablePush = ^() {
@@ -1602,7 +1638,6 @@ NSString *const kXMPPPresence = @"presence";
 		}
 		else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"enabled"])
 		{
-			
 			//save old unAckedStanzas queue before it is cleared
 			NSMutableArray *stanzas = self.unAckedStanzas;
 			
@@ -1626,12 +1661,10 @@ NSString *const kXMPPPresence = @"presence";
 			[self initSession];
 			
 			//resend unacked stanzas saved above (this happens only if the server provides smacks support without resumption support)
-			if(stanzas) {
-				for(NSDictionary *dic in stanzas) {
-					[self send:(MLXMLNode*)[dic objectForKey:kStanza]];
-					
-				}
-			}
+			//or if the resumption failed for other reasons the server is responsible for
+			//clean up those stanzas to only include message stanzas because iqs don't survive a session change
+			//message duplicates are possible in this scenario, but that's better than dropping messages
+			[self resendUnackedMessageStanzasOnly:stanzas];
 		}
 		else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"r"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
 		{
@@ -1663,12 +1696,13 @@ NSString *const kXMPPPresence = @"presence";
 			
 			MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
 			
-			
 			processor.sendIq=^(MLXMLNode * _Nullable nodeResponse) {
-									if(nodeResponse) {
-										[self send:nodeResponse];
-									}
-								};
+				if(nodeResponse) {
+					[self send:nodeResponse];
+				}
+			};
+			
+			[self sendInitalPresence];
 			
 			[processor parseFeatures:nil];
 			self.connectionProperties.pushEnabled=NO;
@@ -1680,16 +1714,13 @@ NSString *const kXMPPPresence = @"presence";
 			}
 #endif
 #endif
-				if(self.loginCompletion) {
+			if(self.loginCompletion) {
 				self.loginCompletion(YES, @"");
 				self.loginCompletion=nil;
 			}
-			
-			[self sendInitalPresence];
 		}
-		else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"]) // stream resume failed
+		else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"]) // smacks resume or smacks enable failed
 		{
-			
 			if(self.resuming)   //resume failed
 			{
 				[[DataLayer sharedInstance] resetContactsForAccount:self->_accountNo];
@@ -1698,14 +1729,14 @@ NSString *const kXMPPPresence = @"presence";
 				
 				//invalidate stream id
 				self.streamID=nil;
-				[self persistState];
-				
 				//get h value, if server supports smacks revision 1.5.2
 				ParseFailed* failedNode= [[ParseFailed alloc]  initWithDictionary:stanzaToParse];
 				DDLogInfo(@"++++++++++++++++++++++++ failed resume: h=%@", failedNode.h);
 				[self removeAckedStanzasFromQueue:failedNode.h];
+				//persist these changes
+				[self persistState];
 				
-				//if resume failed. bind  a new resource like normal
+				//if resume failed. bind  a new resource like normal (supportsSM3 is still YES here but switches to NO on failed enable)
 				[self bindResource];
 				
 				if(self.loginCompletion) {
@@ -1721,20 +1752,12 @@ NSString *const kXMPPPresence = @"presence";
 				[self initSession];
 				
 				//resend stanzas still in the outgoing queue and clear it afterwards
-				//this happens if the server has internal problems and advertises smacks support but ceases to enable it
+				//this happens if the server has internal problems and advertises smacks support
+				//but failes to resume the stream as well as to enable smacks on the new stream
+				//clean up those stanzas to only include message stanzas because iqs don't survive a session change
 				//message duplicates are possible in this scenario, but that's better than dropping messages
-				if(self.unAckedStanzas)
-				{
-					for(NSDictionary *dic in self.unAckedStanzas) {
-						[self send:(MLXMLNode*)[dic objectForKey:kStanza]];
-					}
-					
-					//clear queue afterwards (we don't want to repeat this)
-					[self.unAckedStanzas removeAllObjects];
-					
-					//persist these changes
-					[self persistState];
-				}
+				//the self.unAckedStanzas queue is not touched by initSession() above because smacks is disabled at this point
+				[self resendUnackedMessageStanzasOnly:self.unAckedStanzas];
 			}
 		}
 		
@@ -2142,35 +2165,22 @@ static NSMutableArray *extracted(xmpp *object) {
         [values setObject:self.connectionProperties.conferenceServer forKey:@"conferenceServer"];
     }
     
-    if(self.connectionProperties.supportsPush)
-    {
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
-    }
-    
-    if(self.connectionProperties.supportsClientState)
-    {
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
-    }
-    
-    if(self.connectionProperties.supportsMam2)
-    {
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
-    }
+    [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
+    [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
+    [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
+    [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
+    [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
     
     if(self.connectionProperties.discoveredServices)
     {
         [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
     }
     
-    if(self.connectionProperties.supportsPubSub)
+    if(self.connectionProperties.pubSubHost)
     {
-        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
+        [values setObject:self.connectionProperties.pubSubHost forKey:@"pubSubHost"];
     }
     
-    if(self.connectionProperties.pubSubHost)
-     {
-         [values setObject:[NSNumber numberWithBool:self.connectionProperties.pubSubHost] forKey:@"pubSubHost"];
-     }
     //save state dictionary
     [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
     
@@ -2202,12 +2212,18 @@ static NSMutableArray *extracted(xmpp *object) {
         self.connectionProperties.discoveredServices=[dic objectForKey:@"discoveredServices"];
         
         
-        self.connectionProperties.uploadServer= [dic objectForKey:@"uploadServer"];
+        self.connectionProperties.uploadServer=[dic objectForKey:@"uploadServer"];
         if(self.connectionProperties.uploadServer)
         {
             self.connectionProperties.supportsHTTPUpload=YES;
         }
         self.connectionProperties.conferenceServer = [dic objectForKey:@"conferenceServer"];
+        
+        if([dic objectForKey:@"usingCarbons2"])
+        {
+            NSNumber *carbonsNumber = [dic objectForKey:@"usingCarbons2"];
+            self.connectionProperties.usingCarbons2 = carbonsNumber.boolValue;
+        }
         
         if([dic objectForKey:@"supportsPush"])
         {
@@ -2385,19 +2401,6 @@ static NSMutableArray *extracted(xmpp *object) {
 	[self sendSignalInitialStanzas];
 #endif
 #endif
-    
-    if(!self.connectionProperties.supportsSM3)
-    {
-        //send out messages still in the queue, even if smacks is not supported this time
-        [self resendUnackedStanzas];
-        
-        //clear queue afterwards (we don't want to repeat this)
-		if(self.unAckedStanzas)
-		{
-			[self.unAckedStanzas removeAllObjects];
-			[self persistState];
-		}
-    }
     
     [self queryMAMSinceLastMessageDate];
 }

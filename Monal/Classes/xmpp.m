@@ -2121,49 +2121,6 @@ static NSMutableArray *extracted(xmpp *object) {
 
 #pragma mark set connection attributes
 
--(void) cleanEnableCarbons
-{
-    NSMutableArray *toClean = [self.unAckedStanzas mutableCopy];
-    NSMutableArray *toIterate = [self.unAckedStanzas copy];
-    for(NSDictionary *dic in toIterate) {
-        if([[dic objectForKey:kStanza] isKindOfClass:[XMPPIQ class]])
-        {
-            XMPPIQ *iq=[dic objectForKey:kStanza] ;
-            if([[iq.attributes objectForKey:@"id"] isEqualToString:@"enableCarbons"])
-            {
-                [toClean removeObject:dic];
-            }
-        }
-        
-    }
-    
-    self.unAckedStanzas=toClean;
-}
-
-/**
- cleans out disco requests from unacked stanzas to prevent a loop
- */
--(void) cleanDisco
-{
-    NSMutableArray *toClean = [self.unAckedStanzas mutableCopy];
-    NSMutableArray *toIterate = [self.unAckedStanzas copy];
-    for(NSDictionary *dic in toIterate) {
-        if([[dic objectForKey:kStanza] isKindOfClass:[XMPPIQ class]])
-        {
-            XMPPIQ *iq=[dic objectForKey:kStanza] ;
-            MLXMLNode *query = [iq.children firstObject];
-            
-            if([[query.attributes objectForKey:kXMLNS] isEqualToString:@"http://jabber.org/protocol/disco#info"])
-            {
-                [toClean removeObject:dic];
-            }
-        }
-        
-    }
-    
-    self.unAckedStanzas=toClean;
-}
-
 -(void) persistState
 {
     //state dictionary

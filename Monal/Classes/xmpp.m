@@ -2391,12 +2391,6 @@ static NSMutableArray *extracted(xmpp *object) {
     [self fetchRoster];
     [self sendInitalPresence];
     
-#ifndef TARGET_IS_EXTENSION
-#ifndef DISABLE_OMEMO
-	[self sendSignalInitialStanzas];
-#endif
-#endif
-    
     [self queryMAMSinceLastMessageDate];
 }
 

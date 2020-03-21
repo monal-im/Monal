@@ -166,7 +166,6 @@
     if([iqNode.idval isEqualToString:@"enableCarbons"])
     {
         self.connection.usingCarbons2=YES;
-        //  [self cleanEnableCarbons];
     }
     
     if(iqNode.discoItems==YES || iqNode.discoInfo==YES)
@@ -221,11 +220,6 @@
 }
 
 -(void) discoResult:(ParseIq *) iqNode {
-    
-    //        if(iqNode.discoInfo) {
-    //            [self cleanDisco];
-    //        }
-    
     if(iqNode.features) {
         [self parseFeatures:iqNode];
         if([iqNode.from isEqualToString:self.connection.server.host] ||

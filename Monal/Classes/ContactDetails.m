@@ -497,6 +497,7 @@
 
 
 -(BOOL) textFieldShouldEndEditing:(UITextField *)textField {
+    if(!textField) return NO;
     [[DataLayer sharedInstance] setNickName:textField.text forContact:self.contact.contactJid andAccount:self.accountNo];
     
     if(textField.text.length>0)

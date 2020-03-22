@@ -3483,9 +3483,9 @@ static NSMutableArray *extracted(xmpp *object) {
 		return;
 	}
 	uint8_t* buf=malloc(kXMPPReadSize);
+    NSInteger len = 0;
 	do
 	{
-		NSInteger len = 0;
 		len = [_iStream read:buf maxLength:kXMPPReadSize];
 		DDLogVerbose(@"done reading %ld", (long)len);
 		if(len>0) {
@@ -3501,7 +3501,7 @@ static NSMutableArray *extracted(xmpp *object) {
 				DDLogError(@"got data but not string (utf-8 decoding error possibly data is incomplete)");
 			}
 		}
-	} while(len>0)
+    } while(len>0);
 	free(buf);
 	return;
 }

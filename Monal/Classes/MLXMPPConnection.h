@@ -35,7 +35,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong)  NSString* uploadServer;
 
 @property (nonatomic, strong)  NSString* conferenceServer;
-@property (nonatomic, strong)  NSString* pubsubServer;
 
 @property (nonatomic, assign) BOOL supportsHTTPUpload;
 // client state

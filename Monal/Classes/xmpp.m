@@ -526,14 +526,7 @@ NSString *const kXMPPPresence = @"presence";
 -(void) cleanUpState
 {
     if(self.explicitLogout)
-    {
-        _unAckedStanzas=nil;
-        self.connectionProperties.discoveredServices=nil;
-        [self persistState];
         [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
-    }
-    
-  
     
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
     if(_accountNo)
@@ -2176,6 +2169,8 @@ static NSMutableArray *extracted(xmpp *object) {
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
+    [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
+    [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
     
     if(self.connectionProperties.discoveredServices)
     {
@@ -2253,6 +2248,18 @@ static NSMutableArray *extracted(xmpp *object) {
         {
             NSNumber *supportsPubSub = [dic objectForKey:@"supportsPubSub"];
             self.connectionProperties.supportsPubSub = supportsPubSub.boolValue;
+        }
+        
+        if([dic objectForKey:@"supportsHTTPUpload"])
+        {
+            NSNumber *supportsHTTPUpload = [dic objectForKey:@"supportsHTTPUpload"];
+            self.connectionProperties.supportsHTTPUpload = supportsHTTPUpload.boolValue;
+        }
+        
+        if([dic objectForKey:@"supportsPing"])
+        {
+            NSNumber *supportsPing = [dic objectForKey:@"supportsPing"];
+            self.connectionProperties.supportsPing = supportsPing.boolValue;
         }
         
         if([dic objectForKey:@"pubSubHost"])
@@ -2389,8 +2396,23 @@ static NSMutableArray *extracted(xmpp *object) {
     
     //force new disco queries because we landed here because of a failed smacks resume
     //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)
-    //--> all of this reasons imply that we had to start a new xmpp stream and our old cached disco data is stale now
+    //--> all of this reasons imply that we had to start a new xmpp stream and our old cached disco data
+    //    and other state values are stale now
+	//(smacks state will be reset/cleared later on if appropriate, no need to handle smacks here)
+    self.connectionProperties.serverFeatures=nil;
     self.connectionProperties.discoveredServices=nil;
+    self.connectionProperties.uploadServer=nil;
+    self.connectionProperties.conferenceServer=nil;
+    self.connectionProperties.usingCarbons2=NO;
+    self.connectionProperties.supportsPush=NO;
+    self.connectionProperties.supportsClientState=NO;
+    self.connectionProperties.supportsMam2=NO;
+    self.connectionProperties.supportsPubSub=NO;
+    self.connectionProperties.pubSubHost=nil;
+    self.connectionProperties.supportsHTTPUpload=NO;
+    self.connectionProperties.supportsPing=NO;
+    
+    //now fetch the disco
     [self queryDisco];
     [self fetchRoster];
     [self sendInitalPresence];

@@ -1222,6 +1222,7 @@ NSString *const kXMPPPresence = @"presence";
 			MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
 			processor.sendIq=^(MLXMLNode * _Nullable iqResponse) {
 				if(iqResponse) {
+					DDLogInfo(@"sending iq stanza");
 					[self send:iqResponse];
 				}
 			};
@@ -1691,17 +1692,7 @@ NSString *const kXMPPPresence = @"presence";
 			[self removeAckedStanzasFromQueue:resumeNode.h];
 			[self resendUnackedStanzas];
 			
-			MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
-			
-			processor.sendIq=^(MLXMLNode * _Nullable nodeResponse) {
-				if(nodeResponse) {
-					[self send:nodeResponse];
-				}
-			};
-			
 			[self sendInitalPresence];
-			
-			[processor parseFeatures:nil];
 			
 			//force push (re)enable on session resumption
 			self.connectionProperties.pushEnabled=NO;
@@ -2413,9 +2404,9 @@ static NSMutableArray *extracted(xmpp *object) {
     self.connectionProperties.supportsPing=NO;
     
     //now fetch the disco
+    [self sendInitalPresence];
     [self queryDisco];
     [self fetchRoster];
-    [self sendInitalPresence];
     
     [self queryMAMSinceLastMessageDate];
 }

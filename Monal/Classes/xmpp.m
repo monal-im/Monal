@@ -75,6 +75,7 @@ NSString *const kXMPPPresence = @"presence";
 {
     NSInputStream *_iStream;
     NSOutputStream *_oStream;
+    NSMutableData* _inputDataBuffer;
     NSMutableString* _inputBuffer;
     NSMutableArray* _outputQueue;
     // 64KiB buffer for stanzas we can not (completely) write to the tcp socket
@@ -156,6 +157,7 @@ NSString *const kXMPPPresence = @"presence";
     _accountState = kStateLoggedOut;
     
     _discoveredServerList=[[NSMutableArray alloc] init];
+    _inputDataBuffer=[[NSMutableData alloc] init];
     _inputBuffer=[[NSMutableString alloc] init];
     _outputQueue=[[NSMutableArray alloc] init];
     
@@ -482,6 +484,7 @@ NSString *const kXMPPPresence = @"presence";
                                   forMode:NSDefaultRunLoopMode];
         DDLogInfo(@"removed streams");
         
+        self->_inputDataBuffer=[[NSMutableData alloc] init];
         self->_inputBuffer=[[NSMutableString alloc] init];
         
         @try
@@ -523,14 +526,7 @@ NSString *const kXMPPPresence = @"presence";
 -(void) cleanUpState
 {
     if(self.explicitLogout)
-    {
-        _unAckedStanzas=nil;
-        self.connectionProperties.discoveredServices=nil;
-        [self persistState];
         [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
-    }
-    
-  
     
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
     if(_accountNo)
@@ -730,6 +726,7 @@ NSString *const kXMPPPresence = @"presence";
 -(void) startStream
 {
 	//flush buffer to ignore all prior input
+	self->_inputDataBuffer=[[NSMutableData alloc] init];
 	self->_inputBuffer=[[NSMutableString alloc] init];
 	
 	DDLogInfo(@" got read queue");
@@ -2172,6 +2169,8 @@ static NSMutableArray *extracted(xmpp *object) {
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
+    [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
+    [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
     
     if(self.connectionProperties.discoveredServices)
     {
@@ -2249,6 +2248,18 @@ static NSMutableArray *extracted(xmpp *object) {
         {
             NSNumber *supportsPubSub = [dic objectForKey:@"supportsPubSub"];
             self.connectionProperties.supportsPubSub = supportsPubSub.boolValue;
+        }
+        
+        if([dic objectForKey:@"supportsHTTPUpload"])
+        {
+            NSNumber *supportsHTTPUpload = [dic objectForKey:@"supportsHTTPUpload"];
+            self.connectionProperties.supportsHTTPUpload = supportsHTTPUpload.boolValue;
+        }
+        
+        if([dic objectForKey:@"supportsPing"])
+        {
+            NSNumber *supportsPing = [dic objectForKey:@"supportsPing"];
+            self.connectionProperties.supportsPing = supportsPing.boolValue;
         }
         
         if([dic objectForKey:@"pubSubHost"])
@@ -2385,8 +2396,23 @@ static NSMutableArray *extracted(xmpp *object) {
     
     //force new disco queries because we landed here because of a failed smacks resume
     //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)
-    //--> all of this reasons imply that we had to start a new xmpp stream and our old cached disco data is stale now
+    //--> all of this reasons imply that we had to start a new xmpp stream and our old cached disco data
+    //    and other state values are stale now
+	//(smacks state will be reset/cleared later on if appropriate, no need to handle smacks here)
+    self.connectionProperties.serverFeatures=nil;
     self.connectionProperties.discoveredServices=nil;
+    self.connectionProperties.uploadServer=nil;
+    self.connectionProperties.conferenceServer=nil;
+    self.connectionProperties.usingCarbons2=NO;
+    self.connectionProperties.supportsPush=NO;
+    self.connectionProperties.supportsClientState=NO;
+    self.connectionProperties.supportsMam2=NO;
+    self.connectionProperties.supportsPubSub=NO;
+    self.connectionProperties.pubSubHost=nil;
+    self.connectionProperties.supportsHTTPUpload=NO;
+    self.connectionProperties.supportsPing=NO;
+    
+    //now fetch the disco
     [self queryDisco];
     [self fetchRoster];
     [self sendInitalPresence];
@@ -3451,39 +3477,33 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(void) readToBuffer
 {
-    
-    if(![_iStream hasBytesAvailable])
-    {
-        DDLogVerbose(@"no bytes  to read");
-        return;
-    }
-    
-    uint8_t* buf=malloc(kXMPPReadSize);
-    NSInteger len = 0;
-    
-    len = [_iStream read:buf maxLength:kXMPPReadSize];
-    DDLogVerbose(@"done reading %ld", (long)len);
-    if(len>0) {
-        NSData* data = [NSData dataWithBytes:(const void *)buf length:len];
-        //  DDLogVerbose(@" got raw string %s ", buf);
-        if(data)
-        {
-			NSString* inputString=[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+	if(![_iStream hasBytesAvailable])
+	{
+		DDLogVerbose(@"no bytes  to read");
+		return;
+	}
+	uint8_t* buf=malloc(kXMPPReadSize);
+	do
+	{
+		NSInteger len = 0;
+		len = [_iStream read:buf maxLength:kXMPPReadSize];
+		DDLogVerbose(@"done reading %ld", (long)len);
+		if(len>0) {
+			[self->_inputDataBuffer appendBytes:(const void *)buf length:len];
+			//  DDLogVerbose(@" got raw string %s ", buf);
+			NSString* inputString=[[NSString alloc] initWithData:self->_inputDataBuffer encoding:NSUTF8StringEncoding];
 			if(inputString) {
 				[self->_inputBuffer appendString:inputString];
+				[self->_inputDataBuffer setLength:0];		//remove all data because it got decoded as utf-8 string now
+				[self processInput];
 			}
 			else {
-				DDLogError(@"got data but not string");
+				DDLogError(@"got data but not string (utf-8 decoding error possibly data is incomplete)");
 			}
-        }
-        free(buf);
-        [self processInput];
-    }
-    else
-    {
-        free(buf);
-        return;
-    }
+		}
+	} while(len>0)
+	free(buf);
+	return;
 }
 
 

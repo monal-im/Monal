@@ -75,6 +75,7 @@ NSString *const kXMPPPresence = @"presence";
 {
     NSInputStream *_iStream;
     NSOutputStream *_oStream;
+    NSMutableData* _inputDataBuffer;
     NSMutableString* _inputBuffer;
     NSMutableArray* _outputQueue;
     // 64KiB buffer for stanzas we can not (completely) write to the tcp socket
@@ -156,6 +157,7 @@ NSString *const kXMPPPresence = @"presence";
     _accountState = kStateLoggedOut;
     
     _discoveredServerList=[[NSMutableArray alloc] init];
+    _inputDataBuffer=[[NSMutableData alloc] init];
     _inputBuffer=[[NSMutableString alloc] init];
     _outputQueue=[[NSMutableArray alloc] init];
     
@@ -482,6 +484,7 @@ NSString *const kXMPPPresence = @"presence";
                                   forMode:NSDefaultRunLoopMode];
         DDLogInfo(@"removed streams");
         
+        self->_inputDataBuffer=[[NSMutableData alloc] init];
         self->_inputBuffer=[[NSMutableString alloc] init];
         
         @try
@@ -730,6 +733,7 @@ NSString *const kXMPPPresence = @"presence";
 -(void) startStream
 {
 	//flush buffer to ignore all prior input
+	self->_inputDataBuffer=[[NSMutableData alloc] init];
 	self->_inputBuffer=[[NSMutableString alloc] init];
 	
 	DDLogInfo(@" got read queue");
@@ -3451,39 +3455,33 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(void) readToBuffer
 {
-    
-    if(![_iStream hasBytesAvailable])
-    {
-        DDLogVerbose(@"no bytes  to read");
-        return;
-    }
-    
-    uint8_t* buf=malloc(kXMPPReadSize);
-    NSInteger len = 0;
-    
-    len = [_iStream read:buf maxLength:kXMPPReadSize];
-    DDLogVerbose(@"done reading %ld", (long)len);
-    if(len>0) {
-        NSData* data = [NSData dataWithBytes:(const void *)buf length:len];
-        //  DDLogVerbose(@" got raw string %s ", buf);
-        if(data)
-        {
-			NSString* inputString=[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+	if(![_iStream hasBytesAvailable])
+	{
+		DDLogVerbose(@"no bytes  to read");
+		return;
+	}
+	uint8_t* buf=malloc(kXMPPReadSize);
+	do
+	{
+		NSInteger len = 0;
+		len = [_iStream read:buf maxLength:kXMPPReadSize];
+		DDLogVerbose(@"done reading %ld", (long)len);
+		if(len>0) {
+			[self->_inputDataBuffer appendBytes:(const void *)buf length:len];
+			//  DDLogVerbose(@" got raw string %s ", buf);
+			NSString* inputString=[[NSString alloc] initWithData:self->_inputDataBuffer encoding:NSUTF8StringEncoding];
 			if(inputString) {
 				[self->_inputBuffer appendString:inputString];
+				[self->_inputDataBuffer setLength:0];		//remove all data because it got decoded as utf-8 string now
+				[self processInput];
 			}
 			else {
-				DDLogError(@"got data but not string");
+				DDLogError(@"got data but not string (utf-8 decoding error possibly data is incomplete)");
 			}
-        }
-        free(buf);
-        [self processInput];
-    }
-    else
-    {
-        free(buf);
-        return;
-    }
+		}
+	} while(len>0)
+	free(buf);
+	return;
 }
 
 

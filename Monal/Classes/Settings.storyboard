@@ -363,7 +363,7 @@
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <segue destination="T2P-jI-4uD" kind="show" identifier="showServerDetails" id="i4b-wV-798"/>
-                        <segue destination="srS-6q-JWF" kind="showDetail" identifier="showMAMPref" id="IMn-Af-tuo"/>
+                        <segue destination="srS-6q-JWF" kind="show" identifier="showMAMPref" id="IMn-Af-tuo"/>
                         <segue destination="HEj-uf-d1q" kind="show" identifier="showKeyTrust" id="pEf-Bd-Qzb"/>
                         <segue destination="hjV-um-Y0a" kind="show" identifier="showPassChange" id="sL4-44-otR"/>
                     </connections>
@@ -415,7 +415,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HiN-m0-zbc" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2610" y="4584"/>
+            <point key="canvasLocation" x="3029" y="4184"/>
         </scene>
         <!--Settings-->
         <scene sceneID="0ks-uc-vHz">
@@ -691,6 +691,7 @@
                             <outlet property="delegate" destination="srS-6q-JWF" id="vLl-bT-fXh"/>
                         </connections>
                     </tableView>
+                    <navigationItem key="navigationItem" id="SGT-45-PcA"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="LYN-w1-Tri" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

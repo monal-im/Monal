@@ -443,11 +443,13 @@
              NSString *accountNoCopy = self.contact.accountId;
              BOOL isMucCopy = self.contact.isGroup;
              BOOL encryptChatCopy = self.encryptChat;
+             MLContact *contactCopy = self.contact;
              
              
              [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
                  [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
                                        withCompletionHandler:nil];
+                   [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:nil userInfo:@{@"contact":contactCopy}];
              }];
          }
          else  {

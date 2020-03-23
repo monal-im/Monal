@@ -165,6 +165,7 @@
     
     if([iqNode.idval isEqualToString:@"enableCarbons"])
     {
+		DDLogInfo(@"incoming enableCarbons result");
         self.connection.usingCarbons2=YES;
     }
     
@@ -221,10 +222,23 @@
 
 -(void) discoResult:(ParseIq *) iqNode {
     if(iqNode.features) {
-        [self parseFeatures:iqNode];
         if([iqNode.from isEqualToString:self.connection.server.host] ||
            [iqNode.from isEqualToString:self.connection.identity.domain]) {
             self.connection.serverFeatures=iqNode.features;
+        }
+        
+        if([iqNode.features containsObject:@"urn:xmpp:carbons:2"])
+        {
+            DDLogInfo(@"got disco result with carbons ns");
+            if(!self.connection.usingCarbons2) {
+                DDLogInfo(@"sending enableCarbons iq");
+                if(self.sendIq) self.sendIq([self enableCarbons]);
+            }
+        }
+        
+        if([iqNode.features containsObject:@"urn:xmpp:ping"])
+        {
+            self.connection.supportsPing=YES;
         }
         
         [iqNode.features.allObjects enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -507,27 +521,12 @@
 
 -(XMPPIQ *) enableCarbons
 {
+	DDLogInfo(@"building enableCarbons iq");
     XMPPIQ *carbons =[[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
     MLXMLNode *enable =[[MLXMLNode alloc] initWithElement:@"enable"];
     [enable setXMLNS:@"urn:xmpp:carbons:2"];
     [carbons.children addObject:enable];
     return carbons;
-}
-
--(void) parseFeatures:(ParseIq *) iqNode
-{
-    if([self.connection.serverFeatures containsObject:@"urn:xmpp:carbons:2"])
-    {
-        if(!self.connection.usingCarbons2){
-            if(self.sendIq) self.sendIq([self enableCarbons]);
-        }
-    }
-    
-    if([self.connection.serverFeatures containsObject:@"urn:xmpp:ping"])
-    {
-        self.connection.supportsPing=YES;
-    }
-    
 }
 
 @end

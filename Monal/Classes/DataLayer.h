@@ -130,6 +130,9 @@ extern NSString *const kMessageTypeUrl;
 
 -(void) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 
+-(void) saveMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withComment:(NSString*) comment;
+-(NSString*) loadMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo;
+
 #pragma mark - MUC
 
 -(NSString *) ownNickNameforMuc:(NSString*) room andServer:(NSString*) server forAccount:(NSString*) accountNo;

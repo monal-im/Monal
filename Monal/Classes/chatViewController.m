@@ -64,7 +64,6 @@
             self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
         }
     }];
-    
 }
 
 -(void) setupWithContact:(MLContact* ) contact
@@ -196,7 +195,6 @@
         if(self.contact.isGroup) {
             NSArray *members= [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
             self.navigationItem.title=[NSString stringWithFormat:@"%@ (%ld)", self.navigationItem.title, members.count];
-            
         }
     });
 }
@@ -234,10 +232,14 @@
     [self updateBackground];
     
     self.placeHolderText.text=[NSString stringWithFormat:@"Message from %@", self.jid];
+    // Load message draft from db
+    NSString* messageDraft = [[DataLayer sharedInstance] loadMessageDraft:self.contact.contactJid forAccount:self.contact.accountId];
+    if([messageDraft length] > 0) {
+        [self.chatInput setText:messageDraft];
+        self.placeHolderText.hidden=YES;
+    }
     self.hardwareKeyboardPresent = YES; //default to YES and when keybaord will appears is called, this may be set to NO
     [self scrollToBottom];
-    
-    
 }
 
 
@@ -324,6 +326,8 @@
 
 -(IBAction)dismissKeyboard:(id)sender
 {
+    // Save message draft
+    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text];
     [self.chatInput resignFirstResponder];
 }
 
@@ -1484,6 +1488,8 @@
 
 - (void)keyboardDidHide:(NSNotification*)aNotification
 {
+    // Save message draft
+    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text];
     UIEdgeInsets contentInsets = UIEdgeInsetsZero;
     self.messageTable.contentInset = contentInsets;
     self.messageTable.scrollIndicatorInsets = contentInsets;

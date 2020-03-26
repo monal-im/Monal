@@ -1009,7 +1009,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) offlineContactsWithCompletion: (void (^)(NSMutableArray *))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name,nick_name,  a.account_id, MUC, muc_subject, muc_nick from buddylist  as A inner join account as b  on a.account_id=b.account_id  where  online=0 and enabled=1 order by full_name COLLATE NOCASE "];
+    NSString* query=[NSString stringWithFormat:@"select buddy_name,A.state,status,filename,0, ifnull(full_name, buddy_name) as full_name,nick_name,  a.account_id, MUC, muc_subject, muc_nick from buddylist  as A inner join account as b  on a.account_id=b.account_id  where  online=0 and enabled=1 order by full_name COLLATE NOCASE "];
     [self executeReader:query withCompletion:^(NSMutableArray *results) {
         
         NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];

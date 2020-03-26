@@ -233,11 +233,15 @@
     
     self.placeHolderText.text=[NSString stringWithFormat:@"Message from %@", self.jid];
     // Load message draft from db
-    NSString* messageDraft = [[DataLayer sharedInstance] loadMessageDraft:self.contact.contactJid forAccount:self.contact.accountId];
-    if([messageDraft length] > 0) {
-        [self.chatInput setText:messageDraft];
-        self.placeHolderText.hidden=YES;
-    }
+    [[DataLayer sharedInstance] loadMessageDraft:self.contact.contactJid forAccount:self.contact.accountId
+        withCompletion:^(NSString* messageDraft) {
+            if([messageDraft length] > 0) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    self.chatInput.text = messageDraft;
+                    self.placeHolderText.hidden = YES;
+                });
+            }
+    }];
     self.hardwareKeyboardPresent = YES; //default to YES and when keybaord will appears is called, this may be set to NO
     [self scrollToBottom];
 }
@@ -327,7 +331,7 @@
 -(IBAction)dismissKeyboard:(id)sender
 {
     // Save message draft
-    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text];
+    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text withCompletion:nil];
     [self.chatInput resignFirstResponder];
 }
 
@@ -1489,7 +1493,7 @@
 - (void)keyboardDidHide:(NSNotification*)aNotification
 {
     // Save message draft
-    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text];
+    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text withCompletion:nil];
     UIEdgeInsets contentInsets = UIEdgeInsetsZero;
     self.messageTable.contentInset = contentInsets;
     self.messageTable.scrollIndicatorInsets = contentInsets;

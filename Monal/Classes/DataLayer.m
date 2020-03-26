@@ -1423,19 +1423,26 @@ static DataLayer *sharedInstance=nil;
     }];
 }
 
--(void) saveMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withComment:(NSString*) comment
+-(void) saveMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withComment:(NSString*) comment withCompletion:(void (^)(BOOL))completion
 {
     NSString* query=[NSString stringWithFormat:@"update buddylist set messageDraft=? where account_id=? and buddy_name=?"];
     NSArray *params=@[comment, accountNo, buddy];
-    [self executeNonQuery:query  andArguments:params withCompletion:nil];
+    [self executeNonQuery:query andArguments:params  withCompletion:^(BOOL success) {
+            if(completion) {
+                completion(success);
+            }
+    }];
 }
 
--(NSString*) loadMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo
+-(void) loadMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSString*))completion
 {
     NSString* query=[NSString stringWithFormat:@"SELECT messageDraft from buddylist where account_id=? and buddy_name=?"];
     NSArray *params=@[accountNo, buddy];
-    NSString* messageDraft=(NSString*)[self executeScalar:query andArguments:params];
-    return messageDraft;
+    [self executeScalar:query andArguments:params withCompletion:^(NSObject* messageDraft) {
+        if(completion) {
+            completion((NSString *)messageDraft);
+        }
+    }];
 }
 
 

@@ -3490,7 +3490,7 @@ static NSMutableArray *extracted(xmpp *object) {
 				DDLogError(@"got data but not string (utf-8 decoding error possibly data is incomplete)");
 			}
 		}
-    } while(len>0);
+    } while(len>0 && [_iStream hasBytesAvailable]);
 	free(buf);
 	return;
 }

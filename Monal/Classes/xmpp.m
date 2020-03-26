@@ -80,7 +80,7 @@ NSString *const kXMPPPresence = @"presence";
     NSMutableArray* _outputQueue;
     // 64KiB buffer for stanzas we can not (completely) write to the tcp socket
     uint8_t * _outputBuffer;
-    size_t _outputBufferByteIndex;
+    size_t _outputBufferByteCount;
     
     NSArray* _stanzaTypes;
     
@@ -169,11 +169,10 @@ NSString *const kXMPPPresence = @"presence";
     self.sendQueue.qualityOfService=NSQualityOfServiceUtility;
     self.sendQueue.maxConcurrentOperationCount=1;
     
-    // 64KiB buffer for stanzas we can not (completely) write to the tcp socket
     if(_outputBuffer)
 		free(_outputBuffer);
-    _outputBuffer = malloc(sizeof(uint8_t) * 65536);
-    _outputBufferByteIndex = 0;
+    _outputBuffer = nil;
+    _outputBufferByteCount = 0;
     
     //placing more common at top to reduce iteration
     _stanzaTypes=[NSArray arrayWithObjects:
@@ -391,7 +390,10 @@ NSString *const kXMPPPresence = @"presence";
     [self.sendQueue cancelAllOperations];
 	[self.sendQueue addOperationWithBlock:^{
 		_outputQueue=[[NSMutableArray alloc] init];
-		_outputBufferByteIndex = 0;
+		if(_outputBuffer)
+			free(_outputBuffer);
+		_outputBuffer = nil;
+		_outputBufferByteCount = 0;
 	}];
     
     //read persisted state
@@ -463,7 +465,10 @@ NSString *const kXMPPPresence = @"presence";
 	[self.sendQueue cancelAllOperations];
 	[self.sendQueue addOperationWithBlock:^{
 		self->_outputQueue=[[NSMutableArray alloc] init];
-		self->_outputBufferByteIndex = 0;
+		if(_outputBuffer)
+			free(_outputBuffer);
+		_outputBuffer = nil;
+		self->_outputBufferByteCount = 0;
 	}];
     [self.receiveQueue cancelAllOperations];
     [self.receiveQueue addOperationWithBlock:^{
@@ -3404,20 +3409,25 @@ static NSMutableArray *extracted(xmpp *object) {
     }
     
     //try to send remaining buffered data first
-    if(_outputBufferByteIndex>0)
+    if(_outputBufferByteCount>0)
     {
-		NSInteger sentLen=[_oStream write:_outputBuffer maxLength:_outputBufferByteIndex];
+		NSInteger sentLen=[_oStream write:_outputBuffer maxLength:_outputBufferByteCount];
 		if(sentLen!=-1)
 		{
-			if(sentLen!=_outputBufferByteIndex)		//some bytes remaining to send --> trim buffer and return NO
+			if(sentLen!=_outputBufferByteCount)		//some bytes remaining to send --> trim buffer and return NO
 			{
-				memmove(_outputBuffer, _outputBuffer+(size_t)sentLen, _outputBufferByteIndex-(size_t)sentLen);
-				_outputBufferByteIndex-=sentLen;
+				memmove(_outputBuffer, _outputBuffer+(size_t)sentLen, _outputBufferByteCount-(size_t)sentLen);
+				_outputBufferByteCount-=sentLen;
 				_streamHasSpace=NO;
 				return NO;		//stanza has to remain in _outputQueue
 			}
 			else
-				_outputBufferByteIndex=0;		//everything sent
+			{
+				//dealloc empty buffer
+				free(_outputBuffer);
+				_outputBuffer=nil;
+				_outputBufferByteCount=0;		//everything sent
+			}
 		}
 		else
 		{
@@ -3435,22 +3445,15 @@ static NSMutableArray *extracted(xmpp *object) {
     {
 		if(sentLen!=rawstringLen)
 		{
-			if(rawstringLen-sentLen > sizeof(_outputBuffer)/sizeof(uint8_t))
-			{
-				DDLogError(@"sending: remaining part of stanza bigger than output buffer, this should *NEVER* happen: %ld > %ld",
-						(long)(rawstringLen-sentLen), sizeof(_outputBuffer)/sizeof(uint8_t));
-				//the output xml stream is now out of sync because the xml data got truncated
-				//we now have two options: leave the stanza in the _outputQueue and try to resend it or remove it from the queue
-				//because the xml stream is out of sync, either option is good/bad --> we remove it from the queue for now
-				return YES;		//pretend we sent the complete stanza
-			}
+			//allocate new _outputBuffer
+			_outputBuffer=malloc(sizeof(uint8_t) * rawstringLen-sentLen);
 			//copy the remaining data into the buffer and set the buffer pointer accordingly
 			memcpy(_outputBuffer, rawstring+(size_t)sentLen, (size_t)(rawstringLen-sentLen));
-			_outputBufferByteIndex=(size_t)(rawstringLen-sentLen);
+			_outputBufferByteCount=(size_t)(rawstringLen-sentLen);
 			_streamHasSpace=NO;
 		}
 		else
-			_outputBufferByteIndex=0;
+			_outputBufferByteCount=0;
         return YES;
     }
     else

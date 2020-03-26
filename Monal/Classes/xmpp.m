@@ -1137,7 +1137,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) removeAckedStanzasFromQueue:(NSNumber*) hvalue
 {
-	if(self.unAckedStanzas.count>0)
+	if([self.unAckedStanzas count]>0)
 	{
 		NSMutableArray *iterationArray = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
 		DDLogDebug(@"removeAckedStanzasFromQueue: hvalue %@, lastOutboundStanza %@", hvalue, self.lastOutboundStanza);
@@ -1145,12 +1145,9 @@ NSString *const kXMPPPresence = @"presence";
 		for(NSDictionary *dic in iterationArray)
 		{
 			NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
-			//*** I think this should not be <= but < (having a h value of 1 means the first stanza was acked and the first
-			//*** stanza has a kStanzaID of 0
+			//having a h value of 1 means the first stanza was acked and the first stanza has a kStanzaID of 0
 			if([stanzaNumber integerValue]<[hvalue integerValue])
-			{
 				[discard addObject:dic];
-			}
 		}
 		
 		[iterationArray removeObjectsInArray:discard];
@@ -1164,8 +1161,10 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) requestSMAck
 {
-    if(!self.smacksRequestInFlight && self.unAckedStanzas.count>0 ) {
-        DDLogVerbose(@"requesting smacks ack...");
+    if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 &&
+		!self.smacksRequestInFlight && [self.unAckedStanzas count]>0 ) {
+        
+		DDLogVerbose(@"requesting smacks ack...");
         MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
         NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3"};
         rNode.attributes=[dic mutableCopy];
@@ -1696,14 +1695,11 @@ NSString *const kXMPPPresence = @"presence";
 			
 			//force push (re)enable on session resumption
 			self.connectionProperties.pushEnabled=NO;
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
 			if(self.connectionProperties.supportsPush)
 			{
 				[self enablePush];
 			}
-#endif
-#endif
+			
 			if(self.loginCompletion) {
 				self.loginCompletion(YES, @"");
 				self.loginCompletion=nil;
@@ -2403,10 +2399,10 @@ static NSMutableArray *extracted(xmpp *object) {
     self.connectionProperties.supportsHTTPUpload=NO;
     self.connectionProperties.supportsPing=NO;
     
-    //now fetch the disco
-    [self sendInitalPresence];
-    [self queryDisco];
+    //now fetch roster, request disco and send initial presence
     [self fetchRoster];
+    [self queryDisco];
+    [self sendInitalPresence];
     
     [self queryMAMSinceLastMessageDate];
 }
@@ -3374,15 +3370,14 @@ static NSMutableArray *extracted(xmpp *object) {
 		else		//stop sending the remainder of the queue if the send failed (tcp output buffer full etc.)
         {
 			DDLogInfo(@"could not send whole _outputQueue: tcp buffer full or connection has an error");
-			requestAck=NO;		//don't try to request an ack if the tcp buffer is already full
 			break;
 		}
     }
     
-    if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 && requestAck)
+    if(requestAck)
     {
 		//adding the smacks request to the receiveQueue will make sure that we send the request
-		//*after* processing an incoming burst of stanzas (potentially causing an outgoing burst of stanzas)
+		//*after* processing an incoming burst of stanzas (which is potentially causing an outgoing burst of stanzas)
 		//this reduces the requests to an absolute minimum while still maintaining the rule to request an ack
 		//for every stanza (e.g. until the smacks queue is empty) and not sending an ack if one is already in flight
 		DDLogVerbose(@"adding smacks request to receiveQueue...");
@@ -3500,6 +3495,8 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(void) enablePush
 {
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
     if(self.accountState>=kStateBound && [self.pushNode length]>0 && [self.pushSecret length]>0 && self.connectionProperties.supportsPush)
     {
         DDLogInfo(@"ENABLING PUSH: %@ < %@", self.pushNode, self.pushSecret);
@@ -3511,6 +3508,8 @@ static NSMutableArray *extracted(xmpp *object) {
     else {
         DDLogInfo(@" NOT enabling push: %@ < %@", self.pushNode, self.pushSecret);
     }
+#endif
+#endif
 }
 
 @end

@@ -385,23 +385,25 @@
                 } else  {
                     [cell showStatusText:messageRow.messageText];
                 }
+                
+                if(messageRow.timestamp) {
+                    cell.time.text = [self formattedDateWithSource:messageRow.timestamp];
+                    cell.time.hidden=NO;
+                } else  {
+                    cell.time.hidden=YES;
+                }
+                
             } else  {
                 DDLogWarn(@"Active chat but no messages found in history for %@.", row.contactJid);
             }
+            
         });
     }];
-                       
+    
     [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
             cell.userImage.image=image;
     }];
-    
-    if(row.lastMessageTime) {
-        cell.time.text = [self formattedDateWithSource:row.lastMessageTime];
-        cell.time.hidden=NO;
-    } else  {
-        cell.time.hidden=YES;
-    }
-        
+   
     [cell setOrb];
     return cell;
 }

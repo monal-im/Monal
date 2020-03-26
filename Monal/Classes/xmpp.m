@@ -80,7 +80,7 @@ NSString *const kXMPPPresence = @"presence";
     NSMutableArray* _outputQueue;
     // 64KiB buffer for stanzas we can not (completely) write to the tcp socket
     uint8_t * _outputBuffer;
-    size_t _outputBufferByteIndex;
+    size_t _outputBufferByteCount;
     
     NSArray* _stanzaTypes;
     
@@ -169,11 +169,10 @@ NSString *const kXMPPPresence = @"presence";
     self.sendQueue.qualityOfService=NSQualityOfServiceUtility;
     self.sendQueue.maxConcurrentOperationCount=1;
     
-    // 64KiB buffer for stanzas we can not (completely) write to the tcp socket
     if(_outputBuffer)
 		free(_outputBuffer);
-    _outputBuffer = malloc(sizeof(uint8_t) * 65536);
-    _outputBufferByteIndex = 0;
+    _outputBuffer = nil;
+    _outputBufferByteCount = 0;
     
     //placing more common at top to reduce iteration
     _stanzaTypes=[NSArray arrayWithObjects:
@@ -391,7 +390,10 @@ NSString *const kXMPPPresence = @"presence";
     [self.sendQueue cancelAllOperations];
 	[self.sendQueue addOperationWithBlock:^{
 		_outputQueue=[[NSMutableArray alloc] init];
-		_outputBufferByteIndex = 0;
+		if(_outputBuffer)
+			free(_outputBuffer);
+		_outputBuffer = nil;
+		_outputBufferByteCount = 0;
 	}];
     
     //read persisted state
@@ -463,7 +465,10 @@ NSString *const kXMPPPresence = @"presence";
 	[self.sendQueue cancelAllOperations];
 	[self.sendQueue addOperationWithBlock:^{
 		self->_outputQueue=[[NSMutableArray alloc] init];
-		self->_outputBufferByteIndex = 0;
+		if(_outputBuffer)
+			free(_outputBuffer);
+		_outputBuffer = nil;
+		self->_outputBufferByteCount = 0;
 	}];
     [self.receiveQueue cancelAllOperations];
     [self.receiveQueue addOperationWithBlock:^{
@@ -1137,7 +1142,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) removeAckedStanzasFromQueue:(NSNumber*) hvalue
 {
-	if(self.unAckedStanzas.count>0)
+	if([self.unAckedStanzas count]>0)
 	{
 		NSMutableArray *iterationArray = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
 		DDLogDebug(@"removeAckedStanzasFromQueue: hvalue %@, lastOutboundStanza %@", hvalue, self.lastOutboundStanza);
@@ -1145,12 +1150,9 @@ NSString *const kXMPPPresence = @"presence";
 		for(NSDictionary *dic in iterationArray)
 		{
 			NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
-			//*** I think this should not be <= but < (having a h value of 1 means the first stanza was acked and the first
-			//*** stanza has a kStanzaID of 0
+			//having a h value of 1 means the first stanza was acked and the first stanza has a kStanzaID of 0
 			if([stanzaNumber integerValue]<[hvalue integerValue])
-			{
 				[discard addObject:dic];
-			}
 		}
 		
 		[iterationArray removeObjectsInArray:discard];
@@ -1164,8 +1166,10 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) requestSMAck
 {
-    if(!self.smacksRequestInFlight && self.unAckedStanzas.count>0 ) {
-        DDLogVerbose(@"requesting smacks ack...");
+    if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 &&
+		!self.smacksRequestInFlight && [self.unAckedStanzas count]>0 ) {
+        
+		DDLogVerbose(@"requesting smacks ack...");
         MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
         NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3"};
         rNode.attributes=[dic mutableCopy];
@@ -1696,14 +1700,11 @@ NSString *const kXMPPPresence = @"presence";
 			
 			//force push (re)enable on session resumption
 			self.connectionProperties.pushEnabled=NO;
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
 			if(self.connectionProperties.supportsPush)
 			{
 				[self enablePush];
 			}
-#endif
-#endif
+			
 			if(self.loginCompletion) {
 				self.loginCompletion(YES, @"");
 				self.loginCompletion=nil;
@@ -2403,10 +2404,10 @@ static NSMutableArray *extracted(xmpp *object) {
     self.connectionProperties.supportsHTTPUpload=NO;
     self.connectionProperties.supportsPing=NO;
     
-    //now fetch the disco
-    [self sendInitalPresence];
-    [self queryDisco];
+    //now fetch roster, request disco and send initial presence
     [self fetchRoster];
+    [self queryDisco];
+    [self sendInitalPresence];
     
     [self queryMAMSinceLastMessageDate];
 }
@@ -3374,15 +3375,14 @@ static NSMutableArray *extracted(xmpp *object) {
 		else		//stop sending the remainder of the queue if the send failed (tcp output buffer full etc.)
         {
 			DDLogInfo(@"could not send whole _outputQueue: tcp buffer full or connection has an error");
-			requestAck=NO;		//don't try to request an ack if the tcp buffer is already full
 			break;
 		}
     }
     
-    if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 && requestAck)
+    if(requestAck)
     {
 		//adding the smacks request to the receiveQueue will make sure that we send the request
-		//*after* processing an incoming burst of stanzas (potentially causing an outgoing burst of stanzas)
+		//*after* processing an incoming burst of stanzas (which is potentially causing an outgoing burst of stanzas)
 		//this reduces the requests to an absolute minimum while still maintaining the rule to request an ack
 		//for every stanza (e.g. until the smacks queue is empty) and not sending an ack if one is already in flight
 		DDLogVerbose(@"adding smacks request to receiveQueue...");
@@ -3409,20 +3409,25 @@ static NSMutableArray *extracted(xmpp *object) {
     }
     
     //try to send remaining buffered data first
-    if(_outputBufferByteIndex>0)
+    if(_outputBufferByteCount>0)
     {
-		NSInteger sentLen=[_oStream write:_outputBuffer maxLength:_outputBufferByteIndex];
+		NSInteger sentLen=[_oStream write:_outputBuffer maxLength:_outputBufferByteCount];
 		if(sentLen!=-1)
 		{
-			if(sentLen!=_outputBufferByteIndex)		//some bytes remaining to send --> trim buffer and return NO
+			if(sentLen!=_outputBufferByteCount)		//some bytes remaining to send --> trim buffer and return NO
 			{
-				memmove(_outputBuffer, _outputBuffer+(size_t)sentLen, _outputBufferByteIndex-(size_t)sentLen);
-				_outputBufferByteIndex-=sentLen;
+				memmove(_outputBuffer, _outputBuffer+(size_t)sentLen, _outputBufferByteCount-(size_t)sentLen);
+				_outputBufferByteCount-=sentLen;
 				_streamHasSpace=NO;
 				return NO;		//stanza has to remain in _outputQueue
 			}
 			else
-				_outputBufferByteIndex=0;		//everything sent
+			{
+				//dealloc empty buffer
+				free(_outputBuffer);
+				_outputBuffer=nil;
+				_outputBufferByteCount=0;		//everything sent
+			}
 		}
 		else
 		{
@@ -3440,22 +3445,15 @@ static NSMutableArray *extracted(xmpp *object) {
     {
 		if(sentLen!=rawstringLen)
 		{
-			if(rawstringLen-sentLen > sizeof(_outputBuffer)/sizeof(uint8_t))
-			{
-				DDLogError(@"sending: remaining part of stanza bigger than output buffer, this should *NEVER* happen: %ld > %ld",
-						(long)(rawstringLen-sentLen), sizeof(_outputBuffer)/sizeof(uint8_t));
-				//the output xml stream is now out of sync because the xml data got truncated
-				//we now have two options: leave the stanza in the _outputQueue and try to resend it or remove it from the queue
-				//because the xml stream is out of sync, either option is good/bad --> we remove it from the queue for now
-				return YES;		//pretend we sent the complete stanza
-			}
+			//allocate new _outputBuffer
+			_outputBuffer=malloc(sizeof(uint8_t) * rawstringLen-sentLen);
 			//copy the remaining data into the buffer and set the buffer pointer accordingly
 			memcpy(_outputBuffer, rawstring+(size_t)sentLen, (size_t)(rawstringLen-sentLen));
-			_outputBufferByteIndex=(size_t)(rawstringLen-sentLen);
+			_outputBufferByteCount=(size_t)(rawstringLen-sentLen);
 			_streamHasSpace=NO;
 		}
 		else
-			_outputBufferByteIndex=0;
+			_outputBufferByteCount=0;
         return YES;
     }
     else
@@ -3492,7 +3490,7 @@ static NSMutableArray *extracted(xmpp *object) {
 				DDLogError(@"got data but not string (utf-8 decoding error possibly data is incomplete)");
 			}
 		}
-    } while(len>0);
+    } while(len>0 && [_iStream hasBytesAvailable]);
 	free(buf);
 	return;
 }
@@ -3500,6 +3498,8 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(void) enablePush
 {
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
     if(self.accountState>=kStateBound && [self.pushNode length]>0 && [self.pushSecret length]>0 && self.connectionProperties.supportsPush)
     {
         DDLogInfo(@"ENABLING PUSH: %@ < %@", self.pushNode, self.pushSecret);
@@ -3511,6 +3511,8 @@ static NSMutableArray *extracted(xmpp *object) {
     else {
         DDLogInfo(@" NOT enabling push: %@ < %@", self.pushNode, self.pushSecret);
     }
+#endif
+#endif
 }
 
 @end

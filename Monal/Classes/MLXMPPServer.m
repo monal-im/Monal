@@ -22,18 +22,21 @@
  */
 @property (nonatomic, strong) NSString *serverInUse;
 @property (nonatomic, strong) NSNumber *portInUse;
+@property (nonatomic, assign) BOOL directTLSInUse;
 
 @end
 
 @implementation MLXMPPServer
 
--(id) initWithHost:(NSString *) host andPort:(NSNumber *) port{
+-(id) initWithHost:(NSString *) host andPort:(NSNumber *) port andOldStyleSSL:(BOOL) oldStyleSSL {
     self = [super init];
     self.host=host;
     self.port=port;
+    self.oldStyleSSL=oldStyleSSL;
     
     self.serverInUse=host;
     self.portInUse=port;
+    self.directTLSInUse=oldStyleSSL;
     
     return self;
 }
@@ -54,6 +57,15 @@
 
 - (NSNumber *) connectPort {
     return self.portInUse;
+}
+
+- (void) updateConnectTLS:(BOOL) isSecure
+{
+    self.directTLSInUse = isSecure;
+}
+
+- (BOOL) connectTLS {
+    return self.directTLSInUse;
 }
 
 @end

@@ -22,12 +22,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic,assign) BOOL oldStyleSSL;
 @property (nonatomic,assign) BOOL selfSignedCert;
 
--(id) initWithHost:(NSString *) host andPort:(NSNumber *) port;
+-(id) initWithHost:(NSString *) host andPort:(NSNumber *) port andOldStyleSSL:(BOOL) oldStyleSSL;
 
 
 - (void) updateConnectServer:(NSString *) server;
 
 - (void) updateConnectPort:(NSNumber *) port;
+
+- (void) updateConnectTLS:(BOOL) isSecure;
 
 /**
  returns the currently connected server may be host or dns one.
@@ -38,6 +40,11 @@ NS_ASSUME_NONNULL_BEGIN
 returns the currently connected port may be configured  or dns one.
 */
 - (NSNumber *) connectPort;
+
+/**
+returns the currently directTLS setting may be configured  or dns one.
+*/
+- (BOOL) connectTLS;
 
 @end
 

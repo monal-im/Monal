@@ -8,6 +8,8 @@
 
 #import <CommonCrypto/CommonCrypto.h>
 #import <CFNetwork/CFSocketStream.h>
+#import <Security/SecureTransport.h>
+
 #import "xmpp.h"
 #import "DataLayer.h"
 #import "EncodingTools.h"
@@ -156,7 +158,9 @@ NSString *const kXMPPPresence = @"presence";
 {
     _accountState = kStateLoggedOut;
     
-    _discoveredServerList=[[NSMutableArray alloc] init];
+    _discoveredServersList=[[NSMutableArray alloc] init];
+	if(!_usableServersList)
+		_usableServersList=[[NSMutableArray alloc] init];
     _inputDataBuffer=[[NSMutableData alloc] init];
     _inputBuffer=[[NSMutableString alloc] init];
     _outputQueue=[[NSMutableArray alloc] init];
@@ -242,14 +246,45 @@ NSString *const kXMPPPresence = @"presence";
     [_iStream scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
 }
 
+-(void) initTLS
+{
+	NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
+	[settings setObject:self.connectionProperties.identity.domain forKey:kCFStreamSSLPeerName];
+	if(self.connectionProperties.server.selfSignedCert)
+	{
+		DDLogInfo(@"configured self signed SSL");
+		[settings setObject:@NO forKey:kCFStreamSSLValidatesCertificateChain];
+	}
+	
+	//this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
+	DDLogInfo(@"configuring SSL handshake");
+	if(CFReadStreamSetProperty((__bridge CFReadStreamRef)self->_iStream, kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings))
+		DDLogInfo(@"Set TLS properties on streams. Security level %@", [self->_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
+	else
+	{
+		DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
+		DDLogInfo(@"Set TLS properties on streams.security level %@", [self->_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
+	}
+	
+	//see this for extracting the sslcontext of the cfstream: https://stackoverflow.com/a/26726525/3528174
+	//see this for creating the proper protocols array: https://github.com/LLNL/FRS/blob/master/Pods/AWSIoT/AWSIoT/Internal/AWSIoTMQTTClient.m
+	//this will only have an effect if the TLS handshake was not already started (e.g. the TCP socket is not connected)
+	SSLContextRef sslContext = (__bridge SSLContextRef) [_iStream propertyForKey: (__bridge NSString *) kCFStreamPropertySSLContext ];
+	CFStringRef strs[1];
+	strs[0] = CFSTR("xmpp-client");
+	CFArrayRef protocols = CFArrayCreate(NULL, (void *)strs, 1, &kCFTypeArrayCallBacks);
+	SSLSetALPNProtocols(sslContext, protocols);
+	CFRelease(protocols);
+}
+
 -(void) createStreams
 {
-    DDLogInfo(@"stream  creating to  server: %@ port: %@", self.connectionProperties.server.connectServer, self.connectionProperties.server.port);
+    DDLogInfo(@"stream  creating to  server: %@ port: %@ directTLS: %@", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort, self.connectionProperties.server.connectTLS ? @"YES" : @"NO");
     
     NSInputStream *localIStream;
     NSOutputStream *localOStream;
     
-    [NSStream getStreamsToHostWithName:self.connectionProperties.server.connectServer port:self.connectionProperties.server.port.integerValue inputStream:&localIStream outputStream:&localOStream];
+    [NSStream getStreamsToHostWithName:self.connectionProperties.server.connectServer port:self.connectionProperties.server.connectPort.integerValue inputStream:&localIStream outputStream:&localOStream];
     
     if(localIStream) {
         _iStream=localIStream;
@@ -276,37 +311,10 @@ NSString *const kXMPPPresence = @"presence";
         DDLogInfo(@"streams created ok");
     }
     
-    
-    if((self.connectionProperties.server.SSL==YES)  && (self.connectionProperties.server.oldStyleSSL==YES))
+    if(self.connectionProperties.server.connectTLS==YES)
     {
-        // do ssl stuff here
-        DDLogInfo(@"starting old style SSL");
-        
-        NSMutableDictionary *settings = [ [NSMutableDictionary alloc ]
-                                         initWithObjectsAndKeys:
-                                         kCFStreamSocketSecurityLevelNegotiatedSSL,
-                                         kCFStreamSSLLevel,
-                                         nil ];
-        
-        if(self.connectionProperties.server.selfSignedCert)
-        {
-            DDLogInfo(@"self signed SSL");
-            NSDictionary* secureOFF= [ [NSDictionary alloc ]
-                                      initWithObjectsAndKeys:
-                                      [NSNumber numberWithBool:NO], kCFStreamSSLValidatesCertificateChain, nil];
-            
-            [settings addEntriesFromDictionary:secureOFF];
-            
-            
-            
-        }
-        
-        CFReadStreamSetProperty((__bridge CFReadStreamRef)_iStream,
-                                kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings);
-        CFWriteStreamSetProperty((__bridge CFWriteStreamRef)_oStream,
-                                 kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings);
-        
-        DDLogInfo(@"connection secured");
+		DDLogInfo(@"starting directSSL");
+        [self initTLS];
     }
     
     MLXMLNode* xmlOpening = [[MLXMLNode alloc] initWithElement:@"xml"];
@@ -315,8 +323,7 @@ NSString *const kXMPPPresence = @"presence";
     [self setRunLoop];
     
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    dispatch_source_t streamTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,q_background
-                                                           );
+    dispatch_source_t streamTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,q_background);
     
     dispatch_source_set_timer(streamTimer,
                               dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC),
@@ -347,16 +354,49 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) connectionTask
 {
-    if(self.connectionProperties.server.oldStyleSSL==NO) {
-        // do DNS discovery if it hasn't already been set
-        if([_discoveredServerList count]==0) {
-            _discoveredServerList= [[[MLDNSLookup alloc] init] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
-        }
+	// do DNS discovery if it hasn't already been set
+	if([_discoveredServersList count]==0) {
+		_discoveredServersList=[[[MLDNSLookup alloc] init] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
     }
     
-    if([_discoveredServerList count]>0) {
-        [self.connectionProperties.server updateConnectServer:[[_discoveredServerList objectAtIndex:0] objectForKey:@"server"]];
-        [self.connectionProperties.server updateConnectPort:[[_discoveredServerList objectAtIndex:0] objectForKey:@"port"]];
+    //if all servers have been tried start over with the first one again
+    if([_discoveredServersList count]>0 && [_usableServersList count]==0)
+	{
+		DDLogWarn(@"All %lu SRV dns records tried, starting over again", (unsigned long)[_discoveredServersList count]);
+		_usableServersList = [_discoveredServersList mutableCopy];
+		for(NSDictionary *row in _usableServersList)
+		{
+			DDLogInfo(@"SRV entry: server=%@, port=%@, isSecure=%s (prio: %@)",
+				[row objectForKey:@"server"],
+				[row objectForKey:@"port"],
+				[[row objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
+				[row objectForKey:@"priority"]
+			);
+		}
+	}
+	
+    if([_usableServersList count]>0) {
+		DDLogInfo(@"Using connection parameters discovered via SRV dns record: server=%@, port=%@, isSecure=%s, priority=%@",
+			[[_usableServersList objectAtIndex:0] objectForKey:@"server"],
+			[[_usableServersList objectAtIndex:0] objectForKey:@"port"],
+			[[[_usableServersList objectAtIndex:0] objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
+			[[_usableServersList objectAtIndex:0] objectForKey:@"priority"]
+		);
+        [self.connectionProperties.server updateConnectServer: [[_usableServersList objectAtIndex:0] objectForKey:@"server"]];
+        [self.connectionProperties.server updateConnectPort: [[_usableServersList objectAtIndex:0] objectForKey:@"port"]];
+		[self.connectionProperties.server updateConnectTLS: [[[_usableServersList objectAtIndex:0] objectForKey:@"isSecure"] boolValue]];
+		//remove this server so that the next connection attempt will try the next server in the list
+		[_usableServersList removeObjectAtIndex:0];
+		DDLogInfo(@"%lu SRV entries left:", (unsigned long)[_usableServersList count]);
+		for(NSDictionary *row in _usableServersList)
+		{
+			DDLogInfo(@"SRV entry: server=%@, port=%@, isSecure=%s (prio: %@)",
+				[row objectForKey:@"server"],
+				[row objectForKey:@"port"],
+				[[row objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
+				[row objectForKey:@"priority"]
+			);
+		}
     }
     
     [self createStreams];
@@ -1549,7 +1589,7 @@ NSString *const kXMPPPresence = @"presence";
 				
 				if ((self.connectionProperties.server.SSL && self->_startTLSComplete)
 					|| (!self.connectionProperties.server.SSL && !self->_startTLSComplete)
-					|| (self.connectionProperties.server.SSL && self.connectionProperties.server.oldStyleSSL))
+					|| (self.connectionProperties.server.connectTLS==YES))
 				{
 					if(self.registration){
 						[self requestRegForm];
@@ -1764,30 +1804,7 @@ NSString *const kXMPPPresence = @"presence";
 			{
 				if(streamNode.startTLSProceed)
 				{
-					NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
-					[settings setObject:self.connectionProperties.identity.domain forKey:kCFStreamSSLPeerName];
-					
-					[settings setObject:kCFStreamSocketSecurityLevelNegotiatedSSL forKey:kCFStreamSSLLevel];
-					
-					if(self.connectionProperties.server.selfSignedCert)
-					{
-						[settings  setObject:@NO forKey:kCFStreamSSLValidatesCertificateChain];
-					}
-					
-					if (CFReadStreamSetProperty((__bridge CFReadStreamRef)self->_iStream,
-												kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings) &&
-						CFWriteStreamSetProperty((__bridge CFWriteStreamRef)self->_oStream,
-													kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings))
-						
-					{
-						DDLogInfo(@"Set TLS properties on streams. Security level %@", [self->_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
-						
-					}
-					else
-					{
-						DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
-						DDLogInfo(@"Set TLS properties on streams.security level %@", [self->_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
-					}
+					[self initTLS];
 					
 					[self startStream];
 					
@@ -1949,6 +1966,8 @@ NSString *const kXMPPPresence = @"presence";
 					self->_loginStarted=NO;
 					self.loginStartTimeStamp=nil;
 					
+					//reset usable servers list so that the next connect starts with the highest prio server again
+					_usableServersList=[[NSMutableArray alloc] init];
 					
 				}
 			}

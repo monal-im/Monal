@@ -10,20 +10,19 @@
 @import Darwin.POSIX.sys.time; 
 
 @interface MLDNSLookup()
-
 @end
+
+BOOL isSecure=NO;
 
 @implementation MLDNSLookup
 
--(NSArray *) dnsDiscoverOnDomain:(NSString *) domain
+-(void) doDiscoveryWithSecure: (BOOL)secure andDomain: (NSString *) domain
 {
-    self.discoveredServers =[[NSMutableArray alloc] init];
-    
-    DNSServiceRef sdRef;
+	DNSServiceRef sdRef;
     DNSServiceErrorType res;
     
-    NSString* serviceDiscoveryString=[NSString stringWithFormat:@"_xmpp-client._tcp.%@", domain];
-    
+    isSecure = secure;
+    NSString* serviceDiscoveryString=[NSString stringWithFormat:@"_xmpp%s-client._tcp.%@", isSecure ? "s" : "", domain];
     res=DNSServiceQueryRecord(
                               &sdRef, 0, 0,
                               [serviceDiscoveryString UTF8String],
@@ -63,7 +62,17 @@
         }
         
     }
+}
+
+-(NSArray *) dnsDiscoverOnDomain:(NSString *) domain
+{
+    self.discoveredServers =[[NSMutableArray alloc] init];
     
+    //mix xmpps and xmpp records as per XEP-0368
+    [self doDiscoveryWithSecure:YES andDomain:domain];
+    [self doDiscoveryWithSecure:NO andDomain:domain];
+    
+    //we ignore weights here for simplicity
     NSSortDescriptor *descriptor = [[NSSortDescriptor alloc] initWithKey:@"priority"  ascending:YES];
     NSArray* sortArray =[NSArray arrayWithObjects:descriptor,nil];
     [self.discoveredServers sortUsingDescriptors:sortArray];
@@ -143,7 +152,7 @@ void print_rdata(int type, int len, const u_char *rdata, void* context)
         NSNumber* num=[NSNumber numberWithInt:ntohs(srv->priority)];
         NSNumber* theport=[NSNumber numberWithInt:portval];
         if(theserver && num && theport) {
-            NSDictionary* row=[NSDictionary dictionaryWithObjectsAndKeys:num,@"priority", theserver, @"server", theport, @"port",nil];
+            NSDictionary* row=[NSDictionary dictionaryWithObjectsAndKeys:num,@"priority", theserver,@"server", theport,@"port", [NSNumber numberWithBool:isSecure],@"isSecure", nil];
             [caller.discoveredServers addObject:row];
         }
     }

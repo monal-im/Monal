@@ -41,6 +41,7 @@ NSString *const kMessageTypeImage =@"Image";
 NSString *const kMessageTypeText =@"Text";
 NSString *const kMessageTypeStatus =@"Status";
 NSString *const kMessageTypeUrl =@"Url";
+NSString *const kMessageTypeGeo =@"Geo";
 
 // used for contact rows
 NSString *const kContactName =@"buddy_name";
@@ -2978,12 +2979,8 @@ static DataLayer *sharedInstance=nil;
            messageType=kMessageTypeUrl;
     }
     
-    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"]) {
-        
-        if ([messageString hasPrefix:@"HTTPS://"] ||
-            [messageString hasPrefix:@"https://"] ||
-            [messageString hasPrefix:@"aesgcm://"])
-        {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"] &&
+        ([messageString hasPrefix:@"HTTPS://"] || [messageString hasPrefix:@"https://"] || [messageString hasPrefix:@"aesgcm://"])) {
             NSString *cleaned = [messageString stringByReplacingOccurrencesOfString:@"aesgcm://" withString:@"https://"];
             NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:cleaned]];
             request.HTTPMethod=@"HEAD";
@@ -3005,14 +3002,13 @@ static DataLayer *sharedInstance=nil;
                     completion(messageType);
                 }
             }] resume];
+    } else if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowGeoLocation"] && [messageString hasPrefix:@"geo:"]) {
+        messageType = kMessageTypeGeo;
+        
+        if(completion) {
+            completion(messageType);
         }
-        else {
-            if(completion) {
-                completion(messageType);
-            }
-        }
-    }
-    else
+    } else
         if(completion) {
             completion(messageType);
         }

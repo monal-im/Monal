@@ -73,6 +73,7 @@ An array of Dics what have timers to make sure everything was sent
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"SetDefaults"];
 
         [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ShowImages"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ShowGeoLocation"];
         [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ChatBackgrounds"];
 
         [[NSUserDefaults standardUserDefaults] synchronize];
@@ -99,6 +100,13 @@ An array of Dics what have timers to make sure everything was sent
     if(sounds==nil)
     {
         [[NSUserDefaults standardUserDefaults] setObject:@"alert2" forKey:@"AlertSoundFile"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+    }
+
+    // upgrade ShowGeoLocation
+    NSNumber* mapLocationTest =  [[NSUserDefaults standardUserDefaults] objectForKey: @"ShowGeoLocation"];
+    if(mapLocationTest==nil) {
+        [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ShowGeoLocation"];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
 }

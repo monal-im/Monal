@@ -382,6 +382,9 @@
                 } else if([messageRow.messageType isEqualToString:kMessageTypeImage])
                 {
                     [cell showStatusText:@"📷 An Image"];
+                } else if([messageRow.messageType isEqualToString:kMessageTypeGeo])
+                {
+                    [cell showStatusText:@"🧭 A Geolocation"];
                 } else  {
                     [cell showStatusText:messageRow.messageText];
                 }

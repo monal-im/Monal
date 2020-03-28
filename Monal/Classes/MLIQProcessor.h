@@ -35,11 +35,6 @@ typedef void (^processAction)(void);
 -(void) processIq:(ParseIq *) messageNode;
 
 /**
- exposed so that we can parse features loaded from disk 
- */
--(void) parseFeatures:(ParseIq * _Nullable) messageNode;
-
-/**
  process a node and send out devices
  */
 -(void) processOMEMODevices:(ParseIq *) iqNode;

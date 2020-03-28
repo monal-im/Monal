@@ -149,6 +149,7 @@ extern NSString *const kMessageTypeUrl;
 -(void) updateMucSubject:(NSString *) subject forAccount:(NSString *) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(BOOL))completion;
 -(void) mucSubjectforAccount:(NSString *) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(NSString *))completion;
 
+-(void) setMessageId:(NSString*) messageid stanzaId:(NSString *) stanzaId;
 
 /**
  Calls with YES if contact  has laredy been added to the database for this account

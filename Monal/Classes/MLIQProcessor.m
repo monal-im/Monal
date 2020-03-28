@@ -318,10 +318,9 @@
 }
 
 -(void) rosterResult:(ParseIq *) iqNode {
-    
-    if(iqNode.from != nil
-      && iqNode.from != self.connection.identity.domain) {
-        DDLogError(@"invalid sender for roster. Rejecintg. ");
+    if(iqNode.from != nil && ![iqNode.from isEqualToString:self.connection.identity.jid]
+       && ![iqNode.from isEqualToString:self.connection.identity.domain]) {
+        DDLogError(@"invalid sender for roster. Rejecting.");
         return;
     }
     

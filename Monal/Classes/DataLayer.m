@@ -1777,7 +1777,7 @@ static DataLayer *sharedInstance=nil;
 -(void) setMessageId:(NSString*) messageid stanzaId:(NSString *) stanzaId
 {
     NSString* query=[NSString stringWithFormat:@"update message_history set stanzaid=? where messageid=?"];
-    DDLogVerbose(@" setting message type %@",query);
+    DDLogVerbose(@" setting message stanzaid %@",query);
     [self executeNonQuery:query  andArguments:@[stanzaId, messageid]  withCompletion:nil];
 }
 

@@ -1423,6 +1423,28 @@ static DataLayer *sharedInstance=nil;
     }];
 }
 
+-(void) saveMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withComment:(NSString*) comment withCompletion:(void (^)(BOOL))completion
+{
+    NSString* query=[NSString stringWithFormat:@"update buddylist set messageDraft=? where account_id=? and buddy_name=?"];
+    NSArray *params=@[comment, accountNo, buddy];
+    [self executeNonQuery:query andArguments:params  withCompletion:^(BOOL success) {
+            if(completion) {
+                completion(success);
+            }
+    }];
+}
+
+-(void) loadMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSString*))completion
+{
+    NSString* query=[NSString stringWithFormat:@"SELECT messageDraft from buddylist where account_id=? and buddy_name=?"];
+    NSArray *params=@[accountNo, buddy];
+    [self executeScalar:query andArguments:params withCompletion:^(NSObject* messageDraft) {
+        if(completion) {
+            completion((NSString *)messageDraft);
+        }
+    }];
+}
+
 
 
 #pragma mark MUC
@@ -2921,6 +2943,14 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Upgrade to 4.5  success ");
     }
     
+    if([dbversion doubleValue]<4.6)
+    {
+        DDLogVerbose(@"Database version <4.6 detected. Performing upgrade on accounts. ");
+        [self executeNonQuery:@"alter table buddylist add column messageDraft text;" andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='4.6'; " andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.6 success ");
+    }
+
     [dbversionCheck unlock];
     return;
     

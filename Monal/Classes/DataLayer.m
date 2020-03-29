@@ -41,6 +41,8 @@ NSString *const kMessageTypeImage =@"Image";
 NSString *const kMessageTypeText =@"Text";
 NSString *const kMessageTypeStatus =@"Status";
 NSString *const kMessageTypeUrl =@"Url";
+NSString *const kMessageTypeMessageDraft =@"MessageDraft";
+
 
 // used for contact rows
 NSString *const kContactName =@"buddy_name";
@@ -1998,8 +2000,8 @@ static DataLayer *sharedInstance=nil;
 -(void) lastMessageForContact:(NSString*) contact forAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion
 {
     if(!accountNo ||! contact) return;
-    NSString* query=[NSString stringWithFormat:@"select message, timestamp  as thetime, messageType from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 1"];
-    NSArray *params=@[accountNo, contact, contact];
+    NSString* query=[NSString stringWithFormat:@"SELECT message, thetime, messageType FROM (SELECT 1 as messagePrio, bl.messageDraft as message, ac.lastMessageTime as thetime, 'MessageDraft' as messageType FROM buddylist AS bl INNER JOIN activechats AS ac where bl.account_id = ac.account_id and bl.buddy_name = ac.buddy_name and ac.account_id = ? and ac.buddy_name = ? and messageDraft is not NULL and messageDraft != '' UNION SELECT 2 as messagePrio, message, timestamp, messageType from (select message, timestamp, messageType FROM message_history where account_id=? and (message_from =? or message_to=?) ORDER BY message_history_id DESC LIMIT 1) ORDER BY messagePrio ASC LIMIT 1)"];
+    NSArray *params=@[accountNo, contact, accountNo, contact, contact];
     
     [self executeReader:query andArguments:params withCompletion:^(NSMutableArray *results) {
         NSDateFormatter* formatter = self.dbFormatter;

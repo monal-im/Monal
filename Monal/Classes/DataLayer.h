@@ -49,6 +49,7 @@ extern NSString *const kMessageTypeImage;
 extern NSString *const kMessageTypeText;
 extern NSString *const kMessageTypeStatus;
 extern NSString *const kMessageTypeUrl;
+extern NSString *const kMessageTypeMessageDraft;
 
 + (DataLayer* )sharedInstance;
 

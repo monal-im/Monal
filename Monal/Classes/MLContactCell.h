@@ -32,6 +32,8 @@ typedef enum {
 -(void) setOrb;
 
 -(void) showStatusText:(NSString *) text;
+-(void) showStatusTextItalic:(NSString *) text withItalicRange:(NSRange)italicRange;
+-(void) setStatusTextLayout:(NSString *) text;
 -(void) showDisplayName:(NSString *) name;
 
 @end

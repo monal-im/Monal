@@ -276,6 +276,13 @@
 
 -(void) viewWillDisappear:(BOOL)animated
 {
+    // Save message draft
+    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text withCompletion:^(BOOL success) {
+        if(success) {
+            // Update status message for contact to show current draft
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+        }
+    }];
     [super viewWillDisappear:animated];
     [MLNotificationManager sharedInstance].currentAccountNo=nil;
     [MLNotificationManager sharedInstance].currentContact=nil;

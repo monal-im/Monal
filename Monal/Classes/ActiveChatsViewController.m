@@ -382,7 +382,10 @@
                 } else if([messageRow.messageType isEqualToString:kMessageTypeImage])
                 {
                     [cell showStatusText:@"📷 An Image"];
-                } else  {
+                } else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft]) {
+                    NSString* draftPreview = [NSString stringWithFormat:@"Draft: %@", messageRow.messageText];
+                    [cell showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, 6)];
+                } else {
                     [cell showStatusText:messageRow.messageText];
                 }
                 
@@ -392,7 +395,6 @@
                 } else  {
                     cell.time.hidden=YES;
                 }
-                
             } else  {
                 DDLogWarn(@"Active chat but no messages found in history for %@.", row.contactJid);
             }

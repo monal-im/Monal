@@ -1216,7 +1216,7 @@ NSString *const kXMPPPresence = @"presence";
 		[self send:rNode];
 		self.smacksRequestInFlight=YES;
     } else  {
-        DDLogDebug(@"no smacks ack when there is nothing pending or a request already in flight...");
+        DDLogDebug(@"no smacks request, there is nothing pending or a request already in flight...");
     }
 }
 

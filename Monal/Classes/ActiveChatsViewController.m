@@ -369,8 +369,6 @@
         });
     }];
     
-    [cell showStatusText:nil];
-    
     [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:row.accountId withCompletion:^(NSMutableArray *messages) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if(messages.count>0)
@@ -396,6 +394,7 @@
                     cell.time.hidden=YES;
                 }
             } else  {
+                [cell showStatusText:nil];
                 DDLogWarn(@"Active chat but no messages found in history for %@.", row.contactJid);
             }
             

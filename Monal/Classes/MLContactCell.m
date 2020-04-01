@@ -62,13 +62,14 @@
     NSMutableAttributedString *italicString = [[NSMutableAttributedString alloc] initWithString:text];
     [italicString addAttribute:NSFontAttributeName value:italicFont range:italicRange];
 
-    self.statusText.attributedText = italicString;
-    [self setStatusTextLayout:text];
+    if(![italicString isEqualToAttributedString:self.statusText.originalAttributedText]) {
+        self.statusText.attributedText = italicString;
+        [self setStatusTextLayout:text];
+    }
 }
 
 -(void) setStatusTextLayout:(NSString *) text {
-    if(text)
-    {
+    if(text) {
         self.centeredDisplayName.hidden=YES;
         self.displayName.hidden=NO;
         self.statusText.hidden=NO;

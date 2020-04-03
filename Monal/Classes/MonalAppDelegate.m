@@ -503,6 +503,8 @@
         
         UIMenu *deleteMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.delete" options:UIMenuOptionsDisplayInline children:@[deleteCommand]];
         [builder insertSiblingMenu:deleteMenu afterMenuForIdentifier:@"im.monal.detail"];
+        
+       [builder removeMenuForIdentifier:UIMenuHelp];
     }
 }
 

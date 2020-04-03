@@ -818,6 +818,7 @@ static DataLayer *sharedInstance=nil;
 
 -(NSMutableDictionary *) readStateForAccount:(NSString*) accountNo
 {
+    if(!accountNo) return nil; 
     NSString* query=[NSString stringWithFormat:@"SELECT state from account where account_id=?"];
     NSArray *params=@[accountNo];
     NSData * data=(NSData*)[self executeScalar:query andArguments:params];

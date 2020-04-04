@@ -7,7 +7,7 @@ _Hint: This is work in progress, everyone is invited to fill up the list._
 |[XEP-0004 Data Forms](https://xmpp.org/extensions/xep-0004.html)|?|?|
 |[XEP-0016 Privacy Lists](https://xmpp.org/extensions/xep-0016.html)|?|?|
 |[XEP-0027 Current Jabber OpenPGP Usage](https://xmpp.org/extensions/xep-0027.html)|?|?|
-|[XEP-0030 Service Discovery](https://xmpp.org/extensions/xep-0030.html)|:x:|#387|
+|[XEP-0030 Service Discovery](https://xmpp.org/extensions/xep-0030.html)|:x:||#387|
 |[XEP-0033 Extended Stanza Addressing](https://xmpp.org/extensions/xep-0033.html)|?|?|
 |[XEP-0045 Multi-User Chat](https://xmpp.org/extensions/xep-0045.html)|:heavy_check_mark:|?|
 |[XEP-0047 In-Band Bytestreams (IBB)](https://xmpp.org/extensions/xep-0047.html)|?|?|
@@ -74,4 +74,4 @@ _Hint: This is work in progress, everyone is invited to fill up the list._
 |[XEP-0392 Consistent Color Generation](https://xmpp.org/extensions/xep-0392.html)|:x:|?|
 |[XEP-0393 Message Styling](https://xmpp.org/extensions/xep-0393.html)|?|?|
 |[XEP-0398 User Avatar to vCard-Based Avatars Conversion](https://xmpp.org/extensions/xep-0398.html)|?|?|
-|[XEP-0411 Bookmarks Conversion](https://xmpp.org/extensions/xep-0411.html)|:x:|#19|
+|[XEP-0411 Bookmarks Conversion](https://xmpp.org/extensions/xep-0411.html)|:x:||#19|

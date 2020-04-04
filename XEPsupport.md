@@ -38,7 +38,7 @@ _Hint: This is work in progress, everyone is invited to fill up the list._
 |[XEP-0153 vCard-Based Avatars](https://xmpp.org/extensions/xep-0153.html)|?|?|
 |[XEP-0156 Discovering Alternative XMPP Connection Methods](https://xmpp.org/extensions/xep-0156.html)|?|?|
 |[XEP-0158 CAPTCHA Forms](https://xmpp.org/extensions/xep-0158.html)|?|?|
-|[XEP-0162 Best Practices for Roster and Subscription Management](https://xmpp.org/extensions/xep-0162.html)|✓|0.2||
+|[XEP-0162 Best Practices for Roster and Subscription Management](https://xmpp.org/extensions/xep-0162.html)|:heavy_check_mark:|0.2||
 |[XEP-0163 Personal Eventing Protocol](https://xmpp.org/extensions/xep-0163.html)|?|?|
 |[XEP-0172 User Nickname](https://xmpp.org/extensions/xep-0172.html)|?|?|
 |[XEP-0174 Serverless Messaging](https://xmpp.org/extensions/xep-0174.html)|?|?|

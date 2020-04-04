@@ -7,7 +7,7 @@ _Hint: This is work in progress, everyone is invited to fill up the list._
 |[XEP-0004 Data Forms](https://xmpp.org/extensions/xep-0004.html)|?|?|
 |[XEP-0016 Privacy Lists](https://xmpp.org/extensions/xep-0016.html)|?|?|
 |[XEP-0027 Current Jabber OpenPGP Usage](https://xmpp.org/extensions/xep-0027.html)|?|?|
-|[XEP-0030 Service Discovery](https://xmpp.org/extensions/xep-0030.html)|?|?|
+|[XEP-0030 Service Discovery](https://xmpp.org/extensions/xep-0030.html)|:x:|#387|
 |[XEP-0033 Extended Stanza Addressing](https://xmpp.org/extensions/xep-0033.html)|?|?|
 |[XEP-0045 Multi-User Chat](https://xmpp.org/extensions/xep-0045.html)|:heavy_check_mark:|?|
 |[XEP-0047 In-Band Bytestreams (IBB)](https://xmpp.org/extensions/xep-0047.html)|?|?|
@@ -68,10 +68,10 @@ _Hint: This is work in progress, everyone is invited to fill up the list._
 |[XEP-0319 Last User Interaction in Presence](https://xmpp.org/extensions/xep-0319.html)|?|?|
 |[XEP-0363 HTTP File Upload](https://xmpp.org/extensions/xep-0363.html)|?|?|
 |[XEP-0368 SRV records for XMPP over TLS](https://xmpp.org/extensions/xep-0368.html)|?|?|
-|[XEP-0373 OpenPGP for XMPP](https://xmpp.org/extensions/xep-0373.html)|?|?|
+|[XEP-0373 OpenPGP for XMPP](https://xmpp.org/extensions/xep-0373.html)|:x:|?|
 |[XEP-0380 Explicit Message Encryption](https://xmpp.org/extensions/xep-0380.html)|?|?|
 |[XEP-0384 OMEMO Encryption](https://xmpp.org/extensions/xep-0384.html)|:warning:|?|partial, only in 1:1 chats|
-|[XEP-0392 Consistent Color Generation](https://xmpp.org/extensions/xep-0392.html)|?|?|
+|[XEP-0392 Consistent Color Generation](https://xmpp.org/extensions/xep-0392.html)|:x:|?|
 |[XEP-0393 Message Styling](https://xmpp.org/extensions/xep-0393.html)|?|?|
 |[XEP-0398 User Avatar to vCard-Based Avatars Conversion](https://xmpp.org/extensions/xep-0398.html)|?|?|
-|[XEP-0411 Bookmarks Conversion](https://xmpp.org/extensions/xep-0411.html)|?|?|
+|[XEP-0411 Bookmarks Conversion](https://xmpp.org/extensions/xep-0411.html)|:x:|#19|

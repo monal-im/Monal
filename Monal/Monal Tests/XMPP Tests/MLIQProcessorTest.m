@@ -21,6 +21,7 @@
 
 @property (nonatomic, strong) SignalContext *signalContext;
 @property (nonatomic, strong) MLSignalStore *monalSignalStore;
+@property (nonatomic, strong) NSOperationQueue *queue;
 
 @end
 
@@ -30,6 +31,7 @@
     self.accountNo=@"1";
     self.jid=@"foo@monal.im";
     self.resource=@"Monal-iOS.51";
+    self.queue= [NSOperationQueue currentQueue];
     
     MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:self.jid  password:@"" andResource:self.resource];
 
@@ -56,7 +58,7 @@
     NSDictionary *stanzaToParse =@{@"stanzaType":@"iq", @"stanzaString":sample};
     
      ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
-    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties processQueue:self.queue signalContex:self.signalContext andSignalStore:self.monalSignalStore];
 
     [processor processIq:iqNode];
     
@@ -73,7 +75,7 @@
     XCTestExpectation *vcard= [[XCTestExpectation alloc] initWithDescription:@"vcard"];
     
      ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
-    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties processQueue:self.queue signalContex:self.signalContext andSignalStore:self.monalSignalStore];
     processor.getVcards = ^{
         [vcard fulfill];
     };
@@ -92,7 +94,7 @@
     XCTestExpectation *vcard= [[XCTestExpectation alloc] initWithDescription:@"vcard"];
     
      ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
-    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties processQueue:self.queue signalContex:self.signalContext andSignalStore:self.monalSignalStore];
     processor.getVcards = ^{
         [vcard fulfill];
     };
@@ -113,7 +115,7 @@
     
     ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
     
-    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+    MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties processQueue:self.queue signalContex:self.signalContext andSignalStore:self.monalSignalStore];
     [processor processIq:iqNode];
     
     [self waitForExpectations:@[expectation] timeout:5];

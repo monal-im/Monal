@@ -146,6 +146,8 @@
 		264A7E751AA7263600E860E3 /* MLSwitchCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264A7E741AA7263600E860E3 /* MLSwitchCell.xib */; };
 		264DCF9C23E11483004105CE /* MLNewViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 264DCF9B23E11483004105CE /* MLNewViewController.m */; };
 		26529F5217FA7B260057F199 /* addContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FE17BDD85F0031304D /* addContact.m */; };
+		26537970244208FE007D67D5 /* MLBasePaser.h in Headers */ = {isa = PBXBuildFile; fileRef = 2653796E244208FE007D67D5 /* MLBasePaser.h */; };
+		26537971244208FE007D67D5 /* MLBasePaser.m in Sources */ = {isa = PBXBuildFile; fileRef = 2653796F244208FE007D67D5 /* MLBasePaser.m */; };
 		2653EAE61C5B243400ED97F7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2653EAE51C5B243400ED97F7 /* Main.storyboard */; };
 		265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */; };
 		2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2664D28423F2312400CD4085 /* MLAccountPickerViewController.m */; };
@@ -580,6 +582,8 @@
 		264E34591787BAB100BC7BD0 /* XMPPPresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPresence.h; sourceTree = "<group>"; };
 		264E345A1787BAB100BC7BD0 /* XMPPPresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPresence.m; sourceTree = "<group>"; };
 		264FF3E4158A855D00D97B86 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		2653796E244208FE007D67D5 /* MLBasePaser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLBasePaser.h; sourceTree = "<group>"; };
+		2653796F244208FE007D67D5 /* MLBasePaser.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLBasePaser.m; sourceTree = "<group>"; };
 		2653EAE51C5B243400ED97F7 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		265BD14E21A2D15600A59251 /* MLBackgroundSettings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLBackgroundSettings.h; sourceTree = "<group>"; };
 		265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLBackgroundSettings.m; sourceTree = "<group>"; };
@@ -1393,9 +1397,9 @@
 			isa = PBXGroup;
 			children = (
 				263F1278177F867B0025B235 /* ParseStream.h */,
+				263F1279177F867B0025B235 /* ParseStream.m */,
 				261B29331FECBBF0001C5CF4 /* ParseFailed.h */,
 				261B29321FECBBF0001C5CF4 /* ParseFailed.m */,
-				263F1279177F867B0025B235 /* ParseStream.m */,
 				26CF3EAB1780DE5C002B7085 /* ParseIq.h */,
 				26CF3EAC1780DE5C002B7085 /* ParseIq.m */,
 				26CF3EB01780DFD9002B7085 /* XMPPParser.h */,
@@ -1414,6 +1418,8 @@
 				26C3EDFC1A807E76000E6331 /* ParseA.m */,
 				26C3EDFE1A819A38000E6331 /* ParseResumed.h */,
 				26C3EDFF1A819A38000E6331 /* ParseResumed.m */,
+				2653796E244208FE007D67D5 /* MLBasePaser.h */,
+				2653796F244208FE007D67D5 /* MLBasePaser.m */,
 			);
 			name = Parsers;
 			sourceTree = "<group>";
@@ -1659,6 +1665,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				26CC579623A0867400ABB92A /* monalxmpp.h in Headers */,
+				26537970244208FE007D67D5 /* MLBasePaser.h in Headers */,
 				26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2340,6 +2347,7 @@
 				26CC57E423A08E4B00ABB92A /* EncodingTools.m in Sources */,
 				26CC57AF23A086C000ABB92A /* ParseEnabled.m in Sources */,
 				26CC57D723A08D9B00ABB92A /* MLPush.m in Sources */,
+				26537971244208FE007D67D5 /* MLBasePaser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -51,7 +51,7 @@ NSString *const kCount =@"count";
 +(void) initialize
 {
     NSFileManager* fileManager = [NSFileManager defaultManager];
-    
+
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths objectAtIndex:0];
     NSString *writableDBPath = [documentsDirectory stringByAppendingPathComponent:@"sworim.sqlite"];
@@ -68,12 +68,12 @@ NSString *const kCount =@"count";
     NSError *error;
     [fileManager setAttributes:attributes ofItemAtPath:writableDBPath error:&error];
 #endif
-    
+
     //  sqlite3_shutdown();
     if (sqlite3_config(SQLITE_CONFIG_MULTITHREAD) == SQLITE_OK) {
         DDLogInfo(@"initialize: Database configured ok");
     } else DDLogInfo(@"initialize: Database not configured ok");
-    
+
     sqlite3_initialize();
 }
 
@@ -106,20 +106,20 @@ NSString *const kCount =@"count";
 				if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
 				{
 					DDLogError(@"number bind error");
-					
+
 				}
 			}
 			else if([obj isKindOfClass:[NSString class]])
 			{
 				NSString *text = (NSString *) obj;
-				
+
 				if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
 					DDLogError(@"string bind error");
-					
+
 				};
 			}
 		}];
-		
+
 		if (sqlite3_step(statement) == SQLITE_ROW)
 		{
 			switch(sqlite3_column_type(statement,0))
@@ -132,7 +132,7 @@ NSString *const kCount =@"count";
 					toReturn= returnInt;
 					break;
 				}
-					
+
 				case (SQLITE_FLOAT):
 				{
 					NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,0)];
@@ -140,7 +140,7 @@ NSString *const kCount =@"count";
 					toReturn= returnInt;
 					break;
 				}
-					
+
 				case (SQLITE_TEXT):
 				{
 					NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull) sqlite3_column_text(statement,0)];
@@ -148,21 +148,21 @@ NSString *const kCount =@"count";
 					while(sqlite3_step(statement)== SQLITE_ROW ){} //clear
 					toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
 					break;
-					
+
 				}
-					
+
 				case (SQLITE_BLOB):
 				{
-					
+
 					const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
 					int size = sqlite3_column_bytes(statement,0);
 					NSData* returnData = [NSData dataWithBytes:bytes length:size];
 					while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
 					toReturn= returnData;
-					
+
 					break;
 				}
-					
+
 				case (SQLITE_NULL):
 				{
 					DDLogDebug(@"return nil with sql null: %@", query);
@@ -170,7 +170,7 @@ NSString *const kCount =@"count";
 					toReturn= nil;
 					break;
 				}
-					
+
 			}
 		} else {
             DDLogVerbose(@"return nil with no row");
@@ -191,7 +191,7 @@ NSString *const kCount =@"count";
     NSMutableArray* __block toReturn =  [[NSMutableArray alloc] init] ;
 	sqlite3_stmt *statement;
 	if (sqlite3_prepare_v2(self->database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
-		
+
 		sqlite3_reset(statement);
 		[args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
 			if([obj isKindOfClass:[NSNumber class]])
@@ -200,27 +200,27 @@ NSString *const kCount =@"count";
 				if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
 				{
 					DDLogError(@"number bind error");
-					
+
 				}
 			}
 			else if([obj isKindOfClass:[NSString class]])
 			{
 				NSString *text = (NSString *) obj;
-				
+
 				if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
 					DDLogError(@"string bind error");
-					
+
 				};
 			}
 		}];
-		
+
 		while (sqlite3_step(statement) == SQLITE_ROW) {
 			NSMutableDictionary* row= [[NSMutableDictionary alloc] init];
 			int counter=0;
 			while(counter< sqlite3_column_count(statement) )
 			{
 				NSString* columnName=[NSString stringWithUTF8String:sqlite3_column_name(statement,counter)];
-				
+
 				switch(sqlite3_column_type(statement,counter))
 				{
 						// SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
@@ -230,44 +230,44 @@ NSString *const kCount =@"count";
 						[row setObject:returnInt forKey:columnName];
 						break;
 					}
-						
+
 					case (SQLITE_FLOAT):
 					{
 						NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,counter)];
 						[row setObject:returnInt forKey:columnName];
 						break;
 					}
-						
+
 					case (SQLITE_TEXT):
 					{
 						NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,counter)];
 						[row setObject:[returnString stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
 						break;
-						
+
 					}
-						
+
 					case (SQLITE_BLOB):
 					{
 						const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,counter);
 						int size = sqlite3_column_bytes(statement,counter);
 						NSData* returnData = [NSData dataWithBytes:bytes length:size];
-						
+
 						[row setObject:returnData forKey:columnName];
 						break;
 					}
-						
+
 					case (SQLITE_NULL):
 					{
 						DDLogDebug(@"return nil with sql null: %@", query);
 						[row setObject:@"" forKey:columnName];
 						break;
 					}
-						
+
 				}
-				
+
 				counter++;
 			}
-			
+
 			[toReturn addObject:row];
 		}
 	} else {
@@ -292,36 +292,36 @@ NSString *const kCount =@"count";
 				if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
 				{
 					DDLogError(@"number bind error");
-					
+
 				}
 			}
 			else if([obj isKindOfClass:[NSString class]])
 			{
 				NSString *text = (NSString *) obj;
-				
+
 				if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
 					DDLogError(@"string bind error");
-					
+
 				};
 			}
-			
+
 			else if([obj isKindOfClass:[NSData class]])
 			{
 				NSData *data = (NSData *) obj;
-				
+
 				if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes], (int)data.length,SQLITE_TRANSIENT)!=SQLITE_OK) {
 					DDLogError(@"string bind error");
-					
+
 				};
 			}
 		}];
-		
+
 		if(sqlite3_step(statement)==SQLITE_DONE)
 			toReturn=YES;
 		else
 			toReturn=NO;
 	}
-	
+
 	else
 	{
 		DDLogError(@"nonquery returning NO with out OK %@", query);
@@ -382,7 +382,7 @@ NSString *const kCount =@"count";
             completion(nil);
         }
     }
-    
+
 	NSObject* toReturn;
 	sqlite3_stmt *statement;
 	if (sqlite3_prepare_v2(self->database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
@@ -394,29 +394,29 @@ NSString *const kCount =@"count";
 				if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
 				{
 					DDLogError(@"number bind error");
-					
+
 				}
 			}
 			else if([obj isKindOfClass:[NSString class]])
 			{
 				NSString *text = (NSString *) obj;
-				
+
 				if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
 					DDLogError(@"string bind error");
-					
+
 				};
 			}
 			else if([obj isKindOfClass:[NSData class]])
 			{
 				NSData *data = (NSData *) obj;
-				
+
 				if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes],data.length,SQLITE_TRANSIENT)!=SQLITE_OK) {
 					DDLogError(@"string bind error");
-					
+
 				};
 			}
 		}];
-		
+
 		if (sqlite3_step(statement) == SQLITE_ROW)
 		{
 			switch(sqlite3_column_type(statement,0))
@@ -429,7 +429,7 @@ NSString *const kCount =@"count";
 					toReturn= returnInt;
 					break;
 				}
-					
+
 				case (SQLITE_FLOAT):
 				{
 					NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,0)];
@@ -437,7 +437,7 @@ NSString *const kCount =@"count";
 					toReturn= returnInt;
 					break;
 				}
-					
+
 				case (SQLITE_TEXT):
 				{
 					NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,0)];
@@ -445,9 +445,9 @@ NSString *const kCount =@"count";
 					while(sqlite3_step(statement)== SQLITE_ROW ){} //clear
 					toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
 					break;
-					
+
 				}
-					
+
 				case (SQLITE_BLOB):
 				{
 					const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
@@ -455,10 +455,10 @@ NSString *const kCount =@"count";
 					NSData* returnData = [NSData dataWithBytes:bytes length:size];
 					while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
 					toReturn= returnData;
-					
+
 					break;
 				}
-					
+
 				case (SQLITE_NULL):
 				{
 					DDLogDebug(@"return nil with sql null: %@", query);
@@ -466,7 +466,7 @@ NSString *const kCount =@"count";
 					toReturn= nil;
 					break;
 				}
-					
+
 			}
 		} else {
             DDLogVerbose(@"return nil with no row");
@@ -478,9 +478,9 @@ NSString *const kCount =@"count";
 		DDLogVerbose(@"returning nil with out OK %@", query);
 		toReturn= nil;
 	}
-	
+
 	sqlite3_finalize(statement);
-	
+
 	if(completion) {
 		completion(toReturn);
 	}
@@ -494,9 +494,9 @@ NSString *const kCount =@"count";
             completion(nil);
         }
     }
-    
+
 	NSMutableArray*  toReturn =  [[NSMutableArray alloc] init] ;
-	
+
 	sqlite3_stmt *statement;
 	if (sqlite3_prepare_v2(self->database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
 		sqlite3_reset(statement);
@@ -507,27 +507,27 @@ NSString *const kCount =@"count";
 				if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
 				{
 					DDLogError(@"number bind error");
-					
+
 				}
 			}
 			else if([obj isKindOfClass:[NSString class]])
 			{
 				NSString *text = (NSString *) obj;
-				
+
 				if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
 					DDLogError(@"string bind error");
-					
+
 				};
 			}
 		}];
-		
+
 		while (sqlite3_step(statement) == SQLITE_ROW) {
 			NSMutableDictionary* row= [[NSMutableDictionary alloc] init];
 			int counter=0;
 			while(counter< sqlite3_column_count(statement) )
 			{
 				NSString* columnName=[NSString stringWithUTF8String:sqlite3_column_name(statement,counter)];
-				
+
 				switch(sqlite3_column_type(statement,counter))
 				{
 						// SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
@@ -537,47 +537,47 @@ NSString *const kCount =@"count";
 						[row setObject:returnInt forKey:columnName];
 						break;
 					}
-						
+
 					case (SQLITE_FLOAT):
 					{
 						NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,counter)];
 						[row setObject:returnInt forKey:columnName];
 						break;
 					}
-						
+
 					case (SQLITE_TEXT):
 					{
 						NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,counter)];
 						[row setObject:[returnString stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
 						break;
-						
+
 					}
-						
+
 					case (SQLITE_BLOB):
 					{
-						
+
 						const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,counter);
 						int size = sqlite3_column_bytes(statement,counter);
 						NSData* returnData = [NSData dataWithBytes:bytes length:size];
-						
-						
+
+
 						[row setObject:returnData forKey:columnName];
 						break;
 					}
-						
+
 					case (SQLITE_NULL):
 					{
 						DDLogDebug(@"return nil with sql null: %@", query);
-						
+
 						[row setObject:@"" forKey:columnName];
 						break;
 					}
-						
+
 				}
-				
+
 				counter++;
 			}
-			
+
 			[toReturn addObject:row];
 		}
 	}
@@ -586,9 +586,9 @@ NSString *const kCount =@"count";
 		DDLogVerbose(@"reader nil with sql not ok: %@", query );
 		toReturn= nil;
 	}
-	
+
 	sqlite3_finalize(statement);
-	
+
 	if(completion) {
 		completion(toReturn);
 	}
@@ -602,7 +602,7 @@ NSString *const kCount =@"count";
             completion(NO);
         }
     }
-    
+
     BOOL __block toReturn;
 	sqlite3_stmt *statement;
 	if (sqlite3_prepare_v2(self->database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
@@ -615,43 +615,43 @@ NSString *const kCount =@"count";
 				if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
 				{
 					DDLogError(@"number bind error");
-					
+
 				}
 			}
 			else if([obj isKindOfClass:[NSString class]])
 			{
 				NSString *text = (NSString *) obj;
-				
+
 				if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
 					DDLogError(@"string bind error");
-					
+
 				};
 			}
 			else if([obj isKindOfClass:[NSData class]])
 			{
 				NSData *data = (NSData *) obj;
-				
+
 				if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes], data.length,SQLITE_TRANSIENT)!=SQLITE_OK) {
 					DDLogError(@"string bind error");
-					
+
 				};
 			}
 		}];
-		
+
 		if(sqlite3_step(statement)==SQLITE_DONE)
 			toReturn=YES;
 		else
 			toReturn=NO;
 	}
-	
+
 	else
 	{
 		DDLogError(@"nonquery returning NO with out OK %@", query);
 		toReturn=NO;
 	}
-	
+
 	sqlite3_finalize(statement);
-	
+
 	if (completion)
 	{
 		completion(toReturn);
@@ -663,10 +663,10 @@ NSString *const kCount =@"count";
 
 -(void) protocolListWithCompletion: (void (^)(NSArray *result))completion
 {
-    NSString* query=[NSString stringWithFormat:@"select * from protocol where protocol_id=1"]; //only xmpp now 
+    NSString* query=[NSString stringWithFormat:@"select * from protocol where protocol_id=1"]; //only xmpp now
     [self executeReader:query withCompletion:^(NSMutableArray * result) {
         if(completion) completion(result);
-        
+
     }];
 }
 
@@ -675,7 +675,7 @@ NSString *const kCount =@"count";
     NSString* query=[NSString stringWithFormat:@"select * from account order by account_id asc "];
     [self executeReader:query withCompletion:^(NSMutableArray * result) {
         if(completion) completion(result);
-        
+
     }];
 }
 
@@ -683,21 +683,21 @@ NSString *const kCount =@"count";
 {
     NSString* query=[NSString stringWithFormat:@"select * from account where enabled=1 order by account_id asc "];
     NSArray* toReturn = [self executeReader:query andArguments:nil] ;
-    
+
     if(toReturn!=nil)
     {
-        
+
         DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
-        
+
         return toReturn;
     }
     else
     {
         DDLogError(@"account list  is empty or failed to read");
-        
+
         return nil;
     }
-    
+
 }
 
 -(BOOL) isAccountEnabled:(NSString*) accountNo
@@ -710,7 +710,7 @@ NSString *const kCount =@"count";
             return YES;
         }
     }
-    
+
     return NO;
 }
 
@@ -719,10 +719,10 @@ NSString *const kCount =@"count";
     if(!user && !domain) return;
     NSString *cleanUser =user;
     NSString *cleanDomain = domain;
-    
+
     if(!cleanDomain) cleanDomain=@"";
     if(!cleanUser) cleanUser=@"";
-    
+
     NSString *query=[NSString stringWithFormat:@"select account_id from account where domain=? and username=?"];
     [self executeReader:query andArguments:@[cleanDomain,cleanUser] withCompletion:^(NSMutableArray * result) {
         NSString *toreturn;
@@ -756,7 +756,7 @@ NSString *const kCount =@"count";
         {
             DDLogError(@"account list  is empty or failed to read");
         }
-        
+
         if(completion) completion(result);
     }];
 }
@@ -765,14 +765,22 @@ NSString *const kCount =@"count";
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
 {
     NSString* query=
+<<<<<<< HEAD
     [NSString stringWithFormat:@"update account set server=?, other_port=?, username=?, secure=?, resource=?, domain=?, enabled=?, selfsigned=?, oldstyleSSL=?, airdrop=? where account_id=?"];
-    
+
     NSString* server = (NSString *) [dictionary objectForKey:kServer];
     NSString* port = (NSString *)[dictionary objectForKey:kPort];
     NSArray * params=@[server==nil ? @"" : server,
                        port==nil ? @"5222" : port,
+=======
+    [NSString stringWithFormat:@"update account  set server=?, other_port=?, username=?, secure=?, resource=?, domain=?, enabled=?, selfsigned=?, oldstyleSSL=?, airdrop=? where account_id=?"];
+
+    NSArray * params=@[
+                       ((NSString *)[dictionary objectForKey:kServer]),
+                       ((NSString *)[dictionary objectForKey:kPort]),
+>>>>>>> fixed parser, reduce memory use, speed up
                        ((NSString *)[dictionary objectForKey:kUsername]),
-                       
+
                        [dictionary objectForKey:kSSL],
                        ((NSString *)[dictionary objectForKey:kResource]),
                        ((NSString *)[dictionary objectForKey:kDomain]),
@@ -782,7 +790,7 @@ NSString *const kCount =@"count";
                        [dictionary objectForKey:kAirdrop],
                        [dictionary objectForKey:kAccountID]
     ];
-    
+
     [self executeNonQuery:query andArguments:params withCompletion:completion];
 }
 
@@ -795,7 +803,7 @@ NSString *const kCount =@"count";
     NSArray *params= @[@"1",
                        server==nil ? @"" : server,
                        port==nil ? @"5222" : port,
-                       
+
                        [dictionary objectForKey:kSSL],
                        ((NSString *)[dictionary objectForKey:kResource]),
                        ((NSString *)[dictionary objectForKey:kDomain]),
@@ -806,7 +814,7 @@ NSString *const kCount =@"count";
                        ((NSString *)[dictionary objectForKey:kUsername]),
                        [dictionary objectForKey:kAirdrop]?[dictionary objectForKey:kAirdrop]:@"0"
     ];
-    
+
     [self executeNonQuery:query andArguments:params withCompletion:completion];
 }
 
@@ -815,21 +823,21 @@ NSString *const kCount =@"count";
 {
     // remove all other traces of the account_id in one transaction
     [self beginWriteTransaction];
-    
+
     NSString* query1=[NSString stringWithFormat:@"delete from buddylist  where account_id=%@ ;", accountNo];
     [self executeNonQuery:query1 andArguments:nil];
-    
+
     NSString* query3=[NSString stringWithFormat:@"delete from message_history  where account_id=%@ ;", accountNo];
     [self executeNonQuery:query3 andArguments:nil];
-    
+
     NSString* query4=[NSString stringWithFormat:@"delete from activechats  where account_id=%@ ;", accountNo];
     [self executeNonQuery:query4 andArguments:nil];
-    
+
     NSString* query=[NSString stringWithFormat:@"delete from account  where account_id=%@ ;", accountNo];
     BOOL lastResult = [self executeNonQuery:query andArguments:nil];
-    
+
     [self endWriteTransaction];
-    
+
     if(lastResult!=NO)
     {
         return YES;
@@ -843,7 +851,7 @@ NSString *const kCount =@"count";
 
 -(BOOL) disableEnabledAccount:(NSString*) accountNo
 {
-    
+
     NSString* query=[NSString stringWithFormat:@"update account set enabled=0 where account_id=%@  ", accountNo];
     if([self executeNonQuery:query andArguments:nil]!=NO)
     {
@@ -857,7 +865,7 @@ NSString *const kCount =@"count";
 
 -(NSMutableDictionary *) readStateForAccount:(NSString*) accountNo
 {
-    if(!accountNo) return nil; 
+    if(!accountNo) return nil;
     NSString* query=[NSString stringWithFormat:@"SELECT state from account where account_id=?"];
     NSArray *params=@[accountNo];
     NSData * data=(NSData*)[self executeScalar:query andArguments:params];
@@ -886,9 +894,9 @@ NSString *const kCount =@"count";
     if([[actualfull  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]==0) {
         actualfull=contact;
     }
-    
+
     NSString *query=[NSString stringWithFormat:@"insert into buddylist ('account_id', 'buddy_name', 'full_name' , 'nick_name', 'new', 'online', 'dirty',  'muc', 'muc_nick') values( ?, ?, ?,?,1, 0, 0,?,?);"];
-    
+
     if(!(accountNo && contact && actualfull && nickName)) {
         if(completion)
         {
@@ -901,7 +909,7 @@ NSString *const kCount =@"count";
             {
                 completion(success);
             }
-            
+
         }];
     }
 }
@@ -911,18 +919,18 @@ NSString *const kCount =@"count";
     [self beginWriteTransaction];
     //clean up logs
     [self messageHistoryClean:buddy :accountNo];
-    
+
     NSString* query=[NSString stringWithFormat:@"delete from buddylist  where account_id=? and buddy_name=?;"];
     NSArray *params= @[accountNo, buddy];
-    
+
     [self executeNonQuery:query andArguments:params withCompletion:nil];
-    
+
     [self setSubscription:kSubNone andAsk:@"" forContact:buddy andAccount:accountNo];
     [self endWriteTransaction];
 }
 -(BOOL) clearBuddies:(NSString*) accountNo
 {
-    
+
     NSString* query=[NSString stringWithFormat:@"delete from buddylist  where account_id=%@ ;", accountNo];
     if([self executeNonQuery:query andArguments:nil]!=NO)
     {
@@ -943,8 +951,8 @@ NSString *const kCount =@"count";
     NSString* query2=[NSString stringWithFormat:@"delete from  buddy_resources  where buddy_id in (select buddy_id from  buddylist where account_id=?)"];
     NSArray *params=@[accountNo];
     [self executeNonQuery:query2 andArguments:params];
-    
-    
+
+
     NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0, online=0, state='offline', status='' where account_id=?"];
     BOOL retval=[self executeNonQuery:query andArguments:params];
 	[self endWriteTransaction];
@@ -956,7 +964,7 @@ NSString *const kCount =@"count";
     {
         return NO;
     }
-    
+
 }
 
 -(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion
@@ -964,29 +972,29 @@ NSString *const kCount =@"count";
     if(!username || !accountNo) return;
     NSString* query= query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0, ifnull(full_name, buddy_name) as full_name, nick_name, account_id, MUC, muc_subject, muc_nick , full_name as raw_full, subscription, ask  from buddylist where buddy_name=? and account_id=?"];
     NSArray *params= @[username, accountNo];
-    
+
     [self executeReader:query andArguments:params  withCompletion:^(NSArray * results) {
         if(results!=nil)
         {
             DDLogVerbose(@" count: %lu",  (unsigned long)[results count] );
-            
+
         }
         else
         {
             DDLogError(@"buddylist is empty or failed to read");
         }
-        
+
         NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
         [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSDictionary *dic = (NSDictionary *) obj;
             [toReturn addObject:[MLContact contactFromDictionary:dic]];
         }];
-        
+
         if(completion) {
             completion(toReturn);
         }
     }];
-    
+
 }
 
 
@@ -995,19 +1003,19 @@ NSString *const kCount =@"count";
     NSString *likeString =[NSString stringWithFormat:@"%%%@%%", search];
     NSString* query=@"";
     query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name, account_id, online from buddylist where buddy_name like ? or full_name like ?  order by full_name COLLATE NOCASE asc "];
-    
+
     NSArray *params = @[likeString,likeString];
-    
+
     //DDLogVerbose(query);
     NSArray* results = [self executeReader:query andArguments:params];
-    
+
     NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
           [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
               NSDictionary *dic = (NSDictionary *) obj;
               [toReturn addObject:[MLContact contactFromDictionary:dic]];
           }];
-          
-    
+
+
     if(toReturn!=nil)
     {
         DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
@@ -1018,48 +1026,48 @@ NSString *const kCount =@"count";
         DDLogError(@"buddylist is empty or failed to read");
         return nil;
     }
-    
+
 }
 
 -(void) onlineContactsSortedBy:(NSString*) sort withCompeltion: (void (^)(NSMutableArray *))completion
 {
     NSString* query=@"";
-    
+
     if([sort isEqualToString:@"Name"])
     {
         query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count' , ifnull(full_name, buddy_name) as full_name,nick_name,  MUC, muc_subject, muc_nick, account_id from buddylist where online=1  and subscription='both'  order by full_name COLLATE NOCASE asc "];
     }
-    
+
     if([sort isEqualToString:@"Status"])
     {
         query=[NSString stringWithFormat:@"select buddy_name,state,status,filename,0 as 'count', ifnull(full_name, buddy_name) as full_name,nick_name,  MUC, muc_subject, muc_nick, account_id from buddylist where   online=1 and subscription='both'  order by state,full_name COLLATE NOCASE  asc "];
     }
-    
-    
+
+
     [self executeReader:query withCompletion:^(NSMutableArray *results) {
-        
+
         NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
         [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSDictionary *dic = (NSDictionary *) obj;
             [toReturn addObject:[MLContact contactFromDictionary:dic]];
         }];
-        
+
         if(completion) completion(toReturn);
     }];
-    
+
 }
 
 -(void) offlineContactsWithCompletion: (void (^)(NSMutableArray *))completion
 {
     NSString* query=[NSString stringWithFormat:@"select buddy_name,A.state,status,filename,0, ifnull(full_name, buddy_name) as full_name,nick_name,  a.account_id, MUC, muc_subject, muc_nick from buddylist  as A inner join account as b  on a.account_id=b.account_id  where  online=0 and enabled=1 order by full_name COLLATE NOCASE "];
     [self executeReader:query withCompletion:^(NSMutableArray *results) {
-        
+
         NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
         [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSDictionary *dic = (NSDictionary *) obj;
             [toReturn addObject:[MLContact contactFromDictionary:dic]];
         }];
-        
+
         if(completion) completion(toReturn);
     }];
 }
@@ -1069,27 +1077,27 @@ NSString *const kCount =@"count";
 {
     NSString* query=[NSString stringWithFormat:@"select count(*) from buddylist as a inner join buddy_resources as b on a.buddy_id=b.buddy_id  inner join ver_info as c  on  b.ver=c.ver where buddy_name=? and account_id=? and cap=?"];
     NSArray *params =@[user, acctNo,cap];
-    
+
     //DDLogVerbose(@"%@", query);
     NSNumber* count = (NSNumber*) [self executeScalar:query andArguments:params];
-    
+
     if([count integerValue]>0) return YES; else return NO;
 }
 
 -(NSArray*) capsforVer:(NSString*) verString
 {
-    
+
     NSString* query=[NSString stringWithFormat:@"select cap from ver_info where ver=?"];
     NSArray * params=@[verString];
-    
+
     //DDLogVerbose(query);
     NSArray* toReturn = [self executeReader:query andArguments:params];
-    
+
     if(toReturn!=nil)
     {
-        
+
         if([toReturn count]==0) return nil;
-        
+
         DDLogVerbose(@" caps  count: %lu",  (unsigned long)[toReturn count] );
         return toReturn; //[toReturn autorelease];
     }
@@ -1098,25 +1106,25 @@ NSString *const kCount =@"count";
         DDLogError(@"caps list is empty");
         return nil;
     }
-    
+
 }
 
 -(NSString*)getVerForUser:(NSString*)user Resource:(NSString*) resource
 {
     NSString* query1=[NSString stringWithFormat:@" select ver from buddy_resources as A inner join buddylist as B on a.buddy_id=b.buddy_id where resource=? and buddy_name=?"];
     NSArray * params=@[resource,user];
-    
+
     NSString* ver = (NSString*) [self executeScalar:query1 andArguments:params];
-    
+
     return ver;
-    
+
 }
 
 -(BOOL)setFeature:(NSString*)feature  forVer:(NSString*) ver
 {
     NSString* query=[NSString stringWithFormat:@"insert into ver_info values (?, ?)"];
     NSArray *params =@[ver,feature];
-    
+
     if([self executeNonQuery:query andArguments:params]!=NO)
     {
         return YES;
@@ -1132,10 +1140,10 @@ NSString *const kCount =@"count";
 -(void) clearLegacyCaps
 {
     NSString* query=[NSString stringWithFormat:@"delete from buddy_resources_legacy_caps"];
-    
+
     //DDLogVerbose(@"%@", query);
     [self executeNonQuery:query andArguments:nil];
-    
+
     return;
 }
 
@@ -1143,10 +1151,10 @@ NSString *const kCount =@"count";
 {
     NSString* query=[NSString stringWithFormat:@"select count(*) from buddylist as a inner join buddy_resources_legacy_caps as b on a.buddy_id=b.buddy_id  inner join legacy_caps as c on c.capid=b.capid where buddy_name=? and account_id=? and captext=?"];
     NSArray * params= @[ user, acctNo,cap ];
-    
+
     //DDLogVerbose(@"%@", query);
     NSNumber* count = (NSNumber *) [self executeScalar:query andArguments:params];
-    
+
     if([count integerValue]>0) return YES; else return NO;
 }
 
@@ -1175,7 +1183,7 @@ NSString *const kCount =@"count";
     NSArray *params=@[contact ];
     NSArray* resources = [self executeReader:query1 andArguments:params];
     return resources;
-    
+
 }
 
 
@@ -1183,7 +1191,7 @@ NSString *const kCount =@"count";
 {
 	[self beginWriteTransaction];
     [self setResourceOnline:presenceObj forAccount:accountNo];
-    
+
     [self isBuddyOnline:presenceObj.user forAccount:accountNo withCompletion:^(BOOL isOnline) {
         if(!isOnline) {
             NSString* query=[NSString stringWithFormat:@"update buddylist set online=1, new=1, muc=? where account_id=? and  buddy_name=?"];
@@ -1205,7 +1213,7 @@ NSString *const kCount =@"count";
 		[self endWriteTransaction];
 		return NO;
 	}
-    
+
     NSString* query2=[NSString stringWithFormat:@"delete from   buddy_resources where buddy_id=? and resource=?"];
     NSArray *params2=@[buddyid, presenceObj.resource?presenceObj.resource:@""];
     if([self executeNonQuery:query2 andArguments:params2]==NO)
@@ -1213,7 +1221,7 @@ NSString *const kCount =@"count";
 		[self endWriteTransaction];
 		return NO;
 	}
-    
+
     NSString* query4=[NSString stringWithFormat:@"delete from   buddy_resources_legacy_caps where buddy_id=? and resource=?"];
     NSArray *params3=@[buddyid, presenceObj.resource?presenceObj.resource:@"" ];
     if([self executeNonQuery:query4 andArguments:params3]==NO)
@@ -1221,11 +1229,11 @@ NSString *const kCount =@"count";
 		[self endWriteTransaction];
 		return NO;
 	}
-    
+
     //see how many left
     NSString* query3=[NSString stringWithFormat:@" select count(buddy_id) from buddy_resources where buddy_id=%@;", buddyid ];
     NSString* resourceCount = (NSString*)[self executeScalar:query3 andArguments:nil];
-    
+
     if([resourceCount integerValue]<1)
     {
         NSString* query=[NSString stringWithFormat:@"update buddylist set online=0, state='offline', dirty=1  where account_id=? and  buddy_name=?;"];
@@ -1253,18 +1261,18 @@ NSString *const kCount =@"count";
 {
     NSString* toPass;
     //data length check
-    
+
     if([presenceObj.show length]>20) toPass=[presenceObj.show substringToIndex:19]; else toPass=presenceObj.show;
     if(!toPass) toPass=@"";
-    
+
     NSString* query=[NSString stringWithFormat:@"update buddylist set state=?, dirty=1 where account_id=? and  buddy_name=?;"];
     [self executeNonQuery:query andArguments:@[toPass, accountNo, presenceObj.user] withCompletion:nil];
-    
+
 }
 
 -(NSString*) buddyState:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-    
+
     NSString* query=[NSString stringWithFormat:@"select state from buddylist where account_id=? and buddy_name=?"];
     NSArray *params=@[accountNo, buddy];
     NSString* state= (NSString*)[self executeScalar:query andArguments:params];
@@ -1274,15 +1282,15 @@ NSString *const kCount =@"count";
 -(void) contactRequestsForAccountWithCompletion:(void (^)(NSMutableArray *))completion
 {
     NSString* query=[NSString stringWithFormat:@"select account_id, buddy_name from subscriptionRequests"];
-     
+
      [self executeReader:query withCompletion:^(NSMutableArray *results) {
-         
+
          NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
          [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
              NSDictionary *dic = (NSDictionary *) obj;
              [toReturn addObject:[MLContact contactFromDictionary:dic]];
          }];
-         
+
          if(completion) completion(toReturn);
      }];
 }
@@ -1309,10 +1317,10 @@ NSString *const kCount =@"count";
         toPass= presenceObj.status;
     }
     if(!toPass) toPass=@"";
-    
+
     NSString* query=[NSString stringWithFormat:@"update buddylist set status=?, dirty=1 where account_id=? and  buddy_name=?;"];
     [self executeNonQuery:query andArguments:@[toPass,accountNo, presenceObj.user] withCompletion:nil];
-    
+
 }
 
 -(NSString*) buddyStatus:(NSString*) buddy forAccount:(NSString*) accountNo
@@ -1364,16 +1372,16 @@ NSString *const kCount =@"count";
 {
     NSString* toPass;
     //data length check
-    
+
     NSString *cleanFullName =[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     if([cleanFullName length]>50) toPass=[cleanFullName substringToIndex:49]; else toPass=cleanFullName;
-    
+
     if(!toPass) return;
-    
+
     NSString* query=[NSString stringWithFormat:@"update buddylist set full_name=?,dirty=1 where account_id=? and  buddy_name=?"];
     NSArray *params=@[toPass , accountNo, contact];
     [self executeNonQuery:query  andArguments:params withCompletion:nil];
-    
+
 }
 
 -(void) setNickName:(NSString*) nickName forContact:(NSString*) buddy andAccount:(NSString*) accountNo
@@ -1381,13 +1389,13 @@ NSString *const kCount =@"count";
     if(!nickName || !buddy) return;
     NSString* toPass;
     //data length check
-    
+
     if([nickName length]>50) toPass=[nickName substringToIndex:49]; else toPass=nickName;
     NSString* query=[NSString stringWithFormat:@"update buddylist set nick_name=?,dirty=1 where account_id=? and  buddy_name=?"];
     NSArray *params=@[toPass, accountNo, buddy];
-    
+
     [self executeNonQuery:query andArguments:params withCompletion:nil];
-    
+
 }
 
 -(NSString*) nickName:(NSString*) buddy forAccount:(NSString*) accountNo;
@@ -1420,7 +1428,7 @@ NSString *const kCount =@"count";
     NSArray *params=@[hash,
                       accountNo, presenceObj.user];
     [self executeNonQuery:query  andArguments:params withCompletion:nil];
-    
+
 }
 
 -(void) contactHash:(NSString*) buddy forAccount:(NSString*) accountNo withCompeltion: (void (^)(NSString *))completion
@@ -1432,7 +1440,7 @@ NSString *const kCount =@"count";
         {
             completion((NSString *)iconHash);
         }
-        
+
     }];
 }
 
@@ -1441,9 +1449,9 @@ NSString *const kCount =@"count";
 {
     NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=? and buddy_name=? "];
     NSArray *params=@[accountNo, buddy];
-    
+
     [self executeScalar:query andArguments:params withCompletion:^(NSObject *value) {
-        
+
         NSNumber* count=(NSNumber*)value;
         BOOL toreturn=NO;
         if(count!=nil)
@@ -1452,7 +1460,7 @@ NSString *const kCount =@"count";
             if(val>0) {
                 toreturn= YES;
             }
-            
+
         }
         if(completion)
         {
@@ -1466,9 +1474,9 @@ NSString *const kCount =@"count";
 {
     NSString* query=[NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=? and buddy_name=? and online=1 "];
     NSArray *params=@[accountNo, buddy];
-    
+
     [self executeScalar:query andArguments:params withCompletion:^(NSObject *value) {
-        
+
         NSNumber* count=(NSNumber*)value;
         BOOL toreturn=NO;
         if(count!=nil)
@@ -1477,7 +1485,7 @@ NSString *const kCount =@"count";
             if(val>0) {
                 toreturn= YES;
             }
-            
+
         }
         if(completion)
         {
@@ -1529,7 +1537,7 @@ NSString *const kCount =@"count";
     if([combinedRoom componentsSeparatedByString:@"@"].count==1) {
         combinedRoom = [NSString stringWithFormat:@"%@@%@", room, server];
     }
-    
+
     NSString* query=[NSString stringWithFormat:@"SELECT muc_nick from buddylist where account_id=?  and buddy_name=? "];
     NSArray *params=@[ accountNo, combinedRoom];
     NSString * nick=(NSString*)[self executeScalar:query andArguments:params];
@@ -1547,11 +1555,11 @@ NSString *const kCount =@"count";
     if([combinedRoom componentsSeparatedByString:@"@"].count==1) {
         combinedRoom = [NSString stringWithFormat:@"%@@%@", room, server];
     }
-    
+
     NSString* query=[NSString stringWithFormat:@"update buddylist set muc_nick=?, muc=1 where account_id=? and buddy_name=?"];
     NSArray *params=@[nick, accountNo, combinedRoom];
     DDLogVerbose(@"%@", query);
-    
+
     [self executeNonQuery:query andArguments:params  withCompletion:completion];
 }
 
@@ -1561,15 +1569,15 @@ NSString *const kCount =@"count";
     NSString* query=[NSString stringWithFormat:@"insert into muc_favorites (room, nick,autojoin,  account_id) values(?,?,?, ?)"];
     NSArray *params=@[room, nick, [NSNumber numberWithBool:autoJoin], accountNo];
     DDLogVerbose(@"%@", query);
-    
+
     [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
-        
+
         if(completion) {
             completion(success);
         }
-        
+
     }];
-    
+
 }
 
 -(void) updateMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo autoJoin:(BOOL) autoJoin andCompletion:(void (^)(BOOL))completion
@@ -1577,15 +1585,15 @@ NSString *const kCount =@"count";
     NSString* query=[NSString stringWithFormat:@"update muc_favorites set autojoin=? where mucid=? and account_id=?"];
     NSArray *params=@[[NSNumber numberWithBool:autoJoin], mucid, [NSNumber numberWithInteger:accountNo]];
     DDLogVerbose(@"%@", query);
-    
+
     [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
-        
+
         if(completion) {
             completion(success);
         }
-        
+
     }];
-    
+
 }
 
 -(void) deleteMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo withCompletion:(void (^)(BOOL))completion
@@ -1593,15 +1601,15 @@ NSString *const kCount =@"count";
     NSString* query=[NSString stringWithFormat:@"delete from muc_favorites where mucid=? and account_id=?"];
     NSArray *params=@[mucid, [NSNumber numberWithInteger:accountNo]];
     DDLogVerbose(@"%@", query);
-    
+
     [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
-        
+
         if(completion) {
             completion(success);
         }
-        
+
     }];
-    
+
 }
 
 -(void) mucFavoritesForAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion
@@ -1614,14 +1622,14 @@ NSString *const kCount =@"count";
         }
         else{
             DDLogVerbose(@"could not fetch  muc favorites");
-            
+
         }
-        
+
         if(completion) {
             completion(favorites);
         }
     }];
-    
+
 }
 
 -(void) updateMucSubject:(NSString *) subject forAccount:(NSString*) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(BOOL))completion
@@ -1629,28 +1637,28 @@ NSString *const kCount =@"count";
     NSString* query=[NSString stringWithFormat:@"update buddylist set muc_subject=? where account_id=? and buddy_name=?"];
     NSArray *params=@[subject, accountNo, room];
     DDLogVerbose(@"%@", query);
-    
+
     [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
-        
+
         if(completion) {
             completion(success);
         }
-        
+
     }];
-    
+
 }
 
 -(void) mucSubjectforAccount:(NSString*) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(NSString* ))completion
 {
     NSString* query=[NSString stringWithFormat:@"select muc_subject from buddylist where account_id=? and buddy_name=?"];
-    
+
     NSArray *params=@[accountNo, room];
     DDLogVerbose(@"%@", query);
-    
+
     [self executeScalar:query andArguments:params withCompletion:^(NSObject *result) {
         if(completion) completion((NSString *)result);
     }];
-    
+
 }
 
 
@@ -1672,10 +1680,10 @@ NSString *const kCount =@"count";
     }
 
     NSString *idToUse=stanzaid?stanzaid:messageid; //just ensures stanzaid is not null
-    
+
     NSString* typeToUse=messageType;
 	if(!typeToUse) typeToUse=kMessageTypeText; //default to insert
-	
+
     [self beginWriteTransaction];
     [self hasMessageForStanzaId:idToUse orMessageID:messageid toContact:actualfrom onAccount:accountNo andCompletion:^(BOOL exists) {
         if(!exists)
@@ -1687,37 +1695,37 @@ NSString *const kCount =@"count";
             NSDate* destinationDate;
             if(messageDate) {
                 //already GMT no need for conversion
-                
+
                 destinationDate= messageDate;
                 [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
             }
             else {
-                
+
                 NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
                 NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
-                
+
                 NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
                 NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
                 NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
-                
+
                 destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
             }
             // note: if it isnt the same day we want to show the full  day
-            
+
             NSString* dateString = [formatter stringFromDate:destinationDate];
-            
-            
-            
-            
+
+
+
+
           //do not do this in MUC
             if(!messageType && [actualfrom isEqualToString:from]) {
-                
+
 				[self messageTypeForMessage:message withKeepThread:YES andCompletion:^(NSString *foundMessageType) {
 						NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?,?,?,?, ?, ?, ?);"];
 						NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",foundMessageType,[NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
 						DDLogVerbose(@"%@",query);
 						[self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
-							
+
 							if(success) {
 								[self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:^(BOOL innerSuccess) {
 									[self endWriteTransaction];
@@ -1731,17 +1739,17 @@ NSString *const kCount =@"count";
 								if(completion) {
 									completion(success, messageType);
 								}
-							} 
+							}
 						}];
 				}];
-                
-                
+
+
             } else  {
                 NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?,?,?,?, ?, ?, ?);"];
                 NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",typeToUse,[NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
                 DDLogVerbose(@"%@",query);
 				[self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
-					
+
 					if(success) {
 						[self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:^(BOOL innerSuccess) {
 							[self endWriteTransaction];
@@ -1758,14 +1766,14 @@ NSString *const kCount =@"count";
 					}
                 }];
             }
-            
+
         }
         else {
 			[self endWriteTransaction];
             DDLogError(@"Message %@ or stanza Id %@ duplicated,, id in use %@", messageid, stanzaid,  idToUse);
         }
     }];
-    
+
 }
 
 -(void) hasMessageForStanzaId:(NSString *) stanzaId orMessageID:(NSString *) messageId toContact:(NSString *) contact onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion
@@ -1773,21 +1781,21 @@ NSString *const kCount =@"count";
     if(!accountNo || !contact) return;
     NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? and message_from=? and (stanzaid=? or messageid=?) limit 1"];
     NSArray *params=@[accountNo, contact, stanzaId, messageId];
-    
+
     [self executeScalar:query andArguments:params withCompletion:^(NSObject* result) {
-        
+
         BOOL exists=NO;
         if(result)
         {
             exists=YES;
         }
-        
+
         if(completion)
         {
             completion(exists);
         }
     }];
-    
+
 }
 
 -(void) hasMessageForId:(NSString*) messageid onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion
@@ -1795,21 +1803,21 @@ NSString *const kCount =@"count";
     if(!accountNo ) return;
     NSString* query=[NSString stringWithFormat:@"select messageid from  message_history where account_id=? and messageid=? limit 1"];
     NSArray *params=@[accountNo, messageid?messageid:@""];
-    
+
     [self executeScalar:query andArguments:params withCompletion:^(NSObject* result) {
-        
+
         BOOL exists=NO;
         if(result)
         {
             exists=YES;
         }
-        
+
         if(completion)
         {
             completion(exists);
         }
     }];
-    
+
 }
 
 -(void) setMessageId:(NSString*) messageid delivered:(BOOL) delivered
@@ -1872,66 +1880,66 @@ NSString *const kCount =@"count";
 {
     NSString* query=[NSString stringWithFormat:@"delete from message_history where message_history_id=%@", messageNo];
     [self executeNonQuery:query withCompletion:nil];
-    
+
 }
 
 -(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo
 {
     //returns a list of  buddy's with message history
-    
+
     NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
     //DDLogVerbose(query);
     NSArray* user = [self executeReader:query1 andArguments:nil ];
-    
+
     if(user!=nil)
     {
-        
+
         NSString* query=[NSString stringWithFormat:@"select distinct date(timestamp) as the_date from message_history where account_id=? and  message_from=? or  message_to=?   order by timestamp desc"];
         NSArray  *params=@[accountNo, buddy, buddy  ];
         //DDLogVerbose(query);
         NSArray* toReturn = [self executeReader:query andArguments:params];
-        
+
         if(toReturn!=nil)
         {
-            
+
             DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
-            
+
             return toReturn; //[toReturn autorelease];
         }
         else
         {
             DDLogError(@"message history buddy date list is empty or failed to read");
-            
+
             return nil;
         }
-        
+
     } else return nil;
-    
+
 }
 
 
 -(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date
 {
-    
+
     NSString* query=[NSString stringWithFormat:@"select af, message_from, message_to,  message, thetime, delivered, message_history_id from (select ifnull(actual_from, message_from) as af,message_from, message_to, message, delivered,    timestamp  as thetime, message_history_id, previewImage, previewText from message_history where account_id=? and (message_from=? or message_to=?) and date(timestamp)=? order by message_history_id desc) order by message_history_id asc"];
     NSArray *params=@[accountNo, buddy, buddy, date];
-    
+
     DDLogVerbose(@"%@",query);
     NSArray* results = [self executeReader:query andArguments:params];
-    
+
     NSDateFormatter* formatter = self.dbFormatter;
-    
+
     NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
     [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSDictionary *dic = (NSDictionary *) obj;
         [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:formatter]];
     }];
-    
+
     if(toReturn!=nil)
     {
-        
+
         DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
-        
+
         return toReturn; //[toReturn autorelease];
     }
     else
@@ -1939,7 +1947,7 @@ NSString *const kCount =@"count";
         DDLogError(@"message history is empty or failed to read");
         return nil;
     }
-    
+
 }
 
 
@@ -1947,15 +1955,15 @@ NSString *const kCount =@"count";
 -(NSArray*) allMessagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     //returns a buddy's message history
-    
+
     NSString* query=[NSString stringWithFormat:@"select message_from, message, thetime from (select message_from, message, timestamp as thetime, message_history_id, previewImage, previewText from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc) order by message_history_id asc "];
     NSArray *params=@[accountNo, buddy, buddy];
     //DDLogVerbose(query);
     NSArray* toReturn = [self executeReader:query andArguments:params];
-    
+
     if(toReturn!=nil)
     {
-        
+
         DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
         return toReturn; //[toReturn autorelease];
     }
@@ -1964,20 +1972,20 @@ NSString *const kCount =@"count";
         DDLogError(@"message history is empty or failed to read");
         return nil;
     }
-    
+
 }
 
 -(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo
 {
     //returns a buddy's message history
-    
-    
-    
+
+
+
     NSString* query=[NSString stringWithFormat:@"delete from message_history where account_id=? and (message_from=? or message_to=?) "];
     NSArray *params=@[accountNo, buddy, buddy];
     //DDLogVerbose(query);
     if( [self executeNonQuery:query andArguments:params])
-        
+
     {
         DDLogVerbose(@" cleaned messages for %@",  buddy );
         return YES;
@@ -1987,7 +1995,7 @@ NSString *const kCount =@"count";
         DDLogError(@"message history failed to clean");
         return NO;
     }
-    
+
 }
 
 
@@ -2005,20 +2013,20 @@ NSString *const kCount =@"count";
         DDLogError(@"message history failed to clean all");
         return NO;
     }
-    
+
 }
 
 -(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo
 {
     //returns a list of  buddy's with message history
-    
+
     NSString* query1=[NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
     //DDLogVerbose(query);
     NSArray* user = [self executeReader:query1 andArguments:nil];
-    
+
     if([user count]>0)
     {
-        
+
         NSString* query=[NSString stringWithFormat:@"select x.* from(select distinct buddy_name as thename ,'', nick_name, message_from as buddy_name, filename, a.account_id from message_history as a left outer join buddylist as b on a.message_from=b.buddy_name and a.account_id=b.account_id where a.account_id=?  union select distinct message_to as thename ,'',  nick_name, message_to as buddy_name,  filename, a.account_id from message_history as a left outer join buddylist as b on a.message_to=b.buddy_name and a.account_id=b.account_id where a.account_id=?  and message_to!=\"(null)\" )  as x where buddy_name!=?  order by thename COLLATE NOCASE "];
         NSArray *params=@[accountNo, accountNo,
                           ((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]),
@@ -2026,16 +2034,16 @@ NSString *const kCount =@"count";
                           ((NSString *)[[user objectAtIndex:0] objectForKey:@"domain"])  ];
         //DDLogVerbose(query);
         NSArray* results = [self executeReader:query andArguments:params];
-        
+
         NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
         [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSDictionary *dic = (NSDictionary *) obj;
             [toReturn addObject:[MLContact contactFromDictionary:dic]];
         }];
-        
+
         if(toReturn!=nil)
         {
-            
+
             DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count] );
             return toReturn; //[toReturn autorelease];
         }
@@ -2044,7 +2052,7 @@ NSString *const kCount =@"count";
             DDLogError(@"message history buddy list is empty or failed to read");
             return nil;
         }
-        
+
     } else return nil;
 }
 
@@ -2060,13 +2068,13 @@ NSString *const kCount =@"count";
     NSArray *params=@[accountNo, buddy, buddy];
     [self executeReader:query andArguments:params withCompletion:^(NSMutableArray *rawArray) {
         NSDateFormatter* formatter = self.dbFormatter;
-        
+
         NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:rawArray.count];
         [rawArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSDictionary *dic = (NSDictionary *) obj;
             [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:formatter]];
         }];
-        
+
         if(toReturn!=nil)
         {
             DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count] );
@@ -2075,7 +2083,7 @@ NSString *const kCount =@"count";
         {
             DDLogError(@"message history is empty or failed to read");
         }
-        
+
         if(completion) completion(toReturn);
     }];
 }
@@ -2085,16 +2093,16 @@ NSString *const kCount =@"count";
     if(!accountNo ||! contact) return;
     NSString* query=[NSString stringWithFormat:@"SELECT message, thetime, messageType FROM (SELECT 1 as messagePrio, bl.messageDraft as message, ac.lastMessageTime as thetime, 'MessageDraft' as messageType FROM buddylist AS bl INNER JOIN activechats AS ac where bl.account_id = ac.account_id and bl.buddy_name = ac.buddy_name and ac.account_id = ? and ac.buddy_name = ? and messageDraft is not NULL and messageDraft != '' UNION SELECT 2 as messagePrio, message, timestamp, messageType from (select message, timestamp, messageType FROM message_history where account_id=? and (message_from =? or message_to=?) ORDER BY message_history_id DESC LIMIT 1) ORDER BY messagePrio ASC LIMIT 1)"];
     NSArray *params=@[accountNo, contact, accountNo, contact, contact];
-    
+
     [self executeReader:query andArguments:params withCompletion:^(NSMutableArray *results) {
         NSDateFormatter* formatter = self.dbFormatter;
-        
+
         NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
         [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSDictionary *dic = (NSDictionary *) obj;
             [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:formatter]];
         }];
-        
+
         if(toReturn!=nil)
         {
             DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count] );
@@ -2103,7 +2111,7 @@ NSString *const kCount =@"count";
         {
             DDLogError(@"message history is empty or failed to read");
         }
-        
+
         if(completion) completion(toReturn);
     }];
 }
@@ -2114,24 +2122,24 @@ NSString *const kCount =@"count";
     if(!buddy || !accountNo) return;
     NSString* query2=[NSString stringWithFormat:@"  update message_history set unread=0 where account_id=? and message_from=? or message_to=?"];
     [self executeNonQuery:query2 andArguments:@[accountNo, buddy, buddy] withCompletion:nil];
-    
+
 }
 
 
 -(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId encrypted:(BOOL) encrypted withCompletion:(void (^)(BOOL, NSString *))completion
 {
     //Message_history going out, from is always the local user. always read, default to  delivered (will be reset by timer if needed)
-    
+
     NSString *cleanedActualFrom=actualfrom;
-    
+
     if([actualfrom isEqualToString:@"(null)"])
     {
         //handle null dictionary string
         cleanedActualFrom =from;
     }
-    
+
     [self messageTypeForMessage:message withKeepThread:NO andCompletion:^(NSString *messageType) {
-        
+
         NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
         NSString *dateTime =[NSString stringWithFormat:@"%@ %@", [parts objectAtIndex:0],[parts objectAtIndex:1]];
         NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted) values (?,?,?,?,?,?,?,?,?,?,?);"];
@@ -2147,8 +2155,8 @@ NSString *const kCount =@"count";
 			}];
         }];
     }];
-    
-    
+
+
 }
 
 
@@ -2157,10 +2165,10 @@ NSString *const kCount =@"count";
 {
     // count # of meaages in message table
     NSString* query=[NSString stringWithFormat:@"select count(message_history_id) from  message_history where unread=1"];
-    
+
     [self executeScalar:query withCompletion:^(NSObject *result) {
         NSNumber *count= (NSNumber *) result;
-        
+
         if(completion)
         {
             completion(count);
@@ -2171,34 +2179,34 @@ NSString *const kCount =@"count";
 -(void)setSynchpointforAccount:(NSString*) accountNo
 {
     NSString* query=[NSString stringWithFormat:@"update buddylist set synchpoint=?  where account_id=?"];
-    
+
     NSDateFormatter *dateFromatter = [[NSDateFormatter alloc] init];
     NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-    
+
     [dateFromatter setLocale:enUSPOSIXLocale];
     [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
     [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     NSString *synchPoint =[dateFromatter stringFromDate:[NSDate date]];
-    
+
     [self executeNonQuery:query andArguments:@[synchPoint, accountNo] withCompletion:nil];
 }
 
 -(void) synchPointforAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion
 {
     NSString* query=[NSString stringWithFormat:@"select synchpoint from buddylist  where account_id=? order by synchpoint  desc limit 1"];
-    
+
     [self executeScalar:query andArguments:@[accountNo] withCompletion:^(NSObject* result) {
         if(completion)
         {
             NSDateFormatter *dateFromatter = [[NSDateFormatter alloc] init];
             NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-            
+
             [dateFromatter setLocale:enUSPOSIXLocale];
             [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
             [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-            
+
             NSDate *datetoReturn =[dateFromatter dateFromString:(NSString *)result];
-            
+
             completion(datetoReturn);
         }
     }];
@@ -2207,19 +2215,19 @@ NSString *const kCount =@"count";
 -(void) lastMessageDateForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion
 {
     NSString* query=[NSString stringWithFormat:@"select timestamp from  message_history where account_id=? and (message_from=? or (message_to=? and delivered=1)) order by timestamp desc limit 1"];
-    
+
     [self executeScalar:query andArguments:@[accountNo, contact, contact] withCompletion:^(NSObject* result) {
         if(completion)
         {
             NSDateFormatter *dateFromatter = [[NSDateFormatter alloc] init];
             NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-            
+
             [dateFromatter setLocale:enUSPOSIXLocale];
             [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
             [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-            
+
             NSDate *datetoReturn =[dateFromatter dateFromString:(NSString *)result];
-            
+
             completion(datetoReturn);
         }
     }];
@@ -2228,7 +2236,7 @@ NSString *const kCount =@"count";
 -(void) lastMessageSanzaForAccount:(NSString*) accountNo andJid:(NSString*) jid withCompletion: (void (^)(NSString *))completion
 {
     NSString* query=[NSString stringWithFormat:@"select stanzaid from  message_history where account_id=? and message_from!=? and stanzaid not null and stanzaid!='' order by timestamp desc limit 1"];
-    
+
     [self executeScalar:query andArguments:@[accountNo, jid] withCompletion:^(NSObject* result) {
         if(completion)
         {
@@ -2240,19 +2248,19 @@ NSString *const kCount =@"count";
 -(void) lastMessageDateAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion
 {
     NSString* query=[NSString stringWithFormat:@"select timestamp from  message_history where account_id=? order by timestamp desc limit 1"];
-    
+
     [self executeScalar:query andArguments:@[accountNo] withCompletion:^(NSObject* result) {
         if(completion)
         {
             NSDateFormatter *dateFromatter = [[NSDateFormatter alloc] init];
             NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-            
+
             [dateFromatter setLocale:enUSPOSIXLocale];
             [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
             [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-            
+
             NSDate *datetoReturn =[dateFromatter dateFromString:(NSString *)result];
-            
+
             completion(datetoReturn);
         }
     }];
@@ -2263,22 +2271,22 @@ NSString *const kCount =@"count";
 -(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion
 {
     NSString* query=[NSString stringWithFormat:@"select  distinct a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id,lastMessageTime, 0 AS 'count', subscription, ask from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by lastMessageTime desc" ];
-    
+
     NSDateFormatter *dateFromatter = [[NSDateFormatter alloc] init];
     NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-    
+
     [dateFromatter setLocale:enUSPOSIXLocale];
     [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
     [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-    
+
     [self executeReader:query withCompletion:^(NSMutableArray *results) {
-        
+
         NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
         [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSDictionary *dic = (NSDictionary *) obj;
             [toReturn addObject:[MLContact contactFromDictionary:dic withDateFormatter:dateFromatter]];
         }];
-        
+
         if(completion) completion(toReturn);
     }];
 }
@@ -2288,7 +2296,7 @@ NSString *const kCount =@"count";
 	[self beginWriteTransaction];
     //mark messages as read
     [self markAsReadBuddy:buddyname forAccount:accountNo];
-    
+
     NSString* query=[NSString stringWithFormat:@"delete from activechats where buddy_name=? and account_id=? "];
     //	DDLogVerbose(query);
     [self executeNonQuery:query andArguments:@[buddyname,accountNo] withCompletion:nil];
@@ -2297,11 +2305,11 @@ NSString *const kCount =@"count";
 
 -(void) removeAllActiveBuddies
 {
-    
+
     NSString* query=[NSString stringWithFormat:@"delete from activechats " ];
     //	DDLogVerbose(query);
     [self executeNonQuery:query withCompletion:nil];
-    
+
 }
 
 
@@ -2336,12 +2344,12 @@ NSString *const kCount =@"count";
                         completion(result);
                     }
                 }];
-                
+
             }
         }
-        
+
     }];
-    
+
 }
 
 
@@ -2357,12 +2365,12 @@ NSString *const kCount =@"count";
                 toReturn=YES;
             }
         }
-        
+
         if (completion) {
             completion(toReturn);
         }
     }];
-    
+
 }
 
 -(void) updateActiveBuddy:(NSString*) buddyname setTime:(NSString *)timestamp forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
@@ -2371,10 +2379,10 @@ NSString *const kCount =@"count";
     [self beginWriteTransaction];
     [self executeScalar:query andArguments:@[accountNo, buddyname] withCompletion:^(NSObject *result) {
         NSString *lastTime= (NSString *) result;
-        
+
         NSDate *lastDate = [self.dbFormatter dateFromString:lastTime];
         NSDate *newDate = [self.dbFormatter dateFromString:timestamp];
-        
+
         if(lastDate.timeIntervalSince1970<newDate.timeIntervalSince1970) {
             NSString* query=[NSString stringWithFormat:@"update activechats set lastMessageTime=? where account_id=? and buddy_name=? "];
             [self executeNonQuery:query andArguments:@[timestamp, accountNo, buddyname] withCompletion:^(BOOL success) {
@@ -2385,7 +2393,7 @@ NSString *const kCount =@"count";
 			[self endWriteTransaction];
 			if(completion) completion(NO);
 		}
-        
+
     }];
 }
 
@@ -2398,14 +2406,14 @@ NSString *const kCount =@"count";
 {
     // count # messages from a specific user in messages table
     NSString* query=[NSString stringWithFormat:@"select count(message_history_id) from  message_history where unread=1 and account_id=? and message_from=?"];
-    
+
     [self executeScalar:query andArguments:@[accountNo, buddy] withCompletion:^(NSObject* result) {
         if(completion)
         {
             completion((NSNumber *)result);
         }
     }];
-    
+
 }
 
 
@@ -2413,14 +2421,14 @@ NSString *const kCount =@"count";
 {
     // count # messages from a specific user in messages table
     NSString* query=[NSString stringWithFormat:@"select count(message_history_id) from  message_history where account_id=? and message_from=? or message_to=? "];
-    
+
     [self executeScalar:query andArguments:@[accountNo, buddy, buddy] withCompletion:^(NSObject* result) {
         if(completion)
         {
             completion((NSNumber *)result);
         }
     }];
-    
+
 }
 
 #pragma db Commands
@@ -2443,25 +2451,25 @@ NSString *const kCount =@"count";
     }
     [self executeNonQuery:@"pragma journal_mode=WAL;" andArguments:nil];
     [self executeNonQuery:@"pragma synchronous=NORMAL;" andArguments:nil];
-    
+
     //truncate faster than del
     [self executeNonQuery:@"pragma truncate;" andArguments:nil];
-    
+
     self.dbFormatter = [[NSDateFormatter alloc] init];
     [self.dbFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     [self.dbFormatter  setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-    
+
     [self version];
 }
 
 -(void) version
 {
     [self beginWriteTransaction];
-    
+
 #if TARGET_OS_IPHONE
     // checking db version and upgrading if necessary
     DDLogVerbose(@"Database version check");
-    
+
     //<1.02 has no db version table but gtalk port is 443 . this is an identifier
     NSNumber* gtalkport= (NSNumber*)[self executeScalar:@"select default_port from  protocol   where protocol_name='GTalk';" andArguments:nil];
     if([gtalkport intValue]==443)
@@ -2472,8 +2480,8 @@ NSString *const kCount =@"count";
         [self executeNonQuery:@"update protocol set default_port=5223 where protocol_name='GTalk';" andArguments:nil];
         [self executeNonQuery:@"create table dbversion(dbversion varchar(10) );" andArguments:nil];
         [self executeNonQuery:@"insert into dbversion values('1.02');" andArguments:nil];
-        
-        
+
+
         DDLogVerbose(@"Upgrade to 1.02 success importing default account");
         NSString* importAcc= [NSString stringWithFormat:@"insert into account values(null, '%@', 0, '%@', %@, '%@', '%@', %@, '%@', '%@', 1); ",
                               [[NSUserDefaults standardUserDefaults] stringForKey:@"username"] ,
@@ -2484,374 +2492,374 @@ NSString *const kCount =@"count";
                               [ [NSUserDefaults standardUserDefaults] stringForKey:@"SSL"] ,
                               [[NSUserDefaults standardUserDefaults] stringForKey:@"resource"] ,
                               [[NSUserDefaults standardUserDefaults] stringForKey:@"thedomain"]
-                              
+
                               ];
-        
+
         [self executeNonQuery:importAcc andArguments:nil];
-        
-        
-        
+
+
+
         DDLogVerbose(@"Done");
-        
-        
+
+
     }
-    
-    
-    
+
+
+
     // < 1.04 has google talk on 5223 or 443
-    
+
     if( ([gtalkport intValue]==5223) || ([gtalkport intValue]==443))
     {
         DDLogVerbose(@"Database version <1.04 detected. Performing upgrade");
         [self executeNonQuery:@"update protocol set default_port=5222 where protocol_name='GTalk';" andArguments:nil];
         [self executeNonQuery:@"insert into protocol values (null,'Facebook',5222); " andArguments:nil];
-        
+
         [self executeNonQuery:@"drop table buddylist; " andArguments:nil];
         [self executeNonQuery:@"drop table buddyicon; " andArguments:nil];
         [self executeNonQuery:@"create table buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(50), full_name varchar(50), nick_name varchar(50)); " andArguments:nil];
         [self executeNonQuery:@"create table buddyicon(buddyicon_id integer null primary key AUTOINCREMENT,buddy_id integer not null,hash varchar(255),  filename varchar(50)); " andArguments:nil];
-        
+
         [self executeNonQuery:@"drop table dbversion;" andArguments:nil];
         [self executeNonQuery:@"create table dbversion(dbversion real);" andArguments:nil];
         [self executeNonQuery:@"insert into dbversion values(1.04);" andArguments:nil];
         DDLogVerbose(@"Upgrade to 1.04 success ");
-        
-        
+
+
     }
-    
-    
+
+
     NSNumber* dbversion= (NSNumber*)[self executeScalar:@"select dbversion from dbversion" andArguments:nil];
     DDLogVerbose(@"Got db version %@", dbversion);
-    
-    
+
+
     if([dbversion doubleValue]<1.07)
     {
         DDLogVerbose(@"Database version <1.07 detected. Performing upgrade");
         [self executeNonQuery:@"create table buddylistOnline (buddy_id integer not null primary key AUTOINCREMENT,account_id integer not null,buddy_name varchar(50), group_name varchar(100)); " andArguments:nil];
         [self executeNonQuery:@"update dbversion set dbversion='1.07'; " andArguments:nil];
-        
+
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"IdleAlert"];
-        
+
         DDLogVerbose(@"Upgrade to 1.07 success ");
-        
+
     }
-    
+
     if([dbversion doubleValue]<1.071)
     {
         DDLogVerbose(@"Database version <1.071 detected. Performing upgrade");
         [self executeNonQuery:@"drop table buddylistOnline;  " andArguments:nil];
-        
+
         [self executeNonQuery:@"drop table buddylist;  " andArguments:nil];
         [self executeNonQuery:@"drop table messages;  " andArguments:nil];
         [self executeNonQuery:@"drop table message_history;  " andArguments:nil];
         [self executeNonQuery:@"drop table buddyicon;  " andArguments:nil];
-        
-        
-        
+
+
+
         [self executeNonQuery:@"create table buddylist(buddy_id integer not null primary key AUTOINCREMENT,account_id integer not null, buddy_name varchar(50) collate nocase, full_name varchar(50),nick_name varchar(50), group_name varchar(50),iconhash varchar(200),filename varchar(100),state varchar(20), status varchar(200),online bool, dirty bool, new bool); " andArguments:nil];
-        
-        
-        
-        
+
+
+
+
         [self executeNonQuery:@"create table messages(message_id integer not null primary key AUTOINCREMENT,account_id integer, message_from varchar(50) collate nocase,message_to varchar(50) collate nocase, timestamp datetime, message blob,notice integer,actual_from varchar(50) collate nocase);" andArguments:nil];
-        
-        
-        
+
+
+
         [self executeNonQuery:@"create table message_history(message_history_id integer not null primary key AUTOINCREMENT,account_id integer, message_from varchar(50) collate nocase,message_to varchar(50) collate nocase,timestamp datetime , message blob,actual_from varchar(50) collate nocase);" andArguments:nil];
-        
-        
-        
-        
+
+
+
+
         [self executeNonQuery:@"create table activechats(account_id integer not null, buddy_name varchar(50) collate nocase); " andArguments:nil];
-        
-        
+
+
         [self executeNonQuery:@"update dbversion set dbversion='1.071'; " andArguments:nil];
-        
+
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"IdleAlert"];
-        
+
         DDLogVerbose(@"Upgrade to 1.071 success ");
-        
+
     }
-    
-    
+
+
     if([dbversion doubleValue]<1.072)
     {
         DDLogVerbose(@"Database version <1.072 detected. Performing upgrade on passwords. ");
         [self executeReader:@"select account_id, password from account" andArguments:nil];
-        
-        
+
+
         [self executeNonQuery:@"update account set password=''; " andArguments:nil];
-        
+
     }
-    
-    
+
+
     if([dbversion doubleValue]<1.073)
     {
         DDLogVerbose(@"Database version <1.073 detected. Performing upgrade on passwords. ");
-        
+
         //set defaults on upgrade
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"OfflineContact"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MessagePreview"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Logging"];
-        
+
         [self executeNonQuery:@"update dbversion set dbversion='1.073'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 1.073 success ");
-        
+
     }
-    
-    
-    
+
+
+
     if([dbversion doubleValue]<1.074)
     {
         DDLogVerbose(@"Database version <1.074 detected. Performing upgrade on protocols. ");
-        
-        
+
+
         [self executeNonQuery:@"delete from protocol where protocol_id=3 " andArguments:nil];
         [self executeNonQuery:@"delete from protocol where protocol_id=4 " andArguments:nil];
         [self executeNonQuery:@" create table legacy_caps(capid integer not null primary key ,captext  varchar(20))" andArguments:nil];
-        
+
         [self executeNonQuery:@" insert into legacy_caps values (1,'pmuc-v1');" andArguments:nil];
         [self executeNonQuery:@" insert into legacy_caps values (2,'voice-v1');" andArguments:nil];
         [self executeNonQuery:@" insert into legacy_caps values (3,'camera-v1');" andArguments:nil];
         [self executeNonQuery:@" insert into legacy_caps values (4, 'video-v1');" andArguments:nil];
-        
-        
-        
+
+
+
         [self executeNonQuery:@"create table buddy_resources(buddy_id integer,resource varchar(255),ver varchar(20))" andArguments:nil];
-        
+
         [self executeNonQuery:@"create table ver_info(ver varchar(20),cap varchar(255), primary key (ver,cap))" andArguments:nil];
-        
+
         [self executeNonQuery:@"create table buddy_resources_legacy_caps (buddy_id integer,resource varchar(255),capid  integer);" andArguments:nil];
-        
+
         [self executeNonQuery:@"update dbversion set dbversion='1.074'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 1.074 success ");
-        
+
     }
-    
+
     if([dbversion doubleValue]<1.1)
     {
         DDLogVerbose(@"Database version <1.1 detected. Performing upgrade on accounts. ");
-        
+
         [self executeNonQuery:@"alter table account add column selfsigned bool;" andArguments:nil];
         [self executeNonQuery:@"alter table account add column oldstyleSSL bool; " andArguments:nil];
-        
+
         [self executeNonQuery:@"update dbversion set dbversion='1.1'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 1.1 success ");
-        
+
     }
-    
-    
+
+
     if([dbversion doubleValue]<1.2)
     {
         DDLogVerbose(@"Database version <1.2 detected. Performing upgrade on accounts. ");
-        
+
         [self executeNonQuery:@"update  buddylist set iconhash=NULL;" andArguments:nil];
         [self executeNonQuery:@"alter table message_history  add column unread bool;" andArguments:nil];
         [self executeNonQuery:@" insert into message_history (account_id,message_from, message_to, timestamp, message, actual_from,unread) select account_id,message_from, message_to, timestamp, message, actual_from, 1  from messages ;" andArguments:nil];
         [self executeNonQuery:@"" andArguments:nil];
-        
-        
+
+
         [self executeNonQuery:@"update dbversion set dbversion='1.2'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 1.2 success ");
-        
+
     }
-    
+
     //going to from 2.1 beta to final
     if([dbversion doubleValue]<1.3)
     {
         DDLogVerbose(@"Database version <1.3 detected. Performing upgrade on accounts. ");
-        
+
         [self executeNonQuery:@"update  buddylist set iconhash=NULL;" andArguments:nil];
-        
+
         [self executeNonQuery:@"update dbversion set dbversion='1.3'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 1.3 success ");
-        
+
     }
-    
-    
+
+
     if([dbversion doubleValue]<1.31)
     {
         DDLogVerbose(@"Database version <1.31 detected. Performing upgrade on accounts. ");
-        
+
         [self executeNonQuery:@"alter table buddylist add column  Muc bool;" andArguments:nil];
-        
+
         [self executeNonQuery:@"update dbversion set dbversion='1.31'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 1.31 success ");
-        
+
     }
-    
+
     if([dbversion doubleValue]<1.41)
     {
         DDLogVerbose(@"Database version <1.41 detected. Performing upgrade on accounts. ");
-        
+
         [self executeNonQuery:@"alter table message_history add column  delivered bool;" andArguments:nil];
         [self executeNonQuery:@"alter table message_history add column  messageid varchar(255);" andArguments:nil];
         [self executeNonQuery:@"update message_history set delivered=1;" andArguments:nil];
         [self executeNonQuery:@"update dbversion set dbversion='1.41'; " andArguments:nil];
-        
-        
+
+
         DDLogVerbose(@"Upgrade to 1.41 success ");
-        
+
     }
-    
-    
+
+
     if([dbversion doubleValue]<1.42)
     {
         DDLogVerbose(@"Database version <1.42 detected. Performing upgrade on accounts. ");
-        
+
         [self executeNonQuery:@"delete from protocol where protocol_id=5;" andArguments:nil];
         [self executeNonQuery:@"update dbversion set dbversion='1.42'; " andArguments:nil];
-        
-        
+
+
         DDLogVerbose(@"Upgrade to 1.41 success ");
-        
+
     }
 #else
     NSNumber* dbversion= (NSNumber*)[self executeScalar:@"select dbversion from dbversion" andArguments:nil];
     DDLogVerbose(@"Got db version %@", dbversion);
 #endif
-    
+
     if([dbversion doubleValue]<1.5)
     {
         DDLogVerbose(@"Database version <1.5 detected. Performing upgrade on accounts. ");
-        
+
         [self executeNonQuery:@"alter table account add column oauth bool;" andArguments:nil withCompletion:nil];
         [self executeNonQuery:@"update dbversion set dbversion='1.5'; " andArguments:nil withCompletion:nil];
-        
+
         DDLogVerbose(@"Upgrade to 1.5 success ");
-        
+
     }
-    
+
     if([dbversion doubleValue]<1.6)
     {
         DDLogVerbose(@"Database version <1.6 detected. Performing upgrade on accounts. ");
-        
+
         [self executeNonQuery:@"alter table message_history add column messageType varchar(255);"  withCompletion:nil];
         [self executeNonQuery:@"update dbversion set dbversion='1.6'; " withCompletion:nil];
-        
+
         DDLogVerbose(@"Upgrade to 1.6 success ");
-        
+
     }
-    
-    
+
+
     // this point forward OSX might have legacy issues
-    
-    
+
+
     if([dbversion doubleValue]<2.0)
     {
         DDLogVerbose(@"Database version <2.0 detected. Performing upgrade on accounts. ");
-        
+
         [self executeNonQuery:@"drop table muc_favorites" withCompletion:nil];
         [self executeNonQuery:@"CREATE TABLE IF NOT EXISTS \"muc_favorites\" (\"mucid\" integer NOT NULL primary key autoincrement,\"room\" varchar(255,0),\"nick\" varchar(255,0),\"autojoin\" bool, account_id int);" withCompletion:nil];
         [self executeNonQuery:@"update dbversion set dbversion='2.0'; " withCompletion:nil];
         [self executeNonQuery:@"alter table buddy_resources add column muc_role varchar(255);" withCompletion:nil];
         [self executeNonQuery:@"alter table buddylist add column muc_subject varchar(255);" withCompletion:nil];
         [self executeNonQuery:@"alter table buddylist add column muc_nick varchar(255);" withCompletion:nil];
-        
+
         DDLogVerbose(@"Upgrade to 2.0 success ");
-        
+
     }
-    
+
     if([dbversion doubleValue]<2.1)
     {
         DDLogVerbose(@"Database version <2.1 detected. Performing upgrade on accounts. ");
-        
-        
+
+
         [self executeNonQuery:@"alter table message_history add column received bool;" withCompletion:nil];
         [self executeNonQuery:@"update dbversion set dbversion='2.1'; " withCompletion:nil];
-        
+
         DDLogVerbose(@"Upgrade to 2.1 success ");
-        
+
     }
-    
-    
+
+
     if([dbversion doubleValue]<2.2)
     {
         DDLogVerbose(@"Database version <2.2 detected. Performing upgrade . ");
-        
+
         [self executeNonQuery:@"alter table buddylist add column synchPoint datetime;" withCompletion:nil];
         [self executeNonQuery:@"update dbversion set dbversion='2.2'; " withCompletion:nil];
-        
+
         DDLogVerbose(@"Upgrade to 2.2 success ");
     }
-    
+
     if([dbversion doubleValue]<2.3)
     {
         DDLogVerbose(@"Database version <2.3 detected. Performing upgrade . ");
-        
+
         srand([[NSDate date] timeIntervalSince1970]);
 #if TARGET_OS_IPHONE
         NSString *resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
 #else
         NSString *resource=[NSString stringWithFormat:@"Monal-OSX.%d",rand()%100];
 #endif
-        
+
         NSString *resourceQuery = [NSString stringWithFormat:@"update account set resource='%@';",resource];
-        
+
         [self executeNonQuery:resourceQuery withCompletion:nil];
         [self executeNonQuery:@"update dbversion set dbversion='2.3'; " withCompletion:nil];
-        
+
         DDLogVerbose(@"Upgrade to 2.3 success ");
     }
-    
+
     //OMEMO begins below
     if([dbversion doubleValue]<3.1)
     {
         DDLogVerbose(@"Database version <3.1 detected. Performing upgrade . ");
-        
+
         [self executeNonQuery:@"CREATE TABLE signalIdentity (deviceid int NOT NULL PRIMARY KEY, account_id int NOT NULL unique,identityPublicKey BLOB,identityPrivateKey BLOB)" withCompletion:nil];
         [self executeNonQuery:@"CREATE TABLE signalSignedPreKey (account_id int NOT NULL,signedPreKeyId int not null,signedPreKey BLOB);" withCompletion:nil];
-        
+
         [self executeNonQuery:@"CREATE TABLE signalPreKey (account_id int NOT NULL,prekeyid int not null,preKey BLOB);" withCompletion:nil];
-        
+
         [self executeNonQuery:@"CREATE TABLE signalContactIdentity ( account_id int NOT NULL,contactName text,contactDeviceId int not null,identity BLOB,trusted boolean);" withCompletion:nil];
-        
+
         [self executeNonQuery:@"CREATE TABLE signalContactKey (account_id int NOT NULL,contactName text,contactDeviceId int not null, groupId text,senderKey BLOB);" withCompletion:nil];
-        
+
         [self executeNonQuery:@"  CREATE TABLE signalContactSession (account_id int NOT NULL, contactName text, contactDeviceId int not null, recordData BLOB)" withCompletion:nil];
         [self executeNonQuery:@"alter table message_history add column encrypted bool;" withCompletion:nil];
-        
+
         [self executeNonQuery:@"alter table message_history add column previewText text;" withCompletion:nil];
         [self executeNonQuery:@"alter table message_history add column previewImage text;" withCompletion:nil];
-        
+
         [self executeNonQuery:@"alter table buddylist add column backgroundImage text;" withCompletion:nil];
-        
+
         [self executeNonQuery:@"update dbversion set dbversion='3.1'; " withCompletion:nil];
-        
-        
+
+
         DDLogVerbose(@"Upgrade to 3.1 success ");
     }
-    
-    
+
+
     if([dbversion doubleValue]<3.2)
     {
         DDLogVerbose(@"Database version <3.2 detected. Performing upgrade . ");
-        
+
         [self executeNonQuery:@"update dbversion set dbversion='3.2'; " withCompletion:nil];
-        
+
         [self executeNonQuery:@"CREATE TABLE muteList (jid varchar(50));" withCompletion:nil];
         [self executeNonQuery:@"CREATE TABLE blockList (jid varchar(50));" withCompletion:nil];
-        
+
         DDLogVerbose(@"Upgrade to 3.2 success ");
     }
-    
+
     if([dbversion doubleValue]<3.3)
     {
         DDLogVerbose(@"Database version <3.3 detected. Performing upgrade . ");
         [self executeNonQuery:@"update dbversion set dbversion='3.3'; " withCompletion:nil];
-        
+
         [self executeNonQuery:@"alter table buddylist add column encrypt bool;" withCompletion:nil];
-        
+
         DDLogVerbose(@"Upgrade to 3.3 success ");
     }
-    
+
     if([dbversion doubleValue]<3.4)
     {
         DDLogVerbose(@"Database version <3.4 detected. Performing upgrade . ");
         [self executeNonQuery:@"update dbversion set dbversion='3.4'; " withCompletion:nil];
-        
+
         [self executeNonQuery:@" alter table activechats add COLUMN lastMessageTime datetime " withCompletion:nil];
-        
+
         //iterate current active and set their times
         NSArray *active = [self executeReader:@"select distinct buddy_name, account_id from activeChats" andArguments:nil];
         [active enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -2861,96 +2869,96 @@ NSString *const kCount =@"count";
             if(max!=nil) {
                 [self executeNonQuery:@"update activechats set lastMessageTime=? where buddy_name=? and account_id=?" andArguments:@[max,[row objectForKey:@"buddy_name"], [row objectForKey:@"account_id"]]];
             } else  {
-                
+
             }
         }];
-        
+
         DDLogVerbose(@"Upgrade to 3.4 success ");
     }
-    
+
     if([dbversion doubleValue]<3.5)
     {
         DDLogVerbose(@"Database version <3.5 detected. Performing upgrade . ");
         [self executeNonQuery:@"update dbversion set dbversion='3.5'; " withCompletion:nil];
-        
+
         [self executeNonQuery:@"CREATE UNIQUE INDEX uniqueContact on buddylist (buddy_name, account_id); " withCompletion:nil];
         [self executeNonQuery:@"delete from buddy_resources" withCompletion:nil];
         [self executeNonQuery:@"CREATE UNIQUE INDEX uniqueResource on buddy_resources (buddy_id, resource); " withCompletion:nil];
-        
+
         DDLogVerbose(@"Upgrade to 3.5 success ");
     }
-    
-    
+
+
     if([dbversion doubleValue]<3.6)
     {
         DDLogVerbose(@"Database version <3.6 detected. Performing upgrade . ");
         [self executeNonQuery:@"update dbversion set dbversion='3.6'; " withCompletion:nil];
-        
+
         [self executeNonQuery:@"CREATE TABLE imageCache (url varchar(255), path varchar(255) );" withCompletion:nil];
-        
+
         DDLogVerbose(@"Upgrade to 3.6 success ");
     }
-    
+
     if([dbversion doubleValue]<3.7)
     {
-        
+
         DDLogVerbose(@"Database version <3.7 detected. Performing upgrade . ");
         [self executeNonQuery:@"update dbversion set dbversion='3.7'; " withCompletion:nil];
-        
+
         [self executeNonQuery:@"alter table message_history add column stanzaid text;" withCompletion:nil];
-        
+
         DDLogVerbose(@"Upgrade to 3.7 success ");
     }
-    
+
     if([dbversion doubleValue]<3.8)
     {
         DDLogVerbose(@"Database version <3.8 detected. Performing upgrade on accounts. ");
-        
+
         [self executeNonQuery:@"alter table account add column airdrop bool;" andArguments:nil];
-        
+
         [self executeNonQuery:@"update dbversion set dbversion='3.8'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 3.8  success ");
-        
+
     }
-    
+
     if([dbversion doubleValue]<3.9)
     {
         DDLogVerbose(@"Database version <3.9 detected. Performing upgrade on accounts. ");
-        
+
         [self executeNonQuery:@"alter table account add column rosterVersion varchar(50);" andArguments:nil];
-        
+
         [self executeNonQuery:@"update dbversion set dbversion='3.9'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 3.9  success ");
-        
+
     }
-    
+
     if([dbversion doubleValue]<4.0)
      {
          DDLogVerbose(@"Database version <4.0 detected. Performing upgrade on accounts. ");
-         
+
          [self executeNonQuery:@"alter table message_history add column errorType varchar(50);" andArguments:nil];
          [self executeNonQuery:@"alter table message_history add column errorReason varchar(50);" andArguments:nil];
-         
+
          [self executeNonQuery:@"update dbversion set dbversion='4.0'; " andArguments:nil];
          DDLogVerbose(@"Upgrade to 4.0  success ");
-         
+
      }
-     
+
     if([dbversion doubleValue]<4.1)
      {
          DDLogVerbose(@"Database version <4.1 detected. Performing upgrade on accounts. ");
-         
+
          [self executeNonQuery:@"CREATE TABLE subscriptionRequests(requestid integer not null primary key AUTOINCREMENT,account_id integer not null,buddy_name varchar(50) collate nocase, UNIQUE(account_id,buddy_name))" andArguments:nil];
-        
+
          [self executeNonQuery:@"update dbversion set dbversion='4.1'; " andArguments:nil];
          DDLogVerbose(@"Upgrade to 4.1  success ");
-         
+
      }
-    
+
     if([dbversion doubleValue]<4.2)
      {
          DDLogVerbose(@"Database version <4.2 detected. Performing upgrade on accounts. ");
-         
+
          NSArray *contacts= [self executeReader:@"select distinct account_id, buddy_name, lastMessageTime from activechats;" andArguments:nil];
           [self executeNonQuery:@"delete from activechats;" andArguments:nil];
          [contacts enumerateObjectsUsingBlock:^(NSDictionary * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -2961,10 +2969,10 @@ NSString *const kCount =@"count";
                        [obj objectForKey:@"lastMessageTime"]
                       ]];
          }];
-         
+
           NSArray *dupeMessageids= [self executeReader:@"select * from (select messageid, count(messageid) as c from message_history   group by messageid) where c>1" andArguments:nil];
-         
-         
+
+
          [dupeMessageids enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                  NSArray *dupeMessages= [self executeReader:@"select * from message_history where messageid=? order by message_history_id asc " andArguments:@[[obj objectForKey:@"messageid"]]];
             //hopefully this is quick and doesnt grow..
@@ -2975,15 +2983,15 @@ NSString *const kCount =@"count";
                  }
              }];
          }];
-         
+
          [self executeNonQuery:@"CREATE UNIQUE INDEX ux_account_messageid ON message_history(account_id, messageid)" andArguments:nil];
-                
+
          [self executeNonQuery:@"alter table activechats add column lastMesssage blob;" andArguments:nil];
          [self executeNonQuery:@"CREATE UNIQUE INDEX ux_account_buddy ON activechats(account_id, buddy_name)" andArguments:nil];
-        
+
          [self executeNonQuery:@"update dbversion set dbversion='4.2'; " andArguments:nil];
          DDLogVerbose(@"Upgrade to 4.2  success ");
-         
+
      }
 
     if([dbversion doubleValue]<4.3)
@@ -2994,7 +3002,7 @@ NSString *const kCount =@"count";
         [self executeNonQuery:@"update dbversion set dbversion='4.3'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.3  success ");
     }
-    
+
     if([dbversion doubleValue]<4.4)
     {
         DDLogVerbose(@"Database version <4.4 detected. Performing upgrade on accounts. ");
@@ -3002,7 +3010,7 @@ NSString *const kCount =@"count";
         [self executeNonQuery:@"update dbversion set dbversion='4.4'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.4  success ");
     }
-    
+
     if([dbversion doubleValue]<4.5)
     {
         DDLogVerbose(@"Database version <4.5 detected. Performing upgrade on accounts. ");
@@ -3010,7 +3018,7 @@ NSString *const kCount =@"count";
         [self executeNonQuery:@"update dbversion set dbversion='4.5'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.5  success ");
     }
-    
+
     if([dbversion doubleValue]<4.6)
     {
         DDLogVerbose(@"Database version <4.6 detected. Performing upgrade on accounts. ");
@@ -3018,7 +3026,7 @@ NSString *const kCount =@"count";
         [self executeNonQuery:@"update dbversion set dbversion='4.6'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.6 success ");
     }
-    
+
     if([dbversion doubleValue]<4.7)
     {
         DDLogVerbose(@"Database version <4.7 detected. Performing upgrade on accounts.");
@@ -3033,7 +3041,7 @@ NSString *const kCount =@"count";
         [self executeNonQuery:@"update dbversion set dbversion='4.7'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.7 success ");
     }
-    
+
     if([dbversion doubleValue]<4.71)
     {
         DDLogVerbose(@"Database version <4.71 detected. Performing upgrade on accounts.");
@@ -3042,7 +3050,7 @@ NSString *const kCount =@"count";
         [self executeNonQuery:@"update dbversion set dbversion='4.71'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.71 success ");
     }
-    
+
     [self endWriteTransaction];
     return;
 }
@@ -3065,18 +3073,18 @@ NSString *const kCount =@"count";
         }
         return;
     }
-    
+
     if ([messageString hasPrefix:@"xmpp:"]) {
            messageType=kMessageTypeUrl;
     }
-    
+
     if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"] &&
         ([messageString hasPrefix:@"HTTPS://"] || [messageString hasPrefix:@"https://"] || [messageString hasPrefix:@"aesgcm://"])) {
             NSString *cleaned = [messageString stringByReplacingOccurrencesOfString:@"aesgcm://" withString:@"https://"];
             NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:cleaned]];
             request.HTTPMethod=@"HEAD";
             request.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
-            
+
 			if(keepThread && completion)
 				semaphore = dispatch_semaphore_create(0);
             NSURLSession *session = [NSURLSession sharedSession];
@@ -3090,7 +3098,7 @@ NSString *const kCount =@"count";
                 else  {
                     messageType=kMessageTypeUrl;
                 }
-                
+
                 if(completion)
 				{
 					if(keepThread)
@@ -3099,7 +3107,7 @@ NSString *const kCount =@"count";
 						completion(messageType);
 				}
             }] resume];
-			
+
 			if(keepThread && completion)
 			{
 				dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
@@ -3107,7 +3115,7 @@ NSString *const kCount =@"count";
 			}
     } else if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowGeoLocation"] && [messageString hasPrefix:@"geo:"]) {
         messageType = kMessageTypeGeo;
-        
+
         if(completion) {
             completion(messageType);
         }
@@ -3218,7 +3226,7 @@ NSString *const kCount =@"count";
     NSString* query=[NSString stringWithFormat:@"select distinct A.* from imageCache as A inner join  message_history as B on message = a.url where account_id=? and actual_from=? order by message_history_id desc"];
     NSArray *params=@[accountNo, contact];
     NSMutableArray* toReturn = [[self executeReader:query andArguments:params] mutableCopy];
-    
+
     if(toReturn!=nil)
     {
         DDLogVerbose(@"attachment  count: %lu",  (unsigned long)[toReturn count] );
@@ -3229,7 +3237,7 @@ NSString *const kCount =@"count";
         DDLogError(@"attachment list  is empty or failed to read");
         return nil;
     }
-    
+
 }
 
 

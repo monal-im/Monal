@@ -16,11 +16,10 @@
 #pragma mark NSXMLParser delegate
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict{
-    DDLogVerbose(@"began this element: %@", elementName);
      _messageBuffer=nil;
     
     //getting login mechanisms
-	if([elementName isEqualToString:@"stream:features"])
+	if([elementName isEqualToString:@"features"])
 	{
 		State=@"Features";
 		return;
@@ -62,7 +61,7 @@
 		DDLogVerbose(@"Got SartTLS procced");
 		//trying to switch to TLS
         _startTLSProceed=YES;
-		[parser abortParsing];
+        return;
 		
 	}
     
@@ -106,7 +105,7 @@
 		
 	{
 		_SASLSuccess=YES;
-        [parser abortParsing];
+        return;
 	}
     
 	

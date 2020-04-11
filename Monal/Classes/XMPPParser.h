@@ -12,7 +12,7 @@
 #import "MLConstants.h"
 
 
-@interface XMPPParser : NSObject <NSXMLParserDelegate>
+@interface XMPPParser : NSObject 
 {
     NSString* State;
     NSMutableString* _messageBuffer;
@@ -26,9 +26,11 @@
     
     NSString* _errorType;
     NSString* _errorReason;
-    
+  
 }
 
+@property (nonatomic, copy) NSString* stanzaType;
+@property (nonatomic, copy) NSString* stanzaNameSpace;
 
 @property (nonatomic, copy, readonly) NSString* type;
 /**
@@ -67,9 +69,9 @@ if error, the reason
 @property (nonatomic, copy, readonly) NSString* errorReason;
 
 
-- (id) initWithDictionary:(NSDictionary*) dictionary;
+- (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict;
 
-- (id) initWithData:(NSData *) data; 
-
+- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string;
+- (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName ;
 
 @end

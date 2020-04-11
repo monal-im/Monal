@@ -9,42 +9,9 @@
 #import "XMPPParser.h"
 
 
-
-
 @implementation XMPPParser
 
-- (id) initWithData:(NSData *) data
-{
-    self=[super init];
-    [self parseData:data];
-    return self;
-}
-
-- (id) initWithDictionary:(NSDictionary*) dictionary
-{
-    self=[super init];
-    NSData* stanzaData= [[dictionary objectForKey:@"stanzaString"] dataUsingEncoding:NSUTF8StringEncoding];
-    [self parseData:stanzaData];
-    return  self;
-}
-
--(void) parseData:(NSData *) data
-{
-    NSXMLParser* parser = [[NSXMLParser alloc] initWithData:data];
-    [parser setShouldProcessNamespaces:NO];
-    [parser setShouldReportNamespacePrefixes:NO];
-    [parser setShouldResolveExternalEntities:NO];
-    [parser setDelegate:self];
-    
-    [parser parse];
-}
- 
-
 #pragma mark common parser delegate functions
-- (void)parserDidStartDocument:(NSXMLParser *)parser{
-	DDLogVerbose(@"parsing start");
-  
-}
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
@@ -111,18 +78,10 @@
     [_messageBuffer appendString:string];
 }
 
-
-- (void)parser:(NSXMLParser *)parser foundIgnorableWhitespace:(NSString *)whitespaceString
-{
-	DDLogVerbose(@"found ignorable whitespace: %@", whitespaceString);
-}
-
-- (void)parser:(NSXMLParser *)parser parseErrorOccurred:(NSError *)parseError
-{
-	DDLogVerbose(@"Error: line: %d , col: %d desc: %@ ",[parser lineNumber],
-                [parser columnNumber], [parseError localizedDescription]);
-	
+- (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
     
 }
+
+
 
 @end

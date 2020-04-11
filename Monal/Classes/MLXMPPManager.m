@@ -303,7 +303,7 @@ An array of Dics what have timers to make sure everything was sent
 
     server.SSL=[[account objectForKey:kSSL] boolValue];
     server.selfSignedCert=[[account objectForKey:kSelfSigned] boolValue];
- 
+
     if(server.oldStyleSSL && !server.SSL ) server.SSL=YES; //tehcnically a config error but  understandable
 
     xmpp* xmppAccount=[[xmpp alloc] initWithServer:server andIdentity:identity];
@@ -968,81 +968,81 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 -(void) parseMessageForData:(NSData *) data
 {
     //parse message
-    ParseMessage *messageNode = [[ParseMessage alloc] initWithData:data];
-    NSArray *cleanParts= [messageNode.to componentsSeparatedByString:@"/"];
-    NSString *jid= cleanParts[0];
-
-    NSArray *parts =[jid componentsSeparatedByString:@"@"];
-    NSString* user =parts[0];
-
-    if(parts.count>1){
-        NSString *domain= parts[1];
-
-        [[DataLayer sharedInstance] accountForUser:user andDomain:domain withCompletion:^(NSString *accountNo) {
-            if(accountNo) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-
-                    MLSignalStore *monalSignalStore = [[MLSignalStore alloc] initWithAccountId:accountNo];
-
-                    //signal store
-                    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:monalSignalStore];
-                    //signal context
-                    SignalContext *signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
-
-                    //process message
-                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:accountNo jid:jid
-                                                                                          connection: nil
-                                                                                          signalContex:signalContext andSignalStore:monalSignalStore];
-                    messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
-                        if(success)
-                        {
-                            [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:accountNo withCompletion:nil];
-
-                            if(messageNode.from  ) {
-                                NSString* actuallyFrom= messageNode.actualFrom;
-                                if(!actuallyFrom) actuallyFrom=messageNode.from;
-
-                                NSString* messageText=messageNode.messageText;
-                                if(!messageText) messageText=@"";
-
-                                BOOL shouldRefresh = NO;
-                                if(messageNode.delayTimeStamp)  shouldRefresh =YES;
-
-                                NSArray *jidParts= [jid componentsSeparatedByString:@"/"];
-
-                                NSString *recipient;
-                                if([jidParts count]>1) {
-                                    recipient= jidParts[0];
-                                }
-                                if(!recipient) return; // this shouldnt happen
-
-                                MLMessage *message = [[MLMessage alloc] init];
-                                                            message.from=messageNode.from;
-                                                            message.actualFrom= actuallyFrom;
-                                                            message.messageText= messageNode.messageText;
-                                                            message.to=messageNode.to?messageNode.to:recipient;
-                                                            message.messageId=messageNode.idval?messageNode.idval:@"";
-                                                            message.accountId=accountNo;
-                                                            message.encrypted=encrypted;
-                                                            message.delayTimeStamp=messageNode.delayTimeStamp;
-                                                            message.timestamp =[NSDate date];
-                                                            message.shouldShowAlert= showAlert;
-                                                            message.messageType=kMessageTypeText;
-                                                            
-
-                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
-                            }
-                        }
-                        else {
-                            DDLogError(@"error adding message from data");
-                        }
-                    };
-                    [messageProcessor processMessage:messageNode];
-
-                });
-            }
-        }];
-    }
+//    ParseMessage *messageNode = [[ParseMessage alloc] initWithData:data];
+//    NSArray *cleanParts= [messageNode.to componentsSeparatedByString:@"/"];
+//    NSString *jid= cleanParts[0];
+//
+//    NSArray *parts =[jid componentsSeparatedByString:@"@"];
+//    NSString* user =parts[0];
+//
+//    if(parts.count>1){
+//        NSString *domain= parts[1];
+//
+//        [[DataLayer sharedInstance] accountForUser:user andDomain:domain withCompletion:^(NSString *accountNo) {
+//            if(accountNo) {
+//                dispatch_async(dispatch_get_main_queue(), ^{
+//
+//                    MLSignalStore *monalSignalStore = [[MLSignalStore alloc] initWithAccountId:accountNo];
+//
+//                    //signal store
+//                    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:monalSignalStore];
+//                    //signal context
+//                    SignalContext *signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
+//
+//                    //process message
+//                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:accountNo jid:jid
+//                                                                                          connection: nil
+//                                                                                          signalContex:signalContext andSignalStore:monalSignalStore];
+//                    messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
+//                        if(success)
+//                        {
+//                            [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:accountNo withCompletion:nil];
+//
+//                            if(messageNode.from  ) {
+//                                NSString* actuallyFrom= messageNode.actualFrom;
+//                                if(!actuallyFrom) actuallyFrom=messageNode.from;
+//
+//                                NSString* messageText=messageNode.messageText;
+//                                if(!messageText) messageText=@"";
+//
+//                                BOOL shouldRefresh = NO;
+//                                if(messageNode.delayTimeStamp)  shouldRefresh =YES;
+//
+//                                NSArray *jidParts= [jid componentsSeparatedByString:@"/"];
+//
+//                                NSString *recipient;
+//                                if([jidParts count]>1) {
+//                                    recipient= jidParts[0];
+//                                }
+//                                if(!recipient) return; // this shouldnt happen
+//
+//                                MLMessage *message = [[MLMessage alloc] init];
+//                                                            message.from=messageNode.from;
+//                                                            message.actualFrom= actuallyFrom;
+//                                                            message.messageText= messageNode.messageText;
+//                                                            message.to=messageNode.to?messageNode.to:recipient;
+//                                                            message.messageId=messageNode.idval?messageNode.idval:@"";
+//                                                            message.accountId=accountNo;
+//                                                            message.encrypted=encrypted;
+//                                                            message.delayTimeStamp=messageNode.delayTimeStamp;
+//                                                            message.timestamp =[NSDate date];
+//                                                            message.shouldShowAlert= showAlert;
+//                                                            message.messageType=kMessageTypeText;
+//
+//
+//                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
+//                            }
+//                        }
+//                        else {
+//                            DDLogError(@"error adding message from data");
+//                        }
+//                    };
+//                    [messageProcessor processMessage:messageNode];
+//
+//                });
+//            }
+//        }];
+//    }
 }
 
 @end

@@ -1032,8 +1032,11 @@ NSString *const kXMPPPresence = @"presence";
                         finalend=firstClose.location+firstClose.length+1;
                     }
                 }
-                NSRange firstClose=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
-                options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, dupePos.location-pos.location-1)];
+                NSRange firstClose;
+                if(dupePos.location!=NSNotFound) {
+                    firstClose=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
+                                                   options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, dupePos.location-pos.location-1)];
+                }
                 
                 if([stanzaType isEqualToString:@"presence"] && dupePos.location!=NSNotFound && firstClose.location==NSNotFound) {
                     //did not find close between dupe and start

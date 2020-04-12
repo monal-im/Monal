@@ -3095,7 +3095,7 @@ static NSMutableArray *extracted(xmpp *object) {
 {
     XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iq setiqTo:self.connectionProperties.identity.domain];
-    [iq changePasswordForUser:self.connectionProperties.identity.jid newPassword:newPass];
+    [iq changePasswordForUser:self.connectionProperties.identity.user newPassword:newPass];
     if(completion) {
         [self.xmppCompletionHandlers setObject:completion forKey:iq.stanzaID];
     }

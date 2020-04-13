@@ -882,7 +882,7 @@
                                             <outlet property="thumbnailImage" destination="GlC-dn-bvj" id="iHP-Iz-z5V"/>
                                         </connections>
                                     </tableViewCell>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
                                         <rect key="frame" x="0.0" y="506" width="414" height="242"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xhf-eh-Dkx" id="BdL-U7-BOc">
@@ -921,7 +921,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="744-locked-received" translatesAutoresizingMaskIntoConstraints="NO" id="xOs-7M-3BE" userLabel="Lock Image">
-                                                    <rect key="frame" x="201" y="220" width="11" height="11"/>
+                                                    <rect key="frame" x="275" y="220" width="11" height="11"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="11" id="Qnz-K5-bat"/>
                                                         <constraint firstAttribute="width" constant="11" id="VjC-rP-5EN"/>
@@ -929,7 +929,6 @@
                                                 </imageView>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstAttribute="trailing" secondItem="xOs-7M-3BE" secondAttribute="trailing" constant="202" id="2ly-1O-6vB"/>
                                                 <constraint firstItem="pDb-8S-deD" firstAttribute="leading" secondItem="BdL-U7-BOc" secondAttribute="leadingMargin" id="Apu-ML-nIQ"/>
                                                 <constraint firstItem="8oX-KS-wOP" firstAttribute="trailing" secondItem="BdL-U7-BOc" secondAttribute="trailingMargin" id="Jfp-Oz-kPJ"/>
                                                 <constraint firstAttribute="trailingMargin" relation="greaterThanOrEqual" secondItem="pDb-8S-deD" secondAttribute="trailing" constant="59" id="QFK-OR-A8b"/>
@@ -951,6 +950,7 @@
                                             <outlet property="date" destination="8oX-KS-wOP" id="aNj-gd-h76"/>
                                             <outlet property="dividerDate" destination="6mV-D5-Rfv" id="gva-Y8-3sk"/>
                                             <outlet property="dividerHeight" destination="Wnt-B1-X9b" id="6mg-aE-zSr"/>
+                                            <outlet property="lockImage" destination="xOs-7M-3BE" id="edY-vd-6Hg"/>
                                             <outlet property="map" destination="pDb-8S-deD" id="bbo-WG-9Is"/>
                                             <outlet property="name" destination="Tdu-SR-34h" id="eOI-3h-ERl"/>
                                             <outlet property="nameHeight" destination="QCT-tL-Z1r" id="JII-SS-5RD"/>

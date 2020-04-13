@@ -148,7 +148,7 @@
             
         case 2:
         {
-            return 5;
+            return 6;
             break;
         }
             
@@ -256,6 +256,14 @@
                     cell.textLabel.text=NSLocalizedString(@"Show Inline Images", @"");
                     cell.detailTextLabel.text=@"Will make a HTTP HEAD call on all links";
                     cell.defaultKey=@"ShowImages";
+                    cell.switchEnabled=YES;
+                    break;
+                }
+                case 5:
+                {
+                    cell.textLabel.text=NSLocalizedString(@"Show Inline Geo Location", @"");
+                    cell.detailTextLabel.text=@"";
+                    cell.defaultKey=@"ShowGeoLocation";
                     cell.switchEnabled=YES;
                     break;
                 }

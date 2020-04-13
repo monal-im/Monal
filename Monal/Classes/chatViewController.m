@@ -10,6 +10,7 @@
 #import "MLChatCell.h"
 #import "MLLinkCell.h"
 #import "MLChatImageCell.h"
+#import "MLChatMapsCell.h"
 
 #import "MLConstants.h"
 #import "MonalAppDelegate.h"
@@ -1151,86 +1152,122 @@
         cell=imageCell;
         
     }
-    else {
-        
-        if([row.messageType isEqualToString:kMessageTypeUrl])
-        {
-            MLLinkCell *toreturn;
-            if([from isEqualToString:self.contact.contactJid]) {
-                toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
-            }
-            else  {
-                toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
-            }
-            
-            NSString * cleanLink=[row.messageText  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            NSArray *parts = [cleanLink componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            cell.link = parts[0];
-            
-            toreturn.messageBody.text =cell.link;
-            toreturn.link=cell.link;
-            
-            if(row.previewText || row.previewImage)
-            {
-                toreturn.imageUrl = row.previewImage;
-                toreturn.messageTitle.text = row.previewText;
-                [toreturn loadImageWithCompletion:^{
-                    
-                }];
-            }  else {
-                [toreturn loadPreviewWithCompletion:^{
-                    if(toreturn.messageTitle.text.length==0) toreturn.messageTitle.text=@" "; // prevent repeated calls
-                    [[DataLayer sharedInstance] setMessageId:row.messageId previewText:toreturn.messageTitle.text  andPreviewImage:toreturn.imageUrl.absoluteString];
-                }];
-            }
-            cell=toreturn;
-            
-        } else {
-            NSString* lowerCase= [row.messageText lowercaseString];
-            NSRange pos = [lowerCase rangeOfString:@"https://"];
-            if(pos.location==NSNotFound) {
-                pos=[lowerCase rangeOfString:@"http://"];
-            }
-            
-            NSRange pos2;
-            if(pos.location!=NSNotFound)
-            {
-                NSString* urlString =[row.messageText substringFromIndex:pos.location];
-                pos2= [urlString rangeOfString:@" "];
-                if(pos2.location==NSNotFound) {
-                    pos2= [urlString rangeOfString:@">"];
-                }
-                
-                if(pos2.location!=NSNotFound) {
-                    urlString=[urlString substringToIndex:pos2.location];
-                }
-                NSArray *parts = [urlString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-                cell.link = parts[0];
-                
-                if(cell.link) {
-                    
-                    NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
-                    NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link attributes:underlineAttribute];
-                    NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
-                    [stitchedString appendAttributedString:
-                     [[NSAttributedString alloc] initWithString:[row.messageText substringToIndex:pos.location] attributes:nil]];
-                    [stitchedString appendAttributedString:underlined];
-                    if(pos2.location!=NSNotFound)
-                    {
-                        NSString* remainder = [row.messageText substringFromIndex:pos.location+[underlined length]];
-                        [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
-                    }
-                    cell.messageBody.attributedText=stitchedString;
-                }
-            }
-            else
-            {
-                cell.messageBody.text =row.messageText;
-                cell.link=nil;
-            }
-            
+    else if ([row.messageType isEqualToString:kMessageTypeUrl]) {
+        MLLinkCell *toreturn;
+        if([from isEqualToString:self.contact.contactJid]) {
+            toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
+        }
+        else  {
+            toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
         }
         
+        NSString * cleanLink=[row.messageText  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        NSArray *parts = [cleanLink componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        cell.link = parts[0];
+        
+        toreturn.messageBody.text =cell.link;
+        toreturn.link=cell.link;
+        
+        if(row.previewText || row.previewImage)
+        {
+            toreturn.imageUrl = row.previewImage;
+            toreturn.messageTitle.text = row.previewText;
+            [toreturn loadImageWithCompletion:^{
+                
+            }];
+        }  else {
+            [toreturn loadPreviewWithCompletion:^{
+                if(toreturn.messageTitle.text.length==0) toreturn.messageTitle.text=@" "; // prevent repeated calls
+                [[DataLayer sharedInstance] setMessageId:row.messageId previewText:toreturn.messageTitle.text  andPreviewImage:toreturn.imageUrl.absoluteString];
+            }];
+        }
+        cell=toreturn;
+    } else if ([row.messageType isEqualToString:kMessageTypeGeo]) {
+        // Parse latitude and longitude
+        NSString* geoPattern = @"^geo:(-?(?:90|[0-9][0-8]|[0-9])(?:\\.[0-9]{1,32})?),(-?(?:180|1[0-7][0-9]|[0-9]{1,2})(?:\\.[0-9]{1,32})?)$";
+        NSError *error = NULL;
+        NSRegularExpression* geoRegex = [NSRegularExpression regularExpressionWithPattern:geoPattern
+        options:NSRegularExpressionCaseInsensitive
+          error:&error];
+
+        if(error != NULL) {
+            DDLogError(@"Error while loading geoPattern");
+        }
+
+        NSTextCheckingResult* geoMatch = [geoRegex firstMatchInString:row.messageText options:0 range:NSMakeRange(0, [row.messageText length])];
+
+        NSRange latitudeRange = [geoMatch rangeAtIndex:1];
+        NSRange longitudeRange = [geoMatch rangeAtIndex:2];
+        NSString* latitude = [row.messageText substringWithRange:latitudeRange];
+        NSString* longitude = [row.messageText substringWithRange:longitudeRange];
+
+        // Display inline map
+        if([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowGeoLocation"]) {
+            MLChatMapsCell* mapsCell;
+            if([from isEqualToString:self.contact.contactJid]) {
+                mapsCell = (MLChatMapsCell *) [tableView dequeueReusableCellWithIdentifier:@"mapsInCell"];
+                mapsCell.outBound=NO;
+            } else  {
+                mapsCell = (MLChatMapsCell *) [tableView dequeueReusableCellWithIdentifier:@"mapsOutCell"];
+            }
+            
+            // Set lat / long used for map view and pin
+            mapsCell.latitude = [latitude doubleValue];
+            mapsCell.longitude = [longitude doubleValue];
+
+            [mapsCell loadCoordinatesWithCompletion:^{}];
+            cell=mapsCell;
+        } else {
+            NSMutableAttributedString *geoString = [[NSMutableAttributedString alloc] initWithString:row.messageText];
+            [geoString addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:[geoMatch rangeAtIndex:0]];
+
+            cell.messageBody.attributedText = geoString;
+            NSInteger zoomLayer = 15;
+            cell.link = [NSString stringWithFormat:@"https://www.openstreetmap.org/?mlat=%@&mlon=%@&zoom=%ldd", latitude, longitude, zoomLayer] ;
+        }
+    } else {
+        // Check if message contains a url
+        NSString* lowerCase= [row.messageText lowercaseString];
+        NSRange pos = [lowerCase rangeOfString:@"https://"];
+        if(pos.location==NSNotFound) {
+            pos=[lowerCase rangeOfString:@"http://"];
+        }
+        
+        NSRange pos2;
+        if(pos.location!=NSNotFound)
+        {
+            NSString* urlString =[row.messageText substringFromIndex:pos.location];
+            pos2= [urlString rangeOfString:@" "];
+            if(pos2.location==NSNotFound) {
+                pos2= [urlString rangeOfString:@">"];
+            }
+            
+            if(pos2.location!=NSNotFound) {
+                urlString=[urlString substringToIndex:pos2.location];
+            }
+            NSArray *parts = [urlString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+            cell.link = parts[0];
+            
+            if(cell.link) {
+                NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
+                NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link attributes:underlineAttribute];
+                NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
+                [stitchedString appendAttributedString:
+                 [[NSAttributedString alloc] initWithString:[row.messageText substringToIndex:pos.location] attributes:nil]];
+                [stitchedString appendAttributedString:underlined];
+                if(pos2.location!=NSNotFound)
+                {
+                    NSString* remainder = [row.messageText substringFromIndex:pos.location+[underlined length]];
+                    [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
+                }
+                cell.messageBody.attributedText=stitchedString;
+            }
+        }
+        else // Default case
+        {
+            cell.messageBody.text = row.messageText;
+            cell.link = nil;
+        }
     }
     
     if(self.contact.isGroup)

@@ -134,11 +134,11 @@
                 
             }];
             return;
-            
         }
-        else if([message.messageType isEqualToString:kMessageTypeUrl])
-        {
+        else if([message.messageType isEqualToString:kMessageTypeUrl]) {
             content.body =@"Sent a Link 🔗";
+        } else if([message.messageType isEqualToString:kMessageTypeGeo]) {
+            content.body =@"Sent a Geolocation 🧭";
         }
         
         UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval

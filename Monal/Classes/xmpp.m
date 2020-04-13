@@ -953,7 +953,11 @@ NSString *const kXMPPPresence = @"presence";
             {
                 NSRange dupePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",stanzaType]
                                                     options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, _inputBuffer.length-pos.location-1)];
-                
+                NSRange firstClose;
+                             if(dupePos.location!=NSNotFound) {
+                                 firstClose=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
+                                                                options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, dupePos.location-pos.location-1)];
+                             }
                 
                 if([stanzaType isEqualToString:@"message"] && dupePos.location!=NSNotFound) {
                     //check for carbon forwarded
@@ -992,13 +996,7 @@ NSString *const kXMPPPresence = @"presence";
                         finalend=firstClose.location+firstClose.length+1;
                     }
                 }
-                NSRange firstClose;
-                if(dupePos.location!=NSNotFound) {
-                    firstClose=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
-                                                   options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, dupePos.location-pos.location-1)];
-                }
-                
-                if([stanzaType isEqualToString:@"presence"] && dupePos.location!=NSNotFound && firstClose.location==NSNotFound) {
+                else if([stanzaType isEqualToString:@"presence"] && dupePos.location!=NSNotFound && firstClose.location==NSNotFound) {
                     //did not find close between dupe and start
                     NSRange messageClose =[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
                                                                                      options:NSCaseInsensitiveSearch range:NSMakeRange(dupePos.location, _inputBuffer.length-dupePos.location)];

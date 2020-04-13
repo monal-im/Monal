@@ -1283,7 +1283,7 @@ NSString *const kXMPPPresence = @"presence";
 			
 			ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
 			
-            MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties processQueue:self.receiveQueue signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+			MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
 			processor.sendIq=^(MLXMLNode * _Nullable iqResponse) {
 				if(iqResponse) {
 					DDLogInfo(@"sending iq stanza");

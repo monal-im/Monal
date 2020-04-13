@@ -809,7 +809,21 @@ NSString *const kXMPPPresence = @"presence";
                         finalend=firstClose.location+firstClose.length+1;
                     }
                 }
+                NSRange firstClose;
+                if(dupePos.location!=NSNotFound) {
+                    firstClose=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
+                                                   options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, dupePos.location-pos.location-1)];
+                }
                 
+                if([stanzaType isEqualToString:@"presence"] && dupePos.location!=NSNotFound && firstClose.location==NSNotFound) {
+                    //did not find close between dupe and start
+                    NSRange messageClose =[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
+                                                                                     options:NSCaseInsensitiveSearch range:NSMakeRange(dupePos.location, _inputBuffer.length-dupePos.location)];
+                    if(messageClose.location!=NSNotFound){
+                        finalstart=startpos;
+                        finalend=messageClose.location+messageClose.length+1; //+1 to inclde closing >
+                    }
+                }
                 else {
                     
                     //since there is another block of the same stanza, short cuts dont work.check to find beginning of next element
@@ -2867,7 +2881,7 @@ NSString *const kXMPPPresence = @"presence";
 {
     XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iq setiqTo:self.connectionProperties.identity.domain];
-    [iq changePasswordForUser:self.connectionProperties.identity.jid newPassword:newPass];
+    [iq changePasswordForUser:self.connectionProperties.identity.user newPassword:newPass];
     if(completion) {
         [self.xmppCompletionHandlers setObject:completion forKey:iq.stanzaID];
     }

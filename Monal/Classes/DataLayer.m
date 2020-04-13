@@ -41,6 +41,7 @@ NSString *const kMessageTypeImage =@"Image";
 NSString *const kMessageTypeText =@"Text";
 NSString *const kMessageTypeStatus =@"Status";
 NSString *const kMessageTypeUrl =@"Url";
+NSString *const kMessageTypeGeo =@"Geo";
 
 // used for contact rows
 NSString *const kContactName =@"buddy_name";
@@ -863,8 +864,7 @@ NSString *const kCount =@"count";
 
 -(NSMutableDictionary *) readStateForAccount:(NSString*) accountNo
 {
-	if(!accountNo)
-		return nil;
+    if(!accountNo) return nil; 
     NSString* query=[NSString stringWithFormat:@"SELECT state from account where account_id=?"];
     NSArray *params=@[accountNo];
     NSData * data=(NSData*)[self executeScalar:query andArguments:params];
@@ -3043,12 +3043,8 @@ NSString *const kCount =@"count";
            messageType=kMessageTypeUrl;
     }
     
-    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"]) {
-        
-        if ([messageString hasPrefix:@"HTTPS://"] ||
-            [messageString hasPrefix:@"https://"] ||
-            [messageString hasPrefix:@"aesgcm://"])
-        {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"] &&
+        ([messageString hasPrefix:@"HTTPS://"] || [messageString hasPrefix:@"https://"] || [messageString hasPrefix:@"aesgcm://"])) {
             NSString *cleaned = [messageString stringByReplacingOccurrencesOfString:@"aesgcm://" withString:@"https://"];
             NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:cleaned]];
             request.HTTPMethod=@"HEAD";
@@ -3070,14 +3066,13 @@ NSString *const kCount =@"count";
                     completion(messageType);
                 }
             }] resume];
+    } else if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowGeoLocation"] && [messageString hasPrefix:@"geo:"]) {
+        messageType = kMessageTypeGeo;
+        
+        if(completion) {
+            completion(messageType);
         }
-        else {
-            if(completion) {
-                completion(messageType);
-            }
-        }
-    }
-    else
+    } else
         if(completion) {
             completion(messageType);
         }

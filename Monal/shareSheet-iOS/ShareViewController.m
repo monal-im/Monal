@@ -26,6 +26,7 @@
 @implementation ShareViewController
 
 -(void)viewDidLoad {
+    [super viewDidLoad];
     [self.navigationController.navigationBar setTintColor:[UIColor whiteColor]];
     [self.navigationController.navigationBar setBackgroundColor:[UIColor monaldarkGreen]];
     self.navigationController.navigationItem.title=@"Monal";

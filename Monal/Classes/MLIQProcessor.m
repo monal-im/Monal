@@ -19,6 +19,7 @@
 @property (nonatomic, strong) MLSignalStore *monalSignalStore;
 @property (nonatomic, strong) MLXMPPConnection *connection;
 @property (nonatomic, strong) NSString *accountNo;
+@property (nonatomic, strong) NSOperationQueue *receiveQueue;
 
 @end
 
@@ -28,13 +29,14 @@
  */
 @implementation MLIQProcessor
 
--(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore
+-(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection processQueue:(NSOperationQueue *) receiveQueue  signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore
 {
     self=[super init];
     self.accountNo = accountNo;
     self.connection= connection;
     self.signalContext=signalContext;
     self.monalSignalStore= monalSignalStore;
+    self.receiveQueue=receiveQueue;
     return self;
 }
 
@@ -403,9 +405,11 @@
         {
 #endif
 #endif
-			//these are done synchronously in the receiverQueue like everything else, too
-			[self processOMEMODevices:iqNode];
-			[self processOMEMOKeys:iqNode];
+            [self.receiveQueue addOperationWithBlock:^{
+                        [self processOMEMODevices:iqNode];
+                        [self processOMEMOKeys:iqNode];
+            }];
+
 #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
         }

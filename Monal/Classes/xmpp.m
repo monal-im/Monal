@@ -159,8 +159,8 @@ NSString *const kXMPPPresence = @"presence";
     _accountState = kStateLoggedOut;
     
     _discoveredServersList=[[NSMutableArray alloc] init];
-	if(!_usableServersList)
-		_usableServersList=[[NSMutableArray alloc] init];
+    if(!_usableServersList)
+		    _usableServersList=[[NSMutableArray alloc] init];
     _inputDataBuffer=[[NSMutableData alloc] init];
     _inputBuffer=[[NSMutableString alloc] init];
     _outputQueue=[[NSMutableArray alloc] init];
@@ -1277,7 +1277,7 @@ NSString *const kXMPPPresence = @"presence";
 			
 			ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
 			
-			MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+            MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties processQueue:self.receiveQueue signalContex:self.signalContext andSignalStore:self.monalSignalStore];
 			processor.sendIq=^(MLXMLNode * _Nullable iqResponse) {
 				if(iqResponse) {
 					DDLogInfo(@"sending iq stanza");

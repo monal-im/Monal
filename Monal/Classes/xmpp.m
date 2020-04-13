@@ -953,7 +953,11 @@ NSString *const kXMPPPresence = @"presence";
             {
                 NSRange dupePos=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"<%@",stanzaType]
                                                     options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location+1, _inputBuffer.length-pos.location-1)];
-                
+                NSRange firstClose;
+                             if(dupePos.location!=NSNotFound) {
+                                 firstClose=[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
+                                                                options:NSCaseInsensitiveSearch range:NSMakeRange(pos.location, dupePos.location-pos.location-1)];
+                             }
                 
                 if([stanzaType isEqualToString:@"message"] && dupePos.location!=NSNotFound) {
                     //check for carbon forwarded
@@ -992,7 +996,15 @@ NSString *const kXMPPPresence = @"presence";
                         finalend=firstClose.location+firstClose.length+1;
                     }
                 }
-                
+                else if([stanzaType isEqualToString:@"presence"] && dupePos.location!=NSNotFound && firstClose.location==NSNotFound) {
+                    //did not find close between dupe and start
+                    NSRange messageClose =[_inputBuffer rangeOfString:[NSString stringWithFormat:@"</%@",stanzaType]
+                                                                                     options:NSCaseInsensitiveSearch range:NSMakeRange(dupePos.location, _inputBuffer.length-dupePos.location)];
+                    if(messageClose.location!=NSNotFound){
+                        finalstart=startpos;
+                        finalend=messageClose.location+messageClose.length+1; //+1 to inclde closing >
+                    }
+                }
                 else {
                     
                     //since there is another block of the same stanza, short cuts dont work.check to find beginning of next element
@@ -1223,7 +1235,7 @@ NSString *const kXMPPPresence = @"presence";
 			
 			ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
 			
-			MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+            MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties processQueue:self.receiveQueue signalContex:self.signalContext andSignalStore:self.monalSignalStore];
 			processor.sendIq=^(MLXMLNode * _Nullable iqResponse) {
 				if(iqResponse) {
 					DDLogInfo(@"sending iq stanza");
@@ -3081,7 +3093,7 @@ static NSMutableArray *extracted(xmpp *object) {
 {
     XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iq setiqTo:self.connectionProperties.identity.domain];
-    [iq changePasswordForUser:self.connectionProperties.identity.jid newPassword:newPass];
+    [iq changePasswordForUser:self.connectionProperties.identity.user newPassword:newPass];
     if(completion) {
         [self.xmppCompletionHandlers setObject:completion forKey:iq.stanzaID];
     }

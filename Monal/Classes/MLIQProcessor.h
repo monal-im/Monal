@@ -27,17 +27,12 @@ typedef void (^processAction)(void);
 @property (nonatomic, strong) processAction sendSignalInitialStanzas;
 @property (nonatomic, strong) processAction getVcards;
 
--(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore;
+-(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection processQueue:(NSOperationQueue *) receiveQueue  signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore;
 
 /**
  Process a iq, persist any changes and post notifications
  */
 -(void) processIq:(ParseIq *) messageNode;
-
-/**
- exposed so that we can parse features loaded from disk 
- */
--(void) parseFeatures:(ParseIq * _Nullable) messageNode;
 
 /**
  process a node and send out devices

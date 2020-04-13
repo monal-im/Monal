@@ -45,11 +45,12 @@ extern NSString *const kContactName;
 extern NSString *const kCount;
 
 extern NSString *const kMessageType;
+extern NSString *const kMessageTypeGeo;
 extern NSString *const kMessageTypeImage;
-extern NSString *const kMessageTypeText;
-extern NSString *const kMessageTypeStatus;
-extern NSString *const kMessageTypeUrl;
 extern NSString *const kMessageTypeMessageDraft;
+extern NSString *const kMessageTypeStatus;
+extern NSString *const kMessageTypeText;
+extern NSString *const kMessageTypeUrl;
 
 + (DataLayer* )sharedInstance;
 
@@ -150,6 +151,7 @@ extern NSString *const kMessageTypeMessageDraft;
 -(void) updateMucSubject:(NSString *) subject forAccount:(NSString *) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(BOOL))completion;
 -(void) mucSubjectforAccount:(NSString *) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(NSString *))completion;
 
+-(void) setMessageId:(NSString*) messageid stanzaId:(NSString *) stanzaId;
 
 /**
  Calls with YES if contact  has laredy been added to the database for this account

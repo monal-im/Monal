@@ -383,7 +383,10 @@
                 } else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft]) {
                     NSString* draftPreview = [NSString stringWithFormat:@"Draft: %@", messageRow.messageText];
                     [cell showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, 6)];
-                } else {
+                } else if([messageRow.messageType isEqualToString:kMessageTypeGeo])
+                {
+                    [cell showStatusText:@"📍 A Location"];
+                } else  {
                     [cell showStatusText:messageRow.messageText];
                 }
                 

@@ -37,12 +37,12 @@ NSString *const kUsername =@"username";
 NSString *const kFullName =@"full_name";
 
 NSString *const kMessageType =@"messageType";
+NSString *const kMessageTypeGeo =@"Geo";
 NSString *const kMessageTypeImage =@"Image";
-NSString *const kMessageTypeText =@"Text";
-NSString *const kMessageTypeStatus =@"Status";
-NSString *const kMessageTypeUrl =@"Url";
 NSString *const kMessageTypeMessageDraft =@"MessageDraft";
-
+NSString *const kMessageTypeStatus =@"Status";
+NSString *const kMessageTypeText =@"Text";
+NSString *const kMessageTypeUrl =@"Url";
 
 // used for contact rows
 NSString *const kContactName =@"buddy_name";
@@ -820,6 +820,7 @@ static DataLayer *sharedInstance=nil;
 
 -(NSMutableDictionary *) readStateForAccount:(NSString*) accountNo
 {
+    if(!accountNo) return nil; 
     NSString* query=[NSString stringWithFormat:@"SELECT state from account where account_id=?"];
     NSArray *params=@[accountNo];
     NSData * data=(NSData*)[self executeScalar:query andArguments:params];
@@ -1776,6 +1777,12 @@ static DataLayer *sharedInstance=nil;
     [self executeNonQuery:query  andArguments:@[text?text:@"", image?image:@"", messageid]  withCompletion:nil];
 }
 
+-(void) setMessageId:(NSString*) messageid stanzaId:(NSString *) stanzaId
+{
+    NSString* query=[NSString stringWithFormat:@"update message_history set stanzaid=? where messageid=?"];
+    DDLogVerbose(@" setting message stanzaid %@",query);
+    [self executeNonQuery:query  andArguments:@[stanzaId, messageid]  withCompletion:nil];
+}
 
 
 
@@ -2980,12 +2987,8 @@ static DataLayer *sharedInstance=nil;
            messageType=kMessageTypeUrl;
     }
     
-    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"]) {
-        
-        if ([messageString hasPrefix:@"HTTPS://"] ||
-            [messageString hasPrefix:@"https://"] ||
-            [messageString hasPrefix:@"aesgcm://"])
-        {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"] &&
+        ([messageString hasPrefix:@"HTTPS://"] || [messageString hasPrefix:@"https://"] || [messageString hasPrefix:@"aesgcm://"])) {
             NSString *cleaned = [messageString stringByReplacingOccurrencesOfString:@"aesgcm://" withString:@"https://"];
             NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:cleaned]];
             request.HTTPMethod=@"HEAD";
@@ -3007,14 +3010,13 @@ static DataLayer *sharedInstance=nil;
                     completion(messageType);
                 }
             }] resume];
+    } else if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowGeoLocation"] && [messageString hasPrefix:@"geo:"]) {
+        messageType = kMessageTypeGeo;
+        
+        if(completion) {
+            completion(messageType);
         }
-        else {
-            if(completion) {
-                completion(messageType);
-            }
-        }
-    }
-    else
+    } else
         if(completion) {
             completion(messageType);
         }

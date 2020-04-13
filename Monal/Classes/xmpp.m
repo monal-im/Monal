@@ -6,15 +6,8 @@
 //
 //
 
+#import <Network/Network.h>
 #import <CommonCrypto/CommonCrypto.h>
-#import <CFNetwork/CFSocketStream.h>
-#import <Security/SecureTransport.h>
-//#import <Security/SecureTransportPriv.h>
-OSStatus
-SSLSetALPNData				(SSLContextRef      context,
-                             const void *data,
-                             size_t length)
-    __OSX_AVAILABLE_STARTING(__MAC_10_11, __IPHONE_9_0);
 
 #import "xmpp.h"
 #import "DataLayer.h"
@@ -81,19 +74,17 @@ NSString *const kXMPPPresence = @"presence";
 
 @interface xmpp()
 {
-    NSInputStream *_iStream;
-    NSOutputStream *_oStream;
+    nw_connection_t _connection;
     NSMutableData* _inputDataBuffer;
     NSMutableString* _inputBuffer;
     NSMutableArray* _outputQueue;
-    // 64KiB buffer for stanzas we can not (completely) write to the tcp socket
-    uint8_t * _outputBuffer;
-    size_t _outputBufferByteCount;
     
     NSArray* _stanzaTypes;
     
     BOOL _startTLSComplete;
-    BOOL _streamHasSpace;
+    BOOL _ConnectionSendIsLooping;
+    BOOL _stopConnectionSendLoop;
+    BOOL _stopConnectionReceiveLoop;
     
     //does not reset at disconnect
     BOOL _loggedInOnce;
@@ -156,8 +147,6 @@ NSString *const kXMPPPresence = @"presence";
 
 @end
 
-
-
 @implementation xmpp
 
 -(void) setupObjects
@@ -172,17 +161,14 @@ NSString *const kXMPPPresence = @"presence";
     _outputQueue=[[NSMutableArray alloc] init];
     
     self.receiveQueue=[[NSOperationQueue alloc] init];
+    self.receiveQueue.name=@"ReceiveQueue";
     self.receiveQueue.qualityOfService=NSQualityOfServiceUtility;
     self.receiveQueue.maxConcurrentOperationCount=1;
     
     self.sendQueue=[[NSOperationQueue alloc] init];
+    self.sendQueue.name=@"SendQueue";
     self.sendQueue.qualityOfService=NSQualityOfServiceUtility;
     self.sendQueue.maxConcurrentOperationCount=1;
-    
-    if(_outputBuffer)
-		free(_outputBuffer);
-    _outputBuffer = nil;
-    _outputBufferByteCount = 0;
     
     //placing more common at top to reduce iteration
     _stanzaTypes=[NSArray arrayWithObjects:
@@ -237,172 +223,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void)dealloc
 {
-    if(_outputBuffer)
-        free(_outputBuffer);
-    _outputBuffer = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
--(void) setRunLoop
-{
-    [_oStream setDelegate:self];
-    [_oStream scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-    
-    [_iStream setDelegate:self];
-    [_iStream scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-}
-
--(void) initTLS
-{
-	NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
-	[settings setObject:self.connectionProperties.identity.domain forKey:kCFStreamSSLPeerName];
-	if(self.connectionProperties.server.selfSignedCert)
-	{
-		DDLogInfo(@"configured self signed SSL");
-		[settings setObject:@NO forKey:kCFStreamSSLValidatesCertificateChain];
-	}
-	
-	//this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
-	DDLogInfo(@"configuring SSL handshake");
-	if(CFReadStreamSetProperty((__bridge CFReadStreamRef)self->_iStream, kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings))
-		DDLogInfo(@"Set TLS properties on streams. Security level %@", [self->_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
-	else
-	{
-		DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
-		DDLogInfo(@"Set TLS properties on streams.security level %@", [self->_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
-	}
-	
-	//see this for extracting the sslcontext of the cfstream: https://stackoverflow.com/a/26726525/3528174
-	//the ssl context methods (like SSLSetALPNData) are declared in Security/SecureTransportPriv.h and can be found here:
-	//https://opensource.apple.com/source/Security/Security-57740.31.2/OSX/libsecurity_ssl/lib/sslContext.c.auto.html
-	//this will only have an effect if the TLS handshake was not already started (e.g. the TCP socket is not connected)
-	SSLContextRef sslContext = (__bridge SSLContextRef) [_iStream propertyForKey: (__bridge NSString *) kCFStreamPropertySSLContext ];
-	SSLSetALPNData(sslContext, "\x0Bxmpp-client", 12);
-}
-
--(void) createStreams
-{
-    DDLogInfo(@"stream  creating to  server: %@ port: %@ directTLS: %@", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort, self.connectionProperties.server.connectTLS ? @"YES" : @"NO");
-    
-    NSInputStream *localIStream;
-    NSOutputStream *localOStream;
-    
-    [NSStream getStreamsToHostWithName:self.connectionProperties.server.connectServer port:self.connectionProperties.server.connectPort.integerValue inputStream:&localIStream outputStream:&localOStream];
-    
-    if(localIStream) {
-        _iStream=localIStream;
-    }
-    
-    if(localOStream) {
-        _oStream = localOStream;
-    }
-    
-    
-    if((_iStream==nil) || (_oStream==nil))
-    {
-        DDLogError(@"Connection failed");
-        NSString *message=@"Unable to connect to server";
-        [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
-        if(self.loginCompletion)  {
-            self.loginCompletion(NO, message);
-            self.loginCompletion=nil;
-        }
-        
-        return;
-    }
-    else {
-        DDLogInfo(@"streams created ok");
-    }
-    
-    if(self.connectionProperties.server.connectTLS==YES)
-    {
-		DDLogInfo(@"starting directSSL");
-        [self initTLS];
-    }
-    
-    MLXMLNode* xmlOpening = [[MLXMLNode alloc] initWithElement:@"xml"];
-    [self send:xmlOpening];
-    [self startStream];
-    [self setRunLoop];
-    
-    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    dispatch_source_t streamTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,q_background);
-    
-    dispatch_source_set_timer(streamTimer,
-                              dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC),
-                              DISPATCH_TIME_FOREVER
-                              , 1ull * NSEC_PER_SEC);
-    
-    dispatch_source_set_event_handler(streamTimer, ^{
-        DDLogError(@"stream connection timed out");
-        dispatch_source_cancel(streamTimer);
-        
-        [self disconnect];
-    });
-    
-    dispatch_source_set_cancel_handler(streamTimer, ^{
-        DDLogError(@"stream timer cancelled");
-    });
-    
-    dispatch_resume(streamTimer);
-    
-    [_iStream open];
-    [_oStream open];
-    
-    dispatch_source_cancel(streamTimer);
-    
-}
-
-
-
--(void) connectionTask
-{
-	// do DNS discovery if it hasn't already been set
-	if([_discoveredServersList count]==0) {
-		_discoveredServersList=[[[MLDNSLookup alloc] init] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
-    }
-    
-    //if all servers have been tried start over with the first one again
-    if([_discoveredServersList count]>0 && [_usableServersList count]==0)
-	{
-		DDLogWarn(@"All %lu SRV dns records tried, starting over again", (unsigned long)[_discoveredServersList count]);
-		_usableServersList = [_discoveredServersList mutableCopy];
-		for(NSDictionary *row in _usableServersList)
-		{
-			DDLogInfo(@"SRV entry: server=%@, port=%@, isSecure=%s (prio: %@)",
-				[row objectForKey:@"server"],
-				[row objectForKey:@"port"],
-				[[row objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
-				[row objectForKey:@"priority"]
-			);
-		}
-	}
-	
-    if([_usableServersList count]>0) {
-		DDLogInfo(@"Using connection parameters discovered via SRV dns record: server=%@, port=%@, isSecure=%s, priority=%@",
-			[[_usableServersList objectAtIndex:0] objectForKey:@"server"],
-			[[_usableServersList objectAtIndex:0] objectForKey:@"port"],
-			[[[_usableServersList objectAtIndex:0] objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
-			[[_usableServersList objectAtIndex:0] objectForKey:@"priority"]
-		);
-        [self.connectionProperties.server updateConnectServer: [[_usableServersList objectAtIndex:0] objectForKey:@"server"]];
-        [self.connectionProperties.server updateConnectPort: [[_usableServersList objectAtIndex:0] objectForKey:@"port"]];
-		[self.connectionProperties.server updateConnectTLS: [[[_usableServersList objectAtIndex:0] objectForKey:@"isSecure"] boolValue]];
-		//remove this server so that the next connection attempt will try the next server in the list
-		[_usableServersList removeObjectAtIndex:0];
-		DDLogInfo(@"%lu SRV entries left:", (unsigned long)[_usableServersList count]);
-		for(NSDictionary *row in _usableServersList)
-		{
-			DDLogInfo(@"SRV entry: server=%@, port=%@, isSecure=%s (prio: %@)",
-				[row objectForKey:@"server"],
-				[row objectForKey:@"port"],
-				[[row objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
-				[row objectForKey:@"priority"]
-			);
-		}
-    }
-    
-    [self createStreams];
 }
 
 -(void) connectWithCompletion:(xmppCompletion) completion
@@ -430,19 +251,11 @@ NSString *const kXMPPPresence = @"presence";
     self.pingID=nil;
     
     DDLogInfo(@"XMPP connnect  start");
-    [self.sendQueue cancelAllOperations];
-	[self.sendQueue addOperationWithBlock:^{
-		_outputQueue=[[NSMutableArray alloc] init];
-		if(_outputBuffer)
-			free(_outputBuffer);
-		_outputBuffer = nil;
-		_outputBufferByteCount = 0;
-	}];
     
     //read persisted state
     [self readState];
     
-    [self connectionTask];
+    [self openConnection];
     
     if(self.registration) return;
     
@@ -503,65 +316,9 @@ NSString *const kXMPPPresence = @"presence";
     [self disconnectWithCompletion:nil];
 }
 
--(void) closeSocket
-{
-	[self.sendQueue cancelAllOperations];
-	[self.sendQueue addOperationWithBlock:^{
-		self->_outputQueue=[[NSMutableArray alloc] init];
-		if(_outputBuffer)
-			free(_outputBuffer);
-		_outputBuffer = nil;
-		self->_outputBufferByteCount = 0;
-	}];
-    [self.receiveQueue cancelAllOperations];
-    [self.receiveQueue addOperationWithBlock:^{
-        
-        self.connectedTime =nil;
-        
-        self.pingID=nil;
-        DDLogInfo(@"removing streams");
-        
-        //prevent any new read or write
-        [self->_iStream setDelegate:nil];
-        [self->_oStream setDelegate:nil];
-        
-        [self->_oStream removeFromRunLoop:[NSRunLoop mainRunLoop]
-                                  forMode:NSDefaultRunLoopMode];
-        
-        [self->_iStream removeFromRunLoop:[NSRunLoop mainRunLoop]
-                                  forMode:NSDefaultRunLoopMode];
-        DDLogInfo(@"removed streams");
-        
-        self->_inputDataBuffer=[[NSMutableData alloc] init];
-        self->_inputBuffer=[[NSMutableString alloc] init];
-        
-        @try
-        {
-            [self->_iStream close];
-        }
-        @catch(id theException)
-        {
-            DDLogError(@"Exception in istream close");
-        }
-        
-        @try
-        {
-            [self->_oStream close];
-        }
-        @catch(id theException)
-        {
-            DDLogError(@"Exception in ostream close");
-        }
-        
-        self->_iStream=nil;
-        self->_oStream=nil;
-    }];
-}
-
 -(void) resetValues
 {
     _startTLSComplete=NO;
-    _streamHasSpace=NO;
     _loginStarted=NO;
     _loginStartTimeStamp=nil;
     _loginError=NO;
@@ -609,7 +366,7 @@ NSString *const kXMPPPresence = @"presence";
     
     if(self.explicitLogout && _accountState>=kStateHasStream)
     {
-		[self.sendQueue cancelAllOperations];
+		[self clearNetworkQueues];
 		[self.sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
 			if(_accountState>=kStateBound)
 			{
@@ -618,16 +375,16 @@ NSString *const kXMPPPresence = @"presence";
 				{
 					XMPPIQ* disable=[[XMPPIQ alloc] initWithType:kiqSetType];
 					[disable setPushDisableWithNode:self.pushNode];
-					[self writeToStream:disable.XMLString];		// dont even bother queueing
+					[self writeNodeToConnection:disable withCompletion:nil];		// dont even bother queueing
 				}
 				
 				[self sendLastAck];
 			}
 			
 			//close stream
-			MLXMLNode* stream = [[MLXMLNode alloc] init];
-			stream.element = @"/stream:stream"; //hack to close stream
-			[self writeToStream:stream.XMLString]; // dont even bother queueing
+			MLXMLNode* node = [[MLXMLNode alloc] init];
+			node.element = @"/stream:stream";	//hack to close stream
+			[self writeNodeToConnection:node withCompletion:nil];	// dont even bother queueing
 		}]] waitUntilFinished:YES];			//block until finished because we are closing the socket directly afterwards
         
         //preserve unAckedStanzas even on explicitLogout and resend them on next connect
@@ -644,7 +401,7 @@ NSString *const kXMPPPresence = @"presence";
         
     }
     
-    [self closeSocket];
+    [self closeConnection];
     
     [self.receiveQueue addOperationWithBlock:^{
         [self cleanUpState];
@@ -916,7 +673,24 @@ NSString *const kXMPPPresence = @"presence";
     [self send:ping];
 }
 
-
+-(void) enablePush
+{
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
+    if(self.accountState>=kStateBound && [self.pushNode length]>0 && [self.pushSecret length]>0 && self.connectionProperties.supportsPush)
+    {
+        DDLogInfo(@"ENABLING PUSH: %@ < %@", self.pushNode, self.pushSecret);
+        XMPPIQ* enable =[[XMPPIQ alloc] initWithType:kiqSetType];
+        [enable setPushEnableWithNode:self.pushNode andSecret:self.pushSecret];
+        [self send:enable];
+        self.connectionProperties.pushEnabled=YES;
+    }
+    else {
+        DDLogInfo(@" NOT enabling push: %@ < %@", self.pushNode, self.pushSecret);
+    }
+#endif
+#endif
+}
 
 
 -(NSMutableDictionary*) nextStanza
@@ -1144,7 +918,7 @@ NSString *const kXMPPPresence = @"presence";
     return  returnDic;
 }
 
-#pragma mark message ACK
+#pragma mark smacks
 -(void) resendUnackedStanzas
 {
     /**
@@ -1242,7 +1016,7 @@ NSString *const kXMPPPresence = @"presence";
         if(queuedSend) {
             [self send:aNode];
         } else  {		//this should only be done from sendQueue (e.g. by sendLastAck())
-            [self writeToStream:aNode.XMLString];		// dont even bother queueing
+            [self writeNodeToConnection:aNode withCompletion:nil];		// dont even bother queueing
         }
     }
 }
@@ -1988,16 +1762,12 @@ NSString *const kXMPPPresence = @"presence";
 }
 
 
-static NSMutableArray *extracted(xmpp *object) {
-    return object->_outputQueue;
-}
-
 -(void) send:(MLXMLNode*) stanza
 {
-    if(!stanza) return;
-    
-    if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 && self.unAckedStanzas)
-    {
+	if(!stanza) return;
+	
+	if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 && self.unAckedStanzas)
+	{
 		//only count stanzas, not nonzas
 		if([stanza.element isEqualToString:@"iq"]
 			|| [stanza.element isEqualToString:@"message"]
@@ -2013,12 +1783,8 @@ static NSMutableArray *extracted(xmpp *object) {
 			[self persistState];
 		}
     }
-    
-    [self.sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
-		DDLogDebug(@"SEND: %@", stanza.XMLString);
-		[extracted(self) addObject:stanza];
-		[self writeFromQueue];  // try to send if there is space
-	}]];
+	
+	[self enqueueStanzaToSend:stanza];
 }
 
 
@@ -2327,17 +2093,18 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(void) disconnectToResumeWithCompletion:(void (^)(void))completion
 {
-    if(_accountState==kStateLoggedIn)		// race condition. socket may be closed so dont trigger a reconnect
-    {
+	if(_accountState==kStateLoggedIn)		// race condition. socket may be closed so dont trigger a reconnect
+	{
+		[self clearNetworkQueues];
 		[self.sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
 			[self sendLastAck];
 		}]] waitUntilFinished:YES];			//block until finished because we are closing the socket directly afterwards
 	}
-    [self.receiveQueue addOperationWithBlock:^{
-        [self closeSocket]; // just closing socket to simulate a unintentional disconnect
-        [self resetValues];
-        if(completion) completion();
-    }];
+	[self closeConnection];		// just closing socket to simulate a unintentional disconnect
+	[self.receiveQueue addOperationWithBlock:^{
+		[self resetValues];
+		if(completion) completion();
+	}];
 }
 
 -(void) queryDisco
@@ -2462,9 +2229,6 @@ static NSMutableArray *extracted(xmpp *object) {
     
     if(self.statusMessage) [node setStatus:self.statusMessage];
     [self send:node];
-    
-    
-    
 }
 
 -(void) setVisible:(BOOL) visible
@@ -3145,396 +2909,575 @@ static NSMutableArray *extracted(xmpp *object) {
 }
 
 
-
-#pragma mark - nsstream delegate
-
-- (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode
-{
-    DDLogVerbose(@"Stream has event");
-    
-    if(stream!=_iStream && stream!=_oStream)
-    {
-        DDLogVerbose(@"event from stale stream. This should not happen. Cleaning up and reconnecting.");
-        [self disconnectWithCompletion:^{
-            [self reconnect];
-        }];
-        return;
-    }
-    
-    switch(eventCode)
-    {
-        case NSStreamEventOpenCompleted:
-        {
-            DDLogVerbose(@"Stream open completed");
-            
-        }
-            //for writing
-        case NSStreamEventHasSpaceAvailable:
-        {
-            [self.sendQueue addOperationWithBlock: ^{
-                self->_streamHasSpace=YES;
-                
-                DDLogVerbose(@"Stream has space to write");
-                [self writeFromQueue];
-            }];
-            break;
-        }
-            
-            //for reading
-        case  NSStreamEventHasBytesAvailable:
-        {
-            DDLogVerbose(@"Stream has bytes to read");
-            [self.receiveQueue addOperationWithBlock: ^{
-                [self readToBuffer];
-            }];
-            
-            break;
-        }
-            
-        case NSStreamEventErrorOccurred:
-        {
-            NSError* st_error= [stream streamError];
-            DDLogError(@"Stream error code=%ld domain=%@   local desc:%@ ",(long)st_error.code,st_error.domain,  st_error.localizedDescription);
-            
-            NSString *message =st_error.localizedDescription;
-            
-            //            SecTrustRef trust = (__bridge SecTrustRef)[_iStream propertyForKey:kCFStreamPropertySSLPeerTrust];
-            //
-            //            SecCertificateRef cert=SecTrustGetCertificateAtIndex( trust,  0);
-            
-            switch(st_error.code)
-            {
-                case errSSLXCertChainInvalid: {
-                    message = @"SSL Error: Certificate chain is invalid";
-                    break;
-                }
-                    
-                case errSSLUnknownRootCert: {
-                    message = @"SSL Error: Unknown root certificate";
-                    break;
-                }
-                    
-                case errSSLCertExpired: {
-                    message = @"SSL Error: Certificate expired";
-                    break;
-                }
-                    
-                case errSSLHostNameMismatch: {
-                    message = @"SSL Error: Host name mismatch";
-                    break;
-                }
-                    
-            }
-            
-            if(!self.registration) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message, st_error]];
-                if(self.loginCompletion)  {
-                    self.loginCompletion(NO, message);
-                    self.loginCompletion=nil;
-                }
-            }
-            
-            //everythign comes twice. just use the input stream
-            if(stream==_oStream){
-                return;
-            }
-            
-            if(_loggedInOnce)
-            {
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-                       || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )
-                       && (self.accountState>=kStateLoggedIn)){
-                        DDLogInfo(@" Stream error in the background. Ignoring");
-                        return;
-                    } else  {
-#endif
-#endif
-                        
-                        
-                        DDLogInfo(@" stream error calling reconnect for account that logged in once ");
-                        [self disconnectWithCompletion:^{
-                            [self reconnect:5];
-                        }];
-                        return;
-                        
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-                    }
-                });
-#endif
-#endif
-            }
-            
-            
-            if(st_error.code==2 )// operation couldnt be completed // socket not connected
-            {
-                [self disconnectWithCompletion:^{
-                    [self reconnect:5];
-                }];
-                return;
-            }
-            
-            
-            if(st_error.code==60)// could not complete operation
-            {
-                [self disconnectWithCompletion:^{
-                    [self reconnect:5];
-                }];
-                return;
-            }
-            
-            if(st_error.code==64)// Host is down
-            {
-                [self disconnectWithCompletion:^{
-                    [self reconnect:5];
-                }];
-                return;
-            }
-            
-            if(st_error.code==32)// Broken pipe
-            {
-                [self disconnectWithCompletion:^{
-                    [self reconnect:5];
-                }];
-                return;
-            }
-            
-            
-            if(st_error.code==-9807)// Could not complete operation. SSL probably
-            {
-                [self disconnect];
-                return;
-            }
-            
-      
-            DDLogInfo(@"unhandled stream error");
-            [self disconnectWithCompletion:^{
-                [self reconnect:5];
-            }];
-            
-            break;
-            
-        }
-        case NSStreamEventNone:
-        {
-            DDLogVerbose(@"Stream event none");
-            break;
-            
-        }
-            
-            
-        case NSStreamEventEndEncountered:
-        {
-            if(_loggedInOnce)
-            {
-                DDLogInfo(@"%@ Stream end encoutered.. reconnecting.", [stream class] );
-                _loginStarted=NO;
-                [self disconnectWithCompletion:^{
-                    self->_accountState=kStateReconnecting;
-                    [self reconnect:5];
-                }];
-                
-            }
-         
-            break;
-            
-        }
-            
-    }
-    
-}
-
 #pragma mark network I/O
--(void) writeFromQueue
+
+-(void) handleConnectionError: (nw_error_t) error
 {
-	if(!_streamHasSpace)
-    {
-        DDLogVerbose(@"no space to write. early return from writeFromQueue().");
-        return;
-    }
-    BOOL requestAck=NO;
-    NSMutableArray *queueCopy = [[NSMutableArray alloc] initWithArray:_outputQueue];
-	DDLogVerbose(@"iterating _outputQueue");
-    for(MLXMLNode* node in queueCopy)
-    {
-        if (!_connectedTime && self.explicitLogout) break;
-        BOOL success=[self writeToStream:node.XMLString];
-        if(success)
-        {
-			//only react to stanzas, not nonzas
-			if([node.element isEqualToString:@"iq"]
-				|| [node.element isEqualToString:@"message"]
-				|| [node.element isEqualToString:@"presence"]) {
-				requestAck=YES;
-			}
-			
-			if([node isKindOfClass:[XMPPMessage class]])
-			{
-				XMPPMessage *messageNode = (XMPPMessage *) node;
-				NSDictionary *dic =@{kMessageId:messageNode.xmppId};
-				[[NSNotificationCenter defaultCenter] postNotificationName: kMonalSentMessageNotice object:self userInfo:dic];
-				
-			}
-			else if([node isKindOfClass:[XMPPIQ class]])
-			{
-				XMPPIQ *iq = (XMPPIQ *)node;
-				if([iq.children count]>0)
-				{
-					MLXMLNode *child =[iq.children objectAtIndex:0];
-					if ([[child element] isEqualToString:@"ping"])
-					{
-						[self setPingTimerForID:[iq.attributes objectForKey:@"id"]];
-					}
-				}
-			}
-			
-			DDLogVerbose(@"removing sent MLXMLNode from _outputQueue");
-			[_outputQueue removeObject:node];
-		}
-		else		//stop sending the remainder of the queue if the send failed (tcp output buffer full etc.)
-        {
-			DDLogInfo(@"could not send whole _outputQueue: tcp buffer full or connection has an error");
+	NSError* st_error = (__bridge NSError*)nw_error_copy_cf_error(error);
+	
+	DDLogError(@"Stream error code=%ld domain=%@ local desc:%@ ",(long)st_error.code,st_error.domain,  st_error.localizedDescription);
+	
+	NSString *message =st_error.localizedDescription;
+	
+	switch(st_error.code)
+	{
+		case errSSLXCertChainInvalid: {
+			message = @"SSL Error: Certificate chain is invalid";
 			break;
 		}
-    }
-    
-    if(requestAck)
-    {
-		//adding the smacks request to the receiveQueue will make sure that we send the request
-		//*after* processing an incoming burst of stanzas (which is potentially causing an outgoing burst of stanzas)
-		//this reduces the requests to an absolute minimum while still maintaining the rule to request an ack
-		//for every stanza (e.g. until the smacks queue is empty) and not sending an ack if one is already in flight
-		DDLogVerbose(@"adding smacks request to receiveQueue...");
-		[self.receiveQueue addOperationWithBlock: ^{
-			DDLogVerbose(@"requesting smacks ack...");
-			[self requestSMAck];
+			
+		case errSSLUnknownRootCert: {
+			message = @"SSL Error: Unknown root certificate";
+			break;
+		}
+			
+		case errSSLCertExpired: {
+			message = @"SSL Error: Certificate expired";
+			break;
+		}
+			
+		case errSSLHostNameMismatch: {
+			message = @"SSL Error: Host name mismatch";
+			break;
+		}
+			
+	}
+	
+	if(!self.registration) {
+		[[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message, st_error]];
+		if(self.loginCompletion)  {
+			self.loginCompletion(NO, message);
+			self.loginCompletion=nil;
+		}
+	}
+	
+	if(_loggedInOnce)
+	{
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
+		dispatch_async(dispatch_get_main_queue(), ^{
+			if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+				|| ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive )
+				&& (self.accountState>=kStateLoggedIn)){
+				DDLogInfo(@" Stream error in the background. Ignoring");
+				return;
+			} else  {
+#endif
+#endif
+				
+				
+				DDLogInfo(@" stream error calling reconnect for account that logged in once ");
+				[self disconnectWithCompletion:^{
+					[self reconnect:5];
+				}];
+				return;
+				
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
+			}
+		});
+#endif
+#endif
+	}
+	
+	
+	if(st_error.code==2 )// operation couldnt be completed // socket not connected
+	{
+		[self disconnectWithCompletion:^{
+			[self reconnect:5];
 		}];
-        
-    } else  {
-        DDLogVerbose(@"NOT requesting smacks ack...");
-    }
+		return;
+	}
+	
+	
+	if(st_error.code==60)// could not complete operation
+	{
+		[self disconnectWithCompletion:^{
+			[self reconnect:5];
+		}];
+		return;
+	}
+	
+	if(st_error.code==64)// Host is down
+	{
+		[self disconnectWithCompletion:^{
+			[self reconnect:5];
+		}];
+		return;
+	}
+	
+	if(st_error.code==32)// Broken pipe
+	{
+		[self disconnectWithCompletion:^{
+			[self reconnect:5];
+		}];
+		return;
+	}
+	
+	
+	if(st_error.code==-9807)// Could not complete operation. SSL probably
+	{
+		[self disconnect];
+		return;
+	}
+	
+
+	DDLogInfo(@"unhandled stream error");
+	[self disconnectWithCompletion:^{
+		[self reconnect:5];
+	}];
 }
 
--(BOOL) writeToStream:(NSString*) messageOut
+-(void) clearNetworkQueues
 {
-    if(!messageOut) {
-        DDLogInfo(@"tried to send empty message. returning without doing anything.");
-        return YES;		//pretend we sent the empty "data"
-    }
-    if(!_streamHasSpace)
-    {
-        DDLogVerbose(@"no space to write. returning.");
-        return NO;		//no space to write --> stanza has to remain in _outputQueue
-    }
-    
-    //try to send remaining buffered data first
-    if(_outputBufferByteCount>0)
-    {
-		NSInteger sentLen=[_oStream write:_outputBuffer maxLength:_outputBufferByteCount];
-		if(sentLen!=-1)
+	//suspend queues to stop not already running tasks
+	self.receiveQueue.suspended=YES;
+	self.sendQueue.suspended=YES;
+	//force running or future loop tasks to stop immediately without processing any data
+	_stopConnectionSendLoop=YES;		//force-stop send loop
+	_stopConnectionReceiveLoop=YES;		//force-stop receive loop
+	//cancel all queued tasks in our network queues
+	[self.receiveQueue cancelAllOperations];
+	[self.sendQueue cancelAllOperations];
+	//clear _outputQueue inside the sendQueue thread
+	[self.sendQueue addOperationWithBlock:^{
+		_outputQueue=[[NSMutableArray alloc] init];
+	}];
+	//clear _inputDataBuffer and _inputBuffer inside the receiveQueue thread
+	[self.receiveQueue addOperationWithBlock:^{
+		_inputDataBuffer=[[NSMutableData alloc] init];
+		_inputBuffer=[[NSMutableString alloc] init];
+	}];
+	//restart queues again
+	self.sendQueue.suspended=NO;
+	self.receiveQueue.suspended=NO;
+}
+
+-(void) initTLS
+{
+	/*
+	NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
+	[settings setObject:self.connectionProperties.identity.domain forKey:kCFStreamSSLPeerName];
+	if(self.connectionProperties.server.selfSignedCert)
+	{
+		DDLogInfo(@"configured self signed SSL");
+		[settings setObject:@NO forKey:kCFStreamSSLValidatesCertificateChain];
+	}
+	
+	//this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
+	DDLogInfo(@"configuring SSL handshake");
+	if(CFReadStreamSetProperty((__bridge CFReadStreamRef)self->_iStream, kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings))
+		DDLogInfo(@"Set TLS properties on streams. Security level %@", [self->_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
+	else
+	{
+		DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
+		DDLogInfo(@"Set TLS properties on streams.security level %@", [self->_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
+	}
+	
+	//see this for extracting the sslcontext of the cfstream: https://stackoverflow.com/a/26726525/3528174
+	//the ssl context methods (like SSLSetALPNData) are declared in Security/SecureTransportPriv.h and can be found here:
+	//https://opensource.apple.com/source/Security/Security-57740.31.2/OSX/libsecurity_ssl/lib/sslContext.c.auto.html
+	//this will only have an effect if the TLS handshake was not already started (e.g. the TCP socket is not connected)
+	SSLContextRef sslContext = (__bridge SSLContextRef) [_iStream propertyForKey: (__bridge NSString *) kCFStreamPropertySSLContext ];
+	SSLSetAllowsAnyRoot(sslContext, 1);
+	tls_handshake_set_alpn_data(sslContext->hdsk, alpnData);
+	//SSLSetALPNData(sslContext, "\x0Bxmpp-client", 12);
+	*/
+	
+	
+	nw_parameters_t parameters = nw_connection_copy_parameters(_connection);
+	nw_protocol_stack_t stack = nw_parameters_copy_default_protocol_stack(parameters);
+	
+	nw_protocol_stack_iterate_application_protocols(stack, ^(nw_protocol_options_t protocol) {
+		DDLogInfo(@"initTLS stack entry: %@", protocol);
+	});
+	
+	
+	/*
+	nw_protocol_definition_t tls = nw_protocol_copy_tls_definition();
+	
+	nw_protocol_stack_prepend_application_protocol();
+	
+	configure_tls = ^(nw_protocol_options_t tls_options) {
+	};
+	sec_protocol_options_t options = nw_tls_copy_sec_protocol_options(tls_options);
+	
+	sec_protocol_options_set_tls_server_name(options, [self.connectionProperties.identity.domain cStringUsingEncoding:NSUTF8StringEncoding]);
+	if(self.connectionProperties.server.selfSignedCert)
+	{
+		DDLogInfo(@"configured self signed SSL");
+		sec_protocol_options_set_peer_authentication_required(options, 0);
+	}
+	sec_protocol_options_add_tls_application_protocol(options, "\x0Bxmpp-client");
+	sec_protocol_options_set_tls_resumption_enabled(options, 1);
+	sec_protocol_options_set_tls_tickets_enabled(options, 1);
+	*/
+}
+
+-(void) openConnection
+{
+	// do DNS discovery if it hasn't already been set
+	if([_discoveredServersList count]==0) {
+		_discoveredServersList=[[[MLDNSLookup alloc] init] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
+	}
+	
+	//if all servers have been tried start over with the first one again
+	if([_discoveredServersList count]>0 && [_usableServersList count]==0)
+	{
+		DDLogWarn(@"All %lu SRV dns records tried, starting over again", (unsigned long)[_discoveredServersList count]);
+		_usableServersList = [_discoveredServersList mutableCopy];
+		for(NSDictionary *row in _usableServersList)
 		{
-			if(sentLen!=_outputBufferByteCount)		//some bytes remaining to send --> trim buffer and return NO
+			DDLogInfo(@"SRV entry: server=%@, port=%@, isSecure=%s (prio: %@)",
+				[row objectForKey:@"server"],
+				[row objectForKey:@"port"],
+				[[row objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
+				[row objectForKey:@"priority"]
+			);
+		}
+	}
+	
+    if([_usableServersList count]>0) {
+		DDLogInfo(@"Using connection parameters discovered via SRV dns record: server=%@, port=%@, isSecure=%s, priority=%@",
+			[[_usableServersList objectAtIndex:0] objectForKey:@"server"],
+			[[_usableServersList objectAtIndex:0] objectForKey:@"port"],
+			[[[_usableServersList objectAtIndex:0] objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
+			[[_usableServersList objectAtIndex:0] objectForKey:@"priority"]
+		);
+        [self.connectionProperties.server updateConnectServer: [[_usableServersList objectAtIndex:0] objectForKey:@"server"]];
+        [self.connectionProperties.server updateConnectPort: [[_usableServersList objectAtIndex:0] objectForKey:@"port"]];
+		[self.connectionProperties.server updateConnectTLS: [[[_usableServersList objectAtIndex:0] objectForKey:@"isSecure"] boolValue]];
+		//remove this server so that the next connection attempt will try the next server in the list
+		[_usableServersList removeObjectAtIndex:0];
+		DDLogInfo(@"%lu SRV entries left:", (unsigned long)[_usableServersList count]);
+		for(NSDictionary *row in _usableServersList)
+		{
+			DDLogInfo(@"SRV entry: server=%@, port=%@, isSecure=%s (prio: %@)",
+				[row objectForKey:@"server"],
+				[row objectForKey:@"port"],
+				[[row objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
+				[row objectForKey:@"priority"]
+			);
+		}
+	}
+	
+	
+	DDLogInfo(@"connection creating to  server: %@ port: %@ directTLS: %@", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort, self.connectionProperties.server.connectTLS ? @"YES" : @"NO");
+	
+	dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+	dispatch_source_t streamTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,q_background);
+	dispatch_source_set_timer(streamTimer,
+							dispatch_time(DISPATCH_TIME_NOW, 5ull * NSEC_PER_SEC),
+							DISPATCH_TIME_FOREVER,
+							1ull * NSEC_PER_SEC);
+	
+	dispatch_source_set_event_handler(streamTimer, ^{
+		DDLogError(@"stream connection timed out");
+		dispatch_source_cancel(streamTimer);
+		
+		[self disconnect];
+	});
+	dispatch_source_set_cancel_handler(streamTimer, ^{
+		DDLogError(@"stream timer cancelled");
+	});
+	dispatch_resume(streamTimer);
+	
+	nw_endpoint_t endpoint = nw_endpoint_create_host(
+		[self.connectionProperties.server.connectServer cStringUsingEncoding:NSUTF8StringEncoding],
+		[[self.connectionProperties.server.connectPort stringValue] cStringUsingEncoding:NSUTF8StringEncoding]
+	);
+	//always configure tls
+	nw_parameters_t parameters = nw_parameters_create_secure_tcp(NW_PARAMETERS_DISABLE_PROTOCOL, NW_PARAMETERS_DEFAULT_CONFIGURATION);
+	
+	//extract preconfigured tls_protocol_options for use with nw_protocol_stack_prepend_application_protocol
+	nw_parameters_t parameters_with_tls = nw_parameters_create_secure_tcp(^(nw_protocol_options_t tls_options) {
+		sec_protocol_options_t options = nw_tls_copy_sec_protocol_options(tls_options);
+		sec_protocol_options_set_tls_server_name(options, [self.connectionProperties.identity.domain cStringUsingEncoding:NSUTF8StringEncoding]);
+		if(self.connectionProperties.server.selfSignedCert)
+		{
+			DDLogInfo(@"configured self signed SSL");
+			sec_protocol_options_set_peer_authentication_required(options, 0);
+		}
+		sec_protocol_options_add_tls_application_protocol(options, "xmpp-client");
+		sec_protocol_options_set_tls_resumption_enabled(options, 1);
+		sec_protocol_options_set_tls_tickets_enabled(options, 1);
+	}, NW_PARAMETERS_DEFAULT_CONFIGURATION);
+	nw_protocol_stack_t tls_stack = nw_parameters_copy_default_protocol_stack(parameters_with_tls);
+	__block nw_protocol_options_t tls_protocol_options;
+	nw_protocol_stack_iterate_application_protocols(tls_stack, ^(nw_protocol_options_t protocol) {
+		DDLogInfo(@"preconfig stack entry: %@", protocol);
+		tls_protocol_options = protocol;
+	});
+	
+	_connection = nw_connection_create(endpoint, parameters_with_tls);
+	nw_connection_set_queue(_connection, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
+	nw_connection_set_state_changed_handler(_connection, ^(nw_connection_state_t state, nw_error_t error) {
+		if(state == nw_connection_state_waiting) {
+			//do nothing here, documentation says the connection will be automatically retried "when conditions are favourable"
+			//which seems to mean: if the network path changed (for example connectivity regained)
+			//if this happens inside the connection timeout all is ok
+			//if not, the connection will be cancelled already and everything will be ok, too
+		} else if(state == nw_connection_state_failed) {
+			DDLogError(@"Connection failed");
+			dispatch_source_cancel(streamTimer);
+			NSString *message=@"Unable to connect to server";
+			[[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+			if(self.loginCompletion)  {
+				self.loginCompletion(NO, message);
+				self.loginCompletion=nil;
+			}
+			[self disconnect];
+		} else if(state == nw_connection_state_ready) {
+			DDLogInfo(@"Connection established");
+			dispatch_source_cancel(streamTimer);
+			
+			if(self.connectionProperties.server.connectTLS==YES)
 			{
-				memmove(_outputBuffer, _outputBuffer+(size_t)sentLen, _outputBufferByteCount-(size_t)sentLen);
-				_outputBufferByteCount-=sentLen;
-				_streamHasSpace=NO;
-				return NO;		//stanza has to remain in _outputQueue
+				DDLogInfo(@"starting directSSL");
+				
+				//add tls
+				//nw_protocol_stack_t stack = nw_parameters_copy_default_protocol_stack(parameters);
+				//nw_protocol_stack_prepend_application_protocol(stack, tls_protocol_options);
+				
+				[self initTLS];
+			}
+			
+			//allow looping (again)
+			_stopConnectionSendLoop=NO;
+			_stopConnectionReceiveLoop=NO;
+			
+			//start receive loop (send looping will be automatically started on first send)
+			[self.receiveQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
+				[self receiveLoop];
+			}]];
+			
+			//start xml stream
+			MLXMLNode* xmlOpening = [[MLXMLNode alloc] initWithElement:@"xml"];
+			[self send:xmlOpening];
+			[self startStream];
+		} else if(state == nw_connection_state_cancelled) {
+			DDLogInfo(@"Connection closed");
+		}
+	});
+	
+	//clear network queues and start connection
+	[self clearNetworkQueues];
+	nw_connection_start(_connection);
+}
+
+-(void) closeConnection
+{
+	[self clearNetworkQueues];
+	[self.receiveQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
+		self.connectedTime =nil;
+		self.pingID=nil;
+		
+		if(_connection)
+			nw_connection_cancel(_connection);
+		_connection = NULL;
+	//block until finished if we are not already in the receiveQueue
+	}]] waitUntilFinished:([NSOperationQueue currentQueue]!=self.receiveQueue)];
+}
+
+-(void) enqueueStanzaToSend: (MLXMLNode*) stanza
+{
+	if(_stopConnectionSendLoop) return;			//ignore new request if we are clearing/shutting down the sendQueue
+	[self.sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
+		if(_stopConnectionSendLoop) return;			//ignore new request if we are clearing/shutting down the sendQueue
+		
+		//add stanza to _outputQueue
+		DDLogDebug(@"QUEUED SEND: %@", stanza.XMLString);
+		[_outputQueue addObject:stanza];
+		
+		if(_ConnectionSendIsLooping) return;		//don't start a new loop if already running
+		[self sendLoopWithRequestAck:NO];
+	}]];
+}
+
+-(void) writeNodeToConnection:(MLXMLNode*) node withCompletion: (void (^)(nw_error_t _Nullable error))completion
+{
+	//don't do anything if no connection is established
+	if(!_connection)
+	{
+		DDLogDebug(@"NOT sending (no connection established): %@", node.XMLString);
+		return;
+	}
+	
+	DDLogDebug(@"really sending: %@", node.XMLString);
+	const uint8_t *rawstring = (const uint8_t *)[node.XMLString UTF8String];
+	dispatch_data_t data = dispatch_data_create(rawstring, strlen((char*)rawstring), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), DISPATCH_DATA_DESTRUCTOR_DEFAULT);
+	nw_connection_send(_connection, data, NW_CONNECTION_DEFAULT_MESSAGE_CONTEXT, true, ^(nw_error_t  _Nullable error) {
+		//[data release];
+		if(completion) {
+			completion(error);
+		}
+	});
+}
+
+-(void) sendLoopWithRequestAck: (BOOL) _requestAck
+{
+	if(!_connectedTime && self.explicitLogout) return;
+	__block BOOL requestAck = _requestAck;
+	
+	//extract the first stanza from the _outputQueue and utf8-encode it into a dispatch_data_t object
+	MLXMLNode* node = [_outputQueue firstObject];
+	
+	//send data
+	_ConnectionSendIsLooping=YES;		//this is used to prevent multiple send loops from running
+	[self writeNodeToConnection:node withCompletion:^(nw_error_t  _Nullable send_error) {
+		//stop looping if *forced* to do so (this will only be done when clearing/shutting down the sendQueue)
+		if(_stopConnectionSendLoop)
+		{
+			_ConnectionSendIsLooping=NO;		//we are not looping anymore
+			return;
+		}
+		//process completion handler in a sendQueue block to make sure everything instruction in this method
+		//is always done in the sendQueue thread
+		[self.sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
+			//stop looping if *forced* to do so (this will only be done when clearing/shutting down the sendQueue)
+			//do this inside the block again to counter race conditions with clearNetworkQueues
+			if(_stopConnectionSendLoop)
+			{
+				_ConnectionSendIsLooping=NO;		//we are not looping anymore
+				return;
+			}
+			
+			[_outputQueue removeObject:node];
+			if(send_error != NULL)
+			{
+				_ConnectionSendIsLooping=NO;		//we are not looping anymore
+				DDLogError(@"sending: failed with error %ld (%@)", (long)nw_error_get_error_code(send_error), send_error);
+				[self handleConnectionError: send_error];
+				return;		//stop send loop
 			}
 			else
 			{
-				//dealloc empty buffer
-				free(_outputBuffer);
-				_outputBuffer=nil;
-				_outputBufferByteCount=0;		//everything sent
+				DDLogVerbose(@"stanza sent to socket...");
+				
+				if([node isKindOfClass:[XMPPMessage class]])
+				{
+					XMPPMessage *messageNode = (XMPPMessage *) node;
+					NSDictionary *dic =@{kMessageId:messageNode.xmppId};
+					[[NSNotificationCenter defaultCenter] postNotificationName: kMonalSentMessageNotice object:self userInfo:dic];
+					
+				}
+				else if([node isKindOfClass:[XMPPIQ class]])
+				{
+					XMPPIQ *iq = (XMPPIQ *)node;
+					if([iq.children count]>0)
+					{
+						MLXMLNode *child =[iq.children objectAtIndex:0];
+						if ([[child element] isEqualToString:@"ping"])
+						{
+							[self setPingTimerForID:[iq.attributes objectForKey:@"id"]];
+						}
+					}
+				}
+				
+				//only react to stanzas, not nonzas
+				if([node.element isEqualToString:@"iq"]
+					|| [node.element isEqualToString:@"message"]
+					|| [node.element isEqualToString:@"presence"]) {
+					requestAck=YES;
+				}
+				
+				//continue looping over the rest of _outputQueue
+				if([_outputQueue count])
+					[self sendLoopWithRequestAck:requestAck];
+				//the loop ended --> check if we need to request a smacks ack
+				else
+				{
+					if(requestAck)
+					{
+						//adding the smacks request to the receiveQueue will make sure that we send the request
+						//*after* processing an incoming burst of stanzas (which is potentially causing an outgoing burst of stanzas)
+						//this reduces the requests to an absolute minimum while still maintaining the rule to request an ack
+						//for every outgoing stanza (e.g. one request after prcessing the full queue) while not sending an ack if one is already in flight
+						DDLogVerbose(@"adding smacks request to receiveQueue...");
+						[self.receiveQueue addOperationWithBlock: ^{
+							DDLogVerbose(@"requesting smacks ack...");
+							[self requestSMAck];
+						}];
+					}
+					else
+						DDLogVerbose(@"NOT requesting smacks ack...");
+					
+					_ConnectionSendIsLooping=NO;		//we are not looping anymore
+					return;
+				}
 			}
-		}
-		else
-		{
-			NSError* error=[_oStream streamError];
-			DDLogError(@"sending: failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
-			return NO;
-		}
-	}
-    
-    //then try to send the stanza in question and buffer half sent data
-    const uint8_t *rawstring = (const uint8_t *)[messageOut UTF8String];
-    NSInteger rawstringLen=strlen((char*)rawstring);
-    NSInteger sentLen = [_oStream write:rawstring maxLength:rawstringLen];
-    if(sentLen!=-1)
-    {
-		if(sentLen!=rawstringLen)
-		{
-			//allocate new _outputBuffer
-			_outputBuffer=malloc(sizeof(uint8_t) * rawstringLen-sentLen);
-			//copy the remaining data into the buffer and set the buffer pointer accordingly
-			memcpy(_outputBuffer, rawstring+(size_t)sentLen, (size_t)(rawstringLen-sentLen));
-			_outputBufferByteCount=(size_t)(rawstringLen-sentLen);
-			_streamHasSpace=NO;
-		}
-		else
-			_outputBufferByteCount=0;
-        return YES;
-    }
-    else
-    {
-        NSError* error=[_oStream streamError];
-        DDLogError(@"sending: failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
-        return NO;
-    }
+		}]];
+	}];
 }
 
--(void) readToBuffer
+-(void) receiveLoop
 {
-	if(![_iStream hasBytesAvailable])
+	//stop looping if forced to do so
+	if(_stopConnectionReceiveLoop)
+		return;
+	
+	//don't do anything if no connection is established
+	if(!_connection)
 	{
-		DDLogVerbose(@"no bytes  to read");
+		DDLogDebug(@"NOT running receiveLoop (no connection established)");
 		return;
 	}
-	uint8_t* buf=malloc(kXMPPReadSize);
-    NSInteger len = 0;
-	do
-	{
-		len = [_iStream read:buf maxLength:kXMPPReadSize];
-		DDLogVerbose(@"done reading %ld", (long)len);
-		if(len>0) {
-			[self->_inputDataBuffer appendBytes:(const void *)buf length:len];
-			//  DDLogVerbose(@" got raw string %s ", buf);
-			NSString* inputString=[[NSString alloc] initWithData:self->_inputDataBuffer encoding:NSUTF8StringEncoding];
-			if(inputString) {
-				[self->_inputBuffer appendString:inputString];
-				[self->_inputDataBuffer setLength:0];		//remove all data because it got decoded as utf-8 string now
-				[self processInput];
+	
+	nw_connection_receive(_connection, 1, UINT32_MAX, ^(dispatch_data_t content, nw_content_context_t context, bool is_complete, nw_error_t receive_error) {
+		//stop processing incoming data if forced to do so
+		if(_stopConnectionReceiveLoop)
+			return;
+		
+		[self.receiveQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
+			//stop processing incoming data if forced to do so
+			//do this inside the block again to counter race conditions with clearNetworkQueues
+			if(_stopConnectionReceiveLoop)
+				return;
+			
+			//handle content received
+			if(content != NULL) {
+				DDLogVerbose(@"connection received data");
+				[self->_inputDataBuffer appendData:(NSData *)content];
+				NSString* inputString=[[NSString alloc] initWithData:self->_inputDataBuffer encoding:NSUTF8StringEncoding];
+				if(inputString) {
+					[self->_inputBuffer appendString:inputString];
+					[self->_inputDataBuffer setLength:0];		//remove all data because it got decoded as utf-8 string now
+					[self processInput];
+				}
+				else {
+					DDLogError(@"got data but not string (utf-8 decoding error possibly data is incomplete)");
+				}
 			}
-			else {
-				DDLogError(@"got data but not string (utf-8 decoding error possibly data is incomplete)");
+			
+			//check if we're read-closed and stop our loop if true
+			//this has to be done *after* processing content
+			if(is_complete)
+			{
+				if(_loggedInOnce)
+				{
+					DDLogInfo(@"%@ Stream end encoutered.. reconnecting.");
+					_loginStarted=NO;
+					[self disconnectWithCompletion:^{
+						self->_accountState=kStateReconnecting;
+						[self reconnect:5];
+					}];
+				}
+				return;		//stop this read loop
 			}
-		}
-    } while(len>0 && [_iStream hasBytesAvailable]);
-	free(buf);
-	return;
-}
-
-
--(void) enablePush
-{
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-    if(self.accountState>=kStateBound && [self.pushNode length]>0 && [self.pushSecret length]>0 && self.connectionProperties.supportsPush)
-    {
-        DDLogInfo(@"ENABLING PUSH: %@ < %@", self.pushNode, self.pushSecret);
-        XMPPIQ* enable =[[XMPPIQ alloc] initWithType:kiqSetType];
-        [enable setPushEnableWithNode:self.pushNode andSecret:self.pushSecret];
-        [self send:enable];
-        self.connectionProperties.pushEnabled=YES;
-    }
-    else {
-        DDLogInfo(@" NOT enabling push: %@ < %@", self.pushNode, self.pushSecret);
-    }
-#endif
-#endif
+			
+			//check for errors
+			//this has to be done *after* processing content
+			if(receive_error != NULL)
+			{
+				DDLogError(@"receiving: failed with error %ld (%@)", (long)nw_error_get_error_code(receive_error), receive_error);
+				[self handleConnectionError: receive_error];
+				return;		//stop this read loop
+			}
+			
+			//receive more data
+			[self receiveLoop];
+		}]];
+	});
 }
 
 @end

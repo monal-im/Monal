@@ -74,6 +74,22 @@
     
 }
 
+-(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations {
+    [self.locationManager stopUpdatingLocation];
+
+    // Check last location
+    CLLocation* gpsLoc = [locations lastObject];
+    if(gpsLoc == nil) {
+        return;
+    }
+    // Send location
+    [self sendMessage:[NSString stringWithFormat:@"geo:%f,%f", gpsLoc.coordinate.latitude, gpsLoc.coordinate.longitude]];
+}
+
+- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
+    DDLogError(@"Error while fetching location %@", error);
+}
+
 #pragma mark -  view lifecycle
 
 -(void) viewDidLoad
@@ -142,7 +158,7 @@
         
     } else {
         [self.sendButton setImage:[UIImage imageNamed:@"648-paper-airplane"] forState:UIControlStateNormal];
-        [self.pictureButton setImage:[UIImage imageNamed:@"714-camera"] forState:UIControlStateNormal];
+        [self.plusButton setImage:[UIImage imageNamed:@"907-plus-rounded-square"] forState:UIControlStateNormal];
     }
 #endif
     
@@ -528,12 +544,17 @@
     }];
 }
 
-#pragma mark - image picker
+#pragma mark - attachment picker
 
 -(IBAction)attach:(id)sender
 {
     [self.chatInput resignFirstResponder];
     xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+
+    UIAlertController *actionControll = [UIAlertController alertControllerWithTitle:@"Select Action"
+    message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+
+    // Check for http upload support
     if(!account.connectionProperties.supportsHTTPUpload )
     {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error"
@@ -544,45 +565,74 @@
         [self presentViewController:alert animated:YES completion:nil];
         
         return;
-    }
-    
-#if TARGET_OS_MACCATALYST
-    [self attachfile:sender];
-#else
-    
-    UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
-    imagePicker.delegate =self;
-    
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Select Image Source"
-                                                                   message:nil preferredStyle:UIAlertControllerStyleActionSheet];
-    
-    [alert addAction:[UIAlertAction actionWithTitle:@"Camera" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
-        [self presentViewController:imagePicker animated:YES completion:nil];
-    }]];
-    
-    [alert addAction:[UIAlertAction actionWithTitle:@"Photos" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-        [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
-            if(granted)
-            {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self presentViewController:imagePicker animated:YES completion:nil];
-                });
-            }
-        }];
-        
-    }]];
-    
-    
-    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-        [alert dismissViewControllerAnimated:YES completion:nil];
-    }]];
-    alert.popoverPresentationController.sourceView=sender;
-    [self presentViewController:alert animated:YES completion:nil];
-#endif
-}
+    } else {
+        #if TARGET_OS_MACCATALYST
+            [self attachfile:sender];
+        #else
+            UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
+            imagePicker.delegate =self;
 
+            UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:@"Camera" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+                [self presentViewController:imagePicker animated:YES completion:nil];
+            }];
+
+            UIAlertAction* photosAction = [UIAlertAction actionWithTitle:@"Photos" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+                [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+                    if(granted)
+                    {
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [self presentViewController:imagePicker animated:YES completion:nil];
+                        });
+                    }
+                }];
+            }];
+
+            // Set image
+            if (@available(iOS 13.0, *)) {
+                [cameraAction setValue:[[UIImage systemImageNamed:@"camera"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+                [photosAction setValue:[[UIImage systemImageNamed:@"photo"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+            } else {
+                [cameraAction setValue:[[UIImage imageNamed:@"714-camera"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+            }
+            [actionControll addAction:cameraAction];
+            [actionControll addAction:photosAction];
+        #endif
+    }
+
+    #if !TARGET_OS_MACCATALYST
+    // GPS
+    CLAuthorizationStatus gpsStatus = [CLLocationManager authorizationStatus];
+    if(gpsStatus == kCLAuthorizationStatusAuthorizedAlways || gpsStatus == kCLAuthorizationStatusAuthorizedWhenInUse) {
+        UIAlertAction* gpsAlert = [UIAlertAction actionWithTitle:@"Send Location" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            if(self.locationManager == nil) {
+                self.locationManager = [[CLLocationManager alloc] init];
+                self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+                self.locationManager.delegate = self;
+            }
+            [self.locationManager startUpdatingLocation];
+        }];
+        // Set image
+        if (@available(iOS 13.0, *)) {
+            [gpsAlert setValue:[[UIImage systemImageNamed:@"location"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+        }
+        [actionControll addAction:gpsAlert];
+    } else if(gpsStatus == kCLAuthorizationStatusNotDetermined) {
+        if(self.locationManager == nil) {
+            self.locationManager = [[CLLocationManager alloc] init];
+        }
+        [self.locationManager requestWhenInUseAuthorization];
+    }
+
+        [actionControll addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            [actionControll dismissViewControllerAnimated:YES completion:nil];
+        }]];
+
+        actionControll.popoverPresentationController.sourceView=sender;
+        [self presentViewController:actionControll animated:YES completion:nil];
+    #endif
+}
 
 -(void) uploadData:(NSData *) data
 {
@@ -1223,7 +1273,7 @@
 
             cell.messageBody.attributedText = geoString;
             NSInteger zoomLayer = 15;
-            cell.link = [NSString stringWithFormat:@"https://www.openstreetmap.org/?mlat=%@&mlon=%@&zoom=%ldd", latitude, longitude, zoomLayer] ;
+            cell.link = [NSString stringWithFormat:@"https://www.openstreetmap.org/?mlat=%@&mlon=%@&zoom=%ldd", latitude, longitude, zoomLayer];
         }
     } else {
         // Check if message contains a url

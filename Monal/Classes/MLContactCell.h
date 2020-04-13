@@ -5,6 +5,7 @@
 //  Created by Anurodh Pokharel on 7/7/13.
 //
 //
+#import "MLAttributedLabel.h"
 
 typedef enum {
     kStatusOnline=1,
@@ -23,7 +24,7 @@ typedef enum {
 @property (nonatomic, weak) IBOutlet UILabel *centeredDisplayName;
 @property (nonatomic, weak) IBOutlet UILabel *time;
 
-@property (nonatomic, weak) IBOutlet UILabel *statusText;
+@property (nonatomic, weak) IBOutlet MLAttributedLabel *statusText;
 @property (nonatomic, weak) IBOutlet UIImageView *statusOrb;
 @property (nonatomic, weak) IBOutlet UIImageView *userImage;
 @property (nonatomic, weak) IBOutlet UIButton *badge;
@@ -32,6 +33,8 @@ typedef enum {
 -(void) setOrb;
 
 -(void) showStatusText:(NSString *) text;
+-(void) showStatusTextItalic:(NSString *) text withItalicRange:(NSRange)italicRange;
+-(void) setStatusTextLayout:(NSString *) text;
 -(void) showDisplayName:(NSString *) name;
 
 @end

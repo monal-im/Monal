@@ -48,18 +48,48 @@ NSString *const kMessageTypeUrl =@"Url";
 NSString *const kContactName =@"buddy_name";
 NSString *const kCount =@"count";
 
-static DataLayer *sharedInstance=nil;
 
++(void) initialize
+{
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+    NSString *writableDBPath = [documentsDirectory stringByAppendingPathComponent:@"sworim.sqlite"];
+    DDLogInfo(@"initialize: db path %@", writableDBPath);
+    if( ![fileManager fileExistsAtPath:writableDBPath])
+    {
+        // The writable database does not exist, so copy the default to the appropriate location.
+        NSString *defaultDBPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"sworim.sqlite"];
+        NSError* error;
+        [fileManager copyItemAtPath:defaultDBPath toPath:writableDBPath error:&error];
+    }
+#if TARGET_OS_IPHONE
+    NSDictionary *attributes =@{NSFileProtectionKey:NSFileProtectionCompleteUntilFirstUserAuthentication};
+    NSError *error;
+    [fileManager setAttributes:attributes ofItemAtPath:writableDBPath error:&error];
+#endif
+    
+    //  sqlite3_shutdown();
+    if (sqlite3_config(SQLITE_CONFIG_MULTITHREAD) == SQLITE_OK) {
+        DDLogInfo(@"initialize: Database configured ok");
+    } else DDLogInfo(@"initialize: Database not configured ok");
+    
+    sqlite3_initialize();
+}
+
+//every thread gets its own instance having its own db connection
+//this allows for concurrent reads/writes
 + (DataLayer* )sharedInstance
 {
-    static dispatch_once_t once;
-    dispatch_once(&once, ^{
-        sharedInstance = [DataLayer alloc] ;
-        [sharedInstance initDB];
-        
-    });
-    return sharedInstance;
-    
+	NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+	if(threadData[@"_dbInstanceForThread"])
+		return threadData[@"_dbInstanceForThread"];
+	DataLayer* newInstance = [DataLayer alloc];
+	[newInstance openDB];
+	threadData[@"_dbInstanceForThread"] = newInstance;						//save thread-local instance
+	threadData[@"_dbTransactionRunning"] = [NSNumber numberWithInt:0];		//init data for nested transactions
+	return newInstance;
 }
 
 #pragma mark  - V1 low level
@@ -67,95 +97,93 @@ static DataLayer *sharedInstance=nil;
 {
     if(!query) return nil;
     NSObject* __block toReturn;
-    dispatch_sync(_dbQueue, ^{
-        sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(self->database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
-            sqlite3_reset(statement);
-            [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                if([obj isKindOfClass:[NSNumber class]])
-                {
-                    NSNumber *number = (NSNumber *) obj;
-                    if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
-                    {
-                        DDLogError(@"number bind error");
-                        
-                    }
-                }
-                else if([obj isKindOfClass:[NSString class]])
-                {
-                    NSString *text = (NSString *) obj;
-                    
-                    if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
-                        DDLogError(@"string bind error");
-                        
-                    };
-                }
-            }];
-            
-            if (sqlite3_step(statement) == SQLITE_ROW)
-            {
-                switch(sqlite3_column_type(statement,0))
-                {
-                        // SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
-                    case (SQLITE_INTEGER):
-                    {
-                        NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement,0)];
-                        while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
-                        toReturn= returnInt;
-                        break;
-                    }
-                        
-                    case (SQLITE_FLOAT):
-                    {
-                        NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,0)];
-                        while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
-                        toReturn= returnInt;
-                        break;
-                    }
-                        
-                    case (SQLITE_TEXT):
-                    {
-                        NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull) sqlite3_column_text(statement,0)];
-                        //	DDLogVerbose(@"got %@", returnString);
-                        while(sqlite3_step(statement)== SQLITE_ROW ){} //clear
-                        toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
-                        break;
-                        
-                    }
-                        
-                    case (SQLITE_BLOB):
-                    {
-                        
-                        const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
-                        int size = sqlite3_column_bytes(statement,0);
-                        NSData* returnData = [NSData dataWithBytes:bytes length:size];
-                        while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
-                        toReturn= returnData;
-                        
-                        break;
-                    }
-                        
-                    case (SQLITE_NULL):
-                    {
-                        DDLogVerbose(@"return nil with sql null");
-                        while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
-                        toReturn= nil;
-                        break;
-                    }
-                        
-                }
-                
-            } else
-            {DDLogVerbose(@"return nil with no row");
-                toReturn= nil;};
-        }
-        else{
-            //if noting else
-            DDLogVerbose(@"returning nil with out OK %@", query);
-            toReturn= nil;
-        }
-    });
-    
+	sqlite3_stmt *statement;
+	if (sqlite3_prepare_v2(self->database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
+		sqlite3_reset(statement);
+		[args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+			if([obj isKindOfClass:[NSNumber class]])
+			{
+				NSNumber *number = (NSNumber *) obj;
+				if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
+				{
+					DDLogError(@"number bind error");
+					
+				}
+			}
+			else if([obj isKindOfClass:[NSString class]])
+			{
+				NSString *text = (NSString *) obj;
+				
+				if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+					DDLogError(@"string bind error");
+					
+				};
+			}
+		}];
+		
+		if (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			switch(sqlite3_column_type(statement,0))
+			{
+					// SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
+				case (SQLITE_INTEGER):
+				{
+					NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement,0)];
+					while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+					toReturn= returnInt;
+					break;
+				}
+					
+				case (SQLITE_FLOAT):
+				{
+					NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,0)];
+					while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+					toReturn= returnInt;
+					break;
+				}
+					
+				case (SQLITE_TEXT):
+				{
+					NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull) sqlite3_column_text(statement,0)];
+					//	DDLogVerbose(@"got %@", returnString);
+					while(sqlite3_step(statement)== SQLITE_ROW ){} //clear
+					toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
+					break;
+					
+				}
+					
+				case (SQLITE_BLOB):
+				{
+					
+					const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
+					int size = sqlite3_column_bytes(statement,0);
+					NSData* returnData = [NSData dataWithBytes:bytes length:size];
+					while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+					toReturn= returnData;
+					
+					break;
+				}
+					
+				case (SQLITE_NULL):
+				{
+					DDLogVerbose(@"return nil with sql null");
+					while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+					toReturn= nil;
+					break;
+				}
+					
+			}
+			
+		} else
+		{DDLogVerbose(@"return nil with no row");
+			toReturn= nil;};
+	}
+	else{
+		//if noting else
+		DDLogVerbose(@"returning nil with out OK %@", query);
+		toReturn= nil;
+	}
+    sqlite3_finalize(statement);
     return toReturn;
 }
 
@@ -163,97 +191,95 @@ static DataLayer *sharedInstance=nil;
 {
     if(!query) return nil;
     NSMutableArray* __block toReturn =  [[NSMutableArray alloc] init] ;
-    dispatch_sync(_dbQueue, ^{
-        sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(self->database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
-            
-            sqlite3_reset(statement);
-            [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                if([obj isKindOfClass:[NSNumber class]])
-                {
-                    NSNumber *number = (NSNumber *) obj;
-                    if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
-                    {
-                        DDLogError(@"number bind error");
-                        
-                    }
-                }
-                else if([obj isKindOfClass:[NSString class]])
-                {
-                    NSString *text = (NSString *) obj;
-                    
-                    if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
-                        DDLogError(@"string bind error");
-                        
-                    };
-                }
-            }];
-            
-            while (sqlite3_step(statement) == SQLITE_ROW) {
-                NSMutableDictionary* row= [[NSMutableDictionary alloc] init];
-                int counter=0;
-                while(counter< sqlite3_column_count(statement) )
-                {
-                    NSString* columnName=[NSString stringWithUTF8String:sqlite3_column_name(statement,counter)];
-                    
-                    switch(sqlite3_column_type(statement,counter))
-                    {
-                            // SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
-                        case (SQLITE_INTEGER):
-                        {
-                            NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement,counter)];
-                            [row setObject:returnInt forKey:columnName];
-                            break;
-                        }
-                            
-                        case (SQLITE_FLOAT):
-                        {
-                            NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,counter)];
-                            [row setObject:returnInt forKey:columnName];
-                            break;
-                        }
-                            
-                        case (SQLITE_TEXT):
-                        {
-                            NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,counter)];
-                            [row setObject:[returnString stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
-                            break;
-                            
-                        }
-                            
-                        case (SQLITE_BLOB):
-                        {
-                            const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,counter);
-                            int size = sqlite3_column_bytes(statement,counter);
-                            NSData* returnData = [NSData dataWithBytes:bytes length:size];
-                            
-                            [row setObject:returnData forKey:columnName];
-                            break;
-                        }
-                            
-                        case (SQLITE_NULL):
-                        {
-                            DDLogVerbose(@"return nil with sql null");
-                            
-                            [row setObject:@"" forKey:columnName];
-                            break;
-                        }
-                            
-                    }
-                    
-                    counter++;
-                }
-                
-                [toReturn addObject:row];
-            }
-        }
-        else
-        {
-            DDLogVerbose(@"reader nil with sql not ok: %@", query );
-            toReturn= nil;
-        }
-    });
-    
+	sqlite3_stmt *statement;
+	if (sqlite3_prepare_v2(self->database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
+		
+		sqlite3_reset(statement);
+		[args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+			if([obj isKindOfClass:[NSNumber class]])
+			{
+				NSNumber *number = (NSNumber *) obj;
+				if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
+				{
+					DDLogError(@"number bind error");
+					
+				}
+			}
+			else if([obj isKindOfClass:[NSString class]])
+			{
+				NSString *text = (NSString *) obj;
+				
+				if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+					DDLogError(@"string bind error");
+					
+				};
+			}
+		}];
+		
+		while (sqlite3_step(statement) == SQLITE_ROW) {
+			NSMutableDictionary* row= [[NSMutableDictionary alloc] init];
+			int counter=0;
+			while(counter< sqlite3_column_count(statement) )
+			{
+				NSString* columnName=[NSString stringWithUTF8String:sqlite3_column_name(statement,counter)];
+				
+				switch(sqlite3_column_type(statement,counter))
+				{
+						// SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
+					case (SQLITE_INTEGER):
+					{
+						NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement,counter)];
+						[row setObject:returnInt forKey:columnName];
+						break;
+					}
+						
+					case (SQLITE_FLOAT):
+					{
+						NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,counter)];
+						[row setObject:returnInt forKey:columnName];
+						break;
+					}
+						
+					case (SQLITE_TEXT):
+					{
+						NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,counter)];
+						[row setObject:[returnString stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
+						break;
+						
+					}
+						
+					case (SQLITE_BLOB):
+					{
+						const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,counter);
+						int size = sqlite3_column_bytes(statement,counter);
+						NSData* returnData = [NSData dataWithBytes:bytes length:size];
+						
+						[row setObject:returnData forKey:columnName];
+						break;
+					}
+						
+					case (SQLITE_NULL):
+					{
+						DDLogVerbose(@"return nil with sql null");
+						
+						[row setObject:@"" forKey:columnName];
+						break;
+					}
+						
+				}
+				
+				counter++;
+			}
+			
+			[toReturn addObject:row];
+		}
+	}
+	else
+	{
+		DDLogVerbose(@"reader nil with sql not ok: %@", query );
+		toReturn= nil;
+	}
+    sqlite3_finalize(statement);
     return toReturn;
 }
 
@@ -261,55 +287,52 @@ static DataLayer *sharedInstance=nil;
 {
     if(!query) return NO;
     BOOL __block toReturn;
-    dispatch_sync(_dbQueue, ^{
-        sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(self->database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
-        {
-            
-            [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                if([obj isKindOfClass:[NSNumber class]])
-                {
-                    NSNumber *number = (NSNumber *) obj;
-                    if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
-                    {
-                        DDLogError(@"number bind error");
-                        
-                    }
-                }
-                else if([obj isKindOfClass:[NSString class]])
-                {
-                    NSString *text = (NSString *) obj;
-                    
-                    if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
-                        DDLogError(@"string bind error");
-                        
-                    };
-                }
-                
-                else if([obj isKindOfClass:[NSData class]])
-                {
-                    NSData *data = (NSData *) obj;
-                    
-                    if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes], (int)data.length,SQLITE_TRANSIENT)!=SQLITE_OK) {
-                        DDLogError(@"string bind error");
-                        
-                    };
-                }
-            }];
-            
-            if(sqlite3_step(statement)==SQLITE_DONE)
-                toReturn=YES;
-            else
-                toReturn=NO;
-        }
-        
-        else
-        {
-            DDLogError(@"nonquery returning NO with out OK %@", query);
-            toReturn=NO;
-        }
-    });
-    
+	sqlite3_stmt *statement;
+	if (sqlite3_prepare_v2(self->database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
+	{
+		[args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+			if([obj isKindOfClass:[NSNumber class]])
+			{
+				NSNumber *number = (NSNumber *) obj;
+				if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
+				{
+					DDLogError(@"number bind error");
+					
+				}
+			}
+			else if([obj isKindOfClass:[NSString class]])
+			{
+				NSString *text = (NSString *) obj;
+				
+				if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+					DDLogError(@"string bind error");
+					
+				};
+			}
+			
+			else if([obj isKindOfClass:[NSData class]])
+			{
+				NSData *data = (NSData *) obj;
+				
+				if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes], (int)data.length,SQLITE_TRANSIENT)!=SQLITE_OK) {
+					DDLogError(@"string bind error");
+					
+				};
+			}
+		}];
+		
+		if(sqlite3_step(statement)==SQLITE_DONE)
+			toReturn=YES;
+		else
+			toReturn=NO;
+	}
+	
+	else
+	{
+		DDLogError(@"nonquery returning NO with out OK %@", query);
+		toReturn=NO;
+	}
+    sqlite3_finalize(statement);
     return toReturn;
 }
 
@@ -317,6 +340,29 @@ static DataLayer *sharedInstance=nil;
 
 
 #pragma mark - V2 low level
+
+-(void) beginWriteTransaction
+{
+	NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+	threadData[@"_dbTransactionRunning"] = [NSNumber numberWithInt:[threadData[@"_dbTransactionRunning"] intValue] + 1];
+	if([threadData[@"_dbTransactionRunning"] intValue] > 1)
+		return;			//begin only outermost transaction
+	BOOL retval;
+	do {
+		retval=[self executeNonQuery:@"BEGIN IMMEDIATE TRANSACTION;" andArguments:nil];
+		if(!retval)
+			[NSThread sleepForTimeInterval:0.001f];		//wait one millisecond and retry again
+	} while(!retval);
+}
+
+-(void) endWriteTransaction
+{
+	NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+	threadData[@"_dbTransactionRunning"] = [NSNumber numberWithInt:[threadData[@"_dbTransactionRunning"] intValue] - 1];
+	if([threadData[@"_dbTransactionRunning"] intValue] == 0)
+		[self executeNonQuery:@"COMMIT;" andArguments:nil];		//commit only outermost transaction
+}
+
 -(void) executeScalar:(NSString*) query withCompletion: (void (^)(NSObject *))completion
 {
     [self executeScalar:query andArguments:nil withCompletion:completion];
@@ -342,109 +388,107 @@ static DataLayer *sharedInstance=nil;
         }
     }
     
-    dispatch_async(_dbQueue, ^{
-        NSObject* toReturn;
-        sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(self->database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
-            sqlite3_reset(statement);
-            [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                if([obj isKindOfClass:[NSNumber class]])
-                {
-                    NSNumber *number = (NSNumber *) obj;
-                    if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
-                    {
-                        DDLogError(@"number bind error");
-                        
-                    }
-                }
-                else if([obj isKindOfClass:[NSString class]])
-                {
-                    NSString *text = (NSString *) obj;
-                    
-                    if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
-                        DDLogError(@"string bind error");
-                        
-                    };
-                }
-                else if([obj isKindOfClass:[NSData class]])
-                {
-                    NSData *data = (NSData *) obj;
-                    
-                    if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes],data.length,SQLITE_TRANSIENT)!=SQLITE_OK) {
-                        DDLogError(@"string bind error");
-                        
-                    };
-                }
-            }];
-            
-            if (sqlite3_step(statement) == SQLITE_ROW)
-            {
-                switch(sqlite3_column_type(statement,0))
-                {
-                        // SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
-                    case (SQLITE_INTEGER):
-                    {
-                        NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement,0)];
-                        while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
-                        toReturn= returnInt;
-                        break;
-                    }
-                        
-                    case (SQLITE_FLOAT):
-                    {
-                        NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,0)];
-                        while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
-                        toReturn= returnInt;
-                        break;
-                    }
-                        
-                    case (SQLITE_TEXT):
-                    {
-                        NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,0)];
-                        //    DDLogVerbose(@"got %@", returnString);
-                        while(sqlite3_step(statement)== SQLITE_ROW ){} //clear
-                        toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
-                        break;
-                        
-                    }
-                        
-                    case (SQLITE_BLOB):
-                    {
-                        const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
-                        int size = sqlite3_column_bytes(statement,0);
-                        NSData* returnData = [NSData dataWithBytes:bytes length:size];
-                        while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
-                        toReturn= returnData;
-                        
-                        break;
-                    }
-                        
-                    case (SQLITE_NULL):
-                    {
-                        DDLogVerbose(@"return nil with sql null");
-                        while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
-                        toReturn= nil;
-                        break;
-                    }
-                        
-                }
-                
-            } else
-            {DDLogVerbose(@"return nil with no row");
-                toReturn= nil;};
-        }
-        else{
-            //if noting else
-            DDLogVerbose(@"returning nil with out OK %@", query);
-            toReturn= nil;
-        }
-        
-        sqlite3_finalize(statement);
-        
-        if(completion) {
-            completion(toReturn);
-        }
-    });
+	NSObject* toReturn;
+	sqlite3_stmt *statement;
+	if (sqlite3_prepare_v2(self->database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
+		sqlite3_reset(statement);
+		[args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+			if([obj isKindOfClass:[NSNumber class]])
+			{
+				NSNumber *number = (NSNumber *) obj;
+				if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
+				{
+					DDLogError(@"number bind error");
+					
+				}
+			}
+			else if([obj isKindOfClass:[NSString class]])
+			{
+				NSString *text = (NSString *) obj;
+				
+				if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+					DDLogError(@"string bind error");
+					
+				};
+			}
+			else if([obj isKindOfClass:[NSData class]])
+			{
+				NSData *data = (NSData *) obj;
+				
+				if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes],data.length,SQLITE_TRANSIENT)!=SQLITE_OK) {
+					DDLogError(@"string bind error");
+					
+				};
+			}
+		}];
+		
+		if (sqlite3_step(statement) == SQLITE_ROW)
+		{
+			switch(sqlite3_column_type(statement,0))
+			{
+					// SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
+				case (SQLITE_INTEGER):
+				{
+					NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement,0)];
+					while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+					toReturn= returnInt;
+					break;
+				}
+					
+				case (SQLITE_FLOAT):
+				{
+					NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,0)];
+					while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+					toReturn= returnInt;
+					break;
+				}
+					
+				case (SQLITE_TEXT):
+				{
+					NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,0)];
+					//    DDLogVerbose(@"got %@", returnString);
+					while(sqlite3_step(statement)== SQLITE_ROW ){} //clear
+					toReturn= [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
+					break;
+					
+				}
+					
+				case (SQLITE_BLOB):
+				{
+					const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,0);
+					int size = sqlite3_column_bytes(statement,0);
+					NSData* returnData = [NSData dataWithBytes:bytes length:size];
+					while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+					toReturn= returnData;
+					
+					break;
+				}
+					
+				case (SQLITE_NULL):
+				{
+					DDLogVerbose(@"return nil with sql null");
+					while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+					toReturn= nil;
+					break;
+				}
+					
+			}
+			
+		} else
+		{DDLogVerbose(@"return nil with no row");
+			toReturn= nil;};
+	}
+	else{
+		//if noting else
+		DDLogVerbose(@"returning nil with out OK %@", query);
+		toReturn= nil;
+	}
+	
+	sqlite3_finalize(statement);
+	
+	if(completion) {
+		completion(toReturn);
+	}
     
 }
 
@@ -457,106 +501,103 @@ static DataLayer *sharedInstance=nil;
         }
     }
     
-    dispatch_async(_dbQueue, ^{
-        
-        NSMutableArray*  toReturn =  [[NSMutableArray alloc] init] ;
-        
-        sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(self->database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
-            sqlite3_reset(statement);
-            [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                if([obj isKindOfClass:[NSNumber class]])
-                {
-                    NSNumber *number = (NSNumber *) obj;
-                    if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
-                    {
-                        DDLogError(@"number bind error");
-                        
-                    }
-                }
-                else if([obj isKindOfClass:[NSString class]])
-                {
-                    NSString *text = (NSString *) obj;
-                    
-                    if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
-                        DDLogError(@"string bind error");
-                        
-                    };
-                }
-            }];
-            
-            while (sqlite3_step(statement) == SQLITE_ROW) {
-                NSMutableDictionary* row= [[NSMutableDictionary alloc] init];
-                int counter=0;
-                while(counter< sqlite3_column_count(statement) )
-                {
-                    NSString* columnName=[NSString stringWithUTF8String:sqlite3_column_name(statement,counter)];
-                    
-                    switch(sqlite3_column_type(statement,counter))
-                    {
-                            // SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
-                        case (SQLITE_INTEGER):
-                        {
-                            NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement,counter)];
-                            [row setObject:returnInt forKey:columnName];
-                            break;
-                        }
-                            
-                        case (SQLITE_FLOAT):
-                        {
-                            NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,counter)];
-                            [row setObject:returnInt forKey:columnName];
-                            break;
-                        }
-                            
-                        case (SQLITE_TEXT):
-                        {
-                            NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,counter)];
-                            [row setObject:[returnString stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
-                            break;
-                            
-                        }
-                            
-                        case (SQLITE_BLOB):
-                        {
-                            
-                            const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,counter);
-                            int size = sqlite3_column_bytes(statement,counter);
-                            NSData* returnData = [NSData dataWithBytes:bytes length:size];
-                            
-                            
-                            [row setObject:returnData forKey:columnName];
-                            break;
-                        }
-                            
-                        case (SQLITE_NULL):
-                        {
-                            DDLogVerbose(@"return nil with sql null");
-                            
-                            [row setObject:@"" forKey:columnName];
-                            break;
-                        }
-                            
-                    }
-                    
-                    counter++;
-                }
-                
-                [toReturn addObject:row];
-            }
-        }
-        else
-        {
-            DDLogVerbose(@"reader nil with sql not ok: %@", query );
-            toReturn= nil;
-        }
-        
-        sqlite3_finalize(statement);
-        
-        if(completion) {
-            completion(toReturn);
-        }
-    });
+	NSMutableArray*  toReturn =  [[NSMutableArray alloc] init] ;
+	
+	sqlite3_stmt *statement;
+	if (sqlite3_prepare_v2(self->database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
+		sqlite3_reset(statement);
+		[args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+			if([obj isKindOfClass:[NSNumber class]])
+			{
+				NSNumber *number = (NSNumber *) obj;
+				if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
+				{
+					DDLogError(@"number bind error");
+					
+				}
+			}
+			else if([obj isKindOfClass:[NSString class]])
+			{
+				NSString *text = (NSString *) obj;
+				
+				if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+					DDLogError(@"string bind error");
+					
+				};
+			}
+		}];
+		
+		while (sqlite3_step(statement) == SQLITE_ROW) {
+			NSMutableDictionary* row= [[NSMutableDictionary alloc] init];
+			int counter=0;
+			while(counter< sqlite3_column_count(statement) )
+			{
+				NSString* columnName=[NSString stringWithUTF8String:sqlite3_column_name(statement,counter)];
+				
+				switch(sqlite3_column_type(statement,counter))
+				{
+						// SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
+					case (SQLITE_INTEGER):
+					{
+						NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement,counter)];
+						[row setObject:returnInt forKey:columnName];
+						break;
+					}
+						
+					case (SQLITE_FLOAT):
+					{
+						NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement,counter)];
+						[row setObject:returnInt forKey:columnName];
+						break;
+					}
+						
+					case (SQLITE_TEXT):
+					{
+						NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement,counter)];
+						[row setObject:[returnString stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
+						break;
+						
+					}
+						
+					case (SQLITE_BLOB):
+					{
+						
+						const char* bytes=(const char* _Nonnull)sqlite3_column_blob(statement,counter);
+						int size = sqlite3_column_bytes(statement,counter);
+						NSData* returnData = [NSData dataWithBytes:bytes length:size];
+						
+						
+						[row setObject:returnData forKey:columnName];
+						break;
+					}
+						
+					case (SQLITE_NULL):
+					{
+						DDLogVerbose(@"return nil with sql null");
+						
+						[row setObject:@"" forKey:columnName];
+						break;
+					}
+						
+				}
+				
+				counter++;
+			}
+			
+			[toReturn addObject:row];
+		}
+	}
+	else
+	{
+		DDLogVerbose(@"reader nil with sql not ok: %@", query );
+		toReturn= nil;
+	}
+	
+	sqlite3_finalize(statement);
+	
+	if(completion) {
+		completion(toReturn);
+	}
 }
 
 -(void) executeNonQuery:(NSString*) query andArguments:(NSArray *) args  withCompletion: (void (^)(BOOL))completion
@@ -569,60 +610,58 @@ static DataLayer *sharedInstance=nil;
     }
     
     BOOL __block toReturn;
-    dispatch_async(_dbQueue, ^{
-        sqlite3_stmt *statement;
-        if (sqlite3_prepare_v2(self->database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
-        {
-            sqlite3_reset(statement);
-            [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                if([obj isKindOfClass:[NSNumber class]])
-                {
-                    NSNumber *number = (NSNumber *) obj;
-                    if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
-                    {
-                        DDLogError(@"number bind error");
-                        
-                    }
-                }
-                else if([obj isKindOfClass:[NSString class]])
-                {
-                    NSString *text = (NSString *) obj;
-                    
-                    if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
-                        DDLogError(@"string bind error");
-                        
-                    };
-                }
-                else if([obj isKindOfClass:[NSData class]])
-                {
-                    NSData *data = (NSData *) obj;
-                    
-                    if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes], data.length,SQLITE_TRANSIENT)!=SQLITE_OK) {
-                        DDLogError(@"string bind error");
-                        
-                    };
-                }
-            }];
-            
-            if(sqlite3_step(statement)==SQLITE_DONE)
-                toReturn=YES;
-            else
-                toReturn=NO;
-        }
-        
-        else
-        {
-            DDLogError(@"nonquery returning NO with out OK %@", query);
-            toReturn=NO;
-        }
-        
-        sqlite3_finalize(statement);
-        
-        if (completion)
-        {
-            completion(toReturn);
-        }
-    });
+	sqlite3_stmt *statement;
+	if (sqlite3_prepare_v2(self->database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK)
+	{
+		sqlite3_reset(statement);
+		[args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+			if([obj isKindOfClass:[NSNumber class]])
+			{
+				NSNumber *number = (NSNumber *) obj;
+				if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue])!=SQLITE_OK)
+				{
+					DDLogError(@"number bind error");
+					
+				}
+			}
+			else if([obj isKindOfClass:[NSString class]])
+			{
+				NSString *text = (NSString *) obj;
+				
+				if(sqlite3_bind_text(statement, (signed)idx+1,[text cStringUsingEncoding:NSUTF8StringEncoding], -1,SQLITE_TRANSIENT)!=SQLITE_OK) {
+					DDLogError(@"string bind error");
+					
+				};
+			}
+			else if([obj isKindOfClass:[NSData class]])
+			{
+				NSData *data = (NSData *) obj;
+				
+				if(sqlite3_bind_blob(statement, (signed)idx+1,[data bytes], data.length,SQLITE_TRANSIENT)!=SQLITE_OK) {
+					DDLogError(@"string bind error");
+					
+				};
+			}
+		}];
+		
+		if(sqlite3_step(statement)==SQLITE_DONE)
+			toReturn=YES;
+		else
+			toReturn=NO;
+	}
+	
+	else
+	{
+		DDLogError(@"nonquery returning NO with out OK %@", query);
+		toReturn=NO;
+	}
+	
+	sqlite3_finalize(statement);
+	
+	if (completion)
+	{
+		completion(toReturn);
+	}
 }
 
 
@@ -782,7 +821,9 @@ static DataLayer *sharedInstance=nil;
 
 -(BOOL) removeAccount:(NSString*) accountNo
 {
-    // remove all other traces of the account_id
+    // remove all other traces of the account_id in one transaction
+    [self beginWriteTransaction];
+    
     NSString* query1=[NSString stringWithFormat:@"delete from buddylist  where account_id=%@ ;", accountNo];
     [self executeNonQuery:query1 andArguments:nil];
     
@@ -793,7 +834,11 @@ static DataLayer *sharedInstance=nil;
     [self executeNonQuery:query4 andArguments:nil];
     
     NSString* query=[NSString stringWithFormat:@"delete from account  where account_id=%@ ;", accountNo];
-    if([self executeNonQuery:query andArguments:nil]!=NO)
+    BOOL lastResult = [self executeNonQuery:query andArguments:nil];
+    
+    [self endWriteTransaction];
+    
+    if(lastResult!=NO)
     {
         return YES;
     }
@@ -871,7 +916,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-    
+    [self beginWriteTransaction];
     //clean up logs
     [self messageHistoryClean:buddy :accountNo];
     
@@ -881,7 +926,7 @@ static DataLayer *sharedInstance=nil;
     [self executeNonQuery:query andArguments:params withCompletion:nil];
     
     [self setSubscription:kSubNone andAsk:@"" forContact:buddy andAccount:accountNo];
-    
+    [self endWriteTransaction];
 }
 -(BOOL) clearBuddies:(NSString*) accountNo
 {
@@ -902,14 +947,16 @@ static DataLayer *sharedInstance=nil;
 -(BOOL) resetContactsForAccount:(NSString*) accountNo
 {
     if(!accountNo) return NO;
+	[self beginWriteTransaction];
     NSString* query2=[NSString stringWithFormat:@"delete from  buddy_resources  where buddy_id in (select buddy_id from  buddylist where account_id=?)"];
     NSArray *params=@[accountNo];
     [self executeNonQuery:query2 andArguments:params];
     
     
     NSString* query=[NSString stringWithFormat:@"update buddylist set dirty=0, new=0, online=0, state='offline', status='' where account_id=?"];
-    
-    if([self executeNonQuery:query andArguments:params]!=NO)
+    BOOL retval=[self executeNonQuery:query andArguments:params];
+	[self endWriteTransaction];
+    if(retval!=NO)
     {
         return YES;
     }
@@ -1116,6 +1163,7 @@ static DataLayer *sharedInstance=nil;
 -(void) setResourceOnline:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
 {
     if(!presenceObj.resource) return;
+	[self beginWriteTransaction];
     //get buddyid for name and account
     NSString* query1=[NSString stringWithFormat:@"select buddy_id from buddylist where account_id=? and  buddy_name=?;"];
     [self executeScalar:query1 andArguments:@[accountNo, presenceObj.user] withCompletion:^(NSObject *buddyid) {
@@ -1124,6 +1172,7 @@ static DataLayer *sharedInstance=nil;
             [self executeNonQuery:query andArguments:@[buddyid, presenceObj.resource] withCompletion:nil];
         }
     }];
+	[self endWriteTransaction];
 }
 
 
@@ -1140,6 +1189,7 @@ static DataLayer *sharedInstance=nil;
 
 -(void) setOnlineBuddy:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
 {
+	[self beginWriteTransaction];
     [self setResourceOnline:presenceObj forAccount:accountNo];
     
     [self isBuddyOnline:presenceObj.user forAccount:accountNo withCompletion:^(BOOL isOnline) {
@@ -1149,23 +1199,36 @@ static DataLayer *sharedInstance=nil;
             [self executeNonQuery:query andArguments:params withCompletion:nil];
         }
     }];
-    
+    [self endWriteTransaction];
 }
 
 -(BOOL) setOfflineBuddy:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
 {
+	[self beginWriteTransaction];
     NSString* query1=[NSString stringWithFormat:@" select buddy_id from buddylist where account_id=? and  buddy_name=?;"];
     NSArray *params=@[accountNo, presenceObj.user];
     NSString* buddyid = (NSString*)[self executeScalar:query1 andArguments:params];
-    if(buddyid==nil) return NO;
+    if(buddyid==nil)
+	{
+		[self endWriteTransaction];
+		return NO;
+	}
     
     NSString* query2=[NSString stringWithFormat:@"delete from   buddy_resources where buddy_id=? and resource=?"];
     NSArray *params2=@[buddyid, presenceObj.resource?presenceObj.resource:@""];
-    if([self executeNonQuery:query2 andArguments:params2]==NO) return NO;
+    if([self executeNonQuery:query2 andArguments:params2]==NO)
+	{
+		[self endWriteTransaction];
+		return NO;
+	}
     
     NSString* query4=[NSString stringWithFormat:@"delete from   buddy_resources_legacy_caps where buddy_id=? and resource=?"];
     NSArray *params3=@[buddyid, presenceObj.resource?presenceObj.resource:@"" ];
-    if([self executeNonQuery:query4 andArguments:params3]==NO) return NO;
+    if([self executeNonQuery:query4 andArguments:params3]==NO)
+	{
+		[self endWriteTransaction];
+		return NO;
+	}
     
     //see how many left
     NSString* query3=[NSString stringWithFormat:@" select count(buddy_id) from buddy_resources where buddy_id=%@;", buddyid ];
@@ -1175,7 +1238,9 @@ static DataLayer *sharedInstance=nil;
     {
         NSString* query=[NSString stringWithFormat:@"update buddylist set online=0, state='offline', dirty=1  where account_id=? and  buddy_name=?;"];
         NSArray*params4=@[accountNo, presenceObj.user];
-        if([self executeNonQuery:query andArguments:params4]!=NO)
+		BOOL retval=[self executeNonQuery:query andArguments:params4];
+		[self endWriteTransaction];
+        if(retval!=NO)
         {
             return YES;
         }
@@ -1184,8 +1249,11 @@ static DataLayer *sharedInstance=nil;
             return NO;
         }
     }
-    else return NO;
-    
+    else
+	{
+		[self endWriteTransaction];
+		return NO;
+	}
 }
 
 
@@ -1611,6 +1679,7 @@ static DataLayer *sharedInstance=nil;
 
     NSString *idToUse=stanzaid?stanzaid:messageid; //just ensures stanzaid is not null
     
+    [self beginWriteTransaction];
     [self hasMessageForStanzaId:idToUse orMessageID:messageid toContact:actualfrom onAccount:accountNo andCompletion:^(BOOL exists) {
         if(!exists)
         {
@@ -1658,6 +1727,7 @@ static DataLayer *sharedInstance=nil;
                                  
                               }
                               
+							  [self endWriteTransaction];
                               if(completion)
                               {
                                   completion(success, messageType);
@@ -1677,6 +1747,7 @@ static DataLayer *sharedInstance=nil;
                         
                     }
                     
+					[self endWriteTransaction];
                     if(completion)
                     {
                         completion(success, messageType);
@@ -1687,6 +1758,7 @@ static DataLayer *sharedInstance=nil;
             
         }
         else {
+			[self endWriteTransaction];
             DDLogError(@"Message %@ or stanza Id %@ duplicated,, id in use %@", messageid, stanzaid,  idToUse);
         }
     }];
@@ -1749,8 +1821,7 @@ static DataLayer *sharedInstance=nil;
 {
     NSString* query=[NSString stringWithFormat:@"update message_history set received=? where messageid=?"];
     DDLogVerbose(@" setting received confrmed %@",query);
-    [self executeNonQuery:query  andArguments:@[[NSNumber numberWithBool:received], messageid]  withCompletion:nil];
-    [self executeNonQuery:query withCompletion:nil];
+    [self executeNonQuery:query andArguments:@[[NSNumber numberWithBool:received], messageid]  withCompletion:nil];
 }
 
 -(void) setMessageId:(NSString*) messageid errorType:(NSString *) errorType errorReason:(NSString *)errorReason
@@ -2054,6 +2125,7 @@ static DataLayer *sharedInstance=nil;
         cleanedActualFrom =from;
     }
     
+    [self beginWriteTransaction];
     [self messageTypeForMessage:message withCompletion:^(NSString *messageType) {
         
         NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
@@ -2066,8 +2138,11 @@ static DataLayer *sharedInstance=nil;
         [self executeNonQuery:query andArguments:params  withCompletion:^(BOOL result) {
             if (completion) {
                 [self updateActiveBuddy:to setTime:dateTime forAccount:accountNo withCompletion:nil];
+				[self endWriteTransaction];
                 completion(result,messageType);
             }
+            else
+				[self endWriteTransaction];
         }];
     }];
     
@@ -2208,12 +2283,14 @@ static DataLayer *sharedInstance=nil;
 
 -(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo
 {
+	[self beginWriteTransaction];
     //mark messages as read
     [self markAsReadBuddy:buddyname forAccount:accountNo];
     
     NSString* query=[NSString stringWithFormat:@"delete from activechats where buddy_name=? and account_id=? "];
     //	DDLogVerbose(query);
     [self executeNonQuery:query andArguments:@[buddyname,accountNo] withCompletion:nil];
+	[self endWriteTransaction];
 }
 
 -(void) removeAllActiveBuddies
@@ -2236,12 +2313,14 @@ static DataLayer *sharedInstance=nil;
         }
         return;
     }
+    [self beginWriteTransaction];
     NSString* query=[NSString stringWithFormat:@"select count(buddy_name) from activechats where account_id=? and buddy_name=? "];
     [self executeScalar:query  andArguments:@[accountNo, buddyname] withCompletion:^(NSObject * count) {
         if(count!=nil)
         {
             NSInteger val=[((NSNumber *)count) integerValue];
             if(val>0) {
+				[self endWriteTransaction];
                 if (completion) {
                     completion(NO);
                 }
@@ -2250,6 +2329,7 @@ static DataLayer *sharedInstance=nil;
                 //no
                 NSString* query2=[NSString stringWithFormat:@"insert into activechats (buddy_name,account_id, lastMessageTime) values (?,?, current_timestamp) "];
                 [self executeNonQuery:query2 andArguments:@[buddyname,accountNo] withCompletion:^(BOOL result) {
+					[self endWriteTransaction];
                     if (completion) {
                         completion(result);
                     }
@@ -2286,7 +2366,7 @@ static DataLayer *sharedInstance=nil;
 -(void) updateActiveBuddy:(NSString*) buddyname setTime:(NSString *)timestamp forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
 {
     NSString* query=[NSString stringWithFormat:@"select lastMessageTime from  activechats where account_id=? and buddy_name=?"];
-    
+    [self beginWriteTransaction];
     [self executeScalar:query andArguments:@[accountNo, buddyname] withCompletion:^(NSObject *result) {
         NSString *lastTime= (NSString *) result;
         
@@ -2296,9 +2376,13 @@ static DataLayer *sharedInstance=nil;
         if(lastDate.timeIntervalSince1970<newDate.timeIntervalSince1970) {
             NSString* query=[NSString stringWithFormat:@"update activechats set lastMessageTime=? where account_id=? and buddy_name=? "];
             [self executeNonQuery:query andArguments:@[timestamp, accountNo, buddyname] withCompletion:^(BOOL success) {
+				[self endWriteTransaction];
                 if(completion) completion(success);
             }];
-        } else  if(completion) completion(NO);
+        } else {
+			[self endWriteTransaction];
+			if(completion) completion(NO);
+		}
         
     }];
 }
@@ -2339,39 +2423,15 @@ static DataLayer *sharedInstance=nil;
 
 #pragma db Commands
 
--(void) initDB
+-(void) openDB
 {
-    
-    _dbQueue = dispatch_queue_create(kMonalDBQueue, DISPATCH_QUEUE_SERIAL);
-    
-    NSFileManager* fileManager = [NSFileManager defaultManager];
-    
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths objectAtIndex:0];
-    NSString *writableDBPath = [documentsDirectory stringByAppendingPathComponent:@"sworim.sqlite"];
-    DDLogInfo(@"db path %@", writableDBPath);
-    if( ![fileManager fileExistsAtPath:writableDBPath])
+    NSString *dbPath = [documentsDirectory stringByAppendingPathComponent:@"sworim.sqlite"];
+    DDLogInfo(@"db path %@", dbPath);
+
+    if (sqlite3_open_v2([dbPath UTF8String], &database, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nil) == SQLITE_OK)
     {
-        // The writable database does not exist, so copy the default to the appropriate location.
-        NSString *defaultDBPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"sworim.sqlite"];
-        NSError* error;
-        [fileManager copyItemAtPath:defaultDBPath toPath:writableDBPath error:&error];
-    }
-#if TARGET_OS_IPHONE
-    NSDictionary *attributes =@{NSFileProtectionKey:NSFileProtectionCompleteUntilFirstUserAuthentication};
-    NSError *error;
-    [fileManager setAttributes:attributes ofItemAtPath:writableDBPath error:&error];
-#endif
-    
-    //  sqlite3_shutdown();
-    if (sqlite3_config(SQLITE_CONFIG_SERIALIZED) == SQLITE_OK) {
-        DDLogVerbose(@"Database configured ok");
-    } else DDLogVerbose(@"Database not configured ok");
-    
-    sqlite3_initialize();
-    
-    dbPath = writableDBPath; //[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"sworim.sqlite"];
-    if (sqlite3_open([dbPath UTF8String], &database) == SQLITE_OK) {
         DDLogVerbose(@"Database opened");
     }
     else
@@ -2379,25 +2439,22 @@ static DataLayer *sharedInstance=nil;
         //database error message
         DDLogError(@"Error opening database");
     }
+    [self executeNonQuery:@"pragma journal_mode=WAL;" andArguments:nil];
+    [self executeNonQuery:@"pragma synchronous=NORMAL;" andArguments:nil];
+    
     //truncate faster than del
     [self executeNonQuery:@"pragma truncate;" andArguments:nil];
     
-    dbversionCheck=[NSLock new];
-    
     self.dbFormatter = [[NSDateFormatter alloc] init];
-     [self.dbFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-     [self.dbFormatter  setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-     
+    [self.dbFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    [self.dbFormatter  setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     
     [self version];
-    
-    
 }
 
 -(void) version
 {
-    [dbversionCheck lock];
-    
+    [self beginWriteTransaction];
     
 #if TARGET_OS_IPHONE
     // checking db version and upgrading if necessary
@@ -2960,7 +3017,7 @@ static DataLayer *sharedInstance=nil;
         DDLogVerbose(@"Upgrade to 4.6 success ");
     }
 
-    [dbversionCheck unlock];
+    [self endWriteTransaction];
     return;
     
 }

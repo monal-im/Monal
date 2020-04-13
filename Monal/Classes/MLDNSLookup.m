@@ -22,7 +22,7 @@ BOOL isSecure=NO;
     DNSServiceErrorType res;
     
     isSecure = secure;
-    NSString* serviceDiscoveryString=[NSString stringWithFormat:@"_xmpp%s-client._tcp.%@", isSecure ? "s" : "", domain];
+    NSString* serviceDiscoveryString=[NSString stringWithFormat:@"_xmpp%@-client._tcp.%@", isSecure ? @"s" : @"", domain];
     res=DNSServiceQueryRecord(
                               &sdRef, 0, 0,
                               [serviceDiscoveryString UTF8String],

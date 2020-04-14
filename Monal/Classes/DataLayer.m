@@ -2129,7 +2129,7 @@ NSString *const kCount =@"count";
         cleanedActualFrom =from;
     }
     
-    [self beginWriteTransaction];
+ //   [self beginWriteTransaction];
     [self messageTypeForMessage:message withCompletion:^(NSString *messageType) {
         
         NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
@@ -2140,7 +2140,7 @@ NSString *const kCount =@"count";
         NSArray *params=@[accountNo, from, to, dateTime, message, cleanedActualFrom,[NSNumber numberWithInteger:0], [NSNumber numberWithInteger:1], messageId,messageType, [NSNumber numberWithInteger:encrypted]];
         DDLogVerbose(@"%@",query);
         [self executeNonQuery:query andArguments:params  withCompletion:^(BOOL result) {
-            [self endWriteTransaction];
+           // [self endWriteTransaction];
             
             if (completion) {
                 [self updateActiveBuddy:to setTime:dateTime forAccount:accountNo withCompletion:nil];

@@ -2049,32 +2049,34 @@ NSString *const kCount =@"count";
 
 
 //message history
--(NSMutableArray*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo
+-(void) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion
 {
-    if(!accountNo ||! buddy) return nil;
+    if(!accountNo ||! buddy) {
+        if(completion) completion(nil);
+        return;
+    };
     NSString* query=[NSString stringWithFormat:@"select af,message_from, message_to, account_id,  message, thetime, message_history_id, delivered, messageid, messageType, received,encrypted,previewImage, previewText, unread, errorType, errorReason  from (select ifnull(actual_from, message_from) as af, message_from, message_to, account_id,   message, received, encrypted,   timestamp  as thetime, message_history_id, delivered,messageid, messageType, previewImage, previewText, unread, errorType, errorReason from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 250) order by thetime asc"];
     NSArray *params=@[accountNo, buddy, buddy];
-    NSArray* rawArray = [self executeReader:query andArguments:params];
-    
-    NSDateFormatter* formatter = self.dbFormatter;
-    
-    NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:rawArray.count];
-    [rawArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSDictionary *dic = (NSDictionary *) obj;
-        [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:formatter]];
+    [self executeReader:query andArguments:params withCompletion:^(NSMutableArray *rawArray) {
+        NSDateFormatter* formatter = self.dbFormatter;
+        
+        NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:rawArray.count];
+        [rawArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSDictionary *dic = (NSDictionary *) obj;
+            [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:formatter]];
+        }];
+        
+        if(toReturn!=nil)
+        {
+            DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count] );
+        }
+        else
+        {
+            DDLogError(@"message history is empty or failed to read");
+        }
+        
+        if(completion) completion(toReturn);
     }];
-    
-    if(toReturn!=nil)
-    {
-        DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count] );
-        return toReturn;
-    }
-    else
-    {
-        DDLogError(@"message history is empty or failed to read");
-        return nil;
-    }
-    
 }
 
 -(void) lastMessageForContact:(NSString*) contact forAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion

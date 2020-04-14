@@ -227,7 +227,7 @@ extern NSString *const kMessageTypeUrl;
 -(void) deleteMessageHistory:(NSNumber *) messageNo;
 
 #pragma mark - message history
--(NSMutableArray *) messagesForContact:(NSString *) buddy forAccount:(NSString *) accountNo;
+-(void) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion;
 -(NSArray *) allMessagesForContact:(NSString* ) buddy forAccount:(NSString *) accountNo;
 -(void) lastMessageForContact:(NSString *) contact forAccount:(NSString *) accountNo withCompletion:(void (^)(NSMutableArray *))completion;
 

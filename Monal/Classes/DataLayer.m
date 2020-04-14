@@ -1496,10 +1496,12 @@ NSString *const kCount =@"count";
 
 -(void) saveMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withComment:(NSString*) comment withCompletion:(void (^)(BOOL))completion
 {
+   [self beginWriteTransaction];
     NSString* query=[NSString stringWithFormat:@"update buddylist set messageDraft=? where account_id=? and buddy_name=?"];
     NSArray *params=@[comment, accountNo, buddy];
     [self executeNonQuery:query andArguments:params  withCompletion:^(BOOL success) {
-            if(completion) {
+        [self endWriteTransaction];
+        if(completion) {
                 completion(success);
             }
     }];
@@ -2136,13 +2138,14 @@ NSString *const kCount =@"count";
         NSArray *params=@[accountNo, from, to, dateTime, message, cleanedActualFrom,[NSNumber numberWithInteger:0], [NSNumber numberWithInteger:1], messageId,messageType, [NSNumber numberWithInteger:encrypted]];
         DDLogVerbose(@"%@",query);
         [self executeNonQuery:query andArguments:params  withCompletion:^(BOOL result) {
+            [self endWriteTransaction];
+            
             if (completion) {
                 [self updateActiveBuddy:to setTime:dateTime forAccount:accountNo withCompletion:nil];
-				[self endWriteTransaction];
                 completion(result,messageType);
             }
-            else
-				[self endWriteTransaction];
+    
+			
         }];
     }];
     

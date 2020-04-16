@@ -277,6 +277,13 @@
 
 -(void) viewWillDisappear:(BOOL)animated
 {
+    // Save message draft
+    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text withCompletion:^(BOOL success) {
+        if(success) {
+            // Update status message for contact to show current draft
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+        }
+    }];
     [super viewWillDisappear:animated];
     [MLNotificationManager sharedInstance].currentAccountNo=nil;
     [MLNotificationManager sharedInstance].currentContact=nil;
@@ -362,11 +369,42 @@
     if(!self.contact.contactJid) return;
     NSMutableArray *newList;
     if(!_day) {
-        newList =[[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId];
-        [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId withCompletion:^(NSNumber *unread) {
-            if([unread integerValue]==0) self->_firstmsg=YES;
-            
+      [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId withCompletion:^(NSMutableArray *newList) {
+            [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId withCompletion:^(NSNumber *unread) {
+                      if([unread integerValue]==0) self->_firstmsg=YES;
+                      
+                  }];
+           
+          if(!self.jid) return;
+          MLMessage *unreadStatus = [[MLMessage alloc] init];
+          unreadStatus.messageType=kMessageTypeStatus;
+          unreadStatus.messageText=@"Unread Messages Below";
+          unreadStatus.actualFrom=self.jid;
+          
+          NSInteger unreadPos = newList.count-1;
+          while(unreadPos>=0)
+          {
+              MLMessage *row = [newList objectAtIndex:unreadPos];
+              if(!row.unread)
+              {
+                  unreadPos++; //move back down one
+                  break;
+              }
+              unreadPos--; //move up the list
+          }
+          
+          if(unreadPos<=newList.count-1 && unreadPos>0) {
+              [newList insertObject:unreadStatus atIndex:unreadPos];
+          }
+          
+          if(newList.count!=self.messageList.count)
+          {
+              self.messageList = newList;
+          }
+          
+          
         }];
+      
     }
     else
     {
@@ -374,33 +412,6 @@
         
     }
     
-    if(!self.jid) return;
-    
-    MLMessage *unreadStatus = [[MLMessage alloc] init];
-    unreadStatus.messageType=kMessageTypeStatus;
-    unreadStatus.messageText=@"Unread Messages Below";
-    unreadStatus.actualFrom=self.jid;
-    
-    NSInteger unreadPos = newList.count-1;
-    while(unreadPos>=0)
-    {
-        MLMessage *row = [newList objectAtIndex:unreadPos];
-        if(!row.unread)
-        {
-            unreadPos++; //move back down one
-            break;
-        }
-        unreadPos--; //move up the list
-    }
-    
-    if(unreadPos<=newList.count-1 && unreadPos>0) {
-        [newList insertObject:unreadStatus atIndex:unreadPos];
-    }
-    
-    if(newList.count!=self.messageList.count)
-    {
-        self.messageList = newList;
-    }
 }
 
 

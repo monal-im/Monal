@@ -63,11 +63,10 @@
     
     MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:@"nothing@yax.im" password:@"nothing" andResource:@"MonalReg"];
     
-    MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:kRegServer andPort:[NSNumber numberWithInt:5222]];
+    MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:kRegServer andPort:[NSNumber numberWithInt:5222] andOldStyleSSL:NO];
    
     server.SSL=YES;
     server.selfSignedCert=NO;
-    server.oldStyleSSL=NO;
     
     self.xmppAccount= [[xmpp alloc] initWithServer:server andIdentity:identity];
     

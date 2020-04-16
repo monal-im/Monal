@@ -249,6 +249,7 @@
 		322AD0CC78815E4551793930 /* Pods_Monal_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F59B43550E822D135D1127E /* Pods_Monal_Tests.framework */; };
 		3517ED822FCB1456A8D492B1 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C40CE7301D792181A28A1F8 /* Pods_Monal.framework */; };
 		8C56FAA9FC72C01E0AF98EFE /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C28AE0807330E8B6F972591 /* Pods_NotificaionService.framework */; };
+		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
 		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
 		D838DFA541E4102BCA92A60E /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC355146D687D83135E2BBF7 /* Pods_monalxmpp.framework */; };
 		FE9BEACD951D0F8D3EBE264D /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99727E17D81471E803966620 /* Pods_shareSheet.framework */; };
@@ -760,6 +761,8 @@
 		B15AF16CBD0F4AC6113EB3BA /* Pods-shareSheet.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.debug.xcconfig"; path = "Pods/Target Support Files/Pods-shareSheet/Pods-shareSheet.debug.xcconfig"; sourceTree = "<group>"; };
 		B7CF94A039065B2420A65087 /* Pods-NotificaionService.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-NotificaionService/Pods-NotificaionService.adhoc.xcconfig"; sourceTree = "<group>"; };
 		B93583E9A8D07409E6847BCE /* Pods-Monal-OSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSX.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX.debug.xcconfig"; sourceTree = "<group>"; };
+		C12436122434AB5D00B8F074 /* MLAttributedLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLAttributedLabel.h; sourceTree = "<group>"; };
+		C12436132434AB5D00B8F074 /* MLAttributedLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAttributedLabel.m; sourceTree = "<group>"; };
 		C1414E9B24312F0100948788 /* MLChatMapsCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatMapsCell.h; sourceTree = "<group>"; };
 		C1414E9C24312F0100948788 /* MLChatMapsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatMapsCell.m; sourceTree = "<group>"; };
 		C1D27E0D3E8B8D0D625C5D2A /* Pods-monalxmppmac.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmppmac.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-monalxmppmac/Pods-monalxmppmac.adhoc.xcconfig"; sourceTree = "<group>"; };
@@ -1462,6 +1465,8 @@
 				26EE1B0B21A8F3CE00264B95 /* MLWelcomeViewController.m */,
 				2602A70722A5431A006D3E72 /* MLRegSuccessViewController.h */,
 				2602A70822A5431A006D3E72 /* MLRegSuccessViewController.m */,
+				C12436122434AB5D00B8F074 /* MLAttributedLabel.h */,
+				C12436132434AB5D00B8F074 /* MLAttributedLabel.m */,
 			);
 			name = OnBoard;
 			sourceTree = "<group>";
@@ -2186,6 +2191,7 @@
 				26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */,
 				26189C8B238A526500EAD70C /* MLSubscriptionTableViewController.m in Sources */,
 				26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */,
+				C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */,
 				26D59D9020711969006F1DEE /* MLEditGroupViewController.m in Sources */,
 				26EE8B1F179B67FA006781F3 /* MLNotificationManager.m in Sources */,
 				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,

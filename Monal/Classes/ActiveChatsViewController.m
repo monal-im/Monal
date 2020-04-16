@@ -369,8 +369,6 @@
         });
     }];
     
-    [cell showStatusText:nil];
-    
     [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:row.accountId withCompletion:^(NSMutableArray *messages) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if(messages.count>0)
@@ -382,6 +380,9 @@
                 } else if([messageRow.messageType isEqualToString:kMessageTypeImage])
                 {
                     [cell showStatusText:@"📷 An Image"];
+                } else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft]) {
+                    NSString* draftPreview = [NSString stringWithFormat:@"Draft: %@", messageRow.messageText];
+                    [cell showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, 6)];
                 } else if([messageRow.messageType isEqualToString:kMessageTypeGeo])
                 {
                     [cell showStatusText:@"📍 A Location"];
@@ -395,8 +396,8 @@
                 } else  {
                     cell.time.hidden=YES;
                 }
-                
             } else  {
+                [cell showStatusText:nil];
                 DDLogWarn(@"Active chat but no messages found in history for %@.", row.contactJid);
             }
             

@@ -52,17 +52,31 @@
 {
     if(![self.statusText.text isEqualToString:text]) {
         self.statusText.text=text;
-        if(text)
-        {
-            self.centeredDisplayName.hidden=YES;
-            self.displayName.hidden=NO;
-            self.statusText.hidden=NO;
-        }
-        else {
-            self.centeredDisplayName.hidden=NO;
-            self.displayName.hidden=YES;
-            self.statusText.hidden=YES;
-        }
+        [self setStatusTextLayout:text];
+    }
+}
+
+-(void) showStatusTextItalic:(NSString *) text withItalicRange:(NSRange)italicRange
+{
+    UIFont* italicFont = [UIFont italicSystemFontOfSize:self.statusText.font.pointSize];
+    NSMutableAttributedString *italicString = [[NSMutableAttributedString alloc] initWithString:text];
+    [italicString addAttribute:NSFontAttributeName value:italicFont range:italicRange];
+
+    if(![italicString isEqualToAttributedString:self.statusText.originalAttributedText]) {
+        self.statusText.attributedText = italicString;
+        [self setStatusTextLayout:text];
+    }
+}
+
+-(void) setStatusTextLayout:(NSString *) text {
+    if(text) {
+        self.centeredDisplayName.hidden=YES;
+        self.displayName.hidden=NO;
+        self.statusText.hidden=NO;
+    } else {
+        self.centeredDisplayName.hidden=NO;
+        self.displayName.hidden=YES;
+        self.statusText.hidden=YES;
     }
 }
 

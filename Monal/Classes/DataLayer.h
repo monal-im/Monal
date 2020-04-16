@@ -44,11 +44,12 @@ extern NSString *const kContactName;
 extern NSString *const kCount;
 
 extern NSString *const kMessageType;
-extern NSString *const kMessageTypeImage;
-extern NSString *const kMessageTypeText;
-extern NSString *const kMessageTypeStatus;
-extern NSString *const kMessageTypeUrl;
 extern NSString *const kMessageTypeGeo;
+extern NSString *const kMessageTypeImage;
+extern NSString *const kMessageTypeMessageDraft;
+extern NSString *const kMessageTypeStatus;
+extern NSString *const kMessageTypeText;
+extern NSString *const kMessageTypeUrl;
 
 + (DataLayer* )sharedInstance;
 
@@ -131,7 +132,7 @@ extern NSString *const kMessageTypeGeo;
 -(void) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 
 -(void) saveMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withComment:(NSString*) comment withCompletion:(void (^)(BOOL))completion;
--(NSString*) loadMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSString*))completion;
+-(void) loadMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSString*))completion;
 
 #pragma mark - MUC
 
@@ -225,7 +226,7 @@ extern NSString *const kMessageTypeGeo;
 -(void) deleteMessageHistory:(NSNumber *) messageNo;
 
 #pragma mark - message history
--(NSMutableArray *) messagesForContact:(NSString *) buddy forAccount:(NSString *) accountNo;
+-(void) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion;
 -(NSArray *) allMessagesForContact:(NSString* ) buddy forAccount:(NSString *) accountNo;
 -(void) lastMessageForContact:(NSString *) contact forAccount:(NSString *) accountNo withCompletion:(void (^)(NSMutableArray *))completion;
 

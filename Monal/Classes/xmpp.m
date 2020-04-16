@@ -1397,7 +1397,7 @@ NSString *const kXMPPPresence = @"presence";
 						XMPPMessage *receiptNode = [[XMPPMessage alloc] init];
 						//the message type is needed so that the store hint is accepted by the server
 						[receiptNode.attributes setObject:messageNode.type forKey:@"type"];
-						[receiptNode.attributes setObject:messageNode.from forKey:@"to"];
+						[receiptNode.attributes setObject:[[messageNode.from componentsSeparatedByString:@"/" ] objectAtIndex:0] forKey:@"to"];
 						[receiptNode setXmppId:[[NSUUID UUID] UUIDString]];
 						[receiptNode setReceipt:messageNode.idval];
 						[receiptNode setStoreHint];

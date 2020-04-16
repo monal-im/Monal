@@ -259,11 +259,6 @@
         [self.xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
         
     }
-#endif
-    
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [self refreshCounter];
-    });
     
     NSArray *devices= [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
     if(devices.count==0) {
@@ -273,6 +268,12 @@
         }
         
     }
+#endif
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self refreshCounter];
+    });
+    
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -810,7 +811,7 @@
 //            }
         }
         
-        [[DataLayer sharedInstance] messageTypeForMessage: message.messageText withCompletion:^(NSString *messageType) {
+        [[DataLayer sharedInstance] messageTypeForMessage: message.messageText withKeepThread:NO andCompletion:^(NSString *messageType) {
             
             dispatch_async(dispatch_get_main_queue(),
                            ^{

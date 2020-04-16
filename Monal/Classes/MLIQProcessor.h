@@ -28,6 +28,7 @@ typedef void (^processAction)(void);
 @property (nonatomic, strong) processAction getVcards;
 
 -(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore;
+-(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection;
 
 /**
  Process a iq, persist any changes and post notifications

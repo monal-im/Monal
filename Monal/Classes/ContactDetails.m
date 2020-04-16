@@ -456,6 +456,7 @@
 
 -(IBAction) toggleEncryption:(id)sender
 {
+#ifndef DISABLE_OMEMO
     NSArray *devices= [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
     if(devices.count>0) {
         if(self.isEncrypted) {
@@ -474,6 +475,7 @@
         [self presentViewController:alert animated:YES completion:nil];
         return;
     }
+#endif
 }
 
 -(void) refreshLock

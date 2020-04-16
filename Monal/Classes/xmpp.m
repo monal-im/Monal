@@ -1283,7 +1283,11 @@ NSString *const kXMPPPresence = @"presence";
 			
 			ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
 			
+#ifndef DISABLE_OMEMO
 			MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+#else
+			MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties];
+#endif
 			processor.sendIq=^(MLXMLNode * _Nullable iqResponse) {
 				if(iqResponse) {
 					DDLogInfo(@"sending iq stanza");
@@ -1329,12 +1333,14 @@ NSString *const kXMPPPresence = @"presence";
 			if([iqNode.idval isEqualToString:self.deviceQueryId])
 			{
 				if([iqNode.type isEqualToString:kiqErrorType]) {
+#ifndef DISABLE_OMEMO
 					//there are no devices published yet
 					DDLogInfo(@"No signal device items. Adding new to pubsub");
 					XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
 					NSString * deviceString=[NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
 					[signalDevice publishDevices:@[deviceString]];
 					[self send:signalDevice];
+#endif
 				}
 			}
 			
@@ -1369,7 +1375,11 @@ NSString *const kXMPPPresence = @"presence";
 			
 			ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
 			
+#ifndef DISABLE_OMEMO
 			MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+#else
+			MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid connection:self.connectionProperties];
+#endif
 			
 			messageProcessor.sendStanza=^(MLXMLNode * _Nullable nodeResponse) {
 				if(nodeResponse) {
@@ -1429,9 +1439,11 @@ NSString *const kXMPPPresence = @"presence";
 				}
 			};
 			
+#ifndef DISABLE_OMEMO
 			messageProcessor.signalAction = ^(void) {
 				[self manageMyKeys];
 			};
+#endif
 			
 			[messageProcessor processMessage:messageNode];
 			

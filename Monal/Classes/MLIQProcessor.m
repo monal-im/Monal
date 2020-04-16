@@ -38,6 +38,14 @@
     return self;
 }
 
+-(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection
+{
+    self=[super init];
+    self.accountNo = accountNo;
+    self.connection= connection;
+    return self;
+}
+
 -(void) processIq:(ParseIq *) iqNode
 {
     

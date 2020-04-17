@@ -1551,8 +1551,8 @@
                         <outlet property="chatInput" destination="jiV-U5-fDl" id="gQc-PG-STp"/>
                         <outlet property="inputContainerView" destination="eXr-Xg-TCZ" id="cve-rB-fhR"/>
                         <outlet property="messageTable" destination="Kkq-aZ-5fP" id="RhH-Dt-heG"/>
-                        <outlet property="pictureButton" destination="c6B-5o-sqL" id="iSm-Wv-SC6"/>
                         <outlet property="placeHolderText" destination="KUa-bA-cQb" id="62v-fn-lf2"/>
+                        <outlet property="plusButton" destination="c6B-5o-sqL" id="eKA-Yp-C43"/>
                         <outlet property="sendButton" destination="kYa-y4-X5Z" id="efC-cC-umG"/>
                         <outlet property="tableviewBottom" destination="Iwu-bN-lxd" id="6KW-KJ-mpd"/>
                         <outlet property="transparentLayer" destination="cUR-xM-Mq7" id="0Fl-vg-WUH"/>
@@ -1594,7 +1594,7 @@
                                 <constraint firstAttribute="width" constant="28" id="r5D-N5-kFE"/>
                                 <constraint firstAttribute="height" constant="27" id="yNE-7P-Ml5"/>
                             </constraints>
-                            <state key="normal" image="camera" catalog="system"/>
+                            <state key="normal" image="plus" catalog="system"/>
                             <connections>
                                 <action selector="attach:" destination="5nR-Q5-dQD" eventType="touchUpInside" id="7Vw-VD-VgI"/>
                             </connections>

@@ -6,6 +6,7 @@
 //  Copyright 2009 __MyCompanyName__. All rights reserved.
 // 
 
+#import <CoreLocation/CoreLocation.h>
 #import <Foundation/Foundation.h>
 #import <QuartzCore/QuartzCore.h>
 
@@ -16,7 +17,7 @@
 #import "MLResizingTextView.h"
 
 
-@interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate>
+@interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate, CLLocationManagerDelegate>
 {
     UIView *containerView;
 	CGRect oldFrame;
@@ -28,11 +29,13 @@
     BOOL _keyboardVisible; 
 }
 
+@property (nonatomic, retain) CLLocationManager *locationManager;
+
 @property (nonatomic, weak) IBOutlet UITableView* messageTable;
 @property (nonatomic, weak) IBOutlet MLResizingTextView* chatInput;
 @property (nonatomic, weak) IBOutlet UILabel* placeHolderText;
 @property (nonatomic, weak) IBOutlet UIButton* sendButton;
-@property (nonatomic, weak) IBOutlet UIButton *pictureButton;
+@property (nonatomic, weak) IBOutlet UIButton* plusButton;
 
 @property (nonatomic, weak) IBOutlet UIView* inputContainerView;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint* tableviewBottom;
@@ -58,6 +61,9 @@
 -(IBAction)dismissKeyboard:(id)sender;
 
 -(void) setupWithContact:(MLContact *) contact;
+
+-(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations;
+-(void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error;
 
 /**
  Receives the new message notice and will update if it is this user. 

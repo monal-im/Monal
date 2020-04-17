@@ -230,8 +230,7 @@
 
 -(void) discoResult:(ParseIq *) iqNode {
     if(iqNode.features) {
-        if([iqNode.from isEqualToString:self.connection.server.host] ||
-           [iqNode.from isEqualToString:self.connection.identity.domain]) {
+        if([iqNode.from isEqualToString:self.connection.identity.domain]) {
             self.connection.serverFeatures=iqNode.features;
         }
         
@@ -305,8 +304,7 @@
     }
     
     
-    if(([iqNode.from isEqualToString:self.connection.server.host] ||
-        [iqNode.from isEqualToString:self.connection.identity.domain]) &&
+    if([iqNode.from isEqualToString:self.connection.identity.domain] &&
        !self.connection.discoveredServices)
     {
         self.connection.discoveredServices=[[NSMutableArray alloc] init];
@@ -314,8 +312,7 @@
         {
             [self.connection.discoveredServices addObject:item];
             
-            if((![[item objectForKey:@"jid"] isEqualToString:self.connection.server.host]  &&
-                ![[item objectForKey:@"jid"] isEqualToString:self.connection.identity.domain])) {
+            if(![[item objectForKey:@"jid"] isEqualToString:self.connection.identity.domain]) {
                 if(self.sendIq) self.sendIq([self discoverService:[item objectForKey:@"jid"]]);
             }
         }

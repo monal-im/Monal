@@ -767,8 +767,10 @@ NSString *const kCount =@"count";
     NSString* query=
     [NSString stringWithFormat:@"update account set server=?, other_port=?, username=?, secure=?, resource=?, domain=?, enabled=?, selfsigned=?, oldstyleSSL=?, airdrop=? where account_id=?"];
     
-    NSArray * params=@[((NSString *)[dictionary objectForKey:kServer]),
-                       ((NSString *)[dictionary objectForKey:kPort]),
+    NSString* server = (NSString *) [dictionary objectForKey:kServer];
+    NSString* port = (NSString *)[dictionary objectForKey:kPort];
+    NSArray * params=@[server==nil ? @"" : server,
+                       port==nil ? @"5222" : port,
                        ((NSString *)[dictionary objectForKey:kUsername]),
                        
                        [dictionary objectForKey:kSSL],
@@ -788,9 +790,11 @@ NSString *const kCount =@"count";
 {
     NSString* query= [NSString stringWithFormat:@"insert into account (protocol_id, server, other_port, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, username, airdrop) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"];
     
+    NSString* server = (NSString *) [dictionary objectForKey:kServer];
+    NSString* port = (NSString *)[dictionary objectForKey:kPort];
     NSArray *params= @[@"1",
-                       ((NSString *) [dictionary objectForKey:kServer]),
-                       ((NSString *)[dictionary objectForKey:kPort]),
+                       server==nil ? @"" : server,
+                       port==nil ? @"5222" : port,
                        
                        [dictionary objectForKey:kSSL],
                        ((NSString *)[dictionary objectForKey:kResource]),
@@ -3014,11 +3018,11 @@ NSString *const kCount =@"count";
         [self executeNonQuery:@"update dbversion set dbversion='4.6'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.6 success ");
     }
+    
     if([dbversion doubleValue]<4.7)
     {
         DDLogVerbose(@"Database version <4.7 detected. Performing upgrade on accounts.");
         // Delete column password,account_name from account, set default value for rosterVersion to 0, increased varchar size
-        [self executeNonQuery:@"BEGIN TRANSACTION;" andArguments:nil];
         [self executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:nil];
         [self executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;" andArguments:nil];
         [self executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'protocol_id' integer NOT NULL, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'oldstyleSSL' bool, 'oauth' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);" andArguments:nil];
@@ -3026,12 +3030,19 @@ NSString *const kCount =@"count";
         [self executeNonQuery:@"UPDATE account SET rosterVersion='0' WHERE rosterVersion is NULL;" andArguments:nil];
         [self executeNonQuery:@"DROP TABLE _accountTMP;" andArguments:nil];
         [self executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:nil];
-        [self executeNonQuery:@"COMMIT;" andArguments:nil];
-
         [self executeNonQuery:@"update dbversion set dbversion='4.7'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.7 success ");
     }
-    [dbversionCheck unlock];
+    
+    if([dbversion doubleValue]<4.71)
+    {
+        DDLogVerbose(@"Database version <4.71 detected. Performing upgrade on accounts.");
+        [self executeNonQuery:@"UPDATE account SET server='';" andArguments:nil];
+        [self executeNonQuery:@"UPDATE account SET other_port=5222;" andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='4.71'; " andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.71 success ");
+    }
+    
     [self endWriteTransaction];
     return;
 }

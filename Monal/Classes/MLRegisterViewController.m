@@ -127,8 +127,6 @@
                 NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
                 [dic setObject:kRegServer forKey:kDomain];
                 [dic setObject:self.jid.text forKey:kUsername];
-                [dic setObject:kRegServer  forKey:kServer];
-                [dic setObject:@"5222" forKey:kPort];
                 NSString *resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
                 [dic setObject:resource  forKey:kResource];
                 [dic setObject:@YES forKey:kSSL];

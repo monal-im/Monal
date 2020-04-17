@@ -97,13 +97,7 @@ NSString *const kGtalk = @"Gtalk";
             NSDictionary* settings=[result objectAtIndex:0]; //only one row
             self.initialSettings=settings;
             
-            //allow blank domains.. dont show @ if so
-            if([[settings objectForKey:@"domain"] length]>0) {
-                self.jid=[NSString stringWithFormat:@"%@@%@",[settings objectForKey:@"username"],[settings objectForKey:@"domain"]];
-            }
-            else {
-                self.jid=[NSString stringWithFormat:@"%@",[settings objectForKey:@"username"]];
-            }
+            self.jid=[NSString stringWithFormat:@"%@@%@",[settings objectForKey:@"username"],[settings objectForKey:@"domain"]];
             
             NSString*pass= [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",self.accountno]];
             
@@ -200,14 +194,6 @@ NSString *const kGtalk = @"Gtalk";
 
     NSArray* elements=[self.jid componentsSeparatedByString:@"@"];
 
-    //default just use JID
-    if([self.server length]==0)
-    {
-        if([elements count]>1){
-            self.server=[elements objectAtIndex:1];
-        }
-    }
-
     //if it is a JID
     if([elements count]>1)
     {
@@ -227,27 +213,12 @@ NSString *const kGtalk = @"Gtalk";
 
     if(self.server) {
         [dic setObject:self.server  forKey:kServer];
-    } else
-    {
-
-       UIAlertController* alert= [UIAlertController alertControllerWithTitle:@"Could not determine server" message:@"Please provide a server or use an id in the format user@server" preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            [alert dismissViewControllerAnimated:YES completion:nil];
-        }]];
-
-        [self presentViewController:alert animated:YES completion:^{
-
-        }];
-        return;
-
     }
-
     if(self.port ) {
         [dic setObject:self.port forKey:kPort];
-    } else {
-
     }
-     NSString *resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
+    
+    NSString *resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
 
     [dic setObject:resource forKey:kResource];
 

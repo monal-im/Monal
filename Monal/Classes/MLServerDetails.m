@@ -28,7 +28,7 @@
     [super viewWillAppear:animated];
     self.serverCaps =[[NSMutableArray alloc] init];
     
-    self.navigationItem.title= self.xmppAccount.connectionProperties.server.host;
+    self.navigationItem.title= self.xmppAccount.connectionProperties.identity.domain;
     
     if(self.xmppAccount.connectionProperties.supportsSM3)
     {

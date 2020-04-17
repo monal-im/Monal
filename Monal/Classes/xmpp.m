@@ -356,6 +356,14 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) connectionTask
 {
+	//allow override for server and port if one is specified for the account
+	if(![self.connectionProperties.server.host isEqual:@""])
+	{
+		DDLogInfo(@"Ignoring SRV records for this connection, server manually configured: %@:%@", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort);
+		[self createStreams];
+		return;
+	}
+	
 	// do DNS discovery if it hasn't already been set
 	if([_discoveredServersList count]==0) {
 		_discoveredServersList=[[[MLDNSLookup alloc] init] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];

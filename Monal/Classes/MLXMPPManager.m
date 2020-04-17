@@ -326,7 +326,10 @@ An array of Dics what have timers to make sure everything was sent
 #endif
 
     //sepcifically look for the server since we might not be online or behind firewall
-    Reachability* hostReach = [Reachability reachabilityWithHostName:xmppAccount.connectionProperties.server.host] ;
+    NSString* host = xmppAccount.connectionProperties.server.host;
+    if(host==nil || [host isEqual:@""])
+        host = xmppAccount.connectionProperties.identity.domain;
+    Reachability* hostReach = [Reachability reachabilityWithHostName:host] ;
 
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged) name:kReachabilityChangedNotification object:nil];

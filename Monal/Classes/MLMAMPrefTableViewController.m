@@ -32,7 +32,7 @@
 {
     [super viewWillAppear:animated];
     self.mamPref =[[NSMutableArray alloc] init];
-    self.navigationItem.title= self.xmppAccount.connectionProperties.server.host;
+    self.navigationItem.title= self.xmppAccount.connectionProperties.identity.domain;
     [self.mamPref addObject:@{@"Title":@"All messages are archived by default.", @"value":@"always"}];
      [self.mamPref addObject:@{@"Title":@"Messages never archived by default.", @"value":@"never"}];
      [self.mamPref addObject:@{@"Title":@"Archive only if the contact is in roster", @"value":@"roster"}];

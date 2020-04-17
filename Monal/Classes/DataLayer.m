@@ -1681,6 +1681,9 @@ NSString *const kCount =@"count";
 
     NSString *idToUse=stanzaid?stanzaid:messageid; //just ensures stanzaid is not null
     
+    NSString* typeToUse=messageType;
+	if(!typeToUse) typeToUse=kMessageTypeText; //default to insert
+	
     [self beginWriteTransaction];
     [self hasMessageForStanzaId:idToUse orMessageID:messageid toContact:actualfrom onAccount:accountNo andCompletion:^(BOOL exists) {
         if(!exists)
@@ -1711,52 +1714,58 @@ NSString *const kCount =@"count";
             
             NSString* dateString = [formatter stringFromDate:destinationDate];
             
-            NSString* typeToUse=messageType;
-            if(!typeToUse) typeToUse=kMessageTypeText; //default to insert
+            
             
             
           //do not do this in MUC
             if(!messageType && [actualfrom isEqualToString:from]) {
                 
-                [self messageTypeForMessage:message withCompletion:^(NSString *foundMessageType) {
-                         NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?,?,?,?, ?, ?, ?);"];
-                          NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",foundMessageType,[NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
-                          DDLogVerbose(@"%@",query);
-                          [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
-                              
-                              if(success) {
-                                  [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:nil];
-                                 
-                              }
-                              
-							  [self endWriteTransaction];
-                              if(completion)
-                              {
-                                  completion(success, messageType);
-                              }
-                          }];
-                }];
+				[self messageTypeForMessage:message withKeepThread:YES andCompletion:^(NSString *foundMessageType) {
+						NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?,?,?,?, ?, ?, ?);"];
+						NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",foundMessageType,[NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
+						DDLogVerbose(@"%@",query);
+						[self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
+							
+							if(success) {
+								[self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:^(BOOL innerSuccess) {
+									[self endWriteTransaction];
+									if(completion) {
+										completion(success, messageType);
+									}
+								}];
+							}
+							else {
+								[self endWriteTransaction];
+								if(completion) {
+									completion(success, messageType);
+								}
+							} 
+						}];
+				}];
                 
                 
             } else  {
                 NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?,?,?,?, ?, ?, ?);"];
                 NSArray *params=@[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"",typeToUse,[NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
                 DDLogVerbose(@"%@",query);
-                [self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
-                    
-                    if(success) {
-                        [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:nil];
-                        
-                    }
-                    
-					[self endWriteTransaction];
-                    if(completion)
-                    {
-                        completion(success, messageType);
-                    }
+				[self executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
+					
+					if(success) {
+						[self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:^(BOOL innerSuccess) {
+							[self endWriteTransaction];
+							if(completion) {
+								completion(success, messageType);
+							}
+						}];
+					}
+					else {
+						[self endWriteTransaction];
+						if(completion) {
+							completion(success, messageType);
+						}
+					}
                 }];
             }
-            
             
         }
         else {
@@ -2129,25 +2138,21 @@ NSString *const kCount =@"count";
         cleanedActualFrom =from;
     }
     
- //   [self beginWriteTransaction];
-    [self messageTypeForMessage:message withCompletion:^(NSString *messageType) {
+    [self messageTypeForMessage:message withKeepThread:NO andCompletion:^(NSString *messageType) {
         
         NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
-        
         NSString *dateTime =[NSString stringWithFormat:@"%@ %@", [parts objectAtIndex:0],[parts objectAtIndex:1]];
-        
         NSString* query=[NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted) values (?,?,?,?,?,?,?,?,?,?,?);"];
         NSArray *params=@[accountNo, from, to, dateTime, message, cleanedActualFrom,[NSNumber numberWithInteger:0], [NSNumber numberWithInteger:1], messageId,messageType, [NSNumber numberWithInteger:encrypted]];
+		[self beginWriteTransaction];
         DDLogVerbose(@"%@",query);
         [self executeNonQuery:query andArguments:params  withCompletion:^(BOOL result) {
-           // [self endWriteTransaction];
-            
-            if (completion) {
-                [self updateActiveBuddy:to setTime:dateTime forAccount:accountNo withCompletion:nil];
-                completion(result,messageType);
-            }
-    
-			
+			[self updateActiveBuddy:to setTime:dateTime forAccount:accountNo withCompletion:^(BOOL innerSuccess) {
+				[self endWriteTransaction];
+				if (completion) {
+					completion(result,messageType);
+				}
+			}];
         }];
     }];
     
@@ -3035,8 +3040,9 @@ NSString *const kCount =@"count";
 
 #pragma mark determine message type
 
--(void) messageTypeForMessage:(NSString *) messageString withCompletion:(void(^)(NSString *messageType)) completion
+-(void) messageTypeForMessage:(NSString *) messageString withKeepThread:(BOOL) keepThread andCompletion:(void(^)(NSString *messageType)) completion
 {
+	dispatch_semaphore_t semaphore;
     __block NSString *messageType=kMessageTypeText;
     if([messageString rangeOfString:@" "].location!=NSNotFound) {
         if(completion) {
@@ -3056,6 +3062,8 @@ NSString *const kCount =@"count";
             request.HTTPMethod=@"HEAD";
             request.cachePolicy= NSURLRequestReturnCacheDataElseLoad;
             
+			if(keepThread && completion)
+				semaphore = dispatch_semaphore_create(0);
             NSURLSession *session = [NSURLSession sharedSession];
             [[session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
                 NSDictionary *headers= ((NSHTTPURLResponse *)response).allHeaderFields;
@@ -3068,10 +3076,20 @@ NSString *const kCount =@"count";
                     messageType=kMessageTypeUrl;
                 }
                 
-                if(completion) {
-                    completion(messageType);
-                }
+                if(completion)
+				{
+					if(keepThread)
+						dispatch_semaphore_signal(semaphore);
+					else
+						completion(messageType);
+				}
             }] resume];
+			
+			if(keepThread && completion)
+			{
+				dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+				completion(messageType);
+			}
     } else if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowGeoLocation"] && [messageString hasPrefix:@"geo:"]) {
         messageType = kMessageTypeGeo;
         

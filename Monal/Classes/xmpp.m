@@ -166,10 +166,12 @@ NSString *const kXMPPPresence = @"presence";
     _outputQueue=[[NSMutableArray alloc] init];
     
     self.receiveQueue=[[NSOperationQueue alloc] init];
+    self.receiveQueue.name = @"receiveQueue";
     self.receiveQueue.qualityOfService=NSQualityOfServiceUtility;
     self.receiveQueue.maxConcurrentOperationCount=1;
     
     self.sendQueue=[[NSOperationQueue alloc] init];
+    self.sendQueue.name = @"sendQueue";
     self.sendQueue.qualityOfService=NSQualityOfServiceUtility;
     self.sendQueue.maxConcurrentOperationCount=1;
     
@@ -1208,7 +1210,7 @@ NSString *const kXMPPPresence = @"presence";
 		}
 		
 		[iterationArray removeObjectsInArray:discard];
-		if(self.unAckedStanzas) self.unAckedStanzas= iterationArray; // if it was set to nil elsewhere, dont restore
+		if(self.unAckedStanzas) self.unAckedStanzas = iterationArray;	// if it was set to nil elsewhere, dont restore
 		
 		//persist these changes (but only if we actually made some changes)
 		if([discard count])
@@ -1218,18 +1220,24 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) requestSMAck
 {
-    if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 &&
+	if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 &&
 		!self.smacksRequestInFlight && [self.unAckedStanzas count]>0 ) {
-        
+		
 		DDLogVerbose(@"requesting smacks ack...");
-        MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
-        NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3"};
-        rNode.attributes=[dic mutableCopy];
+		MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
+		NSDictionary *dic=@{
+			kXMLNS:@"urn:xmpp:sm:3",
+			@"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
+			@"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
+			@"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
+			@"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", (unsigned long) [self.unAckedStanzas count]],
+		};
+		rNode.attributes=[dic mutableCopy];
 		[self send:rNode];
 		self.smacksRequestInFlight=YES;
-    } else  {
-        DDLogDebug(@"no smacks request, there is nothing pending or a request already in flight...");
-    }
+	} else  {
+		DDLogDebug(@"no smacks request, there is nothing pending or a request already in flight...");
+	}
 }
 
 -(void) sendLastAck
@@ -1275,7 +1283,11 @@ NSString *const kXMPPPresence = @"presence";
 			
 			ParseIq* iqNode= [[ParseIq alloc]  initWithDictionary:stanzaToParse];
 			
-            MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties processQueue:self.receiveQueue signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+#ifndef DISABLE_OMEMO
+			MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+#else
+			MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties];
+#endif
 			processor.sendIq=^(MLXMLNode * _Nullable iqResponse) {
 				if(iqResponse) {
 					DDLogInfo(@"sending iq stanza");
@@ -1321,12 +1333,14 @@ NSString *const kXMPPPresence = @"presence";
 			if([iqNode.idval isEqualToString:self.deviceQueryId])
 			{
 				if([iqNode.type isEqualToString:kiqErrorType]) {
+#ifndef DISABLE_OMEMO
 					//there are no devices published yet
 					DDLogInfo(@"No signal device items. Adding new to pubsub");
 					XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
 					NSString * deviceString=[NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
 					[signalDevice publishDevices:@[deviceString]];
 					[self send:signalDevice];
+#endif
 				}
 			}
 			
@@ -1361,7 +1375,11 @@ NSString *const kXMPPPresence = @"presence";
 			
 			ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
 			
+#ifndef DISABLE_OMEMO
 			MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+#else
+			MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid connection:self.connectionProperties];
+#endif
 			
 			messageProcessor.sendStanza=^(MLXMLNode * _Nullable nodeResponse) {
 				if(nodeResponse) {
@@ -1379,7 +1397,7 @@ NSString *const kXMPPPresence = @"presence";
 						XMPPMessage *receiptNode = [[XMPPMessage alloc] init];
 						//the message type is needed so that the store hint is accepted by the server
 						[receiptNode.attributes setObject:messageNode.type forKey:@"type"];
-						[receiptNode.attributes setObject:messageNode.from forKey:@"to"];
+						[receiptNode.attributes setObject:[[messageNode.from componentsSeparatedByString:@"/" ] objectAtIndex:0] forKey:@"to"];
 						[receiptNode setXmppId:[[NSUUID UUID] UUIDString]];
 						[receiptNode setReceipt:messageNode.idval];
 						[receiptNode setStoreHint];
@@ -1421,9 +1439,11 @@ NSString *const kXMPPPresence = @"presence";
 				}
 			};
 			
+#ifndef DISABLE_OMEMO
 			messageProcessor.signalAction = ^(void) {
 				[self manageMyKeys];
 			};
+#endif
 			
 			[messageProcessor processMessage:messageNode];
 			

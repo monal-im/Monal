@@ -30,7 +30,9 @@
 {
     [super viewWillAppear:animated];
     self.account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+#ifndef DISABLE_OMEMO
     self.devices= [self.account.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
+#endif
 }
 
 #pragma mark - Table view data source
@@ -50,6 +52,7 @@
     NSNumber *device =[self.devices objectAtIndex:indexPath.row];
     SignalAddress *address = [[SignalAddress alloc] initWithName:self.contact.contactJid deviceId:(int) device.integerValue];
     
+#ifndef DISABLE_OMEMO
     NSData *identity=[self.account.monalSignalStore getIdentityForAddress:address];
     
     cell.key.text = [EncodingTools signalHexKeyWithData:identity];
@@ -62,6 +65,7 @@
     } else  {
         cell.deviceid.text = [NSString stringWithFormat:@"%ld", (long)device.integerValue];
     }
+#endif
     return cell;
 }
 
@@ -94,6 +98,7 @@
     UISwitch *button =(UISwitch *)sender;
     NSInteger row = button.tag-100;
     
+#ifndef DISABLE_OMEMO
     NSNumber *device =[self.devices objectAtIndex:row];
     SignalAddress *address = [[SignalAddress alloc] initWithName:self.contact.contactJid deviceId:(int) device.integerValue];
     
@@ -107,6 +112,7 @@
     }
     
     [self.account.monalSignalStore updateTrust:newTrust forAddress:address];
+#endif
 }
 
 @end

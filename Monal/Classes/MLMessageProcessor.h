@@ -24,6 +24,7 @@ typedef void (^nodeCompletion)( MLXMLNode  * _Nullable nodeResponse);
 @property (nonatomic, strong) nodeCompletion sendStanza;
 
 -(MLMessageProcessor *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid connection:(MLXMPPConnection *) connection   signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore;
+-(MLMessageProcessor *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid connection:(MLXMPPConnection *) connection;
 
 /**
  Process a message, persist it and post relevant notifications

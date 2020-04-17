@@ -37,6 +37,14 @@
     return self;
 }
 
+-(MLMessageProcessor *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid connection:(MLXMPPConnection *) connection {
+    self=[super init];
+    self.accountNo = accountNo;
+    self.jid= jid;
+    self.connection= connection;
+    return self;
+}
+
 
 -(void) processMessage:(ParseMessage *) messageNode
 {

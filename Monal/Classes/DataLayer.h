@@ -274,7 +274,7 @@ extern NSString *const kMessageTypeUrl;
 /**
  checks HTTP  head on URL to determine the message type
  */
--(void) messageTypeForMessage:(NSString *) messageString withCompletion:(void(^)(NSString *messageType)) completion;
+-(void) messageTypeForMessage:(NSString *) messageString withKeepThread:(BOOL) keepThread andCompletion:(void(^)(NSString *messageType)) completion;
 
 
 -(void) muteJid:(NSString *) jid;

@@ -20,7 +20,6 @@
 NSString *const kAccountID= @"account_id";
 
 //used for account rows
-NSString *const kAccountName =@"account_name";
 NSString *const kDomain =@"domain";
 NSString *const kEnabled =@"enabled";
 
@@ -166,19 +165,18 @@ NSString *const kCount =@"count";
 					
 				case (SQLITE_NULL):
 				{
-					DDLogVerbose(@"return nil with sql null");
+					DDLogDebug(@"return nil with sql null: %@", query);
 					while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
 					toReturn= nil;
 					break;
 				}
 					
 			}
-			
-		} else
-		{DDLogVerbose(@"return nil with no row");
-			toReturn= nil;};
-	}
-	else{
+		} else {
+            DDLogVerbose(@"return nil with no row");
+			toReturn= nil;
+        };
+	} else{
 		//if noting else
 		DDLogVerbose(@"returning nil with out OK %@", query);
 		toReturn= nil;
@@ -260,8 +258,7 @@ NSString *const kCount =@"count";
 						
 					case (SQLITE_NULL):
 					{
-						DDLogVerbose(@"return nil with sql null");
-						
+						DDLogDebug(@"return nil with sql null: %@", query);
 						[row setObject:@"" forKey:columnName];
 						break;
 					}
@@ -273,9 +270,7 @@ NSString *const kCount =@"count";
 			
 			[toReturn addObject:row];
 		}
-	}
-	else
-	{
+	} else {
 		DDLogVerbose(@"reader nil with sql not ok: %@", query );
 		toReturn= nil;
 	}
@@ -466,17 +461,17 @@ NSString *const kCount =@"count";
 					
 				case (SQLITE_NULL):
 				{
-					DDLogVerbose(@"return nil with sql null");
-					while(sqlite3_step(statement)== SQLITE_ROW) {} //clear
+					DDLogDebug(@"return nil with sql null: %@", query);
+					while(sqlite3_step(statement) == SQLITE_ROW) {} //clear
 					toReturn= nil;
 					break;
 				}
 					
 			}
-			
-		} else
-		{DDLogVerbose(@"return nil with no row");
-			toReturn= nil;};
+		} else {
+            DDLogVerbose(@"return nil with no row");
+			toReturn= nil;
+        };
 	}
 	else{
 		//if noting else
@@ -489,7 +484,6 @@ NSString *const kCount =@"count";
 	if(completion) {
 		completion(toReturn);
 	}
-    
 }
 
 -(void) executeReader:(NSString*) query andArguments:(NSArray *) args withCompletion: (void (^)(NSMutableArray *))completion
@@ -573,7 +567,7 @@ NSString *const kCount =@"count";
 						
 					case (SQLITE_NULL):
 					{
-						DDLogVerbose(@"return nil with sql null");
+						DDLogDebug(@"return nil with sql null: %@", query);
 						
 						[row setObject:@"" forKey:columnName];
 						break;
@@ -771,11 +765,9 @@ NSString *const kCount =@"count";
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
 {
     NSString* query=
-    [NSString stringWithFormat:@"update account  set account_name=?,  server=?, other_port=?, username=?, secure=?, resource=?, domain=?, enabled=?, selfsigned=?, oldstyleSSL=?, airdrop=? where account_id=?"];
+    [NSString stringWithFormat:@"update account set server=?, other_port=?, username=?, secure=?, resource=?, domain=?, enabled=?, selfsigned=?, oldstyleSSL=?, airdrop=? where account_id=?"];
     
-    NSArray * params=@[((NSString *)[dictionary objectForKey:kUsername]),
-                       
-                       ((NSString *)[dictionary objectForKey:kServer]),
+    NSArray * params=@[((NSString *)[dictionary objectForKey:kServer]),
                        ((NSString *)[dictionary objectForKey:kPort]),
                        ((NSString *)[dictionary objectForKey:kUsername]),
                        
@@ -790,16 +782,13 @@ NSString *const kCount =@"count";
     ];
     
     [self executeNonQuery:query andArguments:params withCompletion:completion];
-    
 }
 
 -(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion
 {
-    NSString* query= [NSString stringWithFormat:@"insert into account (account_name, protocol_id, server,other_port, secure,resource,domain, enabled, selfsigned, oldstyleSSL,oauth, username, airdrop   ) values( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?) "];
+    NSString* query= [NSString stringWithFormat:@"insert into account (protocol_id, server, other_port, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, username, airdrop) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"];
     
-    NSString *username = [((NSString *)[dictionary objectForKey:kUsername]) copy];
-    NSArray *params= @[((NSString *)[dictionary objectForKey:kUsername]),
-                       @"1",
+    NSArray *params= @[@"1",
                        ((NSString *) [dictionary objectForKey:kServer]),
                        ((NSString *)[dictionary objectForKey:kPort]),
                        
@@ -810,12 +799,11 @@ NSString *const kCount =@"count";
                        [dictionary objectForKey:kSelfSigned],
                        [dictionary objectForKey:kOldSSL],
                        [dictionary objectForKey:kOauth],
-                       username,
+                       ((NSString *)[dictionary objectForKey:kUsername]),
                        [dictionary objectForKey:kAirdrop]?[dictionary objectForKey:kAirdrop]:@"0"
     ];
     
     [self executeNonQuery:query andArguments:params withCompletion:completion];
-    
 }
 
 
@@ -3026,10 +3014,26 @@ NSString *const kCount =@"count";
         [self executeNonQuery:@"update dbversion set dbversion='4.6'; " andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.6 success ");
     }
+    if([dbversion doubleValue]<4.7)
+    {
+        DDLogVerbose(@"Database version <4.7 detected. Performing upgrade on accounts.");
+        // Delete column password,account_name from account, set default value for rosterVersion to 0, increased varchar size
+        [self executeNonQuery:@"BEGIN TRANSACTION;" andArguments:nil];
+        [self executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:nil];
+        [self executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'protocol_id' integer NOT NULL, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'oldstyleSSL' bool, 'oauth' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);" andArguments:nil];
+        [self executeNonQuery:@"INSERT INTO account (account_id, protocol_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state) SELECT account_id, protocol_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state from _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"UPDATE account SET rosterVersion='0' WHERE rosterVersion is NULL;" andArguments:nil];
+        [self executeNonQuery:@"DROP TABLE _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:nil];
+        [self executeNonQuery:@"COMMIT;" andArguments:nil];
 
+        [self executeNonQuery:@"update dbversion set dbversion='4.7'; " andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.7 success ");
+    }
+    [dbversionCheck unlock];
     [self endWriteTransaction];
     return;
-    
 }
 
 -(void) dealloc

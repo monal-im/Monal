@@ -25,7 +25,6 @@
 
 
 extern NSString *const kAccountID;
-extern NSString *const kAccountName;
 extern NSString *const kDomain;
 extern NSString *const kEnabled;
 
@@ -154,7 +153,7 @@ extern NSString *const kMessageTypeUrl;
 -(void) setMessageId:(NSString*) messageid stanzaId:(NSString *) stanzaId;
 
 /**
- Calls with YES if contact  has laredy been added to the database for this account
+ Calls with YES if contact  has already been added to the database for this account
  */
 -(void) isContactInList:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 

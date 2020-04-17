@@ -119,7 +119,7 @@
     
     dispatch_async(dispatch_get_main_queue(), ^{
         NSString *contactName=[dic objectForKey:@"user"];
-        NSString *userName=[dic objectForKey:kAccountName];
+        NSString *userName=[dic objectForKey:kUsername];
         
         
         UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Incoming Call" message:[NSString stringWithFormat:@"Incoming audio call to %@ from %@ ",userName,  contactName] preferredStyle:UIAlertControllerStyleAlert];

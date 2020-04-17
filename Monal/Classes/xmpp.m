@@ -3107,7 +3107,7 @@ static NSMutableArray *extracted(xmpp *object) {
                                              @"resource":iqNode.resource,
                                              @"id": iqNode.idval,
                                              kAccountID:self.accountNo,
-                                             kAccountName: self.connectionProperties.identity.jid
+                                             @"account_name": self.connectionProperties.identity.jid
                         };
                         
                         [[NSNotificationCenter defaultCenter]

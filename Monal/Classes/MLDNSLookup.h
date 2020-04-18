@@ -16,19 +16,19 @@
 #import <arpa/inet.h>
 
 #ifndef T_SRV
-#define T_SRV 33
+#define T_SRV kDNSServiceType_SRV
 #endif
 
 #ifndef T_PTR
-#define T_PTR 12
+#define T_PTR kDNSServiceType_PTR
 #endif
 
 #ifndef T_A
-#define T_A 1
+#define T_A kDNSServiceType_A
 #endif
 
 #ifndef T_TXT
-#define T_TXT 16
+#define T_TXT kDNSServiceType_TXT
 #endif
 
 #define MAX_DOMAIN_LABEL 63
@@ -38,16 +38,16 @@
 
 typedef union { unsigned char b[2]; unsigned short NotAnInteger; } Opaque16;
 
-typedef struct { u_char c[ 64]; } domainlabel;
-typedef struct { u_char c[256]; } domainname;
+typedef struct { u_char c[MAX_DOMAIN_LABEL]; } domainLabel;
+typedef struct { u_char c[MAX_DOMAIN_NAME]; } domainName;
 
 
-typedef struct
+typedef struct __attribute__((packed))
 {
     uint16_t priority;
     uint16_t weight;
     uint16_t port;
-    domainname target;
+    domainName target;
 } srv_rdata;
 
 

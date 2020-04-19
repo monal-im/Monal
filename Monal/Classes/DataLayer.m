@@ -2131,7 +2131,7 @@ NSString *const kCount =@"count";
         cleanedActualFrom =from;
     }
 
-    [self messageTypeForMessage:message withKeepThread:NO andCompletion:^(NSString *messageType) {
+    [self messageTypeForMessage:message withKeepThread:YES andCompletion:^(NSString *messageType) {
 
         NSArray* parts=[[[NSDate date] description] componentsSeparatedByString:@" "];
         NSString *dateTime =[NSString stringWithFormat:@"%@ %@", [parts objectAtIndex:0],[parts objectAtIndex:1]];

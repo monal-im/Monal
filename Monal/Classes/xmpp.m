@@ -2484,7 +2484,7 @@ static NSMutableArray *extracted(xmpp *object) {
 -(NSString*)getVersionString
 {
     // We may need this later
-    NSString* unhashed=[NSString stringWithFormat:@"client/phone//Monal %@<%@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"], [XMPPIQ featuresString]];
+    NSString* unhashed=[NSString stringWithFormat:@"client/phone//Monal %@<%@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"], [XMPPIQ featuresString]];
 
     NSData* hashed;
     // <http://jabber.org/protocol/offline<

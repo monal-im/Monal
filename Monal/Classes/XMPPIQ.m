@@ -81,7 +81,6 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* enableNode =[[MLXMLNode alloc] init];
     enableNode.element=@"enable";
     [enableNode.attributes setObject:@"urn:xmpp:push:0" forKey:kXMLNS];
-    //this push jid is hardcoded and does not have to be the same hostname as the api endpoint set in MonalAppDelegate.m
     [enableNode.attributes setObject:[MLPush pushServer] forKey:@"jid"];
     [enableNode.attributes setObject:node forKey:@"node"];
     [self.children addObject:enableNode];
@@ -117,7 +116,7 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* disableNode =[[MLXMLNode alloc] init];
     disableNode.element=@"disable";
     [disableNode.attributes setObject:@"urn:xmpp:push:0" forKey:kXMLNS];
-    //this push jid is hardcoded and does not have to be the same hostname as the api endpoint set in MonalAppDelegate.m
+    [disableNode.attributes setObject:[MLPush pushServer] forKey:@"jid"];
     [disableNode.attributes setObject:@"192.168.2.3" forKey:@"jid"];
     [disableNode.attributes setObject:node forKey:@"node"];
     [self.children addObject:disableNode];
@@ -207,8 +206,8 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* identityNode =[[MLXMLNode alloc] init];
     identityNode.element=@"identity";
     [identityNode.attributes setObject:@"client" forKey:@"category"];
-     [identityNode.attributes setObject:@"phone" forKey:@"type"];
-     [identityNode.attributes setObject:[NSString stringWithFormat:@"Monal %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]] forKey:@"name"];
+    [identityNode.attributes setObject:@"phone" forKey:@"type"];
+    [identityNode.attributes setObject:[NSString stringWithFormat:@"Monal %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]] forKey:@"name"];
     [queryNode.children addObject:identityNode];
        
     [self.children addObject:queryNode];
@@ -562,7 +561,7 @@ NSString *const kiqErrorType = @"error";
     name.element=@"name";
     name.data=@"Monal";
     
- #if TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE
     MLXMLNode* os =[[MLXMLNode alloc] init];
     os.element=@"os";
     os.data=@"iOS";

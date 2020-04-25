@@ -765,20 +765,12 @@ NSString *const kCount =@"count";
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
 {
     NSString* query=
-<<<<<<< HEAD
     [NSString stringWithFormat:@"update account set server=?, other_port=?, username=?, secure=?, resource=?, domain=?, enabled=?, selfsigned=?, oldstyleSSL=?, airdrop=? where account_id=?"];
 
     NSString* server = (NSString *) [dictionary objectForKey:kServer];
     NSString* port = (NSString *)[dictionary objectForKey:kPort];
     NSArray * params=@[server==nil ? @"" : server,
                        port==nil ? @"5222" : port,
-=======
-    [NSString stringWithFormat:@"update account  set server=?, other_port=?, username=?, secure=?, resource=?, domain=?, enabled=?, selfsigned=?, oldstyleSSL=?, airdrop=? where account_id=?"];
-
-    NSArray * params=@[
-                       ((NSString *)[dictionary objectForKey:kServer]),
-                       ((NSString *)[dictionary objectForKey:kPort]),
->>>>>>> fixed parser, reduce memory use, speed up
                        ((NSString *)[dictionary objectForKey:kUsername]),
 
                        [dictionary objectForKey:kSSL],

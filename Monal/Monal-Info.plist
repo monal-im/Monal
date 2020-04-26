@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Allow access to your location</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -89,6 +87,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Monal allows users to take photos and upload to a conversation</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Allow access to your location</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Monal uses the microphone to transmit your voice in audio calls.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

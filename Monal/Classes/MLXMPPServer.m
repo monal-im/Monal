@@ -64,7 +64,7 @@
     self.directTLSInUse = isSecure;
 }
 
-- (BOOL) connectTLS {
+- (BOOL) isDirectTLS {
     return self.directTLSInUse;
 }
 

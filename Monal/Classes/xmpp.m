@@ -261,7 +261,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) createStreams
 {
-    DDLogInfo(@"stream  creating to  server: %@ port: %@ directTLS: %@", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort, self.connectionProperties.server.connectTLS ? @"YES" : @"NO");
+    DDLogInfo(@"stream  creating to  server: %@ port: %@ directTLS: %@", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort, self.connectionProperties.server.isDirectTLS ? @"YES" : @"NO");
 
     NSInputStream *localIStream;
     NSOutputStream *localOStream;
@@ -293,7 +293,7 @@ NSString *const kXMPPPresence = @"presence";
         DDLogInfo(@"streams created ok");
     }
 
-    if(self.connectionProperties.server.connectTLS==YES)
+    if(self.connectionProperties.server.isDirectTLS==YES)
     {
 		DDLogInfo(@"starting directSSL");
         [self initTLS];
@@ -1404,7 +1404,7 @@ NSString *const kXMPPPresence = @"presence";
 
                     if ((self.connectionProperties.server.SSL && self->_startTLSComplete)
                         || (!self.connectionProperties.server.SSL && !self->_startTLSComplete)
-                        || (self.connectionProperties.server.SSL && self.connectionProperties.server.oldStyleSSL))
+                        || (self.connectionProperties.server.SSL && self.connectionProperties.server.isDirectTLS))
                     {
                         if(self.registration){
                             [self requestRegForm];
@@ -1645,9 +1645,8 @@ NSString *const kXMPPPresence = @"presence";
                     DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
                     DDLogInfo(@"Set TLS properties on streams.security level %@", [self->_iStream propertyForKey:NSStreamSocketSecurityLevelKey]);
                 }
+                 self->_startTLSComplete=YES;
                 [self startStream];
-                self->_startTLSComplete=YES;
-
             }
         }
     }

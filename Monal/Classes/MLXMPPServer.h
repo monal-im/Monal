@@ -42,9 +42,9 @@ returns the currently connected port may be configured  or dns one.
 - (NSNumber *) connectPort;
 
 /**
-returns the currently directTLS setting may be configured  or dns one.
+ Will indicate whether direct TLS us used. This is either the old style or  updated via DNS discovery
 */
-- (BOOL) connectTLS;
+- (BOOL) isDirectTLS;
 
 @end
 

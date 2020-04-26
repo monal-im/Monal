@@ -1762,6 +1762,7 @@ NSString *const kCount =@"count";
         }
         else {
 			[self endWriteTransaction];
+            if(completion) completion(NO,nil);
             DDLogError(@"Message %@ or stanza Id %@ duplicated,, id in use %@", messageid, stanzaid,  idToUse);
         }
     }];

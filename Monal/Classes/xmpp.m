@@ -1021,11 +1021,24 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) processXMLDoc {
     if(_inputDataBuffer.length>0) {
+
+        #ifdef DEBUG
+                NSString *dataString = [[NSString alloc] initWithBytes:_inputDataBuffer.bytes length:_inputDataBuffer.length encoding:NSUTF8StringEncoding];
+                DDLogVerbose(@"RECV: %@", dataString);
+        #endif
         
-#ifdef DEBUG
-        NSString *dataString = [[NSString alloc] initWithBytes:_inputDataBuffer.bytes length:_inputDataBuffer.length encoding:NSUTF8StringEncoding];
-        DDLogVerbose(@"RECV: %@", dataString);
-#endif
+        //sanity check
+        char* lastByte = malloc(1);
+        [_inputDataBuffer getBytes:lastByte range:NSMakeRange(_inputDataBuffer.length-1, 1)];
+        if(lastByte[0] !='>') {
+              free(lastByte);
+            DDLogInfo(@"Incomplete stanza getting more");
+            return;
+        }
+        
+        free(lastByte);
+        
+
         
         if(self->_accountState>=kStateBinding || self.resuming) {
             //we append these strings so that the parser sees a valid XML doc

@@ -258,7 +258,7 @@ NSString *const kCount =@"count";
 
 					case (SQLITE_NULL):
 					{
-						DDLogDebug(@"return nil with sql null: %@", query);
+						//DDLogDebug(@"return nil with sql null: %@", query);
 						[row setObject:@"" forKey:columnName];
 						break;
 					}
@@ -567,7 +567,7 @@ NSString *const kCount =@"count";
 
 					case (SQLITE_NULL):
 					{
-						DDLogDebug(@"return nil with sql null: %@", query);
+						//DDLogDebug(@"return nil with sql null: %@", query);
 
 						[row setObject:@"" forKey:columnName];
 						break;

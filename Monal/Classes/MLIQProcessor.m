@@ -401,6 +401,7 @@
 -(void) omemoResult:(ParseIq *) iqNode {
 #ifndef DISABLE_OMEMO
     
+    NSOperationQueue *originalQueue=[NSOperationQueue currentQueue];
 #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -408,9 +409,10 @@
         {
 #endif
 #endif
-			//these are done synchronously in the receiverQueue like everything else, too
-			[self processOMEMODevices:iqNode];
-			[self processOMEMOKeys:iqNode];
+            [originalQueue addOperationWithBlock:^{
+                    [self processOMEMODevices:iqNode];
+                    [self processOMEMOKeys:iqNode];
+            }];
 #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
         }

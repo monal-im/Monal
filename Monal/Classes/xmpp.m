@@ -196,8 +196,8 @@ NSString *const kXMPPPresence = @"presence";
 
     NSString *prefixString =@"<container>";
     NSString *suffixString =@"</container>";
-    self.containerPrefix = [[prefixString dataUsingEncoding:kCFStringEncodingUTF8] mutableCopy];
-    self.containerSuffix = [[suffixString dataUsingEncoding:kCFStringEncodingUTF8] mutableCopy];
+    self.containerPrefix = [[prefixString dataUsingEncoding:NSUTF8StringEncoding] mutableCopy];
+    self.containerSuffix = [[suffixString dataUsingEncoding:NSUTF8StringEncoding] mutableCopy];
 
 }
 

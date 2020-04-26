@@ -12,6 +12,7 @@
 #import "MLConstants.h"
 #import "MLMessage.h"
 #import "xmpp.h"
+#import "MLBasePaser.h"
 @import SignalProtocolC;
 
 
@@ -50,14 +51,36 @@
     self.signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
 }
 
+-(void) parseString:(NSString *) sample withDelegate:(MLBasePaser *) baseParserDelegate {
+    NSString *containerStart =@"<container>";
+    NSString *containerStop =@"</container>";
+    
+    
+    NSMutableData *data = [[NSMutableData alloc] init];
+    [data appendData:[containerStart dataUsingEncoding:NSUTF8StringEncoding]];
+    [data appendData:[sample dataUsingEncoding:NSUTF8StringEncoding]];
+    [data appendData:[containerStop dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    NSXMLParser *xmlParser = [[NSXMLParser alloc] initWithData:data];
+    [xmlParser setShouldProcessNamespaces:NO];
+    [xmlParser setShouldReportNamespacePrefixes:NO];
+    [xmlParser setShouldResolveExternalEntities:NO];
+    [xmlParser setDelegate:baseParserDelegate];
+    
+    [xmlParser parse];
+}
+
 -(void) testMessageValid {
     NSString  *sample= @"<message xmlns='jabber:client' from='juliet@capulet.example/balcony' to='romeo@montague.example/garden' type='chat'><body>Hello</body><thread>0e3141cd80894871a68e6fe6b1ec56fa</thread></message>";
-    
-    NSDictionary *stanzaToParse =@{@"stanzaType":@"message", @"stanzaString":sample};
-    ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
-    XCTAssert([messageNode.messageText isEqualToString:@"Hello"], @"message body wrong");
-    XCTAssert([messageNode.from isEqualToString:@"juliet@capulet.example"], @"sender not parsed");
-    XCTAssert([messageNode.to isEqualToString:@"romeo@montague.example"], @"recipient not parsed");
+
+      MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
+          ParseMessage* messageNode =(ParseMessage*) parsedStanza;
+          XCTAssert([messageNode.messageText isEqualToString:@"Hello"], @"message body wrong");
+          XCTAssert([messageNode.from isEqualToString:@"juliet@capulet.example"], @"sender not parsed");
+          XCTAssert([messageNode.to isEqualToString:@"romeo@montague.example"], @"recipient not parsed");
+      }];
+      
+      [self parseString:sample withDelegate:baseParserDelegate];
     
 }
 
@@ -65,9 +88,12 @@
 -(void) testCarbonValid {
     NSString  *sample= @"<message xmlns='jabber:client' from='romeo@montague.example' to='romeo@montague.example/home' type='chat'>  <received xmlns='urn:xmpp:carbons:2'><forwarded xmlns='urn:xmpp:forward:0'><message xmlns='jabber:client' from='juliet@capulet.example/balcony' to='romeo@montague.example/garden' type='chat'><body>Thou shall meet me tonite, at our house's hall!</body></message></forwarded></received></message>";
     
-    NSDictionary *stanzaToParse =@{@"stanzaType":@"message", @"stanzaString":sample};
-    ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
-    XCTAssert([messageNode.from isEqualToString:@"juliet@capulet.example"], @"Valid Carbon not processed");
+    MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
+        ParseMessage* messageNode =(ParseMessage*) parsedStanza;
+        XCTAssert([messageNode.from isEqualToString:@"juliet@capulet.example"], @"Valid Carbon not processed");
+    }];
+    
+    [self parseString:sample withDelegate:baseParserDelegate];
     
 }
 
@@ -75,19 +101,23 @@
 -(void) testCarbonImpersonation {
     NSString  *sample= @"<message xmlns='jabber:client' from='tybalt@capulet.example/home' to='romeo@montague.example' type='chat'>  <received xmlns='urn:xmpp:carbons:2'><forwarded xmlns='urn:xmpp:forward:0'><message xmlns='jabber:client' from='juliet@capulet.example/balcony' to='romeo@montague.example/garden' type='chat'><body>Thou shall meet me tonite, at our house's hall!</body></message></forwarded></received></message>";
     
-    NSDictionary *stanzaToParse =@{@"stanzaType":@"message", @"stanzaString":sample};
-    ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
-    XCTAssert([messageNode.from isEqualToString:@"tybalt@capulet.example"], @"Carbon impersonation");
-    
+    MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
+          ParseMessage* messageNode =(ParseMessage*) parsedStanza;
+          XCTAssert([messageNode.from isEqualToString:@"tybalt@capulet.example"], @"Carbon impersonation");
+      }];
+      
+      [self parseString:sample withDelegate:baseParserDelegate];
 }
 
 -(void) testDelay {
     NSString  *sample= @"<message type='chat' from='anu@yax.im' to='anu@yax.im/Monal-iOS.78'><sent xmlns='urn:xmpp:carbons:2'><forwarded xmlns='urn:xmpp:forward:0'><message xmlns='jabber:client' type='chat' from='anu@yax.im/Monal-iOS.51' to='anurodhp@jabb3r.org' id='5F246FD4-8A5C-414C-BAD4-CDCD4F0B825C'><body>Culprit</body><request xmlns='urn:xmpp:receipts'/><store xmlns='urn:xmpp:hints'/><stanza-id by='anu@yax.im' xmlns='urn:xmpp:sid:0' id='b9a2a83b-ea6a-4763-9ace-c6adf6b2b47d'/></message></forwarded></sent><delay from='anu@yax.im' stamp='2020-01-01T18:16:32Z' xmlns='urn:xmpp:delay'/></message>";
     
-    NSDictionary *stanzaToParse =@{@"stanzaType":@"message", @"stanzaString":sample};
-    ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
-    XCTAssert([messageNode.delayTimeStamp isEqualToDate:[NSDate dateWithTimeIntervalSince1970:1577902592]], @"Delay time stamp ok");
-    
+    MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
+           ParseMessage* messageNode =(ParseMessage*) parsedStanza;
+        XCTAssert([messageNode.delayTimeStamp isEqualToDate:[NSDate dateWithTimeIntervalSince1970:1577902592]], @"Delay time stamp ok");
+       }];
+       
+       [self parseString:sample withDelegate:baseParserDelegate];
 }
 
 
@@ -95,11 +125,16 @@
     NSString  *sample= @"<message id='B3AF01E4-026A-4C0E-B183-A1273B585C07' to='anu@yax.im/Monal-iOS.51' from='monal_muc2@chat.yax.im/sim' type='groupchat'><body>Ok</body><store xmlns='urn:xmpp:hints'/><stanza-id id='LvW2gRGIhjrL_OTD' by='monal_muc2@chat.yax.im' xmlns='urn:xmpp:sid:0'/></message>";
     
     NSDictionary *stanzaToParse =@{@"stanzaType":@"message", @"stanzaString":sample};
-    ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
-    XCTAssert([messageNode.type isEqualToString:kMessageGroupChatType], @"did not identify group chat");
-    XCTAssert([messageNode.from isEqualToString:@"monal_muc2@chat.yax.im"], @"did not identify room");
-    XCTAssert([messageNode.actualFrom isEqualToString:@"sim"], @"did not identify sender nick");
 
+    MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
+        ParseMessage* messageNode =(ParseMessage*) parsedStanza;
+        XCTAssert([messageNode.type isEqualToString:kMessageGroupChatType], @"did not identify group chat");
+        XCTAssert([messageNode.from isEqualToString:@"monal_muc2@chat.yax.im"], @"did not identify room");
+        XCTAssert([messageNode.actualFrom isEqualToString:@"sim"], @"did not identify sender nick");
+    }];
+    
+    [self parseString:sample withDelegate:baseParserDelegate];
+    
 }
 
 

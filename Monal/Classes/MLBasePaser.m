@@ -142,8 +142,9 @@
         if(self.compeltion) {
             if(!self.currentStanzaParser) {
                 DDLogError(@"No stanza parser. not calling completion");
+            } else {
+                self.compeltion(self.currentStanzaParser);
             }
-            self.compeltion(self.currentStanzaParser);
         } else  {
             DDLogError(@"no completion handler for stanza!");
         }

@@ -12,6 +12,7 @@
 #import "MLXMPPConnection.h"
 #import "MLConstants.h"
 #import "MLMessage.h"
+#import "MLBasePaser.h"
 
 @interface MLMessageProcessorTest : XCTestCase
 @property (nonatomic, strong) NSString *accountNo;
@@ -46,11 +47,28 @@
 }
 
 
+-(void) parseString:(NSString *) sample withDelegate:(MLBasePaser *) baseParserDelegate {
+    NSString *containerStart =@"<container>";
+    NSString *containerStop =@"</container>";
+    
+    
+    NSMutableData *data = [[NSMutableData alloc] init];
+    [data appendData:[containerStart dataUsingEncoding:NSUTF8StringEncoding]];
+    [data appendData:[sample dataUsingEncoding:NSUTF8StringEncoding]];
+    [data appendData:[containerStop dataUsingEncoding:NSUTF8StringEncoding]];
+    
+    NSXMLParser *xmlParser = [[NSXMLParser alloc] initWithData:data];
+    [xmlParser setShouldProcessNamespaces:NO];
+    [xmlParser setShouldReportNamespacePrefixes:NO];
+    [xmlParser setShouldResolveExternalEntities:NO];
+    [xmlParser setDelegate:baseParserDelegate];
+    
+    [xmlParser parse];
+}
 
 - (void)testmucMessage {
     NSString  *sample= @"<message from='monal@chat.yax.im/Anu' to='anu@yax.im/Monal-iOS.31' type='groupchat'><subject>Monal IM - Official Support - XMPP client for iOS and macOS - https://monal.im/</subject></message>";
     
-    NSDictionary *stanzaToParse =@{@"stanzaType":@"message", @"stanzaString":sample};
     XCTNSNotificationExpectation *expectation=[[XCTNSNotificationExpectation alloc] initWithName:kMonalNewMessageNotice object:nil];
     expectation.handler = ^BOOL(NSNotification * _Nonnull notification) {
         MLMessage *message = [[notification userInfo] objectForKey:@"message"];
@@ -58,11 +76,15 @@
         return YES;
     };
     
-    ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
-    MLMessageProcessor *processor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.jid connection:nil signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+    MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
+        MLMessageProcessor *processor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.jid connection:nil signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+        [processor processMessage:parsedStanza];
+    }];
     
-    [processor processMessage:messageNode];
-   // [self waitForExpectations:@[expectation] timeout:5];
+    [self parseString:sample withDelegate:baseParserDelegate];
+  
+    
+  //  [self waitForExpectations:@[expectation] timeout:5];
     
 }
 
@@ -77,12 +99,15 @@
         return YES;
     };
     
-    ParseMessage* messageNode= [[ParseMessage alloc]  initWithDictionary:stanzaToParse];
-    MLMessageProcessor *processor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.jid connection:nil signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+
+      MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
+          MLMessageProcessor *processor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.jid connection:nil signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+          [processor processMessage:parsedStanza];
+      }];
+      
+      [self parseString:sample withDelegate:baseParserDelegate];
     
-    [processor processMessage:messageNode];
-   // [self waitForExpectations:@[expectation] timeout:5];
-    
+      // [self waitForExpectations:@[expectation] timeout:5];
 }
 
 

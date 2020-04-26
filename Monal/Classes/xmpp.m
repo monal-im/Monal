@@ -1798,13 +1798,13 @@ NSString *const kXMPPPresence = @"presence";
                 srand([[NSDate date] timeIntervalSince1970]);
                 self->_accountState=kStateLoggedIn;
 
-                [self startStream];
-//                NSXMLParser *xmlParser = [[NSXMLParser alloc] initWithStream:_iStream];
-//                [xmlParser setShouldProcessNamespaces:NO];
-//                [xmlParser setShouldReportNamespacePrefixes:NO];
-//                [xmlParser setShouldResolveExternalEntities:NO];
-//                [xmlParser setDelegate:self.baseParserDelegate];
-//                self.xmlParser=xmlParser;
+                NSXMLParser *xmlParser = [[NSXMLParser alloc] initWithStream:_iStream];
+                [xmlParser setShouldProcessNamespaces:NO];
+                [xmlParser setShouldReportNamespacePrefixes:NO];
+                [xmlParser setShouldResolveExternalEntities:NO];
+                [self.baseParserDelegate reset];
+                [xmlParser setDelegate:self.baseParserDelegate];
+                self.xmlParser=xmlParser;
 
 
                 self.connectedTime=[NSDate date];
@@ -1812,9 +1812,12 @@ NSString *const kXMPPPresence = @"presence";
                 self->_loginStarted=NO;
                 self.loginStartTimeStamp=nil;
 
-
-
-
+                 [self.receiveQueue addOperationWithBlock: ^{
+                     [self.xmlParser parse];//blocking operation
+                 }];
+                
+                [self startStream];
+                        
             }
         }
     }

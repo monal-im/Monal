@@ -1021,37 +1021,33 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) processXMLDoc {
     if(_inputDataBuffer.length>0) {
-
+        
 #ifdef DEBUG
         NSString *dataString = [[NSString alloc] initWithBytes:_inputDataBuffer.bytes length:_inputDataBuffer.length encoding:NSUTF8StringEncoding];
         DDLogVerbose(@"RECV: %@", dataString);
 #endif
-
+        
         if(self->_accountState>=kStateBinding || self.resuming) {
             //we append these strings so that the parser sees a valid XML doc
-            NSMutableData *xmlDoc = [[NSMutableData alloc] init];
-
-            [xmlDoc appendData:self.containerPrefix];
-            [xmlDoc appendData:_inputDataBuffer];
-            [xmlDoc appendData:self.containerSuffix];
-
-            _inputDataBuffer=xmlDoc;
+            [_inputDataBuffer appendData:self.containerSuffix];
         }
         else  {
-            DDLogVerbose(@"State: %d resuming %d", self->_accountState, self.resuming);
+            DDLogVerbose(@"State: %ld resuming %d", (long)self->_accountState, self.resuming);
         }
-
-
+        
         [self.baseParserDelegate reset];
         NSXMLParser *xmlParser = [[NSXMLParser alloc] initWithData:_inputDataBuffer];
-          [xmlParser setShouldProcessNamespaces:NO];
-          [xmlParser setShouldReportNamespacePrefixes:NO];
-          [xmlParser setShouldResolveExternalEntities:NO];
-          [xmlParser setDelegate:self.baseParserDelegate];
-          self.xmlParser=xmlParser;
-
-          [self.xmlParser parse];
+        [xmlParser setShouldProcessNamespaces:NO];
+        [xmlParser setShouldReportNamespacePrefixes:NO];
+        [xmlParser setShouldResolveExternalEntities:NO];
+        [xmlParser setDelegate:self.baseParserDelegate];
+        self.xmlParser=xmlParser;
+        
+        [self.xmlParser parse];
         _inputDataBuffer = [[NSMutableData alloc] init];
+        if(self->_accountState>=kStateBinding || self.resuming) {
+            [_inputDataBuffer appendData:self.containerPrefix];
+        }
     } else  {
         DDLogError(@"No Doc to process");
     }
@@ -1798,13 +1794,13 @@ NSString *const kXMPPPresence = @"presence";
                 srand([[NSDate date] timeIntervalSince1970]);
                 self->_accountState=kStateLoggedIn;
 
-                NSXMLParser *xmlParser = [[NSXMLParser alloc] initWithStream:_iStream];
-                [xmlParser setShouldProcessNamespaces:NO];
-                [xmlParser setShouldReportNamespacePrefixes:NO];
-                [xmlParser setShouldResolveExternalEntities:NO];
-                [self.baseParserDelegate reset];
-                [xmlParser setDelegate:self.baseParserDelegate];
-                self.xmlParser=xmlParser;
+//                NSXMLParser *xmlParser = [[NSXMLParser alloc] initWithStream:_iStream];
+//                [xmlParser setShouldProcessNamespaces:NO];
+//                [xmlParser setShouldReportNamespacePrefixes:NO];
+//                [xmlParser setShouldResolveExternalEntities:NO];
+//                [self.baseParserDelegate reset];
+//                [xmlParser setDelegate:self.baseParserDelegate];
+//                self.xmlParser=xmlParser;
 
 
                 self.connectedTime=[NSDate date];
@@ -1812,11 +1808,12 @@ NSString *const kXMPPPresence = @"presence";
                 self->_loginStarted=NO;
                 self.loginStartTimeStamp=nil;
 
-                 [self.receiveQueue addOperationWithBlock: ^{
-                     [self.xmlParser parse];//blocking operation
-                 }];
+//                 [self.receiveQueue addOperationWithBlock: ^{
+//                     [self.xmlParser parse];//blocking operation
+//                 }];
                 
-                [self startStream];
+                     [self startStream];
+                 [_inputDataBuffer appendData:self.containerPrefix];
                         
             }
         }

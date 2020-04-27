@@ -45,6 +45,7 @@
 
 
 @property (nonatomic, assign) BOOL encryptChat;
+@property (nonatomic, assign) BOOL sendLocation; // used for first request
 
 @property (nonatomic, strong) NSDate* lastMamDate;
 @property (nonatomic, assign) BOOL hardwareKeyboardPresent;
@@ -72,22 +73,6 @@
     self.contact=contact;
     [self setup];
     
-}
-
--(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations {
-    [self.locationManager stopUpdatingLocation];
-
-    // Check last location
-    CLLocation* gpsLoc = [locations lastObject];
-    if(gpsLoc == nil) {
-        return;
-    }
-    // Send location
-    [self sendMessage:[NSString stringWithFormat:@"geo:%f,%f", gpsLoc.coordinate.latitude, gpsLoc.coordinate.longitude]];
-}
-
-- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
-    DDLogError(@"Error while fetching location %@", error);
 }
 
 #pragma mark -  view lifecycle
@@ -556,6 +541,43 @@
     }];
 }
 
+#pragma mark  - location delegate
+- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
+    CLAuthorizationStatus gpsStatus = [CLLocationManager authorizationStatus];
+    if(gpsStatus == kCLAuthorizationStatusAuthorizedAlways || gpsStatus == kCLAuthorizationStatusAuthorizedWhenInUse) {
+        if(self.sendLocation) {
+            self.sendLocation=NO;
+            [self.locationManager requestLocation];
+        }
+    }
+}
+
+-(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations {
+    [self.locationManager stopUpdatingLocation];
+
+    // Check last location
+    CLLocation* gpsLoc = [locations lastObject];
+    if(gpsLoc == nil) {
+        return;
+    }
+    // Send location
+    [self sendMessage:[NSString stringWithFormat:@"geo:%f,%f", gpsLoc.coordinate.latitude, gpsLoc.coordinate.longitude]];
+}
+
+- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
+    DDLogError(@"Error while fetching location %@", error);
+}
+
+-(void) makeLocationManager {
+    if(self.locationManager == nil) {
+        self.locationManager = [[CLLocationManager alloc] init];
+        self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+        self.locationManager.delegate = self;
+    }
+}
+
+
+
 #pragma mark - attachment picker
 
 -(IBAction)attach:(id)sender
@@ -612,38 +634,39 @@
             [actionControll addAction:photosAction];
         #endif
     }
-
-    #if !TARGET_OS_MACCATALYST
-    // GPS
-    CLAuthorizationStatus gpsStatus = [CLLocationManager authorizationStatus];
-    if(gpsStatus == kCLAuthorizationStatusAuthorizedAlways || gpsStatus == kCLAuthorizationStatusAuthorizedWhenInUse) {
-        UIAlertAction* gpsAlert = [UIAlertAction actionWithTitle:@"Send Location" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            if(self.locationManager == nil) {
-                self.locationManager = [[CLLocationManager alloc] init];
-                self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-                self.locationManager.delegate = self;
-            }
+    
+    UIAlertAction* gpsAlert = [UIAlertAction actionWithTitle:@"Send Location" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        // GPS
+        CLAuthorizationStatus gpsStatus = [CLLocationManager authorizationStatus];
+        if(gpsStatus == kCLAuthorizationStatusAuthorizedAlways || gpsStatus == kCLAuthorizationStatusAuthorizedWhenInUse) {
+            [self makeLocationManager];
             [self.locationManager startUpdatingLocation];
-        }];
-        // Set image
-        if (@available(iOS 13.0, *)) {
-            [gpsAlert setValue:[[UIImage systemImageNamed:@"location"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+        } else if(gpsStatus == kCLAuthorizationStatusNotDetermined) {
+            [self makeLocationManager];
+            self.sendLocation=YES;
+            [self.locationManager requestWhenInUseAuthorization];
+        } else {
+            UIAlertController *permissionAlert = [UIAlertController alertControllerWithTitle:@"Location Access Needed"
+              message:@"Monal does not have access to your location. Please update the location access in your device's Privacy Settings." preferredStyle:UIAlertControllerStyleAlert];
+            [self presentViewController:permissionAlert animated:YES completion:nil];
+            [permissionAlert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                  [permissionAlert dismissViewControllerAnimated:YES completion:nil];
+              }]];
         }
-        [actionControll addAction:gpsAlert];
-    } else if(gpsStatus == kCLAuthorizationStatusNotDetermined) {
-        if(self.locationManager == nil) {
-            self.locationManager = [[CLLocationManager alloc] init];
-        }
-        [self.locationManager requestWhenInUseAuthorization];
+    }];
+    
+    // Set image
+    if (@available(iOS 13.0, *)) {
+        [gpsAlert setValue:[[UIImage systemImageNamed:@"location"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
     }
-
-        [actionControll addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-            [actionControll dismissViewControllerAnimated:YES completion:nil];
-        }]];
-
-        actionControll.popoverPresentationController.sourceView=sender;
-        [self presentViewController:actionControll animated:YES completion:nil];
-    #endif
+    [actionControll addAction:gpsAlert];
+    
+    [actionControll addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        [actionControll dismissViewControllerAnimated:YES completion:nil];
+    }]];
+    
+    actionControll.popoverPresentationController.sourceView=sender;
+    [self presentViewController:actionControll animated:YES completion:nil];
 }
 
 -(void) uploadData:(NSData *) data

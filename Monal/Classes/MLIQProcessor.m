@@ -285,11 +285,13 @@
             
             [[DataLayer sharedInstance] lastMessageDateForContact:self.connection.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
                 
-                if(lastDate) { // if no last date, there are no messages yet. Will fetch when in chat 
-                    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-                    [query setMAMQueryFromStart:lastDate toDate:nil withMax:nil andJid:nil];
-                    if(self.sendIq) self.sendIq(query);
-                }
+                NSDate *dateToUse =lastDate;
+                if(!dateToUse) dateToUse  =[NSDate dateWithTimeIntervalSinceNow:-60*60*24*14]; //two weeks
+                
+                XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+                [query setMAMQueryFromStart:dateToUse toDate:nil withMax:nil andJid:nil];
+                if(self.sendIq) self.sendIq(query);
+                
             }];
             
         }

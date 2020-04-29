@@ -1575,6 +1575,9 @@ NSString *const kXMPPPresence = @"presence";
             self.loginCompletion(YES, @"");
             self.loginCompletion=nil;
         }
+        
+        [self queryMAMSinceLastMessageDate];
+        
     }
     else  if([[stanzaToParse objectForKey:@"stanzaType"] isEqualToString:@"failed"]) // smacks resume or smacks enable failed
     {
@@ -1600,6 +1603,8 @@ NSString *const kXMPPPresence = @"presence";
                 self.loginCompletion(YES, @"");
                 self.loginCompletion=nil;
             }
+            
+            [self queryMAMSinceLastMessageDate];
         }
         else        //smacks enable failed
         {
@@ -1607,6 +1612,7 @@ NSString *const kXMPPPresence = @"presence";
 
             //init session and query disco, roster etc.
             [self initSession];
+            [self queryMAMSinceLastMessageDate];
 
             //resend stanzas still in the outgoing queue and clear it afterwards
             //this happens if the server has internal problems and advertises smacks support
@@ -2112,6 +2118,9 @@ static NSMutableArray *extracted(xmpp *object) {
         {
             NSNumber *mamNumber = [dic objectForKey:@"supportsMAM"];
             self.connectionProperties.supportsMam2 = mamNumber.boolValue;
+            if(self.accountState>=kStateLoggedIn) {
+                [self queryMAMSinceLastMessageDate];
+            }
         }
 
         if([dic objectForKey:@"supportsPubSub"])
@@ -2288,7 +2297,6 @@ static NSMutableArray *extracted(xmpp *object) {
     [self queryDisco];
     [self sendInitalPresence];
 
-    [self queryMAMSinceLastMessageDate];
 }
 
 -(void) setStatusMessageText:(NSString*) message
@@ -2687,7 +2695,9 @@ static NSMutableArray *extracted(xmpp *object) {
                 else  {
 					//TODO: this has a race condition here and doesnt play well with changing the time on the phone
 					//use the date of the last message received instead!!
-                    [self setMAMQueryFromStart:synchDate toDate:nil withMax:nil andJid:nil];
+                    NSDate *dateToUse =synchDate;
+                    if(!dateToUse) dateToUse  =[NSDate dateWithTimeIntervalSinceNow:-60*60*24*14]; //two weeks
+                    [self setMAMQueryFromStart:dateToUse toDate:nil withMax:nil andJid:nil];
                 }
                 [[DataLayer sharedInstance] setSynchpointforAccount:self.accountNo];
             }];

@@ -173,7 +173,7 @@ NSString *const kCount =@"count";
 
 			}
 		} else {
-            DDLogVerbose(@"return nil with no row");
+           // DDLogVerbose(@"return nil with no row");
 			toReturn= nil;
         };
 	} else{
@@ -469,7 +469,7 @@ NSString *const kCount =@"count";
 
 			}
 		} else {
-            DDLogVerbose(@"return nil with no row");
+         //   DDLogVerbose(@"return nil with no row");
 			toReturn= nil;
         };
 	}
@@ -1705,10 +1705,7 @@ NSString *const kCount =@"count";
             // note: if it isnt the same day we want to show the full  day
 
             NSString* dateString = [formatter stringFromDate:destinationDate];
-
-
-
-
+            
           //do not do this in MUC
             if(!messageType && [actualfrom isEqualToString:from]) {
 

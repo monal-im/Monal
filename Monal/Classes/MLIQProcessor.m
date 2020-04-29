@@ -280,19 +280,23 @@
         
         if([iqNode.features containsObject:@"urn:xmpp:mam:2"])
         {
+            BOOL previousStatus =self.connection.supportsMam2;
             self.connection.supportsMam2=YES;
             DDLogInfo(@" supports mam:2");
             
-            [[DataLayer sharedInstance] lastMessageDateForContact:self.connection.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
-                
-                NSDate *dateToUse =lastDate;
-                if(!dateToUse) dateToUse  =[NSDate dateWithTimeIntervalSinceNow:-60*60*24*14]; //two weeks
-                
-                XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-                [query setMAMQueryFromStart:dateToUse toDate:nil withMax:nil andJid:nil];
-                if(self.sendIq) self.sendIq(query);
-                
-            }];
+            //ony if it went from NO to YES
+            if(!previousStatus)  {
+                [[DataLayer sharedInstance] lastMessageDateForContact:self.connection.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
+                    
+                    NSDate *dateToUse =lastDate;
+                    if(!dateToUse) dateToUse  =[NSDate dateWithTimeIntervalSinceNow:-60*60*24*14]; //two weeks
+                    
+                    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+                    [query setMAMQueryFromStart:dateToUse toDate:nil withMax:nil andJid:nil];
+                    if(self.sendIq) self.sendIq(query);
+                    
+                }];
+            }
             
         }
     }

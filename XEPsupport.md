@@ -7,11 +7,11 @@ _Hint: This is work in progress, everyone is invited to fill up the list._
 |[XEP-0004 Data Forms](https://xmpp.org/extensions/xep-0004.html)|?|?|
 |[XEP-0016 Privacy Lists](https://xmpp.org/extensions/xep-0016.html)|?|?|
 |[XEP-0027 Current Jabber OpenPGP Usage](https://xmpp.org/extensions/xep-0027.html)|?|?|
-|[XEP-0030 Service Discovery](https://xmpp.org/extensions/xep-0030.html)|:x:|[#387](https://github.com/anurodhp/Monal/issues/387)|
+|[XEP-0030 Service Discovery](https://xmpp.org/extensions/xep-0030.html)|:x:|?|[#387](https://github.com/anurodhp/Monal/issues/387)|
 |[XEP-0033 Extended Stanza Addressing](https://xmpp.org/extensions/xep-0033.html)|?|?|
-|[XEP-0045 Multi-User Chat](https://xmpp.org/extensions/xep-0045.html)|:heavy_check_mark:|[#41](https://github.com/anurodhp/Monal/issues/41)
+|[XEP-0045 Multi-User Chat](https://xmpp.org/extensions/xep-0045.html)|:heavy_check_mark:|?|[#41](https://github.com/anurodhp/Monal/issues/41)
 |[XEP-0047 In-Band Bytestreams (IBB)](https://xmpp.org/extensions/xep-0047.html)|?|?|
-|[XEP-0048 Bookmarks](https://xmpp.org/extensions/xep-0048.html)|:x:|[#19](https://github.com/anurodhp/Monal/issues/19)|
+|[XEP-0048 Bookmarks](https://xmpp.org/extensions/xep-0048.html)|:x:|?|[#19](https://github.com/anurodhp/Monal/issues/19)|
 |[XEP-0049 Private XML Storage](https://xmpp.org/extensions/xep-0049.html)|?|?|
 |[XEP-0050 Ad-Hoc Commands](https://xmpp.org/extensions/xep-0050.html)|?|?|
 |[XEP-0054 vcard-temp](https://xmpp.org/extensions/xep-0054.html)|?|?|
@@ -24,7 +24,7 @@ _Hint: This is work in progress, everyone is invited to fill up the list._
 |[XEP-0071 XHTML-IM](https://xmpp.org/extensions/xep-0071.html)|?|?|
 |[XEP-0077 In-Band Registration](https://xmpp.org/extensions/xep-0077.html)|:warning:|?|partial, using a hardcoded server|
 |[XEP-0084 User Avatar](https://xmpp.org/extensions/xep-0084.html)|?|?|
-|[XEP-0085 Chat State Notifications](https://xmpp.org/extensions/xep-0085.html)|?|[#288](https://github.com/anurodhp/Monal/issues/288)|
+|[XEP-0085 Chat State Notifications](https://xmpp.org/extensions/xep-0085.html)|?|?|[#288](https://github.com/anurodhp/Monal/issues/288)|
 |[XEP-0092 Software Version](https://xmpp.org/extensions/xep-0092.html)|?|?|
 |[XEP-0095 Stream Initiation](https://xmpp.org/extensions/xep-0095.html)|?|?|
 |[XEP-0107 User Mood](https://xmpp.org/extensions/xep-0107.html)|?|?|
@@ -40,7 +40,7 @@ _Hint: This is work in progress, everyone is invited to fill up the list._
 |[XEP-0158 CAPTCHA Forms](https://xmpp.org/extensions/xep-0158.html)|?|?|
 |[XEP-0162 Best Practices for Roster and Subscription Management](https://xmpp.org/extensions/xep-0162.html)|:heavy_check_mark:|0.2||
 |[XEP-0163 Personal Eventing Protocol](https://xmpp.org/extensions/xep-0163.html)|?|?|
-|[XEP-0172 User Nickname](https://xmpp.org/extensions/xep-0172.html)|:x:|[#45](https://github.com/anurodhp/Monal/issues/45)
+|[XEP-0172 User Nickname](https://xmpp.org/extensions/xep-0172.html)|:x:|?|[#45](https://github.com/anurodhp/Monal/issues/45)
 |[XEP-0174 Serverless Messaging](https://xmpp.org/extensions/xep-0174.html)|:x:|?|[#55](https://github.com/anurodhp/Monal/issues/55)
 |[XEP-0175 Best Practices for Use of SASL ANONYMOUS](https://xmpp.org/extensions/xep-0175.html)|?|?|
 |[XEP-0178 Best Practices for Use of SASL EXTERNAL with Certificates](https://xmpp.org/extensions/xep-0178.html)|?|?|
@@ -53,7 +53,7 @@ _Hint: This is work in progress, everyone is invited to fill up the list._
 |[XEP-0202 Entity Time](https://xmpp.org/extensions/xep-0202.html)|?|?|
 |[XEP-0203 Delayed Delivery](https://xmpp.org/extensions/xep-0203.html)|?|?|
 |[XEP-0209 Metacontacts](https://xmpp.org/extensions/xep-0209.html)|?|?|
-|[XEP-0215 External Service Discovery](https://xmpp.org/extensions/xep-0215.html)|:x:|?|#401
+|[XEP-0215 External Service Discovery](https://xmpp.org/extensions/xep-0215.html)|:x:|?|[#401](https://github.com/anurodhp/Monal/issues/401)
 |[XEP-0221 Data Forms Media Element](https://xmpp.org/extensions/xep-0221.html)|?|?|
 |[XEP-0231 Bits of Binary](https://xmpp.org/extensions/xep-0231.html)|?|?|
 |[XEP-0234 Jingle File Transfer](https://xmpp.org/extensions/xep-0234.html)|?|?|Used by [XEP-0234 Jingle File Transfer](https://xmpp.org/extensions/xep-0234.html)|
@@ -66,10 +66,10 @@ _Hint: This is work in progress, everyone is invited to fill up the list._
 |[XEP-0297 Stanza Forwarding](https://xmpp.org/extensions/xep-0297.html)|?|?|
 |[XEP-0300 Use of Cryptographic Hash Functions in XMPP](https://xmpp.org/extensions/xep-0300.html)|?|?|
 |[XEP-0306 Extensible Status Conditions for Multi-User Chat](https://xmpp.org/extensions/xep-0306.html)|?|?|
-|[XEP-0308 Last Message Correction](https://xmpp.org/extensions/xep-0308.html)|:x:|?|#252|
+|[XEP-0308 Last Message Correction](https://xmpp.org/extensions/xep-0308.html)|:x:|?|[#252](https://github.com/anurodhp/Monal/issues/252)
 |[XEP-0313 Message Archive Management](https://xmpp.org/extensions/xep-0313.html)|:warning:|?|partial, MUC-MAM not implemented|
 |[XEP-0319 Last User Interaction in Presence](https://xmpp.org/extensions/xep-0319.html)|?|?|
-|[XEP-0363 HTTP File Upload](https://xmpp.org/extensions/xep-0363.html)|?|?|
+|[XEP-0363 HTTP File Upload](https://xmpp.org/extensions/xep-0363.html)|:heavy_check_mark:|?|
 |[XEP-0368 SRV records for XMPP over TLS](https://xmpp.org/extensions/xep-0368.html)|?|?|
 |[XEP-0373 OpenPGP for XMPP](https://xmpp.org/extensions/xep-0373.html)|:x:|?|
 |[XEP-0379 Pre-Authenticated Roster Subscription](https://xmpp.org/extensions/xep-0379.html)|:x:|?|[#127](https://github.com/anurodhp/Monal/issues/127)

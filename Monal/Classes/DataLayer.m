@@ -1666,7 +1666,7 @@ NSString *const kCount =@"count";
 
 -(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL, NSString*))completion
 {
-    if(!from || !to ||! message) {
+    if(!from || !to || !message) {
         if(completion) completion(NO,nil);
         return;
     }

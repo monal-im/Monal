@@ -336,59 +336,69 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) connectionTask
 {
-	//allow override for server and port if one is specified for the account
-	if(![self.connectionProperties.server.host isEqual:@""])
-	{
-		DDLogInfo(@"Ignoring SRV records for this connection, server manually configured: %@:%@", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort);
-		[self createStreams];
-		return;
-	}
-
-	// do DNS discovery if it hasn't already been set
-	if([_discoveredServersList count]==0) {
-		_discoveredServersList=[[[MLDNSLookup alloc] init] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
+    //allow override for server and port if one is specified for the account
+    if(![self.connectionProperties.server.host isEqual:@""])
+    {
+        DDLogInfo(@"Ignoring SRV records for this connection, server manually configured: %@:%@", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort);
+        [self createStreams];
+        return;
     }
 
-    //if all servers have been tried start over with the first one again
+    // do DNS discovery if it hasn't already been set
+    if([_discoveredServersList count]==0) {
+        _discoveredServersList=[[[MLDNSLookup alloc] init] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
+    }
+
+    // Show warning when xmpp-client srv entry prohibits connections
+    for(NSDictionary *row in _discoveredServersList) {
+        // Check if entry "." == srv target
+        if(![[row objectForKey:@"isEnabled"] boolValue]) {
+            NSString *message = @"SRV entry prohibits XMPP connection";
+            DDLogInfo(@"%@ for domain %@", message, self.connectionProperties.identity.domain);
+            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+            return;
+        }
+    }
+    
+    // if all servers have been tried start over with the first one again
     if([_discoveredServersList count]>0 && [_usableServersList count]==0)
-	{
-		DDLogWarn(@"All %lu SRV dns records tried, starting over again", (unsigned long)[_discoveredServersList count]);
-		_usableServersList = [_discoveredServersList mutableCopy];
-		for(NSDictionary *row in _usableServersList)
-		{
-			DDLogInfo(@"SRV entry: server=%@, port=%@, isSecure=%s (prio: %@)",
-				[row objectForKey:@"server"],
-				[row objectForKey:@"port"],
-				[[row objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
-				[row objectForKey:@"priority"]
-			);
-		}
-	}
+    {
+        DDLogWarn(@"All %lu SRV dns records tried, starting over again", (unsigned long)[_discoveredServersList count]);
+        _usableServersList = [_discoveredServersList mutableCopy];
+        for(NSDictionary *row in _usableServersList)
+        {
+            DDLogInfo(@"SRV entry: server=%@, port=%@, isSecure=%s (prio: %@)",
+                [row objectForKey:@"server"],
+                [row objectForKey:@"port"],
+                [[row objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
+                [row objectForKey:@"priority"]
+            );
+        }
+    }
 
     if([_usableServersList count]>0) {
-		DDLogInfo(@"Using connection parameters discovered via SRV dns record: server=%@, port=%@, isSecure=%s, priority=%@",
-			[[_usableServersList objectAtIndex:0] objectForKey:@"server"],
-			[[_usableServersList objectAtIndex:0] objectForKey:@"port"],
-			[[[_usableServersList objectAtIndex:0] objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
-			[[_usableServersList objectAtIndex:0] objectForKey:@"priority"]
-		);
+        DDLogInfo(@"Using connection parameters discovered via SRV dns record: server=%@, port=%@, isSecure=%s, priority=%@",
+            [[_usableServersList objectAtIndex:0] objectForKey:@"server"],
+            [[_usableServersList objectAtIndex:0] objectForKey:@"port"],
+            [[[_usableServersList objectAtIndex:0] objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
+            [[_usableServersList objectAtIndex:0] objectForKey:@"priority"]
+        );
         [self.connectionProperties.server updateConnectServer: [[_usableServersList objectAtIndex:0] objectForKey:@"server"]];
         [self.connectionProperties.server updateConnectPort: [[_usableServersList objectAtIndex:0] objectForKey:@"port"]];
-		[self.connectionProperties.server updateConnectTLS: [[[_usableServersList objectAtIndex:0] objectForKey:@"isSecure"] boolValue]];
-		//remove this server so that the next connection attempt will try the next server in the list
-		[_usableServersList removeObjectAtIndex:0];
-		DDLogInfo(@"%lu SRV entries left:", (unsigned long)[_usableServersList count]);
-		for(NSDictionary *row in _usableServersList)
-		{
-			DDLogInfo(@"SRV entry: server=%@, port=%@, isSecure=%s (prio: %@)",
-				[row objectForKey:@"server"],
-				[row objectForKey:@"port"],
-				[[row objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
-				[row objectForKey:@"priority"]
-			);
-		}
+        [self.connectionProperties.server updateConnectTLS: [[[_usableServersList objectAtIndex:0] objectForKey:@"isSecure"] boolValue]];
+        //remove this server so that the next connection attempt will try the next server in the list
+        [_usableServersList removeObjectAtIndex:0];
+        DDLogInfo(@"%lu SRV entries left:", (unsigned long)[_usableServersList count]);
+        for(NSDictionary *row in _usableServersList)
+        {
+            DDLogInfo(@"SRV entry: server=%@, port=%@, isSecure=%s (prio: %@)",
+                [row objectForKey:@"server"],
+                [row objectForKey:@"port"],
+                [[row objectForKey:@"isSecure"] boolValue] ? "YES" : "NO",
+                [row objectForKey:@"priority"]
+            );
+        }
     }
-
     [self createStreams];
 }
 
@@ -2482,7 +2492,7 @@ static NSMutableArray *extracted(xmpp *object) {
 -(NSString*)getVersionString
 {
     // We may need this later
-    NSString* unhashed=[NSString stringWithFormat:@"client/phone//Monal %@<%@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"], [XMPPIQ featuresString]];
+    NSString* unhashed=[NSString stringWithFormat:@"client/phone//Monal %@<%@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"], [XMPPIQ featuresString]];
 
     NSData* hashed;
     // <http://jabber.org/protocol/offline<

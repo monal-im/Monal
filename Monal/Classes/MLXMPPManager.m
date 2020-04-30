@@ -299,7 +299,10 @@ An array of Dics what have timers to make sure everything was sent
     NSString *password = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@",[account objectForKey:kUsername],[account objectForKey:kDomain] ] password:password andResource:[account objectForKey:kResource]];
 
-    MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andOldStyleSSL:[[account objectForKey:kOldSSL] boolValue]];
+    NSString* host = [account objectForKey:kServer];
+    if(host==nil || [host isEqual:@""])
+        host = [account objectForKey:kDomain];
+    MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:host andPort:[account objectForKey:kPort] andOldStyleSSL:[[account objectForKey:kOldSSL] boolValue]];
 
     server.SSL=[[account objectForKey:kSSL] boolValue];
     server.selfSignedCert=[[account objectForKey:kSelfSigned] boolValue];
@@ -326,10 +329,7 @@ An array of Dics what have timers to make sure everything was sent
 #endif
 
     //sepcifically look for the server since we might not be online or behind firewall
-    NSString* host = xmppAccount.connectionProperties.server.host;
-    if(host==nil || [host isEqual:@""])
-        host = xmppAccount.connectionProperties.identity.domain;
-    Reachability* hostReach = [Reachability reachabilityWithHostName:host] ;
+    Reachability* hostReach = [Reachability reachabilityWithHostName:host];
 
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged) name:kReachabilityChangedNotification object:nil];

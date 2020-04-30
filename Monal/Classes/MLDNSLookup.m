@@ -85,7 +85,7 @@ BOOL isSecure=NO;
 
 
 
-char *ConvertDomainLabelToCString_withescape(const domainlabel *const label, char *ptr, char esc)
+char *ConvertDomainLabelToCString_withescape(const domainLabel* label, char *ptr, char esc)
 {
     const u_char *      src = label->c;                         // Domain label we're reading
     const u_char        len = *src++;                           // Read length of this (non-null) label
@@ -112,17 +112,17 @@ char *ConvertDomainLabelToCString_withescape(const domainlabel *const label, cha
     return(ptr);                                                // and return
 }
 
-char *ConvertDomainNameToCString_withescape(const domainname *const name, char *ptr, char esc)
+char *ConvertDomainNameToCString_withescape(const domainName* name, int len, char *ptr, char esc)
 {
     const u_char *src         = name->c;                        // Domain name we're reading
-    const u_char *const max   = name->c + MAX_DOMAIN_NAME;      // Maximum that's valid
+    const u_char *const max   = name->c + MIN(MAX_DOMAIN_NAME, len);      // Maximum that's valid
     
     if (*src == 0) *ptr++ = '.';                                // Special case: For root, just write a dot
     
     while (*src)                                                                                                        // While more characters in the domain name
     {
         if (src + 1 + *src >= max) return(NULL);
-        ptr = ConvertDomainLabelToCString_withescape((const domainlabel *)src, ptr, esc);
+        ptr = ConvertDomainLabelToCString_withescape((const domainLabel *)src, ptr, esc);
         if (!ptr) return(NULL);
         src += 1 + *src;
         *ptr++ = '.';                                           // Write the dot after the label
@@ -135,24 +135,39 @@ char *ConvertDomainNameToCString_withescape(const domainname *const name, char *
 // print arbitrary rdata in a readable manned
 void print_rdata(int type, int len, const u_char *rdata, void* context)
 {
-    srv_rdata *srv;
-    char targetstr[MAX_CSTRING];
+    int srvDomainLen = len - 6; // len - sizeof(priority) - sizeof(weight) - sizeof(port)
+    if(srvDomainLen > MAX_DOMAIN_NAME) {
+        return;
+    }
 
-    
+    srv_rdata *srv;
+    char targetStr[MAX_CSTRING];
+
     MLDNSLookup *caller = (__bridge MLDNSLookup *) context;
-    
-    if(type== T_SRV)
+
+    if(type == T_SRV)
     {
         srv = (srv_rdata *)rdata;
-        ConvertDomainNameToCString_withescape(&srv->target, targetstr, 0);
+        ConvertDomainNameToCString_withescape(&srv->target, srvDomainLen, targetStr, 0);
         //  DDLogVerbose(@"pri=%d, w=%d, port=%d, target=%s\n", ntohs(srv->priority), ntohs(srv->weight), ntohs(srv->port), targetstr);
         
-        int portval=ntohs(srv->port);
-        NSString* theserver=[NSString stringWithUTF8String:targetstr];
-        NSNumber* num=[NSNumber numberWithInt:ntohs(srv->priority)];
-        NSNumber* theport=[NSNumber numberWithInt:portval];
-        if(theserver && num && theport) {
-            NSDictionary* row=[NSDictionary dictionaryWithObjectsAndKeys:num,@"priority", theserver,@"server", theport,@"port", [NSNumber numberWithBool:isSecure],@"isSecure", nil];
+        NSString* theServer = [NSString stringWithUTF8String:targetStr];
+        NSNumber* prio = [NSNumber numberWithInt:ntohs(srv->priority)];
+        NSNumber* weight = [NSNumber numberWithInt:ntohs(srv->weight)];
+        NSNumber* thePort = [NSNumber numberWithInt:ntohs(srv->port)];
+        if(theServer && prio && weight && thePort) {
+            // Check if service is not provided
+            bool serviceEnabled = ![theServer isEqualToString:@"."];
+            if(serviceEnabled == false && isSecure) {
+                return;
+            }
+            // Validate that the domain ends with at dot
+            if(![theServer hasSuffix:@"."]) {
+                return;
+            }
+            // TODO: Validate that the server fqdn format is correct
+
+            NSDictionary* row=[NSDictionary dictionaryWithObjectsAndKeys:prio,@"priority", theServer,@"server", thePort,@"port", [NSNumber numberWithBool:isSecure],@"isSecure", weight,@"weight", [NSNumber numberWithBool:serviceEnabled],@"isEnabled", nil];
             [caller.discoveredServers addObject:row];
         }
     }

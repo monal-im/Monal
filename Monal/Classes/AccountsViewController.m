@@ -107,8 +107,8 @@
     
     self.hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     self.hud.removeFromSuperViewOnHide=YES;
-    self.hud.label.text =@"Reconnecting";
-    self.hud.detailsLabel.text =@"Will connect any logged out accounts.";
+    self.hud.label.text =NSLocalizedString(@"Reconnecting",@ "");
+    self.hud.detailsLabel.text =NSLocalizedString(@"Will connect any logged out accounts.",@ "");
     [[MLXMPPManager sharedInstance] connectIfNecessary];
      [self.hud hideAnimated:YES afterDelay:1.0f];
     self.hud=nil;
@@ -118,8 +118,8 @@
 {
     self.hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     self.hud.removeFromSuperViewOnHide=YES;
-    self.hud.label.text =@"Logging out all accounts";
-    self.hud.detailsLabel.text=@"Tap Reconnect to log everything back in.";
+    self.hud.label.text =NSLocalizedString(@"Logging out all accounts",@ "");
+    self.hud.detailsLabel.text=NSLocalizedString(@"Tap Reconnect to log everything back in.",@ "");
     [[MLXMPPManager sharedInstance] logoutAll];
     [self.hud hideAnimated:YES afterDelay:3.0f];
     self.hud=nil;
@@ -273,17 +273,17 @@
             if([[[_accountList objectAtIndex:indexPath.row] objectForKey:@"enabled"] boolValue] ==YES) {
                    cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
                 if([[MLXMPPManager sharedInstance] isAccountForIdConnected: [NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]]) {
-                    accessory.image=[UIImage imageNamed:@"Connected"];
+                    accessory.image=[UIImage imageNamed:NSLocalizedString(@"Connected",@ "")];
                     cell.accessoryView =accessory;
                     
                     NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor: [NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]];
                     if(connectedTime) {
-                        cell.detailTextLabel.text=[NSString stringWithFormat:@"Connected since: %@",[self.uptimeFormatter stringFromDate:connectedTime]];
+                        cell.detailTextLabel.text=[NSString stringWithFormat:NSLocalizedString(@"Connected since: %@",@ ""),[self.uptimeFormatter stringFromDate:connectedTime]];
                     }
                     
                 }
                 else {
-                    accessory.image =[UIImage imageNamed:@"Disconnected"];
+                    accessory.image =[UIImage imageNamed:NSLocalizedString(@"Disconnected",@ "")];
                     cell.accessoryView =accessory;
                 }
        
@@ -310,7 +310,7 @@
             
             if([protocol isEqualToString:@"XMPP"])
             {
-                 cell.detailTextLabel.text=@"Jabber, Openfire, Prosody etc.   ";
+                 cell.detailTextLabel.text=NSLocalizedString(@"Jabber, Openfire, Prosody etc.   ",@ "");
             }
             
             return cell;

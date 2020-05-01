@@ -483,7 +483,7 @@
          
          if([[settings objectForKey:kAirdrop] boolValue])
          {
-             DDLogInfo(@"Sending Via share sheet");
+             DDLogInfo(NSLocalizedString(@"Sending Via share sheet",@ ""));
              [self sendWithShareSheet];
              
          }
@@ -572,7 +572,7 @@
 }
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
-    DDLogError(@"Error while fetching location %@", error);
+    DDLogError(NSLocalizedString(@"Error while fetching location %@",@ ""), error);
 }
 
 -(void) makeLocationManager {
@@ -669,7 +669,6 @@
         [actionControll addAction:photosAction];
 #endif
     }
-
     UIAlertAction* gpsAlert = [UIAlertAction actionWithTitle:NSLocalizedString(@"Send Location",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         // GPS
         CLAuthorizationStatus gpsStatus = [CLLocationManager authorizationStatus];
@@ -696,7 +695,6 @@
         [gpsAlert setValue:[[UIImage systemImageNamed:@"location"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
     }
     [actionControll addAction:gpsAlert];
-
     [actionControll addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
         [actionControll dismissViewControllerAnimated:YES completion:nil];
     }]];
@@ -726,7 +724,7 @@
             [mutableBody appendData:encrypted.authTag];
             dataToPass = [mutableBody copy];
         } else  {
-            DDLogError(@"Could not encrypt attachment");
+            DDLogError(NSLocalizedString(@"Could not encrypt attachment",@ ""));
         }
     }
     
@@ -817,7 +815,7 @@
 -(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId withCompletion:(void (^)(BOOL success))completion
 {
     if(!self.jid || !message)  {
-        DDLogError(@" not ready to send messages");
+        DDLogError(NSLocalizedString(@" not ready to send messages",@ ""));
         return;
     }
 
@@ -894,7 +892,7 @@
     
     MLMessage *message = [notification.userInfo objectForKey:@"message"];
     if(!message) {
-        DDLogError(@"Notification without message");
+        DDLogError(=NSLocalizedString(@"Notification without message",@ ""));
     }
     
     if([message.accountId isEqualToString:self.contact.accountId]
@@ -1188,7 +1186,7 @@
     if(indexPath.row<self.messageList.count) {
         row= [self.messageList objectAtIndex:indexPath.row];
     } else  {
-        DDLogError(@"Attempt to access beyond bounds");
+        DDLogError(=NSLocalizedString(@"Attempt to access beyond bounds",@ ""));
     }
     
     NSString *from=row.from;
@@ -1306,7 +1304,7 @@
           error:&error];
 
         if(error != NULL) {
-            DDLogError(@"Error while loading geoPattern");
+            DDLogError(=NSLocalizedString(@"Error while loading geoPattern",@ ""));
         }
 
         NSTextCheckingResult* geoMatch = [geoRegex firstMatchInString:row.messageText options:0 range:NSMakeRange(0, [row.messageText length])];

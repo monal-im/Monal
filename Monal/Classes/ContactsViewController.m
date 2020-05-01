@@ -122,8 +122,8 @@
         NSString *userName=[dic objectForKey:kUsername];
         
         
-        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Incoming Call" message:[NSString stringWithFormat:@"Incoming audio call to %@ from %@ ",userName,  contactName] preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:@"Accept" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Incoming Call" message:[NSString stringWithFormat:NSLocalizedString(@"Incoming audio call to %@ from %@ ",@""),userName,  contactName] preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Accept",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             
             [self performSegueWithIdentifier:@"showCall" sender:dic];
             

@@ -184,7 +184,7 @@
             }
             
             if(!title) title=@"";
-            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Logged Out"];
+            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, NSLocalizedString(@"Logged Out",@ "")];
         }
         else  {
             self.sendButton.enabled=YES;
@@ -234,7 +234,7 @@
     
     [self updateBackground];
     
-    self.placeHolderText.text=[NSString stringWithFormat:@"Message from %@", self.jid];
+    self.placeHolderText.text=[NSString stringWithFormat:NSLocalizedString(@"Message from %@",@ ""), self.jid];
     // Load message draft from db
     [[DataLayer sharedInstance] loadMessageDraft:self.contact.contactJid forAccount:self.contact.accountId
         withCompletion:^(NSString* messageDraft) {
@@ -381,7 +381,7 @@
           if(!self.jid) return;
           MLMessage *unreadStatus = [[MLMessage alloc] init];
           unreadStatus.messageType=kMessageTypeStatus;
-          unreadStatus.messageText=@"Unread Messages Below";
+          unreadStatus.messageText=NSLocalizedString(@"Unread Messages Below",@ "");
           unreadStatus.actualFrom=self.jid;
           
           NSInteger unreadPos = newList.count-1;
@@ -483,7 +483,7 @@
          
          if([[settings objectForKey:kAirdrop] boolValue])
          {
-             DDLogInfo(@"Sending Via share sheet");
+             DDLogInfo(NSLocalizedString(@"Sending Via share sheet",@ ""));
              [self sendWithShareSheet];
              
          }
@@ -572,7 +572,7 @@
 }
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
-    DDLogError(@"Error while fetching location %@", error);
+    DDLogError(NSLocalizedString(@"Error while fetching location %@",@ ""), error);
 }
 
 -(void) makeLocationManager {
@@ -619,33 +619,34 @@
     [self.chatInput resignFirstResponder];
     xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
 
-    UIAlertController *actionControll = [UIAlertController alertControllerWithTitle:@"Select Action"
+    UIAlertController *actionControll = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Select Action",@ "")
                                                                             message:nil preferredStyle:UIAlertControllerStyleActionSheet];
 
     // Check for http upload support
     if(!account.connectionProperties.supportsHTTPUpload )
     {
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error"
-                                                                       message:@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it." preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@ "")
+                                                                       message:NSLocalizedString(@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it.",@ "") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
         
         return;
     } else {
+
 #if TARGET_OS_MACCATALYST
         [self attachfile:sender];
 #else
         UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
         imagePicker.delegate =self;
 
-        UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:@"Camera" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
             [self presentViewController:imagePicker animated:YES completion:nil];
         }];
 
-        UIAlertAction* photosAction = [UIAlertAction actionWithTitle:@"Photos" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
             [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
                 if(granted)
@@ -669,7 +670,7 @@
 #endif
     }
 
-    UIAlertAction* gpsAlert = [UIAlertAction actionWithTitle:@"Send Location" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertAction* gpsAlert = [UIAlertAction actionWithTitle:NSLocalizedString(@"Send Location",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         // GPS
         CLAuthorizationStatus gpsStatus = [CLLocationManager authorizationStatus];
         if(gpsStatus == kCLAuthorizationStatusAuthorizedAlways || gpsStatus == kCLAuthorizationStatusAuthorizedWhenInUse) {
@@ -681,10 +682,10 @@
             self.sendLocation=YES;
             [self.locationManager requestWhenInUseAuthorization];
         } else {
-            UIAlertController *permissionAlert = [UIAlertController alertControllerWithTitle:@"Location Access Needed"
-                                                                                     message:@"Monal does not have access to your location. Please update the location access in your device's Privacy Settings." preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertController *permissionAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Location Access Needed",@ "")
+                                                                                     message:NSLocalizedString(@"Monal does not have access to your location. Please update the location access in your device's Privacy Settings.",@ "") preferredStyle:UIAlertControllerStyleAlert];
             [self presentViewController:permissionAlert animated:YES completion:nil];
-            [permissionAlert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            [permissionAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
                 [permissionAlert dismissViewControllerAnimated:YES completion:nil];
             }]];
         }
@@ -696,7 +697,7 @@
     }
     [actionControll addAction:gpsAlert];
 
-    [actionControll addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+    [actionControll addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
         [actionControll dismissViewControllerAnimated:YES completion:nil];
     }]];
 
@@ -709,8 +710,8 @@
     if(!self.uploadHUD) {
         self.uploadHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         self.uploadHUD.removeFromSuperViewOnHide=YES;
-        self.uploadHUD.label.text =@"Uploading";
-        self.uploadHUD.detailsLabel.text =@"Uploading file to server";
+        self.uploadHUD.label.text =NSLocalizedString(@"Uploading",@ "");
+        self.uploadHUD.detailsLabel.text =NSLocalizedString(@"Uploading file to server",@ "");
         
     }
     NSData *decryptedData= data;
@@ -725,7 +726,7 @@
             [mutableBody appendData:encrypted.authTag];
             dataToPass = [mutableBody copy];
         } else  {
-            DDLogError(@"Could not encrypt attachment");
+            DDLogError(NSLocalizedString(@"Could not encrypt attachment",@ ""));
         }
     }
     
@@ -752,7 +753,7 @@
                                                   [EncodingTools hexadecimalString:[encrypted.key subdataWithRange:NSMakeRange(0, keySize)]]];
                         urlToPass=urlComponents.string;
                     } else  {
-                        DDLogError(@"Could not parse url for conversion to aesgcm:");
+                        DDLogError(NSLocalizedString(@"Could not parse url for conversion to aesgcm:",@ ""));
                     }
                 }
                 
@@ -766,8 +767,8 @@
                 
             }
             else  {
-                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"There was an error uploading the file to the server" message:[NSString stringWithFormat:@"%@", error.localizedDescription] preferredStyle:UIAlertControllerStyleAlert];
-                [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"There was an error uploading the file to the server",@ "") message:[NSString stringWithFormat:@"%@", error.localizedDescription] preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                     [alert dismissViewControllerAnimated:YES completion:nil];
                 }]];
                 [self presentViewController:alert animated:YES completion:nil];
@@ -816,7 +817,7 @@
 -(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId withCompletion:(void (^)(BOOL success))completion
 {
     if(!self.jid || !message)  {
-        DDLogError(@" not ready to send messages");
+        DDLogError(NSLocalizedString(@" not ready to send messages",@ ""));
         return;
     }
 
@@ -870,16 +871,16 @@
 {
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     NSDictionary *userDic = notification.userInfo;
-    NSString *from = [userDic objectForKey:@"from"];
+    NSString *from = [userDic objectForKey:=NSLocalizedString(@"from",@ "")];
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"You have been invited to a conversation %@?", nil), from ];
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Group Chat Invite" message:messageString preferredStyle:UIAlertControllerStyleAlert];
+        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(=NSLocalizedString(@"You have been invited to a conversation %@?",@ ""), nil), from ];
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:=NSLocalizedString(@"Group Chat Invite" message:messageString preferredStyle:UIAlertControllerStyleAlert];
         
-        [alert addAction:[UIAlertAction actionWithTitle:@"Join" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:=NSLocalizedString(@"Join" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [xmppAccount joinRoom:from withNick:xmppAccount.connectionProperties.identity.user andPassword:nil];
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:=NSLocalizedString(@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
@@ -893,7 +894,7 @@
     
     MLMessage *message = [notification.userInfo objectForKey:@"message"];
     if(!message) {
-        DDLogError(@"Notification without message");
+        DDLogError(=NSLocalizedString(@"Notification without message",@ ""));
     }
     
     if([message.accountId isEqualToString:self.contact.accountId]
@@ -1137,8 +1138,8 @@
 {
     NSInteger historyId = ((UIButton*) sender).tag;
     
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Retry sending message?" message:@"This message failed to send." preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:@"Retry" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:=NSLocalizedString(@"Retry sending message?",@ "")message:=NSLocalizedString(@"This message failed to send.",@ "") preferredStyle:UIAlertControllerStyleActionSheet];
+    [alert addAction:[UIAlertAction actionWithTitle:=NSLocalizedString(@"Retry",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
         if([messageArray count]>0) {
             NSDictionary *dic= [messageArray objectAtIndex:0];
@@ -1146,7 +1147,7 @@
             [self setMessageId:[dic objectForKey:@"messageid"] delivered:YES]; // for the UI, db will be set in the notification
         }
     }]];
-    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+    [alert addAction:[UIAlertAction actionWithTitle:=NSLocalizedString(@"Cancel",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         [self dismissViewControllerAnimated:YES completion:nil];
     }]];
     alert.popoverPresentationController.sourceView=sender;
@@ -1187,7 +1188,7 @@
     if(indexPath.row<self.messageList.count) {
         row= [self.messageList objectAtIndex:indexPath.row];
     } else  {
-        DDLogError(@"Attempt to access beyond bounds");
+        DDLogError(=NSLocalizedString(@"Attempt to access beyond bounds",@ ""));
     }
     
     NSString *from=row.from;
@@ -1305,7 +1306,7 @@
           error:&error];
 
         if(error != NULL) {
-            DDLogError(@"Error while loading geoPattern");
+            DDLogError(=NSLocalizedString(@"Error while loading geoPattern",@ ""));
         }
 
         NSTextCheckingResult* geoMatch = [geoRegex firstMatchInString:row.messageText options:0 range:NSMakeRange(0, [row.messageText length])];
@@ -1496,7 +1497,7 @@
                 IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
                 browser.delegate=self;
                
-                UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStyleDone target:self action:@selector(closePhotos)];
+                UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:=NSLocalizedString(@"Close",@ "") style:UIBarButtonItemStyleDone target:self action:@selector(closePhotos)];
                 browser.navigationItem.rightBarButtonItem=close;
                 
                 //                browser.displayActionButton = YES; // Show action button to allow sharing, copying, etc (defaults to YES)

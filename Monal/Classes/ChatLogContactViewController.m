@@ -27,7 +27,7 @@
     self.navigationItem.title=self.contact.fullName;
 
     _tableData =[[DataLayer sharedInstance] messageHistoryListDates:self.contact.contactJid forAccount:self.contact.accountId];
-    self.navigationItem.title= @"Log Date";
+    self.navigationItem.title= NSLocalizedString(@"Log Date",@"");
     [self.tableView reloadData];
 }
 

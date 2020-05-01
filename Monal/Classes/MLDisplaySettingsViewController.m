@@ -102,19 +102,19 @@
     switch (section) {
         case 0:
         {
-            return @"Status";
+            return NSLocalizedString(@"Status",@"");
             break;
         }
             
         case 1:
         {
-            return @"Presence";
+            return NSLocalizedString(@"Presence",@"");
             break;
         }
             
         case 2:
         {
-            return @"General";
+            return NSLocalizedString(@"General",@"");
             break;
         }
             

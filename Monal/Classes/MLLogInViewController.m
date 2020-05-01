@@ -55,7 +55,7 @@
 -(IBAction) login:(id)sender
 {
     self.loginHUD= [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    self.loginHUD.label.text=@"Logging in";
+    self.loginHUD.label.text=NSLocalizedString(@"Logging in",@"");
     self.loginHUD.mode=MBProgressHUDModeIndeterminate;
     self.loginHUD.removeFromSuperViewOnHide=YES;
 
@@ -76,8 +76,8 @@
     if(!user || !domain)
     {
         self.loginHUD.hidden=YES;
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Invalid Credentails" message:@"Your XMPP account should be in in the format user@domain. For special configurations, use manual setup." preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid Credentails",@"") message:NSLocalizedString(@"Your XMPP account should be in in the format user@domain. For special configurations, use manual setup.",@"") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
@@ -87,8 +87,8 @@
     if(password.length==0)
     {
         self.loginHUD.hidden=YES;
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Invalid Credentails" message:@"Please enter a password." preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid Credentails",@"") message:NSLocalizedString(@"Please enter a password.",@"") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
@@ -124,8 +124,8 @@
 {
      dispatch_async(dispatch_get_main_queue(), ^{
     self.loginHUD.hidden=YES;
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Success!" message:@"You are set up and connected." preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:@"Start Using Monal" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Success!",@"") message:NSLocalizedString(@"You are set up and connected.",@"") preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Start Using Monal",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [self dismissViewControllerAnimated:YES completion:nil];
     }]];
     [self presentViewController:alert animated:YES completion:nil];
@@ -137,8 +137,8 @@
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         self.loginHUD.hidden=YES;
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet." preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@"") message:NSLocalizedString(@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.",@"") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];

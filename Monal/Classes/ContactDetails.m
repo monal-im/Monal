@@ -59,7 +59,7 @@
     if(self.contact.isGroup) {
        NSArray *members= [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
         self.groupMemberCount=members.count;
-        self.navigationItem.title =@"Group Chat";
+        self.navigationItem.title =NSLocalizedString(@"Group Chat",@"");
         
     }
     
@@ -76,22 +76,22 @@
         self.isSubscribed=NO;
        
         if([self.contact.subscription isEqualToString:kSubNone]){
-            self.subMessage=@"Neither can see keys.";
+            self.subMessage=NSLocalizedString(@"Neither can see keys.",@"");
         }
         
         else  if([self.contact.subscription isEqualToString:kSubTo]){
-             self.subMessage=@"You can see their keys. They can't see yours";
+             self.subMessage=NSLocalizedString(@"You can see their keys. They can't see yours",@"");
         }
         
         else if([self.contact.subscription isEqualToString:kSubFrom]){
-             self.subMessage=@"They can see your keys. You can't see theirs";
+             self.subMessage=NSLocalizedString(@"They can see your keys. You can't see theirs",@"");
         } else {
-              self.subMessage=@"Unknown Subcription";
+              self.subMessage=NSLocalizedString(@"Unknown Subcription",@"");
         }
         
         if([self.contact.ask isEqualToString:kAskSubscribe])
         {
-            self.subMessage =[NSString  stringWithFormat:@"%@ (Pending Approval)", self.subMessage];
+            self.subMessage =[NSString  stringWithFormat:NSLocalizedString(@"%@ (Pending Approval)",@""), self.subMessage];
         }
         
     } else  {
@@ -204,7 +204,7 @@
                         cell.textInput.text=self.contact.fullName;
                     }
                     if([cell.textInput.text isEqualToString:@"(null)"])  cell.textInput.text=@"";
-                    cell.textInput.placeholder=@"Set a nickname";
+                    cell.textInput.placeholder=NSLocalizedString(@"Set a nickname",@"");
                     cell.textInput.delegate=self;
                 }
                 thecell=cell;
@@ -221,7 +221,7 @@
             }
             else {
                 UITableViewCell *cell=  (UITableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"TableCell"];
-                cell.textLabel.text = @"View Images Received";
+                cell.textLabel.text = NSLocalizedString(@"View Images Received",@"");
                 thecell=cell;
             }
             break;
@@ -229,23 +229,23 @@
         case 2: {
             thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Sub"];
             if(indexPath.row==0) {
-               thecell.textLabel.text=@"Encryption Keys";
+               thecell.textLabel.text=NSLocalizedString(@"Encryption Keys",@"");
            } else
             if(indexPath.row==1) {
                 if(self.contact.isGroup) {
-                    thecell.textLabel.text=@"Participants";
+                    thecell.textLabel.text=NSLocalizedString(@"Participants",@"");
                 } else {
-                    thecell.textLabel.text=@"Resources";
+                    thecell.textLabel.text=NSLocalizedString(@"Resources",@"");
                 }
             }
             else if(indexPath.row==2) {
                 if(self.contact.isGroup) {
-                    thecell.textLabel.text=@"Leave Conversation";
+                    thecell.textLabel.text=NSLocalizedString(@"Leave Conversation",@"");
                 } else  {
                     if(self.isSubscribed) {
-                        thecell.textLabel.text=@"Remove Contact";
+                        thecell.textLabel.text=NSLocalizedString(@"Remove Contact",@"");
                     } else  {
-                        thecell.textLabel.text=@"Add Contact";
+                        thecell.textLabel.text=NSLocalizedString(@"Add Contact",@"");
                     }
                 }
             }
@@ -274,10 +274,10 @@
 {
     NSString* toreturn=nil;
     if(section==1)
-        toreturn= @"About";
+        toreturn= NSLocalizedString(@"About",@"");
     
     if(section==2)
-        toreturn= @"Connection Details";
+        toreturn= NSLocalizedString(@"Connection Details",@"");
     
     return toreturn;
 }
@@ -318,16 +318,16 @@
 }
 
 -(void) addContact {
-    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Add %@ to your contacts?", nil),self.contact.fullName ];
-    NSString* detailString =@"They will see when you are online. They will be able to send you encrypted messages.";
+    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(NSLocalizedString(@"Add %@ to your contacts?",@""), nil),self.contact.fullName ];
+    NSString* detailString =NSLocalizedString(@"They will see when you are online. They will be able to send you encrypted messages.",@"");
 
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
                                                                    message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [alert dismissViewControllerAnimated:YES completion:nil];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes",@"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         [[MLXMPPManager sharedInstance] addContact:self.contact];
         if([self.contact.state isEqualToString:kSubTo]  || [self.contact.state isEqualToString:kSubNone] ) {
             [[MLXMPPManager sharedInstance] approveContact:self.contact]; //incase there was a pending request
@@ -340,23 +340,23 @@
 }
 
 -(void) removeContact {
-    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),self.contact.fullName ];
-    NSString* detailString =@"They will no longer see when you are online. They may not be able to send you encrypted messages.";
+    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(NSLocalizedString(@"Remove %@ from contacts?",@""), nil),self.contact.fullName ];
+    NSString* detailString =NSLocalizedString(@"They will no longer see when you are online. They may not be able to send you encrypted messages.",@"");
        
     BOOL isMUC=self.contact.isGroup;
     if(isMUC)
     {
-        messageString =@"Leave this converstion?";
+        messageString =NSLocalizedString(@"Leave this converstion?",@"");
         detailString=nil;
     }
     
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
                                                                    message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [alert dismissViewControllerAnimated:YES completion:nil];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes",@"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         if(isMUC) {
             [[MLXMPPManager sharedInstance] leaveRoom:self.contact.contactJid withNick:self.contact.accountNickInGroup forAccountId:self.contact.accountId ];
         }
@@ -401,7 +401,7 @@
             self.rightImage=[UIImage imageNamed:@"IDMPhotoBrowser_arrowRight"];
             browser.leftArrowImage =self.leftImage;
             browser.rightArrowImage =self.rightImage;
-            UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:@"Close" style:UIBarButtonItemStyleDone target:self action:@selector(closePhotos)];
+            UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close",@"") style:UIBarButtonItemStyleDone target:self action:@selector(closePhotos)];
                           browser.navigationItem.rightBarButtonItem=close;
             
             UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
@@ -409,8 +409,8 @@
             
             [self presentViewController:nav animated:YES completion:nil];
         } else  {
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Nothing to see" message:@"You have not received any images in this conversation." preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Nothing to see",@"") message:NSLocalizedString(@"You have not received any images in this conversation.",@"") preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
             [self presentViewController:alert animated:YES completion:nil];
@@ -468,8 +468,8 @@
         }
         
     } else  {
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Encryption Not Supported" message:@"This contact does not appear to have any devices that support encryption." preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Encryption Not Supported",@"") message:NSLocalizedString(@"This contact does not appear to have any devices that support encryption.",@"") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];

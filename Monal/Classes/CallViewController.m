@@ -59,7 +59,7 @@
         if(!granted)
         {
             dispatch_async(dispatch_get_main_queue(), ^{
-                UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Please Allow Audio Access",@ "") message:NSLocalizedString(@"If you want to use VOIP you will need to allow access in Settings->Privacy->Microphone.",@ "") preferredStyle:UIAlertControllerStyleAlert];
+                UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Please Allow Audio Access",@ "") message:NSLocalizedString(@"If you want to use VOIP you will need to allow access in Settings-> Privacy-> Microphone.",@ "") preferredStyle:UIAlertControllerStyleAlert];
                 
                 UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
                     

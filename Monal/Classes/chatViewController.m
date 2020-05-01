@@ -753,7 +753,7 @@
                                                   [EncodingTools hexadecimalString:[encrypted.key subdataWithRange:NSMakeRange(0, keySize)]]];
                         urlToPass=urlComponents.string;
                     } else  {
-                        DDLogError(NSLocalizedString(@"Could not parse url for conversion to aesgcm:",@ ""));
+                        DDLogError(NSLocalizedString(@"Could not parse URL for conversion to aesgcm:",@ ""));
                     }
                 }
                 

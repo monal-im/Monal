@@ -52,6 +52,9 @@
         }
     }
     
+    //What is this namespace thing for? What element is called "something:x" and has an attribute called "xmlns:something"?
+    //I never saw this anywhere in the wild on my prosody server
+    //TODO: maybe completely remove this namespace thingie?
     NSString *namespace = nil;
     NSArray *parts =[elementName componentsSeparatedByString:@":"];
     if([parts count]>1) {
@@ -60,11 +63,10 @@
     {
         namespace =@"";
     }
-    
     if([elementName isEqualToString:[NSString stringWithFormat:@"%@:x",namespace]] || [elementName isEqualToString:@"x"] )
     {
         if([[attributeDict objectForKey:[NSString stringWithFormat:@"xmlns:%@",namespace]] isEqualToString:@"http://jabber.org/protocol/muc#user"]
-           || [[attributeDict objectForKey:kXMLNS ] isEqualToString:@"http://jabber.org/protocol/muc#user"])
+           || [namespaceURI isEqualToString:@"http://jabber.org/protocol/muc#user"])
         {
             self.MUC=YES;
             return;
@@ -75,6 +77,8 @@
 
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
+    [super parser:parser didEndElement:elementName namespaceURI:namespaceURI qualifiedName:qName];
+    
     if(_messageBuffer)
     {
         if([elementName isEqualToString:@"show"])

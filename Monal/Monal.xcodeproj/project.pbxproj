@@ -250,9 +250,13 @@
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
 		322AD0CC78815E4551793930 /* Pods_Monal_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F59B43550E822D135D1127E /* Pods_Monal_Tests.framework */; };
 		3517ED822FCB1456A8D492B1 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C40CE7301D792181A28A1F8 /* Pods_Monal.framework */; };
+		5435BE9B245F97B2006C61BF /* ParseR.h in Headers */ = {isa = PBXBuildFile; fileRef = 5435BE99245F97B1006C61BF /* ParseR.h */; };
+		5435BE9C245F97B3006C61BF /* ParseR.m in Sources */ = {isa = PBXBuildFile; fileRef = 5435BE9A245F97B1006C61BF /* ParseR.m */; };
 		8C56FAA9FC72C01E0AF98EFE /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C28AE0807330E8B6F972591 /* Pods_NotificaionService.framework */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
 		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
+		C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */ = {isa = PBXBuildFile; fileRef = C18E7578245E8AE900AE8FB7 /* MLPipe.h */; };
+		C18E757C245E8AE900AE8FB7 /* MLPipe.m in Sources */ = {isa = PBXBuildFile; fileRef = C18E7579245E8AE900AE8FB7 /* MLPipe.m */; };
 		C1B7DF6C2438883600C7F0C4 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */; };
 		D838DFA541E4102BCA92A60E /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC355146D687D83135E2BBF7 /* Pods_monalxmpp.framework */; };
 		FE9BEACD951D0F8D3EBE264D /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99727E17D81471E803966620 /* Pods_shareSheet.framework */; };
@@ -744,6 +748,8 @@
 		428F57D57919ACB0B97869A6 /* Pods-jrtplib-static-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
 		4425FD9C1F3AFFA64619FF67 /* Pods-jrtplib-static-OSX.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.appstore.xcconfig"; sourceTree = "<group>"; };
 		4C28AE0807330E8B6F972591 /* Pods_NotificaionService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NotificaionService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5435BE99245F97B1006C61BF /* ParseR.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParseR.h; sourceTree = "<group>"; };
+		5435BE9A245F97B1006C61BF /* ParseR.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ParseR.m; sourceTree = "<group>"; };
 		5ED93030541F175E7BEB1FC2 /* Pods-NotificaionService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NotificaionService/Pods-NotificaionService.debug.xcconfig"; sourceTree = "<group>"; };
 		5F59B43550E822D135D1127E /* Pods_Monal_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6253B2B3FE987619C2714CF5 /* Pods-Monal Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -770,6 +776,8 @@
 		C12436132434AB5D00B8F074 /* MLAttributedLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAttributedLabel.m; sourceTree = "<group>"; };
 		C1414E9B24312F0100948788 /* MLChatMapsCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatMapsCell.h; sourceTree = "<group>"; };
 		C1414E9C24312F0100948788 /* MLChatMapsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatMapsCell.m; sourceTree = "<group>"; };
+		C18E7578245E8AE900AE8FB7 /* MLPipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPipe.h; sourceTree = "<group>"; };
+		C18E7579245E8AE900AE8FB7 /* MLPipe.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPipe.m; sourceTree = "<group>"; };
 		C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/CoreLocation.framework; sourceTree = DEVELOPER_DIR; };
 		C1D27E0D3E8B8D0D625C5D2A /* Pods-monalxmppmac.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmppmac.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-monalxmppmac/Pods-monalxmppmac.adhoc.xcconfig"; sourceTree = "<group>"; };
 		C8C2F3F80367A8A1D3C24092 /* Pods-Monal Tests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests.adhoc.xcconfig"; sourceTree = "<group>"; };
@@ -915,6 +923,8 @@
 				26C4B22221B6B91300610282 /* MLDNSLookup.h */,
 				26C4B22321B6B91300610282 /* MLDNSLookup.m */,
 				26D0940622A14D03009C7AEF /* MLXMPPConstants.h */,
+				C18E7578245E8AE900AE8FB7 /* MLPipe.h */,
+				C18E7579245E8AE900AE8FB7 /* MLPipe.m */,
 				2661100B238F08820030A4EE /* MLXMPPServer.h */,
 				2661100C238F08820030A4EE /* MLXMPPServer.m */,
 				26611010238F08980030A4EE /* MLXMPPIdentity.h */,
@@ -1420,6 +1430,8 @@
 				26C3EDFF1A819A38000E6331 /* ParseResumed.m */,
 				2653796E244208FE007D67D5 /* MLBasePaser.h */,
 				2653796F244208FE007D67D5 /* MLBasePaser.m */,
+				5435BE99245F97B1006C61BF /* ParseR.h */,
+				5435BE9A245F97B1006C61BF /* ParseR.m */,
 			);
 			name = Parsers;
 			sourceTree = "<group>";
@@ -1665,7 +1677,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				26CC579623A0867400ABB92A /* monalxmpp.h in Headers */,
+				C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */,
 				26537970244208FE007D67D5 /* MLBasePaser.h in Headers */,
+				5435BE9B245F97B2006C61BF /* ParseR.h in Headers */,
 				26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2337,6 +2351,8 @@
 				26CC57C923A0892800ABB92A /* MLMessageProcessor.m in Sources */,
 				26CC57D623A08D7100ABB92A /* MLMetaInfo.m in Sources */,
 				26CC57AB23A086C000ABB92A /* ParsePresence.m in Sources */,
+				C18E757C245E8AE900AE8FB7 /* MLPipe.m in Sources */,
+				5435BE9C245F97B3006C61BF /* ParseR.m in Sources */,
 				26CC57D523A08D7100ABB92A /* MLSignalStore.m in Sources */,
 				26CC57B223A086CC00ABB92A /* MLXMLNode.m in Sources */,
 				26CC57A523A086AA00ABB92A /* MLXMPPIdentity.m in Sources */,

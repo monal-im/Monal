@@ -21,15 +21,16 @@
     if([attributeDict objectForKey:@"from"])
     {
         if(!_from) {
-        _from =[attributeDict objectForKey:@"from"];
-        NSArray *parts=[_from componentsSeparatedByString:@"/"];
-        _user =[parts objectAtIndex:0];
-        
-        if([parts count]>1) {
-            _resource=[parts objectAtIndex:1];
-        }
-        
-        _from = [_from lowercaseString]; // intedned to not break code that expects lowercase
+            _from = [attributeDict objectForKey:@"from"];
+            NSArray *parts = [_from componentsSeparatedByString:@"/"];
+            _user = [[parts objectAtIndex:0] lowercaseString];      // intended to not break code that expects lowercase
+            
+            _resource = @"";
+            if([parts count]>1) {
+                _resource = [NSString stringWithFormat:@"%@%@", @"/", [parts objectAtIndex:1]];     // resources are case sensitive
+            }
+            
+            _from = [NSString stringWithFormat:@"%@%@", _user, _resource];     // concat lowercased user part and kept-as-is resource part
             
         }else  {
             //DDLogError(@"Attempt to overwrite from");
@@ -41,17 +42,15 @@
     if([attributeDict objectForKey:@"to"])
     {
         if(!_to) {
-            _to =[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-            _to=[_to lowercaseString];
-            
+            _to = [[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0] lowercaseString];
         }
         else  {
            //DDLogError(@"Attempt to overwrite to");
         }
     }
     
-    //remove any  resource markers and get user
-    _user=[[_user lowercaseString] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    //remove any resource markers and get user
+    _user = [_user stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     
     if([elementName isEqualToString:@"error"])
     {
@@ -59,8 +58,8 @@
         return;
     }
     
-    
-    if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:ietf:params:xml:ns:xmpp-stanzas"])
+    if([namespaceURI isEqualToString:@"urn:ietf:params:xml:ns:xmpp-stanzas"] ||
+        [namespaceURI isEqualToString:@"urn:ietf:params:xml:ns:xmpp-streams"])
     {
         if(!_errorReason) _errorReason=elementName;
         return;
@@ -79,9 +78,10 @@
 }
 
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
-    
+    if(_errorReason && [elementName isEqualToString:@"text"])
+    {
+        _errorText=_messageBuffer;
+    }
 }
-
-
 
 @end

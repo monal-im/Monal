@@ -92,8 +92,9 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, readonly) xmppState accountState;
 
 // discovered properties
-@property (nonatomic,strong)  NSArray* discoveredServersList;
-@property (nonatomic,strong)  NSMutableArray* usableServersList;
+@property (nonatomic, assign)  BOOL SRVDiscoveryDone;
+@property (nonatomic, strong)  NSArray* discoveredServersList;
+@property (nonatomic, strong)  NSMutableArray* usableServersList;
 
 @property (nonatomic,strong)  NSArray*  roomList;
 @property (nonatomic, strong) NSArray* rosterList;

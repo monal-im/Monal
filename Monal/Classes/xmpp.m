@@ -156,6 +156,7 @@ NSString *const kXMPPPresence = @"presence";
 {
     _accountState = kStateLoggedOut;
 
+    _SRVDiscoveryDone = NO;
     _discoveredServersList=[[NSMutableArray alloc] init];
     if(!_usableServersList)
 		    _usableServersList=[[NSMutableArray alloc] init];
@@ -336,7 +337,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) connectionTask
 {
-    //allow override for server and port if one is specified for the account
+    // allow override for server and port if one is specified for the account
     if(![self.connectionProperties.server.host isEqual:@""])
     {
         DDLogInfo(@"Ignoring SRV records for this connection, server manually configured: %@:%@", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort);
@@ -345,8 +346,17 @@ NSString *const kXMPPPresence = @"presence";
     }
 
     // do DNS discovery if it hasn't already been set
-    if([_discoveredServersList count]==0) {
+    if(!_SRVDiscoveryDone) {
+        _SRVDiscoveryDone = YES;
         _discoveredServersList=[[[MLDNSLookup alloc] init] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
+        
+        // no SRV records found, update server to directly connect to specified domain
+        if([_discoveredServersList count]==0)
+        {
+            [self.connectionProperties.server updateConnectServer: self.connectionProperties.identity.domain];
+            [self.connectionProperties.server updateConnectPort: @5222];
+            [self.connectionProperties.server updateConnectTLS: NO];
+        }
     }
 
     // Show warning when xmpp-client srv entry prohibits connections
@@ -386,7 +396,7 @@ NSString *const kXMPPPresence = @"presence";
         [self.connectionProperties.server updateConnectServer: [[_usableServersList objectAtIndex:0] objectForKey:@"server"]];
         [self.connectionProperties.server updateConnectPort: [[_usableServersList objectAtIndex:0] objectForKey:@"port"]];
         [self.connectionProperties.server updateConnectTLS: [[[_usableServersList objectAtIndex:0] objectForKey:@"isSecure"] boolValue]];
-        //remove this server so that the next connection attempt will try the next server in the list
+        // remove this server so that the next connection attempt will try the next server in the list
         [_usableServersList removeObjectAtIndex:0];
         DDLogInfo(@"%lu SRV entries left:", (unsigned long)[_usableServersList count]);
         for(NSDictionary *row in _usableServersList)
@@ -399,6 +409,7 @@ NSString *const kXMPPPresence = @"presence";
             );
         }
     }
+    
     [self createStreams];
 }
 

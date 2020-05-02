@@ -27,16 +27,16 @@
 
 typedef NS_ENUM (NSInteger, xmppState) {
     kStateLoggedOut =-1,
-    kStateDisconnected , // has connected once
-    kStateReconnecting ,
-    kStateHasStream ,
-    kStateLoggedIn ,
+    kStateDisconnected, // has connected once
+    kStateReconnecting,
+    kStateHasStream,
+    kStateLoggedIn,
     kStateBinding,
     kStateBound //is operating normally
 };
 
 typedef NS_ENUM (NSInteger, xmppRegistrationState) {
-    kStateRequestingForm =-1,
+    kStateRequestingForm = -1,
     kStateSubmittingForm,
     kStateFormResponseReceived,
     kStateRegistered
@@ -53,41 +53,41 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 
 @interface xmpp : NSObject <NSStreamDelegate>
 
-@property (nonatomic,strong) NSString* pushNode;
-@property (nonatomic,strong) NSString* pushSecret;
+@property (nonatomic, strong) NSString* pushNode;
+@property (nonatomic, strong) NSString* pushSecret;
 
-@property (nonatomic,strong) MLXMPPConnection* connectionProperties;
+@property (nonatomic, strong) MLXMPPConnection* connectionProperties;
 
 //reg
-@property (nonatomic,assign) BOOL registrationSubmission;
-@property (nonatomic,assign) BOOL registration;
-@property (nonatomic,assign) xmppRegistrationState registrationState;
+@property (nonatomic, assign) BOOL registrationSubmission;
+@property (nonatomic, assign) BOOL registration;
+@property (nonatomic, assign) xmppRegistrationState registrationState;
 
-@property (nonatomic,strong) NSString *regUser;
-@property (nonatomic,strong) NSString *regPass;
-@property (nonatomic,strong) NSString *regCode;
-@property (nonatomic,strong) NSDictionary *regHidden;
+@property (nonatomic, strong) NSString *regUser;
+@property (nonatomic, strong) NSString *regPass;
+@property (nonatomic, strong) NSString *regCode;
+@property (nonatomic, strong) NSDictionary *regHidden;
 @property (nonatomic, strong) xmppDataCompletion regFormCompletion;
 
 
-@property (nonatomic,strong) jingleCall* call;
+@property (nonatomic, strong) jingleCall* call;
 
 // state attributes
-@property (nonatomic,assign) NSInteger priority;
-@property (nonatomic,strong) NSString* statusMessage;
-@property (nonatomic,assign) BOOL awayState;
-@property (nonatomic,assign) BOOL visibleState;
+@property (nonatomic, assign) NSInteger priority;
+@property (nonatomic, strong) NSString* statusMessage;
+@property (nonatomic, assign) BOOL awayState;
+@property (nonatomic, assign) BOOL visibleState;
 
-@property (nonatomic,assign) BOOL hasShownAlert;
+@property (nonatomic, assign) BOOL hasShownAlert;
 
 @property (nonatomic, strong) jingleCall *jingle;
 
 // DB info
-@property (nonatomic,strong) NSString* accountNo;
+@property (nonatomic, strong) NSString* accountNo;
 
 //we should have an enumerator for this
-@property (nonatomic,assign) BOOL explicitLogout;
-@property (nonatomic,assign,readonly) BOOL loginError;
+@property (nonatomic, assign) BOOL explicitLogout;
+@property (nonatomic, assign,readonly) BOOL loginError;
 
 @property (nonatomic, readonly) xmppState accountState;
 
@@ -96,17 +96,17 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, strong)  NSArray* discoveredServersList;
 @property (nonatomic, strong)  NSMutableArray* usableServersList;
 
-@property (nonatomic,strong)  NSArray*  roomList;
+@property (nonatomic, strong)  NSArray*  roomList;
 @property (nonatomic, strong) NSArray* rosterList;
 @property (nonatomic, assign) BOOL staleRoster; //roster is stale if it resumed in the background
 
 
-@property (nonatomic,assign) BOOL airDrop;
+@property (nonatomic, assign) BOOL airDrop;
 
 //calculated
-@property (nonatomic,strong, readonly) NSString* versionHash;
+@property (nonatomic, strong, readonly) NSString* versionHash;
 
-@property (nonatomic,strong) NSDate* connectedTime;
+@property (nonatomic, strong) NSDate* connectedTime;
 
 #ifndef DISABLE_OMEMO
 @property (nonatomic, strong) SignalContext *signalContext;

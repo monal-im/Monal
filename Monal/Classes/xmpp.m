@@ -1105,11 +1105,18 @@ NSString *const kXMPPPresence = @"presence";
 
         ParseIq* iqNode=parsedStanza;
 
+#ifndef DISABLE_OMEMO
         MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo
                                                                connection:self.connectionProperties
                                                              signalContex:self.signalContext
                                                            andSignalStore:self.monalSignalStore];
-        processor.sendIq=^(MLXMLNode * _Nullable iqResponse) {
+#else
+        MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo
+                                                               connection:self.connectionProperties
+                                                             signalContex:nil
+                                                           andSignalStore:nil];
+#endif
+            processor.sendIq=^(MLXMLNode * _Nullable iqResponse) {
             if(iqResponse) {
                 DDLogInfo(@"sending iq stanza");
                 [self send:iqResponse];
@@ -1150,7 +1157,7 @@ NSString *const kXMPPPresence = @"presence";
 
         [processor processIq:iqNode];
 
-
+#ifndef DISABLE_OMEMO
         if([iqNode.idval isEqualToString:self.deviceQueryId])
         {
             if([iqNode.type isEqualToString:kiqErrorType]) {
@@ -1162,6 +1169,7 @@ NSString *const kXMPPPresence = @"presence";
                 [self send:signalDevice];
             }
         }
+#endif
 
         //TODO these result iq need to be moved elsewhere/refactored
         //kept outside intentionally
@@ -1194,7 +1202,11 @@ NSString *const kXMPPPresence = @"presence";
 
         ParseMessage* messageNode= parsedStanza;
 
+#ifndef DISABLE_OMEMO
         MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+#else
+        MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid connection:self.connectionProperties signalContex:nil andSignalStore:nil];
+#endif
 
         messageProcessor.sendStanza=^(MLXMLNode * _Nullable nodeResponse) {
             if(nodeResponse) {
@@ -1254,9 +1266,11 @@ NSString *const kXMPPPresence = @"presence";
             }
         };
 
+#ifndef DISABLE_OMEMO
         messageProcessor.signalAction = ^(void) {
             [self manageMyKeys];
         };
+#endif
 
         [messageProcessor processMessage:messageNode];
 

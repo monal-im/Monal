@@ -1549,9 +1549,6 @@ NSString *const kXMPPPresence = @"presence";
             self.loginCompletion(YES, @"");
             self.loginCompletion=nil;
         }
-        
-        [self queryMAMSinceLastMessageDate];
-        
     }
     else  if([parsedStanza.stanzaType isEqualToString:@"failed"] && [parsedStanza isKindOfClass:[ParseFailed class]]) // smacks resume or smacks enable failed
     {
@@ -1577,8 +1574,6 @@ NSString *const kXMPPPresence = @"presence";
                 self.loginCompletion(YES, @"");
                 self.loginCompletion=nil;
             }
-            
-            [self queryMAMSinceLastMessageDate];
         }
         else        //smacks enable failed
         {
@@ -1586,7 +1581,6 @@ NSString *const kXMPPPresence = @"presence";
 
             //init session and query disco, roster etc.
             [self initSession];
-            [self queryMAMSinceLastMessageDate];
 
             //resend stanzas still in the outgoing queue and clear it afterwards
             //this happens if the server has internal problems and advertises smacks support
@@ -2044,9 +2038,6 @@ static NSMutableArray *extracted(xmpp *object) {
         {
             NSNumber *mamNumber = [dic objectForKey:@"supportsMAM"];
             self.connectionProperties.supportsMam2 = mamNumber.boolValue;
-            if(self.accountState>=kStateLoggedIn) {
-                [self queryMAMSinceLastMessageDate];
-            }
         }
 
         if([dic objectForKey:@"supportsPubSub"])
@@ -2223,7 +2214,11 @@ static NSMutableArray *extracted(xmpp *object) {
     [self fetchRoster];
     [self queryDisco];
     [self sendInitalPresence];
-
+    
+    //query mam since last received message because we could not resume the smacks session
+    //(we would not have landed here if we were able to resume the smacks session)
+    //this will do a catchup of everything we might have missed since our last connection
+    [self queryMAMSinceLastMessageDate];
 }
 
 -(void) setStatusMessageText:(NSString*) message

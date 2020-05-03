@@ -406,26 +406,22 @@
 
 -(void) omemoResult:(ParseIq *) iqNode {
 #ifndef DISABLE_OMEMO
-    
-    NSOperationQueue *originalQueue=[NSOperationQueue currentQueue];
+    BOOL __block isBackgrounded = NO;
 #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground)
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
         {
-#endif
-#endif
-            [originalQueue addOperationWithBlock:^{
-                    [self processOMEMODevices:iqNode];
-                    [self processOMEMOKeys:iqNode];
-            }];
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
+            isBackgrounded = YES;
         }
     });
 #endif
 #endif
-    
+    if(!isBackgrounded)
+    {
+        [self processOMEMODevices:iqNode];
+        [self processOMEMOKeys:iqNode];
+    }
 #endif
 }
 

@@ -335,18 +335,17 @@
         return;
     }
     
+    if(iqNode.rosterVersion) {
+        [[DataLayer sharedInstance] setRosterVersion:iqNode.rosterVersion forAccount:self.accountNo];
+    }
     for(NSDictionary* contact in iqNode.items)
     {
-        if(iqNode.rosterVersion) {
-            [[DataLayer sharedInstance] setRosterVersion:iqNode.rosterVersion forAccount:self.accountNo];
-        }
-        
         if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove])
         {
             [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"jid"] forAccount:self.accountNo];
         }
-        else {
-            
+        else
+        {
             if([[contact objectForKey:@"subscription"] isEqualToString:kSubTo])
             {
                 MLContact *contactObj = [[MLContact alloc] init];

@@ -49,7 +49,7 @@
     MLContact *contact = self.requests[indexPath.row];
     cell.textLabel.text= contact.contactJid;
     xmpp* account =[[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
-    cell.detailTextLabel.text=[NSString stringWithFormat:@"Account: %@",account.connectionProperties.identity.jid];
+    cell.detailTextLabel.text=[NSString stringWithFormat:NSLocalizedString(@"Account: %@",@ ""),account.connectionProperties.identity.jid];
     
     return cell;
 }
@@ -63,7 +63,7 @@
 
 -(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    return @"Allowing someone to add you as a contact lets them see when you online. It also allows you to send encrypted messages.  Tap to approve. Swipe to reject.";
+    return NSLocalizedString(@"Allowing someone to add you as a contact lets them see when you online. It also allows you to send encrypted messages.  Tap to approve. Swipe to reject.",@ "");
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {

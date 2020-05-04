@@ -263,7 +263,7 @@ NSString *const kXMPPPresence = @"presence";
     if((localIStream==nil) || (localOStream==nil))
     {
         DDLogError(@"Connection failed");
-        NSString *message=@"Unable to connect to server";
+        NSString *message=NSLocalizedString(@"Unable to connect to server",@ "");
         [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
         if(self.loginCompletion)  {
             self.loginCompletion(NO, message);
@@ -344,7 +344,7 @@ NSString *const kXMPPPresence = @"presence";
     for(NSDictionary *row in _discoveredServersList) {
         // Check if entry "." == srv target
         if(![[row objectForKey:@"isEnabled"] boolValue]) {
-            NSString *message = @"SRV entry prohibits XMPP connection";
+            NSString *message = NSLocalizedString(@"SRV entry prohibits XMPP connection",@ "");
             DDLogInfo(@"%@ for domain %@", message, self.connectionProperties.identity.domain);
             [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
             return;
@@ -1794,7 +1794,7 @@ static NSMutableArray *extracted(xmpp *object) {
     [messageNode setXmppId:messageId ];
 #ifndef DISABLE_OMEMO
     if(self.signalContext && !isMUC && encrypt) {
-        [messageNode setBody:@"[This message is OMEMO encrypted]"];
+        [messageNode setBody:NSLocalizedString(@"[This message is OMEMO encrypted]",@ "")];
 
         NSArray *devices = [self.monalSignalStore allDeviceIdsForAddressName:contact];
         NSArray *myDevices = [self.monalSignalStore allDeviceIdsForAddressName:self.connectionProperties.identity.jid];
@@ -2963,22 +2963,22 @@ static NSMutableArray *extracted(xmpp *object) {
             switch(st_error.code)
             {
                 case errSSLXCertChainInvalid: {
-                    message = @"SSL Error: Certificate chain is invalid";
+                    message = NSLocalizedString(@"SSL Error: Certificate chain is invalid",@ "");
                     break;
                 }
 
                 case errSSLUnknownRootCert: {
-                    message = @"SSL Error: Unknown root certificate";
+                    message = NSLocalizedString(@"SSL Error: Unknown root certificate",@ "");
                     break;
                 }
 
                 case errSSLCertExpired: {
-                    message = @"SSL Error: Certificate expired";
+                    message = NSLocalizedString(@"SSL Error: Certificate expired",@ "");
                     break;
                 }
 
                 case errSSLHostNameMismatch: {
-                    message = @"SSL Error: Host name mismatch";
+                    message = NSLocalizedString(@"SSL Error: Host name mismatch",@ "");
                     break;
                 }
 

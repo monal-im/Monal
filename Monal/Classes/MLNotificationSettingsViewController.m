@@ -44,21 +44,21 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.sectionsFooters =@[@"Apple push service should always be on. If it is off, your device can not talk to Apple's server.",
+    self.sectionsFooters =NSLocalizedString(@[@"Apple push service should always be on. If it is off, your device can not talk to Apple's server.",
                      @"If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission.  Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'. ",
                      @"If Monal push is off, your device could not talk to push.monal.im. This should also never be off. It requires Apple push service to work first. ",
                      @"",
-                            @"Rebuilding is useful if you are  expereicing problems. This will require an app restart to work."];
+                            @"Rebuilding is useful if you are  expereicing problems. This will require an app restart to work."],@ "");
     
-    self.sectionsHeaders =@[@"",
+    self.sectionsHeaders =NSLocalizedString(@[@"",
                             @"",
                             @"",
                             @"Accounts",
-                            @"Advanced"];
+                            @"Advanced"],@ "");
     
-    self.apple=@[@"Apple Push Service"];
-    self.user=@[@"Can Show Notifications"];
-    self.monal=@[@"Monal Push Server"];
+    self.apple=NSLocalizedString(@[@"Apple Push Service"],@ "");
+    self.user=NSLocalizedString(@[@"Can Show Notifications"],@ "");
+    self.monal=NSLocalizedString(@[@"Monal Push Server"],@ "");
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 }
@@ -201,7 +201,7 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
         case kNotificationSettingSectionAdvanced: {
             UITableViewCell *cell= [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
             cell.imageView.hidden=YES;
-            cell.textLabel.text =@"Rebuild Tokens";
+            cell.textLabel.text =NSLocalizedString(@"Rebuild Tokens",@ "");
             toreturn=cell;
             break;
         }

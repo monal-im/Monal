@@ -122,7 +122,7 @@
                 }
                 
                 if(!content.attachments)  {
-                    content.body =@"Sent an Image 📷";
+                    content.body =NSLocalizedString(@"Sent an Image 📷",@ "");
                 }else  {
                     content.body=@"";
                 }
@@ -136,9 +136,9 @@
             return;
         }
         else if([message.messageType isEqualToString:kMessageTypeUrl]) {
-            content.body =@"Sent a Link 🔗";
+            content.body =NSLocalizedString(@"Sent a Link 🔗",@ "");
         } else if([message.messageType isEqualToString:kMessageTypeGeo]) {
-            content.body =@"Sent a location📍";
+            content.body =NSLocalizedString(@"Sent a location📍",@ "");
         }
         
         UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval

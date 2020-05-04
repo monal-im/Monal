@@ -38,14 +38,14 @@ NS_ENUM(NSInteger, kSettingSection)
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.sections =@[@"App", @"Support", @"About"];
+    self.sections =NSLocalizedString(@[@"App", @"Support", @"About"],@ "");
     
-    self.appRows=@[@"Quick Setup", @"Accounts", @"Notifications", @"Backgrounds", @"Sounds", @"Display", @"Chat Logs"];  //@"Cloud Storage"
-    self.supportRows=@[@"Email Support", @"Submit A Bug"];
+    self.appRows=NSLocalizedString(@[@"Quick Setup", @"Accounts", @"Notifications", @"Backgrounds", @"Sounds", @"Display", @"Chat Logs"],@ "");  //@"Cloud Storage"
+    self.supportRows=@[@"Email Support", @"Submit A Bug"],@ "");
 #ifdef DEBUG
-    self.aboutRows=@[@"Rate Monal", @"Open Source", @"Privacy", @"Crash Logging",  @"About", @"Version",  @"Log" ];
+    self.aboutRows=NSLocalizedString(@[@"Rate Monal", @"Open Source", @"Privacy", @"Crash Logging",  @"About", @"Version",  @"Log" ],@ "");
 #else
-    self.aboutRows=@[@"Rate Monal", @"Open Source", @"Privacy", @"Crash Logging", @"About", @"Version"];
+    self.aboutRows=NSLocalizedString(@[@"Rate Monal", @"Open Source", @"Privacy", @"Crash Logging", @"About", @"Version"],@ "");
 #endif
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     #if !TARGET_OS_MACCATALYST
@@ -116,7 +116,7 @@ NS_ENUM(NSInteger, kSettingSection)
                 NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
                 NSString* build = [infoDict objectForKey:@"CFBundleVersion"];
                 
-                cell.textLabel.text= [NSString stringWithFormat:@"Version  %@ (%@)",version, build];
+                cell.textLabel.text= [NSString stringWithFormat:NSLocalizedString(@"Version  %@ (%@)",@ ""),version, build];
                 cell.accessoryType=UITableViewCellAccessoryNone;
             } else {
                 cell.textLabel.text= self.aboutRows[indexPath.row];
@@ -276,8 +276,8 @@ NS_ENUM(NSInteger, kSettingSection)
         [self presentViewController:composeVC animated:YES completion:nil];
     }
     else  {
-        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Error" message:@"There is no configured email account. Please email info@monal.im ." preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@ "") message:NSLocalizedString(@"There is no configured email account. Please email info@monal.im .",@ "") preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             
         }];
         [messageAlert addAction:closeAction];

@@ -268,8 +268,8 @@ NSString *const kGtalk = @"Gtalk";
                     }];
                 } else  {
                     dispatch_async(dispatch_get_main_queue(), ^{
-                   UIAlertController* alert= [UIAlertController alertControllerWithTitle:@"Account Exists" message:@"This account already exists in Monal." preferredStyle:UIAlertControllerStyleAlert];
-                    [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                   UIAlertController* alert= [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Account Exists",@ "") message:NSLocalizedString(@"This account already exists in Monal.",@ "") preferredStyle:UIAlertControllerStyleAlert];
+                    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                         [alert dismissViewControllerAnimated:YES completion:nil];
                     }]];
 
@@ -318,8 +318,8 @@ NSString *const kGtalk = @"Gtalk";
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeCustomView;
         hud.removeFromSuperViewOnHide=YES;
-        hud.label.text =@"Success";
-        hud.detailsLabel.text =@"The account has been saved";
+        hud.label.text =NSLocalizedString(@"Success",@ "");
+        hud.detailsLabel.text =NSLocalizedString(@"The account has been saved",@ "");
         UIImage *image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         hud.customView = [[UIImageView alloc] initWithImage:image];
 
@@ -331,12 +331,12 @@ NSString *const kGtalk = @"Gtalk";
 {
     DDLogVerbose(@"Deleting");
 
-    UIAlertController *questionAlert =[UIAlertController alertControllerWithTitle:@"Delete Account" message:@"This will remove this account and the associated data from this device." preferredStyle:UIAlertControllerStyleActionSheet];
-    UIAlertAction *noAction =[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+    UIAlertController *questionAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Delete Account",@ "") message:NSLocalizedString(@"This will remove this account and the associated data from this device.",@ "") preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertAction *noAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"No",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
 
     }];
 
-    UIAlertAction *yesAction =[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+    UIAlertAction *yesAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
 
         [SAMKeychain deletePasswordForService:@"Monal"  account:[NSString stringWithFormat:@"%@",self.accountno]];
         [self.db removeAccount:self.accountno];
@@ -346,8 +346,8 @@ NSString *const kGtalk = @"Gtalk";
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeCustomView;
         hud.removeFromSuperViewOnHide=YES;
-        hud.label.text =@"Success";
-        hud.detailsLabel.text =@"The account has been deleted";
+        hud.label.text =NSLocalizedString(@"Success",@ "");
+        hud.detailsLabel.text =NSLocalizedString(@"The account has been deleted",@ "");
         UIImage *image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         hud.customView = [[UIImageView alloc] initWithImage:image];
 
@@ -399,12 +399,12 @@ NSString *const kGtalk = @"Gtalk";
                     MLButtonCell *buttonCell =(MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
                     UIColor *monalGreen =[UIColor colorWithRed:128.0/255 green:203.0/255 blue:182.0/255 alpha:1.0f];
                     buttonCell.buttonText.textColor= monalGreen;
-                    buttonCell.buttonText.text=@"Authenticate";
+                    buttonCell.buttonText.text=NSLocalizedString(@"Authenticate",@ "");
                     buttonCell.selectionStyle= UITableViewCellSelectionStyleNone;
                     return buttonCell;
 
                 } else  {
-                    thecell.cellLabel.text=@"Password";
+                    thecell.cellLabel.text=NSLocalizedString(@"Password",@ "");
                     thecell.toggleSwitch.hidden=YES;
                     thecell.textInputField.secureTextEntry=YES;
                     thecell.textInputField.tag=2;
@@ -413,7 +413,7 @@ NSString *const kGtalk = @"Gtalk";
                 break;
             }
             case 2: {
-                thecell.cellLabel.text=@"Enabled";
+                thecell.cellLabel.text=NSLocalizedString(@"Enabled",@ "");
                 thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=1;
                 thecell.toggleSwitch.on=self.enabled;
@@ -428,7 +428,7 @@ NSString *const kGtalk = @"Gtalk";
         {
                 //advanced
             case 0:  {
-                thecell.cellLabel.text=@"Server";
+                thecell.cellLabel.text=NSLocalizedString(@"Server",@ "");
                 thecell.toggleSwitch.hidden=YES;
                 thecell.textInputField.tag=3;
                 thecell.textInputField.text=self.server;
@@ -437,7 +437,7 @@ NSString *const kGtalk = @"Gtalk";
             }
 
             case 1:  {
-                thecell.cellLabel.text=@"Port";
+                thecell.cellLabel.text=NSLocalizedString(@"Port",@ "");
                 thecell.toggleSwitch.hidden=YES;
                 thecell.textInputField.tag=4;
                 thecell.textInputField.text=self.port;
@@ -452,21 +452,21 @@ NSString *const kGtalk = @"Gtalk";
                 break;
             }
             case 3: {
-                thecell.cellLabel.text=@"Old Style TLS";
+                thecell.cellLabel.text=NSLocalizedString(@"Old Style TLS",@ "");
                 thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=3;
                 thecell.toggleSwitch.on=self.oldStyleSSL;
                 break;
             }
             case 4: {
-                thecell.cellLabel.text=@"Validate certificate";
+                thecell.cellLabel.text=NSLocalizedString(@"Validate certificate",@ "");
                 thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=4;
                 thecell.toggleSwitch.on=!self.selfSignedSSL;
                 break;
             }
             case 5: {
-                thecell.cellLabel.text=@"Message Archive Pref";
+                thecell.cellLabel.text=NSLocalizedString(@"Message Archive Pref",@ "");
                 thecell.toggleSwitch.hidden=YES;
 
                 thecell.textInputField.hidden=YES;
@@ -474,7 +474,7 @@ NSString *const kGtalk = @"Gtalk";
                 break;
             }
             case 6: {
-                thecell.cellLabel.text=@"My Keys";
+                thecell.cellLabel.text=NSLocalizedString(@"My Keys",@ "");
                 thecell.toggleSwitch.hidden=YES;
 
                 thecell.textInputField.hidden=YES;
@@ -482,7 +482,7 @@ NSString *const kGtalk = @"Gtalk";
                 break;
             }
             case 7: {
-                thecell.cellLabel.text=@"Change Password";
+                thecell.cellLabel.text=NSLocalizedString(@"Change Password",@ "");
                 thecell.toggleSwitch.hidden=YES;
 
                 thecell.textInputField.hidden=YES;
@@ -490,7 +490,7 @@ NSString *const kGtalk = @"Gtalk";
                 break;
             }
             case 8: {
-                thecell.cellLabel.text=@"Use AirDrop";
+                thecell.cellLabel.text=NSLocalizedString(@"Use AirDrop",@ "");
                 thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=5;
                 thecell.toggleSwitch.on=self.airDrop;
@@ -510,7 +510,7 @@ NSString *const kGtalk = @"Gtalk";
                 {
 
                     MLButtonCell *buttonCell =(MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
-                    buttonCell.buttonText.text=@"Delete";
+                    buttonCell.buttonText.text=NSLocalizedString(@"Delete",@ "");
                     buttonCell.buttonText.textColor= [UIColor redColor];
                     buttonCell.selectionStyle= UITableViewCellSelectionStyleNone;
                     return buttonCell;

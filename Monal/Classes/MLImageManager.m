@@ -167,11 +167,11 @@
 
     if([[EncodingTools dataWithBase64EncodedString:data] writeToFile:writablePath atomically:NO] )
     {
-        DDLogVerbose(@"wrote image to file",@""));
+        DDLogVerbose(@"wrote image to file");
     }
     else
     {
-        DDLogError(@"failed to write image",@""));
+        DDLogError(@"failed to write image");
     }
     
     //remove from cache if its there

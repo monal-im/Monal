@@ -38,14 +38,14 @@ NS_ENUM(NSInteger, kSettingSection)
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.sections =NSLocalizedString(@[@"App", @"Support", @"About"],@ "");
+    self.sections =@[NSLocalizedString(@"App",@ ""), NSLocalizedString(@"Support",@ ""), NSLocalizedString(@"About",@ "")];
     
-    self.appRows=NSLocalizedString(@[@"Quick Setup", @"Accounts", @"Notifications", @"Backgrounds", @"Sounds", @"Display", @"Chat Logs"],@ "");  //@"Cloud Storage"
-    self.supportRows=@[@"Email Support", @"Submit A Bug"],@ "");
+    self.appRows=@[NSLocalizedString(@"Quick Setup", NSLocalizedString(@"Accounts", NSLocalizedString(@"Notifications", NSLocalizedString(@"Backgrounds", NSLocalizedString(@"Sounds", NSLocalizedString(@"Display", NSLocalizedString(@"Chat Logs"];  //@"Cloud Storage"
+    self.supportRows=@[NSLocalizedString(@"Email Support",@ ""), NSLocalizedString(@"Submit A Bug",@ "")];
 #ifdef DEBUG
-    self.aboutRows=NSLocalizedString(@[@"Rate Monal", @"Open Source", @"Privacy", @"Crash Logging",  @"About", @"Version",  @"Log" ],@ "");
+    self.aboutRows=@[NSLocalizedString(@"Rate Monal",@ ""), NSLocalizedString(@"Open Source",@ ""), NSLocalizedString(@"Privacy",@ ""), NSLocalizedString(@"Crash Logging",@ ""), NSLocalizedString(@"About",@ ""), NSLocalizedString(@"Version",@ ""), NSLocalizedString(@"Log",@ "")];
 #else
-    self.aboutRows=NSLocalizedString(@[@"Rate Monal", @"Open Source", @"Privacy", @"Crash Logging", @"About", @"Version"],@ "");
+    self.aboutRows=@[NSLocalizedString(@"Rate Monal",@ ""), NSLocalizedString(@"Open Source",@ ""), NSLocalizedString(@"Privacy",@ ""), NSLocalizedString(@"Crash Logging",@ ""), NSLocalizedString(@"About",@ ""), NSLocalizedString(@"Version",@ "")];
 #endif
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     #if !TARGET_OS_MACCATALYST

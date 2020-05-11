@@ -26,7 +26,7 @@
     
     NSString* _errorType;
     NSString* _errorReason;
-  
+	NSString* _errorText;
 }
 
 @property (nonatomic, copy) NSString* stanzaType;
@@ -68,9 +68,13 @@ if error, the reason
 */
 @property (nonatomic, copy, readonly) NSString* errorReason;
 
+/**
+if error, the human readable text
+*/
+@property (nonatomic, copy, readonly) NSString* errorText;
+
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict;
-
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string;
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName ;
 

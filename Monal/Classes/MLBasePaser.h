@@ -19,6 +19,7 @@
 #import "ParseChallenge.h"
 #import "ParseFailure.h"
 #import "ParseEnabled.h"
+#import "ParseR.h"
 #import "ParseA.h"
 #import "ParseResumed.h"
 #import "ParseFailed.h"

@@ -40,14 +40,14 @@
 	
      if([elementName isEqualToString:@"ping"])
      {
-         _queryXMLNS=[attributeDict objectForKey:kXMLNS];
+         _queryXMLNS=namespaceURI;
          if([_queryXMLNS isEqualToString:@"urn:xmpp:ping"])
              _ping=YES;
      }
 
     if([elementName isEqualToString:@"query"])
     {
-        _queryXMLNS=[attributeDict objectForKey:kXMLNS];
+        _queryXMLNS=namespaceURI;
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"]) _discoInfo=YES;
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#items"]) _discoItems=YES;
         if([_queryXMLNS isEqualToString:kRegisterNameSpace])
@@ -56,7 +56,7 @@
         }
         
         
-        if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"jabber:iq:roster"])  {
+        if([namespaceURI isEqualToString:@"jabber:iq:roster"])  {
             State=@"RosterQuery";
             _roster=YES;
             _rosterVersion = [attributeDict objectForKey:@"ver"];
@@ -71,7 +71,7 @@
     if([elementName isEqualToString:@"feature"])
     {
         if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"]) {
-            if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"jabber:iq:roster"])
+            if([namespaceURI isEqualToString:@"jabber:iq:roster"])
             {
                 _roster=YES;
             }
@@ -85,13 +85,13 @@
         
     }
     
-    if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"jabber:iq:auth"]) _legacyAuth=YES;
+    if([namespaceURI isEqualToString:@"jabber:iq:auth"]) _legacyAuth=YES;
     
     //http upload
     
     if([elementName isEqualToString:@"slot"])
     {
-        _queryXMLNS=[attributeDict objectForKey:kXMLNS];
+        _queryXMLNS=namespaceURI;
           State=@"slot";
         _httpUpload =YES; 
         return;
@@ -129,14 +129,14 @@
     }
     
 
-    if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"jabber:iq:version"])
+    if([namespaceURI isEqualToString:@"jabber:iq:version"])
     {
         _version=YES;
         return;
     }
     
     
-    if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"jabber:iq:last"])
+    if([namespaceURI isEqualToString:@"jabber:iq:last"])
     {
         _last=YES;
         return;
@@ -149,19 +149,19 @@
     }
     
     
-    if([elementName isEqualToString:@"prefs"] && [[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:mam:2"])
+    if([elementName isEqualToString:@"prefs"] && [namespaceURI isEqualToString:@"urn:xmpp:mam:2"])
     {
         _mam2default =[attributeDict objectForKey:@"default"];
         return;
     }
     
-    if([elementName isEqualToString:@"fin"] && [[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:mam:2"]  &&  [[attributeDict objectForKey:@"complete"] isEqualToString:@"true"])
+    if([elementName isEqualToString:@"fin"] && [namespaceURI isEqualToString:@"urn:xmpp:mam:2"]  &&  [[attributeDict objectForKey:@"complete"] isEqualToString:@"true"])
     {
         _mam2fin =YES;
         return;
     }
     
-    if([elementName isEqualToString:@"set"] && [[attributeDict objectForKey:kXMLNS] isEqualToString:@"http://jabber.org/protocol/rsm"])
+    if([elementName isEqualToString:@"set"] && [namespaceURI isEqualToString:@"http://jabber.org/protocol/rsm"])
     {
         State=@"MAMSet";
         return;
@@ -172,13 +172,13 @@
     
     //** jingle ** /
     
-    if([elementName isEqualToString:@"jingle"] &&  [[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:jingle:1"])
+    if([elementName isEqualToString:@"jingle"] &&  [namespaceURI isEqualToString:@"urn:xmpp:jingle:1"])
      {
          _jingleSession=[attributeDict copy];
          return;
      }
     
-    if([elementName isEqualToString:@"description"] &&  [[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:jingle:apps:rtp:1"])
+    if([elementName isEqualToString:@"description"] &&  [namespaceURI isEqualToString:@"urn:xmpp:jingle:apps:rtp:1"])
     {
         State=@"jingleDescription";
         return;
@@ -193,7 +193,7 @@
         return;
     }
     
-    if([elementName isEqualToString:@"transport"] &&  [[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:jingle:transports:raw-udp:1"])
+    if([elementName isEqualToString:@"transport"] &&  [namespaceURI isEqualToString:@"urn:xmpp:jingle:transports:raw-udp:1"])
     {
         State=@"jingleTransport";
         return;
@@ -224,7 +224,7 @@
         
     }
     
-    if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"eu.siacs.conversations.axolotl"]) {
+    if([namespaceURI isEqualToString:@"eu.siacs.conversations.axolotl"]) {
         if([elementName isEqualToString:@"bundle"])
         {
             State=@"Bundle";
@@ -260,7 +260,7 @@
     
  
     //register
-    if([[attributeDict objectForKey:kXMLNS] isEqualToString:kDataNameSpace] && self.registration) {
+    if([namespaceURI isEqualToString:kDataNameSpace] && self.registration) {
         if([elementName isEqualToString:@"x"]) {
             State = @"RegistrationForm";
             return;
@@ -285,7 +285,7 @@
         return;
     }
     
-  if([[attributeDict objectForKey:kXMLNS] isEqualToString:kStanzasNameSpace]
+  if([namespaceURI isEqualToString:kStanzasNameSpace]
        &&  [State isEqualToString:@"Error"] ) {
         if([elementName isEqualToString:@"text"]) {
             State = @"ErrorText";
@@ -299,6 +299,7 @@
 
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
+    [super parser:parser didEndElement:elementName namespaceURI:namespaceURI qualifiedName:qName];
     
     if(([elementName isEqualToString:@"text"]) && [State isEqualToString:@"ErrorText"])
     {

@@ -14,7 +14,6 @@
 
 @property (nonatomic,readonly, assign) BOOL supportsLegacyAuth;
 @property (nonatomic,readonly, assign) BOOL supportsUserReg;
-@property (nonatomic,readonly, assign) BOOL supportsSM2;
 @property (nonatomic,readonly, assign) BOOL supportsSM3;
 @property (nonatomic,readonly, assign) BOOL supportsCarbons2;
 @property (nonatomic,readonly, assign) BOOL supportsRosterVer;
@@ -35,8 +34,6 @@
 @property (nonatomic,readonly, assign) BOOL bind;
 
 @property (nonatomic,readonly, assign) BOOL supportsClientState;
-
-@property (nonatomic,readonly, assign) BOOL error;
 
 
 @end

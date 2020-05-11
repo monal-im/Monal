@@ -48,7 +48,7 @@
         
     }
     
-    if(([elementName isEqualToString:@"delay"]) && [[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:delay"])
+    if(([elementName isEqualToString:@"delay"]) && [namespaceURI isEqualToString:@"urn:xmpp:delay"])
     {
         NSDateFormatter *rfc3339DateFormatter = [[NSDateFormatter alloc] init];
         NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
@@ -71,7 +71,7 @@
         
     }
     
-    if([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:sid:0"])
+    if([namespaceURI isEqualToString:@"urn:xmpp:sid:0"])
     {
         _stanzaId = [attributeDict objectForKey:@"id"];
     }
@@ -143,7 +143,7 @@
     }
     
     
-    if(([elementName isEqualToString:@"x"])  && ([[attributeDict objectForKey:kXMLNS] isEqualToString:@""]))
+    if(([elementName isEqualToString:@"x"])  && ([namespaceURI isEqualToString:@""]))
     {
         State=@"OOB";
         return;
@@ -162,7 +162,7 @@
 	//message->user:X
 	if(([State isEqualToString:@"Message"]) && ( ([elementName isEqualToString: @"user:invite"]) || ([elementName isEqualToString: @"invite"]))
        // && (([[attributeDict objectForKey:@"xmlns:user"] isEqualToString:@"http://jabber.org/protocol/muc#user"]) ||
-       //  ([[attributeDict objectForKey:kXMLNS] isEqualToString:@"http://jabber.org/protocol/muc#user"])
+       //  ([namespaceURI isEqualToString:@"http://jabber.org/protocol/muc#user"])
        //   )
 	   )
 	{
@@ -183,7 +183,7 @@
 	}
 	
 
-	if(([elementName isEqualToString:@"data"])  && ([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:avatar:data"]))
+	if(([elementName isEqualToString:@"data"])  && ([namespaceURI isEqualToString:@"urn:xmpp:avatar:data"]))
 	{
         State=@"AvatarData";
 		
@@ -191,7 +191,7 @@
 	}
 	
     
-    if(([elementName isEqualToString:@"result"])  && ([[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:mam:2"]))
+    if(([elementName isEqualToString:@"result"])  && ([namespaceURI isEqualToString:@"urn:xmpp:mam:2"]))
     {
         _mamResult=YES;
         _idval=[attributeDict objectForKey:kId];
@@ -208,13 +208,13 @@
 	}
 
     
-    if([elementName isEqualToString:@"request"]  && [[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:receipts"] )
+    if([elementName isEqualToString:@"request"]  && [namespaceURI isEqualToString:@"urn:xmpp:receipts"] )
     {
         _requestReceipt=YES;
         return;
     }
     
-    if([elementName isEqualToString:@"received"]  && [[attributeDict objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:receipts"] )
+    if([elementName isEqualToString:@"received"]  && [namespaceURI isEqualToString:@"urn:xmpp:receipts"] )
     {
         _receivedID =[attributeDict objectForKey:@"id"];
         return;
@@ -233,7 +233,7 @@
     
     if([State isEqualToString:@"OMEMODevices"] &&
        [elementName isEqualToString:@"list"]
-       && [[attributeDict objectForKey:kXMLNS] isEqualToString:@"eu.siacs.conversations.axolotl"]  )
+       && [namespaceURI isEqualToString:@"eu.siacs.conversations.axolotl"]  )
     {
         State =@"OMEMODeviceList";
         self.devices=[[NSMutableArray alloc] init];
@@ -252,7 +252,7 @@
     
     
     if(([elementName isEqualToString:@"encrypted"])
-       && [[attributeDict objectForKey:kXMLNS] isEqualToString:@"eu.siacs.conversations.axolotl"]  )
+       && [namespaceURI isEqualToString:@"eu.siacs.conversations.axolotl"]  )
     {
         State=@"OMEMO";
         return;
@@ -288,6 +288,8 @@
 
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
+    [super parser:parser didEndElement:elementName namespaceURI:namespaceURI qualifiedName:qName];
+    
     if([elementName isEqualToString:@"body"])
     {
         if([State isEqualToString:@"HTML"]){

@@ -20,7 +20,7 @@
 
 -(id) initWithCompeltion:(stanzaCompletion) completion
 {
-    self =[super init];
+    self = [super init];
     self.compeltion = completion;
     return self;
 }
@@ -35,28 +35,20 @@
 - (void)parserDidStartDocument:(NSXMLParser *)parser{
     DDLogVerbose(@"Document start");
     self.currentStanzaParser=nil;
-     self.depth=0;
+    self.depth=0;
 }
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
     self.depth++;
-    DDLogDebug(@"Started element :%@ with depth: %ld", elementName, self.depth);
+    DDLogDebug(@"Started element: %@ with depth: %ld and namespaceURI: %@", elementName, self.depth, namespaceURI);
     
-    //look at the element not the name space
-    NSString *nameSpace;
-    NSArray *parts =[elementName componentsSeparatedByString:@":"];
-    if(parts.count>1)
+    if(self.depth <= 2) // stream:stream is 1
     {
-        nameSpace =parts[0];
-        elementName =parts[1];
-    }
-    
-    if(self.depth <=2) // stream:stream is 1
-    {
-        [self makeStanzaParser:elementName];
+        DDLogDebug(@"Creating new stanza parser for element: %@", elementName);
+        [self makeStanzaParser:elementName andNamespaceURI:namespaceURI];
         self.currentStanzaParser.stanzaType=elementName;
-        self.currentStanzaParser.stanzaNameSpace=nameSpace;
+        self.currentStanzaParser.stanzaNameSpace=namespaceURI;
     }
     
     if(!self.currentStanzaParser)
@@ -65,65 +57,78 @@
         return;
     }
     
-    [self.currentStanzaParser parser:parser didStartElement:elementName namespaceURI:nameSpace qualifiedName:qName attributes:attributeDict];
-
+    [self.currentStanzaParser parser:parser didStartElement:elementName namespaceURI:namespaceURI qualifiedName:qName attributes:attributeDict];
 }
 
--(void) makeStanzaParser:(NSString *) elementName
+-(void) makeStanzaParser:(NSString *) elementName andNamespaceURI:(NSString *)namespaceURI
 {
-    DDLogDebug(@"Getting parser for %@", elementName);
-    if([elementName isEqualToString:@"a"])
+    //http://etherx.jabber.org/streams
+    if(([elementName isEqualToString:@"stream"] && [namespaceURI isEqualToString:@"http://etherx.jabber.org/streams"]) ||
+        ([elementName isEqualToString:@"proceed"] && [namespaceURI isEqualToString:@"urn:ietf:params:xml:ns:xmpp-tls"]) ||
+        ([elementName isEqualToString:@"success"] && [namespaceURI isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"]) ||
+        ([elementName isEqualToString:@"features"] && [namespaceURI isEqualToString:@"http://etherx.jabber.org/streams"]) ||
+        ([elementName isEqualToString:@"error"] && [namespaceURI isEqualToString:@"http://etherx.jabber.org/streams"])
+    )
     {
-        self.currentStanzaParser=[[ParseA alloc] init];
-    }
-    
-    if([elementName isEqualToString:@"stream"] ||
-       [elementName isEqualToString:@"proceed"] ||
-       [elementName isEqualToString:@"success"] ||
-       [elementName isEqualToString:@"features"]
-       )
-    {
+        DDLogDebug(@"Creating ParseStream for %@", elementName);
         self.currentStanzaParser=[[ParseStream alloc] init];
     }
     
-    if([elementName isEqualToString:@"iq"])
+    if([elementName isEqualToString:@"iq"] && [namespaceURI isEqualToString:@"jabber:client"])
     {
+        DDLogDebug(@"Creating ParseIq for %@", elementName);
         self.currentStanzaParser=[[ParseIq alloc] init];
     }
-    
-    if([elementName isEqualToString:@"message"])
+    if([elementName isEqualToString:@"message"] && [namespaceURI isEqualToString:@"jabber:client"])
     {
+        DDLogDebug(@"Creating ParseMessage for %@", elementName);
         self.currentStanzaParser=[[ParseMessage alloc] init];
     }
-    
-    if([elementName isEqualToString:@"presence"])
+    if([elementName isEqualToString:@"presence"] && [namespaceURI isEqualToString:@"jabber:client"])
     {
+        DDLogDebug(@"Creating ParsePresence for %@", elementName);
         self.currentStanzaParser=[[ParsePresence alloc] init];
     }
     
-    if([elementName isEqualToString:@"enabled"])
+    if([elementName isEqualToString:@"enabled"] && [namespaceURI isEqualToString:@"urn:xmpp:sm:3"])
     {
+        DDLogDebug(@"Creating ParseEnabled for %@", elementName);
         self.currentStanzaParser=[[ParseEnabled alloc] init];
     }
-    if([elementName isEqualToString:@"failed"])
+    if([elementName isEqualToString:@"failed"] && [namespaceURI isEqualToString:@"urn:xmpp:sm:3"])
     {
+        DDLogDebug(@"Creating ParseFailed for %@", elementName);
         self.currentStanzaParser=[[ParseFailed alloc] init];
     }
-    if([elementName isEqualToString:@"resumed"])
+    if([elementName isEqualToString:@"resumed"] && [namespaceURI isEqualToString:@"urn:xmpp:sm:3"])
     {
+        DDLogDebug(@"Creating ParseResumed for %@", elementName);
         self.currentStanzaParser=[[ParseResumed alloc] init];
     }
-
-    if([elementName isEqualToString:@"failure"])
+    if([elementName isEqualToString:@"a"] && [namespaceURI isEqualToString:@"urn:xmpp:sm:3"])
     {
+        DDLogDebug(@"Creating ParseA for %@", elementName);
+        self.currentStanzaParser=[[ParseA alloc] init];
+    }
+    if([elementName isEqualToString:@"r"] && [namespaceURI isEqualToString:@"urn:xmpp:sm:3"])
+    {
+        DDLogDebug(@"Creating ParseR for %@", elementName);
+        self.currentStanzaParser=[[ParseR alloc] init];
+    }
+
+    if([elementName isEqualToString:@"failure"] && [namespaceURI isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
+    {
+        DDLogDebug(@"Creating ParseFailure for %@", elementName);
         self.currentStanzaParser=[[ParseFailure alloc] init];
     }
-    if([elementName isEqualToString:@"challenge"])
+    if([elementName isEqualToString:@"challenge"] && [namespaceURI isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
     {
+        DDLogDebug(@"Creating ParseChallenge for %@", elementName);
         self.currentStanzaParser=[[ParseChallenge alloc] init];
     }
-        
+    
     if(!self.currentStanzaParser) {
+        DDLogDebug(@"Creating GENERIC XMPPParser for %@", elementName);
         self.currentStanzaParser =[[XMPPParser alloc] init];
     }
 }
@@ -135,7 +140,7 @@
 
 
 -(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
-    DDLogDebug(@"Ended element :%@ depth %ld", elementName, self.depth);
+    DDLogDebug(@"Ended element: %@ depth %ld", elementName, self.depth);
     [self.currentStanzaParser parser:parser didEndElement:elementName namespaceURI:namespaceURI qualifiedName:qName];
     
     if(self.depth <=2) {
@@ -165,7 +170,7 @@
 
 - (void)parser:(NSXMLParser *)parser parseErrorOccurred:(NSError *)parseError
 {
-    DDLogError(@"Error: line: %ld , col: %ld desc: %@ ",(long)[parser lineNumber],
+    DDLogError(@"parseErrorOccurred: line: %ld , col: %ld desc: %@ ",(long)[parser lineNumber],
                (long)[parser columnNumber], [parseError localizedDescription]);
 }
 

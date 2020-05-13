@@ -109,7 +109,7 @@
     if((iqNode.discoInfo))
     {
         XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-        if(iqNode.resource &&  iqNode.resource.lenght>0) {
+        if(iqNode.resource &&  iqNode.resource.length>0) {
             [discoInfo setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user, iqNode.resource]];
         } else  {
             [discoInfo setiqTo:iqNode.user];

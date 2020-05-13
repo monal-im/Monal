@@ -1,3 +1,7 @@
+# macOS
+.DS_Store
+
+# Xcode
 Monal/Monal.xcodeproj/project.xcworkspace/xcuserdata/anurodhp.xcuserdatad/UserInterfaceState.xcuserstate
 Monal/Monal.xcodeproj/xcuserdata/anurodhp.xcuserdatad/xcschemes/Monal.xcscheme
 Monal/Monal.xcodeproj/xcuserdata/anurodhp.xcuserdatad/xcschemes/jrtplib-static.xcscheme

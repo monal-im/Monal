@@ -421,11 +421,11 @@ NSString *const kXMPPPresence = @"presence";
     DDLogInfo(@"XMPP connnect  start");
     [self.sendQueue cancelAllOperations];
 	[self.sendQueue addOperationWithBlock:^{
-		_outputQueue=[[NSMutableArray alloc] init];
-		if(_outputBuffer)
-			free(_outputBuffer);
-		_outputBuffer = nil;
-		_outputBufferByteCount = 0;
+		self->_outputQueue=[[NSMutableArray alloc] init];
+		if(self->_outputBuffer)
+			free(self->_outputBuffer);
+		self->_outputBuffer = nil;
+		self->_outputBufferByteCount = 0;
 	}];
 
     [self.receiveQueue cancelAllOperations];
@@ -500,9 +500,9 @@ NSString *const kXMPPPresence = @"presence";
 	[self.sendQueue cancelAllOperations];
 	[self.sendQueue addOperationWithBlock:^{
 		self->_outputQueue=[[NSMutableArray alloc] init];
-		if(_outputBuffer)
-			free(_outputBuffer);
-		_outputBuffer = nil;
+		if(self->_outputBuffer)
+			free(self->_outputBuffer);
+		self->_outputBuffer = nil;
 		self->_outputBufferByteCount = 0;
 	}];
     [self.receiveQueue cancelAllOperations];
@@ -842,21 +842,18 @@ NSString *const kXMPPPresence = @"presence";
                               1ull * NSEC_PER_SEC);
 
     dispatch_source_set_event_handler(pingTimeOut, ^{
-
         if(self.pingID)
         {
             DDLogVerbose(@"ping timed out without a reply to %@",self.pingID);
-            _accountState=kStateReconnecting;
+            self->_accountState=kStateReconnecting;
             [self reconnect];
         }
         else
         {
             DDLogVerbose(@"ping reply was seen");
-
         }
 
         dispatch_source_cancel(pingTimeOut);
-
     });
 
     dispatch_source_set_cancel_handler(pingTimeOut, ^{
@@ -888,7 +885,6 @@ NSString *const kXMPPPresence = @"presence";
                 DDLogVerbose(@"ping called while one already in progress that took more than 10 seconds. disconnect before reconnect.");
                 [self reconnect:0];
             }
-
         }
         else {
             //always use smacks pings if supported (they are shorter and better than whitespace pings)
@@ -907,7 +903,6 @@ NSString *const kXMPPPresence = @"presence";
                 }
             }
         }
-
 }
 
 -(void) sendWhiteSpacePing
@@ -1218,7 +1213,6 @@ NSString *const kXMPPPresence = @"presence";
 #endif
 
         [messageProcessor processMessage:messageNode];
-
     }
     else  if([parsedStanza.stanzaType  isEqualToString:@"presence"] && [parsedStanza isKindOfClass:[ParsePresence class]])
     {
@@ -1345,15 +1339,13 @@ NSString *const kXMPPPresence = @"presence";
                                             kaccountNoKey:self->_accountNo};
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
                 }
-
             }
         }
-
     }
     else if([parsedStanza.stanzaType isEqualToString:@"error"] && [parsedStanza isKindOfClass:[ParseStream class]])
     {
         DDLogInfo(@"Got stream error %@ %@ (%@)", parsedStanza.errorType, parsedStanza.errorReason, parsedStanza.errorText);
-        NSString *message=[NSString stringWithFormat:@"XMPP stream error: %@", parsedStanza.errorReason, parsedStanza.errorText];
+        NSString *message=[NSString stringWithFormat:@"XMPP stream error: %@ (%@)", parsedStanza.errorReason, parsedStanza.errorText];
         if(parsedStanza.errorText && ![parsedStanza.errorText isEqualToString:@""])
             message=[NSString stringWithFormat:@"XMPP stream error %@: %@", parsedStanza.errorReason, parsedStanza.errorText];
         [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self,message ]];
@@ -1410,7 +1402,6 @@ NSString *const kXMPPPresence = @"presence";
 
                         saslXML.data=saslplain;
                         [self send:saslXML];
-
                     }
                     else
                         if(streamNode.SASLDIGEST_MD5)
@@ -1434,7 +1425,6 @@ NSString *const kXMPPPresence = @"presence";
                         }
                 }
             }
-
         }
         else
         {
@@ -1472,9 +1462,7 @@ NSString *const kXMPPPresence = @"presence";
                     self.loginCompletion=nil;
                 }
             }
-
         }
-
     }
     else if([parsedStanza.stanzaType isEqualToString:@"enabled"] && [parsedStanza isKindOfClass:[ParseEnabled class]])
     {
@@ -1628,7 +1616,6 @@ NSString *const kXMPPPresence = @"presence";
             [self disconnect];
 
         }
-
     }
     else  if([parsedStanza.stanzaType isEqualToString:@"challenge"] && [parsedStanza isKindOfClass:[ParseChallenge class]])
     {
@@ -1638,7 +1625,6 @@ NSString *const kXMPPPresence = @"presence";
             MLXMLNode* responseXML= [[MLXMLNode alloc]init];
             responseXML.element=@"response";
             [responseXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:kXMLNS];
-
 
             NSString* decoded=[[NSString alloc]  initWithData: (NSData*)[EncodingTools dataWithBase64EncodedString:challengeNode.challengeText] encoding:NSASCIIStringEncoding];
             DDLogVerbose(@"decoded challenge to %@", decoded);
@@ -1654,7 +1640,6 @@ NSString *const kXMPPPresence = @"presence";
                     DDLogVerbose(@"digest-md5 success");
 
                 }
-
             }
             else{
 
@@ -1673,7 +1658,6 @@ NSString *const kXMPPPresence = @"presence";
                         if([split[0] isEqualToString:@"nonce"]) {
                             nonce=[split[1]  substringWithRange:NSMakeRange(1, [split[1]  length]-2)] ;
                         }
-
                     }
                 }
 
@@ -1730,7 +1714,6 @@ NSString *const kXMPPPresence = @"presence";
 
             [self send:responseXML];
             return;
-
         }
     }
     else  if([parsedStanza.stanzaType isEqualToString:@"success"] && [parsedStanza isKindOfClass:[ParseStream class]])
@@ -1759,7 +1742,6 @@ NSString *const kXMPPPresence = @"presence";
     }
 }
 
-
 #pragma mark stanza handling
 
 -(void) postConnectNotification
@@ -1768,7 +1750,6 @@ NSString *const kXMPPPresence = @"presence";
     [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
 }
-
 
 static NSMutableArray *extracted(xmpp *object) {
     return object->_outputQueue;
@@ -1803,7 +1784,6 @@ static NSMutableArray *extracted(xmpp *object) {
 	}]];
 }
 
-
 #pragma mark messaging
 
 -(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString *) messageId
@@ -1831,7 +1811,6 @@ static NSMutableArray *extracted(xmpp *object) {
             [payload setData:[EncodingTools encodeBase64WithData:encryptedPayload.body]];
             [encrypted.children addObject:payload];
 
-
             NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
             MLXMLNode *header =[[MLXMLNode alloc] initWithElement:@"header"];
             [header.attributes setObject:deviceid forKey:@"sid"];
@@ -1840,7 +1819,6 @@ static NSMutableArray *extracted(xmpp *object) {
             MLXMLNode *ivNode =[[MLXMLNode alloc] initWithElement:@"iv"];
             [ivNode setData:[EncodingTools encodeBase64WithData:encryptedPayload.iv]];
             [header.children addObject:ivNode];
-
 
             [devices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 NSNumber *device = (NSNumber *)obj;
@@ -1936,7 +1914,6 @@ static NSMutableArray *extracted(xmpp *object) {
     }
 }
 
-
 #pragma mark set connection attributes
 
 -(void) persistState
@@ -1982,7 +1959,7 @@ static NSMutableArray *extracted(xmpp *object) {
     [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
     //debug output
-    DDLogVerbose(@"persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@\n",
+    DDLogVerbose(@"persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n",
                  self.lastHandledInboundStanza,
                  self.lastHandledOutboundStanza,
                  self.lastOutboundStanza,
@@ -2065,7 +2042,7 @@ static NSMutableArray *extracted(xmpp *object) {
         }
 
         //debug output
-        DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%d%s,\n\tstreamID=%@",
+        DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@",
                      self.lastHandledInboundStanza,
                      self.lastHandledOutboundStanza,
                      self.lastOutboundStanza,
@@ -2078,7 +2055,6 @@ static NSMutableArray *extracted(xmpp *object) {
                 DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
     }
 }
-
 
 -(void) incrementLastHandledStanza {
     if(self.connectionProperties.supportsSM3 && self.accountState>=kStateBound) {

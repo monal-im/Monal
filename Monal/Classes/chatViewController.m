@@ -455,7 +455,7 @@
     [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId withCompletion:^(NSArray *result) {
         NSArray *accounts = result;
          if(accounts.count==0) {
-             DDLogError(@"Account sbould be >0");
+             DDLogError(@"Account should be >0");
              return;
          }
          NSDictionary* settings=[accounts objectAtIndex:0];

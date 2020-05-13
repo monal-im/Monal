@@ -52,10 +52,9 @@
             if(self.selectContact) self.selectContact(selectedContact);
         };
     }
-    if([segue.identifier isEqualToString:@"acceptContact"])
-      {
-          MLSubscriptionTableViewController* newScreen = (MLSubscriptionTableViewController *)segue.destinationViewController;
-      }
+    if([segue.identifier isEqualToString:@"acceptContact"]) {
+        MLSubscriptionTableViewController* newScreen = (MLSubscriptionTableViewController *)segue.destinationViewController;
+    }
 }
 
 @end

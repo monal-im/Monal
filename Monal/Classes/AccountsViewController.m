@@ -65,13 +65,7 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.accountList=result;
-            [self.accountsTable reloadData];
-        });
-        
-    }];
+    [self refreshAccountList];
     
     self.selected=nil;
 }
@@ -89,7 +83,6 @@
             self.accountList=result;
             [self.accountsTable reloadData];
         });
-        
     }];
 }
 

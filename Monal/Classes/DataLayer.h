@@ -53,7 +53,6 @@ extern NSString *const kMessageTypeUrl;
 
 + (DataLayer* )sharedInstance;
 
--(void) initDB;
 -(void) version;
 
 //lowest level command handlers. These are called in sync
@@ -165,10 +164,11 @@ extern NSString *const kMessageTypeUrl;
 #pragma mark - account commands
 -(void) protocolListWithCompletion: (void (^)(NSArray* result))completion;
 -(void) accountListWithCompletion: (void (^)(NSArray* result))completion;
+-(void) accountListEnabledWithCompletion: (void (^)(NSArray* result))completion;
 -(NSArray*) enabledAccountList;
 -(BOOL) isAccountEnabled:(NSString*) accountNo;
 -(void) doesAccountExistUser:(NSString*) user andDomain:(NSString *) domain withCompletion:(void (^)(BOOL result))completion;
--(void) accountForUser:(NSString*) user andDomain:(NSString *) domain withCompletion:(void (^)(NSString* result))completion;
+-(void) accountIDForUser:(NSString*) user andDomain:(NSString *) domain withCompletion:(void (^)(NSString* result))completion;
 
 -(void) detailsForAccount:(NSString*) accountNo withCompletion:(void (^)(NSArray* result))completion;
 
@@ -240,9 +240,6 @@ extern NSString *const kMessageTypeUrl;
  retrieves the date of the the last message to or from this contact
  */
 -(void) lastMessageDateForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion;;
-
--(void) lastMessageSanzaForAccount:(NSString*) accountNo andContact:(NSString*) contact withCompletion: (void (^)(NSString *))completion;
-
 
 -(void) lastMessageDateAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion;
 

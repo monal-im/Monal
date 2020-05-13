@@ -267,19 +267,16 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) connectAccount:(NSString*) accountNo
 {
-    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+    [[DataLayer sharedInstance] detailsForAccount:accountNo withCompletion:^(NSArray *result) {
         dispatch_async(self->_netQueue, ^{
-            self->_accountList=result;
-            for (NSDictionary* account in self->_accountList)
-            {
-                if([[account objectForKey:kAccountID] integerValue]==[accountNo integerValue])
-                {
-                    [self connectAccountWithDictionary:account];
-                    break;
-                }
+            NSArray *accounts = result;
+            if(accounts.count == 1) {
+                NSDictionary* account=[accounts objectAtIndex:0];
+                [self connectAccountWithDictionary:account];
+            } else {
+                DDLogVerbose(@"Expected account settings in db for accountNo: %@", accountNo);
             }
         });
-
     }];
 }
 
@@ -377,69 +374,49 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void)logoutAll
 {
-
-    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+    [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray *result) {
         self->_accountList=result;
-        for (NSDictionary* account in self->_accountList)
-        {
-            if([[account objectForKey:@"enabled"] boolValue]==YES)
-            {
-                [self disconnectAccount:[NSString stringWithFormat:@"%@",[account objectForKey:@ "account_id"]]];
-
-            }
+        for (NSDictionary* account in self->_accountList) {
+            [self disconnectAccount:[NSString stringWithFormat:@"%@",[account objectForKey:@ "account_id"]]];
         }
     }];
-
 }
 
 -(void)logoutAllKeepStreamWithCompletion:(void (^)(void))completion
 {
-    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+    [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray *result) {
         self->_accountList=result;
-        for (NSDictionary* account in self->_accountList)
-        {
-            if([[account objectForKey:@"enabled"] boolValue]==YES)
-            {
-
-                [self->_connectedXMPP enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                    NSDictionary* account=(NSDictionary *) obj;
-                    xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
-                    DDLogVerbose(@"got account and cleaning up.. keeping stream ");
-                    if(idx<self->_connectedXMPP.count){
-                        [xmppAccount disconnectToResumeWithCompletion:nil];
-                    } else  {
-                        [xmppAccount disconnectToResumeWithCompletion:completion];
-                    }
-                    DDLogVerbose(@"done cleaning up account. ");
-                }];
-
-            }
+        for (NSDictionary* account in self->_accountList) {
+            [self->_connectedXMPP enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                NSDictionary* account=(NSDictionary *) obj;
+                xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
+                DDLogVerbose(@"got account and cleaning up.. keeping stream");
+                if(idx<self->_connectedXMPP.count){
+                    [xmppAccount disconnectToResumeWithCompletion:nil];
+                } else  {
+                    [xmppAccount disconnectToResumeWithCompletion:completion];
+                }
+                DDLogVerbose(@"done cleaning up account.");
+            }];
         }
     }];
-
 }
 
 
 -(void)connectIfNecessary
 {
-
-    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
+    [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray *result) {
         dispatch_async(self->_netQueue,
                        ^{
                            self->_accountList=result;
-                           for (NSDictionary* account in self->_accountList)
-                           {
-                               if([[account objectForKey:@"enabled"] boolValue]==YES)
-                               {
-                                   xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
-                                   if(existing.accountState<kStateReconnecting){
-                                       [self connectAccountWithDictionary:account];
-                                   }
+                           for (NSDictionary* account in self->_accountList) {
+                               xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
+                               if(existing.accountState<kStateReconnecting){
+                                   [self connectAccountWithDictionary:account];
                                }
                            }
                        });
     }];
-
 }
 
 -(void) updatePassword:(NSString *) password forAccount:(NSString *) accountNo
@@ -450,7 +427,6 @@ An array of Dics what have timers to make sure everything was sent
      [SAMKeychain setPassword:password forService:@"Monal" account:accountNo];
     xmpp* xmpp =[self getConnectedAccountForID:accountNo];
     [xmpp.connectionProperties.identity updatPassword:password];
-
 }
 
 -(void) reachabilityChanged
@@ -477,12 +453,8 @@ An array of Dics what have timers to make sure everything was sent
 
             //try to send a ping. if it fails, it will reconnect
             [xmppAccount sendPing];
-
-
-
         }
     }
-
 }
 
 
@@ -976,7 +948,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 //    if(parts.count>1){
 //        NSString *domain= parts[1];
 //
-//        [[DataLayer sharedInstance] accountForUser:user andDomain:domain withCompletion:^(NSString *accountNo) {
+//        [[DataLayer sharedInstance] accountIDForUser:user andDomain:domain withCompletion:^(NSString *accountNo) {
 //            if(accountNo) {
 //                dispatch_async(dispatch_get_main_queue(), ^{
 //

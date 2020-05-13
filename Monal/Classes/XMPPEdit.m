@@ -251,8 +251,8 @@ NSString *const kGtalk = @"Gtalk";
                 if(!result) {
                     [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
                         if(result) {
-                             [self showSuccessHUD];
-                            [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
+                            [self showSuccessHUD];
+                            [[DataLayer sharedInstance] accountIDForUser:user andDomain:domain withCompletion:^(NSString* accountid) {
                                 if(accountid) {
                                     self.accountno=[NSString stringWithFormat:@"%@",accountid];
                                     self.editMode=YES;
@@ -267,7 +267,6 @@ NSString *const kGtalk = @"Gtalk";
                                     {
                                         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
                                     }
-                                    
                                 }
                             }];
                         }

@@ -87,16 +87,16 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 
 //we should have an enumerator for this
 @property (nonatomic, assign) BOOL explicitLogout;
-@property (nonatomic, assign,readonly) BOOL loginError;
+@property (nonatomic, assign, readonly) BOOL loginError;
 
 @property (nonatomic, readonly) xmppState accountState;
 
 // discovered properties
-@property (nonatomic, assign)  BOOL SRVDiscoveryDone;
-@property (nonatomic, strong)  NSArray* discoveredServersList;
-@property (nonatomic, strong)  NSMutableArray* usableServersList;
+@property (nonatomic, assign) BOOL SRVDiscoveryDone;
+@property (nonatomic, strong) NSArray* discoveredServersList;
+@property (nonatomic, strong) NSMutableArray* usableServersList;
 
-@property (nonatomic, strong)  NSArray*  roomList;
+@property (nonatomic, strong) NSArray*  roomList;
 @property (nonatomic, strong) NSArray* rosterList;
 @property (nonatomic, assign) BOOL staleRoster; //roster is stale if it resumed in the background
 
@@ -109,8 +109,8 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, strong) NSDate* connectedTime;
 
 #ifndef DISABLE_OMEMO
-@property (nonatomic, strong) SignalContext *signalContext;
-@property (nonatomic, strong) MLSignalStore *monalSignalStore;
+@property (nonatomic, strong) SignalContext* signalContext;
+@property (nonatomic, strong) MLSignalStore* monalSignalStore;
 #endif
 
 extern NSString *const kMessageId;
@@ -121,7 +121,7 @@ extern NSString *const kXMPPSuccess;
 extern NSString *const kXMPPPresence;
 
 
--(id) initWithServer:(nonnull MLXMPPServer *) server andIdentity:(nonnull MLXMPPIdentity *)identity;
+-(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*)identity;
 
 -(void) connectWithCompletion:(xmppCompletion) completion;
 -(void) connect;
@@ -130,7 +130,7 @@ extern NSString *const kXMPPPresence;
 /**
  send a message to a contact with xmpp id
  */
--(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString *) messageId ;
+-(void) sendMessage:(NSString* _Nonnull) message toContact:(NSString* _Nonnull) contact isMUC:(BOOL) isMUC isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString *) messageId ;
 
 /**
  crafts a whitepace ping and sends it
@@ -150,24 +150,24 @@ extern NSString *const kXMPPPresence;
 /**
  Adds the stanza to the output Queue
  */
--(void) send:(MLXMLNode *_Nonnull) stanza;
+-(void) send:(MLXMLNode* _Nonnull) stanza;
 
 /**
  removes a contact from the roster
  */
--(void) removeFromRoster:(NSString *_Nonnull) contact;
+-(void) removeFromRoster:(NSString* _Nonnull) contact;
 
 /**
  adds a new contact to the roster
  */
--(void) addToRoster:(NSString *_Nonnull) contact;
+-(void) addToRoster:(NSString* _Nonnull) contact;
 
 /**
  adds a new contact to the roster
  */
--(void) approveToRoster:(NSString *_Nonnull) contact;
+-(void) approveToRoster:(NSString* _Nonnull) contact;
 
--(void) rejectFromRoster:(NSString *_Nonnull) contact;
+-(void) rejectFromRoster:(NSString* _Nonnull) contact;
 
 /**
  sets up a background task to reconnect if needed. dEfault wait of 5s
@@ -185,7 +185,7 @@ extern NSString *const kXMPPPresence;
 /**
 sets the status message. makes xmpp call
  */
--(void) setStatusMessageText:(NSString *) message;
+-(void) setStatusMessageText:(NSString*) message;
 
 /**
 sets away xmpp call.
@@ -215,34 +215,34 @@ sets away xmpp call.
 /**
  join a room on the conference server
  */
--(void) joinRoom:(NSString*) room withNick:(NSString*) nick andPassword:(NSString *)password;
+-(void) joinRoom:(NSString* _Nonnull) room withNick:(NSString* _Nullable) nick andPassword:(NSString* _Nullable)password;
 
 /**
  leave specific room. the nick name is the name used in the room.
  it is arbitrary and it may not match any other hame.
  */
--(void) leaveRoom:(NSString*) room withNick:(NSString *) nick;
+-(void) leaveRoom:(NSString* _Nonnull) room withNick:(NSString* _Nullable) nick;
 
 #pragma mark Jingle
 /**
  Calls a contact
  */
--(void)call:(MLContact*) contact;
+-(void)call:(MLContact* _Nonnull) contact;
 
 /**
 Hangs up current call with contact
  */
--(void)hangup:(MLContact*) contact;
+-(void)hangup:(MLContact* _Nonnull) contact;
 
 /**
 Decline a call request
  */
--(void)declineCall:(NSDictionary*) contact;
+-(void)declineCall:(NSDictionary* _Nonnull) contact;
 
 /**
  accept call request
  */
--(void)acceptCall:(NSDictionary*) contact;
+-(void)acceptCall:(NSDictionary* _Nonnull) contact;
 
 
 /*
@@ -284,13 +284,13 @@ Decline a call request
 /**
  query a user's vcard
  */
--(void) getVCard:(NSString *) user;
+-(void) getVCard:(NSString* _Nonnull) user;
 
 #ifndef DISABLE_OMEMO
 
--(void) subscribeOMEMODevicesFrom:(NSString *) jid;
+-(void) subscribeOMEMODevicesFrom:(NSString* _Nonnull) jid;
 /** OMEMO */
--(void) queryOMEMODevicesFrom:(NSString *) jid;
+-(void) queryOMEMODevicesFrom:(NSString* _Nonnull) jid;
 #endif
 
 /**
@@ -303,8 +303,8 @@ Decline a call request
 
 #pragma mark - account management
 
--(void) changePassword:(NSString *) newPass withCompletion:(xmppCompletion) completion;
+-(void) changePassword:(NSString* _Nonnull) newPass withCompletion:(xmppCompletion _Nullable) completion;
 
--(void) registerUser:(NSString *) username withPassword:(NSString *) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion) completion;
+-(void) registerUser:(NSString* _Nonnull) username withPassword:(NSString* _Nonnull) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
 
 @end

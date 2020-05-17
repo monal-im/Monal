@@ -377,24 +377,24 @@ An array of Dics what have timers to make sure everything was sent
     [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray *result) {
         self->_accountList=result;
         for (NSDictionary* account in self->_accountList) {
-            [self disconnectAccount:[NSString stringWithFormat:@"%@",[account objectForKey:@ "account_id"]]];
+            DDLogVerbose(@"Disconnecting account %@@%@", [account objectForKey:@"username"], [account objectForKey:@"domain"]);
+            [self disconnectAccount:[NSString stringWithFormat:@"%@", [account objectForKey:@"account_id"]]];
         }
     }];
 }
 
 -(void)logoutAllKeepStreamWithCompletion:(void (^)(void))completion
 {
-    [self->_connectedXMPP enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSDictionary* account=(NSDictionary *) obj;
-        xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
-        DDLogVerbose(@"got account and cleaning up.. keeping stream");
-        if(idx<self->_connectedXMPP.count){
-            [xmppAccount disconnectToResumeWithCompletion:nil];
-        } else  {
-            [xmppAccount disconnectToResumeWithCompletion:completion];
-        }
-        DDLogVerbose(@"done cleaning up account.");
+    [self->_connectedXMPP enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL* _Nonnull stop) {
+        NSDictionary* account = (NSDictionary*) obj;
+        xmpp* xmppAccount = [account objectForKey:@"xmppAccount"];
+
+        DDLogVerbose(@"Disconnecting account %@@%@ (cleaning up.. keeping stream)", [account objectForKey:@"username"], [account objectForKey:@"domain"]);
+        [xmppAccount disconnectToResumeWithCompletion:nil];
+        DDLogVerbose(@"done cleaning up account %@@%@.", [account objectForKey:@"username"], [account objectForKey:@"domain"]);
     }];
+
+    if(completion) completion();
 }
 
 

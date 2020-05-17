@@ -2914,7 +2914,7 @@ NSString *const kCount = @"count";
 				dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
 				completion(messageType);
 			}
-    } else if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowGeoLocation"] && [messageString hasPrefix:@"geo:"]) {
+    } else if ([messageString hasPrefix:@"geo:"]) {
         messageType = kMessageTypeGeo;
 
         if(completion) {

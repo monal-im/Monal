@@ -38,6 +38,7 @@
 @property (nonatomic, assign)  NSInteger thismonth;
 @property (nonatomic, assign)  NSInteger thisday;
 @property (nonatomic, strong)  MBProgressHUD *uploadHUD;
+@property (nonatomic, strong)  MBProgressHUD *gpsHUD;
 
 @property (nonatomic, strong) NSMutableArray* messageList;
 @property (nonatomic, strong) NSMutableArray* photos;
@@ -555,11 +556,17 @@
 -(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations {
     [self.locationManager stopUpdatingLocation];
 
+    // Only send geo message if gpsHUD is visible
+    if(self.gpsHUD.hidden == YES) {
+        return;
+    }
+
     // Check last location
     CLLocation* gpsLoc = [locations lastObject];
     if(gpsLoc == nil) {
         return;
     }
+    self.gpsHUD.hidden=YES;
     // Send location
     [self sendMessage:[NSString stringWithFormat:@"geo:%f,%f", gpsLoc.coordinate.latitude, gpsLoc.coordinate.longitude]];
 }
@@ -576,7 +583,34 @@
     }
 }
 
+-(void) displayGPSHUD {
+    // Setup HUD
+    if(!self.gpsHUD) {
+        self.gpsHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        self.gpsHUD.removeFromSuperViewOnHide=NO;
+        self.gpsHUD.label.text =@"GPS";
+        self.gpsHUD.detailsLabel.text =@"Waiting for GPS signal";
+    }
+    // Display HUD
+    self.gpsHUD.hidden = NO;
 
+    // Trigger warning when no gps location was received
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 4 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        if(self.gpsHUD.hidden == NO) {
+            // Stop locationManager & hide gpsHUD screen
+            [self.locationManager stopUpdatingLocation];
+            self.gpsHUD.hidden = YES;
+
+            // Display warning
+            UIAlertController *gpsWarning = [UIAlertController alertControllerWithTitle:@"No GPS location received"
+                                                                                message:@"Monal did not received a gps location. Please try again later." preferredStyle:UIAlertControllerStyleAlert];
+            [gpsWarning addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                [gpsWarning dismissViewControllerAnimated:YES completion:nil];
+            }]];
+            [self presentViewController:gpsWarning animated:YES completion:nil];
+        }
+    });
+}
 
 #pragma mark - attachment picker
 
@@ -586,7 +620,7 @@
     xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
 
     UIAlertController *actionControll = [UIAlertController alertControllerWithTitle:@"Select Action"
-    message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+                                                                            message:nil preferredStyle:UIAlertControllerStyleActionSheet];
 
     // Check for http upload support
     if(!account.connectionProperties.supportsHTTPUpload )
@@ -600,45 +634,46 @@
         
         return;
     } else {
-        #if TARGET_OS_MACCATALYST
-            [self attachfile:sender];
-        #else
-            UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
-            imagePicker.delegate =self;
+#if TARGET_OS_MACCATALYST
+        [self attachfile:sender];
+#else
+        UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
+        imagePicker.delegate =self;
 
-            UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:@"Camera" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
-                [self presentViewController:imagePicker animated:YES completion:nil];
+        UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:@"Camera" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+            [self presentViewController:imagePicker animated:YES completion:nil];
+        }];
+
+        UIAlertAction* photosAction = [UIAlertAction actionWithTitle:@"Photos" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+            [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+                if(granted)
+                {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self presentViewController:imagePicker animated:YES completion:nil];
+                    });
+                }
             }];
+        }];
 
-            UIAlertAction* photosAction = [UIAlertAction actionWithTitle:@"Photos" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-                [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
-                    if(granted)
-                    {
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            [self presentViewController:imagePicker animated:YES completion:nil];
-                        });
-                    }
-                }];
-            }];
-
-            // Set image
-            if (@available(iOS 13.0, *)) {
-                [cameraAction setValue:[[UIImage systemImageNamed:@"camera"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
-                [photosAction setValue:[[UIImage systemImageNamed:@"photo"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
-            } else {
-                [cameraAction setValue:[[UIImage imageNamed:@"714-camera"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
-            }
-            [actionControll addAction:cameraAction];
-            [actionControll addAction:photosAction];
-        #endif
+        // Set image
+        if (@available(iOS 13.0, *)) {
+            [cameraAction setValue:[[UIImage systemImageNamed:@"camera"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+            [photosAction setValue:[[UIImage systemImageNamed:@"photo"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+        } else {
+            [cameraAction setValue:[[UIImage imageNamed:@"714-camera"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+        }
+        [actionControll addAction:cameraAction];
+        [actionControll addAction:photosAction];
+#endif
     }
-    
+
     UIAlertAction* gpsAlert = [UIAlertAction actionWithTitle:@"Send Location" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         // GPS
         CLAuthorizationStatus gpsStatus = [CLLocationManager authorizationStatus];
         if(gpsStatus == kCLAuthorizationStatusAuthorizedAlways || gpsStatus == kCLAuthorizationStatusAuthorizedWhenInUse) {
+            [self displayGPSHUD];
             [self makeLocationManager];
             [self.locationManager startUpdatingLocation];
         } else if(gpsStatus == kCLAuthorizationStatusNotDetermined) {
@@ -647,24 +682,24 @@
             [self.locationManager requestWhenInUseAuthorization];
         } else {
             UIAlertController *permissionAlert = [UIAlertController alertControllerWithTitle:@"Location Access Needed"
-              message:@"Monal does not have access to your location. Please update the location access in your device's Privacy Settings." preferredStyle:UIAlertControllerStyleAlert];
+                                                                                     message:@"Monal does not have access to your location. Please update the location access in your device's Privacy Settings." preferredStyle:UIAlertControllerStyleAlert];
             [self presentViewController:permissionAlert animated:YES completion:nil];
             [permissionAlert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-                  [permissionAlert dismissViewControllerAnimated:YES completion:nil];
-              }]];
+                [permissionAlert dismissViewControllerAnimated:YES completion:nil];
+            }]];
         }
     }];
-    
+
     // Set image
     if (@available(iOS 13.0, *)) {
         [gpsAlert setValue:[[UIImage systemImageNamed:@"location"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
     }
     [actionControll addAction:gpsAlert];
-    
+
     [actionControll addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
         [actionControll dismissViewControllerAnimated:YES completion:nil];
     }]];
-    
+
     actionControll.popoverPresentationController.sourceView=sender;
     [self presentViewController:actionControll animated:YES completion:nil];
 }
@@ -784,23 +819,22 @@
         DDLogError(@" not ready to send messages");
         return;
     }
-    
+
     [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:self.contact.accountId withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString *messageType) {
         DDLogVerbose(@"added message");
         
         if(result) {
             dispatch_async(dispatch_get_main_queue(),
                            ^{
-              MLMessage *messageObj = [[MLMessage alloc] init];
-                             messageObj.actualFrom=self.jid;
-                             messageObj.from=self.jid;
-                             messageObj.timestamp=[NSDate date];
-                             messageObj.hasBeenSent=YES;
-                             messageObj.messageId=messageId;
-                             messageObj.encrypted=self.encryptChat;
-                             messageObj.messageType=messageType;
-                             messageObj.messageText=message;
-    
+                MLMessage* messageObj = [[MLMessage alloc] init];
+                messageObj.actualFrom=self.jid;
+                messageObj.from=self.jid;
+                messageObj.timestamp=[NSDate date];
+                messageObj.hasBeenSent=YES;
+                messageObj.messageId=messageId;
+                messageObj.encrypted=self.encryptChat;
+                messageObj.messageType=messageType;
+                messageObj.messageText=message;
 
                 [self.messageTable performBatchUpdates:^{
                     if(!self.messageList) self.messageList = [[NSMutableArray alloc] init];
@@ -817,8 +851,6 @@
 
                     [self scrollToBottom];
                 }];
-                
-                
             });
         }
         else {
@@ -832,7 +864,6 @@
         [[DataLayer sharedInstance] addActiveBuddies:to forAccount:self.contact.accountId withCompletion:nil];
         _firstmsg=NO;
     }
-    
 }
 
 -(void) presentMucInvite:(NSNotification *)notification
@@ -852,7 +883,6 @@
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
-        
     });
 }
 
@@ -865,23 +895,23 @@
     if(!message) {
         DDLogError(@"Notification without message");
     }
-        
+    
     if([message.accountId isEqualToString:self.contact.accountId]
        && ([message.from isEqualToString:self.contact.contactJid]
            || [message.to isEqualToString:self.contact.contactJid] ))
     {
         if([self.contact.subscription isEqualToString:kSubBoth]) {
             //getting encrypted chat turns it on. not the other way around
-//            if(message.encrypted && !self.encryptChat) {
-//                NSArray *devices= [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
-//                if(devices.count>0) {
-//                    dispatch_async(dispatch_get_main_queue(), ^{
-//                        [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
-//                        self.encryptChat=YES;
-//                        [self refreshButton:notification];
-//                    });
-//                }
-//            }
+            //            if(message.encrypted && !self.encryptChat) {
+            //                NSArray *devices= [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
+            //                if(devices.count>0) {
+            //                    dispatch_async(dispatch_get_main_queue(), ^{
+            //                        [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+            //                        self.encryptChat=YES;
+            //                        [self refreshButton:notification];
+            //                    });
+            //                }
+            //            }
         }
         
         [[DataLayer sharedInstance] messageTypeForMessage: message.messageText withKeepThread:YES andCompletion:^(NSString *messageType) {
@@ -914,7 +944,6 @@
                 
                 [self refreshCounter];
             });
-            
         }];
     }
 }
@@ -1269,7 +1298,7 @@
         cell=toreturn;
     } else if ([row.messageType isEqualToString:kMessageTypeGeo]) {
         // Parse latitude and longitude
-        NSString* geoPattern = @"^geo:(-?(?:90|[0-9][0-8]|[0-9])(?:\\.[0-9]{1,32})?),(-?(?:180|1[0-7][0-9]|[0-9]{1,2})(?:\\.[0-9]{1,32})?)$";
+        NSString* geoPattern = @"^geo:(-?(?:90|[1-8][0-9]|[0-9])(?:\\.[0-9]{1,32})?),(-?(?:180|1[0-7][0-9]|[0-9]{1,2})(?:\\.[0-9]{1,32})?)$";
         NSError *error = NULL;
         NSRegularExpression* geoRegex = [NSRegularExpression regularExpressionWithPattern:geoPattern
         options:NSRegularExpressionCaseInsensitive
@@ -1280,35 +1309,40 @@
         }
 
         NSTextCheckingResult* geoMatch = [geoRegex firstMatchInString:row.messageText options:0 range:NSMakeRange(0, [row.messageText length])];
+        
+        if(geoMatch.numberOfRanges > 0) {
+            NSRange latitudeRange = [geoMatch rangeAtIndex:1];
+            NSRange longitudeRange = [geoMatch rangeAtIndex:2];
+            NSString* latitude = [row.messageText substringWithRange:latitudeRange];
+            NSString* longitude = [row.messageText substringWithRange:longitudeRange];
 
-        NSRange latitudeRange = [geoMatch rangeAtIndex:1];
-        NSRange longitudeRange = [geoMatch rangeAtIndex:2];
-        NSString* latitude = [row.messageText substringWithRange:latitudeRange];
-        NSString* longitude = [row.messageText substringWithRange:longitudeRange];
+            // Display inline map
+            if([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowGeoLocation"]) {
+                MLChatMapsCell* mapsCell;
+                if([from isEqualToString:self.contact.contactJid]) {
+                    mapsCell = (MLChatMapsCell *) [tableView dequeueReusableCellWithIdentifier:@"mapsInCell"];
+                    mapsCell.outBound=NO;
+                } else  {
+                    mapsCell = (MLChatMapsCell *) [tableView dequeueReusableCellWithIdentifier:@"mapsOutCell"];
+                }
 
-        // Display inline map
-        if([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowGeoLocation"]) {
-            MLChatMapsCell* mapsCell;
-            if([from isEqualToString:self.contact.contactJid]) {
-                mapsCell = (MLChatMapsCell *) [tableView dequeueReusableCellWithIdentifier:@"mapsInCell"];
-                mapsCell.outBound=NO;
-            } else  {
-                mapsCell = (MLChatMapsCell *) [tableView dequeueReusableCellWithIdentifier:@"mapsOutCell"];
+                // Set lat / long used for map view and pin
+                mapsCell.latitude = [latitude doubleValue];
+                mapsCell.longitude = [longitude doubleValue];
+
+                [mapsCell loadCoordinatesWithCompletion:^{}];
+                cell=mapsCell;
+            } else {
+                NSMutableAttributedString *geoString = [[NSMutableAttributedString alloc] initWithString:row.messageText];
+                [geoString addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:[geoMatch rangeAtIndex:0]];
+
+                cell.messageBody.attributedText = geoString;
+                NSInteger zoomLayer = 15;
+                cell.link = [NSString stringWithFormat:@"https://www.openstreetmap.org/?mlat=%@&mlon=%@&zoom=%ldd", latitude, longitude, zoomLayer];
             }
-            
-            // Set lat / long used for map view and pin
-            mapsCell.latitude = [latitude doubleValue];
-            mapsCell.longitude = [longitude doubleValue];
-
-            [mapsCell loadCoordinatesWithCompletion:^{}];
-            cell=mapsCell;
         } else {
-            NSMutableAttributedString *geoString = [[NSMutableAttributedString alloc] initWithString:row.messageText];
-            [geoString addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:[geoMatch rangeAtIndex:0]];
-
-            cell.messageBody.attributedText = geoString;
-            NSInteger zoomLayer = 15;
-            cell.link = [NSString stringWithFormat:@"https://www.openstreetmap.org/?mlat=%@&mlon=%@&zoom=%ldd", latitude, longitude, zoomLayer];
+            cell.messageBody.text = row.messageText;
+            cell.link = nil;
         }
     } else {
         // Check if message contains a url

@@ -98,8 +98,7 @@
     NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
     [dic setObject:domain forKey:kDomain];
     [dic setObject:user forKey:kUsername];
-    NSString *resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
-    [dic setObject:resource  forKey:kResource];
+    [dic setObject:[EncodingTools encodeRandomResource]  forKey:kResource];
     [dic setObject:@YES forKey:kSSL];
     [dic setObject:@YES forKey:kEnabled];
     [dic setObject:@NO forKey:kSelfSigned];

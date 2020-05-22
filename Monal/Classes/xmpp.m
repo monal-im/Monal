@@ -1344,8 +1344,8 @@ NSString *const kXMPPPresence = @"presence";
     }
     else if([parsedStanza.stanzaType isEqualToString:@"error"] && [parsedStanza isKindOfClass:[ParseStream class]])
     {
-        DDLogInfo(@"Got stream error %@ %@ (%@)", parsedStanza.errorType, parsedStanza.errorReason, parsedStanza.errorText);
-        NSString *message=[NSString stringWithFormat:@"XMPP stream error: %@ (%@)", parsedStanza.errorReason, parsedStanza.errorText];
+        DDLogWarn(@"Got XMPP stream error: %@ %@ (%@)", parsedStanza.errorType, parsedStanza.errorReason, parsedStanza.errorText);
+        NSString *message=[NSString stringWithFormat:@"XMPP stream error: %@", parsedStanza.errorReason];
         if(parsedStanza.errorText && ![parsedStanza.errorText isEqualToString:@""])
             message=[NSString stringWithFormat:@"XMPP stream error %@: %@", parsedStanza.errorReason, parsedStanza.errorText];
         [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self,message ]];

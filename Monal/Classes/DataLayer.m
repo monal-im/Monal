@@ -7,6 +7,7 @@
 //
 
 #import "DataLayer.h"
+#import "EncodingTools.h"
 
 @interface DataLayer()
 
@@ -751,7 +752,7 @@ NSString *const kCount = @"count";
     }];
 }
 
--(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
+-(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion
 {
     NSString* query = [NSString stringWithFormat:@"update account set server=?, other_port=?, username=?, secure=?, resource=?, domain=?, enabled=?, selfsigned=?, oldstyleSSL=?, airdrop=? where account_id=?"];
 
@@ -2594,14 +2595,7 @@ NSString *const kCount = @"count";
     {
         DDLogVerbose(@"Database version <2.3 detected. Performing upgrade.");
 
-        srand([[NSDate date] timeIntervalSince1970]);
-#if TARGET_OS_IPHONE
-        NSString* resource= [NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
-#else
-        NSString* resource= [NSString stringWithFormat:@"Monal-OSX.%d",rand()%100];
-#endif
-
-        NSString* resourceQuery = [NSString stringWithFormat:@"update account set resource='%@';",resource];
+        NSString* resourceQuery = [NSString stringWithFormat:@"update account set resource='%@';", [EncodingTools encodeRandomResource]];
 
         [self executeNonQuery:resourceQuery withCompletion:nil];
         [self executeNonQuery:@"update dbversion set dbversion='2.3';" withCompletion:nil];

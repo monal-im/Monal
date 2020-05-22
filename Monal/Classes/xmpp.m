@@ -1056,7 +1056,7 @@ NSString *const kXMPPPresence = @"presence";
                                                              signalContex:nil
                                                            andSignalStore:nil];
 #endif
-            processor.sendIq=^(MLXMLNode * _Nullable iqResponse) {
+        processor.sendIq=^(MLXMLNode * _Nullable iqResponse) {
             if(iqResponse) {
                 DDLogInfo(@"sending iq stanza");
                 [self send:iqResponse];
@@ -1518,6 +1518,7 @@ NSString *const kXMPPPresence = @"presence";
         //now we are bound again
         self->_accountState=kStateBound;
         [self postConnectNotification];
+        _usableServersList=[[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
 
         //remove already delivered stanzas and resend the (still) unacked ones
         ParseResumed* resumeNode= parsedStanza;
@@ -2955,7 +2956,7 @@ static NSMutableArray *extracted(xmpp *object) {
         case NSStreamEventErrorOccurred:
         {
             NSError* st_error= [stream streamError];
-            DDLogError(@"Stream error code=%ld domain=%@   local desc:%@ ",(long)st_error.code,st_error.domain,  st_error.localizedDescription);
+            DDLogError(@"Stream error code=%ld domain=%@ local desc:%@ ",(long)st_error.code,st_error.domain,  st_error.localizedDescription);
 
             NSString *message =st_error.localizedDescription;
 
@@ -2991,11 +2992,6 @@ static NSMutableArray *extracted(xmpp *object) {
                 }
             }
 
-            //everythign comes twice. just use the input stream
-            if(stream==_oStream){
-                return;
-            }
-
             if(_loggedInOnce)
             {
 #ifndef TARGET_IS_EXTENSION
@@ -3009,8 +3005,6 @@ static NSMutableArray *extracted(xmpp *object) {
                     } else  {
 #endif
 #endif
-
-
                         DDLogInfo(@" stream error calling reconnect for account that logged in once ");
                         [self disconnectWithCompletion:^{
                             [self reconnect:5];
@@ -3024,49 +3018,25 @@ static NSMutableArray *extracted(xmpp *object) {
 #endif
 #endif
             }
-
-
-            if(st_error.code==2 )// operation couldnt be completed // socket not connected
-            {
-                [self disconnectWithCompletion:^{
-                    [self reconnect:5];
-                }];
-                return;
-            }
-
-
-            if(st_error.code==60)// could not complete operation
-            {
-                [self disconnectWithCompletion:^{
-                    [self reconnect:5];
-                }];
-                return;
-            }
-
-            if(st_error.code==64)// Host is down
-            {
-                [self disconnectWithCompletion:^{
-                    [self reconnect:5];
-                }];
-                return;
-            }
-
-            if(st_error.code==32)// Broken pipe
-            {
-                [self disconnectWithCompletion:^{
-                    [self reconnect:5];
-                }];
-                return;
-            }
-
-
-            if(st_error.code==-9807)// Could not complete operation. SSL probably
+            
+            
+            if(st_error.code==-9807)         // Could not complete operation. SSL probably
             {
                 [self disconnect];
                 return;
             }
-
-
+            
+            if(st_error.code == 2 ||         // operation couldnt be completed // socket not connected
+                st_error.code == 60 ||       // could not complete operation
+                st_error.code == 64 ||       // Host is down
+                st_error.code == 32          // Broken pipe
+            ) {
+                [self disconnectWithCompletion:^{
+                    [self reconnect:5];
+                }];
+                return;
+            }
+            
             DDLogInfo(@"unhandled stream error");
             [self disconnectWithCompletion:^{
                 [self reconnect:5];

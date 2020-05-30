@@ -12,7 +12,7 @@
 #import "MLPush.h"
 
 #if !TARGET_OS_MACCATALYST
-@import UserNotificationsUI;
+@import UserNotifications;
 #endif
 
 NS_ENUM(NSInteger, kNotificationSettingSection)
@@ -66,18 +66,15 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
 -(void) viewWillAppear:(BOOL)animated
 {
     self.navigationItem.title = NSLocalizedString(@"Notification Settings",@"");
+    UNUserNotificationCenter* notificationSettings = [UNUserNotificationCenter currentNotificationCenter];
 
-    //TODO when ios 9 is dropped switch this to new API
-    // [UNUserNotificationCenter getNotificationSettingsWithCompletionHandler:]
-    UIUserNotificationSettings *notificationSettings= [[UIApplication sharedApplication] currentUserNotificationSettings];
-    
-    if (notificationSettings.types == UIUserNotificationTypeNone) {
-        self.canShowNotifications=NO;
-    }
-    else if (notificationSettings.types  & UIUserNotificationTypeAlert){
-      self.canShowNotifications=YES;
-    }
-    
+    [notificationSettings getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings* settings) {
+        if(settings.alertSetting == UNNotificationSettingEnabled) {
+            self.canShowNotifications = YES;
+        } else {
+            self.canShowNotifications = NO;
+        }
+    }];
 }
 
 

@@ -137,10 +137,7 @@ NSString *const kGtalk = @"Gtalk";
         
         self.port=@"5222";
         self.useSSL=true;
-        srand([[NSDate date] timeIntervalSince1970]);
-        self.resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
-        
-        
+        self.resource=[EncodingTools encodeRandomResource];
         self.oldStyleSSL=NO;
         self.selfSignedSSL=NO;
         
@@ -218,9 +215,7 @@ NSString *const kGtalk = @"Gtalk";
         [dic setObject:self.port forKey:kPort];
     }
     
-    NSString *resource=[NSString stringWithFormat:@"Monal-iOS.%d",rand()%100];
-
-    [dic setObject:resource forKey:kResource];
+    [dic setObject:[EncodingTools encodeRandomResource] forKey:kResource];
 
     [dic setObject:[NSNumber numberWithBool:self.useSSL] forKey:kSSL];
     [dic setObject:[NSNumber numberWithBool:self.enabled] forKey:kEnabled];
@@ -251,8 +246,8 @@ NSString *const kGtalk = @"Gtalk";
                 if(!result) {
                     [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
                         if(result) {
-                             [self showSuccessHUD];
-                            [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
+                            [self showSuccessHUD];
+                            [[DataLayer sharedInstance] accountIDForUser:user andDomain:domain withCompletion:^(NSString* accountid) {
                                 if(accountid) {
                                     self.accountno=[NSString stringWithFormat:@"%@",accountid];
                                     self.editMode=YES;
@@ -267,7 +262,6 @@ NSString *const kGtalk = @"Gtalk";
                                     {
                                         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
                                     }
-                                    
                                 }
                             }];
                         }

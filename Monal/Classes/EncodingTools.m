@@ -12,15 +12,25 @@
 
 @implementation EncodingTools
 
+
++ (NSString *) encodeRandomResource {
+    u_int32_t i=arc4random();
+#if TARGET_OS_IPHONE
+    NSString* resource=[NSString stringWithFormat:@"Monal-iOS.%@", [EncodingTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
+#else
+    NSString* resource=[NSString stringWithFormat:@"Monal-OSX.%@", [EncodingTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
+#endif
+    return resource;
+}
+
 #pragma mark  Bae64
 
-
-+ (NSString *)encodeBase64WithString:(NSString *)strData {
++ (NSString *) encodeBase64WithString:(NSString *)strData {
     NSData *data =[strData dataUsingEncoding:NSUTF8StringEncoding];
     return [EncodingTools encodeBase64WithData:data];
 }
 
-+ (NSString *)encodeBase64WithData:(NSData *)objData
++ (NSString *) encodeBase64WithData:(NSData *)objData
 {
    return [objData base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
 }

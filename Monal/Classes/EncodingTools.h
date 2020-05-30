@@ -10,6 +10,7 @@
 
 @interface EncodingTools : NSObject
 
++ (NSString *) encodeRandomResource;
 + (NSString *)encodeBase64WithString:(NSString *)strData;
 + (NSString *)encodeBase64WithData:(NSData *)objData;
 + (NSData*) dataWithBase64EncodedString:(NSString *)string;

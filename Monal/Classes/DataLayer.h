@@ -162,7 +162,6 @@ extern NSString *const kMessageTypeUrl;
 -(NSString*) nickName:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 #pragma mark - account commands
--(void) protocolListWithCompletion: (void (^)(NSArray* result))completion;
 -(void) accountListWithCompletion: (void (^)(NSArray* result))completion;
 -(void) accountListEnabledWithCompletion: (void (^)(NSArray* result))completion;
 -(NSArray*) enabledAccountList;

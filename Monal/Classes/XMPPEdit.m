@@ -119,13 +119,11 @@
     }
     else
     {
-        
         self.port=@"5222";
         self.useSSL=true;
         self.resource=[EncodingTools encodeRandomResource];
         self.oldStyleSSL=NO;
         self.selfSignedSSL=NO;
-        
     }
     
     self.sectionArray = @[@"Account", @"Advanced Settings",@""];

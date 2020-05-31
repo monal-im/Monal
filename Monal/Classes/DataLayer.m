@@ -648,14 +648,6 @@ NSString *const kCount = @"count";
 
 #pragma mark account commands
 
--(void) protocolListWithCompletion: (void (^)(NSArray *result))completion
-{
-    NSString* query = [NSString stringWithFormat:@"select * from protocol where protocol_id=1"]; //only xmpp now
-    [self executeReader:query withCompletion:^(NSMutableArray* result) {
-        if(completion) completion(result);
-    }];
-}
-
 -(void) accountListWithCompletion: (void (^)(NSArray* result))completion
 {
     NSString* query = [NSString stringWithFormat:@"select * from account order by account_id asc"];
@@ -777,12 +769,11 @@ NSString *const kCount = @"count";
 
 -(void) addAccountWithDictionary:(NSDictionary*) dictionary andCompletion: (void (^)(BOOL))completion
 {
-    NSString* query = [NSString stringWithFormat:@"insert into account (protocol_id, server, other_port, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, username, airdrop) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"];
+    NSString* query = [NSString stringWithFormat:@"insert into account (server, other_port, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, username, airdrop) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"];
     
     NSString* server = (NSString*) [dictionary objectForKey:kServer];
     NSString* port = (NSString*)[dictionary objectForKey:kPort];
-    NSArray* params = @[@"1",
-                       server == nil ? @"" : server,
+    NSArray* params = @[server == nil ? @"" : server,
                        port == nil ? @"5222" : port,
                        [dictionary objectForKey:kSSL],
                        ((NSString *)[dictionary objectForKey:kResource]),
@@ -2327,55 +2318,6 @@ NSString *const kCount = @"count";
     // checking db version and upgrading if necessary
     DDLogVerbose(@"Database version check");
 
-    // <1.02 has no db version table but gtalk port is 443 . this is an identifier
-    NSNumber* gtalkport = (NSNumber*)[self executeScalar:@"select default_port from  protocol   where protocol_name='GTalk';" andArguments:nil];
-    if([gtalkport intValue] == 443)
-    {
-        DDLogVerbose(@"Database version <1.02 detected. Performing upgrade");
-        [self executeNonQuery:@"drop table account;" andArguments:nil];
-        [self executeNonQuery:@"create table account( account_id integer not null primary key AUTOINCREMENT, account_name varchar(20) not null, protocol_id integer not null, server varchar(50) not null, other_port integer, username varchar(30), password varchar(30), secure bool, resource varchar(30), domain varchar(50), enabled bool);" andArguments:nil];
-        [self executeNonQuery:@"update protocol set default_port=5223 where protocol_name='GTalk';" andArguments:nil];
-        [self executeNonQuery:@"create table dbversion(dbversion varchar(10) );" andArguments:nil];
-        [self executeNonQuery:@"insert into dbversion values('1.02');" andArguments:nil];
-
-
-        DDLogVerbose(@"Upgrade to 1.02 success importing default account");
-        NSString* importAcc= [NSString stringWithFormat:@"insert into account values(null, '%@', 0, '%@', %@, '%@', '%@', %@, '%@', '%@', 1);",
-                              [[NSUserDefaults standardUserDefaults] stringForKey:@"username"] ,
-                              [ [NSUserDefaults standardUserDefaults] stringForKey:@"server"] ,
-                              [ [NSUserDefaults standardUserDefaults] stringForKey:@"portno"] ,
-                              [ [NSUserDefaults standardUserDefaults] stringForKey:@"username"] ,
-                              [ [NSUserDefaults standardUserDefaults] stringForKey:@"password"] ,
-                              [ [NSUserDefaults standardUserDefaults] stringForKey:@"SSL"] ,
-                              [[NSUserDefaults standardUserDefaults] stringForKey:@"resource"] ,
-                              [[NSUserDefaults standardUserDefaults] stringForKey:@"thedomain"]
-
-                              ];
-
-        [self executeNonQuery:importAcc andArguments:nil];
-
-        DDLogVerbose(@"Done");
-    }
-
-    // < 1.04 has google talk on 5223 or 443
-
-    if( ([gtalkport intValue] == 5223) || ([gtalkport intValue] == 443))
-    {
-        DDLogVerbose(@"Database version <1.04 detected. Performing upgrade");
-        [self executeNonQuery:@"update protocol set default_port=5222 where protocol_name='GTalk';" andArguments:nil];
-        [self executeNonQuery:@"insert into protocol values (null,'Facebook', 5222);" andArguments:nil];
-
-        [self executeNonQuery:@"drop table buddylist;" andArguments:nil];
-        [self executeNonQuery:@"drop table buddyicon;" andArguments:nil];
-        [self executeNonQuery:@"create table buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(50), full_name varchar(50), nick_name varchar(50));" andArguments:nil];
-        [self executeNonQuery:@"create table buddyicon(buddyicon_id integer null primary key AUTOINCREMENT, buddy_id integer not null, hash varchar(255),  filename varchar(50));" andArguments:nil];
-
-        [self executeNonQuery:@"drop table dbversion;" andArguments:nil];
-        [self executeNonQuery:@"create table dbversion(dbversion real);" andArguments:nil];
-        [self executeNonQuery:@"insert into dbversion values(1.04);" andArguments:nil];
-        DDLogVerbose(@"Upgrade to 1.04 success");
-    }
-
     NSNumber* dbversion= (NSNumber*)[self executeScalar:@"select dbversion from dbversion" andArguments:nil];
     DDLogVerbose(@"Got db version %@", dbversion);
 
@@ -2819,7 +2761,7 @@ NSString *const kCount = @"count";
         DDLogVerbose(@"Database version <4.6 detected. Performing upgrade on accounts.");
         [self executeNonQuery:@"alter table buddylist add column messageDraft text;" andArguments:nil];
         [self executeNonQuery:@"update dbversion set dbversion='4.6';" andArguments:nil];
-        DDLogVerbose(@"Upgrade to 4.6 success ");
+        DDLogVerbose(@"Upgrade to 4.6 success");
     }
 
     if([dbversion doubleValue] < 4.7)
@@ -2834,7 +2776,7 @@ NSString *const kCount = @"count";
         [self executeNonQuery:@"DROP TABLE _accountTMP;" andArguments:nil];
         [self executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:nil];
         [self executeNonQuery:@"update dbversion set dbversion='4.7';" andArguments:nil];
-        DDLogVerbose(@"Upgrade to 4.7 success ");
+        DDLogVerbose(@"Upgrade to 4.7 success");
     }
 
     if([dbversion doubleValue] < 4.71)
@@ -2843,7 +2785,22 @@ NSString *const kCount = @"count";
         // Only reset server to '' when server == domain
         [self executeNonQuery:@"UPDATE account SET server='' where server=domain;" andArguments:nil];
         [self executeNonQuery:@"update dbversion set dbversion='4.71';" andArguments:nil];
-        DDLogVerbose(@"Upgrade to 4.71 success ");
+        DDLogVerbose(@"Upgrade to 4.71 success");
+    }
+    
+    if([dbversion doubleValue] < 4.72)
+    {
+        DDLogVerbose(@"Database version <4.72 detected. Performing upgrade on accounts.");
+        // Delete column protocol_id from account and drop protocol table
+        [self executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:nil];
+        [self executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'oldstyleSSL' bool, 'oauth' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);" andArguments:nil];
+        [self executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state from _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"DROP TABLE _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:nil];
+        [self executeNonQuery:@"DROP TABLE protocol;" andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='4.72';" andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.72 success");
     }
 
     [self endWriteTransaction];

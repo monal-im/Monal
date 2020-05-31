@@ -15,6 +15,8 @@
 
 @end
 
+static BOOL _version_check_done = NO;
+
 @implementation DataLayer
 
 
@@ -2305,7 +2307,8 @@ NSString *const kCount = @"count";
     [self.dbFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     [self.dbFormatter  setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 
-    [self version];
+    if(!_version_check_done)
+        [self version];
 }
 
 -(void) version
@@ -2829,8 +2832,8 @@ NSString *const kCount = @"count";
         DDLogVerbose(@"Upgrade to 4.74 success");
     }
 
-
     [self endWriteTransaction];
+    _version_check_done = YES;
     return;
 }
 

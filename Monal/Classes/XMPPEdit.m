@@ -108,7 +108,7 @@ NSString *const kGtalk = @"Gtalk";
             self.server=[settings objectForKey:@"server"];
             
             self.port=[NSString stringWithFormat:@"%@", [settings objectForKey:@"other_port"]];
-            // self.resource=[settings objectForKey:@"resource"];
+            self.resource=[settings objectForKey:kResource];
             
             self.useSSL=[[settings objectForKey:@"secure"] boolValue];
             self.enabled=[[settings objectForKey:kEnabled] boolValue];
@@ -215,7 +215,7 @@ NSString *const kGtalk = @"Gtalk";
         [dic setObject:self.port forKey:kPort];
     }
     
-    [dic setObject:[EncodingTools encodeRandomResource] forKey:kResource];
+    [dic setObject:self.resource forKey:kResource];
 
     [dic setObject:[NSNumber numberWithBool:self.useSSL] forKey:kSSL];
     [dic setObject:[NSNumber numberWithBool:self.enabled] forKey:kEnabled];

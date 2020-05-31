@@ -46,7 +46,7 @@
     
 	if(([State isEqualToString:@"Features"]) && ([elementName isEqualToString:@"starttls"]))
 	{
-        DDLogVerbose(@"Using new style SSL");
+        DDLogVerbose(@"Using STARTTLS");
         _callStartTLS=YES;
 		return; 
 	}
@@ -60,7 +60,7 @@
     
 	if(([elementName isEqualToString:@"proceed"]) && ([namespaceURI isEqualToString:@"urn:ietf:params:xml:ns:xmpp-tls"]) )
 	{
-		DDLogVerbose(@"Got SartTLS procced");
+		DDLogVerbose(@"Got StartTLS procced");
 		//trying to switch to TLS
         _startTLSProceed=YES;
         return;

@@ -29,7 +29,7 @@
 
 @property (nonatomic, assign) BOOL enabled;
 @property (nonatomic, assign) BOOL useSSL;
-@property (nonatomic, assign) BOOL oldStyleSSL;
+@property (nonatomic, assign) BOOL directTLS;
 @property (nonatomic, assign) BOOL selfSignedSSL;
 @property (nonatomic, assign) BOOL airDrop;
 
@@ -110,7 +110,7 @@
             self.useSSL=[[settings objectForKey:@"secure"] boolValue];
             self.enabled=[[settings objectForKey:kEnabled] boolValue];
             
-            self.oldStyleSSL=[[settings objectForKey:@"oldstyleSSL"] boolValue];
+            self.directTLS=[[settings objectForKey:@"directTLS"] boolValue];
             self.selfSignedSSL=[[settings objectForKey:@"selfsigned"] boolValue];
             self.airDrop = [[settings objectForKey:kAirdrop] boolValue];
             
@@ -121,7 +121,7 @@
         self.port=@"5222";
         self.useSSL=true;
         self.resource=[EncodingTools encodeRandomResource];
-        self.oldStyleSSL=NO;
+        self.directTLS=NO;
         self.selfSignedSSL=NO;
     }
     
@@ -202,7 +202,7 @@
     [dic setObject:[NSNumber numberWithBool:self.useSSL] forKey:kSSL];
     [dic setObject:[NSNumber numberWithBool:self.enabled] forKey:kEnabled];
     [dic setObject:[NSNumber numberWithBool:self.selfSignedSSL] forKey:kSelfSigned];
-    [dic setObject:[NSNumber numberWithBool:self.oldStyleSSL] forKey:kOldSSL];
+    [dic setObject:[NSNumber numberWithBool:self.directTLS] forKey:kDirectTLS];
     [dic setObject:[NSNumber numberWithBool:self.airDrop] forKey:kAirdrop];
     [dic setObject:self.accountno forKey:kAccountID];
 
@@ -417,10 +417,10 @@
                 break;
             }
             case 3: {
-                thecell.cellLabel.text=NSLocalizedString(@"Old Style TLS",@ "");
+                thecell.cellLabel.text=NSLocalizedString(@"Direct TLS",@ "");
                 thecell.textInputField.hidden=YES;
                 thecell.toggleSwitch.tag=3;
-                thecell.toggleSwitch.on=self.oldStyleSSL;
+                thecell.toggleSwitch.on=self.directTLS;
                 break;
             }
             case 4: {
@@ -720,10 +720,10 @@
         case 3: {
             if(toggle.on)
             {
-                self.oldStyleSSL=YES;
+                self.directTLS=YES;
             }
             else {
-                self.oldStyleSSL=NO;
+                self.directTLS=NO;
             }
             break;
         }

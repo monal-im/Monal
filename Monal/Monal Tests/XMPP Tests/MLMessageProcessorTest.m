@@ -33,7 +33,7 @@
     
     MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:self.jid  password:@"" andResource:self.resource];
 
-    MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:@"monal.im" andPort:@5222 andOldStyleSSL:NO];
+    MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:@"monal.im" andPort:@5222 andDirectTLS:NO];
     server.SSL=YES;
  
     self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];

@@ -63,7 +63,7 @@
     
     MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:@"nothing@yax.im" password:@"nothing" andResource:@"MonalReg"];
     
-    MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:kRegServer andPort:[NSNumber numberWithInt:5222] andOldStyleSSL:NO];
+    MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:kRegServer andPort:[NSNumber numberWithInt:5222] andDirectTLS:NO];
    
     server.SSL=YES;
     server.selfSignedCert=NO;
@@ -131,7 +131,7 @@
                 [dic setObject:@YES forKey:kSSL];
                 [dic setObject:@YES forKey:kEnabled];
                 [dic setObject:@NO forKey:kSelfSigned];
-                [dic setObject:@NO forKey:kOldSSL];
+                [dic setObject:@NO forKey:kDirectTLS];
                 
                 NSString *passwordText = [self.password.text copy];
                 

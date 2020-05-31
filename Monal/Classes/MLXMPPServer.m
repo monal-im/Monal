@@ -28,15 +28,15 @@
 
 @implementation MLXMPPServer
 
--(id) initWithHost:(NSString *) host andPort:(NSNumber *) port andOldStyleSSL:(BOOL) oldStyleSSL {
+-(id) initWithHost:(NSString *) host andPort:(NSNumber *) port andDirectTLS:(BOOL) directTLS {
     self = [super init];
     self.host=host;
     self.port=port;
-    self.oldStyleSSL=oldStyleSSL;
+    self.directTLS=directTLS;
     
     self.serverInUse=host;
     self.portInUse=port;
-    self.directTLSInUse=oldStyleSSL;
+    self.directTLSInUse=directTLS;
     
     return self;
 }

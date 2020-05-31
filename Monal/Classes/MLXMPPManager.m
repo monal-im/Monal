@@ -296,10 +296,10 @@ An array of Dics what have timers to make sure everything was sent
     NSString *password = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@",[account objectForKey:kUsername],[account objectForKey:kDomain] ] password:password andResource:[account objectForKey:kResource]];
 
-    MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andOldStyleSSL:[[account objectForKey:kOldSSL] boolValue]];
+    MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andDirectTLS:[[account objectForKey:kDirectTLS] boolValue]];
     server.SSL=[[account objectForKey:kSSL] boolValue];
     server.selfSignedCert=[[account objectForKey:kSelfSigned] boolValue];
-    if(server.oldStyleSSL && !server.SSL ) server.SSL=YES; //technically a config error but understandable
+    if(server.directTLS && !server.SSL ) server.SSL=YES; //technically a config error but understandable
 
     xmpp* xmppAccount=[[xmpp alloc] initWithServer:server andIdentity:identity];
     xmppAccount.explicitLogout=NO;

@@ -26,7 +26,6 @@
 @property (nonatomic, strong) NSString *accountType;
 
 -(IBAction) delClicked: (id) sender;
--(void)authenticateWithOAuth;
 -(IBAction) save:(id) sender;
 
 

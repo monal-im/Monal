@@ -310,12 +310,6 @@ An array of Dics what have timers to make sure everything was sent
     xmppAccount.airDrop=[[account objectForKey:kAirdrop] boolValue];
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]];
 
-
-    //    if([xmppAccount.password length]==0 && !xmppAccount.oAuth) //&& ([tempPass length]==0)
-    //    {
-    //        // ask fro temp pass if not oauth
-    //    }
-
 #ifndef DISABLE_OMEMO
     [xmppAccount setupSignal];
 #endif

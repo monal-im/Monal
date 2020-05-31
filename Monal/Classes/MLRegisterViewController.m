@@ -132,7 +132,6 @@
                 [dic setObject:@YES forKey:kEnabled];
                 [dic setObject:@NO forKey:kSelfSigned];
                 [dic setObject:@NO forKey:kOldSSL];
-                [dic setObject:@NO forKey:kOauth];
                 
                 NSString *passwordText = [self.password.text copy];
                 

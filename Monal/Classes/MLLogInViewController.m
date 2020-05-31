@@ -103,7 +103,6 @@
     [dic setObject:@YES forKey:kEnabled];
     [dic setObject:@NO forKey:kSelfSigned];
     [dic setObject:@NO forKey:kOldSSL];
-    [dic setObject:@NO forKey:kOauth];
     
     [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
         if(result) {

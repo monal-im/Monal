@@ -34,7 +34,6 @@
 @property (nonatomic, assign) BOOL airDrop;
 
 @property (nonatomic, weak) UITextField *currentTextField;
-@property (nonatomic, strong) NSURL *oAuthURL;
 
 @property (nonatomic, strong) NSDictionary *initialSettings;
 

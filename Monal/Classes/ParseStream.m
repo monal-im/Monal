@@ -153,12 +153,6 @@
 			_SASLDIGEST_MD5=YES;
 		}
         
-        if([_messageBuffer isEqualToString:@"X-OAUTH2"])
-        {
-            DDLogVerbose(@"SASL X-OAUTH2 is supported");
-            _SASLX_OAUTH2=YES;
-        }
-        
         _messageBuffer=nil; 
 		return;
 	}

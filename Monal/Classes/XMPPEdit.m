@@ -20,8 +20,6 @@
 
 
 
-NSString *const kGtalk = @"Gtalk";
-
 @interface XMPPEdit()
 @property (nonatomic, strong) NSString *jid;
 @property (nonatomic, strong) NSString *password;
@@ -117,23 +115,10 @@ NSString *const kGtalk = @"Gtalk";
             self.selfSignedSSL=[[settings objectForKey:@"selfsigned"] boolValue];
             self.airDrop = [[settings objectForKey:kAirdrop] boolValue];
             
-            if([[settings objectForKey:@"domain"] isEqualToString:@"gmail.com"])
-            {
-                self->JIDLabel.text=@"GTalk ID";
-                self.accountType=kGtalk;
-            }
         }];
     }
     else
     {
-        
-        if(_originIndex.row==1)
-        {
-            JIDLabel.text=@"GTalk ID";
-            self.server=@"talk.google.com";
-            self.jid=@"@gmail.com";
-            self.accountType=kGtalk;
-        }
         
         self.port=@"5222";
         self.useSSL=true;
@@ -223,13 +208,6 @@ NSString *const kGtalk = @"Gtalk";
     [dic setObject:[NSNumber numberWithBool:self.oldStyleSSL] forKey:kOldSSL];
     [dic setObject:[NSNumber numberWithBool:self.airDrop] forKey:kAirdrop];
     [dic setObject:self.accountno forKey:kAccountID];
-
-    BOOL isGtalk=NO;
-    if([self.accountType isEqualToString:kGtalk]) {
-        isGtalk=YES;
-    }
-
-    [dic setObject:[NSNumber numberWithBool:isGtalk] forKey:kOauth];
 
     if(!self.editMode)
     {
@@ -395,21 +373,11 @@ NSString *const kGtalk = @"Gtalk";
                 break;
             }
             case 1: {
-                if([self.accountType isEqualToString:kGtalk]){
-                    MLButtonCell *buttonCell =(MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
-                    UIColor *monalGreen =[UIColor colorWithRed:128.0/255 green:203.0/255 blue:182.0/255 alpha:1.0f];
-                    buttonCell.buttonText.textColor= monalGreen;
-                    buttonCell.buttonText.text=NSLocalizedString(@"Authenticate",@ "");
-                    buttonCell.selectionStyle= UITableViewCellSelectionStyleNone;
-                    return buttonCell;
-
-                } else  {
-                    thecell.cellLabel.text=NSLocalizedString(@"Password",@ "");
-                    thecell.toggleSwitch.hidden=YES;
-                    thecell.textInputField.secureTextEntry=YES;
-                    thecell.textInputField.tag=2;
-                    thecell.textInputField.text=self.password;
-                }
+                thecell.cellLabel.text=NSLocalizedString(@"Password",@ "");
+                thecell.toggleSwitch.hidden=YES;
+                thecell.textInputField.secureTextEntry=YES;
+                thecell.textInputField.tag=2;
+                thecell.textInputField.text=self.password;
                 break;
             }
             case 2: {
@@ -590,13 +558,8 @@ NSString *const kGtalk = @"Gtalk";
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)newIndexPath
 {
     DDLogVerbose(@"selected log section %ld , row %ld", newIndexPath.section, newIndexPath.row);
-    if(newIndexPath.section==0 && newIndexPath.row==1)
-    {
-        if([self.accountType isEqualToString:kGtalk]){
-            [self authenticateWithOAuth];
-        }
-    }
-    else if (newIndexPath.section==1)
+    
+    if (newIndexPath.section==1)
     {  switch (newIndexPath.row)
         {
             case 5:  {

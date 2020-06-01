@@ -362,26 +362,26 @@
         switch (indexPath.row)
         {
             case 0: {
-                thecell.cellLabel.text=@"Jabber ID";
-                thecell.toggleSwitch.hidden=YES;
-                thecell.textInputField.tag=1;
+                thecell.cellLabel.text = @"Jabber ID";
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.tag = 1;
                 thecell.textInputField.keyboardType = UIKeyboardTypeEmailAddress;
-                thecell.textInputField.text=self.jid;
+                thecell.textInputField.text = self.jid;
                 break;
             }
             case 1: {
-                thecell.cellLabel.text=NSLocalizedString(@"Password",@ "");
-                thecell.toggleSwitch.hidden=YES;
-                thecell.textInputField.secureTextEntry=YES;
-                thecell.textInputField.tag=2;
-                thecell.textInputField.text=self.password;
+                thecell.cellLabel.text = NSLocalizedString(@"Password",@ "");
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.secureTextEntry = YES;
+                thecell.textInputField.tag = 2;
+                thecell.textInputField.text = self.password;
                 break;
             }
             case 2: {
-                thecell.cellLabel.text=NSLocalizedString(@"Enabled",@ "");
-                thecell.textInputField.hidden=YES;
-                thecell.toggleSwitch.tag=1;
-                thecell.toggleSwitch.on=self.enabled;
+                thecell.cellLabel.text = NSLocalizedString(@"Enabled",@ "");
+                thecell.textInputField.hidden = YES;
+                thecell.toggleSwitch.tag = 1;
+                thecell.toggleSwitch.on = self.enabled;
                 break;
             }
 
@@ -393,78 +393,83 @@
         {
                 //advanced
             case 0:  {
-                thecell.cellLabel.text=NSLocalizedString(@"Server",@ "");
-                thecell.toggleSwitch.hidden=YES;
-                thecell.textInputField.tag=3;
-                thecell.textInputField.text=self.server;
+                thecell.cellLabel.text = NSLocalizedString(@"Server",@ "");
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.tag = 3;
+                thecell.textInputField.text = self.server;
                 thecell.accessoryType=UITableViewCellAccessoryDetailButton;
                 break;
             }
 
             case 1:  {
-                thecell.cellLabel.text=NSLocalizedString(@"Port",@ "");
-                thecell.toggleSwitch.hidden=YES;
-                thecell.textInputField.tag=4;
-                thecell.textInputField.text=self.port;
+                thecell.cellLabel.text = NSLocalizedString(@"Port",@ "");
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.tag = 4;
+                thecell.textInputField.text = self.port;
                 break;
             }
 
             case 2: {
-                thecell.cellLabel.text=@"TLS";
-                thecell.textInputField.hidden=YES;
-                thecell.toggleSwitch.tag=2;
-                thecell.toggleSwitch.on=self.useSSL;
+                thecell.cellLabel.text = @"TLS";
+                thecell.textInputField.hidden = YES;
+                thecell.toggleSwitch.tag = 2;
+                thecell.toggleSwitch.on = self.useSSL;
                 break;
             }
             case 3: {
-                thecell.cellLabel.text=NSLocalizedString(@"Direct TLS",@ "");
-                thecell.textInputField.hidden=YES;
-                thecell.toggleSwitch.tag=3;
-                thecell.toggleSwitch.on=self.directTLS;
+                thecell.cellLabel.text = NSLocalizedString(@"Direct TLS",@ "");
+                thecell.textInputField.hidden = YES;
+                thecell.toggleSwitch.tag = 3;
+                thecell.toggleSwitch.on = self.directTLS;
                 break;
             }
             case 4: {
-                thecell.cellLabel.text=NSLocalizedString(@"Validate certificate",@ "");
-                thecell.textInputField.hidden=YES;
-                thecell.toggleSwitch.tag=4;
-                thecell.toggleSwitch.on=!self.selfSignedSSL;
+                thecell.cellLabel.text = NSLocalizedString(@"Validate certificate",@ "");
+                thecell.textInputField.hidden = YES;
+                thecell.toggleSwitch.tag = 4;
+                thecell.toggleSwitch.on = !self.selfSignedSSL;
                 break;
             }
             case 5: {
-                thecell.cellLabel.text=NSLocalizedString(@"Message Archive Pref",@ "");
-                thecell.toggleSwitch.hidden=YES;
+                thecell.cellLabel.text = NSLocalizedString(@"Message Archive Pref",@ "");
+                thecell.toggleSwitch.hidden = YES;
 
-                thecell.textInputField.hidden=YES;
-                thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+                thecell.textInputField.hidden = YES;
+                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                 break;
             }
             case 6: {
-                thecell.cellLabel.text=NSLocalizedString(@"My Keys",@ "");
-                thecell.toggleSwitch.hidden=YES;
+                thecell.cellLabel.text = NSLocalizedString(@"My Keys",@ "");
+                thecell.toggleSwitch.hidden = YES;
 
-                thecell.textInputField.hidden=YES;
-                thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+                thecell.textInputField.hidden = YES;
+                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                 break;
             }
             case 7: {
-                thecell.cellLabel.text=NSLocalizedString(@"Change Password",@ "");
-                thecell.toggleSwitch.hidden=YES;
+                thecell.cellLabel.text = NSLocalizedString(@"Change Password",@ "");
+                thecell.toggleSwitch.hidden = YES;
 
-                thecell.textInputField.hidden=YES;
-                thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+                thecell.textInputField.hidden = YES;
+                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                 break;
             }
             case 8: {
-                thecell.cellLabel.text=NSLocalizedString(@"Use AirDrop",@ "");
-                thecell.textInputField.hidden=YES;
-                thecell.toggleSwitch.tag=5;
-                thecell.toggleSwitch.on=self.airDrop;
+                thecell.cellLabel.text = NSLocalizedString(@"Use AirDrop",@ "");
+                thecell.textInputField.hidden = YES;
+                thecell.toggleSwitch.tag = 5;
+                thecell.toggleSwitch.on = self.airDrop;
                 break;
             }
-
+            case 9: {
+                thecell.cellLabel.text = NSLocalizedString(@"Resource",@ "");
+                thecell.labelRight.text = self.resource;
+                thecell.labelRight.hidden = NO;
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.hidden = YES;
+                break;
+            }
         }
-
-
     }
     else if (indexPath.section==2)
     {
@@ -474,10 +479,10 @@
                 if(self.editMode==true)
                 {
 
-                    MLButtonCell *buttonCell =(MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
-                    buttonCell.buttonText.text=NSLocalizedString(@"Delete",@ "");
-                    buttonCell.buttonText.textColor= [UIColor redColor];
-                    buttonCell.selectionStyle= UITableViewCellSelectionStyleNone;
+                    MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
+                    buttonCell.buttonText.text = NSLocalizedString(@"Delete",@ "");
+                    buttonCell.buttonText.textColor = [UIColor redColor];
+                    buttonCell.selectionStyle = UITableViewCellSelectionStyleNone;
                     return buttonCell;
                 }
                 break;
@@ -487,12 +492,12 @@
         }
     }
 
-    thecell.textInputField.delegate=self;
-    if(thecell.textInputField.hidden==YES)
+    thecell.textInputField.delegate = self;
+    if(thecell.textInputField.hidden == YES)
     {
         [thecell.toggleSwitch addTarget:self action:@selector(toggleSwitch:) forControlEvents:UIControlEventValueChanged];
     }
-    thecell.selectionStyle= UITableViewCellSelectionStyleNone;
+    thecell.selectionStyle = UITableViewCellSelectionStyleNone;
     return thecell;
 }
 
@@ -505,23 +510,23 @@
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    UIView *tempView=[[UIView alloc]initWithFrame:CGRectMake(0,200,300,244)];
-    tempView.backgroundColor=[UIColor clearColor];
+    UIView* tempView = [[UIView alloc]initWithFrame:CGRectMake(0,200,300,244)];
+    tempView.backgroundColor = [UIColor clearColor];
 
-    UILabel *tempLabel=[[UILabel alloc]initWithFrame:CGRectMake(15,0,300,44)];
-    tempLabel.backgroundColor=[UIColor clearColor];
+    UILabel* tempLabel = [[UILabel alloc]initWithFrame:CGRectMake(15,0,300,44)];
+    tempLabel.backgroundColor = [UIColor clearColor];
     tempLabel.shadowColor = [UIColor blackColor];
     tempLabel.shadowOffset = CGSizeMake(0,2);
     tempLabel.textColor = [UIColor whiteColor]; //here you can change the text color of header.
     tempLabel.font = [UIFont boldSystemFontOfSize:17.0f];
-    tempLabel.text=[self tableView:tableView titleForHeaderInSection:section ];
+    tempLabel.text = [self tableView:tableView titleForHeaderInSection:section ];
 
     [tempView addSubview:tempLabel];
 
-    tempLabel.textColor=[UIColor darkGrayColor];
-    tempLabel.text=  tempLabel.text.uppercaseString;
-    tempLabel.shadowColor =[UIColor clearColor];
-    tempLabel.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
+    tempLabel.textColor = [UIColor darkGrayColor];
+    tempLabel.text =  tempLabel.text.uppercaseString;
+    tempLabel.shadowColor = [UIColor clearColor];
+    tempLabel.font = [UIFont systemFontOfSize:[UIFont systemFontSize]];
 
     return tempView;
 }
@@ -535,13 +540,13 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
 
-    if(section==0){
+    if(section == 0){
         return 3;
     }
-    else if( section ==1) {
-        return 9;
+    else if(section == 1) {
+        return 10;
     }
-    else  if(section == 2&&  self.editMode==false)
+    else  if(section == 2 &&  self.editMode == false)
     {
         return 0;
     }
@@ -556,23 +561,22 @@
 {
     DDLogVerbose(@"selected log section %ld , row %ld", newIndexPath.section, newIndexPath.row);
     
-    if (newIndexPath.section==1)
-    {  switch (newIndexPath.row)
+    if (newIndexPath.section == 1)
+    {
+        switch (newIndexPath.row)
         {
-            case 5:  {
+            case 5:
                 [self performSegueWithIdentifier:@"showMAMPref" sender:self];
                 break;
-            }case 6:  {
+            case 6:
                 [self performSegueWithIdentifier:@"showKeyTrust" sender:self];
                 break;
-            }
-            case 7:  {
+            case 7:
                 [self performSegueWithIdentifier:@"showPassChange" sender:self];
                 break;
-            }
         }
     }
-    else if(newIndexPath.section==2)
+    else if(newIndexPath.section == 2)
     {
         [self delClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
     }
@@ -581,15 +585,13 @@
 
 -(void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section==1)
+    if (indexPath.section == 1)
     {
         switch (indexPath.row)
         {
-
-            case 0:  {
+            case 0:
                 [self performSegueWithIdentifier:@"showServerDetails" sender:self];
-            }
-
+                break;
         }
     }
 }
@@ -601,87 +603,82 @@
 {
     if ([segue.identifier isEqualToString:@"showServerDetails"])
     {
-        MLServerDetails *server= (MLServerDetails *)segue.destinationViewController;
+        MLServerDetails* server= (MLServerDetails*)segue.destinationViewController;
         server.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
     }
 
     else if ([segue.identifier isEqualToString:@"showMAMPref"])
     {
-        MLMAMPrefTableViewController *mam= (MLMAMPrefTableViewController *)segue.destinationViewController;
+        MLMAMPrefTableViewController* mam = (MLMAMPrefTableViewController*)segue.destinationViewController;
         mam.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
     }
     else if ([segue.identifier isEqualToString:@"showKeyTrust"])
     {
         if(self.jid && self.accountno) {
-            MLKeysTableViewController *keys= (MLKeysTableViewController *)segue.destinationViewController;
+            MLKeysTableViewController* keys = (MLKeysTableViewController*)segue.destinationViewController;
             keys.ownKeys = YES;
             MLContact *contact = [[MLContact alloc] init];
-            contact.contactJid=self.jid;
-            contact.accountId=self.accountno;
+            contact.contactJid = self.jid;
+            contact.accountId = self.accountno;
             keys.contact=contact;
         }
     }
     else if ([segue.identifier isEqualToString:@"showPassChange"])
     {
         if(self.jid && self.accountno) {
-            MLPasswordChangeTableViewController *pwchange= (MLPasswordChangeTableViewController *)segue.destinationViewController;
+            MLPasswordChangeTableViewController* pwchange = (MLPasswordChangeTableViewController*)segue.destinationViewController;
            pwchange.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
         }
     }
-
-
 }
 
 #pragma mark -  text input  fielddelegate
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField
 {
-    self.currentTextField=textField;
-    if(textField.tag==1) //user input field
+    self.currentTextField = textField;
+    if(textField.tag == 1) //user input field
     {
-        if(textField.text.length >0) {
-            UITextPosition *startPos=  textField.beginningOfDocument;
-            UITextRange *newRange = [textField textRangeFromPosition:startPos toPosition:startPos];
+        if(textField.text.length > 0) {
+            UITextPosition* startPos = textField.beginningOfDocument;
+            UITextRange* newRange = [textField textRangeFromPosition:startPos toPosition:startPos];
 
             // Set new range
             [textField setSelectedTextRange:newRange];
         }
     }
-
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField
 {
     switch (textField.tag) {
         case 1: {
-            self.jid=textField.text;
+            self.jid = textField.text;
             break;
         }
         case 2: {
-            self.password=textField.text;
+            self.password = textField.text;
             break;
         }
 
         case 3: {
-            self.server=textField.text;
+            self.server = textField.text;
             break;
         }
 
         case 4: {
-            self.port=textField.text;
+            self.port = textField.text;
             break;
         }
         case 5: {
-            self.resource=textField.text;
+            self.resource = textField.text;
             break;
         }
 
         default:
             break;
     }
-
 }
-
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
@@ -693,26 +690,26 @@
 
 -(void) toggleSwitch:(id)sender
 {
-    UISwitch *toggle = (UISwitch *) sender;
+    UISwitch* toggle = (UISwitch*) sender;
 
     switch (toggle.tag) {
         case 1: {
             if(toggle.on)
             {
-                self.enabled=YES;
+                self.enabled = YES;
             }
             else {
-                self.enabled=NO;
+                self.enabled = NO;
             }
             break;
         }
         case 2: {
             if(toggle.on)
             {
-                self.useSSL=YES;
+                self.useSSL = YES;
             }
             else {
-                self.useSSL=NO;
+                self.useSSL = NO;
             }
             break;
         }
@@ -720,39 +717,35 @@
         case 3: {
             if(toggle.on)
             {
-                self.directTLS=YES;
+                self.directTLS = YES;
             }
             else {
-                self.directTLS=NO;
+                self.directTLS = NO;
             }
             break;
         }
         case 4: {
             if(toggle.on)
             {
-                self.selfSignedSSL=NO;
+                self.selfSignedSSL = NO;
             }
             else {
-                self.selfSignedSSL=YES;
+                self.selfSignedSSL = YES;
             }
-
             break;
         }
 
         case 5: {
             if(toggle.on)
             {
-                self.airDrop=YES;
+                self.airDrop = YES;
             }
             else {
-                self.airDrop=NO;
+                self.airDrop = NO;
             }
-
             break;
         }
     }
-
-
 }
 
 

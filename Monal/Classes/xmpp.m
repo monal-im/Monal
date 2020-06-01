@@ -1018,7 +1018,14 @@ NSString *const kXMPPPresence = @"presence";
     if(self.connectionProperties.supportsSM3)
     {
         MLXMLNode *aNode = [[MLXMLNode alloc] initWithElement:@"a"];
-        NSDictionary *dic= @{kXMLNS:@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza] };
+        NSDictionary *dic=@{
+			kXMLNS:@"urn:xmpp:sm:3",
+            @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
+			@"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
+			@"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
+			@"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
+			@"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", (unsigned long) [self.unAckedStanzas count]],
+		};
         aNode.attributes = [dic mutableCopy];
         if(queuedSend) {
             [self send:aNode];
@@ -3136,7 +3143,7 @@ static NSMutableArray *extracted(xmpp *object) {
 		//for every stanza (e.g. until the smacks queue is empty) and not sending an ack if one is already in flight
 		DDLogVerbose(@"adding smacks request to receiveQueue...");
 		[self.receiveQueue addOperationWithBlock: ^{
-			DDLogVerbose(@"requesting smacks ack...");
+			DDLogVerbose(@"calling requestSMAck from receiveQueue...");
 			[self requestSMAck];
 		}];
 

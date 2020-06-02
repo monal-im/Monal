@@ -41,10 +41,4 @@
     return message;
 }
 
--(BOOL) shouldForceRefresh
-{
-    if(self.delayTimeStamp!=nil) return YES;
-    else return NO;
-}
-
 @end

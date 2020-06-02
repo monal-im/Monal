@@ -974,7 +974,7 @@ NSString *const kXMPPPresence = @"presence";
 		}
 
 		[iterationArray removeObjectsInArray:discard];
-		if(self.unAckedStanzas) self.unAckedStanzas = iterationArray;	// if it was set to nil elsewhere, dont restore
+		self.unAckedStanzas = iterationArray;
 
 		//persist these changes (but only if we actually made some changes)
 		if([discard count])

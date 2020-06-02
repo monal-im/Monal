@@ -96,7 +96,6 @@ NSString *const kXMPPPresence = @"presence";
 
 @property (nonatomic, assign) BOOL resuming;
 @property (nonatomic, strong) NSString *streamID;
-
 @property (nonatomic, assign) BOOL hasDiscoAndRoster;
 
 /**
@@ -1767,29 +1766,30 @@ static NSMutableArray *extracted(xmpp *object) {
 {
     if(!stanza) return;
 
-    if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 && self.unAckedStanzas)
+    if((self.accountState>=kStateBound || self.streamID) && self.connectionProperties.supportsSM3 && self.unAckedStanzas)
     {
-		//only count stanzas, not nonzas
-		if([stanza.element isEqualToString:@"iq"]
-			|| [stanza.element isEqualToString:@"message"]
-			|| [stanza.element isEqualToString:@"presence"])
-		{
-			DDLogVerbose(@"ADD UNACKED STANZA: %@: %@", self.lastOutboundStanza, stanza.XMLString);
-			NSDictionary *dic =@{kStanzaID:self.lastOutboundStanza, kStanza:stanza};
-			[self.unAckedStanzas addObject:dic];
-			//increment for next call
-			self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue]+1];
+        //only count stanzas, not nonzas
+        if([stanza.element isEqualToString:@"iq"]
+            || [stanza.element isEqualToString:@"message"]
+            || [stanza.element isEqualToString:@"presence"])
+        {
+            DDLogVerbose(@"ADD UNACKED STANZA: %@: %@", self.lastOutboundStanza, stanza.XMLString);
+            NSDictionary *dic =@{kStanzaID:self.lastOutboundStanza, kStanza:stanza};
+            [self.unAckedStanzas addObject:dic];
+            //increment for next call
+            self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue]+1];
 
-			//persist these changes
-			[self persistState];
-		}
+            //persist these changes
+            [self persistState];
+        }
     }
 
-    [self.sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
-		DDLogDebug(@"SEND: %@", stanza.XMLString);
-		[extracted(self) addObject:stanza];
-		[self writeFromQueue];  // try to send if there is space
-	}]];
+    if(self.accountState>kStateDisconnected)
+        [self.sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
+            DDLogDebug(@"SEND: %@", stanza.XMLString);
+            [extracted(self) addObject:stanza];
+            [self writeFromQueue];  // try to send if there is space
+        }]];
 }
 
 #pragma mark messaging
@@ -1945,6 +1945,7 @@ static NSMutableArray *extracted(xmpp *object) {
         [values setObject:self.connectionProperties.conferenceServer forKey:@"conferenceServer"];
     }
 
+    [values setObject:[NSNumber numberWithBool:_loggedInOnce] forKey:@"loggedInOnce"];
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
@@ -1993,7 +1994,6 @@ static NSMutableArray *extracted(xmpp *object) {
         self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
         self.connectionProperties.discoveredServices=[dic objectForKey:@"discoveredServices"];
 
-
         self.connectionProperties.uploadServer=[dic objectForKey:@"uploadServer"];
         if(self.connectionProperties.uploadServer)
         {
@@ -2001,6 +2001,12 @@ static NSMutableArray *extracted(xmpp *object) {
         }
         self.connectionProperties.conferenceServer = [dic objectForKey:@"conferenceServer"];
 
+        if([dic objectForKey:@"loggedInOnce"])
+        {
+            NSNumber *loggedInOnce = [dic objectForKey:@"loggedInOnce"];
+            _loggedInOnce = loggedInOnce.boolValue;
+        }
+        
         if([dic objectForKey:@"usingCarbons2"])
         {
             NSNumber *carbonsNumber = [dic objectForKey:@"usingCarbons2"];
@@ -2435,8 +2441,14 @@ static NSMutableArray *extracted(xmpp *object) {
             DDLogError(@"no jid on info");
         }
     }
+}
 
-
+-(BOOL) isHibernated
+{
+    BOOL hibernated = (_accountState == kStateDisconnected || _accountState == kStateReconnecting);
+    hibernated &= (_connectionProperties.supportsSM3 == YES);
+    hibernated &= (_streamID != nil);
+    return hibernated;
 }
 
 
@@ -3087,6 +3099,11 @@ static NSMutableArray *extracted(xmpp *object) {
 	if(!_streamHasSpace)
     {
         DDLogVerbose(@"no space to write. early return from writeFromQueue().");
+        return;
+    }
+    if(![_outputQueue count])
+    {
+        DDLogVerbose(@"no entries in _outputQueue. early return from writeFromQueue().");
         return;
     }
     BOOL requestAck=NO;

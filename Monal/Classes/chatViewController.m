@@ -147,9 +147,6 @@
         [self.plusButton setImage:[UIImage imageNamed:@"907-plus-rounded-square"] forState:UIControlStateNormal];
     }
 #endif
-    
-    
-
 }
 
 -(void) handleForeGround {
@@ -177,16 +174,18 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         NSString *title=self.contact.contactDisplayName;
         
-        if(xmppAccount.accountState<kStateLoggedIn)
+        if([xmppAccount isHibernated] == YES)
         {
+            self.sendButton.enabled = YES;
+            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Hibernated"];
+        } else if(xmppAccount.accountState<kStateLoggedIn) {
             if(!xmppAccount.airDrop) {
-                self.sendButton.enabled=NO;
+                self.sendButton.enabled = NO;
             }
             
             if(!title) title=@"";
-            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, NSLocalizedString(@"Logged Out",@ "")];
-        }
-        else  {
+                self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, NSLocalizedString(@"Logged Out",@ "")];
+        } else  {
             self.sendButton.enabled=YES;
             self.navigationItem.title=title;
         }

@@ -67,22 +67,22 @@
 }
 
 - (void)testmucMessage {
-    NSString  *sample= @"<message from='monal@chat.yax.im/Anu' to='anu@yax.im/Monal-iOS.31' type='groupchat'><subject>Monal IM - Official Support - XMPP client for iOS and macOS - https://monal.im/</subject></message>";
-    
-    XCTNSNotificationExpectation *expectation=[[XCTNSNotificationExpectation alloc] initWithName:kMonalNewMessageNotice object:nil];
-    expectation.handler = ^BOOL(NSNotification * _Nonnull notification) {
-        MLMessage *message = [[notification userInfo] objectForKey:@"message"];
-        
-        return YES;
-    };
-    
-    MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
-        MLMessageProcessor *processor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.jid connection:nil signalContex:self.signalContext andSignalStore:self.monalSignalStore];
-        [processor processMessage:parsedStanza];
-    }];
-    
-    [self parseString:sample withDelegate:baseParserDelegate];
-  
+//    NSString  *sample= @"<message from='monal@chat.yax.im/Anu' to='anu@yax.im/Monal-iOS.31' type='groupchat'><subject>Monal IM - Official Support - XMPP client for iOS and macOS - https://monal.im/</subject></message>";
+//    
+//    XCTNSNotificationExpectation *expectation=[[XCTNSNotificationExpectation alloc] initWithName:kMonalNewMessageNotice object:nil];
+//    expectation.handler = ^BOOL(NSNotification * _Nonnull notification) {
+//        MLMessage *message = [[notification userInfo] objectForKey:@"message"];
+//        
+//        return YES;
+//    };
+//    
+//    MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
+//        MLMessageProcessor *processor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.jid connection:nil signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+//        [processor processMessage:parsedStanza];
+//    }];
+//    
+//    [self parseString:sample withDelegate:baseParserDelegate];
+//  
     
   //  [self waitForExpectations:@[expectation] timeout:5];
     

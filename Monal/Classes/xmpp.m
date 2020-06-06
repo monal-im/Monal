@@ -3023,9 +3023,11 @@ static NSMutableArray *extracted(xmpp *object) {
                 }
 
             }
-
             if(!self.registration) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message, st_error]];
+                // Do not show "Connection refused" message if there are more SRV records to try
+                if(!_SRVDiscoveryDone || (_SRVDiscoveryDone && [_usableServersList count] == 0) || st_error.code != 61) {
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message, st_error]];
+                }
                 if(self.loginCompletion)  {
                     self.loginCompletion(NO, message);
                     self.loginCompletion=nil;

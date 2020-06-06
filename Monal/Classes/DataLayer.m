@@ -2128,7 +2128,7 @@ NSString *const kCount = @"count";
 #pragma mark active chats
 -(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion
 {
-    NSString* query = [NSString stringWithFormat:@"select  distinct a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id,lastMessageTime, 0 AS 'count', subscription, ask from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by lastMessageTime desc" ];
+    NSString* query = [NSString stringWithFormat:@"select  distinct a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id,lastMessageTime, 0 AS 'count', subscription, ask from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by lastMessageTime desc"];
 
     NSDateFormatter* dateFromatter = [[NSDateFormatter alloc] init];
     NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
@@ -2143,6 +2143,22 @@ NSString *const kCount = @"count";
         [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSDictionary* dic = (NSDictionary *) obj;
             [toReturn addObject:[MLContact contactFromDictionary:dic withDateFormatter:dateFromatter]];
+        }];
+
+        if(completion) completion(toReturn);
+    }];
+}
+
+-(void) activeContactDictWithCompletion: (void (^)(NSMutableArray *))completion
+{
+    NSString* query = [NSString stringWithFormat:@"select  distinct a.buddy_name, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, a.account_id from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by lastMessageTime desc"];
+
+    [self executeReader:query withCompletion:^(NSMutableArray *results) {
+
+        NSMutableArray* toReturn = [[NSMutableArray alloc] initWithCapacity:results.count];
+        [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSDictionary* dic = (NSDictionary *) obj;
+            [toReturn addObject:dic];
         }];
 
         if(completion) completion(toReturn);

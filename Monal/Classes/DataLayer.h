@@ -251,6 +251,7 @@ extern NSString *const kMessageTypeUrl;
 
 #pragma mark active contacts
 -(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion;
+-(void) activeContactDictWithCompletion: (void (^)(NSMutableArray *))completion;
 -(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
 -(void) removeAllActiveBuddies;
 -(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;

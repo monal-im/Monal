@@ -14,11 +14,11 @@
 
 @interface ShareViewController ()
 
-@property (nonatomic, strong) NSDictionary *account;
-@property (nonatomic, strong) NSString *recipient;
+@property (nonatomic, strong) NSDictionary* account;
+@property (nonatomic, strong) NSString* recipient;
 
-@property (nonatomic, strong) NSArray *accounts;
-@property (nonatomic, strong) NSArray *recipients;
+@property (nonatomic, strong) NSArray* accounts;
+@property (nonatomic, strong) NSMutableArray* recipients;
 
 
 @end
@@ -29,20 +29,23 @@
     [super viewDidLoad];
     [self.navigationController.navigationBar setTintColor:[UIColor whiteColor]];
     [self.navigationController.navigationBar setBackgroundColor:[UIColor monaldarkGreen]];
-    self.navigationController.navigationItem.title=@"Monal";
+    self.navigationController.navigationItem.title = @"Monal";
 }
 
 - (void)presentationAnimationDidFinish {
-    NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
-    self.accounts= [groupDefaults objectForKey:@"accounts"];
-    NSData *data=[groupDefaults objectForKey:@"recipients"];
+    NSUserDefaults* groupDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
+    self.accounts = [groupDefaults objectForKey:@"accounts"];
+    NSData* recipientsData = [groupDefaults objectForKey:@"recipients"];
     
-    NSError *error;
-    self.recipients=[NSKeyedUnarchiver unarchivedObjectOfClass:[NSArray class] fromData:data error:&error];
-    
+    NSError* error;
+    NSSet* objClasses = [NSSet setWithArray:@[[NSMutableArray class], [NSMutableDictionary class]]];
+    self.recipients = [NSKeyedUnarchiver unarchivedObjectOfClasses:objClasses fromData:recipientsData error:&error];
+    if(error) {
+        NSLog(@"Monal ShareViewController: %@", error);
+    }
+
     self.recipient = [groupDefaults objectForKey:@"lastRecipient"];
     self.account = [groupDefaults objectForKey:@"lastAccount"];
-    self.textView.text=@"";
     [self reloadConfigurationItems];
 }
 
@@ -53,12 +56,12 @@
 }
 
 - (void)didSelectPost {
-    NSMutableDictionary *payload = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
     
-    NSExtensionItem *item = self.extensionContext.inputItems.firstObject;
-   // NSLog(@"Attachments = %@", item.attachments);
+    NSExtensionItem* item = self.extensionContext.inputItems.firstObject;
+    NSLog(@"Attachments = %@", item.attachments);
     
-    for (NSItemProvider *provider in item.attachments)
+    for (NSItemProvider* provider in item.attachments)
     {
        if([provider hasItemConformingToTypeIdentifier:@"public.url"])
        {
@@ -75,8 +78,9 @@
                [outbox addObject:payload];
                [groupDefaults setObject:outbox forKey:@"outbox"];
                
-                [groupDefaults setObject:self.account forKey:@"lastAccount"];
-                [groupDefaults setObject:self.recipient forKey:@"lastRecipient"];
+               // Save last used account / recipient
+               [groupDefaults setObject:self.account forKey:@"lastAccount"];
+               [groupDefaults setObject:self.recipient forKey:@"lastRecipient"];
                
                [groupDefaults synchronize];
            }];
@@ -94,12 +98,14 @@
 
 - (NSArray *)configurationItems {
     NSMutableArray *toreturn = [[NSMutableArray alloc] init];
-    if(self.accounts.count>1) {
-        SLComposeSheetConfigurationItem *account = [[SLComposeSheetConfigurationItem alloc] init];
-        account.title=@"Account";
-        account.value=[NSString stringWithFormat:@"%@@%@",[self.account objectForKey:@"username"],[self.account objectForKey:@"domain"]];
-        account.tapHandler = ^{
-            MLSelectionController *controller = (MLSelectionController *)[self.storyboard instantiateViewControllerWithIdentifier:@"accounts"];
+    if(self.accounts.count > 1) {
+        SLComposeSheetConfigurationItem* accountSelector = [[SLComposeSheetConfigurationItem alloc] init];
+        accountSelector.title=@"Account";
+
+        accountSelector.value=[NSString stringWithFormat:@"%@@%@",[self.account objectForKey:@"username"],[self.account objectForKey:@"domain"]];
+        accountSelector.tapHandler = ^{
+            UIStoryboard* iosShareStoryboard = [UIStoryboard storyboardWithName:@"iosShare" bundle:nil];
+            MLSelectionController* controller = (MLSelectionController*)[iosShareStoryboard instantiateViewControllerWithIdentifier:@"accounts"];
             controller.options= self.accounts;
             controller.completion = ^(NSDictionary *selectedAccount)
             {
@@ -115,7 +121,7 @@
             
             [self pushConfigurationViewController:controller];
         };
-        [toreturn addObject:account];
+        [toreturn addObject:accountSelector];
     }
     
     if(!self.account && self.accounts.count>0) {
@@ -127,26 +133,28 @@
     recipient.title=@"Recipient";
     recipient.value=self.recipient;
     recipient.tapHandler = ^{
-        MLSelectionController *controller = (MLSelectionController *)[self.storyboard instantiateViewControllerWithIdentifier:@"contacts"];
-        
+        UIStoryboard* iosShareStoryboard = [UIStoryboard storyboardWithName:@"iosShare" bundle:nil];
+        MLSelectionController *controller = (MLSelectionController *)[iosShareStoryboard instantiateViewControllerWithIdentifier:@"contacts"];
+
+        // Create list of recipients for the selected account
         NSMutableArray *recipientsToShow = [[NSMutableArray alloc] init];
-        
-        for (MLContact *row in self.recipients) {
-            if([row.accountId integerValue]==[[self.account objectForKey:@"account_id"] integerValue])
+        for (NSMutableDictionary* row in self.recipients) {
+            if([[row objectForKey:@"account_id"] integerValue] == [[self.account objectForKey:@"account_id"] integerValue])
             {
-                [recipientsToShow addObject:@{@"contact":row}];
+                MLContact* contact = [MLContact contactFromDictionary:row];
+                [recipientsToShow addObject:@{@"contact": contact}];
             }
         }
-        
+
         controller.options = recipientsToShow;
         controller.completion = ^(NSDictionary *selectedRecipient)
         {
-            MLContact *contact = [selectedRecipient objectForKey:@"contact"];
+            MLContact* contact = [selectedRecipient objectForKey:@"contact"];
             if(contact) {
-                self.recipient=contact.contactJid;
+                self.recipient = contact.contactJid;
             }
             else {
-                self.recipient=@"";
+                self.recipient = @"";
             }
             [self reloadConfigurationItems];
         };

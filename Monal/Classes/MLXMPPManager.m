@@ -436,6 +436,7 @@ An array of Dics what have timers to make sure everything was sent
             DDLogVerbose(@"reachable");
             DDLogVerbose(@"pinging ");
 
+            //[self connectIfNecessary];
             //try to send a ping. if it fails, it will reconnect
             [xmppAccount sendPing];
         }

@@ -52,9 +52,8 @@
 }
 
 -(void) parseString:(NSString *) sample withDelegate:(MLBasePaser *) baseParserDelegate {
-    NSString *containerStart =@"<container>";
-    NSString *containerStop =@"</container>";
-    
+    NSString *containerStart =@"<stream:stream from='yax.im' id='42020411-eb9f-4e68-b3f6-3c92769e6104' xmlns:stream='http://etherx.jabber.org/streams' xmlns='jabber:client' xml:lang='en' version='1.0'>";
+    NSString *containerStop =@"</stream:stream>";
     
     NSMutableData *data = [[NSMutableData alloc] init];
     [data appendData:[containerStart dataUsingEncoding:NSUTF8StringEncoding]];
@@ -62,7 +61,7 @@
     [data appendData:[containerStop dataUsingEncoding:NSUTF8StringEncoding]];
     
     NSXMLParser *xmlParser = [[NSXMLParser alloc] initWithData:data];
-    [xmlParser setShouldProcessNamespaces:NO];
+    [xmlParser setShouldProcessNamespaces:YES];
     [xmlParser setShouldReportNamespacePrefixes:NO];
     [xmlParser setShouldResolveExternalEntities:NO];
     [xmlParser setDelegate:baseParserDelegate];

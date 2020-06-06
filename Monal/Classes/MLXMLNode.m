@@ -49,6 +49,14 @@
     [encoder encodeObject:_data forKey:@"data"];
 }
 
+-(id) copyWithZone:(NSZone*)zone {
+    MLXMLNode* copy = [[[self class] alloc] initWithElement:self.element];
+    copy.attributes = [_attributes mutableCopy];
+    copy.children = [_children mutableCopy];
+    copy.data = _data;
+    return copy;
+}
+
 -(void) setXMLNS:(NSString*) xmlns
 {
     [self.attributes setObject:xmlns forKey:kXMLNS];
@@ -70,6 +78,22 @@
     [mutable replaceOccurrencesOfString:@">" withString:@"&gt;" options:NSLiteralSearch range:NSMakeRange(0, mutable.length)];
     
     return [mutable copy];
+}
+
+-(void) addDelayTagFrom:(NSString *) from
+{
+    NSDateFormatter* rfc3339DateFormatter = [[NSDateFormatter alloc] init];
+    NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+    
+    [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
+    [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ssZ"];
+    [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    
+    MLXMLNode* delay =[[MLXMLNode alloc] initWithElement:@"delay"];
+    [delay setXMLNS:@"urn:xmpp:delay"];
+    [delay.attributes setValue:[rfc3339DateFormatter stringFromDate:[NSDate date]] forKey:@"stamp"];
+    [delay.attributes setValue:from forKey:@"from"];
+    [self.children addObject:delay];
 }
 
 -(NSString*) XMLString

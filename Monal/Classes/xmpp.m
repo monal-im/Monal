@@ -1763,14 +1763,35 @@ static NSMutableArray *extracted(xmpp *object) {
             || [stanza.element isEqualToString:@"message"]
             || [stanza.element isEqualToString:@"presence"])
         {
-            DDLogVerbose(@"ADD UNACKED STANZA: %@: %@", self.lastOutboundStanza, stanza.XMLString);
-            NSDictionary *dic =@{kQueueID:self.lastOutboundStanza, kStanza:stanza};
-            [self.unAckedStanzas addObject:dic];
-            //increment for next call
-            self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue]+1];
+            MLXMLNode* queued_stanza = [stanza copy];
+            if(![queued_stanza.element isEqualToString:@"iq"])
+            {
+                MLXMLNode* queued_stanza = [stanza copy];
+                if(![queued_stanza.element isEqualToString:@"iq"])
+                {
+                    //check if a delay tag is already present
+                    BOOL found = NO;
+                    for(MLXMLNode* child in queued_stanza.children)
+                    {
+                        if([child.element isEqualToString:@"delay"] && [[child.attributes objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:delay"])
+                        {
+                            found = YES;
+                            break;
+                        }
+                    }
+                    //only add a delay tag if not already present
+                    if(!found)
+                        [queued_stanza addDelayTagFrom:self.connectionProperties.identity.jid];
+                }
+                DDLogVerbose(@"ADD UNACKED STANZA: %@: %@", self.lastOutboundStanza, queued_stanza.XMLString);
+                NSDictionary *dic =@{kQueueID:self.lastOutboundStanza, kStanza:queued_stanza};
+                [self.unAckedStanzas addObject:dic];
+                //increment for next call
+                self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue]+1];
 
-            //persist these changes
-            [self persistState];
+                //persist these changes
+                [self persistState];
+            }
         }
     }
 

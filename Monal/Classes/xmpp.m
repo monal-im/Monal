@@ -854,44 +854,49 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) sendPing
 {
+    DDLogVerbose(@"sendPing called");
+    if(self.accountState<kStateReconnecting  && !self->_reconnectScheduled)
+    {
+        DDLogInfo(@" ping calling reconnect");
+        self->_accountState=kStateReconnecting;
+        [self reconnect:0];
+        return;
+    }
 
-        if(self.accountState<kStateReconnecting  && !self->_reconnectScheduled)
-        {
-            DDLogInfo(@" ping calling reconnect");
-            self->_accountState=kStateReconnecting;
-            [self reconnect:0];
+    if(self.accountState<kStateBound)
+    {
+        if(self->_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]<=10) {
+            DDLogInfo(@"ping attempt before logged in and bound. returning.");
             return;
         }
-
-        if(self.accountState<kStateBound)
+        else if (self->_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>10)
         {
-            if(self->_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]<=10) {
-                DDLogInfo(@"ping attempt before logged in and bound. returning.");
-                return;
-            }
-            else if (self->_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>10)
-            {
-                DDLogVerbose(@"ping called while one already in progress that took more than 10 seconds. disconnect before reconnect.");
-                [self reconnect:0];
+            DDLogVerbose(@"ping called while one already in progress that took more than 10 seconds. disconnect before reconnect.");
+            [self reconnect:0];
+        }
+    }
+    else {
+        //always use smacks pings if supported (they are shorter and better than whitespace pings)
+        if(self.connectionProperties.supportsSM3 )
+        {
+            //all smacks operations have to be done from the receiveQueue
+            DDLogVerbose(@"adding pinging smacks request to receiveQueue...");
+            [self.receiveQueue addOperationWithBlock: ^{
+                DDLogVerbose(@"calling pinging requestSMAck from receiveQueue...");
+                [self requestSMAck:YES];
+            }];
+        }
+        else  {
+            if(self.connectionProperties.supportsPing) {
+                XMPPIQ* ping =[[XMPPIQ alloc] initWithType:kiqGetType];
+                [ping setiqTo:self.connectionProperties.identity.domain];
+                [ping setPing];
+                [self send:ping];
+            } else  {
+                [self sendWhiteSpacePing];
             }
         }
-        else {
-            //always use smacks pings if supported (they are shorter and better than whitespace pings)
-            if(self.connectionProperties.supportsSM3 )
-            {
-                [self requestSMAck];
-            }
-            else  {
-                if(self.connectionProperties.supportsPing) {
-                    XMPPIQ* ping =[[XMPPIQ alloc] initWithType:kiqGetType];
-                    [ping setiqTo:self.connectionProperties.identity.domain];
-                    [ping setPing];
-                    [self send:ping];
-                } else  {
-                    [self sendWhiteSpacePing];
-                }
-            }
-        }
+    }
 }
 
 -(void) sendWhiteSpacePing
@@ -914,14 +919,14 @@ NSString *const kXMPPPresence = @"presence";
     /**
      Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
      It may also result in mutation on iteration
-	*/
-	NSMutableArray *sendCopy = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
-	[self.unAckedStanzas removeAllObjects];
-	[sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-		NSDictionary *dic= (NSDictionary *) obj;
-		[self send:(MLXMLNode*)[dic objectForKey:kStanza]];
-	}];
-	[self persistState];
+    */
+    NSMutableArray *sendCopy = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
+    [self.unAckedStanzas removeAllObjects];
+    [sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSDictionary *dic= (NSDictionary *) obj;
+        [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
+    }];
+    [self persistState];
 }
 
 -(void) resendUnackedMessageStanzasOnly:(NSMutableArray*) stanzas
@@ -929,26 +934,27 @@ NSString *const kXMPPPresence = @"presence";
     /**
      Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
      It may also result in mutation on iteration
-	*/
-	if(stanzas)
-	{
-		NSMutableArray *sendCopy = [[NSMutableArray alloc] initWithArray:stanzas];
-		//clear queue because we don't want to repeat resending these stanzas later if the var stanzas points to self.unAckedStanzas here
-		[stanzas removeAllObjects];
-		[sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-			NSDictionary *dic= (NSDictionary *) obj;
-			MLXMLNode *stanza=[dic objectForKey:kStanza];
-			if([stanza.element isEqualToString:@"message"])		//only resend message stanzas because of the smacks error condition
-				[self send:stanza];
-		}];
-		//persist these changes (the queue can now be empty because smacks enable failed
-		//or contain all the resent stanzas (e.g. only resume failed))
-		[self persistState];
-	}
+    */
+    if(stanzas)
+    {
+        NSMutableArray *sendCopy = [[NSMutableArray alloc] initWithArray:stanzas];
+        //clear queue because we don't want to repeat resending these stanzas later if the var stanzas points to self.unAckedStanzas here
+        [stanzas removeAllObjects];
+        [sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSDictionary *dic= (NSDictionary *) obj;
+            MLXMLNode *stanza=[dic objectForKey:kStanza];
+            if([stanza.element isEqualToString:@"message"])		//only resend message stanzas because of the smacks error condition
+                [self send:stanza];
+        }];
+        //persist these changes (the queue can now be empty because smacks enable failed
+        //or contain all the resent stanzas (e.g. only resume failed))
+        [self persistState];
+    }
 }
 
 -(void) removeAckedStanzasFromQueue:(NSNumber*) hvalue
 {
+    self.lastHandledOutboundStanza=hvalue;
 	if([self.unAckedStanzas count]>0)
 	{
 		NSMutableArray *iterationArray = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
@@ -971,26 +977,26 @@ NSString *const kXMPPPresence = @"presence";
 	}
 }
 
--(void) requestSMAck
+-(void) requestSMAck:(BOOL) force
 {
-	if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 &&
-		!self.smacksRequestInFlight && [self.unAckedStanzas count]>0 ) {
-
-		DDLogVerbose(@"requesting smacks ack...");
-		MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
-		NSDictionary *dic=@{
-			kXMLNS:@"urn:xmpp:sm:3",
-			@"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
-			@"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
-			@"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
-			@"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", (unsigned long) [self.unAckedStanzas count]],
-		};
-		rNode.attributes=[dic mutableCopy];
-		[self send:rNode];
-		self.smacksRequestInFlight=YES;
-	} else  {
-		DDLogDebug(@"no smacks request, there is nothing pending or a request already in flight...");
-	}
+    if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 &&
+        ((!self.smacksRequestInFlight && [self.unAckedStanzas count]>0) || force)
+    ) {
+        DDLogVerbose(@"requesting smacks ack...");
+        MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
+        NSDictionary *dic=@{
+            kXMLNS:@"urn:xmpp:sm:3",
+            @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
+            @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
+            @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
+            @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", (unsigned long) [self.unAckedStanzas count]],
+        };
+        rNode.attributes=[dic mutableCopy];
+        [self send:rNode];
+        self.smacksRequestInFlight=YES;
+    } else  {
+        DDLogDebug(@"no smacks request, there is nothing pending or a request already in flight...");
+    }
 }
 
 -(void) sendLastAck
@@ -1008,13 +1014,13 @@ NSString *const kXMPPPresence = @"presence";
     {
         MLXMLNode *aNode = [[MLXMLNode alloc] initWithElement:@"a"];
         NSDictionary *dic=@{
-			kXMLNS:@"urn:xmpp:sm:3",
+            kXMLNS:@"urn:xmpp:sm:3",
             @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
-			@"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
-			@"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
-			@"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
-			@"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", (unsigned long) [self.unAckedStanzas count]],
-		};
+            @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
+            @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
+            @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
+            @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", (unsigned long) [self.unAckedStanzas count]],
+        };
         aNode.attributes = [dic mutableCopy];
         if(queuedSend) {
             [self send:aNode];
@@ -1499,16 +1505,16 @@ NSString *const kXMPPPresence = @"presence";
         self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
     {
         ParseA* aNode=parsedStanza;
-        self.lastHandledOutboundStanza=aNode.h;
 
         //remove acked messages
         [self removeAckedStanzasFromQueue:aNode.h];
 
         self.smacksRequestInFlight=NO;			//ack returned
-        [self requestSMAck];					//request ack again (will only happen if queue is not empty)
+        [self requestSMAck:NO];					//request ack again (will only happen if queue is not empty)
     }
     else  if([parsedStanza.stanzaType isEqualToString:@"resumed"] && [parsedStanza isKindOfClass:[ParseResumed class]])
     {
+        ParseResumed* resumeNode=parsedStanza;
         self.resuming=NO;
 
         //now we are bound again
@@ -1517,7 +1523,6 @@ NSString *const kXMPPPresence = @"presence";
         _usableServersList=[[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
 
         //remove already delivered stanzas and resend the (still) unacked ones
-        ParseResumed* resumeNode= parsedStanza;
         [self removeAckedStanzasFromQueue:resumeNode.h];
         [self resendUnackedStanzas];
 
@@ -1755,16 +1760,14 @@ static NSMutableArray *extracted(xmpp *object) {
 -(void) send:(MLXMLNode*) stanza
 {
     if(!stanza) return;
-
-    if((self.accountState>=kStateBound || self.streamID) && self.connectionProperties.supportsSM3 && self.unAckedStanzas)
-    {
-        //only count stanzas, not nonzas
-        if([stanza.element isEqualToString:@"iq"]
-            || [stanza.element isEqualToString:@"message"]
-            || [stanza.element isEqualToString:@"presence"])
+    //always process everything on the receiveQueue to avoid race conditions of all sorts (like hard to find/reproduce smacks counting bugs etc.)
+    void (^operation)(void) = ^{
+        if((self.accountState>=kStateBound || self.streamID) && self.connectionProperties.supportsSM3 && self.unAckedStanzas)
         {
-            MLXMLNode* queued_stanza = [stanza copy];
-            if(![queued_stanza.element isEqualToString:@"iq"])
+            //only count stanzas, not nonzas
+            if([stanza.element isEqualToString:@"iq"]
+                || [stanza.element isEqualToString:@"message"]
+                || [stanza.element isEqualToString:@"presence"])
             {
                 MLXMLNode* queued_stanza = [stanza copy];
                 if(![queued_stanza.element isEqualToString:@"iq"])
@@ -1793,14 +1796,21 @@ static NSMutableArray *extracted(xmpp *object) {
                 [self persistState];
             }
         }
-    }
 
-    if(self.accountState>kStateDisconnected)
-        [self.sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
-            DDLogDebug(@"SEND: %@", stanza.XMLString);
-            [extracted(self) addObject:stanza];
-            [self writeFromQueue];  // try to send if there is space
-        }]];
+        if(self.accountState>kStateDisconnected)
+            [self.sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
+                DDLogDebug(@"SEND: %@", stanza.XMLString);
+                [extracted(self) addObject:stanza];
+                [self writeFromQueue];  // try to send if there is space
+            }]];
+    };
+    if([NSOperationQueue currentQueue]!=self.receiveQueue)
+    {
+        DDLogWarn(@"SWITCHING TO RECEIVE QUEUE IN SEND (called from outside of receiveQueue): %@", stanza.XMLString);
+        [self.receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:YES];
+    }
+    else
+        operation();
 }
 
 #pragma mark messaging
@@ -3172,11 +3182,11 @@ static NSMutableArray *extracted(xmpp *object) {
 		DDLogVerbose(@"adding smacks request to receiveQueue...");
 		[self.receiveQueue addOperationWithBlock: ^{
 			DDLogVerbose(@"calling requestSMAck from receiveQueue...");
-			[self requestSMAck];
+			[self requestSMAck:NO];
 		}];
 
     } else  {
-        DDLogVerbose(@"NOT requesting smacks ack...");
+        DDLogVerbose(@"NOT adding smacks request to receiveQueue...");
     }
 }
 

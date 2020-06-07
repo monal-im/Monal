@@ -445,6 +445,20 @@ An array of Dics what have timers to make sure everything was sent
 
 
 #pragma mark -  XMPP commands
+-(void) sendMessageAndAddToHistory:(NSString*) message toContact:(NSString*)recipient fromAccount:(NSString*) accountID fromJID:(NSString*) fromJID isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC  isUpload:(BOOL) isUpload withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion {
+    NSString* msgid = [[NSUUID UUID] UUIDString];
+
+    // Save message to history
+    [[DataLayer sharedInstance] addMessageHistoryFrom:fromJID to:recipient forAccount:accountID withMessage:message actuallyFrom:fromJID withId:msgid encrypted:encrypted withCompletion:^(BOOL successHist, NSString *messageTypeHist) {
+        // Send message
+        if(successHist) {
+            [self sendMessage:message toContact:recipient fromAccount:accountID isEncrypted:encrypted isMUC:NO  isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString *messageIdSend) {
+                if(successSend) completion(successSend, messageIdSend);
+            }];
+        }
+    }];
+}
+
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC  isUpload:(BOOL) isUpload messageId:(NSString *) messageId
 withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
@@ -878,32 +892,27 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 
 - (void) sendOutboxForAccount:(NSString *) account{
-    NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
-    NSMutableArray *outbox=[[groupDefaults objectForKey:@"outbox"] mutableCopy];
-    NSMutableArray *outboxClean=[[groupDefaults objectForKey:@"outbox"] mutableCopy];
+    NSUserDefaults* groupDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
+    NSMutableArray* outbox = [[groupDefaults objectForKey:@"outbox"] mutableCopy];
+    NSMutableArray* outboxClean = [[groupDefaults objectForKey:@"outbox"] mutableCopy];
 
-    for (NSDictionary *row in outbox)
+    for (NSDictionary* row in outbox)
     {
-        NSDictionary *accountDic = [row objectForKey:@"account"] ;
+        NSDictionary* accountDic = [row objectForKey:@"account"] ;
         if([[accountDic objectForKey:@"account_id"] integerValue] == [account integerValue])
         {
-            NSString* msgid=[[NSUUID UUID] UUIDString];
-            NSString* accountID = [accountDic objectForKey:@"account_id"];
+            NSString* accountID = [NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]];
             NSString* recipient = [row objectForKey:@"recipient"];
             NSAssert(recipient != nil, @"Recipient missing");
             NSAssert(recipient != nil, @"Recipient missing");
+            BOOL encryptMessages = [[DataLayer sharedInstance] shouldEncryptForJid:recipient andAccountNo:accountID];
+            NSString* fromJID = [NSString stringWithFormat:@"%@@%@", [accountDic objectForKey:@"username"], [accountDic objectForKey:@"domain"]];
 
-            BOOL encryptMessage = [[DataLayer sharedInstance] shouldEncryptForJid:recipient andAccountNo:accountID];
-            [[DataLayer sharedInstance] addMessageHistoryFrom:accountID to:recipient forAccount:accountID withMessage:[row objectForKey:@"url"]  actuallyFrom:accountID withId:msgid encrypted:encryptMessage withCompletion:^(BOOL success, NSString *messageType) {
-
-            }];
-
-            [self sendMessage:[row objectForKey:@"url"] toContact:recipient fromAccount:[NSString stringWithFormat:@"%@", accountID]  isEncrypted:encryptMessage isMUC:NO  isUpload:NO messageId:msgid withCompletionHandler:^(BOOL success, NSString *messageId) {
-
-                if(success) {
-                    if(((NSString *)[row objectForKey:@"comment"]).length > 0) {
-                        [self sendMessage:[row objectForKey:@"comment"] toContact:recipient fromAccount:accountID  isEncrypted:encryptMessage isMUC:NO isUpload:YES messageId:[[NSUUID UUID] UUIDString] withCompletionHandler:^(BOOL success, NSString *messageId) {
-
+            [self sendMessageAndAddToHistory:[row objectForKey:@"url"] toContact:recipient fromAccount:accountID fromJID:fromJID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                if(successSendObject) {
+                    NSString* comment = (NSString*)[row objectForKey:@"comment"];
+                    if(comment.length > 0) {
+                        [self sendMessageAndAddToHistory:comment toContact:recipient fromAccount:accountID fromJID:fromJID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendComment, NSString* messageIdSendComment) {
                         }];
                     }
                     [outboxClean removeObject:row];
@@ -912,8 +921,6 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
             }];
         }
     }
-
-
 }
 
 -(void) sendMessageForConnectedAccounts

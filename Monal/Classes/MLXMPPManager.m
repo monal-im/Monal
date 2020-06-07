@@ -888,20 +888,26 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         if([[accountDic objectForKey:@"account_id"] integerValue] == [account integerValue])
         {
             NSString* msgid=[[NSUUID UUID] UUIDString];
-            [[DataLayer sharedInstance] addMessageHistoryFrom:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]] to:[row objectForKey:@"recipient"] forAccount:[accountDic objectForKey:@"account_id"] withMessage:[row objectForKey:@"url"]  actuallyFrom:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  withId:msgid encrypted:NO withCompletion:^(BOOL success, NSString *messageType) {
+            NSString* accountID = [accountDic objectForKey:@"account_id"];
+            NSString* recipient = [row objectForKey:@"recipient"];
+            NSAssert(recipient != nil, @"Recipient missing");
+            NSAssert(recipient != nil, @"Recipient missing");
+
+            BOOL encryptMessage = [[DataLayer sharedInstance] shouldEncryptForJid:recipient andAccountNo:accountID];
+            [[DataLayer sharedInstance] addMessageHistoryFrom:accountID to:recipient forAccount:accountID withMessage:[row objectForKey:@"url"]  actuallyFrom:accountID withId:msgid encrypted:encryptMessage withCompletion:^(BOOL success, NSString *messageType) {
 
             }];
 
-            [self sendMessage:[row objectForKey:@"url"] toContact:[row objectForKey:@"recipient"] fromAccount:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  isEncrypted:NO isMUC:NO  isUpload:NO messageId:msgid withCompletionHandler:^(BOOL success, NSString *messageId) {
+            [self sendMessage:[row objectForKey:@"url"] toContact:recipient fromAccount:[NSString stringWithFormat:@"%@", accountID]  isEncrypted:encryptMessage isMUC:NO  isUpload:NO messageId:msgid withCompletionHandler:^(BOOL success, NSString *messageId) {
 
                 if(success) {
-                    if(((NSString *)[row objectForKey:@"comment"]).length>0) {
-                        [self sendMessage:[row objectForKey:@"comment"] toContact:[row objectForKey:@"recipient"]  fromAccount:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  isEncrypted:NO isMUC:NO isUpload:YES messageId:[[NSUUID UUID] UUIDString] withCompletionHandler:^(BOOL success, NSString *messageId) {
+                    if(((NSString *)[row objectForKey:@"comment"]).length > 0) {
+                        [self sendMessage:[row objectForKey:@"comment"] toContact:recipient fromAccount:accountID  isEncrypted:encryptMessage isMUC:NO isUpload:YES messageId:[[NSUUID UUID] UUIDString] withCompletionHandler:^(BOOL success, NSString *messageId) {
 
                         }];
                     }
                     [outboxClean removeObject:row];
-                       [groupDefaults setObject:outboxClean forKey:@"outbox"];
+                    [groupDefaults setObject:outboxClean forKey:@"outbox"];
                 }
             }];
         }

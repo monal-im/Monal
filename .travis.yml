@@ -16,5 +16,5 @@ script:
   - set -o pipefail && xcodebuild -workspace "Monal.xcworkspace" -scheme "Monal" -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 11 Pro' test | xcpretty
 notifications:
   email:
-    on_success: never # default: change
-    on_failure: always # default: always
+    on_success: never
+    on_failure: always

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>method</key>
+	<string>ad-hoc</string>
+	<key>compileBitcode</key>
+	<false/>
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>monal.alpha</key>
+		<string>Monal Alpha</string>
+		<key>monal.alpha.shareSheet</key>
+		<string>Monal Alpha shareSheet</string>
+		<key>monal.alpha.NotificaionService</key>
+		<string>Monal Alpha NotificationService</string>
+	</dict>
+</dict>
+</plist>

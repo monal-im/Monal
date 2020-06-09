@@ -6,7 +6,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.monal</string>
+		<string>group.monalalpha</string>
 	</array>
 	<key>com.apple.security.network.client</key>
 	<true/>

@@ -1706,6 +1706,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				541DC33B248D1746001FD06D /* MonalAdhoc.entitlements */,
 				26AA70222146E2B900598605 /* shareSheet.entitlements */,
 				26FDB4341DC16A9800A129E0 /* Monal.entitlements */,
 				29B97315FDCFA39411CA2CEA /* Root Sources */,
@@ -2106,6 +2107,8 @@
 					};
 					26AA70102146BBB800598605 = {
 						CreatedOnToolsVersion = 9.4.1;
+						DevelopmentTeam = S8D843U34Y;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -3099,7 +3102,8 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = NO;
-				DEVELOPMENT_TEAM = 33XS7DE5NZ;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3114,6 +3118,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"DEBUG=1",
+					"DEBUG_ALPHA=1",
 				);
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -3129,13 +3134,13 @@
 				LLVM_LTO = NO;
 				MARKETING_VERSION = 5.0.1;
 				OTHER_LDFLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
+				PRODUCT_BUNDLE_IDENTIFIER = monal.alpha;
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Monal App Store";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Monal Catalyst App Store";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal Alpha";
 				RUN_CLANG_STATIC_ANALYZER = YES;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Catalyst Monal Alpha";
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "Classes/Monal-Bridging-Header.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Monal-Swift.h";
@@ -3162,14 +3167,13 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = NotificaionService/NotificaionService.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 0;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
-				DEVELOPMENT_TEAM = 33XS7DE5NZ;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -3193,12 +3197,12 @@
 				MARKETING_VERSION = 5.0.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
+				PRODUCT_BUNDLE_IDENTIFIER = monal.alpha.NotificaionService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Monal Catalyst  Notification Filtering App Store";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal Alpha NotificationService";
 				RUN_CLANG_STATIC_ANALYZER = YES;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Catalyst Monal Alpha NotificationService";
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -3240,14 +3244,13 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_ENTITLEMENTS = NotificaionService/NotificaionService.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 0;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
-				DEVELOPMENT_TEAM = 33XS7DE5NZ;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -3276,11 +3279,11 @@
 				MARKETING_VERSION = 5.0.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
+				PRODUCT_BUNDLE_IDENTIFIER = monal.alpha.NotificaionService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Monal Catalyst  Notification Filtering App Store";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal Alpha NotificationService";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -3325,14 +3328,13 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_ENTITLEMENTS = NotificaionService/NotificaionService.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 0;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
-				DEVELOPMENT_TEAM = 33XS7DE5NZ;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -3361,12 +3363,12 @@
 				MARKETING_VERSION = 5.0.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
+				PRODUCT_BUNDLE_IDENTIFIER = monal.alpha.NotificaionService;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Monal Catalyst  Notification Filtering App Store";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal Alpha NotificationService";
 				RUN_CLANG_STATIC_ANALYZER = YES;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Catalyst Monal Alpha NotificationService";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = YES;
@@ -3398,8 +3400,8 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
+				CODE_SIGN_IDENTITY = "Apple Distribution: Thilo Molitor (S8D843U34Y)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution: Thilo Molitor (S8D843U34Y)";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -3439,8 +3441,8 @@
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = NO;
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
-				DEVELOPMENT_TEAM = 33XS7DE5NZ;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3465,13 +3467,13 @@
 				LLVM_LTO = NO;
 				MARKETING_VERSION = 5.0.1;
 				OTHER_LDFLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
+				PRODUCT_BUNDLE_IDENTIFIER = monal.alpha;
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Monal App Store";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Monal Catalyst App Store";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal Alpha";
 				RUN_CLANG_STATIC_ANALYZER = YES;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Catalyst Monal Alpha";
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "Classes/Monal-Bridging-Header.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Monal-Swift.h";
@@ -3485,7 +3487,7 @@
 			baseConfigurationReference = B4C8C4A8BA0B48E5DA219993 /* Pods-jrtplib-static.appstore.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_IDENTITY = "Apple Distribution: Thilo Molitor (S8D843U34Y)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_BITCODE = NO;
@@ -3568,8 +3570,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 0;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
-				DEVELOPMENT_TEAM = 33XS7DE5NZ;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -3591,11 +3592,12 @@
 				);
 				MARKETING_VERSION = 5.0.1;
 				MTL_ENABLE_DEBUG_INFO = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
+				PRODUCT_BUNDLE_IDENTIFIER = monal.alpha.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Monal Share Sheet";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal Alpha shareSheet";
 				RUN_CLANG_STATIC_ANALYZER = YES;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Catalyst Monal Alpha shareSheet";
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -3642,8 +3644,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 0;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
-				DEVELOPMENT_TEAM = 33XS7DE5NZ;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -3666,11 +3667,12 @@
 				);
 				MARKETING_VERSION = 5.0.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
+				PRODUCT_BUNDLE_IDENTIFIER = monal.alpha.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Monal Share Sheet";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal Alpha shareSheet";
 				RUN_CLANG_STATIC_ANALYZER = YES;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Catalyst Monal Alpha shareSheet";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = YES;
@@ -3720,8 +3722,7 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 0;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
-				DEVELOPMENT_TEAM = 33XS7DE5NZ;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -3744,12 +3745,12 @@
 				);
 				MARKETING_VERSION = 5.0.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
+				PRODUCT_BUNDLE_IDENTIFIER = monal.alpha.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Monal Share Sheet";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Monal Catalyst App Store Share sheet";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal Alpha shareSheet";
 				RUN_CLANG_STATIC_ANALYZER = YES;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Catalyst Monal Alpha shareSheet";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = YES;
@@ -3774,8 +3775,8 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 0;
@@ -3860,8 +3861,8 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 0;
@@ -3952,8 +3953,8 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 0;
@@ -4033,8 +4034,8 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
+				CODE_SIGN_IDENTITY = "Apple Distribution: Thilo Molitor (S8D843U34Y)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution: Thilo Molitor (S8D843U34Y)";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -4066,7 +4067,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				CODE_SIGN_ENTITLEMENTS = Monal.entitlements;
+				CODE_SIGN_ENTITLEMENTS = MonalAdhoc.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
@@ -4074,8 +4075,8 @@
 				COPY_PHASE_STRIP = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = NO;
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
-				DEVELOPMENT_TEAM = 33XS7DE5NZ;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
+				DEVELOPMENT_TEAM = S8D843U34Y;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -4100,13 +4101,13 @@
 				LLVM_LTO = NO;
 				MARKETING_VERSION = 5.0.1;
 				OTHER_LDFLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
+				PRODUCT_BUNDLE_IDENTIFIER = monal.alpha;
 				PRODUCT_NAME = Monal;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Monal App Store";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Monal Catalyst App Store";
+				PROVISIONING_PROFILE_SPECIFIER = "Monal Alpha";
 				RUN_CLANG_STATIC_ANALYZER = YES;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "Catalyst Monal Alpha";
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "Classes/Monal-Bridging-Header.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "Monal-Swift.h";
@@ -4120,7 +4121,7 @@
 			baseConfigurationReference = 127D3489728DDC3A97F4293A /* Pods-jrtplib-static.adhoc.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_IDENTITY = "Apple Distribution: Thilo Molitor (S8D843U34Y)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_BITCODE = NO;
@@ -4170,8 +4171,8 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer: Anurodh Pokharel (NVHUCKM9V3)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Anurodh Pokharel (NVHUCKM9V3)";
+				CODE_SIGN_IDENTITY = "Apple Distribution: Thilo Molitor (S8D843U34Y)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution: Thilo Molitor (S8D843U34Y)";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";

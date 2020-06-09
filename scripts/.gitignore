@@ -1,0 +1,8 @@
+*.cer
+*.pem
+*.p12
+*.key
+*.csr
+password.txt
+*.mobileprovision
+*.provisionprofile

@@ -204,6 +204,17 @@ NSString *const kXMPPPresence = @"presence";
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+-(void) dispatchOnReceiveQueue: (void (^)(void)) operation
+{
+    if([NSOperationQueue currentQueue]!=self.receiveQueue)
+    {
+        DDLogWarn(@"DISPATCHING OPERATION ON RECEIVE QUEUE");
+        [self.receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:YES];
+    }
+    else
+        operation();
+}
+
 -(void) initTLS
 {
 	NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
@@ -288,7 +299,7 @@ NSString *const kXMPPPresence = @"presence";
         DDLogError(@"stream connection timed out");
         dispatch_source_cancel(streamTimer);
 
-        [self disconnect];
+        [self reconnect];       //try other srv records if availbalbe
     });
 
     dispatch_source_set_cancel_handler(streamTimer, ^{
@@ -296,12 +307,9 @@ NSString *const kXMPPPresence = @"presence";
     });
 
     dispatch_resume(streamTimer);
-
     [localIStream open];
     [_oStream open];
-
     dispatch_source_cancel(streamTimer);
-
 }
 
 -(void) connectionTask
@@ -495,9 +503,9 @@ NSString *const kXMPPPresence = @"presence";
 		self->_outputBufferByteCount = 0;
 	}];
     [self.receiveQueue cancelAllOperations];
-    [self.receiveQueue addOperationWithBlock:^{
+    [self dispatchOnReceiveQueue: ^{
 
-        self.connectedTime =nil;
+        self.connectedTime = nil;
 
         self.pingID=nil;
         DDLogInfo(@"removing streams");
@@ -531,33 +539,36 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) resetValues
 {
-    _startTLSComplete=NO;
-    _streamHasSpace=NO;
-    _loginStarted=NO;
-    _loginStartTimeStamp=nil;
-    _loginError=NO;
-    _accountState=kStateDisconnected;
-    _reconnectScheduled =NO;
+    [self dispatchOnReceiveQueue: ^{
+        _startTLSComplete=NO;
+        _streamHasSpace=NO;
+        _loginStarted=NO;
+        _loginStartTimeStamp=nil;
+        _loginError=NO;
+        _accountState=kStateDisconnected;
+        _reconnectScheduled =NO;
 
-    self.httpUploadQueue =nil;
+        self.httpUploadQueue =nil;
+    }];
 }
 
 -(void) cleanUpState
 {
-    if(self.explicitLogout)
-        [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
+    [self dispatchOnReceiveQueue: ^{
+        if(self.explicitLogout)
+            [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
 
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
-    if(_accountNo)
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountClearContacts object:nil userInfo:@{kAccountID:_accountNo}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
+        if(_accountNo)
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountClearContacts object:nil userInfo:@{kAccountID:_accountNo}];
 
 
-    DDLogInfo(@"Connections closed");
+        DDLogInfo(@"Connections closed");
 
-    [self resetValues];
+        [self resetValues];
 
-    DDLogInfo(@"All closed and cleaned up");
-
+        DDLogInfo(@"All closed and cleaned up");
+    }];
 }
 
 -(void) disconnectWithCompletion:(void(^)(void))completion
@@ -601,48 +612,49 @@ NSString *const kXMPPPresence = @"presence";
 			[self writeToStream:stream.XMLString]; // dont even bother queueing
 		}]] waitUntilFinished:YES];			//block until finished because we are closing the socket directly afterwards
 
-        //preserve unAckedStanzas even on explicitLogout and resend them on next connect
-        //if we don't do this messages could be lost when logging out directly after sending them
-        //and: sending messages twice is less intrusive than silently losing them
-        NSMutableArray* stanzas = self.unAckedStanzas;
+		[self.receiveQueue cancelAllOperations];
+        [self dispatchOnReceiveQueue: ^{
+            //preserve unAckedStanzas even on explicitLogout and resend them on next connect
+            //if we don't do this messages could be lost when logging out directly after sending them
+            //and: sending messages twice is less intrusive than silently losing them
+            NSMutableArray* stanzas = self.unAckedStanzas;
 
-        //reset smacks state to sane values (this can be done even if smacks is not supported)
-        [self initSM3];
-        self.unAckedStanzas=stanzas;
+            //reset smacks state to sane values (this can be done even if smacks is not supported)
+            [self initSM3];
+            self.unAckedStanzas=stanzas;
 
-        //persist these changes
-        [self persistState];
-
+            //persist these changes
+            [self persistState];
+        }];			//this will block until finished because we are closing the socket directly afterwards
     }
 
     [self closeSocket];
+    [self cleanUpState];
 
-    [self.receiveQueue addOperationWithBlock:^{
-        [self cleanUpState];
+    [self dispatchOnReceiveQueue: ^{
         if(completion) completion();
     }];
-
 }
 
 -(void) reconnect
 {
-    [self reconnect:5.0];
+    [self reconnect:1.0];
 }
 
 -(void) reconnect:(NSInteger) scheduleWait
 {
     if(self.registration || self.registrationSubmission) return;  //we never want to
 
-    [self.receiveQueue addOperationWithBlock: ^{
+    [self dispatchOnReceiveQueue: ^{
         DDLogVerbose(@"reconnecting ");
         //can be called multiple times
 
         if(!self.loginStartTimeStamp)  self.loginStartTimeStamp=[NSDate date]; // can be destroyed by threads resulting in a deadlock
-        if (self->_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>10)
+        if (self->_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>5)
         {
-            DDLogVerbose(@"reconnect called while one already in progress that took more than 10 seconds. disconnect before reconnect.");
+            DDLogVerbose(@"reconnect called while one already in progress that took more than 5 seconds. disconnect before reconnect.");
             [self disconnectWithCompletion:^{
-                [self reconnect];
+                [self reconnect:0];
             }];
             return;
         }
@@ -657,9 +669,6 @@ NSString *const kXMPPPresence = @"presence";
         self->_loginStarted=YES;
 
         NSTimeInterval wait=scheduleWait;
-//        if(!self->_loggedInOnce) {
-//            wait=0;
-//        }
 #if TARGET_OS_IPHONE
 
         if(self.connectionProperties.pushEnabled)
@@ -1353,7 +1362,7 @@ NSString *const kXMPPPresence = @"presence";
         }
 
         [self disconnectWithCompletion:^{
-            [self reconnect:5];
+            [self reconnect];
         }];
 
     }
@@ -2127,11 +2136,10 @@ static NSMutableArray *extracted(xmpp *object) {
 			[self sendLastAck];
 		}]] waitUntilFinished:YES];			//block until finished because we are closing the socket directly afterwards
 	}
-    [self.receiveQueue addOperationWithBlock:^{
-        [self closeSocket]; // just closing socket to simulate a unintentional disconnect
-        [self resetValues];
-        if(completion) completion();
-    }];
+    [self closeSocket]; // just closing socket to simulate a unintentional disconnect
+    [self resetValues];
+    
+    if(completion) completion();
 }
 
 -(void) queryDisco
@@ -3049,7 +3057,7 @@ static NSMutableArray *extracted(xmpp *object) {
 #endif
                         DDLogInfo(@" stream error calling reconnect for account that logged in once ");
                         [self disconnectWithCompletion:^{
-                            [self reconnect:5];
+                            [self reconnect];
                         }];
                         return;
 
@@ -3074,14 +3082,14 @@ static NSMutableArray *extracted(xmpp *object) {
                 st_error.code == 32          // Broken pipe
             ) {
                 [self disconnectWithCompletion:^{
-                    [self reconnect:5];
+                    [self reconnect];
                 }];
                 return;
             }
             
             DDLogInfo(@"unhandled stream error");
             [self disconnectWithCompletion:^{
-                [self reconnect:5];
+                [self reconnect];
             }];
 
             break;
@@ -3103,7 +3111,7 @@ static NSMutableArray *extracted(xmpp *object) {
                 _loginStarted=NO;
                 [self disconnectWithCompletion:^{
                     self->_accountState=kStateReconnecting;
-                    [self reconnect:5];
+                    [self reconnect];
                 }];
 
             }

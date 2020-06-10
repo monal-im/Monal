@@ -1535,15 +1535,24 @@ NSString *const kXMPPPresence = @"presence";
         [self removeAckedStanzasFromQueue:resumeNode.h];
         [self resendUnackedStanzas];
 
-        [self sendInitalPresence];
-
         //force push (re)enable on session resumption
         self.connectionProperties.pushEnabled=NO;
         if(self.connectionProperties.supportsPush)
-        {
             [self enablePush];
-        }
 
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+            {
+#endif
+                [self setClientInactive];
+#if TARGET_OS_IPHONE
+            }
+        });
+#endif
+#endif
+    
         if(self.loginCompletion) {
             self.loginCompletion(YES, @"");
             self.loginCompletion=nil;
@@ -2167,19 +2176,6 @@ static NSMutableArray *extracted(xmpp *object) {
     if(!self.visibleState) [presence setInvisible];
 
     [self send:presence];
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-        {
-#endif
-            [self setClientInactive];
-#if TARGET_OS_IPHONE
-        }
-    });
-#endif
-#endif
-
 }
 
 -(void) fetchRoster
@@ -2210,6 +2206,19 @@ static NSMutableArray *extracted(xmpp *object) {
     [session setXMLNS:@"urn:ietf:params:xml:ns:xmpp-session"];
     [sessionQuery.children addObject:session];
     [self send:sessionQuery];
+
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+        {
+#endif
+            [self setClientInactive];
+#if TARGET_OS_IPHONE
+        }
+    });
+#endif
+#endif
 
     //force new disco queries because we landed here because of a failed smacks resume
     //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)

@@ -40,7 +40,7 @@
         
         if(self.message.text.length==0)
         {
-            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@"") message:NSLocalizedString(NSLocalizedString(@"Message can't be empty",@"") preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@"") message:NSLocalizedString(@"Message can't be empty",@"") preferredStyle:UIAlertControllerStyleAlert];
             UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
                 
             }];

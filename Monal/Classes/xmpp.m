@@ -2431,24 +2431,18 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(NSString*)getVersionString
 {
-    // We may need this later
-    NSString* unhashed=[NSString stringWithFormat:@"client/phone//Monal %@<%@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"], [XMPPIQ featuresString]];
-
+    // see https://xmpp.org/extensions/xep-0115.html#ver
     NSData* hashed;
-    // <http://jabber.org/protocol/offline<
     unsigned char digest[CC_SHA1_DIGEST_LENGTH];
-    NSData *stringBytes = [unhashed dataUsingEncoding: NSUTF8StringEncoding]; /* or some other encoding */
-    if (CC_SHA1([stringBytes bytes], (UInt32)[stringBytes length], digest)) {
-        hashed =[NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
-    }
-
-    NSString* hashedBase64= [EncodingTools encodeBase64WithData:hashed];
+    NSString* unhashed = [NSString stringWithFormat:@"client/phone//Monal %@<%@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"], [XMPPIQ featuresString]];
+    
+    NSData *stringBytes = [unhashed dataUsingEncoding: NSUTF8StringEncoding];
+    if(CC_SHA1([stringBytes bytes], (UInt32)[stringBytes length], digest))
+        hashed = [NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
+    NSString* hashedBase64 = [EncodingTools encodeBase64WithData:hashed];
 
     DDLogVerbose(@"ver string: unhashed %@, hashed %@, hashed-64 %@", unhashed, hashed, hashedBase64);
-
-
     return hashedBase64;
-
 }
 
 

@@ -75,7 +75,7 @@
 
 -(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    return @"Favorite Group Chats (MUC). Tap to join. ";
+    return NSLocalizedString(@"Favorite Group Chats (MUC). Tap to join. ",@"");
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -203,7 +203,7 @@
 
 - (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView
 {
-    NSString *text = @"No groups yet";
+    NSString *text = NSLocalizedString(@"No groups yet",@"");
     
     NSDictionary *attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
                                  NSForegroundColorAttributeName: [UIColor darkGrayColor]};
@@ -213,7 +213,7 @@
 
 - (NSAttributedString *)descriptionForEmptyDataSet:(UIScrollView *)scrollView
 {
-    NSString *text = @"When you have some favorite groups, they will be here for you.";
+    NSString *text = NSLocalizedString(@"When you have some favorite groups, they will be here for you.",@"");
     
     NSMutableParagraphStyle *paragraph = [NSMutableParagraphStyle new];
     paragraph.lineBreakMode = NSLineBreakByWordWrapping;

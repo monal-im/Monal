@@ -28,8 +28,8 @@
 {
     if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
     {
-        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"No connected accounts" message:@"Please make sure at least one account has connected before trying to message someone." preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"No connected accounts",@"") message:NSLocalizedString(@"Please make sure at least one account has connected before trying to message someone.",@"") preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             
         }];
         [messageAlert addAction:closeAction];
@@ -40,8 +40,8 @@
         
         if(self.message.text.length==0)
         {
-            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Error" message:@"Message can't be empty" preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@"") message:NSLocalizedString(NSLocalizedString(@"Message can't be empty",@"") preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
                 
             }];
             [messageAlert addAction:closeAction];
@@ -85,8 +85,8 @@
         }
         else
         {
-            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Error" message:@"Recipient name can't be empty" preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@"") message:NSLocalizedString(@"Recipient name can't be empty",@"") preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
                 
             }];
             [messageAlert addAction:closeAction];
@@ -123,7 +123,7 @@
 -(void) viewDidLoad
 {
     [super viewDidLoad];
-    self.navigationItem.title=@"Send A Message";
+    self.navigationItem.title=NSLocalizedString(@"Send A Message",@"");
     
     _accountPicker = [[ UIPickerView alloc] init];
     _accountPickerView= [[UIView alloc] initWithFrame: _accountPicker.frame];
@@ -167,7 +167,7 @@
 {
     if(section==0)
     {
-        return @"Recipients are usually in the format: username@domain.something";
+        return NSLocalizedString(@"Recipients are usually in the format: username@domain.something",@"");
     }
     else return nil;
 }
@@ -206,7 +206,7 @@
                 
                 if([[MLXMPPManager sharedInstance].connectedXMPP count]>1){
                     self.accountName =textCell.textInput;
-                    self.accountName.placeholder = @"Account";
+                    self.accountName.placeholder = NSLocalizedString(@"Account",@"");
                     self.accountName.inputView=_accountPickerView;
                     self.accountName.delegate=self;
                 } else  {
@@ -218,13 +218,13 @@
             }
             else   if(indexPath.row ==1){
                 self.contactName =textCell.textInput;
-                self.contactName.placeholder = @"Recipient Name";
+                self.contactName.placeholder = NSLocalizedString(@"Recipient Name",@"");
                 self.contactName.delegate=self;
             }
             
             else   if(indexPath.row ==2){
                 self.message =textCell.textInput;
-                self.message.placeholder = @"Message";
+                self.message.placeholder = NSLocalizedString(@"Message",@"");
                 self.message.delegate=self;
             }
             textCell.textInput.inputAccessoryView =_keyboardToolbar;
@@ -272,7 +272,7 @@
         if(name)
             return name;
     }
-    return @"Unnamed";
+    return NSLocalizedString(@"Unnamed",@"");
 }
 
 #pragma mark picker view datasource

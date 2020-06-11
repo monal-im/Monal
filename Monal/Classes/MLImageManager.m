@@ -115,7 +115,7 @@
      return _inboundImage;
  }
  
-    _inboundImage=[[UIImage imageNamed:@"incoming"]
+    _inboundImage=[[UIImage imageNamed:NSLocalizedString(@"incoming",@"")]
                    resizableImageWithCapInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
     
     return _inboundImage;
@@ -130,7 +130,7 @@
         return _outboundImage;
     }
     
-    _outboundImage=[[UIImage imageNamed:@"outgoing"]
+    _outboundImage=[[UIImage imageNamed:NSLocalizedString(@"outgoing",@"")]
                    resizableImageWithCapInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
     
     return _outboundImage;
@@ -167,7 +167,7 @@
 
     if([[EncodingTools dataWithBase64EncodedString:data] writeToFile:writablePath atomically:NO] )
     {
-        DDLogVerbose(@"wrote imgae to file");
+        DDLogVerbose(@"wrote image to file");
     }
     else
     {

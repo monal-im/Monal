@@ -20,9 +20,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     if(self.ownKeys) {
-        self.navigationItem.title=@"My Encryption Keys";
+        self.navigationItem.title=NSLocalizedString(@"My Encryption Keys",@"");
     } else  {
-        self.navigationItem.title=@"Encryption Keys";
+        self.navigationItem.title=NSLocalizedString(@"Encryption Keys",@"");
     }
 }
 
@@ -61,7 +61,7 @@
     [cell.toggle addTarget:self action:@selector(toggleTrust:) forControlEvents:UIControlEventValueChanged];
     if(device.integerValue == self.account.monalSignalStore.deviceid)
     {
-        cell.deviceid.text = [NSString stringWithFormat:@"%ld (This device)", (long)device.integerValue];
+        cell.deviceid.text = [NSString stringWithFormat:NSLocalizedString(@"%ld (This device)",@""), (long)device.integerValue];
     } else  {
         cell.deviceid.text = [NSString stringWithFormat:@"%ld", (long)device.integerValue];
     }
@@ -75,9 +75,9 @@
     if(section==0)
     {
         if(self.ownKeys) {
-            toreturn= @"These are your encryption keys. Each device is a different place you have logged in. You should trust a key when you have verified it.";
+            toreturn= NSLocalizedString(@"These are your encryption keys. Each device is a different place you have logged in. You should trust a key when you have verified it.",@"");
         } else {
-            toreturn= @"You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen."; ///or scan their QR code
+            toreturn= NSLocalizedString(@"You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen.",@""); ///or scan their QR code
         }
     }
     
@@ -88,7 +88,7 @@
 {
     NSString* toreturn=nil;
     if(section==0)
-        toreturn= @"Monal uses OMEMO encryption to protect your conversations";
+        toreturn= NSLocalizedString(@"Monal uses OMEMO encryption to protect your conversations",@"");
     
     return toreturn;
 }

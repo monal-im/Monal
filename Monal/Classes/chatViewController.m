@@ -871,16 +871,16 @@
 {
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     NSDictionary *userDic = notification.userInfo;
-    NSString *from = [userDic objectForKey:=NSLocalizedString(@"from",@ "")];
+    NSString *from = [userDic objectForKey:NSLocalizedString(@"from",@"")];
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(=NSLocalizedString(@"You have been invited to a conversation %@?",@ ""), nil), from ];
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:=NSLocalizedString(@"Group Chat Invite",@ "") message:messageString preferredStyle:UIAlertControllerStyleAlert];
+        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"You have been invited to a conversation %@?",@""), from ];
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Group Chat Invite",@"") message:messageString preferredStyle:UIAlertControllerStyleAlert];
         
-        [alert addAction:[UIAlertAction actionWithTitle:=NSLocalizedString(@"Join",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Join",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [xmppAccount joinRoom:from withNick:xmppAccount.connectionProperties.identity.user andPassword:nil];
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
-        [alert addAction:[UIAlertAction actionWithTitle:=NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];

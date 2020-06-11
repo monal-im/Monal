@@ -114,14 +114,14 @@
             if([[MLXMPPManager sharedInstance].connectedXMPP count]==1){
                 toreturn=@"";
             } else  {
-                toreturn=@"Account To Use";
+                toreturn=NSLocalizedString(@"Account To Use",@"");
             }
             break;
         }
             
         case 1:
         {
-            toreturn=@"Group Information";
+            toreturn=NSLocalizedString(@"Group Information",@"");
             break;
         }
             
@@ -144,7 +144,7 @@
         case 0:
         {
             UITableViewCell *accountCell =[tableView dequeueReusableCellWithIdentifier:@"AccountPickerCell"];
-            accountCell.textLabel.text=[NSString stringWithFormat:@"Using Account: %@", [[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:_selectedRow]];
+            accountCell.textLabel.text=[NSString stringWithFormat:NSLocalizedString(@"Using Account: %@",@""), [[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:_selectedRow]];
             accountCell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             toreturn=accountCell;
             break;
@@ -157,7 +157,7 @@
             {
                 case 0:{
                       MLTextInputCell* thecell=(MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-                    thecell.textInput.placeholder=@"Room";
+                    thecell.textInput.placeholder=NSLocalizedString(@"Room",@"");
                     
                     thecell.textInput.keyboardType = UIKeyboardTypeEmailAddress;
                     thecell.textInput.inputAccessoryView =self.keyboardToolbar;
@@ -169,7 +169,7 @@
                 }
                 case 1:{
                      MLTextInputCell* thecell=(MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-                    thecell.textInput.placeholder=@"Nickname";
+                    thecell.textInput.placeholder=NSLocalizedString(@"Nickname",@"");
                     thecell.textInput.inputAccessoryView =self.keyboardToolbar;
                      self.nickField= thecell.textInput;
                     thecell.textInput.delegate=self;
@@ -179,7 +179,7 @@
                 }
                 case 2:{
                     MLTextInputCell* thecell=(MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-                   thecell.textInput.placeholder=@"Password";
+                   thecell.textInput.placeholder=NSLocalizedString(@"Password",@"");
                     thecell.textInput.inputAccessoryView =self.keyboardToolbar;
                     thecell.textInput.secureTextEntry=YES;
                     
@@ -191,7 +191,7 @@
                 case 3:{
                     MLSwitchCell* thecell=(MLSwitchCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
                     
-                    thecell.cellLabel.text=@"Favorite";
+                    thecell.cellLabel.text=NSLocalizedString(@"Favorite",@"");
                     thecell.textInputField.hidden=YES;
                      self.favSwitch= thecell.toggleSwitch;
                     [self.favSwitch addTarget:self action:@selector(toggleFav) forControlEvents:UIControlEventTouchUpInside];
@@ -202,7 +202,7 @@
                 case 4:{
                     MLSwitchCell* thecell=(MLSwitchCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
                     
-                    thecell.cellLabel.text=@"Auto Join";
+                    thecell.cellLabel.text=NSLocalizedString(@"Auto Join",@"");
                     thecell.textInputField.hidden=YES;
                     self.autoSwitch= thecell.toggleSwitch;
                      [self.autoSwitch addTarget:self action:@selector(toggleJoin) forControlEvents:UIControlEventTouchUpInside];
@@ -275,8 +275,8 @@
 {
     if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
     {
-        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"No connected accounts" message:@"Please make sure at least one account has connected before trying to add a contact." preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"No connected accounts",@"") message:NSLocalizedString(@"Please make sure at least one account has connected before trying to add a contact.",@"") preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             
         }];
         [messageAlert addAction:closeAction];

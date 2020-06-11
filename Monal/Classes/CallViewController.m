@@ -31,14 +31,14 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    DDLogVerbose(@"call screen will  appear");
+    DDLogVerbose(NSLocalizedString(@"call screen will  appear",@ ""));
     [UIDevice currentDevice].proximityMonitoringEnabled=YES;
    
     NSString *contactName ;
     if(self.contact) {
         contactName=self.contact.contactJid;
         if(!contactName) {
-            contactName = @"No Contact Selected";
+            contactName = NSLocalizedString(@"No Contact Selected",@ "");
             
         }
     } 
@@ -59,9 +59,9 @@
         if(!granted)
         {
             dispatch_async(dispatch_get_main_queue(), ^{
-                UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Please Allow Audio Access" message:@"If you want to use VOIP you will need to allow access in Settings->Privacy->Microphone." preferredStyle:UIAlertControllerStyleAlert];
+                UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Please Allow Audio Access",@ "") message:NSLocalizedString(@"If you want to use VOIP you will need to allow access in Settings-> Privacy-> Microphone.",@ "") preferredStyle:UIAlertControllerStyleAlert];
                 
-                UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
                     
                 }];
                 
@@ -75,7 +75,7 @@
 -(void)viewDidDisappear:(BOOL)animated
 {
     [super viewDidDisappear:animated];
-	DDLogVerbose(@"call screen did  disappear");
+	DDLogVerbose(NSLocalizedString(@"call screen did disappear",@ ""));
 }
 
 

@@ -33,9 +33,9 @@
     [super viewWillAppear:animated];
     self.mamPref =[[NSMutableArray alloc] init];
     self.navigationItem.title= self.xmppAccount.connectionProperties.identity.domain;
-    [self.mamPref addObject:@{@"Title":@"All messages are archived by default.", @"value":@"always"}];
-     [self.mamPref addObject:@{@"Title":@"Messages never archived by default.", @"value":@"never"}];
-     [self.mamPref addObject:@{@"Title":@"Archive only if the contact is in roster", @"value":@"roster"}];
+    [self.mamPref addObject:@{@"Title":NSLocalizedString(@"All messages are archived by default.",@""), @"value":@"always"}];
+     [self.mamPref addObject:@{@"Title":NSLocalizedString(@"Messages never archived by default.",@""), @"value":@"never"}];
+     [self.mamPref addObject:@{@"Title":NSLocalizedString(@"Archive only if the contact is in roster",@""), @"value":@"roster"}];
     
      [self.xmppAccount getMAMPrefs];
 }
@@ -104,7 +104,7 @@
 
 -(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    return @"Select Message Archive Management (MAM) Preferences ";
+    return NSLocalizedString(@"Select Message Archive Management (MAM) Preferences ",@"");
 }
 
 @end

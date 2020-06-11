@@ -130,7 +130,7 @@
             [[MLXMPPManager sharedInstance] handleCall:dic withResponse:YES];
         }];
         
-        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Decline" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Decline",@"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             [[MLXMPPManager sharedInstance] handleCall:dic withResponse:NO];
         }];
         [messageAlert addAction:closeAction];
@@ -258,14 +258,14 @@
 
 -(NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewRowAction *delete = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:@"Delete" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+    UITableViewRowAction *delete = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:NSLocalizedString(@"Delete",@"") handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
         [self deleteRowAtIndexPath:indexPath];
     }];
     UITableViewRowAction *mute;
     MLContactCell *cell = (MLContactCell *)[tableView cellForRowAtIndexPath:indexPath];
     if(cell.muteBadge.hidden)
     {
-        mute = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"Mute" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+        mute = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:NSLocalizedString(@"Mute",@"") handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
             [self muteContactAtIndexPath:indexPath];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
@@ -274,7 +274,7 @@
         [mute setBackgroundColor:[UIColor monalGreen]];
         
     } else  {
-        mute = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"Unmute" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+        mute = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:NSLocalizedString(@"Unmute",@"") handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
             [self unMuteContactAtIndexPath:indexPath];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
@@ -482,7 +482,7 @@
 }
 
 -(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return @"Remove Contact";
+    return NSLocalizedString(@"Remove Contact",@"");
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
@@ -521,23 +521,23 @@
         return;
     }
     
-    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", nil),contact.fullName ];
-    NSString* detailString =@"They will no longer see when you are online. They may not be able to access your encryption keys.";
+    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(NSLocalizedString(@"Remove %@ from contacts?",@""), nil),contact.fullName ];
+    NSString* detailString =NSLocalizedString(@"They will no longer see when you are online. They may not be able to access your encryption keys.",@"");
     
     BOOL isMUC=contact.isGroup;
     if(isMUC)
     {
-        messageString =@"Leave this converstion?";
+        messageString =NSLocalizedString(@"Leave this converstion?",@"");
         detailString=nil;
     }
     
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
                                                                    message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [alert dismissViewControllerAnimated:YES completion:nil];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes",@"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         if(isMUC) {
             [[MLXMPPManager sharedInstance] leaveRoom:contact.contactJid withNick:contact.accountNickInGroup forAccountId:contact.accountId ];
         }
@@ -634,7 +634,7 @@
 
 - (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView
 {
-    NSString *text = @"You need friends for this ride";
+    NSString *text = NSLocalizedString(@"You need friends for this ride",@"");
     
     NSDictionary *attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
                                  NSForegroundColorAttributeName: [UIColor darkGrayColor]};
@@ -644,7 +644,7 @@
 
 - (NSAttributedString *)descriptionForEmptyDataSet:(UIScrollView *)scrollView
 {
-    NSString *text = @"Add new contacts with the + button above. Your friends will pop up here when they can talk";
+    NSString *text = NSLocalizedString(@"Add new contacts with the + button above. Your friends will pop up here when they can talk",@"");
     
     NSMutableParagraphStyle *paragraph = [NSMutableParagraphStyle new];
     paragraph.lineBreakMode = NSLineBreakByWordWrapping;

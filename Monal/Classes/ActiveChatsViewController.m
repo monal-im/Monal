@@ -229,8 +229,8 @@
         //for 3->4 release remove later
         if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeeniOS13Message"]) {
             
-            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Notification Changes" message:[NSString stringWithFormat:@"Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old expereince back."] preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:@"Got it!" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Notification Changes",@ "") message:[NSString stringWithFormat:NSLocalizedString(@"Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old expereince back.",@ "")] preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Got it!",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
                 [self dismissViewControllerAnimated:YES completion:nil];
                 
             }];
@@ -376,16 +376,16 @@
                 MLMessage *messageRow = messages[0];
                 if([messageRow.messageType isEqualToString:kMessageTypeUrl])
                 {
-                    [cell showStatusText:@"🔗 A Link"];
+                    [cell showStatusText:NSLocalizedString(@"🔗 A Link",@ "")];
                 } else if([messageRow.messageType isEqualToString:kMessageTypeImage])
                 {
-                    [cell showStatusText:@"📷 An Image"];
+                    [cell showStatusText:NSLocalizedString(@"📷 An Image",@ "")];
                 } else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft]) {
-                    NSString* draftPreview = [NSString stringWithFormat:@"Draft: %@", messageRow.messageText];
+                    NSString* draftPreview = [NSString stringWithFormat:NSLocalizedString(@"Draft: %@",@ ""), messageRow.messageText];
                     [cell showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, 6)];
                 } else if([messageRow.messageType isEqualToString:kMessageTypeGeo])
                 {
-                    [cell showStatusText:@"📍 A Location"];
+                    [cell showStatusText:NSLocalizedString(@"📍 A Location",@ "")];
                 } else  {
                     [cell showStatusText:messageRow.messageText];
                 }
@@ -398,7 +398,7 @@
                 }
             } else  {
                 [cell showStatusText:nil];
-                DDLogWarn(@"Active chat but no messages found in history for %@.", row.contactJid);
+                DDLogWarn(NSLocalizedString(@"Active chat but no messages found in history for %@.",@ ""), row.contactJid);
             }
             
         });
@@ -422,7 +422,7 @@
 
 
 -(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return @"Hide Chat";
+    return NSLocalizedString(@"Hide Chat",@ "");
 }
 
 
@@ -474,7 +474,7 @@
 
 - (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView
 {
-    NSString *text = @"No one is here";
+    NSString *text = NSLocalizedString(@"No one is here",@ "");
     
     NSDictionary *attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
                                  NSForegroundColorAttributeName: [UIColor darkGrayColor]};
@@ -484,7 +484,7 @@
 
 - (NSAttributedString *)descriptionForEmptyDataSet:(UIScrollView *)scrollView
 {
-    NSString *text = @"When you start talking to someone,\n they will show up here.";
+    NSString *text = NSLocalizedString(@"When you start talking to someone,\n they will show up here.",@ "");
     
     NSMutableParagraphStyle *paragraph = [NSMutableParagraphStyle new];
     paragraph.lineBreakMode = NSLineBreakByWordWrapping;

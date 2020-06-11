@@ -1138,8 +1138,8 @@
 {
     NSInteger historyId = ((UIButton*) sender).tag;
     
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:=NSLocalizedString(@"Retry sending message?",@ "")message:=NSLocalizedString(@"This message failed to send.",@ "") preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:=NSLocalizedString(@"Retry",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Retry sending message?",@ "") message:NSLocalizedString(@"This message failed to send.",@ "") preferredStyle:UIAlertControllerStyleActionSheet];
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Retry",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
         if([messageArray count]>0) {
             NSDictionary *dic= [messageArray objectAtIndex:0];
@@ -1147,7 +1147,7 @@
             [self setMessageId:[dic objectForKey:@"messageid"] delivered:YES]; // for the UI, db will be set in the notification
         }
     }]];
-    [alert addAction:[UIAlertAction actionWithTitle:=NSLocalizedString(@"Cancel",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         [self dismissViewControllerAnimated:YES completion:nil];
     }]];
     alert.popoverPresentationController.sourceView=sender;
@@ -1497,7 +1497,7 @@
                 IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
                 browser.delegate=self;
                
-                UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:=NSLocalizedString(@"Close",@ "") style:UIBarButtonItemStyleDone target:self action:@selector(closePhotos)];
+                UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close",@"") style:UIBarButtonItemStyleDone target:self action:@selector(closePhotos)];
                 browser.navigationItem.rightBarButtonItem=close;
                 
                 //                browser.displayActionButton = YES; // Show action button to allow sharing, copying, etc (defaults to YES)

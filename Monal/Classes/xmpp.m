@@ -2478,7 +2478,6 @@ static NSMutableArray *extracted(xmpp *object) {
 -(BOOL) isHibernated
 {
     BOOL hibernated = (_accountState == kStateDisconnected || _accountState == kStateReconnecting);
-    hibernated &= (_connectionProperties.supportsSM3 == YES);
     hibernated &= (_streamID != nil);
     return hibernated;
 }

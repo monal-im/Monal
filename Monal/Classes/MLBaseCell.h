@@ -11,9 +11,6 @@
 #define kDefaultTextHeight 20
 #define kDefaultTextOffset 5
 
-FOUNDATION_EXPORT NSString *const kDelivered;
-FOUNDATION_EXPORT NSString *const kRead;
-
 
 @interface MLBaseCell : UITableViewCell
 

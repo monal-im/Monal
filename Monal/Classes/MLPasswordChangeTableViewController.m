@@ -25,7 +25,7 @@
 {
     if(!self.xmppAccount)
     {
-        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"No connected accounts",@ "") message:NSLocalizedString(@"Please make sure you are connected before changing your password." preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"No connected accounts",@"") message:NSLocalizedString(@"Please make sure you are connected before changing your password.",@"") preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             
         }];

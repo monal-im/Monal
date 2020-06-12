@@ -117,7 +117,6 @@ NSString *const kiqErrorType = @"error";
     disableNode.element=@"disable";
     [disableNode.attributes setObject:@"urn:xmpp:push:0" forKey:kXMLNS];
     [disableNode.attributes setObject:[MLPush pushServer] forKey:@"jid"];
-    [disableNode.attributes setObject:@"192.168.2.3" forKey:@"jid"];
     [disableNode.attributes setObject:node forKey:@"node"];
     [self.children addObject:disableNode];
 }

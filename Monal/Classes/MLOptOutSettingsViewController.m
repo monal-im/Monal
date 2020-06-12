@@ -17,7 +17,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title=@"Opt Out";
+    self.title=NSLocalizedString(@"Opt Out",@ "");
 }
 
 - (void)didReceiveMemoryWarning {
@@ -37,12 +37,12 @@
 
 -(NSString *) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    return @"Select services to opt out of";
+    return NSLocalizedString(@"Select services to opt out of",@ "");
 }
 
 -(NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
 {
-    return @"Monal uses Crashlytics to track crashes. These are anonymous, GDPR compliant and help debug issues. Per GDPR, you may opt out of this logging. Because I will not be able to see the cause of your crashes, opting out here effectlvely opts you out of receiving support if you encounter issues." ;
+    return NSLocalizedString(@"Monal uses Crashlytics to track crashes. These are anonymous, GDPR compliant and help debug issues. Per GDPR, you may opt out of this logging. Because I will not be able to see the cause of your crashes, opting out here effectively opts you out of receiving support if you encounter issues.",@ "") ;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {

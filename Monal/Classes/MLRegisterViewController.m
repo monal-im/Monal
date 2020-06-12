@@ -77,8 +77,8 @@
     
     if(self.jid.text.length==0 || self.password.text.length==0)
         {
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"No Empty Values" message:@"Please make sure you have entered a username, password." preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No Empty Values",@ "") message:NSLocalizedString(@"Please make sure you have entered a username, password.",@ "") preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
             [self presentViewController:alert animated:YES completion:nil];
@@ -87,8 +87,8 @@
     
     if([self.jid.text rangeOfString:@"@"].location!=NSNotFound)
     {
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Invalid username" message:@"The username does not need to have an @ symbol. Please try again." preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid username",@ "") message:NSLocalizedString(@"The username does not need to have an @ symbol. Please try again.",@ "") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
@@ -96,7 +96,7 @@
     }
     
         self.loginHUD= [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-        self.loginHUD.label.text=@"Signing Up";
+        self.loginHUD.label.text=NSLocalizedString(@"Signing Up",@ "");
         self.loginHUD.mode=MBProgressHUDModeIndeterminate;
         self.loginHUD.removeFromSuperViewOnHide=YES;
     
@@ -115,9 +115,9 @@
             
             if(!success) {
                 NSString *displayMessage = message;
-                if(displayMessage.length==0) displayMessage = @"Could not register your username. Please check your code or change the username and try again.";
-                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
-                [alert addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                if(displayMessage.length==0) displayMessage = NSLocalizedString(@"Could not register your username. Please check your code or change the username and try again.",@ "");
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@ "") message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                     [alert dismissViewControllerAnimated:YES completion:nil];
                 }]];
                 [self presentViewController:alert animated:YES completion:nil];

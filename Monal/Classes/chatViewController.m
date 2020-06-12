@@ -669,7 +669,6 @@
         [actionControll addAction:photosAction];
 #endif
     }
-
     UIAlertAction* gpsAlert = [UIAlertAction actionWithTitle:NSLocalizedString(@"Send Location",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         // GPS
         CLAuthorizationStatus gpsStatus = [CLLocationManager authorizationStatus];
@@ -696,7 +695,6 @@
         [gpsAlert setValue:[[UIImage systemImageNamed:@"location"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
     }
     [actionControll addAction:gpsAlert];
-
     [actionControll addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
         [actionControll dismissViewControllerAnimated:YES completion:nil];
     }]];

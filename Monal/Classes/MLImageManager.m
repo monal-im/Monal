@@ -171,7 +171,7 @@
     }
     else
     {
-        DDLogError(@"failed to write image");
+        DDLogError(@"failed to write image",@""));
     }
     
     //remove from cache if its there

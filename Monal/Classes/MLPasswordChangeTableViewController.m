@@ -25,8 +25,8 @@
 {
     if(!self.xmppAccount)
     {
-        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"No connected accounts" message:@"Please make sure you are connected before chaning your password." preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"No connected accounts",@ "") message:NSLocalizedString(@"Please make sure you are connected before changing your password." preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             
         }];
         [messageAlert addAction:closeAction];
@@ -39,19 +39,19 @@
         {
             [self.xmppAccount changePassword:self.password.text withCompletion:^(BOOL success, NSString *message) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    NSString *title =@"Error";
+                    NSString *title =NSLocalizedString(@"Error",@ "");
                     NSString *displayMessage =message;
                     if(success) {
-                        title=@"Success";
-                        displayMessage=@"The password has been changed";
+                        title=NSLocalizedString(@"Success",@ "");
+                        displayMessage=NSLocalizedString(@"The password has been changed",@ "");
                
                        [[MLXMPPManager sharedInstance] updatePassword:self.password.text forAccount:self.xmppAccount.accountNo];
                     } else  {
-                        if(displayMessage.length==0) displayMessage=@"Could not change the password";
+                        if(displayMessage.length==0) displayMessage=NSLocalizedString(@"Could not change the password",@ "");
                     }
                     
                     UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:title message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
-                    UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                    UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
                         
                     }];
                     [messageAlert addAction:closeAction];
@@ -62,8 +62,8 @@
         }
         else
         {
-            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:@"Error" message:@"Password can't be empty" preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@ "") message:NSLocalizedString(@"Password cannot be empty",@ "") preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
                 
             }];
             [messageAlert addAction:closeAction];
@@ -96,7 +96,7 @@
 -(void) viewDidLoad
 {
     [super viewDidLoad];
-    self.navigationItem.title=@"Change Password";
+    self.navigationItem.title=NSLocalizedString(@"Change Password",@ "");
     [self.tableView registerNib:[UINib nibWithNibName:@"MLTextInputCell"
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"TextCell"];
@@ -120,7 +120,7 @@
 {
     if(section==0)
     {
-        return @"Enter your new password. Passwords may not be empty. They may also be governed by server or company policies.";
+        return NSLocalizedString(@"Enter your new password. Passwords may not be empty. They may also be governed by server or company policies.",@ "");
     }
     else return nil;
 }
@@ -152,7 +152,7 @@
             MLTextInputCell *textCell =[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
             if(indexPath.row ==0){
                 self.password =textCell.textInput;
-                self.password.placeholder = @"New Password";
+                self.password.placeholder = NSLocalizedString(@"New Password",@ "");
                 self.password.delegate=self;
                 self.password.secureTextEntry=YES;
             }

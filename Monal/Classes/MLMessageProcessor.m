@@ -279,7 +279,7 @@
         SignalAddress *address = [[SignalAddress alloc] initWithName:messageNode.from deviceId:(uint32_t)messageNode.sid.intValue];
         if(!self.signalContext) {
             DDLogError(@"Missing signal context");
-            return @"Error decrypting message";
+            return NSLocalizedString(@"Error decrypting message",@ "");
         }
         
         __block NSDictionary *messageKey;
@@ -297,7 +297,7 @@
         if(!messageKey)
         {
             DDLogError(@"Message was not encrypted for this device: %d", self.monalSignalStore.deviceid);
-            return [NSString stringWithFormat:@"Message was not encrypted for this device. Please make sure the sender trusts deviceid %d and that they have you as a contact.",self.monalSignalStore.deviceid];
+            return [NSString stringWithFormat:NSLocalizedString(@"Message was not encrypted for this device. Please make sure the sender trusts deviceid %d and that they have you as a contact.",@ ""),self.monalSignalStore.deviceid];
         }
         else {
             SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
@@ -326,7 +326,7 @@
             
             if(!decryptedKey){
                 DDLogError(@"Could not decrypt to obtain key.");
-                return @"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person.";
+                return NSLocalizedString(@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person.",@ "");
             }
             else  {
                 
@@ -346,7 +346,7 @@
                     NSData *decData = [AESGcm decrypt:decodedPayload withKey:key andIv:iv withAuth:auth];
                     if(!decData) {
                         DDLogError(@"Could not decrypt message with key  that was decrypted.");
-                         return @"Encrypted message was sent in an older format Monal can't decrypt. Please ask them to update their client. (GCM error)";
+                         return NSLocalizedString(@"Encrypted message was sent in an older format Monal can't decrypt. Please ask them to update their client. (GCM error)",@ "");
                     }
                     else  {
                         DDLogInfo(@"Decrypted message passing bask string.");
@@ -356,7 +356,7 @@
                     
                 } else  {
                     DDLogError(@"Could not get key");
-                    return @"Could not decrypt message";
+                    return NSLocalizedString(@"Could not decrypt message",@ "");
                 }
             }
         }

@@ -22,7 +22,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title=@"Sounds";
+    self.title=NSLocalizedString(@"Sounds",@ "");
     
     self.soundList = @[@"Morse",
                        @"Xylophone",
@@ -61,14 +61,14 @@
 -(NSString *) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     if(section==1){
-        return @"Select sounds that are played with new message notificaitons. Default is Xylophone.";
+        return NSLocalizedString(@"Select sounds that are played with new message notificaitons. Default is Xylophone.",@ "");
     } else return nil;
 }
 
 -(NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
 {
     if(section==1){
-        return @"Sounds courtesy Emrah" ;
+        return NSLocalizedString(@"Sounds courtesy Emrah",@ "") ;
     } else return nil;
 }
 
@@ -81,7 +81,7 @@
             cell.parent= self;
             cell.switchEnabled=YES;
             cell.defaultKey=@"Sound";
-            cell.textLabel.text=@"Play Sounds";
+            cell.textLabel.text=NSLocalizedString(@"Play Sounds",@ "");
             toreturn=cell;
             break;
         }

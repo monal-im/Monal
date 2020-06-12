@@ -31,9 +31,9 @@
 - (void)showIntro {
     
     EAIntroPage *page1 = [EAIntroPage page];
-    page1.title = @"Welcome to Monal";
+    page1.title = NSLocalizedString(@"Welcome to Monal",@ "");
     page1.titleColor=[UIColor darkGrayColor];
-    page1.desc = @"Chat for free with your friends and family!";
+    page1.desc = NSLocalizedString(@"Chat for free with your friends, colleagues and family!",@ "");
     if (@available(iOS 13.0, *)) {
         page1.descColor=[UIColor labelColor];
     } else {
@@ -45,9 +45,9 @@
     page1.descPositionY = self.view.bounds.size.height/2 - 70;
     
     EAIntroPage *page2 = [EAIntroPage page];
-    page2.title = @"Choices Galore";
+    page2.title = NSLocalizedString(@"Choices Galore",@ "");
     page2.titleColor=[UIColor darkGrayColor];
-    page2.desc = @"Use your existing account or make a new one on the many servers around the world";
+    page2.desc = NSLocalizedString(@"Use your existing account or make a new one on the many servers around the world",@ "");
     page2.titleIconView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"PeterRabbit8"]];
     if (@available(iOS 13.0, *)) {
         page2.descColor=[UIColor labelColor];
@@ -59,9 +59,9 @@
     page2.descPositionY = self.view.bounds.size.height/2 - 70;
     
     EAIntroPage *page3 = [EAIntroPage page];
-    page3.title = @"Escape The Garden";
+    page3.title = NSLocalizedString(@"Escape The Garden",@ "");
     page3.titleColor=[UIColor darkGrayColor];
-    page3.desc = @"You are not trapped in a garden. Talk to anyone else without anyone tracking you.";
+    page3.desc = NSLocalizedString(@"You are not trapped in a garden. Talk to anyone else without anyone tracking you.",@ "");
     if (@available(iOS 13.0, *)) {
         page3.descColor=[UIColor labelColor];
     } else {
@@ -73,9 +73,9 @@
     page3.descPositionY = self.view.bounds.size.height/2 - 70;
     
     EAIntroPage *page4 = [EAIntroPage page];
-    page4.title = @"Spread The Word";
+    page4.title = NSLocalizedString(@"Spread The Word",@ "");
     page4.titleColor=[UIColor darkGrayColor];
-    page4.desc = @"If you like Monal, please let others know and leave a review";
+    page4.desc = NSLocalizedString(@"If you like Monal, please let others know and leave a review",@ "");
     if (@available(iOS 13.0, *)) {
         page4.descColor=[UIColor labelColor];
     } else {

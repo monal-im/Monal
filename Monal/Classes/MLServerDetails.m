@@ -32,32 +32,32 @@
     
     if(self.xmppAccount.connectionProperties.supportsSM3)
     {
-        [self.serverCaps addObject:@{@"Title":@"XEP-0198: Stream Management", @"Description":@"Resume a stream when disconnected. Results in faster reconnect and saves battery life."}];
+        [self.serverCaps addObject:@{NSLocalizedString(@"Title",@ ""):NSLocalizedString(@"XEP-0198: Stream Management",@ ""), NSLocalizedString(@"Description",@ ""):NSLocalizedString(@"Resume a stream when disconnected. Results in faster reconnect and saves battery life.",@ "")}];
     }
     
     if(self.xmppAccount.connectionProperties.supportsPush)
     {
-        [self.serverCaps addObject:@{@"Title":@"XEP-0357: Push Notifications", @"Description":@"Receive push notifications from via Apple even when disconnected. Vastly improves reliability. "}];
+        [self.serverCaps addObject:@{NSLocalizedString(@"Title",@ ""):NSLocalizedString(@"XEP-0357: Push Notifications",@ ""), NSLocalizedString(@"Description",@ ""):NSLocalizedString(@"Receive push notifications from via Apple even when disconnected. Vastly improves reliability.",@ "")}];
     }
     
     if(self.xmppAccount.connectionProperties.usingCarbons2)
     {
-        [self.serverCaps addObject:@{@"Title":@"XEP-0280: Message Carbons", @"Description":@"Synchronize your messages on all loggedin devices."}];
+        [self.serverCaps addObject:@{NSLocalizedString(@"Title",@ ""):NSLocalizedString(@"XEP-0280: Message Carbons",@ ""), NSLocalizedString(@"Description",@ ""):NSLocalizedString(@"Synchronize your messages on all loggedin devices.",@ "")}];
     }
     
     if(self.xmppAccount.connectionProperties.supportsMam2)
     {
-           [self.serverCaps addObject:@{@"Title":@"XEP-0313: Message Archive Management", @"Description":@"Access message archives on the server."}];
+           [self.serverCaps addObject:@{NSLocalizedString(@"Title",@ ""):NSLocalizedString(@"XEP-0313: Message Archive Management",@ ""), NSLocalizedString(@"Description",@ ""):NSLocalizedString(@"Access message archives on the server.",@ "")}];
     }
     
     if(self.xmppAccount.connectionProperties.supportsHTTPUpload)
     {
-           [self.serverCaps addObject:@{@"Title":@"XEP-0363: HTTP File Upload", @"Description":@"Upload files to the server to share with others."}];
+           [self.serverCaps addObject:@{NSLocalizedString(@"Title",@ ""):NSLocalizedString(@"XEP-0363: HTTP File Upload",@ ""), NSLocalizedString(@"Description",@ ""):NSLocalizedString(@"Upload files to the server to share with others.",@ "")}];
     }
     
     if(self.xmppAccount.connectionProperties.supportsClientState)
     {
-           [self.serverCaps addObject:@{@"Title":@"XEP-0352: Client State Indication", @"Description":@"Indicate when a particular device is active or inactive. Saves battery. "}];
+           [self.serverCaps addObject:@{NSLocalizedString(@"Title",@ ""):NSLocalizedString(@"XEP-0352: Client State Indication",@ ""), NSLocalizedString(@"Description",@ ""):NSLocalizedString(@"Indicate when a particular device is active or inactive. Saves battery.",@ "")}];
     }
     
 }
@@ -82,8 +82,8 @@
     
     NSDictionary *dic = [self.serverCaps objectAtIndex:indexPath.row];
     
-    cell.textLabel.text= [dic objectForKey:@"Title"];
-    cell.detailTextLabel.text= [dic objectForKey:@"Description"];
+    cell.textLabel.text= [dic objectForKey:NSLocalizedString(@"Title",@ "")];
+    cell.detailTextLabel.text= [dic objectForKey:NSLocalizedString(@"Description",@ "")];
     
     return cell;
 }
@@ -91,7 +91,7 @@
 
 -(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    return @"These are the modern XMPP capabilities Monal detected on your server after you've logged in. ";
+    return NSLocalizedString(@"These are the modern XMPP capabilities Monal detected on your server after you have logged in.",@ "");
 }
 
 

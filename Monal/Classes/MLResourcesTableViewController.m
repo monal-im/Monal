@@ -18,9 +18,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     if(self.contact.isGroup) {
-        self.navigationItem.title=@"Participants";
+        self.navigationItem.title=NSLocalizedString(@"Participants",@ "");
     } else {
-        self.navigationItem.title=@"Resources";
+        self.navigationItem.title=NSLocalizedString(@"Resources",@ "");
     }
     
 }

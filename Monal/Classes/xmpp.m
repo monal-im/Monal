@@ -1460,7 +1460,16 @@ NSString *const kXMPPPresence = @"presence";
             //test if smacks is supported and allows resume
             if(self.connectionProperties.supportsSM3 && self.streamID) {
                 MLXMLNode *resumeNode=[[MLXMLNode alloc] initWithElement:@"resume"];
-                NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza], @"previd":self.streamID };
+                NSDictionary *dic = @{
+                    kXMLNS:@"urn:xmpp:sm:3",
+                    @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
+                    @"previd":self.streamID,
+                    
+                    @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
+                    @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
+                    @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
+                    @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", (unsigned long) [self.unAckedStanzas count]]
+                };
                 resumeNode.attributes=[dic mutableCopy];
                 self.resuming=YES;      //this is needed to distinguish a failed smacks resume and a failed smacks enable later on
                 [self send:resumeNode];

@@ -1789,7 +1789,7 @@ static NSMutableArray *extracted(xmpp *object) {
     if(!stanza) return;
     //always process everything on the receiveQueue to avoid race conditions of all sorts (like hard to find/reproduce smacks counting bugs etc.)
     void (^operation)(void) = ^{
-        if((self.accountState>=kStateBound || self.streamID) && self.connectionProperties.supportsSM3 && self.unAckedStanzas)
+        if(((self.accountState>=kStateBound && self.connectionProperties.supportsSM3) || [self isHibernated]) && self.unAckedStanzas)
         {
             //only count stanzas, not nonzas
             if([stanza.element isEqualToString:@"iq"]

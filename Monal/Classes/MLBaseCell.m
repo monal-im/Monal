@@ -7,8 +7,7 @@
 //
 
 #import "MLBaseCell.h"
-#define  kDelivered NSLocalizedString(@"Delivered",@"");
-#define  kRead NSLocalizedString(@"Read",@"");
+
 
 @implementation MLBaseCell
 

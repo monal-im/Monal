@@ -11,6 +11,9 @@
 #define kDefaultTextHeight 20
 #define kDefaultTextOffset 5
 
+#define  kDelivered NSLocalizedString(@"Delivered",@"");
+#define  kRead NSLocalizedString(@"Read",@"");
+
 
 @interface MLBaseCell : UITableViewCell
 

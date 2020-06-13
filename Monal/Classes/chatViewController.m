@@ -180,8 +180,9 @@
                 self.sendButton.enabled = NO;
             }
             
-            if(!title) title=@"";
-                self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, NSLocalizedString(@"Logged Out",@ "")];
+            if(!title)
+                title=@"";
+            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, NSLocalizedString(@"Logging In",@ "")];
         } else  {
             self.sendButton.enabled=YES;
             self.navigationItem.title=title;

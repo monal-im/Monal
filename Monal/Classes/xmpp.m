@@ -930,6 +930,8 @@ NSString *const kXMPPPresence = @"presence";
      It may also result in mutation on iteration
     */
     NSMutableArray *sendCopy = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
+    //remove all stanzas from queue and correct the lastOutboundStanza counter accordingly
+    self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue] - [self.unAckedStanzas count]];
     [self.unAckedStanzas removeAllObjects];
     [sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSDictionary *dic= (NSDictionary *) obj;

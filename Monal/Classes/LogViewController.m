@@ -46,7 +46,14 @@
     //scroll to bottom
     NSRange range = NSMakeRange(self.logView.text.length - 1, 1);
     [self.logView scrollRangeToVisible:range];
-    
+}
+
+-(IBAction)shareAction:(id)sender
+{
+    NSArray* sharedText = [NSArray arrayWithObjects:[self.logView text],  nil];
+    UIActivityViewController* shareController = [[UIActivityViewController alloc] initWithActivityItems:sharedText applicationActivities:nil];
+
+    [self presentViewController:shareController animated:YES completion:^{}];
 }
 
 - (void)didReceiveMemoryWarning

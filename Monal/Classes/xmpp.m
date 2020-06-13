@@ -963,6 +963,8 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) removeAckedStanzasFromQueue:(NSNumber*) hvalue
 {
+    if(hvalue==nil)
+        return;
     self.lastHandledOutboundStanza=hvalue;
 	if([self.unAckedStanzas count]>0)
 	{

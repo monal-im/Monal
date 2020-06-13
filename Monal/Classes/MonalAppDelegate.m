@@ -171,7 +171,7 @@
     self.fileLogger = [[DDFileLogger alloc] init];
     self.fileLogger.rollingFrequency = 60 * 60 * 24; // 24 hour rolling
     self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
-    self.fileLogger.maximumFileSize=1024 * 500;
+    self.fileLogger.maximumFileSize=1024 * 1024 * 64;
     [DDLog addLogger:self.fileLogger];
 #endif
     

@@ -548,6 +548,24 @@
                                             <action selector="shareAction:" destination="v41-1Z-cuJ" id="oNT-ak-asa"/>
                                         </connections>
                                     </barButtonItem>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="hQM-Na-1B0"/>
+                                    <barButtonItem systemItem="rewind" id="Itl-QC-MOb">
+                                        <connections>
+                                            <action selector="rewindButton:" destination="v41-1Z-cuJ" id="TAy-7J-xNv"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="Djz-pP-Ntv"/>
+                                    <barButtonItem systemItem="fastForward" id="EvC-j0-wsf">
+                                        <connections>
+                                            <action selector="fastForwardButton:" destination="v41-1Z-cuJ" id="26Y-Hn-3KL"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="bbT-e6-jf6"/>
+                                    <barButtonItem systemItem="refresh" id="Xb3-az-ikh">
+                                        <connections>
+                                            <action selector="refreshButton:" destination="v41-1Z-cuJ" id="C0v-wD-Qrb"/>
+                                        </connections>
+                                    </barButtonItem>
                                 </items>
                             </toolbar>
                         </subviews>

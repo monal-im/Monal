@@ -16,6 +16,9 @@
 
 @implementation LogViewController
 
+DDFileLogger* _logger;
+DDLogFileInfo* _logInfo;
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -35,17 +38,14 @@
 {
     
     [super viewDidAppear:animated];
-    MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-    DDFileLogger *logger=appDelegate.fileLogger;
+    MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
+    _logger = appDelegate.fileLogger;
+    NSArray* sortedLogFileInfos = [_logger.logFileManager sortedLogFileInfos];
+    _logInfo = [sortedLogFileInfos objectAtIndex: 0];
+
+    [self reloadLog];
     
-    NSArray *sortedLogFileInfos = [logger.logFileManager sortedLogFileInfos];
-    DDLogFileInfo *logFileInfo = [sortedLogFileInfos objectAtIndex: 0];
-    NSError *error;
-    self.logView.text=[NSString stringWithContentsOfFile:logFileInfo.filePath encoding:NSUTF8StringEncoding error:&error];
-    
-    //scroll to bottom
-    NSRange range = NSMakeRange(self.logView.text.length - 1, 1);
-    [self.logView scrollRangeToVisible:range];
+    [self scrollToBottom];
 }
 
 -(IBAction)shareAction:(id)sender
@@ -54,6 +54,37 @@
     UIActivityViewController* shareController = [[UIActivityViewController alloc] initWithActivityItems:sharedText applicationActivities:nil];
 
     [self presentViewController:shareController animated:YES completion:^{}];
+}
+
+-(void) reloadLog {
+    NSError* error;
+    self.logView.text=[NSString stringWithContentsOfFile:_logInfo.filePath encoding:NSUTF8StringEncoding error:&error];
+}
+
+-(void) scrollToBottom {
+    NSRange range = NSMakeRange(self.logView.text.length - 1, 1);
+    [self.logView scrollRangeToVisible:range];
+}
+
+-(void) scrollToTop {
+    NSRange range = NSMakeRange(0, 0);
+    [self.logView scrollRangeToVisible:range];
+}
+
+/*
+ * Toolbar button
+ */
+
+- (IBAction)rewindButton:(id)sender {
+    [self scrollToTop];
+}
+
+- (IBAction)fastForwardButton:(id)sender {
+    [self scrollToBottom];;
+}
+
+- (IBAction)refreshButton:(id)sender {
+    [self reloadLog];
 }
 
 - (void)didReceiveMemoryWarning

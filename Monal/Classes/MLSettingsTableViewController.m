@@ -43,9 +43,13 @@ NS_ENUM(NSInteger, kSettingSection)
     self.appRows=@[NSLocalizedString(@"Quick Setup", @""), NSLocalizedString(@"Accounts",@""), NSLocalizedString(@"Notifications",@""), NSLocalizedString(@"Backgrounds",@""), NSLocalizedString(@"Sounds",@""), NSLocalizedString(@"Display",@""), NSLocalizedString(@"Chat Logs",@"")];  //@"Cloud Storage"
     self.supportRows=@[NSLocalizedString(@"Email Support",@ ""), NSLocalizedString(@"Submit A Bug",@ "")];
 #ifdef DEBUG
-    self.aboutRows=@[NSLocalizedString(@"Rate Monal",@""), NSLocalizedString(@"Open Source",@""), NSLocalizedString(@"Privacy",@""), NSLocalizedString(@"Crash Logging",@""), NSLocalizedString(@"About",@""), NSLocalizedString(@"Version",@""), NSLocalizedString(@"Log",@"")];
+    self.aboutRows=@[NSLocalizedString(@"Rate Monal",@""), NSLocalizedString(@"Open Source",@""), NSLocalizedString(@"Privacy",@""),
+                    // NSLocalizedString(@"Crash Logging",@""),
+                     NSLocalizedString(@"About",@""), NSLocalizedString(@"Version",@""), NSLocalizedString(@"Log",@"")];
 #else
-    self.aboutRows=@[NSLocalizedString(@"Rate Monal",@""), NSLocalizedString(@"Open Source",@""), NSLocalizedString(@"Privacy",@""), NSLocalizedString(@"Crash Logging",@""), NSLocalizedString(@"About",@""), NSLocalizedString(@"Version",@"")];
+    self.aboutRows=@[NSLocalizedString(@"Rate Monal",@""), NSLocalizedString(@"Open Source",@""), NSLocalizedString(@"Privacy",@""),
+                    // NSLocalizedString(@"Crash Logging",@""),
+                     NSLocalizedString(@"About",@""), NSLocalizedString(@"Version",@"")];
 #endif
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     #if !TARGET_OS_MACCATALYST
@@ -210,9 +214,9 @@ NS_ENUM(NSInteger, kSettingSection)
                 case 2:
                     [self openLink:@"https://monal.im/privacy-policy/"];
                     break;
-                case 3:
-                    [self performSegueWithIdentifier:@"showOptOut" sender:self];
-                    break;
+//                case 3:
+//                    [self performSegueWithIdentifier:@"showOptOut" sender:self];
+//                    break;
                     
                 case 4:
                     [self openLink:@"https://monal.im/about/"];

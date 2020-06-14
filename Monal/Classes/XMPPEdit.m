@@ -20,8 +20,6 @@
 
 
 
-NSString *const kGtalk = @"Gtalk";
-
 @interface XMPPEdit()
 @property (nonatomic, strong) NSString *jid;
 @property (nonatomic, strong) NSString *password;
@@ -31,12 +29,11 @@ NSString *const kGtalk = @"Gtalk";
 
 @property (nonatomic, assign) BOOL enabled;
 @property (nonatomic, assign) BOOL useSSL;
-@property (nonatomic, assign) BOOL oldStyleSSL;
+@property (nonatomic, assign) BOOL directTLS;
 @property (nonatomic, assign) BOOL selfSignedSSL;
 @property (nonatomic, assign) BOOL airDrop;
 
 @property (nonatomic, weak) UITextField *currentTextField;
-@property (nonatomic, strong) NSURL *oAuthURL;
 
 @property (nonatomic, strong) NSDictionary *initialSettings;
 
@@ -108,39 +105,24 @@ NSString *const kGtalk = @"Gtalk";
             self.server=[settings objectForKey:@"server"];
             
             self.port=[NSString stringWithFormat:@"%@", [settings objectForKey:@"other_port"]];
-            // self.resource=[settings objectForKey:@"resource"];
+            self.resource=[settings objectForKey:kResource];
             
             self.useSSL=[[settings objectForKey:@"secure"] boolValue];
             self.enabled=[[settings objectForKey:kEnabled] boolValue];
             
-            self.oldStyleSSL=[[settings objectForKey:@"oldstyleSSL"] boolValue];
+            self.directTLS=[[settings objectForKey:@"directTLS"] boolValue];
             self.selfSignedSSL=[[settings objectForKey:@"selfsigned"] boolValue];
             self.airDrop = [[settings objectForKey:kAirdrop] boolValue];
             
-            if([[settings objectForKey:@"domain"] isEqualToString:@"gmail.com"])
-            {
-                self->JIDLabel.text=@"GTalk ID";
-                self.accountType=kGtalk;
-            }
         }];
     }
     else
     {
-        
-        if(_originIndex.row==1)
-        {
-            JIDLabel.text=@"GTalk ID";
-            self.server=@"talk.google.com";
-            self.jid=@"@gmail.com";
-            self.accountType=kGtalk;
-        }
-        
         self.port=@"5222";
         self.useSSL=true;
         self.resource=[EncodingTools encodeRandomResource];
-        self.oldStyleSSL=NO;
+        self.directTLS=NO;
         self.selfSignedSSL=NO;
-        
     }
     
     self.sectionArray = @[@"Account", @"Advanced Settings",@""];
@@ -215,21 +197,14 @@ NSString *const kGtalk = @"Gtalk";
         [dic setObject:self.port forKey:kPort];
     }
     
-    [dic setObject:[EncodingTools encodeRandomResource] forKey:kResource];
+    [dic setObject:self.resource forKey:kResource];
 
     [dic setObject:[NSNumber numberWithBool:self.useSSL] forKey:kSSL];
     [dic setObject:[NSNumber numberWithBool:self.enabled] forKey:kEnabled];
     [dic setObject:[NSNumber numberWithBool:self.selfSignedSSL] forKey:kSelfSigned];
-    [dic setObject:[NSNumber numberWithBool:self.oldStyleSSL] forKey:kOldSSL];
+    [dic setObject:[NSNumber numberWithBool:self.directTLS] forKey:kDirectTLS];
     [dic setObject:[NSNumber numberWithBool:self.airDrop] forKey:kAirdrop];
     [dic setObject:self.accountno forKey:kAccountID];
-
-    BOOL isGtalk=NO;
-    if([self.accountType isEqualToString:kGtalk]) {
-        isGtalk=YES;
-    }
-
-    [dic setObject:[NSNumber numberWithBool:isGtalk] forKey:kOauth];
 
     if(!self.editMode)
     {
@@ -387,36 +362,26 @@ NSString *const kGtalk = @"Gtalk";
         switch (indexPath.row)
         {
             case 0: {
-                thecell.cellLabel.text=@"Jabber ID";
-                thecell.toggleSwitch.hidden=YES;
-                thecell.textInputField.tag=1;
+                thecell.cellLabel.text = @"Jabber ID";
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.tag = 1;
                 thecell.textInputField.keyboardType = UIKeyboardTypeEmailAddress;
-                thecell.textInputField.text=self.jid;
+                thecell.textInputField.text = self.jid;
                 break;
             }
             case 1: {
-                if([self.accountType isEqualToString:kGtalk]){
-                    MLButtonCell *buttonCell =(MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
-                    UIColor *monalGreen =[UIColor colorWithRed:128.0/255 green:203.0/255 blue:182.0/255 alpha:1.0f];
-                    buttonCell.buttonText.textColor= monalGreen;
-                    buttonCell.buttonText.text=NSLocalizedString(@"Authenticate",@ "");
-                    buttonCell.selectionStyle= UITableViewCellSelectionStyleNone;
-                    return buttonCell;
-
-                } else  {
-                    thecell.cellLabel.text=NSLocalizedString(@"Password",@ "");
-                    thecell.toggleSwitch.hidden=YES;
-                    thecell.textInputField.secureTextEntry=YES;
-                    thecell.textInputField.tag=2;
-                    thecell.textInputField.text=self.password;
-                }
+                thecell.cellLabel.text = NSLocalizedString(@"Password",@ "");
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.secureTextEntry = YES;
+                thecell.textInputField.tag = 2;
+                thecell.textInputField.text = self.password;
                 break;
             }
             case 2: {
-                thecell.cellLabel.text=NSLocalizedString(@"Enabled",@ "");
-                thecell.textInputField.hidden=YES;
-                thecell.toggleSwitch.tag=1;
-                thecell.toggleSwitch.on=self.enabled;
+                thecell.cellLabel.text = NSLocalizedString(@"Enabled",@ "");
+                thecell.textInputField.hidden = YES;
+                thecell.toggleSwitch.tag = 1;
+                thecell.toggleSwitch.on = self.enabled;
                 break;
             }
 
@@ -428,78 +393,83 @@ NSString *const kGtalk = @"Gtalk";
         {
                 //advanced
             case 0:  {
-                thecell.cellLabel.text=NSLocalizedString(@"Server",@ "");
-                thecell.toggleSwitch.hidden=YES;
-                thecell.textInputField.tag=3;
-                thecell.textInputField.text=self.server;
+                thecell.cellLabel.text = NSLocalizedString(@"Server",@ "");
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.tag = 3;
+                thecell.textInputField.text = self.server;
                 thecell.accessoryType=UITableViewCellAccessoryDetailButton;
                 break;
             }
 
             case 1:  {
-                thecell.cellLabel.text=NSLocalizedString(@"Port",@ "");
-                thecell.toggleSwitch.hidden=YES;
-                thecell.textInputField.tag=4;
-                thecell.textInputField.text=self.port;
+                thecell.cellLabel.text = NSLocalizedString(@"Port",@ "");
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.tag = 4;
+                thecell.textInputField.text = self.port;
                 break;
             }
 
             case 2: {
-                thecell.cellLabel.text=@"TLS";
-                thecell.textInputField.hidden=YES;
-                thecell.toggleSwitch.tag=2;
-                thecell.toggleSwitch.on=self.useSSL;
+                thecell.cellLabel.text = @"TLS";
+                thecell.textInputField.hidden = YES;
+                thecell.toggleSwitch.tag = 2;
+                thecell.toggleSwitch.on = self.useSSL;
                 break;
             }
             case 3: {
-                thecell.cellLabel.text=NSLocalizedString(@"Old Style TLS",@ "");
-                thecell.textInputField.hidden=YES;
-                thecell.toggleSwitch.tag=3;
-                thecell.toggleSwitch.on=self.oldStyleSSL;
+                thecell.cellLabel.text = NSLocalizedString(@"Direct TLS",@ "");
+                thecell.textInputField.hidden = YES;
+                thecell.toggleSwitch.tag = 3;
+                thecell.toggleSwitch.on = self.directTLS;
                 break;
             }
             case 4: {
-                thecell.cellLabel.text=NSLocalizedString(@"Validate certificate",@ "");
-                thecell.textInputField.hidden=YES;
-                thecell.toggleSwitch.tag=4;
-                thecell.toggleSwitch.on=!self.selfSignedSSL;
+                thecell.cellLabel.text = NSLocalizedString(@"Validate certificate",@ "");
+                thecell.textInputField.hidden = YES;
+                thecell.toggleSwitch.tag = 4;
+                thecell.toggleSwitch.on = !self.selfSignedSSL;
                 break;
             }
             case 5: {
-                thecell.cellLabel.text=NSLocalizedString(@"Message Archive Pref",@ "");
-                thecell.toggleSwitch.hidden=YES;
+                thecell.cellLabel.text = NSLocalizedString(@"Message Archive Pref",@ "");
+                thecell.toggleSwitch.hidden = YES;
 
-                thecell.textInputField.hidden=YES;
-                thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+                thecell.textInputField.hidden = YES;
+                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                 break;
             }
             case 6: {
-                thecell.cellLabel.text=NSLocalizedString(@"My Keys",@ "");
-                thecell.toggleSwitch.hidden=YES;
+                thecell.cellLabel.text = NSLocalizedString(@"My Keys",@ "");
+                thecell.toggleSwitch.hidden = YES;
 
-                thecell.textInputField.hidden=YES;
-                thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+                thecell.textInputField.hidden = YES;
+                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                 break;
             }
             case 7: {
-                thecell.cellLabel.text=NSLocalizedString(@"Change Password",@ "");
-                thecell.toggleSwitch.hidden=YES;
+                thecell.cellLabel.text = NSLocalizedString(@"Change Password",@ "");
+                thecell.toggleSwitch.hidden = YES;
 
-                thecell.textInputField.hidden=YES;
-                thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+                thecell.textInputField.hidden = YES;
+                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                 break;
             }
             case 8: {
-                thecell.cellLabel.text=NSLocalizedString(@"Use AirDrop",@ "");
-                thecell.textInputField.hidden=YES;
-                thecell.toggleSwitch.tag=5;
-                thecell.toggleSwitch.on=self.airDrop;
+                thecell.cellLabel.text = NSLocalizedString(@"Use AirDrop",@ "");
+                thecell.textInputField.hidden = YES;
+                thecell.toggleSwitch.tag = 5;
+                thecell.toggleSwitch.on = self.airDrop;
                 break;
             }
-
+            case 9: {
+                thecell.cellLabel.text = NSLocalizedString(@"Resource",@ "");
+                thecell.labelRight.text = self.resource;
+                thecell.labelRight.hidden = NO;
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.hidden = YES;
+                break;
+            }
         }
-
-
     }
     else if (indexPath.section==2)
     {
@@ -509,10 +479,10 @@ NSString *const kGtalk = @"Gtalk";
                 if(self.editMode==true)
                 {
 
-                    MLButtonCell *buttonCell =(MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
-                    buttonCell.buttonText.text=NSLocalizedString(@"Delete",@ "");
-                    buttonCell.buttonText.textColor= [UIColor redColor];
-                    buttonCell.selectionStyle= UITableViewCellSelectionStyleNone;
+                    MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
+                    buttonCell.buttonText.text = NSLocalizedString(@"Delete",@ "");
+                    buttonCell.buttonText.textColor = [UIColor redColor];
+                    buttonCell.selectionStyle = UITableViewCellSelectionStyleNone;
                     return buttonCell;
                 }
                 break;
@@ -522,12 +492,12 @@ NSString *const kGtalk = @"Gtalk";
         }
     }
 
-    thecell.textInputField.delegate=self;
-    if(thecell.textInputField.hidden==YES)
+    thecell.textInputField.delegate = self;
+    if(thecell.textInputField.hidden == YES)
     {
         [thecell.toggleSwitch addTarget:self action:@selector(toggleSwitch:) forControlEvents:UIControlEventValueChanged];
     }
-    thecell.selectionStyle= UITableViewCellSelectionStyleNone;
+    thecell.selectionStyle = UITableViewCellSelectionStyleNone;
     return thecell;
 }
 
@@ -540,23 +510,23 @@ NSString *const kGtalk = @"Gtalk";
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    UIView *tempView=[[UIView alloc]initWithFrame:CGRectMake(0,200,300,244)];
-    tempView.backgroundColor=[UIColor clearColor];
+    UIView* tempView = [[UIView alloc]initWithFrame:CGRectMake(0,200,300,244)];
+    tempView.backgroundColor = [UIColor clearColor];
 
-    UILabel *tempLabel=[[UILabel alloc]initWithFrame:CGRectMake(15,0,300,44)];
-    tempLabel.backgroundColor=[UIColor clearColor];
+    UILabel* tempLabel = [[UILabel alloc]initWithFrame:CGRectMake(15,0,300,44)];
+    tempLabel.backgroundColor = [UIColor clearColor];
     tempLabel.shadowColor = [UIColor blackColor];
     tempLabel.shadowOffset = CGSizeMake(0,2);
     tempLabel.textColor = [UIColor whiteColor]; //here you can change the text color of header.
     tempLabel.font = [UIFont boldSystemFontOfSize:17.0f];
-    tempLabel.text=[self tableView:tableView titleForHeaderInSection:section ];
+    tempLabel.text = [self tableView:tableView titleForHeaderInSection:section ];
 
     [tempView addSubview:tempLabel];
 
-    tempLabel.textColor=[UIColor darkGrayColor];
-    tempLabel.text=  tempLabel.text.uppercaseString;
-    tempLabel.shadowColor =[UIColor clearColor];
-    tempLabel.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
+    tempLabel.textColor = [UIColor darkGrayColor];
+    tempLabel.text =  tempLabel.text.uppercaseString;
+    tempLabel.shadowColor = [UIColor clearColor];
+    tempLabel.font = [UIFont systemFontOfSize:[UIFont systemFontSize]];
 
     return tempView;
 }
@@ -569,14 +539,13 @@ NSString *const kGtalk = @"Gtalk";
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-
-    if(section==0){
+    if(section == 0){
         return 3;
     }
-    else if( section ==1) {
-        return 9;
+    else if(section == 1) {
+        return 10;
     }
-    else  if(section == 2&&  self.editMode==false)
+    else  if(section == 2 &&  self.editMode == false)
     {
         return 0;
     }
@@ -590,29 +559,23 @@ NSString *const kGtalk = @"Gtalk";
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)newIndexPath
 {
     DDLogVerbose(@"selected log section %ld , row %ld", newIndexPath.section, newIndexPath.row);
-    if(newIndexPath.section==0 && newIndexPath.row==1)
+    
+    if (newIndexPath.section == 1)
     {
-        if([self.accountType isEqualToString:kGtalk]){
-            [self authenticateWithOAuth];
-        }
-    }
-    else if (newIndexPath.section==1)
-    {  switch (newIndexPath.row)
+        switch (newIndexPath.row)
         {
-            case 5:  {
+            case 5:
                 [self performSegueWithIdentifier:@"showMAMPref" sender:self];
                 break;
-            }case 6:  {
+            case 6:
                 [self performSegueWithIdentifier:@"showKeyTrust" sender:self];
                 break;
-            }
-            case 7:  {
+            case 7:
                 [self performSegueWithIdentifier:@"showPassChange" sender:self];
                 break;
-            }
         }
     }
-    else if(newIndexPath.section==2)
+    else if(newIndexPath.section == 2)
     {
         [self delClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
     }
@@ -621,15 +584,13 @@ NSString *const kGtalk = @"Gtalk";
 
 -(void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section==1)
+    if (indexPath.section == 1)
     {
         switch (indexPath.row)
         {
-
-            case 0:  {
+            case 0:
                 [self performSegueWithIdentifier:@"showServerDetails" sender:self];
-            }
-
+                break;
         }
     }
 }
@@ -641,87 +602,79 @@ NSString *const kGtalk = @"Gtalk";
 {
     if ([segue.identifier isEqualToString:@"showServerDetails"])
     {
-        MLServerDetails *server= (MLServerDetails *)segue.destinationViewController;
+        MLServerDetails* server= (MLServerDetails*)segue.destinationViewController;
         server.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
     }
 
     else if ([segue.identifier isEqualToString:@"showMAMPref"])
     {
-        MLMAMPrefTableViewController *mam= (MLMAMPrefTableViewController *)segue.destinationViewController;
+        MLMAMPrefTableViewController* mam = (MLMAMPrefTableViewController*)segue.destinationViewController;
         mam.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
     }
     else if ([segue.identifier isEqualToString:@"showKeyTrust"])
     {
         if(self.jid && self.accountno) {
-            MLKeysTableViewController *keys= (MLKeysTableViewController *)segue.destinationViewController;
+            MLKeysTableViewController* keys = (MLKeysTableViewController*)segue.destinationViewController;
             keys.ownKeys = YES;
             MLContact *contact = [[MLContact alloc] init];
-            contact.contactJid=self.jid;
-            contact.accountId=self.accountno;
+            contact.contactJid = self.jid;
+            contact.accountId = self.accountno;
             keys.contact=contact;
         }
     }
     else if ([segue.identifier isEqualToString:@"showPassChange"])
     {
         if(self.jid && self.accountno) {
-            MLPasswordChangeTableViewController *pwchange= (MLPasswordChangeTableViewController *)segue.destinationViewController;
+            MLPasswordChangeTableViewController* pwchange = (MLPasswordChangeTableViewController*)segue.destinationViewController;
            pwchange.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
         }
     }
-
-
 }
 
 #pragma mark -  text input  fielddelegate
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField
 {
-    self.currentTextField=textField;
-    if(textField.tag==1) //user input field
+    self.currentTextField = textField;
+    if(textField.tag == 1) //user input field
     {
-        if(textField.text.length >0) {
-            UITextPosition *startPos=  textField.beginningOfDocument;
-            UITextRange *newRange = [textField textRangeFromPosition:startPos toPosition:startPos];
+        if(textField.text.length > 0) {
+            UITextPosition* startPos = textField.beginningOfDocument;
+            UITextRange* newRange = [textField textRangeFromPosition:startPos toPosition:startPos];
 
             // Set new range
             [textField setSelectedTextRange:newRange];
         }
     }
-
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField
 {
     switch (textField.tag) {
         case 1: {
-            self.jid=textField.text;
+            self.jid = textField.text;
             break;
         }
         case 2: {
-            self.password=textField.text;
+            self.password = textField.text;
             break;
         }
-
         case 3: {
-            self.server=textField.text;
+            self.server = textField.text;
             break;
         }
-
         case 4: {
-            self.port=textField.text;
+            self.port = textField.text;
             break;
         }
         case 5: {
-            self.resource=textField.text;
+            self.resource = textField.text;
             break;
         }
-
         default:
             break;
     }
-
 }
-
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
@@ -733,26 +686,26 @@ NSString *const kGtalk = @"Gtalk";
 
 -(void) toggleSwitch:(id)sender
 {
-    UISwitch *toggle = (UISwitch *) sender;
+    UISwitch* toggle = (UISwitch*) sender;
 
     switch (toggle.tag) {
         case 1: {
             if(toggle.on)
             {
-                self.enabled=YES;
+                self.enabled = YES;
             }
             else {
-                self.enabled=NO;
+                self.enabled = NO;
             }
             break;
         }
         case 2: {
             if(toggle.on)
             {
-                self.useSSL=YES;
+                self.useSSL = YES;
             }
             else {
-                self.useSSL=NO;
+                self.useSSL = NO;
             }
             break;
         }
@@ -760,39 +713,35 @@ NSString *const kGtalk = @"Gtalk";
         case 3: {
             if(toggle.on)
             {
-                self.oldStyleSSL=YES;
+                self.directTLS = YES;
             }
             else {
-                self.oldStyleSSL=NO;
+                self.directTLS = NO;
             }
             break;
         }
         case 4: {
             if(toggle.on)
             {
-                self.selfSignedSSL=NO;
+                self.selfSignedSSL = NO;
             }
             else {
-                self.selfSignedSSL=YES;
+                self.selfSignedSSL = YES;
             }
-
             break;
         }
 
         case 5: {
             if(toggle.on)
             {
-                self.airDrop=YES;
+                self.airDrop = YES;
             }
             else {
-                self.airDrop=NO;
+                self.airDrop = NO;
             }
-
             break;
         }
     }
-
-
 }
 
 

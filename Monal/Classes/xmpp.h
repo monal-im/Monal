@@ -91,6 +91,8 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 
 @property (nonatomic, readonly) xmppState accountState;
 
+
+
 // discovered properties
 @property (nonatomic, assign) BOOL SRVDiscoveryDone;
 @property (nonatomic, strong) NSArray* discoveredServersList;
@@ -206,6 +208,8 @@ sets away xmpp call.
  request futher service detail
  */
 -(void) getServiceDetails;
+
+-(BOOL) isHibernated;
 
 /**
  get list of rooms on conference server

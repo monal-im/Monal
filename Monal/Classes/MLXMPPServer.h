@@ -19,10 +19,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSNumber *port;
 
 @property (nonatomic,assign) BOOL SSL;
-@property (nonatomic,assign) BOOL oldStyleSSL;
+@property (nonatomic,assign) BOOL directTLS;
 @property (nonatomic,assign) BOOL selfSignedCert;
 
--(id) initWithHost:(NSString *) host andPort:(NSNumber *) port andOldStyleSSL:(BOOL) oldStyleSSL;
+-(id) initWithHost:(NSString *) host andPort:(NSNumber *) port andDirectTLS:(BOOL) directTLS;
 
 
 - (void) updateConnectServer:(NSString *) server;

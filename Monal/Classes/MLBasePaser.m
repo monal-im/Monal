@@ -12,7 +12,7 @@
 
 @property (nonatomic, strong) XMPPParser *currentStanzaParser;
 @property (nonatomic, assign) NSInteger depth;
-@property (nonatomic, strong) stanzaCompletion compeltion;
+@property (nonatomic, strong) stanzaCompletion completion;
 
 @end
 
@@ -21,7 +21,7 @@
 -(id) initWithCompeltion:(stanzaCompletion) completion
 {
     self = [super init];
-    self.compeltion = completion;
+    self.completion = completion;
     return self;
 }
 
@@ -144,11 +144,11 @@
     [self.currentStanzaParser parser:parser didEndElement:elementName namespaceURI:namespaceURI qualifiedName:qName];
     
     if(self.depth <=2) {
-        if(self.compeltion) {
+        if(self.completion) {
             if(!self.currentStanzaParser) {
                 DDLogError(@"No stanza parser. not calling completion");
             } else {
-                self.compeltion(self.currentStanzaParser);
+                self.completion(self.currentStanzaParser);
             }
         } else  {
             DDLogError(@"no completion handler for stanza!");

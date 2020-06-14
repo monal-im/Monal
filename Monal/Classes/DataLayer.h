@@ -32,9 +32,8 @@ extern NSString *const kServer;
 extern NSString *const kPort;
 extern NSString *const kResource;
 extern NSString *const kSSL;
-extern NSString *const kOldSSL;
+extern NSString *const kDirectTLS;
 extern NSString *const kSelfSigned;
-extern NSString *const kOauth;
 extern NSString *const kAirdrop;
 
 extern NSString *const kUsername;
@@ -162,7 +161,6 @@ extern NSString *const kMessageTypeUrl;
 -(NSString*) nickName:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 #pragma mark - account commands
--(void) protocolListWithCompletion: (void (^)(NSArray* result))completion;
 -(void) accountListWithCompletion: (void (^)(NSArray* result))completion;
 -(void) accountListEnabledWithCompletion: (void (^)(NSArray* result))completion;
 -(NSArray*) enabledAccountList;
@@ -253,6 +251,7 @@ extern NSString *const kMessageTypeUrl;
 
 #pragma mark active contacts
 -(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion;
+-(void) activeContactDictWithCompletion: (void (^)(NSMutableArray *))completion;
 -(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
 -(void) removeAllActiveBuddies;
 -(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;

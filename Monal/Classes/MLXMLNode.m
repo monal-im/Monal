@@ -25,7 +25,6 @@
     self=[self init];
     self.element=element;
     return self;
-    
 }
 
 -(id) initWithCoder:(NSCoder*)decoder
@@ -48,6 +47,14 @@
     [encoder encodeObject:_attributes forKey:@"attributes"];
     [encoder encodeObject:_children forKey:@"children"];
     [encoder encodeObject:_data forKey:@"data"];
+}
+
+-(id) copyWithZone:(NSZone*)zone {
+    MLXMLNode* copy = [[[self class] alloc] initWithElement:self.element];
+    copy.attributes = [_attributes mutableCopy];
+    copy.children = [_children mutableCopy];
+    copy.data = _data;
+    return copy;
 }
 
 -(void) setXMLNS:(NSString*) xmlns
@@ -73,58 +80,65 @@
     return [mutable copy];
 }
 
+-(void) addDelayTagFrom:(NSString *) from
+{
+    NSDateFormatter* rfc3339DateFormatter = [[NSDateFormatter alloc] init];
+    NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+    
+    [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
+    [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ssZ"];
+    [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    
+    MLXMLNode* delay =[[MLXMLNode alloc] initWithElement:@"delay"];
+    [delay setXMLNS:@"urn:xmpp:delay"];
+    [delay.attributes setValue:[rfc3339DateFormatter stringFromDate:[NSDate date]] forKey:@"stamp"];
+    [delay.attributes setValue:from forKey:@"from"];
+    [self.children addObject:delay];
+}
+
 -(NSString*) XMLString
 {
-    if(!_element) return nil; // sanity check
- 
-    if([_element isEqualToString:@"whitePing"]) {
+    if(!_element)
+        return nil; // sanity check
+    
+    if([_element isEqualToString:@"__whitePing"])
         return @" ";
-    }
-
-    if([_element isEqualToString:@"xml"]) {
+    
+    if([_element isEqualToString:@"__xml"])
          return [NSString stringWithFormat:@"<?xml version='1.0'?>"];
-    }
     
     NSMutableString* outputString=[[NSMutableString alloc] init];
-    [outputString appendString:[NSString stringWithFormat:@"<%@",_element]];
+    [outputString appendString:[NSString stringWithFormat:@"<%@", _element]];
     
     //set attributes
     for(NSString* key in [_attributes allKeys])
-    {
-        [outputString appendString:[NSString stringWithFormat:@" %@='%@' ",key, [MLXMLNode escapeForXMPPSingleQuote:(NSString *)[_attributes objectForKey:key]]]];
-    }
+        [outputString appendString:[NSString stringWithFormat:@" %@='%@'", key, [MLXMLNode escapeForXMPPSingleQuote:(NSString *)[_attributes objectForKey:key]]]];
     
-    if ([_element isEqualToString:@"starttls"]) {
-        [outputString appendString:[NSString stringWithFormat:@"/>"]];
-    }
-    else
+    if([_children count] || (_data && ![_data isEqualToString:@""]))
     {
         [outputString appendString:[NSString stringWithFormat:@">"]];
         
         //set children here
         for(MLXMLNode* child in _children)
-        {
             [outputString appendString:[child XMLString]];
-        }
         
-        
-        if(_data) {
+        if(_data)
             [outputString appendString:[MLXMLNode escapeForXMPP:_data]];
-        }
         
-        //dont close stream
-        if(![_element isEqualToString:@"stream:stream"] && ![_element isEqualToString:@"/stream:stream"]) {
+        //dont close stream element
+        if(![_element isEqualToString:@"stream:stream"] && ![_element isEqualToString:@"/stream:stream"])
             [outputString appendString:[NSString stringWithFormat:@"</%@>", _element]];
-        }
+    }
+    else
+    {
+        //dont close stream element
+        if(![_element isEqualToString:@"stream:stream"] && ![_element isEqualToString:@"/stream:stream"])
+            [outputString appendString:[NSString stringWithFormat:@"/>"]];
+        else
+            [outputString appendString:[NSString stringWithFormat:@">"]];
     }
     
-    return (NSString*)outputString ;
-}
-
-
--(NSString *)stanzaID
-{
-    return  [self.attributes objectForKey:@"id"];
+    return (NSString*)outputString;
 }
 
 @end

@@ -103,8 +103,6 @@ The of the message in the DB , should be int
  */
 +(MLMessage *) messageFromDictionary:(NSDictionary *) dic withDateFormatter:(NSDateFormatter *) formatter;
 
--(BOOL) shouldForceRefresh;
-
 @end
 
 NS_ASSUME_NONNULL_END

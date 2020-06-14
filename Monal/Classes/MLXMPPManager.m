@@ -15,11 +15,10 @@
 #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
 #import "MonalAppDelegate.h"
-@import MobileCoreServices;
 #endif
-#else
-@import MobileCoreServices;
 #endif
+
+@import MobileCoreServices;
 
 @import SAMKeychain;
 
@@ -296,10 +295,10 @@ An array of Dics what have timers to make sure everything was sent
     NSString *password = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@",[account objectForKey:kUsername],[account objectForKey:kDomain] ] password:password andResource:[account objectForKey:kResource]];
 
-    MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andOldStyleSSL:[[account objectForKey:kOldSSL] boolValue]];
+    MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andDirectTLS:[[account objectForKey:kDirectTLS] boolValue]];
     server.SSL=[[account objectForKey:kSSL] boolValue];
     server.selfSignedCert=[[account objectForKey:kSelfSigned] boolValue];
-    if(server.oldStyleSSL && !server.SSL ) server.SSL=YES; //technically a config error but understandable
+    if(server.directTLS && !server.SSL ) server.SSL=YES; //technically a config error but understandable
 
     xmpp* xmppAccount=[[xmpp alloc] initWithServer:server andIdentity:identity];
     xmppAccount.explicitLogout=NO;
@@ -309,12 +308,6 @@ An array of Dics what have timers to make sure everything was sent
 
     xmppAccount.airDrop=[[account objectForKey:kAirdrop] boolValue];
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]];
-
-
-    //    if([xmppAccount.password length]==0 && !xmppAccount.oAuth) //&& ([tempPass length]==0)
-    //    {
-    //        // ask fro temp pass if not oauth
-    //    }
 
 #ifndef DISABLE_OMEMO
     [xmppAccount setupSignal];
@@ -446,6 +439,7 @@ An array of Dics what have timers to make sure everything was sent
             DDLogVerbose(@"reachable");
             DDLogVerbose(@"pinging ");
 
+            //[self connectIfNecessary];
             //try to send a ping. if it fails, it will reconnect
             [xmppAccount sendPing];
         }
@@ -454,6 +448,20 @@ An array of Dics what have timers to make sure everything was sent
 
 
 #pragma mark -  XMPP commands
+-(void) sendMessageAndAddToHistory:(NSString*) message toContact:(NSString*)recipient fromAccount:(NSString*) accountID fromJID:(NSString*) fromJID isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC  isUpload:(BOOL) isUpload withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion {
+    NSString* msgid = [[NSUUID UUID] UUIDString];
+
+    // Save message to history
+    [[DataLayer sharedInstance] addMessageHistoryFrom:fromJID to:recipient forAccount:accountID withMessage:message actuallyFrom:fromJID withId:msgid encrypted:encrypted withCompletion:^(BOOL successHist, NSString *messageTypeHist) {
+        // Send message
+        if(successHist) {
+            [self sendMessage:message toContact:recipient fromAccount:accountID isEncrypted:encrypted isMUC:NO  isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString *messageIdSend) {
+                if(successSend) completion(successSend, messageIdSend);
+            }];
+        }
+    }];
+}
+
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC  isUpload:(BOOL) isUpload messageId:(NSString *) messageId
 withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
@@ -887,36 +895,35 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 
 - (void) sendOutboxForAccount:(NSString *) account{
-    NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
-    NSMutableArray *outbox=[[groupDefaults objectForKey:@"outbox"] mutableCopy];
-    NSMutableArray *outboxClean=[[groupDefaults objectForKey:@"outbox"] mutableCopy];
+    NSUserDefaults* groupDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
+    NSMutableArray* outbox = [[groupDefaults objectForKey:@"outbox"] mutableCopy];
+    NSMutableArray* outboxClean = [[groupDefaults objectForKey:@"outbox"] mutableCopy];
 
-    for (NSDictionary *row in outbox)
+    for (NSDictionary* row in outbox)
     {
-        NSDictionary *accountDic = [row objectForKey:@"account"] ;
+        NSDictionary* accountDic = [row objectForKey:@"account"] ;
         if([[accountDic objectForKey:@"account_id"] integerValue] == [account integerValue])
         {
-            NSString* msgid=[[NSUUID UUID] UUIDString];
-            [[DataLayer sharedInstance] addMessageHistoryFrom:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]] to:[row objectForKey:@"recipient"] forAccount:[accountDic objectForKey:@"account_id"] withMessage:[row objectForKey:@"url"]  actuallyFrom:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  withId:msgid encrypted:NO withCompletion:^(BOOL success, NSString *messageType) {
+            NSString* accountID = [NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]];
+            NSString* recipient = [row objectForKey:@"recipient"];
+            NSAssert(recipient != nil, @"Recipient missing");
+            NSAssert(recipient != nil, @"Recipient missing");
+            BOOL encryptMessages = [[DataLayer sharedInstance] shouldEncryptForJid:recipient andAccountNo:accountID];
+            NSString* fromJID = [NSString stringWithFormat:@"%@@%@", [accountDic objectForKey:@"username"], [accountDic objectForKey:@"domain"]];
 
-            }];
-
-            [self sendMessage:[row objectForKey:@"url"] toContact:[row objectForKey:@"recipient"] fromAccount:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  isEncrypted:NO isMUC:NO  isUpload:NO messageId:msgid withCompletionHandler:^(BOOL success, NSString *messageId) {
-
-                if(success) {
-                    if(((NSString *)[row objectForKey:@"comment"]).length>0) {
-                        [self sendMessage:[row objectForKey:@"comment"] toContact:[row objectForKey:@"recipient"]  fromAccount:[NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]]  isEncrypted:NO isMUC:NO isUpload:YES messageId:[[NSUUID UUID] UUIDString] withCompletionHandler:^(BOOL success, NSString *messageId) {
-
+            [self sendMessageAndAddToHistory:[row objectForKey:@"url"] toContact:recipient fromAccount:accountID fromJID:fromJID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                if(successSendObject) {
+                    NSString* comment = (NSString*)[row objectForKey:@"comment"];
+                    if(comment.length > 0) {
+                        [self sendMessageAndAddToHistory:comment toContact:recipient fromAccount:accountID fromJID:fromJID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendComment, NSString* messageIdSendComment) {
                         }];
                     }
                     [outboxClean removeObject:row];
-                       [groupDefaults setObject:outboxClean forKey:@"outbox"];
+                    [groupDefaults setObject:outboxClean forKey:@"outbox"];
                 }
             }];
         }
     }
-
-
 }
 
 -(void) sendMessageForConnectedAccounts

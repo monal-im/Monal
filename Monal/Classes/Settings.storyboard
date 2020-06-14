@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="dgM-uB-Aap">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="dgM-uB-Aap">
     <device id="retina6_5" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -533,22 +533,55 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="aaa" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="JYm-gw-Mhc">
-                                <rect key="frame" x="0.0" y="88" width="414" height="774"/>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" editable="NO" text="aaa" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="JYm-gw-Mhc">
+                                <rect key="frame" x="0.0" y="88" width="414" height="725"/>
                                 <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                                 <color key="textColor" systemColor="labelColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="87s-YI-3sS">
+                                <rect key="frame" x="0.0" y="769" width="414" height="44"/>
+                                <items>
+                                    <barButtonItem systemItem="action" id="z1c-Lt-zEe">
+                                        <connections>
+                                            <action selector="shareAction:" destination="v41-1Z-cuJ" id="oNT-ak-asa"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="hQM-Na-1B0"/>
+                                    <barButtonItem systemItem="rewind" id="Itl-QC-MOb">
+                                        <connections>
+                                            <action selector="rewindButton:" destination="v41-1Z-cuJ" id="TAy-7J-xNv"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="Djz-pP-Ntv"/>
+                                    <barButtonItem systemItem="fastForward" id="EvC-j0-wsf">
+                                        <connections>
+                                            <action selector="fastForwardButton:" destination="v41-1Z-cuJ" id="26Y-Hn-3KL"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="bbT-e6-jf6"/>
+                                    <barButtonItem systemItem="refresh" id="Xb3-az-ikh">
+                                        <connections>
+                                            <action selector="refreshButton:" destination="v41-1Z-cuJ" id="C0v-wD-Qrb"/>
+                                        </connections>
+                                    </barButtonItem>
+                                </items>
+                            </toolbar>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="JYm-gw-Mhc" firstAttribute="leading" secondItem="EB3-va-n1E" secondAttribute="leading" id="7OF-Xo-ZGa"/>
-                            <constraint firstItem="Eub-EA-z0c" firstAttribute="top" secondItem="JYm-gw-Mhc" secondAttribute="bottom" id="MFM-gd-XfO"/>
+                            <constraint firstAttribute="trailing" secondItem="87s-YI-3sS" secondAttribute="trailing" id="Bf1-Gb-UEF"/>
+                            <constraint firstItem="Eub-EA-z0c" firstAttribute="top" secondItem="87s-YI-3sS" secondAttribute="bottom" id="MhG-wQ-YOw"/>
+                            <constraint firstItem="87s-YI-3sS" firstAttribute="leading" secondItem="EB3-va-n1E" secondAttribute="leading" id="TtL-VW-4B2"/>
                             <constraint firstAttribute="trailing" secondItem="JYm-gw-Mhc" secondAttribute="trailing" id="XJd-3p-CJk"/>
                             <constraint firstItem="JYm-gw-Mhc" firstAttribute="top" secondItem="pE0-Vj-loH" secondAttribute="bottom" id="ghu-qL-fHv"/>
+                            <constraint firstItem="87s-YI-3sS" firstAttribute="bottom" relation="lessThanOrEqual" secondItem="JYm-gw-Mhc" secondAttribute="bottom" id="vZZ-KP-PaX"/>
                         </constraints>
                     </view>
+                    <toolbarItems/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="logView" destination="JYm-gw-Mhc" id="IRa-EC-O43"/>
                     </connections>
@@ -842,11 +875,11 @@
             <point key="canvasLocation" x="3386" y="5027"/>
         </scene>
     </scenes>
-    <resources>
-        <image name="740-gear" width="28" height="28"/>
-    </resources>
     <inferredMetricsTieBreakers>
         <segue reference="ljw-Ff-MNq"/>
         <segue reference="pZO-HH-rUP"/>
     </inferredMetricsTieBreakers>
+    <resources>
+        <image name="740-gear" width="28" height="28"/>
+    </resources>
 </document>

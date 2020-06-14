@@ -96,14 +96,11 @@
     [nc addObserver:self selector:@selector(dismissKeyboard:) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
     
-    [nc addObserver:self selector:@selector(keyboardDidShow:)
-               name:UIKeyboardDidShowNotification object:nil];
+    [nc addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
     
-    [nc addObserver:self selector:@selector(keyboardDidHide:)
-               name:UIKeyboardDidHideNotification object:nil];
+    [nc addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardDidHideNotification object:nil];
     
-    [nc addObserver:self selector:@selector(keyboardWillShow:)
-               name:UIKeyboardWillShowNotification object:nil];
+    [nc addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     
     [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
@@ -147,9 +144,6 @@
         [self.plusButton setImage:[UIImage imageNamed:@"907-plus-rounded-square"] forState:UIControlStateNormal];
     }
 #endif
-    
-    
-
 }
 
 -(void) handleForeGround {
@@ -177,16 +171,19 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         NSString *title=self.contact.contactDisplayName;
         
-        if(xmppAccount.accountState<kStateLoggedIn)
+        if([xmppAccount isHibernated] == YES)
         {
+            self.sendButton.enabled = YES;
+            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Hibernated"];
+        } else if(xmppAccount.accountState<kStateLoggedIn) {
             if(!xmppAccount.airDrop) {
-                self.sendButton.enabled=NO;
+                self.sendButton.enabled = NO;
             }
             
-            if(!title) title=@"";
-            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, NSLocalizedString(@"Logged Out",@ "")];
-        }
-        else  {
+            if(!title)
+                title=@"";
+            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, NSLocalizedString(@"Logging In",@ "")];
+        } else  {
             self.sendButton.enabled=YES;
             self.navigationItem.title=title;
         }
@@ -262,13 +259,23 @@
         
     }
     
-    NSArray *devices= [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
-    if(devices.count==0) {
+    NSArray* devices = [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
+    if(devices.count == 0) {
         if(self.encryptChat) {
-            self.encryptChat=NO;
-            [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Encryption Not Supported" message:@"This contact does not appear to have any devices that support encryption." preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:@"Disable Encryption" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                // Disable encryption
+                self.encryptChat=NO;
+                [self refreshButton:nil];
+                [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+                [alert dismissViewControllerAnimated:YES completion:nil];
+            }]];
+            [alert addAction:[UIAlertAction actionWithTitle:@"Ignore" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                [alert dismissViewControllerAnimated:YES completion:nil];
+            }]];
+
+            [self presentViewController:alert animated:YES completion:nil];
         }
-        
     }
 #endif
     

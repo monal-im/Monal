@@ -30,6 +30,11 @@
 -(NSString*) XMLString;
 
 /**
+ Adds a delayed delivery tag to the stanza, see XEP 0203
+ */
+-(void) addDelayTagFrom:(NSString *) from;
+
+/**
  The name of the element itself. 
  */
 @property (nonatomic,strong) NSString* element;
@@ -48,7 +53,5 @@
  String to be inserted into the data field between elements. AKA inner text.
  */
 @property (nonatomic,strong) NSString* data;
-
-- (NSString *)stanzaID;
 
 @end

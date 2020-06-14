@@ -21,7 +21,6 @@
 @property (nonatomic, strong) NSIndexPath  *selected;
 
 @property (nonatomic, strong) NSArray* accountList;
-@property (nonatomic, strong) NSArray* protocolList;
 
 @end
 
@@ -41,20 +40,16 @@
 
     self.accountsTable.backgroundView=nil;
  
-   [[DataLayer sharedInstance] protocolListWithCompletion:^(NSArray *result) {
-       dispatch_async(dispatch_get_main_queue(), ^{
-           self.protocolList=result;
-           [self.accountsTable reloadData];
-       });
-       
-   }];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.accountsTable reloadData];
+    });
     
-    self.uptimeFormatter =[[NSDateFormatter alloc] init];
-    self.uptimeFormatter.dateStyle =NSDateFormatterShortStyle;
-    self.uptimeFormatter.timeStyle =NSDateFormatterShortStyle;
-    self.uptimeFormatter.doesRelativeDateFormatting=YES;
-    self.uptimeFormatter.locale=[NSLocale currentLocale];
-    self.uptimeFormatter.timeZone=[NSTimeZone systemTimeZone];
+    self.uptimeFormatter = [[NSDateFormatter alloc] init];
+    self.uptimeFormatter.dateStyle = NSDateFormatterShortStyle;
+    self.uptimeFormatter.timeStyle = NSDateFormatterShortStyle;
+    self.uptimeFormatter.doesRelativeDateFormatting = YES;
+    self.uptimeFormatter.locale = [NSLocale currentLocale];
+    self.uptimeFormatter.timeZone = [NSTimeZone systemTimeZone];
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(refreshAccountList) name:kMonalAccountStatusChanged object:nil];
@@ -232,7 +227,7 @@
         }
         case 1:
         {
-            return [_protocolList count];
+            return 1;
             break;
         }
             
@@ -297,22 +292,14 @@
         }
         case 1:
         {
-            UITableViewCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ProtocolCell"];
-            if(cell==nil)
-            {
-                cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ProtocolCell"];
-            }
-            NSString* protocol =[[_protocolList objectAtIndex:indexPath.row] objectForKey:@"protocol_name"];
-            cell.textLabel.text=protocol;
-            cell.imageView.image=[UIImage imageNamed:protocol];
-            
+            UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"ProtocolCell"];
+            if(cell == nil)
+                cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ProtocolCell"];
+            cell.textLabel.text=NSLocalizedString(@"XMPP",@ "");
+            cell.imageView.image=[UIImage imageNamed:@"XMPP"];
+            cell.detailTextLabel.text=NSLocalizedString(@"Jabber, Openfire, Prosody etc.   ",@ "");
             cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
-            
-            if([protocol isEqualToString:@"XMPP"])
-            {
-                 cell.detailTextLabel.text=NSLocalizedString(@"Jabber, Openfire, Prosody etc.   ",@ "");
-            }
-            
+
             return cell;
             break;
         }

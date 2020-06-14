@@ -11,7 +11,7 @@
 @interface MLSwitchCell : UITableViewCell
 
 /**
- Label to the right
+ Label to the left
  */
 @property  (nonatomic, weak) IBOutlet UILabel* cellLabel;
 
@@ -24,5 +24,10 @@
  Textinput field
  */
 @property  (nonatomic, weak) IBOutlet UITextField* textInputField;
+
+/**
+Label to the right
+*/
+@property (weak, nonatomic) IBOutlet UILabel* labelRight;
 
 @end

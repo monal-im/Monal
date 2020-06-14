@@ -34,7 +34,6 @@ target 'Monal' do
 pod 'CocoaLumberjack'
 pod 'MBProgressHUD', '~> 1.1.0'
 
-#pod 'NXOAuth2Client', '~> 1.2.8'
 pod 'NotificationBannerSwift', '~> 3.0.0'
 pod 'IDMPhotoBrowser'
 pod 'SDWebImage', '~> 4.3.3'

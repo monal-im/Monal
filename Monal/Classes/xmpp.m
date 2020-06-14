@@ -42,7 +42,7 @@
 NSString *const kMessageId=@"MessageID";
 NSString *const kSendTimer=@"SendTimer";
 
-NSString *const kStanzaID=@"stanzaID";
+NSString *const kQueueID=@"queueID";
 NSString *const kStanza=@"stanza";
 
 
@@ -96,7 +96,6 @@ NSString *const kXMPPPresence = @"presence";
 
 @property (nonatomic, assign) BOOL resuming;
 @property (nonatomic, strong) NSString *streamID;
-
 @property (nonatomic, assign) BOOL hasDiscoAndRoster;
 
 /**
@@ -115,8 +114,8 @@ NSString *const kXMPPPresence = @"presence";
 @property (nonatomic, strong) NSNumber *lastOutboundStanza;
 
 /**
- Array of NSdic with stanzas that have not been acked.
- NSDic {stanzaID, stanza}
+ Array of NSDictionary with stanzas that have not been acked.
+ NSDictionary {queueID, stanza}
  */
 @property (nonatomic, strong) NSMutableArray *unAckedStanzas;
 
@@ -139,9 +138,6 @@ NSString *const kXMPPPresence = @"presence";
 @property (nonatomic, strong) NSOperationQueue *receiveQueue;
 
 @property (nonatomic, strong) NSOperationQueue *sendQueue;
-
-@property (nonatomic, strong) NSData *containerPrefix;
-@property (nonatomic, strong) NSData *containerSuffix;
 
 @end
 
@@ -176,7 +172,6 @@ NSString *const kXMPPPresence = @"presence";
 
     _versionHash=[self getVersionString];
 
-
     self.priority=[[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"] integerValue];
     self.statusMessage=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];
     self.awayState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"];
@@ -189,13 +184,6 @@ NSString *const kXMPPPresence = @"presence";
     }
 
     self.xmppCompletionHandlers = [[NSMutableDictionary alloc] init];
-
-
-    NSString *prefixString =@"<container>";
-    NSString *suffixString =@"</container>";
-    self.containerPrefix = [[prefixString dataUsingEncoding:NSUTF8StringEncoding] mutableCopy];
-    self.containerSuffix = [[suffixString dataUsingEncoding:NSUTF8StringEncoding] mutableCopy];
-
 }
 
 
@@ -214,6 +202,17 @@ NSString *const kXMPPPresence = @"presence";
         free(_outputBuffer);
     _outputBuffer = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+-(void) dispatchOnReceiveQueue: (void (^)(void)) operation
+{
+    if([NSOperationQueue currentQueue]!=self.receiveQueue)
+    {
+        DDLogWarn(@"DISPATCHING OPERATION ON RECEIVE QUEUE");
+        [self.receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:YES];
+    }
+    else
+        operation();
 }
 
 -(void) initTLS
@@ -300,7 +299,7 @@ NSString *const kXMPPPresence = @"presence";
         DDLogError(@"stream connection timed out");
         dispatch_source_cancel(streamTimer);
 
-        [self disconnect];
+        [self reconnect];       //try other srv records if availbalbe
     });
 
     dispatch_source_set_cancel_handler(streamTimer, ^{
@@ -308,12 +307,9 @@ NSString *const kXMPPPresence = @"presence";
     });
 
     dispatch_resume(streamTimer);
-
     [localIStream open];
     [_oStream open];
-
     dispatch_source_cancel(streamTimer);
-
 }
 
 -(void) connectionTask
@@ -337,6 +333,7 @@ NSString *const kXMPPPresence = @"presence";
             [self.connectionProperties.server updateConnectServer: self.connectionProperties.identity.domain];
             [self.connectionProperties.server updateConnectPort: @5222];
             [self.connectionProperties.server updateConnectTLS: NO];
+            DDLogInfo(@"NO SRV records found, using standard xmpp config: %@:%@ (using starttls)", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort);
         }
     }
 
@@ -506,9 +503,9 @@ NSString *const kXMPPPresence = @"presence";
 		self->_outputBufferByteCount = 0;
 	}];
     [self.receiveQueue cancelAllOperations];
-    [self.receiveQueue addOperationWithBlock:^{
+    [self dispatchOnReceiveQueue: ^{
 
-        self.connectedTime =nil;
+        self.connectedTime = nil;
 
         self.pingID=nil;
         DDLogInfo(@"removing streams");
@@ -542,33 +539,36 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) resetValues
 {
-    _startTLSComplete=NO;
-    _streamHasSpace=NO;
-    _loginStarted=NO;
-    _loginStartTimeStamp=nil;
-    _loginError=NO;
-    _accountState=kStateDisconnected;
-    _reconnectScheduled =NO;
+    [self dispatchOnReceiveQueue: ^{
+        _startTLSComplete=NO;
+        _streamHasSpace=NO;
+        _loginStarted=NO;
+        _loginStartTimeStamp=nil;
+        _loginError=NO;
+        _accountState=kStateDisconnected;
+        _reconnectScheduled =NO;
 
-    self.httpUploadQueue =nil;
+        self.httpUploadQueue =nil;
+    }];
 }
 
 -(void) cleanUpState
 {
-    if(self.explicitLogout)
-        [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
+    [self dispatchOnReceiveQueue: ^{
+        if(self.explicitLogout)
+            [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
 
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
-    if(_accountNo)
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountClearContacts object:nil userInfo:@{kAccountID:_accountNo}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
+        if(_accountNo)
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountClearContacts object:nil userInfo:@{kAccountID:_accountNo}];
 
 
-    DDLogInfo(@"Connections closed");
+        DDLogInfo(@"Connections closed");
 
-    [self resetValues];
+        [self resetValues];
 
-    DDLogInfo(@"All closed and cleaned up");
-
+        DDLogInfo(@"All closed and cleaned up");
+    }];
 }
 
 -(void) disconnectWithCompletion:(void(^)(void))completion
@@ -612,48 +612,49 @@ NSString *const kXMPPPresence = @"presence";
 			[self writeToStream:stream.XMLString]; // dont even bother queueing
 		}]] waitUntilFinished:YES];			//block until finished because we are closing the socket directly afterwards
 
-        //preserve unAckedStanzas even on explicitLogout and resend them on next connect
-        //if we don't do this messages could be lost when logging out directly after sending them
-        //and: sending messages twice is less intrusive than silently losing them
-        NSMutableArray* stanzas = self.unAckedStanzas;
+		[self.receiveQueue cancelAllOperations];
+        [self dispatchOnReceiveQueue: ^{
+            //preserve unAckedStanzas even on explicitLogout and resend them on next connect
+            //if we don't do this messages could be lost when logging out directly after sending them
+            //and: sending messages twice is less intrusive than silently losing them
+            NSMutableArray* stanzas = self.unAckedStanzas;
 
-        //reset smacks state to sane values (this can be done even if smacks is not supported)
-        [self initSM3];
-        self.unAckedStanzas=stanzas;
+            //reset smacks state to sane values (this can be done even if smacks is not supported)
+            [self initSM3];
+            self.unAckedStanzas=stanzas;
 
-        //persist these changes
-        [self persistState];
-
+            //persist these changes
+            [self persistState];
+        }];			//this will block until finished because we are closing the socket directly afterwards
     }
 
     [self closeSocket];
+    [self cleanUpState];
 
-    [self.receiveQueue addOperationWithBlock:^{
-        [self cleanUpState];
+    [self dispatchOnReceiveQueue: ^{
         if(completion) completion();
     }];
-
 }
 
 -(void) reconnect
 {
-    [self reconnect:5.0];
+    [self reconnect:1.0];
 }
 
 -(void) reconnect:(NSInteger) scheduleWait
 {
     if(self.registration || self.registrationSubmission) return;  //we never want to
 
-    [self.receiveQueue addOperationWithBlock: ^{
+    [self dispatchOnReceiveQueue: ^{
         DDLogVerbose(@"reconnecting ");
         //can be called multiple times
 
         if(!self.loginStartTimeStamp)  self.loginStartTimeStamp=[NSDate date]; // can be destroyed by threads resulting in a deadlock
-        if (self->_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>10)
+        if (self->_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>5)
         {
-            DDLogVerbose(@"reconnect called while one already in progress that took more than 10 seconds. disconnect before reconnect.");
+            DDLogVerbose(@"reconnect called while one already in progress that took more than 5 seconds. disconnect before reconnect.");
             [self disconnectWithCompletion:^{
-                [self reconnect];
+                [self reconnect:0];
             }];
             return;
         }
@@ -668,9 +669,6 @@ NSString *const kXMPPPresence = @"presence";
         self->_loginStarted=YES;
 
         NSTimeInterval wait=scheduleWait;
-//        if(!self->_loggedInOnce) {
-//            wait=0;
-//        }
 #if TARGET_OS_IPHONE
 
         if(self.connectionProperties.pushEnabled)
@@ -785,7 +783,7 @@ NSString *const kXMPPPresence = @"presence";
         DDLogInfo(@"parse ended");
     });
 
-    MLXMLNode* xmlOpening = [[MLXMLNode alloc] initWithElement:@"xml"];
+    MLXMLNode* xmlOpening = [[MLXMLNode alloc] initWithElement:@"__xml"];
     [self send:xmlOpening];
     MLXMLNode* stream = [[MLXMLNode alloc] init];
     stream.element=@"stream:stream";
@@ -865,44 +863,49 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) sendPing
 {
+    DDLogVerbose(@"sendPing called");
+    if(self.accountState<kStateReconnecting  && !self->_reconnectScheduled)
+    {
+        DDLogInfo(@" ping calling reconnect");
+        self->_accountState=kStateReconnecting;
+        [self reconnect:0];
+        return;
+    }
 
-        if(self.accountState<kStateReconnecting  && !self->_reconnectScheduled)
-        {
-            DDLogInfo(@" ping calling reconnect");
-            self->_accountState=kStateReconnecting;
-            [self reconnect:0];
+    if(self.accountState<kStateBound)
+    {
+        if(self->_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]<=10) {
+            DDLogInfo(@"ping attempt before logged in and bound. returning.");
             return;
         }
-
-        if(self.accountState<kStateBound)
+        else if (self->_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>10)
         {
-            if(self->_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]<=10) {
-                DDLogInfo(@"ping attempt before logged in and bound. returning.");
-                return;
-            }
-            else if (self->_loginStarted && [[NSDate date] timeIntervalSinceDate:self.loginStartTimeStamp]>10)
-            {
-                DDLogVerbose(@"ping called while one already in progress that took more than 10 seconds. disconnect before reconnect.");
-                [self reconnect:0];
+            DDLogVerbose(@"ping called while one already in progress that took more than 10 seconds. disconnect before reconnect.");
+            [self reconnect:0];
+        }
+    }
+    else {
+        //always use smacks pings if supported (they are shorter and better than whitespace pings)
+        if(self.connectionProperties.supportsSM3 )
+        {
+            //all smacks operations have to be done from the receiveQueue
+            DDLogVerbose(@"adding pinging smacks request to receiveQueue...");
+            [self.receiveQueue addOperationWithBlock: ^{
+                DDLogVerbose(@"calling pinging requestSMAck from receiveQueue...");
+                [self requestSMAck:YES];
+            }];
+        }
+        else  {
+            if(self.connectionProperties.supportsPing) {
+                XMPPIQ* ping =[[XMPPIQ alloc] initWithType:kiqGetType];
+                [ping setiqTo:self.connectionProperties.identity.domain];
+                [ping setPing];
+                [self send:ping];
+            } else  {
+                [self sendWhiteSpacePing];
             }
         }
-        else {
-            //always use smacks pings if supported (they are shorter and better than whitespace pings)
-            if(self.connectionProperties.supportsSM3 )
-            {
-                [self requestSMAck];
-            }
-            else  {
-                if(self.connectionProperties.supportsPing) {
-                    XMPPIQ* ping =[[XMPPIQ alloc] initWithType:kiqGetType];
-                    [ping setiqTo:self.connectionProperties.identity.domain];
-                    [ping setPing];
-                    [self send:ping];
-                } else  {
-                    [self sendWhiteSpacePing];
-                }
-            }
-        }
+    }
 }
 
 -(void) sendWhiteSpacePing
@@ -915,7 +918,7 @@ NSString *const kXMPPPresence = @"presence";
         return;
     }
 
-    MLXMLNode* ping =[[MLXMLNode alloc] initWithElement:@"whitePing"]; // no such element. Node has logic to  print white space
+    MLXMLNode* ping =[[MLXMLNode alloc] initWithElement:@"__whitePing"]; // no such element. Node has logic to  print white space
     [self send:ping];
 }
 
@@ -925,14 +928,16 @@ NSString *const kXMPPPresence = @"presence";
     /**
      Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
      It may also result in mutation on iteration
-	*/
-	NSMutableArray *sendCopy = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
-	[self.unAckedStanzas removeAllObjects];
-	[sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-		NSDictionary *dic= (NSDictionary *) obj;
-		[self send:(MLXMLNode*)[dic objectForKey:kStanza]];
-	}];
-	[self persistState];
+    */
+    NSMutableArray *sendCopy = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
+    //remove all stanzas from queue and correct the lastOutboundStanza counter accordingly
+    self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue] - [self.unAckedStanzas count]];
+    [self.unAckedStanzas removeAllObjects];
+    [sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSDictionary *dic= (NSDictionary *) obj;
+        [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
+    }];
+    [self persistState];
 }
 
 -(void) resendUnackedMessageStanzasOnly:(NSMutableArray*) stanzas
@@ -940,26 +945,29 @@ NSString *const kXMPPPresence = @"presence";
     /**
      Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
      It may also result in mutation on iteration
-	*/
-	if(stanzas)
-	{
-		NSMutableArray *sendCopy = [[NSMutableArray alloc] initWithArray:stanzas];
-		//clear queue because we don't want to repeat resending these stanzas later if the var stanzas points to self.unAckedStanzas here
-		[stanzas removeAllObjects];
-		[sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-			NSDictionary *dic= (NSDictionary *) obj;
-			MLXMLNode *stanza=[dic objectForKey:kStanza];
-			if([stanza.element isEqualToString:@"message"])		//only resend message stanzas because of the smacks error condition
-				[self send:stanza];
-		}];
-		//persist these changes (the queue can now be empty because smacks enable failed
-		//or contain all the resent stanzas (e.g. only resume failed))
-		[self persistState];
-	}
+    */
+    if(stanzas)
+    {
+        NSMutableArray *sendCopy = [[NSMutableArray alloc] initWithArray:stanzas];
+        //clear queue because we don't want to repeat resending these stanzas later if the var stanzas points to self.unAckedStanzas here
+        [stanzas removeAllObjects];
+        [sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            NSDictionary *dic= (NSDictionary *) obj;
+            MLXMLNode *stanza=[dic objectForKey:kStanza];
+            if([stanza.element isEqualToString:@"message"])		//only resend message stanzas because of the smacks error condition
+                [self send:stanza];
+        }];
+        //persist these changes (the queue can now be empty because smacks enable failed
+        //or contain all the resent stanzas (e.g. only resume failed))
+        [self persistState];
+    }
 }
 
 -(void) removeAckedStanzasFromQueue:(NSNumber*) hvalue
 {
+    if(hvalue==nil)
+        return;
+    self.lastHandledOutboundStanza=hvalue;
 	if([self.unAckedStanzas count]>0)
 	{
 		NSMutableArray *iterationArray = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
@@ -967,14 +975,14 @@ NSString *const kXMPPPresence = @"presence";
 		NSMutableArray *discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
 		for(NSDictionary *dic in iterationArray)
 		{
-			NSNumber *stanzaNumber = [dic objectForKey:kStanzaID];
-			//having a h value of 1 means the first stanza was acked and the first stanza has a kStanzaID of 0
+			NSNumber *stanzaNumber = [dic objectForKey:kQueueID];
+			//having a h value of 1 means the first stanza was acked and the first stanza has a kQueueID of 0
 			if([stanzaNumber integerValue]<[hvalue integerValue])
 				[discard addObject:dic];
 		}
 
 		[iterationArray removeObjectsInArray:discard];
-		if(self.unAckedStanzas) self.unAckedStanzas = iterationArray;	// if it was set to nil elsewhere, dont restore
+		self.unAckedStanzas = iterationArray;
 
 		//persist these changes (but only if we actually made some changes)
 		if([discard count])
@@ -982,26 +990,26 @@ NSString *const kXMPPPresence = @"presence";
 	}
 }
 
--(void) requestSMAck
+-(void) requestSMAck:(BOOL) force
 {
-	if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 &&
-		!self.smacksRequestInFlight && [self.unAckedStanzas count]>0 ) {
-
-		DDLogVerbose(@"requesting smacks ack...");
-		MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
-		NSDictionary *dic=@{
-			kXMLNS:@"urn:xmpp:sm:3",
-			@"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
-			@"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
-			@"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
-			@"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", (unsigned long) [self.unAckedStanzas count]],
-		};
-		rNode.attributes=[dic mutableCopy];
-		[self send:rNode];
-		self.smacksRequestInFlight=YES;
-	} else  {
-		DDLogDebug(@"no smacks request, there is nothing pending or a request already in flight...");
-	}
+    if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 &&
+        ((!self.smacksRequestInFlight && [self.unAckedStanzas count]>0) || force)
+    ) {
+        DDLogVerbose(@"requesting smacks ack...");
+        MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
+        NSDictionary *dic=@{
+            kXMLNS:@"urn:xmpp:sm:3",
+            @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
+            @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
+            @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
+            @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", (unsigned long) [self.unAckedStanzas count]],
+        };
+        rNode.attributes=[dic mutableCopy];
+        [self send:rNode];
+        self.smacksRequestInFlight=YES;
+    } else  {
+        DDLogDebug(@"no smacks request, there is nothing pending or a request already in flight...");
+    }
 }
 
 -(void) sendLastAck
@@ -1018,7 +1026,14 @@ NSString *const kXMPPPresence = @"presence";
     if(self.connectionProperties.supportsSM3)
     {
         MLXMLNode *aNode = [[MLXMLNode alloc] initWithElement:@"a"];
-        NSDictionary *dic= @{kXMLNS:@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza] };
+        NSDictionary *dic=@{
+            kXMLNS:@"urn:xmpp:sm:3",
+            @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
+            @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
+            @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
+            @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
+            @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", (unsigned long) [self.unAckedStanzas count]],
+        };
         aNode.attributes = [dic mutableCopy];
         if(queuedSend) {
             [self send:aNode];
@@ -1033,10 +1048,6 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) processInput:(XMPPParser *) parsedStanza
 {
-    //prevent reconnect attempt
-    if(_accountState<kStateHasStream)
-        _accountState=kStateHasStream;
-
     DDLogDebug(@"RECV Stanza: <%@> with namespace '%@'", parsedStanza.stanzaType, parsedStanza.stanzaNameSpace);
 
     if([parsedStanza.stanzaType isEqualToString:@"iq"] && [parsedStanza isKindOfClass:[ParseIq class]])
@@ -1355,7 +1366,7 @@ NSString *const kXMPPPresence = @"presence";
         }
 
         [self disconnectWithCompletion:^{
-            [self reconnect:5];
+            [self reconnect];
         }];
 
     }
@@ -1364,6 +1375,10 @@ NSString *const kXMPPPresence = @"presence";
     {
         ParseStream* streamNode= parsedStanza;
 
+        //prevent reconnect attempt
+        if(_accountState<kStateHasStream)
+            _accountState=kStateHasStream;
+        
         //perform logic to handle stream
         if(self.accountState<kStateLoggedIn )
         {
@@ -1449,7 +1464,16 @@ NSString *const kXMPPPresence = @"presence";
             //test if smacks is supported and allows resume
             if(self.connectionProperties.supportsSM3 && self.streamID) {
                 MLXMLNode *resumeNode=[[MLXMLNode alloc] initWithElement:@"resume"];
-                NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3",@"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza], @"previd":self.streamID };
+                NSDictionary *dic = @{
+                    kXMLNS:@"urn:xmpp:sm:3",
+                    @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
+                    @"previd":self.streamID,
+                    
+                    @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
+                    @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
+                    @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
+                    @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", (unsigned long) [self.unAckedStanzas count]]
+                };
                 resumeNode.attributes=[dic mutableCopy];
                 self.resuming=YES;      //this is needed to distinguish a failed smacks resume and a failed smacks enable later on
                 [self send:resumeNode];
@@ -1503,16 +1527,16 @@ NSString *const kXMPPPresence = @"presence";
         self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
     {
         ParseA* aNode=parsedStanza;
-        self.lastHandledOutboundStanza=aNode.h;
 
         //remove acked messages
         [self removeAckedStanzasFromQueue:aNode.h];
 
         self.smacksRequestInFlight=NO;			//ack returned
-        [self requestSMAck];					//request ack again (will only happen if queue is not empty)
+        [self requestSMAck:NO];					//request ack again (will only happen if queue is not empty)
     }
     else  if([parsedStanza.stanzaType isEqualToString:@"resumed"] && [parsedStanza isKindOfClass:[ParseResumed class]])
     {
+        ParseResumed* resumeNode=parsedStanza;
         self.resuming=NO;
 
         //now we are bound again
@@ -1521,19 +1545,27 @@ NSString *const kXMPPPresence = @"presence";
         _usableServersList=[[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
 
         //remove already delivered stanzas and resend the (still) unacked ones
-        ParseResumed* resumeNode= parsedStanza;
         [self removeAckedStanzasFromQueue:resumeNode.h];
         [self resendUnackedStanzas];
-
-        [self sendInitalPresence];
 
         //force push (re)enable on session resumption
         self.connectionProperties.pushEnabled=NO;
         if(self.connectionProperties.supportsPush)
-        {
             [self enablePush];
-        }
 
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+            {
+#endif
+                [self setClientInactive];
+#if TARGET_OS_IPHONE
+            }
+        });
+#endif
+#endif
+    
         if(self.loginCompletion) {
             self.loginCompletion(YES, @"");
             self.loginCompletion=nil;
@@ -1759,30 +1791,57 @@ static NSMutableArray *extracted(xmpp *object) {
 -(void) send:(MLXMLNode*) stanza
 {
     if(!stanza) return;
+    //always process everything on the receiveQueue to avoid race conditions of all sorts (like hard to find/reproduce smacks counting bugs etc.)
+    void (^operation)(void) = ^{
+        if(((self.accountState>=kStateBound && self.connectionProperties.supportsSM3) || [self isHibernated]) && self.unAckedStanzas)
+        {
+            //only count stanzas, not nonzas
+            if([stanza.element isEqualToString:@"iq"]
+                || [stanza.element isEqualToString:@"message"]
+                || [stanza.element isEqualToString:@"presence"])
+            {
+                MLXMLNode* queued_stanza = [stanza copy];
+                if(![queued_stanza.element isEqualToString:@"iq"])
+                {
+                    //check if a delay tag is already present
+                    BOOL found = NO;
+                    for(MLXMLNode* child in queued_stanza.children)
+                    {
+                        if([child.element isEqualToString:@"delay"] && [[child.attributes objectForKey:kXMLNS] isEqualToString:@"urn:xmpp:delay"])
+                        {
+                            found = YES;
+                            break;
+                        }
+                    }
+                    //only add a delay tag if not already present
+                    if(!found)
+                        [queued_stanza addDelayTagFrom:self.connectionProperties.identity.jid];
+                }
+                DDLogVerbose(@"ADD UNACKED STANZA: %@: %@", self.lastOutboundStanza, queued_stanza.XMLString);
+                NSDictionary *dic =@{kQueueID:self.lastOutboundStanza, kStanza:queued_stanza};
+                [self.unAckedStanzas addObject:dic];
+                //increment for next call
+                self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue]+1];
 
-    if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 && self.unAckedStanzas)
+                //persist these changes
+                [self persistState];
+            }
+        }
+
+        if(self.accountState>kStateDisconnected)
+            [self.sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
+                DDLogDebug(@"SEND: %@", stanza.XMLString);
+                [extracted(self) addObject:stanza];
+                [self writeFromQueue];  // try to send if there is space
+            }]];
+    };
+    if([NSOperationQueue currentQueue]!=self.receiveQueue)
     {
-		//only count stanzas, not nonzas
-		if([stanza.element isEqualToString:@"iq"]
-			|| [stanza.element isEqualToString:@"message"]
-			|| [stanza.element isEqualToString:@"presence"])
-		{
-			DDLogVerbose(@"ADD UNACKED STANZA: %@: %@", self.lastOutboundStanza, stanza.XMLString);
-			NSDictionary *dic =@{kStanzaID:self.lastOutboundStanza, kStanza:stanza};
-			[self.unAckedStanzas addObject:dic];
-			//increment for next call
-			self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue]+1];
-
-			//persist these changes
-			[self persistState];
-		}
+        DDLogWarn(@"SWITCHING TO RECEIVE QUEUE IN SEND (called from outside of receiveQueue): %@", stanza.XMLString);
+        [self.receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:YES];
     }
-
-    [self.sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
-		DDLogDebug(@"SEND: %@", stanza.XMLString);
-		[extracted(self) addObject:stanza];
-		[self writeFromQueue];  // try to send if there is space
-	}]];
+    else
+        operation();
 }
 
 #pragma mark messaging
@@ -1938,6 +1997,7 @@ static NSMutableArray *extracted(xmpp *object) {
         [values setObject:self.connectionProperties.conferenceServer forKey:@"conferenceServer"];
     }
 
+    [values setObject:[NSNumber numberWithBool:_loggedInOnce] forKey:@"loggedInOnce"];
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
@@ -1986,7 +2046,6 @@ static NSMutableArray *extracted(xmpp *object) {
         self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
         self.connectionProperties.discoveredServices=[dic objectForKey:@"discoveredServices"];
 
-
         self.connectionProperties.uploadServer=[dic objectForKey:@"uploadServer"];
         if(self.connectionProperties.uploadServer)
         {
@@ -1994,6 +2053,12 @@ static NSMutableArray *extracted(xmpp *object) {
         }
         self.connectionProperties.conferenceServer = [dic objectForKey:@"conferenceServer"];
 
+        if([dic objectForKey:@"loggedInOnce"])
+        {
+            NSNumber *loggedInOnce = [dic objectForKey:@"loggedInOnce"];
+            _loggedInOnce = loggedInOnce.boolValue;
+        }
+        
         if([dic objectForKey:@"usingCarbons2"])
         {
             NSNumber *carbonsNumber = [dic objectForKey:@"usingCarbons2"];
@@ -2053,7 +2118,7 @@ static NSMutableArray *extracted(xmpp *object) {
                      );
         if(self.unAckedStanzas)
             for(NSDictionary *dic in self.unAckedStanzas)
-                DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kStanzaID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
+                DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kQueueID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
     }
 }
 
@@ -2093,11 +2158,10 @@ static NSMutableArray *extracted(xmpp *object) {
 			[self sendLastAck];
 		}]] waitUntilFinished:YES];			//block until finished because we are closing the socket directly afterwards
 	}
-    [self.receiveQueue addOperationWithBlock:^{
-        [self closeSocket]; // just closing socket to simulate a unintentional disconnect
-        [self resetValues];
-        if(completion) completion();
-    }];
+    [self closeSocket]; // just closing socket to simulate a unintentional disconnect
+    [self resetValues];
+    
+    if(completion) completion();
 }
 
 -(void) queryDisco
@@ -2125,19 +2189,6 @@ static NSMutableArray *extracted(xmpp *object) {
     if(!self.visibleState) [presence setInvisible];
 
     [self send:presence];
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-        {
-#endif
-            [self setClientInactive];
-#if TARGET_OS_IPHONE
-        }
-    });
-#endif
-#endif
-
 }
 
 -(void) fetchRoster
@@ -2168,6 +2219,19 @@ static NSMutableArray *extracted(xmpp *object) {
     [session setXMLNS:@"urn:ietf:params:xml:ns:xmpp-session"];
     [sessionQuery.children addObject:session];
     [self send:sessionQuery];
+
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+        {
+#endif
+            [self setClientInactive];
+#if TARGET_OS_IPHONE
+        }
+    });
+#endif
+#endif
 
     //force new disco queries because we landed here because of a failed smacks resume
     //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)
@@ -2342,7 +2406,7 @@ static NSMutableArray *extracted(xmpp *object) {
     [query setiqTo:jid];
     [query requestDevices];
     if([jid isEqualToString:self.connectionProperties.identity.jid]) {
-        self.deviceQueryId=query.stanzaID;
+        self.deviceQueryId=[query.attributes objectForKey:@"id"];
     }
 
     [self send:query];
@@ -2380,24 +2444,18 @@ static NSMutableArray *extracted(xmpp *object) {
 
 -(NSString*)getVersionString
 {
-    // We may need this later
-    NSString* unhashed=[NSString stringWithFormat:@"client/phone//Monal %@<%@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"], [XMPPIQ featuresString]];
-
+    // see https://xmpp.org/extensions/xep-0115.html#ver
     NSData* hashed;
-    // <http://jabber.org/protocol/offline<
     unsigned char digest[CC_SHA1_DIGEST_LENGTH];
-    NSData *stringBytes = [unhashed dataUsingEncoding: NSUTF8StringEncoding]; /* or some other encoding */
-    if (CC_SHA1([stringBytes bytes], (UInt32)[stringBytes length], digest)) {
-        hashed =[NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
-    }
-
-    NSString* hashedBase64= [EncodingTools encodeBase64WithData:hashed];
+    NSString* unhashed = [NSString stringWithFormat:@"client/phone//Monal %@<%@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"], [XMPPIQ featuresString]];
+    
+    NSData *stringBytes = [unhashed dataUsingEncoding: NSUTF8StringEncoding];
+    if(CC_SHA1([stringBytes bytes], (UInt32)[stringBytes length], digest))
+        hashed = [NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
+    NSString* hashedBase64 = [EncodingTools encodeBase64WithData:hashed];
 
     DDLogVerbose(@"ver string: unhashed %@, hashed %@, hashed-64 %@", unhashed, hashed, hashedBase64);
-
-
     return hashedBase64;
-
 }
 
 
@@ -2428,8 +2486,13 @@ static NSMutableArray *extracted(xmpp *object) {
             DDLogError(@"no jid on info");
         }
     }
+}
 
-
+-(BOOL) isHibernated
+{
+    BOOL hibernated = (_accountState == kStateDisconnected || _accountState == kStateReconnecting);
+    hibernated &= (_streamID != nil);
+    return hibernated;
 }
 
 
@@ -2871,7 +2934,7 @@ static NSMutableArray *extracted(xmpp *object) {
     [iq setiqTo:self.connectionProperties.identity.domain];
     [iq changePasswordForUser:self.connectionProperties.identity.user newPassword:newPass];
     if(completion) {
-        [self.xmppCompletionHandlers setObject:completion forKey:iq.stanzaID];
+        [self.xmppCompletionHandlers setObject:completion forKey:[iq.attributes objectForKey:@"id"]];
     }
     [self send:iq];
 }
@@ -2983,9 +3046,11 @@ static NSMutableArray *extracted(xmpp *object) {
                 }
 
             }
-
             if(!self.registration) {
-                [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message, st_error]];
+                // Do not show "Connection refused" message if there are more SRV records to try
+                if(!_SRVDiscoveryDone || (_SRVDiscoveryDone && [_usableServersList count] == 0) || st_error.code != 61) {
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message, st_error]];
+                }
                 if(self.loginCompletion)  {
                     self.loginCompletion(NO, message);
                     self.loginCompletion=nil;
@@ -3007,7 +3072,7 @@ static NSMutableArray *extracted(xmpp *object) {
 #endif
                         DDLogInfo(@" stream error calling reconnect for account that logged in once ");
                         [self disconnectWithCompletion:^{
-                            [self reconnect:5];
+                            [self reconnect];
                         }];
                         return;
 
@@ -3032,14 +3097,14 @@ static NSMutableArray *extracted(xmpp *object) {
                 st_error.code == 32          // Broken pipe
             ) {
                 [self disconnectWithCompletion:^{
-                    [self reconnect:5];
+                    [self reconnect];
                 }];
                 return;
             }
             
             DDLogInfo(@"unhandled stream error");
             [self disconnectWithCompletion:^{
-                [self reconnect:5];
+                [self reconnect];
             }];
 
             break;
@@ -3061,7 +3126,7 @@ static NSMutableArray *extracted(xmpp *object) {
                 _loginStarted=NO;
                 [self disconnectWithCompletion:^{
                     self->_accountState=kStateReconnecting;
-                    [self reconnect:5];
+                    [self reconnect];
                 }];
 
             }
@@ -3080,6 +3145,11 @@ static NSMutableArray *extracted(xmpp *object) {
 	if(!_streamHasSpace)
     {
         DDLogVerbose(@"no space to write. early return from writeFromQueue().");
+        return;
+    }
+    if(![_outputQueue count])
+    {
+        DDLogVerbose(@"no entries in _outputQueue. early return from writeFromQueue().");
         return;
     }
     BOOL requestAck=NO;
@@ -3136,12 +3206,12 @@ static NSMutableArray *extracted(xmpp *object) {
 		//for every stanza (e.g. until the smacks queue is empty) and not sending an ack if one is already in flight
 		DDLogVerbose(@"adding smacks request to receiveQueue...");
 		[self.receiveQueue addOperationWithBlock: ^{
-			DDLogVerbose(@"requesting smacks ack...");
-			[self requestSMAck];
+			DDLogVerbose(@"calling requestSMAck from receiveQueue...");
+			[self requestSMAck:NO];
 		}];
 
     } else  {
-        DDLogVerbose(@"NOT requesting smacks ack...");
+        DDLogVerbose(@"NOT adding smacks request to receiveQueue...");
     }
 }
 

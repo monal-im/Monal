@@ -40,31 +40,30 @@ NSString *const kiqErrorType = @"error";
 
 + (NSArray *) features {
     static NSArray* featuresArray;
-     static dispatch_once_t onceToken;
-     dispatch_once(&onceToken, ^{
-         //This list must be in aphabetical order
-    featuresArray=@[@"eu.siacs.conversations.axolotl.devicelist+notify",
-                    @"http://jabber.org/protocol/caps",
-                        @"http://jabber.org/protocol/disco#info",
-                        @"http://jabber.org/protocol/disco#items",
-                        @"http://jabber.org/protocol/muc",
-                        @"urn:xmpp:jingle:1",
-                        @"urn:xmpp:jingle:apps:rtp:1",
-                        @"urn:xmpp:jingle:apps:rtp:audio",
-                        @"urn:xmpp:jingle:transports:raw-udp:0",
-                        @"urn:xmpp:jingle:transports:raw-udp:1",
-                        @"urn:xmpp:receipts"
-                    
-                        ];
-     });
-    
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        featuresArray = @[
+            @"eu.siacs.conversations.axolotl.devicelist+notify",
+            @"http://jabber.org/protocol/caps",
+            @"http://jabber.org/protocol/disco#info",
+            @"http://jabber.org/protocol/disco#items",
+            @"http://jabber.org/protocol/muc",
+            @"urn:xmpp:jingle:1",
+            @"urn:xmpp:jingle:apps:rtp:1",
+            @"urn:xmpp:jingle:apps:rtp:audio",
+            @"urn:xmpp:jingle:transports:raw-udp:0",
+            @"urn:xmpp:jingle:transports:raw-udp:1",
+            @"urn:xmpp:receipts"
+        ];
+        // this has to be sorted for the features hash to be correct, see https://xmpp.org/extensions/xep-0115.html#ver
+        featuresArray = [featuresArray sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+    });
     return featuresArray;
 }
 
 +(NSString *) featuresString
 {
-    NSMutableString *toreturn = [[NSMutableString alloc] init];
-    
+    NSMutableString* toreturn = [[NSMutableString alloc] init];
     for(NSString* feature in [XMPPIQ features])
     {
         [toreturn appendString:feature];
@@ -183,7 +182,6 @@ NSString *const kiqErrorType = @"error";
 
 -(void) setDiscoInfoWithFeaturesAndNode:(NSString*) node
 {
-    
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode setXMLNS:@"http://jabber.org/protocol/disco#info"];
@@ -210,7 +208,6 @@ NSString *const kiqErrorType = @"error";
     [queryNode.children addObject:identityNode];
        
     [self.children addObject:queryNode];
-    
 }
 
 -(void) setiqTo:(NSString*) to

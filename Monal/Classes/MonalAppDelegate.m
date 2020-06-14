@@ -171,7 +171,7 @@
     self.fileLogger = [[DDFileLogger alloc] init];
     self.fileLogger.rollingFrequency = 60 * 60 * 24; // 24 hour rolling
     self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
-    self.fileLogger.maximumFileSize=1024 * 500;
+    self.fileLogger.maximumFileSize=1024 * 1024 * 64;
     [DDLog addLogger:self.fileLogger];
 #endif
     
@@ -421,8 +421,11 @@
 -(void)applicationWillResignActive:(UIApplication *)application
 {
      NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
-    [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
-        NSData *archive = [NSKeyedArchiver archivedDataWithRootObject:cleanActive requiringSecureCoding:YES error:nil];
+
+    [[DataLayer sharedInstance] activeContactDictWithCompletion:^(NSMutableArray *cleanActive) {
+        NSError* err;
+        NSData *archive = [NSKeyedArchiver archivedDataWithRootObject:cleanActive requiringSecureCoding:YES error:&err];
+        NSAssert(err == nil, @"%@", err);
         [groupDefaults setObject:archive forKey:@"recipients"];
         [groupDefaults synchronize];
     }];

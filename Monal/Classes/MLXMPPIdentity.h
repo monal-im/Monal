@@ -27,12 +27,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 /**
- Creates a new identity. Password can be null if we plan on using oauth.
+ Creates a new identity.
  */
--(id) initWithJid:(nonnull NSString *)jid password:(NSString *) password andResource:(nonnull NSString *) resource;
+-(id) initWithJid:(nonnull NSString *)jid password:(nonnull NSString *) password andResource:(nonnull NSString *) resource;
 
 /**
- Update password is only used when using Oauth or the password is changed in app
+ Update password is only used when the password is changed in app
  */
 -(void) updatPassword:(NSString *) newPassword;
 

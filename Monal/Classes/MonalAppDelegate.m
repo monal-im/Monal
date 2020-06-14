@@ -16,11 +16,6 @@
 #import "MLImageManager.h"
 #import "ActiveChatsViewController.h"
 
-#if !TARGET_OS_MACCATALYST
-@import Crashlytics;
-@import Fabric;
-#endif
-
 @import NotificationBannerSwift;
 
 #import "MLXMPPManager.h"
@@ -241,7 +236,7 @@
 #if !TARGET_OS_MACCATALYST
     BOOL optout = [[NSUserDefaults standardUserDefaults] boolForKey:@"CrashlyticsOptOut"];
     if(!optout) {
-        [Fabric with:@[[Crashlytics class]]];
+    
     }
 #endif
     

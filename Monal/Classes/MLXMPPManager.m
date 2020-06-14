@@ -19,18 +19,17 @@
 #endif
 
 @import MobileCoreServices;
-
 @import SAMKeychain;
 
 #if TARGET_OS_IPHONE
-static const int pingFreqencyMinutes =10;
+static const int pingFreqencyMinutes = 10;
 #else
-static const int pingFreqencyMinutes =3;
+static const int pingFreqencyMinutes = 3;
 #endif
 
-static const int sendMessageTimeoutSeconds =10;
+static const int sendMessageTimeoutSeconds = 10;
 
-NSString *const kXmppAccount= @"xmppAccount";
+NSString *const kXmppAccount = @"xmppAccount";
 
 @interface MLXMPPManager()
 

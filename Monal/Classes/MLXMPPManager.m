@@ -12,9 +12,12 @@
 #import "MLMessageProcessor.h"
 #import "ParseMessage.h"
 
+#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
 #import "MonalAppDelegate.h"
 #endif
+#endif
+
 @import MobileCoreServices;
 
 @import SAMKeychain;

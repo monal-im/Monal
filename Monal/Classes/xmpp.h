@@ -109,8 +109,8 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, strong) NSDate* connectedTime;
 
 #ifndef DISABLE_OMEMO
-@property (nonatomic, strong) SignalContext* signalContext;
-@property (nonatomic, strong) MLSignalStore* monalSignalStore;
+@property (atomic, strong) SignalContext* signalContext;
+@property (atomic, strong) MLSignalStore* monalSignalStore;
 #endif
 
 extern NSString *const kMessageId;

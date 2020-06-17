@@ -952,8 +952,8 @@ NSString *const kXMPPPresence = @"presence";
         //clear queue because we don't want to repeat resending these stanzas later if the var stanzas points to self.unAckedStanzas here
         [stanzas removeAllObjects];
         [sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSDictionary *dic= (NSDictionary *) obj;
-            MLXMLNode *stanza=[dic objectForKey:kStanza];
+            NSDictionary* dic = (NSDictionary *) obj;
+            MLXMLNode* stanza = [dic objectForKey:kStanza];
             if([stanza.element isEqualToString:@"message"])		//only resend message stanzas because of the smacks error condition
                 [self send:stanza];
         }];
@@ -967,27 +967,41 @@ NSString *const kXMPPPresence = @"presence";
 {
     if(hvalue==nil)
         return;
+    
     self.lastHandledOutboundStanza=hvalue;
-	if([self.unAckedStanzas count]>0)
-	{
-		NSMutableArray *iterationArray = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
-		DDLogDebug(@"removeAckedStanzasFromQueue: hvalue %@, lastOutboundStanza %@", hvalue, self.lastOutboundStanza);
-		NSMutableArray *discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
-		for(NSDictionary *dic in iterationArray)
-		{
-			NSNumber *stanzaNumber = [dic objectForKey:kQueueID];
-			//having a h value of 1 means the first stanza was acked and the first stanza has a kQueueID of 0
-			if([stanzaNumber integerValue]<[hvalue integerValue])
-				[discard addObject:dic];
-		}
+    
+    if([self.unAckedStanzas count]>0)
+    {
+        NSMutableArray* iterationArray = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
+        DDLogDebug(@"removeAckedStanzasFromQueue: hvalue %@, lastOutboundStanza %@", hvalue, self.lastOutboundStanza);
+        NSMutableArray* discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
+        for(NSDictionary* dic in iterationArray)
+        {
+            NSNumber* stanzaNumber = [dic objectForKey:kQueueID];
+            MLXMLNode* node = [dic objectForKey:kStanza];
+            //having a h value of 1 means the first stanza was acked and the first stanza has a kQueueID of 0
+            if([stanzaNumber integerValue]<[hvalue integerValue])
+            {
+                [discard addObject:dic];
+                
+                //signal successful delivery to the server to all notification listeners
+                //(NOT the successful delivery to the receiving client, see the implementation of XEP-0184 for that)
+                if([node isKindOfClass:[XMPPMessage class]])
+                {
+                    XMPPMessage* messageNode = (XMPPMessage*)node;
+                    NSDictionary* dic = @{kMessageId:messageNode.xmppId};
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalSentMessageNotice object:self userInfo:dic];
+                }
+            }
+        }
 
-		[iterationArray removeObjectsInArray:discard];
-		self.unAckedStanzas = iterationArray;
+        [iterationArray removeObjectsInArray:discard];
+        self.unAckedStanzas = iterationArray;
 
-		//persist these changes (but only if we actually made some changes)
-		if([discard count])
-			[self persistState];
-	}
+        //persist these changes (but only if we actually made some changes)
+        if([discard count])
+            [self persistState];
+    }
 }
 
 -(void) requestSMAck:(BOOL) force
@@ -3168,14 +3182,7 @@ static NSMutableArray *extracted(xmpp *object) {
 				requestAck=YES;
 			}
 
-			if([node isKindOfClass:[XMPPMessage class]])
-			{
-				XMPPMessage *messageNode = (XMPPMessage *) node;
-				NSDictionary *dic =@{kMessageId:messageNode.xmppId};
-				[[NSNotificationCenter defaultCenter] postNotificationName: kMonalSentMessageNotice object:self userInfo:dic];
-
-			}
-			else if([node isKindOfClass:[XMPPIQ class]])
+			if([node isKindOfClass:[XMPPIQ class]])
 			{
 				XMPPIQ *iq = (XMPPIQ *)node;
 				if([iq.children count]>0)

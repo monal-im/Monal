@@ -897,10 +897,11 @@ NSString *const kXMPPPresence = @"presence";
         }
         else  {
             if(self.connectionProperties.supportsPing) {
-                XMPPIQ* ping =[[XMPPIQ alloc] initWithType:kiqGetType];
+                XMPPIQ* ping = [[XMPPIQ alloc] initWithType:kiqGetType];
                 [ping setiqTo:self.connectionProperties.identity.domain];
                 [ping setPing];
                 [self send:ping];
+                [self setPingTimerForID:[ping.attributes objectForKey:@"id"]];
             } else  {
                 [self sendWhiteSpacePing];
             }
@@ -3175,47 +3176,34 @@ static NSMutableArray *extracted(xmpp *object) {
         BOOL success=[self writeToStream:node.XMLString];
         if(success)
         {
-			//only react to stanzas, not nonzas
-			if([node.element isEqualToString:@"iq"]
-				|| [node.element isEqualToString:@"message"]
-				|| [node.element isEqualToString:@"presence"]) {
-				requestAck=YES;
-			}
+            //only react to stanzas, not nonzas
+            if([node.element isEqualToString:@"iq"]
+                || [node.element isEqualToString:@"message"]
+                || [node.element isEqualToString:@"presence"]) {
+                requestAck=YES;
+            }
 
-			if([node isKindOfClass:[XMPPIQ class]])
-			{
-				XMPPIQ *iq = (XMPPIQ *)node;
-				if([iq.children count]>0)
-				{
-					MLXMLNode *child =[iq.children objectAtIndex:0];
-					if ([[child element] isEqualToString:@"ping"])
-					{
-						[self setPingTimerForID:[iq.attributes objectForKey:@"id"]];
-					}
-				}
-			}
-
-			DDLogVerbose(@"removing sent MLXMLNode from _outputQueue");
-			[_outputQueue removeObject:node];
-		}
-		else		//stop sending the remainder of the queue if the send failed (tcp output buffer full etc.)
+            DDLogVerbose(@"removing sent MLXMLNode from _outputQueue");
+            [_outputQueue removeObject:node];
+        }
+        else		//stop sending the remainder of the queue if the send failed (tcp output buffer full etc.)
         {
-			DDLogInfo(@"could not send whole _outputQueue: tcp buffer full or connection has an error");
-			break;
-		}
+            DDLogInfo(@"could not send whole _outputQueue: tcp buffer full or connection has an error");
+            break;
+        }
     }
 
     if(requestAck)
     {
-		//adding the smacks request to the receiveQueue will make sure that we send the request
-		//*after* processing an incoming burst of stanzas (which is potentially causing an outgoing burst of stanzas)
-		//this reduces the requests to an absolute minimum while still maintaining the rule to request an ack
-		//for every stanza (e.g. until the smacks queue is empty) and not sending an ack if one is already in flight
-		DDLogVerbose(@"adding smacks request to receiveQueue...");
-		[self.receiveQueue addOperationWithBlock: ^{
-			DDLogVerbose(@"calling requestSMAck from receiveQueue...");
-			[self requestSMAck:NO];
-		}];
+        //adding the smacks request to the receiveQueue will make sure that we send the request
+        //*after* processing an incoming burst of stanzas (which is potentially causing an outgoing burst of stanzas)
+        //this reduces the requests to an absolute minimum while still maintaining the rule to request an ack
+        //for every stanza (e.g. until the smacks queue is empty) and not sending an ack if one is already in flight
+        DDLogVerbose(@"adding smacks request to receiveQueue...");
+        [self.receiveQueue addOperationWithBlock: ^{
+            DDLogVerbose(@"calling requestSMAck from receiveQueue...");
+            [self requestSMAck:NO];
+        }];
 
     } else  {
         DDLogVerbose(@"NOT adding smacks request to receiveQueue...");

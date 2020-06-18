@@ -125,7 +125,6 @@ extern NSString *const kXMPPPresence;
 
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*)identity;
 
--(void) connectWithCompletion:(xmppCompletion) completion;
 -(void) connect;
 -(void) disconnect;
 

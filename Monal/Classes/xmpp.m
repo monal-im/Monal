@@ -391,12 +391,6 @@ NSString *const kXMPPPresence = @"presence";
     [self createStreams];
 }
 
--(void) connectWithCompletion:(xmppCompletion) completion
-{
-    [self connect];
-    if(completion) self.loginCompletion = completion;
-}
-
 -(void) connect
 {
     if(self.airDrop){

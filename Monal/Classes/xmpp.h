@@ -78,8 +78,6 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, assign) BOOL awayState;
 @property (nonatomic, assign) BOOL visibleState;
 
-@property (nonatomic, assign) BOOL hasShownAlert;
-
 @property (nonatomic, strong) jingleCall *jingle;
 
 // DB info

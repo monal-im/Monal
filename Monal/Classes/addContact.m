@@ -37,9 +37,8 @@
         
         if(self.contactName.text.length>0)
         {
-            NSDictionary* datarow= [[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:_selectedRow];
-                  xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-         
+            xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:_selectedRow];
+            
             MLContact *contactObj = [[MLContact alloc] init];
                       contactObj.contactJid=self.contactName.text;
                       contactObj.accountId= account.accountNo;

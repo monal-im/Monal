@@ -277,7 +277,7 @@
  */
 -(void) handleURL:(NSURL *) url {
     //TODO just uses fist account. maybe change in the future
-    xmpp *account=[[MLXMPPManager sharedInstance].connectedXMPP.firstObject objectForKey:@"xmppAccount"];;
+    xmpp *account=[[MLXMPPManager sharedInstance].connectedXMPP firstObject];
     if(account) {
         NSURLComponents *components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
         __block MLContact *contact = [[MLContact alloc] init];
@@ -408,7 +408,6 @@
 {
     DDLogVerbose(@"Entering FG");
  
-    [[MLXMPPManager sharedInstance] resetForeground];
     [[MLXMPPManager sharedInstance] setClientsActive];
     [[MLXMPPManager sharedInstance] sendMessageForConnectedAccounts];
 }

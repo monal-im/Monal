@@ -56,8 +56,7 @@
             xmpp* account;
             
             if(_selectedRow<[[MLXMPPManager sharedInstance].connectedXMPP count] && _selectedRow>=0) {
-                NSDictionary* datarow= [[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:_selectedRow];
-                account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+                xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:_selectedRow];
 
             }
             

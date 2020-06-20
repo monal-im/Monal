@@ -858,7 +858,7 @@ NSString *const kXMPPPresence = @"presence";
 -(void) sendPing
 {
     DDLogVerbose(@"sendPing called");
-    if(self.accountState<kStateReconnecting  && !self->_reconnectScheduled)
+    if(self.accountState<kStateReconnecting && !self->_reconnectScheduled)
     {
         DDLogInfo(@" ping calling reconnect");
         self->_accountState=kStateReconnecting;

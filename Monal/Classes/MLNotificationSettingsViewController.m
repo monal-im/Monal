@@ -182,8 +182,7 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
         case kNotificationSettingSectionAccounts: {
             UITableViewCell *cell= [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
             cell.imageView.hidden=NO;
-            NSDictionary  *row = [MLXMPPManager sharedInstance].connectedXMPP[indexPath.row];
-            xmpp *xmppAccount = [row objectForKey:@"xmppAccount"];
+            xmpp* xmppAccount = [MLXMPPManager sharedInstance].connectedXMPP[indexPath.row];
             cell.textLabel.text =xmppAccount.connectionProperties.identity.jid;
             
             if(xmppAccount.connectionProperties.pushEnabled) {

@@ -7,13 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "Reachability.h"
 #import "xmpp.h"
 
 #define kMonalNetQueue "im.monal.netQueue"
 #define kMonalConnectedListQueue "im.monal.connectedListQueue"
-
-extern NSString *const kXmppAccount;
 
 /**
  A singleton to control all of the active XMPP connections
@@ -65,11 +62,6 @@ extern NSString *const kXmppAccount;
 -(void) getServiceDetailsForAccount:(NSInteger) row;
 
 /**
-Returns the server set name of the conencted account 
- */
--(NSString*) getNameForConnectedRow:(NSInteger) row;
-
-/**
  Returns the user set name of the conencted account
  */
 -(NSString*) getAccountNameForConnectedRow:(NSInteger) row;
@@ -96,17 +88,6 @@ Returns the server set name of the conencted account
 
 
 #pragma mark MUC commands
-/**
- Gets a list of rooms on the confernce server
- */
--(void) getRoomsForAccountRow:(NSInteger) row;
-
-
-/**
- returns the list of rooms in confrence server
- */
--(NSArray*) getRoomsListForAccountRow:(NSInteger) row;
-
 
 /**
  Joins the selected Room on the conference server

@@ -1793,10 +1793,6 @@ NSString *const kXMPPPresence = @"presence";
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
 }
 
-static NSMutableArray *extracted(xmpp *object) {
-    return object->_outputQueue;
-}
-
 -(void) send:(MLXMLNode*) stanza
 {
     if(!stanza) return;
@@ -1840,7 +1836,7 @@ static NSMutableArray *extracted(xmpp *object) {
         if(self.accountState>kStateDisconnected)
             [self.sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
                 DDLogDebug(@"SEND: %@", stanza.XMLString);
-                [extracted(self) addObject:stanza];
+                [_outputQueue addObject:stanza];
                 [self writeFromQueue];  // try to send if there is space
             }]];
     };

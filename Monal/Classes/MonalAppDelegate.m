@@ -233,15 +233,8 @@
     // should any accounts connect?
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     
-#if !TARGET_OS_MACCATALYST
-    BOOL optout = [[NSUserDefaults standardUserDefaults] boolForKey:@"CrashlyticsOptOut"];
-    if(!optout) {
-    
-    }
-#endif
-    
     //update logs if needed
-    if(! [[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])
+    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])
     {
         [[DataLayer sharedInstance] messageHistoryCleanAll];
     }

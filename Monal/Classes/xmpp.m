@@ -66,12 +66,11 @@ NSString *const kXMPPPresence = @"presence";
     MLPipe* _iPipe;
     NSOutputStream* _oStream;
     NSMutableArray* _outputQueue;
-    // 64KiB buffer for stanzas we can not (completely) write to the tcp socket
-    uint8_t * _outputBuffer;
+    // buffer for stanzas we can not (completely) write to the tcp socket
+    uint8_t* _outputBuffer;
     size_t _outputBufferByteCount;
 
-    NSArray* _stanzaTypes;
-
+    NSMutableArray* _smacksAckHandler;
     BOOL _startTLSComplete;
     BOOL _streamHasSpace;
 
@@ -95,29 +94,29 @@ NSString *const kXMPPPresence = @"presence";
 
 
 @property (nonatomic, assign) BOOL resuming;
-@property (nonatomic, strong) NSString *streamID;
+@property (nonatomic, strong) NSString* streamID;
 @property (nonatomic, assign) BOOL hasDiscoAndRoster;
 
 /**
  h to go out in r stanza
  */
-@property (nonatomic, strong) NSNumber *lastHandledInboundStanza;
+@property (nonatomic, strong) NSNumber* lastHandledInboundStanza;
 
 /**
  h from a stanza
  */
-@property (nonatomic, strong) NSNumber *lastHandledOutboundStanza;
+@property (nonatomic, strong) NSNumber* lastHandledOutboundStanza;
 
 /**
  internal counter that should match lastHandledOutboundStanza
  */
-@property (nonatomic, strong) NSNumber *lastOutboundStanza;
+@property (nonatomic, strong) NSNumber* lastOutboundStanza;
 
 /**
  Array of NSDictionary with stanzas that have not been acked.
  NSDictionary {queueID, stanza}
  */
-@property (nonatomic, strong) NSMutableArray *unAckedStanzas;
+@property (nonatomic, strong) NSMutableArray* unAckedStanzas;
 
 @property (nonatomic, strong) dispatch_source_t loginCancelOperation;
 
@@ -607,10 +606,11 @@ NSString *const kXMPPPresence = @"presence";
 		}]] waitUntilFinished:YES];			//block until finished because we are closing the socket directly afterwards
 
 		[self.receiveQueue cancelAllOperations];
+        //this will block until finished because we are closing the socket directly afterwards
         [self dispatchOnReceiveQueue: ^{
             //preserve unAckedStanzas even on explicitLogout and resend them on next connect
             //if we don't do this messages could be lost when logging out directly after sending them
-            //and: sending messages twice is less intrusive than silently losing them
+            //and: sending messages twice is less intrusive than silently loosing them
             NSMutableArray* stanzas = self.unAckedStanzas;
 
             //reset smacks state to sane values (this can be done even if smacks is not supported)
@@ -619,7 +619,7 @@ NSString *const kXMPPPresence = @"presence";
 
             //persist these changes
             [self persistState];
-        }];			//this will block until finished because we are closing the socket directly afterwards
+        }];
     }
 
     [self closeSocket];
@@ -960,16 +960,25 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) removeAckedStanzasFromQueue:(NSNumber*) hvalue
 {
-    if(hvalue==nil)
-        return;
-    
     self.lastHandledOutboundStanza=hvalue;
+    
+    //call registered smacksAckHandler
+    NSMutableArray* discard =[[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
+    for(NSDictionary* dic in _smacksAckHandler)
+    {
+        if([[dic objectForKey:@"value"] integerValue] <= [self.lastHandledOutboundStanza integerValue])
+        {
+            [discard addObject:dic];
+            ((void(^)())[dic objectForKey:@"handler"])();
+        }
+    }
+    [_smacksAckHandler removeObjectsInArray:discard];
     
     if([self.unAckedStanzas count]>0)
     {
         NSMutableArray* iterationArray = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
         DDLogDebug(@"removeAckedStanzasFromQueue: hvalue %@, lastOutboundStanza %@", hvalue, self.lastOutboundStanza);
-        NSMutableArray* discard =[[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
+        NSMutableArray* discard = [[NSMutableArray alloc] initWithCapacity:[self.unAckedStanzas count]];
         for(NSDictionary* dic in iterationArray)
         {
             NSNumber* stanzaNumber = [dic objectForKey:kQueueID];
@@ -1083,6 +1092,11 @@ NSString *const kXMPPPresence = @"presence";
             }
         };
 
+        //this will be called after mam catchup is complete
+        processor.mamFinished = ^() {
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
+        };
+        
         //this will be called after bind
         processor.initSession = ^() {
             //init session and query disco, roster etc.
@@ -1550,12 +1564,21 @@ NSString *const kXMPPPresence = @"presence";
 
         //now we are bound again
         self->_accountState=kStateBound;
-        [self postConnectNotification];
         _usableServersList=[[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
 
         //remove already delivered stanzas and resend the (still) unacked ones
         [self removeAckedStanzasFromQueue:resumeNode.h];
         [self resendUnackedStanzas];
+
+        //signal finished catchup if our current outgoing stanza counter is acked, this introduces an additional roundtrip to make sure
+        //all stanzas the *server* wanted to replay have been received, too
+        //request an ack to accomplish this if stanza replay did not already trigger one (smacksRequestInFlight is false if replay did not trigger one)
+        if(!self.smacksRequestInFlight)
+            [self requestSMAck:YES];        //force sending of the request even if the smacks queue is empty
+        NSDictionary* dic = @{@"value":self.lastOutboundStanza, @"handler": ^{
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
+        }};
+        [_smacksAckHandler addObject:dic];
 
         //force push (re)enable on session resumption
         self.connectionProperties.pushEnabled=NO;
@@ -1574,7 +1597,8 @@ NSString *const kXMPPPresence = @"presence";
         });
 #endif
 #endif
-    
+        
+        [self postConnectNotification];
         if(self.loginCompletion) {
             self.loginCompletion(YES, @"");
             self.loginCompletion=nil;
@@ -2125,6 +2149,9 @@ NSString *const kXMPPPresence = @"presence";
             for(NSDictionary *dic in self.unAckedStanzas)
                 DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kQueueID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
     }
+    
+    //always reset handler when loading smacks state
+    _smacksAckHandler = [[NSMutableArray alloc] init];
 }
 
 -(void) incrementLastHandledStanza {
@@ -2141,6 +2168,7 @@ NSString *const kXMPPPresence = @"presence";
     self.lastOutboundStanza=[NSNumber numberWithInteger:0];
     self.unAckedStanzas=[[NSMutableArray alloc] init];
     self.streamID=nil;
+    _smacksAckHandler = [[NSMutableArray alloc] init];
     DDLogDebug(@"initSM3 done");
 }
 

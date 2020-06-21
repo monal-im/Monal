@@ -160,7 +160,7 @@ An array of Dics what have timers to make sure everything was sent
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
 
-     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(autoJoinRoom:) name:kMLHasConnectedNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(autoJoinRoom:) name:kMLHasConnectedNotice object:nil];
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sendOutbox:) name:kMLHasConnectedNotice object:nil];
 
@@ -182,17 +182,22 @@ An array of Dics what have timers to make sure everything was sent
     });
     nw_path_monitor_start(_path_monitor);
 
+    //this is only for debugging purposes, the real handler has to be added to the NotificationServiceExtension
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(catchupFinished:) name:kMonalFinishedCatchup object:nil];
+    
     return self;
 }
 
 -(void) dealloc
 {
-    [[NSNotificationCenter defaultCenter]  removeObserver:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     if(_pinger)
         dispatch_source_cancel(_pinger);
 }
 
-
+-(void) catchupFinished: (NSNotification *) notification {
+    DDLogVerbose(@"### CATCHUP FINISHED ###");
+}
 
 #pragma mark - client state
 
@@ -780,7 +785,6 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
     [self sendOutboxForAccount:account];
 }
-
 
 - (void) sendOutboxForAccount:(NSString *) account{
     NSUserDefaults* groupDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];

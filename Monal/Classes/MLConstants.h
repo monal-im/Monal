@@ -37,6 +37,7 @@ typedef void (^accountCompletion)(NSInteger accountRow);
 #define kMonalContactOfflineNotice @"kMLContactOfflineNotice"
 #define kMLHasRoomsNotice @"kMLHasRoomsNotice"
 #define kMLHasConnectedNotice @"kMLHasConnectedNotice"
+#define kMonalFinishedCatchup @"kMonalFinishedCatchup"
 
 #define kMonalPresentChat @"kMonalPresentChat"
 

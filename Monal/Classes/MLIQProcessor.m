@@ -145,6 +145,12 @@
         return;
     }
     
+    if(iqNode.mam2Last && iqNode.mam2fin)
+    {
+        if(self.mamFinished) self.mamFinished();
+        return;
+    }
+    
     // default MAM settings
     if(iqNode.mam2default)
     {

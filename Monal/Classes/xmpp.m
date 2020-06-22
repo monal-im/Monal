@@ -2610,7 +2610,7 @@ NSString *const kXMPPPresence = @"presence";
 #pragma mark client state
 -(void) setClientActive
 {
-    if(!self.connectionProperties.supportsClientState) return;
+    if(!self.connectionProperties.supportsClientState || self.accountState<kStateBound) return;
     MLXMLNode *activeNode =[[MLXMLNode alloc] initWithElement:@"active" ];
     [activeNode setXMLNS:@"urn:xmpp:csi:0"];
     [self send:activeNode];
@@ -2618,7 +2618,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) setClientInactive
 {
-    if(!self.connectionProperties.supportsClientState) return;
+    if(!self.connectionProperties.supportsClientState || self.accountState<kStateBound) return;
     MLXMLNode *activeNode =[[MLXMLNode alloc] initWithElement:@"inactive" ];
     [activeNode setXMLNS:@"urn:xmpp:csi:0"];
     [self send:activeNode];

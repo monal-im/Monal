@@ -378,7 +378,6 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -415,7 +414,6 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -547,7 +545,6 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -583,7 +580,7 @@
 				26A7120923C590AD00FC6A86 /* Adhoc */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Adhoc;
+			defaultConfigurationName = AppStore;
 		};
 		26A711D123C4D67300FC6A86 /* Build configuration list for PBXNativeTarget "MLCrypto" */ = {
 			isa = XCConfigurationList;
@@ -593,7 +590,7 @@
 				26A7120A23C590AD00FC6A86 /* Adhoc */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Adhoc;
+			defaultConfigurationName = AppStore;
 		};
 		26A711D423C4D67300FC6A86 /* Build configuration list for PBXNativeTarget "MLCryptoTests" */ = {
 			isa = XCConfigurationList;
@@ -603,7 +600,7 @@
 				26A7120B23C590AD00FC6A86 /* Adhoc */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Adhoc;
+			defaultConfigurationName = AppStore;
 		};
 /* End XCConfigurationList section */
 	};

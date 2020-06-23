@@ -218,7 +218,7 @@ NS_ENUM(NSInteger, kSettingSection)
 //                    [self performSegueWithIdentifier:@"showOptOut" sender:self];
 //                    break;
                     
-                case 4:
+                case 3:
                     [self openLink:@"https://monal.im/about/"];
                     break;
                     

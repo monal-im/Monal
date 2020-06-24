@@ -66,9 +66,9 @@ typedef void (^accountCompletion)(NSInteger accountRow);
 #define kinfoStatusKey @"status"
 
 //temp not for relase
-//#ifndef DEBUG
-//#define DEBUG 1
-//#endif
+#ifndef DEBUG
+#define DEBUG 1
+#endif
 
 //temp for  a release
 //#ifndef DISABLE_OMEMO

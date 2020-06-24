@@ -363,9 +363,11 @@
     cell.username=row.contactJid;
     cell.count=0;
     
-    [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:row.accountId withCompletion:^(NSNumber *unread) {
+    [[DataLayer sharedInstance] countUserUnreadMessages:row.contactJid forAccount:row.accountId withCompletion:^(NSNumber *unread) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            cell.count=[unread integerValue];
+            if([cell.username isEqualToString:row.contactJid]){
+                cell.count=[unread integerValue];
+            }
         });
     }];
     

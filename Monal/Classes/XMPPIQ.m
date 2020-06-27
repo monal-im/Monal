@@ -320,14 +320,9 @@ NSString *const kiqErrorType = @"error";
 -(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate withMax:(NSString *) maxResults  andJid:(NSString *)jid
 {
     
-    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
-    queryNode.element=@"query";
-    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:kXMLNS];
+    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2"];
     
-    
-    MLXMLNode* xnode =[[MLXMLNode alloc] init];
-    xnode.element=@"x";
-    [xnode.attributes setObject:@"jabber:x:data" forKey:kXMLNS];
+    MLXMLNode* xnode = [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data"];
     [xnode.attributes setObject:@"submit" forKey:@"type"];
     
     MLXMLNode* field1 =[[MLXMLNode alloc] init];

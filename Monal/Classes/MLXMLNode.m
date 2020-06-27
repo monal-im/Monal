@@ -27,6 +27,14 @@
     return self;
 }
 
+-(id) initWithElement:(NSString*)element andNamespace:(NSString*)xmlns
+{
+    self=[self init];
+    self.element=element;
+    [self setXMLNS:xmlns];
+    return self;
+}
+
 -(id) initWithCoder:(NSCoder*)decoder
 {
     self = [super init];

@@ -2659,7 +2659,7 @@ NSString *const kXMPPPresence = @"presence";
 
 /* query everything after a certain sanza id
  */
--(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) after  withMax:(NSString *) max andJid:(NSString *)jid
+-(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) after withMax:(NSString *) max andJid:(NSString *)jid
 {
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
     [query setMAMQueryFromStart:startDate after:after withMax:max andJid:jid];
@@ -2694,14 +2694,15 @@ NSString *const kXMPPPresence = @"presence";
     if(self.connectionProperties.supportsMam2) {
         [[DataLayer sharedInstance] synchPointforAccount:self.accountNo  withCompletion:^(NSDate *synchDate) {
             [[DataLayer sharedInstance] lastMessageDateForContact:self.connectionProperties.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
-                if(lastDate.timeIntervalSince1970>synchDate.timeIntervalSince1970) { // if there is no last date, there are no messages yet.
+                if(lastDate.timeIntervalSince1970>synchDate.timeIntervalSince1970) {
+                    //TODO: use query with after and mam ID
                     [self setMAMQueryFromStart:[lastDate dateByAddingTimeInterval:1] toDate:nil withMax:nil andJid:nil];
                 }
-                else  {
-					//TODO: this has a race condition here and doesnt play well with changing the time on the phone
-					//use the date of the last message received instead!!
-                    NSDate *dateToUse =synchDate;
-                    if(!dateToUse) dateToUse  =[NSDate dateWithTimeIntervalSinceNow:-60*60*24*14]; //two weeks
+                else  {     // if there is no last date, there are no messages yet.
+                    //TODO: this has a race condition here and doesnt play well with changing the time on the phone
+                    //use the date of the last message received instead!!
+                    NSDate *dateToUse = synchDate;
+                    if(!dateToUse) dateToUse = [NSDate dateWithTimeIntervalSinceNow:-60*60*24*14];  //two weeks
                     [self setMAMQueryFromStart:dateToUse toDate:nil withMax:nil andJid:nil];
                 }
                 [[DataLayer sharedInstance] setSynchpointforAccount:self.accountNo];
@@ -3233,7 +3234,7 @@ NSString *const kXMPPPresence = @"presence";
             [self requestSMAck:NO];
         }];
 
-    } else  {
+    } else {
         DDLogVerbose(@"NOT adding smacks request to receiveQueue...");
     }
 }

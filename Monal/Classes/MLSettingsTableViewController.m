@@ -40,27 +40,45 @@ NS_ENUM(NSInteger, kSettingSection)
     
     self.sections =@[NSLocalizedString(@"App",@ ""), NSLocalizedString(@"Support",@ ""), NSLocalizedString(@"About",@ "")];
     
-    self.appRows=@[NSLocalizedString(@"Quick Setup", @""), NSLocalizedString(@"Accounts",@""), NSLocalizedString(@"Notifications",@""), NSLocalizedString(@"Backgrounds",@""), NSLocalizedString(@"Sounds",@""), NSLocalizedString(@"Display",@""), NSLocalizedString(@"Chat Logs",@"")];  //@"Cloud Storage"
-    self.supportRows=@[NSLocalizedString(@"Email Support",@ ""), NSLocalizedString(@"Submit A Bug",@ "")];
+    self.appRows = @[
+        NSLocalizedString(@"Quick Setup", @""),
+        NSLocalizedString(@"Accounts",@""),
+        NSLocalizedString(@"Notifications",@""),
+        NSLocalizedString(@"Backgrounds",@""),
+        NSLocalizedString(@"Sounds",@""),
+        NSLocalizedString(@"Display",@""),
+        NSLocalizedString(@"Chat Logs",@"")
+    ];
+    self.supportRows = @[
+        NSLocalizedString(@"Email Support",@ ""),
+        NSLocalizedString(@"Submit A Bug",@ "")
+    ];
 #ifdef DEBUG
-    self.aboutRows=@[NSLocalizedString(@"Rate Monal",@""), NSLocalizedString(@"Open Source",@""), NSLocalizedString(@"Privacy",@""),
-                    // NSLocalizedString(@"Crash Logging",@""),
-                     NSLocalizedString(@"About",@""), NSLocalizedString(@"Version",@""), NSLocalizedString(@"Log",@"")];
+    self.aboutRows = @[
+        NSLocalizedString(@"Rate Monal",@""),
+        NSLocalizedString(@"Open Source",@""),
+        NSLocalizedString(@"Privacy",@""),
+        NSLocalizedString(@"About",@""),
+        NSLocalizedString(@"Log",@""),
+        NSLocalizedString(@"Version",@"")
+    ];
 #else
-    self.aboutRows=@[NSLocalizedString(@"Rate Monal",@""), NSLocalizedString(@"Open Source",@""), NSLocalizedString(@"Privacy",@""),
-                    // NSLocalizedString(@"Crash Logging",@""),
-                     NSLocalizedString(@"About",@""), NSLocalizedString(@"Version",@"")];
+    self.aboutRows = @[
+        NSLocalizedString(@"Rate Monal",@""),
+        NSLocalizedString(@"Open Source",@""),
+        NSLocalizedString(@"Privacy",@""),
+        NSLocalizedString(@"About",@""),
+        NSLocalizedString(@"Version",@"")
+    ];
 #endif
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
-    #if !TARGET_OS_MACCATALYST
+#if !TARGET_OS_MACCATALYST
     if (@available(iOS 13.0, *)) {
         self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
     } else {
         // Fallback on earlier versions
     }
-      #endif
-    
-    
+#endif
 }
 
 - (void)didReceiveMemoryWarning {
@@ -74,43 +92,32 @@ NS_ENUM(NSInteger, kSettingSection)
     return kSettingSectionCount;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-
-    NSInteger toreturn=0;
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
     switch(section)
     {
-        case kSettingSectionApp: {
-           toreturn= self.appRows.count;
-            break;
-        }
-        case kSettingSectionSupport: {
-            toreturn=  self.supportRows.count;
-            break;
-        }
-        case kSettingSectionAbout: {
-            toreturn= self.aboutRows.count;
-            break;
-        }
-
+        case kSettingSectionApp: return self.appRows.count;
+        case kSettingSectionSupport: return self.supportRows.count;
+        case kSettingSectionAbout: return self.aboutRows.count;
     }
-    
-    return toreturn;
+    return 0;
 }
 
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"settingsCell" forIndexPath:indexPath];
     
     switch(indexPath.section)
     {
         case kSettingSectionApp: {
-            cell.textLabel.text= self.appRows[indexPath.row];
-            cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+            cell.textLabel.text = self.appRows[indexPath.row];
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
             break;
         }
         case kSettingSectionSupport: {
-            cell.textLabel.text= self.supportRows[indexPath.row];
-            cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+            cell.textLabel.text = self.supportRows[indexPath.row];
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
             break;
         }
         case kSettingSectionAbout: {
@@ -120,15 +127,14 @@ NS_ENUM(NSInteger, kSettingSection)
                 NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
                 NSString* build = [infoDict objectForKey:@"CFBundleVersion"];
                 
-                cell.textLabel.text= [NSString stringWithFormat:NSLocalizedString(@"Version  %@ (%@)",@ ""),version, build];
-                cell.accessoryType=UITableViewCellAccessoryNone;
+                cell.textLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@)", @ ""), version, build];
+                cell.accessoryType = UITableViewCellAccessoryNone;
             } else {
-                cell.textLabel.text= self.aboutRows[indexPath.row];
-                cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+                cell.textLabel.text = self.aboutRows[indexPath.row];
+                cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
             }
             break;
         }
-            
     }
     return cell;
 }
@@ -136,9 +142,7 @@ NS_ENUM(NSInteger, kSettingSection)
 
 -(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    NSString *toreturn;
-    if(section!=kSettingSectionApp) toreturn= self.sections[section];
-    return toreturn;
+    return section!=kSettingSectionApp ? self.sections[section] : 0;
 }
 
 
@@ -214,15 +218,12 @@ NS_ENUM(NSInteger, kSettingSection)
                 case 2:
                     [self openLink:@"https://monal.im/privacy-policy/"];
                     break;
-//                case 3:
-//                    [self performSegueWithIdentifier:@"showOptOut" sender:self];
-//                    break;
                     
                 case 3:
                     [self openLink:@"https://monal.im/about/"];
                     break;
                     
-                case 6:
+                case 4:
                     [self performSegueWithIdentifier:@"showLogs" sender:self];
                     break;
                

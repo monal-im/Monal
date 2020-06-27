@@ -18,22 +18,22 @@
 #endif
 #endif
 
+@import Network;
 @import MobileCoreServices;
-
 @import SAMKeychain;
 
 #if TARGET_OS_IPHONE
-static const int pingFreqencyMinutes =10;
+static const int pingFreqencyMinutes = 10;
 #else
-static const int pingFreqencyMinutes =3;
+static const int pingFreqencyMinutes = 3;
 #endif
 
-static const int sendMessageTimeoutSeconds =10;
-
-NSString *const kXmppAccount= @"xmppAccount";
+static const int sendMessageTimeoutSeconds = 10;
 
 @interface MLXMPPManager()
-
+{
+    nw_path_monitor_t _path_monitor;
+}
 
 /**
  convenience function getting account in connected array with account number/id matching
@@ -142,9 +142,8 @@ An array of Dics what have timers to make sure everything was sent
                               , 1ull * NSEC_PER_SEC);
 
     dispatch_source_set_event_handler(_pinger, ^{
-        for(NSDictionary* row in self->_connectedXMPP)
+        for(xmpp* xmppAccount in _connectedXMPP)
         {
-            xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
             if(xmppAccount.accountState>=kStateBound) {
                 DDLogInfo(@"began a ping");
                 [xmppAccount sendPing];
@@ -161,29 +160,50 @@ An array of Dics what have timers to make sure everything was sent
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
 
-     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(autoJoinRoom:) name:kMLHasConnectedNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(autoJoinRoom:) name:kMLHasConnectedNotice object:nil];
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sendOutbox:) name:kMLHasConnectedNotice object:nil];
 
+    _path_monitor = nw_path_monitor_create();
+    nw_path_monitor_set_queue(_path_monitor, q_background);
+    nw_path_monitor_set_update_handler(_path_monitor, ^(nw_path_t path) {
+        DDLogVerbose(@"*** nw_path_monitor update_handler called");
+        if(nw_path_get_status(path) == nw_path_status_satisfied)
+        {
+            for(xmpp* xmppAccount in _connectedXMPP)
+            {
+                DDLogVerbose(@"reachable");
+                DDLogVerbose(@"pinging ");
 
+                //try to send a ping. if it fails, it will reconnect
+                [xmppAccount sendPing];
+            }
+        }
+    });
+    nw_path_monitor_start(_path_monitor);
+
+    //this is only for debugging purposes, the real handler has to be added to the NotificationServiceExtension
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(catchupFinished:) name:kMonalFinishedCatchup object:nil];
+    
     return self;
 }
 
 -(void) dealloc
 {
-    [[NSNotificationCenter defaultCenter]  removeObserver:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     if(_pinger)
         dispatch_source_cancel(_pinger);
 }
 
-
+-(void) catchupFinished: (NSNotification *) notification {
+    DDLogVerbose(@"### CATCHUP FINISHED ###");
+}
 
 #pragma mark - client state
 
 -(void) setClientsInactive {
-    for(NSDictionary* row in _connectedXMPP)
+    for(xmpp* xmppAccount in _connectedXMPP)
     {
-        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
         if(xmppAccount.connectionProperties.supportsClientState && xmppAccount.accountState>=kStateLoggedIn) {
             [xmppAccount sendLastAck];
             [xmppAccount setClientInactive];
@@ -192,9 +212,8 @@ An array of Dics what have timers to make sure everything was sent
 }
 
 -(void) setClientsActive {
-    for(NSDictionary* row in _connectedXMPP)
+    for(xmpp* xmppAccount in _connectedXMPP)
     {
-        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
         if(xmppAccount.connectionProperties.supportsClientState && xmppAccount.accountState>=kStateLoggedIn) {
             [xmppAccount setClientActive];
         }
@@ -221,17 +240,6 @@ An array of Dics what have timers to make sure everything was sent
     [account approveToRoster:contact.contactJid];
 }
 
-
-
--(void) resetForeground
-{
-    for(NSDictionary* row in _connectedXMPP)
-    {
-        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-        xmppAccount.hasShownAlert=NO;
-    }
-}
-
 -(BOOL) isAccountForIdConnected:(NSString*) accountNo
 {
     xmpp* account = [self getConnectedAccountForID:accountNo];
@@ -249,17 +257,12 @@ An array of Dics what have timers to make sure everything was sent
 
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo
 {
-    xmpp* toReturn=nil;
-    for (NSDictionary* account in _connectedXMPP)
+    for(xmpp* xmppAccount in _connectedXMPP)
     {
-        xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
-
-        if([xmppAccount.accountNo isEqualToString:accountNo] )
-        {
-            toReturn= xmppAccount;
-        }
+        if([xmppAccount.accountNo isEqualToString:accountNo])
+            return xmppAccount;
     }
-    return toReturn;
+    return nil;
 }
 
 #pragma mark - Connection related
@@ -317,19 +320,12 @@ An array of Dics what have timers to make sure everything was sent
     NSString* host = [account objectForKey:kServer];
     if(host==nil || [host isEqual:@""])
         host = [account objectForKey:kDomain];
-    Reachability* hostReach = [Reachability reachabilityWithHostName:host];
 
-
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged) name:kReachabilityChangedNotification object:nil];
-    [hostReach startNotifier];
-
-    if(xmppAccount && hostReach) {
-        NSDictionary* accountDic= [[NSDictionary alloc] initWithObjects:@[xmppAccount, hostReach] forKeys:@[@"xmppAccount", @"hostReach"]];
-        [_connectedXMPP addObject:accountDic];
-         DDLogVerbose(@"reachability starting reconnect");
+    if(xmppAccount) {
+        [_connectedXMPP addObject:xmppAccount];
+        DDLogVerbose(@"starting reconnect");
         [xmppAccount reconnect:0];
     }
-
 }
 
 
@@ -339,14 +335,11 @@ An array of Dics what have timers to make sure everything was sent
     dispatch_async(dispatch_get_main_queue(), ^{
         int index=0;
         int pos=-1;
-        for (NSDictionary* account in self->_connectedXMPP)
+        for (xmpp* xmppAccount in _connectedXMPP)
         {
-            xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
             if([xmppAccount.accountNo isEqualToString:accountNo] )
             {
                 DDLogVerbose(@"got account and cleaning up.. ");
-                Reachability* hostReach=[account objectForKey:@"hostReach"];
-                [hostReach stopNotifier];
                 xmppAccount.explicitLogout=YES;
                 [ xmppAccount disconnect];
                 DDLogVerbose(@"done cleaning up account ");
@@ -356,8 +349,8 @@ An array of Dics what have timers to make sure everything was sent
             index++;
         }
 
-        if((pos>=0) && (pos<[self->_connectedXMPP count])) {
-            [self->_connectedXMPP removeObjectAtIndex:pos];
+        if((pos>=0) && (pos<[_connectedXMPP count])) {
+            [_connectedXMPP removeObjectAtIndex:pos];
             DDLogVerbose(@"removed account at pos  %d", pos);
         }
     });
@@ -378,13 +371,9 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void)logoutAllKeepStreamWithCompletion:(void (^)(void))completion
 {
-    [self->_connectedXMPP enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL* _Nonnull stop) {
-        NSDictionary* account = (NSDictionary*) obj;
-        xmpp* xmppAccount = [account objectForKey:@"xmppAccount"];
-
-        DDLogVerbose(@"Disconnecting account %@@%@ (cleaning up.. keeping stream)", [account objectForKey:@"username"], [account objectForKey:@"domain"]);
+    [_connectedXMPP enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL* _Nonnull stop) {
+        xmpp* xmppAccount = (xmpp*) obj;
         [xmppAccount disconnectToResumeWithCompletion:nil];
-        DDLogVerbose(@"done cleaning up account %@@%@.", [account objectForKey:@"username"], [account objectForKey:@"domain"]);
     }];
 
     if(completion) completion();
@@ -416,36 +405,6 @@ An array of Dics what have timers to make sure everything was sent
     xmpp* xmpp =[self getConnectedAccountForID:accountNo];
     [xmpp.connectionProperties.identity updatPassword:password];
 }
-
--(void) reachabilityChanged
-{
-    for (NSDictionary* row in _connectedXMPP)
-    {
-        Reachability* hostReach=[row objectForKey:@"hostReach"];
-        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
-        if([hostReach currentReachabilityStatus]==NotReachable)
-        {
-            DDLogVerbose(@"not reachable");
-            if(xmppAccount.accountState>=kStateBound)
-            {
-                DDLogVerbose(@"There will be a ping soon to test. ");
-
-                //dont explicitly disconnect since it might be that there was a network inteepution
-                //ie moving through cells.  schedule a ping for 1 min and see if that results in a TCP or XMPP error
-            }
-        }
-        else
-        {
-            DDLogVerbose(@"reachable");
-            DDLogVerbose(@"pinging ");
-
-            //[self connectIfNecessary];
-            //try to send a ping. if it fails, it will reconnect
-            [xmppAccount sendPing];
-        }
-    }
-}
-
 
 #pragma mark -  XMPP commands
 -(void) sendMessageAndAddToHistory:(NSString*) message toContact:(NSString*)recipient fromAccount:(NSString*) accountID fromJID:(NSString*) fromJID isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC  isUpload:(BOOL) isUpload withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion {
@@ -574,61 +533,33 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 -(void) getServiceDetailsForAccount:(NSInteger) row
 {
-
-    if(row < [_connectedXMPP count] && row>=0) {
-    NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-    dispatch_async(_netQueue,
-                   ^{
-                       xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-                       if(account)
-                       {
-                           [account getServiceDetails];
-                       }
-                   }
-                   );
+    if(row < [_connectedXMPP count] && row>=0)
+    {
+        xmpp* account =  [_connectedXMPP objectAtIndex:row];
+        dispatch_async(_netQueue, ^{
+            if(account)
+            {
+                [account getServiceDetails];
+            }
+        });
     }
 }
-
--(NSString*) getNameForConnectedRow:(NSInteger) row
-{
-    NSString *toreturn;
-    if(row<[_connectedXMPP count] && row>=0) {
-        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-        toreturn= account.connectionProperties.identity.jid;
-    }
-    return toreturn;
-}
-
 
 -(NSString*) getAccountNameForConnectedRow:(NSInteger) row
 {
-    NSString *toreturn;
-    if(row<[_connectedXMPP count] && row>=0) {
-        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-        toreturn= account.connectionProperties.identity.jid;
+    if(row<[_connectedXMPP count] && row>=0)
+    {
+        xmpp* account = [_connectedXMPP objectAtIndex:row];
+        return account.connectionProperties.identity.jid;
     }
-    return toreturn;
+    return @"";
 }
-
-
--(NSString*) idForConnectedRow:(NSInteger) row
-{
-    NSString *toreturn;
-    if(row<[_connectedXMPP count] && row>=0) {
-        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-        toreturn= [datarow objectForKey:@"account_id"];
-    }
-    return toreturn;
-}
-
 
 #pragma mark - contact
 
 -(void) removeContact:(MLContact *) contact
 {
-    xmpp* account =[self getConnectedAccountForID:contact.accountId];
+    xmpp* account = [self getConnectedAccountForID:contact.accountId];
     if(account)
     {
 
@@ -657,29 +588,6 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 }
 
 #pragma mark - MUC commands
-//makes xmpp call
--(void) getRoomsForAccountRow:(NSInteger) row
-{
-    if(row<[_connectedXMPP count] && row>=0) {
-        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-        [account getConferenceRooms];
-    }
-
-}
-
-
-//exposes list
--(NSArray*) getRoomsListForAccountRow:(NSInteger) row
-{
-    if(row<[_connectedXMPP count] && row>=0) {
-        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
-        return account.roomList;
-    }
-    else return  nil;
-
-}
 
 -(void)  joinRoom:(NSString*) roomName  withNick:(NSString *)nick andPassword:(NSString*) password forAccounId:(NSString *) accountId
 {
@@ -691,8 +599,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 -(void)  joinRoom:(NSString*) roomName  withNick:(NSString *)nick andPassword:(NSString*) password forAccountRow:(NSInteger) row
 {
     if(row<[_connectedXMPP count] && row>=0) {
-        NSDictionary* datarow= [_connectedXMPP objectAtIndex:row];
-        xmpp* account= (xmpp*)[datarow objectForKey:@"xmppAccount"];
+        xmpp* account = [_connectedXMPP objectAtIndex:row];
         [account joinRoom:roomName withNick:nick andPassword:password];
     }
 }
@@ -756,38 +663,26 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 -(void) setStatusMessage:(NSString*) message
 {
-    for (NSDictionary* row in _connectedXMPP)
-    {
-        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+    for(xmpp* xmppAccount in _connectedXMPP)
         [xmppAccount setStatusMessageText:message];
-    }
 }
 
 -(void) setAway:(BOOL) isAway
 {
-    for (NSDictionary* row in _connectedXMPP)
-    {
-        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+    for(xmpp* xmppAccount in _connectedXMPP)
         [xmppAccount setAway:isAway];
-    }
 }
 
 -(void) setVisible:(BOOL) isVisible
 {
-    for (NSDictionary* row in _connectedXMPP)
-    {
-        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+    for(xmpp* xmppAccount in _connectedXMPP)
         [xmppAccount setVisible:isVisible];
-    }
 }
 
 -(void) setPriority:(NSInteger) priority
 {
-    for (NSDictionary* row in _connectedXMPP)
-    {
-        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
+    for(xmpp* xmppAccount in _connectedXMPP)
         [xmppAccount updatePriority:priority];
-    }
 }
 
 #pragma mark message signals
@@ -846,9 +741,8 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
     //yes, this is ineffecient but the size shouldnt ever be huge
     NSMutableIndexSet *indexSet=[[NSMutableIndexSet alloc] init];
-    for(NSDictionary *account in self.connectedXMPP)
+    for(xmpp* xmppAccount in _connectedXMPP)
     {
-        xmpp *xmppAccount = [account objectForKey:@"xmppAccount"];
         NSInteger pos=0;
         for(MLContact *row in dirtySet)
         {
@@ -875,9 +769,8 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     [[NSUserDefaults standardUserDefaults] setObject:node forKey:@"pushNode"];
     [[NSUserDefaults standardUserDefaults] setObject:secret forKey:@"pushSecret"];
 
-    for(NSDictionary  *row in _connectedXMPP)
+    for(xmpp* xmppAccount in _connectedXMPP)
     {
-        xmpp* xmppAccount=[row objectForKey:@"xmppAccount"];
         xmppAccount.pushNode=node;
         xmppAccount.pushSecret=secret;
         [xmppAccount enablePush];
@@ -892,7 +785,6 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
     [self sendOutboxForAccount:account];
 }
-
 
 - (void) sendOutboxForAccount:(NSString *) account{
     NSUserDefaults* groupDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
@@ -928,11 +820,8 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 -(void) sendMessageForConnectedAccounts
 {
-    for (NSDictionary* account in _connectedXMPP)
-    {
-         xmpp* xmppAccount=[account objectForKey:@"xmppAccount"];
+    for(xmpp* xmppAccount in _connectedXMPP)
         [self sendOutboxForAccount:xmppAccount.accountNo];
-    }
 }
 
 

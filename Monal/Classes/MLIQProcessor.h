@@ -22,6 +22,7 @@ typedef void (^processAction)(void);
 @interface MLIQProcessor : NSObject
 
 @property (nonatomic, strong) iqCompletion sendIq;
+@property (nonatomic, strong) processAction mamFinished;
 @property (nonatomic, strong) processAction initSession;
 @property (nonatomic, strong) processAction enablePush;
 @property (nonatomic, strong) processAction sendSignalInitialStanzas;

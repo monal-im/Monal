@@ -78,8 +78,6 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, assign) BOOL awayState;
 @property (nonatomic, assign) BOOL visibleState;
 
-@property (nonatomic, assign) BOOL hasShownAlert;
-
 @property (nonatomic, strong) jingleCall *jingle;
 
 // DB info
@@ -111,8 +109,8 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, strong) NSDate* connectedTime;
 
 #ifndef DISABLE_OMEMO
-@property (nonatomic, strong) SignalContext* signalContext;
-@property (nonatomic, strong) MLSignalStore* monalSignalStore;
+@property (atomic, strong) SignalContext* signalContext;
+@property (atomic, strong) MLSignalStore* monalSignalStore;
 #endif
 
 extern NSString *const kMessageId;
@@ -125,7 +123,6 @@ extern NSString *const kXMPPPresence;
 
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*)identity;
 
--(void) connectWithCompletion:(xmppCompletion) completion;
 -(void) connect;
 -(void) disconnect;
 

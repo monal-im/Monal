@@ -49,9 +49,8 @@
 -(void) refresh
 {
     self.favorites = [[NSMutableArray alloc] init];
-    for(NSDictionary *row in [MLXMPPManager sharedInstance].connectedXMPP)
+    for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
     {
-        xmpp *account = [row objectForKey:kXmppAccount];
         [[DataLayer sharedInstance] mucFavoritesForAccount:account.accountNo withCompletion:^(NSMutableArray *results) {
             [self.favorites addObjectsFromArray:results];
             dispatch_async(dispatch_get_main_queue(),^(){

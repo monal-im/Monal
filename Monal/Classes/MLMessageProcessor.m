@@ -17,8 +17,8 @@
 
 
 @interface MLMessageProcessor ()
-@property (nonatomic, strong) SignalContext *signalContext;
-@property (nonatomic, strong) MLSignalStore *monalSignalStore;
+@property (atomic, strong) SignalContext *signalContext;
+@property (atomic, strong) MLSignalStore *monalSignalStore;
 @property (nonatomic, strong) NSString *jid;
 @property (nonatomic, strong) NSString *accountNo;
 @property (nonatomic, strong) MLXMPPConnection *connection;
@@ -77,7 +77,6 @@
         recipient= self.jid;
     }
     
-  
     NSString *decrypted =[self decryptMessage:messageNode];
     
     if(messageNode.hasBody || messageNode.subject|| decrypted)
@@ -276,7 +275,7 @@
 #ifndef DISABLE_OMEMO
     if(messageNode.encryptedPayload)
     {
-        SignalAddress *address = [[SignalAddress alloc] initWithName:messageNode.from deviceId:(uint32_t)messageNode.sid.intValue];
+        SignalAddress *address = [[SignalAddress alloc] initWithName:messageNode.from.lowercaseString deviceId:(uint32_t)messageNode.sid.intValue];
         if(!self.signalContext) {
             DDLogError(@"Missing signal context");
             return NSLocalizedString(@"Error decrypting message",@ "");
@@ -312,12 +311,15 @@
             
             NSData *decoded= [EncodingTools dataWithBase64EncodedString:[messageKey objectForKey:@"key"]];
             
-            SignalCiphertext *ciphertext = [[SignalCiphertext alloc] initWithData:decoded type:messagetype];
-            NSError *error;
-            NSData *decryptedKey=  [cipher decryptCiphertext:ciphertext error:&error];
-            
-            NSData *key;
-            NSData *auth;
+            SignalCiphertext* ciphertext = [[SignalCiphertext alloc] initWithData:decoded type:messagetype];
+            NSError* error;
+            NSData* decryptedKey =  [cipher decryptCiphertext:ciphertext error:&error];
+            if(error) {
+                DDLogError(@"Could not decrypt to obtain key: %@", error);
+                return [NSString stringWithFormat:@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person. (%@)", error];
+            }
+            NSData* key;
+            NSData* auth;
             
             if(messagetype==SignalCiphertextTypePreKeyMessage)
             {

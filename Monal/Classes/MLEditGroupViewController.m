@@ -284,8 +284,7 @@
         [self presentViewController:messageAlert animated:YES completion:nil];
     }
     else  {
-        NSDictionary *accountrow = [MLXMPPManager sharedInstance].connectedXMPP[_selectedRow];
-        xmpp* account= (xmpp*)[accountrow objectForKey:kXmppAccount];
+        xmpp* account = [MLXMPPManager sharedInstance].connectedXMPP[_selectedRow];
         
         if(self.favSwitch.on && !self.groupData){
             BOOL autoJoinValue=NO;

@@ -249,10 +249,16 @@
             }
         }
         
+        if([iqNode.features containsObject:@"urn:xmpp:blocking"])
+        {
+            self.connection.supportsBlocking=YES;
+        }
+        
         if([iqNode.features containsObject:@"urn:xmpp:ping"])
         {
             self.connection.supportsPing=YES;
         }
+
         
         [iqNode.features.allObjects enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSString *feature = (NSString *)obj;

@@ -161,15 +161,11 @@
     [DDLog addLogger:[DDOSLogger sharedInstance]];
     
 #ifdef  DEBUG
-    
-#ifndef TARGET_IPHONE_SIMULATOR
     self.fileLogger = [[DDFileLogger alloc] init];
     self.fileLogger.rollingFrequency = 60 * 60 * 24; // 24 hour rolling
     self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
     self.fileLogger.maximumFileSize=1024 * 1024 * 64;
     [DDLog addLogger:self.fileLogger];
-#endif
-    
 #endif
     
     [UNUserNotificationCenter currentNotificationCenter].delegate=self;

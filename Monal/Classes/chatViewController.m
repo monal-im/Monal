@@ -1196,12 +1196,17 @@
         DDLogError(@"Attempt to access beyond bounds");
     }
     
-    NSString *from=row.from;
+    NSString* from = row.from;
+    
+    //cut text after 1500 chars to make the message cell work properly (too big texts don't render the text in the cell at all)
+    NSString* messageText = row.messageText;
+    if([messageText length] > 2048)
+        messageText = [NSString stringWithFormat:@"%@\n[...]", [messageText substringToIndex:2048]];
     
     if([row.messageType isEqualToString:kMessageTypeStatus])
     {
         cell=[tableView dequeueReusableCellWithIdentifier:@"StatusCell"];
-        cell.messageBody.text = row.messageText;
+        cell.messageBody.text = messageText;
         cell.link=nil;
         return cell;
     }
@@ -1263,8 +1268,8 @@
         }
         
         
-        if(![imageCell.link isEqualToString:row.messageText]){
-            imageCell.link = row.messageText;
+        if(![imageCell.link isEqualToString:messageText]){
+            imageCell.link = messageText;
             imageCell.thumbnailImage.image=nil;
             imageCell.loading=NO;
             [imageCell loadImageWithCompletion:^{}];
@@ -1281,7 +1286,7 @@
             toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
         }
         
-        NSString * cleanLink=[row.messageText  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        NSString * cleanLink=[messageText  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSArray *parts = [cleanLink componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         cell.link = parts[0];
         
@@ -1314,13 +1319,13 @@
             DDLogError(@"Error while loading geoPattern");
         }
 
-        NSTextCheckingResult* geoMatch = [geoRegex firstMatchInString:row.messageText options:0 range:NSMakeRange(0, [row.messageText length])];
+        NSTextCheckingResult* geoMatch = [geoRegex firstMatchInString:messageText options:0 range:NSMakeRange(0, [messageText length])];
         
         if(geoMatch.numberOfRanges > 0) {
             NSRange latitudeRange = [geoMatch rangeAtIndex:1];
             NSRange longitudeRange = [geoMatch rangeAtIndex:2];
-            NSString* latitude = [row.messageText substringWithRange:latitudeRange];
-            NSString* longitude = [row.messageText substringWithRange:longitudeRange];
+            NSString* latitude = [messageText substringWithRange:latitudeRange];
+            NSString* longitude = [messageText substringWithRange:longitudeRange];
 
             // Display inline map
             if([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowGeoLocation"]) {
@@ -1339,7 +1344,7 @@
                 [mapsCell loadCoordinatesWithCompletion:^{}];
                 cell=mapsCell;
             } else {
-                NSMutableAttributedString *geoString = [[NSMutableAttributedString alloc] initWithString:row.messageText];
+                NSMutableAttributedString *geoString = [[NSMutableAttributedString alloc] initWithString:messageText];
                 [geoString addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:[geoMatch rangeAtIndex:0]];
 
                 cell.messageBody.attributedText = geoString;
@@ -1347,12 +1352,12 @@
                 cell.link = [NSString stringWithFormat:@"https://www.openstreetmap.org/?mlat=%@&mlon=%@&zoom=%ldd", latitude, longitude, zoomLayer];
             }
         } else {
-            cell.messageBody.text = row.messageText;
+            cell.messageBody.text = messageText;
             cell.link = nil;
         }
     } else {
         // Check if message contains a url
-        NSString* lowerCase= [row.messageText lowercaseString];
+        NSString* lowerCase= [messageText lowercaseString];
         NSRange pos = [lowerCase rangeOfString:@"https://"];
         if(pos.location==NSNotFound) {
             pos=[lowerCase rangeOfString:@"http://"];
@@ -1361,7 +1366,7 @@
         NSRange pos2;
         if(pos.location!=NSNotFound)
         {
-            NSString* urlString =[row.messageText substringFromIndex:pos.location];
+            NSString* urlString =[messageText substringFromIndex:pos.location];
             pos2= [urlString rangeOfString:@" "];
             if(pos2.location==NSNotFound) {
                 pos2= [urlString rangeOfString:@">"];
@@ -1378,11 +1383,11 @@
                 NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link attributes:underlineAttribute];
                 NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
                 [stitchedString appendAttributedString:
-                 [[NSAttributedString alloc] initWithString:[row.messageText substringToIndex:pos.location] attributes:nil]];
+                 [[NSAttributedString alloc] initWithString:[messageText substringToIndex:pos.location] attributes:nil]];
                 [stitchedString appendAttributedString:underlined];
                 if(pos2.location!=NSNotFound)
                 {
-                    NSString* remainder = [row.messageText substringFromIndex:pos.location+[underlined length]];
+                    NSString* remainder = [messageText substringFromIndex:pos.location+[underlined length]];
                     [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
                 }
                 cell.messageBody.attributedText=stitchedString;
@@ -1390,7 +1395,7 @@
         }
         else // Default case
         {
-            cell.messageBody.text = row.messageText;
+            cell.messageBody.text = messageText;
             cell.link = nil;
         }
     }

@@ -3311,7 +3311,11 @@ NSString *const kXMPPPresence = @"presence";
 {
 #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
-    if(self.accountState>=kStateBound && [self.pushNode length]>0 && [self.pushSecret length]>0 && self.connectionProperties.supportsPush)
+    if(
+        self.accountState>=kStateBound && self.connectionProperties.supportsPush &&
+        self.pushNode!=nil && [self.pushNode length]>0 &&
+        self.pushSecret!=nil && [self.pushSecret length]>0
+    )
     {
         DDLogInfo(@"ENABLING PUSH: %@ < %@", self.pushNode, self.pushSecret);
         XMPPIQ* enable =[[XMPPIQ alloc] initWithType:kiqSetType];
@@ -3319,7 +3323,8 @@ NSString *const kXMPPPresence = @"presence";
         [self send:enable];
         self.connectionProperties.pushEnabled=YES;
     }
-    else {
+    else
+    {
         DDLogInfo(@" NOT enabling push: %@ < %@", self.pushNode, self.pushSecret);
     }
 #endif

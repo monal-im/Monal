@@ -195,26 +195,31 @@ An array of Dics what have timers to make sure everything was sent
         dispatch_source_cancel(_pinger);
 }
 
--(void) catchupFinished: (NSNotification *) notification {
+-(void) catchupFinished: (NSNotification *) notification
+{
     DDLogVerbose(@"### CATCHUP FINISHED ###");
 }
 
 #pragma mark - client state
 
--(void) setClientsInactive {
+-(void) setClientsInactive
+{
     for(xmpp* xmppAccount in _connectedXMPP)
     {
-        if(xmppAccount.connectionProperties.supportsClientState && xmppAccount.accountState>=kStateLoggedIn) {
+        if(xmppAccount.accountState>=kStateLoggedIn && xmppAccount.connectionProperties.supportsClientState)
+        {
             [xmppAccount sendLastAck];
             [xmppAccount setClientInactive];
         }
     }
 }
 
--(void) setClientsActive {
+-(void) setClientsActive
+{
     for(xmpp* xmppAccount in _connectedXMPP)
     {
-        if(xmppAccount.connectionProperties.supportsClientState && xmppAccount.accountState>=kStateLoggedIn) {
+        if(xmppAccount.accountState>=kStateLoggedIn && xmppAccount.connectionProperties.supportsClientState)
+        {
             [xmppAccount setClientActive];
         }
 
@@ -222,7 +227,8 @@ An array of Dics what have timers to make sure everything was sent
         {
             [xmppAccount sendPing];
         }
-        else  {
+        else
+        {
             [xmppAccount reconnect];
         }
     }
@@ -770,15 +776,20 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 -(void) setPushNode:(NSString *)node andSecret:(NSString *)secret
 {
     self.pushNode=node;
-    self.pushSecret=secret;
-
-    [[NSUserDefaults standardUserDefaults] setObject:node forKey:@"pushNode"];
-    [[NSUserDefaults standardUserDefaults] setObject:secret forKey:@"pushSecret"];
+    [[NSUserDefaults standardUserDefaults] setObject:self.pushNode forKey:@"pushNode"];
+    
+    if(secret)
+    {
+        self.pushSecret=secret;
+        [[NSUserDefaults standardUserDefaults] setObject:self.pushSecret forKey:@"pushSecret"];
+    }
+    else    //use saved one (push server not reachable via http(s))
+        self.pushSecret=[[NSUserDefaults standardUserDefaults] objectForKey:@"pushSecret"];
 
     for(xmpp* xmppAccount in _connectedXMPP)
     {
-        xmppAccount.pushNode=node;
-        xmppAccount.pushSecret=secret;
+        xmppAccount.pushNode=self.pushNode;
+        xmppAccount.pushSecret=self.pushSecret;
         [xmppAccount enablePush];
     }
 }

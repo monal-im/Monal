@@ -73,10 +73,8 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, strong) jingleCall* call;
 
 // state attributes
-@property (nonatomic, assign) NSInteger priority;
 @property (nonatomic, strong) NSString* statusMessage;
 @property (nonatomic, assign) BOOL awayState;
-@property (nonatomic, assign) BOOL visibleState;
 
 @property (nonatomic, strong) jingleCall *jingle;
 
@@ -190,16 +188,6 @@ sets the status message. makes xmpp call
 sets away xmpp call.
  */
 -(void) setAway:(BOOL) away;
-
-/**
- sets visibility xmpp call.
- */
--(void) setVisible:(BOOL) visible;
-
-/**
- sets priority. makes xmpp call. this is differnt from setting the property value itself.
- */
--(void) updatePriority:(NSInteger) priority;
 
 /**
  request futher service detail

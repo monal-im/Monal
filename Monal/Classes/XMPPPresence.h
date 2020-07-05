@@ -35,8 +35,6 @@
 }
 
 @property (nonatomic,strong) NSString* versionHash;
-@property (nonatomic,assign) NSInteger priority;
-
 
 
 /**
@@ -55,11 +53,6 @@
 -(void) setAvailable;
 
 /**
- creates and sets the priority child
- */
--(void) setPriority:(NSInteger)priority;
-
-/**
  creates and sets the show child
  */
 -(void) setShow:(NSString*) showVal;
@@ -75,10 +68,7 @@
  */
 -(void) unsubscribeContact:(NSString*) jid;
 
-/**
- sets type unavilable.  there is no corresponding visibility call since any presence without unavailable will be visible. 
- */
--(void) setInvisible;
+-(void) setLastInteraction:(NSDate*) date;
 
 #pragma mark subscription
 /**

@@ -77,7 +77,8 @@ NSString *const kXMPPPresence = @"presence";
     //does not reset at disconnect
     BOOL _loggedInOnce;
     BOOL _hasRequestedServerInfo;
-
+    BOOL _isCSIActive;
+    NSDate* _lastInteractionDate;
 }
 
 @property (nonatomic, assign) BOOL smacksRequestInFlight;
@@ -170,17 +171,23 @@ NSString *const kXMPPPresence = @"presence";
     _outputBufferByteCount = 0;
 
     _versionHash=[self getVersionString];
+    _isCSIActive=YES;       //default value is yes if no csi state was sent yet
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+            {
+#endif
+                _isCSIActive=NO;
+#if TARGET_OS_IPHONE
+            }
+        });
+#endif
+#endif
+    _lastInteractionDate=[NSDate date];     //better default than 1970
 
-    self.priority=[[[NSUserDefaults standardUserDefaults] stringForKey:@"XMPPPriority"] integerValue];
     self.statusMessage=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];
     self.awayState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"];
-
-    if([[NSUserDefaults standardUserDefaults] objectForKey:@"Visible"]){
-        self.visibleState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Visible"];
-    }
-    else  {
-        self.visibleState=YES;
-    }
 
     self.xmppCompletionHandlers = [[NSMutableDictionary alloc] init];
 }
@@ -1584,19 +1591,8 @@ NSString *const kXMPPPresence = @"presence";
         self.connectionProperties.pushEnabled=NO;
         if(self.connectionProperties.supportsPush)
             [self enablePush];
-
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-            {
-#endif
-                [self setClientInactive];
-#if TARGET_OS_IPHONE
-            }
-        });
-#endif
-#endif
+        
+        [self sendCurrentCSIState];
         
         [self postConnectNotification];
         if(self.loginCompletion) {
@@ -2046,6 +2042,8 @@ NSString *const kXMPPPresence = @"presence";
         [values setObject:self.connectionProperties.pubSubHost forKey:@"pubSubHost"];
     }
 
+    [values setObject:_lastInteractionDate forKey:@"lastInteractionDate"];
+
     //save state dictionary
     [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
@@ -2062,7 +2060,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) readState
 {
-    NSMutableDictionary* dic=[[DataLayer sharedInstance] readStateForAccount:self.accountNo];
+    NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
     if(dic)
     {
         //collect smacks state
@@ -2136,6 +2134,9 @@ NSString *const kXMPPPresence = @"presence";
             NSString *pubSubHost = [dic objectForKey:@"pubSubHost"];
             self.connectionProperties.pubSubHost = pubSubHost;
         }
+        
+        if([dic objectForKey:@"lastInteractionDate"])
+            _lastInteractionDate = [dic objectForKey:@"lastInteractionDate"];
 
         //debug output
         DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@",
@@ -2214,14 +2215,16 @@ NSString *const kXMPPPresence = @"presence";
 }
 
 
--(void) sendInitalPresence
+-(void) sendPresence
 {
     XMPPPresence* presence=[[XMPPPresence alloc] initWithHash:_versionHash];
-    [presence setPriority:self.priority];
     if(self.statusMessage) [presence setStatus:self.statusMessage];
     if(self.awayState) [presence setAway];
-    if(!self.visibleState) [presence setInvisible];
-
+    
+    //send last interaction date if not currently active
+    if(!_isCSIActive)
+        [presence setLastInteraction:_lastInteractionDate];
+    
     [self send:presence];
 }
 
@@ -2254,19 +2257,6 @@ NSString *const kXMPPPresence = @"presence";
     [sessionQuery.children addObject:session];
     [self send:sessionQuery];
 
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-        {
-#endif
-            [self setClientInactive];
-#if TARGET_OS_IPHONE
-        }
-    });
-#endif
-#endif
-
     //force new disco queries because we landed here because of a failed smacks resume
     //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)
     //--> all of this reasons imply that we had to start a new xmpp stream and our old cached disco data
@@ -2288,7 +2278,8 @@ NSString *const kXMPPPresence = @"presence";
     //now fetch roster, request disco and send initial presence
     [self fetchRoster];
     [self queryDisco];
-    [self sendInitalPresence];
+    [self sendPresence];
+    [self sendCurrentCSIState];
     
     //query mam since last received message because we could not resume the smacks session
     //(we would not have landed here if we were able to resume the smacks session)
@@ -2298,60 +2289,17 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) setStatusMessageText:(NSString*) message
 {
-    if([message length]>0)
-        self.statusMessage=message;
+    if(message && [message length] > 0)
+        self.statusMessage = message;
     else
-        message=nil;
-
-    XMPPPresence* node =[[XMPPPresence alloc] initWithHash:self.versionHash];
-    if(message)[node setStatus:message];
-
-    if(self.awayState) [node setAway];
-
-    [self send:node];
+        message = nil;
+    [self sendPresence];
 }
 
 -(void) setAway:(BOOL) away
 {
-    self.awayState=away;
-    XMPPPresence* node =[[XMPPPresence alloc] initWithHash:self.versionHash];
-    if(away) {
-        [node setAway];
-    }
-    else {
-        [node setAvailable];
-    }
-
-    if(self.statusMessage) [node setStatus:self.statusMessage];
-    [self send:node];
-
-
-
-}
-
--(void) setVisible:(BOOL) visible
-{
-    self.visibleState=visible;
-    XMPPPresence* node =[[XMPPPresence alloc] initWithHash:self.versionHash];
-    if(!visible)
-        [node setInvisible];
-    else
-    {
-        if(self.statusMessage) [node setStatus:self.statusMessage];
-        if(self.awayState) [node setAway];
-    }
-
-    [self send:node];
-}
-
--(void) updatePriority:(NSInteger) priority
-{
-    self.priority=priority;
-
-    XMPPPresence* node =[[XMPPPresence alloc] initWithHash:self.versionHash];
-    [node setPriority:priority];
-    [self send:node];
-
+    self.awayState = away;
+    [self sendPresence];
 }
 
 #pragma mark - OMEMO
@@ -2610,18 +2558,63 @@ NSString *const kXMPPPresence = @"presence";
 #pragma mark client state
 -(void) setClientActive
 {
-    if(!self.connectionProperties.supportsClientState || self.accountState<kStateBound) return;
-    MLXMLNode *activeNode =[[MLXMLNode alloc] initWithElement:@"active" ];
-    [activeNode setXMLNS:@"urn:xmpp:csi:0"];
-    [self send:activeNode];
+    [self dispatchOnReceiveQueue: ^{
+        //ignore active --> active transition
+        if(_isCSIActive)
+            return;
+        
+        //record new csi state and send csi nonza
+        _isCSIActive = YES;
+        [self sendCurrentCSIState];
+        
+        //to make sure this date is newer than the old saved one (even if we now falsely "tag" the beginning of our interaction, not the end)
+        //if everything works out as it should and the app does not get killed, we will "tag" the end of our interaction as soon as the app is backgrounded
+        _lastInteractionDate = [NSDate date];
+        [self persistState];
+        
+        //this will broadcast our presence without idle element, because of _isCSIActive=YES
+        //(presence without idle indicates the client is now active, see XEP-0319)
+        [self sendPresence];
+    }];
 }
 
 -(void) setClientInactive
 {
-    if(!self.connectionProperties.supportsClientState || self.accountState<kStateBound) return;
-    MLXMLNode *activeNode =[[MLXMLNode alloc] initWithElement:@"inactive" ];
-    [activeNode setXMLNS:@"urn:xmpp:csi:0"];
-    [self send:activeNode];
+    [self dispatchOnReceiveQueue: ^{
+        //ignore inactive --> inactive transition
+        if(!_isCSIActive)
+            return;
+        
+        //save date as last interaction date (XEP-0319) (e.g. "tag" the end of our interaction)
+        _lastInteractionDate = [NSDate date];
+        [self persistState];
+        
+        //record new state
+        _isCSIActive = NO;
+        
+        //this will broadcast our presence with idle element set, because of _isCSIActive=NO (see XEP-0319)
+        [self sendPresence];
+        
+        //send csi inactive nonza *after* broadcasting our presence
+        [self sendCurrentCSIState];
+    }];
+}
+
+-(void) sendCurrentCSIState
+{
+    [self dispatchOnReceiveQueue: ^{
+        //don't send anything before a resource is bound
+        if(self.accountState<kStateBound || !self.connectionProperties.supportsClientState)
+            return;
+        
+        //really send csi nonza
+        MLXMLNode* csiNode;
+        if(_isCSIActive)
+            csiNode = [[MLXMLNode alloc] initWithElement:@"active" andNamespace:@"urn:xmpp:csi:0"];
+        else
+            csiNode = [[MLXMLNode alloc] initWithElement:@"inactive" andNamespace:@"urn:xmpp:csi:0"];
+        [self send:csiNode];
+    }];
 }
 
 #pragma mark - Message archive

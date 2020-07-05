@@ -31,14 +31,7 @@
     [c.attributes setObject:@"http://monal.im/" forKey:@"node"];
     [c.attributes setObject:@"sha-1" forKey:@"hash"];
     [c.attributes setObject:self.versionHash forKey:@"ver"];
-    [c.attributes setObject:[NSString stringWithFormat:@"%@ %@", kextpmuc, kextvoice] forKey:@"ext"]; //deprecated .. for legacy
-    
     [self.children addObject:c];
-    
-    /*
-     having xmlns:caps seems to make it accept legacy caps? doesnt seem to check hash value
-     */
-     
     
     return self;
 }
@@ -70,18 +63,18 @@
     [self.children addObject:statusNode];
 }
 
--(void) setPriority:(NSInteger)priority
+-(void) setLastInteraction:(NSDate*) date
 {
-    _priority=priority; 
-    MLXMLNode* priorityNode =[[MLXMLNode alloc] init];
-    priorityNode.element=@"priority";
-    priorityNode.data=[NSString stringWithFormat:@"%ld",(long)_priority];
-    [self.children addObject:priorityNode];
-}
-
--(void) setInvisible
-{
-  [self.attributes setObject:@"unavailable" forKey:@"type"];
+    NSDateFormatter* rfc3339DateFormatter = [[NSDateFormatter alloc] init];
+    NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+    
+    [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
+    [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z"];
+    [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    
+    MLXMLNode* idle = [[MLXMLNode alloc] initWithElement:@"idle" andNamespace:@"urn:xmpp:idle:1"];
+    [idle.attributes setValue:[rfc3339DateFormatter stringFromDate:[NSDate date]] forKey:@"since"];
+    [self.children addObject:idle];
 }
 
 #pragma mark MUC 

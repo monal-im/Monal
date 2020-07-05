@@ -52,13 +52,11 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) defaultSettings
 {
-    BOOL setDefaults =[[NSUserDefaults standardUserDefaults] boolForKey:@"SetDefaults"];
+    BOOL setDefaults = [[NSUserDefaults standardUserDefaults] boolForKey:@"SetDefaults"];
     if(!setDefaults)
     {
-        //  [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:@"StatusMessage"]; // we dont want anything set
-        [[NSUserDefaults standardUserDefaults] setObject:@"0" forKey:@"XMPPPriority"];
+        // [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:@"StatusMessage"];   // we dont want anything set
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"Away"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Visible"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MusicStatus"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Sound"];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MessagePreview"];
@@ -67,35 +65,33 @@ An array of Dics what have timers to make sure everything was sent
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"OfflineContact"];
         [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"SortContacts"];
 
-        [[NSUserDefaults standardUserDefaults] setObject:[[NSUUID UUID] UUIDString] forKey:@"DeviceUUID"];
-
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"SetDefaults"];
 
-        [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ShowImages"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ShowGeoLocation"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ChatBackgrounds"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"ShowImages"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"ShowGeoLocation"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"ChatBackgrounds"];
 
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
 
-    //on upgrade this one needs to be set to yes. Can be removed later.
-    NSNumber *imagesTest= [[NSUserDefaults standardUserDefaults] objectForKey: @"ShowImages"];
+    // on upgrade this one needs to be set to yes. Can be removed later.
+    NSNumber *imagesTest= [[NSUserDefaults standardUserDefaults] objectForKey:@"ShowImages"];
 
     if(imagesTest==nil)
     {
-          [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ShowImages"];
+          [[NSUserDefaults standardUserDefaults] setBool:YES  forKey:@"ShowImages"];
           [[NSUserDefaults standardUserDefaults] synchronize];
     }
 
-    //upgrade
-    NSNumber *background =   [[NSUserDefaults standardUserDefaults] objectForKey: @"ChatBackgrounds"];
+    // upgrade
+    NSNumber *background = [[NSUserDefaults standardUserDefaults] objectForKey:@"ChatBackgrounds"];
     if(background==nil)
     {
-        [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ChatBackgrounds"];
+        [[NSUserDefaults standardUserDefaults] setBool:YES  forKey:@"ChatBackgrounds"];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
 
-    NSNumber *sounds =  [[NSUserDefaults standardUserDefaults] objectForKey: @"AlertSoundFile"];
+    NSNumber *sounds = [[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"];
     if(sounds==nil)
     {
         [[NSUserDefaults standardUserDefaults] setObject:@"alert2" forKey:@"AlertSoundFile"];
@@ -103,9 +99,10 @@ An array of Dics what have timers to make sure everything was sent
     }
 
     // upgrade ShowGeoLocation
-    NSNumber* mapLocationTest =  [[NSUserDefaults standardUserDefaults] objectForKey: @"ShowGeoLocation"];
-    if(mapLocationTest==nil) {
-        [[NSUserDefaults standardUserDefaults] setBool:YES  forKey: @"ShowGeoLocation"];
+    NSNumber* mapLocationTest = [[NSUserDefaults standardUserDefaults] objectForKey:@"ShowGeoLocation"];
+    if(mapLocationTest==nil)
+    {
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"ShowGeoLocation"];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
 }
@@ -206,11 +203,8 @@ An array of Dics what have timers to make sure everything was sent
 {
     for(xmpp* xmppAccount in _connectedXMPP)
     {
-        if(xmppAccount.accountState>=kStateLoggedIn && xmppAccount.connectionProperties.supportsClientState)
-        {
-            [xmppAccount sendLastAck];
-            [xmppAccount setClientInactive];
-        }
+        [xmppAccount setClientInactive];
+        [xmppAccount sendLastAck];
     }
 }
 
@@ -218,19 +212,11 @@ An array of Dics what have timers to make sure everything was sent
 {
     for(xmpp* xmppAccount in _connectedXMPP)
     {
-        if(xmppAccount.accountState>=kStateLoggedIn && xmppAccount.connectionProperties.supportsClientState)
-        {
-            [xmppAccount setClientActive];
-        }
-
+        [xmppAccount setClientActive];
         if(xmppAccount.accountState>=kStateLoggedIn)
-        {
             [xmppAccount sendPing];
-        }
         else
-        {
             [xmppAccount reconnect];
-        }
     }
 }
 
@@ -313,7 +299,6 @@ An array of Dics what have timers to make sure everything was sent
     xmppAccount.explicitLogout=NO;
     xmppAccount.pushNode=self.pushNode;
     xmppAccount.pushSecret=self.pushSecret;
-
 
     xmppAccount.airDrop=[[account objectForKey:kAirdrop] boolValue];
     xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]];
@@ -685,18 +670,6 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         [xmppAccount setAway:isAway];
 }
 
--(void) setVisible:(BOOL) isVisible
-{
-    for(xmpp* xmppAccount in _connectedXMPP)
-        [xmppAccount setVisible:isVisible];
-}
-
--(void) setPriority:(NSInteger) priority
-{
-    for(xmpp* xmppAccount in _connectedXMPP)
-        [xmppAccount updatePriority:priority];
-}
-
 #pragma mark message signals
 -(void) handleNewMessage:(NSNotification *)notification
 {
@@ -783,7 +756,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         self.pushSecret=secret;
         [[NSUserDefaults standardUserDefaults] setObject:self.pushSecret forKey:@"pushSecret"];
     }
-    else    //use saved one (push server not reachable via http(s))
+    else    //use saved one (push server not reachable via http(s)) --> the old secret might still be valid
         self.pushSecret=[[NSUserDefaults standardUserDefaults] objectForKey:@"pushSecret"];
 
     for(xmpp* xmppAccount in _connectedXMPP)

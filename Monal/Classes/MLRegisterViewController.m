@@ -65,7 +65,6 @@
     
     MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:kRegServer andPort:[NSNumber numberWithInt:5222] andDirectTLS:NO];
    
-    server.SSL=YES;
     server.selfSignedCert=NO;
     
     self.xmppAccount= [[xmpp alloc] initWithServer:server andIdentity:identity];
@@ -128,7 +127,6 @@
                 [dic setObject:kRegServer forKey:kDomain];
                 [dic setObject:self.jid.text forKey:kUsername];
                 [dic setObject:[EncodingTools encodeRandomResource] forKey:kResource];
-                [dic setObject:@YES forKey:kSSL];
                 [dic setObject:@YES forKey:kEnabled];
                 [dic setObject:@NO forKey:kSelfSigned];
                 [dic setObject:@NO forKey:kDirectTLS];

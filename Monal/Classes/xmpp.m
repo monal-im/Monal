@@ -1413,7 +1413,7 @@ NSString *const kXMPPPresence = @"presence";
         if(self.accountState<kStateLoggedIn )
         {
 
-            if(self.connectionProperties.server.SSL && !self.connectionProperties.server.isDirectTLS && streamNode.callStartTLS)
+            if(!self.connectionProperties.server.isDirectTLS && streamNode.callStartTLS)
             {
                 MLXMLNode* startTLS= [[MLXMLNode alloc] init];
                 startTLS.element=@"starttls";
@@ -1422,9 +1422,7 @@ NSString *const kXMPPPresence = @"presence";
                 return;
             }
 
-            if ((self.connectionProperties.server.SSL && self->_startTLSComplete)
-                || (!self.connectionProperties.server.SSL && !self->_startTLSComplete)
-                || (self.connectionProperties.server.SSL && self.connectionProperties.server.isDirectTLS))
+            if(self.connectionProperties.server.isDirectTLS || self->_startTLSComplete)
             {
                 if(self.registration){
                     [self requestRegForm];

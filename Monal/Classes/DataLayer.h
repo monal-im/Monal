@@ -31,7 +31,6 @@ extern NSString *const kEnabled;
 extern NSString *const kServer;
 extern NSString *const kPort;
 extern NSString *const kResource;
-extern NSString *const kSSL;
 extern NSString *const kDirectTLS;
 extern NSString *const kSelfSigned;
 extern NSString *const kAirdrop;

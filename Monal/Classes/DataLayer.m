@@ -29,7 +29,6 @@ NSString *const kEnabled = @"enabled";
 NSString *const kServer = @"server";
 NSString *const kPort = @"other_port";
 NSString *const kResource = @"resource";
-NSString *const kSSL = @"secure";
 NSString *const kDirectTLS = @"directTLS";
 NSString *const kSelfSigned = @"selfsigned";
 NSString *const kAirdrop = @"airdrop";
@@ -747,15 +746,13 @@ NSString *const kCount = @"count";
 
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion
 {
-    NSString* query = [NSString stringWithFormat:@"update account set server=?, other_port=?, username=?, secure=?, resource=?, domain=?, enabled=?, selfsigned=?, directTLS=?, airdrop=? where account_id=?"];
+    NSString* query = [NSString stringWithFormat:@"update account set server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, selfsigned=?, directTLS=?, airdrop=? where account_id=?"];
 
     NSString* server = (NSString *) [dictionary objectForKey:kServer];
     NSString* port = (NSString *)[dictionary objectForKey:kPort];
     NSArray* params = @[server == nil ? @"" : server,
                        port == nil ? @"5222" : port,
                        ((NSString*)[dictionary objectForKey:kUsername]),
-
-                       [dictionary objectForKey:kSSL],
                        ((NSString*)[dictionary objectForKey:kResource]),
                        ((NSString*)[dictionary objectForKey:kDomain]),
                        [dictionary objectForKey:kEnabled],
@@ -770,13 +767,12 @@ NSString *const kCount = @"count";
 
 -(void) addAccountWithDictionary:(NSDictionary*) dictionary andCompletion: (void (^)(BOOL))completion
 {
-    NSString* query = [NSString stringWithFormat:@"insert into account (server, other_port, secure, resource, domain, enabled, selfsigned, directTLS, username, airdrop) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"];
+    NSString* query = [NSString stringWithFormat:@"insert into account (server, other_port, resource, domain, enabled, selfsigned, directTLS, username, airdrop) values(?, ?, ?, ?, ?, ?, ?, ?, ?)"];
     
     NSString* server = (NSString*) [dictionary objectForKey:kServer];
     NSString* port = (NSString*)[dictionary objectForKey:kPort];
     NSArray* params = @[server == nil ? @"" : server,
                        port == nil ? @"5222" : port,
-                       [dictionary objectForKey:kSSL],
                        ((NSString *)[dictionary objectForKey:kResource]),
                        ((NSString *)[dictionary objectForKey:kDomain]),
                        [dictionary objectForKey:kEnabled] ,
@@ -2846,6 +2842,20 @@ NSString *const kCount = @"count";
         [self executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:nil];
         [self executeNonQuery:@"update dbversion set dbversion='4.74';" andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.74 success");
+    }
+    
+    if([dbversion doubleValue] < 4.75)
+    {
+        DDLogVerbose(@"Database version <4.75 detected. Performing upgrade on accounts.");
+        // Delete column secure from account
+        [self executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:nil];
+        [self executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);" andArguments:nil];
+        [self executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, airdrop, rosterVersion, state from _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"DROP TABLE _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='4.75';" andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.75 success");
     }
 
     [self endWriteTransaction];

@@ -53,6 +53,10 @@ NSString *const kiqErrorType = @"error";
             @"urn:xmpp:jingle:apps:rtp:audio",
             @"urn:xmpp:jingle:transports:raw-udp:0",
             @"urn:xmpp:jingle:transports:raw-udp:1",
+            @"urn:xmpp:receipts",
+            @"jabber:x:oob",
+            @"urn:xmpp:idle:1",
+            @"urn:xmpp:ping",
             @"urn:xmpp:receipts"
         ];
         // this has to be sorted for the features hash to be correct, see https://xmpp.org/extensions/xep-0115.html#ver

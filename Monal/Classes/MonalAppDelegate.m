@@ -102,7 +102,6 @@
                 DDLogInfo(@"voip push wake expiring");
                 [[UIApplication sharedApplication] endBackgroundTask:tempTask];
                 tempTask=UIBackgroundTaskInvalid;
-                [[MLXMPPManager sharedInstance] logoutAllKeepStreamWithCompletion:nil];
             }];
             
             [[MLXMPPManager sharedInstance] connectIfNecessary];

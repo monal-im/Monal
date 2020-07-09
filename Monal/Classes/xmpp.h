@@ -26,13 +26,13 @@
 #import "MLXMPPConnection.h"
 
 typedef NS_ENUM (NSInteger, xmppState) {
-    kStateLoggedOut =-1,
-    kStateDisconnected, // has connected once
+    kStateLoggedOut = -1,
+    kStateDisconnected,		// has connected once
     kStateReconnecting,
     kStateHasStream,
     kStateLoggedIn,
     kStateBinding,
-    kStateBound //is operating normally
+    kStateBound		//is operating normally
 };
 
 typedef NS_ENUM (NSInteger, xmppRegistrationState) {
@@ -42,11 +42,11 @@ typedef NS_ENUM (NSInteger, xmppRegistrationState) {
     kStateRegistered
 };
 
-FOUNDATION_EXPORT NSString *const kFileName;
-FOUNDATION_EXPORT NSString *const kContentType;
-FOUNDATION_EXPORT NSString *const kData;
-FOUNDATION_EXPORT NSString *const kContact;
-FOUNDATION_EXPORT NSString *const kCompletion;
+FOUNDATION_EXPORT NSString* const kFileName;
+FOUNDATION_EXPORT NSString* const kContentType;
+FOUNDATION_EXPORT NSString* const kData;
+FOUNDATION_EXPORT NSString* const kContact;
+FOUNDATION_EXPORT NSString* const kCompletion;
 
 typedef void (^xmppCompletion)(BOOL success, NSString *message);
 typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFields);
@@ -59,15 +59,10 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, strong) MLXMPPConnection* connectionProperties;
 
 //reg
-@property (nonatomic, assign) BOOL registrationSubmission;
-@property (nonatomic, assign) BOOL registration;
-@property (nonatomic, assign) xmppRegistrationState registrationState;
-
 @property (nonatomic, strong) NSString *regUser;
 @property (nonatomic, strong) NSString *regPass;
 @property (nonatomic, strong) NSString *regCode;
 @property (nonatomic, strong) NSDictionary *regHidden;
-@property (nonatomic, strong) xmppDataCompletion regFormCompletion;
 
 
 @property (nonatomic, strong) jingleCall* call;
@@ -80,10 +75,6 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 
 // DB info
 @property (nonatomic, strong) NSString* accountNo;
-
-//we should have an enumerator for this
-@property (nonatomic, assign) BOOL explicitLogout;
-@property (nonatomic, assign, readonly) BOOL loginError;
 
 @property (nonatomic, readonly) xmppState accountState;
 
@@ -119,10 +110,11 @@ extern NSString *const kXMPPSuccess;
 extern NSString *const kXMPPPresence;
 
 
--(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*)identity;
+-(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAirDrop:(BOOL) airDrop andAccountNo:(NSString*) accountNo;
 
 -(void) connect;
 -(void) disconnect;
+-(void) disconnect:(BOOL) explicitLogout;
 
 /**
  send a message to a contact with xmpp id
@@ -137,7 +129,7 @@ extern NSString *const kXMPPPresence;
 /**
  crafts a  ping and sends it
  */
--(void) sendPing;
+-(void) sendPing:(double) timeout;
 
 /**
  ack any stanzas we have
@@ -299,6 +291,7 @@ Decline a call request
 
 -(void) changePassword:(NSString* _Nonnull) newPass withCompletion:(xmppCompletion _Nullable) completion;
 
+-(void) requestRegFormWithCompletion:(xmppDataCompletion) completion andErrorCompletion:(xmppCompletion) errorCompletion;
 -(void) registerUser:(NSString* _Nonnull) username withPassword:(NSString* _Nonnull) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
 
 @end

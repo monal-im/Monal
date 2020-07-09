@@ -13,36 +13,89 @@
 @implementation EncodingTools
 
 
-+ (NSString *) encodeRandomResource {
++(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler
+{
+    return [self startTimer:timeout withHandler:handler andCancelHandler:nil];
+}
+
++(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t) cancelHandler
+{
+    if(timeout<=0.001)
+    {
+        DDLogWarn(@"Timer timeout is smaller than 0.001, calling handler directly.");
+        if(handler)
+            handler();
+        return ^{ };        //empty cancel block because this "timer" already triggered
+    }
+    
+    NSString* uuid = [[NSUUID UUID] UUIDString];
+    
+    DDLogDebug(@"setting up timer %@(%G)", uuid, timeout);
+    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, q_background);
+    dispatch_source_set_timer(timer,
+                              dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout*NSEC_PER_SEC)),
+                              DISPATCH_TIME_FOREVER,
+                              1ull * NSEC_PER_SEC);
+    
+    dispatch_source_set_event_handler(timer, ^{
+        DDLogDebug(@"timer %@ %@(%G) triggered", timer, uuid, timeout);
+        dispatch_source_cancel(timer);
+        if(handler)
+            handler();
+    });
+    
+    dispatch_source_set_cancel_handler(timer, ^{
+        //DDLogDebug(@"timer %@ %@(%G) cancelled", timer, uuid, timeout);
+        if(cancelHandler)
+            cancelHandler();
+    });
+    
+    //start timer
+    DDLogDebug(@"starting timer %@ %@(%G)", timer, uuid, timeout);
+    dispatch_resume(timer);
+    
+    //return block that can be used to cancel the timer
+    return ^{
+        DDLogDebug(@"cancel block for timer %@ %@(%G) called", timer, uuid, timeout);
+        if(!dispatch_source_testcancel(timer))
+            dispatch_source_cancel(timer);
+    };
+}
+
++(NSString*) encodeRandomResource
+{
     u_int32_t i=arc4random();
 #if TARGET_OS_IPHONE
     NSString* resource=[NSString stringWithFormat:@"Monal-iOS.%@", [EncodingTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
 #else
-    NSString* resource=[NSString stringWithFormat:@"Monal-OSX.%@", [EncodingTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
+    NSString* resource=[NSString stringWithFormat:@"Monal-macOS.%@", [EncodingTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
 #endif
     return resource;
 }
 
 #pragma mark  Bae64
 
-+ (NSString *) encodeBase64WithString:(NSString *)strData {
++(NSString*) encodeBase64WithString:(NSString*) strData
+{
     NSData *data =[strData dataUsingEncoding:NSUTF8StringEncoding];
     return [EncodingTools encodeBase64WithData:data];
 }
 
-+ (NSString *) encodeBase64WithData:(NSData *)objData
++(NSString*) encodeBase64WithData:(NSData*) objData
 {
    return [objData base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
 }
 
-+ (NSData *) dataWithBase64EncodedString:(NSString *)string
++(NSData*) dataWithBase64EncodedString:(NSString*) string
 {
     return [[NSData alloc] initWithBase64EncodedString:string options:NSDataBase64DecodingIgnoreUnknownCharacters];
 }
 
 #pragma mark MD5
 
-+ (NSData *) MD5:(NSString*)string {
++(NSData*) MD5:(NSString*) string
+{
     
     const char *cStr = [string UTF8String];
     unsigned char result[CC_MD5_DIGEST_LENGTH];

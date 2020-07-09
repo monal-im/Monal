@@ -70,7 +70,6 @@
     [self.attributes setObject:xmlns forKey:kXMLNS];
 }
 
-
 +(NSString *) escapeForXMPPSingleQuote:(NSString *) targetString
 {
     NSMutableString *mutable=[targetString mutableCopy];

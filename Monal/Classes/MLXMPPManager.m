@@ -22,12 +22,11 @@
 @import MobileCoreServices;
 @import SAMKeychain;
 
-#if TARGET_OS_IPHONE
-static const int pingFreqencyMinutes = 10;
-#else
-static const int pingFreqencyMinutes = 3;
-#endif
+//this is in seconds
+#define SHORT_PING 2.0
+#define LONG_PING 16.0
 
+static const int pingFreqencyMinutes = 4;
 static const int sendMessageTimeoutSeconds = 10;
 
 @interface MLXMPPManager()
@@ -130,20 +129,19 @@ An array of Dics what have timers to make sure everything was sent
 
     //set up regular ping
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    _pinger = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
-                                     q_background);
+    _pinger = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, q_background);
 
     dispatch_source_set_timer(_pinger,
                               DISPATCH_TIME_NOW,
-                              60ull * NSEC_PER_SEC *pingFreqencyMinutes
-                              , 1ull * NSEC_PER_SEC);
+                              60ull * NSEC_PER_SEC *pingFreqencyMinutes,
+                              1ull * NSEC_PER_SEC);
 
     dispatch_source_set_event_handler(_pinger, ^{
         for(xmpp* xmppAccount in _connectedXMPP)
         {
             if(xmppAccount.accountState>=kStateBound) {
                 DDLogInfo(@"began a ping");
-                [xmppAccount sendPing];
+                [xmppAccount sendPing:LONG_PING];        //long ping timeout because this is a background/interval ping
             }
         }
     });
@@ -167,14 +165,17 @@ An array of Dics what have timers to make sure everything was sent
         DDLogVerbose(@"*** nw_path_monitor update_handler called");
         if(nw_path_get_status(path) == nw_path_status_satisfied)
         {
+            DDLogVerbose(@"reachable");
             for(xmpp* xmppAccount in _connectedXMPP)
             {
-                DDLogVerbose(@"reachable");
-                DDLogVerbose(@"pinging ");
-
                 //try to send a ping. if it fails, it will reconnect
-                [xmppAccount sendPing];
+                DDLogVerbose(@"pinging");
+                [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
             }
+        }
+        else
+        {
+            DDLogVerbose(@"NOT reachable");
         }
     });
     nw_path_monitor_start(_path_monitor);
@@ -201,23 +202,21 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) setClientsInactive
 {
-    for(xmpp* xmppAccount in _connectedXMPP)
-    {
-        [xmppAccount setClientInactive];
-        [xmppAccount sendLastAck];
-    }
+    dispatch_async(self->_netQueue, ^{
+        for(xmpp* xmppAccount in _connectedXMPP)
+            [xmppAccount setClientInactive];
+    });
 }
 
 -(void) setClientsActive
 {
-    for(xmpp* xmppAccount in _connectedXMPP)
-    {
-        [xmppAccount setClientActive];
-        if(xmppAccount.accountState>=kStateLoggedIn)
-            [xmppAccount sendPing];
-        else
-            [xmppAccount reconnect];
-    }
+    dispatch_async(self->_netQueue, ^{
+        for(xmpp* xmppAccount in _connectedXMPP)
+        {
+            [xmppAccount setClientActive];
+            [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+        }
+    });
 }
 
 -(void) rejectContact:(MLContact*) contact
@@ -276,13 +275,11 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) connectAccountWithDictionary:(NSDictionary*)account
 {
-    xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
+    xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
     if(existing)
     {
-         DDLogVerbose(@"existing account just reconnecitng.");
-        existing.explicitLogout=NO;
-        [existing reconnect:0];
-
+        DDLogVerbose(@"existing account just pinging.");
+        [existing sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         return;
     }
     DDLogVerbose(@"connecting account %@@%@",[account objectForKey:kUsername], [account objectForKey:kDomain]);
@@ -293,44 +290,33 @@ An array of Dics what have timers to make sure everything was sent
     MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andDirectTLS:[[account objectForKey:kDirectTLS] boolValue]];
     server.selfSignedCert=[[account objectForKey:kSelfSigned] boolValue];
 
-    xmpp* xmppAccount=[[xmpp alloc] initWithServer:server andIdentity:identity];
-    xmppAccount.explicitLogout=NO;
+    xmpp* xmppAccount=[[xmpp alloc] initWithServer:server andIdentity:identity andAirDrop:[[account objectForKey:kAirdrop] boolValue] andAccountNo:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     xmppAccount.pushNode=self.pushNode;
     xmppAccount.pushSecret=self.pushSecret;
-
-    xmppAccount.airDrop=[[account objectForKey:kAirdrop] boolValue];
-    xmppAccount.accountNo=[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]];
 
 #ifndef DISABLE_OMEMO
     [xmppAccount setupSignal];
 #endif
 
-    //sepcifically look for the server since we might not be online or behind firewall
-    NSString* host = [account objectForKey:kServer];
-    if(host==nil || [host isEqual:@""])
-        host = [account objectForKey:kDomain];
-
     if(xmppAccount) {
         [_connectedXMPP addObject:xmppAccount];
-        DDLogVerbose(@"starting reconnect");
-        [xmppAccount reconnect:0];
+        DDLogVerbose(@"starting connect");
+        [xmppAccount connect];
     }
 }
 
 
 -(void) disconnectAccount:(NSString*) accountNo
 {
-
-    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(self->_netQueue, ^{
         int index=0;
         int pos=-1;
-        for (xmpp* xmppAccount in _connectedXMPP)
+        for(xmpp* xmppAccount in _connectedXMPP)
         {
             if([xmppAccount.accountNo isEqualToString:accountNo] )
             {
                 DDLogVerbose(@"got account and cleaning up.. ");
-                xmppAccount.explicitLogout=YES;
-                [ xmppAccount disconnect];
+                [xmppAccount disconnect:YES];
                 DDLogVerbose(@"done cleaning up account ");
                 pos=index;
                 break;
@@ -347,41 +333,25 @@ An array of Dics what have timers to make sure everything was sent
 }
 
 
--(void)logoutAll
+-(void) logoutAll
 {
-    [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray *result) {
-        self->_accountList=result;
-        for (NSDictionary* account in self->_accountList) {
-            DDLogVerbose(@"Disconnecting account %@@%@", [account objectForKey:@"username"], [account objectForKey:@"domain"]);
-            [self disconnectAccount:[NSString stringWithFormat:@"%@", [account objectForKey:@"account_id"]]];
-        }
+    [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray* result) {
+        dispatch_async(self->_netQueue, ^{
+            for(NSDictionary* account in result) {
+                DDLogVerbose(@"Disconnecting account %@@%@", [account objectForKey:@"username"], [account objectForKey:@"domain"]);
+                [self disconnectAccount:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
+            }
+        });
     }];
 }
 
--(void)logoutAllKeepStreamWithCompletion:(void (^)(void))completion
+-(void) connectIfNecessary
 {
-    [_connectedXMPP enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL* _Nonnull stop) {
-        xmpp* xmppAccount = (xmpp*) obj;
-        [xmppAccount disconnectToResumeWithCompletion:nil];
-    }];
-
-    if(completion) completion();
-}
-
-
--(void)connectIfNecessary
-{
-    [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray *result) {
-        dispatch_async(self->_netQueue,
-                       ^{
-                           self->_accountList=result;
-                           for (NSDictionary* account in self->_accountList) {
-                               xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
-                               if(existing.accountState<kStateReconnecting){
-                                   [self connectAccountWithDictionary:account];
-                               }
-                           }
-                       });
+    [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray* result) {
+        dispatch_async(self->_netQueue, ^{
+            for(NSDictionary* account in result)
+                [self connectAccountWithDictionary:account];
+        });
     }];
 }
 
@@ -617,7 +587,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
             NSNumber *autoJoin =[row objectForKey:@"autojoin"] ;
             if(autoJoin.boolValue) {
                 dispatch_async(self->_netQueue, ^{
-                         [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[NSString stringWithFormat:@"%@",[row objectForKey:@"account_id"]]];
+                         [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[NSString stringWithFormat:@"%@", [row objectForKey:kAccountID]]];
                 });
             }
         }
@@ -720,19 +690,17 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     return  _timerList;
 }
 
--(void) cleanArrayOfConnectedAccounts:(NSMutableArray *)dirtySet
+-(void) cleanArrayOfConnectedAccounts:(NSMutableArray*) dirtySet
 {
     //yes, this is ineffecient but the size shouldnt ever be huge
     NSMutableIndexSet *indexSet=[[NSMutableIndexSet alloc] init];
     for(xmpp* xmppAccount in _connectedXMPP)
     {
         NSInteger pos=0;
-        for(MLContact *row in dirtySet)
+        for(MLContact* row in dirtySet)
         {
-            if([row.contactJid isEqualToString:xmppAccount.connectionProperties.identity.jid] )
-            {
+            if([row.contactJid isEqualToString:xmppAccount.connectionProperties.identity.jid])
                 [indexSet addIndex:pos];
-            }
             pos++;
         }
 
@@ -782,9 +750,9 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     for (NSDictionary* row in outbox)
     {
         NSDictionary* accountDic = [row objectForKey:@"account"] ;
-        if([[accountDic objectForKey:@"account_id"] integerValue] == [account integerValue])
+        if([[accountDic objectForKey:kAccountID] integerValue] == [account integerValue])
         {
-            NSString* accountID = [NSString stringWithFormat:@"%@", [accountDic objectForKey:@"account_id"]];
+            NSString* accountID = [NSString stringWithFormat:@"%@", [accountDic objectForKey:kAccountID]];
             NSString* recipient = [row objectForKey:@"recipient"];
             NSAssert(recipient != nil, @"Recipient missing");
             NSAssert(recipient != nil, @"Recipient missing");

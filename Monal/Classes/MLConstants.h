@@ -19,6 +19,7 @@ static const DDLogLevel ddLogLevel = DDLogLevelInfo;
 
 typedef void (^contactCompletion)(MLContact *selectedContact);
 typedef void (^accountCompletion)(NSInteger accountRow);
+typedef void (^monal_void_block_t)();
 
 
 //used in OSX only really
@@ -48,7 +49,6 @@ typedef void (^accountCompletion)(NSInteger accountRow);
 #define kMonalCallRequestNotice @"kMonalCallRequestNotice"
 
 #define kMonalAccountStatusChanged @"kMonalAccountStatusChanged"
-#define kMonalAccountClearContacts @"kMonalAccountClearContacts"
 #define kMonalAccountAuthRequest @"kMonalAccountAuthRequest"
 
 #define kMonalContactRefresh @"kMonalContactRefresh"

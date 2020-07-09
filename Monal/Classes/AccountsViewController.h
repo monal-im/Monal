@@ -14,6 +14,5 @@
 @property (nonatomic, strong) UITableView* accountsTable;
 
 -(IBAction)connect:(id)sender;
--(IBAction)logout:(id)sender;
 
 @end

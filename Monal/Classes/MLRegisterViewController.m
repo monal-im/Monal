@@ -30,7 +30,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
 }
 
 - (void) viewWillAppear:(BOOL)animated
@@ -38,10 +37,10 @@
     [super viewWillAppear:animated];
     [self registerForKeyboardNotifications];
     
-    [self makeXMPPConnection];
+    [self createXMPPInstance];
     
     __weak MLRegisterViewController *weakself = self;
-    self.xmppAccount.regFormCompletion=^(NSData *captchaImage, NSDictionary *hiddenFields) {
+    [self.xmppAccount requestRegFormWithCompletion:^(NSData *captchaImage, NSDictionary *hiddenFields) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if(captchaImage) {
                 weakself.captchaImage.image= [UIImage imageWithData:captchaImage];
@@ -50,33 +49,31 @@
                 //show error image
                 //self.captchaImage.image=
             }
-            weakself.xmppAccount.explicitLogout=YES;
-            [weakself.xmppAccount disconnect];//we dont want to see any time out errors
+            [weakself.xmppAccount disconnect:YES];  //we dont want to see any time out errors
         });
-    };
-    [self.xmppAccount connect];
-
+    } andErrorCompletion:^(BOOL success, NSString* error) {
+        NSString *displayMessage = error;
+        if(displayMessage.length==0) displayMessage = NSLocalizedString(@"Could not request registration form. Please check your internet connection and try again.", @ "");
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @ "") message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+    }];
 }
--(void) makeXMPPConnection {
-    self.xmppAccount=[[xmpp alloc] init];
-    self.xmppAccount.explicitLogout=NO;
-    
-    MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:@"nothing@yax.im" password:@"nothing" andResource:@"MonalReg"];
-    
-    MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:kRegServer andPort:[NSNumber numberWithInt:5222] andDirectTLS:NO];
-   
-    server.selfSignedCert=NO;
-    
-    self.xmppAccount= [[xmpp alloc] initWithServer:server andIdentity:identity];
-    
-    self.xmppAccount.registration=YES;
+-(void) createXMPPInstance
+{
+    MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:@"nothing@yax.im" password:@"nothing" andResource:@"MonalReg"];
+    MLXMPPServer* server = [[MLXMPPServer alloc] initWithHost:@"" andPort:[NSNumber numberWithInt:5222] andDirectTLS:NO];
+    server.selfSignedCert = NO;
+    self.xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAirDrop:NO andAccountNo:@"-1"];
 }
 
--(IBAction)registerAccount:(id)sender {
-    
+-(IBAction)registerAccount:(id) sender
+{
     if(self.jid.text.length==0 || self.password.text.length==0)
         {
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No Empty Values",@ "") message:NSLocalizedString(@"Please make sure you have entered a username, password.",@ "") preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No Empty Values", @"") message:NSLocalizedString(@"Please make sure you have entered a username, password.", @"") preferredStyle:UIAlertControllerStyleAlert];
             [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
@@ -86,43 +83,43 @@
     
     if([self.jid.text rangeOfString:@"@"].location!=NSNotFound)
     {
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid username",@ "") message:NSLocalizedString(@"The username does not need to have an @ symbol. Please try again.",@ "") preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid username", @"") message:NSLocalizedString(@"The username does not need to have an @ symbol. Please try again.", @"") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
         return;
     }
     
-        self.loginHUD= [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-        self.loginHUD.label.text=NSLocalizedString(@"Signing Up",@ "");
-        self.loginHUD.mode=MBProgressHUDModeIndeterminate;
-        self.loginHUD.removeFromSuperViewOnHide=YES;
+    self.loginHUD= [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    self.loginHUD.label.text=NSLocalizedString(@"Signing Up", @"");
+    self.loginHUD.mode=MBProgressHUDModeIndeterminate;
+    self.loginHUD.removeFromSuperViewOnHide=YES;
     
     NSString *jid = [self.jid.text copy];
     NSString *pass =[self.password.text copy];
     NSString *code =[self.captcha.text copy];
-    [self makeXMPPConnection];
+    [self createXMPPInstance];
 
     self.loginHUD.hidden=NO;
     
     [self.xmppAccount registerUser:jid withPassword:pass captcha:code andHiddenFields: self.hiddenFields withCompletion:^(BOOL success, NSString *message) {
         dispatch_async(dispatch_get_main_queue(), ^{
-             self.loginHUD.hidden=YES;
-            self.xmppAccount.explicitLogout=YES;
-            [self.xmppAccount disconnect];
+            self.loginHUD.hidden=YES;
+            [self.xmppAccount disconnect:YES];
             
-            if(!success) {
+            if(!success)
+            {
                 NSString *displayMessage = message;
-                if(displayMessage.length==0) displayMessage = NSLocalizedString(@"Could not register your username. Please check your code or change the username and try again.",@ "");
-                UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@ "") message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
-                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                if(displayMessage.length==0) displayMessage = NSLocalizedString(@"Could not register your username. Please check your code or change the username and try again.", @"");
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                     [alert dismissViewControllerAnimated:YES completion:nil];
                 }]];
                 [self presentViewController:alert animated:YES completion:nil];
-                
-            } else {
-                
+            }
+            else
+            {
                 NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
                 [dic setObject:kRegServer forKey:kDomain];
                 [dic setObject:self.jid.text forKey:kUsername];
@@ -150,9 +147,6 @@
             }
         });
     }];
-    
-    [self.xmppAccount connect];
-  
 }
 
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender

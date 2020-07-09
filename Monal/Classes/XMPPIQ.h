@@ -16,16 +16,19 @@ FOUNDATION_EXPORT NSString *const kiqErrorType;
 
 @interface XMPPIQ : MLXMLNode
 
--(id) initWithId:(NSString*) sessionid andType:(NSString*) iqType;
+-(id) initWithId:(NSString*) iqid andType:(NSString*) iqType;
 -(id) initWithType:(NSString*) iqType;
 
--(void) setPushEnableWithNode:(NSString *)node andSecret:(NSString *)secret;
--(void) setPushDisableWithNode:(NSString *)node;
+-(NSString*) getId;
+-(void) setId:(NSString*) id;
+
+-(void) setPushEnableWithNode:(NSString *) node andSecret:(NSString *) secret;
+-(void) setPushDisableWithNode:(NSString *) node;
 
 /**
  login with legacy authentication. only as fallback.
  */
--(void) setAuthWithUserName:(NSString *)username resource:(NSString *) resource andPassword:(NSString *) password;
+-(void) setAuthWithUserName:(NSString *) username resource:(NSString *) resource andPassword:(NSString *) password;
 
 /**
  Makes an iq to bind with a resouce. Passing nil will set no resource.

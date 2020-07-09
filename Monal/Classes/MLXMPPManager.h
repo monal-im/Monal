@@ -19,7 +19,6 @@
 {
     dispatch_queue_t _netQueue ;
     dispatch_source_t _pinger;
-    NSArray* _accountList;
 }
 
 + (MLXMPPManager* )sharedInstance;
@@ -28,12 +27,12 @@
 /**
  Checks if there are any enabled acconts and connects them if necessary.  
  */
--(void)connectIfNecessary;
+-(void) connectIfNecessary;
 
 /**
  logout all accounts
  */
--(void)logoutAll;
+-(void) logoutAll;
 
 /**
  disconnects the specified account
@@ -49,12 +48,12 @@
 /**
  Remove a contact from an account
  */
--(void) removeContact:(MLContact *) contact;
+-(void) removeContact:(MLContact*) contact;
 
 /**
  Add a contact from an account
  */
--(void) addContact:(MLContact *) contact;
+-(void) addContact:(MLContact*) contact;
 
 /**
  Block  a jid
@@ -89,7 +88,7 @@
 /**
  update the password in the keychan and update memory cache
  */
--(void) updatePassword:(NSString *) password forAccount:(NSString *) accountNo;
+-(void) updatePassword:(NSString*) password forAccount:(NSString*) accountNo;
 
 
 #pragma mark MUC commands
@@ -97,15 +96,15 @@
 /**
  Joins the selected Room on the conference server
  */
--(void)  joinRoom:(NSString*) roomName withNick:(NSString *)nick andPassword:(NSString*) password forAccountRow:(NSInteger) row;
+-(void) joinRoom:(NSString*) roomName withNick:(NSString*) nick andPassword:(NSString*) password forAccountRow:(NSInteger) row;
 
--(void)  joinRoom:(NSString*) roomName withNick:(NSString *)nick andPassword:(NSString*) password forAccounId:(NSString *) accountId;
+-(void) joinRoom:(NSString*) roomName withNick:(NSString*) nick andPassword:(NSString*) password forAccounId:(NSString*) accountId;
 /**
  leaves a specified MUC room. 
  @param roomName room
  @param accountId the accountid number from the database
  */
--(void)  leaveRoom:(NSString*) roomName withNick:(NSString *) nick forAccountId:(NSString*) accountId;
+-(void) leaveRoom:(NSString*) roomName withNick:(NSString*) nick forAccountId:(NSString*) accountId;
 
 #pragma mark Jingle VOIP
 
@@ -127,7 +126,7 @@
 /**
  respond to call with either accept or not. Passes back the notifiaction dictionary
  */
--(void) handleCall:(NSDictionary *) userDic withResponse:(BOOL) accept; 
+-(void) handleCall:(NSDictionary*) userDic withResponse:(BOOL) accept; 
 
 /**
 Sends a message to a specified contact in account. Calls completion handler on success or failure.
@@ -150,7 +149,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion;
 /**
 Attempts to upload a file to the  HTTP upload service
  */
--(void)httpUploadData:(NSData *)data withFilename:(NSString*) filename andType:(NSString*)contentType  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;
+-(void)httpUploadData:(NSData*) data withFilename:(NSString*) filename andType:(NSString*) contentType  toContact:(NSString*) contact onAccount:(NSString*) accountNo withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;
 
 
 #pragma mark XMPP settings
@@ -160,7 +159,6 @@ Attempts to upload a file to the  HTTP upload service
 
 @property (nonatomic, strong, readonly) NSMutableArray* connectedXMPP;
 
-
 @property (nonatomic, assign) BOOL hasAPNSToken;
 
 @property (nonatomic, strong) NSString *pushNode;
@@ -169,14 +167,14 @@ Attempts to upload a file to the  HTTP upload service
 /**
  updates unread
  */
--(void) handleNewMessage:(NSNotification *)notification;
+-(void) handleNewMessage:(NSNotification*) notification;
 
 -(void) resetForeground;
 
 /**
  updates delivery status after message has been sent
  */
--(void) handleSentMessage:(NSNotification *)notification;
+-(void) handleSentMessage:(NSNotification*) notification;
 
 /**
  updtes client state on server as inactive
@@ -191,25 +189,20 @@ Attempts to upload a file to the  HTTP upload service
 /**
  fetch a contacts vCard
  */
--(void) getVCard:(MLContact *) contact;
-
-/**
- log out everything but doesnt destroy the stream id
- */
--(void)logoutAllKeepStreamWithCompletion:(void (^)(void))completion;
+-(void) getVCard:(MLContact*) contact;
 
 /**
  Iterates through set and compares with connected accounts. Removes them. useful for active chat. 
  */
--(void) cleanArrayOfConnectedAccounts:(NSMutableArray *) dirtySet;
+-(void) cleanArrayOfConnectedAccounts:(NSMutableArray*) dirtySet;
 
--(void) setPushNode:(NSString *)node andSecret:(NSString *)secret;
+-(void) setPushNode:(NSString*) node andSecret:(NSString*)secret;
 
 
 
 -(void) sendMessageForConnectedAccounts;
 
--(void) parseMessageForData:(NSData *) data;
+-(void) parseMessageForData:(NSData*) data;
 
 
 @end

@@ -22,12 +22,13 @@ NSString *const kiqErrorType = @"error";
 @implementation XMPPIQ
 
 
--(id) initWithId:(NSString*) sessionid andType:(NSString*) iqType
+-(id) initWithId:(NSString*) iqid andType:(NSString*) iqType
 {
     self=[super init];
     self.element=@"iq";
-    if (sessionid && iqType) {
-        [self.attributes setObject:sessionid forKey:@"id"];
+    if(iqid && iqType)
+    {
+        [self setId:iqid];
         [self.attributes setObject:iqType forKey:@"type"];
     }
     return self;
@@ -38,7 +39,18 @@ NSString *const kiqErrorType = @"error";
     return [self initWithId:[[NSUUID UUID] UUIDString] andType:iqType];
 }
 
-+ (NSArray *) features {
+-(NSString*) getId
+{
+    return [self.attributes objectForKey:@"id"];
+}
+
+-(void) setId:(NSString*) id
+{
+    [self.attributes setObject:id forKey:@"id"];
+}
+
++(NSArray*) features
+{
     static NSArray* featuresArray;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -65,7 +77,7 @@ NSString *const kiqErrorType = @"error";
     return featuresArray;
 }
 
-+(NSString *) featuresString
++(NSString*) featuresString
 {
     NSMutableString* toreturn = [[NSMutableString alloc] init];
     for(NSString* feature in [XMPPIQ features])
@@ -76,9 +88,7 @@ NSString *const kiqErrorType = @"error";
     return toreturn;
 }
 
-
 #pragma mark iq set
- #if TARGET_OS_IPHONE
 -(void) setPushEnableWithNode:(NSString *)node andSecret:(NSString *)secret
 {
     MLXMLNode* enableNode =[[MLXMLNode alloc] init];
@@ -112,7 +122,6 @@ NSString *const kiqErrorType = @"error";
     [secretFieldNode.children addObject:secretValueNode];
     [xNode.children addObject:secretFieldNode];
 }
-#endif
 
 -(void) setPushDisableWithNode:(NSString *)node
 {
@@ -217,16 +226,13 @@ NSString *const kiqErrorType = @"error";
 -(void) setiqTo:(NSString*) to
 {
     if(to)
-    [self.attributes setObject:to forKey:@"to"];
+        [self.attributes setObject:to forKey:@"to"];
 }
 
 -(void) setPing
 {
-    MLXMLNode* pingNode =[[MLXMLNode alloc] init];
-    pingNode.element=@"ping";
-    [pingNode.attributes setObject:@"urn:xmpp:ping" forKey:kXMLNS];
+    MLXMLNode* pingNode = [[MLXMLNode alloc] initWithElement:@"ping" andNamespace:@"urn:xmpp:ping"];
     [self.children addObject:pingNode];
-
 }
 
 #pragma mark - MAM

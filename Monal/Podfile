@@ -30,9 +30,9 @@ target 'Monal' do
   use_frameworks!
   inhibit_all_warnings!
 pod 'CocoaLumberjack'
-pod 'MBProgressHUD', '~> 1.1.0'
+pod 'MBProgressHUD', '~> 1.2.0'
 
-pod 'NotificationBannerSwift', '~> 3.0.0'
+pod 'NotificationBannerSwift', '~> 3.0.2'
 pod 'IDMPhotoBrowser'
 pod 'SDWebImage', '~> 4.3.3'
 
@@ -57,6 +57,6 @@ target 'monalxmpp' do
   pod 'SignalProtocolObjC'
   pod 'SignalProtocolC'
 
-  pod 'OpenSSL-Universal', '1.0.2.18'
+  pod 'OpenSSL-Universal', '1.0.2.19'
 
 end

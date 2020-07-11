@@ -107,6 +107,9 @@ extern NSString *const kXMPPError;
 extern NSString *const kXMPPSuccess;
 extern NSString *const kXMPPPresence;
 
+extern NSString* const kAccountState;
+extern NSString* const kAccountHibernate;
+
 
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAirDrop:(BOOL) airDrop andAccountNo:(NSString*) accountNo;
 

@@ -15,15 +15,15 @@
 {
     self = [super initWithCoder:coder];
     if (self) {
-        self.autoresizingMask= UIViewAutoresizingFlexibleHeight;
-        self.chatInput.scrollEnabled=NO;
+        self.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+        self.chatInput.scrollEnabled = NO;
         self.chatInput.contentInset = UIEdgeInsetsMake(5, 0, 5, 0);
     }
     return self;
 }
 
 - (CGSize)intrinsicContentSize {
-    CGSize size= CGSizeMake(self.bounds.size.width,  self.chatInput.intrinsicContentSize.height);
+    CGSize size = CGSizeMake(self.bounds.size.width, self.chatInput.intrinsicContentSize.height);
     return size;
 }
 

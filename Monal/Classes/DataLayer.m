@@ -20,7 +20,9 @@ static BOOL _version_check_done = NO;
 @implementation DataLayer
 
 
-NSString *const kAccountID = @"account_id";
+NSString* const kAccountID = @"account_id";
+NSString* const kAccountState = @"account_state";
+NSString* const kAccountHibernate = @"account_hibernate";
 
 //used for account rows
 NSString *const kDomain = @"domain";
@@ -2858,6 +2860,15 @@ NSString *const kCount = @"count";
         DDLogVerbose(@"Upgrade to 4.75 success");
     }
 
+    if([dbversion doubleValue] < 4.76)
+    {
+        DDLogVerbose(@"Database version <4.76 detected. Performing upgrade on accounts.");
+        // Add column for the last interaction of a contact
+        [self executeNonQuery:@"alter table buddylist add column lastInteraction INTEGER NOT NULL DEFAULT 0;" andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='4.76';" andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.76 success");
+    }
+
     [self endWriteTransaction];
     _version_check_done = YES;
     return;
@@ -3047,12 +3058,24 @@ NSString *const kCount = @"count";
 
 }
 
+-(NSDate*) lastInteractionFromJid:(NSString* _Nonnull) jid andAccountNo:(NSString* _Nonnull) accountNo
+{
+    NSAssert(jid, @"jid should not be null");
+    NSAssert(accountNo != NULL, @"accountNo should not be null");
+
+    NSString* query = [NSString stringWithFormat:@"SELECT lastInteraction from buddylist where account_id=? and buddy_name=?"];
+    NSArray* params = @[accountNo, jid];
+    NSNumber* lastInteractionTime = (NSNumber*)[self executeScalar:query andArguments:params];
+
+    return [NSDate dateWithTimeIntervalSince1970:[lastInteractionTime doubleValue]];
+}
+
 #pragma mark -  encryption
 
 -(BOOL) shouldEncryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo
 {
     if(!jid || !accountNo) return NO;
-    NSString* query = [NSString stringWithFormat:@"SELECT encrypt from buddylist where account_id=?  and buddy_name=?"];
+    NSString* query = [NSString stringWithFormat:@"SELECT encrypt from buddylist where account_id=? and buddy_name=?"];
     NSArray* params = @[accountNo, jid];
     NSNumber* status=(NSNumber*)[self executeScalar:query andArguments:params];
     return [status boolValue];

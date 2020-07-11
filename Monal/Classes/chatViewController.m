@@ -24,6 +24,7 @@
 #import "DataLayer.h"
 #import "AESGcm.h"
 #import "EncodingTools.h"
+#import "HelperTools.h"
 
 @import QuartzCore;
 @import MobileCoreServices;
@@ -54,6 +55,8 @@
 
 @end
 
+@class HelperTools;
+
 @implementation chatViewController
 
 -(void) setup
@@ -62,7 +65,7 @@
     
     [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId withCompletion:^(NSArray *result) {
         NSArray* accountVals = result;
-        if([accountVals count]>0)
+        if([accountVals count] > 0)
         {
             self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
         }
@@ -82,7 +85,7 @@
 {
     [super viewDidLoad];
     [self setupDateObjects];
-    containerView= self.view;
+    containerView = self.view;
     self.messageTable.scrollsToTop=YES;
     self.chatInput.scrollsToTop=NO;
     
@@ -105,7 +108,7 @@
     [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
-    [nc addObserver:self selector:@selector(refreshButton:) name:kMonalAccountStatusChanged object:nil];
+    [nc addObserver:self selector:@selector(updateUIElementsOnAccountChange:) name:kMonalAccountStatusChanged object:nil];
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     
@@ -119,9 +122,16 @@
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight=UITableViewAutomaticDimension;
     
+    self.navBarContainerView.frame = CGRectMake(0, 0, self.view.frame.size.width, 53);
+    [self.view addSubview:self.navBarContainerView];
+    [self.navBarContainerView.leadingAnchor constraintEqualToAnchor:self.navBarContainerView.superview.leadingAnchor].active = YES;
+    [self.navBarContainerView.bottomAnchor constraintEqualToAnchor:self.navBarContainerView.superview.bottomAnchor].active = YES;
+    [self.navBarContainerView.trailingAnchor constraintEqualToAnchor:self.navBarContainerView.superview.trailingAnchor].active = YES;
+
 #if TARGET_OS_MACCATALYST
     //does not become first responder like in iOS
     [self.view addSubview:self.inputContainerView];
+
     [self.inputContainerView.leadingAnchor constraintEqualToAnchor:self.inputContainerView.superview.leadingAnchor].active=YES;
     [self.inputContainerView.bottomAnchor constraintEqualToAnchor:self.inputContainerView.superview.bottomAnchor].active=YES;
     [self.inputContainerView.trailingAnchor constraintEqualToAnchor:self.inputContainerView.superview.trailingAnchor].active=YES;
@@ -164,45 +174,89 @@
     });
 }
 
--(void) refreshButton:(NSNotification *) notificaiton
+-(void) displayEncryptionStateInUI
+{
+    if(self.encryptChat) {
+        [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"744-locked-received"] forState:UIControlStateNormal];
+    } else {
+        [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"745-unlocked"] forState:UIControlStateNormal];
+    }
+}
+
+// TODO use notification
+-(void) updateUIElementsOnAccountChange:(xmppState) accountState isHibernated:(BOOL) isHibernated
 {
     if(!self.contact.accountId) return;
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+
+    NSString* jidLabelText = nil;
+    BOOL sendButtonEnabled = NO;
+
+    NSString* contactDisplayName = self.contact.contactDisplayName;
+
+    if(isHibernated == YES)
+    {
+        sendButtonEnabled = YES;
+        jidLabelText = [NSString stringWithFormat:@"%@ [%@]", contactDisplayName, @"Hibernated"];
+    } else if(accountState < kStateLoggedIn) {
+        /* if(!xmppAccount.airDrop) {
+            sendButtonEnabled = NO;
+        }*/
+        
+        if(!contactDisplayName)
+            contactDisplayName = @"";
+        jidLabelText = [NSString stringWithFormat:@"%@ [%@]", contactDisplayName, NSLocalizedString(@"Logging In", @"")];
+    } else  {
+        sendButtonEnabled = YES;
+
+        jidLabelText = [NSString stringWithFormat:@"%@", contactDisplayName];
+    }
+
+    if(self.contact.isGroup) {
+        NSArray* members = [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
+        jidLabelText = [NSString stringWithFormat:@"%@ (%ld)", self.navBarContactJid.text, members.count];
+    }
+    // change text values
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *title=self.contact.contactDisplayName;
-        
-        if([xmppAccount isHibernated] == YES)
-        {
-            self.sendButton.enabled = YES;
-            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Hibernated"];
-        } else if(xmppAccount.accountState<kStateLoggedIn) {
-            if(!xmppAccount.airDrop) {
-                self.sendButton.enabled = NO;
-            }
-            
-            if(!title)
-                title=@"";
-            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, NSLocalizedString(@"Logging In",@ "")];
-        } else  {
-            self.sendButton.enabled=YES;
-            self.navigationItem.title=title;
-        }
-        
-        if(self.encryptChat){
-            self.navigationItem.title = [NSString stringWithFormat:@"%@ 🔒", self.navigationItem.title];
-        }
-        
-        if(self.contact.isGroup) {
-            NSArray *members= [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
-            self.navigationItem.title=[NSString stringWithFormat:@"%@ (%ld)", self.navigationItem.title, members.count];
-        }
+        self.navBarContactJid.text = jidLabelText;
+        self.sendButton.enabled = sendButtonEnabled;
     });
 }
 
+-(void) updateUIElementsOnAccountChange:(NSNotification* _Nullable) notification
+{
+    if(notification) {
+        NSDictionary* userInfo = notification.userInfo;
+        // Check if all objects of the notification are present
+        NSString* accountNo = [userInfo objectForKey:kAccountID];
+        NSNumber* accountState = [userInfo objectForKey:kAccountState];
+        NSNumber* accountHibernate = [userInfo objectForKey:kAccountHibernate];
+        
+        // Only parse account changes for our current opened account
+        if(![accountNo isEqualToString:self.xmppAccount.accountNo]) {
+            return;
+        }
+        
+        if(accountNo && accountState && accountHibernate) {
+            [self updateUIElementsOnAccountChange:(xmppState)[accountState intValue] isHibernated:[accountHibernate boolValue]];
+        }
+    } else {
+        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+        [self updateUIElementsOnAccountChange:kStateLoggedIn isHibernated:[xmppAccount isHibernated]];
+    }
+}
+
+-(void) updateNavBarLastInteractionLabel
+{
+    // Load the latest interaction timestamp from db and display it in the title
+   NSString* lastInteractionString = [HelperTools lastInteractionFromJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+   self.navBarLastInteraction.text = lastInteractionString;
+}
 
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    // Hide normal navigation bar
+    [[self navigationController] setNavigationBarHidden:YES animated:NO];
     
     [MLNotificationManager sharedInstance].currentAccountNo=self.contact.accountId;
     [MLNotificationManager sharedInstance].currentContact=self.contact;
@@ -224,10 +278,12 @@
     }
     
     if(self.contact.contactJid && self.contact.accountId) {
-        self.encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+        self.encryptChat = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
     }
     [self handleForeGround];
-    [self refreshButton:nil];
+    [self updateUIElementsOnAccountChange:nil];
+    [self updateNavBarLastInteractionLabel];
+    [self displayEncryptionStateInUI];
     
     [self updateBackground];
     
@@ -265,8 +321,8 @@
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Encryption Not Supported" message:@"This contact does not appear to have any devices that support encryption." preferredStyle:UIAlertControllerStyleAlert];
             [alert addAction:[UIAlertAction actionWithTitle:@"Disable Encryption" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 // Disable encryption
-                self.encryptChat=NO;
-                [self refreshButton:nil];
+                self.encryptChat = NO;
+                [self updateUIElementsOnAccountChange:nil];
                 [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
@@ -302,9 +358,8 @@
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
-    if(self.messageTable.contentSize.height>self.messageTable.bounds.size.height)
+    if(self.messageTable.contentSize.height > self.messageTable.bounds.size.height)
         [self.messageTable setContentOffset:CGPointMake(0, self.messageTable.contentSize.height- self.messageTable.bounds.size.height) animated:NO];
-    
 }
 
 -(void) dealloc
@@ -522,8 +577,8 @@
     {
         UINavigationController *nav = segue.destinationViewController;
         ContactDetails* details = (ContactDetails *)nav.topViewController;
-        details.contact= self.contact;
-        details.completion=^{
+        details.contact = self.contact;
+        details.completion = ^{
             [self viewWillAppear:YES];
         };
     }
@@ -914,7 +969,6 @@
             //                    dispatch_async(dispatch_get_main_queue(), ^{
             //                        [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
             //                        self.encryptChat=YES;
-            //                        [self refreshButton:notification];
             //                    });
             //                }
             //            }
@@ -937,12 +991,11 @@
                 [self->_messageTable beginUpdates];
                 NSIndexPath *path1;
                 NSInteger bottom =  self.messageList.count-1;
-                if(bottom>=0) {
+                if(bottom >= 0) {
                     
                     path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
                     [self->_messageTable insertRowsAtIndexPaths:@[path1]
                                                withRowAnimation:UITableViewRowAnimationBottom];
-                    
                 }
                 [self->_messageTable endUpdates];
                 
@@ -1198,7 +1251,7 @@
     
     NSString* from = row.from;
     
-    //cut text after 1500 chars to make the message cell work properly (too big texts don't render the text in the cell at all)
+    //cut text after 2048 chars to make the message cell work properly (too big texts don't render the text in the cell at all)
     NSString* messageText = row.messageText;
     if([messageText length] > 2048)
         messageText = [NSString stringWithFormat:@"%@\n[...]", [messageText substringToIndex:2048]];
@@ -1332,7 +1385,7 @@
                 MLChatMapsCell* mapsCell;
                 if([from isEqualToString:self.contact.contactJid]) {
                     mapsCell = (MLChatMapsCell *) [tableView dequeueReusableCellWithIdentifier:@"mapsInCell"];
-                    mapsCell.outBound=NO;
+                    mapsCell.outBound = NO;
                 } else  {
                     mapsCell = (MLChatMapsCell *) [tableView dequeueReusableCellWithIdentifier:@"mapsOutCell"];
                 }
@@ -1342,9 +1395,9 @@
                 mapsCell.longitude = [longitude doubleValue];
 
                 [mapsCell loadCoordinatesWithCompletion:^{}];
-                cell=mapsCell;
+                cell = mapsCell;
             } else {
-                NSMutableAttributedString *geoString = [[NSMutableAttributedString alloc] initWithString:messageText];
+                NSMutableAttributedString* geoString = [[NSMutableAttributedString alloc] initWithString:messageText];
                 [geoString addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:[geoMatch rangeAtIndex:0]];
 
                 cell.messageBody.attributedText = geoString;
@@ -1357,25 +1410,25 @@
         }
     } else {
         // Check if message contains a url
-        NSString* lowerCase= [messageText lowercaseString];
+        NSString* lowerCase = [messageText lowercaseString];
         NSRange pos = [lowerCase rangeOfString:@"https://"];
-        if(pos.location==NSNotFound) {
-            pos=[lowerCase rangeOfString:@"http://"];
+        if(pos.location == NSNotFound) {
+            pos = [lowerCase rangeOfString:@"http://"];
         }
         
         NSRange pos2;
-        if(pos.location!=NSNotFound)
+        if(pos.location != NSNotFound)
         {
-            NSString* urlString =[messageText substringFromIndex:pos.location];
-            pos2= [urlString rangeOfString:@" "];
-            if(pos2.location==NSNotFound) {
-                pos2= [urlString rangeOfString:@">"];
+            NSString* urlString = [messageText substringFromIndex:pos.location];
+            pos2 = [urlString rangeOfString:@" "];
+            if(pos2.location == NSNotFound) {
+                pos2 = [urlString rangeOfString:@">"];
             }
             
-            if(pos2.location!=NSNotFound) {
-                urlString=[urlString substringToIndex:pos2.location];
+            if(pos2.location != NSNotFound) {
+                urlString = [urlString substringToIndex:pos2.location];
             }
-            NSArray *parts = [urlString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+            NSArray* parts = [urlString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             cell.link = parts[0];
             
             if(cell.link) {
@@ -1677,6 +1730,9 @@
 //    self.messageTable.scrollIndicatorInsets = contentInsets;
 }
 
-
+- (IBAction)navBarReturnButton:(id)sender
+{
+    [self.navigationController dismissViewControllerAnimated:YES completion:NULL];
+}
 
 @end

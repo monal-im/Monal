@@ -16,6 +16,7 @@
 #import "MLKeysTableViewController.h"
 #import "MLResourcesTableViewController.h"
 #import "MLTextInputCell.h"
+#import "HelperTools.h"
 
 
 @interface ContactDetails()
@@ -35,6 +36,8 @@
 
 @end
 
+@class HelperTools;
+
 @implementation ContactDetails
 
 #pragma mark view lifecycle
@@ -52,14 +55,14 @@
     if(!self.contact) return;
     
     [[MLXMPPManager sharedInstance] getVCard:self.contact];
-    self.tableView.rowHeight= UITableViewAutomaticDimension;
+    self.tableView.rowHeight = UITableViewAutomaticDimension;
     
-    self.navigationItem.title=self.contact.contactDisplayName;
+    self.navigationItem.title = self.contact.contactDisplayName;
     
     if(self.contact.isGroup) {
-       NSArray *members= [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
-        self.groupMemberCount=members.count;
-        self.navigationItem.title =NSLocalizedString(@"Group Chat",@"");
+       NSArray* members = [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
+        self.groupMemberCount = members.count;
+        self.navigationItem.title = NSLocalizedString(@"Group Chat",@"");
         
     }
     
@@ -68,12 +71,12 @@
     [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" andMucNick:nil  withCompletion:^(BOOL success) {
     }];
     
-    NSDictionary *newSub=[[DataLayer sharedInstance] getSubscriptionForContact:self.contact.contactJid andAccount:self.contact.accountId];
-    self.contact.ask= [newSub objectForKey:@"ask"];
-    self.contact.subscription= [newSub objectForKey:@"subscription"];
+    NSDictionary* newSub = [[DataLayer sharedInstance] getSubscriptionForContact:self.contact.contactJid andAccount:self.contact.accountId];
+    self.contact.ask = [newSub objectForKey:@"ask"];
+    self.contact.subscription = [newSub objectForKey:@"subscription"];
     
     if(!self.contact.subscription || ![self.contact.subscription isEqualToString:kSubBoth]) {
-        self.isSubscribed=NO;
+        self.isSubscribed = NO;
        
         if([self.contact.subscription isEqualToString:kSubNone]){
             self.subMessage=NSLocalizedString(@"Neither can see keys.",@"");
@@ -119,17 +122,17 @@
 {
     if([segue.identifier isEqualToString:@"showCall"])
     {
-        CallViewController *callScreen = segue.destinationViewController;
+        CallViewController* callScreen = segue.destinationViewController;
         callScreen.contact=self.contact;
     }
     else if([segue.identifier isEqualToString:@"showResources"])
     {
-        MLResourcesTableViewController *resourcesVC = segue.destinationViewController;
+        MLResourcesTableViewController* resourcesVC = segue.destinationViewController;
         resourcesVC.contact=self.contact;
     }
     else if([segue.identifier isEqualToString:@"showKeys"])
     {
-        MLKeysTableViewController *keysVC = segue.destinationViewController;
+        MLKeysTableViewController* keysVC = segue.destinationViewController;
         keysVC.contact=self.contact;
     }
 }
@@ -139,7 +142,7 @@
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    if(section==0) return 2; // table view does not like <=1
+    if(section == 0) return 2; // table view does not like <=1
     
     return 30.0;
 }
@@ -151,28 +154,32 @@
     
     switch(indexPath.section) {
         case 0: {
-            MLContactDetailHeader *detailCell=  (MLContactDetailHeader *)[tableView dequeueReusableCellWithIdentifier:@"headerCell"];
+            MLContactDetailHeader* detailCell = (MLContactDetailHeader *)[tableView dequeueReusableCellWithIdentifier:@"headerCell"];
+
+            // Set jid field
             if(self.contact.isGroup) {
                detailCell.jid.text=[NSString stringWithFormat:@"%@ (%lu)", self.contact.contactJid, self.groupMemberCount];
                 //for how hide things that arent relevant
-                detailCell.phoneButton.hidden=YES;
-                detailCell.isContact.hidden=YES;
+                detailCell.phoneButton.hidden = YES;
+                detailCell.isContact.hidden = YES;
             } else {
-                detailCell.jid.text=self.contact.contactJid;
-                detailCell.isContact.hidden=self.isSubscribed;
-                detailCell.isContact.text=self.subMessage;
+                detailCell.jid.text = self.contact.contactJid;
+                detailCell.isContact.hidden = self.isSubscribed;
+                detailCell.isContact.text = self.subMessage;
             }
+            // Set lastInteraction field
+            detailCell.lastInteraction.text = [HelperTools lastInteractionFromJid:self.contact.contactJid andAccountNo:self.contact.accountId];
             
             if(self.contact.isGroup || !self.isSubscribed) {
-                detailCell.lockButton.hidden=YES;
+                detailCell.lockButton.hidden = YES;
             }
             
             [[MLImageManager sharedInstance] getIconForContact:self.contact.contactJid andAccount:self.contact.accountId withCompletion:^(UIImage *image) {
-                detailCell.buddyIconView.image=image;
+                detailCell.buddyIconView.image = image;
                 //   detailCell.background.image=image;
             }];
             
-            detailCell.background.image= [UIImage imageNamed:@"Tie_My_Boat_by_Ray_García"];
+            detailCell.background.image = [UIImage imageNamed:@"Tie_My_Boat_by_Ray_García"];
             
             if(self.isMuted) {
                 [detailCell.muteButton setImage:[UIImage imageNamed:@"847-moon-selected"] forState:UIControlStateNormal];
@@ -186,11 +193,11 @@
                 [detailCell.lockButton setImage:[UIImage imageNamed:@"745-unlocked"] forState:UIControlStateNormal];
             }
             
-            thecell=detailCell;
+            thecell = detailCell;
             break;
         }
         case 1: {
-            if(indexPath.row==0)
+            if(indexPath.row == 0)
             {
                 MLTextInputCell *cell=  (MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
                 if(self.contact.isGroup) {

@@ -38,7 +38,13 @@
 @property (nonatomic, weak) IBOutlet UIButton* plusButton;
 
 @property (nonatomic, weak) IBOutlet UIView* inputContainerView;
+@property (nonatomic, weak) IBOutlet UIView* navBarContainerView;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint* tableviewBottom;
+@property (weak, nonatomic) IBOutlet UILabel *navBarContactJid;
+@property (weak, nonatomic) IBOutlet UILabel *navBarLastInteraction;
+@property (weak, nonatomic) IBOutlet UIButton *navBarContactDetailsButton;
+- (IBAction)navBarReturnButton:(id)sender;
+@property (weak, nonatomic) IBOutlet UIButton* navBarEncryptToggleButton;
 
 @property (nonatomic, weak) IBOutlet UIImageView* backgroundImage;
 @property (nonatomic, weak) IBOutlet UIView* transparentLayer;

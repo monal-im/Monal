@@ -226,6 +226,16 @@ NSString *const kXMPPPresence = @"presence";
         operation();
 }
 
+-(void) accountStatusChanged
+{
+    // Send notification that our account state has changed
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil userInfo:@{
+            kAccountID:self.accountNo,
+            kAccountState:[[NSNumber alloc] initWithInt:(int)self.accountState],
+            kAccountHibernate:[NSNumber numberWithBool:[self isHibernated]]
+    }];
+}
+
 -(void) observeValueForKeyPath:(NSString*) keyPath ofObject:(id) object change:(NSDictionary *) change context:(void*) context
 {
     //check for idle state every time the number of operations in _sendQueue changes
@@ -1622,7 +1632,7 @@ NSString *const kXMPPPresence = @"presence";
 {
     NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName": self.connectionProperties.identity.jid};
     [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
+     [self accountStatusChanged];
 }
 
 -(void) sendIq:(XMPPIQ*) iq withResultHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler

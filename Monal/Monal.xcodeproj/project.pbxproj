@@ -257,6 +257,7 @@
 		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
 		C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */ = {isa = PBXBuildFile; fileRef = C18E7578245E8AE900AE8FB7 /* MLPipe.h */; };
 		C18E757C245E8AE900AE8FB7 /* MLPipe.m in Sources */ = {isa = PBXBuildFile; fileRef = C18E7579245E8AE900AE8FB7 /* MLPipe.m */; };
+		C1AAC3E424B5EF4100BB15D6 /* HelperTools.m in Sources */ = {isa = PBXBuildFile; fileRef = C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */; };
 		C1B7DF6C2438883600C7F0C4 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */; };
 		D838DFA541E4102BCA92A60E /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC355146D687D83135E2BBF7 /* Pods_monalxmpp.framework */; };
 		FE9BEACD951D0F8D3EBE264D /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99727E17D81471E803966620 /* Pods_shareSheet.framework */; };
@@ -776,6 +777,8 @@
 		C1414E9C24312F0100948788 /* MLChatMapsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatMapsCell.m; sourceTree = "<group>"; };
 		C18E7578245E8AE900AE8FB7 /* MLPipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPipe.h; sourceTree = "<group>"; };
 		C18E7579245E8AE900AE8FB7 /* MLPipe.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPipe.m; sourceTree = "<group>"; };
+		C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelperTools.h; sourceTree = "<group>"; };
+		C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HelperTools.m; sourceTree = "<group>"; };
 		C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/CoreLocation.framework; sourceTree = DEVELOPER_DIR; };
 		C1D27E0D3E8B8D0D625C5D2A /* Pods-monalxmppmac.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmppmac.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-monalxmppmac/Pods-monalxmppmac.adhoc.xcconfig"; sourceTree = "<group>"; };
 		C8C2F3F80367A8A1D3C24092 /* Pods-Monal Tests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests.adhoc.xcconfig"; sourceTree = "<group>"; };
@@ -1493,6 +1496,8 @@
 		26F7BB3A1115F8A300712672 /* tools */ = {
 			isa = PBXGroup;
 			children = (
+				C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */,
+				C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */,
 				260C6C92178080730004E2E1 /* EncodingTools.h */,
 				260C6C93178080730004E2E1 /* EncodingTools.m */,
 			);
@@ -1821,6 +1826,7 @@
 				ORGANIZATIONNAME = Monal.im;
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
+						LastSwiftMigration = 1150;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -2231,6 +2237,7 @@
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
 				26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */,
 				2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */,
+				C1AAC3E424B5EF4100BB15D6 /* HelperTools.m in Sources */,
 				C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */,
 				2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */,
 				268DD58617C4541000C673A9 /* MLChatCell.m in Sources */,
@@ -2484,6 +2491,9 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SUPPORTS_MACCATALYST = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -2939,6 +2949,8 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SUPPORTS_MACCATALYST = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_VERSION = 5.0;
 			};
 			name = AppStore;
 		};
@@ -3530,6 +3542,8 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SUPPORTS_MACCATALYST = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Adhoc;
 		};

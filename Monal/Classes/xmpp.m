@@ -90,6 +90,7 @@ NSString *const kXMPPPresence = @"presence";
     NSMutableArray* _smacksAckHandler;
     NSMutableDictionary* _iqHandlers;
     BOOL _startTLSComplete;
+    BOOL _catchupDone;
     
     //registration related stuff
     BOOL _registration;
@@ -129,8 +130,6 @@ NSString *const kXMPPPresence = @"presence";
  */
 @property (nonatomic, strong) NSMutableArray* unAckedStanzas;
 
-@property (nonatomic, strong) xmppCompletion loginCompletion;
-
 /**
  ID of the signal device query
  */
@@ -149,22 +148,27 @@ NSString *const kXMPPPresence = @"presence";
     _registration = NO;
     _registrationSubmission = NO;
 
+    _startTLSComplete = NO;
+    _catchupDone = NO;
+    self.httpUploadQueue = nil;
+
     _SRVDiscoveryDone = NO;
-    _discoveredServersList=[[NSMutableArray alloc] init];
+    _discoveredServersList = [[NSMutableArray alloc] init];
     if(!_usableServersList)
-		    _usableServersList=[[NSMutableArray alloc] init];
-    _outputQueue=[[NSMutableArray alloc] init];
+        _usableServersList = [[NSMutableArray alloc] init];
+    _outputQueue = [[NSMutableArray alloc] init];
     _iqHandlers = [[NSMutableDictionary alloc] init];
 
-    _receiveQueue=[[NSOperationQueue alloc] init];
+    _receiveQueue = [[NSOperationQueue alloc] init];
     _receiveQueue.name = @"receiveQueue";
-    _receiveQueue.qualityOfService=NSQualityOfServiceUtility;
-    _receiveQueue.maxConcurrentOperationCount=1;
+    _receiveQueue.qualityOfService = NSQualityOfServiceUtility;
+    _receiveQueue.maxConcurrentOperationCount = 1;
 
-    _sendQueue=[[NSOperationQueue alloc] init];
+    _sendQueue = [[NSOperationQueue alloc] init];
     _sendQueue.name = @"sendQueue";
-    _sendQueue.qualityOfService=NSQualityOfServiceUtility;
-    _sendQueue.maxConcurrentOperationCount=1;
+    _sendQueue.qualityOfService = NSQualityOfServiceUtility;
+    _sendQueue.maxConcurrentOperationCount = 1;
+    [_sendQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
 
     if(_outputBuffer)
 		free(_outputBuffer);
@@ -178,9 +182,7 @@ NSString *const kXMPPPresence = @"presence";
         dispatch_async(dispatch_get_main_queue(), ^{
             if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
             {
-#endif
                 _isCSIActive=NO;
-#if TARGET_OS_IPHONE
             }
         });
 #endif
@@ -190,7 +192,6 @@ NSString *const kXMPPPresence = @"presence";
     self.statusMessage=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];
     self.awayState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"];
 }
-
 
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAirDrop:(BOOL) airDrop andAccountNo:(NSString*) accountNo
 {
@@ -223,6 +224,35 @@ NSString *const kXMPPPresence = @"presence";
     }
     else
         operation();
+}
+
+-(void) observeValueForKeyPath:(NSString*) keyPath ofObject:(id) object change:(NSDictionary *) change context:(void*) context
+{
+    //check for idle state every time the number of operations in _sendQueue changes
+    if(object == _sendQueue && [@"operationCount" isEqual: keyPath])
+    {
+        //check idle state if _sendQueue is empty and if so, publish kMonalIdle notification
+        //only do the (more heavy but complete) idle check if we reache zero operations in this observed queue
+        if(![_sendQueue operationCount] && self.idle)
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
+    }
+}
+
+-(BOOL) idle
+{
+    __block BOOL retval = NO;
+    //we are idle when the catchup is done, no unacked stanzas are left in the smacks queue and receive and send queues are empty (no pending operations)
+    [self dispatchOnReceiveQueue: ^{
+        DDLogVerbose(@"Idle check:");
+        DDLogVerbose(@"    _catchupDone = %@", _catchupDone ? @"YES" : @"NO");
+        DDLogVerbose(@"    [self.unAckedStanzas count] = %lu", (unsigned long)[self.unAckedStanzas count]);
+        DDLogVerbose(@"    [_receiveQueue operationCount] = %lu", (unsigned long)[_receiveQueue operationCount]);
+        DDLogVerbose(@"    [_sendQueue operationCount] = %lu", (unsigned long)[_sendQueue operationCount]);
+        if(_catchupDone && !((unsigned long)[self.unAckedStanzas count]) && [_receiveQueue operationCount]<=1 && ![_sendQueue operationCount])
+            retval=YES;
+        DDLogVerbose(@"--> %@", retval ? @"idle" : @"NOT IDLE");
+    }];
+    return retval;
 }
 
 -(void) initTLS
@@ -274,11 +304,6 @@ NSString *const kXMPPPresence = @"presence";
         DDLogError(@"Connection failed");
         NSString *message=NSLocalizedString(@"Unable to connect to server",@ "");
         [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
-        if(self.loginCompletion)
-        {
-            self.loginCompletion(NO, message);
-            self.loginCompletion=nil;
-        }
         return;
     }
     else
@@ -388,6 +413,11 @@ NSString *const kXMPPPresence = @"presence";
         DDLogInfo(@"using airdrop. No XMPP connection.");
         return;
     }
+    if(![[MLXMPPManager sharedInstance] hasConnectivity])
+    {
+        DDLogInfo(@"no connectivity, ignoring connect call.");
+        return;
+    }
     
     [self dispatchOnReceiveQueue: ^{
         [_receiveQueue cancelAllOperations];        //stop everything coming after this (we will start a clean connect here!)
@@ -408,6 +438,9 @@ NSString *const kXMPPPresence = @"presence";
         
         DDLogInfo(@"XMPP connnect start");
         _accountState=kStateReconnecting;
+        _startTLSComplete = NO;
+        _catchupDone = NO;
+        self.httpUploadQueue = nil;
         
         [_sendQueue cancelAllOperations];
         [_sendQueue addOperationWithBlock:^{
@@ -426,7 +459,20 @@ NSString *const kXMPPPresence = @"presence";
         if(_registration || _registrationSubmission)
             return;
         
-        _cancelLoginTimer = [EncodingTools startTimer:8.0 withHandler:^{
+        double __block connectTimeout = 8.0;
+#ifdef TARGET_IS_EXTENSION
+    connectTimeout = 300.0;     //long timeout if in background
+#else
+#if TARGET_OS_IPHONE
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+            {
+                connectTimeout = 300.0;     //long timeout if in background
+            }
+        });
+#endif
+#endif
+        _cancelLoginTimer = [HelperTools startTimer:connectTimeout withHandler:^{
             [self dispatchOnReceiveQueue: ^{
                 _cancelLoginTimer = nil;
                 DDLogInfo(@"login took too long, cancelling and trying to reconnect (potentially using another SRV record)");
@@ -554,6 +600,7 @@ NSString *const kXMPPPresence = @"presence";
         
         DDLogInfo(@"resetting internal stream state to disconnected");
         _startTLSComplete = NO;
+        _catchupDone = NO;
         _accountState = kStateDisconnected;
         self.httpUploadQueue = nil;
     }];
@@ -600,6 +647,11 @@ NSString *const kXMPPPresence = @"presence";
         _baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
             [_receiveQueue addOperationWithBlock:^{
                 [self processInput:parsedStanza];           // always process stanzas in the receiveQueue
+                
+                //check idle state if this was the last operation in the _receiveQueue and if so, publish kMonalIdle notification
+                //quickly check our own queue before doing the more heavy (but complete) idle check
+                if(![_receiveQueue operationCount] && self.idle)
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
             }];
         }];
     } else {
@@ -896,6 +948,7 @@ NSString *const kXMPPPresence = @"presence";
 
         //this will be called after mam catchup is complete
         processor.mamFinished = ^() {
+            _catchupDone = YES;
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
         };
         
@@ -1134,35 +1187,22 @@ NSString *const kXMPPPresence = @"presence";
 
                     }];
 
-                    if(!presenceNode.MUC) {
-                        // do not do this in the background
-
-                        __block  BOOL checkChange = YES;
-
-                        if(checkChange)
+                    if(!presenceNode.MUC)
+                    {
+                        //check for vcard change
+                        if(presenceNode.photoHash)
                         {
-                            //check for vcard change
-                            if(presenceNode.photoHash) {
-                                [[DataLayer sharedInstance]  contactHash:[presenceNode.user copy] forAccount:self->_accountNo withCompeltion:^(NSString *iconHash) {
-                                    if([presenceNode.photoHash isEqualToString:iconHash])
-                                    {
-                                        DDLogVerbose(@"photo hash is the  same");
-                                    }
-                                    else
-                                    {
-                                        [[DataLayer sharedInstance]  setContactHash:presenceNode forAccount:self->_accountNo];
-
-                                        [self getVCard:presenceNode.user];
-                                    }
-
-                                }];
-
-                            }
-                        }
-                        else
-                        {
-                            // just set and request when in foreground if needed
-                            [[DataLayer sharedInstance]  setContactHash:presenceNode  forAccount:self->_accountNo];
+                            [[DataLayer sharedInstance]  contactHash:[presenceNode.user copy] forAccount:self->_accountNo withCompeltion:^(NSString *iconHash) {
+                                if([presenceNode.photoHash isEqualToString:iconHash])
+                                {
+                                    DDLogVerbose(@"photo hash is the  same");
+                                }
+                                else
+                                {
+                                    [[DataLayer sharedInstance]  setContactHash:presenceNode forAccount:self->_accountNo];
+                                    [self getVCard:presenceNode.user];
+                                }
+                            }];
                         }
                     }
                 }
@@ -1188,10 +1228,6 @@ NSString *const kXMPPPresence = @"presence";
         if(parsedStanza.errorText && ![parsedStanza.errorText isEqualToString:@""])
             message=[NSString stringWithFormat:@"XMPP stream error %@: %@", parsedStanza.errorReason, parsedStanza.errorText];
         [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self,message ]];
-        if(self.loginCompletion)  {
-            self.loginCompletion(NO, message);
-            self.loginCompletion=nil;
-        }
 
         [self reconnect];
     }
@@ -1305,14 +1341,7 @@ NSString *const kXMPPPresence = @"presence";
                 [self send:resumeNode];
             }
             else
-            {
                 [self bindResource];
-
-                if(self.loginCompletion) {
-                    self.loginCompletion(YES, @"");
-                    self.loginCompletion=nil;
-                }
-            }
         }
     }
     else if([parsedStanza.stanzaType isEqualToString:@"enabled"] && [parsedStanza isKindOfClass:[ParseEnabled class]])
@@ -1375,27 +1404,21 @@ NSString *const kXMPPPresence = @"presence";
         [self removeAckedStanzasFromQueue:resumeNode.h];
         [self resendUnackedStanzas];
 
+        //publish new csi and last active state
+        [self sendCurrentCSIState];
+        [self sendPresence];
+
         //signal finished catchup if our current outgoing stanza counter is acked, this introduces an additional roundtrip to make sure
         //all stanzas the *server* wanted to replay have been received, too
         //request an ack to accomplish this if stanza replay did not already trigger one (smacksRequestInFlight is false if replay did not trigger one)
         if(!self.smacksRequestInFlight)
-            [self requestSMAck:YES];        //force sending of the request even if the smacks queue is empty
+            [self requestSMAck:YES];    //force sending of the request even if the smacks queue is empty (needed to always trigger the smacks handler below after 1 RTT)
         [self addSmacksHandler:^{
+            _catchupDone = YES;
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
         }];
 
-        //force push (re)enable on session resumption
-        self.connectionProperties.pushEnabled=NO;
-        if(self.connectionProperties.supportsPush)
-            [self enablePush];
-        
-        [self sendCurrentCSIState];
-        
         [self postConnectNotification];
-        if(self.loginCompletion) {
-            self.loginCompletion(YES, @"");
-            self.loginCompletion=nil;
-        }
     }
     else  if([parsedStanza.stanzaType isEqualToString:@"failed"] && [parsedStanza isKindOfClass:[ParseFailed class]]) // smacks resume or smacks enable failed
     {
@@ -1416,11 +1439,6 @@ NSString *const kXMPPPresence = @"presence";
 
             //if resume failed. bind  a new resource like normal (supportsSM3 is still YES here but switches to NO on failed enable)
             [self bindResource];
-
-            if(self.loginCompletion) {
-                self.loginCompletion(YES, @"");
-                self.loginCompletion=nil;
-            }
         }
         else        //smacks enable failed
         {
@@ -1464,10 +1482,6 @@ NSString *const kXMPPPresence = @"presence";
         }
 
         [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
-        if(self.loginCompletion)  {
-            self.loginCompletion(NO, message);
-            self.loginCompletion=nil;
-        }
 
         if(failure.saslError || failure.notAuthorized)
         {
@@ -2908,15 +2922,11 @@ NSString *const kXMPPPresence = @"presence";
                 }
 
             }
-            if(!_registration) {
+            if(!_registration)
+            {
                 // Do not show "Connection refused" message if there are more SRV records to try
-                if(!_SRVDiscoveryDone || (_SRVDiscoveryDone && [_usableServersList count] == 0) || st_error.code != 61) {
+                if(!_SRVDiscoveryDone || (_SRVDiscoveryDone && [_usableServersList count] == 0) || st_error.code != 61)
                     [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message, st_error]];
-                }
-                if(self.loginCompletion)  {
-                    self.loginCompletion(NO, message);
-                    self.loginCompletion=nil;
-                }
             }
 
             if(_loggedInOnce)

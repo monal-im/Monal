@@ -53,6 +53,8 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 
 @interface xmpp : NSObject <NSStreamDelegate>
 
+@property (nonatomic, readonly) BOOL idle;
+
 @property (nonatomic, strong) NSString* pushNode;
 @property (nonatomic, strong) NSString* pushSecret;
 
@@ -78,17 +80,13 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 
 @property (nonatomic, readonly) xmppState accountState;
 
-
-
 // discovered properties
 @property (nonatomic, assign) BOOL SRVDiscoveryDone;
 @property (nonatomic, strong) NSArray* discoveredServersList;
 @property (nonatomic, strong) NSMutableArray* usableServersList;
 
-@property (nonatomic, strong) NSArray*  roomList;
+@property (nonatomic, strong) NSArray* roomList;
 @property (nonatomic, strong) NSArray* rosterList;
-@property (nonatomic, assign) BOOL staleRoster; //roster is stale if it resumed in the background
-
 
 @property (nonatomic, assign) BOOL airDrop;
 

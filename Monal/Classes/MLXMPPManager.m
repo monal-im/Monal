@@ -6,6 +6,8 @@
 //
 //
 
+#import <BackgroundTasks/BackgroundTasks.h>
+
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
 
@@ -22,16 +24,21 @@
 @import MobileCoreServices;
 @import SAMKeychain;
 
+static const NSString* kBackgroundFetchingTask = @"im.monal.fetch";
+
 //this is in seconds
 #define SHORT_PING 2.0
 #define LONG_PING 16.0
 
-static const int pingFreqencyMinutes = 4;
+static const int pingFreqencyMinutes = 5;       //about the same Conversations uses
 static const int sendMessageTimeoutSeconds = 10;
 
 @interface MLXMPPManager()
 {
     nw_path_monitor_t _path_monitor;
+    UIBackgroundTaskIdentifier _bgTask;
+    BGTask* _bgFetch;
+    BOOL _hasConnectivity;
 }
 
 /**
@@ -121,7 +128,15 @@ An array of Dics what have timers to make sure everything was sent
 {
     self=[super init];
 
-    _connectedXMPP=[[NSMutableArray alloc] init];
+    _connectedXMPP = [[NSMutableArray alloc] init];
+    _bgTask = UIBackgroundTaskInvalid;
+    _hasConnectivity = NO;
+    
+    if(@available(iOS 13.0, *))
+    {
+        DDLogInfo(@"calling configureBackgroundFetchingTask");
+        [self configureBackgroundFetchingTask];
+    }
 
     _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_SERIAL);
 
@@ -133,15 +148,19 @@ An array of Dics what have timers to make sure everything was sent
 
     dispatch_source_set_timer(_pinger,
                               DISPATCH_TIME_NOW,
-                              60ull * NSEC_PER_SEC *pingFreqencyMinutes,
-                              1ull * NSEC_PER_SEC);
+                              60ull * NSEC_PER_SEC * pingFreqencyMinutes,
+                              60ull * NSEC_PER_SEC);        //allow for better battery optimizations
 
     dispatch_source_set_event_handler(_pinger, ^{
-        for(xmpp* xmppAccount in _connectedXMPP)
+        //only ping when having connectivity
+        if(_hasConnectivity)
         {
-            if(xmppAccount.accountState>=kStateBound) {
-                DDLogInfo(@"began a ping");
-                [xmppAccount sendPing:LONG_PING];        //long ping timeout because this is a background/interval ping
+            for(xmpp* xmppAccount in _connectedXMPP)
+            {
+                if(xmppAccount.accountState>=kStateBound) {
+                    DDLogInfo(@"began a idle ping");
+                    [xmppAccount sendPing:LONG_PING];        //long ping timeout because this is a background/interval ping
+                }
             }
         }
     });
@@ -166,23 +185,40 @@ An array of Dics what have timers to make sure everything was sent
         if(nw_path_get_status(path) == nw_path_status_satisfied)
         {
             DDLogVerbose(@"reachable");
+            _hasConnectivity = YES;
             for(xmpp* xmppAccount in _connectedXMPP)
             {
                 //try to send a ping. if it fails, it will reconnect
-                DDLogVerbose(@"pinging");
+                DDLogVerbose(@"manager pinging");
                 [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
             }
         }
         else
         {
             DDLogVerbose(@"NOT reachable");
+            _hasConnectivity = NO;
+            BOOL wasIdle = [self allAccountsIdle];      //we have to check that here because diconnect: makes them non-idle (no catchup done yet etc.)
+            for(xmpp* xmppAccount in _connectedXMPP)
+            {
+                //disconnect to prevent endless loops trying to connect
+                DDLogVerbose(@"manager disconnecting");
+                [xmppAccount disconnect];
+            }
+            if(!wasIdle)
+            {
+                DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored");
+                [self scheduleBackgroundFetchingTask];      //this will automatically start the app if connectivity gets restored
+            }
         }
     });
     nw_path_monitor_start(_path_monitor);
 
     //this is only for debugging purposes, the real handler has to be added to the NotificationServiceExtension
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(catchupFinished:) name:kMonalFinishedCatchup object:nil];
-    
+
+    //process idle state changes
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
+
     return self;
 }
 
@@ -193,28 +229,168 @@ An array of Dics what have timers to make sure everything was sent
         dispatch_source_cancel(_pinger);
 }
 
--(void) catchupFinished: (NSNotification *) notification
+-(void) catchupFinished:(NSNotification*) notification
 {
-    DDLogVerbose(@"### CATCHUP FINISHED ###");
+    DDLogVerbose(@"### MAM/SMACKS CATCHUP FINISHED ###");
+}
+
+-(void) nowIdle:(NSNotification*) notification
+{
+    dispatch_async(self->_netQueue, ^{
+        DDLogVerbose(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
+        [self checkIfBackgroundTaskIsStillNeeded];
+    });
+}
+
+-(BOOL) allAccountsIdle
+{
+    for(xmpp* xmppAccount in _connectedXMPP)
+    {
+        if(!xmppAccount.idle)
+            return NO;
+    }
+    return YES;
+}
+
+-(BOOL) isInBackground
+{
+    __block BOOL inBackground = NO;
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
+    void (^block)(void) = ^{
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+            inBackground = YES;
+    };
+    if(dispatch_get_current_queue() == dispatch_get_main_queue())
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+#endif
+#endif
+    return inBackground;
+}
+
+-(void) checkIfBackgroundTaskIsStillNeeded
+{
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
+        if([self allAccountsIdle] && [self isInBackground])
+        {
+            DDLogInfo(@"### All accounts idle, stopping all background tasks ###");
+            if(_bgTask != UIBackgroundTaskInvalid)
+            {
+                DDLogVerbose(@"stopping UIKit _bgTask");
+                [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
+                _bgTask = UIBackgroundTaskInvalid;
+            }
+            else if(_bgFetch)
+            {
+                DDLogVerbose(@"stopping backgroundFetchingTask");
+                [_bgFetch setTaskCompletedWithSuccess:YES];
+            }
+            else
+                DDLogVerbose(@"no background tasks running, nothing to stop");
+            
+            /*
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                DDLogVerbose(@"disconnecting all accounts (we don't need idle connections that could get killed any time anyways)");
+                for(xmpp* xmppAccount in _connectedXMPP)
+                    [xmppAccount disconnect];
+            }
+            */
+        }
+#endif
+#endif
+}
+
+-(void) handleBackgroundFetchingTask:(BGTask*) task API_AVAILABLE(ios(13.0))
+{
+    DDLogVerbose(@"RUNNING BGTASK");
+    _bgFetch = task;
+    task.expirationHandler = ^{
+        DDLogError(@"*** BGTASK EXPIRED ***");
+        _bgFetch = nil;
+        [task setTaskCompletedWithSuccess:NO];
+        [self scheduleBackgroundFetchingTask];      //schedule new one if neccessary
+    };
+}
+
+-(void) configureBackgroundFetchingTask
+{
+    if(@available(iOS 13.0, *))
+    {
+        [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundFetchingTask usingQueue:nil launchHandler:^(BGTask *task) {
+            DDLogVerbose(@"RUNNING BGTASK LAUNCH HANDLER");
+            [self handleBackgroundFetchingTask:task];
+        }];
+    } else {
+        // No fallback unfortunately
+    }
+}
+
+-(void) scheduleBackgroundFetchingTask
+{
+    if(@available(iOS 13.0, *))
+    {
+        NSError *error = NULL;
+        // cancel existing task (if any)
+        [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundFetchingTask];
+        // new task
+        BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
+        request.requiresNetworkConnectivity = YES;
+        request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
+        BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
+        if(!success) {
+            // Errorcodes https://stackoverflow.com/a/58224050/872051
+            DDLogError(@"Failed to submit BGTask request: %@", error);
+        } else {
+            DDLogVerbose(@"Success submitting BGTask request %@", request);
+        }
+    }
+    else
+    {
+        // No fallback unfortunately
+        DDLogError(@"BGTask needed but NOT supported!");
+    }
 }
 
 #pragma mark - client state
 
 -(void) setClientsInactive
 {
-    dispatch_async(self->_netQueue, ^{
+    //don't block main thread here
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         for(xmpp* xmppAccount in _connectedXMPP)
             [xmppAccount setClientInactive];
+        [self checkIfBackgroundTaskIsStillNeeded];
     });
 }
 
 -(void) setClientsActive
 {
-    dispatch_async(self->_netQueue, ^{
+    //start indicating we want to do work even when the app is put into background
+    if(_bgTask == UIBackgroundTaskInvalid)
+    {
+        _bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+            DDLogWarn(@"BG WAKE EXPIRING");
+            [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
+            _bgTask = UIBackgroundTaskInvalid;
+            
+            //schedule a BGProcessingTaskRequest to process this further as soon as possible
+            if(@available(iOS 13.0, *))
+            {
+                DDLogInfo(@"calling scheduleBackgroundFetchingTask");
+                [self scheduleBackgroundFetchingTask];
+            }
+        }];
+    }
+    //don't block main thread here
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         for(xmpp* xmppAccount in _connectedXMPP)
         {
             [xmppAccount setClientActive];
-            [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+            if(_hasConnectivity)
+                [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         }
     });
 }
@@ -279,7 +455,10 @@ An array of Dics what have timers to make sure everything was sent
     if(existing)
     {
         DDLogVerbose(@"existing account just pinging.");
-        [existing sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+        if(_hasConnectivity)
+            [existing sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+        else
+            DDLogVerbose(@"NOT pinging because no connectivity.");
         return;
     }
     DDLogVerbose(@"connecting account %@@%@",[account objectForKey:kUsername], [account objectForKey:kDomain]);
@@ -300,8 +479,13 @@ An array of Dics what have timers to make sure everything was sent
 
     if(xmppAccount) {
         [_connectedXMPP addObject:xmppAccount];
-        DDLogVerbose(@"starting connect");
-        [xmppAccount connect];
+        if(_hasConnectivity)
+        {
+            DDLogVerbose(@"starting connect");
+            [xmppAccount connect];
+        }
+        else
+            DDLogVerbose(@"NOT connecting because no connectivity.");
     }
 }
 

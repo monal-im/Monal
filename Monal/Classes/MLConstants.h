@@ -39,6 +39,7 @@ typedef void (^monal_void_block_t)();
 #define kMLHasRoomsNotice @"kMLHasRoomsNotice"
 #define kMLHasConnectedNotice @"kMLHasConnectedNotice"
 #define kMonalFinishedCatchup @"kMonalFinishedCatchup"
+#define kMonalIdle @"kMonalIdle"
 
 #define kMonalPresentChat @"kMonalPresentChat"
 

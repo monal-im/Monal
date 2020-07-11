@@ -130,7 +130,7 @@
 {
     //make sure unread badge matches application badge
     [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber *result) {
-        dispatch_async(dispatch_get_main_queue(), ^{
+        void (^block)(void) = ^{
             NSInteger unread = 0;
             if(result) {
                 unread = [result integerValue];
@@ -142,7 +142,11 @@
             else {
                 [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
             }
-        });
+        };
+        if(dispatch_get_current_queue() == dispatch_get_main_queue())
+            block();
+        else
+            dispatch_sync(dispatch_get_main_queue(), block);
     }];
 }
 
@@ -220,7 +224,7 @@
         [MLXMPPManager sharedInstance].pushNode = [[NSUserDefaults standardUserDefaults] objectForKey:@"pushNode"];
         [MLXMPPManager sharedInstance].pushSecret=[[NSUserDefaults standardUserDefaults] objectForKey:@"pushSecret"];
         [MLXMPPManager sharedInstance].hasAPNSToken=YES;
-        NSLog(@"push node %@", [MLXMPPManager sharedInstance].pushNode);
+        DDLogInfo(@"push node %@", [MLXMPPManager sharedInstance].pushNode);
     }
     
     [self setUISettings];
@@ -392,7 +396,7 @@
     });
 }
 
-- (void)applicationWillEnterForeground:(UIApplication *)application
+- (void) applicationWillEnterForeground:(UIApplication *)application
 {
     DDLogVerbose(@"Entering FG");
  
@@ -400,7 +404,7 @@
     [[MLXMPPManager sharedInstance] sendMessageForConnectedAccounts];
 }
 
--(void)applicationWillResignActive:(UIApplication *)application
+-(void) applicationWillResignActive:(UIApplication *)application
 {
      NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
 
@@ -419,21 +423,26 @@
 -(void) applicationDidEnterBackground:(UIApplication *)application
 {
     UIApplicationState state = [application applicationState];
-    if (state == UIApplicationStateInactive) {
-        DDLogVerbose(@"Screen lock");
-    } else if (state == UIApplicationStateBackground) {
+    if (state == UIApplicationStateInactive)
+        DDLogVerbose(@"Screen lock / incoming call");
+    else if (state == UIApplicationStateBackground)
         DDLogVerbose(@"Entering BG");
-    }
     
     [self updateUnread];
     [[MLXMPPManager sharedInstance] setClientsInactive];
-
 }
 
--(void)applicationWillTerminate:(UIApplication *)application
+-(void) applicationWillTerminate:(UIApplication *)application
 {
+    DDLogWarn(@"|~~| T E R M I N A T I N G |~~|");
     [self updateUnread];
+    DDLogVerbose(@"|~~| 25%% |~~|");
     [[NSUserDefaults standardUserDefaults] synchronize];
+    DDLogVerbose(@"|~~| 50%% |~~|");
+    [[MLXMPPManager sharedInstance] scheduleBackgroundFetchingTask];        //make sure delivery will be attempted, if needed
+    DDLogVerbose(@"|~~| 75%% |~~|");
+    [[MLXMPPManager sharedInstance] setClientsInactive];
+    DDLogVerbose(@"|~~| T E R M I N A T E D |~~|");
 }
 
 #pragma mark - error feedback

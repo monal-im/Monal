@@ -158,6 +158,7 @@ Attempts to upload a file to the  HTTP upload service
 -(void) setAway:(BOOL) isAway;
 
 @property (nonatomic, strong, readonly) NSMutableArray* connectedXMPP;
+@property (nonatomic, readonly) BOOL hasConnectivity;
 
 @property (nonatomic, assign) BOOL hasAPNSToken;
 
@@ -175,6 +176,8 @@ Attempts to upload a file to the  HTTP upload service
  updates delivery status after message has been sent
  */
 -(void) handleSentMessage:(NSNotification*) notification;
+
+-(void) scheduleBackgroundFetchingTask;
 
 /**
  updtes client state on server as inactive

@@ -803,14 +803,14 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="GlC-dn-bvj">
-                                                    <rect key="frame" x="20" y="37" width="275" height="202"/>
+                                                    <rect key="frame" x="20" y="37" width="247" height="202"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="200" id="T8s-TI-xbm"/>
                                                         <constraint firstAttribute="width" constant="275" id="ypT-uw-per"/>
                                                     </constraints>
                                                 </imageView>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Date" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Xld-jv-Isd">
-                                                    <rect key="frame" x="303" y="31" width="91" height="12"/>
+                                                    <rect key="frame" x="275" y="31" width="119" height="12"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
@@ -862,7 +862,7 @@
                                                 <constraint firstItem="h9a-ua-MIo" firstAttribute="leading" secondItem="1wW-PP-jdj" secondAttribute="trailing" id="kXi-iN-kmY"/>
                                                 <constraint firstAttribute="trailingMargin" relation="greaterThanOrEqual" secondItem="GlC-dn-bvj" secondAttribute="trailing" constant="59" id="ku9-Jx-kPr"/>
                                                 <constraint firstItem="Xld-jv-Isd" firstAttribute="trailing" secondItem="GA8-Q5-xRV" secondAttribute="trailingMargin" id="lcg-Yi-F6F"/>
-                                                <constraint firstItem="vGy-8U-lGI" firstAttribute="leading" secondItem="GA8-Q5-xRV" secondAttribute="leadingMargin" constant="255" id="ofd-if-oZz"/>
+                                                <constraint firstItem="vGy-8U-lGI" firstAttribute="leading" secondItem="GlC-dn-bvj" secondAttribute="trailing" constant="8" id="ofd-if-oZz"/>
                                                 <constraint firstItem="vGy-8U-lGI" firstAttribute="bottom" secondItem="GA8-Q5-xRV" secondAttribute="bottomMargin" id="unD-6y-fRX"/>
                                                 <constraint firstItem="vGy-8U-lGI" firstAttribute="bottom" secondItem="GA8-Q5-xRV" secondAttribute="bottomMargin" id="vuY-6C-hcG"/>
                                                 <constraint firstItem="GlC-dn-bvj" firstAttribute="top" secondItem="1wW-PP-jdj" secondAttribute="bottom" constant="5" id="y3Q-RO-5OU"/>
@@ -883,7 +883,7 @@
                                             <outlet property="thumbnailImage" destination="GlC-dn-bvj" id="iHP-Iz-z5V"/>
                                         </connections>
                                     </tableViewCell>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
                                         <rect key="frame" x="0.0" y="506" width="414" height="242"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xhf-eh-Dkx" id="BdL-U7-BOc">

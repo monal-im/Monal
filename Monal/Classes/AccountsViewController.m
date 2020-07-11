@@ -9,12 +9,12 @@
 #import "AccountsViewController.h"
 #import "DataLayer.h"
 #import "XMPPEdit.h"
-#import "tools.h"
 #import "MBProgressHUD.h"
 #import "xmpp.h"
 
 
 @interface AccountsViewController ()
+
 @property (nonatomic , strong) MBProgressHUD *hud;
 @property (nonatomic , strong) NSDateFormatter *uptimeFormatter;
 
@@ -92,7 +92,7 @@
     self.hud.label.text = NSLocalizedString(@"Reconnecting", @"");
     self.hud.detailsLabel.text = NSLocalizedString(@"Will logout and reconnect any connected accounts.", @"");
     [[MLXMPPManager sharedInstance] logoutAll];
-    [EncodingTools startTimer:1.0 withHandler:^{
+    [HelperTools startTimer:1.0 withHandler:^{
         [[MLXMPPManager sharedInstance] connectIfNecessary];
     }];
     [self.hud hideAnimated:YES afterDelay:3.0f];

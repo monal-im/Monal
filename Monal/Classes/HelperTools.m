@@ -1,17 +1,95 @@
 //
-//  EncodingTools.m
+//  HelperTools.m
 //  Monal
 //
-//  Created by Anurodh Pokharel on 6/30/13.
-//
+//  Created by Friedrich Altheide on 08.07.20.
+//  Copyright © 2020 Monal.im. All rights reserved.
 //
 
 #include <CommonCrypto/CommonDigest.h>
-#import "EncodingTools.h"
-@import os.log;
+#import "HelperTools.h"
+#import "DataLayer.h"
 
-@implementation EncodingTools
+@implementation HelperTools
 
+/*
+ * create string containing the info when a user was seen the last time
+ * return nil if no timestamp was found in the db
+ */
++(NSString* _Nullable) formatLastInteraction:(NSDate*) lastInteraction
+{
+    // get current timestamp
+    unsigned long currentTimestamp = [[NSDate date] timeIntervalSince1970];
+
+    unsigned long lastInteractionTime = 0;      //default is zero which corresponds to "online"
+
+    // calculate timestamp and clamp it to be not in the future (but only if given)
+    if(lastInteraction && lastInteraction!=[NSNull null])       //NSDictionary does not support nil, so we're using NSNull sometimes
+        lastInteractionTime = MIN([lastInteraction timeIntervalSince1970], currentTimestamp);
+
+    if(lastInteractionTime > 0) {
+        NSString* timeString;
+
+        unsigned long diff = currentTimestamp - lastInteractionTime;
+        if(diff / 60 < 1) {
+            // less than one minute
+            timeString = NSLocalizedString(@"Just seen", @"");
+            diff = 0;
+        } else if(diff / 60 < 2 * 60){
+            // less than one hour
+            timeString = NSLocalizedString(@"Last seen: %d min", @"");
+            diff /= 60;
+        } else if(diff / (60 * 60) < 2 * 24){
+            // less than 24 hours
+            timeString = NSLocalizedString(@"Last seen: %d hours", @"");
+            diff /= 60 * 60;
+        } else {
+            // more than 24 hours
+            timeString = NSLocalizedString(@"Last seen: %d days", @"");
+            diff /= 60 * 60 * 24;
+        }
+
+        NSString* lastSeen = [NSString stringWithFormat:timeString, diff];
+        return [NSString stringWithFormat:@"%@", lastSeen];
+    } else {
+        return NSLocalizedString(@"Online", @"");;
+    }
+}
+
++(NSDate*) parseDateTimeString:(NSString*) datetime
+{
+    NSDate* retval = nil;
+    NSDateFormatter *rfc3339DateFormatter = [[NSDateFormatter alloc] init];
+    NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+    
+    [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
+    [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss.SSSSSSXXXXX"];
+    [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    
+    retval = [rfc3339DateFormatter dateFromString:datetime];
+    if(!retval)
+    {
+        NSDateFormatter *rfc3339DateFormatter2 = [[NSDateFormatter alloc] init];
+
+        [rfc3339DateFormatter2 setLocale:enUSPOSIXLocale];
+        [rfc3339DateFormatter2 setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+        [rfc3339DateFormatter2 setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ssZ"];
+        retval = [rfc3339DateFormatter2 dateFromString:datetime];
+    }
+    return retval;
+}
+
++(NSString*) generateDateTimeString:(NSDate*) datetime
+{
+    NSDateFormatter* rfc3339DateFormatter = [[NSDateFormatter alloc] init];
+    NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+    
+    [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
+    [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z"];
+    [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    
+    return [rfc3339DateFormatter stringFromDate:datetime];
+}
 
 +(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler
 {
@@ -20,18 +98,20 @@
 
 +(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t) cancelHandler
 {
+    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     if(timeout<=0.001)
     {
-        DDLogWarn(@"Timer timeout is smaller than 0.001, calling handler directly.");
+        DDLogWarn(@"Timer timeout is smaller than 0.001, dispatching handler directly.");
         if(handler)
-            handler();
+            dispatch_async(q_background, ^{
+                handler();
+            });
         return ^{ };        //empty cancel block because this "timer" already triggered
     }
     
     NSString* uuid = [[NSUUID UUID] UUIDString];
     
     DDLogDebug(@"setting up timer %@(%G)", uuid, timeout);
-    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, q_background);
     dispatch_source_set_timer(timer,
                               dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout*NSEC_PER_SEC)),
@@ -67,9 +147,9 @@
 {
     u_int32_t i=arc4random();
 #if TARGET_OS_IPHONE
-    NSString* resource=[NSString stringWithFormat:@"Monal-iOS.%@", [EncodingTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
+    NSString* resource=[NSString stringWithFormat:@"Monal-iOS.%@", [self hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
 #else
-    NSString* resource=[NSString stringWithFormat:@"Monal-macOS.%@", [EncodingTools hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
+    NSString* resource=[NSString stringWithFormat:@"Monal-macOS.%@", [self hexadecimalString:[NSData dataWithBytes: &i length: sizeof(i)]]];
 #endif
     return resource;
 }
@@ -79,7 +159,7 @@
 +(NSString*) encodeBase64WithString:(NSString*) strData
 {
     NSData *data =[strData dataUsingEncoding:NSUTF8StringEncoding];
-    return [EncodingTools encodeBase64WithData:data];
+    return [self encodeBase64WithData:data];
 }
 
 +(NSString*) encodeBase64WithData:(NSData*) objData
@@ -91,53 +171,6 @@
 {
     return [[NSData alloc] initWithBase64EncodedString:string options:NSDataBase64DecodingIgnoreUnknownCharacters];
 }
-
-#pragma mark MD5
-
-+(NSData*) MD5:(NSString*) string
-{
-    
-    const char *cStr = [string UTF8String];
-    unsigned char result[CC_MD5_DIGEST_LENGTH];
-    CC_MD5(cStr, strlen(cStr), result);
-    /* NSString* toreturn= [NSString stringWithFormat: @"%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
-     result[0], result[1], result[2], result[3],
-     result[4], result[5], result[6], result[7],
-     result[8], result[9], result[10], result[11],
-     result[12], result[13], result[14], result[15]];
-     
-     DDLogVerbose(@" hash: %@ => %@",string, toreturn );
-     */
-    
-    int size=sizeof(unsigned char)*CC_MD5_DIGEST_LENGTH;
-    //  DDLogVerbose(@" hash: %s size:%d", result,size);
-    
-    NSData* data =[[NSData  alloc ] initWithBytes: (const void *)result length:size];
-    
-    
-    return data;
-}
-
-+ (NSData *) DataMD5:(NSData*)datain {
-    
-    const char *cStr = [datain bytes];
-    unsigned char result[CC_MD5_DIGEST_LENGTH];
-    CC_MD5(cStr, [datain length], result);
-    /* NSString* toreturn= [NSString stringWithFormat: @"%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
-     result[0], result[1], result[2], result[3],
-     result[4], result[5], result[6], result[7],
-     result[8], result[9], result[10], result[11],
-     result[12], result[13], result[14], result[15]];
-     */
-    // DDLogVerbose(@"data %s hash: %s",cStr, result );
-    
-    int size=sizeof(unsigned char)*CC_MD5_DIGEST_LENGTH;
-    NSData* data =[NSData dataWithBytes:result length:size];
-    
-    
-    return data;
-}
-
 
 + (NSString *)hexadecimalString:(NSData*) data
 {
@@ -186,7 +219,7 @@
 
 + (NSString *)signalHexKeyWithData:(NSData*) data
 {
-    NSString *hex = [EncodingTools hexadecimalString:data];
+    NSString *hex = [self hexadecimalString:data];
     
     //remove 05 cipher info
     hex = [hex substringWithRange:NSMakeRange(2, hex.length-2)];
@@ -203,6 +236,5 @@
     
     return output.uppercaseString;
 }
-
 
 @end

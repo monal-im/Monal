@@ -26,11 +26,6 @@ FOUNDATION_EXPORT NSString *const kiqErrorType;
 -(void) setPushDisableWithNode:(NSString *) node;
 
 /**
- login with legacy authentication. only as fallback.
- */
--(void) setAuthWithUserName:(NSString *) username resource:(NSString *) resource andPassword:(NSString *) password;
-
-/**
  Makes an iq to bind with a resouce. Passing nil will set no resource.
  */
 -(void) setBindWithResource:(NSString*) resource;
@@ -88,12 +83,6 @@ Queries the last page of messages (most recent) for a recipient
  sets up a disco info query node
  */
 -(void) setDiscoItemNode;
-
-#pragma mark legacy authentication
-/**
- legacy autnetication. only used as a fallback
- */
--(void) getAuthwithUserName:(NSString *)username;
 
 #pragma mark roster
 /**

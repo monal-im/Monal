@@ -13,7 +13,7 @@
 #import "xmpp.h"
 #import "MLPipe.h"
 #import "DataLayer.h"
-#import "EncodingTools.h"
+#import "HelperTools.h"
 #import "MLXMPPManager.h"
 
 #import "MLImageManager.h"
@@ -631,7 +631,7 @@ NSString *const kXMPPPresence = @"presence";
         [self disconnect:NO];
 
         DDLogInfo(@"Trying to connect again in %G seconds...", wait);
-        [EncodingTools startTimer:wait withHandler:^{
+        [HelperTools startTimer:wait withHandler:^{
             [self dispatchOnReceiveQueue: ^{
                 //there may be another connect/login operation in progress triggered from reachability or another timer
                 if(self.accountState<kStateReconnecting) {
@@ -724,7 +724,7 @@ NSString *const kXMPPPresence = @"presence";
         else
         {
             //start ping timer
-            _cancelPingTimer = [EncodingTools startTimer:timeout withHandler:^{
+            _cancelPingTimer = [HelperTools startTimer:timeout withHandler:^{
                 [self dispatchOnReceiveQueue: ^{
                     _cancelPingTimer = nil;
                     DDLogInfo(@"ping took too long, reconnecting");
@@ -1280,7 +1280,7 @@ NSString *const kXMPPPresence = @"presence";
                     //look at menchanisms presented
                     if (streamNode.SASLPlain)
                     {
-                        NSString* saslplain=[EncodingTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  self.connectionProperties.identity.user, self.connectionProperties.identity.password ]];
+                        NSString* saslplain=[HelperTools encodeBase64WithString: [NSString stringWithFormat:@"\0%@\0%@",  self.connectionProperties.identity.user, self.connectionProperties.identity.password ]];
 
                         MLXMLNode* saslXML= [[MLXMLNode alloc]init];
                         saslXML.element=@"auth";
@@ -1302,13 +1302,9 @@ NSString *const kXMPPPresence = @"presence";
                         }
                         else
                         {
-
-                            //no supported auth mechanism try legacy
-                            //[self disconnect];
-                            DDLogInfo(@"no auth mechanism. will try legacy auth");
-                            XMPPIQ* iqNode =[[XMPPIQ alloc] initWithElement:@"iq"];
-                            [iqNode getAuthwithUserName:self.connectionProperties.identity.user ];
-                            [self send:iqNode];
+                            //no supported auth mechanism
+                            DDLogInfo(@"no supported auth mechanism, disconnecting!");
+                            [self disconnect];
                         }
                 }
             }
@@ -1507,7 +1503,7 @@ NSString *const kXMPPPresence = @"presence";
             responseXML.element=@"response";
             [responseXML.attributes setObject: @"urn:ietf:params:xml:ns:xmpp-sasl"  forKey:kXMLNS];
 
-            NSString* decoded=[[NSString alloc]  initWithData: (NSData*)[EncodingTools dataWithBase64EncodedString:challengeNode.challengeText] encoding:NSASCIIStringEncoding];
+            NSString* decoded=[[NSString alloc]  initWithData: (NSData*)[HelperTools dataWithBase64EncodedString:challengeNode.challengeText] encoding:NSASCIIStringEncoding];
             DDLogVerbose(@"decoded challenge to %@", decoded);
             NSArray* parts =[decoded componentsSeparatedByString:@","];
 
@@ -1544,14 +1540,14 @@ NSString *const kXMPPPresence = @"presence";
 
                 if(!realm) realm=@"";
 
-                NSData* cnonce_Data=[EncodingTools MD5: [NSString stringWithFormat:@"%d",arc4random()%100000]];
-                NSString* cnonce =[EncodingTools hexadecimalString:cnonce_Data];
+                NSData* cnonce_Data=[HelperTools MD5: [NSString stringWithFormat:@"%d",arc4random()%100000]];
+                NSString* cnonce =[HelperTools hexadecimalString:cnonce_Data];
 
                 // ****** digest stuff going on here...
                 NSString* X= [NSString stringWithFormat:@"%@:%@:%@", self.connectionProperties.identity.user, realm,  self.connectionProperties.identity.password ];
                 DDLogVerbose(@"X: %@", X);
 
-                NSData* Y = [EncodingTools MD5:X];
+                NSData* Y = [HelperTools MD5:X];
 
                 //  if you have the authzid  here you need it below too but it wont work on som servers
                 // so best not include it
@@ -1566,26 +1562,26 @@ NSString *const kXMPPPresence = @"presence";
                 [HA1data appendData:A1];
                 DDLogVerbose(@" HA1data : %@",HA1data  );
 
-                NSData* HA1=[EncodingTools DataMD5:HA1data];
+                NSData* HA1=[HelperTools DataMD5:HA1data];
 
                 NSString* A2=[NSString stringWithFormat:@"AUTHENTICATE:xmpp/%@", realm];
                 DDLogVerbose(@"%@", A2);
-                NSData* HA2=[EncodingTools MD5:A2];
+                NSData* HA2=[HelperTools MD5:A2];
 
                 NSString* KD=[NSString stringWithFormat:@"%@:%@:00000001:%@:auth:%@",
-                              [EncodingTools hexadecimalString:HA1], nonce,
+                              [HelperTools hexadecimalString:HA1], nonce,
                               cnonce,
-                              [EncodingTools hexadecimalString:HA2]];
+                              [HelperTools hexadecimalString:HA2]];
 
                 DDLogVerbose(@" KD: %@", KD );
-                NSData* responseData=[EncodingTools MD5:KD];
+                NSData* responseData=[HelperTools MD5:KD];
                 // above this is ok
                 NSString* response=[NSString stringWithFormat:@"username=\"%@\",realm=\"%@\",nonce=\"%@\",cnonce=\"%@\",nc=00000001,qop=auth,digest-uri=\"xmpp/%@\",response=%@,charset=utf-8",
-                                    self.connectionProperties.identity.user,realm, nonce, cnonce, realm, [EncodingTools hexadecimalString:responseData]];
+                                    self.connectionProperties.identity.user,realm, nonce, cnonce, realm, [HelperTools hexadecimalString:responseData]];
                 //,authzid=\"%@@%@/%@\"  ,account,domain, resource
 
                 DDLogVerbose(@"  response :  %@", response);
-                NSString* encoded=[EncodingTools encodeBase64WithString:response];
+                NSString* encoded=[HelperTools encodeBase64WithString:response];
 
                 //                NSString* xmppcmd = [NSString stringWithFormat:@"<response xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>%@</response>", encoded]
                 //                [self talk:xmppcmd];
@@ -1726,7 +1722,7 @@ NSString *const kXMPPPresence = @"presence";
             [messageNode.children addObject:encrypted];
 
             MLXMLNode *payload =[[MLXMLNode alloc] initWithElement:@"payload"];
-            [payload setData:[EncodingTools encodeBase64WithData:encryptedPayload.body]];
+            [payload setData:[HelperTools encodeBase64WithData:encryptedPayload.body]];
             [encrypted.children addObject:payload];
 
             NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
@@ -1735,7 +1731,7 @@ NSString *const kXMPPPresence = @"presence";
             [encrypted.children addObject:header];
 
             MLXMLNode *ivNode =[[MLXMLNode alloc] initWithElement:@"iv"];
-            [ivNode setData:[EncodingTools encodeBase64WithData:encryptedPayload.iv]];
+            [ivNode setData:[HelperTools encodeBase64WithData:encryptedPayload.iv]];
             [header.children addObject:ivNode];
 
             [devices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -1755,7 +1751,7 @@ NSString *const kXMPPPresence = @"presence";
                         [keyNode.attributes setObject:@"1" forKey:@"prekey"];
                     }
 
-                    [keyNode setData:[EncodingTools encodeBase64WithData:deviceEncryptedKey.data]];
+                    [keyNode setData:[HelperTools encodeBase64WithData:deviceEncryptedKey.data]];
                     [header.children addObject:keyNode];
                 }
 
@@ -1777,7 +1773,7 @@ NSString *const kXMPPPresence = @"presence";
                         [keyNode.attributes setObject:@"1" forKey:@"prekey"];
                     }
 
-                    [keyNode setData:[EncodingTools encodeBase64WithData:deviceEncryptedKey.data]];
+                    [keyNode setData:[HelperTools encodeBase64WithData:deviceEncryptedKey.data]];
                     [header.children addObject:keyNode];
                 }
             }];
@@ -2261,7 +2257,7 @@ NSString *const kXMPPPresence = @"presence";
     NSData *stringBytes = [unhashed dataUsingEncoding: NSUTF8StringEncoding];
     if(CC_SHA1([stringBytes bytes], (UInt32)[stringBytes length], digest))
         hashed = [NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
-    NSString* hashedBase64 = [EncodingTools encodeBase64WithData:hashed];
+    NSString* hashedBase64 = [HelperTools encodeBase64WithData:hashed];
 
     DDLogVerbose(@"ver string: unhashed %@, hashed %@, hashed-64 %@", unhashed, hashed, hashedBase64);
     return hashedBase64;

@@ -23,7 +23,6 @@
 #import "MLImageManager.h"
 #import "DataLayer.h"
 #import "AESGcm.h"
-#import "EncodingTools.h"
 #import "HelperTools.h"
 
 @import QuartzCore;
@@ -832,8 +831,8 @@
                     if(urlComponents) {
                         urlComponents.scheme = @"aesgcm";
                         urlComponents.fragment = [NSString stringWithFormat:@"%@%@",
-                                                  [EncodingTools hexadecimalString:encrypted.iv],
-                                                  [EncodingTools hexadecimalString:[encrypted.key subdataWithRange:NSMakeRange(0, keySize)]]];
+                                                  [HelperTools hexadecimalString:encrypted.iv],
+                                                  [HelperTools hexadecimalString:[encrypted.key subdataWithRange:NSMakeRange(0, keySize)]]];
                         urlToPass=urlComponents.string;
                     } else  {
                         DDLogError(@"Could not parse URL for conversion to aesgcm:");

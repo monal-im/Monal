@@ -9,7 +9,7 @@
 #import "MLMessageProcessor.h"
 #import "DataLayer.h"
 #import "SignalAddress.h"
-#import "EncodingTools.h"
+#import "HelperTools.h"
 #import "AESGcm.h"
 #import "MLConstants.h"
 #import "MLImageManager.h"
@@ -309,7 +309,7 @@
                 messagetype= SignalCiphertextTypeMessage;
             }
             
-            NSData *decoded= [EncodingTools dataWithBase64EncodedString:[messageKey objectForKey:@"key"]];
+            NSData *decoded= [HelperTools dataWithBase64EncodedString:[messageKey objectForKey:@"key"]];
             
             SignalCiphertext* ciphertext = [[SignalCiphertext alloc] initWithData:decoded type:messagetype];
             NSError* error;
@@ -342,8 +342,8 @@
                 }
                 
                 if(key){
-                    NSData *iv = [EncodingTools dataWithBase64EncodedString:messageNode.iv];
-                    NSData *decodedPayload = [EncodingTools dataWithBase64EncodedString:messageNode.encryptedPayload];
+                    NSData *iv = [HelperTools dataWithBase64EncodedString:messageNode.iv];
+                    NSData *decodedPayload = [HelperTools dataWithBase64EncodedString:messageNode.encryptedPayload];
                     
                     NSData *decData = [AESGcm decrypt:decodedPayload withKey:key andIv:iv withAuth:auth];
                     if(!decData) {

@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MLXMLNode.h"
-#import "EncodingTools.h"
+#import "HelperTools.h"
 
 #import "MLConstants.h"
 #import "MLXMPPConstants.h"

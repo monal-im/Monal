@@ -7,7 +7,7 @@
 //
 
 #import "DataLayer.h"
-#import "EncodingTools.h"
+#import "HelperTools.h"
 
 @interface DataLayer()
 
@@ -1057,27 +1057,6 @@ NSString *const kCount = @"count";
     return ([self executeNonQuery:query andArguments:params] != NO);
 }
 
-#pragma mark legacy caps
-
--(void) clearLegacyCaps
-{
-    NSString* query = [NSString stringWithFormat:@"delete from buddy_resources_legacy_caps"];
-
-    //DDLogVerbose(@"%@", query);
-    [self executeNonQuery:query andArguments:nil];
-}
-
--(BOOL) checkLegacyCap:(NSString*)cap forUser:(NSString*) user accountNo:(NSString*) acctNo
-{
-    NSString* query = [NSString stringWithFormat:@"select count(*) from buddylist as a inner join buddy_resources_legacy_caps as b on a.buddy_id=b.buddy_id  inner join legacy_caps as c on c.capid=b.capid where buddy_name=? and account_id=? and captext=?"];
-    NSArray * params= @[ user, acctNo, cap];
-
-    //DDLogVerbose(@"%@", query);
-    NSNumber* count = (NSNumber *) [self executeScalar:query andArguments:params];
-
-    return ([count integerValue] > 0);
-}
-
 #pragma mark presence functions
 
 -(void) setResourceOnline:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
@@ -1136,14 +1115,6 @@ NSString *const kCount = @"count";
     NSString* query2 = [NSString stringWithFormat:@"delete from buddy_resources where buddy_id=? and resource=?"];
     NSArray* params2 = @[buddyid, presenceObj.resource?presenceObj.resource:@""];
     if([self executeNonQuery:query2 andArguments:params2] == NO)
-	{
-		[self endWriteTransaction];
-		return NO;
-	}
-
-    NSString* query4 = [NSString stringWithFormat:@"delete from buddy_resources_legacy_caps where buddy_id=? and resource=?"];
-    NSArray* params3 = @[buddyid, presenceObj.resource?presenceObj.resource:@"" ];
-    if([self executeNonQuery:query4 andArguments:params3] == NO)
 	{
 		[self endWriteTransaction];
 		return NO;
@@ -2552,7 +2523,7 @@ NSString *const kCount = @"count";
     {
         DDLogVerbose(@"Database version <2.3 detected. Performing upgrade.");
 
-        NSString* resourceQuery = [NSString stringWithFormat:@"update account set resource='%@';", [EncodingTools encodeRandomResource]];
+        NSString* resourceQuery = [NSString stringWithFormat:@"update account set resource='%@';", [HelperTools encodeRandomResource]];
 
         [self executeNonQuery:resourceQuery withCompletion:nil];
         [self executeNonQuery:@"update dbversion set dbversion='2.3';" withCompletion:nil];
@@ -2865,6 +2836,9 @@ NSString *const kCount = @"count";
         DDLogVerbose(@"Database version <4.76 detected. Performing upgrade on accounts.");
         // Add column for the last interaction of a contact
         [self executeNonQuery:@"alter table buddylist add column lastInteraction INTEGER NOT NULL DEFAULT 0;" andArguments:nil];
+        // drop legacy caps tables
+        [self executeNonQuery:@"DROP TABLE legacy_caps;" andArguments:nil];
+        [self executeNonQuery:@"DROP TABLE buddy_resources_legacy_caps;" andArguments:nil];
         [self executeNonQuery:@"update dbversion set dbversion='4.76';" andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.76 success");
     }

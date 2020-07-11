@@ -98,11 +98,6 @@ extern NSString *const kMessageTypeUrl;
 
 -(BOOL)setFeature:(NSString*)feature  forVer:(NSString*) ver;
 
-#pragma mark legacy caps
--(void) clearLegacyCaps;
-//-(BOOL) setLegacyCap:(NSString*)cap forUser:(presence*)presenceObj accountNo:(NSString*) acctNo;
--(BOOL) checkLegacyCap:(NSString*)cap forUser:(NSString*) user accountNo:(NSString*) acctNo;
-
 #pragma mark  presence functions
 -(void) setResourceOnline:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
 -(void) setOnlineBuddy:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;

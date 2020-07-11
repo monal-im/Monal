@@ -8,6 +8,7 @@
 
 #import "XMPPPresence.h"
 #import "MLXMPPConstants.h"
+#import "HelperTools.h"
 
 @implementation XMPPPresence
 
@@ -65,15 +66,8 @@
 
 -(void) setLastInteraction:(NSDate*) date
 {
-    NSDateFormatter* rfc3339DateFormatter = [[NSDateFormatter alloc] init];
-    NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-    
-    [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
-    [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z"];
-    [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-    
     MLXMLNode* idle = [[MLXMLNode alloc] initWithElement:@"idle" andNamespace:@"urn:xmpp:idle:1"];
-    [idle.attributes setValue:[rfc3339DateFormatter stringFromDate:[NSDate date]] forKey:@"since"];
+    [idle.attributes setValue:[HelperTools generateDateTimeString:[NSDate date]] forKey:@"since"];
     [self.children addObject:idle];
 }
 

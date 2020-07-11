@@ -10,7 +10,7 @@
 #import "MLConstants.h"
 #import "DataLayer.h"
 #import "MLImageManager.h"
-#import "EncodingTools.h"
+#import "HelperTools.h"
 
 
 @interface MLIQProcessor()
@@ -313,15 +313,6 @@
         }
     }
     
-    if(iqNode.legacyAuth)
-    {
-        XMPPIQ* auth =[[XMPPIQ alloc] initWithId:@"auth2" andType:kiqSetType];
-        [auth setAuthWithUserName:self.connection.identity.jid resource:self.connection.identity.resource andPassword:self.connection.identity.password];
-        self.sendIq(auth);
-        return;
-    }
-    
-    
     if([iqNode.from isEqualToString:self.connection.identity.domain] &&
        !self.connection.discoveredServices)
     {
@@ -507,16 +498,16 @@
             
             NSDictionary *row = (NSDictionary *) obj;
             NSString *keyid = (NSString *)[row objectForKey:@"preKeyId"];
-            NSData *preKeyData = [EncodingTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]];
+            NSData *preKeyData = [HelperTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]];
             if(preKeyData) {
                 SignalPreKeyBundle *bundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
                                                                                        deviceId:device
                                                                                        preKeyId:[keyid intValue]
                                                                                    preKeyPublic:preKeyData
                                                                                  signedPreKeyId:iqNode.signedPreKeyId.intValue
-                                                                             signedPreKeyPublic:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
-                                                                                      signature:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
-                                                                                    identityKey:[EncodingTools dataWithBase64EncodedString:iqNode.identityKey]
+                                                                             signedPreKeyPublic:[HelperTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
+                                                                                      signature:[HelperTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
+                                                                                    identityKey:[HelperTools dataWithBase64EncodedString:iqNode.identityKey]
                                                                                           error:nil];
                 
                 [builder processPreKeyBundle:bundle error:nil];

@@ -1,16 +1,21 @@
 //
-//  EncodingTools.h
+//  HelperTools.h
 //  Monal
 //
-//  Created by Anurodh Pokharel on 6/30/13.
-//
+//  Created by Friedrich Altheide on 08.07.20.
+//  Copyright © 2020 Monal.im. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
 
-@interface EncodingTools : NSObject
+NS_ASSUME_NONNULL_BEGIN
 
+@interface HelperTools : NSObject
+
++(NSString* _Nullable) formatLastInteraction:(NSDate*) lastInteraction;
++(NSDate*) parseDateTimeString:(NSString*) datetime;
++(NSString*) generateDateTimeString:(NSDate*) datetime;
 +(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler;
 +(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t) cancelHandler;
 +(NSString*) encodeRandomResource;
@@ -18,10 +23,10 @@
 +(NSString*) encodeBase64WithData:(NSData*) objData;
 +(NSData*) dataWithBase64EncodedString:(NSString*) string;
 
-+(NSData *) MD5:(NSString*)string ;
-+ (NSData *) DataMD5:(NSData*)datain;
 + (NSString *)hexadecimalString:(NSData*) data;
 + (NSData *)dataWithHexString:(NSString *)hex;
 + (NSString *)signalHexKeyWithData:(NSData*) data;
 
 @end
+
+NS_ASSUME_NONNULL_END

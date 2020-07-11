@@ -8,6 +8,7 @@
 
 #import "MLXMLNode.h"
 #import "MLXMPPConstants.h"
+#import "HelperTools.h"
 
 @implementation MLXMLNode
 
@@ -89,17 +90,9 @@
 
 -(void) addDelayTagFrom:(NSString *) from
 {
-    NSDateFormatter* rfc3339DateFormatter = [[NSDateFormatter alloc] init];
-    NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-    
-    [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
-    [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ssZ"];
-    [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-    
-    MLXMLNode* delay =[[MLXMLNode alloc] initWithElement:@"delay"];
-    [delay setXMLNS:@"urn:xmpp:delay"];
-    [delay.attributes setValue:[rfc3339DateFormatter stringFromDate:[NSDate date]] forKey:@"stamp"];
-    [delay.attributes setValue:from forKey:@"from"];
+    MLXMLNode* delay = [[MLXMLNode alloc] initWithElement:@"delay" andNamespace:@"urn:xmpp:delay"];
+    delay.attributes[@"from"] = from;
+    delay.attributes[@"stamp"] = [HelperTools generateDateTimeString:[NSDate date]];
     [self.children addObject:delay];
 }
 
@@ -107,9 +100,6 @@
 {
     if(!_element)
         return nil; // sanity check
-    
-    if([_element isEqualToString:@"__whitePing"])
-        return @" ";
     
     if([_element isEqualToString:@"__xml"])
          return [NSString stringWithFormat:@"<?xml version='1.0'?>"];

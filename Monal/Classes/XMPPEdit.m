@@ -15,12 +15,9 @@
 #import "MLKeysTableViewController.h"
 #import "MLPasswordChangeTableViewController.h"
 
-#import "tools.h"
-
-
-
 
 @interface XMPPEdit()
+
 @property (nonatomic, strong) NSString *jid;
 @property (nonatomic, strong) NSString *password;
 @property (nonatomic, strong) NSString *resource;
@@ -35,7 +32,6 @@
 @property (nonatomic, weak) UITextField *currentTextField;
 
 @property (nonatomic, strong) NSDictionary *initialSettings;
-
 
 @end
 
@@ -117,7 +113,7 @@
     else
     {
         self.port=@"5222";
-        self.resource=[EncodingTools encodeRandomResource];
+        self.resource=[HelperTools encodeRandomResource];
         self.directTLS=NO;
         self.selfSignedSSL=NO;
     }

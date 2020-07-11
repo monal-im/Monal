@@ -7,7 +7,7 @@
 //
 
 #import "XMPPIQ.h"
-#import "EncodingTools.h"
+#import "HelperTools.h"
 #import "SignalPreKey.h"
 
 #if TARGET_OS_IPHONE
@@ -133,48 +133,14 @@ NSString *const kiqErrorType = @"error";
     [self.children addObject:disableNode];
 }
 
--(void) setAuthWithUserName:(NSString *)username resource:(NSString *) resource andPassword:(NSString *) password
-{
-    [self.attributes setObject:@"auth1" forKey:@"id"];
-    [self.attributes setObject:kiqSetType forKey:@"type"];
-    
-    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
-    queryNode.element=@"query";
-    [queryNode setXMLNS:@"jabber:iq:auth"];
-    
-    MLXMLNode* userNode =[[MLXMLNode alloc] init];
-    userNode.element=@"username";
-    userNode.data =username;
-    
-    MLXMLNode* resourceNode =[[MLXMLNode alloc] init];
-    resourceNode.element=@"resource";
-    resourceNode.data =resource;
-    
-    MLXMLNode* passNode =[[MLXMLNode alloc] init];
-    passNode.element=@"password";
-    passNode.data =password;
-    
-    [queryNode.children addObject:userNode];
-    [queryNode.children addObject:resourceNode];
-    [queryNode.children addObject:passNode];
-    [self.children addObject:queryNode];
-}
-
 -(void) setBindWithResource:(NSString*) resource
 {
 
-    MLXMLNode* bindNode =[[MLXMLNode alloc] init];
-    bindNode.element=@"bind";
-    [bindNode.attributes setObject:@"urn:ietf:params:xml:ns:xmpp-bind" forKey:kXMLNS];
-    
-    MLXMLNode* resourceNode =[[MLXMLNode alloc] init];
-    resourceNode.element=@"resource";
-    resourceNode.data=resource;
+    MLXMLNode* bindNode =[[MLXMLNode alloc] initWithElement:@"bind" andNamespace:@"urn:ietf:params:xml:ns:xmpp-bind"];
+    MLXMLNode* resourceNode = [[MLXMLNode alloc] initWithElement:@"resource"];
+    resourceNode.data = resource;
     [bindNode.children addObject:resourceNode];
-    
     [self.children addObject:bindNode];
-    
-    
 }
 
 -(void) setDiscoInfoNode
@@ -195,22 +161,16 @@ NSString *const kiqErrorType = @"error";
 
 -(void) setDiscoInfoWithFeaturesAndNode:(NSString*) node
 {
-    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
-    queryNode.element=@"query";
-    [queryNode setXMLNS:@"http://jabber.org/protocol/disco#info"];
-    if(node){
+    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#info"];
+    if(node)
         [queryNode. attributes setObject:node forKey:@"node"];
-    }
     
-
     for(NSString* feature in [XMPPIQ features])
     {
-    
-    MLXMLNode* featureNode =[[MLXMLNode alloc] init];
-    featureNode.element=@"feature";
+        MLXMLNode* featureNode =[[MLXMLNode alloc] init];
+        featureNode.element=@"feature";
         [featureNode.attributes setObject:feature forKey:@"var"];
-    [queryNode.children addObject:featureNode];
-    
+        [queryNode.children addObject:featureNode];
    }
     
     MLXMLNode* identityNode =[[MLXMLNode alloc] init];
@@ -267,7 +227,6 @@ NSString *const kiqErrorType = @"error";
     queryNode.element=@"query";
     [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:kXMLNS];
     
-    
     MLXMLNode* xnode =[[MLXMLNode alloc] init];
     xnode.element=@"x";
     [xnode.attributes setObject:@"jabber:x:data" forKey:kXMLNS];
@@ -285,8 +244,6 @@ NSString *const kiqErrorType = @"error";
     
     [xnode.children addObject:field1];
     
-
-    
     //if we are fetching "all" limit with RSM to 50 for now
     MLXMLNode* set =[[MLXMLNode alloc] init];
     set.element=@"set";
@@ -302,8 +259,9 @@ NSString *const kiqErrorType = @"error";
     [set.children addObject:before];
     
     [queryNode.children addObject:set];
-
-    if(jid) {
+    
+    if(jid)
+    {
         MLXMLNode* field3 =[[MLXMLNode alloc] init];
         field3.element=@"field";
         [field3.attributes setObject:@"with" forKey:@"var"];
@@ -316,11 +274,8 @@ NSString *const kiqErrorType = @"error";
         [xnode.children addObject:field3];
     }
     
-    
     [queryNode.children addObject:xnode];
-    
     [self.children addObject:queryNode];
-    
 }
 
 /**
@@ -335,41 +290,25 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* xnode = [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data"];
     [xnode.attributes setObject:@"submit" forKey:@"type"];
     
-    MLXMLNode* field1 =[[MLXMLNode alloc] init];
-    field1.element=@"field";
+    MLXMLNode* field1 = [[MLXMLNode alloc] initWithElement:@"field"];
     [field1.attributes setObject:@"FORM_TYPE" forKey:@"var"];
     [field1.attributes setObject:@"hidden" forKey:@"type"];
     
-    MLXMLNode* value =[[MLXMLNode alloc] init];
-    value.element=@"value";
-    value.data=@"urn:xmpp:mam:2";
+    MLXMLNode* value =[[MLXMLNode alloc] initWithElement:@"value"];
+    value.data = @"urn:xmpp:mam:2";
     [field1.children addObject:value];
     
     [xnode.children addObject:field1];
     
-    NSDateFormatter *rfc3339DateFormatter;
-    if(startDate || endDate) {
-        rfc3339DateFormatter = [[NSDateFormatter alloc] init];
-        NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-        
-        [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
-        [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'"];
-        [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-    }
-    
     if(startDate){
-        MLXMLNode* field2 =[[MLXMLNode alloc] init];
-        field2.element=@"field";
+        MLXMLNode* field2 = [[MLXMLNode alloc] initWithElement:@"field"];
         [field2.attributes setObject:@"start" forKey:@"var"];
         
-        MLXMLNode* value2 =[[MLXMLNode alloc] init];
-        value2.element=@"value";
-        if(startDate) {
-            value2.data=[rfc3339DateFormatter stringFromDate:startDate];
-        }
-        else  {
-            value2.data=[rfc3339DateFormatter stringFromDate:[NSDate dateWithTimeIntervalSinceReferenceDate:0]];
-        }
+        MLXMLNode* value2 = [[MLXMLNode alloc] initWithElement:@"value"];
+        if(startDate)
+            value2.data = [HelperTools generateDateTimeString:startDate];
+        else
+            value2.data = [HelperTools generateDateTimeString:[NSDate dateWithTimeIntervalSinceReferenceDate:0]];
         
         [field2.children addObject:value2];
         [xnode.children addObject:field2];
@@ -390,41 +329,32 @@ NSString *const kiqErrorType = @"error";
     }
     
     if(endDate) {
-        MLXMLNode* field3 =[[MLXMLNode alloc] init];
-        field3.element=@"field";
+        MLXMLNode* field3 = [[MLXMLNode alloc] initWithElement:@"field"];
         [field3.attributes setObject:@"end" forKey:@"var"];
         
-        MLXMLNode* value3 =[[MLXMLNode alloc] init];
-        value3.element=@"value";
-        if(endDate) {
-            value3.data=[rfc3339DateFormatter stringFromDate:endDate];
-        }
-        else  {
-            value3.data=[rfc3339DateFormatter stringFromDate:[NSDate date]];
-        }
+        MLXMLNode* value3 = [[MLXMLNode alloc] initWithElement:@"value"];
+        if(endDate)
+            value3.data = [HelperTools generateDateTimeString:endDate];
+        else
+            value3.data = [HelperTools generateDateTimeString:[NSDate date]];
         [field3.children addObject:value3];
         [xnode.children addObject:field3];
     }
     
-    
-    if(jid) {
-        MLXMLNode* field3 =[[MLXMLNode alloc] init];
-        field3.element=@"field";
+    if(jid)
+    {
+        MLXMLNode* field3 = [[MLXMLNode alloc] initWithElement:@"field"];
         [field3.attributes setObject:@"with" forKey:@"var"];
         
-        MLXMLNode* value3 =[[MLXMLNode alloc] init];
-        value3.element=@"value";
-        value3.data=jid;
+        MLXMLNode* value3 =[[MLXMLNode alloc] initWithElement:@"value"];
+        value3.data = jid;
         [field3.children addObject:value3];
         
         [xnode.children addObject:field3];
     }
     
-    
     [queryNode.children addObject:xnode];
-    
     [self.children addObject:queryNode];
-    
 }
 
 
@@ -434,67 +364,43 @@ NSString *const kiqErrorType = @"error";
 -(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) uid withMax:(NSString *) maxResults  andJid:(NSString *)jid
 {
     
-    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
-    queryNode.element=@"query";
-    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:kXMLNS];
+    MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2"];
     
-    
-    MLXMLNode* xnode =[[MLXMLNode alloc] init];
-    xnode.element=@"x";
-    [xnode.attributes setObject:@"jabber:x:data" forKey:kXMLNS];
+    MLXMLNode* xnode = [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data"];
     [xnode.attributes setObject:@"submit" forKey:@"type"];
     
-    MLXMLNode* field1 =[[MLXMLNode alloc] init];
-    field1.element=@"field";
+    MLXMLNode* field1 = [[MLXMLNode alloc] initWithElement:@"field"];
     [field1.attributes setObject:@"FORM_TYPE" forKey:@"var"];
     [field1.attributes setObject:@"hidden" forKey:@"type"];
     
-    MLXMLNode* value =[[MLXMLNode alloc] init];
-    value.element=@"value";
-    value.data=@"urn:xmpp:mam:2";
+    MLXMLNode* value =[[MLXMLNode alloc] initWithElement:@"value"];
+    value.data = @"urn:xmpp:mam:2";
     [field1.children addObject:value];
     
     [xnode.children addObject:field1];
     
-    NSDateFormatter *rfc3339DateFormatter;
-    if(startDate) {
-        rfc3339DateFormatter = [[NSDateFormatter alloc] init];
-        NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-        
-        [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
-        [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z'"];
-        [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-    }
-    
-    if(startDate){
-        MLXMLNode* field2 =[[MLXMLNode alloc] init];
-        field2.element=@"field";
+    if(startDate)
+    {
+        MLXMLNode* field2 = [[MLXMLNode alloc] initWithElement:@"field"];
         [field2.attributes setObject:@"start" forKey:@"var"];
         
-        MLXMLNode* value2 =[[MLXMLNode alloc] init];
-        value2.element=@"value";
-        if(startDate) {
-            value2.data=[rfc3339DateFormatter stringFromDate:startDate];
-        }
-        else  {
-            value2.data=[rfc3339DateFormatter stringFromDate:[NSDate dateWithTimeIntervalSinceReferenceDate:0]];
-        }
+        MLXMLNode* value2 = [[MLXMLNode alloc] initWithElement:@"value"];
+        if(startDate)
+            value2.data = [HelperTools generateDateTimeString:startDate];
+        else
+            value2.data = [HelperTools generateDateTimeString:[NSDate dateWithTimeIntervalSinceReferenceDate:0]];
         
         [field2.children addObject:value2];
         [xnode.children addObject:field2];
     }
-
     
-    if(jid) {
-        MLXMLNode* field3 =[[MLXMLNode alloc] init];
-        field3.element=@"field";
+    if(jid)
+    {
+        MLXMLNode* field3 = [[MLXMLNode alloc] initWithElement:@"field"];
         [field3.attributes setObject:@"with" forKey:@"var"];
-        
-        MLXMLNode* value3 =[[MLXMLNode alloc] init];
-        value3.element=@"value";
-        value3.data=jid;
+        MLXMLNode* value3 = [[MLXMLNode alloc] initWithElement:@"value"];
+        value3.data = jid;
         [field3.children addObject:value3];
-        
         [xnode.children addObject:field3];
     }
     
@@ -502,28 +408,26 @@ NSString *const kiqErrorType = @"error";
     field3.element=@"set";
     [field3.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:kXMLNS];
     
-    if(maxResults) {
+    if(maxResults)
+    {
         MLXMLNode* max =[[MLXMLNode alloc] init];
         max.element=@"max";
         max.data=maxResults;
         [field3.children addObject:max];
     }
     
-    if(uid) {
-   
+    if(uid)
+    {
         MLXMLNode* value3 =[[MLXMLNode alloc] init];
         value3.element=@"after";
         value3.data=uid;
         [field3.children addObject:value3];
-        
-       
     }
-     [queryNode.children addObject:field3];
+    [queryNode.children addObject:field3];
     
     [queryNode.children addObject:xnode];
     
     [self.children addObject:queryNode];
-    
 }
 
 -(void) setRemoveFromRoster:(NSString*) jid
@@ -541,14 +445,12 @@ NSString *const kiqErrorType = @"error";
 }
 
 -(void) setRosterRequest:(NSString *) version
-{       
+{
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode.attributes setObject:@"jabber:iq:roster" forKey:kXMLNS];
     if(version)
-    {
         [queryNode.attributes setObject:version forKey:@"ver"];
-    }
     [self.children addObject:queryNode];
 }
 
@@ -572,17 +474,14 @@ NSString *const kiqErrorType = @"error";
     os.data=@"macOS";
 #endif
     
-    MLXMLNode* appVersion =[[MLXMLNode alloc] init];
-    appVersion.element=@"version";
-    appVersion.data=[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+    MLXMLNode* appVersion = [[MLXMLNode alloc] initWithElement:@"version"];
+    appVersion.data = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     
     [queryNode.children addObject:name];
     [queryNode.children addObject:os];
     [queryNode.children addObject:appVersion];
     [self.children addObject:queryNode];
 }
-
-
 
 -(void) setLast
 {
@@ -637,23 +536,6 @@ NSString *const kiqErrorType = @"error";
 
 
 #pragma mark iq get
--(void) getAuthwithUserName:(NSString *)username
-{
-    [self.attributes setObject:@"auth1" forKey:@"id"];
-    [self.attributes setObject:kiqGetType forKey:@"type"];
-    
-    
-    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
-    queryNode.element=@"query";
-    [queryNode setXMLNS:@"jabber:iq:auth"];
-    
-    MLXMLNode* userNode =[[MLXMLNode alloc] init];
-    userNode.element=@"username";
-    userNode.data =username;
-    
-    [queryNode.children addObject:userNode];
-    [self.children addObject:queryNode];
-}
 
 -(void) getVcardTo:(NSString*) to
 {
@@ -950,18 +832,18 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* signedPreKeyPublic =[[MLXMLNode alloc] init];
     signedPreKeyPublic.element=@"signedPreKeyPublic";
     [signedPreKeyPublic.attributes setObject:[keys objectForKey:@"signedPreKeyId"] forKey:@"signedPreKeyId"];
-    signedPreKeyPublic.data = [EncodingTools encodeBase64WithData: [keys objectForKey:@"signedPreKeyPublic"]];
+    signedPreKeyPublic.data = [HelperTools encodeBase64WithData: [keys objectForKey:@"signedPreKeyPublic"]];
     [bundle.children addObject:signedPreKeyPublic];
     
     
     MLXMLNode* signedPreKeySignature =[[MLXMLNode alloc] init];
     signedPreKeySignature.element=@"signedPreKeySignature";
-    signedPreKeySignature.data = [EncodingTools encodeBase64WithData:[keys objectForKey:@"signedPreKeySignature"]];
+    signedPreKeySignature.data = [HelperTools encodeBase64WithData:[keys objectForKey:@"signedPreKeySignature"]];
     [bundle.children addObject:signedPreKeySignature];
     
     MLXMLNode* identityKey =[[MLXMLNode alloc] init];
     identityKey.element=@"identityKey";
-    identityKey.data = [EncodingTools encodeBase64WithData:[keys objectForKey:@"identityKey"]];
+    identityKey.data = [HelperTools encodeBase64WithData:[keys objectForKey:@"identityKey"]];
     [bundle.children addObject:identityKey];
     
     MLXMLNode* prekeyNode =[[MLXMLNode alloc] init];
@@ -973,7 +855,7 @@ NSString *const kiqErrorType = @"error";
         MLXMLNode* preKeyPublic =[[MLXMLNode alloc] init];
         preKeyPublic.element=@"preKeyPublic";
         [preKeyPublic.attributes setObject:[NSString stringWithFormat:@"%d", prekey.preKeyId] forKey:@"preKeyId"];
-        preKeyPublic.data = [EncodingTools encodeBase64WithData:prekey.keyPair.publicKey];
+        preKeyPublic.data = [HelperTools encodeBase64WithData:prekey.keyPair.publicKey];
         [prekeyNode.children addObject:preKeyPublic];
         
     }];

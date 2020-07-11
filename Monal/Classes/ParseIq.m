@@ -8,7 +8,7 @@
 
 #import "ParseIq.h"
 #import "SignalPreKey.h"
-#import "EncodingTools.h"
+#import "HelperTools.h"
 
 @interface ParseIq()
 
@@ -85,10 +85,7 @@
         
     }
     
-    if([namespaceURI isEqualToString:@"jabber:iq:auth"]) _legacyAuth=YES;
-    
     //http upload
-    
     if([elementName isEqualToString:@"slot"])
     {
         _queryXMLNS=namespaceURI;
@@ -434,7 +431,7 @@
     if(([elementName isEqualToString:@"data"]) && [State isEqualToString:@"RegistrationFormData"]
        )
     {
-        _captchaData=[EncodingTools dataWithBase64EncodedString:_messageBuffer];
+        _captchaData=[HelperTools dataWithBase64EncodedString:_messageBuffer];
         return;
     }
     

@@ -28,14 +28,6 @@
 		
 	}
 	
-    if(([State isEqualToString:@"Features"]) && ([elementName isEqualToString:@"auth"]))
-	{
-        DDLogVerbose(@"Supports legacy auth");
-        _supportsLegacyAuth=true;
-        
-		return;
-    }
-    
     if(([State isEqualToString:@"Features"]) && ([elementName isEqualToString:@"register"]))
 	{
         DDLogVerbose(@"Supports user registration");

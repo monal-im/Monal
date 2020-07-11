@@ -55,7 +55,7 @@
 #ifndef DISABLE_OMEMO
     NSData *identity=[self.account.monalSignalStore getIdentityForAddress:address];
     
-    cell.key.text = [EncodingTools signalHexKeyWithData:identity];
+    cell.key.text = [HelperTools signalHexKeyWithData:identity];
     cell.toggle.on = [self.account.monalSignalStore isTrustedIdentity:address identityKey:identity];
     cell.toggle.tag= 100+indexPath.row;
     [cell.toggle addTarget:self action:@selector(toggleTrust:) forControlEvents:UIControlEventValueChanged];

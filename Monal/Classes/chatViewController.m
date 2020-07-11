@@ -29,8 +29,6 @@
 @import QuartzCore;
 @import MobileCoreServices;
 
-
-
 @interface chatViewController()<IDMPhotoBrowserDelegate>
 
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
@@ -51,7 +49,10 @@
 
 @property (nonatomic, strong) NSDate* lastMamDate;
 @property (nonatomic, assign) BOOL hardwareKeyboardPresent;
-@property (nonatomic, strong) xmpp* xmppAccount ;
+@property (nonatomic, strong) xmpp* xmppAccount;
+
+@property (nonatomic, strong) NSLayoutConstraint* chatInputConstraintHWKeyboard;
+@property (nonatomic, strong) NSLayoutConstraint* chatInputConstraintSWKeyboard;
 
 @end
 
@@ -86,8 +87,8 @@
     [super viewDidLoad];
     [self setupDateObjects];
     containerView = self.view;
-    self.messageTable.scrollsToTop=YES;
-    self.chatInput.scrollsToTop=NO;
+    self.messageTable.scrollsToTop = YES;
+    self.chatInput.scrollsToTop = NO;
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
@@ -100,10 +101,9 @@
     [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
     
     [nc addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
-    
     [nc addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardDidHideNotification object:nil];
-    
     [nc addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+    [nc addObserver:self selector:@selector(keyboardWillDisappear:) name:UIKeyboardWillHideNotification object:nil];
     
     [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
@@ -120,7 +120,7 @@
     self.chatInput.textContainerInset=UIEdgeInsetsMake(5, 0, 5, 0);
     
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
-    self.messageTable.estimatedRowHeight=UITableViewAutomaticDimension;
+    self.messageTable.estimatedRowHeight = UITableViewAutomaticDimension;
     
     self.navBarContainerView.frame = CGRectMake(0, 0, self.view.frame.size.width, 53);
     [self.view addSubview:self.navBarContainerView];
@@ -135,16 +135,22 @@
     [self.inputContainerView.leadingAnchor constraintEqualToAnchor:self.inputContainerView.superview.leadingAnchor].active=YES;
     [self.inputContainerView.bottomAnchor constraintEqualToAnchor:self.inputContainerView.superview.bottomAnchor].active=YES;
     [self.inputContainerView.trailingAnchor constraintEqualToAnchor:self.inputContainerView.superview.trailingAnchor].active=YES;
-    self.tableviewBottom.constant+=20;
+    self.tableviewBottom.constant += 20;
     
     //UTI @"public.data" for everything
     NSString *images = (NSString *)kUTTypeImage;
     self.imagePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images] inMode:UIDocumentPickerModeImport];
     self.imagePicker.allowsMultipleSelection=NO;
     self.imagePicker.delegate=self;
-    
 #endif
+
+    // Set max height of the chatInput (The chat should be still readable while the HW-Keyboard is active
+    self.chatInputConstraintHWKeyboard = [NSLayoutConstraint constraintWithItem:self.chatInput attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationLessThanOrEqual toItem:nil attribute:NSLayoutAttributeHeight multiplier:1 constant:self.view.frame.size.height * 0.6];
+    self.chatInputConstraintSWKeyboard = [NSLayoutConstraint constraintWithItem:self.chatInput attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationLessThanOrEqual toItem:nil attribute:NSLayoutAttributeHeight multiplier:1 constant:self.view.frame.size.height * 0.4];
+    [self.inputContainerView addConstraint:self.chatInputConstraintHWKeyboard];
+    [self.inputContainerView addConstraint:self.chatInputConstraintSWKeyboard];
     
+    [self setChatInputHeightConstraints:YES];
     
 #if !TARGET_OS_MACCATALYST
     if (@available(iOS 13.0, *)) {
@@ -154,6 +160,18 @@
         [self.plusButton setImage:[UIImage imageNamed:@"907-plus-rounded-square"] forState:UIControlStateNormal];
     }
 #endif
+}
+
+-(void) setChatInputHeightConstraints:(BOOL) hwKeyboardPresent
+{
+    if((!self.chatInputConstraintHWKeyboard) || (!self.chatInputConstraintSWKeyboard)) {
+        return;
+    }
+    // activate / disable constraints depending on keyboard type
+    self.chatInputConstraintHWKeyboard.active = hwKeyboardPresent;
+    self.chatInputConstraintSWKeyboard.active = !hwKeyboardPresent;
+    
+    [self.inputContainerView layoutIfNeeded];
 }
 
 -(void) handleForeGround {
@@ -299,6 +317,9 @@
             }
     }];
     self.hardwareKeyboardPresent = YES; //default to YES and when keybaord will appears is called, this may be set to NO
+    
+    // Set correct chatInput height constraints
+    [self setChatInputHeightConstraints:self.hardwareKeyboardPresent];
     [self scrollToBottom];
 }
 
@@ -359,7 +380,7 @@
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
     if(self.messageTable.contentSize.height > self.messageTable.bounds.size.height)
-        [self.messageTable setContentOffset:CGPointMake(0, self.messageTable.contentSize.height- self.messageTable.bounds.size.height) animated:NO];
+        [self.messageTable setContentOffset:CGPointMake(0, self.messageTable.contentSize.height - self.messageTable.bounds.size.height) animated:NO];
 }
 
 -(void) dealloc
@@ -557,10 +578,12 @@
 
 -(void)resignTextView
 {
-    NSString *cleanstring = [self.chatInput.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    if(cleanstring.length>0)
+    // Trim leading spaces
+    NSString* cleanString = [self.chatInput.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    // Only send msg that have at least one character
+    if(cleanString.length > 0)
     {
-        [self sendMessage:cleanstring];
+        [self sendMessage:cleanString];
         
         [self.chatInput setText:@""];
     }
@@ -1666,7 +1689,7 @@
     if(self.hardwareKeyboardPresent &&  [text isEqualToString:@"\n"])
     {
         [self resignTextView];
-        shouldinsert=NO;
+        shouldinsert = NO;
     }
     
     return shouldinsert;
@@ -1675,9 +1698,9 @@
 - (void)textViewDidChange:(UITextView *)textView
 {
     if(textView.text.length>0)
-        self.placeHolderText.hidden=YES;
+        self.placeHolderText.hidden = YES;
     else
-        self.placeHolderText.hidden=NO;
+        self.placeHolderText.hidden = NO;
 }
 
 
@@ -1696,20 +1719,24 @@
 
 #pragma mark - Keyboard
 
+- (void)keyboardWillDisappear:(NSNotification*) aNotification
+{
+    [self setChatInputHeightConstraints:YES];
+}
+
 - (void)keyboardDidShow:(NSNotification*)aNotification
 {
       //TODO grab animation info
     NSDictionary* info = [aNotification userInfo];
     CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
-    if(kbSize.height>100) { //my inputbar +any other
-        self.hardwareKeyboardPresent=NO;
+    if(kbSize.height > 100) { //my inputbar +any other
+        self.hardwareKeyboardPresent = NO;
     }
-    UIEdgeInsets contentInsets = UIEdgeInsetsMake(0.0, 0.0, kbSize.height-10, 0.0);
+    UIEdgeInsets contentInsets = UIEdgeInsetsMake(0.0, 0.0, kbSize.height - 10, 0.0);
     self.messageTable.contentInset = contentInsets;
     self.messageTable.scrollIndicatorInsets = contentInsets;
     
     [self scrollToBottom];
-    
 }
 
 - (void)keyboardDidHide:(NSNotification*)aNotification
@@ -1723,7 +1750,7 @@
 
 - (void)keyboardWillShow:(NSNotification*)aNotification
 {
-
+    [self setChatInputHeightConstraints:NO];
     //TODO grab animation info
 //    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
 //    self.messageTable.contentInset = contentInsets;

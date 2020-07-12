@@ -132,16 +132,10 @@
         return;
     }
     
-    
-    if([namespaceURI isEqualToString:@"jabber:iq:last"])
-    {
-        _last=YES;
-        return;
-    }
-    
     if([elementName isEqualToString:@"item"])
     {
-        if(!_items)  _items=[[NSMutableArray alloc] init];
+        if(!_items)
+            _items=[[NSMutableArray alloc] init];
         [_items addObject:attributeDict];
     }
     

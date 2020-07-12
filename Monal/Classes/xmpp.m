@@ -523,7 +523,8 @@ NSString *const kXMPPPresence = @"presence";
             if(data[@"invalidateOnDisconnect"])
             {
                 DDLogWarn(@"invalidating iq handler for iq id '%@'", id);
-                ((monal_iq_handler_t) data[@"errorHandler"])(nil);
+                if(data[@"errorHandler"])
+                    ((monal_iq_handler_t) data[@"errorHandler"])(nil);
             }
         }];
         
@@ -949,10 +950,11 @@ NSString *const kXMPPPresence = @"presence";
                                                              signalContex:nil
                                                            andSignalStore:nil];
 #endif
-        processor.sendIq=^(MLXMLNode * _Nullable iqResponse) {
-            if(iqResponse) {
+        processor.sendIq=^(MLXMLNode* _Nullable iq, (monal_iq_handler_t) _Nullable resultHandler, (monal_iq_handler_t) _Nullable errorHandler) {
+            if(iq)
+            {
                 DDLogInfo(@"sending iq stanza");
-                [self send:iqResponse];
+                [self sendIq:iq withResultHandler:resultHandler andErrorHandler:errorHandler];
             }
         };
 
@@ -999,9 +1001,9 @@ NSString *const kXMPPPresence = @"presence";
         //process registered iq handlers
         if(_iqHandlers[iqNode.idval])
         {
-            if([@"result" isEqualToString:iqNode.type])
+            if([@"result" isEqualToString:iqNode.type] && _iqHandlers[iqNode.idval][@"resultHandler"])
                 ((monal_iq_handler_t) _iqHandlers[iqNode.idval][@"resultHandler"])(iqNode);
-            else if([@"error" isEqualToString:iqNode.type])
+            else if([@"error" isEqualToString:iqNode.type] && _iqHandlers[iqNode.idval][@"errorHandler"])
                 ((monal_iq_handler_t) _iqHandlers[iqNode.idval][@"errorHandler"])(iqNode);
             
             //remove handler after calling it
@@ -1542,7 +1544,8 @@ NSString *const kXMPPPresence = @"presence";
 {
     //TODO: make invalidateOnDisconnect configurable once we are somehow able to retain the handlers across app restarts
     [self dispatchOnReceiveQueue:^{
-        _iqHandlers[[iq getId]] = @{@"id": [iq getId], @"resultHandler":resultHandler, @"errorHandler":errorHandler, @"invalidateOnDisconnect":@YES};
+        if(resultHandler || errorHandler)
+            _iqHandlers[[iq getId]] = @{@"id": [iq getId], @"resultHandler":resultHandler, @"errorHandler":errorHandler, @"invalidateOnDisconnect":@YES};
         [self send:iq];
     }];
 }

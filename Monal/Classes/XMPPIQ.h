@@ -106,12 +106,6 @@ removes a contact from the roster
 -(void) setVersion;
 
 /**
- sends last seconds as 0 since if we are responding we arent away. Migth want to add a timer for away in the future. 
- */
--(void) setLast;
-
-
-/**
  sets up an iq that requests a http upload slot
  */
 -(void) httpUploadforFile:(NSString *) file ofSize:(NSNumber *) filesize andContentType:(NSString *) contentType;

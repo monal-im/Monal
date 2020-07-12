@@ -483,34 +483,16 @@ NSString *const kiqErrorType = @"error";
     [self.children addObject:queryNode];
 }
 
--(void) setLast
-{
-    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
-    queryNode.element=@"query";
-    [queryNode.attributes setObject:@"jabber:iq:last" forKey:kXMLNS];
-    [queryNode.attributes setObject:@"0" forKey:@"seconds"];  // hasnt been away for 0 seconds
-    [self.children addObject:queryNode];
-}
-
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
 {
-    MLXMLNode* blockNode =[[MLXMLNode alloc] init];
-    if(blocked) {
-        blockNode.element=@"block";
-    } else {
-        blockNode.element=@"unblock";
-    }
-    [blockNode.attributes setObject:@"urn:xmpp:blocking" forKey:kXMLNS];
-
-    MLXMLNode* itemNode =[[MLXMLNode alloc] init];
-    itemNode.element=@"item";
-    [itemNode.attributes setObject:blockedJid forKey:kJid];
+    MLXMLNode* blockNode = [[MLXMLNode alloc] initWithElement:(blocked ? @"block" : @"unblock") andNamespace:@"urn:xmpp:blocking"];
     
+    MLXMLNode* itemNode = [[MLXMLNode alloc] initWithElement:@"item"];
+    [itemNode.attributes setObject:blockedJid forKey:kJid];
     [blockNode.children addObject:itemNode];
+    
     [self.children addObject:blockNode];
 }
-
-
 
 -(void) httpUploadforFile:(NSString *) file ofSize:(NSNumber *) filesize andContentType:(NSString *) contentType
 {

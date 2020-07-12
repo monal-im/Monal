@@ -67,9 +67,9 @@ NSString *const kiqErrorType = @"error";
             @"urn:xmpp:jingle:transports:raw-udp:1",
             @"urn:xmpp:receipts",
             @"jabber:x:oob",
-            @"urn:xmpp:idle:1",
             @"urn:xmpp:ping",
-            @"urn:xmpp:receipts"
+            @"urn:xmpp:receipts",
+            @"urn:xmpp:idle:1"
         ];
         // this has to be sorted for the features hash to be correct, see https://xmpp.org/extensions/xep-0115.html#ver
         featuresArray = [featuresArray sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
@@ -514,9 +514,7 @@ NSString *const kiqErrorType = @"error";
 
 -(void) httpUploadforFile:(NSString *) file ofSize:(NSNumber *) filesize andContentType:(NSString *) contentType
 {
-    MLXMLNode* requestNode =[[MLXMLNode alloc] init];
-    requestNode.element=@"request";
-    [requestNode.attributes setObject:@"urn:xmpp:http:upload" forKey:kXMLNS];
+    MLXMLNode* requestNode =[[MLXMLNode alloc] initWithElement:@"request" andNamespace:@"urn:xmpp:http:upload:0"];
     
     MLXMLNode* filename =[[MLXMLNode alloc] init];
     filename.element=@"filename";

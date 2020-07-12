@@ -235,99 +235,104 @@
 }
 
 -(void) discoResult:(ParseIq *) iqNode {
-    if(iqNode.features) {
-        if([iqNode.from isEqualToString:self.connection.identity.domain]) {
-            self.connection.serverFeatures=iqNode.features;
-        }
-        
-        if([iqNode.features containsObject:@"urn:xmpp:carbons:2"])
+    if(iqNode.features)
+    {
+        //features advertised on the home server
+        if([iqNode.from isEqualToString:self.connection.identity.domain])
         {
-            DDLogInfo(@"got disco result with carbons ns");
-            if(!self.connection.usingCarbons2) {
-                DDLogInfo(@"sending enableCarbons iq");
-                if(self.sendIq) self.sendIq([self enableCarbons]);
+            self.connection.serverFeatures = iqNode.features;
+        
+            if([iqNode.features containsObject:@"urn:xmpp:carbons:2"])
+            {
+                DDLogInfo(@"got disco result with carbons ns");
+                if(!self.connection.usingCarbons2)
+                {
+                    DDLogInfo(@"sending enableCarbons iq");
+                    if(self.sendIq)
+                        self.sendIq([self enableCarbons]);
+                }
+            }
+            
+            if([iqNode.features containsObject:@"urn:xmpp:ping"])
+            {
+                self.connection.supportsPing=YES;
+            }
+            
+            if([iqNode.features containsObject:@"urn:xmpp:blocking"])
+            {
+                self.connection.supportsBlocking=YES;
             }
         }
         
-        if([iqNode.features containsObject:@"urn:xmpp:blocking"])
+        //features advertised on our own jid/account
+        if([iqNode.from isEqualToString:self.connection.identity.jid])
         {
-            self.connection.supportsBlocking=YES;
-        }
-        
-        if([iqNode.features containsObject:@"urn:xmpp:ping"])
-        {
-            self.connection.supportsPing=YES;
-        }
-
-        
-        [iqNode.features.allObjects enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSString *feature = (NSString *)obj;
-            if([feature isEqualToString:@"http://jabber.org/protocol/pubsub#publish"]) {
-                self.connection.supportsPubSub=YES;
-                self.connection.pubSubHost=iqNode.from;
-                *stop=YES;
-#ifndef DISABLE_OMEMO
-                if(self.sendSignalInitialStanzas) self.sendSignalInitialStanzas();
-#endif
+            [iqNode.features.allObjects enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                NSString *feature = (NSString *)obj;
+                if([feature isEqualToString:@"http://jabber.org/protocol/pubsub#publish"]) {
+                    self.connection.supportsPubSub=YES;
+                    *stop=YES;
+    #ifndef DISABLE_OMEMO
+                    if(self.sendSignalInitialStanzas) self.sendSignalInitialStanzas();
+    #endif
+                }
+            }];
+            
+            if([iqNode.features containsObject:@"urn:xmpp:push:0"])
+            {
+                self.connection.supportsPush=YES;
+                if(self.enablePush) self.enablePush();
             }
-        }];
+            
+            if([iqNode.features containsObject:@"urn:xmpp:mam:2"])
+            {
+                BOOL previousStatus = self.connection.supportsMam2;
+                self.connection.supportsMam2 = YES;
+                DDLogInfo(@" supports mam:2");
+                
+                //ony if it went from NO to YES
+                if(!previousStatus)
+                {
+                    [[DataLayer sharedInstance] lastMessageDateForContact:self.connection.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
+                        
+                        NSDate *dateToUse = lastDate;
+                        if(!dateToUse) dateToUse = [NSDate dateWithTimeIntervalSinceNow:-60*60*24*14]; //two weeks
+                        
+                        XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+                        [query setMAMQueryFromStart:dateToUse toDate:nil withMax:nil andJid:nil];
+                        if(self.sendIq) self.sendIq(query);
+                    }];
+                }
+            }
+        }
 
-        if([iqNode.features containsObject:@"urn:xmpp:http:upload"]  ||
-          [iqNode.features containsObject:@"urn:xmpp:http:upload:0"] )
+        if(!self.connection.supportsHTTPUpload && [iqNode.features containsObject:@"urn:xmpp:http:upload:0"])
         {
-            self.connection.supportsHTTPUpload=YES;
+            self.connection.supportsHTTPUpload = YES;
             self.connection.uploadServer = iqNode.from;
         }
         
-        if([iqNode.features containsObject:@"http://jabber.org/protocol/muc"])
+        if(!self.connection.conferenceServer && [iqNode.features containsObject:@"http://jabber.org/protocol/muc"])
         {
-            self.connection.conferenceServer=iqNode.from;
-        }
-        
-        if([iqNode.features containsObject:@"urn:xmpp:push:0"])
-        {
-            self.connection.supportsPush=YES;
-            if(self.enablePush) self.enablePush();
-        }
-        
-        if([iqNode.features containsObject:@"urn:xmpp:mam:2"])
-        {
-            BOOL previousStatus =self.connection.supportsMam2;
-            self.connection.supportsMam2=YES;
-            DDLogInfo(@" supports mam:2");
-            
-            //ony if it went from NO to YES
-            if(!previousStatus)  {
-                [[DataLayer sharedInstance] lastMessageDateForContact:self.connection.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
-                    
-                    NSDate *dateToUse =lastDate;
-                    if(!dateToUse) dateToUse  =[NSDate dateWithTimeIntervalSinceNow:-60*60*24*14]; //two weeks
-                    
-                    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-                    [query setMAMQueryFromStart:dateToUse toDate:nil withMax:nil andJid:nil];
-                    if(self.sendIq) self.sendIq(query);
-                    
-                }];
-            }
-            
+            self.connection.conferenceServer = iqNode.from;
         }
     }
     
     if([iqNode.from isEqualToString:self.connection.identity.domain] &&
        !self.connection.discoveredServices)
     {
-        self.connection.discoveredServices=[[NSMutableArray alloc] init];
-        for (NSDictionary* item in iqNode.items)
+        self.connection.discoveredServices = [[NSMutableArray alloc] init];
+        for(NSDictionary* item in iqNode.items)
         {
             [self.connection.discoveredServices addObject:item];
-            
-            if(![[item objectForKey:@"jid"] isEqualToString:self.connection.identity.domain]) {
-                if(self.sendIq) self.sendIq([self discoverService:[item objectForKey:@"jid"]]);
-            }
+            if(![[item objectForKey:@"jid"] isEqualToString:self.connection.identity.domain])
+                if(self.sendIq)
+                    self.sendIq([self discoverService:[item objectForKey:@"jid"]]);
         }
     
         // send to bare jid for push etc.
-        if(self.sendIq) self.sendIq([self discoverService:self.connection.identity.jid]);
+        if(self.sendIq)
+            self.sendIq([self discoverService:self.connection.identity.jid]);
     }
 }
 
@@ -529,12 +534,11 @@
     return discoInfo;
 }
 
--(XMPPIQ *) enableCarbons
+-(XMPPIQ*) enableCarbons
 {
 	DDLogInfo(@"building enableCarbons iq");
-    XMPPIQ *carbons =[[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
-    MLXMLNode *enable =[[MLXMLNode alloc] initWithElement:@"enable"];
-    [enable setXMLNS:@"urn:xmpp:carbons:2"];
+    XMPPIQ *carbons = [[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
+    MLXMLNode *enable = [[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:carbons:2"];
     [carbons.children addObject:enable];
     return carbons;
 }

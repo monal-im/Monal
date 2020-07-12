@@ -1772,11 +1772,6 @@ NSString *const kXMPPPresence = @"presence";
         [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
     }
 
-    if(self.connectionProperties.pubSubHost)
-    {
-        [values setObject:self.connectionProperties.pubSubHost forKey:@"pubSubHost"];
-    }
-
     [values setObject:_lastInteractionDate forKey:@"lastInteractionDate"];
 
     //save state dictionary
@@ -1864,12 +1859,6 @@ NSString *const kXMPPPresence = @"presence";
             self.connectionProperties.supportsPing = supportsPing.boolValue;
         }
 
-        if([dic objectForKey:@"pubSubHost"])
-        {
-            NSString *pubSubHost = [dic objectForKey:@"pubSubHost"];
-            self.connectionProperties.pubSubHost = pubSubHost;
-        }
-        
         if([dic objectForKey:@"lastInteractionDate"])
             _lastInteractionDate = [dic objectForKey:@"lastInteractionDate"];
 
@@ -1992,7 +1981,6 @@ NSString *const kXMPPPresence = @"presence";
     self.connectionProperties.supportsClientState=NO;
     self.connectionProperties.supportsMam2=NO;
     self.connectionProperties.supportsPubSub=NO;
-    self.connectionProperties.pubSubHost=nil;
     self.connectionProperties.supportsHTTPUpload=NO;
     self.connectionProperties.supportsPing=NO;
 
@@ -2096,9 +2084,8 @@ NSString *const kXMPPPresence = @"presence";
 {
     if(!self.connectionProperties.supportsPubSub) return;
        XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-       [query setiqTo:self.connectionProperties.pubSubHost];
+       [query setiqTo:self.connectionProperties.identity.jid];
        [query subscribeDevices:jid];
-
        [self send:query];
 }
 

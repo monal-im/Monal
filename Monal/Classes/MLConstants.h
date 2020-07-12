@@ -22,20 +22,16 @@ typedef void (^accountCompletion)(NSInteger accountRow);
 typedef void (^monal_void_block_t)();
 
 
-//used in OSX only really
-#define kMonalWindowVisible @"kMonalWindowVisible"
-
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
 #define kMLMessageSentToContact @"kMLMessageSentToContact"
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"
 #define kMonalSendFailedMessageNotice @"kMonalSendFailedMessageNotice"
 
+#define kMonalLastInteractionUpdatedNotice @"kMonalLastInteractionUpdatedNotice"
 #define kMonalMessageReceivedNotice @"kMonalMessageReceivedNotice"
 #define kMonalMessageErrorNotice @"kMonalMessageErrorNotice"
 #define kMonalReceivedMucInviteNotice @"kMonalReceivedMucInviteNotice"
 
-#define kMonalContactOnlineNotice @"kMLContactOnlineNotice"
-#define kMonalContactOfflineNotice @"kMLContactOfflineNotice"
 #define kMLHasRoomsNotice @"kMLHasRoomsNotice"
 #define kMLHasConnectedNotice @"kMLHasConnectedNotice"
 #define kMonalFinishedCatchup @"kMonalFinishedCatchup"

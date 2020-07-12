@@ -7,27 +7,31 @@
 //
 
 #import "ParsePresence.h"
+#import "HelperTools.h"
 
 
 
 @implementation ParsePresence
 
-
-- (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
+- (void) parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
     _messageBuffer=nil;
     if([elementName isEqualToString:@"presence"])
     {
         [super parser:parser didStartElement:elementName namespaceURI:namespaceURI qualifiedName:qName attributes:attributeDict];
         DDLogVerbose(@"Presence from %@", _user);
-		DDLogVerbose(@"Presence type %@", _type);
+        DDLogVerbose(@"Presence type %@", _type);
         
         if([_type isEqualToString:@"error"])
-		{
+        {
             //we are done, parse next element
             return;
-			
-		}
+        }
+    }
+    
+    if([elementName isEqualToString:@"idle"] && [namespaceURI isEqualToString:@"urn:xmpp:idle:1"])
+    {
+        _since = [HelperTools parseDateTimeString:[attributeDict objectForKey:@"since"]];
     }
     
     if([elementName isEqualToString:@"show"])
@@ -54,15 +58,13 @@
     
     //What is this namespace thing for? What element is called "something:x" and has an attribute called "xmlns:something"?
     //I never saw this anywhere in the wild on my prosody server
-    //TODO: maybe completely remove this namespace thingie?
+    //TODO: maybe completely remove this namespace thingie? -tmolitor
     NSString *namespace = nil;
     NSArray *parts =[elementName componentsSeparatedByString:@":"];
-    if([parts count]>1) {
-     namespace=[NSString stringWithFormat:@"%@",[parts objectAtIndex:0]];
-    } else
-    {
+    if([parts count]>1)
+        namespace=[NSString stringWithFormat:@"%@",[parts objectAtIndex:0]];
+    else
         namespace =@"";
-    }
     if([elementName isEqualToString:[NSString stringWithFormat:@"%@:x",namespace]] || [elementName isEqualToString:@"x"] )
     {
         if([[attributeDict objectForKey:[NSString stringWithFormat:@"xmlns:%@",namespace]] isEqualToString:@"http://jabber.org/protocol/muc#user"]

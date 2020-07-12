@@ -1040,7 +1040,7 @@ NSString *const kXMPPPresence = @"presence";
     {
         [self incrementLastHandledStanza];
 
-        ParseMessage* messageNode= parsedStanza;
+        ParseMessage* messageNode = parsedStanza;
 
 #ifndef DISABLE_OMEMO
         MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
@@ -1120,16 +1120,16 @@ NSString *const kXMPPPresence = @"presence";
         ParsePresence* presenceNode = parsedStanza;
         NSString *recipient = presenceNode.to;
 
+        //set own jid as recipient, if none given
         if(!recipient)
-        {
             recipient = self.connectionProperties.identity.jid;
-        }
 
-
-        if([presenceNode.user isEqualToString:self.connectionProperties.identity.jid]) {
-            //ignore self
+        if([presenceNode.user isEqualToString:self.connectionProperties.identity.jid])
+        {
+            //ignore self presences for now
         }
-        else {
+        else
+        {
             if([presenceNode.type isEqualToString:kpresencesSubscribe])
             {
                 MLContact *contact = [[MLContact alloc] init];
@@ -1137,7 +1137,6 @@ NSString *const kXMPPPresence = @"presence";
                 contact.contactJid=presenceNode.user;
 
                 [[DataLayer sharedInstance] addContactRequest:contact];
-
             }
 
             if(presenceNode.MUC)
@@ -1167,18 +1166,13 @@ NSString *const kXMPPPresence = @"presence";
             {
                 DDLogVerbose(@"presence notice from %@", presenceNode.user);
 
-                if((presenceNode.user!=nil) && (presenceNode.user.length >0))
+                if(presenceNode.user!=nil && presenceNode.user.length>0)
                 {
-
                     MLContact *contact = [[MLContact alloc] init];
                     contact.accountId=self.accountNo;
                     contact.contactJid=presenceNode.user;
                     contact.state=presenceNode.show;
                     contact.statusMessage=presenceNode.status;
-
-                    [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self->_accountNo];
-                    [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self->_accountNo];
-                    [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self->_accountNo];
 
                     [[DataLayer sharedInstance] addContact:[presenceNode.user copy] forAccount:self->_accountNo fullname:@"" nickname:@"" andMucNick:nil withCompletion:^(BOOL success) {
                         if(!success)
@@ -1189,12 +1183,22 @@ NSString *const kXMPPPresence = @"presence";
                         {
                             DDLogVerbose(@"Contact not already in list");
                         }
+                    }];
 
-                        DDLogVerbose(@" showing as online from presence");
+                    //update buddy state
+                    [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self->_accountNo];
+                    [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self->_accountNo];
+                    [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self->_accountNo];
 
-
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOnlineNotice object:self userInfo:@{@"contact":contact}];
-
+                    //handle last interaction time (dispatch database update in own background thread)
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                        [[DataLayer sharedInstance] setLastInteraction:presenceNode.since forJid:presenceNode.user andAccountNo:self.accountNo];
+                    });
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                        @"jid": presenceNode.user,
+                        @"accountNo": self.accountNo,
+                        @"lastInteraction": presenceNode.since ? presenceNode.since : [NSNull null],    //nil cannot directly be saved in NSDictionary
+                        @"isTyping": @NO
                     }];
 
                     if(!presenceNode.MUC)
@@ -1223,11 +1227,7 @@ NSString *const kXMPPPresence = @"presence";
             }
             else if([presenceNode.type isEqualToString:kpresenceUnavailable])
             {
-                if ([[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:self->_accountNo] ) {
-                    NSDictionary* userDic=@{kusernameKey: presenceNode.user,
-                                            kaccountNoKey:self->_accountNo};
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactOfflineNotice object:self userInfo:userDic];
-                }
+                [[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:self->_accountNo];
             }
         }
     }

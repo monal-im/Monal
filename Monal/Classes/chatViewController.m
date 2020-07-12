@@ -108,6 +108,7 @@
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
     [nc addObserver:self selector:@selector(updateUIElementsOnAccountChange:) name:kMonalAccountStatusChanged object:nil];
+    [nc addObserver:self selector:@selector(updateNavBarLastInteractionLabel:) name:kMonalLastInteractionUpdatedNotice object:nil];
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     
@@ -262,11 +263,34 @@
     }
 }
 
--(void) updateNavBarLastInteractionLabel
+-(void) updateNavBarLastInteractionLabel:(NSNotification*) notification
 {
-    // Load the latest interaction timestamp from db and display it in the title
-   NSString* lastInteractionString = [HelperTools lastInteractionFromJid:self.contact.contactJid andAccountNo:self.contact.accountId];
-   self.navBarLastInteraction.text = lastInteractionString;
+    NSDate* lastInteractionDate = [NSNull null];
+    NSString* jid = self.contact.contactJid;
+    NSString* accountNo = self.contact.accountId;
+    // use supplied data from notification...
+    if(notification)
+    {
+        NSDictionary* data = notification.userInfo;
+        if(![jid isEqualToString:data[@"jid"]] || ![accountNo isEqualToString:data[@"accountNo"]])
+            return;     // ignore other accounts or contacts
+        if(data[@"isTyping"]==@YES)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.navBarLastInteraction.text = NSLocalizedString(@"Typing...", @"");
+            });
+            return;
+        }
+        lastInteractionDate = data[@"lastInteraction"];
+    }
+    // ...or load the latest interaction timestamp from db
+    else
+        lastInteractionDate = [[DataLayer sharedInstance] lastInteractionOfJid:jid forAccountNo:accountNo];
+    // make timestamp human readable
+    NSString* lastInteractionString = [HelperTools formatLastInteraction:lastInteractionDate];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.navBarLastInteraction.text = lastInteractionString;
+    });
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -299,7 +323,7 @@
     }
     [self handleForeGround];
     [self updateUIElementsOnAccountChange:nil];
-    [self updateNavBarLastInteractionLabel];
+    [self updateNavBarLastInteractionLabel:nil];
     [self displayEncryptionStateInUI];
     
     [self updateBackground];

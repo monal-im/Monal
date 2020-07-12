@@ -284,7 +284,8 @@ extern NSString *const kMessageTypeUrl;
 -(void) deleteImageCacheForUrl:(NSString*) url;
 -(void) imageCacheForUrl:(NSString*) url withCompletion: (void (^)(NSString *path))completion;
 -(NSMutableArray*) allAttachmentsFromContact:(NSString*) contact forAccount:(NSString*) accountNo;
--(NSDate*) lastInteractionFromJid:(NSString* _Nonnull) jid andAccountNo:(NSString* _Nonnull) accountNo;
+-(NSDate*) lastInteractionOfJid:(NSString* _Nonnull) jid forAccountNo:(NSString* _Nonnull) accountNo;
+-(void) setLastInteraction:(NSDate*) lastInteractionTime forJid:(NSString* _Nonnull) jid andAccountNo:(NSString* _Nonnull) accountNo;
 
 -(NSDictionary *) getSubscriptionForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 -(void) setSubscription:(NSString *)sub andAsk:(NSString*) ask forContact:(NSString*) contact andAccount:(NSString*) accountNo;

@@ -11,6 +11,8 @@
 
 @interface ParsePresence : XMPPParser
 
+@property (nonatomic, copy, readonly) NSDate* since;
+
 /**
  the text inside of show tags e.g. away
  */

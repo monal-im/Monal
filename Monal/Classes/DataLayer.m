@@ -416,7 +416,7 @@ NSString *const kCount = @"count";
 		{
 			switch(sqlite3_column_type(statement, 0))
 			{
-					// SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
+				// SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
 				case (SQLITE_INTEGER):
 				{
 					NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement, 0)];
@@ -839,13 +839,12 @@ NSString *const kCount = @"count";
 
 #pragma mark contact Commands
 
--(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName andMucNick:(NSString*) mucNick withCompletion: (void (^)(BOOL))completion
+-(void) addContact:(NSString*) contact forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName andMucNick:(NSString*) mucNick withCompletion: (void (^)(BOOL))completion
 {
     // no blank full names
     NSString* actualfull = fullName;
-    if([[actualfull  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] == 0) {
+    if([[actualfull stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] == 0)
         actualfull = contact;
-    }
 
     NSString* query = [NSString stringWithFormat:@"insert into buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'new', 'online', 'dirty', 'muc', 'muc_nick') values(?, ?, ?, ?, 1, 0, 0, ?, ?);"];
 
@@ -1085,7 +1084,7 @@ NSString *const kCount = @"count";
 }
 
 
--(void) setOnlineBuddy:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
+-(void) setOnlineBuddy:(ParsePresence*) presenceObj forAccount:(NSString *)accountNo
 {
 	[self beginWriteTransaction];
     [self setResourceOnline:presenceObj forAccount:accountNo];
@@ -3032,7 +3031,7 @@ NSString *const kCount = @"count";
 
 }
 
--(NSDate*) lastInteractionFromJid:(NSString* _Nonnull) jid andAccountNo:(NSString* _Nonnull) accountNo
+-(NSDate*) lastInteractionOfJid:(NSString* _Nonnull) jid forAccountNo:(NSString* _Nonnull) accountNo
 {
     NSAssert(jid, @"jid should not be null");
     NSAssert(accountNo != NULL, @"accountNo should not be null");
@@ -3041,7 +3040,24 @@ NSString *const kCount = @"count";
     NSArray* params = @[accountNo, jid];
     NSNumber* lastInteractionTime = (NSNumber*)[self executeScalar:query andArguments:params];
 
-    return [NSDate dateWithTimeIntervalSince1970:[lastInteractionTime doubleValue]];
+    //return NSDate object or NSNull, if last interaction is zero
+    if(![lastInteractionTime integerValue])
+        return nil;
+    return [NSDate dateWithTimeIntervalSince1970:[lastInteractionTime integerValue]];
+}
+
+-(void) setLastInteraction:(NSDate*) lastInteractionTime forJid:(NSString* _Nonnull) jid andAccountNo:(NSString* _Nonnull) accountNo
+{
+    NSAssert(jid, @"jid should not be null");
+    NSAssert(accountNo != NULL, @"accountNo should not be null");
+
+    NSNumber* timestamp = @0;       //default value for "online" or "unknown"
+    if(lastInteractionTime)
+        timestamp = [NSNumber numberWithInt:lastInteractionTime.timeIntervalSince1970];
+
+    NSString* query = [NSString stringWithFormat:@"UPDATE buddylist SET lastInteraction=? WHERE account_id=? and buddy_name=?"];
+    NSArray* params = @[timestamp, accountNo, jid];
+    [self executeNonQuery:query andArguments:params];
 }
 
 #pragma mark -  encryption

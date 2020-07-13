@@ -589,6 +589,10 @@
 
 -(IBAction) unwindToActiveChatsViewController:(UIStoryboardSegue*) segue
 {
+    // Show normal navigation bar again
+    [[self navigationController] setNavigationBarHidden:NO animated:NO];
+    
+    // unselected the current user
     self.lastSelectedUser = nil;
 }
 

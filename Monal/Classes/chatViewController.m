@@ -303,19 +303,11 @@
     [MLNotificationManager sharedInstance].currentContact=self.contact;
     
     if(self.day) {
-        [[DataLayer sharedInstance] fullNameForContact:self.contact.contactJid inAccount:self.contact.accountId withCompeltion:^(NSString *name) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                NSString *displyTitle=name;
-                if(displyTitle.length==0) displyTitle=self.contact.contactJid;
-                self.navigationItem.title=  [NSString stringWithFormat:@"%@(%@)", displyTitle, self->_day];
-            });
-        }];
-        
         [[NSNotificationCenter defaultCenter] removeObserver:self];
-        self.inputContainerView.hidden=YES;
+        self.inputContainerView.hidden = YES;
     }
     else {
-        self.inputContainerView.hidden=NO;
+        self.inputContainerView.hidden = NO;
     }
     
     if(self.contact.contactJid && self.contact.accountId) {

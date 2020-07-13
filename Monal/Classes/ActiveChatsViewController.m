@@ -451,12 +451,14 @@
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    self.lastSelectedIndexPath=indexPath;
-    MLContact *selected = self.contacts[indexPath.row];
-    if(selected.contactJid==self.lastSelectedUser.contactJid) return;
+    self.lastSelectedIndexPath = indexPath;
+    MLContact* selected = self.contacts[indexPath.row];
     
-    [self presentChatWithRow:[self.contacts objectAtIndex:indexPath.row] ];
-    self.lastSelectedUser=[self.contacts objectAtIndex:indexPath.row];
+    // Only open contact chat when it is not opened yet -> macOS
+    if(selected.contactJid == self.lastSelectedUser.contactJid) return;
+    
+    [self presentChatWithRow:[self.contacts objectAtIndex:indexPath.row]];
+    self.lastSelectedUser = [self.contacts objectAtIndex:indexPath.row];
 }
 
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
@@ -582,6 +584,12 @@
 
 -(void) showSettings {
    [self performSegueWithIdentifier:@"showSettings" sender:self];
+}
+
+
+-(IBAction) unwindToActiveChatsViewController:(UIStoryboardSegue*) segue
+{
+    self.lastSelectedUser = nil;
 }
 
 @end

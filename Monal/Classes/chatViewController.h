@@ -43,7 +43,6 @@
 @property (weak, nonatomic) IBOutlet UILabel *navBarContactJid;
 @property (weak, nonatomic) IBOutlet UILabel *navBarLastInteraction;
 @property (weak, nonatomic) IBOutlet UIButton *navBarContactDetailsButton;
-- (IBAction)navBarReturnButton:(id)sender;
 @property (weak, nonatomic) IBOutlet UIButton* navBarEncryptToggleButton;
 
 @property (nonatomic, weak) IBOutlet UIImageView* backgroundImage;
@@ -54,7 +53,7 @@
 @property (nonatomic, strong) MLContact* contact;
 
 /**
- full own username with domain e.g. aa@gmail.com
+ full own username with domain e.g. user@example.org
  */
 @property (nonatomic, strong) NSString* jid;
 

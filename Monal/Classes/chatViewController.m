@@ -67,14 +67,14 @@
         NSArray* accountVals = result;
         if([accountVals count] > 0)
         {
-            self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
+            self.jid = [NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
         }
     }];
 }
 
 -(void) setupWithContact:(MLContact* ) contact
 {
-    self.contact=contact;
+    self.contact = contact;
     [self setup];
     
 }
@@ -122,7 +122,7 @@
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight = UITableViewAutomaticDimension;
     
-    self.navBarContainerView.frame = CGRectMake(0, 0, self.view.frame.size.width, 53);
+     self.navBarContainerView.frame = CGRectMake(0, 0, self.view.frame.size.width, 60);
     [self.view addSubview:self.navBarContainerView];
     [self.navBarContainerView.leadingAnchor constraintEqualToAnchor:self.navBarContainerView.superview.leadingAnchor].active = YES;
     [self.navBarContainerView.bottomAnchor constraintEqualToAnchor:self.navBarContainerView.superview.bottomAnchor].active = YES;
@@ -1778,11 +1778,6 @@
 //    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
 //    self.messageTable.contentInset = contentInsets;
 //    self.messageTable.scrollIndicatorInsets = contentInsets;
-}
-
-- (IBAction)navBarReturnButton:(id)sender
-{
-    [self.navigationController dismissViewControllerAnimated:YES completion:NULL];
 }
 
 @end

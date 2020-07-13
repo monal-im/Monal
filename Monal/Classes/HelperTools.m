@@ -121,7 +121,7 @@
         NSString* lastSeen = [NSString stringWithFormat:timeString, diff];
         return [NSString stringWithFormat:@"%@", lastSeen];
     } else {
-        return NSLocalizedString(@"Online", @"");;
+        return NSLocalizedString(@"Online", @"");
     }
 }
 

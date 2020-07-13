@@ -388,7 +388,7 @@
 -(void) viewWillDisappear:(BOOL)animated
 {
     // Save message draft
-    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text withCompletion:^(BOOL success) {
+    [self saveMessageDraft:^(BOOL success) {
         if(success) {
             // Update status message for contact to show current draft
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
@@ -404,6 +404,12 @@
     [super viewDidLayoutSubviews];
     if(self.messageTable.contentSize.height > self.messageTable.bounds.size.height)
         [self.messageTable setContentOffset:CGPointMake(0, self.messageTable.contentSize.height - self.messageTable.bounds.size.height) animated:NO];
+}
+
+-(void) saveMessageDraft:(void (^)(BOOL))completion
+{
+    // Save message draft
+    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text withCompletion:completion];
 }
 
 -(void) dealloc
@@ -447,8 +453,7 @@
 
 -(IBAction)dismissKeyboard:(id)sender
 {
-    // Save message draft
-    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text withCompletion:nil];
+    [self saveMessageDraft:nil];
     [self.chatInput resignFirstResponder];
 }
 
@@ -593,10 +598,8 @@
              [self sendWithShareSheet];
              
          }
-        
         [[NSNotificationCenter defaultCenter] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":self.contact}];
     }];
- 
 }
 
 -(void)resignTextView
@@ -606,9 +609,11 @@
     // Only send msg that have at least one character
     if(cleanString.length > 0)
     {
-        [self sendMessage:cleanString];
-        
+        // Reset chatInput -> remove draft from db so that macOS will show the new send message
         [self.chatInput setText:@""];
+        [self saveMessageDraft:nil];
+        // Send trimmed message
+        [self sendMessage:cleanString];
     }
 }
 
@@ -1764,8 +1769,8 @@
 
 - (void)keyboardDidHide:(NSNotification*)aNotification
 {
-    // Save message draft
-    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text withCompletion:nil];
+    [self saveMessageDraft:nil];
+
     UIEdgeInsets contentInsets = UIEdgeInsetsZero;
     self.messageTable.contentInset = contentInsets;
     self.messageTable.scrollIndicatorInsets = contentInsets;

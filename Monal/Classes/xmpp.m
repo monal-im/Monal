@@ -2447,6 +2447,15 @@ NSString *const kXMPPPresence = @"presence";
 }
 #endif
 
+-(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
+{
+    XMPPIQ* iqBlocked= [[XMPPIQ alloc] initWithType:kiqSetType];
+  
+    [iqBlocked setBlocked:blocked forJid:blockedJid];
+   
+    [self send:iqBlocked];
+}
+
 #pragma mark vcard
 
 -(void) getVcards

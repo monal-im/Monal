@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #define kXMLNS @"xmlns"
 #define kId @"id"
+#define kJid @"jid"
 
 #define kRegisterNameSpace @"jabber:iq:register"
 #define kDataNameSpace @"jabber:x:data"

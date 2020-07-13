@@ -587,6 +587,12 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     [account getVCard:contact.contactJid];
 }
 
+-(void) blocked:(BOOL) isBlockd Jid:(MLContact *) contact
+{
+    xmpp* account =[self getConnectedAccountForID:contact.accountId];
+    [account setBlocked:isBlockd forJid:contact.contactJid];
+}
+
 #pragma mark - MUC commands
 
 -(void)  joinRoom:(NSString*) roomName  withNick:(NSString *)nick andPassword:(NSString*) password forAccounId:(NSString *) accountId

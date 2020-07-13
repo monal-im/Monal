@@ -57,6 +57,11 @@
 -(void) addContact:(MLContact *) contact;
 
 /**
+ Block  a jid
+ */
+-(void) blocked:(BOOL) isBlockd Jid:(MLContact *) contact;
+
+/**
  Gets service details for account
  */
 -(void) getServiceDetailsForAccount:(NSInteger) row;

@@ -157,6 +157,9 @@ removes a contact from the roster
 +(NSString *) featuresString;
 
 
+-(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid;
+
+
 #pragma mark Signal
 
 -(void) subscribeDevices:(NSString*) jid;

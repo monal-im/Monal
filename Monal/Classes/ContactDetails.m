@@ -249,6 +249,12 @@
                     }
                 }
             }
+            else if(indexPath.row==3) {
+                thecell.textLabel.text=NSLocalizedString(@"Block Sender",@"");
+            }
+            else if(indexPath.row==4) {
+                thecell.textLabel.text=NSLocalizedString(@"Unblock Sender",@"");
+            }
             thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             break;
         }
@@ -261,7 +267,7 @@
 {
     if(section==0)  return 1;
     if(section==1)  return 3;
-    if(section==2)  return 3;
+    if(section==2)  return 5;
     
     return 0; //some default shouldnt reach this
 }
@@ -311,6 +317,14 @@
                 }  else  {
                     [self addContact];
                 }
+                break;
+            }
+            case 3:  {
+                [self blockContact];
+                break;
+            }
+            case 4:  {
+                [self unBlockContact];
                 break;
             }
         }
@@ -364,6 +378,44 @@
             [[MLXMPPManager sharedInstance] removeContact:self.contact];
         }
    
+    }]];
+    
+    alert.popoverPresentationController.sourceView=self.tableView;
+    
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+-(void) blockContact {
+    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(NSLocalizedString(@"Block %@ from contacting you?",@""), nil),self.contact.fullName ];
+    NSString* detailString =NSLocalizedString(@"This sender will no longer be able to contact you",@"");
+
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
+                                                                   message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert dismissViewControllerAnimated:YES completion:nil];
+    }]];
+    
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes",@"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+        [[MLXMPPManager sharedInstance] blocked:YES Jid:self.contact];
+    }]];
+    
+    alert.popoverPresentationController.sourceView=self.tableView;
+    
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
+-(void) unBlockContact {
+    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(NSLocalizedString(@"Allow %@ to contact you?",@""), nil),self.contact.fullName ];
+    NSString* detailString =NSLocalizedString(@"This sender will be able to send you messages",@"");
+
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
+                                                                   message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert dismissViewControllerAnimated:YES completion:nil];
+    }]];
+    
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes",@"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+        [[MLXMPPManager sharedInstance] blocked:NO Jid:self.contact];
     }]];
     
     alert.popoverPresentationController.sourceView=self.tableView;

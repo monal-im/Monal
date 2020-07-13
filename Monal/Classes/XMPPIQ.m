@@ -588,6 +588,24 @@ NSString *const kiqErrorType = @"error";
     [self.children addObject:queryNode];
 }
 
+-(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
+{
+    MLXMLNode* blockNode =[[MLXMLNode alloc] init];
+    if(blocked) {
+        blockNode.element=@"block";
+    } else {
+        blockNode.element=@"unblock";
+    }
+    [blockNode.attributes setObject:@"urn:xmpp:blocking" forKey:kXMLNS];
+
+    MLXMLNode* itemNode =[[MLXMLNode alloc] init];
+    itemNode.element=@"item";
+    [itemNode.attributes setObject:blockedJid forKey:kJid];
+    
+    [blockNode.children addObject:itemNode];
+    [self.children addObject:blockNode];
+}
+
 
 
 -(void) httpUploadforFile:(NSString *) file ofSize:(NSNumber *) filesize andContentType:(NSString *) contentType

@@ -19,6 +19,4 @@ NS_ASSUME_NONNULL_BEGIN
 #define kBobNameSpace @"urn:xmpp:bob"
 #define kStanzasNameSpace @"urn:ietf:params:xml:ns:xmpp-stanzas"
 
-
-
 NS_ASSUME_NONNULL_END

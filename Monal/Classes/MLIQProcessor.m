@@ -93,7 +93,7 @@
     
     if(iqNode.version)
     {
-        XMPPIQ* versioniq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+        XMPPIQ* versioniq = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
         [versioniq setiqTo:iqNode.from];
         [versioniq setVersion];
         if(self.sendIq)
@@ -102,12 +102,11 @@
     
     if((iqNode.discoInfo))
     {
-        XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-        if(iqNode.resource &&  iqNode.resource.length>0) {
+        XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+        if(iqNode.resource && iqNode.resource.length>0)
             [discoInfo setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user, iqNode.resource]];
-        } else  {
+        else
             [discoInfo setiqTo:iqNode.user];
-        }
         [discoInfo setDiscoInfoWithFeaturesAndNode:iqNode.queryNode];
         if(self.sendIq)
             self.sendIq(discoInfo, nil, nil);
@@ -233,7 +232,7 @@
 }
 
 -(void) discoResult:(ParseIq *) iqNode {
-    if(iqNode.features)
+    if(iqNode.discoInfo && iqNode.features)
     {
         //features advertised on the home server
         if([iqNode.from isEqualToString:self.connection.identity.domain])
@@ -317,8 +316,7 @@
         }
     }
     
-    if([iqNode.from isEqualToString:self.connection.identity.domain] &&
-       !self.connection.discoveredServices)
+    if(iqNode.discoItems && [iqNode.from isEqualToString:self.connection.identity.domain] && !self.connection.discoveredServices)
     {
         self.connection.discoveredServices = [[NSMutableArray alloc] init];
         for(NSDictionary* item in iqNode.items)
@@ -328,10 +326,17 @@
                 if(self.sendIq)
                     self.sendIq([self discoverService:[item objectForKey:@"jid"]], nil, nil);
         }
-    
+        
         // send to bare jid for push etc.
         if(self.sendIq)
             self.sendIq([self discoverService:self.connection.identity.jid], nil, nil);
+    }
+    
+    //entity caps of some contact
+    if(iqNode.discoInfo && iqNode.identities && iqNode.features && ![iqNode.from isEqualToString:self.connection.identity.domain])
+    {
+        NSString* ver = [HelperTools getEntityCapsHashForIdentities:iqNode.identities andFeatures:iqNode.features];
+        [[DataLayer sharedInstance] setCaps:iqNode.features forVer:ver];
     }
 }
 

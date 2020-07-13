@@ -91,12 +91,12 @@ extern NSString *const kMessageTypeUrl;
 -(void) offlineContactsWithCompletion: (void (^)(NSMutableArray *))completion;
 
 #pragma mark Ver string and Capabilities
--(NSArray*) capsforVer:(NSString*) verString;
--(NSString*)getVerForUser:(NSString*)user Resource:(NSString*) resource;
 
--(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user accountNo:(NSString*) acctNo;
-
--(BOOL)setFeature:(NSString*)feature  forVer:(NSString*) ver;
+-(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user andAccountNo:(NSString*) acctNo;
+-(NSString*) getVerForUser:(NSString*) user andResource:(NSString*) resource;
+-(void) setVer:(NSString*) ver forUser:(NSString*) user andResource:(NSString*) resource;
+-(NSSet*) getCapsforVer:(NSString*) ver;
+-(void) setCaps:(NSSet*) caps forVer:(NSString*) ver;
 
 #pragma mark  presence functions
 -(void) setResourceOnline:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;

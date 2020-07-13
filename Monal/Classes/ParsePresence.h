@@ -27,6 +27,8 @@ the hash inside the photo tag
  */
 @property (nonatomic, copy, readonly) NSString* photoHash;
 
+@property (nonatomic, copy, readonly) NSString* capsHash;
+
 /**
  Status codes that come back e.g. when you join a group chat.
  */

@@ -38,7 +38,6 @@
 #define kConnectTimeout 20ull //seconds
 #define kPingTimeout 120ull //seconds
 
-typedef void (^monal_iq_handler_t)(ParseIq*);
 
 NSString *const kMessageId=@"MessageID";
 NSString *const kSendTimer=@"SendTimer";
@@ -175,8 +174,8 @@ NSString *const kXMPPPresence = @"presence";
     _outputBuffer = nil;
     _outputBufferByteCount = 0;
 
-    _versionHash=[self getVersionString];
-    _isCSIActive=YES;       //default value is yes if no csi state was sent yet
+    _versionHash = [HelperTools getOwnCapsHash];
+    _isCSIActive = YES;         //default value is yes if no csi state was sent yet
 #ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -243,7 +242,7 @@ NSString *const kXMPPPresence = @"presence";
     {
         //check idle state if _sendQueue is empty and if so, publish kMonalIdle notification
         //only do the (more heavy but complete) idle check if we reache zero operations in this observed queue
-        if(![_sendQueue operationCount] && self.idle)
+        if(![_sendQueue operationCount] && ![_receiveQueue operationCount] && self.idle)
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
     }
 }
@@ -661,7 +660,7 @@ NSString *const kXMPPPresence = @"presence";
                 
                 //check idle state if this was the last operation in the _receiveQueue and if so, publish kMonalIdle notification
                 //quickly check our own queue before doing the more heavy (but complete) idle check
-                if(![_receiveQueue operationCount] && self.idle)
+                if([_receiveQueue operationCount]<=1 && self.idle)
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
             }];
         }];
@@ -950,7 +949,7 @@ NSString *const kXMPPPresence = @"presence";
                                                              signalContex:nil
                                                            andSignalStore:nil];
 #endif
-        processor.sendIq=^(MLXMLNode* _Nullable iq, (monal_iq_handler_t) _Nullable resultHandler, (monal_iq_handler_t) _Nullable errorHandler) {
+        processor.sendIq=^(MLXMLNode* _Nullable iq, monal_iq_handler_t resultHandler, monal_iq_handler_t errorHandler) {
             if(iq)
             {
                 DDLogInfo(@"sending iq stanza");
@@ -1161,7 +1160,6 @@ NSString *const kXMPPPresence = @"presence";
                     //handle this differently later
                     return;
                 }
-
             }
 
             if(presenceNode.type==nil)
@@ -1231,6 +1229,24 @@ NSString *const kXMPPPresence = @"presence";
             {
                 [[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:self->_accountNo];
             }
+
+            //handle entity capabilities
+            if(presenceNode.capsHash && presenceNode.user && [presenceNode.user length]>0 && presenceNode.resource && [presenceNode.resource length]>0)
+            {
+                NSString* ver = [[DataLayer sharedInstance] getVerForUser:presenceNode.user andResource:presenceNode.resource];
+                if(!ver || ![ver isEqualToString:presenceNode.capsHash])     //caps hash of resource changed
+                    [[DataLayer sharedInstance] setVer:presenceNode.capsHash forUser:presenceNode.user andResource:presenceNode.resource];
+
+                if(![[DataLayer sharedInstance] getCapsforVer:presenceNode.capsHash])
+                {
+                    DDLogInfo(@"Presence included unknown caps hash %@, querying disco", presenceNode.capsHash);
+                    XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
+                    [discoInfo setiqTo:presenceNode.from];
+                    [discoInfo setDiscoInfoNode];
+                    [self send:discoInfo];
+                }
+            }
+
         }
     }
     else if([parsedStanza.stanzaType isEqualToString:@"error"] && [parsedStanza isKindOfClass:[ParseStream class]])
@@ -1915,14 +1931,12 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) queryDisco
 {
-    XMPPIQ* discoItems =[[XMPPIQ alloc] initWithType:kiqGetType];
+    XMPPIQ* discoItems = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoItems setiqTo:self.connectionProperties.identity.domain];
-    MLXMLNode* items = [[MLXMLNode alloc] initWithElement:@"query"];
-    [items setXMLNS:@"http://jabber.org/protocol/disco#items"];
-    [discoItems.children addObject:items];
+    [discoItems setDiscoItemNode];
     [self send:discoItems];
 
-    XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
+    XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoInfo setiqTo:self.connectionProperties.identity.domain];
     [discoInfo setDiscoInfoNode];
     [self send:discoInfo];
@@ -2144,23 +2158,6 @@ NSString *const kXMPPPresence = @"presence";
 
 #pragma mark query info
 
--(NSString*)getVersionString
-{
-    // see https://xmpp.org/extensions/xep-0115.html#ver
-    NSData* hashed;
-    unsigned char digest[CC_SHA1_DIGEST_LENGTH];
-    NSString* unhashed = [NSString stringWithFormat:@"client/phone//Monal %@<%@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"], [XMPPIQ featuresString]];
-    
-    NSData *stringBytes = [unhashed dataUsingEncoding: NSUTF8StringEncoding];
-    if(CC_SHA1([stringBytes bytes], (UInt32)[stringBytes length], digest))
-        hashed = [NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
-    NSString* hashedBase64 = [HelperTools encodeBase64WithData:hashed];
-
-    DDLogVerbose(@"ver string: unhashed %@, hashed %@, hashed-64 %@", unhashed, hashed, hashedBase64);
-    return hashedBase64;
-}
-
-
 -(void) getServiceDetails
 {
     if(_hasRequestedServerInfo)
@@ -2174,8 +2171,8 @@ NSString *const kXMPPPresence = @"presence";
 
     for (NSDictionary *item in self.connectionProperties.discoveredServices)
     {
-        XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
-        NSString* jid =[item objectForKey:@"jid"];
+        XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
+        NSString* jid = [item objectForKey:@"jid"];
         if(jid)
         {
             [discoInfo setiqTo:jid];

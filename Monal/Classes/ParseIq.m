@@ -11,6 +11,9 @@
 #import "HelperTools.h"
 
 @interface ParseIq()
+{
+    NSMutableArray* _identities;
+}
 
 @property (nonatomic, strong) NSMutableArray* omemoDevices;
 @property (nonatomic, strong) NSMutableDictionary *currentPreKey;
@@ -21,6 +24,12 @@
 @implementation ParseIq
 
 #pragma mark NSXMLParser delegate
+
+// return always sorted (https://xmpp.org/extensions/xep-0115.html#ver-gen)
+-(NSArray*) identities
+{
+    return [_identities sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+}
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
@@ -48,8 +57,10 @@
     if([elementName isEqualToString:@"query"])
     {
         _queryXMLNS=namespaceURI;
-        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"]) _discoInfo=YES;
-        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#items"]) _discoItems=YES;
+        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"])
+            _discoInfo=YES;
+        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#items"])
+            _discoItems=YES;
         if([_queryXMLNS isEqualToString:kRegisterNameSpace])
         {
             _registration=YES;
@@ -66,23 +77,35 @@
         if(node) _queryNode=node; 
           
      }
-  
+    
+    if([elementName isEqualToString:@"identity"])
+    {
+        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"])
+        {
+            if(!_identities)
+                _identities = [[NSMutableArray alloc] init];
+            [_identities addObject:[NSString stringWithFormat:@"%@/%@/%@/%@",
+                attributeDict[@"category"] ? attributeDict[@"category"] : @"",
+                attributeDict[@"type"] ? attributeDict[@"type"] : @"",
+                //TODO: check if the xml parser parses this to 'xml:lang' or 'lang' and change accordingly
+                attributeDict[@"lang"] ? attributeDict[@"lang"] : @"",
+                attributeDict[@"name"] ? attributeDict[@"name"] : @""
+            ]];
+        }
+    }
     
     if([elementName isEqualToString:@"feature"])
     {
-        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"]) {
+        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"])
+        {
             if([namespaceURI isEqualToString:@"jabber:iq:roster"])
-            {
-                _roster=YES;
-            }
-        
-            if(!_features)  _features=[[NSMutableSet alloc] init];
-            if([attributeDict objectForKey:@"var"]) {
-                [_features addObject:[attributeDict objectForKey:@"var"]];
-            }
+                _roster = YES;
             
+            if(!_features)
+                _features = [[NSMutableSet alloc] init];
+            if([attributeDict objectForKey:@"var"])
+                [_features addObject:[attributeDict objectForKey:@"var"]];
         }
-        
     }
     
     //http upload

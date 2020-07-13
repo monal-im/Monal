@@ -49,45 +49,6 @@ NSString *const kiqErrorType = @"error";
     [self.attributes setObject:id forKey:@"id"];
 }
 
-+(NSArray*) features
-{
-    static NSArray* featuresArray;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        featuresArray = @[
-            @"eu.siacs.conversations.axolotl.devicelist+notify",
-            @"http://jabber.org/protocol/caps",
-            @"http://jabber.org/protocol/disco#info",
-            @"http://jabber.org/protocol/disco#items",
-            @"http://jabber.org/protocol/muc",
-            @"urn:xmpp:jingle:1",
-            @"urn:xmpp:jingle:apps:rtp:1",
-            @"urn:xmpp:jingle:apps:rtp:audio",
-            @"urn:xmpp:jingle:transports:raw-udp:0",
-            @"urn:xmpp:jingle:transports:raw-udp:1",
-            @"urn:xmpp:receipts",
-            @"jabber:x:oob",
-            @"urn:xmpp:ping",
-            @"urn:xmpp:receipts",
-            @"urn:xmpp:idle:1"
-        ];
-        // this has to be sorted for the features hash to be correct, see https://xmpp.org/extensions/xep-0115.html#ver
-        featuresArray = [featuresArray sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
-    });
-    return featuresArray;
-}
-
-+(NSString*) featuresString
-{
-    NSMutableString* toreturn = [[NSMutableString alloc] init];
-    for(NSString* feature in [XMPPIQ features])
-    {
-        [toreturn appendString:feature];
-        [toreturn appendString:@"<"];
-    }
-    return toreturn;
-}
-
 #pragma mark iq set
 -(void) setPushEnableWithNode:(NSString *)node andSecret:(NSString *)secret
 {
@@ -145,17 +106,13 @@ NSString *const kiqErrorType = @"error";
 
 -(void) setDiscoInfoNode
 {
-    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
-    queryNode.element=@"query";
-    [queryNode setXMLNS:@"http://jabber.org/protocol/disco#info"];
+    MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#info"];
     [self.children addObject:queryNode];
 }
 
 -(void) setDiscoItemNode
 {
-    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
-    queryNode.element=@"query";
-    [queryNode setXMLNS:@"http://jabber.org/protocol/disco#items"];
+    MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#items"];
     [self.children addObject:queryNode];
 }
 
@@ -163,23 +120,21 @@ NSString *const kiqErrorType = @"error";
 {
     MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#info"];
     if(node)
-        [queryNode. attributes setObject:node forKey:@"node"];
+        [queryNode.attributes setObject:node forKey:@"node"];
     
-    for(NSString* feature in [XMPPIQ features])
+    for(NSString* feature in [HelperTools getOwnFeatureSet])
     {
-        MLXMLNode* featureNode =[[MLXMLNode alloc] init];
-        featureNode.element=@"feature";
-        [featureNode.attributes setObject:feature forKey:@"var"];
+        MLXMLNode* featureNode = [[MLXMLNode alloc] initWithElement:@"feature"];
+        featureNode.attributes[@"var"] = feature;
         [queryNode.children addObject:featureNode];
-   }
+    }
     
-    MLXMLNode* identityNode =[[MLXMLNode alloc] init];
-    identityNode.element=@"identity";
-    [identityNode.attributes setObject:@"client" forKey:@"category"];
-    [identityNode.attributes setObject:@"phone" forKey:@"type"];
-    [identityNode.attributes setObject:[NSString stringWithFormat:@"Monal %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]] forKey:@"name"];
+    MLXMLNode* identityNode = [[MLXMLNode alloc] initWithElement:@"identity"];
+    identityNode.attributes[@"category"] = @"client";
+    identityNode.attributes[@"type"] = @"phone";
+    identityNode.attributes[@"name"] = [NSString stringWithFormat:@"Monal %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
     [queryNode.children addObject:identityNode];
-       
+    
     [self.children addObject:queryNode];
 }
 

@@ -39,6 +39,15 @@
         _messageBuffer=nil;
     }
     
+    if([elementName isEqualToString:@"c"] && [namespaceURI isEqualToString:@"http://jabber.org/protocol/caps"])
+    {
+        //we only support sha1 hashes for now
+        if([attributeDict objectForKey:@"hash"] && [@"sha-1" isEqualToString:[attributeDict objectForKey:@"hash"]])
+            _capsHash = [attributeDict objectForKey:@"ver"];
+        else
+            DDLogInfo(@"Unknown caps hash algo '%@'", [attributeDict objectForKey:@"hash"]);
+    }
+    
     if(self.MUC) {
         if([elementName isEqualToString:@"status"])
         {
@@ -64,7 +73,7 @@
     if([parts count]>1)
         namespace=[NSString stringWithFormat:@"%@",[parts objectAtIndex:0]];
     else
-        namespace =@"";
+        namespace=@"";
     if([elementName isEqualToString:[NSString stringWithFormat:@"%@:x",namespace]] || [elementName isEqualToString:@"x"] )
     {
         if([[attributeDict objectForKey:[NSString stringWithFormat:@"xmlns:%@",namespace]] isEqualToString:@"http://jabber.org/protocol/muc#user"]

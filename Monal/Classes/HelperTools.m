@@ -12,6 +12,75 @@
 
 @implementation HelperTools
 
+
++(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features
+{
+    // see https://xmpp.org/extensions/xep-0115.html#ver
+    NSMutableString* unhashed = [[NSMutableString alloc] init];
+    NSData* hashed;
+    unsigned char digest[CC_SHA1_DIGEST_LENGTH];
+    
+    //generate identities string
+    for(NSString* identity in identities)
+        [unhashed appendString:[NSString stringWithFormat:@"%@<", identity]];
+    //append features string
+    [unhashed appendString:[self generateStringOfFeatureSet:features]];
+    
+    NSData *stringBytes = [unhashed dataUsingEncoding: NSUTF8StringEncoding];
+    if(CC_SHA1([stringBytes bytes], (UInt32)[stringBytes length], digest))
+        hashed = [NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
+    NSString* hashedBase64 = [self encodeBase64WithData:hashed];
+    
+    DDLogVerbose(@"ver string: unhashed %@, hashed %@, hashed-64 %@", unhashed, hashed, hashedBase64);
+    return hashedBase64;
+}
+
++(NSString*) getOwnCapsHash
+{
+    NSString* client = [NSString stringWithFormat:@"client/phone//Monal %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
+    return [self getEntityCapsHashForIdentities:@[client] andFeatures:[self getOwnFeatureSet]];
+}
+
++(NSSet*) getOwnFeatureSet
+{
+    static NSSet* featuresSet;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSArray* featuresArray = @[
+            @"eu.siacs.conversations.axolotl.devicelist+notify",
+            @"http://jabber.org/protocol/caps",
+            @"http://jabber.org/protocol/disco#info",
+            @"http://jabber.org/protocol/disco#items",
+            @"http://jabber.org/protocol/muc",
+            @"urn:xmpp:jingle:1",
+            @"urn:xmpp:jingle:apps:rtp:1",
+            @"urn:xmpp:jingle:apps:rtp:audio",
+            @"urn:xmpp:jingle:transports:raw-udp:0",
+            @"urn:xmpp:jingle:transports:raw-udp:1",
+            @"urn:xmpp:receipts",
+            @"jabber:x:oob",
+            @"urn:xmpp:ping",
+            @"urn:xmpp:receipts",
+            @"urn:xmpp:idle:1"
+        ];
+        featuresSet = [[NSSet alloc] initWithArray:featuresArray];
+    });
+    return featuresSet;
+}
+
++(NSString*) generateStringOfFeatureSet:(NSSet*) features
+{
+    // this has to be sorted for the features hash to be correct, see https://xmpp.org/extensions/xep-0115.html#ver
+    NSArray* featuresArray = [[features allObjects] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+    NSMutableString* toreturn = [[NSMutableString alloc] init];
+    for(NSString* feature in featuresArray)
+    {
+        [toreturn appendString:feature];
+        [toreturn appendString:@"<"];
+    }
+    return toreturn;
+}
+
 /*
  * create string containing the info when a user was seen the last time
  * return nil if no timestamp was found in the db

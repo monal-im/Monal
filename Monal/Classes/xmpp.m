@@ -748,7 +748,7 @@ NSString *const kXMPPPresence = @"presence";
                 XMPPIQ* ping = [[XMPPIQ alloc] initWithType:kiqGetType];
                 [ping setiqTo:self.connectionProperties.identity.domain];
                 [ping setPing];
-                [self sendIq:ping withResultHandler:^(ParseIq* result){
+                [self sendIq:ping withResponseHandler:^(ParseIq* result){
                     handler();
                 } andErrorHandler:^(ParseIq* error){
                     handler();
@@ -947,7 +947,7 @@ NSString *const kXMPPPresence = @"presence";
             if(iq)
             {
                 DDLogInfo(@"sending iq stanza");
-                [self sendIq:iq withResultHandler:resultHandler andErrorHandler:errorHandler];
+                [self sendIq:iq withResponseHandler:resultHandler andErrorHandler:errorHandler];
             }
         };
 
@@ -1547,7 +1547,7 @@ NSString *const kXMPPPresence = @"presence";
      [self accountStatusChanged];
 }
 
--(void) sendIq:(XMPPIQ*) iq withResultHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler
+-(void) sendIq:(XMPPIQ*) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler
 {
     //TODO: make invalidateOnDisconnect configurable once we are somehow able to retain the handlers across app restarts
     [self dispatchOnReceiveQueue:^{
@@ -2215,7 +2215,7 @@ NSString *const kXMPPPresence = @"presence";
         ofSize:[NSNumber numberWithInteger:((NSData*)[params objectForKey:kData]).length]
         andContentType:[params objectForKey:kContentType]
     ];
-    [self sendIq:httpSlotRequest withResultHandler:^(ParseIq* response) {
+    [self sendIq:httpSlotRequest withResponseHandler:^(ParseIq* response) {
         DDLogInfo(@"Got slot for upload: %@", response.getURL);
         //upload to server using HTTP PUT
         NSMutableDictionary* headers = [[NSMutableDictionary alloc] init];
@@ -2670,7 +2670,7 @@ NSString *const kXMPPPresence = @"presence";
     XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iq setiqTo:self.connectionProperties.identity.domain];
     [iq changePasswordForUser:self.connectionProperties.identity.user newPassword:newPass];
-    [self sendIq:iq withResultHandler:^(ParseIq* response) {
+    [self sendIq:iq withResponseHandler:^(ParseIq* response) {
         //dispatch completion handler outside of the receiveQueue
         if(completion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -2713,7 +2713,7 @@ NSString *const kXMPPPresence = @"presence";
     [iq setiqTo:self.connectionProperties.identity.domain];
     [iq getRegistrationFields];
 
-    [self sendIq:iq withResultHandler:^(ParseIq* result) {
+    [self sendIq:iq withResponseHandler:^(ParseIq* result) {
         //dispatch completion handler outside of the receiveQueue
         if(_regFormCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -2733,7 +2733,7 @@ NSString *const kXMPPPresence = @"presence";
     XMPPIQ* iq =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iq registerUser:self.regUser withPassword:self.regPass captcha:self.regCode andHiddenFields:self.regHidden];
 
-    [self sendIq:iq withResultHandler:^(ParseIq* result) {
+    [self sendIq:iq withResponseHandler:^(ParseIq* result) {
         //dispatch completion handler outside of the receiveQueue
         if(_regFormSubmitCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{

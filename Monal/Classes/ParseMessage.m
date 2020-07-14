@@ -49,6 +49,30 @@
         
     }
     
+    if(([elementName isEqualToString:@"active"]) && [namespaceURI isEqualToString:@"http://jabber.org/protocol/chatstates"])
+    {
+        _composing = NO;
+        _notComposing = YES;
+    }
+    
+    if(([elementName isEqualToString:@"composing"]) && [namespaceURI isEqualToString:@"http://jabber.org/protocol/chatstates"])
+    {
+        _composing = YES;
+        _notComposing = NO;
+    }
+    
+    if(([elementName isEqualToString:@"paused"]) && [namespaceURI isEqualToString:@"http://jabber.org/protocol/chatstates"])
+    {
+        _composing = NO;
+        _notComposing = YES;
+    }
+    
+    if(([elementName isEqualToString:@"inactive"]) && [namespaceURI isEqualToString:@"http://jabber.org/protocol/chatstates"])
+    {
+        _composing = NO;
+        _notComposing = YES;
+    }
+    
     if(([elementName isEqualToString:@"delay"]) && [namespaceURI isEqualToString:@"urn:xmpp:delay"])
     {
         _delayTimeStamp = [HelperTools parseDateTimeString:[attributeDict objectForKey:@"stamp"]];

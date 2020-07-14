@@ -285,7 +285,7 @@
             {
                 BOOL previousStatus = self.connection.supportsMam2;
                 self.connection.supportsMam2 = YES;
-                DDLogInfo(@" supports mam:2");
+                DDLogInfo(@"supports mam:2");
                 
                 //ony if it went from NO to YES
                 if(!previousStatus)
@@ -306,6 +306,7 @@
 
         if(!self.connection.supportsHTTPUpload && [iqNode.features containsObject:@"urn:xmpp:http:upload:0"])
         {
+            DDLogInfo(@"supports http upload with server: %@", iqNode.from);
             self.connection.supportsHTTPUpload = YES;
             self.connection.uploadServer = iqNode.from;
         }

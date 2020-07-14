@@ -61,7 +61,8 @@
             @"jabber:x:oob",
             @"urn:xmpp:ping",
             @"urn:xmpp:receipts",
-            @"urn:xmpp:idle:1"
+            @"urn:xmpp:idle:1",
+            @"http://jabber.org/protocol/chatstates"
         ];
         featuresSet = [[NSSet alloc] initWithArray:featuresArray];
     });
@@ -180,7 +181,7 @@
     
     NSString* uuid = [[NSUUID UUID] UUIDString];
     
-    DDLogDebug(@"setting up timer %@(%G)", uuid, timeout);
+    //DDLogDebug(@"setting up timer %@(%G)", uuid, timeout);
     dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, q_background);
     dispatch_source_set_timer(timer,
                               dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout*NSEC_PER_SEC)),

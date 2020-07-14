@@ -121,11 +121,7 @@ extern NSString* const kAccountHibernate;
  send a message to a contact with xmpp id
  */
 -(void) sendMessage:(NSString* _Nonnull) message toContact:(NSString* _Nonnull) contact isMUC:(BOOL) isMUC isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString *) messageId ;
-
-/**
- crafts a whitepace ping and sends it
- */
--(void) sendWhiteSpacePing;
+-(void) sendChatState:(BOOL) isTyping toJid:(NSString*) jid;
 
 /**
  crafts a  ping and sends it

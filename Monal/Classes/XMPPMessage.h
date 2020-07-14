@@ -48,6 +48,6 @@ FOUNDATION_EXPORT NSString* const kMessageHeadlineType;
  @see https://xmpp.org/extensions/xep-0334.html
  */
 -(void) setStoreHint;
-
+-(void) setNoStoreHint;
 
 @end

@@ -69,11 +69,20 @@ NSString* const kMessageHeadlineType=@"headline";
 }
 
 
--(void) setStoreHint {
+-(void) setStoreHint
+{
     MLXMLNode* store =[[MLXMLNode alloc] init];
-       store.element=@"store";
-       [store.attributes setValue:@"urn:xmpp:hints" forKey:kXMLNS];
-       [self.children addObject:store];
+    store.element=@"store";
+    [store.attributes setValue:@"urn:xmpp:hints" forKey:kXMLNS];
+    [self.children addObject:store];
+}
+
+-(void) setNoStoreHint
+{
+    MLXMLNode* store = [[MLXMLNode alloc] initWithElement:@"no-store" andNamespace:@"urn:xmpp:hints"];
+    [self.children addObject:store];
+    MLXMLNode* storage = [[MLXMLNode alloc] initWithElement:@"no-storage" andNamespace:@"urn:xmpp:hints"];
+    [self.children addObject:storage];
 }
 
 @end

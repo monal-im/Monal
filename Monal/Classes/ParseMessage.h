@@ -28,6 +28,8 @@
 @property (nonatomic, copy, readonly) NSDate *delayTimeStamp;
 @property (nonatomic, copy, readonly) NSString* avatarData;
 @property (nonatomic, copy, readonly) NSString* oobURL;
+@property (nonatomic, assign, readonly) BOOL composing;
+@property (nonatomic, assign, readonly) BOOL notComposing;
 
 /** Messages that are requesting a resposne */
 @property (nonatomic, assign, readonly) BOOL requestReceipt;

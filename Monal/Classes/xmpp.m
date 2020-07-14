@@ -778,7 +778,7 @@ NSString *const kXMPPPresence = @"presence";
         DDLogError(@"adding smacks handler for value *SMALLER* than current self.lastOutboundStanza, this handler will *never* be triggered!");
         return;
     }
-    NSDictionary* dic = @{@"value":value, @"handler": handler};
+    NSDictionary* dic = @{@"value":value, @"handler":handler};
     [_smacksAckHandler addObject:dic];
 }
 
@@ -827,7 +827,7 @@ NSString *const kXMPPPresence = @"presence";
     self.lastHandledOutboundStanza=hvalue;
     
     //call registered smacksAckHandler
-    NSMutableArray* discard =[[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
+    NSMutableArray* discard = [[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
     for(NSDictionary* dic in _smacksAckHandler)
     {
         if([[dic objectForKey:@"value"] integerValue] <= [self.lastHandledOutboundStanza integerValue])
@@ -857,8 +857,8 @@ NSString *const kXMPPPresence = @"presence";
                 if([node isKindOfClass:[XMPPMessage class]])
                 {
                     XMPPMessage* messageNode = (XMPPMessage*)node;
-                    NSDictionary* dic = @{kMessageId:messageNode.xmppId};
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalSentMessageNotice object:self userInfo:dic];
+                    if(messageNode.xmppId)
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalSentMessageNotice object:self userInfo:@{kMessageId:messageNode.xmppId}];
                 }
             }
         }
@@ -1752,6 +1752,24 @@ NSString *const kXMPPPresence = @"presence";
     } else  {
         [self send:messageNode];
     }
+}
+
+-(void) sendChatState:(BOOL) isTyping toJid:(NSString*) jid
+{
+    XMPPMessage* messageNode =[[XMPPMessage alloc] init];
+    [messageNode.attributes setObject:jid forKey:@"to"];
+    [messageNode setNoStoreHint];
+    if(isTyping)
+    {
+        MLXMLNode* chatstate = [[MLXMLNode alloc] initWithElement:@"composing" andNamespace:@"http://jabber.org/protocol/chatstates"];
+        [messageNode.children addObject:chatstate];
+    }
+    else
+    {
+        MLXMLNode* chatstate = [[MLXMLNode alloc] initWithElement:@"active" andNamespace:@"http://jabber.org/protocol/chatstates"];
+        [messageNode.children addObject:chatstate];
+    }
+    [self send:messageNode];
 }
 
 #pragma mark set connection attributes

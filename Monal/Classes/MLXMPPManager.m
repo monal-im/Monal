@@ -620,6 +620,15 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                    });
 }
 
+-(void) sendChatState:(BOOL) isTyping fromAccount:(NSString*) accountNo toJid:(NSString*) jid
+{
+    dispatch_async(_netQueue, ^{
+        xmpp* account = [self getConnectedAccountForID:accountNo];
+        if(account)
+            [account sendChatState:isTyping toJid:jid];
+    });
+}
+
 
 #pragma  mark - HTTP upload
 

@@ -19,14 +19,8 @@
 
 @interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate, CLLocationManagerDelegate>
 {
-    UIView *containerView;
-	CGRect oldFrame;
+    UIView* containerView;
 	BOOL _firstmsg;
-	BOOL wasaway;
-	BOOL wasoffline;
-    NSArray* activeChats;
-    
-    BOOL _keyboardVisible; 
 }
 
 @property (nonatomic, retain) CLLocationManager *locationManager;

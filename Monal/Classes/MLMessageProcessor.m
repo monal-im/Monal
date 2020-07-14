@@ -194,6 +194,15 @@
         [self processHeadline:messageNode];
     }
     
+    if((messageNode.composing || messageNode.notComposing) &&
+        [[DataLayer sharedInstance] checkCap:@"http://jabber.org/protocol/chatstates" forUser:messageNode.user andAccountNo:self.accountNo])
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+            @"jid": messageNode.user,
+            @"accountNo": self.accountNo,
+            @"isTyping": messageNode.composing ? @YES : @NO
+        }];
+    }
 }
     
 -(void) processHeadline:(ParseMessage *) messageNode

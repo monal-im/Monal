@@ -29,6 +29,10 @@
 @import MobileCoreServices;
 
 @interface chatViewController()<IDMPhotoBrowserDelegate>
+{
+    BOOL _isTyping;
+    monal_void_block_t _cancelTypingNotification;
+}
 
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
 @property (nonatomic, strong)  NSCalendar *gregorian;
@@ -41,7 +45,6 @@
 @property (nonatomic, strong) NSMutableArray* messageList;
 @property (nonatomic, strong) NSMutableArray* photos;
 @property (nonatomic, strong) UIDocumentPickerViewController *imagePicker;
-
 
 @property (nonatomic, assign) BOOL encryptChat;
 @property (nonatomic, assign) BOOL sendLocation; // used for first request
@@ -76,7 +79,6 @@
 {
     self.contact = contact;
     [self setup];
-    
 }
 
 #pragma mark -  view lifecycle
@@ -112,6 +114,7 @@
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     
+    _isTyping = NO;
     self.hidesBottomBarWhenPushed=YES;
     
     self.chatInput.layer.borderColor=[UIColor lightGrayColor].CGColor;
@@ -281,7 +284,7 @@
             });
             return;
         }
-        lastInteractionDate = data[@"lastInteraction"];
+        lastInteractionDate = data[@"lastInteraction"];     //this is nil for a "not typing" (aka typing ended) notification --> "online"
     }
     // ...or load the latest interaction timestamp from db
     else
@@ -389,7 +392,8 @@
     [super viewWillDisappear:animated];
     [MLNotificationManager sharedInstance].currentAccountNo=nil;
     [MLNotificationManager sharedInstance].currentContact=nil;
-        
+    
+    [self sendChatState:NO];
 }
 
 - (void)viewDidLayoutSubviews {
@@ -594,6 +598,59 @@
     }];
 }
 
+-(void) sendChatState:(BOOL) isTyping
+{
+    [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId withCompletion:^(NSArray *result) {
+        if(result.count==0)
+        {
+            DDLogError(@"Account should be >0");
+            return;
+        }
+    }];
+    
+    if(isTyping)
+    {
+        if(!_isTyping)      //started typing? --> send composing chatstate (e.g. typing)
+        {
+            DDLogVerbose(@"Sending chatstate isTyping=%@", isTyping ? @"YES" : @"NO");
+            [[MLXMPPManager sharedInstance] sendChatState:isTyping fromAccount:self.contact.accountId toJid:self.contact.contactJid];
+        }
+        
+        //cancel old timer if existing
+        if(_cancelTypingNotification)
+            _cancelTypingNotification();
+        
+        //start new timer
+        _cancelTypingNotification = [HelperTools startTimer:5.0 withHandler:^{
+            //no typing interaction in 5 seconds? --> send out active chatstate (e.g. typing ended)
+            if(_isTyping)
+            {
+                _isTyping = NO;
+                DDLogVerbose(@"Sending chatstate isTyping=NO");
+                [[MLXMPPManager sharedInstance] sendChatState:NO fromAccount:self.contact.accountId toJid:self.contact.contactJid];
+            }
+        }];
+        
+        //set internal state
+        _isTyping = YES;
+    }
+    else
+    {
+        if(_isTyping)      //stopped typing? --> send active chatstate (e.g. typing ended)
+        {
+            DDLogVerbose(@"Sending chatstate isTyping=%@", isTyping ? @"YES" : @"NO");
+            [[MLXMPPManager sharedInstance] sendChatState:isTyping fromAccount:self.contact.accountId toJid:self.contact.contactJid];
+        }
+        
+        //cancel old timer if existing
+        if(_cancelTypingNotification)
+            _cancelTypingNotification();
+        
+        //set internal state
+        _isTyping = NO;
+    }
+}
+
 -(void)resignTextView
 {
     // Trim leading spaces
@@ -607,6 +664,7 @@
         // Send trimmed message
         [self sendMessage:cleanString];
     }
+    [self sendChatState:NO];
 }
 
 -(IBAction)sendMessageText:(id)sender
@@ -616,6 +674,8 @@
 
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
+    [self sendChatState:NO];
+
     if([segue.identifier isEqualToString:@"showDetails"])
     {
         UINavigationController *nav = segue.destinationViewController;
@@ -1705,6 +1765,8 @@
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
     BOOL shouldinsert=YES;
+    
+    [self sendChatState:YES];
     
     if(self.hardwareKeyboardPresent &&  [text isEqualToString:@"\n"])
     {

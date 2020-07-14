@@ -451,21 +451,10 @@ NSString *const kiqErrorType = @"error";
 
 -(void) httpUploadforFile:(NSString *) file ofSize:(NSNumber *) filesize andContentType:(NSString *) contentType
 {
-    MLXMLNode* requestNode =[[MLXMLNode alloc] initWithElement:@"request" andNamespace:@"urn:xmpp:http:upload:0"];
-    
-    MLXMLNode* filename =[[MLXMLNode alloc] init];
-    filename.element=@"filename";
-    filename.data=file;
-    
-    MLXMLNode* size =[[MLXMLNode alloc] init];
-    size.element=@"size";
-    size.data=[NSString stringWithFormat:@"%@", filesize];
-    
-    MLXMLNode* contentTypeNode =[[MLXMLNode alloc] init];
-    contentTypeNode.element=@"content-type";
-    contentTypeNode.data=contentType;
-    
-    [requestNode.children addObjectsFromArray:@[filename, size, contentTypeNode]];
+    MLXMLNode* requestNode = [[MLXMLNode alloc] initWithElement:@"request" andNamespace:@"urn:xmpp:http:upload:0"];
+    requestNode.attributes[@"filename"] = file;
+    requestNode.attributes[@"size"] = [NSString stringWithFormat:@"%@", filesize];
+    requestNode.attributes[@"content-type"] = contentType;
     [self.children addObject:requestNode];
 }
 

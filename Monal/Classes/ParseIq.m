@@ -13,6 +13,7 @@
 @interface ParseIq()
 {
     NSMutableArray* _identities;
+    NSString* _currentUploadHeader;
 }
 
 @property (nonatomic, strong) NSMutableArray* omemoDevices;
@@ -111,26 +112,35 @@
     //http upload
     if([elementName isEqualToString:@"slot"])
     {
-        _queryXMLNS=namespaceURI;
-          State=@"slot";
-        _httpUpload =YES; 
+        _queryXMLNS = namespaceURI;
+        State=@"slot";
+        _httpUpload = YES; 
         return;
     }
     
     if([elementName isEqualToString:@"get"] && _httpUpload)
     {
         State = @"slotGet";
+        _getURL = [attributeDict objectForKey:@"url"];
         return;
     }
     
     if([elementName isEqualToString:@"put"] && _httpUpload)
     {
-         State = @"slotPut";
+        State = @"slotPut";
+        _putURL = [attributeDict objectForKey:@"url"];
+        _uploadHeaders = [[NSMutableDictionary alloc] init];
+        return;
+    }
+    
+    if([elementName isEqualToString:@"header"] && [State isEqualToString:@"slotPut"])
+    {
+        _currentUploadHeader = [attributeDict objectForKey:@"name"];
         return;
     }
     
     //roster
-  
+    
     if([elementName isEqualToString:@"item"] && [State isEqualToString:@"RosterQuery"])
     {
         State=@"RosterItem"; // we can get item info
@@ -165,7 +175,7 @@
     
     if([elementName isEqualToString:@"prefs"] && [namespaceURI isEqualToString:@"urn:xmpp:mam:2"])
     {
-        _mam2default =[attributeDict objectForKey:@"default"];
+        _mam2default = [attributeDict objectForKey:@"default"];
         return;
     }
     
@@ -288,10 +298,10 @@
             if(!self.hiddenFormFields) self.hiddenFormFields = [[NSMutableDictionary alloc] init];
         }
         
-         if([elementName isEqualToString:@"data"]) {
-             State = @"RegistrationFormData";
-             return;
-         }
+        if([elementName isEqualToString:@"data"]) {
+            State = @"RegistrationFormData";
+            return;
+        }
     }
     
     if([elementName isEqualToString:@"error"]) {
@@ -299,8 +309,7 @@
         return;
     }
     
-  if([namespaceURI isEqualToString:kStanzasNameSpace]
-       &&  [State isEqualToString:@"Error"] ) {
+    if([State isEqualToString:@"Error"] ) {
         if([elementName isEqualToString:@"text"]) {
             State = @"ErrorText";
             return;
@@ -314,6 +323,14 @@
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
     [super parser:parser didEndElement:elementName namespaceURI:namespaceURI qualifiedName:qName];
+    
+    if([elementName isEqualToString:@"header"] && [State isEqualToString:@"slotPut"])
+    {
+        if(_currentUploadHeader)
+            _uploadHeaders[_currentUploadHeader] = [_messageBuffer copy];
+        _currentUploadHeader = nil;
+        return;
+    }
     
     if(([elementName isEqualToString:@"text"]) && [State isEqualToString:@"ErrorText"])
     {
@@ -390,20 +407,6 @@
        // _photoBinValue=_messageBuffer;
         return;
     }
-    
-    if(([elementName isEqualToString:@"get"]) && _httpUpload )
-    {
-        _getURL=[_messageBuffer copy];
-        return;
-    }
-    
-    if(([elementName isEqualToString:@"put"]) && _httpUpload )
-    {
-        _putURL=[_messageBuffer copy];
-        return;
-    }
-    
-
     
     if([elementName isEqualToString:@"signedPreKeyPublic"] &&  [State isEqualToString:@"Bundle"])
     {

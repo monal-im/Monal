@@ -101,9 +101,6 @@ NSString *const kXMPPPresence = @"presence";
 
 @property (nonatomic, assign) BOOL smacksRequestInFlight;
 
-//HTTP upload
-@property (nonatomic, strong) NSMutableArray *httpUploadQueue;
-
 @property (nonatomic, assign) BOOL resuming;
 @property (nonatomic, strong) NSString* streamID;
 @property (nonatomic, assign) BOOL hasDiscoAndRoster;
@@ -149,7 +146,6 @@ NSString *const kXMPPPresence = @"presence";
 
     _startTLSComplete = NO;
     _catchupDone = NO;
-    self.httpUploadQueue = nil;
 
     _SRVDiscoveryDone = NO;
     _discoveredServersList = [[NSMutableArray alloc] init];
@@ -449,7 +445,6 @@ NSString *const kXMPPPresence = @"presence";
         _accountState=kStateReconnecting;
         _startTLSComplete = NO;
         _catchupDone = NO;
-        self.httpUploadQueue = nil;
         
         [_sendQueue cancelAllOperations];
         [_sendQueue addOperationWithBlock:^{
@@ -612,7 +607,6 @@ NSString *const kXMPPPresence = @"presence";
         _startTLSComplete = NO;
         _catchupDone = NO;
         _accountState = kStateDisconnected;
-        self.httpUploadQueue = nil;
     }];
 }
 
@@ -1033,9 +1027,6 @@ NSString *const kXMPPPresence = @"presence";
         if([iqNode.idval isEqualToString:self.jingle.idval]) {
             [self jingleResult:iqNode];
         }
-
-        [self processHTTPIQ:iqNode];
-
     }
     else  if([parsedStanza.stanzaType  isEqualToString:@"message"] && [parsedStanza isKindOfClass:[ParseMessage class]])
     {
@@ -2215,70 +2206,48 @@ NSString *const kXMPPPresence = @"presence";
 
 #pragma mark HTTP upload
 
--(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion
+-(void) requestHTTPSlotWithParams:(NSDictionary*) params andCompletion:(void(^)(NSString *url,  NSError *error)) completion
 {
-    NSString *uuid = [[NSUUID UUID] UUIDString];
-    XMPPIQ* httpSlotRequest =[[XMPPIQ alloc] initWithId:uuid andType:kiqGetType];
+    XMPPIQ* httpSlotRequest = [[XMPPIQ alloc] initWithType:kiqGetType];
     [httpSlotRequest setiqTo:self.connectionProperties.uploadServer];
-    NSData *data= [params objectForKey:kData];
-    NSNumber *size=[NSNumber numberWithInteger: data.length];
-
-    NSMutableDictionary *iqParams =[NSMutableDictionary dictionaryWithDictionary:params];
-    [iqParams setObject:uuid forKey:kId];
-    [iqParams setObject:completion forKey:kCompletion];
-
-    if(!self.httpUploadQueue)
-    {
-        self.httpUploadQueue = [[NSMutableArray alloc] init];
-    }
-
-    [self.httpUploadQueue addObject:iqParams];
-    [httpSlotRequest httpUploadforFile:[params objectForKey:kFileName] ofSize:size andContentType:[params objectForKey:kContentType]];
-    [self send:httpSlotRequest];
-}
-
--(void) processHTTPIQ:(ParseIq *) iqNode
-{
-    if(iqNode.httpUpload)
-    {
-        NSDictionary *matchingRow;
-        //look up id val in upload queue array
-        for(NSDictionary * row in self.httpUploadQueue)
-        {
-            if([[row objectForKey:kId] isEqualToString:iqNode.idval])
-            {
-                matchingRow= row;
-                break;
-            }
-        }
-
-        if(matchingRow) {
-
-            //upload to put
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [MLHTTPRequest sendWithVerb:kPut path:iqNode.putURL
-                                    headers:@{@"Content-Type":[matchingRow objectForKey:kContentType]}
-                              withArguments:nil data:[matchingRow objectForKey:kData] andCompletionHandler:^(NSError *error, id result) {
-                    void (^completion) (NSString *url,  NSError *error)  = [matchingRow objectForKey:kCompletion];
+    [httpSlotRequest
+        httpUploadforFile:[params objectForKey:kFileName]
+        ofSize:[NSNumber numberWithInteger:((NSData*)[params objectForKey:kData]).length]
+        andContentType:[params objectForKey:kContentType]
+    ];
+    [self sendIq:httpSlotRequest withResultHandler:^(ParseIq* response) {
+        DDLogInfo(@"Got slot for upload: %@", response.getURL);
+        //upload to server using HTTP PUT
+        NSMutableDictionary* headers = [[NSMutableDictionary alloc] init];
+        [headers addEntriesFromDictionary:@{@"Content-Type":[params objectForKey:kContentType]}];
+        [headers addEntriesFromDictionary:response.uploadHeaders];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [MLHTTPRequest
+                sendWithVerb:kPut path:response.putURL
+                headers:headers
+                withArguments:nil
+                data:[params objectForKey:kData]
+                andCompletionHandler:^(NSError *error, id result) {
                     if(!error)
                     {
-                        //send get to contact
+                        DDLogInfo(@"Upload succeded, get url: %@", response.getURL);
+                        //send get url to contact
                         if(completion)
-                        {
-                            completion(iqNode.getURL, nil);
-                        }
-                    } else  {
-                        if(completion)
-                        {
-                            completion(nil, error);
-                        }
+                            completion(response.getURL, nil);
                     }
-
-                }];
-            });
-
-        }
-    }
+                    else
+                    {
+                        DDLogInfo(@"Upload failed, error: %@", error);
+                        if(completion)
+                            completion(nil, error);
+                    }
+                }
+            ];
+        });
+    } andErrorHandler:^(ParseIq* error) {
+        if(completion)
+            completion(nil, error.errorMessage);
+    }];
 }
 
 #pragma mark client state

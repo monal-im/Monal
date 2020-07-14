@@ -29,6 +29,8 @@
 @property (nonatomic, strong, readonly) NSMutableArray* items;
 @property (nonatomic, strong, readonly) NSString* errorMessage;
 
+@property (nonatomic, strong, readonly) NSMutableDictionary* uploadHeaders;
+
 // vcard releated
 
 @property (nonatomic, assign, readonly) BOOL vCard;

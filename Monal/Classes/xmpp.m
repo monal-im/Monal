@@ -2760,14 +2760,13 @@ NSString *const kXMPPPresence = @"presence";
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode
 {
     DDLogVerbose(@"Stream has event");
-
     switch(eventCode)
     {
         case NSStreamEventOpenCompleted:
         {
             DDLogVerbose(@"Stream open completed");
         }
-
+        
         //for writing
         case NSStreamEventHasSpaceAvailable:
         {
@@ -2778,18 +2777,18 @@ NSString *const kXMPPPresence = @"presence";
             }];
             break;
         }
-
+        
         //for reading
         case  NSStreamEventHasBytesAvailable:
         {
             DDLogError(@"Stream has bytes to read (should not be called!)");
             break;
         }
-
+        
         case NSStreamEventErrorOccurred:
         {
-            NSError* st_error= [stream streamError];
-            DDLogError(@"Stream error code=%ld domain=%@ local desc:%@ ",(long)st_error.code,st_error.domain,  st_error.localizedDescription);
+            NSError* st_error = [stream streamError];
+            DDLogError(@"Stream error code=%ld domain=%@ local desc:%@",(long)st_error.code,st_error.domain,  st_error.localizedDescription);
 
             NSString *message =st_error.localizedDescription;
 
@@ -2831,12 +2830,12 @@ NSString *const kXMPPPresence = @"presence";
                     if((([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                        || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))
                        && (self.accountState>=kStateLoggedIn)){
-                        DDLogInfo(@" Stream error in the background. Ignoring");
+                        DDLogInfo(@"Stream error in the background. Ignoring");
                         return;
                     } else  {
 #endif
 #endif
-                        DDLogInfo(@" stream error calling reconnect for account that logged in once ");
+                        DDLogInfo(@"stream error calling reconnect for account that logged in once ");
                         [self reconnect];
                         return;
 
@@ -2846,11 +2845,13 @@ NSString *const kXMPPPresence = @"presence";
                 });
 #endif
 #endif
+                //don't reconnect twice
+                return;
             }
-            
             
             if(st_error.code==-9807)         // Could not complete operation. SSL probably
             {
+                DDLogInfo(@"Stream error code -9807 --> disconnecting");
                 [self disconnect];
                 return;
             }
@@ -2860,43 +2861,35 @@ NSString *const kXMPPPresence = @"presence";
                 st_error.code == 64 ||       // Host is down
                 st_error.code == 32          // Broken pipe
             ) {
+                DDLogInfo(@"known stream error, trying to reconnect");
                 [self reconnect];
                 return;
             }
             
-            DDLogInfo(@"unhandled stream error");
+            DDLogInfo(@"unknown stream error, trying to reconnect");
             [self reconnect];
-
             break;
-
         }
+        
         case NSStreamEventNone:
         {
             DDLogVerbose(@"Stream event none");
             break;
-
         }
-
-
+        
         case NSStreamEventEndEncountered:
         {
-            if(_loggedInOnce)
-            {
-                DDLogInfo(@"%@ Stream end encoutered.. reconnecting.", [stream class] );
-                [self reconnect];
-            }
+            DDLogInfo(@"%@ Stream end encountered, trying to reconnect", [stream class]);
+            [self reconnect];
             break;
-
         }
-
     }
-
 }
 
 #pragma mark network I/O
 -(void) writeFromQueue
 {
-	if(!_streamHasSpace)
+    if(!_streamHasSpace)
     {
         DDLogVerbose(@"no space to write. early return from writeFromQueue().");
         return;
@@ -2908,7 +2901,7 @@ NSString *const kXMPPPresence = @"presence";
     }
     BOOL requestAck=NO;
     NSMutableArray *queueCopy = [[NSMutableArray alloc] initWithArray:_outputQueue];
-	DDLogVerbose(@"iterating _outputQueue");
+    DDLogVerbose(@"iterating _outputQueue");
     for(MLXMLNode* node in queueCopy)
     {
         BOOL success=[self writeToStream:node.XMLString];
@@ -2924,7 +2917,7 @@ NSString *const kXMPPPresence = @"presence";
             DDLogVerbose(@"removing sent MLXMLNode from _outputQueue");
             [_outputQueue removeObject:node];
         }
-        else		//stop sending the remainder of the queue if the send failed (tcp output buffer full etc.)
+        else        //stop sending the remainder of the queue if the send failed (tcp output buffer full etc.)
         {
             DDLogInfo(@"could not send whole _outputQueue: tcp buffer full or connection has an error");
             break;
@@ -2967,31 +2960,31 @@ NSString *const kXMPPPresence = @"presence";
     //try to send remaining buffered data first
     if(_outputBufferByteCount>0)
     {
-		NSInteger sentLen=[_oStream write:_outputBuffer maxLength:_outputBufferByteCount];
-		if(sentLen!=-1)
-		{
-			if(sentLen!=_outputBufferByteCount)		//some bytes remaining to send --> trim buffer and return NO
-			{
-				memmove(_outputBuffer, _outputBuffer+(size_t)sentLen, _outputBufferByteCount-(size_t)sentLen);
-				_outputBufferByteCount-=sentLen;
-				_streamHasSpace=NO;
-				return NO;		//stanza has to remain in _outputQueue
-			}
-			else
-			{
-				//dealloc empty buffer
-				free(_outputBuffer);
-				_outputBuffer=nil;
-				_outputBufferByteCount=0;		//everything sent
-			}
-		}
-		else
-		{
-			NSError* error=[_oStream streamError];
-			DDLogError(@"sending: failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
-			return NO;
-		}
-	}
+        NSInteger sentLen=[_oStream write:_outputBuffer maxLength:_outputBufferByteCount];
+        if(sentLen!=-1)
+        {
+            if(sentLen!=_outputBufferByteCount)		//some bytes remaining to send --> trim buffer and return NO
+            {
+                memmove(_outputBuffer, _outputBuffer+(size_t)sentLen, _outputBufferByteCount-(size_t)sentLen);
+                _outputBufferByteCount-=sentLen;
+                _streamHasSpace=NO;
+                return NO;		//stanza has to remain in _outputQueue
+            }
+            else
+            {
+                //dealloc empty buffer
+                free(_outputBuffer);
+                _outputBuffer=nil;
+                _outputBufferByteCount=0;		//everything sent
+            }
+        }
+        else
+        {
+            NSError* error=[_oStream streamError];
+            DDLogError(@"sending: failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
+            return NO;
+        }
+    }
 
     //then try to send the stanza in question and buffer half sent data
     const uint8_t *rawstring = (const uint8_t *)[messageOut UTF8String];
@@ -2999,17 +2992,17 @@ NSString *const kXMPPPresence = @"presence";
     NSInteger sentLen = [_oStream write:rawstring maxLength:rawstringLen];
     if(sentLen!=-1)
     {
-		if(sentLen!=rawstringLen)
-		{
-			//allocate new _outputBuffer
-			_outputBuffer=malloc(sizeof(uint8_t) * (rawstringLen-sentLen));
-			//copy the remaining data into the buffer and set the buffer pointer accordingly
-			memcpy(_outputBuffer, rawstring+(size_t)sentLen, (size_t)(rawstringLen-sentLen));
-			_outputBufferByteCount=(size_t)(rawstringLen-sentLen);
-			_streamHasSpace=NO;
-		}
-		else
-			_outputBufferByteCount=0;
+        if(sentLen!=rawstringLen)
+        {
+            //allocate new _outputBuffer
+            _outputBuffer=malloc(sizeof(uint8_t) * (rawstringLen-sentLen));
+            //copy the remaining data into the buffer and set the buffer pointer accordingly
+            memcpy(_outputBuffer, rawstring+(size_t)sentLen, (size_t)(rawstringLen-sentLen));
+            _outputBufferByteCount=(size_t)(rawstringLen-sentLen);
+            _streamHasSpace=NO;
+        }
+        else
+            _outputBufferByteCount=0;
         return YES;
     }
     else

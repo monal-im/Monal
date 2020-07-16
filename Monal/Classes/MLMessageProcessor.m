@@ -52,10 +52,11 @@
     {
         DDLogError(@"Error type message received");
         
-        if([messageNode.errorReason isEqualToString:@"recipient-unavailable"]) {
-               //ignore becasue with push this is moot
-               return;
-           }
+        if(!messageNode.idval.length)
+        {
+            DDLogError(@"Ignoring error messages having an empty ID");
+            return;
+        }
         
         //update db
         [[DataLayer sharedInstance] setMessageId:messageNode.idval errorType:messageNode.errorType?messageNode.errorType:@""
@@ -89,8 +90,7 @@
             ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.from andServer:@"" forAccount:self.accountNo];
         }
         
-        if (ownNick!=nil
-            && [messageNode.actualFrom isEqualToString:ownNick])
+        if (ownNick!=nil && [messageNode.actualFrom isEqualToString:ownNick])
         {
             DDLogDebug(@"Dropping muc echo");
             return;

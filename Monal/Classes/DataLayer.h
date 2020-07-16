@@ -13,14 +13,9 @@
 #import "MLContact.h"
 #import "MLConstants.h"
 
-#define kMonalDBQueue "im.monal.dbQueue"
 
 @interface DataLayer : NSObject {
-    NSString* dbPath;
     sqlite3* database;
-    NSLock* dbversionCheck;
-    
-    dispatch_queue_t _dbQueue ;
 }
 
 

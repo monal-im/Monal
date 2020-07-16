@@ -139,7 +139,7 @@
         return;
     }
     
-    if(iqNode.mam2Last && iqNode.mam2fin)
+    if(iqNode.mam2fin)
     {
         if(self.mamFinished)
             self.mamFinished();

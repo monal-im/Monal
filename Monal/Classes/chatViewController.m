@@ -213,24 +213,18 @@
     BOOL sendButtonEnabled = NO;
 
     NSString* contactDisplayName = self.contact.contactDisplayName;
-
+    if(!contactDisplayName)
+        contactDisplayName = @"";
+    
+    //send button is always enabled, except if the account is permanently disabled
+    sendButtonEnabled = YES;
+    if(![[DataLayer sharedInstance] isAccountEnabled:self.contact.accountId])
+        sendButtonEnabled = NO;
+    
     if(isHibernated == YES)
-    {
-        sendButtonEnabled = YES;
         jidLabelText = [NSString stringWithFormat:@"%@ [%@]", contactDisplayName, @"Hibernated"];
-    } else if(accountState < kStateLoggedIn) {
-        /* if(!xmppAccount.airDrop) {
-            sendButtonEnabled = NO;
-        }*/
-        
-        if(!contactDisplayName)
-            contactDisplayName = @"";
-        jidLabelText = [NSString stringWithFormat:@"%@ [%@]", contactDisplayName, NSLocalizedString(@"Logging In", @"")];
-    } else  {
-        sendButtonEnabled = YES;
-
+    else
         jidLabelText = [NSString stringWithFormat:@"%@", contactDisplayName];
-    }
 
     if(self.contact.isGroup) {
         NSArray* members = [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
@@ -245,7 +239,8 @@
 
 -(void) updateUIElementsOnAccountChange:(NSNotification* _Nullable) notification
 {
-    if(notification) {
+    if(notification)
+    {
         NSDictionary* userInfo = notification.userInfo;
         // Check if all objects of the notification are present
         NSString* accountNo = [userInfo objectForKey:kAccountID];
@@ -253,14 +248,14 @@
         NSNumber* accountHibernate = [userInfo objectForKey:kAccountHibernate];
         
         // Only parse account changes for our current opened account
-        if(![accountNo isEqualToString:self.xmppAccount.accountNo]) {
+        if(![accountNo isEqualToString:self.xmppAccount.accountNo])
             return;
-        }
         
-        if(accountNo && accountState && accountHibernate) {
+        if(accountNo && accountState && accountHibernate)
             [self updateUIElementsOnAccountChange:(xmppState)[accountState intValue] isHibernated:[accountHibernate boolValue]];
-        }
-    } else {
+    }
+    else
+    {
         xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
         [self updateUIElementsOnAccountChange:kStateLoggedIn isHibernated:[xmppAccount isHibernated]];
     }
@@ -609,6 +604,12 @@
             return;
         }
     }];
+    
+    if(!self.sendButton.enabled)
+    {
+        DDLogWarn(@"Account disabled, ignoring chatstate update");
+        return;
+    }
     
     if(isTyping)
     {

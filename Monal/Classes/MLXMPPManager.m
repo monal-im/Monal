@@ -42,11 +42,6 @@ static const int sendMessageTimeoutSeconds = 10;
 }
 
 /**
- convenience function getting account in connected array with account number/id matching
- */
--(xmpp*) getConnectedAccountForID:(NSString*) accountNo;
-
-/**
 An array of Dics what have timers to make sure everything was sent
  */
 @property (nonatomic, strong) NSMutableArray *timerList;
@@ -397,13 +392,13 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) rejectContact:(MLContact*) contact
 {
-    xmpp* account =[self getConnectedAccountForID:contact.accountId];
+    xmpp* account = [self getConnectedAccountForID:contact.accountId];
     [account rejectFromRoster:contact.contactJid];
 }
 
 -(void) approveContact:(MLContact*) contact
 {
-    xmpp* account =[self getConnectedAccountForID:contact.accountId];
+    xmpp* account = [self getConnectedAccountForID:contact.accountId];
     [account approveToRoster:contact.contactJid];
 }
 
@@ -632,7 +627,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 #pragma  mark - HTTP upload
 
--(void)httpUploadJpegData:(NSData*) fileData   toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion{
+-(void) httpUploadJpegData:(NSData*) fileData   toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion{
 
     NSString *fileName = [NSString stringWithFormat:@"%@.jpg",[NSUUID UUID].UUIDString];
 
@@ -641,10 +636,9 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     NSString *mimeType = (__bridge_transfer NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
     CFRelease(UTI);
     [self httpUploadData:fileData withFilename:fileName andType:mimeType toContact:contact onAccount:accountNo withCompletionHandler:completion];
-
 }
 
--(void)httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion{
+-(void) httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion{
 
     //get file name
     NSString *fileName =  fileURL.pathComponents.lastObject;
@@ -657,7 +651,6 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
     NSData *fileData = [[NSData alloc] initWithContentsOfURL:fileURL];
 
     [self httpUploadData:fileData withFilename:fileName andType:mimeType toContact:contact onAccount:accountNo withCompletionHandler:completion];
-
 }
 
 
@@ -676,8 +669,6 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         NSDictionary *params =@{kData:data,kFileName:filename, kContentType:contentType, kContact:contact};
         [account requestHTTPSlotWithParams:params andCompletion:completion];
     }
-
-
 }
 
 

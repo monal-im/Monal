@@ -1517,10 +1517,7 @@ NSString *const kXMPPPresence = @"presence";
                 _cancelLoginTimer();        //we are now logged in --> cancel running login timer
                 _cancelLoginTimer = nil;
             }
-
-            self.connectedTime=[NSDate date];
             self->_loggedInOnce=YES;
-            
             [_iPipe drainInputStream];
             [self startXMPPStream];
         }
@@ -2171,7 +2168,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(BOOL) isHibernated
 {
-    BOOL hibernated = (_accountState == kStateDisconnected || _accountState == kStateReconnecting);
+    BOOL hibernated = (_accountState < kStateBound);
     hibernated &= (_streamID != nil);
     return hibernated;
 }

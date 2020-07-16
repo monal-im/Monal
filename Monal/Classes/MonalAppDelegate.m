@@ -303,16 +303,11 @@
 
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
 {
-    if([url.scheme isEqualToString:@"file"]) // for airdrop
-    {
-        return [self openFile:url];
-    }
     if([url.scheme isEqualToString:@"xmpp"]) //for links
     {
         [self handleURL:url];
         return YES;
     }
- 
     return NO;
 }
 

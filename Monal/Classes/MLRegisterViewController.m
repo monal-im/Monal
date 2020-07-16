@@ -66,7 +66,7 @@
     MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:@"nothing@yax.im" password:@"nothing" andResource:@"MonalReg"];
     MLXMPPServer* server = [[MLXMPPServer alloc] initWithHost:@"" andPort:[NSNumber numberWithInt:5222] andDirectTLS:NO];
     server.selfSignedCert = NO;
-    self.xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAirDrop:NO andAccountNo:@"-1"];
+    self.xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:@"-1"];
 }
 
 -(IBAction)registerAccount:(id) sender

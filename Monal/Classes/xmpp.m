@@ -188,15 +188,12 @@ NSString *const kXMPPPresence = @"presence";
     self.awayState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"];
 }
 
--(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAirDrop:(BOOL) airDrop andAccountNo:(NSString*) accountNo
+-(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSString*) accountNo
 {
     self = [super init];
-
     self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];
-    [self setupObjects];
     _accountNo = accountNo;
-    _airDrop = airDrop;
-
+    [self setupObjects];
     return self;
 }
 
@@ -414,10 +411,6 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) connect
 {
-    if(self.airDrop){
-        DDLogInfo(@"using airdrop. No XMPP connection.");
-        return;
-    }
     if(![[MLXMPPManager sharedInstance] hasConnectivity])
     {
         DDLogInfo(@"no connectivity, ignoring connect call.");
@@ -1722,27 +1715,7 @@ NSString *const kXMPPPresence = @"presence";
     //for MAM
     [messageNode setStoreHint];
 
-    if(self.airDrop) {
-        DDLogInfo(@"Writing to file for Airdop");
-
-        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-        NSString *documentsDirectory = [paths objectAtIndex:0]; // Get documents directory
-
-        [messageNode.attributes setObject:self.connectionProperties.identity.jid forKey:@"from"];
-
-        NSString  *myString =[messageNode XMLString];
-        NSError *error;
-        NSString *path =[documentsDirectory stringByAppendingPathComponent:@"message.xmpp"];
-        BOOL succeed = [myString writeToFile:path
-                                  atomically:YES encoding:NSUTF8StringEncoding error:&error];
-        if (!succeed){
-            // Handle e@rror here
-            DDLogError(@"Error writing to airdrop file");
-        }
-
-    } else  {
-        [self send:messageNode];
-    }
+    [self send:messageNode];
 }
 
 -(void) sendChatState:(BOOL) isTyping toJid:(NSString*) jid

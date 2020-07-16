@@ -27,7 +27,6 @@
 @property (nonatomic, assign) BOOL enabled;
 @property (nonatomic, assign) BOOL directTLS;
 @property (nonatomic, assign) BOOL selfSignedSSL;
-@property (nonatomic, assign) BOOL airDrop;
 
 @property (nonatomic, weak) UITextField *currentTextField;
 
@@ -106,8 +105,6 @@
             
             self.directTLS=[[settings objectForKey:@"directTLS"] boolValue];
             self.selfSignedSSL=[[settings objectForKey:@"selfsigned"] boolValue];
-            self.airDrop = [[settings objectForKey:kAirdrop] boolValue];
-            
         }];
     }
     else
@@ -195,7 +192,6 @@
     [dic setObject:[NSNumber numberWithBool:self.enabled] forKey:kEnabled];
     [dic setObject:[NSNumber numberWithBool:self.selfSignedSSL] forKey:kSelfSigned];
     [dic setObject:[NSNumber numberWithBool:self.directTLS] forKey:kDirectTLS];
-    [dic setObject:[NSNumber numberWithBool:self.airDrop] forKey:kAirdrop];
     [dic setObject:self.accountno forKey:kAccountID];
 
     if(!self.editMode)
@@ -259,19 +255,10 @@
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
             }
             
-            if(self.airDrop != [[self.initialSettings objectForKey:kAirdrop] boolValue])
-            {
-                xmpp *account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
-                account.airDrop=self.airDrop;
-                
-                 [[MLXMPPManager sharedInstance] connectAccount:self.accountno]; //we "connect" 
-            }
-            
             [self showSuccessHUD];
         }];
 
         [[DataLayer sharedInstance] resetContactsForAccount:self.accountno];
-
     }
 }
 
@@ -432,13 +419,6 @@
                 break;
             }
             case 7: {
-                thecell.cellLabel.text = NSLocalizedString(@"Use AirDrop",@ "");
-                thecell.textInputField.hidden = YES;
-                thecell.toggleSwitch.tag = 4;
-                thecell.toggleSwitch.on = self.airDrop;
-                break;
-            }
-            case 8: {
                 thecell.cellLabel.text = NSLocalizedString(@"Resource",@ "");
                 thecell.labelRight.text = self.resource;
                 thecell.labelRight.hidden = NO;
@@ -693,17 +673,6 @@
             }
             else {
                 self.selfSignedSSL = YES;
-            }
-            break;
-        }
-
-        case 4: {
-            if(toggle.on)
-            {
-                self.airDrop = YES;
-            }
-            else {
-                self.airDrop = NO;
             }
             break;
         }

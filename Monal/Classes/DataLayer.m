@@ -33,7 +33,6 @@ NSString *const kPort = @"other_port";
 NSString *const kResource = @"resource";
 NSString *const kDirectTLS = @"directTLS";
 NSString *const kSelfSigned = @"selfsigned";
-NSString *const kAirdrop = @"airdrop";
 
 NSString *const kUsername = @"username";
 NSString *const kFullName = @"full_name";
@@ -749,7 +748,7 @@ NSString *const kCount = @"count";
 
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion
 {
-    NSString* query = [NSString stringWithFormat:@"update account set server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, selfsigned=?, directTLS=?, airdrop=? where account_id=?"];
+    NSString* query = [NSString stringWithFormat:@"update account set server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, selfsigned=?, directTLS=? where account_id=?"];
 
     NSString* server = (NSString *) [dictionary objectForKey:kServer];
     NSString* port = (NSString *)[dictionary objectForKey:kPort];
@@ -761,7 +760,6 @@ NSString *const kCount = @"count";
                        [dictionary objectForKey:kEnabled],
                        [dictionary objectForKey:kSelfSigned],
                        [dictionary objectForKey:kDirectTLS],
-                       [dictionary objectForKey:kAirdrop],
                        [dictionary objectForKey:kAccountID]
     ];
 
@@ -770,19 +768,19 @@ NSString *const kCount = @"count";
 
 -(void) addAccountWithDictionary:(NSDictionary*) dictionary andCompletion: (void (^)(BOOL))completion
 {
-    NSString* query = [NSString stringWithFormat:@"insert into account (server, other_port, resource, domain, enabled, selfsigned, directTLS, username, airdrop) values(?, ?, ?, ?, ?, ?, ?, ?, ?)"];
+    NSString* query = [NSString stringWithFormat:@"insert into account (server, other_port, resource, domain, enabled, selfsigned, directTLS, username) values(?, ?, ?, ?, ?, ?, ?, ?, ?)"];
     
     NSString* server = (NSString*) [dictionary objectForKey:kServer];
     NSString* port = (NSString*)[dictionary objectForKey:kPort];
-    NSArray* params = @[server == nil ? @"" : server,
-                       port == nil ? @"5222" : port,
-                       ((NSString *)[dictionary objectForKey:kResource]),
-                       ((NSString *)[dictionary objectForKey:kDomain]),
-                       [dictionary objectForKey:kEnabled] ,
-                       [dictionary objectForKey:kSelfSigned],
-                       [dictionary objectForKey:kDirectTLS],
-                       ((NSString *)[dictionary objectForKey:kUsername]),
-                       [dictionary objectForKey:kAirdrop]?[dictionary objectForKey:kAirdrop]:@"0"
+    NSArray* params = @[
+        server == nil ? @"" : server,
+        port == nil ? @"5222" : port,
+        ((NSString *)[dictionary objectForKey:kResource]),
+        ((NSString *)[dictionary objectForKey:kDomain]),
+        [dictionary objectForKey:kEnabled] ,
+        [dictionary objectForKey:kSelfSigned],
+        [dictionary objectForKey:kDirectTLS],
+        ((NSString *)[dictionary objectForKey:kUsername])
     ];
     [self executeNonQuery:query andArguments:params withCompletion:completion];
 }
@@ -2317,7 +2315,7 @@ NSString *const kCount = @"count";
     NSString *dbPath = [documentsDirectory stringByAppendingPathComponent:@"sworim.sqlite"];
     DDLogInfo(@"db path %@", dbPath);
 
-    if (sqlite3_open_v2([dbPath UTF8String], &database, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nil) == SQLITE_OK)
+    if(sqlite3_open_v2([dbPath UTF8String], &(self->database), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nil) == SQLITE_OK)
     {
         DDLogVerbose(@"Database opened");
     }
@@ -2874,7 +2872,7 @@ NSString *const kCount = @"count";
         [self executeNonQuery:@"update dbversion set dbversion='4.75';" andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.75 success");
     }
-
+    
     if([dbversion doubleValue] < 4.76)
     {
         DDLogVerbose(@"Database version <4.76 detected. Performing upgrade on accounts.");
@@ -2883,7 +2881,7 @@ NSString *const kCount = @"count";
         [self executeNonQuery:@"update dbversion set dbversion='4.76';" andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.76 success");
     }
-
+    
     if([dbversion doubleValue] < 4.77)
     {
         DDLogVerbose(@"Database version <4.77 detected. Performing upgrade on accounts.");
@@ -2898,7 +2896,21 @@ NSString *const kCount = @"count";
         [self executeNonQuery:@"update dbversion set dbversion='4.77';" andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.77 success");
     }
-
+    
+    if([dbversion doubleValue] < 4.78)
+    {
+        DDLogVerbose(@"Database version <4.78 detected. Performing upgrade on accounts.");
+        // drop airdrop column
+        [self executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:nil];
+        [self executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);" andArguments:nil];
+        [self executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, rosterVersion, state) SELECT account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, rosterVersion, state from _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"DROP TABLE _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='4.78';" andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.78 success");
+    }
+    
     [self endWriteTransaction];
     _version_check_done = YES;
     return;
@@ -2906,7 +2918,8 @@ NSString *const kCount = @"count";
 
 -(void) dealloc
 {
-    sqlite3_close(database);
+    DDLogVerbose(@"Closing database");
+    sqlite3_close(self->database);
 }
 
 

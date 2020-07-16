@@ -88,11 +88,8 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, strong) NSArray* roomList;
 @property (nonatomic, strong) NSArray* rosterList;
 
-@property (nonatomic, assign) BOOL airDrop;
-
 //calculated
 @property (nonatomic, strong, readonly) NSString* versionHash;
-
 @property (nonatomic, strong) NSDate* connectedTime;
 
 #ifndef DISABLE_OMEMO
@@ -111,7 +108,7 @@ extern NSString* const kAccountState;
 extern NSString* const kAccountHibernate;
 
 
--(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAirDrop:(BOOL) airDrop andAccountNo:(NSString*) accountNo;
+-(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSString*) accountNo;
 
 -(void) connect;
 -(void) disconnect;

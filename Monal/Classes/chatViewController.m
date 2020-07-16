@@ -562,38 +562,40 @@
     
     [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId withCompletion:^(NSArray *result) {
         NSArray *accounts = result;
-         if(accounts.count==0) {
-             DDLogError(@"Account should be >0");
-             return;
-         }
-         NSDictionary* settings=[accounts objectAtIndex:0];
-         
-         if(!messageID) {
-             NSString *contactNameCopy =self.contact.contactJid; //prevent retail cycle
-             NSString *accountNoCopy = self.contact.accountId;
-             BOOL isMucCopy = self.contact.isGroup;
-             BOOL encryptChatCopy = self.encryptChat;
-             MLContact *contactCopy = self.contact;
-             
-             
-             [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
-                 [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
-                                       withCompletionHandler:nil];
-                   [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:nil userInfo:@{@"contact":contactCopy}];
-             }];
-         }
-         else  {
-             [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:NO messageId:newMessageID
-                                   withCompletionHandler:nil];
-         }
-         
-         
-         if([[settings objectForKey:kAirdrop] boolValue])
-         {
-             DDLogInfo(@"Sending Via share sheet");
-             [self sendWithShareSheet];
-             
-         }
+        if(accounts.count==0) {
+            DDLogError(@"Account should be >0");
+            return;
+        }
+        NSDictionary* settings=[accounts objectAtIndex:0];
+        
+        if(!messageID)
+        {
+            NSString *contactNameCopy =self.contact.contactJid; //prevent retail cycle
+            NSString *accountNoCopy = self.contact.accountId;
+            BOOL isMucCopy = self.contact.isGroup;
+            BOOL encryptChatCopy = self.encryptChat;
+            MLContact *contactCopy = self.contact;
+            
+            
+            [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
+                [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
+                                    withCompletionHandler:nil];
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:nil userInfo:@{@"contact":contactCopy}];
+            }];
+        }
+        else
+        {
+            [[MLXMPPManager sharedInstance]
+                sendMessage:messageText
+                toContact:self.contact.contactJid
+                fromAccount:self.contact.accountId
+                isEncrypted:self.encryptChat
+                isMUC:self.contact.isGroup
+                isUpload:NO messageId:newMessageID
+                withCompletionHandler:nil
+            ];
+        }
+        
         [[NSNotificationCenter defaultCenter] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":self.contact}];
     }];
 }

@@ -469,7 +469,7 @@ An array of Dics what have timers to make sure everything was sent
     MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andDirectTLS:[[account objectForKey:kDirectTLS] boolValue]];
     server.selfSignedCert=[[account objectForKey:kSelfSigned] boolValue];
 
-    xmpp* xmppAccount=[[xmpp alloc] initWithServer:server andIdentity:identity andAirDrop:[[account objectForKey:kAirdrop] boolValue] andAccountNo:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
+    xmpp* xmppAccount=[[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     xmppAccount.pushNode=self.pushNode;
     xmppAccount.pushSecret=self.pushSecret;
 

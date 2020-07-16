@@ -238,7 +238,11 @@
         [[DataLayer sharedInstance] messageHistoryCleanAll];
     }
     
-    DDLogInfo(@"App started");
+    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+    NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
+    NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
+    NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
+    DDLogInfo(@"App started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
     return YES;
 }
 

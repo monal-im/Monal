@@ -63,6 +63,7 @@ NSString *const kXMPPPresence = @"presence";
 
 @interface xmpp()
 {
+    //network (stream) related stuff
     MLPipe* _iPipe;
     NSOutputStream* _oStream;
     NSMutableArray* _outputQueue;
@@ -90,6 +91,7 @@ NSString *const kXMPPPresence = @"presence";
     NSMutableDictionary* _iqHandlers;
     BOOL _startTLSComplete;
     BOOL _catchupDone;
+    double _exponentialBackoff;
     
     //registration related stuff
     BOOL _registration;
@@ -151,6 +153,7 @@ NSString *const kXMPPPresence = @"presence";
     _discoveredServersList = [[NSMutableArray alloc] init];
     if(!_usableServersList)
         _usableServersList = [[NSMutableArray alloc] init];
+    _exponentialBackoff = 0;
     _outputQueue = [[NSMutableArray alloc] init];
     _iqHandlers = [[NSMutableDictionary alloc] init];
 
@@ -518,6 +521,7 @@ NSString *const kXMPPPresence = @"presence";
         if(explicitLogout && _accountState>=kStateHasStream)
         {
             DDLogInfo(@"doing explicit logout (xmpp stream close)");
+            _exponentialBackoff = 0;
             if(self.accountState>=kStateBound)
                 [_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
                     //disable push for this node
@@ -605,7 +609,10 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) reconnect
 {
-    [self reconnect:1.0];
+    if(!_exponentialBackoff)
+        _exponentialBackoff = 1.0;
+    [self reconnect:_exponentialBackoff];
+    _exponentialBackoff = MIN(_exponentialBackoff, 10.0);
 }
 
 -(void) reconnect:(double) wait
@@ -1295,9 +1302,10 @@ NSString *const kXMPPPresence = @"presence";
             self.resuming=NO;
 
             //now we are bound again
-            _accountState=kStateBound;
-            _connectedTime=[NSDate date];
-            _usableServersList=[[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
+            _accountState = kStateBound;
+            _connectedTime = [NSDate date];
+            _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
+            _exponentialBackoff = 0;
 
             //remove already delivered stanzas and resend the (still) unacked ones
             [self removeAckedStanzasFromQueue:resumeNode.h];
@@ -1989,10 +1997,11 @@ NSString *const kXMPPPresence = @"presence";
 -(void) initSession
 {
     //we are now bound
-    _accountState=kStateBound;
-    _connectedTime=[NSDate date];
+    _accountState = kStateBound;
+    _connectedTime = [NSDate date];
     [self postConnectNotification];
-    _usableServersList=[[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
+    _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
+    _exponentialBackoff = 0;
 
     XMPPIQ* sessionQuery= [[XMPPIQ alloc] initWithType:kiqSetType];
     MLXMLNode* session = [[MLXMLNode alloc] initWithElement:@"session"];

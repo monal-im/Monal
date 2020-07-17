@@ -1866,8 +1866,9 @@ NSString *const kXMPPPresence = @"presence";
     };
     if([NSOperationQueue currentQueue]!=self.receiveQueue)
     {
+        //since we dont know what thead this, saying block yes will cause app dead lock (esp if main thread)
         DDLogWarn(@"SWITCHING TO RECEIVE QUEUE IN SEND (called from outside of receiveQueue): %@", stanza.XMLString);
-        [self.receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:YES];
+        [self.receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:NO];
     }
     else
         operation();

@@ -101,29 +101,43 @@
         NSString* timeString;
 
         unsigned long diff = currentTimestamp - lastInteractionTime;
-        if(diff / 60 < 1)
+        if(diff < 60)
         {
             // less than one minute
             timeString = NSLocalizedString(@"Just seen", @"");
-            diff = 0;
         }
-        else if(diff / 60 < 60)
+        else if(diff < 120)
+        {
+            // less than two minutes
+            timeString = NSLocalizedString(@"Last seen: 1 minute ago", @"");
+        }
+        else if(diff < 3600)
         {
             // less than one hour
-            timeString = NSLocalizedString(@"Last seen: %d min", @"");
+            timeString = NSLocalizedString(@"Last seen: %d minutes ago", @"");
             diff /= 60;
         }
-        else if(diff / (60 * 60) < 24)
+        else if(diff < 7200)
+        {
+            // less than 2 hours
+            timeString = NSLocalizedString(@"Last seen: 1 hour ago", @"");
+        }
+        else if(diff < 86400)
         {
             // less than 24 hours
-            timeString = NSLocalizedString(@"Last seen: %d hours", @"");
-            diff /= 60 * 60;
+            timeString = NSLocalizedString(@"Last seen: %d hours ago", @"");
+            diff /= 3600;
+        }
+        else if(diff < 86400 * 2)
+        {
+            // less than 2 days
+            timeString = NSLocalizedString(@"Last seen: 1 day ago", @"");
         }
         else
         {
-            // more than 24 hours
-            timeString = NSLocalizedString(@"Last seen: %d days", @"");
-            diff /= 60 * 60 * 24;
+            // more than 2 days
+            timeString = NSLocalizedString(@"Last seen: %d days ago", @"");
+            diff /= 86400;
         }
 
         NSString* lastSeen = [NSString stringWithFormat:timeString, diff];
@@ -231,7 +245,7 @@
     return resource;
 }
 
-#pragma mark  Bae64
+#pragma mark  Base64
 
 +(NSString*) encodeBase64WithString:(NSString*) strData
 {

@@ -32,6 +32,7 @@
 {
     BOOL _isTyping;
     monal_void_block_t _cancelTypingNotification;
+    monal_void_block_t _cancelLastInteractionTimer;
 }
 
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
@@ -261,6 +262,13 @@
     }
 }
 
+-(void) stopLastInteractionTimer
+{
+    if(_cancelLastInteractionTimer)
+        _cancelLastInteractionTimer();
+    _cancelLastInteractionTimer = nil;
+}
+
 -(void) updateNavBarLastInteractionLabel:(NSNotification*) notification
 {
     NSDate* lastInteractionDate = [NSNull null];
@@ -274,21 +282,31 @@
             return;     // ignore other accounts or contacts
         if(data[@"isTyping"]==@YES)
         {
+            [self stopLastInteractionTimer];
             dispatch_async(dispatch_get_main_queue(), ^{
                 self.navBarLastInteraction.text = NSLocalizedString(@"Typing...", @"");
             });
             return;
         }
-        lastInteractionDate = data[@"lastInteraction"];     //this is nil for a "not typing" (aka typing ended) notification --> "online"
+        lastInteractionDate = data[@"lastInteraction"];     // this is nil for a "not typing" (aka typing ended) notification --> "online"
     }
     // ...or load the latest interaction timestamp from db
     else
         lastInteractionDate = [[DataLayer sharedInstance] lastInteractionOfJid:jid forAccountNo:accountNo];
-    // make timestamp human readable
-    NSString* lastInteractionString = [HelperTools formatLastInteraction:lastInteractionDate];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.navBarLastInteraction.text = lastInteractionString;
-    });
+    
+    // make timestamp human readable (lastInteractionDate will be captured by this block and automatically used by our timer)
+    monal_void_block_t __block updateTime = ^{
+        DDLogVerbose(@"LastInteraction updateTime() called");
+        NSString* lastInteractionString = [HelperTools formatLastInteraction:lastInteractionDate];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.navBarLastInteraction.text = lastInteractionString;
+        });
+        [self stopLastInteractionTimer];
+        // this timer will be called only if needed
+        if(lastInteractionDate && lastInteractionDate!=[NSNull null])
+            _cancelLastInteractionTimer = [HelperTools startTimer:60 withHandler:updateTime];
+    };
+    updateTime();
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -389,6 +407,7 @@
     [MLNotificationManager sharedInstance].currentContact=nil;
     
     [self sendChatState:NO];
+    [self stopLastInteractionTimer];
 }
 
 - (void)viewDidLayoutSubviews {
@@ -406,6 +425,7 @@
 -(void) dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self stopLastInteractionTimer];
 }
 
 -(void) updateBackground {

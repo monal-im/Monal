@@ -1638,7 +1638,6 @@ NSString *const kXMPPPresence = @"presence";
     //don't use dispatchOnReceiveQueue here because we want to log that this switch happened in the send: call
     if([NSOperationQueue currentQueue]!=_receiveQueue)
     {
-        //since we dont know what thead this, saying block yes will cause app dead lock (esp if main thread)
         DDLogWarn(@"SWITCHING TO RECEIVE QUEUE IN SEND (called from outside of receiveQueue): %@", stanza.XMLString);
         [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:YES];
     }

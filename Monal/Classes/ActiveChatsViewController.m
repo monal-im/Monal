@@ -16,7 +16,6 @@
 #import "MLWelcomeViewController.h"
 #import "ContactsViewController.h"
 #import "MLNewViewController.h"
-#import "MonalAppDelegate.h"
 
 @interface ActiveChatsViewController ()
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;

@@ -101,19 +101,26 @@
         NSString* timeString;
 
         unsigned long diff = currentTimestamp - lastInteractionTime;
-        if(diff / 60 < 1) {
+        if(diff / 60 < 1)
+        {
             // less than one minute
             timeString = NSLocalizedString(@"Just seen", @"");
             diff = 0;
-        } else if(diff / 60 < 2 * 60){
+        }
+        else if(diff / 60 < 60)
+        {
             // less than one hour
             timeString = NSLocalizedString(@"Last seen: %d min", @"");
             diff /= 60;
-        } else if(diff / (60 * 60) < 2 * 24){
+        }
+        else if(diff / (60 * 60) < 24)
+        {
             // less than 24 hours
             timeString = NSLocalizedString(@"Last seen: %d hours", @"");
             diff /= 60 * 60;
-        } else {
+        }
+        else
+        {
             // more than 24 hours
             timeString = NSLocalizedString(@"Last seen: %d days", @"");
             diff /= 60 * 60 * 24;

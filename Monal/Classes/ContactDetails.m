@@ -167,9 +167,10 @@
                 detailCell.isContact.hidden = self.isSubscribed;
                 detailCell.isContact.text = self.subMessage;
             }
+            
             // Set human readable lastInteraction field
             NSDate* lastInteractionDate = [[DataLayer sharedInstance] lastInteractionOfJid:self.contact.contactJid forAccountNo:self.contact.accountId];
-            detailCell.lastInteraction.text = [HelperTools formatLastInteraction:lastInteractionDate];
+            detailCell.lastInteraction.text = [NSDateFormatter localizedStringFromDate:lastInteractionDate dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
             
             if(self.contact.isGroup || !self.isSubscribed) {
                 detailCell.lockButton.hidden = YES;

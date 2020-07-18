@@ -24,7 +24,7 @@ _Hint: This is work in progress, everyone is invited to fill up the list._
 |[XEP-0071 XHTML-IM](https://xmpp.org/extensions/xep-0071.html)|?|?|
 |[XEP-0077 In-Band Registration](https://xmpp.org/extensions/xep-0077.html)|:warning:|?|partial, using a hardcoded server|
 |[XEP-0084 User Avatar](https://xmpp.org/extensions/xep-0084.html)|?|?|
-|[XEP-0085 Chat State Notifications](https://xmpp.org/extensions/xep-0085.html)|?|?|[#288](https://github.com/anurodhp/Monal/issues/288)|
+|[XEP-0085 Chat State Notifications](https://xmpp.org/extensions/xep-0085.html)|:heavy_check_mark:|?|[commit](https://github.com/anurodhp/Monal/pull/417/commits/ee5b37e12d7d2cc4e2272baef8375bedfbbe2d82)|
 |[XEP-0092 Software Version](https://xmpp.org/extensions/xep-0092.html)|?|?|
 |[XEP-0095 Stream Initiation](https://xmpp.org/extensions/xep-0095.html)|?|?|
 |[XEP-0107 User Mood](https://xmpp.org/extensions/xep-0107.html)|?|?|
@@ -45,7 +45,7 @@ _Hint: This is work in progress, everyone is invited to fill up the list._
 |[XEP-0175 Best Practices for Use of SASL ANONYMOUS](https://xmpp.org/extensions/xep-0175.html)|?|?|
 |[XEP-0178 Best Practices for Use of SASL EXTERNAL with Certificates](https://xmpp.org/extensions/xep-0178.html)|?|?|
 |[XEP-0184 Message Receipts](https://xmpp.org/extensions/xep-0184.html)|?|?|
-|[XEP-0191 Blocking Command](https://xmpp.org/extensions/xep-0191.html)|:heavy_check_mark:|?|[commit](https://github.com/anurodhp/Monal/commit/6bd7ff2b8cb195e1f0684208e9fccf9fc611acc0)
+|[XEP-0191 Blocking Command](https://xmpp.org/extensions/xep-0191.html)|:warning:|?|partly, missing sync with server which accounts are blocked, [commit](https://github.com/anurodhp/Monal/commit/6bd7ff2b8cb195e1f0684208e9fccf9fc611acc0)
 |[XEP-0198 Stream Management](https://xmpp.org/extensions/xep-0198.html)|?|?|
 |[XEP-0199 XMPP Ping](https://xmpp.org/extensions/xep-0199.html)|?|?|
 |[XEP-0200 Stanza Encryption](https://xmpp.org/extensions/xep-0200.html)|?|?|
@@ -68,7 +68,7 @@ _Hint: This is work in progress, everyone is invited to fill up the list._
 |[XEP-0306 Extensible Status Conditions for Multi-User Chat](https://xmpp.org/extensions/xep-0306.html)|?|?|
 |[XEP-0308 Last Message Correction](https://xmpp.org/extensions/xep-0308.html)|:x:|?|[#252](https://github.com/anurodhp/Monal/issues/252)
 |[XEP-0313 Message Archive Management](https://xmpp.org/extensions/xep-0313.html)|:warning:|?|partial, MUC-MAM not implemented|
-|[XEP-0319 Last User Interaction in Presence](https://xmpp.org/extensions/xep-0319.html)|?|?|
+|[XEP-0319 Last User Interaction in Presence](https://xmpp.org/extensions/xep-0319.html)|:heavy_check_mark:|?|[commit](https://github.com/anurodhp/Monal/pull/417/commits/2c678a11dd3c93f4fc9dc3bf405687f062e543c3)|
 |[XEP-0363 HTTP File Upload](https://xmpp.org/extensions/xep-0363.html)|:heavy_check_mark:|?|
 |[XEP-0368 SRV records for XMPP over TLS](https://xmpp.org/extensions/xep-0368.html)|?|?|
 |[XEP-0373 OpenPGP for XMPP](https://xmpp.org/extensions/xep-0373.html)|:x:|?|

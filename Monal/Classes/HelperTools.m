@@ -149,35 +149,41 @@
 
 +(NSDate*) parseDateTimeString:(NSString*) datetime
 {
-    NSDate* retval = nil;
-    NSDateFormatter *rfc3339DateFormatter = [[NSDateFormatter alloc] init];
-    NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-    
-    [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
-    [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss.SSSSSSXXXXX"];
-    [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-    
-    retval = [rfc3339DateFormatter dateFromString:datetime];
-    if(!retval)
-    {
-        NSDateFormatter *rfc3339DateFormatter2 = [[NSDateFormatter alloc] init];
-
+    static NSDateFormatter* rfc3339DateFormatter;
+    static NSDateFormatter* rfc3339DateFormatter2;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+        rfc3339DateFormatter = [[NSDateFormatter alloc] init];
+        rfc3339DateFormatter2 = [[NSDateFormatter alloc] init];
+        
+        [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
+        [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss.SSSSSSXXXXX"];
+        [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+        
         [rfc3339DateFormatter2 setLocale:enUSPOSIXLocale];
         [rfc3339DateFormatter2 setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
         [rfc3339DateFormatter2 setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ssZ"];
+    });
+    
+    NSDate* retval = [rfc3339DateFormatter dateFromString:datetime];
+    if(!retval)
         retval = [rfc3339DateFormatter2 dateFromString:datetime];
-    }
     return retval;
 }
 
 +(NSString*) generateDateTimeString:(NSDate*) datetime
 {
-    NSDateFormatter* rfc3339DateFormatter = [[NSDateFormatter alloc] init];
-    NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-    
-    [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
-    [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z"];
-    [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    static NSDateFormatter* rfc3339DateFormatter;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+        NSDateFormatter* rfc3339DateFormatter = [[NSDateFormatter alloc] init];
+        
+        [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
+        [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z"];
+        [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    });
     
     return [rfc3339DateFormatter stringFromDate:datetime];
 }

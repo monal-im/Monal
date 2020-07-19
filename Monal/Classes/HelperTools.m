@@ -213,7 +213,7 @@
     dispatch_source_set_timer(timer,
                               dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout*NSEC_PER_SEC)),
                               DISPATCH_TIME_FOREVER,
-                              1ull * NSEC_PER_SEC);
+                              0ull * NSEC_PER_SEC);
     
     dispatch_source_set_event_handler(timer, ^{
         DDLogDebug(@"timer %@ %@(%G) triggered", timer, uuid, timeout);

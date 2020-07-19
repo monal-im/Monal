@@ -223,7 +223,7 @@
 
     if(self.contact.isGroup) {
         NSArray* members = [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
-        jidLabelText = [NSString stringWithFormat:@"%@ (%ld)", self.navBarContactJid.text, members.count];
+        jidLabelText = [NSString stringWithFormat:@"%@ (%ld)", contactDisplayName, members.count];
     }
     // change text values
     dispatch_async(dispatch_get_main_queue(), ^{

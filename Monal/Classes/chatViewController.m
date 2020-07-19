@@ -126,12 +126,6 @@
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight = UITableViewAutomaticDimension;
     
-     self.navBarContainerView.frame = CGRectMake(0, 0, self.view.frame.size.width, 60);
-    [self.view addSubview:self.navBarContainerView];
-    [self.navBarContainerView.leadingAnchor constraintEqualToAnchor:self.navBarContainerView.superview.leadingAnchor].active = YES;
-    [self.navBarContainerView.bottomAnchor constraintEqualToAnchor:self.navBarContainerView.superview.bottomAnchor].active = YES;
-    [self.navBarContainerView.trailingAnchor constraintEqualToAnchor:self.navBarContainerView.superview.trailingAnchor].active = YES;
-
 #if TARGET_OS_MACCATALYST
     //does not become first responder like in iOS
     [self.view addSubview:self.inputContainerView];
@@ -234,6 +228,9 @@
     // change text values
     dispatch_async(dispatch_get_main_queue(), ^{
         self.navBarContactJid.text = jidLabelText;
+        [[MLImageManager sharedInstance] getIconForContact:self.contact.contactJid andAccount:self.contact.accountId withCompletion:^(UIImage *image) {
+                   self.navBarIcon.image=image;
+          }];
         self.sendButton.enabled = sendButtonEnabled;
     });
 }
@@ -313,7 +310,7 @@
 {
     [super viewWillAppear:animated];
     // Hide normal navigation bar
-    [[self navigationController] setNavigationBarHidden:YES animated:NO];
+    //[[self navigationController] setNavigationBarHidden:YES animated:NO];
     
     [MLNotificationManager sharedInstance].currentAccountNo=self.contact.accountId;
     [MLNotificationManager sharedInstance].currentContact=self.contact;

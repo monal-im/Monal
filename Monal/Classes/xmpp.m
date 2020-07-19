@@ -1639,7 +1639,7 @@ NSString *const kXMPPPresence = @"presence";
     if([NSOperationQueue currentQueue]!=_receiveQueue)
     {
         DDLogWarn(@"SWITCHING TO RECEIVE QUEUE IN SEND (called from outside of receiveQueue): %@", stanza.XMLString);
-        [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:YES];
+        [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:NO];
     }
     else
         operation();

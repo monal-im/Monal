@@ -36,6 +36,7 @@
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint* tableviewBottom;
 @property (weak, nonatomic) IBOutlet UILabel *navBarContactJid;
 @property (weak, nonatomic) IBOutlet UILabel *navBarLastInteraction;
+@property (nonatomic, weak) IBOutlet UIImageView* navBarIcon;
 @property (weak, nonatomic) IBOutlet UIButton *navBarContactDetailsButton;
 @property (weak, nonatomic) IBOutlet UIButton* navBarEncryptToggleButton;
 

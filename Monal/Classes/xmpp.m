@@ -612,7 +612,7 @@ NSString *const kXMPPPresence = @"presence";
     if(!_exponentialBackoff)
         _exponentialBackoff = 1.0;
     [self reconnect:_exponentialBackoff];
-    _exponentialBackoff = MIN(_exponentialBackoff, 10.0);
+    _exponentialBackoff = MIN(_exponentialBackoff * 2, 10.0);
 }
 
 -(void) reconnect:(double) wait

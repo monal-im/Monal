@@ -1586,7 +1586,7 @@
                         <rightBarButtonItems>
                             <barButtonItem title="Info" image="info.circle" catalog="system" id="C9Q-7y-bRl">
                                 <connections>
-                                    <segue destination="cC0-5a-Jvb" kind="show" identifier="showDetails" id="qAH-1S-435"/>
+                                    <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" id="qAH-1S-435"/>
                                 </connections>
                             </barButtonItem>
                             <barButtonItem image="745-unlocked" style="plain" id="wma-QS-7Rc"/>

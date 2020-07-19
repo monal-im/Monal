@@ -16,7 +16,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void (^iqCompletion)( MLXMLNode  * _Nullable iqResponse);
+typedef void (^iqCompletion)(MLXMLNode* iq, monal_iq_handler_t resultHandler, monal_iq_handler_t errorHandler);
 typedef void (^processAction)(void);
 
 @interface MLIQProcessor : NSObject

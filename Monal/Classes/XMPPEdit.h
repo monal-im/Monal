@@ -13,7 +13,6 @@
 
 
 @interface XMPPEdit: UITableViewController <UITextFieldDelegate> {
-	CGRect oldFrame;
 	IBOutlet UILabel *JIDLabel;
 }
 

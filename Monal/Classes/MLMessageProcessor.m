@@ -9,7 +9,7 @@
 #import "MLMessageProcessor.h"
 #import "DataLayer.h"
 #import "SignalAddress.h"
-#import "EncodingTools.h"
+#import "HelperTools.h"
 #import "AESGcm.h"
 #import "MLConstants.h"
 #import "MLImageManager.h"
@@ -24,8 +24,14 @@
 @property (nonatomic, strong) MLXMPPConnection *connection;
 @end
 
+static NSMutableDictionary* _typingNotifications;
 
 @implementation MLMessageProcessor
+
++(void) initialize
+{
+    _typingNotifications = [[NSMutableDictionary alloc] init];
+}
 
 -(MLMessageProcessor *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid connection:(MLXMPPConnection *) connection   signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore {
     self=[super init];
@@ -52,10 +58,11 @@
     {
         DDLogError(@"Error type message received");
         
-        if([messageNode.errorReason isEqualToString:@"recipient-unavailable"]) {
-               //ignore becasue with push this is moot
-               return;
-           }
+        if(!messageNode.idval.length)
+        {
+            DDLogError(@"Ignoring error messages having an empty ID");
+            return;
+        }
         
         //update db
         [[DataLayer sharedInstance] setMessageId:messageNode.idval errorType:messageNode.errorType?messageNode.errorType:@""
@@ -89,8 +96,7 @@
             ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.from andServer:@"" forAccount:self.accountNo];
         }
         
-        if (ownNick!=nil
-            && [messageNode.actualFrom isEqualToString:ownNick])
+        if (ownNick!=nil && [messageNode.actualFrom isEqualToString:ownNick])
         {
             DDLogDebug(@"Dropping muc echo");
             return;
@@ -194,6 +200,38 @@
         [self processHeadline:messageNode];
     }
     
+    //only use "is typing" messages when not older than 2 minutes (always allow "not typing" messages)
+    if([[DataLayer sharedInstance] checkCap:@"http://jabber.org/protocol/chatstates" forUser:messageNode.user andAccountNo:self.accountNo] &&
+        ((messageNode.composing && (!messageNode.delayTimeStamp || [[NSDate date] timeIntervalSinceDate:messageNode.delayTimeStamp] < 120)) ||
+        messageNode.notComposing)
+    )
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+            @"jid": messageNode.user,
+            @"accountNo": self.accountNo,
+            @"isTyping": messageNode.composing ? @YES : @NO
+        }];
+        //send "not typing" notifications (kMonalLastInteractionUpdatedNotice) 60 seconds after the last isTyping was received
+        @synchronized(_typingNotifications) {
+            //copy needed values into local variables to not retain self by our timer block
+            NSString* account = self.accountNo;
+            NSString* jid = messageNode.user;
+            //abort old timer on new isTyping or isNotTyping message
+            if(_typingNotifications[messageNode.user])
+                ((monal_void_block_t) _typingNotifications[messageNode.user])();
+            //start a new timer for every isTyping message
+            if(messageNode.composing)
+            {
+                _typingNotifications[messageNode.user] = [HelperTools startTimer:60 withHandler:^{
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:[NSNull null] userInfo:@{
+                        @"jid": jid,
+                        @"accountNo": account,
+                        @"isTyping": @NO
+                    }];
+                }];
+            }
+        }
+    }
 }
     
 -(void) processHeadline:(ParseMessage *) messageNode
@@ -309,7 +347,7 @@
                 messagetype= SignalCiphertextTypeMessage;
             }
             
-            NSData *decoded= [EncodingTools dataWithBase64EncodedString:[messageKey objectForKey:@"key"]];
+            NSData *decoded= [HelperTools dataWithBase64EncodedString:[messageKey objectForKey:@"key"]];
             
             SignalCiphertext* ciphertext = [[SignalCiphertext alloc] initWithData:decoded type:messagetype];
             NSError* error;
@@ -342,8 +380,8 @@
                 }
                 
                 if(key){
-                    NSData *iv = [EncodingTools dataWithBase64EncodedString:messageNode.iv];
-                    NSData *decodedPayload = [EncodingTools dataWithBase64EncodedString:messageNode.encryptedPayload];
+                    NSData *iv = [HelperTools dataWithBase64EncodedString:messageNode.iv];
+                    NSData *decodedPayload = [HelperTools dataWithBase64EncodedString:messageNode.encryptedPayload];
                     
                     NSData *decData = [AESGcm decrypt:decodedPayload withKey:key andIv:iv withAuth:auth];
                     if(!decData) {

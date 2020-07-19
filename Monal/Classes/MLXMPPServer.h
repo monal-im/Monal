@@ -18,7 +18,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSString *host;
 @property (nonatomic, readonly) NSNumber *port;
 
-@property (nonatomic,assign) BOOL SSL;
 @property (nonatomic,assign) BOOL directTLS;
 @property (nonatomic,assign) BOOL selfSignedCert;
 
@@ -42,7 +41,7 @@ returns the currently connected port may be configured  or dns one.
 - (NSNumber *) connectPort;
 
 /**
- Will indicate whether direct TLS us used. This is either the old style or  updated via DNS discovery
+ Will indicate whether direct TLS us used. This is either the old style or updated via DNS discovery
 */
 - (BOOL) isDirectTLS;
 

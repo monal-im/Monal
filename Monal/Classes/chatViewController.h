@@ -19,14 +19,8 @@
 
 @interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate, CLLocationManagerDelegate>
 {
-    UIView *containerView;
-	CGRect oldFrame;
+    UIView* containerView;
 	BOOL _firstmsg;
-	BOOL wasaway;
-	BOOL wasoffline;
-    NSArray* activeChats;
-    
-    BOOL _keyboardVisible; 
 }
 
 @property (nonatomic, retain) CLLocationManager *locationManager;
@@ -38,7 +32,12 @@
 @property (nonatomic, weak) IBOutlet UIButton* plusButton;
 
 @property (nonatomic, weak) IBOutlet UIView* inputContainerView;
+@property (nonatomic, weak) IBOutlet UIView* navBarContainerView;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint* tableviewBottom;
+@property (weak, nonatomic) IBOutlet UILabel *navBarContactJid;
+@property (weak, nonatomic) IBOutlet UILabel *navBarLastInteraction;
+@property (weak, nonatomic) IBOutlet UIButton *navBarContactDetailsButton;
+@property (weak, nonatomic) IBOutlet UIButton* navBarEncryptToggleButton;
 
 @property (nonatomic, weak) IBOutlet UIImageView* backgroundImage;
 @property (nonatomic, weak) IBOutlet UIView* transparentLayer;
@@ -48,7 +47,7 @@
 @property (nonatomic, strong) MLContact* contact;
 
 /**
- full own username with domain e.g. aa@gmail.com
+ full own username with domain e.g. user@example.org
  */
 @property (nonatomic, strong) NSString* jid;
 

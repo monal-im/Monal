@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MLXMLNode.h"
-#import "EncodingTools.h"
+#import "HelperTools.h"
 
 #import "MLConstants.h"
 #import "MLXMPPConstants.h"
@@ -26,13 +26,13 @@
 #import "MLXMPPConnection.h"
 
 typedef NS_ENUM (NSInteger, xmppState) {
-    kStateLoggedOut =-1,
-    kStateDisconnected, // has connected once
+    kStateLoggedOut = -1,
+    kStateDisconnected,		// has connected once
     kStateReconnecting,
     kStateHasStream,
     kStateLoggedIn,
     kStateBinding,
-    kStateBound //is operating normally
+    kStateBound		//is operating normally
 };
 
 typedef NS_ENUM (NSInteger, xmppRegistrationState) {
@@ -42,16 +42,18 @@ typedef NS_ENUM (NSInteger, xmppRegistrationState) {
     kStateRegistered
 };
 
-FOUNDATION_EXPORT NSString *const kFileName;
-FOUNDATION_EXPORT NSString *const kContentType;
-FOUNDATION_EXPORT NSString *const kData;
-FOUNDATION_EXPORT NSString *const kContact;
-FOUNDATION_EXPORT NSString *const kCompletion;
+FOUNDATION_EXPORT NSString* const kFileName;
+FOUNDATION_EXPORT NSString* const kContentType;
+FOUNDATION_EXPORT NSString* const kData;
+FOUNDATION_EXPORT NSString* const kContact;
+FOUNDATION_EXPORT NSString* const kCompletion;
 
 typedef void (^xmppCompletion)(BOOL success, NSString *message);
 typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFields);
 
 @interface xmpp : NSObject <NSStreamDelegate>
+
+@property (nonatomic, readonly) BOOL idle;
 
 @property (nonatomic, strong) NSString* pushNode;
 @property (nonatomic, strong) NSString* pushSecret;
@@ -59,53 +61,35 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, strong) MLXMPPConnection* connectionProperties;
 
 //reg
-@property (nonatomic, assign) BOOL registrationSubmission;
-@property (nonatomic, assign) BOOL registration;
-@property (nonatomic, assign) xmppRegistrationState registrationState;
-
 @property (nonatomic, strong) NSString *regUser;
 @property (nonatomic, strong) NSString *regPass;
 @property (nonatomic, strong) NSString *regCode;
 @property (nonatomic, strong) NSDictionary *regHidden;
-@property (nonatomic, strong) xmppDataCompletion regFormCompletion;
 
 
 @property (nonatomic, strong) jingleCall* call;
 
 // state attributes
-@property (nonatomic, assign) NSInteger priority;
 @property (nonatomic, strong) NSString* statusMessage;
 @property (nonatomic, assign) BOOL awayState;
-@property (nonatomic, assign) BOOL visibleState;
 
 @property (nonatomic, strong) jingleCall *jingle;
 
 // DB info
 @property (nonatomic, strong) NSString* accountNo;
 
-//we should have an enumerator for this
-@property (nonatomic, assign) BOOL explicitLogout;
-@property (nonatomic, assign, readonly) BOOL loginError;
-
 @property (nonatomic, readonly) xmppState accountState;
-
-
 
 // discovered properties
 @property (nonatomic, assign) BOOL SRVDiscoveryDone;
 @property (nonatomic, strong) NSArray* discoveredServersList;
 @property (nonatomic, strong) NSMutableArray* usableServersList;
 
-@property (nonatomic, strong) NSArray*  roomList;
+@property (nonatomic, strong) NSArray* roomList;
 @property (nonatomic, strong) NSArray* rosterList;
-@property (nonatomic, assign) BOOL staleRoster; //roster is stale if it resumed in the background
-
-
-@property (nonatomic, assign) BOOL airDrop;
 
 //calculated
 @property (nonatomic, strong, readonly) NSString* versionHash;
-
 @property (nonatomic, strong) NSDate* connectedTime;
 
 #ifndef DISABLE_OMEMO
@@ -120,26 +104,26 @@ extern NSString *const kXMPPError;
 extern NSString *const kXMPPSuccess;
 extern NSString *const kXMPPPresence;
 
+extern NSString* const kAccountState;
+extern NSString* const kAccountHibernate;
 
--(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*)identity;
+
+-(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSString*) accountNo;
 
 -(void) connect;
 -(void) disconnect;
+-(void) disconnect:(BOOL) explicitLogout;
 
 /**
  send a message to a contact with xmpp id
  */
 -(void) sendMessage:(NSString* _Nonnull) message toContact:(NSString* _Nonnull) contact isMUC:(BOOL) isMUC isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString *) messageId ;
-
-/**
- crafts a whitepace ping and sends it
- */
--(void) sendWhiteSpacePing;
+-(void) sendChatState:(BOOL) isTyping toJid:(NSString*) jid;
 
 /**
  crafts a  ping and sends it
  */
--(void) sendPing;
+-(void) sendPing:(double) timeout;
 
 /**
  ack any stanzas we have
@@ -190,16 +174,6 @@ sets the status message. makes xmpp call
 sets away xmpp call.
  */
 -(void) setAway:(BOOL) away;
-
-/**
- sets visibility xmpp call.
- */
--(void) setVisible:(BOOL) visible;
-
-/**
- sets priority. makes xmpp call. this is differnt from setting the property value itself.
- */
--(void) updatePriority:(NSInteger) priority;
 
 /**
  request futher service detail
@@ -311,6 +285,7 @@ Decline a call request
 
 -(void) changePassword:(NSString* _Nonnull) newPass withCompletion:(xmppCompletion _Nullable) completion;
 
+-(void) requestRegFormWithCompletion:(xmppDataCompletion) completion andErrorCompletion:(xmppCompletion) errorCompletion;
 -(void) registerUser:(NSString* _Nonnull) username withPassword:(NSString* _Nonnull) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
 
 @end

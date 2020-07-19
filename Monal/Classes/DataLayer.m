@@ -7,7 +7,7 @@
 //
 
 #import "DataLayer.h"
-#import "EncodingTools.h"
+#import "HelperTools.h"
 
 @interface DataLayer()
 
@@ -20,7 +20,9 @@ static BOOL _version_check_done = NO;
 @implementation DataLayer
 
 
-NSString *const kAccountID = @"account_id";
+NSString* const kAccountID = @"account_id";
+NSString* const kAccountState = @"account_state";
+NSString* const kAccountHibernate = @"account_hibernate";
 
 //used for account rows
 NSString *const kDomain = @"domain";
@@ -29,10 +31,8 @@ NSString *const kEnabled = @"enabled";
 NSString *const kServer = @"server";
 NSString *const kPort = @"other_port";
 NSString *const kResource = @"resource";
-NSString *const kSSL = @"secure";
 NSString *const kDirectTLS = @"directTLS";
 NSString *const kSelfSigned = @"selfsigned";
-NSString *const kAirdrop = @"airdrop";
 
 NSString *const kUsername = @"username";
 NSString *const kFullName = @"full_name";
@@ -94,9 +94,10 @@ NSString *const kCount = @"count";
 }
 
 #pragma mark  - V1 low level
--(NSObject*) executeScalar:(NSString*) query andArguments:(NSArray *) args
+-(NSObject*) executeScalar:(NSString*) query andArguments:(NSArray*) args
 {
-    if(!query) return nil;
+    if(!query)
+        return nil;
     NSObject* __block toReturn;
 	sqlite3_stmt *statement;
 	if (sqlite3_prepare_v2(self->database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
@@ -126,7 +127,7 @@ NSString *const kCount = @"count";
 		{
 			switch(sqlite3_column_type(statement,0))
 			{
-					// SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
+				// SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
 				case (SQLITE_INTEGER):
 				{
 					NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement, 0)];
@@ -189,7 +190,7 @@ NSString *const kCount = @"count";
 -(NSArray*) executeReader:(NSString*) query andArguments:(NSArray *) args
 {
     if(!query) return nil;
-    NSMutableArray* __block toReturn =  [[NSMutableArray alloc] init] ;
+    NSMutableArray* __block toReturn = [[NSMutableArray alloc] init];
 	sqlite3_stmt *statement;
 	if (sqlite3_prepare_v2(self->database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) == SQLITE_OK) {
 
@@ -234,15 +235,15 @@ NSString *const kCount = @"count";
 
 					case (SQLITE_FLOAT):
 					{
-						NSNumber* returnInt= [NSNumber numberWithDouble:sqlite3_column_double(statement, counter)];
-						[row setObject:returnInt forKey:columnName];
+						NSNumber* returnDouble = [NSNumber numberWithDouble:sqlite3_column_double(statement, counter)];
+						[row setObject:returnDouble forKey:columnName];
 						break;
 					}
 
 					case (SQLITE_TEXT):
 					{
 						NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement, counter)];
-						[row setObject:[returnString stringByReplacingOccurrencesOfString:@"''" withString:@"'"] forKey:columnName];
+						[row setObject:returnString forKey:columnName];
 						break;
 
 					}
@@ -271,8 +272,8 @@ NSString *const kCount = @"count";
 			[toReturn addObject:row];
 		}
 	} else {
-		DDLogVerbose(@"reader nil with sql not ok: %@", query );
-		toReturn= nil;
+		DDLogVerbose(@"reader nil with sql not ok: %@", query);
+		toReturn = nil;
 	}
     sqlite3_finalize(statement);
     return toReturn;
@@ -415,7 +416,7 @@ NSString *const kCount = @"count";
 		{
 			switch(sqlite3_column_type(statement, 0))
 			{
-					// SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
+				// SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL
 				case (SQLITE_INTEGER):
 				{
 					NSNumber* returnInt= [NSNumber numberWithInt:sqlite3_column_int(statement, 0)];
@@ -437,7 +438,7 @@ NSString *const kCount = @"count";
 					NSString* returnString = [NSString stringWithUTF8String:(const char* _Nonnull)sqlite3_column_text(statement, 0)];
 					//    DDLogVerbose(@"got %@", returnString);
 					while(sqlite3_step(statement) == SQLITE_ROW ){} //clear
-					toReturn = [returnString  stringByReplacingOccurrencesOfString:@"''" withString:@"'"];
+					toReturn = returnString;
 					break;
 
 				}
@@ -747,21 +748,18 @@ NSString *const kCount = @"count";
 
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion
 {
-    NSString* query = [NSString stringWithFormat:@"update account set server=?, other_port=?, username=?, secure=?, resource=?, domain=?, enabled=?, selfsigned=?, directTLS=?, airdrop=? where account_id=?"];
+    NSString* query = [NSString stringWithFormat:@"update account set server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, selfsigned=?, directTLS=? where account_id=?"];
 
     NSString* server = (NSString *) [dictionary objectForKey:kServer];
     NSString* port = (NSString *)[dictionary objectForKey:kPort];
     NSArray* params = @[server == nil ? @"" : server,
                        port == nil ? @"5222" : port,
                        ((NSString*)[dictionary objectForKey:kUsername]),
-
-                       [dictionary objectForKey:kSSL],
                        ((NSString*)[dictionary objectForKey:kResource]),
                        ((NSString*)[dictionary objectForKey:kDomain]),
                        [dictionary objectForKey:kEnabled],
                        [dictionary objectForKey:kSelfSigned],
                        [dictionary objectForKey:kDirectTLS],
-                       [dictionary objectForKey:kAirdrop],
                        [dictionary objectForKey:kAccountID]
     ];
 
@@ -770,20 +768,19 @@ NSString *const kCount = @"count";
 
 -(void) addAccountWithDictionary:(NSDictionary*) dictionary andCompletion: (void (^)(BOOL))completion
 {
-    NSString* query = [NSString stringWithFormat:@"insert into account (server, other_port, secure, resource, domain, enabled, selfsigned, directTLS, username, airdrop) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"];
+    NSString* query = [NSString stringWithFormat:@"insert into account (server, other_port, resource, domain, enabled, selfsigned, directTLS, username) values(?, ?, ?, ?, ?, ?, ?, ?, ?)"];
     
     NSString* server = (NSString*) [dictionary objectForKey:kServer];
     NSString* port = (NSString*)[dictionary objectForKey:kPort];
-    NSArray* params = @[server == nil ? @"" : server,
-                       port == nil ? @"5222" : port,
-                       [dictionary objectForKey:kSSL],
-                       ((NSString *)[dictionary objectForKey:kResource]),
-                       ((NSString *)[dictionary objectForKey:kDomain]),
-                       [dictionary objectForKey:kEnabled] ,
-                       [dictionary objectForKey:kSelfSigned],
-                       [dictionary objectForKey:kDirectTLS],
-                       ((NSString *)[dictionary objectForKey:kUsername]),
-                       [dictionary objectForKey:kAirdrop]?[dictionary objectForKey:kAirdrop]:@"0"
+    NSArray* params = @[
+        server == nil ? @"" : server,
+        port == nil ? @"5222" : port,
+        ((NSString *)[dictionary objectForKey:kResource]),
+        ((NSString *)[dictionary objectForKey:kDomain]),
+        [dictionary objectForKey:kEnabled] ,
+        [dictionary objectForKey:kSelfSigned],
+        [dictionary objectForKey:kDirectTLS],
+        ((NSString *)[dictionary objectForKey:kUsername])
     ];
     [self executeNonQuery:query andArguments:params withCompletion:completion];
 }
@@ -841,13 +838,12 @@ NSString *const kCount = @"count";
 
 #pragma mark contact Commands
 
--(void) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName andMucNick:(NSString*) mucNick withCompletion: (void (^)(BOOL))completion
+-(void) addContact:(NSString*) contact forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName andMucNick:(NSString*) mucNick withCompletion: (void (^)(BOOL))completion
 {
     // no blank full names
     NSString* actualfull = fullName;
-    if([[actualfull  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] == 0) {
+    if([[actualfull stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] == 0)
         actualfull = contact;
-    }
 
     NSString* query = [NSString stringWithFormat:@"insert into buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'new', 'online', 'dirty', 'muc', 'muc_nick') values(?, ?, ?, ?, 1, 0, 0, ?, ?);"];
 
@@ -1006,33 +1002,57 @@ NSString *const kCount = @"count";
     }];
 }
 
--(BOOL) checkCap:(NSString*)cap forUser:(NSString*) user accountNo:(NSString*) acctNo
+#pragma mark entity capabilities
+
+-(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user andAccountNo:(NSString*) acctNo
 {
-    NSString* query = [NSString stringWithFormat:@"select count(*) from buddylist as a inner join buddy_resources as b on a.buddy_id=b.buddy_id  inner join ver_info as c  on  b.ver=c.ver where buddy_name=? and account_id=? and cap=?"];
-    NSArray *params =@[user, acctNo, cap];
-
-    //DDLogVerbose(@"%@", query);
+    NSString* query = [NSString stringWithFormat:@"select count(*) from buddylist as a inner join buddy_resources as b on a.buddy_id=b.buddy_id inner join ver_info as c on b.ver=c.ver where buddy_name=? and account_id=? and cap=?"];
+    NSArray *params = @[user, acctNo, cap];
     NSNumber* count = (NSNumber*) [self executeScalar:query andArguments:params];
-
-    return ([count integerValue]>0);
+    return [count integerValue]>0;
 }
 
--(NSArray*) capsforVer:(NSString*) verString
+-(NSString*) getVerForUser:(NSString*) user andResource:(NSString*) resource
 {
+    NSString* query = [NSString stringWithFormat:@"select ver from buddy_resources as A inner join buddylist as B on a.buddy_id=b.buddy_id where resource=? and buddy_name=?"];
+    NSArray * params = @[resource, user];
+    NSString* ver = (NSString*) [self executeScalar:query andArguments:params];
+    return ver;
+}
 
+-(void) setVer:(NSString*) ver forUser:(NSString*) user andResource:(NSString*) resource
+{
+    NSNumber* timestamp = [NSNumber numberWithInt:[NSDate date].timeIntervalSince1970];
+    [self beginWriteTransaction];
+    
+    //set ver for user and resource
+    NSString* query = [NSString stringWithFormat:@"UPDATE buddy_resources SET ver=? WHERE EXISTS(SELECT * FROM buddylist WHERE buddy_resources.buddy_id=buddylist.buddy_id AND resource=? AND buddy_name=?)"];
+    NSArray * params = @[ver, resource, user];
+    [self executeNonQuery:query andArguments:params];
+    
+    //update timestamp for this ver string to make it not timeout (old ver strings and features are removed from feature cache after 28 days)
+    NSString* query2 = [NSString stringWithFormat:@"INSERT INTO ver_timestamp (ver, timestamp) VALUES (?, ?) ON CONFLICT(ver) DO UPDATE SET timestamp=?;"];
+    NSArray * params2 = @[ver, timestamp, timestamp];
+    [self executeNonQuery:query2 andArguments:params2];
+    
+    [self endWriteTransaction];
+}
+
+-(NSSet*) getCapsforVer:(NSString*) ver
+{
     NSString* query = [NSString stringWithFormat:@"select cap from ver_info where ver=?"];
-    NSArray * params=@[verString];
-
-    //DDLogVerbose(query);
-    NSArray* toReturn = [self executeReader:query andArguments:params];
-
-    if(toReturn != nil)
+    NSArray * params = @[ver];
+    NSArray* resultArray = [self executeReader:query andArguments:params];
+    
+    if(resultArray != nil)
     {
-
-        if([toReturn count] == 0) return nil;
-
-        DDLogVerbose(@" caps  count: %lu", (unsigned long)[toReturn count]);
-        return toReturn; //[toReturn autorelease];
+        DDLogVerbose(@"caps count: %lu", (unsigned long)[resultArray count]);
+        if([resultArray count] == 0)
+            return nil;
+        NSMutableSet* retval = [[NSMutableSet alloc] init];
+        for(NSDictionary* row in resultArray)
+            [retval addObject:row[@"cap"]];
+        return retval;
     }
     else
     {
@@ -1041,43 +1061,42 @@ NSString *const kCount = @"count";
     }
 }
 
--(NSString*)getVerForUser:(NSString*)user Resource:(NSString*) resource
+-(void) setCaps:(NSSet*) caps forVer:(NSString*) ver
 {
-    NSString* query1 = [NSString stringWithFormat:@" select ver from buddy_resources as A inner join buddylist as B on a.buddy_id=b.buddy_id where resource=? and buddy_name=?"];
-    NSArray * params=@[resource, user];
-
-    NSString* ver = (NSString*) [self executeScalar:query1 andArguments:params];
-
-    return ver;
-}
-
--(BOOL)setFeature:(NSString*)feature  forVer:(NSString*) ver
-{
-    NSString* query = [NSString stringWithFormat:@"insert into ver_info values (?, ?)"];
-    NSArray *params =@[ver, feature];
-
-    return ([self executeNonQuery:query andArguments:params] != NO);
-}
-
-#pragma mark legacy caps
-
--(void) clearLegacyCaps
-{
-    NSString* query = [NSString stringWithFormat:@"delete from buddy_resources_legacy_caps"];
-
-    //DDLogVerbose(@"%@", query);
-    [self executeNonQuery:query andArguments:nil];
-}
-
--(BOOL) checkLegacyCap:(NSString*)cap forUser:(NSString*) user accountNo:(NSString*) acctNo
-{
-    NSString* query = [NSString stringWithFormat:@"select count(*) from buddylist as a inner join buddy_resources_legacy_caps as b on a.buddy_id=b.buddy_id  inner join legacy_caps as c on c.capid=b.capid where buddy_name=? and account_id=? and captext=?"];
-    NSArray * params= @[ user, acctNo, cap];
-
-    //DDLogVerbose(@"%@", query);
-    NSNumber* count = (NSNumber *) [self executeScalar:query andArguments:params];
-
-    return ([count integerValue] > 0);
+    NSNumber* timestamp = [NSNumber numberWithInt:[NSDate date].timeIntervalSince1970];
+    [self beginWriteTransaction];
+    
+    //remove old caps for this ver
+    NSString* query0 = [NSString stringWithFormat:@"DELETE FROM ver_info WHERE ver=?;"];
+    NSArray * params0 = @[ver];
+    [self executeNonQuery:query0 andArguments:params0];
+    
+    //insert new caps
+    for(NSString* feature in caps)
+    {
+        NSString* query1 = [NSString stringWithFormat:@"INSERT INTO ver_info (ver, cap) VALUES (?, ?);"];
+        NSArray * params1 = @[ver, feature];
+        [self executeNonQuery:query1 andArguments:params1];
+    }
+    
+    //update timestamp for this ver string
+    NSString* query2 = [NSString stringWithFormat:@"INSERT INTO ver_timestamp (ver, timestamp) VALUES (?, ?) ON CONFLICT(ver) DO UPDATE SET timestamp=?;"];
+    NSArray * params2 = @[ver, timestamp, timestamp];
+    [self executeNonQuery:query2 andArguments:params2];
+    
+    //cleanup old entries
+    NSString* query3 = [NSString stringWithFormat:@"SELECT ver FROM ver_timestamp WHERE timestamp<?"];
+    NSArray* params3 = @[[NSNumber numberWithInt:[timestamp integerValue] - (86400 * 28)]];     //cache timeout is 28 days
+    NSArray* oldEntries = [self executeReader:query3 andArguments:params3];
+    if(oldEntries)
+        for(NSDictionary* row in oldEntries)
+        {
+            NSString* query4 = [NSString stringWithFormat:@"DELETE FROM ver_info WHERE ver=?;"];
+            NSArray * params4 = @[row[@"ver"]];
+            [self executeNonQuery:query4 andArguments:params4];
+        }
+    
+    [self endWriteTransaction];
 }
 
 #pragma mark presence functions
@@ -1108,7 +1127,7 @@ NSString *const kCount = @"count";
 }
 
 
--(void) setOnlineBuddy:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
+-(void) setOnlineBuddy:(ParsePresence*) presenceObj forAccount:(NSString *)accountNo
 {
 	[self beginWriteTransaction];
     [self setResourceOnline:presenceObj forAccount:accountNo];
@@ -1138,14 +1157,6 @@ NSString *const kCount = @"count";
     NSString* query2 = [NSString stringWithFormat:@"delete from buddy_resources where buddy_id=? and resource=?"];
     NSArray* params2 = @[buddyid, presenceObj.resource?presenceObj.resource:@""];
     if([self executeNonQuery:query2 andArguments:params2] == NO)
-	{
-		[self endWriteTransaction];
-		return NO;
-	}
-
-    NSString* query4 = [NSString stringWithFormat:@"delete from buddy_resources_legacy_caps where buddy_id=? and resource=?"];
-    NSArray* params3 = @[buddyid, presenceObj.resource?presenceObj.resource:@"" ];
-    if([self executeNonQuery:query4 andArguments:params3] == NO)
 	{
 		[self endWriteTransaction];
 		return NO;
@@ -2304,7 +2315,7 @@ NSString *const kCount = @"count";
     NSString *dbPath = [documentsDirectory stringByAppendingPathComponent:@"sworim.sqlite"];
     DDLogInfo(@"db path %@", dbPath);
 
-    if (sqlite3_open_v2([dbPath UTF8String], &database, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nil) == SQLITE_OK)
+    if(sqlite3_open_v2([dbPath UTF8String], &(self->database), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nil) == SQLITE_OK)
     {
         DDLogVerbose(@"Database opened");
     }
@@ -2335,7 +2346,7 @@ NSString *const kCount = @"count";
     // checking db version and upgrading if necessary
     DDLogVerbose(@"Database version check");
 
-    NSNumber* dbversion= (NSNumber*)[self executeScalar:@"select dbversion from dbversion" andArguments:nil];
+    NSNumber* dbversion=(NSNumber*)[self executeScalar:@"select dbversion from dbversion;" andArguments:nil];
     DDLogVerbose(@"Got db version %@", dbversion);
 
     if([dbversion doubleValue] < 1.07)
@@ -2554,7 +2565,7 @@ NSString *const kCount = @"count";
     {
         DDLogVerbose(@"Database version <2.3 detected. Performing upgrade.");
 
-        NSString* resourceQuery = [NSString stringWithFormat:@"update account set resource='%@';", [EncodingTools encodeRandomResource]];
+        NSString* resourceQuery = [NSString stringWithFormat:@"update account set resource='%@';", [HelperTools encodeRandomResource]];
 
         [self executeNonQuery:resourceQuery withCompletion:nil];
         [self executeNonQuery:@"update dbversion set dbversion='2.3';" withCompletion:nil];
@@ -2847,7 +2858,59 @@ NSString *const kCount = @"count";
         [self executeNonQuery:@"update dbversion set dbversion='4.74';" andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.74 success");
     }
-
+    
+    if([dbversion doubleValue] < 4.75)
+    {
+        DDLogVerbose(@"Database version <4.75 detected. Performing upgrade on accounts.");
+        // Delete column secure from account
+        [self executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:nil];
+        [self executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);" andArguments:nil];
+        [self executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, airdrop, rosterVersion, state from _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"DROP TABLE _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='4.75';" andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.75 success");
+    }
+    
+    if([dbversion doubleValue] < 4.76)
+    {
+        DDLogVerbose(@"Database version <4.76 detected. Performing upgrade on accounts.");
+        // Add column for the last interaction of a contact
+        [self executeNonQuery:@"alter table buddylist add column lastInteraction INTEGER NOT NULL DEFAULT 0;" andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='4.76';" andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.76 success");
+    }
+    
+    if([dbversion doubleValue] < 4.77)
+    {
+        DDLogVerbose(@"Database version <4.77 detected. Performing upgrade on accounts.");
+        // drop legacy caps tables
+        [self executeNonQuery:@"DROP TABLE IF EXISTS legacy_caps;" andArguments:nil];
+        [self executeNonQuery:@"DROP TABLE IF EXISTS buddy_resources_legacy_caps;" andArguments:nil];
+        //recreate capabilities cache to make a fresh start
+        [self executeNonQuery:@"DROP IF EXISTS TABLE ver_info;" andArguments:nil];
+        [self executeNonQuery:@"CREATE TABLE ver_info(ver VARCHAR(32), cap VARCHAR(255), PRIMARY KEY (ver,cap));" andArguments:nil];
+        [self executeNonQuery:@"CREATE TABLE ver_timestamp (ver VARCHAR(32), timestamp INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ver));" andArguments:nil];
+        [self executeNonQuery:@"CREATE INDEX timeindex ON ver_timestamp(timestamp);"  andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='4.77';" andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.77 success");
+    }
+    
+    if([dbversion doubleValue] < 4.78)
+    {
+        DDLogVerbose(@"Database version <4.78 detected. Performing upgrade on accounts.");
+        // drop airdrop column
+        [self executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:nil];
+        [self executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);" andArguments:nil];
+        [self executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, rosterVersion, state) SELECT account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, rosterVersion, state from _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"DROP TABLE _accountTMP;" andArguments:nil];
+        [self executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='4.78';" andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.78 success");
+    }
+    
     [self endWriteTransaction];
     _version_check_done = YES;
     return;
@@ -2855,7 +2918,8 @@ NSString *const kCount = @"count";
 
 -(void) dealloc
 {
-    sqlite3_close(database);
+    DDLogVerbose(@"Closing database");
+    sqlite3_close(self->database);
 }
 
 
@@ -3037,12 +3101,41 @@ NSString *const kCount = @"count";
 
 }
 
+-(NSDate*) lastInteractionOfJid:(NSString* _Nonnull) jid forAccountNo:(NSString* _Nonnull) accountNo
+{
+    NSAssert(jid, @"jid should not be null");
+    NSAssert(accountNo != NULL, @"accountNo should not be null");
+
+    NSString* query = [NSString stringWithFormat:@"SELECT lastInteraction from buddylist where account_id=? and buddy_name=?"];
+    NSArray* params = @[accountNo, jid];
+    NSNumber* lastInteractionTime = (NSNumber*)[self executeScalar:query andArguments:params];
+
+    //return NSDate object or NSNull, if last interaction is zero
+    if(![lastInteractionTime integerValue])
+        return nil;
+    return [NSDate dateWithTimeIntervalSince1970:[lastInteractionTime integerValue]];
+}
+
+-(void) setLastInteraction:(NSDate*) lastInteractionTime forJid:(NSString* _Nonnull) jid andAccountNo:(NSString* _Nonnull) accountNo
+{
+    NSAssert(jid, @"jid should not be null");
+    NSAssert(accountNo != NULL, @"accountNo should not be null");
+
+    NSNumber* timestamp = @0;       //default value for "online" or "unknown"
+    if(lastInteractionTime)
+        timestamp = [NSNumber numberWithInt:lastInteractionTime.timeIntervalSince1970];
+
+    NSString* query = [NSString stringWithFormat:@"UPDATE buddylist SET lastInteraction=? WHERE account_id=? and buddy_name=?"];
+    NSArray* params = @[timestamp, accountNo, jid];
+    [self executeNonQuery:query andArguments:params];
+}
+
 #pragma mark -  encryption
 
 -(BOOL) shouldEncryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo
 {
     if(!jid || !accountNo) return NO;
-    NSString* query = [NSString stringWithFormat:@"SELECT encrypt from buddylist where account_id=?  and buddy_name=?"];
+    NSString* query = [NSString stringWithFormat:@"SELECT encrypt from buddylist where account_id=? and buddy_name=?"];
     NSArray* params = @[accountNo, jid];
     NSNumber* status=(NSNumber*)[self executeScalar:query andArguments:params];
     return [status boolValue];

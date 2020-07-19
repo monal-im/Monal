@@ -11,15 +11,11 @@
 #import "MLXMPPConstants.h" 
 
 @interface ParseIq : XMPPParser
-{
-    
-}
 
 @property (nonatomic, assign, readonly) BOOL discoInfo;
 @property (nonatomic, assign, readonly) BOOL discoItems;
 @property (nonatomic, assign, readonly) BOOL roster;
 @property (nonatomic, assign, readonly) BOOL ping;
-@property (nonatomic, assign, readonly) BOOL legacyAuth;
 @property (nonatomic, assign, readonly) BOOL httpUpload;
 @property (nonatomic, assign, readonly) BOOL registration;
 
@@ -28,9 +24,12 @@
 
 @property (nonatomic, strong, readonly) NSString* queryXMLNS;
 @property (nonatomic, strong, readonly) NSString* queryNode;
+@property (nonatomic, strong, readonly) NSMutableArray* identities;
 @property (nonatomic, strong, readonly) NSMutableSet* features;
 @property (nonatomic, strong, readonly) NSMutableArray* items;
 @property (nonatomic, strong, readonly) NSString* errorMessage;
+
+@property (nonatomic, strong, readonly) NSMutableDictionary* uploadHeaders;
 
 // vcard releated
 
@@ -77,3 +76,5 @@
 @property (nonatomic, strong, readonly) NSString* rosterVersion;
 
 @end
+
+typedef void (^monal_iq_handler_t)(ParseIq*);

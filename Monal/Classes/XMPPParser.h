@@ -12,7 +12,7 @@
 #import "MLConstants.h"
 
 
-@interface XMPPParser : NSObject 
+@interface XMPPParser : NSObject
 {
     NSString* State;
     NSMutableString* _messageBuffer;

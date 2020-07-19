@@ -8,6 +8,7 @@
 
 #import "ParseMessage.h"
 #import "MLSignalStore.h"
+#import "HelperTools.h"
 
 @interface ParseMessage()
 @property (nonatomic, strong) NSMutableDictionary *currentKey;
@@ -48,27 +49,33 @@
         
     }
     
+    if(([elementName isEqualToString:@"active"]) && [namespaceURI isEqualToString:@"http://jabber.org/protocol/chatstates"])
+    {
+        _composing = NO;
+        _notComposing = YES;
+    }
+    
+    if(([elementName isEqualToString:@"composing"]) && [namespaceURI isEqualToString:@"http://jabber.org/protocol/chatstates"])
+    {
+        _composing = YES;
+        _notComposing = NO;
+    }
+    
+    if(([elementName isEqualToString:@"paused"]) && [namespaceURI isEqualToString:@"http://jabber.org/protocol/chatstates"])
+    {
+        _composing = NO;
+        _notComposing = YES;
+    }
+    
+    if(([elementName isEqualToString:@"inactive"]) && [namespaceURI isEqualToString:@"http://jabber.org/protocol/chatstates"])
+    {
+        _composing = NO;
+        _notComposing = YES;
+    }
+    
     if(([elementName isEqualToString:@"delay"]) && [namespaceURI isEqualToString:@"urn:xmpp:delay"])
     {
-        NSDateFormatter *rfc3339DateFormatter = [[NSDateFormatter alloc] init];
-        NSLocale *enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-        
-        [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
-        [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss.SSSSSSXXXXX"];
-        [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-       
-        _delayTimeStamp = [rfc3339DateFormatter dateFromString:[attributeDict objectForKey:@"stamp"]];
-        if(!_delayTimeStamp)
-        {
-            NSDateFormatter *rfc3339DateFormatter2 = [[NSDateFormatter alloc] init];
-       
-            [rfc3339DateFormatter2 setLocale:enUSPOSIXLocale];
-            [rfc3339DateFormatter2 setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-            [rfc3339DateFormatter2 setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ssZ"];
-            _delayTimeStamp = [rfc3339DateFormatter2 dateFromString:[attributeDict objectForKey:@"stamp"]];
-        }
-        
-        
+        _delayTimeStamp = [HelperTools parseDateTimeString:[attributeDict objectForKey:@"stamp"]];
     }
     
     if([namespaceURI isEqualToString:@"urn:xmpp:sid:0"])

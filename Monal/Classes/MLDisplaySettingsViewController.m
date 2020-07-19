@@ -105,26 +105,22 @@
             return NSLocalizedString(@"Status",@"");
             break;
         }
-            
         case 1:
         {
             return NSLocalizedString(@"Presence",@"");
             break;
         }
-            
         case 2:
         {
             return NSLocalizedString(@"General",@"");
             break;
         }
-            
-       
-            
         default:
         {
-            return  nil;
-        }
+            return nil;
             break;
+        }
+        break;
     }
 }
 
@@ -139,25 +135,21 @@
             return 1;
             break;
         }
-            
         case 1:
         {
-            return 3;
+            return 1;
             break;
         }
-            
         case 2:
         {
             return 6;
             break;
         }
-            
-            
         default:
         {
             return 0; 
         }
-            break;
+        break;
     }
 }
 
@@ -181,13 +173,11 @@
                     return cell;
                     break;
                 }
-                
             }
         }
-   
+        
         case 1:
         {
-            
             switch(indexPath.row)
             {
                 case 0:
@@ -196,29 +186,12 @@
                     cell.defaultKey=@"Away";
                     cell.switchEnabled=YES;
                     break;
-                }
-                case 1:
-                {
-                    cell.textLabel.text=NSLocalizedString(@"Visible", @"");
-                    cell.defaultKey=@"Visible";
-                    cell.switchEnabled=YES;
-                    break;
-                }
-                case 2:
-                {
-                    cell.textLabel.text=NSLocalizedString(@"XMPP Priority", @"");
-                    cell.textInputField.placeholder=NSLocalizedString(@"Number", @"");
-                    cell.textInputField.keyboardType=UIKeyboardTypeNumbersAndPunctuation;
-                       cell.defaultKey=@"XMPPPriority";
-                    cell.textEnabled=YES;
-                    break;
-                }
-  
+                }  
             }
-             return cell; 
+            return cell; 
             break;
         }
-    
+        
         case 2:
         {
             switch(indexPath.row)
@@ -271,13 +244,12 @@
             return cell; 
             break;
         }
-           
-            
         default:
         {
-            
-        }
+            return nil;
             break;
+        }
+        break;
     }
 
     return nil;

@@ -16,16 +16,14 @@ FOUNDATION_EXPORT NSString *const kiqErrorType;
 
 @interface XMPPIQ : MLXMLNode
 
--(id) initWithId:(NSString*) sessionid andType:(NSString*) iqType;
+-(id) initWithId:(NSString*) iqid andType:(NSString*) iqType;
 -(id) initWithType:(NSString*) iqType;
 
--(void) setPushEnableWithNode:(NSString *)node andSecret:(NSString *)secret;
--(void) setPushDisableWithNode:(NSString *)node;
+-(NSString*) getId;
+-(void) setId:(NSString*) id;
 
-/**
- login with legacy authentication. only as fallback.
- */
--(void) setAuthWithUserName:(NSString *)username resource:(NSString *) resource andPassword:(NSString *) password;
+-(void) setPushEnableWithNode:(NSString *) node andSecret:(NSString *) secret;
+-(void) setPushDisableWithNode:(NSString *) node;
 
 /**
  Makes an iq to bind with a resouce. Passing nil will set no resource.
@@ -86,12 +84,6 @@ Queries the last page of messages (most recent) for a recipient
  */
 -(void) setDiscoItemNode;
 
-#pragma mark legacy authentication
-/**
- legacy autnetication. only used as a fallback
- */
--(void) getAuthwithUserName:(NSString *)username;
-
 #pragma mark roster
 /**
 gets vcard info 
@@ -112,12 +104,6 @@ removes a contact from the roster
  makes iq  with version element
  */
 -(void) setVersion;
-
-/**
- sends last seconds as 0 since if we are responding we arent away. Migth want to add a timer for away in the future. 
- */
--(void) setLast;
-
 
 /**
  sets up an iq that requests a http upload slot
@@ -150,11 +136,6 @@ removes a contact from the roster
  Dictionary info has initiator, responder, sid, ownip
  */
 -(void) setJingleTerminateTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info;
-
-/**
- features string for hashing
- */
-+(NSString *) featuresString;
 
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid;

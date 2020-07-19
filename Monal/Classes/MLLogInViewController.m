@@ -98,8 +98,7 @@
     NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
     [dic setObject:domain forKey:kDomain];
     [dic setObject:user forKey:kUsername];
-    [dic setObject:[EncodingTools encodeRandomResource]  forKey:kResource];
-    [dic setObject:@YES forKey:kSSL];
+    [dic setObject:[HelperTools encodeRandomResource]  forKey:kResource];
     [dic setObject:@YES forKey:kEnabled];
     [dic setObject:@NO forKey:kSelfSigned];
     [dic setObject:@NO forKey:kDirectTLS];

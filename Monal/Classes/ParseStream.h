@@ -12,7 +12,6 @@
 
 @interface ParseStream :XMPPParser
 
-@property (nonatomic,readonly, assign) BOOL supportsLegacyAuth;
 @property (nonatomic,readonly, assign) BOOL supportsUserReg;
 @property (nonatomic,readonly, assign) BOOL supportsSM3;
 @property (nonatomic,readonly, assign) BOOL supportsCarbons2;

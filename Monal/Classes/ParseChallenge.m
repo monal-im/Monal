@@ -12,27 +12,20 @@
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
-     _messageBuffer=nil;
-    
+    _messageBuffer=nil;
     if([elementName isEqualToString:@"challenge"])
     {
         if([namespaceURI isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
-           {
-               _saslChallenge=YES; 
-           }
+            _saslChallenge=YES; 
         return;
     }
-
 }
 
 
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
     if([elementName isEqualToString:@"challenge"])
-    {
         _challengeText=_messageBuffer; 
-    }
-    
 }
 
 @end

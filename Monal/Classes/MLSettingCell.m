@@ -82,11 +82,6 @@
     {
         [[MLXMPPManager sharedInstance] setAway:_toggleSwitch.on];
     }
-    else  if([_defaultKey isEqualToString:@"Visible"])
-        {
-            [[MLXMPPManager sharedInstance] setVisible:_toggleSwitch.on];
-        }
-    
 }
 
 #pragma mark uitextfield delegate
@@ -97,25 +92,15 @@
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
-     [[NSUserDefaults standardUserDefaults]  setObject:_textInputField.text forKey: _defaultKey];
+    [[NSUserDefaults standardUserDefaults]  setObject:_textInputField.text forKey: _defaultKey];
     [textField resignFirstResponder];
     
-    if([_defaultKey isEqualToString:@"XMPPPriority"])
+    if([_defaultKey isEqualToString:@"StatusMessage"])
     {
-        NSInteger number =[textField.text integerValue];
-        [[MLXMPPManager sharedInstance] setPriority:number];
+        [[MLXMPPManager sharedInstance] setStatusMessage:textField.text];
     }
-    
-    else
-        if([_defaultKey isEqualToString:@"StatusMessage"])
-        {
-            [[MLXMPPManager sharedInstance] setStatusMessage:textField.text];
-        }
   
     return YES;
 }
-
-
-
 
 @end

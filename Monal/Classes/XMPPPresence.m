@@ -8,6 +8,7 @@
 
 #import "XMPPPresence.h"
 #import "MLXMPPConstants.h"
+#import "HelperTools.h"
 
 @implementation XMPPPresence
 
@@ -31,14 +32,7 @@
     [c.attributes setObject:@"http://monal.im/" forKey:@"node"];
     [c.attributes setObject:@"sha-1" forKey:@"hash"];
     [c.attributes setObject:self.versionHash forKey:@"ver"];
-    [c.attributes setObject:[NSString stringWithFormat:@"%@ %@", kextpmuc, kextvoice] forKey:@"ext"]; //deprecated .. for legacy
-    
     [self.children addObject:c];
-    
-    /*
-     having xmlns:caps seems to make it accept legacy caps? doesnt seem to check hash value
-     */
-     
     
     return self;
 }
@@ -70,18 +64,11 @@
     [self.children addObject:statusNode];
 }
 
--(void) setPriority:(NSInteger)priority
+-(void) setLastInteraction:(NSDate*) date
 {
-    _priority=priority; 
-    MLXMLNode* priorityNode =[[MLXMLNode alloc] init];
-    priorityNode.element=@"priority";
-    priorityNode.data=[NSString stringWithFormat:@"%ld",(long)_priority];
-    [self.children addObject:priorityNode];
-}
-
--(void) setInvisible
-{
-  [self.attributes setObject:@"unavailable" forKey:@"type"];
+    MLXMLNode* idle = [[MLXMLNode alloc] initWithElement:@"idle" andNamespace:@"urn:xmpp:idle:1"];
+    [idle.attributes setValue:[HelperTools generateDateTimeString:[NSDate date]] forKey:@"since"];
+    [self.children addObject:idle];
 }
 
 #pragma mark MUC 

@@ -24,7 +24,7 @@ ver varchar(20)
 
 create table ver_info
 (
-ver varchar(20) ,
+ver varchar(20),
 cap varchar(255),
  primary key (ver,cap)
 );

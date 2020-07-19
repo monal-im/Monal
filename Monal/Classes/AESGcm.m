@@ -7,7 +7,6 @@
 //
 
 #import "AESGcm.h"
-#import "EncodingTools.h"
 #import <MLCrypto/MLCrypto-Swift.h>
 
 #if !TARGET_OS_MACCATALYST

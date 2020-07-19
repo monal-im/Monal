@@ -13,14 +13,9 @@
 #import "MLContact.h"
 #import "MLConstants.h"
 
-#define kMonalDBQueue "im.monal.dbQueue"
 
 @interface DataLayer : NSObject {
-    NSString* dbPath;
     sqlite3* database;
-    NSLock* dbversionCheck;
-    
-    dispatch_queue_t _dbQueue ;
 }
 
 
@@ -31,10 +26,8 @@ extern NSString *const kEnabled;
 extern NSString *const kServer;
 extern NSString *const kPort;
 extern NSString *const kResource;
-extern NSString *const kSSL;
 extern NSString *const kDirectTLS;
 extern NSString *const kSelfSigned;
-extern NSString *const kAirdrop;
 
 extern NSString *const kUsername;
 extern NSString *const kFullName;
@@ -92,17 +85,12 @@ extern NSString *const kMessageTypeUrl;
 -(void) offlineContactsWithCompletion: (void (^)(NSMutableArray *))completion;
 
 #pragma mark Ver string and Capabilities
--(NSArray*) capsforVer:(NSString*) verString;
--(NSString*)getVerForUser:(NSString*)user Resource:(NSString*) resource;
 
--(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user accountNo:(NSString*) acctNo;
-
--(BOOL)setFeature:(NSString*)feature  forVer:(NSString*) ver;
-
-#pragma mark legacy caps
--(void) clearLegacyCaps;
-//-(BOOL) setLegacyCap:(NSString*)cap forUser:(presence*)presenceObj accountNo:(NSString*) acctNo;
--(BOOL) checkLegacyCap:(NSString*)cap forUser:(NSString*) user accountNo:(NSString*) acctNo;
+-(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user andAccountNo:(NSString*) acctNo;
+-(NSString*) getVerForUser:(NSString*) user andResource:(NSString*) resource;
+-(void) setVer:(NSString*) ver forUser:(NSString*) user andResource:(NSString*) resource;
+-(NSSet*) getCapsforVer:(NSString*) ver;
+-(void) setCaps:(NSSet*) caps forVer:(NSString*) ver;
 
 #pragma mark  presence functions
 -(void) setResourceOnline:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
@@ -290,6 +278,8 @@ extern NSString *const kMessageTypeUrl;
 -(void) deleteImageCacheForUrl:(NSString*) url;
 -(void) imageCacheForUrl:(NSString*) url withCompletion: (void (^)(NSString *path))completion;
 -(NSMutableArray*) allAttachmentsFromContact:(NSString*) contact forAccount:(NSString*) accountNo;
+-(NSDate*) lastInteractionOfJid:(NSString* _Nonnull) jid forAccountNo:(NSString* _Nonnull) accountNo;
+-(void) setLastInteraction:(NSDate*) lastInteractionTime forJid:(NSString* _Nonnull) jid andAccountNo:(NSString* _Nonnull) accountNo;
 
 -(NSDictionary *) getSubscriptionForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 -(void) setSubscription:(NSString *)sub andAsk:(NSString*) ask forContact:(NSString*) contact andAccount:(NSString*) accountNo;

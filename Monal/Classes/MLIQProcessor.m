@@ -10,7 +10,7 @@
 #import "MLConstants.h"
 #import "DataLayer.h"
 #import "MLImageManager.h"
-#import "EncodingTools.h"
+#import "HelperTools.h"
 
 
 @interface MLIQProcessor()
@@ -80,74 +80,69 @@
     
 }
 
--(void) processGetIq:(ParseIq *) iqNode {
+-(void) processGetIq:(ParseIq *) iqNode
+{
     
     if(iqNode.ping)
     {
         XMPPIQ* pong =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
         [pong setiqTo:self.connection.identity.domain];
-        if(self.sendIq) self.sendIq(pong);
+        if(self.sendIq)
+            self.sendIq(pong, nil, nil);
     }
     
-    if (iqNode.version)
+    if(iqNode.version)
     {
-        XMPPIQ* versioniq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+        XMPPIQ* versioniq = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
         [versioniq setiqTo:iqNode.from];
         [versioniq setVersion];
-        if(self.sendIq) self.sendIq(versioniq);
+        if(self.sendIq)
+            self.sendIq(versioniq, nil, nil);
     }
-    
-    if (iqNode.last)
-    {
-        XMPPIQ* lastiq =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-        [lastiq setiqTo:iqNode.from];
-        [lastiq setLast];
-        if(self.sendIq) self.sendIq(lastiq);
-    }
-    
     
     if((iqNode.discoInfo))
     {
-        XMPPIQ* discoInfo =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
-        if(iqNode.resource &&  iqNode.resource.length>0) {
+        XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+        if(iqNode.resource && iqNode.resource.length>0)
             [discoInfo setiqTo:[NSString stringWithFormat:@"%@/%@", iqNode.user, iqNode.resource]];
-        } else  {
+        else
             [discoInfo setiqTo:iqNode.user];
-        }
         [discoInfo setDiscoInfoWithFeaturesAndNode:iqNode.queryNode];
-        if(self.sendIq) self.sendIq(discoInfo);
+        if(self.sendIq)
+            self.sendIq(discoInfo, nil, nil);
         
     }
 }
 
--(void) processErrorIq:(ParseIq *) iqNode {
+-(void) processErrorIq:(ParseIq *) iqNode
+{
     DDLogError(@"IQ got Error : %@", iqNode.errorMessage);
 }
 
--(void) processSetIq:(ParseIq *) iqNode {
-    
+-(void) processSetIq:(ParseIq *) iqNode
+{
     //its  a roster push
-    if (iqNode.roster==YES)
-    {
+    if(iqNode.roster==YES)
         [self rosterResult:iqNode];
-    }
-    
 }
 
--(void) processResultIq:(ParseIq *) iqNode {
+-(void) processResultIq:(ParseIq *) iqNode
+{
     
     if(iqNode.mam2Last && !iqNode.mam2fin)
     {
         //RSM paging
         XMPPIQ* pageQuery =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
         [pageQuery setMAMQueryFromStart:nil after:iqNode.mam2Last withMax:nil andJid:nil];
-        if(self.sendIq) self.sendIq(pageQuery);
+        if(self.sendIq)
+            self.sendIq(pageQuery, nil, nil);
         return;
     }
     
-    if(iqNode.mam2Last && iqNode.mam2fin)
+    if(iqNode.mam2fin)
     {
-        if(self.mamFinished) self.mamFinished();
+        if(self.mamFinished)
+            self.mamFinished();
         return;
     }
     
@@ -168,12 +163,14 @@
             MLXMLNode *enableNode =[[MLXMLNode alloc] initWithElement:@"enable"];
             NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3",@"resume":@"true" };
             enableNode.attributes =[dic mutableCopy];
-            if(self.sendIq) self.sendIq(enableNode);
+            if(self.sendIq)
+                self.sendIq(enableNode, nil, nil);
         }
         else
         {
             //init session and query disco, roster etc.
-            if(self.initSession) self.initSession();
+            if(self.initSession)
+                self.initSession();
         }
     }
     
@@ -235,108 +232,112 @@
 }
 
 -(void) discoResult:(ParseIq *) iqNode {
-    if(iqNode.features) {
-        if([iqNode.from isEqualToString:self.connection.identity.domain]) {
-            self.connection.serverFeatures=iqNode.features;
-        }
-        
-        if([iqNode.features containsObject:@"urn:xmpp:carbons:2"])
+    if(iqNode.discoInfo && iqNode.features)
+    {
+        //features advertised on the home server
+        if([iqNode.from isEqualToString:self.connection.identity.domain])
         {
-            DDLogInfo(@"got disco result with carbons ns");
-            if(!self.connection.usingCarbons2) {
-                DDLogInfo(@"sending enableCarbons iq");
-                if(self.sendIq) self.sendIq([self enableCarbons]);
+            self.connection.serverFeatures = iqNode.features;
+            
+            if([iqNode.features containsObject:@"urn:xmpp:carbons:2"])
+            {
+                DDLogInfo(@"got disco result with carbons ns");
+                if(!self.connection.usingCarbons2)
+                {
+                    DDLogInfo(@"sending enableCarbons iq");
+                    if(self.sendIq)
+                        self.sendIq([self enableCarbons], nil, nil);
+                }
+            }
+            
+            if([iqNode.features containsObject:@"urn:xmpp:ping"])
+            {
+                self.connection.supportsPing=YES;
+            }
+            
+            if([iqNode.features containsObject:@"urn:xmpp:blocking"])
+            {
+                self.connection.supportsBlocking=YES;
             }
         }
         
-        if([iqNode.features containsObject:@"urn:xmpp:blocking"])
+        //features advertised on our own jid/account
+        if([iqNode.from isEqualToString:self.connection.identity.jid])
         {
-            self.connection.supportsBlocking=YES;
-        }
-        
-        if([iqNode.features containsObject:@"urn:xmpp:ping"])
-        {
-            self.connection.supportsPing=YES;
-        }
-
-        
-        [iqNode.features.allObjects enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSString *feature = (NSString *)obj;
-            if([feature isEqualToString:@"http://jabber.org/protocol/pubsub#publish"]) {
-                self.connection.supportsPubSub=YES;
-                self.connection.pubSubHost=iqNode.from;
-                *stop=YES;
+            [iqNode.features.allObjects enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                NSString *feature = (NSString *)obj;
+                if([feature isEqualToString:@"http://jabber.org/protocol/pubsub#publish"]) {
+                    self.connection.supportsPubSub=YES;
+                    *stop=YES;
 #ifndef DISABLE_OMEMO
-                if(self.sendSignalInitialStanzas) self.sendSignalInitialStanzas();
+                    if(self.sendSignalInitialStanzas) self.sendSignalInitialStanzas();
 #endif
+                }
+            }];
+            
+            if([iqNode.features containsObject:@"urn:xmpp:push:0"])
+            {
+                self.connection.supportsPush=YES;
+                if(self.enablePush) self.enablePush();
             }
-        }];
+            
+            if([iqNode.features containsObject:@"urn:xmpp:mam:2"])
+            {
+                BOOL previousStatus = self.connection.supportsMam2;
+                self.connection.supportsMam2 = YES;
+                DDLogInfo(@"supports mam:2");
+                
+                //ony if it went from NO to YES
+                if(!previousStatus)
+                {
+                    [[DataLayer sharedInstance] lastMessageDateForContact:self.connection.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
+                        
+                        NSDate *dateToUse = lastDate;
+                        if(!dateToUse) dateToUse = [NSDate dateWithTimeIntervalSinceNow:-60*60*24*14]; //two weeks
+                        
+                        XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+                        [query setMAMQueryFromStart:dateToUse toDate:nil withMax:nil andJid:nil];
+                        if(self.sendIq)
+                            self.sendIq(query, nil, nil);
+                    }];
+                }
+            }
+        }
 
-        if([iqNode.features containsObject:@"urn:xmpp:http:upload"]  ||
-          [iqNode.features containsObject:@"urn:xmpp:http:upload:0"] )
+        if(!self.connection.supportsHTTPUpload && [iqNode.features containsObject:@"urn:xmpp:http:upload:0"])
         {
-            self.connection.supportsHTTPUpload=YES;
+            DDLogInfo(@"supports http upload with server: %@", iqNode.from);
+            self.connection.supportsHTTPUpload = YES;
             self.connection.uploadServer = iqNode.from;
         }
         
-        if([iqNode.features containsObject:@"http://jabber.org/protocol/muc"])
+        if(!self.connection.conferenceServer && [iqNode.features containsObject:@"http://jabber.org/protocol/muc"])
         {
-            self.connection.conferenceServer=iqNode.from;
-        }
-        
-        if([iqNode.features containsObject:@"urn:xmpp:push:0"])
-        {
-            self.connection.supportsPush=YES;
-            if(self.enablePush) self.enablePush();
-        }
-        
-        if([iqNode.features containsObject:@"urn:xmpp:mam:2"])
-        {
-            BOOL previousStatus =self.connection.supportsMam2;
-            self.connection.supportsMam2=YES;
-            DDLogInfo(@" supports mam:2");
-            
-            //ony if it went from NO to YES
-            if(!previousStatus)  {
-                [[DataLayer sharedInstance] lastMessageDateForContact:self.connection.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
-                    
-                    NSDate *dateToUse =lastDate;
-                    if(!dateToUse) dateToUse  =[NSDate dateWithTimeIntervalSinceNow:-60*60*24*14]; //two weeks
-                    
-                    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-                    [query setMAMQueryFromStart:dateToUse toDate:nil withMax:nil andJid:nil];
-                    if(self.sendIq) self.sendIq(query);
-                    
-                }];
-            }
-            
+            self.connection.conferenceServer = iqNode.from;
         }
     }
     
-    if(iqNode.legacyAuth)
+    if(iqNode.discoItems && [iqNode.from isEqualToString:self.connection.identity.domain] && !self.connection.discoveredServices)
     {
-        XMPPIQ* auth =[[XMPPIQ alloc] initWithId:@"auth2" andType:kiqSetType];
-        [auth setAuthWithUserName:self.connection.identity.jid resource:self.connection.identity.resource andPassword:self.connection.identity.password];
-        self.sendIq(auth);
-        return;
-    }
-    
-    
-    if([iqNode.from isEqualToString:self.connection.identity.domain] &&
-       !self.connection.discoveredServices)
-    {
-        self.connection.discoveredServices=[[NSMutableArray alloc] init];
-        for (NSDictionary* item in iqNode.items)
+        self.connection.discoveredServices = [[NSMutableArray alloc] init];
+        for(NSDictionary* item in iqNode.items)
         {
             [self.connection.discoveredServices addObject:item];
-            
-            if(![[item objectForKey:@"jid"] isEqualToString:self.connection.identity.domain]) {
-                if(self.sendIq) self.sendIq([self discoverService:[item objectForKey:@"jid"]]);
-            }
+            if(![[item objectForKey:@"jid"] isEqualToString:self.connection.identity.domain])
+                if(self.sendIq)
+                    self.sendIq([self discoverService:[item objectForKey:@"jid"]], nil, nil);
         }
-    
+        
         // send to bare jid for push etc.
-        if(self.sendIq) self.sendIq([self discoverService:self.connection.identity.jid]);
+        if(self.sendIq)
+            self.sendIq([self discoverService:self.connection.identity.jid], nil, nil);
+    }
+    
+    //entity caps of some contact
+    if(iqNode.discoInfo && iqNode.identities && iqNode.features && ![iqNode.from isEqualToString:self.connection.identity.domain])
+    {
+        NSString* ver = [HelperTools getEntityCapsHashForIdentities:iqNode.identities andFeatures:iqNode.features];
+        [[DataLayer sharedInstance] setCaps:iqNode.features forVer:ver];
     }
 }
 
@@ -402,7 +403,8 @@
     
     XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
     [signalDevice publishDevices:devices];
-    if(self.sendIq) self.sendIq(signalDevice);
+    if(self.sendIq)
+        self.sendIq(signalDevice, nil, nil);
 }
 
 
@@ -412,7 +414,8 @@
     XMPPIQ* query2 =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query2 setiqTo:jid];
     [query2 requestBundles:deviceid];
-    if(self.sendIq) self.sendIq(query2);
+    if(self.sendIq)
+        self.sendIq(query2, nil, nil);
 }
 
 -(void) omemoResult:(ParseIq *) iqNode {
@@ -507,16 +510,16 @@
             
             NSDictionary *row = (NSDictionary *) obj;
             NSString *keyid = (NSString *)[row objectForKey:@"preKeyId"];
-            NSData *preKeyData = [EncodingTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]];
+            NSData *preKeyData = [HelperTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]];
             if(preKeyData) {
                 SignalPreKeyBundle *bundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
                                                                                        deviceId:device
                                                                                        preKeyId:[keyid intValue]
                                                                                    preKeyPublic:preKeyData
                                                                                  signedPreKeyId:iqNode.signedPreKeyId.intValue
-                                                                             signedPreKeyPublic:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
-                                                                                      signature:[EncodingTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
-                                                                                    identityKey:[EncodingTools dataWithBase64EncodedString:iqNode.identityKey]
+                                                                             signedPreKeyPublic:[HelperTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
+                                                                                      signature:[HelperTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
+                                                                                    identityKey:[HelperTools dataWithBase64EncodedString:iqNode.identityKey]
                                                                                           error:nil];
                 
                 [builder processPreKeyBundle:bundle error:nil];
@@ -538,12 +541,11 @@
     return discoInfo;
 }
 
--(XMPPIQ *) enableCarbons
+-(XMPPIQ*) enableCarbons
 {
 	DDLogInfo(@"building enableCarbons iq");
-    XMPPIQ *carbons =[[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
-    MLXMLNode *enable =[[MLXMLNode alloc] initWithElement:@"enable"];
-    [enable setXMLNS:@"urn:xmpp:carbons:2"];
+    XMPPIQ *carbons = [[XMPPIQ alloc] initWithId:@"enableCarbons" andType:kiqSetType];
+    MLXMLNode *enable = [[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:carbons:2"];
     [carbons.children addObject:enable];
     return carbons;
 }

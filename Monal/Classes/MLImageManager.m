@@ -7,7 +7,7 @@
 //
 
 #import "MLImageManager.h"
-#import "EncodingTools.h"
+#import "HelperTools.h"
 #import "DataLayer.h"
 #import "AESGcm.h"
 
@@ -165,7 +165,7 @@
         [fileManager removeItemAtPath:writablePath error:nil];
     }
 
-    if([[EncodingTools dataWithBase64EncodedString:data] writeToFile:writablePath atomically:NO] )
+    if([[HelperTools dataWithBase64EncodedString:data] writeToFile:writablePath atomically:NO] )
     {
         DDLogVerbose(@"wrote image to file");
     }
@@ -496,8 +496,8 @@ Provides temp url
                     [[session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL * _Nullable location, NSURLResponse * _Nullable response, NSError * _Nullable error) {
                         
                         //decrypt
-                        NSData *key = [EncodingTools dataWithHexString:keyHex];
-                        NSData *iv = [EncodingTools dataWithHexString:ivHex];
+                        NSData *key = [HelperTools dataWithHexString:keyHex];
+                        NSData *iv = [HelperTools dataWithHexString:ivHex];
                         
                         NSData *decrypted;
                         NSData *downloaded= [NSData dataWithContentsOfURL:location];

@@ -15,12 +15,9 @@
 #import "MLKeysTableViewController.h"
 #import "MLPasswordChangeTableViewController.h"
 
-#import "tools.h"
-
-
-
 
 @interface XMPPEdit()
+
 @property (nonatomic, strong) NSString *jid;
 @property (nonatomic, strong) NSString *password;
 @property (nonatomic, strong) NSString *resource;
@@ -28,15 +25,12 @@
 @property (nonatomic, strong) NSString *port;
 
 @property (nonatomic, assign) BOOL enabled;
-@property (nonatomic, assign) BOOL useSSL;
 @property (nonatomic, assign) BOOL directTLS;
 @property (nonatomic, assign) BOOL selfSignedSSL;
-@property (nonatomic, assign) BOOL airDrop;
 
 @property (nonatomic, weak) UITextField *currentTextField;
 
 @property (nonatomic, strong) NSDictionary *initialSettings;
-
 
 @end
 
@@ -107,20 +101,16 @@
             self.port=[NSString stringWithFormat:@"%@", [settings objectForKey:@"other_port"]];
             self.resource=[settings objectForKey:kResource];
             
-            self.useSSL=[[settings objectForKey:@"secure"] boolValue];
             self.enabled=[[settings objectForKey:kEnabled] boolValue];
             
             self.directTLS=[[settings objectForKey:@"directTLS"] boolValue];
             self.selfSignedSSL=[[settings objectForKey:@"selfsigned"] boolValue];
-            self.airDrop = [[settings objectForKey:kAirdrop] boolValue];
-            
         }];
     }
     else
     {
         self.port=@"5222";
-        self.useSSL=true;
-        self.resource=[EncodingTools encodeRandomResource];
+        self.resource=[HelperTools encodeRandomResource];
         self.directTLS=NO;
         self.selfSignedSSL=NO;
     }
@@ -199,11 +189,9 @@
     
     [dic setObject:self.resource forKey:kResource];
 
-    [dic setObject:[NSNumber numberWithBool:self.useSSL] forKey:kSSL];
     [dic setObject:[NSNumber numberWithBool:self.enabled] forKey:kEnabled];
     [dic setObject:[NSNumber numberWithBool:self.selfSignedSSL] forKey:kSelfSigned];
     [dic setObject:[NSNumber numberWithBool:self.directTLS] forKey:kDirectTLS];
-    [dic setObject:[NSNumber numberWithBool:self.airDrop] forKey:kAirdrop];
     [dic setObject:self.accountno forKey:kAccountID];
 
     if(!self.editMode)
@@ -243,15 +231,11 @@
                     }];
                 } else  {
                     dispatch_async(dispatch_get_main_queue(), ^{
-                   UIAlertController* alert= [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Account Exists",@ "") message:NSLocalizedString(@"This account already exists in Monal.",@ "") preferredStyle:UIAlertControllerStyleAlert];
-                    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                        [alert dismissViewControllerAnimated:YES completion:nil];
-                    }]];
-
-                    [self presentViewController:alert animated:YES completion:^{
-
-                    }];
-
+                        UIAlertController* alert= [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Account Exists",@ "") message:NSLocalizedString(@"This account already exists in Monal.",@ "") preferredStyle:UIAlertControllerStyleAlert];
+                        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                            [alert dismissViewControllerAnimated:YES completion:nil];
+                        }]];
+                        [self presentViewController:alert animated:YES completion:nil];
                     });
                 }
             }];
@@ -271,19 +255,10 @@
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
             }
             
-            if(self.airDrop != [[self.initialSettings objectForKey:kAirdrop] boolValue])
-            {
-                xmpp *account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
-                account.airDrop=self.airDrop;
-                
-                 [[MLXMPPManager sharedInstance] connectAccount:self.accountno]; //we "connect" 
-            }
-            
             [self showSuccessHUD];
         }];
 
         [[DataLayer sharedInstance] resetContactsForAccount:self.accountno];
-
     }
 }
 
@@ -292,12 +267,11 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeCustomView;
-        hud.removeFromSuperViewOnHide=YES;
-        hud.label.text =NSLocalizedString(@"Success",@ "");
-        hud.detailsLabel.text =NSLocalizedString(@"The account has been saved",@ "");
+        hud.removeFromSuperViewOnHide = YES;
+        hud.label.text = NSLocalizedString(@"Success",@ "");
+        hud.detailsLabel.text = NSLocalizedString(@"The account has been saved",@ "");
         UIImage *image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         hud.customView = [[UIImageView alloc] initWithImage:image];
-
         [hud hideAnimated:YES afterDelay:1.0f];
     });
 }
@@ -307,10 +281,9 @@
     DDLogVerbose(@"Deleting");
 
     UIAlertController *questionAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Delete Account",@ "") message:NSLocalizedString(@"This will remove this account and the associated data from this device.",@ "") preferredStyle:UIAlertControllerStyleActionSheet];
-    UIAlertAction *noAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"No",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-
+    UIAlertAction *noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        //do nothing when "no" was pressed
     }];
-
     UIAlertAction *yesAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
 
         [SAMKeychain deletePasswordForService:@"Monal"  account:[NSString stringWithFormat:@"%@",self.accountno]];
@@ -325,12 +298,11 @@
         hud.detailsLabel.text =NSLocalizedString(@"The account has been deleted",@ "");
         UIImage *image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         hud.customView = [[UIImageView alloc] initWithImage:image];
-
         [hud hideAnimated:YES afterDelay:1.0f];
+        
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             [self.navigationController popViewControllerAnimated:YES];
         });
-
     }];
 
     [questionAlert addAction:noAction];
@@ -391,16 +363,16 @@
     {
         switch (indexPath.row)
         {
-                //advanced
+            //advanced
             case 0:  {
                 thecell.cellLabel.text = NSLocalizedString(@"Server",@ "");
                 thecell.toggleSwitch.hidden = YES;
                 thecell.textInputField.tag = 3;
                 thecell.textInputField.text = self.server;
+                thecell.textInputField.placeholder = NSLocalizedString(@"Hardcoded Hostname", @"");
                 thecell.accessoryType=UITableViewCellAccessoryDetailButton;
                 break;
             }
-
             case 1:  {
                 thecell.cellLabel.text = NSLocalizedString(@"Port",@ "");
                 thecell.toggleSwitch.hidden = YES;
@@ -408,29 +380,21 @@
                 thecell.textInputField.text = self.port;
                 break;
             }
-
             case 2: {
-                thecell.cellLabel.text = @"TLS";
-                thecell.textInputField.hidden = YES;
-                thecell.toggleSwitch.tag = 2;
-                thecell.toggleSwitch.on = self.useSSL;
-                break;
-            }
-            case 3: {
                 thecell.cellLabel.text = NSLocalizedString(@"Direct TLS",@ "");
                 thecell.textInputField.hidden = YES;
-                thecell.toggleSwitch.tag = 3;
+                thecell.toggleSwitch.tag = 2;
                 thecell.toggleSwitch.on = self.directTLS;
                 break;
             }
-            case 4: {
+            case 3: {
                 thecell.cellLabel.text = NSLocalizedString(@"Validate certificate",@ "");
                 thecell.textInputField.hidden = YES;
-                thecell.toggleSwitch.tag = 4;
+                thecell.toggleSwitch.tag = 3;
                 thecell.toggleSwitch.on = !self.selfSignedSSL;
                 break;
             }
-            case 5: {
+            case 4: {
                 thecell.cellLabel.text = NSLocalizedString(@"Message Archive Pref",@ "");
                 thecell.toggleSwitch.hidden = YES;
 
@@ -438,7 +402,7 @@
                 thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                 break;
             }
-            case 6: {
+            case 5: {
                 thecell.cellLabel.text = NSLocalizedString(@"My Keys",@ "");
                 thecell.toggleSwitch.hidden = YES;
 
@@ -446,7 +410,7 @@
                 thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                 break;
             }
-            case 7: {
+            case 6: {
                 thecell.cellLabel.text = NSLocalizedString(@"Change Password",@ "");
                 thecell.toggleSwitch.hidden = YES;
 
@@ -454,14 +418,7 @@
                 thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                 break;
             }
-            case 8: {
-                thecell.cellLabel.text = NSLocalizedString(@"Use AirDrop",@ "");
-                thecell.textInputField.hidden = YES;
-                thecell.toggleSwitch.tag = 5;
-                thecell.toggleSwitch.on = self.airDrop;
-                break;
-            }
-            case 9: {
+            case 7: {
                 thecell.cellLabel.text = NSLocalizedString(@"Resource",@ "");
                 thecell.labelRight.text = self.resource;
                 thecell.labelRight.hidden = NO;
@@ -543,7 +500,7 @@
         return 3;
     }
     else if(section == 1) {
-        return 10;
+        return 9;
     }
     else  if(section == 2 &&  self.editMode == false)
     {
@@ -702,17 +659,6 @@
         case 2: {
             if(toggle.on)
             {
-                self.useSSL = YES;
-            }
-            else {
-                self.useSSL = NO;
-            }
-            break;
-        }
-
-        case 3: {
-            if(toggle.on)
-            {
                 self.directTLS = YES;
             }
             else {
@@ -720,24 +666,13 @@
             }
             break;
         }
-        case 4: {
+        case 3: {
             if(toggle.on)
             {
                 self.selfSignedSSL = NO;
             }
             else {
                 self.selfSignedSSL = YES;
-            }
-            break;
-        }
-
-        case 5: {
-            if(toggle.on)
-            {
-                self.airDrop = YES;
-            }
-            else {
-                self.airDrop = NO;
             }
             break;
         }

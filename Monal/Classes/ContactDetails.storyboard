@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="C2G-Z0-qUr">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="C2G-Z0-qUr">
     <device id="retina4_7" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -71,10 +71,10 @@
                                                         <nil key="highlightedColor"/>
                                                     </label>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="H38-G7-DM8">
-                                                        <rect key="frame" x="102.5" y="178" width="170" height="45"/>
+                                                        <rect key="frame" x="102.5" y="181.5" width="170" height="45"/>
                                                         <subviews>
                                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="LF0-E8-Mzg">
-                                                                <rect key="frame" x="73" y="8" width="56" height="29"/>
+                                                                <rect key="frame" x="73" y="8" width="28" height="29"/>
                                                                 <state key="normal" image="735-phone"/>
                                                                 <connections>
                                                                     <action selector="callContact:" destination="S9G-MN-HIG" eventType="touchUpInside" id="A1m-iT-dBj"/>
@@ -91,7 +91,7 @@
                                                                 </connections>
                                                             </button>
                                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Wab-aR-CcG">
-                                                                <rect key="frame" x="161" y="8" width="42" height="29"/>
+                                                                <rect key="frame" x="133" y="8" width="21" height="29"/>
                                                                 <state key="normal" image="745-unlocked"/>
                                                                 <connections>
                                                                     <action selector="toggleEncryption:" destination="S9G-MN-HIG" eventType="touchUpInside" id="QqE-YL-Ipn"/>
@@ -122,12 +122,21 @@
                                                         <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                         <nil key="highlightedColor"/>
                                                     </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="lastInteraction" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ksn-PV-E6O">
+                                                        <rect key="frame" x="-8" y="159.5" width="375" height="20"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
                                                 </subviews>
                                                 <constraints>
                                                     <constraint firstAttribute="trailing" secondItem="6bI-Lh-Qhb" secondAttribute="trailing" constant="8" id="3rp-f9-4g5"/>
                                                     <constraint firstItem="6bI-Lh-Qhb" firstAttribute="top" secondItem="Vhk-QO-bAB" secondAttribute="bottom" constant="8" id="44U-fg-zIE"/>
-                                                    <constraint firstItem="H38-G7-DM8" firstAttribute="top" secondItem="6bI-Lh-Qhb" secondAttribute="bottom" constant="25.5" id="G5q-oS-2Fy"/>
+                                                    <constraint firstItem="ksn-PV-E6O" firstAttribute="top" secondItem="6bI-Lh-Qhb" secondAttribute="bottom" constant="7" id="8oP-Mc-Geb"/>
+                                                    <constraint firstAttribute="leading" secondItem="ksn-PV-E6O" secondAttribute="leading" constant="8" id="HxE-O6-wAX"/>
                                                     <constraint firstItem="H38-G7-DM8" firstAttribute="centerX" secondItem="DKM-65-0Zv" secondAttribute="centerX" id="cJY-vJ-DMA"/>
+                                                    <constraint firstAttribute="trailing" secondItem="ksn-PV-E6O" secondAttribute="trailing" constant="8" id="dSA-lO-nvk"/>
+                                                    <constraint firstItem="H38-G7-DM8" firstAttribute="top" secondItem="ksn-PV-E6O" secondAttribute="bottom" constant="2" id="jGF-Kz-NV2"/>
                                                     <constraint firstAttribute="bottom" secondItem="hFV-Qh-Uid" secondAttribute="bottom" constant="7.5" id="qXr-Zj-W5K"/>
                                                     <constraint firstItem="6bI-Lh-Qhb" firstAttribute="leading" secondItem="DKM-65-0Zv" secondAttribute="leading" constant="8" id="rDb-Ou-GS0"/>
                                                     <constraint firstItem="hFV-Qh-Uid" firstAttribute="centerX" secondItem="DKM-65-0Zv" secondAttribute="centerX" id="sUV-wr-Ohl"/>
@@ -156,6 +165,7 @@
                                     <outlet property="buddyIconView" destination="Vhk-QO-bAB" id="Duh-ht-AUs"/>
                                     <outlet property="isContact" destination="hFV-Qh-Uid" id="hOQ-bC-BTS"/>
                                     <outlet property="jid" destination="6bI-Lh-Qhb" id="cn9-kH-x83"/>
+                                    <outlet property="lastInteraction" destination="ksn-PV-E6O" id="VuO-na-QID"/>
                                     <outlet property="lockButton" destination="Wab-aR-CcG" id="YXj-do-fWx"/>
                                     <outlet property="muteButton" destination="ShO-Bj-tyf" id="xZ7-Cz-p7Y"/>
                                     <outlet property="phoneButton" destination="LF0-E8-Mzg" id="L08-ty-4bH"/>

@@ -23,14 +23,17 @@
 #import "MLImageManager.h"
 #import "DataLayer.h"
 #import "AESGcm.h"
-#import "EncodingTools.h"
+#import "HelperTools.h"
 
 @import QuartzCore;
 @import MobileCoreServices;
 
-
-
 @interface chatViewController()<IDMPhotoBrowserDelegate>
+{
+    BOOL _isTyping;
+    monal_void_block_t _cancelTypingNotification;
+    monal_void_block_t _cancelLastInteractionTimer;
+}
 
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
 @property (nonatomic, strong)  NSCalendar *gregorian;
@@ -44,15 +47,19 @@
 @property (nonatomic, strong) NSMutableArray* photos;
 @property (nonatomic, strong) UIDocumentPickerViewController *imagePicker;
 
-
 @property (nonatomic, assign) BOOL encryptChat;
 @property (nonatomic, assign) BOOL sendLocation; // used for first request
 
 @property (nonatomic, strong) NSDate* lastMamDate;
 @property (nonatomic, assign) BOOL hardwareKeyboardPresent;
-@property (nonatomic, strong) xmpp* xmppAccount ;
+@property (nonatomic, strong) xmpp* xmppAccount;
+
+@property (nonatomic, strong) NSLayoutConstraint* chatInputConstraintHWKeyboard;
+@property (nonatomic, strong) NSLayoutConstraint* chatInputConstraintSWKeyboard;
 
 @end
+
+@class HelperTools;
 
 @implementation chatViewController
 
@@ -62,18 +69,17 @@
     
     [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId withCompletion:^(NSArray *result) {
         NSArray* accountVals = result;
-        if([accountVals count]>0)
+        if([accountVals count] > 0)
         {
-            self.jid=[NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
+            self.jid = [NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
         }
     }];
 }
 
 -(void) setupWithContact:(MLContact* ) contact
 {
-    self.contact=contact;
+    self.contact = contact;
     [self setup];
-    
 }
 
 #pragma mark -  view lifecycle
@@ -82,9 +88,9 @@
 {
     [super viewDidLoad];
     [self setupDateObjects];
-    containerView= self.view;
-    self.messageTable.scrollsToTop=YES;
-    self.chatInput.scrollsToTop=NO;
+    containerView = self.view;
+    self.messageTable.scrollsToTop = YES;
+    self.chatInput.scrollsToTop = NO;
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
@@ -97,18 +103,19 @@
     [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
     
     [nc addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
-    
     [nc addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardDidHideNotification object:nil];
-    
     [nc addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+    [nc addObserver:self selector:@selector(keyboardWillDisappear:) name:UIKeyboardWillHideNotification object:nil];
     
     [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
-    [nc addObserver:self selector:@selector(refreshButton:) name:kMonalAccountStatusChanged object:nil];
+    [nc addObserver:self selector:@selector(updateUIElementsOnAccountChange:) name:kMonalAccountStatusChanged object:nil];
+    [nc addObserver:self selector:@selector(updateNavBarLastInteractionLabel:) name:kMonalLastInteractionUpdatedNotice object:nil];
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     
+    _isTyping = NO;
     self.hidesBottomBarWhenPushed=YES;
     
     self.chatInput.layer.borderColor=[UIColor lightGrayColor].CGColor;
@@ -117,24 +124,37 @@
     self.chatInput.textContainerInset=UIEdgeInsetsMake(5, 0, 5, 0);
     
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
-    self.messageTable.estimatedRowHeight=UITableViewAutomaticDimension;
+    self.messageTable.estimatedRowHeight = UITableViewAutomaticDimension;
     
+     self.navBarContainerView.frame = CGRectMake(0, 0, self.view.frame.size.width, 60);
+    [self.view addSubview:self.navBarContainerView];
+    [self.navBarContainerView.leadingAnchor constraintEqualToAnchor:self.navBarContainerView.superview.leadingAnchor].active = YES;
+    [self.navBarContainerView.bottomAnchor constraintEqualToAnchor:self.navBarContainerView.superview.bottomAnchor].active = YES;
+    [self.navBarContainerView.trailingAnchor constraintEqualToAnchor:self.navBarContainerView.superview.trailingAnchor].active = YES;
+
 #if TARGET_OS_MACCATALYST
     //does not become first responder like in iOS
     [self.view addSubview:self.inputContainerView];
+
     [self.inputContainerView.leadingAnchor constraintEqualToAnchor:self.inputContainerView.superview.leadingAnchor].active=YES;
     [self.inputContainerView.bottomAnchor constraintEqualToAnchor:self.inputContainerView.superview.bottomAnchor].active=YES;
     [self.inputContainerView.trailingAnchor constraintEqualToAnchor:self.inputContainerView.superview.trailingAnchor].active=YES;
-    self.tableviewBottom.constant+=20;
+    self.tableviewBottom.constant += 20;
     
     //UTI @"public.data" for everything
     NSString *images = (NSString *)kUTTypeImage;
     self.imagePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images] inMode:UIDocumentPickerModeImport];
     self.imagePicker.allowsMultipleSelection=NO;
     self.imagePicker.delegate=self;
-    
 #endif
+
+    // Set max height of the chatInput (The chat should be still readable while the HW-Keyboard is active
+    self.chatInputConstraintHWKeyboard = [NSLayoutConstraint constraintWithItem:self.chatInput attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationLessThanOrEqual toItem:nil attribute:NSLayoutAttributeHeight multiplier:1 constant:self.view.frame.size.height * 0.6];
+    self.chatInputConstraintSWKeyboard = [NSLayoutConstraint constraintWithItem:self.chatInput attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationLessThanOrEqual toItem:nil attribute:NSLayoutAttributeHeight multiplier:1 constant:self.view.frame.size.height * 0.4];
+    [self.inputContainerView addConstraint:self.chatInputConstraintHWKeyboard];
+    [self.inputContainerView addConstraint:self.chatInputConstraintSWKeyboard];
     
+    [self setChatInputHeightConstraints:YES];
     
 #if !TARGET_OS_MACCATALYST
     if (@available(iOS 13.0, *)) {
@@ -144,6 +164,18 @@
         [self.plusButton setImage:[UIImage imageNamed:@"907-plus-rounded-square"] forState:UIControlStateNormal];
     }
 #endif
+}
+
+-(void) setChatInputHeightConstraints:(BOOL) hwKeyboardPresent
+{
+    if((!self.chatInputConstraintHWKeyboard) || (!self.chatInputConstraintSWKeyboard)) {
+        return;
+    }
+    // activate / disable constraints depending on keyboard type
+    self.chatInputConstraintHWKeyboard.active = hwKeyboardPresent;
+    self.chatInputConstraintSWKeyboard.active = !hwKeyboardPresent;
+    
+    [self.inputContainerView layoutIfNeeded];
 }
 
 -(void) handleForeGround {
@@ -164,70 +196,143 @@
     });
 }
 
--(void) refreshButton:(NSNotification *) notificaiton
+-(void) displayEncryptionStateInUI
+{
+    if(self.encryptChat) {
+        [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"744-locked-received"] forState:UIControlStateNormal];
+    } else {
+        [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"745-unlocked"] forState:UIControlStateNormal];
+    }
+}
+
+// TODO use notification
+-(void) updateUIElementsOnAccountChange:(xmppState) accountState isHibernated:(BOOL) isHibernated
 {
     if(!self.contact.accountId) return;
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+
+    NSString* jidLabelText = nil;
+    BOOL sendButtonEnabled = NO;
+
+    NSString* contactDisplayName = self.contact.contactDisplayName;
+    if(!contactDisplayName)
+        contactDisplayName = @"";
+    
+    //send button is always enabled, except if the account is permanently disabled
+    sendButtonEnabled = YES;
+    if(![[DataLayer sharedInstance] isAccountEnabled:self.contact.accountId])
+        sendButtonEnabled = NO;
+    
+    if(isHibernated == YES)
+        jidLabelText = [NSString stringWithFormat:@"%@ [%@]", contactDisplayName, @"Hibernated"];
+    else
+        jidLabelText = [NSString stringWithFormat:@"%@", contactDisplayName];
+
+    if(self.contact.isGroup) {
+        NSArray* members = [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
+        jidLabelText = [NSString stringWithFormat:@"%@ (%ld)", self.navBarContactJid.text, members.count];
+    }
+    // change text values
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *title=self.contact.contactDisplayName;
-        
-        if([xmppAccount isHibernated] == YES)
-        {
-            self.sendButton.enabled = YES;
-            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, @"Hibernated"];
-        } else if(xmppAccount.accountState<kStateLoggedIn) {
-            if(!xmppAccount.airDrop) {
-                self.sendButton.enabled = NO;
-            }
-            
-            if(!title)
-                title=@"";
-            self.navigationItem.title=[NSString stringWithFormat:@"%@ [%@]", title, NSLocalizedString(@"Logging In",@ "")];
-        } else  {
-            self.sendButton.enabled=YES;
-            self.navigationItem.title=title;
-        }
-        
-        if(self.encryptChat){
-            self.navigationItem.title = [NSString stringWithFormat:@"%@ 🔒", self.navigationItem.title];
-        }
-        
-        if(self.contact.isGroup) {
-            NSArray *members= [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
-            self.navigationItem.title=[NSString stringWithFormat:@"%@ (%ld)", self.navigationItem.title, members.count];
-        }
+        self.navBarContactJid.text = jidLabelText;
+        self.sendButton.enabled = sendButtonEnabled;
     });
 }
 
+-(void) updateUIElementsOnAccountChange:(NSNotification* _Nullable) notification
+{
+    if(notification)
+    {
+        NSDictionary* userInfo = notification.userInfo;
+        // Check if all objects of the notification are present
+        NSString* accountNo = [userInfo objectForKey:kAccountID];
+        NSNumber* accountState = [userInfo objectForKey:kAccountState];
+        NSNumber* accountHibernate = [userInfo objectForKey:kAccountHibernate];
+        
+        // Only parse account changes for our current opened account
+        if(![accountNo isEqualToString:self.xmppAccount.accountNo])
+            return;
+        
+        if(accountNo && accountState && accountHibernate)
+            [self updateUIElementsOnAccountChange:(xmppState)[accountState intValue] isHibernated:[accountHibernate boolValue]];
+    }
+    else
+    {
+        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+        [self updateUIElementsOnAccountChange:kStateLoggedIn isHibernated:[xmppAccount isHibernated]];
+    }
+}
+
+-(void) stopLastInteractionTimer
+{
+    if(_cancelLastInteractionTimer)
+        _cancelLastInteractionTimer();
+    _cancelLastInteractionTimer = nil;
+}
+
+-(void) updateNavBarLastInteractionLabel:(NSNotification*) notification
+{
+    NSDate* lastInteractionDate = [NSNull null];
+    NSString* jid = self.contact.contactJid;
+    NSString* accountNo = self.contact.accountId;
+    // use supplied data from notification...
+    if(notification)
+    {
+        NSDictionary* data = notification.userInfo;
+        if(![jid isEqualToString:data[@"jid"]] || ![accountNo isEqualToString:data[@"accountNo"]])
+            return;     // ignore other accounts or contacts
+        if(data[@"isTyping"]==@YES)
+        {
+            [self stopLastInteractionTimer];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.navBarLastInteraction.text = NSLocalizedString(@"Typing...", @"");
+            });
+            return;
+        }
+        lastInteractionDate = data[@"lastInteraction"];     // this is nil for a "not typing" (aka typing ended) notification --> "online"
+    }
+    // ...or load the latest interaction timestamp from db
+    else
+        lastInteractionDate = [[DataLayer sharedInstance] lastInteractionOfJid:jid forAccountNo:accountNo];
+    
+    // make timestamp human readable (lastInteractionDate will be captured by this block and automatically used by our timer)
+    monal_void_block_t __block updateTime = ^{
+        DDLogVerbose(@"LastInteraction updateTime() called");
+        NSString* lastInteractionString = [HelperTools formatLastInteraction:lastInteractionDate];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.navBarLastInteraction.text = lastInteractionString;
+        });
+        [self stopLastInteractionTimer];
+        // this timer will be called only if needed
+        if(lastInteractionDate && lastInteractionDate!=[NSNull null])
+            _cancelLastInteractionTimer = [HelperTools startTimer:60 withHandler:updateTime];
+    };
+    updateTime();
+}
 
 -(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    // Hide normal navigation bar
+    [[self navigationController] setNavigationBarHidden:YES animated:NO];
     
     [MLNotificationManager sharedInstance].currentAccountNo=self.contact.accountId;
     [MLNotificationManager sharedInstance].currentContact=self.contact;
     
     if(self.day) {
-        [[DataLayer sharedInstance] fullNameForContact:self.contact.contactJid inAccount:self.contact.accountId withCompeltion:^(NSString *name) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                NSString *displyTitle=name;
-                if(displyTitle.length==0) displyTitle=self.contact.contactJid;
-                self.navigationItem.title=  [NSString stringWithFormat:@"%@(%@)", displyTitle, self->_day];
-            });
-        }];
-        
         [[NSNotificationCenter defaultCenter] removeObserver:self];
-        self.inputContainerView.hidden=YES;
+        self.inputContainerView.hidden = YES;
     }
     else {
-        self.inputContainerView.hidden=NO;
+        self.inputContainerView.hidden = NO;
     }
     
     if(self.contact.contactJid && self.contact.accountId) {
-        self.encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+        self.encryptChat = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
     }
     [self handleForeGround];
-    [self refreshButton:nil];
+    [self updateUIElementsOnAccountChange:nil];
+    [self updateNavBarLastInteractionLabel:nil];
+    [self displayEncryptionStateInUI];
     
     [self updateBackground];
     
@@ -243,6 +348,9 @@
             }
     }];
     self.hardwareKeyboardPresent = YES; //default to YES and when keybaord will appears is called, this may be set to NO
+    
+    // Set correct chatInput height constraints
+    [self setChatInputHeightConstraints:self.hardwareKeyboardPresent];
     [self scrollToBottom];
 }
 
@@ -265,8 +373,8 @@
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Encryption Not Supported" message:@"This contact does not appear to have any devices that support encryption." preferredStyle:UIAlertControllerStyleAlert];
             [alert addAction:[UIAlertAction actionWithTitle:@"Disable Encryption" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 // Disable encryption
-                self.encryptChat=NO;
-                [self refreshButton:nil];
+                self.encryptChat = NO;
+                [self updateUIElementsOnAccountChange:nil];
                 [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
@@ -288,7 +396,7 @@
 -(void) viewWillDisappear:(BOOL)animated
 {
     // Save message draft
-    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text withCompletion:^(BOOL success) {
+    [self saveMessageDraft:^(BOOL success) {
         if(success) {
             // Update status message for contact to show current draft
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
@@ -297,19 +405,27 @@
     [super viewWillDisappear:animated];
     [MLNotificationManager sharedInstance].currentAccountNo=nil;
     [MLNotificationManager sharedInstance].currentContact=nil;
-        
+    
+    [self sendChatState:NO];
+    [self stopLastInteractionTimer];
 }
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
-    if(self.messageTable.contentSize.height>self.messageTable.bounds.size.height)
-        [self.messageTable setContentOffset:CGPointMake(0, self.messageTable.contentSize.height- self.messageTable.bounds.size.height) animated:NO];
-    
+    if(self.messageTable.contentSize.height > self.messageTable.bounds.size.height)
+        [self.messageTable setContentOffset:CGPointMake(0, self.messageTable.contentSize.height - self.messageTable.bounds.size.height) animated:NO];
+}
+
+-(void) saveMessageDraft:(void (^)(BOOL))completion
+{
+    // Save message draft
+    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text withCompletion:completion];
 }
 
 -(void) dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [self stopLastInteractionTimer];
 }
 
 -(void) updateBackground {
@@ -348,8 +464,7 @@
 
 -(IBAction)dismissKeyboard:(id)sender
 {
-    // Save message draft
-    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text withCompletion:nil];
+    [self saveMessageDraft:nil];
     [self.chatInput resignFirstResponder];
 }
 
@@ -462,53 +577,117 @@
     
     [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId withCompletion:^(NSArray *result) {
         NSArray *accounts = result;
-         if(accounts.count==0) {
-             DDLogError(@"Account should be >0");
-             return;
-         }
-         NSDictionary* settings=[accounts objectAtIndex:0];
-         
-         if(!messageID) {
-             NSString *contactNameCopy =self.contact.contactJid; //prevent retail cycle
-             NSString *accountNoCopy = self.contact.accountId;
-             BOOL isMucCopy = self.contact.isGroup;
-             BOOL encryptChatCopy = self.encryptChat;
-             MLContact *contactCopy = self.contact;
-             
-             
-             [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
-                 [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
-                                       withCompletionHandler:nil];
-                   [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:nil userInfo:@{@"contact":contactCopy}];
-             }];
-         }
-         else  {
-             [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:NO messageId:newMessageID
-                                   withCompletionHandler:nil];
-         }
-         
-         
-         if([[settings objectForKey:kAirdrop] boolValue])
-         {
-             DDLogInfo(@"Sending Via share sheet");
-             [self sendWithShareSheet];
-             
-         }
+        if(accounts.count==0) {
+            DDLogError(@"Account should be >0");
+            return;
+        }
+        NSDictionary* settings=[accounts objectAtIndex:0];
+        
+        if(!messageID)
+        {
+            NSString *contactNameCopy =self.contact.contactJid; //prevent retail cycle
+            NSString *accountNoCopy = self.contact.accountId;
+            BOOL isMucCopy = self.contact.isGroup;
+            BOOL encryptChatCopy = self.encryptChat;
+            MLContact *contactCopy = self.contact;
+            
+            
+            [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
+                [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
+                                    withCompletionHandler:nil];
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:nil userInfo:@{@"contact":contactCopy}];
+            }];
+        }
+        else
+        {
+            [[MLXMPPManager sharedInstance]
+                sendMessage:messageText
+                toContact:self.contact.contactJid
+                fromAccount:self.contact.accountId
+                isEncrypted:self.encryptChat
+                isMUC:self.contact.isGroup
+                isUpload:NO messageId:newMessageID
+                withCompletionHandler:nil
+            ];
+        }
         
         [[NSNotificationCenter defaultCenter] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":self.contact}];
     }];
- 
+}
+
+-(void) sendChatState:(BOOL) isTyping
+{
+    [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId withCompletion:^(NSArray *result) {
+        if(result.count==0)
+        {
+            DDLogError(@"Account should be >0");
+            return;
+        }
+    }];
+    
+    if(!self.sendButton.enabled)
+    {
+        DDLogWarn(@"Account disabled, ignoring chatstate update");
+        return;
+    }
+    
+    if(isTyping)
+    {
+        if(!_isTyping)      //started typing? --> send composing chatstate (e.g. typing)
+        {
+            DDLogVerbose(@"Sending chatstate isTyping=%@", isTyping ? @"YES" : @"NO");
+            [[MLXMPPManager sharedInstance] sendChatState:isTyping fromAccount:self.contact.accountId toJid:self.contact.contactJid];
+        }
+        
+        //cancel old timer if existing
+        if(_cancelTypingNotification)
+            _cancelTypingNotification();
+        
+        //start new timer
+        _cancelTypingNotification = [HelperTools startTimer:5.0 withHandler:^{
+            //no typing interaction in 5 seconds? --> send out active chatstate (e.g. typing ended)
+            if(_isTyping)
+            {
+                _isTyping = NO;
+                DDLogVerbose(@"Sending chatstate isTyping=NO");
+                [[MLXMPPManager sharedInstance] sendChatState:NO fromAccount:self.contact.accountId toJid:self.contact.contactJid];
+            }
+        }];
+        
+        //set internal state
+        _isTyping = YES;
+    }
+    else
+    {
+        if(_isTyping)      //stopped typing? --> send active chatstate (e.g. typing ended)
+        {
+            DDLogVerbose(@"Sending chatstate isTyping=%@", isTyping ? @"YES" : @"NO");
+            [[MLXMPPManager sharedInstance] sendChatState:isTyping fromAccount:self.contact.accountId toJid:self.contact.contactJid];
+        }
+        
+        //cancel old timer if existing
+        if(_cancelTypingNotification)
+            _cancelTypingNotification();
+        
+        //set internal state
+        _isTyping = NO;
+    }
 }
 
 -(void)resignTextView
 {
-    NSString *cleanstring = [self.chatInput.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    if(cleanstring.length>0)
+    // Trim leading spaces
+    NSString* cleanString = [self.chatInput.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    // Only send msg that have at least one character
+    if(cleanString.length > 0)
     {
-        [self sendMessage:cleanstring];
-        
+        // Reset chatInput -> remove draft from db so that macOS will show the new send message
         [self.chatInput setText:@""];
+        [self saveMessageDraft:nil];
+        // Send trimmed message
+        [self sendMessage:cleanString];
     }
+    [self sendChatState:NO];
 }
 
 -(IBAction)sendMessageText:(id)sender
@@ -518,12 +697,14 @@
 
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
+    [self sendChatState:NO];
+
     if([segue.identifier isEqualToString:@"showDetails"])
     {
         UINavigationController *nav = segue.destinationViewController;
         ContactDetails* details = (ContactDetails *)nav.topViewController;
-        details.contact= self.contact;
-        details.completion=^{
+        details.contact = self.contact;
+        details.completion = ^{
             [self viewWillAppear:YES];
         };
     }
@@ -754,8 +935,8 @@
                     if(urlComponents) {
                         urlComponents.scheme = @"aesgcm";
                         urlComponents.fragment = [NSString stringWithFormat:@"%@%@",
-                                                  [EncodingTools hexadecimalString:encrypted.iv],
-                                                  [EncodingTools hexadecimalString:[encrypted.key subdataWithRange:NSMakeRange(0, keySize)]]];
+                                                  [HelperTools hexadecimalString:encrypted.iv],
+                                                  [HelperTools hexadecimalString:[encrypted.key subdataWithRange:NSMakeRange(0, keySize)]]];
                         urlToPass=urlComponents.string;
                     } else  {
                         DDLogError(@"Could not parse URL for conversion to aesgcm:");
@@ -914,7 +1095,6 @@
             //                    dispatch_async(dispatch_get_main_queue(), ^{
             //                        [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
             //                        self.encryptChat=YES;
-            //                        [self refreshButton:notification];
             //                    });
             //                }
             //            }
@@ -937,12 +1117,11 @@
                 [self->_messageTable beginUpdates];
                 NSIndexPath *path1;
                 NSInteger bottom =  self.messageList.count-1;
-                if(bottom>=0) {
+                if(bottom >= 0) {
                     
                     path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
                     [self->_messageTable insertRowsAtIndexPaths:@[path1]
                                                withRowAnimation:UITableViewRowAnimationBottom];
-                    
                 }
                 [self->_messageTable endUpdates];
                 
@@ -1196,12 +1375,17 @@
         DDLogError(@"Attempt to access beyond bounds");
     }
     
-    NSString *from=row.from;
+    NSString* from = row.from;
+    
+    //cut text after 2048 chars to make the message cell work properly (too big texts don't render the text in the cell at all)
+    NSString* messageText = row.messageText;
+    if([messageText length] > 2048)
+        messageText = [NSString stringWithFormat:@"%@\n[...]", [messageText substringToIndex:2048]];
     
     if([row.messageType isEqualToString:kMessageTypeStatus])
     {
         cell=[tableView dequeueReusableCellWithIdentifier:@"StatusCell"];
-        cell.messageBody.text = row.messageText;
+        cell.messageBody.text = messageText;
         cell.link=nil;
         return cell;
     }
@@ -1263,8 +1447,8 @@
         }
         
         
-        if(![imageCell.link isEqualToString:row.messageText]){
-            imageCell.link = row.messageText;
+        if(![imageCell.link isEqualToString:messageText]){
+            imageCell.link = messageText;
             imageCell.thumbnailImage.image=nil;
             imageCell.loading=NO;
             [imageCell loadImageWithCompletion:^{}];
@@ -1281,7 +1465,7 @@
             toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
         }
         
-        NSString * cleanLink=[row.messageText  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        NSString * cleanLink=[messageText  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSArray *parts = [cleanLink componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         cell.link = parts[0];
         
@@ -1314,20 +1498,20 @@
             DDLogError(@"Error while loading geoPattern");
         }
 
-        NSTextCheckingResult* geoMatch = [geoRegex firstMatchInString:row.messageText options:0 range:NSMakeRange(0, [row.messageText length])];
+        NSTextCheckingResult* geoMatch = [geoRegex firstMatchInString:messageText options:0 range:NSMakeRange(0, [messageText length])];
         
         if(geoMatch.numberOfRanges > 0) {
             NSRange latitudeRange = [geoMatch rangeAtIndex:1];
             NSRange longitudeRange = [geoMatch rangeAtIndex:2];
-            NSString* latitude = [row.messageText substringWithRange:latitudeRange];
-            NSString* longitude = [row.messageText substringWithRange:longitudeRange];
+            NSString* latitude = [messageText substringWithRange:latitudeRange];
+            NSString* longitude = [messageText substringWithRange:longitudeRange];
 
             // Display inline map
             if([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowGeoLocation"]) {
                 MLChatMapsCell* mapsCell;
                 if([from isEqualToString:self.contact.contactJid]) {
                     mapsCell = (MLChatMapsCell *) [tableView dequeueReusableCellWithIdentifier:@"mapsInCell"];
-                    mapsCell.outBound=NO;
+                    mapsCell.outBound = NO;
                 } else  {
                     mapsCell = (MLChatMapsCell *) [tableView dequeueReusableCellWithIdentifier:@"mapsOutCell"];
                 }
@@ -1337,9 +1521,9 @@
                 mapsCell.longitude = [longitude doubleValue];
 
                 [mapsCell loadCoordinatesWithCompletion:^{}];
-                cell=mapsCell;
+                cell = mapsCell;
             } else {
-                NSMutableAttributedString *geoString = [[NSMutableAttributedString alloc] initWithString:row.messageText];
+                NSMutableAttributedString* geoString = [[NSMutableAttributedString alloc] initWithString:messageText];
                 [geoString addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:[geoMatch rangeAtIndex:0]];
 
                 cell.messageBody.attributedText = geoString;
@@ -1347,30 +1531,30 @@
                 cell.link = [NSString stringWithFormat:@"https://www.openstreetmap.org/?mlat=%@&mlon=%@&zoom=%ldd", latitude, longitude, zoomLayer];
             }
         } else {
-            cell.messageBody.text = row.messageText;
+            cell.messageBody.text = messageText;
             cell.link = nil;
         }
     } else {
         // Check if message contains a url
-        NSString* lowerCase= [row.messageText lowercaseString];
+        NSString* lowerCase = [messageText lowercaseString];
         NSRange pos = [lowerCase rangeOfString:@"https://"];
-        if(pos.location==NSNotFound) {
-            pos=[lowerCase rangeOfString:@"http://"];
+        if(pos.location == NSNotFound) {
+            pos = [lowerCase rangeOfString:@"http://"];
         }
         
         NSRange pos2;
-        if(pos.location!=NSNotFound)
+        if(pos.location != NSNotFound)
         {
-            NSString* urlString =[row.messageText substringFromIndex:pos.location];
-            pos2= [urlString rangeOfString:@" "];
-            if(pos2.location==NSNotFound) {
-                pos2= [urlString rangeOfString:@">"];
+            NSString* urlString = [messageText substringFromIndex:pos.location];
+            pos2 = [urlString rangeOfString:@" "];
+            if(pos2.location == NSNotFound) {
+                pos2 = [urlString rangeOfString:@">"];
             }
             
-            if(pos2.location!=NSNotFound) {
-                urlString=[urlString substringToIndex:pos2.location];
+            if(pos2.location != NSNotFound) {
+                urlString = [urlString substringToIndex:pos2.location];
             }
-            NSArray *parts = [urlString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+            NSArray* parts = [urlString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             cell.link = parts[0];
             
             if(cell.link) {
@@ -1378,11 +1562,11 @@
                 NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link attributes:underlineAttribute];
                 NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
                 [stitchedString appendAttributedString:
-                 [[NSAttributedString alloc] initWithString:[row.messageText substringToIndex:pos.location] attributes:nil]];
+                 [[NSAttributedString alloc] initWithString:[messageText substringToIndex:pos.location] attributes:nil]];
                 [stitchedString appendAttributedString:underlined];
                 if(pos2.location!=NSNotFound)
                 {
-                    NSString* remainder = [row.messageText substringFromIndex:pos.location+[underlined length]];
+                    NSString* remainder = [messageText substringFromIndex:pos.location+[underlined length]];
                     [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
                 }
                 cell.messageBody.attributedText=stitchedString;
@@ -1390,7 +1574,7 @@
         }
         else // Default case
         {
-            cell.messageBody.text = row.messageText;
+            cell.messageBody.text = messageText;
             cell.link = nil;
         }
     }
@@ -1605,10 +1789,12 @@
 {
     BOOL shouldinsert=YES;
     
+    [self sendChatState:YES];
+    
     if(self.hardwareKeyboardPresent &&  [text isEqualToString:@"\n"])
     {
         [self resignTextView];
-        shouldinsert=NO;
+        shouldinsert = NO;
     }
     
     return shouldinsert;
@@ -1617,9 +1803,9 @@
 - (void)textViewDidChange:(UITextView *)textView
 {
     if(textView.text.length>0)
-        self.placeHolderText.hidden=YES;
+        self.placeHolderText.hidden = YES;
     else
-        self.placeHolderText.hidden=NO;
+        self.placeHolderText.hidden = NO;
 }
 
 
@@ -1638,26 +1824,30 @@
 
 #pragma mark - Keyboard
 
+- (void)keyboardWillDisappear:(NSNotification*) aNotification
+{
+    [self setChatInputHeightConstraints:YES];
+}
+
 - (void)keyboardDidShow:(NSNotification*)aNotification
 {
       //TODO grab animation info
     NSDictionary* info = [aNotification userInfo];
     CGSize kbSize = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size;
-    if(kbSize.height>100) { //my inputbar +any other
-        self.hardwareKeyboardPresent=NO;
+    if(kbSize.height > 100) { //my inputbar +any other
+        self.hardwareKeyboardPresent = NO;
     }
-    UIEdgeInsets contentInsets = UIEdgeInsetsMake(0.0, 0.0, kbSize.height-10, 0.0);
+    UIEdgeInsets contentInsets = UIEdgeInsetsMake(0.0, 0.0, kbSize.height - 10, 0.0);
     self.messageTable.contentInset = contentInsets;
     self.messageTable.scrollIndicatorInsets = contentInsets;
     
     [self scrollToBottom];
-    
 }
 
 - (void)keyboardDidHide:(NSNotification*)aNotification
 {
-    // Save message draft
-    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text withCompletion:nil];
+    [self saveMessageDraft:nil];
+
     UIEdgeInsets contentInsets = UIEdgeInsetsZero;
     self.messageTable.contentInset = contentInsets;
     self.messageTable.scrollIndicatorInsets = contentInsets;
@@ -1665,13 +1855,11 @@
 
 - (void)keyboardWillShow:(NSNotification*)aNotification
 {
-
+    [self setChatInputHeightConstraints:NO];
     //TODO grab animation info
 //    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
 //    self.messageTable.contentInset = contentInsets;
 //    self.messageTable.scrollIndicatorInsets = contentInsets;
 }
-
-
 
 @end

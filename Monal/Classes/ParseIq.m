@@ -8,9 +8,13 @@
 
 #import "ParseIq.h"
 #import "SignalPreKey.h"
-#import "EncodingTools.h"
+#import "HelperTools.h"
 
 @interface ParseIq()
+{
+    NSMutableArray* _identities;
+    NSString* _currentUploadHeader;
+}
 
 @property (nonatomic, strong) NSMutableArray* omemoDevices;
 @property (nonatomic, strong) NSMutableDictionary *currentPreKey;
@@ -21,6 +25,12 @@
 @implementation ParseIq
 
 #pragma mark NSXMLParser delegate
+
+// return always sorted (https://xmpp.org/extensions/xep-0115.html#ver-gen)
+-(NSArray*) identities
+{
+    return [_identities sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
+}
 
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
@@ -48,8 +58,10 @@
     if([elementName isEqualToString:@"query"])
     {
         _queryXMLNS=namespaceURI;
-        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"]) _discoInfo=YES;
-        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#items"]) _discoItems=YES;
+        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"])
+            _discoInfo=YES;
+        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#items"])
+            _discoItems=YES;
         if([_queryXMLNS isEqualToString:kRegisterNameSpace])
         {
             _registration=YES;
@@ -66,51 +78,69 @@
         if(node) _queryNode=node; 
           
      }
-  
+    
+    if([elementName isEqualToString:@"identity"])
+    {
+        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"])
+        {
+            if(!_identities)
+                _identities = [[NSMutableArray alloc] init];
+            [_identities addObject:[NSString stringWithFormat:@"%@/%@/%@/%@",
+                attributeDict[@"category"] ? attributeDict[@"category"] : @"",
+                attributeDict[@"type"] ? attributeDict[@"type"] : @"",
+                //TODO: check if the xml parser parses this to 'xml:lang' or 'lang' and change accordingly
+                attributeDict[@"lang"] ? attributeDict[@"lang"] : @"",
+                attributeDict[@"name"] ? attributeDict[@"name"] : @""
+            ]];
+        }
+    }
     
     if([elementName isEqualToString:@"feature"])
     {
-        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"]) {
+        if([_queryXMLNS isEqualToString:@"http://jabber.org/protocol/disco#info"])
+        {
             if([namespaceURI isEqualToString:@"jabber:iq:roster"])
-            {
-                _roster=YES;
-            }
-        
-            if(!_features)  _features=[[NSMutableSet alloc] init];
-            if([attributeDict objectForKey:@"var"]) {
-                [_features addObject:[attributeDict objectForKey:@"var"]];
-            }
+                _roster = YES;
             
+            if(!_features)
+                _features = [[NSMutableSet alloc] init];
+            if([attributeDict objectForKey:@"var"])
+                [_features addObject:[attributeDict objectForKey:@"var"]];
         }
-        
     }
     
-    if([namespaceURI isEqualToString:@"jabber:iq:auth"]) _legacyAuth=YES;
-    
     //http upload
-    
     if([elementName isEqualToString:@"slot"])
     {
-        _queryXMLNS=namespaceURI;
-          State=@"slot";
-        _httpUpload =YES; 
+        _queryXMLNS = namespaceURI;
+        State=@"slot";
+        _httpUpload = YES; 
         return;
     }
     
     if([elementName isEqualToString:@"get"] && _httpUpload)
     {
         State = @"slotGet";
+        _getURL = [attributeDict objectForKey:@"url"];
         return;
     }
     
     if([elementName isEqualToString:@"put"] && _httpUpload)
     {
-         State = @"slotPut";
+        State = @"slotPut";
+        _putURL = [attributeDict objectForKey:@"url"];
+        _uploadHeaders = [[NSMutableDictionary alloc] init];
+        return;
+    }
+    
+    if([elementName isEqualToString:@"header"] && [State isEqualToString:@"slotPut"])
+    {
+        _currentUploadHeader = [attributeDict objectForKey:@"name"];
         return;
     }
     
     //roster
-  
+    
     if([elementName isEqualToString:@"item"] && [State isEqualToString:@"RosterQuery"])
     {
         State=@"RosterItem"; // we can get item info
@@ -135,23 +165,17 @@
         return;
     }
     
-    
-    if([namespaceURI isEqualToString:@"jabber:iq:last"])
-    {
-        _last=YES;
-        return;
-    }
-    
     if([elementName isEqualToString:@"item"])
     {
-        if(!_items)  _items=[[NSMutableArray alloc] init];
+        if(!_items)
+            _items=[[NSMutableArray alloc] init];
         [_items addObject:attributeDict];
     }
     
     
     if([elementName isEqualToString:@"prefs"] && [namespaceURI isEqualToString:@"urn:xmpp:mam:2"])
     {
-        _mam2default =[attributeDict objectForKey:@"default"];
+        _mam2default = [attributeDict objectForKey:@"default"];
         return;
     }
     
@@ -274,10 +298,10 @@
             if(!self.hiddenFormFields) self.hiddenFormFields = [[NSMutableDictionary alloc] init];
         }
         
-         if([elementName isEqualToString:@"data"]) {
-             State = @"RegistrationFormData";
-             return;
-         }
+        if([elementName isEqualToString:@"data"]) {
+            State = @"RegistrationFormData";
+            return;
+        }
     }
     
     if([elementName isEqualToString:@"error"]) {
@@ -285,8 +309,7 @@
         return;
     }
     
-  if([namespaceURI isEqualToString:kStanzasNameSpace]
-       &&  [State isEqualToString:@"Error"] ) {
+    if([State isEqualToString:@"Error"] ) {
         if([elementName isEqualToString:@"text"]) {
             State = @"ErrorText";
             return;
@@ -300,6 +323,14 @@
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName
 {
     [super parser:parser didEndElement:elementName namespaceURI:namespaceURI qualifiedName:qName];
+    
+    if([elementName isEqualToString:@"header"] && [State isEqualToString:@"slotPut"])
+    {
+        if(_currentUploadHeader)
+            _uploadHeaders[_currentUploadHeader] = [_messageBuffer copy];
+        _currentUploadHeader = nil;
+        return;
+    }
     
     if(([elementName isEqualToString:@"text"]) && [State isEqualToString:@"ErrorText"])
     {
@@ -377,20 +408,6 @@
         return;
     }
     
-    if(([elementName isEqualToString:@"get"]) && _httpUpload )
-    {
-        _getURL=[_messageBuffer copy];
-        return;
-    }
-    
-    if(([elementName isEqualToString:@"put"]) && _httpUpload )
-    {
-        _putURL=[_messageBuffer copy];
-        return;
-    }
-    
-
-    
     if([elementName isEqualToString:@"signedPreKeyPublic"] &&  [State isEqualToString:@"Bundle"])
     {
        _signedPreKeyPublic= [_messageBuffer copy];
@@ -434,7 +451,7 @@
     if(([elementName isEqualToString:@"data"]) && [State isEqualToString:@"RegistrationFormData"]
        )
     {
-        _captchaData=[EncodingTools dataWithBase64EncodedString:_messageBuffer];
+        _captchaData=[HelperTools dataWithBase64EncodedString:_messageBuffer];
         return;
     }
     

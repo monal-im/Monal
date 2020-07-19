@@ -19,6 +19,8 @@
  */
 -(id) initWithElement:(NSString*)element;
 
+-(id) initWithElement:(NSString*)element andNamespace:(NSString*)xmlns;
+
 /**
  Quickly set an XMLNS attribute
  */

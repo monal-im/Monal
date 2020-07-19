@@ -25,14 +25,15 @@
             NSArray *parts = [_from componentsSeparatedByString:@"/"];
             _user = [[parts objectAtIndex:0] lowercaseString];      // intended to not break code that expects lowercase
             
-            _resource = @"";
+            _resource = nil;
             if([parts count]>1) {
-                _resource = [NSString stringWithFormat:@"%@%@", @"/", [parts objectAtIndex:1]];     // resources are case sensitive
+                _resource = [parts objectAtIndex:1];     // resources are case sensitive
             }
             
-            _from = [NSString stringWithFormat:@"%@%@", _user, _resource];     // concat lowercased user part and kept-as-is resource part
+            // concat lowercased user part and kept-as-is resource part
+            _from = [NSString stringWithFormat:@"%@%@", _user, _resource ? [NSString stringWithFormat:@"%@%@", @"/", _resource] : @""];
             
-        }else  {
+        } else {
             //DDLogError(@"Attempt to overwrite from");
         }
     }

@@ -193,9 +193,9 @@
 -(void) displayEncryptionStateInUI
 {
     if(self.encryptChat) {
-        [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"744-locked-received"] forState:UIControlStateNormal];
+        [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"744-locked-received"]];
     } else {
-        [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"745-unlocked"] forState:UIControlStateNormal];
+        [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"745-unlocked"]];
     }
 }
 

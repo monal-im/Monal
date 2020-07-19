@@ -25,32 +25,32 @@
 
 @property (nonatomic, retain) CLLocationManager *locationManager;
 
-@property (nonatomic, weak) IBOutlet UITableView* messageTable;
-@property (nonatomic, weak) IBOutlet MLResizingTextView* chatInput;
-@property (nonatomic, weak) IBOutlet UILabel* placeHolderText;
-@property (nonatomic, weak) IBOutlet UIButton* sendButton;
-@property (nonatomic, weak) IBOutlet UIButton* plusButton;
+@property (nonatomic, weak) IBOutlet UITableView *messageTable;
+@property (nonatomic, weak) IBOutlet MLResizingTextView *chatInput;
+@property (nonatomic, weak) IBOutlet UILabel *placeHolderText;
+@property (nonatomic, weak) IBOutlet UIButton *sendButton;
+@property (nonatomic, weak) IBOutlet UIButton *plusButton;
 
-@property (nonatomic, weak) IBOutlet UIView* inputContainerView;
-@property (nonatomic, weak) IBOutlet UIView* navBarContainerView;
-@property (nonatomic, weak) IBOutlet NSLayoutConstraint* tableviewBottom;
+@property (nonatomic, weak) IBOutlet UIView *inputContainerView;
+@property (nonatomic, weak) IBOutlet UIView *navBarContainerView;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint *tableviewBottom;
 @property (weak, nonatomic) IBOutlet UILabel *navBarContactJid;
 @property (weak, nonatomic) IBOutlet UILabel *navBarLastInteraction;
 @property (nonatomic, weak) IBOutlet UIImageView* navBarIcon;
 @property (weak, nonatomic) IBOutlet UIButton *navBarContactDetailsButton;
-@property (weak, nonatomic) IBOutlet UIButton* navBarEncryptToggleButton;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *navBarEncryptToggleButton;
 
-@property (nonatomic, weak) IBOutlet UIImageView* backgroundImage;
-@property (nonatomic, weak) IBOutlet UIView* transparentLayer;
+@property (nonatomic, weak) IBOutlet UIImageView *backgroundImage;
+@property (nonatomic, weak) IBOutlet UIView *transparentLayer;
 
 
-@property (nonatomic, strong) NSString* day;
-@property (nonatomic, strong) MLContact* contact;
+@property (nonatomic, strong) NSString *day;
+@property (nonatomic, strong) MLContact *contact;
 
 /**
  full own username with domain e.g. user@example.org
  */
-@property (nonatomic, strong) NSString* jid;
+@property (nonatomic, strong) NSString *jid;
 
 -(IBAction)sendMessageText:(id)sender;
 // attach image

@@ -1599,6 +1599,7 @@
                         <outlet property="messageTable" destination="Kkq-aZ-5fP" id="RhH-Dt-heG"/>
                         <outlet property="navBarContactJid" destination="0SD-m9-NQW" id="0W4-aD-fUS"/>
                         <outlet property="navBarContainerView" destination="frN-Fe-gvs" id="8Mz-D4-OCX"/>
+                        <outlet property="navBarEncryptToggleButton" destination="wma-QS-7Rc" id="Gdh-0J-pJK"/>
                         <outlet property="navBarIcon" destination="WsB-Ch-jda" id="2nQ-dC-CiU"/>
                         <outlet property="navBarLastInteraction" destination="zc6-pR-bBL" id="5dx-Hz-DJD"/>
                         <outlet property="placeHolderText" destination="KUa-bA-cQb" id="62v-fn-lf2"/>

@@ -1588,7 +1588,13 @@ NSString *const kXMPPPresence = @"presence";
     }];
 }
 
--(void) send:(MLXMLNode*) stanza
+-(void) send:(MLXMLNode*) stanza{
+    //by default almost everyone needs async no.
+    //OMEMO needs yes for now
+    [self send:stanza async:NO];
+}
+
+-(void) send:(MLXMLNode*) stanza async:(BOOL) async
 {
     if(!stanza) return;
     //always process everything on the receiveQueue to avoid race conditions of all sorts (like hard to find/reproduce smacks counting bugs etc.)
@@ -1639,7 +1645,7 @@ NSString *const kXMPPPresence = @"presence";
     if([NSOperationQueue currentQueue]!=_receiveQueue)
     {
         DDLogWarn(@"SWITCHING TO RECEIVE QUEUE IN SEND (called from outside of receiveQueue): %@", stanza.XMLString);
-        [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:NO];
+        [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:!async];
     }
     else
         operation();
@@ -2140,7 +2146,7 @@ NSString *const kXMPPPresence = @"presence";
         self.deviceQueryId=[query.attributes objectForKey:@"id"];
     }
 
-    [self send:query];
+    [self send:query async:YES];
 
 }
 #endif

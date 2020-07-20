@@ -2970,6 +2970,11 @@ NSString *const kXMPPPresence = @"presence";
         DDLogVerbose(@"no space to write. returning.");
         return NO;		//no space to write --> stanza has to remain in _outputQueue
     }
+    if(!_oStream)
+    {
+        DDLogVerbose(@"no stream to write. returning.");
+        return NO;		//no stream to write --> stanza has to remain in _outputQueue and get dropped later on
+    }
 
     //try to send remaining buffered data first
     if(_outputBufferByteCount>0)
@@ -3006,8 +3011,7 @@ NSString *const kXMPPPresence = @"presence";
     //then try to send the stanza in question and buffer half sent data
     const uint8_t *rawstring = (const uint8_t *)[messageOut UTF8String];
     NSInteger rawstringLen=strlen((char*)rawstring);
-    NSInteger sentLen = 0;
-    if(_oStream) sentLen = [_oStream write:rawstring maxLength:rawstringLen];
+    NSInteger sentLen = [_oStream write:rawstring maxLength:rawstringLen];
     if(sentLen!=-1)
     {
         if(sentLen!=rawstringLen)

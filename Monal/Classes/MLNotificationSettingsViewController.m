@@ -43,28 +43,28 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.sectionsFooters =@[NSLocalizedString(@"Apple push service should always be on. If it is off, your device can not talk to Apple's server.",@""),
-                     NSLocalizedString(@"If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission.  Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'. ",@""),
-                     NSLocalizedString(@"If Monal push is off, your device could not talk to push.monal.im. This should also never be off. It requires Apple push service to work first. ",@""),
-                     NSLocalizedString(@"Rebuilding is useful if you are experiencing problems. This will require an app restart to work.",@""),
+    self.sectionsFooters = @[NSLocalizedString(@"Apple push service should always be on. If it is off, your device can not talk to Apple's server.", @""),
+                     NSLocalizedString(@"If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission.  Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'. ", @""),
+                     NSLocalizedString(@"If Monal push is off, your device could not talk to push.monal.im. This should also never be off. It requires Apple push service to work first. ", @""),
+                     NSLocalizedString(@"Rebuilding is useful if you are experiencing problems. This will require an app restart to work.", @""),
                             @""];
     
-    self.sectionsHeaders =@[@"",
+    self.sectionsHeaders = @[@"",
                             @"",
                             @"",
-                            NSLocalizedString(@"Accounts",@""),
-                            NSLocalizedString(@"Advanced",@"")];
+                            NSLocalizedString(@"Accounts", @""),
+                            NSLocalizedString(@"Advanced", @"")];
     
-    self.apple=@[NSLocalizedString(@"Apple Push Service",@"")];
-    self.user=@[NSLocalizedString(@"Can Show Notifications",@"")];
-    self.monal=@[NSLocalizedString(@"Monal Push Server",@"")];
+    self.apple = @[NSLocalizedString(@"Apple Push Service", @"")];
+    self.user = @[NSLocalizedString(@"Can Show Notifications", @"")];
+    self.monal = @[NSLocalizedString(@"Monal Push Server", @"")];
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 }
 
 -(void) viewWillAppear:(BOOL)animated
 {
-    self.navigationItem.title = NSLocalizedString(@"Notification Settings",@"");
+    self.navigationItem.title = NSLocalizedString(@"Notification Settings", @"");
     UNUserNotificationCenter* notificationSettings = [UNUserNotificationCenter currentNotificationCenter];
 
     [notificationSettings getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings* settings) {
@@ -89,28 +89,28 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    NSInteger toreturn=0;
+    NSInteger toreturn = 0;
     switch(section)
     {
         case kNotificationSettingSectionUser: {
-            toreturn=self.user.count;
+            toreturn = self.user.count;
             break;
         }
         case kNotificationSettingSectionApplePush: {
-            toreturn=self.apple.count;
+            toreturn = self.apple.count;
             break;
         }
         case kNotificationSettingSectionMonalPush: {
-            toreturn= self.monal.count;
+            toreturn = self.monal.count;
             break;
         }
             
         case kNotificationSettingSectionAccounts: {
-            toreturn= [MLXMPPManager sharedInstance].connectedXMPP.count;
+            toreturn = [MLXMPPManager sharedInstance].connectedXMPP.count;
             break;
         }
         case kNotificationSettingSectionAdvanced: {
-            toreturn=1;
+            toreturn = 1;
             break;
         }
             
@@ -127,87 +127,84 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
 
 -(NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
 {
-    NSString *toreturn= self.sectionsFooters[section];
+    NSString* toreturn = self.sectionsFooters[section];
     return toreturn;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    UITableViewCell *toreturn=[tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
+    UITableViewCell* toreturn = [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
     switch(indexPath.section)
     {
         case kNotificationSettingSectionUser: {
             
-            UITableViewCell *cell= [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
-            cell.imageView.hidden=NO;
+            UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
+            cell.imageView.hidden = NO;
             cell.textLabel.text = self.user[0];
             if(self.canShowNotifications) {
-                cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
+                cell.imageView.image = [UIImage imageNamed:@"888-checkmark"];
             }
             else  {
-               cell.imageView.image=[UIImage imageNamed:@"disabled"];
+               cell.imageView.image = [UIImage imageNamed:@"disabled"];
             }
             toreturn=cell;
             break;
         }
         case kNotificationSettingSectionApplePush: {
-            UITableViewCell *cell= [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
+            UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
            
             cell.textLabel.text = self.apple[0];
             
             if([MLXMPPManager sharedInstance].hasAPNSToken) {
-                 cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
+                 cell.imageView.image = [UIImage imageNamed:@"888-checkmark"];
             }
             else  {
-                cell.imageView.image=[UIImage imageNamed:@"disabled"];
+                cell.imageView.image = [UIImage imageNamed:@"disabled"];
             }
-            cell.imageView.hidden=NO;
-            toreturn=cell;
+            cell.imageView.hidden = NO;
+            toreturn = cell;
             break;
         }
         case kNotificationSettingSectionMonalPush: {
-            UITableViewCell *cell= [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
+            UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
             if([MLXMPPManager sharedInstance].pushNode) {
                 cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
             }
             else  {
                cell.imageView.image=[UIImage imageNamed:@"disabled"];
             }
-            cell.imageView.hidden=NO;
+            cell.imageView.hidden = NO;
             cell.textLabel.text = self.monal[0];
-            toreturn=cell;
+            toreturn = cell;
             break;
         }
             
         case kNotificationSettingSectionAccounts: {
-            UITableViewCell *cell= [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
+            UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
             cell.imageView.hidden=NO;
             xmpp* xmppAccount = [MLXMPPManager sharedInstance].connectedXMPP[indexPath.row];
-            cell.textLabel.text =xmppAccount.connectionProperties.identity.jid;
+            cell.textLabel.text = xmppAccount.connectionProperties.identity.jid;
             
             if(xmppAccount.connectionProperties.pushEnabled) {
-                cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
+                cell.imageView.image = [UIImage imageNamed:@"888-checkmark"];
             }
             else  {
-                cell.imageView.image=[UIImage imageNamed:@"disabled"];
+                cell.imageView.image = [UIImage imageNamed:@"disabled"];
             }
             
-            toreturn=cell;
+            toreturn = cell;
             break;
         }
             
         case kNotificationSettingSectionAdvanced: {
-            UITableViewCell *cell= [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
-            cell.imageView.hidden=YES;
-            cell.textLabel.text =NSLocalizedString(@"Rebuild Tokens",@ "");
-            toreturn=cell;
+            UITableViewCell* cell= [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
+            cell.imageView.hidden = YES;
+            cell.textLabel.text = NSLocalizedString(@"Rebuild Tokens", @ "");
+            toreturn = cell;
             break;
         }
-            
     }
-    
     return toreturn;
-    
 }
 
 
@@ -218,7 +215,7 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
     {
         case kNotificationSettingSectionAdvanced: {
           
-            MLPush *push =[[MLPush alloc] init];
+            MLPush* push = [[MLPush alloc] init];
             [push unregisterPush];
             break;
         }

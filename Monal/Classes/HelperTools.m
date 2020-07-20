@@ -178,7 +178,7 @@
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-        NSDateFormatter* rfc3339DateFormatter = [[NSDateFormatter alloc] init];
+        rfc3339DateFormatter = [[NSDateFormatter alloc] init];
         
         [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
         [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ss'Z"];

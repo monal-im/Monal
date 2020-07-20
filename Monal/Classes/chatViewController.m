@@ -1772,6 +1772,7 @@
     return self.inputContainerView;
 }
 
+// Add new line to chatInput with 'shift + enter'
 -(void) shiftEnterKeyPressed:(UIKeyCommand*)keyCommand
 {
     if([self.chatInput isFirstResponder]) {
@@ -1782,6 +1783,7 @@
     }
 }
 
+// Send message with 'enter' if chatInput is first repsonder
 -(void) enterKeyPressed:(UIKeyCommand*)keyCommand
 {
     if([self.chatInput isFirstResponder]) {
@@ -1789,10 +1791,21 @@
     }
 }
 
+// Open contact details
+-(void) commandIPressed:(UIKeyCommand*)keyCommand
+{
+    [self performSegueWithIdentifier:@"showDetails" sender:self];
+}
+
+// List of custom hardware key commands
 - (NSArray<UIKeyCommand *> *)keyCommands {
     return @[
+            // shift + enter
             [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:UIKeyModifierShift action:@selector(shiftEnterKeyPressed:)],
-            [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(enterKeyPressed:)]
+            // enter
+            [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(enterKeyPressed:)],
+            // command + i
+            [UIKeyCommand keyCommandWithInput:@"i" modifierFlags:UIKeyModifierCommand action:@selector(commandIPressed:)]
     ];
 }
 

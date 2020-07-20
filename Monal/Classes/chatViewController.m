@@ -1762,7 +1762,6 @@
     
 }
 
-
 -(BOOL) canBecomeFirstResponder
 {
     return YES;
@@ -1773,6 +1772,29 @@
     return self.inputContainerView;
 }
 
+-(void) shiftEnterKeyPressed:(UIKeyCommand*)keyCommand
+{
+    if([self.chatInput isFirstResponder]) {
+        // Get current cursor postion
+        NSRange pos = [self.chatInput selectedRange];
+        // Insert \n
+        self.chatInput.text = [self.chatInput.text stringByReplacingCharactersInRange:pos withString:@"\n"];
+    }
+}
+
+-(void) enterKeyPressed:(UIKeyCommand*)keyCommand
+{
+    if([self.chatInput isFirstResponder]) {
+        [self resignTextView];
+    }
+}
+
+- (NSArray<UIKeyCommand *> *)keyCommands {
+    return @[
+            [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:UIKeyModifierShift action:@selector(shiftEnterKeyPressed:)],
+            [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(enterKeyPressed:)]
+    ];
+}
 
 # pragma mark - Textview delegate functions
 
@@ -1781,19 +1803,12 @@
     [self scrollToBottom];
 }
 
-
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
     BOOL shouldInsert = YES;
     
     // Notify that we are typing
     [self sendChatState:YES];
-    
-    if(self.hardwareKeyboardPresent &&  [text isEqualToString:@"\n"])
-    {
-        [self resignTextView];
-        shouldInsert = NO;
-    }
 
     // Limit text length to 2048
     const size_t maxAllowedTextLength = 2048;

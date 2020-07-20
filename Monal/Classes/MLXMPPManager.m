@@ -336,21 +336,23 @@ An array of Dics what have timers to make sure everything was sent
 {
     if(@available(iOS 13.0, *))
     {
-        NSError *error = NULL;
-        // cancel existing task (if any)
-        [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundFetchingTask];
-        // new task
-        //BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-        //request.requiresNetworkConnectivity = YES;
-        BGAppRefreshTaskRequest* request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-        request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
-        BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
-        if(!success) {
-            // Errorcodes https://stackoverflow.com/a/58224050/872051
-            DDLogError(@"Failed to submit BGTask request: %@", error);
-        } else {
-            DDLogVerbose(@"Success submitting BGTask request %@", request);
-        }
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            NSError *error = NULL;
+            // cancel existing task (if any)
+            [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundFetchingTask];
+            // new task
+            //BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
+            //request.requiresNetworkConnectivity = YES;
+            BGAppRefreshTaskRequest* request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
+            request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
+            BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
+            if(!success) {
+                // Errorcodes https://stackoverflow.com/a/58224050/872051
+                DDLogError(@"Failed to submit BGTask request: %@", error);
+            } else {
+                DDLogVerbose(@"Success submitting BGTask request %@", request);
+            }
+        });
     }
     else
     {

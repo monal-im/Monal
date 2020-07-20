@@ -321,10 +321,15 @@
                 break;
             }
             case 2:  {
-                if(self.isSubscribed) {
-                    [self removeContact];
-                }  else  {
-                    [self addContact];
+                if(self.contact.isGroup) {
+                    [self removeContact]; // works for muc too
+                } else  {
+                    if(self.isSubscribed) {
+                        [self removeContact];
+                    }  else  {
+                        [self addContact];
+                    }
+                    
                 }
                 break;
             }

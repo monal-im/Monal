@@ -260,6 +260,19 @@ NSString *const kXMPPPresence = @"presence";
     return retval;
 }
 
+-(void) cleanupSendQueue
+{
+    [_sendQueue cancelAllOperations];
+    [_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+        self->_outputQueue=[[NSMutableArray alloc] init];
+        if(self->_outputBuffer)
+            free(self->_outputBuffer);
+        self->_outputBuffer = nil;
+        self->_outputBufferByteCount = 0;
+        self->_streamHasSpace = NO;
+    }]] waitUntilFinished:YES];
+}
+
 -(void) initTLS
 {
     DDLogInfo(@"configuring/starting tls handshake");
@@ -442,14 +455,7 @@ NSString *const kXMPPPresence = @"presence";
         _startTLSComplete = NO;
         _catchupDone = NO;
         
-        [_sendQueue cancelAllOperations];
-        [_sendQueue addOperationWithBlock:^{
-            self->_outputQueue=[[NSMutableArray alloc] init];
-            if(self->_outputBuffer)
-                free(self->_outputBuffer);
-            self->_outputBuffer = nil;
-            self->_outputBufferByteCount = 0;
-        }];
+        [self cleanupSendQueue];
         
         //read persisted state and start connection
         [self readState];
@@ -577,17 +583,9 @@ NSString *const kXMPPPresence = @"presence";
         self->_iPipe = nil;
         [self->_oStream setDelegate:nil];
         [self->_oStream removeFromRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-        _streamHasSpace = NO;
         
         //clean up send queue now that the delegate was removed (_streamHasSpace can not switch to YES now)
-        [_sendQueue cancelAllOperations];
-        [_sendQueue addOperationWithBlock:^{
-            self->_outputQueue=[[NSMutableArray alloc] init];
-            if(self->_outputBuffer)
-                free(self->_outputBuffer);
-            self->_outputBuffer = nil;
-            self->_outputBufferByteCount = 0;
-        }];
+        [self cleanupSendQueue];
 
         DDLogInfo(@"closing output stream");
         @try

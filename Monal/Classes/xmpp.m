@@ -3003,7 +3003,8 @@ NSString *const kXMPPPresence = @"presence";
     //then try to send the stanza in question and buffer half sent data
     const uint8_t *rawstring = (const uint8_t *)[messageOut UTF8String];
     NSInteger rawstringLen=strlen((char*)rawstring);
-    NSInteger sentLen = [_oStream write:rawstring maxLength:rawstringLen];
+    NSInteger sentLen = 0;
+    if(_oStream) sentLen = [_oStream write:rawstring maxLength:rawstringLen];
     if(sentLen!=-1)
     {
         if(sentLen!=rawstringLen)

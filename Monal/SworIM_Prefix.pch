@@ -6,5 +6,8 @@
 #ifdef __OBJC__
     #import <Foundation/Foundation.h>
     #import <UIKit/UIKit.h>
+    
+    #define LOG_LEVEL_DEF ddLogLevel
+    #import <CocoaLumberjack/CocoaLumberjack.h>
 #endif
 

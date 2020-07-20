@@ -163,13 +163,22 @@
 {
     [DDLog addLogger:[DDOSLogger sharedInstance]];
     
-#ifdef  DEBUG
-    self.fileLogger = [[DDFileLogger alloc] init];
-    self.fileLogger.rollingFrequency = 60 * 60 * 24; // 24 hour rolling
+//#ifdef  DEBUG
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:@"group.monal"];
+    id<DDLogFileManager> logFileManager = [[DDLogFileManagerDefault alloc] initWithLogsDirectory:[containerUrl path]];
+    self.fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
+    self.fileLogger.rollingFrequency = 60 * 60 * 24;    // 24 hour rolling
     self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
     self.fileLogger.maximumFileSize=1024 * 1024 * 64;
     [DDLog addLogger:self.fileLogger];
-#endif
+    DDLogInfo(@"Logfile dir: %@", [containerUrl path]);
+    NSArray *directoryContents = [fileManager contentsOfDirectoryAtPath:[containerUrl path] error:nil];
+    for(NSString* file in directoryContents)
+    {
+        DDLogInfo(@"File %@/%@", [containerUrl path], file);
+    }
+//#endif
     
     [UNUserNotificationCenter currentNotificationCenter].delegate=self;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateState:) name:kMLHasConnectedNotice object:nil];

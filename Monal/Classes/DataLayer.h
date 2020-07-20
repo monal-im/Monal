@@ -251,6 +251,8 @@ extern NSString *const kMessageTypeUrl;
 #pragma mark count unread
 -(void) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(NSNumber *))completion;
 -(void) countUnreadMessagesWithCompletion: (void (^)(NSNumber *))completion;
+//set all unread messages to read
+-(void) setAllMessagesAsRead;
 
 -(void) countUserMessages:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(NSNumber *))completion;
 

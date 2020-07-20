@@ -227,6 +227,9 @@ An array of Dics what have timers to make sure everything was sent
 -(void) catchupFinished:(NSNotification*) notification
 {
     DDLogVerbose(@"### MAM/SMACKS CATCHUP FINISHED ###");
+    dispatch_async(dispatch_get_main_queue(), ^{
+        //[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+    });
 }
 
 -(void) nowIdle:(NSNotification*) notification
@@ -375,22 +378,25 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) setClientsActive
 {
-    //start indicating we want to do work even when the app is put into background
-    if(_bgTask == UIBackgroundTaskInvalid)
-    {
-        _bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-            DDLogWarn(@"BG WAKE EXPIRING");
-            [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
-            _bgTask = UIBackgroundTaskInvalid;
-            
-            //schedule a BGProcessingTaskRequest to process this further as soon as possible
-            if(@available(iOS 13.0, *))
-            {
-                DDLogInfo(@"calling scheduleBackgroundFetchingTask");
-                [self scheduleBackgroundFetchingTask];
-            }
-        }];
-    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        //start indicating we want to do work even when the app is put into background
+        if(_bgTask == UIBackgroundTaskInvalid)
+        {
+            _bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+                DDLogWarn(@"BG WAKE EXPIRING");
+                [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
+                _bgTask = UIBackgroundTaskInvalid;
+                
+                //schedule a BGProcessingTaskRequest to process this further as soon as possible
+                if(@available(iOS 13.0, *))
+                {
+                    DDLogInfo(@"calling scheduleBackgroundFetchingTask");
+                    [self scheduleBackgroundFetchingTask];
+                }
+            }];
+        }
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+    });
     //don't block main thread here
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         for(xmpp* xmppAccount in _connectedXMPP)

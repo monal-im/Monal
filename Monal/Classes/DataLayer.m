@@ -2045,6 +2045,14 @@ NSString *const kCount = @"count";
     }];
 }
 
+//set all unread messages to read
+-(void) setAllMessagesAsRead
+{
+    NSString* query = [NSString stringWithFormat:@"update message_history set unread=0 where unread=1"];
+
+    [self executeNonQuery:query andArguments:nil withCompletion:nil];
+}
+
 -(void)setSynchpointforAccount:(NSString*) accountNo
 {
     NSString* query = [NSString stringWithFormat:@"update buddylist set synchpoint=?  where account_id=?"];

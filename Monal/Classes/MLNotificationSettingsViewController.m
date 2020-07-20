@@ -10,6 +10,7 @@
 #import "MLSwitchCell.h"
 #import "MLXMPPManager.h"
 #import "MLPush.h"
+#import "DataLayer.h"
 
 @import UserNotifications;
 
@@ -27,11 +28,12 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
 
 
 @interface MLNotificationSettingsViewController ()
-@property (nonatomic, strong) NSArray *sectionsHeaders;
-@property (nonatomic, strong) NSArray *sectionsFooters;
-@property (nonatomic, strong) NSArray *apple;
-@property (nonatomic, strong) NSArray *user;
-@property (nonatomic, strong) NSArray *monal;
+@property (nonatomic, strong) NSArray* sectionsHeaders;
+@property (nonatomic, strong) NSArray* sectionsFooters;
+@property (nonatomic, strong) NSArray* apple;
+@property (nonatomic, strong) NSArray* user;
+@property (nonatomic, strong) NSArray* monal;
+@property (nonatomic, strong) NSArray* advanced;
 
 
 @property (nonatomic, assign) BOOL canShowNotifications;
@@ -58,7 +60,10 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
     self.apple = @[NSLocalizedString(@"Apple Push Service", @"")];
     self.user = @[NSLocalizedString(@"Can Show Notifications", @"")];
     self.monal = @[NSLocalizedString(@"Monal Push Server", @"")];
-    
+
+    self.advanced = @[NSLocalizedString(@"Rebuild Tokens", @ ""),
+                    NSLocalizedString(@"Mark all messages as read", @ "")];
+
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 }
 
@@ -110,7 +115,7 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
             break;
         }
         case kNotificationSettingSectionAdvanced: {
-            toreturn = 1;
+            toreturn = self.advanced.count;
             break;
         }
             
@@ -197,9 +202,10 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
         }
             
         case kNotificationSettingSectionAdvanced: {
-            UITableViewCell* cell= [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
+            UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
             cell.imageView.hidden = YES;
-            cell.textLabel.text = NSLocalizedString(@"Rebuild Tokens", @ "");
+            cell.textLabel.text = self.advanced[indexPath.row];
+
             toreturn = cell;
             break;
         }
@@ -214,9 +220,21 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
     switch(indexPath.section)
     {
         case kNotificationSettingSectionAdvanced: {
-          
-            MLPush* push = [[MLPush alloc] init];
-            [push unregisterPush];
+            switch(indexPath.row) {
+                // Rebuild Tokens
+                case 0: {
+                    MLPush* push = [[MLPush alloc] init];
+                    [push unregisterPush];
+                    break;
+                }
+                // Mark all messages as read
+                case 1: {
+                    [[DataLayer sharedInstance] setAllMessagesAsRead];
+                    break;
+                }
+                default:
+                    break;
+            }
             break;
         }
     }

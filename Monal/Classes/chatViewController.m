@@ -1784,22 +1784,32 @@
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
-    BOOL shouldinsert=YES;
+    BOOL shouldInsert = YES;
     
+    // Notify that we are typing
     [self sendChatState:YES];
     
     if(self.hardwareKeyboardPresent &&  [text isEqualToString:@"\n"])
     {
         [self resignTextView];
-        shouldinsert = NO;
+        shouldInsert = NO;
     }
-    
-    return shouldinsert;
+
+    // Limit text length to 2048
+    const size_t maxAllowedTextLength = 2048;
+    if([text isEqualToString:@""]) {
+        shouldInsert &= YES;
+    } else {
+        shouldInsert &= (range.location + range.length < maxAllowedTextLength);
+    }
+    shouldInsert &= ([textView.text length] + [text length] - range.length <= maxAllowedTextLength);
+
+    return shouldInsert;
 }
 
 - (void)textViewDidChange:(UITextView *)textView
 {
-    if(textView.text.length>0)
+    if(textView.text.length > 0)
         self.placeHolderText.hidden = YES;
     else
         self.placeHolderText.hidden = NO;

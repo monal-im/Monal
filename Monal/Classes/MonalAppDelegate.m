@@ -25,6 +25,13 @@
 @property (nonatomic, weak) ActiveChatsViewController* activeChats;
 @end
 
+static void logException(NSException* exception)
+{
+    DDLogError(@"CRASH: %@", exception);
+    DDLogError(@"Stack Trace: %@", [exception callStackSymbols]);
+    [DDLog flushLog];
+}
+
 @implementation MonalAppDelegate
 
 
@@ -179,6 +186,9 @@
         DDLogInfo(@"File %@/%@", [containerUrl path], file);
     }
 //#endif
+
+    //log unhandled exceptions
+    NSSetUncaughtExceptionHandler(&logException);
     
     [UNUserNotificationCenter currentNotificationCenter].delegate=self;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateState:) name:kMLHasConnectedNotice object:nil];

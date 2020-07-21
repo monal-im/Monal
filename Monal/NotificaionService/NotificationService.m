@@ -21,6 +21,13 @@ static const DDLogLevel ddLogLevel = DDLogLevelInfo;
 
 @end
 
+static void logException(NSException* exception)
+{
+    DDLogError(@"CRASH: %@", exception);
+    DDLogError(@"Stack Trace: %@", [exception callStackSymbols]);
+    [DDLog flushLog];
+}
+
 @implementation NotificationService
 
 +(void) initialize
@@ -39,6 +46,9 @@ static const DDLogLevel ddLogLevel = DDLogLevelInfo;
     [DDLog addLogger:fileLogger];
     
     DDLogInfo(@"*~*~*~*~*~*~*~*~* Logfile dir: %@", [containerUrl path]);
+    
+    //log unhandled exceptions
+    NSSetUncaughtExceptionHandler(&logException);
 }
 
 - (void)didReceiveNotificationRequest:(UNNotificationRequest *)request withContentHandler:(void (^)(UNNotificationContent * _Nonnull))contentHandler {

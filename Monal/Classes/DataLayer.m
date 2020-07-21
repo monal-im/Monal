@@ -54,7 +54,7 @@ NSString *const kCount = @"count";
 {
     NSFileManager* fileManager = [NSFileManager defaultManager];
 
-    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:@"group.monal"];
+    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
     NSString* writableDBPath = [[containerUrl path] stringByAppendingPathComponent:@"sworim.sqlite"];
     
     //old install is being upgraded --> copy old database to new app group path
@@ -66,11 +66,11 @@ NSString *const kCount = @"count";
         NSError* error;
         [fileManager copyItemAtPath:oldDBPath toPath:writableDBPath error:&error];
         if(error)
-            DDLogError(@"ERROR(copy): %@", error);
+            @throw error;
         DDLogInfo(@"initialize: removing old DB at: %@", oldDBPath);
         [fileManager removeItemAtPath:oldDBPath error:&error];
         if(error)
-            DDLogError(@"ERROR(remove): %@", error);
+            @throw error;
     }
     
     //the file still does not exist (e.g. fresh install) --> copy default database to app group path
@@ -81,7 +81,7 @@ NSString *const kCount = @"count";
         NSError* error;
         [fileManager copyItemAtPath:defaultDBPath toPath:writableDBPath error:&error];
         if(error)
-            DDLogError(@"ERROR(init): %@", error);
+            @throw error;
     }
     
 #if TARGET_OS_IPHONE
@@ -89,7 +89,7 @@ NSString *const kCount = @"count";
     NSError *error;
     [fileManager setAttributes:attributes ofItemAtPath:writableDBPath error:&error];
     if(error)
-        DDLogError(@"ERROR(attributes): %@", error);
+        @throw error;
 #endif
     
     if(sqlite3_config(SQLITE_CONFIG_MULTITHREAD) == SQLITE_OK)
@@ -2343,7 +2343,7 @@ NSString *const kCount = @"count";
 -(void) openDB
 {
     NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:@"group.monal"];
+    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
     NSString* dbPath = [[containerUrl path] stringByAppendingPathComponent:@"sworim.sqlite"];
     DDLogInfo(@"db path %@", dbPath);
 

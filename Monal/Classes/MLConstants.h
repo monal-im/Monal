@@ -22,6 +22,7 @@ typedef void (^contactCompletion)(MLContact *selectedContact);
 typedef void (^accountCompletion)(NSInteger accountRow);
 typedef void (^monal_void_block_t)();
 
+#define kAppGroup @"group.monal"
 
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
 #define kMLMessageSentToContact @"kMLMessageSentToContact"

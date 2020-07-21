@@ -33,7 +33,7 @@ static void logException(NSException* exception)
     [DDLog addLogger:[DDOSLogger sharedInstance]];
     
     NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:@"group.monal"];
+    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
     id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:[containerUrl path]];
     DDFileLogger* fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
     [fileLogger setLogFormatter:formatter];

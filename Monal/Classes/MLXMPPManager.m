@@ -948,7 +948,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 }
 
 - (void) sendOutboxForAccount:(NSString *) account{
-    NSUserDefaults* groupDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
+    NSUserDefaults* groupDefaults = [[NSUserDefaults alloc] initWithSuiteName:kAppGroup];
     NSMutableArray* outbox = [[groupDefaults objectForKey:@"outbox"] mutableCopy];
     NSMutableArray* outboxClean = [[groupDefaults objectForKey:@"outbox"] mutableCopy];
 

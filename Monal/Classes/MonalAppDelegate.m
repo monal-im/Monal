@@ -174,7 +174,7 @@ static void logException(NSException* exception)
     
 //#ifdef  DEBUG
     NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:@"group.monal"];
+    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
     id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:[containerUrl path]];
     self.fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
     [self.fileLogger setLogFormatter:formatter];
@@ -427,7 +427,7 @@ static void logException(NSException* exception)
 
 -(void) applicationWillResignActive:(UIApplication *)application
 {
-     NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
+     NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:kAppGroup];
 
     [[DataLayer sharedInstance] activeContactDictWithCompletion:^(NSMutableArray *cleanActive) {
         NSError* err;

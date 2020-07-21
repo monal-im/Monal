@@ -11,6 +11,7 @@
 
 #import "UIColor+Theme.h"
 #import "MLContact.h"
+#import "MLConstants.h"
 
 @interface ShareViewController ()
 
@@ -33,7 +34,7 @@
 }
 
 - (void)presentationAnimationDidFinish {
-    NSUserDefaults* groupDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
+    NSUserDefaults* groupDefaults = [[NSUserDefaults alloc] initWithSuiteName:kAppGroup];
     self.accounts = [groupDefaults objectForKey:@"accounts"];
     NSData* recipientsData = [groupDefaults objectForKey:@"recipients"];
     
@@ -71,7 +72,7 @@
                [payload setObject:self.account forKey:@"account"];
                [payload setObject:self.recipient forKey:@"recipient"];
                
-               NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
+               NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:kAppGroup];
                NSMutableArray *outbox=[[groupDefaults objectForKey:@"outbox"] mutableCopy];
                if(!outbox) outbox =[[NSMutableArray alloc] init];
                

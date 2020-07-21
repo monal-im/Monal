@@ -168,13 +168,16 @@ static void logException(NSException* exception)
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    DDDispatchQueueLogFormatter* formatter = [[DDDispatchQueueLogFormatter alloc] init];
+    [[DDOSLogger sharedInstance] setLogFormatter:formatter];
     [DDLog addLogger:[DDOSLogger sharedInstance]];
     
 //#ifdef  DEBUG
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:@"group.monal"];
-    id<DDLogFileManager> logFileManager = [[DDLogFileManagerDefault alloc] initWithLogsDirectory:[containerUrl path]];
+    id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:[containerUrl path]];
     self.fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
+    [self.fileLogger setLogFormatter:formatter];
     self.fileLogger.rollingFrequency = 60 * 60 * 24;    // 24 hour rolling
     self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
     self.fileLogger.maximumFileSize=1024 * 1024 * 64;

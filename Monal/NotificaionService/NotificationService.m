@@ -7,12 +7,7 @@
 //
 
 #import "NotificationService.h"
-@import CocoaLumberjack;
-#ifdef DEBUG
-static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
-#else
-static const DDLogLevel ddLogLevel = DDLogLevelInfo;
-#endif
+#import "MLConstants.h"
 
 @interface NotificationService ()
 
@@ -23,8 +18,8 @@ static const DDLogLevel ddLogLevel = DDLogLevelInfo;
 
 static void logException(NSException* exception)
 {
-    DDLogError(@"CRASH: %@", exception);
-    DDLogError(@"Stack Trace: %@", [exception callStackSymbols]);
+    DDLogError(@"*** CRASH: %@", exception);
+    DDLogError(@"*** Stack Trace: %@", [exception callStackSymbols]);
     [DDLog flushLog];
 }
 
@@ -32,27 +27,29 @@ static void logException(NSException* exception)
 
 +(void) initialize
 {
+    DDDispatchQueueLogFormatter* formatter = [[DDDispatchQueueLogFormatter alloc] init];
+    [[DDOSLogger sharedInstance] setLogFormatter:formatter];
     [DDLog addLogger:[DDOSLogger sharedInstance]];
-    
-    DDLogInfo(@"*~*~*~*~*~*~*~*~* notification handler INIT");
     
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:@"group.monal"];
-    id<DDLogFileManager> logFileManager = [[DDLogFileManagerDefault alloc] initWithLogsDirectory:[containerUrl path]];
+    id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:[containerUrl path]];
     DDFileLogger* fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
+    [fileLogger setLogFormatter:formatter];
     fileLogger.rollingFrequency = 60 * 60 * 24;    // 24 hour rolling
     fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
     fileLogger.maximumFileSize=1024 * 1024 * 64;
     [DDLog addLogger:fileLogger];
+    DDLogInfo(@"*** Logfile dir: %@", [containerUrl path]);
     
-    DDLogInfo(@"*~*~*~*~*~*~*~*~* Logfile dir: %@", [containerUrl path]);
+    DDLogInfo(@"*** notification handler INIT");
     
     //log unhandled exceptions
     NSSetUncaughtExceptionHandler(&logException);
 }
 
 - (void)didReceiveNotificationRequest:(UNNotificationRequest *)request withContentHandler:(void (^)(UNNotificationContent * _Nonnull))contentHandler {
-    DDLogInfo(@"*~*~*~*~*~*~*~*~* notification handler called");
+    DDLogInfo(@"*** notification handler called");
     self.contentHandler = contentHandler;
     self.bestAttemptContent = [request.content mutableCopy];
     
@@ -70,12 +67,14 @@ static void logException(NSException* exception)
     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
     UNNotificationRequest* new_request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
     [center addNotificationRequest:new_request withCompletionHandler:^(NSError * _Nullable error) {
-        DDLogInfo(@"*~*~*~*~*~*~*~*~* second notification request completed: %@", error);
+        DDLogInfo(@"*** second notification request completed: %@", error);
     }];
+    
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
 }
 
 - (void)serviceExtensionTimeWillExpire {
-    DDLogInfo(@"*~*~*~*~*~*~*~*~* notification handler expired");
+    DDLogInfo(@"*** notification handler expired");
     // Called just before the extension will be terminated by the system.
     // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
     self.contentHandler(self.bestAttemptContent);

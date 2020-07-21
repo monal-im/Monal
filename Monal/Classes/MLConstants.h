@@ -15,6 +15,7 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 #else
 static const DDLogLevel ddLogLevel = DDLogLevelInfo;
 #endif
+#import "MLLogFileManager.h"
 
 
 typedef void (^contactCompletion)(MLContact *selectedContact);

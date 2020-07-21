@@ -137,6 +137,20 @@
     }
 }
 
+// Close the current view
+-(void) escapePressed:(UIKeyCommand*)keyCommand
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+// List of custom hardware key commands
+- (NSArray<UIKeyCommand *> *)keyCommands {
+    return @[
+            // esc
+            [UIKeyCommand keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(escapePressed:)],
+    ];
+}
+
 
 #pragma mark - tableview
 

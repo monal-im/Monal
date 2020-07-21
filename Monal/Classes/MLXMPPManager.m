@@ -228,7 +228,7 @@ An array of Dics what have timers to make sure everything was sent
 {
     DDLogVerbose(@"### MAM/SMACKS CATCHUP FINISHED ###");
     dispatch_async(dispatch_get_main_queue(), ^{
-        //[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     });
 }
 
@@ -247,6 +247,9 @@ An array of Dics what have timers to make sure everything was sent
         if(!xmppAccount.idle)
             return NO;
     }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+    });
     return YES;
 }
 

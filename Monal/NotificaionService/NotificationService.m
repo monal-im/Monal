@@ -8,6 +8,7 @@
 
 #import "NotificationService.h"
 #import "MLConstants.h"
+#import "MLXMPPManager.h"
 
 @interface NotificationService ()
 
@@ -70,7 +71,12 @@ static void logException(NSException* exception)
         DDLogInfo(@"*** second notification request completed: %@", error);
     }];
     
+    DDLogInfo(@"*** waiting before calling MLXMPPManager");
+    [DDLog flushLog];
+    [NSThread sleepForTimeInterval:4.000];
     [[MLXMPPManager sharedInstance] connectIfNecessary];
+    DDLogInfo(@"*** MLXMPPManager called");
+    [DDLog flushLog];
 }
 
 - (void)serviceExtensionTimeWillExpire {
@@ -78,6 +84,7 @@ static void logException(NSException* exception)
     // Called just before the extension will be terminated by the system.
     // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
     self.contentHandler(self.bestAttemptContent);
+    [DDLog flushLog];
 }
 
 @end

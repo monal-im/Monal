@@ -180,7 +180,7 @@
 		26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */; };
 		26C836622396CB9200C9F21D /* MLIQProcessorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C836612396CB9200C9F21D /* MLIQProcessorTest.m */; };
 		26CC579623A0867400ABB92A /* monalxmpp.h in Headers */ = {isa = PBXBuildFile; fileRef = 26CC579423A0867400ABB92A /* monalxmpp.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		26CC57A023A0868200ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; platformFilter = ios; };
+		26CC57A023A0868200ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		26CC57A223A086AA00ABB92A /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		26CC57A323A086AA00ABB92A /* MLDNSLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C4B22321B6B91300610282 /* MLDNSLookup.m */; };
 		26CC57A423A086AA00ABB92A /* MLXMPPServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661100C238F08820030A4EE /* MLXMPPServer.m */; };
@@ -2487,7 +2487,6 @@
 		};
 		26CC57E823A08F3A00ABB92A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			platformFilter = ios;
 			target = 26CC579123A0867400ABB92A /* monalxmpp */;
 			targetProxy = 26CC57E723A08F3A00ABB92A /* PBXContainerItemProxy */;
 		};

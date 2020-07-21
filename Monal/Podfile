@@ -23,6 +23,8 @@ target 'NotificaionService' do
    use_frameworks!
    inhibit_all_warnings!
    pod 'CocoaLumberjack'
+   pod 'SignalProtocolObjC'
+   pod 'SignalProtocolC'
 
 end
 

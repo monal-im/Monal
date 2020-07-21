@@ -54,28 +54,52 @@ NSString *const kCount = @"count";
 {
     NSFileManager* fileManager = [NSFileManager defaultManager];
 
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths objectAtIndex:0];
-    NSString *writableDBPath = [documentsDirectory stringByAppendingPathComponent:@"sworim.sqlite"];
-    DDLogInfo(@"initialize: db path %@", writableDBPath);
-    if( ![fileManager fileExistsAtPath:writableDBPath])
+    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:@"group.monal"];
+    NSString* writableDBPath = [[containerUrl path] stringByAppendingPathComponent:@"sworim.sqlite"];
+    
+    //old install is being upgraded --> copy old database to new app group path
+    NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString* oldDBPath = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"sworim.sqlite"];
+    if([fileManager fileExistsAtPath:oldDBPath] && ![fileManager fileExistsAtPath:writableDBPath])
     {
-        // The writable database does not exist, so copy the default to the appropriate location.
-        NSString *defaultDBPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"sworim.sqlite"];
+        DDLogInfo(@"initialize: copying existing DB from OLD path to new app group one: %@ --> %@", oldDBPath, writableDBPath);
+        NSError* error;
+        [fileManager copyItemAtPath:oldDBPath toPath:writableDBPath error:&error];
+        if(error)
+            DDLogError(@"ERROR(copy): %@", error);
+        DDLogInfo(@"initialize: removing old DB at: %@", oldDBPath);
+        [fileManager removeItemAtPath:oldDBPath error:&error];
+        if(error)
+            DDLogError(@"ERROR(remove): %@", error);
+    }
+    
+    //the file still does not exist (e.g. fresh install) --> copy default database to app group path
+    if(![fileManager fileExistsAtPath:writableDBPath])
+    {
+        DDLogInfo(@"initialize: copying default DB to: %@", writableDBPath);
+        NSString* defaultDBPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"sworim.sqlite"];
         NSError* error;
         [fileManager copyItemAtPath:defaultDBPath toPath:writableDBPath error:&error];
+        if(error)
+            DDLogError(@"ERROR(init): %@", error);
     }
+    
 #if TARGET_OS_IPHONE
-    NSDictionary *attributes =@{NSFileProtectionKey:NSFileProtectionCompleteUntilFirstUserAuthentication};
+    NSDictionary *attributes = @{NSFileProtectionKey:NSFileProtectionCompleteUntilFirstUserAuthentication};
     NSError *error;
     [fileManager setAttributes:attributes ofItemAtPath:writableDBPath error:&error];
+    if(error)
+        DDLogError(@"ERROR(attributes): %@", error);
 #endif
-
-    //  sqlite3_shutdown();
-    if (sqlite3_config(SQLITE_CONFIG_MULTITHREAD) == SQLITE_OK) {
+    
+    if(sqlite3_config(SQLITE_CONFIG_MULTITHREAD) == SQLITE_OK)
         DDLogInfo(@"initialize: Database configured ok");
-    } else DDLogInfo(@"initialize: Database not configured ok");
-
+    else
+    {
+        DDLogError(@"initialize: Database not configured ok");
+        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"sqlite3_config() failed" userInfo:nil];
+    }
+    
     sqlite3_initialize();
 }
 
@@ -2318,9 +2342,9 @@ NSString *const kCount = @"count";
 
 -(void) openDB
 {
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths objectAtIndex:0];
-    NSString *dbPath = [documentsDirectory stringByAppendingPathComponent:@"sworim.sqlite"];
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:@"group.monal"];
+    NSString* dbPath = [[containerUrl path] stringByAppendingPathComponent:@"sworim.sqlite"];
     DDLogInfo(@"db path %@", dbPath);
 
     if(sqlite3_open_v2([dbPath UTF8String], &(self->database), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nil) == SQLITE_OK)
@@ -2331,6 +2355,7 @@ NSString *const kCount = @"count";
     {
         //database error message
         DDLogError(@"Error opening database");
+        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"sqlite3_open_v2() failed" userInfo:nil];
     }
     [self executeNonQuery:@"pragma journal_mode=WAL;" andArguments:nil];
     [self executeNonQuery:@"pragma synchronous=NORMAL;" andArguments:nil];
@@ -2340,7 +2365,7 @@ NSString *const kCount = @"count";
 
     self.dbFormatter = [[NSDateFormatter alloc] init];
     [self.dbFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    [self.dbFormatter  setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    [self.dbFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 
     if(!_version_check_done)
         [self version];

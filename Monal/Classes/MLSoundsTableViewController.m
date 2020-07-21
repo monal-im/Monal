@@ -61,7 +61,7 @@
 -(NSString *) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     if(section==1){
-        return NSLocalizedString(@"Select sounds that are played with new message notificaitons. Default is Xylophone.",@ "");
+        return NSLocalizedString(@"Select sounds that are played with new message notifications. Default is Xylophone.",@ "");
     } else return nil;
 }
 

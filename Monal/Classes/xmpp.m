@@ -3000,7 +3000,7 @@ NSString *const kXMPPPresence = @"presence";
             NSError* error=[_oStream streamError];
             DDLogError(@"sending: failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                [self reconnect:0];
+                [self reconnect];
             });
             return NO;
         }
@@ -3030,7 +3030,7 @@ NSString *const kXMPPPresence = @"presence";
         NSError* error=[_oStream streamError];
         DDLogError(@"sending: failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            [self reconnect:0];
+            [self reconnect];
         });
         return NO;
     }

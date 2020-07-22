@@ -92,6 +92,7 @@ NSString *const kXMPPPresence = @"presence";
     BOOL _startTLSComplete;
     BOOL _catchupDone;
     double _exponentialBackoff;
+    BOOL _reconnectInProgress;
     
     //registration related stuff
     BOOL _registration;
@@ -148,6 +149,7 @@ NSString *const kXMPPPresence = @"presence";
 
     _startTLSComplete = NO;
     _catchupDone = NO;
+    _reconnectInProgress = NO;
 
     _SRVDiscoveryDone = NO;
     _discoveredServersList = [[NSMutableArray alloc] init];
@@ -496,13 +498,13 @@ NSString *const kXMPPPresence = @"presence";
 -(void) disconnect:(BOOL) explicitLogout
 {
     [self dispatchOnReceiveQueue: ^{
-        [_receiveQueue cancelAllOperations];        //stop everything coming after this (we should be logged out then!)
         if(_accountState<kStateReconnecting)
         {
             DDLogVerbose(@"not doing logout because already logged out");
             return;
         }
         DDLogInfo(@"disconnecting");
+        [_receiveQueue cancelAllOperations];        //stop everything coming after this (we should be logged out then!)
         
         DDLogInfo(@"stopping running timers");
         if(_cancelLoginTimer)
@@ -607,6 +609,11 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) reconnect
 {
+    if(_reconnectInProgress)
+    {
+        DDLogInfo(@"Ignoring reconnect while one already in progress");
+        return;
+    }
     if(!_exponentialBackoff)
         _exponentialBackoff = 1.0;
     [self reconnect:_exponentialBackoff];
@@ -619,16 +626,29 @@ NSString *const kXMPPPresence = @"presence";
     if(_registration || _registrationSubmission)
         return;
 
+    if(_reconnectInProgress)
+    {
+        DDLogInfo(@"Ignoring reconnect while one already in progress");
+        return;
+    }
+    
     [self dispatchOnReceiveQueue: ^{
+        if(_reconnectInProgress)
+        {
+            DDLogInfo(@"Ignoring reconnect while one already in progress");
+            return;
+        }
+        
+        _reconnectInProgress = YES;
         [self disconnect:NO];
 
         DDLogInfo(@"Trying to connect again in %G seconds...", wait);
         [HelperTools startTimer:wait withHandler:^{
             [self dispatchOnReceiveQueue: ^{
                 //there may be another connect/login operation in progress triggered from reachability or another timer
-                if(self.accountState<kStateReconnecting) {
+                if(self.accountState<kStateReconnecting)
                     [self connect];
-                }
+                _reconnectInProgress = NO;
             }];
         }];
         DDLogInfo(@"reconnect exits");

@@ -53,6 +53,9 @@ typedef void (^monal_void_block_t)();
 #define kMonalContactRefresh @"kMonalContactRefresh"
 #define kMonalRefreshContacts @"kMonalRefreshContacts"
 
+// chat
+#define kMonalChatMaxAllowedTextLen 2048 // max count of char's in a single message
+
 //contact cells
 #define kusernameKey @"username"
 #define kfullNameKey @"fullName"

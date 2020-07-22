@@ -1374,10 +1374,10 @@
     
     NSString* from = row.from;
     
-    //cut text after 2048 chars to make the message cell work properly (too big texts don't render the text in the cell at all)
+    //cut text after kMonalChatMaxAllowedTextLen chars to make the message cell work properly (too big texts don't render the text in the cell at all)
     NSString* messageText = row.messageText;
-    if([messageText length] > 2048)
-        messageText = [NSString stringWithFormat:@"%@\n[...]", [messageText substringToIndex:2048]];
+    if([messageText length] > kMonalChatMaxAllowedTextLen)
+        messageText = [NSString stringWithFormat:@"%@\n[...]", [messageText substringToIndex:kMonalChatMaxAllowedTextLen]];
     
     if([row.messageType isEqualToString:kMessageTypeStatus])
     {
@@ -1823,14 +1823,13 @@
     // Notify that we are typing
     [self sendChatState:YES];
 
-    // Limit text length to 2048
-    const size_t maxAllowedTextLength = 2048;
+    // Limit text length to kMonalChatMaxAllowedTextLen
     if([text isEqualToString:@""]) {
         shouldInsert &= YES;
     } else {
-        shouldInsert &= (range.location + range.length < maxAllowedTextLength);
+        shouldInsert &= (range.location + range.length < kMonalChatMaxAllowedTextLen);
     }
-    shouldInsert &= ([textView.text length] + [text length] - range.length <= maxAllowedTextLength);
+    shouldInsert &= ([textView.text length] + [text length] - range.length <= kMonalChatMaxAllowedTextLen);
 
     return shouldInsert;
 }

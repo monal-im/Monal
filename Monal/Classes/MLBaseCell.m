@@ -14,7 +14,7 @@
 - (void)awakeFromNib {
     [super awakeFromNib];
     
-    BOOL backgrounds = [[NSUserDefaults standardUserDefaults] boolForKey:@"ChatBackgrounds"];
+    BOOL backgrounds = [DEFAULTS_DB boolForKey:@"ChatBackgrounds"];
     if(backgrounds) {
         self.name.textColor=[UIColor whiteColor];
         self.date.textColor=[UIColor whiteColor];

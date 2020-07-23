@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MLConstants.h"
 
 #define kDefaultTextHeight 20
 #define kDefaultTextOffset 5

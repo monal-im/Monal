@@ -27,7 +27,9 @@
 
 static void logException(NSException* exception)
 {
+    [DDLog flushLog];
     DDLogError(@"CRASH: %@", exception);
+    [DDLog flushLog];
     DDLogError(@"Stack Trace: %@", [exception callStackSymbols]);
     [DDLog flushLog];
 }
@@ -193,6 +195,35 @@ static void logException(NSException* exception)
     //log unhandled exceptions
     NSSetUncaughtExceptionHandler(&logException);
     
+    //migrate defaults db to shared app group
+    if(![DEFAULTS_DB boolForKey:@"DefaulsMigratedToAppGroup"])
+    {
+        DDLogInfo(@"Migrating [NSUserDefaults standardUserDefaults] to app group container...");
+        [DEFAULTS_DB setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"MessagePreview"] forKey:@"MessagePreview"];
+        [DEFAULTS_DB setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"ChatBackgrounds"] forKey:@"ChatBackgrounds"];
+        [DEFAULTS_DB setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"ShowGeoLocation"] forKey:@"ShowGeoLocation"];
+        [DEFAULTS_DB setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"] forKey:@"Sound"];
+        [DEFAULTS_DB setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"SetDefaults"] forKey:@"SetDefaults"];
+        [DEFAULTS_DB setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenIntro"] forKey:@"HasSeenIntro"];
+        [DEFAULTS_DB setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeeniOS13Message"] forKey:@"HasSeeniOS13Message"];
+        [DEFAULTS_DB setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenLogin"] forKey:@"HasSeenLogin"];
+        [DEFAULTS_DB setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"] forKey:@"SortContacts"];
+        [DEFAULTS_DB setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"] forKey:@"OfflineContact"];
+        [DEFAULTS_DB setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"] forKey:@"Logging"];
+        [DEFAULTS_DB setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"ShowImages"] forKey:@"ShowImages"];
+        [DEFAULTS_DB setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"] forKey:@"Away"];
+        [DEFAULTS_DB setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"HasUpgradedPushiOS13"] forKey:@"HasUpgradedPushiOS13"];
+        [DEFAULTS_DB setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"StatusMessage"] forKey:@"StatusMessage"];
+        [DEFAULTS_DB setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"BackgroundImage"] forKey:@"BackgroundImage"];
+        [DEFAULTS_DB setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"] forKey:@"AlertSoundFile"];
+        [DEFAULTS_DB setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"pushSecret"] forKey:@"pushSecret"];
+        [DEFAULTS_DB setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"pushNode"] forKey:@"pushNode"];
+        
+        [DEFAULTS_DB setBool:@YES forKey:@"DefaulsMigratedToAppGroup"];
+        [DEFAULTS_DB synchronize];
+        DDLogInfo(@"Migration complete and written to disk");
+    }
+    
     [UNUserNotificationCenter currentNotificationCenter].delegate=self;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateState:) name:kMLHasConnectedNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
@@ -228,10 +259,10 @@ static void logException(NSException* exception)
         // if we are launched in the background, it was from a push. dont do this again.
         if (@available(iOS 13.0, *)) {
             //no more voip mode after ios 13
-            if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasUpgradedPushiOS13"]) {
+            if(![DEFAULTS_DB boolForKey:@"HasUpgradedPushiOS13"]) {
                 MLPush *push = [[MLPush alloc] init];
                 [push unregisterVOIPPush];
-                [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasUpgradedPushiOS13"];
+                [DEFAULTS_DB setBool:YES forKey:@"HasUpgradedPushiOS13"];
             }
             
             [[UIApplication sharedApplication] registerForRemoteNotifications];
@@ -243,8 +274,8 @@ static void logException(NSException* exception)
         }
     }
     else  {
-        [MLXMPPManager sharedInstance].pushNode = [[NSUserDefaults standardUserDefaults] objectForKey:@"pushNode"];
-        [MLXMPPManager sharedInstance].pushSecret=[[NSUserDefaults standardUserDefaults] objectForKey:@"pushSecret"];
+        [MLXMPPManager sharedInstance].pushNode = [DEFAULTS_DB objectForKey:@"pushNode"];
+        [MLXMPPManager sharedInstance].pushSecret=[DEFAULTS_DB objectForKey:@"pushSecret"];
         [MLXMPPManager sharedInstance].hasAPNSToken=YES;
         DDLogInfo(@"push node %@", [MLXMPPManager sharedInstance].pushNode);
     }
@@ -255,7 +286,7 @@ static void logException(NSException* exception)
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     
     //update logs if needed
-    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])
+    if(![DEFAULTS_DB boolForKey:@"Logging"])
     {
         [[DataLayer sharedInstance] messageHistoryCleanAll];
     }
@@ -458,12 +489,13 @@ static void logException(NSException* exception)
     DDLogWarn(@"|~~| T E R M I N A T I N G |~~|");
     [self updateUnread];
     DDLogVerbose(@"|~~| 25%% |~~|");
-    [[NSUserDefaults standardUserDefaults] synchronize];
+    [DEFAULTS_DB synchronize];
     DDLogVerbose(@"|~~| 50%% |~~|");
     [[MLXMPPManager sharedInstance] scheduleBackgroundFetchingTask];        //make sure delivery will be attempted, if needed
     DDLogVerbose(@"|~~| 75%% |~~|");
     [[MLXMPPManager sharedInstance] setClientsInactive];
     DDLogVerbose(@"|~~| T E R M I N A T E D |~~|");
+    [DDLog flushLog];
 }
 
 #pragma mark - error feedback

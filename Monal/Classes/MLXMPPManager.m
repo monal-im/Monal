@@ -53,58 +53,58 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) defaultSettings
 {
-    BOOL setDefaults = [[NSUserDefaults standardUserDefaults] boolForKey:@"SetDefaults"];
+    BOOL setDefaults = [DEFAULTS_DB boolForKey:@"SetDefaults"];
     if(!setDefaults)
     {
-        // [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:@"StatusMessage"];   // we dont want anything set
-        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"Away"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MusicStatus"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Sound"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MessagePreview"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Logging"];
+        // [DEFAULTS_DB setObject:@"" forKey:@"StatusMessage"];   // we dont want anything set
+        [DEFAULTS_DB setBool:NO forKey:@"Away"];
+        [DEFAULTS_DB setBool:YES forKey:@"MusicStatus"];
+        [DEFAULTS_DB setBool:YES forKey:@"Sound"];
+        [DEFAULTS_DB setBool:YES forKey:@"MessagePreview"];
+        [DEFAULTS_DB setBool:YES forKey:@"Logging"];
 
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"OfflineContact"];
-        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"SortContacts"];
+        [DEFAULTS_DB setBool:YES forKey:@"OfflineContact"];
+        [DEFAULTS_DB setBool:NO forKey:@"SortContacts"];
 
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"SetDefaults"];
+        [DEFAULTS_DB setBool:YES forKey:@"SetDefaults"];
 
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"ShowImages"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"ShowGeoLocation"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"ChatBackgrounds"];
+        [DEFAULTS_DB setBool:YES forKey:@"ShowImages"];
+        [DEFAULTS_DB setBool:YES forKey:@"ShowGeoLocation"];
+        [DEFAULTS_DB setBool:YES forKey:@"ChatBackgrounds"];
 
-        [[NSUserDefaults standardUserDefaults] synchronize];
+        [DEFAULTS_DB synchronize];
     }
 
     // on upgrade this one needs to be set to yes. Can be removed later.
-    NSNumber *imagesTest= [[NSUserDefaults standardUserDefaults] objectForKey:@"ShowImages"];
+    NSNumber *imagesTest= [DEFAULTS_DB objectForKey:@"ShowImages"];
 
     if(imagesTest==nil)
     {
-          [[NSUserDefaults standardUserDefaults] setBool:YES  forKey:@"ShowImages"];
-          [[NSUserDefaults standardUserDefaults] synchronize];
+          [DEFAULTS_DB setBool:YES  forKey:@"ShowImages"];
+          [DEFAULTS_DB synchronize];
     }
 
     // upgrade
-    NSNumber *background = [[NSUserDefaults standardUserDefaults] objectForKey:@"ChatBackgrounds"];
+    NSNumber *background = [DEFAULTS_DB objectForKey:@"ChatBackgrounds"];
     if(background==nil)
     {
-        [[NSUserDefaults standardUserDefaults] setBool:YES  forKey:@"ChatBackgrounds"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
+        [DEFAULTS_DB setBool:YES  forKey:@"ChatBackgrounds"];
+        [DEFAULTS_DB synchronize];
     }
 
-    NSNumber *sounds = [[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"];
+    NSNumber *sounds = [DEFAULTS_DB objectForKey:@"AlertSoundFile"];
     if(sounds==nil)
     {
-        [[NSUserDefaults standardUserDefaults] setObject:@"alert2" forKey:@"AlertSoundFile"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
+        [DEFAULTS_DB setObject:@"alert2" forKey:@"AlertSoundFile"];
+        [DEFAULTS_DB synchronize];
     }
 
     // upgrade ShowGeoLocation
-    NSNumber* mapLocationTest = [[NSUserDefaults standardUserDefaults] objectForKey:@"ShowGeoLocation"];
+    NSNumber* mapLocationTest = [DEFAULTS_DB objectForKey:@"ShowGeoLocation"];
     if(mapLocationTest==nil)
     {
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"ShowGeoLocation"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
+        [DEFAULTS_DB setBool:YES forKey:@"ShowGeoLocation"];
+        [DEFAULTS_DB synchronize];
     }
 }
 
@@ -236,6 +236,7 @@ An array of Dics what have timers to make sure everything was sent
 {
     dispatch_async(self->_netQueue, ^{
         DDLogVerbose(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
+        [DDLog flushLog];
         [self checkIfBackgroundTaskIsStillNeeded];
     });
 }
@@ -256,7 +257,9 @@ An array of Dics what have timers to make sure everything was sent
 -(BOOL) isInBackground
 {
     __block BOOL inBackground = NO;
-#ifndef TARGET_IS_EXTENSION
+#ifdef TARGET_IS_EXTENSION
+    inBackground = YES;
+#else
 #if TARGET_OS_IPHONE
     void (^block)(void) = ^{
         if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
@@ -278,10 +281,12 @@ An array of Dics what have timers to make sure everything was sent
         if([self allAccountsIdle] && [self isInBackground])
         {
             DDLogInfo(@"### All accounts idle, stopping all background tasks ###");
+            [DDLog flushLog];
             BOOL stopped = NO;
             if(_bgTask != UIBackgroundTaskInvalid)
             {
                 DDLogVerbose(@"stopping UIKit _bgTask");
+                [DDLog flushLog];
                 [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
                 _bgTask = UIBackgroundTaskInvalid;
                 stopped = YES;
@@ -289,11 +294,13 @@ An array of Dics what have timers to make sure everything was sent
             if(_bgFetch)
             {
                 DDLogVerbose(@"stopping backgroundFetchingTask");
+                [DDLog flushLog];
                 [_bgFetch setTaskCompletedWithSuccess:YES];
                 stopped = YES;
             }
             if(!stopped)
                 DDLogVerbose(@"no background tasks running, nothing to stop");
+            [DDLog flushLog];
             
             /*
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -316,11 +323,13 @@ An array of Dics what have timers to make sure everything was sent
         _bgFetch = nil;
         [task setTaskCompletedWithSuccess:NO];
         [self scheduleBackgroundFetchingTask];      //schedule new one if neccessary
+        [DDLog flushLog];
     };
     unsigned long tick = 0;
     while(1)
     {
         DDLogVerbose(@"BGTASK TICK: %ul", tick++);
+        [DDLog flushLog];
         [NSThread sleepForTimeInterval:1.000];
     }
 }
@@ -340,6 +349,8 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) scheduleBackgroundFetchingTask
 {
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
     if(@available(iOS 13.0, *))
     {
         dispatch_sync(dispatch_get_main_queue(), ^{
@@ -365,6 +376,8 @@ An array of Dics what have timers to make sure everything was sent
         // No fallback unfortunately
         DDLogError(@"BGTask needed but NOT supported!");
     }
+#endif
+#endif
 }
 
 #pragma mark - client state
@@ -381,14 +394,15 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) setClientsActive
 {
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
     dispatch_async(dispatch_get_main_queue(), ^{
         //start indicating we want to do work even when the app is put into background
         if(_bgTask == UIBackgroundTaskInvalid)
         {
             _bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
                 DDLogWarn(@"BG WAKE EXPIRING");
-                [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
-                _bgTask = UIBackgroundTaskInvalid;
+                [DDLog flushLog];
                 
                 //schedule a BGProcessingTaskRequest to process this further as soon as possible
                 if(@available(iOS 13.0, *))
@@ -396,10 +410,17 @@ An array of Dics what have timers to make sure everything was sent
                     DDLogInfo(@"calling scheduleBackgroundFetchingTask");
                     [self scheduleBackgroundFetchingTask];
                 }
+                
+                [DDLog flushLog];
+                [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
+                _bgTask = UIBackgroundTaskInvalid;
             }];
         }
         [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     });
+#endif
+#endif
+    
     //don't block main thread here
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         for(xmpp* xmppAccount in _connectedXMPP)
@@ -481,21 +502,11 @@ An array of Dics what have timers to make sure everything was sent
 
     NSError* error;
     NSString *password = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]] error:&error];
+    error = nil;
     if(error)
     {
-        DDLogError(@"Keychain error: %@", error);
-        NSString* idval = [[NSUUID UUID] UUIDString];
-        UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
-        content.title = @"Keychain error";
-        content.body = [NSString stringWithFormat:@"%@", error];
-        content.sound = [UNNotificationSound defaultSound];
-        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-        UNNotificationRequest* new_request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
-        [center addNotificationRequest:new_request withCompletionHandler:^(NSError * _Nullable error) {
-            DDLogInfo(@"*** alerted keychain error: %@", error);
-        }];
-        [NSThread sleepForTimeInterval:4.000];
-        @throw error;
+        DDLogError(@"Keychain error: %@", [NSString stringWithFormat:@"%@", error]);
+        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
     }
     MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@",[account objectForKey:kUsername],[account objectForKey:kDomain] ] password:password andResource:[account objectForKey:kResource]];
 
@@ -577,7 +588,7 @@ An array of Dics what have timers to make sure everything was sent
 #if TARGET_OS_IPHONE
     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
 #endif
-     [SAMKeychain setPassword:password forService:@"Monal" account:accountNo];
+    [SAMKeychain setPassword:password forService:@"Monal" account:accountNo];
     xmpp* xmpp =[self getConnectedAccountForID:accountNo];
     [xmpp.connectionProperties.identity updatPassword:password];
 }
@@ -937,15 +948,15 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 -(void) setPushNode:(NSString *)node andSecret:(NSString *)secret
 {
     self.pushNode=node;
-    [[NSUserDefaults standardUserDefaults] setObject:self.pushNode forKey:@"pushNode"];
+    [DEFAULTS_DB setObject:self.pushNode forKey:@"pushNode"];
     
     if(secret)
     {
         self.pushSecret=secret;
-        [[NSUserDefaults standardUserDefaults] setObject:self.pushSecret forKey:@"pushSecret"];
+        [DEFAULTS_DB setObject:self.pushSecret forKey:@"pushSecret"];
     }
     else    //use saved one (push server not reachable via http(s)) --> the old secret might still be valid
-        self.pushSecret=[[NSUserDefaults standardUserDefaults] objectForKey:@"pushSecret"];
+        self.pushSecret=[DEFAULTS_DB objectForKey:@"pushSecret"];
 
     for(xmpp* xmppAccount in _connectedXMPP)
     {

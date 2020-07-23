@@ -153,7 +153,7 @@
 
 -(void) refreshDisplay
 {
-    if([[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"]) //sort by status
+    if([DEFAULTS_DB boolForKey:@"SortContacts"]) //sort by status
     {
         [[DataLayer sharedInstance] onlineContactsSortedBy:@"Status" withCompeltion:^(NSMutableArray *results) {
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -171,7 +171,7 @@
         }];
     }
     
-    if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+    if([DEFAULTS_DB boolForKey:@"OfflineContact"])
     {
         [[DataLayer sharedInstance] offlineContactsWithCompletion:^(NSMutableArray *results) {
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -339,7 +339,7 @@
         toreturn =1;
     }
     else{
-        if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+        if([DEFAULTS_DB boolForKey:@"OfflineContact"])
             toreturn =3;
         else
             toreturn =2;

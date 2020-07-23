@@ -161,7 +161,7 @@
 -(IBAction) useWithoutAccount:(id)sender
 {
     [self dismissViewControllerAnimated:YES completion:nil];
-    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasSeenLogin"];
+    [DEFAULTS_DB setBool:YES forKey:@"HasSeenLogin"];
 }
 
 -(IBAction) tapAction:(id)sender

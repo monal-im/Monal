@@ -52,25 +52,35 @@ NSString *const kCount = @"count";
 
 +(void) initialize
 {
+    NSError* error;
     NSFileManager* fileManager = [NSFileManager defaultManager];
-
     NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
     NSString* writableDBPath = [[containerUrl path] stringByAppendingPathComponent:@"sworim.sqlite"];
-    
-    //old install is being upgraded --> copy old database to new app group path
     NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString* oldDBPath = [[paths objectAtIndex:0] stringByAppendingPathComponent:@"sworim.sqlite"];
+    
+    //database move is incomplete --> start from scratch
+    //this can happen if the notification extension was run after the app upgrade but before the main app was opened
+    //in this scenario the db doesn't get copyed but created from the default file (e.g. it is empty)
+    if([fileManager fileExistsAtPath:oldDBPath] && [fileManager fileExistsAtPath:writableDBPath])
+    {
+        DDLogInfo(@"initialize: old AND new db files present, delete new one and start from scratch");
+        [fileManager removeItemAtPath:writableDBPath error:&error];
+        if(error)
+            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
+    }
+    
+    //old install is being upgraded --> copy old database to new app group path
     if([fileManager fileExistsAtPath:oldDBPath] && ![fileManager fileExistsAtPath:writableDBPath])
     {
         DDLogInfo(@"initialize: copying existing DB from OLD path to new app group one: %@ --> %@", oldDBPath, writableDBPath);
-        NSError* error;
         [fileManager copyItemAtPath:oldDBPath toPath:writableDBPath error:&error];
         if(error)
-            @throw error;
+            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
         DDLogInfo(@"initialize: removing old DB at: %@", oldDBPath);
         [fileManager removeItemAtPath:oldDBPath error:&error];
         if(error)
-            @throw error;
+            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
     }
     
     //the file still does not exist (e.g. fresh install) --> copy default database to app group path
@@ -81,15 +91,12 @@ NSString *const kCount = @"count";
         NSError* error;
         [fileManager copyItemAtPath:defaultDBPath toPath:writableDBPath error:&error];
         if(error)
-            @throw error;
+            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
     }
     
 #if TARGET_OS_IPHONE
     NSDictionary *attributes = @{NSFileProtectionKey:NSFileProtectionCompleteUntilFirstUserAuthentication};
-    NSError *error;
     [fileManager setAttributes:attributes ofItemAtPath:writableDBPath error:&error];
-    if(error)
-        @throw error;
 #endif
     
     if(sqlite3_config(SQLITE_CONFIG_MULTITHREAD) == SQLITE_OK)
@@ -2388,7 +2395,7 @@ NSString *const kCount = @"count";
         [self executeNonQuery:@"create table buddylistOnline (buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null,buddy_name varchar(50), group_name varchar(100));" andArguments:nil];
         [self executeNonQuery:@"update dbversion set dbversion='1.07';" andArguments:nil];
 
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"IdleAlert"];
+        [DEFAULTS_DB setBool:YES forKey:@"IdleAlert"];
 
         DDLogVerbose(@"Upgrade to 1.07 success");
     }
@@ -2414,7 +2421,7 @@ NSString *const kCount = @"count";
 
         [self executeNonQuery:@"update dbversion set dbversion='1.071';" andArguments:nil];
 
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"IdleAlert"];
+        [DEFAULTS_DB setBool:YES forKey:@"IdleAlert"];
 
         DDLogVerbose(@"Upgrade to 1.071 success");
     }
@@ -2434,9 +2441,9 @@ NSString *const kCount = @"count";
         DDLogVerbose(@"Database version <1.073 detected. Performing upgrade on passwords. ");
 
         //set defaults on upgrade
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"OfflineContact"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MessagePreview"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Logging"];
+        [DEFAULTS_DB setBool:YES forKey:@"OfflineContact"];
+        [DEFAULTS_DB setBool:YES forKey:@"MessagePreview"];
+        [DEFAULTS_DB setBool:YES forKey:@"Logging"];
 
         [self executeNonQuery:@"update dbversion set dbversion='1.073';" andArguments:nil];
         DDLogVerbose(@"Upgrade to 1.073 success");
@@ -2922,7 +2929,7 @@ NSString *const kCount = @"count";
         [self executeNonQuery:@"DROP TABLE IF EXISTS legacy_caps;" andArguments:nil];
         [self executeNonQuery:@"DROP TABLE IF EXISTS buddy_resources_legacy_caps;" andArguments:nil];
         //recreate capabilities cache to make a fresh start
-        [self executeNonQuery:@"DROP IF EXISTS TABLE ver_info;" andArguments:nil];
+        [self executeNonQuery:@"DROP TABLE IF EXISTS ver_info;" andArguments:nil];
         [self executeNonQuery:@"CREATE TABLE ver_info(ver VARCHAR(32), cap VARCHAR(255), PRIMARY KEY (ver,cap));" andArguments:nil];
         [self executeNonQuery:@"CREATE TABLE ver_timestamp (ver VARCHAR(32), timestamp INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ver));" andArguments:nil];
         [self executeNonQuery:@"CREATE INDEX timeindex ON ver_timestamp(timestamp);"  andArguments:nil];
@@ -2942,6 +2949,15 @@ NSString *const kCount = @"count";
         [self executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:nil];
         [self executeNonQuery:@"update dbversion set dbversion='4.78';" andArguments:nil];
         DDLogVerbose(@"Upgrade to 4.78 success");
+    }
+    
+    if([dbversion doubleValue] < 4.80)
+    {
+        //drop and recreate in 4.77 was faulty (wrong drop syntax), do it right this time
+        [self executeNonQuery:@"DROP TABLE IF EXISTS ver_info;" andArguments:nil];
+        [self executeNonQuery:@"CREATE TABLE ver_info(ver VARCHAR(32), cap VARCHAR(255), PRIMARY KEY (ver,cap));" andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='4.80';" andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.80 success");
     }
     
     [self endWriteTransaction];
@@ -2973,7 +2989,7 @@ NSString *const kCount = @"count";
            messageType=kMessageTypeUrl;
     }
 
-    if ([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowImages"] &&
+    if ([DEFAULTS_DB boolForKey: @"ShowImages"] &&
         ([messageString hasPrefix:@"HTTPS://"] || [messageString hasPrefix:@"https://"] || [messageString hasPrefix:@"aesgcm://"])) {
             NSString *cleaned = [messageString stringByReplacingOccurrencesOfString:@"aesgcm://" withString:@"https://"];
             NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:cleaned]];

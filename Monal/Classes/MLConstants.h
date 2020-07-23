@@ -18,11 +18,14 @@ static const DDLogLevel ddLogLevel = DDLogLevelInfo;
 #import "MLLogFileManager.h"
 
 
+#define kAppGroup @"group.monal"
+#define DEFAULTS_DB [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"]
+
+
 typedef void (^contactCompletion)(MLContact *selectedContact);
 typedef void (^accountCompletion)(NSInteger accountRow);
 typedef void (^monal_void_block_t)();
 
-#define kAppGroup @"group.monal"
 
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
 #define kMLMessageSentToContact @"kMLMessageSentToContact"

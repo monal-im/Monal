@@ -19,7 +19,6 @@
 
 static void logException(NSException* exception)
 {
-    DDLogError(@"*** Got CRASH Exception!");
     [DDLog flushLog];
     DDLogError(@"*** CRASH: %@", exception);
     [DDLog flushLog];
@@ -61,7 +60,13 @@ static void logException(NSException* exception)
     self.bestAttemptContent.title = @"New Message"; //[NSString stringWithFormat:@"New Message %@", self.bestAttemptContent.title];
     self.bestAttemptContent.body = @"Open app to view";
     self.bestAttemptContent.badge = @1;
-    //self.contentHandler(self.bestAttemptContent);
+    
+    //just "ignore" this push if we have not migrated our defaults db already (this needs a normal app start to happen)
+    if(![DEFAULTS_DB boolForKey:@"DefaulsMigratedToAppGroup"])
+    {
+        self.contentHandler(self.bestAttemptContent);
+        return;
+    }
     
     NSString* idval = [[NSUUID UUID] UUIDString];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];

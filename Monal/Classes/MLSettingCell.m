@@ -15,14 +15,14 @@
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
-    if (self) {
+    if(self)
+    {
         // Initialization code
-  
-    self.selectionStyle=UITableViewCellSelectionStyleNone;
-    
-    _textInputField=[[UITextField alloc] initWithFrame:CGRectZero];
-    _toggleSwitch=[[UISwitch alloc] initWithFrame:CGRectZero];
-          }
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        
+        _textInputField = [[UITextField alloc] initWithFrame:CGRectZero];
+        _toggleSwitch = [[UISwitch alloc] initWithFrame:CGRectZero];
+    }
     return self;
 }
 
@@ -41,7 +41,7 @@
     
     if(self.switchEnabled)
   {
-    _toggleSwitch.on=  [[NSUserDefaults standardUserDefaults] boolForKey: _defaultKey];
+    _toggleSwitch.on=  [DEFAULTS_DB boolForKey: _defaultKey];
       [ _toggleSwitch addTarget:self action:@selector(switchChange) forControlEvents:UIControlEventValueChanged];
       CGRect frame=CGRectMake(self.frame.size.width-50-padding,
                                 textLabelFrame.origin.y+9,
@@ -68,7 +68,7 @@
         _textInputField.frame=frame;
         _textInputField.returnKeyType=UIReturnKeyDone;
         _textInputField.delegate=self;
-        _textInputField.text= [[NSUserDefaults standardUserDefaults] stringForKey: _defaultKey];
+        _textInputField.text= [DEFAULTS_DB stringForKey: _defaultKey];
         [self.contentView addSubview: _textInputField ];
     }
 
@@ -77,7 +77,7 @@
 
 -(void) switchChange
 {
-    [[NSUserDefaults standardUserDefaults]  setBool:_toggleSwitch.on forKey: _defaultKey];
+    [DEFAULTS_DB  setBool:_toggleSwitch.on forKey: _defaultKey];
     if([_defaultKey isEqualToString:@"Away"])
     {
         [[MLXMPPManager sharedInstance] setAway:_toggleSwitch.on];
@@ -92,7 +92,7 @@
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
-    [[NSUserDefaults standardUserDefaults]  setObject:_textInputField.text forKey: _defaultKey];
+    [DEFAULTS_DB  setObject:_textInputField.text forKey: _defaultKey];
     [textField resignFirstResponder];
     
     if([_defaultKey isEqualToString:@"StatusMessage"])

@@ -98,9 +98,9 @@
         content.threadIdentifier =[self identifierWithNotification:notification];
         content.categoryIdentifier=@"Reply";
         
-        if( [[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"]==true)
+        if( [DEFAULTS_DB boolForKey:@"Sound"]==true)
         {
-            NSString *filename = [[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"];
+            NSString *filename = [DEFAULTS_DB objectForKey:@"AlertSoundFile"];
             if(filename) {
                 content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif",filename]];
             } else  {

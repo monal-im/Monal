@@ -221,14 +221,14 @@
         [self refreshDisplay];
     }
   
-    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenIntro"]) {
+    if(![DEFAULTS_DB boolForKey:@"HasSeenIntro"]) {
         [self performSegueWithIdentifier:@"showIntro" sender:self];
     }
     else  {
         //for 3->4 release remove later
-        if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeeniOS13Message"]) {
-
-            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Notification Changes",@ "") message:[NSString stringWithFormat:NSLocalizedString(@"Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old experience back.",@ "")] preferredStyle:UIAlertControllerStyleAlert];
+        if(![DEFAULTS_DB boolForKey:@"HasSeeniOS13Message"]) {
+            
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Notification Changes",@ "") message:[NSString stringWithFormat:NSLocalizedString(@"Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old expereince back.",@ "")] preferredStyle:UIAlertControllerStyleAlert];
             UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Got it!",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
                 [self dismissViewControllerAnimated:YES completion:nil];
                 
@@ -236,7 +236,7 @@
             
             [messageAlert addAction:acceptAction];
             [self.tabBarController presentViewController:messageAlert animated:YES completion:nil];
-            [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasSeeniOS13Message"];
+            [DEFAULTS_DB setBool:YES forKey:@"HasSeeniOS13Message"];
         }
     }
     
@@ -261,7 +261,7 @@
         welcome.completion = ^(){
             if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
             {
-                if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenLogin"]) {
+                if(![DEFAULTS_DB boolForKey:@"HasSeenLogin"]) {
                     [self performSegueWithIdentifier:@"showLogin" sender:self];
                 }
             }

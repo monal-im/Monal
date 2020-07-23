@@ -105,7 +105,7 @@
 - (void)introDidFinish:(EAIntroView *)introView wasSkipped:(BOOL)wasSkipped {
    
     [self dismissViewControllerAnimated:YES completion:self.completion];
-    [[NSUserDefaults standardUserDefaults] setObject:@YES forKey:@"HasSeenIntro"];
+    [DEFAULTS_DB setObject:@YES forKey:@"HasSeenIntro"];
 }
 
 

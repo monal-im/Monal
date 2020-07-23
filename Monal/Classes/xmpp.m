@@ -177,7 +177,10 @@ NSString *const kXMPPPresence = @"presence";
 
     _versionHash = [HelperTools getOwnCapsHash];
     _isCSIActive = YES;         //default value is yes if no csi state was sent yet
-#ifndef TARGET_IS_EXTENSION
+#ifdef TARGET_IS_EXTENSION
+        DDLogVerbose(@"Calle from extension: CSI inactive");
+        _isCSIActive=NO;        //we are always inactive when called from an extension
+#else
 #if TARGET_OS_IPHONE
         dispatch_async(dispatch_get_main_queue(), ^{
             if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
@@ -189,8 +192,8 @@ NSString *const kXMPPPresence = @"presence";
 #endif
     _lastInteractionDate=[NSDate date];     //better default than 1970
 
-    self.statusMessage=[[NSUserDefaults standardUserDefaults] stringForKey:@"StatusMessage"];
-    self.awayState=[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"];
+    self.statusMessage=[DEFAULTS_DB stringForKey:@"StatusMessage"];
+    self.awayState=[DEFAULTS_DB boolForKey:@"Away"];
 }
 
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSString*) accountNo
@@ -1329,9 +1332,12 @@ NSString *const kXMPPPresence = @"presence";
             [self removeAckedStanzasFromQueue:resumeNode.h];
             [self resendUnackedStanzas];
 
-            //publish new csi and last active state
+            //publish new csi and last active state (but only do so when not in an extension
+            //because the last active state does not change when inside an extension)
             [self sendCurrentCSIState];
+#ifndef TARGET_IS_EXTENSION
             [self sendPresence];
+#endif
 
             //signal finished catchup if our current outgoing stanza counter is acked, this introduces an additional roundtrip to make sure
             //all stanzas the *server* wanted to replay have been received, too
@@ -3058,7 +3064,6 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) enablePush
 {
-#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
     if(
         self.accountState>=kStateBound && self.connectionProperties.supportsPush &&
@@ -3076,7 +3081,6 @@ NSString *const kXMPPPresence = @"presence";
     {
         DDLogInfo(@" NOT enabling push: %@ < %@", self.pushNode, self.pushSecret);
     }
-#endif
 #endif
 }
 

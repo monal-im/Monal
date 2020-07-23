@@ -50,10 +50,10 @@
 -(void) viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
-    [[NSUserDefaults standardUserDefaults] synchronize];
+    [DEFAULTS_DB synchronize];
     
     //update logs if needed
-   if(! [[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])
+   if(! [DEFAULTS_DB boolForKey:@"Logging"])
    {
        [[DataLayer sharedInstance] messageHistoryCleanAll];
    }

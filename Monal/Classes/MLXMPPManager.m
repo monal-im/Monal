@@ -479,7 +479,24 @@ An array of Dics what have timers to make sure everything was sent
     }
     DDLogVerbose(@"connecting account %@@%@",[account objectForKey:kUsername], [account objectForKey:kDomain]);
 
-    NSString *password = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
+    NSError* error;
+    NSString *password = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]] error:&error];
+    if(error)
+    {
+        DDLogError(@"Keychain error: %@", error);
+        NSString* idval = [[NSUUID UUID] UUIDString];
+        UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+        content.title = @"Keychain error";
+        content.body = [NSString stringWithFormat:@"%@", error];
+        content.sound = [UNNotificationSound defaultSound];
+        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+        UNNotificationRequest* new_request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
+        [center addNotificationRequest:new_request withCompletionHandler:^(NSError * _Nullable error) {
+            DDLogInfo(@"*** alerted keychain error: %@", error);
+        }];
+        [NSThread sleepForTimeInterval:4.000];
+        @throw error;
+    }
     MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@",[account objectForKey:kUsername],[account objectForKey:kDomain] ] password:password andResource:[account objectForKey:kResource]];
 
     MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andDirectTLS:[[account objectForKey:kDirectTLS] boolValue]];

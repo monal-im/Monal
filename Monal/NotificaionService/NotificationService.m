@@ -19,7 +19,10 @@
 
 static void logException(NSException* exception)
 {
+    DDLogError(@"*** Got CRASH Exception!");
+    [DDLog flushLog];
     DDLogError(@"*** CRASH: %@", exception);
+    [DDLog flushLog];
     DDLogError(@"*** Stack Trace: %@", [exception callStackSymbols]);
     [DDLog flushLog];
 }

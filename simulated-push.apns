@@ -1,0 +1,11 @@
+{
+	"Simulator Target Bundle": "G7YU7X7KRJ.SworIM",
+	"aps": {
+		"mutable-content":"1",
+		"alert": {
+			"title": "Mein Titel",
+			"body": "Frohe Kunde!"
+		},
+		"sound": "default"
+	}
+}

@@ -43,27 +43,32 @@ static void logException(NSException* exception)
     fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
     fileLogger.maximumFileSize=1024 * 1024 * 64;
     [DDLog addLogger:fileLogger];
-    DDLogInfo(@"*** Logfile dir: %@", [containerUrl path]);
-    
-    DDLogInfo(@"*** notification handler INIT");
+    DDLogInfo(@"*-* Logfile dir: %@", [containerUrl path]);
     
     //log unhandled exceptions
     NSSetUncaughtExceptionHandler(&logException);
+    
+    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+    NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
+    NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
+    NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
+    DDLogInfo(@"*-* Notification Service Extension started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
 }
 
 - (void)didReceiveNotificationRequest:(UNNotificationRequest *)request withContentHandler:(void (^)(UNNotificationContent * _Nonnull))contentHandler {
-    DDLogInfo(@"*** notification handler called");
+    DDLogInfo(@"*-* notification handler called");
     self.contentHandler = contentHandler;
     self.bestAttemptContent = [request.content mutableCopy];
     
     // Modify the notification content here...
-    self.bestAttemptContent.title = @"New Message"; //[NSString stringWithFormat:@"New Message %@", self.bestAttemptContent.title];
+    self.bestAttemptContent.title = @"New Message";
     self.bestAttemptContent.body = @"Open app to view";
     self.bestAttemptContent.badge = @1;
     
     //just "ignore" this push if we have not migrated our defaults db already (this needs a normal app start to happen)
     if(![DEFAULTS_DB boolForKey:@"DefaulsMigratedToAppGroup"])
     {
+        DDLogInfo(@"*-* defaults not migrated to app group, ignoring push");
         self.contentHandler(self.bestAttemptContent);
         return;
     }
@@ -76,19 +81,19 @@ static void logException(NSException* exception)
     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
     UNNotificationRequest* new_request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
     [center addNotificationRequest:new_request withCompletionHandler:^(NSError * _Nullable error) {
-        DDLogInfo(@"*** second notification request completed: %@", error);
+        DDLogInfo(@"*-* second notification request completed: %@", error);
     }];
     
-    DDLogInfo(@"*** waiting before calling MLXMPPManager");
+    DDLogInfo(@"*-* waiting before calling MLXMPPManager");
     [DDLog flushLog];
     [NSThread sleepForTimeInterval:4.000];
     [[MLXMPPManager sharedInstance] connectIfNecessary];
-    DDLogInfo(@"*** MLXMPPManager called");
+    DDLogInfo(@"*-* MLXMPPManager called");
     [DDLog flushLog];
 }
 
 - (void)serviceExtensionTimeWillExpire {
-    DDLogInfo(@"*** notification handler expired");
+    DDLogInfo(@"*-* notification handler expired");
     // Called just before the extension will be terminated by the system.
     // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
     self.contentHandler(self.bestAttemptContent);

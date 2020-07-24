@@ -2951,7 +2951,7 @@ NSString *const kCount = @"count";
         DDLogVerbose(@"Upgrade to 4.78 success");
     }
     
-    if([dbversion doubleValue] < 4.80)
+    if([dbversion doubleValue] < 4.79)
     {
         //drop and recreate in 4.77 was faulty (wrong drop syntax), do it right this time
         [self executeNonQuery:@"DROP TABLE IF EXISTS ver_info;" andArguments:nil];

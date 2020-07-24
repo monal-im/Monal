@@ -18,15 +18,31 @@ static const DDLogLevel ddLogLevel = DDLogLevelInfo;
 #import "MLLogFileManager.h"
 
 
+//configure app group constants
 #define kAppGroup @"group.monal"
 #define DEFAULTS_DB [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"]
 
 
+// some typedefs used throughout the project
 typedef void (^contactCompletion)(MLContact *selectedContact);
 typedef void (^accountCompletion)(NSInteger accountRow);
 typedef void (^monal_void_block_t)();
 
 
+//some xmpp related constants
+#define kRegServer @"yax.im"
+
+#define kXMLNS @"xmlns"
+#define kId @"id"
+#define kJid @"jid"
+
+#define kRegisterNameSpace @"jabber:iq:register"
+#define kDataNameSpace @"jabber:x:data"
+#define kBobNameSpace @"urn:xmpp:bob"
+#define kStanzasNameSpace @"urn:ietf:params:xml:ns:xmpp-stanzas"
+
+
+//all other constants needed
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
 #define kMLMessageSentToContact @"kMLMessageSentToContact"
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"
@@ -56,8 +72,8 @@ typedef void (^monal_void_block_t)();
 #define kMonalContactRefresh @"kMonalContactRefresh"
 #define kMonalRefreshContacts @"kMonalRefreshContacts"
 
-// chat
-#define kMonalChatMaxAllowedTextLen 2048 // max count of char's in a single message
+// max count of char's in a single message (both: sending and receiving)
+#define kMonalChatMaxAllowedTextLen 2048
 
 //contact cells
 #define kusernameKey @"username"

@@ -7,7 +7,7 @@
 //
 
 #import "MLXMLNode.h"
-#import "MLXMPPConstants.h"
+
 
 FOUNDATION_EXPORT NSString *const kiqGetType;
 FOUNDATION_EXPORT NSString *const kiqSetType;

@@ -691,7 +691,6 @@
 		26CF3EAC1780DE5C002B7085 /* ParseIq.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseIq.m; sourceTree = "<group>"; };
 		26CF3EB01780DFD9002B7085 /* XMPPParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPParser.h; sourceTree = "<group>"; };
 		26CF3EB11780DFD9002B7085 /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
-		26D0940622A14D03009C7AEF /* MLXMPPConstants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLXMPPConstants.h; sourceTree = "<group>"; };
 		26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLRegisterViewController.m; sourceTree = "<group>"; };
 		26D0940B22A33E9B009C7AEF /* MLRegisterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLRegisterViewController.h; sourceTree = "<group>"; };
 		26D3476B23A54E67004D6D75 /* MLMessageParserTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMessageParserTest.m; sourceTree = "<group>"; };
@@ -1016,7 +1015,6 @@
 				260C51D0177F08F50039634B /* xmpp.m */,
 				26C4B22221B6B91300610282 /* MLDNSLookup.h */,
 				26C4B22321B6B91300610282 /* MLDNSLookup.m */,
-				26D0940622A14D03009C7AEF /* MLXMPPConstants.h */,
 				C18E7578245E8AE900AE8FB7 /* MLPipe.h */,
 				C18E7579245E8AE900AE8FB7 /* MLPipe.m */,
 				2661100B238F08820030A4EE /* MLXMPPServer.h */,

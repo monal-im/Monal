@@ -12,7 +12,7 @@
 #import "HelperTools.h"
 #import "MLXMLNode.h"
 
-#import "MLXMPPConstants.h"
+
 #import "jingleCall.h"
 #import "MLDNSLookup.h"
 #import "MLSignalStore.h"

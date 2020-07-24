@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 #import "MLConstants.h"
-#import "MLXMPPConstants.h"
+
 
 //parsers
 #import "ParseStream.h"

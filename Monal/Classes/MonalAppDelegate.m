@@ -165,7 +165,8 @@ static void logException(NSException* exception)
        willPresentNotification:(UNNotification *)notification
          withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler;
 {
-    completionHandler(UNNotificationPresentationOptionAlert);
+    DDLogInfo(@"userNotificationCenter:willPresentNotification:withCompletionHandler called, returning UNNotificationPresentationOptionNone");
+    completionHandler(UNNotificationPresentationOptionNone);
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -282,9 +283,6 @@ static void logException(NSException* exception)
     
     [self setUISettings];
 
-    // should any accounts connect?
-    [[MLXMPPManager sharedInstance] connectIfNecessary];
-    
     //update logs if needed
     if(![DEFAULTS_DB boolForKey:@"Logging"])
     {
@@ -296,6 +294,10 @@ static void logException(NSException* exception)
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
     DDLogInfo(@"App started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
+    
+    // should any accounts connect?
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
+    
     return YES;
 }
 
@@ -380,7 +382,7 @@ static void logException(NSException* exception)
 
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
 {
-    DDLogVerbose(@"entering app with %@", notification);
+    DDLogVerbose(@"entering app with didReceiveLocalNotification: %@", notification);
     
     //iphone
     //make sure tab 0 for chat
@@ -390,6 +392,11 @@ static void logException(NSException* exception)
     }
 }
 
+-(void) application:(UIApplication*) application didReceiveRemoteNotification:(NSDictionary*) userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
+{
+    DDLogVerbose(@"got didReceiveRemoteNotification: %@", userInfo);
+    [[MLXMPPManager sharedInstance] incomingPushWithCompletionHandler:completionHandler];
+}
 
 -(void) application:(UIApplication *)application handleActionWithIdentifier:(nullable NSString *)identifier forLocalNotification:(nonnull UILocalNotification *)notification withResponseInfo:(nonnull NSDictionary *)responseInfo completionHandler:(nonnull void (^)(void))completionHandler
 {

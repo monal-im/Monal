@@ -48,7 +48,7 @@
     
     if([message.messageType isEqualToString:kMessageTypeStatus]) return;
     
-    DDLogVerbose(@"notificaiton manager got new message notice %@", notification.userInfo);
+    DDLogVerbose(@"notification manager got new message notice %@", notification.userInfo);
     [[DataLayer sharedInstance] isMutedJid:message.actualFrom withCompletion:^(BOOL muted) {
         if(!muted){
             

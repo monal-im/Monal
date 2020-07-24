@@ -14,10 +14,8 @@
 #import "MLMessageProcessor.h"
 #import "ParseMessage.h"
 
-#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
 #import "MonalAppDelegate.h"
-#endif
 #endif
 
 @import Network;
@@ -27,7 +25,7 @@
 static const NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 //this is in seconds
-#define SHORT_PING 2.0
+#define SHORT_PING 4.0
 #define LONG_PING 16.0
 
 static const int pingFreqencyMinutes = 5;       //about the same Conversations uses
@@ -39,6 +37,8 @@ static const int sendMessageTimeoutSeconds = 10;
     UIBackgroundTaskIdentifier _bgTask;
     BGTask* _bgFetch;
     BOOL _hasConnectivity;
+    void (^_pushCompletion)(UIBackgroundFetchResult result);
+    monal_void_block_t _cancelPushTimer;
 }
 
 /**
@@ -227,9 +227,6 @@ An array of Dics what have timers to make sure everything was sent
 -(void) catchupFinished:(NSNotification*) notification
 {
     DDLogVerbose(@"### MAM/SMACKS CATCHUP FINISHED ###");
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-    });
 }
 
 -(void) nowIdle:(NSNotification*) notification
@@ -237,7 +234,13 @@ An array of Dics what have timers to make sure everything was sent
     dispatch_async(self->_netQueue, ^{
         DDLogVerbose(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
         [DDLog flushLog];
-        [self checkIfBackgroundTaskIsStillNeeded];
+        if(![HelperTools isAppExtension])
+        {
+            DDLogVerbose(@"### NOT EXTENSION --> checking if background is still needed ###");
+            [self checkIfBackgroundTaskIsStillNeeded];
+        }
+        else
+            DDLogVerbose(@"### IN EXTENSION --> ignoring in MLXMPPManager ###");
     });
 }
 
@@ -248,36 +251,44 @@ An array of Dics what have timers to make sure everything was sent
         if(!xmppAccount.idle)
             return NO;
     }
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-    });
     return YES;
 }
 
 -(BOOL) isInBackground
 {
     __block BOOL inBackground = NO;
-#ifdef TARGET_IS_EXTENSION
-    inBackground = YES;
-#else
-#if TARGET_OS_IPHONE
-    void (^block)(void) = ^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-            inBackground = YES;
-    };
-    if(dispatch_get_current_queue() == dispatch_get_main_queue())
-        block();
+    if([HelperTools isAppExtension])
+        inBackground = YES;
     else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    {
+#if TARGET_OS_IPHONE
+        void (^block)(void) = ^{
+            if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+                inBackground = YES;
+        };
+        if(dispatch_get_current_queue() == dispatch_get_main_queue())
+            block();
+        else
+            dispatch_sync(dispatch_get_main_queue(), block);
 #endif
-#endif
+    }
     return inBackground;
 }
 
 -(void) checkIfBackgroundTaskIsStillNeeded
 {
-#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
+    if(![HelperTools isAppExtension])
+    {
+        if([self allAccountsIdle] && _pushCompletion)
+        {
+            DDLogInfo(@"### All accounts idle, calling push completion handler ###");
+            if(_cancelPushTimer)
+                _cancelPushTimer();
+            _pushCompletion(UIBackgroundFetchResultNewData);
+            _pushCompletion = nil;
+            _cancelPushTimer = nil;
+        }
         if([self allAccountsIdle] && [self isInBackground])
         {
             DDLogInfo(@"### All accounts idle, stopping all background tasks ###");
@@ -307,10 +318,10 @@ An array of Dics what have timers to make sure everything was sent
                 DDLogVerbose(@"disconnecting all accounts (we don't need idle connections that could get killed any time anyways)");
                 for(xmpp* xmppAccount in _connectedXMPP)
                     [xmppAccount disconnect];
-            }
+            });
             */
         }
-#endif
+    }
 #endif
 }
 
@@ -349,35 +360,56 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) scheduleBackgroundFetchingTask
 {
-#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
-    if(@available(iOS 13.0, *))
+    if(![HelperTools isAppExtension])
     {
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            NSError *error = NULL;
-            // cancel existing task (if any)
-            [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundFetchingTask];
-            // new task
-            //BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-            //request.requiresNetworkConnectivity = YES;
-            BGAppRefreshTaskRequest* request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-            request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
-            BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
-            if(!success) {
-                // Errorcodes https://stackoverflow.com/a/58224050/872051
-                DDLogError(@"Failed to submit BGTask request: %@", error);
-            } else {
-                DDLogVerbose(@"Success submitting BGTask request %@", request);
-            }
-        });
-    }
-    else
-    {
-        // No fallback unfortunately
-        DDLogError(@"BGTask needed but NOT supported!");
+        if(@available(iOS 13.0, *))
+        {
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                NSError *error = NULL;
+                // cancel existing task (if any)
+                [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundFetchingTask];
+                // new task
+                //BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
+                //request.requiresNetworkConnectivity = YES;
+                BGAppRefreshTaskRequest* request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
+                request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
+                BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
+                if(!success) {
+                    // Errorcodes https://stackoverflow.com/a/58224050/872051
+                    DDLogError(@"Failed to submit BGTask request: %@", error);
+                } else {
+                    DDLogVerbose(@"Success submitting BGTask request %@", request);
+                }
+            });
+        }
+        else
+        {
+            // No fallback unfortunately
+            DDLogError(@"BGTask needed but NOT supported!");
+        }
     }
 #endif
-#endif
+}
+
+-(void) incomingPushWithCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
+{
+    DDLogError(@"got incomingPushWithCompletionHandler");
+    if(![self isInBackground])
+    {
+        DDLogError(@"Ignoring incomingPushWithCompletionHandler: because app is in FG!");
+        completionHandler(UIBackgroundFetchResultNoData);
+        return;
+    }
+    // should any accounts reconnect?
+    _pushCompletion = completionHandler;
+    [self pingAllAccounts];
+    _cancelPushTimer = [HelperTools startTimer:25.0 withHandler:^{
+        DDLogWarn(@"### Push timer triggered!! ###");
+        _pushCompletion(UIBackgroundFetchResultFailed);
+        _pushCompletion = nil;
+        _cancelPushTimer = nil;
+    }];
 }
 
 #pragma mark - client state
@@ -394,31 +426,31 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) setClientsActive
 {
-#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
-    dispatch_async(dispatch_get_main_queue(), ^{
-        //start indicating we want to do work even when the app is put into background
-        if(_bgTask == UIBackgroundTaskInvalid)
-        {
-            _bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-                DDLogWarn(@"BG WAKE EXPIRING");
-                [DDLog flushLog];
-                
-                //schedule a BGProcessingTaskRequest to process this further as soon as possible
-                if(@available(iOS 13.0, *))
-                {
-                    DDLogInfo(@"calling scheduleBackgroundFetchingTask");
-                    [self scheduleBackgroundFetchingTask];
-                }
-                
-                [DDLog flushLog];
-                [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
-                _bgTask = UIBackgroundTaskInvalid;
-            }];
-        }
-        [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-    });
-#endif
+    if(![HelperTools isAppExtension])
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            //start indicating we want to do work even when the app is put into background
+            if(_bgTask == UIBackgroundTaskInvalid)
+            {
+                _bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+                    DDLogWarn(@"BG WAKE EXPIRING");
+                    [DDLog flushLog];
+                    
+                    //schedule a BGProcessingTaskRequest to process this further as soon as possible
+                    if(@available(iOS 13.0, *))
+                    {
+                        DDLogInfo(@"calling scheduleBackgroundFetchingTask");
+                        [self scheduleBackgroundFetchingTask];
+                    }
+                    
+                    [DDLog flushLog];
+                    [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
+                    _bgTask = UIBackgroundTaskInvalid;
+                }];
+            }
+        });
+    }
 #endif
     
     //don't block main thread here
@@ -429,6 +461,16 @@ An array of Dics what have timers to make sure everything was sent
             if(_hasConnectivity)
                 [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         }
+    });
+}
+
+-(void) pingAllAccounts
+{
+    //don't block main thread here
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        for(xmpp* xmppAccount in _connectedXMPP)
+            if(_hasConnectivity)
+                [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
     });
 }
 
@@ -874,14 +916,12 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 #pragma mark message signals
 -(void) handleNewMessage:(NSNotification *)notification
 {
-#ifndef TARGET_IS_EXTENSION
 #if TARGET_OS_IPHONE
-    dispatch_async(dispatch_get_main_queue(), ^{
-    MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-    [appDelegate updateUnread];
-    });
-#else
-#endif
+    if(![HelperTools isAppExtension])
+        dispatch_async(dispatch_get_main_queue(), ^{
+            MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
+            [appDelegate updateUnread];
+        });
 #endif
 }
 
@@ -1011,88 +1051,6 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
     for(xmpp* xmppAccount in _connectedXMPP)
         [self sendOutboxForAccount:xmppAccount.accountNo];
-}
-
-
-#pragma mark - handling air drop
--(void) parseMessageForData:(NSData *) data
-{
-    //parse message
-//    ParseMessage *messageNode = [[ParseMessage alloc] initWithData:data];
-//    NSArray *cleanParts= [messageNode.to componentsSeparatedByString:@"/"];
-//    NSString *jid= cleanParts[0];
-//
-//    NSArray *parts =[jid componentsSeparatedByString:@"@"];
-//    NSString* user =parts[0];
-//
-//    if(parts.count>1){
-//        NSString *domain= parts[1];
-//
-//        [[DataLayer sharedInstance] accountIDForUser:user andDomain:domain withCompletion:^(NSString *accountNo) {
-//            if(accountNo) {
-//                dispatch_async(dispatch_get_main_queue(), ^{
-//
-//                    MLSignalStore *monalSignalStore = [[MLSignalStore alloc] initWithAccountId:accountNo];
-//
-//                    //signal store
-//                    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:monalSignalStore];
-//                    //signal context
-//                    SignalContext *signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
-//
-//                    //process message
-//                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:accountNo jid:jid
-//                                                                                          connection: nil
-//                                                                                          signalContex:signalContext andSignalStore:monalSignalStore];
-//                    messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
-//                        if(success)
-//                        {
-//                            [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:accountNo withCompletion:nil];
-//
-//                            if(messageNode.from  ) {
-//                                NSString* actuallyFrom= messageNode.actualFrom;
-//                                if(!actuallyFrom) actuallyFrom=messageNode.from;
-//
-//                                NSString* messageText=messageNode.messageText;
-//                                if(!messageText) messageText=@"";
-//
-//                                BOOL shouldRefresh = NO;
-//                                if(messageNode.delayTimeStamp)  shouldRefresh =YES;
-//
-//                                NSArray *jidParts= [jid componentsSeparatedByString:@"/"];
-//
-//                                NSString *recipient;
-//                                if([jidParts count]>1) {
-//                                    recipient= jidParts[0];
-//                                }
-//                                if(!recipient) return; // this shouldnt happen
-//
-//                                MLMessage *message = [[MLMessage alloc] init];
-//                                                            message.from=messageNode.from;
-//                                                            message.actualFrom= actuallyFrom;
-//                                                            message.messageText= messageNode.messageText;
-//                                                            message.to=messageNode.to?messageNode.to:recipient;
-//                                                            message.messageId=messageNode.idval?messageNode.idval:@"";
-//                                                            message.accountId=accountNo;
-//                                                            message.encrypted=encrypted;
-//                                                            message.delayTimeStamp=messageNode.delayTimeStamp;
-//                                                            message.timestamp =[NSDate date];
-//                                                            message.shouldShowAlert= showAlert;
-//                                                            message.messageType=kMessageTypeText;
-//
-//
-//                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
-//                            }
-//                        }
-//                        else {
-//                            DDLogError(@"error adding message from data");
-//                        }
-//                    };
-//                    [messageProcessor processMessage:messageNode];
-//
-//                });
-//            }
-//        }];
-//    }
 }
 
 @end

@@ -17,11 +17,13 @@
  */
 @interface MLXMPPManager : NSObject
 {
-    dispatch_queue_t _netQueue ;
-    dispatch_source_t _pinger;
+    dispatch_queue_t _netQueue;
+	dispatch_source_t _pinger;
 }
 
 + (MLXMPPManager* )sharedInstance;
+
+-(BOOL) allAccountsIdle;
 
 #pragma  mark connectivity
 /**
@@ -180,6 +182,8 @@ Attempts to upload a file to the  HTTP upload service
 
 -(void) scheduleBackgroundFetchingTask;
 
+-(void) incomingPushWithCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler;
+
 /**
  updtes client state on server as inactive
  */
@@ -189,6 +193,8 @@ Attempts to upload a file to the  HTTP upload service
  sets client state on server as active
  */
 -(void) setClientsActive;
+
+-(void) pingAllAccounts;
 
 /**
  fetch a contacts vCard

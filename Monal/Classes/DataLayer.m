@@ -2956,9 +2956,11 @@ NSString *const kCount = @"count";
         //drop and recreate in 4.77 was faulty (wrong drop syntax), do it right this time
         [self executeNonQuery:@"DROP TABLE IF EXISTS ver_info;" andArguments:nil];
         [self executeNonQuery:@"CREATE TABLE ver_info(ver VARCHAR(32), cap VARCHAR(255), PRIMARY KEY (ver,cap));" andArguments:nil];
-        [self executeNonQuery:@"update dbversion set dbversion='4.80';" andArguments:nil];
-        DDLogVerbose(@"Upgrade to 4.80 success");
+        [self executeNonQuery:@"update dbversion set dbversion='4.79';" andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.79 success");
     }
+    [self executeNonQuery:@"update dbversion set dbversion='4.79';" andArguments:nil];
+    DDLogVerbose(@"Upgrade to 4.79 success");
     
     [self endWriteTransaction];
     _version_check_done = YES;

@@ -115,6 +115,7 @@ static NSMutableDictionary* _typingNotifications;
                         && lastDate.timeIntervalSince1970>messageNode.delayTimeStamp.timeIntervalSince1970)) {
                     unread=NO;
                     showAlert=NO;
+                    DDLogVerbose(@"Setting showAlert to NO");
                 }
               
                 NSString *messageType=nil;

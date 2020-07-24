@@ -12,8 +12,8 @@
 
 @interface NotificationService ()
 
-@property (nonatomic, strong) void (^contentHandler)(UNNotificationContent *contentToDeliver);
-@property (nonatomic, strong) UNMutableNotificationContent *bestAttemptContent;
+@property (nonatomic, strong) void (^contentHandler)(UNNotificationContent* contentToDeliver);
+@property (nonatomic, strong) UNMutableNotificationContent* bestAttemptContent;
 
 @end
 
@@ -48,6 +48,8 @@ static void logException(NSException* exception)
     //log unhandled exceptions
     NSSetUncaughtExceptionHandler(&logException);
     
+    //TODO: initialize locking server
+    
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
@@ -55,7 +57,14 @@ static void logException(NSException* exception)
     DDLogInfo(@"*-* Notification Service Extension started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
 }
 
-- (void)didReceiveNotificationRequest:(UNNotificationRequest *)request withContentHandler:(void (^)(UNNotificationContent * _Nonnull))contentHandler {
+-(void) dealloc
+{
+    DDLogInfo(@"*-* Deallocating notification service extension");
+    [DDLog flushLog];
+}
+
+- (void)didReceiveNotificationRequest:(UNNotificationRequest *)request withContentHandler:(void (^)(UNNotificationContent * _Nonnull))contentHandler
+{
     DDLogInfo(@"*-* notification handler called");
     self.contentHandler = contentHandler;
     self.bestAttemptContent = [request.content mutableCopy];
@@ -73,6 +82,9 @@ static void logException(NSException* exception)
         return;
     }
     
+    //TODO: check locking server for main app
+    
+    /*
     NSString* idval = [[NSUUID UUID] UUIDString];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     content.title = @"Notification incoming";
@@ -83,21 +95,55 @@ static void logException(NSException* exception)
     [center addNotificationRequest:new_request withCompletionHandler:^(NSError * _Nullable error) {
         DDLogInfo(@"*-* second notification request completed: %@", error);
     }];
+    */
     
-    DDLogInfo(@"*-* waiting before calling MLXMPPManager");
+    DDLogInfo(@"*-* calling MLXMPPManager");
     [DDLog flushLog];
-    [NSThread sleepForTimeInterval:4.000];
-    [[MLXMPPManager sharedInstance] connectIfNecessary];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(xmppError:) name:kXMPPError object:nil];
+    //[[MLXMPPManager sharedInstance] connectIfNecessary];
+    //self.contentHandler(self.bestAttemptContent);
+    //TODO: use getDeliveredNotificationsWithCompletionHandler: and removeDeliveredNotificationsWithIdentifiers:
+    //TODO: to remove old notifications and use their contents for this push, if no messages are pending on the xmpp channel
     DDLogInfo(@"*-* MLXMPPManager called");
     [DDLog flushLog];
 }
 
-- (void)serviceExtensionTimeWillExpire {
+- (void)serviceExtensionTimeWillExpire
+{
     DDLogInfo(@"*-* notification handler expired");
     // Called just before the extension will be terminated by the system.
     // Use this as an opportunity to deliver your "best attempt" at modified content, otherwise the original push payload will be used.
     self.contentHandler(self.bestAttemptContent);
     [DDLog flushLog];
+}
+
+-(void) nowIdle:(NSNotification*) notification
+{
+    DDLogInfo(@"*-* notification handler: some account idle");
+    //dispatch in another thread to avoid blocking the thread posting this notification (most probably the receiveQueue)
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        if([[MLXMPPManager sharedInstance] allAccountsIdle])
+        {
+            DDLogInfo(@"*-* notification handler: all accounts idle --> publishing notification and stopping extension");
+            self.contentHandler(self.bestAttemptContent);
+            [DDLog flushLog];
+        }
+    });
+}
+
+-(void) xmppError:(NSNotification*) notification
+{
+    DDLogInfo(@"*-* notification handler: got xmpp error");
+    //dispatch in another thread to avoid blocking the thread posting this notification (most probably the receiveQueue)
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        if([[MLXMPPManager sharedInstance] allAccountsIdle])
+        {
+            DDLogInfo(@"*-* notification handler: all accounts idle --> publishing notification and stopping extension");
+            self.contentHandler(self.bestAttemptContent);
+            [DDLog flushLog];
+        }
+    });
 }
 
 @end

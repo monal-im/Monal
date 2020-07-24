@@ -13,6 +13,16 @@
 @implementation HelperTools
 
 
++(BOOL) isAppExtension
+{
+    BOOL __block isExtension = NO;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        isExtension = [[[NSBundle mainBundle] executablePath] containsString:@".appex/"];
+    });
+    return isExtension;
+}
+
 +(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features
 {
     // see https://xmpp.org/extensions/xep-0115.html#ver

@@ -177,10 +177,13 @@ NSString *const kXMPPPresence = @"presence";
 
     _versionHash = [HelperTools getOwnCapsHash];
     _isCSIActive = YES;         //default value is yes if no csi state was sent yet
-#ifdef TARGET_IS_EXTENSION
-        DDLogVerbose(@"Calle from extension: CSI inactive");
+    if([HelperTools isAppExtension])
+    {
+        DDLogVerbose(@"Called from extension: CSI inactive");
         _isCSIActive=NO;        //we are always inactive when called from an extension
-#else
+    }
+    else
+    {
 #if TARGET_OS_IPHONE
         dispatch_async(dispatch_get_main_queue(), ^{
             if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
@@ -189,7 +192,7 @@ NSString *const kXMPPPresence = @"presence";
             }
         });
 #endif
-#endif
+    }
     _lastInteractionDate=[NSDate date];     //better default than 1970
 
     self.statusMessage=[DEFAULTS_DB stringForKey:@"StatusMessage"];
@@ -251,14 +254,26 @@ NSString *const kXMPPPresence = @"presence";
 -(BOOL) idle
 {
     __block BOOL retval = NO;
-    //we are idle when the catchup is done, no unacked stanzas are left in the smacks queue and receive and send queues are empty (no pending operations)
+    //we are idle when we are not connected (and not trying to)
+    //or: the catchup is done, no unacked stanzas are left in the smacks queue and receive and send queues are empty (no pending operations)
     [self dispatchOnReceiveQueue: ^{
         DDLogVerbose(@"Idle check:");
+        DDLogVerbose(@"    _accountState < kStateReconnecting = %@", _accountState < kStateReconnecting ? @"YES" : @"NO");
         DDLogVerbose(@"    _catchupDone = %@", _catchupDone ? @"YES" : @"NO");
         DDLogVerbose(@"    [self.unAckedStanzas count] = %lu", (unsigned long)[self.unAckedStanzas count]);
         DDLogVerbose(@"    [_receiveQueue operationCount] = %lu", (unsigned long)[_receiveQueue operationCount]);
         DDLogVerbose(@"    [_sendQueue operationCount] = %lu", (unsigned long)[_sendQueue operationCount]);
-        if(_catchupDone && !((unsigned long)[self.unAckedStanzas count]) && [_receiveQueue operationCount]<=1 && ![_sendQueue operationCount])
+        if(
+            (
+                _accountState<kStateReconnecting &&
+                !_reconnectInProgress
+            ) || (
+                _catchupDone &&
+                !((unsigned long)[self.unAckedStanzas count]) &&
+                [_receiveQueue operationCount]<=1 &&
+                ![_sendQueue operationCount]
+            )
+        )
             retval=YES;
         DDLogVerbose(@"--> %@", retval ? @"idle" : @"NOT IDLE");
     }];
@@ -351,21 +366,22 @@ NSString *const kXMPPPresence = @"presence";
     DDLogInfo(@"TCP streams opened");
 }
 
--(void) connectionTask
+-(BOOL) connectionTask
 {
     // allow override for server and port if one is specified for the account
     if(![self.connectionProperties.server.host isEqual:@""])
     {
         DDLogInfo(@"Ignoring SRV records for this connection, server manually configured: %@:%@", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort);
         [self createStreams];
-        return;
+        return NO;
     }
 
     // do DNS discovery if it hasn't already been set
-    if(!_SRVDiscoveryDone) {
-        _SRVDiscoveryDone = YES;
+    if(!_SRVDiscoveryDone)
+    {
+        DDLogInfo(@"Querying for SRV records");
         _discoveredServersList=[[[MLDNSLookup alloc] init] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
-        
+        _SRVDiscoveryDone = YES;
         // no SRV records found, update server to directly connect to specified domain
         if([_discoveredServersList count]==0)
         {
@@ -377,13 +393,15 @@ NSString *const kXMPPPresence = @"presence";
     }
 
     // Show warning when xmpp-client srv entry prohibits connections
-    for(NSDictionary *row in _discoveredServersList) {
+    for(NSDictionary *row in _discoveredServersList)
+    {
         // Check if entry "." == srv target
-        if(![[row objectForKey:@"isEnabled"] boolValue]) {
+        if(![[row objectForKey:@"isEnabled"] boolValue])
+        {
             NSString *message = NSLocalizedString(@"SRV entry prohibits XMPP connection",@ "");
             DDLogInfo(@"%@ for domain %@", message, self.connectionProperties.identity.domain);
             [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
-            return;
+            return YES;
         }
     }
     
@@ -403,7 +421,8 @@ NSString *const kXMPPPresence = @"presence";
         }
     }
 
-    if([_usableServersList count]>0) {
+    if([_usableServersList count]>0)
+    {
         DDLogInfo(@"Using connection parameters discovered via SRV dns record: server=%@, port=%@, isSecure=%s, priority=%@",
             [[_usableServersList objectAtIndex:0] objectForKey:@"server"],
             [[_usableServersList objectAtIndex:0] objectForKey:@"port"],
@@ -428,6 +447,7 @@ NSString *const kXMPPPresence = @"presence";
     }
     
     [self createStreams];
+    return NO;
 }
 
 -(void) connect
@@ -464,25 +484,31 @@ NSString *const kXMPPPresence = @"presence";
         
         //read persisted state and start connection
         [self readState];
-        [self connectionTask];
+        if([self connectionTask])
+        {
+            DDLogError(@"Server disallows xmpp connections for account '%@', ignoring login", self.accountNo);
+            _accountState=kStateDisconnected;
+            return;
+        }
         
         //return here if we are just registering a new account
         if(_registration || _registrationSubmission)
             return;
         
         double __block connectTimeout = 8.0;
-#ifdef TARGET_IS_EXTENSION
-    connectTimeout = 300.0;     //long timeout if in background
-#else
+        if([HelperTools isAppExtension])
+            connectTimeout = 300.0;     //long timeout if in background
+        else
+        {
 #if TARGET_OS_IPHONE
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-            {
-                connectTimeout = 300.0;     //long timeout if in background
-            }
-        });
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+                {
+                    connectTimeout = 300.0;     //long timeout if in background
+                }
+            });
 #endif
-#endif
+        }
         _cancelLoginTimer = [HelperTools startTimer:connectTimeout withHandler:^{
             [self dispatchOnReceiveQueue: ^{
                 _cancelLoginTimer = nil;
@@ -771,6 +797,7 @@ NSString *const kXMPPPresence = @"presence";
             }
             else
             {
+                DDLogVerbose(@"sending out XEP-0199 ping...");
                 //send xmpp ping even if server does not support it
                 //(the ping iq will get an error response then, which is as good as a normal iq response here)
                 XMPPIQ* ping = [[XMPPIQ alloc] initWithType:kiqGetType];
@@ -1095,25 +1122,32 @@ NSString *const kXMPPPresence = @"presence";
                     }
 
                     void(^notify)(BOOL) = ^(BOOL success) {
-                        if(messageNode.from  ) {
-                            NSString* actuallyFrom= messageNode.actualFrom;
-                            if(!actuallyFrom) actuallyFrom=messageNode.from;
+                        if(messageNode.from)
+                        {
+                            NSString* actuallyFrom = messageNode.actualFrom;
+                            if(!actuallyFrom)
+                                actuallyFrom = messageNode.from;
 
                             MLMessage *message = [[MLMessage alloc] init];
-                            message.from=messageNode.from;
-                            message.actualFrom= actuallyFrom;
-                            message.messageText= body; //this need to be the processed value since it may be decrypted
-                            message.to=messageNode.to?messageNode.to:self.connectionProperties.identity.jid;
-                            message.messageId=messageNode.idval?messageNode.idval:@"";
-                            message.accountId=self.accountNo;
-                            message.encrypted=encrypted;
-                            message.delayTimeStamp=messageNode.delayTimeStamp;
-                            message.timestamp =[NSDate date];
-                            message.shouldShowAlert= showAlert;
-                            message.messageType=newMessageType;
-                            message.hasBeenSent=YES; //if it came in it has been sent to the server
+                            message.from = messageNode.from;
+                            message.actualFrom = actuallyFrom;
+                            message.messageText = body;     //this need to be the processed value since it may be decrypted
+                            message.to = messageNode.to ? messageNode.to : self.connectionProperties.identity.jid;
+                            message.messageId = messageNode.idval ? messageNode.idval : @"";
+                            message.accountId = self.accountNo;
+                            message.encrypted = encrypted;
+                            message.delayTimeStamp = messageNode.delayTimeStamp;
+                            message.timestamp = [NSDate date];
+                            message.shouldShowAlert = showAlert;
+                            message.messageType = newMessageType;
+                            message.hasBeenSent = YES;      //if it came in it has been sent to the server
 
+                            DDLogInfo(@"sending out kMonalNewMessageNotice notification");
                             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
+                        }
+                        else
+                        {
+                            DDLogInfo(@"no messageNode.from, not notifying");
                         }
                     };
 
@@ -1335,9 +1369,11 @@ NSString *const kXMPPPresence = @"presence";
             //publish new csi and last active state (but only do so when not in an extension
             //because the last active state does not change when inside an extension)
             [self sendCurrentCSIState];
-#ifndef TARGET_IS_EXTENSION
-            [self sendPresence];
-#endif
+            if(![HelperTools isAppExtension])
+            {
+                DDLogVerbose(@"Not in extension --> sending out presence after resume");
+                [self sendPresence];
+            }
 
             //signal finished catchup if our current outgoing stanza counter is acked, this introduces an additional roundtrip to make sure
             //all stanzas the *server* wanted to replay have been received, too
@@ -1846,14 +1882,14 @@ NSString *const kXMPPPresence = @"presence";
     [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
     //debug output
-    DDLogVerbose(@"persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n",
-                 self.lastHandledInboundStanza,
-                 self.lastHandledOutboundStanza,
-                 self.lastOutboundStanza,
-                 self.unAckedStanzas ? [self.unAckedStanzas count] : 0,
-                 self.unAckedStanzas ? "" : " (NIL)",
-                 self.streamID
-                 );
+    DDLogVerbose(@"persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n",
+        self.lastHandledInboundStanza,
+        self.lastHandledOutboundStanza,
+        self.lastOutboundStanza,
+        self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
+        self.streamID,
+        _lastInteractionDate
+    );
 }
 
 -(void) readState
@@ -1931,14 +1967,14 @@ NSString *const kXMPPPresence = @"presence";
             _lastInteractionDate = [dic objectForKey:@"lastInteractionDate"];
 
         //debug output
-        DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@",
-                     self.lastHandledInboundStanza,
-                     self.lastHandledOutboundStanza,
-                     self.lastOutboundStanza,
-                     self.unAckedStanzas ? [self.unAckedStanzas count] : 0,
-                     self.unAckedStanzas ? "" : " (NIL)",
-                     self.streamID
-                     );
+        DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n",
+            self.lastHandledInboundStanza,
+            self.lastHandledOutboundStanza,
+            self.lastOutboundStanza,
+            self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
+            self.streamID,
+            _lastInteractionDate
+        );
         if(self.unAckedStanzas)
             for(NSDictionary *dic in self.unAckedStanzas)
                 DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kQueueID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
@@ -2115,10 +2151,11 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) sendSignalInitialStanzas
 {
-#ifndef TARGET_IS_EXTENSION
-    [self queryOMEMODevicesFrom:self.connectionProperties.identity.jid];
-    [self sendOMEMOBundle];
-#endif
+    if(![HelperTools isAppExtension])
+    {
+        [self queryOMEMODevicesFrom:self.connectionProperties.identity.jid];
+        [self sendOMEMOBundle];
+    }
 }
 
 
@@ -2828,7 +2865,7 @@ NSString *const kXMPPPresence = @"presence";
             NSError* st_error = [stream streamError];
             DDLogError(@"Stream error code=%ld domain=%@ local desc:%@",(long)st_error.code,st_error.domain,  st_error.localizedDescription);
 
-            NSString *message =st_error.localizedDescription;
+            NSString *message = st_error.localizedDescription;
 
             switch(st_error.code)
             {
@@ -2860,52 +2897,9 @@ NSString *const kXMPPPresence = @"presence";
                     [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message, st_error]];
             }
 
-            if(_loggedInOnce)
-            {
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if((([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-                       || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))
-                       && (self.accountState>=kStateLoggedIn)){
-                        DDLogInfo(@"Stream error in the background. Ignoring");
-                        return;
-                    } else  {
-#endif
-#endif
-                        DDLogInfo(@"stream error calling reconnect for account that logged in once ");
-                        [self reconnect];
-                        return;
-
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-                    }
-                });
-#endif
-#endif
-                //don't reconnect twice
-                return;
-            }
-            
-            if(st_error.code==-9807)         // Could not complete operation. SSL probably
-            {
-                DDLogInfo(@"Stream error code -9807 --> disconnecting");
-                [self disconnect];
-                return;
-            }
-            
-            if(st_error.code == 2 ||         // operation couldnt be completed // socket not connected
-                st_error.code == 60 ||       // could not complete operation
-                st_error.code == 64 ||       // Host is down
-                st_error.code == 32          // Broken pipe
-            ) {
-                DDLogInfo(@"known stream error, trying to reconnect");
-                [self reconnect];
-                return;
-            }
-            
-            DDLogInfo(@"unknown stream error, trying to reconnect");
+            DDLogInfo(@"stream error, calling reconnect");
             [self reconnect];
+            
             break;
         }
         

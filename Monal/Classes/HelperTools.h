@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface HelperTools : NSObject
 
++(BOOL) isAppExtension;
 +(NSString*) generateStringOfFeatureSet:(NSSet*) features;
 +(NSSet*) getOwnFeatureSet;
 +(NSString*) getOwnCapsHash;

@@ -103,34 +103,39 @@ static NSMutableDictionary* _typingNotifications;
         }
         else
         {
-            NSString *jidWithoutResource =self.jid;
-           
             //if mam but newer than last message we do want an alert..
             [[DataLayer sharedInstance] lastMessageDateForContact:messageNode.from andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
-                BOOL unread=YES;
-                BOOL showAlert=YES;
+                BOOL unread = YES;
+                BOOL showAlert = YES;
                 
-                if ([messageNode.from isEqualToString:jidWithoutResource]
-                    || (messageNode.mamResult
-                        && lastDate.timeIntervalSince1970>messageNode.delayTimeStamp.timeIntervalSince1970)) {
-                    unread=NO;
-                    showAlert=NO;
+                if(
+                    [messageNode.from isEqualToString:self.jid] ||
+                    (
+                        messageNode.mamResult &&
+                        messageNode.delayTimeStamp &&
+                        lastDate.timeIntervalSince1970 > messageNode.delayTimeStamp.timeIntervalSince1970
+                    )
+                )
+                {
                     DDLogVerbose(@"Setting showAlert to NO");
+                    showAlert = NO;
+                    unread = NO;
                 }
               
-                NSString *messageType=nil;
-                BOOL encrypted=NO;
-                NSString *body=messageNode.messageText;
+                NSString* messageType = nil;
+                BOOL encrypted = NO;
+                NSString* body = messageNode.messageText;
                 
                 if(messageNode.oobURL)
                 {
-                    messageType=kMessageTypeImage;
-                    body=messageNode.oobURL;
+                    messageType = kMessageTypeImage;
+                    body = messageNode.oobURL;
                 }
                 
-                if(decrypted) {
-                    body=decrypted;
-                    encrypted=YES;
+                if(decrypted)
+                {
+                    body = decrypted;
+                    encrypted = YES;
                 }
                 
                 
@@ -139,23 +144,22 @@ static NSMutableDictionary* _typingNotifications;
                     messageType=kMessageTypeStatus;
                     
                     [[DataLayer sharedInstance] mucSubjectforAccount:self.accountNo andRoom:messageNode.from withCompletion:^(NSString *currentSubject) {
-                        if(![messageNode.subject isEqualToString:currentSubject]) {
+                        if(![messageNode.subject isEqualToString:currentSubject])
+                        {
                             [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
-                            
-                            if(self.postPersistAction) {
+                            if(self.postPersistAction)
                                 self.postPersistAction(YES, encrypted, showAlert, messageNode.subject, messageType);
-                            }
                         }
                     }];
                     
                     return;
                 }
                 
-                NSString *messageId=messageNode.idval;
-                if(messageId.length==0)
+                NSString *messageId = messageNode.idval;
+                if(!messageId.length)
                 {
-                    DDLogError(@"Empty ID using guid");
-                    messageId=[[NSUUID UUID] UUIDString];
+                    DDLogError(@"Empty ID using random UUID");
+                    messageId = [[NSUUID UUID] UUIDString];
                 }
                 
                 [[DataLayer sharedInstance] addMessageFrom:messageNode.from

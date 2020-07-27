@@ -115,26 +115,23 @@
     if([message.messageType isEqualToString:kMessageTypeStatus]) return;
     
     dispatch_async(dispatch_get_main_queue(),^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || !message.shouldShowAlert)
-        {
+        if(!message.shouldShowAlert)
             return;
-        }
-        
 
-        __block MLContact *messageContact;
+        __block MLContact* messageContact;
         
         [self.chatListTable performBatchUpdates:^{
             [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                MLContact *rowContact = (MLContact *) obj;
-                if([rowContact.contactJid isEqualToString:message.from]) {
-                    messageContact=rowContact;
-                    NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
+                MLContact *rowContact = (MLContact*) obj;
+                if([rowContact.contactJid isEqualToString:message.from])
+                {
+                    messageContact = rowContact;
+                    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:idx inSection:0];
                     [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                    *stop=YES;
+                    *stop = YES;
                 }
             }];
-        }
-                                     completion:^(BOOL finished){
+        } completion:^(BOOL finished) {
             if(!messageContact) {
                 [self refreshDisplay];
             } else  {

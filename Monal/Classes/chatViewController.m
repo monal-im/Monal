@@ -1099,17 +1099,15 @@
         
         [[DataLayer sharedInstance] messageTypeForMessage: message.messageText withKeepThread:YES andCompletion:^(NSString *messageType) {
             
-            dispatch_async(dispatch_get_main_queue(),
-                           ^{
-                NSString *finalMessageType=messageType;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSString* finalMessageType = messageType;
                 if([message.messageType isEqualToString:kMessageTypeStatus])
-                {
-                    finalMessageType =kMessageTypeStatus;
-                }
-                message.messageType=finalMessageType;
+                    finalMessageType = kMessageTypeStatus;
+                message.messageType = finalMessageType;
                 
-                if(!self.messageList) self.messageList=[[NSMutableArray alloc] init];
-                [self.messageList addObject:message]; //TODO maybe we wantt to insert base on delay timestamp..
+                if(!self.messageList)
+                    self.messageList = [[NSMutableArray alloc] init];
+                [self.messageList addObject:message];   //do not insert based on delay timestamp because that would make it possible to fake history entries
                 
                 [self->_messageTable beginUpdates];
                 NSIndexPath *path1;
@@ -1132,10 +1130,7 @@
 
 -(void) setMessageId:(NSString *) messageId delivered:(BOOL) delivered
 {
-    dispatch_async(dispatch_get_main_queue(),
-                   ^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground) return;
-        
+    dispatch_async(dispatch_get_main_queue(), ^{
         int row=0;
         NSIndexPath *indexPath;
         for(MLMessage *message in self.messageList)
@@ -1157,10 +1152,7 @@
 
 -(void) setMessageId:(NSString *) messageId received:(BOOL) received
 {
-    dispatch_async(dispatch_get_main_queue(),
-                   ^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground) return;
-        
+    dispatch_async(dispatch_get_main_queue(), ^{
         int row=0;
         NSIndexPath *indexPath;
         for(MLMessage *message in self.messageList)
@@ -1182,28 +1174,25 @@
 }
 
 
--(void) handleSendFailedMessage:(NSNotification *)notification
+-(void) handleSendFailedMessage:(NSNotification*) notification
 {
     NSDictionary *dic =notification.userInfo;
     [self setMessageId:[dic objectForKey:kMessageId]  delivered:NO];
 }
 
--(void) handleSentMessage:(NSNotification *)notification
+-(void) handleSentMessage:(NSNotification*) notification
 {
     NSDictionary *dic =notification.userInfo;
     [self setMessageId:[dic objectForKey:kMessageId]  delivered:YES];
 }
 
 
--(void) handleMessageError:(NSNotification *)notification
+-(void) handleMessageError:(NSNotification*) notification
 {
     NSDictionary *dic =notification.userInfo;
    
     NSString *messageId= [dic objectForKey:kMessageId];
-    dispatch_async(dispatch_get_main_queue(),
-                   ^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground) return;
-        
+    dispatch_async(dispatch_get_main_queue(), ^{
         int row=0;
         NSIndexPath *indexPath;
         for(MLMessage *message in self.messageList)

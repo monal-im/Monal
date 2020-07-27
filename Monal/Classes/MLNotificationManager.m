@@ -42,34 +42,28 @@
 
 #pragma mark message signals
 
--(void) handleNewMessage:(NSNotification *)notification
+-(void) handleNewMessage:(NSNotification*) notification
 {
     MLMessage *message =[notification.userInfo objectForKey:@"message"];
     
-    if([message.messageType isEqualToString:kMessageTypeStatus]) return;
+    if([message.messageType isEqualToString:kMessageTypeStatus])
+        return;
     
     DDLogVerbose(@"notification manager got new message notice %@", notification.userInfo);
     [[DataLayer sharedInstance] isMutedJid:message.actualFrom withCompletion:^(BOOL muted) {
-        if(!muted){
-            
-            if (message.shouldShowAlert) {
-                dispatch_async(dispatch_get_main_queue(),
-                               ^{
-                    [self presentAlert:notification];
-                });
-            }
+        if(!muted && message.shouldShowAlert)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self presentAlert:notification];
+            });
         }
     }];
 }
 
--(NSString *) identifierWithNotification:(NSNotification *) notification
+-(NSString*) identifierWithNotification:(NSNotification*) notification
 {
     MLMessage *message =[notification.userInfo objectForKey:@"message"];
-    
-    return [NSString stringWithFormat:@"%@_%@",
-            message.accountId,
-            message.from];
-    
+    return [NSString stringWithFormat:@"%@_%@", message.accountId, message.from];
 }
 
 
@@ -150,22 +144,19 @@
 }
 
 
--(void) presentAlert:(NSNotification *)notification
+-(void) presentAlert:(NSNotification*) notification
 {
-    if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-       || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))
-    {
+    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || [UIApplication sharedApplication].applicationState==UIApplicationStateInactive)
         [self showModernNotificaion:notification];
-    }
     else
     {
-          MLMessage *message =[notification.userInfo objectForKey:@"message"];
-        if(!([message.from isEqualToString:self.currentContact.contactJid]) &&
-           !([message.to isEqualToString:self.currentContact.contactJid] ) )
-            //  &&![[notification.userInfo objectForKey:@"from"] isEqualToString:@"Info"]
-        {
-                [self showModernNotificaion:notification];
-        }
+        //don't show notifications for open chats
+        MLMessage* message = [notification.userInfo objectForKey:@"message"];
+        if(
+            ![message.from isEqualToString:self.currentContact.contactJid] &&
+            ![message.to isEqualToString:self.currentContact.contactJid]
+        )
+            [self showModernNotificaion:notification];
     }
     
 };

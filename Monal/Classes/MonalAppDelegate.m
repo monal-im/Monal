@@ -10,6 +10,7 @@
 
 #import "CallViewController.h"
 
+#import "MLLogFormatter.h"
 #import "MLNotificationManager.h"
 #import "DataLayer.h"
 #import "MLPush.h"
@@ -164,7 +165,7 @@ static void logException(NSException* exception)
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    DDDispatchQueueLogFormatter* formatter = [[DDDispatchQueueLogFormatter alloc] init];
+    MLLogFormatter* formatter = [[MLLogFormatter alloc] init];
     [[DDOSLogger sharedInstance] setLogFormatter:formatter];
     [DDLog addLogger:[DDOSLogger sharedInstance]];
     

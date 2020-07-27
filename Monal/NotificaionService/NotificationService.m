@@ -8,6 +8,7 @@
 
 #import "NotificationService.h"
 #import "MLConstants.h"
+#import "MLLogFormatter.h"
 #import "MLXMPPManager.h"
 
 @interface NotificationService ()
@@ -30,7 +31,7 @@ static void logException(NSException* exception)
 
 +(void) initialize
 {
-    DDDispatchQueueLogFormatter* formatter = [[DDDispatchQueueLogFormatter alloc] init];
+    MLLogFormatter* formatter = [[MLLogFormatter alloc] init];
     [[DDOSLogger sharedInstance] setLogFormatter:formatter];
     [DDLog addLogger:[DDOSLogger sharedInstance]];
     
@@ -61,11 +62,18 @@ static void logException(NSException* exception)
 {
     DDLogInfo(@"*-* Deallocating notification service extension");
     [DDLog flushLog];
+    [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers:@[@"remote-push"]];
+    [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[@"remote-push"]];
+    DDLogInfo(@"*-* cleared dummy notifications");
+    [DDLog flushLog];
+    [NSThread sleepForTimeInterval:1.000];
+    DDLogInfo(@"*-* now leaving dealloc");
+    [DDLog flushLog];
 }
 
-- (void)didReceiveNotificationRequest:(UNNotificationRequest *)request withContentHandler:(void (^)(UNNotificationContent * _Nonnull))contentHandler
+- (void)didReceiveNotificationRequest:(UNNotificationRequest*) request withContentHandler:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
 {
-    DDLogInfo(@"*-* notification handler called");
+    DDLogInfo(@"*-* notification handler called (ID=%@)", request.identifier);
     self.contentHandler = contentHandler;
     self.bestAttemptContent = [request.content mutableCopy];
     
@@ -84,7 +92,6 @@ static void logException(NSException* exception)
     
     //TODO: check locking server for main app
     
-    /*
     NSString* idval = [[NSUUID UUID] UUIDString];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     content.title = @"Notification incoming";
@@ -95,13 +102,12 @@ static void logException(NSException* exception)
     [center addNotificationRequest:new_request withCompletionHandler:^(NSError * _Nullable error) {
         DDLogInfo(@"*-* second notification request completed: %@", error);
     }];
-    */
     
     DDLogInfo(@"*-* calling MLXMPPManager");
     [DDLog flushLog];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(xmppError:) name:kXMPPError object:nil];
-    //[[MLXMPPManager sharedInstance] connectIfNecessary];
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
     //self.contentHandler(self.bestAttemptContent);
     //TODO: use getDeliveredNotificationsWithCompletionHandler: and removeDeliveredNotificationsWithIdentifiers:
     //TODO: to remove old notifications and use their contents for this push, if no messages are pending on the xmpp channel
@@ -127,6 +133,8 @@ static void logException(NSException* exception)
         {
             DDLogInfo(@"*-* notification handler: all accounts idle --> publishing notification and stopping extension");
             self.contentHandler(self.bestAttemptContent);
+            [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers:@[@"remote-push"]];
+            [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[@"remote-push"]];
             [DDLog flushLog];
         }
     });

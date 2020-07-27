@@ -259,6 +259,7 @@ NSString *const kXMPPPresence = @"presence";
     [self dispatchOnReceiveQueue: ^{
         DDLogVerbose(@"Idle check:");
         DDLogVerbose(@"    _accountState < kStateReconnecting = %@", _accountState < kStateReconnecting ? @"YES" : @"NO");
+        DDLogVerbose(@"    _reconnectInProgress = %@", _reconnectInProgress ? @"YES" : @"NO");
         DDLogVerbose(@"    _catchupDone = %@", _catchupDone ? @"YES" : @"NO");
         DDLogVerbose(@"    [self.unAckedStanzas count] = %lu", (unsigned long)[self.unAckedStanzas count]);
         DDLogVerbose(@"    [_receiveQueue operationCount] = %lu", (unsigned long)[_receiveQueue operationCount]);

@@ -360,16 +360,16 @@
 }
 
 -(void) addContact {
-    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(NSLocalizedString(@"Add %@ to your contacts?",@""), nil),self.contact.fullName ];
-    NSString* detailString =NSLocalizedString(@"They will see when you are online. They will be able to send you encrypted messages.",@"");
+    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Add %@ to your contacts?", @""),self.contact.fullName ];
+    NSString* detailString = NSLocalizedString(@"They will see when you are online. They will be able to send you encrypted messages.", @"");
 
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
                                                                    message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [alert dismissViewControllerAnimated:YES completion:nil];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes",@"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         [[MLXMPPManager sharedInstance] addContact:self.contact];
         if([self.contact.state isEqualToString:kSubTo]  || [self.contact.state isEqualToString:kSubNone] ) {
             [[MLXMPPManager sharedInstance] approveContact:self.contact]; //incase there was a pending request
@@ -382,8 +382,8 @@
 }
 
 -(void) removeContact {
-    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(NSLocalizedString(@"Remove %@ from contacts?",@""), nil),self.contact.fullName ];
-    NSString* detailString =NSLocalizedString(@"They will no longer see when you are online. They may not be able to send you encrypted messages.",@"");
+    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", @""), self.contact.fullName];
+    NSString* detailString = NSLocalizedString(@"They will no longer see when you are online. They may not be able to send you encrypted messages.", @"");
        
     BOOL isMUC=self.contact.isGroup;
     if(isMUC)
@@ -414,16 +414,16 @@
 }
 
 -(void) blockContact {
-    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(NSLocalizedString(@"Block %@ from contacting you?",@""), nil),self.contact.fullName ];
-    NSString* detailString =NSLocalizedString(@"This sender will no longer be able to contact you",@"");
+    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Block %@ from contacting you?", @""), self.contact.fullName ];
+    NSString* detailString = NSLocalizedString(@"This sender will no longer be able to contact you",@"");
 
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
                                                                    message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [alert dismissViewControllerAnimated:YES completion:nil];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes",@"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         [[MLXMPPManager sharedInstance] blocked:YES Jid:self.contact];
     }]];
     
@@ -433,16 +433,16 @@
 }
 
 -(void) unBlockContact {
-    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(NSLocalizedString(@"Allow %@ to contact you?",@""), nil),self.contact.fullName ];
+    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Allow %@ to contact you?", @""),self.contact.fullName ];
     NSString* detailString =NSLocalizedString(@"This sender will be able to send you messages",@"");
 
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
                                                                    message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [alert dismissViewControllerAnimated:YES completion:nil];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes",@"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         [[MLXMPPManager sharedInstance] blocked:NO Jid:self.contact];
     }]];
     

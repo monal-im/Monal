@@ -67,7 +67,7 @@
 -(void) setLastInteraction:(NSDate*) date
 {
     MLXMLNode* idle = [[MLXMLNode alloc] initWithElement:@"idle" andNamespace:@"urn:xmpp:idle:1"];
-    [idle.attributes setValue:[HelperTools generateDateTimeString:[NSDate date]] forKey:@"since"];
+    [idle.attributes setValue:[HelperTools generateDateTimeString:date] forKey:@"since"];
     [self.children addObject:idle];
 }
 

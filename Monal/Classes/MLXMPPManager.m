@@ -108,7 +108,7 @@ An array of Dics what have timers to make sure everything was sent
     }
 }
 
-+ (MLXMPPManager* )sharedInstance
++ (MLXMPPManager*) sharedInstance
 {
     static dispatch_once_t once;
     static MLXMPPManager* sharedInstance;

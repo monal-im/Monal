@@ -139,18 +139,11 @@ static void logException(NSException* exception)
 {
     //make sure unread badge matches application badge
     [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber *result) {
-        void (^block)(void) = ^{
+        monal_void_block_t block = ^{
             NSInteger unread = 0;
-            if(result) {
+            if(result)
                 unread = [result integerValue];
-            }
-            
-            if(unread>0) {
-                [UIApplication sharedApplication].applicationIconBadgeNumber = unread;
-            }
-            else {
-                [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
-            }
+            [UIApplication sharedApplication].applicationIconBadgeNumber = unread;
         };
         if(dispatch_get_current_queue() == dispatch_get_main_queue())
             block();
@@ -226,34 +219,23 @@ static void logException(NSException* exception)
     }
     
     [UNUserNotificationCenter currentNotificationCenter].delegate=self;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateState:) name:kMLHasConnectedNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
     
-    //ios8 register for local notifications and badges
-    if([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)])
-    {
-        NSSet *categories;
-        
-        UIMutableUserNotificationAction *replyAction = [[UIMutableUserNotificationAction alloc] init];
-        replyAction.activationMode = UIUserNotificationActivationModeBackground;
-        replyAction.title = @"Reply";
-        replyAction.identifier = @"ReplyButton";
-        replyAction.destructive = NO;
-        replyAction.authenticationRequired = NO;
-        replyAction.behavior = UIUserNotificationActionBehaviorTextInput;
-        
-        UIMutableUserNotificationCategory *actionCategory = [[UIMutableUserNotificationCategory alloc] init];
-        actionCategory.identifier = @"Reply";
-        [actionCategory setActions:@[replyAction] forContext:UIUserNotificationActionContextDefault];
-        
-        UIMutableUserNotificationCategory *extensionCategory = [[UIMutableUserNotificationCategory alloc] init];
-        extensionCategory.identifier = @"Extension";
-        
-        categories = [NSSet setWithObjects:actionCategory,extensionCategory,nil];
-        
-        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge categories:nil];
-        [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
-    }
+    //register for local notifications and badges
+    UIMutableUserNotificationAction* replyAction = [[UIMutableUserNotificationAction alloc] init];
+    replyAction.activationMode = UIUserNotificationActivationModeBackground;
+    replyAction.title = @"Reply";
+    replyAction.identifier = @"ReplyButton";
+    replyAction.destructive = NO;
+    replyAction.authenticationRequired = NO;
+    replyAction.behavior = UIUserNotificationActionBehaviorTextInput;
+    
+    UIMutableUserNotificationCategory* actionCategory = [[UIMutableUserNotificationCategory alloc] init];
+    actionCategory.identifier = @"Reply";
+    [actionCategory setActions:@[replyAction] forContext:UIUserNotificationActionContextDefault];
+    
+    UIUserNotificationSettings* settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge categories:[NSSet setWithObjects:actionCategory,nil]];
+    [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
     
     //register for voip push using pushkit
     if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) {
@@ -301,19 +283,20 @@ static void logException(NSException* exception)
     return YES;
 }
 
--(void) applicationDidBecomeActive:(UIApplication *)application
+-(void) applicationDidBecomeActive:(UIApplication*) application
 {
-    //  [UIApplication sharedApplication].applicationIconBadgeNumber=0;
+    //[UIApplication sharedApplication].applicationIconBadgeNumber=0;
 }
 
--(void) setActiveChatsController: (UIViewController *) activeChats
+-(void) setActiveChatsController: (UIViewController*) activeChats
 {
-    self.activeChats=activeChats;
+    self.activeChats = activeChats;
 }
 
 #pragma mark - handling urls
 
--(BOOL) openFile:(NSURL *) file {
+-(BOOL) openFile:(NSURL*) file
+{
     NSData *data = [NSData dataWithContentsOfURL:file];
     [[MLXMPPManager sharedInstance] parseMessageForData:data];
     return data?YES:NO;
@@ -443,18 +426,6 @@ static void logException(NSException* exception)
 
 #pragma mark - backgrounding
 
--(void) updateState:(NSNotification *) notification
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        UIApplicationState state = [[UIApplication sharedApplication] applicationState];
-        if (state == UIApplicationStateInactive || state == UIApplicationStateBackground) {
-            [[MLXMPPManager sharedInstance] setClientsInactive];
-        } else {
-             [[MLXMPPManager sharedInstance] setClientsActive];
-        }
-    });
-}
-
 - (void) applicationWillEnterForeground:(UIApplication *)application
 {
     DDLogVerbose(@"Entering FG");
@@ -498,16 +469,16 @@ static void logException(NSException* exception)
     DDLogVerbose(@"|~~| 25%% |~~|");
     [DEFAULTS_DB synchronize];
     DDLogVerbose(@"|~~| 50%% |~~|");
-    [[MLXMPPManager sharedInstance] scheduleBackgroundFetchingTask];        //make sure delivery will be attempted, if needed
-    DDLogVerbose(@"|~~| 75%% |~~|");
     [[MLXMPPManager sharedInstance] setClientsInactive];
+    DDLogVerbose(@"|~~| 75%% |~~|");
+    [[MLXMPPManager sharedInstance] scheduleBackgroundFetchingTask];        //make sure delivery will be attempted, if needed
     DDLogVerbose(@"|~~| T E R M I N A T E D |~~|");
     [DDLog flushLog];
 }
 
 #pragma mark - error feedback
 
--(void) showConnectionStatus:(NSNotification *) notification
+-(void) showConnectionStatus:(NSNotification*) notification
 {
     NSArray *payload= [notification.object copy];
     dispatch_async(dispatch_get_main_queue(), ^{

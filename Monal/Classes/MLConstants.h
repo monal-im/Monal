@@ -70,6 +70,7 @@ typedef void (^monal_void_block_t)();
 #define kMonalAccountStatusChanged @"kMonalAccountStatusChanged"
 #define kMonalAccountAuthRequest @"kMonalAccountAuthRequest"
 
+#define kMonalRefresh @"kMonalRefresh"
 #define kMonalContactRefresh @"kMonalContactRefresh"
 #define kMonalRefreshContacts @"kMonalRefreshContacts"
 

@@ -65,7 +65,7 @@
 
 -(void) setup
 {
-    self.hidesBottomBarWhenPushed=YES;
+    self.hidesBottomBarWhenPushed = YES;
     
     [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId withCompletion:^(NSArray *result) {
         NSArray* accountVals = result;
@@ -101,6 +101,7 @@
     
     [nc addObserver:self selector:@selector(dismissKeyboard:) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
+    [nc addObserver:self selector:@selector(handleForeGround) name:kMonalRefresh object:nil];
     
     [nc addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
     [nc addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardDidHideNotification object:nil];
@@ -306,7 +307,7 @@
     updateTime();
 }
 
--(void)viewWillAppear:(BOOL)animated
+-(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
     // Hide normal navigation bar

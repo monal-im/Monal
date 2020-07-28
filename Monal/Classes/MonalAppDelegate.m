@@ -174,9 +174,6 @@ static void logException(NSException* exception)
     //log unhandled exceptions
     NSSetUncaughtExceptionHandler(&logException);
     
-    //init process lock
-    self.processLock = [[MLProcessLock alloc] initWithProcessName:@"MainApp"];
-    
     //migrate defaults db to shared app group
     if(![DEFAULTS_DB boolForKey:@"DefaulsMigratedToAppGroup"])
     {
@@ -212,6 +209,28 @@ static void logException(NSException* exception)
         DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
         [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
     }
+    
+    //init process lock
+    //we do this *after* waiting for the service extension so that it can complete its work
+    //this will delay app startup but the user won't have to wait for incoming messages once the app is started
+    self.processLock = [[MLProcessLock alloc] initWithProcessName:@"MainApp"];
+    
+    //log service extension status
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        while(YES)
+        {
+            [MLProcessLock waitForRemoteStartup:@"NotificationServiceExtension"];
+            DDLogWarn(@"NotificationServiceExtension is now running!");
+            [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
+            DDLogWarn(@"NotificationServiceExtension has been terminated!");
+            
+            //trigger view updates
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:self userInfo:nil];
+            });
+        }
+    });
+
 }
 
 - (BOOL)application:(UIApplication*) application didFinishLaunchingWithOptions:(NSDictionary*) launchOptions
@@ -428,12 +447,15 @@ static void logException(NSException* exception)
 {
     DDLogVerbose(@"Entering FG");
  
-    //only proceed with launching if the NotificationServiceExtension is not running
+    //only proceed with foregrounding if the NotificationServiceExtension is not running
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
     {
         DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
         [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
     }
+    
+    //trigger view updates
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:self userInfo:nil];
     
     [[MLXMPPManager sharedInstance] setClientsActive];
     [[MLXMPPManager sharedInstance] sendMessageForConnectedAccounts];

@@ -36,6 +36,8 @@
  */
 -(void) logoutAll;
 
+-(void) disconnectAll;
+
 /**
  disconnects the specified account
  */

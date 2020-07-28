@@ -191,12 +191,7 @@ An array of Dics what have timers to make sure everything was sent
             DDLogVerbose(@"NOT reachable");
             _hasConnectivity = NO;
             BOOL wasIdle = [self allAccountsIdle];      //we have to check that here because diconnect: makes them non-idle (no catchup done yet etc.)
-            for(xmpp* xmppAccount in _connectedXMPP)
-            {
-                //disconnect to prevent endless loops trying to connect
-                DDLogVerbose(@"manager disconnecting");
-                [xmppAccount disconnect];
-            }
+            [self disconnectAll];
             if(!wasIdle)
             {
                 DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored");
@@ -443,6 +438,8 @@ An array of Dics what have timers to make sure everything was sent
         });
     }
     
+    //*** we don't need to check for a running service extension here because the appdelegate does this already for us ***
+    
     //don't block main thread here
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         for(xmpp* xmppAccount in _connectedXMPP)
@@ -603,6 +600,18 @@ An array of Dics what have timers to make sure everything was sent
             }
         });
     }];
+}
+
+-(void) disconnectAll
+{
+    dispatch_async(self->_netQueue, ^{
+        for(xmpp* xmppAccount in _connectedXMPP)
+        {
+            //disconnect to prevent endless loops trying to connect
+            DDLogVerbose(@"manager disconnecting");
+            [xmppAccount disconnect];
+        }
+    });
 }
 
 -(void) connectIfNecessary

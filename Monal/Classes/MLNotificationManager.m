@@ -13,11 +13,8 @@
 @import CoreServices;
 
 @interface MLNotificationManager ()
-@property (nonatomic, strong) NSMutableArray *tempNotificationIds;
 
 @end
-
-
 
 @implementation MLNotificationManager
 
@@ -35,7 +32,6 @@
 {
     self = [super init];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
-    self.tempNotificationIds = [[NSMutableArray alloc] init];
     return self;
 }
 

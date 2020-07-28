@@ -12,6 +12,7 @@
 
 #import "xmpp.h"
 #import "MLPipe.h"
+#import "MLProcessLock.h"
 #import "DataLayer.h"
 #import "HelperTools.h"
 #import "MLXMPPManager.h"
@@ -467,6 +468,18 @@ NSString *const kXMPPPresence = @"presence";
             return;
         }
         
+        //only proceed with connection if not concurrent with other processes
+        if(![HelperTools isAppExtension] && [MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
+        {
+            DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination before connecting");
+            [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
+        }
+        if([HelperTools isAppExtension] && [MLProcessLock checkRemoteRunning:@"MainApp"])
+        {
+            DDLogInfo(@"MainApp is running, not connecting");
+            return;
+        }
+        
         //make sure we are still enabled ("-1" is used for the account registration process and never saved to db
         if(![@"-1" isEqualToString:self.accountNo] && ![[DataLayer sharedInstance] isAccountEnabled:self.accountNo])
         {
@@ -751,6 +764,18 @@ NSString *const kXMPPPresence = @"presence";
         if(![[DataLayer sharedInstance] isAccountEnabled:self.accountNo])
         {
             DDLogInfo(@"account is disabled, ignoring ping.");
+            return;
+        }
+        
+        //only proceed with pinging if not concurrent with other processes
+        if(![HelperTools isAppExtension] && [MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
+        {
+            DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination before pinging");
+            [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
+        }
+        if([HelperTools isAppExtension] && [MLProcessLock checkRemoteRunning:@"MainApp"])
+        {
+            DDLogInfo(@"MainApp is running, not pinging");
             return;
         }
         

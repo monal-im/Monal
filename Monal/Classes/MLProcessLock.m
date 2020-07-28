@@ -65,8 +65,8 @@ static struct sockaddr_un getAddr(NSString* processName)
     struct sockaddr_un addr = getAddr(processName);
     if(connect(fd, (struct sockaddr*)&addr, sizeof(addr)) < 0)
     {
-        DDLogInfo(@"Failed to connect MLProcessLock client fd, remote '%@' seems not to run, but trying again in 1 second to make sure: %@", processName, [NSString stringWithUTF8String:strerror(errno)]);
-        [NSThread sleepForTimeInterval:10.000];
+        DDLogInfo(@"Failed to connect MLProcessLock client fd, remote '%@' seems not to run, but trying again in 100ms to make sure: %@", processName, [NSString stringWithUTF8String:strerror(errno)]);
+        usleep(100000);
         if(connect(fd, (struct sockaddr*)&addr, sizeof(addr)) < 0)
         {
             DDLogInfo(@"Failed to connect MLProcessLock client fd the second time --> remote '%@' is NOT running: %@", processName, [NSString stringWithUTF8String:strerror(errno)]);
@@ -96,7 +96,7 @@ static struct sockaddr_un getAddr(NSString* processName)
         if(connected < 0)
             usleep(100000);
     } while(connected < 0);
-    DDLogInfo(@"MLProcessLock remote '%@' IS running", processName);
+    DDLogInfo(@"MLProcessLock remote '%@' IS now running", processName);
     close(fd);
     return NO;      //this is no error, remote is really running
 }

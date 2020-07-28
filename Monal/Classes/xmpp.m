@@ -204,6 +204,8 @@ NSString *const kXMPPPresence = @"presence";
     self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];
     _accountNo = accountNo;
     [self setupObjects];
+    //read persisted state
+    [self readState];
     return self;
 }
 
@@ -494,7 +496,7 @@ NSString *const kXMPPPresence = @"presence";
         
         [self cleanupSendQueue];
         
-        //read persisted state and start connection
+        //(re)read persisted state and start connection
         [self readState];
         if([self connectionTask])
         {

@@ -165,14 +165,12 @@ static void logException(NSException* exception)
 
 - (BOOL)application:(UIApplication*) application willFinishLaunchingWithOptions:(NSDictionary*) launchOptions
 {
-    MLLogFormatter* formatter = [[MLLogFormatter alloc] init];
-    [[DDOSLogger sharedInstance] setLogFormatter:formatter];
-    [DDLog addLogger:[DDOSLogger sharedInstance]];
-    
     self.fileLogger = [HelperTools configureLogging];
     
     //log unhandled exceptions
     NSSetUncaughtExceptionHandler(&logException);
+    
+    [HelperTools activityLog];
     
     //migrate defaults db to shared app group
     if(![[HelperTools defaultsDB] boolForKey:@"DefaulsMigratedToAppGroup"])
@@ -203,16 +201,7 @@ static void logException(NSException* exception)
         DDLogInfo(@"Migration complete and written to disk");
     }
     
-    //only proceed with launching if the NotificationServiceExtension is not running
-    if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
-    {
-        DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
-        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
-    }
-    
     //init process lock
-    //we do this *after* waiting for the service extension so that it can complete its work
-    //this will delay app startup but the user won't have to wait for incoming messages once the app is started
     self.processLock = [[MLProcessLock alloc] initWithProcessName:@"MainApp"];
     
     //log service extension status
@@ -231,6 +220,12 @@ static void logException(NSException* exception)
         }
     });
 
+    //only proceed with launching if the NotificationServiceExtension is not running
+    if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
+    {
+        DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
+        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
+    }
 }
 
 - (BOOL)application:(UIApplication*) application didFinishLaunchingWithOptions:(NSDictionary*) launchOptions

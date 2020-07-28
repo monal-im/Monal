@@ -13,6 +13,29 @@
 @implementation HelperTools
 
 
++(void) dispatchSyncReentrant:(monal_void_block_t) block onQueue:(dispatch_queue_t) queue
+{
+    if(!queue)
+        queue = dispatch_get_main_queue();
+    if(dispatch_get_current_queue() == queue)
+        block();
+    else
+        dispatch_sync(queue, block);
+}
+
++(void) activityLog
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        BOOL appex = [HelperTools isAppExtension];
+        unsigned int counter = 0;
+        while(counter++)
+        {
+            DDLogInfo(@"activity(%@): %lu", appex ? @"APPEX" : @"MAINAPP", counter);
+            usleep(1000000);
+        }
+    });
+}
+
 +(NSUserDefaults*) defaultsDB
 {
     static NSUserDefaults* db;
@@ -52,12 +75,8 @@
 
 +(BOOL) isAppExtension
 {
-    BOOL __block isExtension = NO;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        isExtension = [[[NSBundle mainBundle] executablePath] containsString:@".appex/"];
-    });
-    return isExtension;
+    //dispatch once seems to corrupt this check (nearly always return mainapp even if in appex) --> don't use dispatch once
+    return [[[NSBundle mainBundle] executablePath] containsString:@".appex/"];
 }
 
 +(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features

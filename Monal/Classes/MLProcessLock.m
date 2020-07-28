@@ -140,6 +140,11 @@ static struct sockaddr_un getAddr(NSString* processName)
     return retval;
 }
 
+CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, void *info)
+{
+    return NULL;
+}
+
 -(id) initWithProcessName:(NSString*) processName
 {
     [self runServerFor:processName];

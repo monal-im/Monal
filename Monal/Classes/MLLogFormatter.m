@@ -43,9 +43,9 @@ static DDQualityOfServiceName _qos_name(NSUInteger qos) {
     NSString *queueThreadLabel = [self queueThreadLabelForLogMessage:logMessage];
 
 #if TARGET_OS_SIMULATOR
-    return [NSString stringWithFormat:@"%@ [%@ (QOS:%@)] %@", [HelperTools isAppExtension] ? @"APPEX" : @"mainapp", queueThreadLabel, _qos_name(logMessage->_qos), logMessage->_message];
+    return [NSString stringWithFormat:@"%@ [%@ (QOS:%@)] %@", [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage->_qos), logMessage->_message];
 #else
-    return [NSString stringWithFormat:@"%@ %@ [%@ (QOS:%@)] %@", timestamp, [HelperTools isAppExtension] ? @"APPEX" : @"mainapp", queueThreadLabel, _qos_name(logMessage->_qos), logMessage->_message];
+    return [NSString stringWithFormat:@"%@ %@ [%@ (QOS:%@)] %@", timestamp, [HelperTools isAppExtension] ? @"APP EXT" : @"mainapp", queueThreadLabel, _qos_name(logMessage->_qos), logMessage->_message];
 #endif
 }
 

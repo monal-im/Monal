@@ -254,14 +254,10 @@ An array of Dics what have timers to make sure everything was sent
         inBackground = YES;
     else
     {
-        void (^block)(void) = ^{
+        [HelperTools dispatchSyncReentrant:^{
             if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                 inBackground = YES;
-        };
-        if(dispatch_get_current_queue() == dispatch_get_main_queue())
-            block();
-        else
-            dispatch_sync(dispatch_get_main_queue(), block);
+        } onQueue:dispatch_get_main_queue()];
     }
     return inBackground;
 }
@@ -314,6 +310,34 @@ An array of Dics what have timers to make sure everything was sent
     }
 }
 
+-(void) addBackgroundTaskIfNeeded:(BOOL) needed
+{
+    if(![HelperTools isAppExtension] && needed)
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            //start indicating we want to do work even when the app is put into background
+            if(_bgTask == UIBackgroundTaskInvalid)
+            {
+                _bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+                    DDLogWarn(@"BG WAKE EXPIRING");
+                    [DDLog flushLog];
+                    
+                    //schedule a BGProcessingTaskRequest to process this further as soon as possible
+                    if(@available(iOS 13.0, *))
+                    {
+                        DDLogInfo(@"calling scheduleBackgroundFetchingTask");
+                        [self scheduleBackgroundFetchingTask];
+                    }
+                    
+                    [DDLog flushLog];
+                    [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
+                    _bgTask = UIBackgroundTaskInvalid;
+                }];
+            }
+        });
+    }
+}
+
 -(void) handleBackgroundFetchingTask:(BGTask*) task API_AVAILABLE(ios(13.0))
 {
     DDLogVerbose(@"RUNNING BGTASK");
@@ -336,14 +360,17 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) configureBackgroundFetchingTask
 {
-    if(@available(iOS 13.0, *))
+    if(![HelperTools isAppExtension])
     {
-        [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundFetchingTask usingQueue:nil launchHandler:^(BGTask *task) {
-            DDLogVerbose(@"RUNNING BGTASK LAUNCH HANDLER");
-            [self handleBackgroundFetchingTask:task];
-        }];
-    } else {
-        // No fallback unfortunately
+        if(@available(iOS 13.0, *))
+        {
+            [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundFetchingTask usingQueue:dispatch_get_main_queue() launchHandler:^(BGTask *task) {
+                DDLogVerbose(@"RUNNING BGTASK LAUNCH HANDLER");
+                [self handleBackgroundFetchingTask:task];
+            }];
+        } else {
+            // No fallback unfortunately
+        }
     }
 }
 
@@ -353,15 +380,18 @@ An array of Dics what have timers to make sure everything was sent
     {
         if(@available(iOS 13.0, *))
         {
-            dispatch_sync(dispatch_get_main_queue(), ^{
+            [HelperTools dispatchSyncReentrant:^{
                 NSError *error = NULL;
                 // cancel existing task (if any)
                 [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundFetchingTask];
                 // new task
-                //BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-                //request.requiresNetworkConnectivity = YES;
-                BGAppRefreshTaskRequest* request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-                request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
+                //BGAppRefreshTaskRequest* request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
+                BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
+                //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
+                request.requiresNetworkConnectivity = YES;
+                request.requiresExternalPower = NO;
+                request.earliestBeginDate = nil;
+                //request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
                 BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
                 if(!success) {
                     // Errorcodes https://stackoverflow.com/a/58224050/872051
@@ -369,7 +399,7 @@ An array of Dics what have timers to make sure everything was sent
                 } else {
                     DDLogVerbose(@"Success submitting BGTask request %@", request);
                 }
-            });
+            } onQueue:dispatch_get_main_queue()];
         }
         else
         {
@@ -403,6 +433,8 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) setClientsInactive
 {
+    [self addBackgroundTaskIfNeeded:[self allAccountsIdle]];
+    
     //don't block main thread here
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         for(xmpp* xmppAccount in _connectedXMPP)
@@ -413,30 +445,7 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) setClientsActive
 {
-    if(![HelperTools isAppExtension])
-    {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            //start indicating we want to do work even when the app is put into background
-            if(_bgTask == UIBackgroundTaskInvalid)
-            {
-                _bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-                    DDLogWarn(@"BG WAKE EXPIRING");
-                    [DDLog flushLog];
-                    
-                    //schedule a BGProcessingTaskRequest to process this further as soon as possible
-                    if(@available(iOS 13.0, *))
-                    {
-                        DDLogInfo(@"calling scheduleBackgroundFetchingTask");
-                        [self scheduleBackgroundFetchingTask];
-                    }
-                    
-                    [DDLog flushLog];
-                    [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
-                    _bgTask = UIBackgroundTaskInvalid;
-                }];
-            }
-        });
-    }
+    [self addBackgroundTaskIfNeeded:YES];
     
     //*** we don't need to check for a running service extension here because the appdelegate does this already for us ***
     

@@ -13,6 +13,33 @@
 @implementation HelperTools
 
 
++(DDFileLogger*) configureLogging
+{
+    MLLogFormatter* formatter = [[MLLogFormatter alloc] init];
+    [[DDOSLogger sharedInstance] setLogFormatter:formatter];
+    [DDLog addLogger:[DDOSLogger sharedInstance]];
+    
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
+    id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:[containerUrl path]];
+    DDFileLogger* fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
+    [fileLogger setLogFormatter:formatter];
+    fileLogger.rollingFrequency = 60 * 60 * 24;    // 24 hour rolling
+    fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
+    fileLogger.maximumFileSize = 1024 * 1024 * 64;
+    [DDLog addLogger:fileLogger];
+    DDLogInfo(@"Logfile dir: %@", [containerUrl path]);
+    
+    //for debugging when upgrading the app
+    NSArray *directoryContents = [fileManager contentsOfDirectoryAtPath:[containerUrl path] error:nil];
+    for(NSString* file in directoryContents)
+    {
+        DDLogInfo(@"File %@/%@", [containerUrl path], file);
+    }
+    
+    return fileLogger;
+}
+
 +(BOOL) isAppExtension
 {
     BOOL __block isExtension = NO;

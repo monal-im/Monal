@@ -8,15 +8,10 @@
 
 #import "NotificationService.h"
 #import "MLConstants.h"
+#import "HelperTools.h"
 #import "MLProcessLock.h"
 #import "MLXMPPManager.h"
-
-@interface NotificationService ()
-
-@property (nonatomic, strong) void (^contentHandler)(UNNotificationContent* contentToDeliver);
-@property (nonatomic, strong) UNMutableNotificationContent* bestAttemptContent;
-
-@end
+#import "MLNotificationManager.h"
 
 static void logException(NSException* exception)
 {
@@ -27,24 +22,18 @@ static void logException(NSException* exception)
     [DDLog flushLog];
 }
 
+@interface NotificationService ()
+
+@property (nonatomic, strong) void (^contentHandler)(UNNotificationContent* contentToDeliver);
+@property (nonatomic, strong) UNMutableNotificationContent* bestAttemptContent;
+
+@end
+
 @implementation NotificationService
 
 +(void) initialize
 {
-    MLLogFormatter* formatter = [[MLLogFormatter alloc] init];
-    [[DDOSLogger sharedInstance] setLogFormatter:formatter];
-    [DDLog addLogger:[DDOSLogger sharedInstance]];
-    
-    NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
-    id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:[containerUrl path]];
-    DDFileLogger* fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
-    [fileLogger setLogFormatter:formatter];
-    fileLogger.rollingFrequency = 60 * 60 * 24;    // 24 hour rolling
-    fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
-    fileLogger.maximumFileSize = 1024 * 1024 * 64;
-    [DDLog addLogger:fileLogger];
-    DDLogInfo(@"*-* Logfile dir: %@", [containerUrl path]);
+    [HelperTools configureLogging];
     
     //log unhandled exceptions
     NSSetUncaughtExceptionHandler(&logException);

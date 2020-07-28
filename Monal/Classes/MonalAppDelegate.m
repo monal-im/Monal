@@ -9,7 +9,8 @@
 #import "MonalAppDelegate.h"
 
 #import "CallViewController.h"
-
+#import "MLConstants.h"
+#import "HelperTools.h"
 #import "MLNotificationManager.h"
 #import "DataLayer.h"
 #import "MLPush.h"
@@ -168,24 +169,8 @@ static void logException(NSException* exception)
     [[DDOSLogger sharedInstance] setLogFormatter:formatter];
     [DDLog addLogger:[DDOSLogger sharedInstance]];
     
-//#ifdef  DEBUG
-    NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
-    id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:[containerUrl path]];
-    self.fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
-    [self.fileLogger setLogFormatter:formatter];
-    self.fileLogger.rollingFrequency = 60 * 60 * 24;    // 24 hour rolling
-    self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
-    self.fileLogger.maximumFileSize=1024 * 1024 * 64;
-    [DDLog addLogger:self.fileLogger];
-    DDLogInfo(@"Logfile dir: %@", [containerUrl path]);
-    NSArray *directoryContents = [fileManager contentsOfDirectoryAtPath:[containerUrl path] error:nil];
-    for(NSString* file in directoryContents)
-    {
-        DDLogInfo(@"File %@/%@", [containerUrl path], file);
-    }
-//#endif
-
+    self.fileLogger = [HelperTools configureLogging];
+    
     //log unhandled exceptions
     NSSetUncaughtExceptionHandler(&logException);
     
@@ -443,24 +428,29 @@ static void logException(NSException* exception)
 {
     DDLogVerbose(@"Entering FG");
  
+    //only proceed with launching if the NotificationServiceExtension is not running
+    if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
+    {
+        DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
+        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
+    }
+    
     [[MLXMPPManager sharedInstance] setClientsActive];
     [[MLXMPPManager sharedInstance] sendMessageForConnectedAccounts];
 }
 
 -(void) applicationWillResignActive:(UIApplication *)application
 {
-     NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:kAppGroup];
-
     [[DataLayer sharedInstance] activeContactDictWithCompletion:^(NSMutableArray *cleanActive) {
         NSError* err;
         NSData *archive = [NSKeyedArchiver archivedDataWithRootObject:cleanActive requiringSecureCoding:YES error:&err];
         NSAssert(err == nil, @"%@", err);
-        [groupDefaults setObject:archive forKey:@"recipients"];
-        [groupDefaults synchronize];
+        [DEFAULTS_DB setObject:archive forKey:@"recipients"];
+        [DEFAULTS_DB synchronize];
     }];
     
-    [groupDefaults setObject:[[DataLayer sharedInstance] enabledAccountList] forKey:@"accounts"];
-    [groupDefaults synchronize];
+    [DEFAULTS_DB setObject:[[DataLayer sharedInstance] enabledAccountList] forKey:@"accounts"];
+    [DEFAULTS_DB synchronize];
 }
 
 -(void) applicationDidEnterBackground:(UIApplication *)application

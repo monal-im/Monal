@@ -311,11 +311,8 @@ void AudioInputCallback(
     self.marker=YES;
     
     disconnecting=NO;
-    #if TARGET_OS_IPHONE
-[[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayAndRecord error: nil];
-    
-#else
-#endif
+    [[AVAudioSession sharedInstance] setCategory: AVAudioSessionCategoryPlayAndRecord error: nil];
+
    
     //********* Audio Queue ********/
     

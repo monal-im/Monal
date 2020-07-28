@@ -11,11 +11,6 @@
 #import "DataLayer.h"
 #import "AESGcm.h"
 
-#if TARGET_OS_IPHONE
-#else
-#import <Cocoa/Cocoa.h>
-#endif
-
 
 @interface MLImageManager()
 
@@ -23,12 +18,7 @@
 @property  (nonatomic, strong) NSCache *imageCache;
 
 @property  (nonatomic, strong) NSOperationQueue *fileQueue;
-#if TARGET_OS_IPHONE
 @property  (nonatomic, strong) UIImage *noIcon;
-#else
-@property  (nonatomic, strong) NSImage *noIcon;
-#endif
-
 
 @end
 
@@ -68,22 +58,10 @@
 
 #pragma mark cache
 
-#if TARGET_OS_IPHONE
 -(UIImage*) noIcon{
     if(!_noIcon) _noIcon=[UIImage imageNamed:@"noicon"];
     return _noIcon;
 }
-
-#else
--(NSImage*) noIcon{
-    if(!_noIcon){
-        
-    _noIcon=[NSImage imageNamed:@"noicon"];
-    }
-    return _noIcon;
-}
-
-#endif
 
 -(NSCache*) iconCache
 {
@@ -107,7 +85,6 @@
 
 #pragma mark chat bubbles
 
-#if TARGET_OS_IPHONE
 -(UIImage *) inboundImage
 {
  if (_inboundImage)
@@ -135,7 +112,6 @@
     
     return _outboundImage;
 }
-#endif
 
 #pragma mark user icons
 
@@ -179,8 +155,6 @@
     
 }
 
-
-#if TARGET_OS_IPHONE
 
 + (UIImage*)circularImage:(UIImage *)image
 {
@@ -274,75 +248,6 @@
     
     return self.chatBackground;
 }
-
-#else
-
-+ (NSImage*)circularImage:(NSImage *)image
-{
-    NSImage *composedImage = [[NSImage alloc] initWithSize:image.size] ;
-    
-    [composedImage lockFocus];
-    CGFloat min;
-    if(image.size.width<image.size.height) {
-        min= image.size.width;
-    }
-    else {
-        min =image.size.height;
-    }
-    NSBezierPath *clipPath = [NSBezierPath bezierPathWithOvalInRect:NSMakeRect(0, 0, min, min)];
-    [clipPath addClip];
-    [image drawAtPoint:NSZeroPoint fromRect:NSMakeRect(0, 0, min,min) operation:NSCompositeSourceOver fraction:1];
-    [composedImage unlockFocus];
-    
-    return composedImage;
-}
-
--(void) getIconForContact:(NSString*) contact andAccount:(NSString *) accountNo withCompletion:(void (^)(NSImage *))completion
-{
-    NSString* filename=[self fileNameforContact:contact];
-    NSString* cacheKey=[NSString stringWithFormat:@"%@_%@",accountNo,contact];
-    //check cache
-    __block NSImage* toreturn= [self.iconCache objectForKey:cacheKey];
-    if(!toreturn) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-            NSString *documentsDirectory = [paths objectAtIndex:0];
-            NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-            writablePath = [writablePath stringByAppendingPathComponent:accountNo];
-            writablePath = [writablePath stringByAppendingPathComponent:filename];
-            
-            
-            NSImage* savedImage =[[NSImage alloc] initWithContentsOfFile:writablePath];
-            if(savedImage)
-                toreturn=savedImage;
-            
-            if(!toreturn)
-            {
-                toreturn=self.noIcon;
-            }
-            
-            toreturn=[MLImageManager circularImage:toreturn];
-            
-            
-            if(toreturn) {
-                [self.iconCache setObject:toreturn forKey:cacheKey];
-            }
-            
-            if(completion)
-            {
-                completion(toreturn);
-            }
-        });
-        
-    }
-    
-    else if(completion)
-    {
-        completion(toreturn);
-    }
-    
-}
-#endif
 
 -(void) filePathForURL:(NSString *)url wuthCompletion:(void (^)(NSString * _Nullable path)) completionHandler {
     [[DataLayer sharedInstance] imageCacheForUrl:url withCompletion:^(NSString *path) {

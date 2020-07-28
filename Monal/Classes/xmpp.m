@@ -184,14 +184,12 @@ NSString *const kXMPPPresence = @"presence";
     }
     else
     {
-#if TARGET_OS_IPHONE
         dispatch_async(dispatch_get_main_queue(), ^{
             if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
             {
                 _isCSIActive=NO;
             }
         });
-#endif
     }
     _lastInteractionDate=[NSDate date];     //better default than 1970
 
@@ -501,14 +499,12 @@ NSString *const kXMPPPresence = @"presence";
             connectTimeout = 300.0;     //long timeout if in background
         else
         {
-#if TARGET_OS_IPHONE
             dispatch_async(dispatch_get_main_queue(), ^{
                 if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                 {
                     connectTimeout = 300.0;     //long timeout if in background
                 }
             });
-#endif
         }
         _cancelLoginTimer = [HelperTools startTimer:connectTimeout withHandler:^{
             [self dispatchOnReceiveQueue: ^{
@@ -3059,7 +3055,6 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) enablePush
 {
-#if TARGET_OS_IPHONE
     if(
         self.accountState>=kStateBound && self.connectionProperties.supportsPush &&
         self.pushNode!=nil && [self.pushNode length]>0 &&
@@ -3076,7 +3071,6 @@ NSString *const kXMPPPresence = @"presence";
     {
         DDLogInfo(@" NOT enabling push: %@ < %@", self.pushNode, self.pushSecret);
     }
-#endif
 }
 
 @end

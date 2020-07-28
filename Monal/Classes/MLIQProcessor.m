@@ -423,14 +423,12 @@
     BOOL __block isBackgrounded = NO;
     if(![HelperTools isAppExtension])
     {
-#if TARGET_OS_IPHONE
         dispatch_sync(dispatch_get_main_queue(), ^{
             if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
             {
                 isBackgrounded = YES;
             }
         });
-#endif
     }
     if(!isBackgrounded)
     {

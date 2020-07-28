@@ -94,10 +94,8 @@ NSString *const kCount = @"count";
             @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
     }
     
-#if TARGET_OS_IPHONE
     NSDictionary *attributes = @{NSFileProtectionKey:NSFileProtectionCompleteUntilFirstUserAuthentication};
     [fileManager setAttributes:attributes ofItemAtPath:writableDBPath error:&error];
-#endif
     
     if(sqlite3_config(SQLITE_CONFIG_MULTITHREAD) == SQLITE_OK)
         DDLogInfo(@"initialize: Database configured ok");
@@ -2382,7 +2380,6 @@ NSString *const kCount = @"count";
 {
     [self beginWriteTransaction];
 
-#if TARGET_OS_IPHONE
     // checking db version and upgrading if necessary
     DDLogVerbose(@"Database version check");
 
@@ -2539,10 +2536,6 @@ NSString *const kCount = @"count";
 
         DDLogVerbose(@"Upgrade to 1.41 success");
     }
-#else
-    NSNumber* dbversion= (NSNumber*)[self executeScalar:@"select dbversion from dbversion" andArguments:nil];
-    DDLogVerbose(@"Got db version %@", dbversion);
-#endif
 
     if([dbversion doubleValue] < 1.5)
     {

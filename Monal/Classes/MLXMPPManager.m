@@ -14,9 +14,7 @@
 #import "MLMessageProcessor.h"
 #import "ParseMessage.h"
 
-#if TARGET_OS_IPHONE
 #import "MonalAppDelegate.h"
-#endif
 
 @import Network;
 @import MobileCoreServices;
@@ -261,7 +259,6 @@ An array of Dics what have timers to make sure everything was sent
         inBackground = YES;
     else
     {
-#if TARGET_OS_IPHONE
         void (^block)(void) = ^{
             if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                 inBackground = YES;
@@ -270,14 +267,12 @@ An array of Dics what have timers to make sure everything was sent
             block();
         else
             dispatch_sync(dispatch_get_main_queue(), block);
-#endif
     }
     return inBackground;
 }
 
 -(void) checkIfBackgroundTaskIsStillNeeded
 {
-#if TARGET_OS_IPHONE
     if(![HelperTools isAppExtension])
     {
         if([self allAccountsIdle] && _pushCompletion)
@@ -322,7 +317,6 @@ An array of Dics what have timers to make sure everything was sent
             */
         }
     }
-#endif
 }
 
 -(void) handleBackgroundFetchingTask:(BGTask*) task API_AVAILABLE(ios(13.0))
@@ -360,7 +354,6 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) scheduleBackgroundFetchingTask
 {
-#if TARGET_OS_IPHONE
     if(![HelperTools isAppExtension])
     {
         if(@available(iOS 13.0, *))
@@ -389,7 +382,6 @@ An array of Dics what have timers to make sure everything was sent
             DDLogError(@"BGTask needed but NOT supported!");
         }
     }
-#endif
 }
 
 -(void) incomingPushWithCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
@@ -426,7 +418,6 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) setClientsActive
 {
-#if TARGET_OS_IPHONE
     if(![HelperTools isAppExtension])
     {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -451,7 +442,6 @@ An array of Dics what have timers to make sure everything was sent
             }
         });
     }
-#endif
     
     //don't block main thread here
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -627,9 +617,7 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) updatePassword:(NSString *) password forAccount:(NSString *) accountNo
 {
-#if TARGET_OS_IPHONE
     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-#endif
     [SAMKeychain setPassword:password forService:@"Monal" account:accountNo];
     xmpp* xmpp =[self getConnectedAccountForID:accountNo];
     [xmpp.connectionProperties.identity updatPassword:password];
@@ -916,13 +904,13 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 #pragma mark message signals
 -(void) handleNewMessage:(NSNotification *)notification
 {
-#if TARGET_OS_IPHONE
     if(![HelperTools isAppExtension])
+    {
         dispatch_async(dispatch_get_main_queue(), ^{
             MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
             [appDelegate updateUnread];
         });
-#endif
+    }
 }
 
 

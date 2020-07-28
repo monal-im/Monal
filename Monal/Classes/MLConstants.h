@@ -16,6 +16,7 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 static const DDLogLevel ddLogLevel = DDLogLevelInfo;
 #endif
 #import "MLLogFileManager.h"
+#import "MLLogFormatter.h"
 
 
 //configure app group constants

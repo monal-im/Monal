@@ -43,7 +43,7 @@ extern NSString *const kMessageTypeStatus;
 extern NSString *const kMessageTypeText;
 extern NSString *const kMessageTypeUrl;
 
-+ (DataLayer* )sharedInstance;
++(DataLayer*) sharedInstance;
 
 -(void) version;
 

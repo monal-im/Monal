@@ -8,7 +8,7 @@
 
 #import "NotificationService.h"
 #import "MLConstants.h"
-#import "MLLogFormatter.h"
+#import "MLProcessLock.h"
 #import "MLXMPPManager.h"
 
 @interface NotificationService ()
@@ -42,15 +42,17 @@ static void logException(NSException* exception)
     [fileLogger setLogFormatter:formatter];
     fileLogger.rollingFrequency = 60 * 60 * 24;    // 24 hour rolling
     fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
-    fileLogger.maximumFileSize=1024 * 1024 * 64;
+    fileLogger.maximumFileSize = 1024 * 1024 * 64;
     [DDLog addLogger:fileLogger];
     DDLogInfo(@"*-* Logfile dir: %@", [containerUrl path]);
     
     //log unhandled exceptions
     NSSetUncaughtExceptionHandler(&logException);
     
-    //TODO: initialize locking server
+    //init process lock
+    [[MLProcessLock alloc] initWithProcessName:@"NotificationServiceExtension"];
     
+    //log startup
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
@@ -90,7 +92,13 @@ static void logException(NSException* exception)
         return;
     }
     
-    //TODO: check locking server for main app
+    //just "ignore" this push if the main app is already running
+    if([MLProcessLock checkRemoteRunning:@"MainApp"])
+    {
+        DDLogInfo(@"*-* main app already running, ignoring push");
+        self.contentHandler(self.bestAttemptContent);
+        return;
+    }
     
     NSString* idval = [[NSUUID UUID] UUIDString];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];

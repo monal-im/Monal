@@ -10,7 +10,6 @@
 
 #import "CallViewController.h"
 
-#import "MLLogFormatter.h"
 #import "MLNotificationManager.h"
 #import "DataLayer.h"
 #import "MLPush.h"
@@ -163,7 +162,7 @@ static void logException(NSException* exception)
     completionHandler(UNNotificationPresentationOptionNone);
 }
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+- (BOOL)application:(UIApplication*) application willFinishLaunchingWithOptions:(NSDictionary*) launchOptions
 {
     MLLogFormatter* formatter = [[MLLogFormatter alloc] init];
     [[DDOSLogger sharedInstance] setLogFormatter:formatter];
@@ -189,6 +188,9 @@ static void logException(NSException* exception)
 
     //log unhandled exceptions
     NSSetUncaughtExceptionHandler(&logException);
+    
+    //init process lock
+    self.processLock = [[MLProcessLock alloc] initWithProcessName:@"MainApp"];
     
     //migrate defaults db to shared app group
     if(![DEFAULTS_DB boolForKey:@"DefaulsMigratedToAppGroup"])
@@ -219,6 +221,16 @@ static void logException(NSException* exception)
         DDLogInfo(@"Migration complete and written to disk");
     }
     
+    //only proceed with launching if the NotificationServiceExtension is not running
+    if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
+    {
+        DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
+        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
+    }
+}
+
+- (BOOL)application:(UIApplication*) application didFinishLaunchingWithOptions:(NSDictionary*) launchOptions
+{
     [UNUserNotificationCenter currentNotificationCenter].delegate=self;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
     
@@ -278,7 +290,7 @@ static void logException(NSException* exception)
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
     DDLogInfo(@"App started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
     
-    // should any accounts connect?
+    //should any accounts connect?
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     
     return YES;

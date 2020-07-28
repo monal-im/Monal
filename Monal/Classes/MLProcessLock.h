@@ -6,11 +6,14 @@
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 
-#ifndef MLProcessLock_h
-#define MLProcessLock_h
+NS_ASSUME_NONNULL_BEGIN
 
 @interface MLProcessLock : NSObject
 
++(BOOL) checkRemoteRunning:(NSString*) processName;
++(BOOL) waitForRemoteTermination:(NSString*) processName;
+-(id) initWithProcessName:(NSString*) processName;
+
 @end
 
-#endif /* MLProcessLock_h */
+NS_ASSUME_NONNULL_END

@@ -1,7 +1,7 @@
 PODS:
-  - CocoaLumberjack (3.6.0):
-    - CocoaLumberjack/Core (= 3.6.0)
-  - CocoaLumberjack/Core (3.6.0)
+  - CocoaLumberjack (3.6.1):
+    - CocoaLumberjack/Core (= 3.6.1)
+  - CocoaLumberjack/Core (3.6.1)
   - DACircularProgress (2.3.1)
   - DZNEmptyDataSet (1.8.1)
   - EAIntroView (2.12.0):
@@ -11,7 +11,7 @@ PODS:
     - DACircularProgress
     - pop
     - SDWebImage
-  - MarqueeLabel (4.0.0)
+  - MarqueeLabel (4.0.2)
   - MBProgressHUD (1.2.0)
   - NotificationBannerSwift (3.0.2):
     - MarqueeLabel (~> 4.0.0)
@@ -45,7 +45,7 @@ DEPENDENCIES:
   - TPCircularBuffer
 
 SPEC REPOS:
-  https://github.com/CocoaPods/Specs.git:
+  trunk:
     - CocoaLumberjack
     - DACircularProgress
     - DZNEmptyDataSet
@@ -53,26 +53,25 @@ SPEC REPOS:
     - EARestrictedScrollView
     - IDMPhotoBrowser
     - MarqueeLabel
+    - MBProgressHUD
     - NotificationBannerSwift
+    - OpenSSL-Universal
     - pop
     - SAMKeychain
+    - SDWebImage
     - SignalProtocolC
     - SignalProtocolObjC
     - SnapKit
     - TPCircularBuffer
-  trunk:
-    - MBProgressHUD
-    - OpenSSL-Universal
-    - SDWebImage
 
 SPEC CHECKSUMS:
-  CocoaLumberjack: 78b0c238666f4f58db069738ec176f4519557516
+  CocoaLumberjack: b17ae15142558d08bbacf69775fa10c4abbebcc9
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   EAIntroView: 249559079ddfdbe80e5bcb755c04c3b964b2ac27
   EARestrictedScrollView: b0c2a3f92fb2610bb44d71c5e4893777c89e45ef
   IDMPhotoBrowser: 4bb459b1faffc228e92bccdf7c54ad6d6b7e8c37
-  MarqueeLabel: b55b26e690b6ad41faedd95cbf5eae6f1d1735b4
+  MarqueeLabel: f762aa681ae201f66c1d511858b171f75d83013a
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   NotificationBannerSwift: 713e20f21b6105f4a36a00e5d9fa414a930d3d8e
   OpenSSL-Universal: ff34003318d5e1163e9529b08470708e389ffcdd
@@ -84,6 +83,6 @@ SPEC CHECKSUMS:
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 
-PODFILE CHECKSUM: 6993c7de7500e5b269b4fcbaf1dd97eff6f2c25b
+PODFILE CHECKSUM: 63f9f583350b3991927d12f028134026f1730ee2
 
-COCOAPODS: 1.8.4
+COCOAPODS: 1.9.3

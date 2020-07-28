@@ -114,9 +114,7 @@
         self.directTLS=NO;
         self.selfSignedSSL=NO;
     }
-    
-    self.sectionArray = @[@"Account", @"Advanced Settings",@""];
-    
+    self.sectionArray = @[@"Account", @"Advanced Settings", @""];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -370,7 +368,7 @@
                 thecell.textInputField.tag = 3;
                 thecell.textInputField.text = self.server;
                 thecell.textInputField.placeholder = NSLocalizedString(@"Hardcoded Hostname", @"");
-                thecell.accessoryType=UITableViewCellAccessoryDetailButton;
+                thecell.accessoryType = UITableViewCellAccessoryDetailButton;
                 break;
             }
             case 1:  {
@@ -428,12 +426,12 @@
             }
         }
     }
-    else if (indexPath.section==2)
+    else if (indexPath.section == 2)
     {
         switch (indexPath.row) {
             case 0:
             {
-                if(self.editMode==true)
+                if(self.editMode == true)
                 {
 
                     MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
@@ -496,13 +494,15 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    // account
     if(section == 0){
         return 3;
     }
+    // Advanced settings
     else if(section == 1) {
-        return 9;
+        return 8;
     }
-    else  if(section == 2 &&  self.editMode == false)
+    else if(section == 2 &&  self.editMode == false)
     {
         return 0;
     }
@@ -521,13 +521,13 @@
     {
         switch (newIndexPath.row)
         {
-            case 5:
+            case 4:
                 [self performSegueWithIdentifier:@"showMAMPref" sender:self];
                 break;
-            case 6:
+            case 5:
                 [self performSegueWithIdentifier:@"showKeyTrust" sender:self];
                 break;
-            case 7:
+            case 6:
                 [self performSegueWithIdentifier:@"showPassChange" sender:self];
                 break;
         }

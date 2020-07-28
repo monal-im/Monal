@@ -427,11 +427,11 @@
 }
 
 -(void) updateBackground {
-    BOOL backgrounds = [DEFAULTS_DB boolForKey:@"ChatBackgrounds"];
+    BOOL backgrounds = [[HelperTools defaultsDB] boolForKey:@"ChatBackgrounds"];
     
     if(backgrounds){
         self.backgroundImage.hidden=NO;
-        NSString *imageName= [DEFAULTS_DB objectForKey:@"BackgroundImage"];
+        NSString *imageName= [[HelperTools defaultsDB] objectForKey:@"BackgroundImage"];
         if(imageName)
         {
             if([imageName isEqualToString:@"CUSTOM"])
@@ -1494,7 +1494,7 @@
             NSString* longitude = [messageText substringWithRange:longitudeRange];
 
             // Display inline map
-            if([DEFAULTS_DB boolForKey: @"ShowGeoLocation"]) {
+            if([[HelperTools defaultsDB] boolForKey: @"ShowGeoLocation"]) {
                 MLChatMapsCell* mapsCell;
                 if([from isEqualToString:self.contact.contactJid]) {
                     mapsCell = (MLChatMapsCell *) [tableView dequeueReusableCellWithIdentifier:@"mapsInCell"];

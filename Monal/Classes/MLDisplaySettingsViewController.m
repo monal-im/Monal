@@ -6,6 +6,7 @@
 //
 //
 
+#import "HelperTools.h"
 #import "MLDisplaySettingsViewController.h"
 #import "MLConstants.h"
 #import "DataLayer.h"
@@ -50,10 +51,10 @@
 -(void) viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
-    [DEFAULTS_DB synchronize];
+    [[HelperTools defaultsDB] synchronize];
     
     //update logs if needed
-   if(! [DEFAULTS_DB boolForKey:@"Logging"])
+   if(! [[HelperTools defaultsDB] boolForKey:@"Logging"])
    {
        [[DataLayer sharedInstance] messageHistoryCleanAll];
    }

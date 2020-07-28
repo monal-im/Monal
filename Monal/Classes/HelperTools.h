@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface HelperTools : NSObject
 
++(NSUserDefaults*) defaultsDB;
 +(DDFileLogger*) configureLogging;
 +(BOOL) isAppExtension;
 +(NSString*) generateStringOfFeatureSet:(NSSet*) features;

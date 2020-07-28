@@ -21,7 +21,6 @@ static const DDLogLevel ddLogLevel = DDLogLevelInfo;
 
 //configure app group constants
 #define kAppGroup @"group.monal"
-#define DEFAULTS_DB [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"]
 
 
 // some typedefs used throughout the project

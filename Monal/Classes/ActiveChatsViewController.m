@@ -222,12 +222,12 @@
         [self refreshDisplay];
     }
   
-    if(![DEFAULTS_DB boolForKey:@"HasSeenIntro"]) {
+    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenIntro"]) {
         [self performSegueWithIdentifier:@"showIntro" sender:self];
     }
     else  {
         //for 3->4 release remove later
-        if(![DEFAULTS_DB boolForKey:@"HasSeeniOS13Message"]) {
+        if(![[HelperTools defaultsDB] boolForKey:@"HasSeeniOS13Message"]) {
             
             UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Notification Changes",@ "") message:[NSString stringWithFormat:NSLocalizedString(@"Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old expereince back.",@ "")] preferredStyle:UIAlertControllerStyleAlert];
             UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Got it!",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
@@ -237,7 +237,7 @@
             
             [messageAlert addAction:acceptAction];
             [self.tabBarController presentViewController:messageAlert animated:YES completion:nil];
-            [DEFAULTS_DB setBool:YES forKey:@"HasSeeniOS13Message"];
+            [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeeniOS13Message"];
         }
     }
     
@@ -262,7 +262,7 @@
         welcome.completion = ^(){
             if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
             {
-                if(![DEFAULTS_DB boolForKey:@"HasSeenLogin"]) {
+                if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"]) {
                     [self performSegueWithIdentifier:@"showLogin" sender:self];
                 }
             }

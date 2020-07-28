@@ -85,7 +85,7 @@ static void logException(NSException* exception)
     self.bestAttemptContent.badge = @1;
     
     //just "ignore" this push if we have not migrated our defaults db already (this needs a normal app start to happen)
-    if(![DEFAULTS_DB boolForKey:@"DefaulsMigratedToAppGroup"])
+    if(![[HelperTools defaultsDB] boolForKey:@"DefaulsMigratedToAppGroup"])
     {
         DDLogInfo(@"defaults not migrated to app group, ignoring push");
         self.contentHandler(self.bestAttemptContent);

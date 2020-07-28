@@ -13,6 +13,16 @@
 @implementation HelperTools
 
 
++(NSUserDefaults*) defaultsDB
+{
+    static NSUserDefaults* db;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        db = [[NSUserDefaults alloc] initWithSuiteName:kAppGroup];
+    });
+    return db;
+}
+
 +(DDFileLogger*) configureLogging
 {
     MLLogFormatter* formatter = [[MLLogFormatter alloc] init];

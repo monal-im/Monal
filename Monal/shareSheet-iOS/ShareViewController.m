@@ -54,8 +54,8 @@ static void logException(NSException* exception)
 - (void)presentationAnimationDidFinish {
     DDLogInfo(@"Monal ShareViewController presentationAnimationDidFinish");
     
-    self.accounts = [DEFAULTS_DB objectForKey:@"accounts"];
-    NSData* recipientsData = [DEFAULTS_DB objectForKey:@"recipients"];
+    self.accounts = [[HelperTools defaultsDB] objectForKey:@"accounts"];
+    NSData* recipientsData = [[HelperTools defaultsDB] objectForKey:@"recipients"];
     
     NSError* error;
     NSSet* objClasses = [NSSet setWithArray:@[[NSMutableArray class], [NSMutableDictionary class]]];
@@ -64,8 +64,8 @@ static void logException(NSException* exception)
         DDLogError(@"Monal ShareViewController: %@", error);
     }
 
-    self.recipient = [DEFAULTS_DB objectForKey:@"lastRecipient"];
-    self.account = [DEFAULTS_DB objectForKey:@"lastAccount"];
+    self.recipient = [[HelperTools defaultsDB] objectForKey:@"lastRecipient"];
+    self.account = [[HelperTools defaultsDB] objectForKey:@"lastAccount"];
     [self reloadConfigurationItems];
 }
 
@@ -91,17 +91,17 @@ static void logException(NSException* exception)
                [payload setObject:self.account forKey:@"account"];
                [payload setObject:self.recipient forKey:@"recipient"];
                
-               NSMutableArray *outbox=[[DEFAULTS_DB objectForKey:@"outbox"] mutableCopy];
+               NSMutableArray *outbox=[[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
                if(!outbox) outbox =[[NSMutableArray alloc] init];
                
                [outbox addObject:payload];
-               [DEFAULTS_DB setObject:outbox forKey:@"outbox"];
+               [[HelperTools defaultsDB] setObject:outbox forKey:@"outbox"];
                
                // Save last used account / recipient
-               [DEFAULTS_DB setObject:self.account forKey:@"lastAccount"];
-               [DEFAULTS_DB setObject:self.recipient forKey:@"lastRecipient"];
+               [[HelperTools defaultsDB] setObject:self.account forKey:@"lastAccount"];
+               [[HelperTools defaultsDB] setObject:self.recipient forKey:@"lastRecipient"];
                
-               [DEFAULTS_DB synchronize];
+               [[HelperTools defaultsDB] synchronize];
            }];
        }
     }

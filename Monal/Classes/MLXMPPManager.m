@@ -51,58 +51,58 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) defaultSettings
 {
-    BOOL setDefaults = [DEFAULTS_DB boolForKey:@"SetDefaults"];
+    BOOL setDefaults = [[HelperTools defaultsDB] boolForKey:@"SetDefaults"];
     if(!setDefaults)
     {
-        // [DEFAULTS_DB setObject:@"" forKey:@"StatusMessage"];   // we dont want anything set
-        [DEFAULTS_DB setBool:NO forKey:@"Away"];
-        [DEFAULTS_DB setBool:YES forKey:@"MusicStatus"];
-        [DEFAULTS_DB setBool:YES forKey:@"Sound"];
-        [DEFAULTS_DB setBool:YES forKey:@"MessagePreview"];
-        [DEFAULTS_DB setBool:YES forKey:@"Logging"];
+        // [[HelperTools defaultsDB] setObject:@"" forKey:@"StatusMessage"];   // we dont want anything set
+        [[HelperTools defaultsDB] setBool:NO forKey:@"Away"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"MusicStatus"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"Sound"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"MessagePreview"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"Logging"];
 
-        [DEFAULTS_DB setBool:YES forKey:@"OfflineContact"];
-        [DEFAULTS_DB setBool:NO forKey:@"SortContacts"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"OfflineContact"];
+        [[HelperTools defaultsDB] setBool:NO forKey:@"SortContacts"];
 
-        [DEFAULTS_DB setBool:YES forKey:@"SetDefaults"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"SetDefaults"];
 
-        [DEFAULTS_DB setBool:YES forKey:@"ShowImages"];
-        [DEFAULTS_DB setBool:YES forKey:@"ShowGeoLocation"];
-        [DEFAULTS_DB setBool:YES forKey:@"ChatBackgrounds"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"ShowImages"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"ShowGeoLocation"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"ChatBackgrounds"];
 
-        [DEFAULTS_DB synchronize];
+        [[HelperTools defaultsDB] synchronize];
     }
 
     // on upgrade this one needs to be set to yes. Can be removed later.
-    NSNumber *imagesTest= [DEFAULTS_DB objectForKey:@"ShowImages"];
+    NSNumber *imagesTest= [[HelperTools defaultsDB] objectForKey:@"ShowImages"];
 
     if(imagesTest==nil)
     {
-          [DEFAULTS_DB setBool:YES  forKey:@"ShowImages"];
-          [DEFAULTS_DB synchronize];
+          [[HelperTools defaultsDB] setBool:YES  forKey:@"ShowImages"];
+          [[HelperTools defaultsDB] synchronize];
     }
 
     // upgrade
-    NSNumber *background = [DEFAULTS_DB objectForKey:@"ChatBackgrounds"];
+    NSNumber *background = [[HelperTools defaultsDB] objectForKey:@"ChatBackgrounds"];
     if(background==nil)
     {
-        [DEFAULTS_DB setBool:YES  forKey:@"ChatBackgrounds"];
-        [DEFAULTS_DB synchronize];
+        [[HelperTools defaultsDB] setBool:YES  forKey:@"ChatBackgrounds"];
+        [[HelperTools defaultsDB] synchronize];
     }
 
-    NSNumber *sounds = [DEFAULTS_DB objectForKey:@"AlertSoundFile"];
+    NSNumber *sounds = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
     if(sounds==nil)
     {
-        [DEFAULTS_DB setObject:@"alert2" forKey:@"AlertSoundFile"];
-        [DEFAULTS_DB synchronize];
+        [[HelperTools defaultsDB] setObject:@"alert2" forKey:@"AlertSoundFile"];
+        [[HelperTools defaultsDB] synchronize];
     }
 
     // upgrade ShowGeoLocation
-    NSNumber* mapLocationTest = [DEFAULTS_DB objectForKey:@"ShowGeoLocation"];
+    NSNumber* mapLocationTest = [[HelperTools defaultsDB] objectForKey:@"ShowGeoLocation"];
     if(mapLocationTest==nil)
     {
-        [DEFAULTS_DB setBool:YES forKey:@"ShowGeoLocation"];
-        [DEFAULTS_DB synchronize];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"ShowGeoLocation"];
+        [[HelperTools defaultsDB] synchronize];
     }
 }
 
@@ -985,15 +985,15 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 -(void) setPushNode:(NSString *)node andSecret:(NSString *)secret
 {
     self.pushNode=node;
-    [DEFAULTS_DB setObject:self.pushNode forKey:@"pushNode"];
+    [[HelperTools defaultsDB] setObject:self.pushNode forKey:@"pushNode"];
     
     if(secret)
     {
         self.pushSecret=secret;
-        [DEFAULTS_DB setObject:self.pushSecret forKey:@"pushSecret"];
+        [[HelperTools defaultsDB] setObject:self.pushSecret forKey:@"pushSecret"];
     }
     else    //use saved one (push server not reachable via http(s)) --> the old secret might still be valid
-        self.pushSecret=[DEFAULTS_DB objectForKey:@"pushSecret"];
+        self.pushSecret=[[HelperTools defaultsDB] objectForKey:@"pushSecret"];
 
     for(xmpp* xmppAccount in _connectedXMPP)
     {
@@ -1013,8 +1013,8 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 }
 
 - (void) sendOutboxForAccount:(NSString *) account{
-    NSMutableArray* outbox = [[DEFAULTS_DB objectForKey:@"outbox"] mutableCopy];
-    NSMutableArray* outboxClean = [[DEFAULTS_DB objectForKey:@"outbox"] mutableCopy];
+    NSMutableArray* outbox = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
+    NSMutableArray* outboxClean = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
 
     for (NSDictionary* row in outbox)
     {
@@ -1036,7 +1036,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                         }];
                     }
                     [outboxClean removeObject:row];
-                    [DEFAULTS_DB setObject:outboxClean forKey:@"outbox"];
+                    [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
                 }
             }];
         }

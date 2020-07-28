@@ -6,6 +6,7 @@
 //
 //
 
+#import "HelperTools.h"
 #import "MLNotificationManager.h"
 #import "MLImageManager.h"
 #import "MLMessage.h"
@@ -92,9 +93,9 @@
         content.threadIdentifier = [self identifierWithNotification:notification];
         content.categoryIdentifier = @"Reply";
         
-        if([DEFAULTS_DB boolForKey:@"Sound"])
+        if([[HelperTools defaultsDB] boolForKey:@"Sound"])
         {
-            NSString* filename = [DEFAULTS_DB objectForKey:@"AlertSoundFile"];
+            NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
             if(filename)
                 content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif",filename]];
             else

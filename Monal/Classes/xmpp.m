@@ -194,8 +194,8 @@ NSString *const kXMPPPresence = @"presence";
     }
     _lastInteractionDate=[NSDate date];     //better default than 1970
 
-    self.statusMessage=[DEFAULTS_DB stringForKey:@"StatusMessage"];
-    self.awayState=[DEFAULTS_DB boolForKey:@"Away"];
+    self.statusMessage=[[HelperTools defaultsDB] stringForKey:@"StatusMessage"];
+    self.awayState=[[HelperTools defaultsDB] boolForKey:@"Away"];
 }
 
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSString*) accountNo

@@ -148,7 +148,7 @@
 -(IBAction) useWithoutAccount:(id)sender
 {
     [self dismissViewControllerAnimated:YES completion:nil];
-    [DEFAULTS_DB setBool:YES forKey:@"HasSeenLogin"];
+    [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
 }
 
 -(IBAction) tapAction:(id)sender

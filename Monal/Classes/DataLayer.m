@@ -2392,7 +2392,7 @@ NSString *const kCount = @"count";
         [self executeNonQuery:@"create table buddylistOnline (buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null,buddy_name varchar(50), group_name varchar(100));" andArguments:nil];
         [self executeNonQuery:@"update dbversion set dbversion='1.07';" andArguments:nil];
 
-        [DEFAULTS_DB setBool:YES forKey:@"IdleAlert"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"IdleAlert"];
 
         DDLogVerbose(@"Upgrade to 1.07 success");
     }
@@ -2418,7 +2418,7 @@ NSString *const kCount = @"count";
 
         [self executeNonQuery:@"update dbversion set dbversion='1.071';" andArguments:nil];
 
-        [DEFAULTS_DB setBool:YES forKey:@"IdleAlert"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"IdleAlert"];
 
         DDLogVerbose(@"Upgrade to 1.071 success");
     }
@@ -2438,9 +2438,9 @@ NSString *const kCount = @"count";
         DDLogVerbose(@"Database version <1.073 detected. Performing upgrade on passwords. ");
 
         //set defaults on upgrade
-        [DEFAULTS_DB setBool:YES forKey:@"OfflineContact"];
-        [DEFAULTS_DB setBool:YES forKey:@"MessagePreview"];
-        [DEFAULTS_DB setBool:YES forKey:@"Logging"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"OfflineContact"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"MessagePreview"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"Logging"];
 
         [self executeNonQuery:@"update dbversion set dbversion='1.073';" andArguments:nil];
         DDLogVerbose(@"Upgrade to 1.073 success");
@@ -2984,7 +2984,7 @@ NSString *const kCount = @"count";
            messageType=kMessageTypeUrl;
     }
 
-    if ([DEFAULTS_DB boolForKey: @"ShowImages"] &&
+    if ([[HelperTools defaultsDB] boolForKey: @"ShowImages"] &&
         ([messageString hasPrefix:@"HTTPS://"] || [messageString hasPrefix:@"https://"] || [messageString hasPrefix:@"aesgcm://"])) {
             NSString *cleaned = [messageString stringByReplacingOccurrencesOfString:@"aesgcm://" withString:@"https://"];
             NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:cleaned]];

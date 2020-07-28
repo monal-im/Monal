@@ -6,6 +6,7 @@
 //  Copyright © 2018 Monal.im. All rights reserved.
 //
 
+#import "HelperTools.h"
 #import "MLWelcomeViewController.h"
 #import <EAIntroView/EAIntroView.h>
 #import "UIColor+Theme.h"
@@ -105,7 +106,7 @@
 - (void)introDidFinish:(EAIntroView *)introView wasSkipped:(BOOL)wasSkipped {
    
     [self dismissViewControllerAnimated:YES completion:self.completion];
-    [DEFAULTS_DB setObject:@YES forKey:@"HasSeenIntro"];
+    [[HelperTools defaultsDB] setObject:@YES forKey:@"HasSeenIntro"];
 }
 
 

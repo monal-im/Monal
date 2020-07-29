@@ -102,10 +102,7 @@ static void logException(NSException* exception)
         }
         if(copy)
             [self addBadgeTo:copy withCompletion:^{
-                //use this to make sure that the async removePendingNotificationRequestsWithIdentifiers: call succeeded before contentHandler is called
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    self.contentHandler(copy);
-                });
+                [self callContentHandler:copy];
             }];
         else
         {
@@ -120,10 +117,7 @@ static void logException(NSException* exception)
                 }
                 if(copy)
                     [self addBadgeTo:copy withCompletion:^{
-                        //use this to make sure that the async removeDeliveredNotificationsWithIdentifiers: call succeeded before contentHandler is called
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                            self.contentHandler(copy);
-                        });
+                        [self callContentHandler:copy];
                     }];
                 else
                 {
@@ -135,14 +129,23 @@ static void logException(NSException* exception)
     }];
 }
 
+-(void) callContentHandler:(UNMutableNotificationContent*) content
+{
+    //use this to make sure that the async removeDeliveredNotificationsWithIdentifiers: call succeeded before contentHandler is called
+    dispatch_async(dispatch_get_main_queue(), ^{
+        usleep(500000);
+        self.contentHandler(content);
+    });
+}
+
 -(void) addBadgeTo:(UNMutableNotificationContent*) content withCompletion:(monal_void_block_t) completion
 {
     [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber *result) {
         NSInteger unread = 0;
         if(result)
             unread = [result integerValue];
-        content.badge = [NSNumber numberWithInteger:unread];
         DDLogVerbose(@"Adding badge value: %lu", (long)unread);
+        content.badge = [NSNumber numberWithInteger:unread];
         completion();
     }];
 }

@@ -11,7 +11,7 @@ git fetch upstream >/dev/null
 date
 git branch tmpcopy
 git log develop..upstream/develop > ../changes.txt
-first="$(git log --grep='Create LICENSE' --since='Mon Jun 8 16:33:25 2020 +0200' --author='tmolitor-stud-tu' --oneline --no-abbrev-commit tmpcopy | awk '{print $1}')"
+first="$(git log --grep='\*\*\* INITIAL ALPHA COMMIT \*\*\*' --since='Mon Jun 8 16:33:25 2020 +0200' --author='tmolitor-stud-tu' --oneline --no-abbrev-commit tmpcopy | awk '{print $1}')"
 git reset --hard upstream/develop
 ls -l ../changes.txt
 mv ../changes.txt changes.txt

@@ -230,6 +230,7 @@ static void logException(NSException* exception)
         return;
     }
     
+    /*
     NSString* idval = [NSString stringWithFormat:@"%@_%@", @"thirty_seconds_notification", [[NSUUID UUID] UUIDString]];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     content.title = @"Notification incoming";
@@ -240,6 +241,7 @@ static void logException(NSException* exception)
     [center addNotificationRequest:new_request withCompletionHandler:^(NSError * _Nullable error) {
         DDLogInfo(@"second notification request completed: %@", error);
     }];
+    */
     
     if(![[MLXMPPManager sharedInstance] hasConnectivity])
     {

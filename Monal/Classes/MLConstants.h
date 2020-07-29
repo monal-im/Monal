@@ -10,11 +10,7 @@
 #import "MLContact.h"
 
 @import CocoaLumberjack;
-#ifdef  DEBUG
 static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
-#else
-static const DDLogLevel ddLogLevel = DDLogLevelInfo;
-#endif
 #import "MLLogFileManager.h"
 #import "MLLogFormatter.h"
 

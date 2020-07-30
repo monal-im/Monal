@@ -76,7 +76,19 @@
 -(void) showModernNotificaion:(NSNotification*) notification
 {
     MLMessage *message = [notification.userInfo objectForKey:@"message"];
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    if([HelperTools isAppExtension])
+    {
+        //publish last notification, we've got a newer one
+        if(self.lastNotification)
+        {
+            UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:self.lastNotification trigger:nil];
+            [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) { }];
+            self.lastNotification = nil;
+        }
+        self.lastNotification = content;
+    }
     
     [[DataLayer sharedInstance] fullNameForContact:message.from inAccount:message.accountId withCompeltion:^(NSString *displayName) {
         
@@ -87,7 +99,7 @@
             content.subtitle = [NSString stringWithFormat:@"%@ says:", message.actualFrom];
         }
         
-        NSString* idval = [NSString stringWithFormat:@"%@_%@", [self identifierWithNotification:notification], message.messageId];
+        //NSString* idval = [NSString stringWithFormat:@"%@_%@", [self identifierWithNotification:notification], message.messageId];
         
         content.body = message.messageText;
         content.threadIdentifier = [self identifierWithNotification:notification];
@@ -102,14 +114,13 @@
                 content.sound = [UNNotificationSound defaultSound];
         }
         
-        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
         if([message.messageType isEqualToString:kMessageTypeImage])
         {
             [[MLImageManager sharedInstance] imageURLForAttachmentLink:message.messageText withCompletion:^(NSURL * _Nullable url) {
                 if(url)
                 {
                     NSError *error;
-                    UNNotificationAttachment* attachment = [UNNotificationAttachment attachmentWithIdentifier:idval URL:url options:@{UNNotificationAttachmentOptionsTypeHintKey:(NSString*) kUTTypePNG} error:&error];
+                    UNNotificationAttachment* attachment = [UNNotificationAttachment attachmentWithIdentifier:[[NSUUID UUID] UUIDString] URL:url options:@{UNNotificationAttachmentOptionsTypeHintKey:(NSString*) kUTTypePNG} error:&error];
                     if(attachment)
                         content.attachments = @[attachment];
                     if(error)
@@ -120,25 +131,25 @@
                     content.body = NSLocalizedString(@"Sent an Image 📷",@ "");
                 else
                     content.body = @"";
-                UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval
-                                                                                      content:content trigger:nil];
-                [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-                    
-                }];
+                
+                if(![HelperTools isAppExtension])
+                {
+                    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:content trigger:nil];
+                    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) { }];
+                }
             }];
             return;
         }
-        else if([message.messageType isEqualToString:kMessageTypeUrl]) {
-            content.body =NSLocalizedString(@"Sent a Link 🔗",@ "");
-        } else if([message.messageType isEqualToString:kMessageTypeGeo]) {
-            content.body =NSLocalizedString(@"Sent a location 📍",@ "");
-        }
+        else if([message.messageType isEqualToString:kMessageTypeUrl])
+            content.body = NSLocalizedString(@"Sent a Link 🔗",@ "");
+        else if([message.messageType isEqualToString:kMessageTypeGeo])
+            content.body = NSLocalizedString(@"Sent a location 📍",@ "");
         
-        UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval
-                                                                              content:content trigger:nil];
-        [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-            
-        }];
+        if([HelperTools isAppExtension])
+        {
+            UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:content trigger:nil];
+            [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) { }];
+        }
     }];
 }
 

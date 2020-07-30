@@ -55,19 +55,24 @@ static void logException(NSException* exception)
     //handle message notifications by initializing the MLNotificationManager
     [MLNotificationManager sharedInstance];
     
+    //initialize the xmppmanager (used later for connectivity checks etc.)
+    //we initialize it here to make sure the connectivity check is complete when using it later
+    [MLXMPPManager sharedInstance];
+    
     //log startup
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
     DDLogInfo(@"Notification Service Extension started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
+    usleep(100000);     //wait for connectivity check
 }
 
 -(void) dealloc
 {
     DDLogInfo(@"Deallocating notification service extension");
     [DDLog flushLog];
-    [self listNotifications];
+    [self listNotifications];       //for debugging
     DDLogInfo(@"Now leaving dealloc");
     [DDLog flushLog];
 }
@@ -90,7 +95,38 @@ static void logException(NSException* exception)
 
 -(void) postNotification
 {
+    //for debugging
+    [self listNotifications];
+    
+    //Use the last notification created by MLNotificationManager (the last one is unpublished) and publish it using our contentHandler()
+    UNMutableNotificationContent* lastNotification = [MLNotificationManager sharedInstance].lastNotification;
+    if(lastNotification)
+    {
+        [MLNotificationManager sharedInstance].lastNotification = nil;      //just to make sure
+        [self addBadgeTo:lastNotification withCompletion:^{
+            [self callContentHandler:lastNotification];
+        }];
+        return;
+    }
+    
+    //If this Notification Service Extension run did not yield new notifications, we have to go another route to be user friendly because
+    //of the following quirk in apple's implementation of the extension:
+    //If multiple push notifications are queued this extension's didReceiveNotificationRequest:withContentHandler: is only called for the
+    //next push, if the previous one got delivered (by calling contentHandler()).
+    //This makes it impossible for those following pushes (e.g. pushes that have been queued already because they got received by the device
+    //with only a few seconds between them [and before this extension had a chance to connect to the xmpp server to receive the actual content])
+    //to use the actual content when calling the contentHandler(), because those content was already fetched and displayed by the previous push.
+    //We thus implement another approach: use the last displayed notification, delete it and replace it by calling contentHandler() with the original
+    //content of the notification (cloned by [request.content mutableCopy] or [notification.request.content mutableCopy]).
+    //As Last resort (if no notifications are already displayed and this push didn't receive any content from the server, too, we just display
+    //a dummy notification to make the user open the app to retrieve the actual message.
+    //Important:
+    //In the "bad network connectivity" case or the "xmpp account has error" case an error notification will be displayed to the user
+    //to alert her that something is wrong and afterwards this method will be called (silencing the possibly waiting dummy notification).
+    //In the "no network connectivity case" a dummy notification will be displayed to alert the user that something is waiting for her
+    //and this method will *not* be called.
     UNMutableNotificationContent* __block copy;
+    
     //try to find an unpublished notification request we can replace
     [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
         for(UNNotificationRequest* request in requests)
@@ -133,7 +169,7 @@ static void logException(NSException* exception)
 {
     //use this to make sure that the async removeDeliveredNotificationsWithIdentifiers: call succeeded before contentHandler is called
     dispatch_async(dispatch_get_main_queue(), ^{
-        usleep(500000);
+        usleep(100000);
         self.contentHandler(content);
     });
 }
@@ -181,7 +217,7 @@ static void logException(NSException* exception)
     //just "ignore" this push if we have not migrated our defaults db already (this needs a normal app start to happen)
     if(![[HelperTools defaultsDB] boolForKey:@"DefaulsMigratedToAppGroup"])
     {
-        DDLogInfo(@"defaults not migrated to app group, ignoring push");
+        DDLogInfo(@"defaults not migrated to app group, ignoring push and posting dummy notification");
         [self postDummyNotification];
         return;
     }
@@ -189,8 +225,8 @@ static void logException(NSException* exception)
     //just "ignore" this push if the main app is already running
     if([MLProcessLock checkRemoteRunning:@"MainApp"])
     {
-        DDLogInfo(@"main app already running, ignoring push");
-        [self postNotification];
+        DDLogInfo(@"main app already running, ignoring push and posting dummy notification");
+        [self postDummyNotification];
         return;
     }
     
@@ -205,6 +241,12 @@ static void logException(NSException* exception)
         DDLogInfo(@"second notification request completed: %@", error);
     }];
     
+    if(![[MLXMPPManager sharedInstance] hasConnectivity])
+    {
+        DDLogInfo(@"no connectivity, just posting dummy notification.");
+        return;
+    }
+    
     DDLogInfo(@"calling MLXMPPManager");
     [DDLog flushLog];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
@@ -218,6 +260,7 @@ static void logException(NSException* exception)
 {
     DDLogInfo(@"notification handler expired");
     [DDLog flushLog];
+    //we did not receive *everything* --> display dummy notification to alert the user about this condition
     [self postDummyNotification];
 }
 
@@ -229,7 +272,6 @@ static void logException(NSException* exception)
         if([[MLXMPPManager sharedInstance] allAccountsIdle])
         {
             DDLogInfo(@"notification handler: all accounts idle --> publishing notification and stopping extension");
-            [self listNotifications];
             [self postNotification];
         }
     });
@@ -240,13 +282,26 @@ static void logException(NSException* exception)
     DDLogInfo(@"notification handler: got xmpp error");
     //dispatch in another thread to avoid blocking the thread posting this notification (most probably the receiveQueue)
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        if([[MLXMPPManager sharedInstance] allAccountsIdle])
-        {
-            DDLogInfo(@"notification handler: account error --> publishing DUMMY notification and stopping extension");
-            [self listNotifications];
-            [self postDummyNotification];
-            [DDLog flushLog];
-        }
+        //display an error notification and disconnect this account, leaving the extension running until all accounts are idle
+        //(disconnected accounts count as idle)
+        //if no account receives any messages, a dummy notification will be displayed, too.
+        DDLogInfo(@"notification handler: account error --> publishing this as error notifications and disconnecting this account");
+        
+        //extract error contents and disconnect the account
+        NSArray* payload = [notification.object copy];
+        NSString* message = payload[1];
+        xmpp* xmppAccount = payload.firstObject;
+        [xmppAccount disconnect];
+        
+        //display error notification
+        NSString* idval = xmppAccount.connectionProperties.identity.jid;        //use this to only show one error notification per account
+        UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+        content.title = xmppAccount.connectionProperties.identity.jid;
+        content.body = message;
+        content.sound = [UNNotificationSound defaultSound];
+        UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+        UNNotificationRequest* new_request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
+        [center addNotificationRequest:new_request withCompletionHandler:^(NSError * _Nullable error) { }];
     });
 }
 

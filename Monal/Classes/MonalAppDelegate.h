@@ -19,7 +19,6 @@
 
 @property (nonatomic, strong) UIWindow* window;
 @property (nonatomic, strong) DDFileLogger* fileLogger;
-@property (nonatomic, strong) MLProcessLock* processLock;
 
 -(void) updateUnread;
 -(void) handleURL:(NSURL *) url;

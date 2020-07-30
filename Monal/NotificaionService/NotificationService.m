@@ -26,7 +26,7 @@ static void logException(NSException* exception)
 
 @property (atomic, strong) void (^contentHandler)(UNNotificationContent* contentToDeliver);
 @property (atomic, strong) UNMutableNotificationContent* bestAttemptContent;
-@property (atomic, strong) UNNotificationRequest* notificationRequest;
+@property (atomic, strong) MLProcessLock* processLock;
 
 @end
 
@@ -40,9 +40,6 @@ static void logException(NSException* exception)
     NSSetUncaughtExceptionHandler(&logException);
     
     [HelperTools activityLog];
-    
-    //init process lock
-    [[MLProcessLock alloc] initWithProcessName:@"NotificationServiceExtension"];
     
     //disconnect all accounts immediately if main app gets started
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -68,6 +65,12 @@ static void logException(NSException* exception)
     usleep(100000);     //wait for connectivity check
 }
 
+-(id) init
+{
+    self = [super init];
+    self.processLock = [[MLProcessLock alloc] initWithProcessName:@"NotificationServiceExtension"];
+    return self;
+}
 -(void) dealloc
 {
     DDLogInfo(@"Deallocating notification service extension");
@@ -79,6 +82,7 @@ static void logException(NSException* exception)
 
 -(void) listNotifications
 {
+    DDLogInfo(@"listNotifications: starting");
     [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
         for(UNNotificationRequest* request in requests)
         {
@@ -91,6 +95,7 @@ static void logException(NSException* exception)
             DDLogInfo(@"listNotifications: delivered notification %@ --> %@: %@", notification.request.identifier, notification.request.content.title, notification.request.content.body);
         }
     }];
+    DDLogInfo(@"listNotifications: ending");
 }
 
 -(void) postNotification
@@ -102,6 +107,7 @@ static void logException(NSException* exception)
     UNMutableNotificationContent* lastNotification = [MLNotificationManager sharedInstance].lastNotification;
     if(lastNotification)
     {
+        DDLogVerbose(@"Using last notification from MLNotificationManager: %@", lastNotification.body);
         [MLNotificationManager sharedInstance].lastNotification = nil;      //just to make sure
         [self addBadgeTo:lastNotification withCompletion:^{
             [self callContentHandler:lastNotification];
@@ -128,11 +134,12 @@ static void logException(NSException* exception)
     UNMutableNotificationContent* __block copy;
     
     //try to find an unpublished notification request we can replace
+    DDLogVerbose(@"try to find an unpublished notification request we can replace");
     [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
         for(UNNotificationRequest* request in requests)
         {
             copy = [request.content mutableCopy];
-            DDLogInfo(@"postNotification: replacing pending notification %@ --> %@: %@", request.identifier, request.content.title, request.content.body);
+            DDLogVerbose(@"postNotification: replacing pending notification %@ --> %@: %@", request.identifier, request.content.title, request.content.body);
             [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers:@[request.identifier]];
             break;
         }
@@ -143,11 +150,12 @@ static void logException(NSException* exception)
         else
         {
             //we could not find such an unpublished notification request --> retry with already published ones
+            DDLogVerbose(@"we could not find such an unpublished notification request --> retry with already published ones");
             [[UNUserNotificationCenter currentNotificationCenter] getDeliveredNotificationsWithCompletionHandler:^(NSArray* notifications) {
                 for(UNNotification* notification in notifications)
                 {
                     copy = [notification.request.content mutableCopy];
-                    DDLogInfo(@"postNotification: replacing delivered notification %@ --> %@: %@", notification.request.identifier, notification.request.content.title, notification.request.content.body);
+                    DDLogVerbose(@"postNotification: replacing delivered notification %@ --> %@: %@", notification.request.identifier, notification.request.content.title, notification.request.content.body);
                     [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[notification.request.identifier]];
                     break;
                 }
@@ -197,7 +205,6 @@ static void logException(NSException* exception)
 - (void)didReceiveNotificationRequest:(UNNotificationRequest*) request withContentHandler:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
 {
     DDLogInfo(@"Notification handler called (request id: %@)", request.identifier);
-    self.notificationRequest = request;
     self.contentHandler = contentHandler;
     
     //create dummy notification used when no real message can be found
@@ -249,12 +256,12 @@ static void logException(NSException* exception)
         return;
     }
     
-    DDLogInfo(@"calling MLXMPPManager");
+    DDLogVerbose(@"calling MLXMPPManager");
     [DDLog flushLog];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(xmppError:) name:kXMPPError object:nil];
     [[MLXMPPManager sharedInstance] connectIfNecessary];
-    DDLogInfo(@"MLXMPPManager called");
+    DDLogVerbose(@"MLXMPPManager called");
     [DDLog flushLog];
 }
 
@@ -288,11 +295,11 @@ static void logException(NSException* exception)
         //(disconnected accounts count as idle)
         //if no account receives any messages, a dummy notification will be displayed, too.
         DDLogInfo(@"notification handler: account error --> publishing this as error notifications and disconnecting this account");
-        
         //extract error contents and disconnect the account
         NSArray* payload = [notification.object copy];
         NSString* message = payload[1];
         xmpp* xmppAccount = payload.firstObject;
+        DDLogVerbose(@"error(%@): %@", xmppAccount.connectionProperties.identity.jid, message);
         [xmppAccount disconnect];
         
         //display error notification

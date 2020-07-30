@@ -36,13 +36,14 @@ static CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, 
 
 +(BOOL) checkRemoteRunning:(NSString*) processName
 {
+    DDLogVerbose(@"checkRemoteRunning:%@ called", processName);
     NSString* portname = [NSString stringWithFormat:@"%@.%@", kAppGroup, processName];
     CFStringRef port_name = (__bridge CFStringRef)portname;
     CFMessagePortRef port = CFMessagePortCreateRemote(kCFAllocatorDefault, port_name);
     if(port == NULL)
     {
-        DDLogVerbose(@"Creating mach remote port failed");
-        DDLogInfo(@"MLProcessLock remote '%@' is NOT running", processName);
+        DDLogVerbose(@"checkRemoteRunning: Creating mach remote port failed");
+        DDLogInfo(@"checkRemoteRunning: MLProcessLock remote '%@' is NOT running", processName);
         return NO;
     }
     
@@ -53,18 +54,19 @@ static CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, 
     SInt32 status = CFMessagePortSendRequest(port, messageIdentifier, messageData, 2000, 2000, kCFRunLoopDefaultMode, &response);
     if(status != kCFMessagePortSuccess)
     {
-        DDLogVerbose(@"Sending mach message failed: %ul", (long)status);
-        DDLogInfo(@"MLProcessLock remote '%@' is NOT running", processName);
+        DDLogVerbose(@"checkRemoteRunning: Sending mach message failed: %ul", (long)status);
+        DDLogInfo(@"checkRemoteRunning: MLProcessLock remote '%@' is NOT running", processName);
         return NO;
     }
     
     NSString* incoming = [[NSString alloc] initWithData:(__bridge NSData*)response encoding:NSUTF8StringEncoding];
-    DDLogInfo(@"MLProcessLock remote '%@' IS running: %@", processName, incoming);
+    DDLogInfo(@"checkRemoteRunning: MLProcessLock remote '%@' IS running: %@", processName, incoming);
     return YES;
 }
 
 +(void) waitForRemoteStartup:(NSString*) processName
 {
+    DDLogVerbose(@"waitForRemoteStartup:%@ called", processName);
     NSString* portname = [NSString stringWithFormat:@"%@.%@", kAppGroup, processName];
     CFStringRef port_name = (__bridge CFStringRef)portname;
     while(YES)
@@ -72,7 +74,7 @@ static CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, 
         CFMessagePortRef port = CFMessagePortCreateRemote(kCFAllocatorDefault, port_name);
         if(port == NULL)
         {
-            DDLogVerbose(@"Creating mach remote port failed");
+            DDLogVerbose(@"waitForRemoteStartup: Creating mach remote port failed");
             usleep(250000);
             continue;
         }
@@ -82,18 +84,19 @@ static CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, 
         SInt32 status = CFMessagePortSendRequest(port, messageIdentifier, messageData, 500, 500, kCFRunLoopDefaultMode, &response);
         if(status != kCFMessagePortSuccess)
         {
-            DDLogVerbose(@"Sending mach message failed: %ul", (long)status);
+            DDLogVerbose(@"waitForRemoteStartup: Sending mach message failed: %ul", (long)status);
             usleep(250000);
             continue;
         }
         NSString* incoming = [[NSString alloc] initWithData:(__bridge NSData*)response encoding:NSUTF8StringEncoding];
-        DDLogInfo(@"MLProcessLock remote '%@' is now running: %@", processName, incoming);
+        DDLogInfo(@"waitForRemoteStartup: MLProcessLock remote '%@' is now running: %@", processName, incoming);
         break;
     }
 }
 
 +(void) waitForRemoteTermination:(NSString*) processName
 {
+    DDLogVerbose(@"waitForRemoteTermination:%@ called", processName);
     NSString* portname = [NSString stringWithFormat:@"%@.%@", kAppGroup, processName];
     CFStringRef port_name = (__bridge CFStringRef)portname;
     while(YES)
@@ -101,8 +104,8 @@ static CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, 
         CFMessagePortRef port = CFMessagePortCreateRemote(kCFAllocatorDefault, port_name);
         if(port == NULL)
         {
-            DDLogVerbose(@"Creating mach remote port failed");
-            DDLogInfo(@"MLProcessLock remote '%@' is now stopped", processName);
+            DDLogVerbose(@"waitForRemoteTermination: Creating mach remote port failed");
+            DDLogInfo(@"waitForRemoteTermination: MLProcessLock remote '%@' is now stopped", processName);
             break;
         }
         SInt32 messageIdentifier = 3;
@@ -111,8 +114,8 @@ static CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, 
         SInt32 status = CFMessagePortSendRequest(port, messageIdentifier, messageData, 2000, 2000, kCFRunLoopDefaultMode, &response);
         if(status != kCFMessagePortSuccess)
         {
-            DDLogVerbose(@"Sending mach message failed: %ul", (long)status);
-            DDLogInfo(@"MLProcessLock remote '%@' is now stopped", processName);
+            DDLogVerbose(@"waitForRemoteTermination: Sending mach message failed: %ul", (long)status);
+            DDLogInfo(@"waitForRemoteTermination: MLProcessLock remote '%@' is now stopped", processName);
             break;
         }
         usleep(250000);

@@ -23,6 +23,7 @@
 #import "UIColor+Theme.h"
 
 @interface MonalAppDelegate()
+@property (nonatomic, strong) MLProcessLock* processLock;
 @property (nonatomic, weak) ActiveChatsViewController* activeChats;
 @end
 

@@ -83,6 +83,7 @@
         //publish last notification, we've got a newer one
         if(self.lastNotification)
         {
+            DDLogVerbose(@"notification manager: publishing last notification: %@", self.lastNotification);
             UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:self.lastNotification trigger:nil];
             [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) { }];
             self.lastNotification = nil;
@@ -134,6 +135,7 @@
                 
                 if(![HelperTools isAppExtension])
                 {
+                    DDLogVerbose(@"notification manager: publishing notification directly: %@", self.lastNotification);
                     UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:content trigger:nil];
                     [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) { }];
                 }
@@ -145,8 +147,9 @@
         else if([message.messageType isEqualToString:kMessageTypeGeo])
             content.body = NSLocalizedString(@"Sent a location 📍",@ "");
         
-        if([HelperTools isAppExtension])
+        if(![HelperTools isAppExtension])
         {
+            DDLogVerbose(@"notification manager: publishing notification directly: %@", self.lastNotification);
             UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:content trigger:nil];
             [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) { }];
         }

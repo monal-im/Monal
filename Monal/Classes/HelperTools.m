@@ -25,9 +25,11 @@
 
 +(void) activityLog
 {
+    DDLogInfo(@"dispatching activity logger");
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        DDLogInfo(@"activity logger running");
         BOOL appex = [HelperTools isAppExtension];
-        unsigned int counter = 0;
+        unsigned long counter = 0;
         while(counter++)
         {
             DDLogInfo(@"activity(%@): %lu", appex ? @"APPEX" : @"MAINAPP", counter);

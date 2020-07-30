@@ -115,6 +115,9 @@ extern NSString* const kAccountHibernate;
 -(void) disconnect;
 -(void) disconnect:(BOOL) explicitLogout;
 
+-(void) suspend;
+-(void) resume;
+
 /**
  send a message to a contact with xmpp id
  */
@@ -157,18 +160,6 @@ extern NSString* const kAccountHibernate;
 -(void) approveToRoster:(NSString* _Nonnull) contact;
 
 -(void) rejectFromRoster:(NSString* _Nonnull) contact;
-
-/**
- sets up a background task to reconnect if needed. dEfault wait of 5s
- */
--(void) reconnect;
-
-/**
- reconnect called with a specified wait. if never logged in then wait is 0.
- */
--(void) reconnect:(NSInteger) scheduleWait;
-
-
 
 #pragma mark set connection attributes
 /**

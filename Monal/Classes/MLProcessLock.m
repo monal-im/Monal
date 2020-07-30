@@ -14,11 +14,13 @@
 #import <sys/un.h>
 #import "MLProcessLock.h"
 #import "MLConstants.h"
+#import "HelperTools.h"
 
 
 static CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, void *info)
 {
     NSString* incoming = [[NSString alloc] initWithData:(__bridge NSData*)data encoding:NSUTF8StringEncoding];
+    DDLogWarn(@"Got mach message: '%@'", incoming);
     if([@"ping" isEqualToString:incoming])
         return (__bridge CFDataRef)[@"pong" dataUsingEncoding:NSUTF8StringEncoding];
     DDLogWarn(@"Unknown mach message: '%@'", incoming);
@@ -51,7 +53,10 @@ static CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, 
     CFDataRef messageData = (__bridge CFDataRef)[@"ping" dataUsingEncoding:NSUTF8StringEncoding];
 
     CFDataRef response = NULL;
-    SInt32 status = CFMessagePortSendRequest(port, messageIdentifier, messageData, 2000, 2000, kCFRunLoopDefaultMode, &response);
+    SInt32 __block status;
+    [HelperTools dispatchSyncReentrant:^{
+        status = CFMessagePortSendRequest(port, messageIdentifier, messageData, 200, 200, kCFRunLoopDefaultMode, &response);
+    } onQueue:dispatch_get_main_queue()];
     if(status != kCFMessagePortSuccess)
     {
         DDLogVerbose(@"checkRemoteRunning: Sending mach message failed: %ul", (long)status);
@@ -75,17 +80,20 @@ static CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, 
         if(port == NULL)
         {
             DDLogVerbose(@"waitForRemoteStartup: Creating mach remote port failed");
-            usleep(250000);
+            usleep(500000);
             continue;
         }
         SInt32 messageIdentifier = 2;
         CFDataRef messageData = (__bridge CFDataRef)[@"ping" dataUsingEncoding:NSUTF8StringEncoding];
         CFDataRef response = NULL;
-        SInt32 status = CFMessagePortSendRequest(port, messageIdentifier, messageData, 500, 500, kCFRunLoopDefaultMode, &response);
+        SInt32 __block status;
+        [HelperTools dispatchSyncReentrant:^{
+            status = CFMessagePortSendRequest(port, messageIdentifier, messageData, 100, 100, kCFRunLoopDefaultMode, &response);
+        } onQueue:dispatch_get_main_queue()];
         if(status != kCFMessagePortSuccess)
         {
             DDLogVerbose(@"waitForRemoteStartup: Sending mach message failed: %ul", (long)status);
-            usleep(250000);
+            usleep(500000);
             continue;
         }
         NSString* incoming = [[NSString alloc] initWithData:(__bridge NSData*)response encoding:NSUTF8StringEncoding];
@@ -111,14 +119,17 @@ static CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, 
         SInt32 messageIdentifier = 3;
         CFDataRef messageData = (__bridge CFDataRef)[@"ping" dataUsingEncoding:NSUTF8StringEncoding];
         CFDataRef response = NULL;
-        SInt32 status = CFMessagePortSendRequest(port, messageIdentifier, messageData, 2000, 2000, kCFRunLoopDefaultMode, &response);
+        SInt32 __block status;
+        [HelperTools dispatchSyncReentrant:^{
+            status = CFMessagePortSendRequest(port, messageIdentifier, messageData, 100, 100, kCFRunLoopDefaultMode, &response);
+        } onQueue:dispatch_get_main_queue()];
         if(status != kCFMessagePortSuccess)
         {
             DDLogVerbose(@"waitForRemoteTermination: Sending mach message failed: %ul", (long)status);
             DDLogInfo(@"waitForRemoteTermination: MLProcessLock remote '%@' is now stopped", processName);
             break;
         }
-        usleep(250000);
+        usleep(500000);
     }
 }
 

@@ -45,7 +45,7 @@
     if([message.messageType isEqualToString:kMessageTypeStatus])
         return;
     
-    DDLogVerbose(@"notification manager got new message notice %@", notification.userInfo);
+    DDLogVerbose(@"notification manager got new message notice: %@", message.messageText);
     [[DataLayer sharedInstance] isMutedJid:message.actualFrom withCompletion:^(BOOL muted) {
         if(!muted && message.shouldShowAlert)
         {
@@ -55,7 +55,6 @@
                 else
                 {
                     //don't show notifications for open chats
-                    MLMessage* message = [notification.userInfo objectForKey:@"message"];
                     if(
                         ![message.from isEqualToString:self.currentContact.contactJid] &&
                         ![message.to isEqualToString:self.currentContact.contactJid]
@@ -73,21 +72,27 @@
     return [NSString stringWithFormat:@"%@_%@", message.accountId, message.from];
 }
 
+-(void) publishLastNotification
+{
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+    if(self.lastNotification)
+    {
+        DDLogVerbose(@"notification manager: publishing last notification: %@", self.lastNotification.body);
+        UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:self.lastNotification trigger:nil];
+        [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) { }];
+        self.lastNotification = nil;
+    }
+}
+
 -(void) showModernNotificaion:(NSNotification*) notification
 {
-    MLMessage *message = [notification.userInfo objectForKey:@"message"];
+    MLMessage* message = [notification.userInfo objectForKey:@"message"];
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     if([HelperTools isAppExtension])
     {
         //publish last notification, we've got a newer one
-        if(self.lastNotification)
-        {
-            DDLogVerbose(@"notification manager: publishing last notification: %@", self.lastNotification);
-            UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:self.lastNotification trigger:nil];
-            [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) { }];
-            self.lastNotification = nil;
-        }
+        [self publishLastNotification];
         self.lastNotification = content;
     }
     
@@ -135,7 +140,7 @@
                 
                 if(![HelperTools isAppExtension])
                 {
-                    DDLogVerbose(@"notification manager: publishing notification directly: %@", self.lastNotification);
+                    DDLogVerbose(@"notification manager: publishing notification directly: %@", self.lastNotification.body);
                     UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:content trigger:nil];
                     [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) { }];
                 }
@@ -149,7 +154,7 @@
         
         if(![HelperTools isAppExtension])
         {
-            DDLogVerbose(@"notification manager: publishing notification directly: %@", self.lastNotification);
+            DDLogVerbose(@"notification manager: publishing notification directly: %@", self.lastNotification.body);
             UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:content trigger:nil];
             [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) { }];
         }

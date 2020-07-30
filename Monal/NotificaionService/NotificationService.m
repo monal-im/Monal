@@ -75,7 +75,14 @@ static void logException(NSException* exception)
 {
     DDLogInfo(@"Deallocating notification service extension");
     [DDLog flushLog];
-    [self listNotifications];       //for debugging
+    
+    [self publishLastNotification];      //make sure nothing is left behind
+    
+    //for debugging
+    usleep(100000);
+    [self listNotifications];
+    usleep(1000000);
+    
     DDLogInfo(@"Now leaving dealloc");
     [DDLog flushLog];
 }
@@ -175,11 +182,41 @@ static void logException(NSException* exception)
 
 -(void) callContentHandler:(UNMutableNotificationContent*) content
 {
+    //check if notification was already posted (we don't want to post multiple notifications when multiple accounts simultaneously go idle
+    if(!self.bestAttemptContent)
+        return;
     //use this to make sure that the async removeDeliveredNotificationsWithIdentifiers: call succeeded before contentHandler is called
     dispatch_async(dispatch_get_main_queue(), ^{
         usleep(100000);
         self.contentHandler(content);
+        self.bestAttemptContent = nil;
     });
+}
+
+-(void) postDummyNotification
+{
+    //check if notification was already posted (we don't want to post multiple notifications when multiple accounts simultaneously go idle
+    if(!self.bestAttemptContent)
+        return;
+    [self publishLastNotification];      //make sure nothing is left behind
+    [self addBadgeTo:self.bestAttemptContent withCompletion:^{
+        DDLogInfo(@"Posting dummy notification");
+        self.contentHandler(self.bestAttemptContent);
+        self.bestAttemptContent = nil;
+    }];
+}
+
+-(void) publishLastNotification
+{
+    //make sure no pending notification is left behind
+    UNMutableNotificationContent* lastNotification = [MLNotificationManager sharedInstance].lastNotification;
+    if(lastNotification)
+    {
+        DDLogVerbose(@"Publishing last MLNotificationManager notification accidentally left behind: %@", lastNotification.body);
+        [self addBadgeTo:lastNotification withCompletion:^{
+            [[MLNotificationManager sharedInstance] publishLastNotification];
+        }];
+    }
 }
 
 -(void) addBadgeTo:(UNMutableNotificationContent*) content withCompletion:(monal_void_block_t) completion
@@ -191,14 +228,6 @@ static void logException(NSException* exception)
         DDLogVerbose(@"Adding badge value: %lu", (long)unread);
         content.badge = [NSNumber numberWithInteger:unread];
         completion();
-    }];
-}
-
--(void) postDummyNotification
-{
-    [self addBadgeTo:self.bestAttemptContent withCompletion:^{
-        DDLogInfo(@"Posting dummy notification");
-        self.contentHandler(self.bestAttemptContent);
     }];
 }
 
@@ -260,6 +289,7 @@ static void logException(NSException* exception)
     [DDLog flushLog];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(xmppError:) name:kXMPPError object:nil];
+    [[MLXMPPManager sharedInstance] resumeAll];
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     DDLogVerbose(@"MLXMPPManager called");
     [DDLog flushLog];
@@ -270,20 +300,23 @@ static void logException(NSException* exception)
     DDLogInfo(@"notification handler expired");
     [DDLog flushLog];
     //we did not receive *everything* --> display dummy notification to alert the user about this condition
+    [[MLXMPPManager sharedInstance] suspendAll];
     [self postDummyNotification];
 }
 
 -(void) nowIdle:(NSNotification*) notification
 {
-    DDLogInfo(@"notification handler: some account idle");
-    //dispatch in another thread to avoid blocking the thread posting this notification (most probably the receiveQueue)
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        if([[MLXMPPManager sharedInstance] allAccountsIdle])
-        {
-            DDLogInfo(@"notification handler: all accounts idle --> publishing notification and stopping extension");
-            [self postNotification];
-        }
-    });
+    //this method will be called inside the receive queue and suspend all other executions in this queue
+    xmpp* xmppAccount = (xmpp*)notification.object;
+    DDLogInfo(@"notification handler: some account idle: %@", xmppAccount.connectionProperties.identity.jid);
+    [xmppAccount suspend];
+    
+    if([[MLXMPPManager sharedInstance] allAccountsIdle])
+    {
+        DDLogInfo(@"notification handler: all accounts idle --> publishing notification and stopping extension");
+        [[MLXMPPManager sharedInstance] suspendAll];
+        [self postNotification];
+    }
 }
 
 -(void) xmppError:(NSNotification*) notification

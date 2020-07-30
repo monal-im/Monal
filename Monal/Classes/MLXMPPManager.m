@@ -623,6 +623,30 @@ An array of Dics what have timers to make sure everything was sent
     });
 }
 
+-(void) suspendAll
+{
+    dispatch_async(self->_netQueue, ^{
+        for(xmpp* xmppAccount in _connectedXMPP)
+        {
+            //disconnect to prevent endless loops trying to connect
+            DDLogVerbose(@"manager suspending");
+            [xmppAccount suspend];
+        }
+    });
+}
+
+-(void) resumeAll
+{
+    dispatch_async(self->_netQueue, ^{
+        for(xmpp* xmppAccount in _connectedXMPP)
+        {
+            //disconnect to prevent endless loops trying to connect
+            DDLogVerbose(@"manager resuming");
+            [xmppAccount resume];
+        }
+    });
+}
+
 -(void) connectIfNecessary
 {
     [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray* result) {

@@ -30,6 +30,7 @@
  */
 @property (nonatomic, strong) NSString* currentAccountNo;
 
+-(void) publishLastNotification;
 
 /**
  handles the notification. 

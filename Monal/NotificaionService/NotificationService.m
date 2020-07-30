@@ -41,14 +41,6 @@ static void logException(NSException* exception)
     
     [HelperTools activityLog];
     
-    //disconnect all accounts immediately if main app gets started
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [MLProcessLock waitForRemoteStartup:@"MainApp"];
-        DDLogWarn(@"Main app is now running, disconnecting all accounts and (hopefully) terminate this extension as soon as possible");
-        //disconnected accounts are idle and this extension will be terminated if all accounts are idle in [self nowIdle:]
-        [[MLXMPPManager sharedInstance] disconnectAll];
-    });
-    
     //handle message notifications by initializing the MLNotificationManager
     [MLNotificationManager sharedInstance];
     
@@ -75,21 +67,13 @@ static void logException(NSException* exception)
 {
     DDLogInfo(@"Deallocating notification service extension");
     [DDLog flushLog];
-    
     [self publishLastNotification];      //make sure nothing is left behind
-    
-    //for debugging
-    usleep(100000);
-    [self listNotifications];
-    usleep(1000000);
-    
     DDLogInfo(@"Now leaving dealloc");
     [DDLog flushLog];
 }
 
 -(void) listNotifications
 {
-    DDLogInfo(@"listNotifications: starting");
     [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
         for(UNNotificationRequest* request in requests)
         {
@@ -102,7 +86,6 @@ static void logException(NSException* exception)
             DDLogInfo(@"listNotifications: delivered notification %@ --> %@: %@", notification.request.identifier, notification.request.content.title, notification.request.content.body);
         }
     }];
-    DDLogInfo(@"listNotifications: ending");
 }
 
 -(void) postNotification
@@ -231,7 +214,7 @@ static void logException(NSException* exception)
     }];
 }
 
-- (void)didReceiveNotificationRequest:(UNNotificationRequest*) request withContentHandler:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
+-(void) didReceiveNotificationRequest:(UNNotificationRequest*) request withContentHandler:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
 {
     DDLogInfo(@"Notification handler called (request id: %@)", request.identifier);
     self.contentHandler = contentHandler;
@@ -266,36 +249,39 @@ static void logException(NSException* exception)
         return;
     }
     
-    /*
-    NSString* idval = [NSString stringWithFormat:@"%@_%@", @"thirty_seconds_notification", [[NSUUID UUID] UUIDString]];
-    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
-    content.title = @"Notification incoming";
-    content.body = @"Please wait 30 seconds to see it...";
-    content.sound = [UNNotificationSound defaultSound];
-    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-    UNNotificationRequest* new_request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
-    [center addNotificationRequest:new_request withCompletionHandler:^(NSError * _Nullable error) {
-        DDLogInfo(@"second notification request completed: %@", error);
-    }];
-    */
-    
     if(![[MLXMPPManager sharedInstance] hasConnectivity])
     {
         DDLogInfo(@"no connectivity, just posting dummy notification.");
         return;
     }
     
-    DDLogVerbose(@"calling MLXMPPManager");
-    [DDLog flushLog];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(xmppError:) name:kXMPPError object:nil];
-    [[MLXMPPManager sharedInstance] resumeAll];
-    [[MLXMPPManager sharedInstance] connectIfNecessary];
-    DDLogVerbose(@"MLXMPPManager called");
-    [DDLog flushLog];
+    //disconnect all accounts immediately if main app gets started
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [MLProcessLock waitForRemoteStartup:@"MainApp"];
+        DDLogWarn(@"Main app is now running, disconnecting all accounts and (hopefully) terminate this extension as soon as possible");
+        //disconnected accounts are idle and this extension will be terminated if all accounts are idle in [self nowIdle:]
+        [[MLXMPPManager sharedInstance] disconnectAll];
+    });
+    
+    if([MLProcessLock checkRemoteRunning:@"MainApp"])
+    {
+        DDLogInfo(@"NOT calling MLXMPPManager, main app already running");
+        [DDLog flushLog];
+    }
+    else
+    {
+        DDLogVerbose(@"calling MLXMPPManager");
+        [DDLog flushLog];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(xmppError:) name:kXMPPError object:nil];
+        [[MLXMPPManager sharedInstance] resumeAll];
+        [[MLXMPPManager sharedInstance] connectIfNecessary];
+        DDLogVerbose(@"MLXMPPManager called");
+        [DDLog flushLog];
+    }
 }
 
-- (void)serviceExtensionTimeWillExpire
+-(void) serviceExtensionTimeWillExpire
 {
     DDLogInfo(@"notification handler expired");
     [DDLog flushLog];
@@ -306,7 +292,8 @@ static void logException(NSException* exception)
 
 -(void) nowIdle:(NSNotification*) notification
 {
-    //this method will be called inside the receive queue and suspend all other executions in this queue
+    //this method will be called inside the receive queue or send queue and immediately suspend all other executions in the receive queue
+    //this is needed to not leak incoming stanzas while this class is being destructed
     xmpp* xmppAccount = (xmpp*)notification.object;
     DDLogInfo(@"notification handler: some account idle: %@", xmppAccount.connectionProperties.identity.jid);
     [xmppAccount suspend];

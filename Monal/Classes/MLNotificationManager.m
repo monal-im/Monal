@@ -140,7 +140,7 @@
                 
                 if(![HelperTools isAppExtension])
                 {
-                    DDLogVerbose(@"notification manager: publishing notification directly: %@", self.lastNotification.body);
+                    DDLogVerbose(@"notification manager: publishing notification directly: %@", content.body);
                     UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:content trigger:nil];
                     [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) { }];
                 }
@@ -154,7 +154,7 @@
         
         if(![HelperTools isAppExtension])
         {
-            DDLogVerbose(@"notification manager: publishing notification directly: %@", self.lastNotification.body);
+            DDLogVerbose(@"notification manager: publishing notification directly: %@", content.body);
             UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:content trigger:nil];
             [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) { }];
         }

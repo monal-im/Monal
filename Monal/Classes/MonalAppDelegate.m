@@ -161,7 +161,6 @@ static void logException(NSException* exception)
          withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler;
 {
     DDLogInfo(@"userNotificationCenter:willPresentNotification:withCompletionHandler called");
-    //TODO: use UNNotificationPresentationOptionNone if the notification is for a chat already open and visible to the user?
     completionHandler(UNNotificationPresentationOptionAlert);
 }
 

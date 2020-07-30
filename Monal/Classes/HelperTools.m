@@ -29,11 +29,12 @@
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         DDLogInfo(@"activity logger running");
         BOOL appex = [HelperTools isAppExtension];
+        DDLogInfo(@"activity logger is: %@", appex ? @"APPEX" : @"MAINAPP");
         unsigned long counter = 0;
         while(counter++)
         {
             DDLogInfo(@"activity(%@): %lu", appex ? @"APPEX" : @"MAINAPP", counter);
-            usleep(1000000);
+            [NSThread sleepForTimeInterval:1];
         }
     });
 }

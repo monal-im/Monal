@@ -139,7 +139,7 @@ static CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, 
     return self;
 }
 
--(void) deinit
+-(void) dealloc
 {
     DDLogInfo(@"Deallocating MLProcessLock");
     CFMessagePortInvalidate(_port);

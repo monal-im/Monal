@@ -223,7 +223,7 @@ NSString *const kXMPPPresence = @"presence";
 {
     if([NSOperationQueue currentQueue]!=_receiveQueue)
     {
-        DDLogWarn(@"DISPATCHING OPERATION ON RECEIVE QUEUE");
+        DDLogVerbose(@"DISPATCHING OPERATION ON RECEIVE QUEUE");
         [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:YES];
     }
     else
@@ -295,6 +295,7 @@ NSString *const kXMPPPresence = @"presence";
 {
     //this will not prevent monal from receiving and parsing xml data, but it won't process received xmpp stanzas until resume is called
     _receiveQueue.suspended = YES;
+    _cancelPingTimer();     //stop any running ping timer (response will probably not being processed in time due to suspend)
 }
 
 -(void) resume
@@ -498,6 +499,7 @@ NSString *const kXMPPPresence = @"presence";
         }
         
         //only proceed with connection if not concurrent with other processes
+        DDLogVerbose(@"Checking remote process lock...");
         if(![HelperTools isAppExtension] && [MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
         {
             DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination before connecting");

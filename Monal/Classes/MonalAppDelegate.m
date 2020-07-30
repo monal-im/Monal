@@ -284,6 +284,9 @@ static void logException(NSException* exception)
         [[DataLayer sharedInstance] messageHistoryCleanAll];
     }
     
+    //handle message notifications by initializing the MLNotificationManager
+    [MLNotificationManager sharedInstance];
+    
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];

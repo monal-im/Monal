@@ -276,7 +276,6 @@ static void logException(NSException* exception)
         [DDLog flushLog];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(xmppError:) name:kXMPPError object:nil];
-        [[MLXMPPManager sharedInstance] resumeAll];
         [[MLXMPPManager sharedInstance] connectIfNecessary];
         DDLogVerbose(@"MLXMPPManager called");
         [DDLog flushLog];
@@ -288,22 +287,22 @@ static void logException(NSException* exception)
     DDLogInfo(@"notification handler expired");
     [DDLog flushLog];
     //we did not receive *everything* --> display dummy notification to alert the user about this condition
-    [[MLXMPPManager sharedInstance] suspendAll];
+    [[MLXMPPManager sharedInstance] disconnectAll];
     [self postDummyNotification];
 }
 
 -(void) nowIdle:(NSNotification*) notification
 {
-    //this method will be called inside the receive queue or send queue and immediately suspend all other executions in the receive queue
+    //this method will be called inside the receive queue or send queue and immediately disconnect the account
     //this is needed to not leak incoming stanzas while this class is being destructed
     xmpp* xmppAccount = (xmpp*)notification.object;
     DDLogInfo(@"notification handler: some account idle: %@", xmppAccount.connectionProperties.identity.jid);
-    [xmppAccount suspend];
+    [xmppAccount disconnect];
     
     if([[MLXMPPManager sharedInstance] allAccountsIdle])
     {
         DDLogInfo(@"notification handler: all accounts idle --> publishing notification and stopping extension");
-        [[MLXMPPManager sharedInstance] suspendAll];
+        [[MLXMPPManager sharedInstance] disconnectAll];
         [self postNotification];
     }
 }

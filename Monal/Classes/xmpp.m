@@ -257,7 +257,7 @@ NSString *const kXMPPPresence = @"presence";
     __block BOOL retval = NO;
     //we are idle when we are not connected (and not trying to)
     //or: the catchup is done, no unacked stanzas are left in the smacks queue and receive and send queues are empty (no pending operations)
-    monal_void_block_t block = ^{
+    [self dispatchOnReceiveQueue:^{
         DDLogVerbose(@"Idle check:");
         DDLogVerbose(@"    _accountState < kStateReconnecting = %@", _accountState < kStateReconnecting ? @"YES" : @"NO");
         DDLogVerbose(@"    _reconnectInProgress = %@", _reconnectInProgress ? @"YES" : @"NO");
@@ -265,7 +265,6 @@ NSString *const kXMPPPresence = @"presence";
         DDLogVerbose(@"    [self.unAckedStanzas count] = %lu", (unsigned long)[self.unAckedStanzas count]);
         DDLogVerbose(@"    [_receiveQueue operationCount] = %lu", (unsigned long)[_receiveQueue operationCount]);
         DDLogVerbose(@"    [_sendQueue operationCount] = %lu", (unsigned long)[_sendQueue operationCount]);
-        DDLogVerbose(@"    _receiveQueue.suspended = %@", _receiveQueue.suspended ? @"YES" : @"NO");
         if(
             (
                 _accountState<kStateReconnecting &&
@@ -275,35 +274,12 @@ NSString *const kXMPPPresence = @"presence";
                 !((unsigned long)[self.unAckedStanzas count]) &&
                 [_receiveQueue operationCount]<=1 &&
                 ![_sendQueue operationCount]
-            ) || (
-                _receiveQueue.suspended &&
-                ![_sendQueue operationCount]
             )
         )
             retval=YES;
         DDLogVerbose(@"--> %@", retval ? @"idle" : @"NOT IDLE");
-    };
-    //dont try to schedule idle check on suspended receive queue
-    if(_receiveQueue.suspended)
-        block();
-    else
-        [self dispatchOnReceiveQueue:block];
+    }];
     return retval;
-}
-
--(void) suspend
-{
-    //this will not prevent monal from receiving and parsing xml data, but it won't process received xmpp stanzas until resume is called
-    _receiveQueue.suspended = YES;
-    //stop any running ping timer (response will probably not being processed in time due to suspend)
-    if(_cancelPingTimer)
-        _cancelPingTimer();
-}
-
--(void) resume
-{
-    //resume processing of (already) parsed xmpp stanzas
-    _receiveQueue.suspended = NO;
 }
 
 -(void) cleanupSendQueue
@@ -484,12 +460,6 @@ NSString *const kXMPPPresence = @"presence";
         return;
     }
     
-    if(_receiveQueue.suspended)
-    {
-        DDLogInfo(@"xmpp class is suspended, ignoring connect call.");
-        return;
-    }
-    
     [self dispatchOnReceiveQueue: ^{
         [_receiveQueue cancelAllOperations];        //stop everything coming after this (we will start a clean connect here!)
         
@@ -569,14 +539,6 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) disconnect:(BOOL) explicitLogout
 {
-    //make disconnect work even if suspended
-    if(_receiveQueue.suspended)
-    {
-        //stop every suspended operation and restart empty queues
-        [_receiveQueue cancelAllOperations];
-        _receiveQueue.suspended = NO;
-    }
-    
     [self dispatchOnReceiveQueue: ^{
         if(_accountState<kStateReconnecting)
         {
@@ -1687,7 +1649,7 @@ NSString *const kXMPPPresence = @"presence";
         else
         {
             DDLogError(@"Ignoring unhandled *INSECURE* top-level xml element %@, reconnecting", parsedStanza.stanzaType);
-            [self reconnect:1.0];
+            [self reconnect];
         }
     }
 }

@@ -161,7 +161,8 @@ static void logException(NSException* exception)
          withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler;
 {
     DDLogInfo(@"userNotificationCenter:willPresentNotification:withCompletionHandler called");
-    completionHandler(UNNotificationPresentationOptionAlert);
+    //throw away (dummy) notifications from notification service extension while main app is running
+    completionHandler(UNNotificationPresentationOptionNone);
 }
 
 - (BOOL)application:(UIApplication*) application willFinishLaunchingWithOptions:(NSDictionary*) launchOptions

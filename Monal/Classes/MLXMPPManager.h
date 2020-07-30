@@ -38,10 +38,6 @@
 
 -(void) disconnectAll;
 
--(void) suspendAll;
-
--(void) resumeAll;
-
 /**
  disconnects the specified account
  */

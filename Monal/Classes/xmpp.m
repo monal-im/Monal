@@ -295,7 +295,9 @@ NSString *const kXMPPPresence = @"presence";
 {
     //this will not prevent monal from receiving and parsing xml data, but it won't process received xmpp stanzas until resume is called
     _receiveQueue.suspended = YES;
-    _cancelPingTimer();     //stop any running ping timer (response will probably not being processed in time due to suspend)
+    //stop any running ping timer (response will probably not being processed in time due to suspend)
+    if(_cancelPingTimer)
+        _cancelPingTimer();
 }
 
 -(void) resume

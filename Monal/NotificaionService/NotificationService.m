@@ -267,6 +267,8 @@ static void logException(NSException* exception)
     {
         DDLogInfo(@"NOT calling MLXMPPManager, main app already running");
         [DDLog flushLog];
+        [self postDummyNotification];
+        return;
     }
     else
     {*/

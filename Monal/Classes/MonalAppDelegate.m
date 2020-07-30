@@ -206,7 +206,7 @@ static void logException(NSException* exception)
     self.processLock = [[MLProcessLock alloc] initWithProcessName:@"MainApp"];
     
     //log service extension status
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    /*dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         while(YES)
         {
             [MLProcessLock waitForRemoteStartup:@"NotificationServiceExtension"];
@@ -219,7 +219,7 @@ static void logException(NSException* exception)
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:self userInfo:nil];
             });
         }
-    });
+    });*/
 
     //only proceed with launching if the NotificationServiceExtension is not running
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])

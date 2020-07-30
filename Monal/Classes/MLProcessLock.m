@@ -38,6 +38,7 @@ static CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, 
 
 +(BOOL) checkRemoteRunning:(NSString*) processName
 {
+    return NO;
     DDLogVerbose(@"checkRemoteRunning:%@ called", processName);
     NSString* portname = [NSString stringWithFormat:@"%@.%@", kAppGroup, processName];
     CFStringRef port_name = (__bridge CFStringRef)portname;
@@ -71,6 +72,7 @@ static CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, 
 
 +(void) waitForRemoteStartup:(NSString*) processName
 {
+    return;
     DDLogVerbose(@"waitForRemoteStartup:%@ called", processName);
     NSString* portname = [NSString stringWithFormat:@"%@.%@", kAppGroup, processName];
     CFStringRef port_name = (__bridge CFStringRef)portname;
@@ -104,6 +106,7 @@ static CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, 
 
 +(void) waitForRemoteTermination:(NSString*) processName
 {
+    return;
     DDLogVerbose(@"waitForRemoteTermination:%@ called", processName);
     NSString* portname = [NSString stringWithFormat:@"%@.%@", kAppGroup, processName];
     CFStringRef port_name = (__bridge CFStringRef)portname;
@@ -135,14 +138,14 @@ static CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, 
 
 -(id) initWithProcessName:(NSString*) processName
 {
-    [self runServerFor:processName];
+    //[self runServerFor:processName];
     return self;
 }
 
 -(void) dealloc
 {
     DDLogInfo(@"Deallocating MLProcessLock");
-    CFMessagePortInvalidate(_port);
+    //CFMessagePortInvalidate(_port);
 }
 
 -(void) runServerFor:(NSString*) processName

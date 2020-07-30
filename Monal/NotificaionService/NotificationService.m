@@ -182,11 +182,11 @@ static void logException(NSException* exception)
     if(!self.bestAttemptContent)
         return;
     [self publishLastNotification];      //make sure nothing is left behind
-    [self addBadgeTo:self.bestAttemptContent withCompletion:^{
-        DDLogInfo(@"Posting dummy notification");
-        self.contentHandler(self.bestAttemptContent);
-        self.bestAttemptContent = nil;
-    }];
+    
+    DDLogInfo(@"Posting dummy notification");
+    //dont use the badge counter from db here (we did not receive any message, let this notification automatically increase the badge by one)
+    self.contentHandler(self.bestAttemptContent);
+    self.bestAttemptContent = nil;
 }
 
 -(void) publishLastNotification

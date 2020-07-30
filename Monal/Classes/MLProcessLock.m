@@ -4,6 +4,7 @@
 //
 //  Created by Thilo Molitor on 26.07.20.
 //  Loosely based on https://ddeville.me/2015/02/interprocess-communication-on-ios-with-berkeley-sockets/
+//  and https://ddeville.me/2015/02/interprocess-communication-on-ios-with-mach-messages/
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 
@@ -14,41 +15,20 @@
 #import "MLProcessLock.h"
 #import "MLConstants.h"
 
-static NSString* getSocketPath(NSString* processName)
-{
-    /*
-     * `sockaddr_un.sun_path` has a max length of 104 characters
-     * However, the container URL for the application group identifier in the simulator is much longer than that
-     * Since the simulator has looser sandbox restrictions we just use /tmp
-     */
-#if TARGET_IPHONE_SIMULATOR
-    NSString* dir = @"/tmp/Monal";
-    [[NSFileManager defaultManager] createDirectoryAtPath:dir withIntermediateDirectories:YES attributes:nil error:NULL];
-#else
-    NSFileManager* fileManager = [NSFileManager defaultManager];
-    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
-    NSString* dir = [containerUrl path];
-#endif
-    NSString* socketPath = [dir stringByAppendingPathComponent:[[NSString alloc] initWithFormat:@"%@.socket", processName]];
-    DDLogVerbose(@"Returning socketPath: %@", socketPath);
-    return socketPath;
-}
 
-static struct sockaddr_un getAddr(NSString* processName)
+static CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, void *info)
 {
-    NSString* socketPath = getSocketPath(processName);
-    const char* cSocketPath = [socketPath UTF8String];
-    
-    struct sockaddr_un addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.sun_family = AF_UNIX;
-    
-    strncpy(addr.sun_path, cSocketPath, sizeof(addr.sun_path) - 1);
-    
-    return addr;
+    NSString* incoming = [[NSString alloc] initWithData:(__bridge NSData*)data encoding:NSUTF8StringEncoding];
+    if([@"ping" isEqualToString:incoming])
+        return (__bridge CFDataRef)[@"pong" dataUsingEncoding:NSUTF8StringEncoding];
+    DDLogWarn(@"Unknown mach message: '%@'", incoming);
+    return (__bridge CFDataRef)[@"unknown" dataUsingEncoding:NSUTF8StringEncoding];
 }
 
 @interface MLProcessLock()
+{
+    CFMessagePortRef _port;
+}
 
 @end
 
@@ -56,93 +36,87 @@ static struct sockaddr_un getAddr(NSString* processName)
 
 +(BOOL) checkRemoteRunning:(NSString*) processName
 {
-    dispatch_fd_t fd = socket(AF_UNIX, SOCK_STREAM, 0);
-    if(fd < 0)
+    NSString* portname = [NSString stringWithFormat:@"%@.%@", kAppGroup, processName];
+    CFStringRef port_name = (__bridge CFStringRef)portname;
+    CFMessagePortRef port = CFMessagePortCreateRemote(kCFAllocatorDefault, port_name);
+    if(port == NULL)
     {
-        DDLogError(@"Error creating MLProcessLock client fd for remote '%@': %@", processName, [NSString stringWithUTF8String:strerror(errno)]);
-        return YES;     //this is an error case --> assume the remote process is running
+        DDLogVerbose(@"Creating mach remote port failed");
+        DDLogInfo(@"MLProcessLock remote '%@' is NOT running", processName);
+        return NO;
     }
-    struct sockaddr_un addr = getAddr(processName);
-    if(connect(fd, (struct sockaddr*)&addr, sizeof(addr)) < 0)
+    
+    SInt32 messageIdentifier = 1;
+    CFDataRef messageData = (__bridge CFDataRef)[@"ping" dataUsingEncoding:NSUTF8StringEncoding];
+
+    CFDataRef response = NULL;
+    SInt32 status = CFMessagePortSendRequest(port, messageIdentifier, messageData, 2000, 2000, kCFRunLoopDefaultMode, &response);
+    if(status != kCFMessagePortSuccess)
     {
-        DDLogInfo(@"Failed to connect MLProcessLock client fd, remote '%@' seems not to run, but trying again in 100ms to make sure: %@", processName, [NSString stringWithUTF8String:strerror(errno)]);
-        usleep(100000);
-        if(connect(fd, (struct sockaddr*)&addr, sizeof(addr)) < 0)
-        {
-            DDLogInfo(@"Failed to connect MLProcessLock client fd the second time --> remote '%@' is NOT running: %@", processName, [NSString stringWithUTF8String:strerror(errno)]);
-            close(fd);
-            return NO;
-        }
+        DDLogVerbose(@"Sending mach message failed: %ul", (long)status);
+        DDLogInfo(@"MLProcessLock remote '%@' is NOT running", processName);
+        return NO;
     }
-    DDLogInfo(@"MLProcessLock remote '%@' IS running", processName);
-    close(fd);
+    
+    NSString* incoming = [[NSString alloc] initWithData:(__bridge NSData*)response encoding:NSUTF8StringEncoding];
+    DDLogInfo(@"MLProcessLock remote '%@' IS running: %@", processName, incoming);
     return YES;
 }
 
-+(BOOL) waitForRemoteStartup:(NSString*) processName
++(void) waitForRemoteStartup:(NSString*) processName
 {
-    dispatch_fd_t fd = socket(AF_UNIX, SOCK_STREAM, 0);
-    if(fd < 0)
+    NSString* portname = [NSString stringWithFormat:@"%@.%@", kAppGroup, processName];
+    CFStringRef port_name = (__bridge CFStringRef)portname;
+    while(YES)
     {
-        DDLogError(@"Error creating MLProcessLock client fd for remote '%@': %@", processName, [NSString stringWithUTF8String:strerror(errno)]);
-        return YES;     //this is an error case, signal it
+        CFMessagePortRef port = CFMessagePortCreateRemote(kCFAllocatorDefault, port_name);
+        if(port == NULL)
+        {
+            DDLogVerbose(@"Creating mach remote port failed");
+            usleep(250000);
+            continue;
+        }
+        SInt32 messageIdentifier = 2;
+        CFDataRef messageData = (__bridge CFDataRef)[@"ping" dataUsingEncoding:NSUTF8StringEncoding];
+        CFDataRef response = NULL;
+        SInt32 status = CFMessagePortSendRequest(port, messageIdentifier, messageData, 500, 500, kCFRunLoopDefaultMode, &response);
+        if(status != kCFMessagePortSuccess)
+        {
+            DDLogVerbose(@"Sending mach message failed: %ul", (long)status);
+            usleep(250000);
+            continue;
+        }
+        NSString* incoming = [[NSString alloc] initWithData:(__bridge NSData*)response encoding:NSUTF8StringEncoding];
+        DDLogInfo(@"MLProcessLock remote '%@' is now running: %@", processName, incoming);
+        break;
     }
-    struct sockaddr_un addr = getAddr(processName);
-    DDLogInfo(@"Waiting for MLProcessLock client fd to connect to remote '%@'...", processName);
-    int connected;
-    do
+}
+
++(void) waitForRemoteTermination:(NSString*) processName
+{
+    NSString* portname = [NSString stringWithFormat:@"%@.%@", kAppGroup, processName];
+    CFStringRef port_name = (__bridge CFStringRef)portname;
+    while(YES)
     {
-        connected = connect(fd, (struct sockaddr*)&addr, sizeof(addr));
-        if(connected < 0)
-            usleep(100000);
-    } while(connected < 0);
-    DDLogInfo(@"MLProcessLock remote '%@' IS now running", processName);
-    close(fd);
-    return NO;      //this is no error, remote is really running
-}
-
-+(BOOL) waitForRemoteTermination:(NSString*) processName
-{
-    BOOL __block retval = NO;
-    dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        dispatch_fd_t fd = socket(AF_UNIX, SOCK_STREAM, 0);
-        if(fd < 0)
+        CFMessagePortRef port = CFMessagePortCreateRemote(kCFAllocatorDefault, port_name);
+        if(port == NULL)
         {
-            DDLogError(@"Error creating MLProcessLock client fd for remote '%@': %@", processName, [NSString stringWithUTF8String:strerror(errno)]);
-            retval = YES;     //this is an error case, signal it
-            return;
+            DDLogVerbose(@"Creating mach remote port failed");
+            DDLogInfo(@"MLProcessLock remote '%@' is now stopped", processName);
+            break;
         }
-        struct sockaddr_un addr = getAddr(processName);
-        int connected;
-        int try = 0;
-        do
+        SInt32 messageIdentifier = 3;
+        CFDataRef messageData = (__bridge CFDataRef)[@"ping" dataUsingEncoding:NSUTF8StringEncoding];
+        CFDataRef response = NULL;
+        SInt32 status = CFMessagePortSendRequest(port, messageIdentifier, messageData, 2000, 2000, kCFRunLoopDefaultMode, &response);
+        if(status != kCFMessagePortSuccess)
         {
-            connected = connect(fd, (struct sockaddr*)&addr, sizeof(addr));
-            if(connected < 0)
-                usleep(100000);
-        } while(connected < 0 && try++ < 20);
-        if(connected < 0)
-        {
-            close(fd);
-            DDLogInfo(@"Failed to connect MLProcessLock client fd while waiting for remote '%@' termination, remote has already been terminated: %@", processName, [NSString stringWithUTF8String:strerror(errno)]);
-            return;
+            DDLogVerbose(@"Sending mach message failed: %ul", (long)status);
+            DDLogInfo(@"MLProcessLock remote '%@' is now stopped", processName);
+            break;
         }
-        //connection successful --> wait for remote termination
-        DDLogInfo(@"Waiting for MLProcessLock termination of remote '%@'", processName);
-        int len;
-        do
-        {
-            char buffer[4096];
-            len = recv(fd, buffer, sizeof(buffer), 0);
-        } while(len);
-        DDLogInfo(@"MLProcessLock remote '%@' got terminated", processName);
-    });
-    return retval;
-}
-
-CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, void *info)
-{
-    return NULL;
+        usleep(250000);
+    }
 }
 
 -(id) initWithProcessName:(NSString*) processName
@@ -154,48 +128,16 @@ CFDataRef callback(CFMessagePortRef local, SInt32 msgid, CFDataRef data, void *i
 -(void) deinit
 {
     DDLogInfo(@"Deallocating MLProcessLock");
+    CFMessagePortInvalidate(_port);
 }
 
 -(void) runServerFor:(NSString*) processName
 {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        dispatch_fd_t fd = socket(AF_UNIX, SOCK_STREAM, 0);
-        if(fd<0)
-        {
-            DDLogError(@"Error creating MLProcessLock server fd: %@", [NSString stringWithUTF8String:strerror(errno)]);
-            return;
-        }
-        
-        int one = 1;
-        setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
-        
-        struct sockaddr_un addr = getAddr(processName);
-        unlink([getSocketPath(processName) UTF8String]);
-        if(bind(fd, (struct sockaddr*)&addr, sizeof(addr)) < 0)
-        {
-            DDLogError(@"Error binding MLProcessLock server fd: %@", [NSString stringWithUTF8String:strerror(errno)]);
-            return;
-        }
-        if(listen(fd, 8) < 0)
-        {
-            DDLogError(@"Error listening on MLProcessLock server fd: %@", [NSString stringWithUTF8String:strerror(errno)]);
-            return;
-        }
-        
-        DDLogInfo(@"MLProcessLock server started and waiting for client connections");
-        while(YES)
-        {
-            struct sockaddr client_addr;
-            socklen_t client_addrlen = sizeof(client_addr);
-            dispatch_fd_t client_fd = accept(fd, &client_addr, &client_addrlen);
-            if(client_fd < 0)
-            {
-                DDLogError(@"Error accepting MLProcessLock client connection: %@", [NSString stringWithUTF8String:strerror(errno)]);
-                continue;
-            }
-            DDLogInfo(@"Accepted MLProcessLock client connection");
-        }
-    });
+    NSString* portname = [NSString stringWithFormat:@"%@.%@", kAppGroup, processName];
+    DDLogInfo(@"Configuring MLProcessLock mach port %@", portname);
+    CFStringRef port_name = (__bridge CFStringRef)portname;
+    _port = CFMessagePortCreateLocal(kCFAllocatorDefault, port_name, &callback, NULL, NULL);
+    CFMessagePortSetDispatchQueue(_port, dispatch_get_main_queue());
 }
 
 @end

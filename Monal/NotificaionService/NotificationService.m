@@ -241,13 +241,13 @@ static void logException(NSException* exception)
         return;
     }
     
-    //just "ignore" this push if the main app is already running
+    /*//just "ignore" this push if the main app is already running
     if([MLProcessLock checkRemoteRunning:@"MainApp"])
     {
         DDLogInfo(@"main app already running, ignoring push and posting dummy notification");
         [self postDummyNotification];
         return;
-    }
+    }*/
     
     if(![[MLXMPPManager sharedInstance] hasConnectivity])
     {
@@ -255,21 +255,21 @@ static void logException(NSException* exception)
         return;
     }
     
-    //disconnect all accounts immediately if main app gets started
+   /* //disconnect all accounts immediately if main app gets started
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [MLProcessLock waitForRemoteStartup:@"MainApp"];
         DDLogWarn(@"Main app is now running, disconnecting all accounts and (hopefully) terminate this extension as soon as possible");
         //disconnected accounts are idle and this extension will be terminated if all accounts are idle in [self nowIdle:]
         [[MLXMPPManager sharedInstance] disconnectAll];
-    });
+    });*/
     
-    if([MLProcessLock checkRemoteRunning:@"MainApp"])
+    /*if([MLProcessLock checkRemoteRunning:@"MainApp"])
     {
         DDLogInfo(@"NOT calling MLXMPPManager, main app already running");
         [DDLog flushLog];
     }
     else
-    {
+    {*/
         DDLogVerbose(@"calling MLXMPPManager");
         [DDLog flushLog];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
@@ -278,7 +278,7 @@ static void logException(NSException* exception)
         [[MLXMPPManager sharedInstance] connectIfNecessary];
         DDLogVerbose(@"MLXMPPManager called");
         [DDLog flushLog];
-    }
+    //}
 }
 
 -(void) serviceExtensionTimeWillExpire

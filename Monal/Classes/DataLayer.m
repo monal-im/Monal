@@ -2618,6 +2618,13 @@ NSString *const kCount = @"count";
         DDLogVerbose(@"Upgrade to 4.79 success");
     }
     
+    if([dbversion doubleValue] < 4.80)
+    {
+        [self executeNonQuery:@"CREATE TABLE ipc(id integer NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);" andArguments:nil];
+        [self executeNonQuery:@"update dbversion set dbversion='4.80';" andArguments:nil];
+        DDLogVerbose(@"Upgrade to 4.80 success");
+    }
+    
     [self endWriteTransaction];
     _version_check_done = YES;
     return;
@@ -2865,6 +2872,22 @@ NSString *const kCount = @"count";
     NSArray* params = @[ accountNo, jid];
     [self executeNonQuery:query andArguments:params];
     return;
+}
+
+#pragma mark - IPC
+
+-(NSDictionary*) readMessageFor:(NSString*) destination
+{
+    //delete old entries that timed out
+    NSNumber* timestamp = [NSNumber numberWithInt:[NSDate date].timeIntervalSince1970];
+    [self executeNonQuery:@"DELETE FROM ipc WHERE timeout<?;" andArguments:@[timestamp]];
+    
+    //load *one single* message from table
+    NSString* query = [NSString stringWithFormat:@"SELECT * FROM ipc WHERE destination=? LIMIT 1;"];
+    
+    NSDictionary* retval = @{};
+    //[self executeNonQuery:@"CREATE TABLE ipc(id integer NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);" andArguments:nil];
+    return @{};
 }
 
 @end

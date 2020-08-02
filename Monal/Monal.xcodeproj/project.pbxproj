@@ -246,6 +246,10 @@
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
 		322AD0CC78815E4551793930 /* Pods_Monal_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F59B43550E822D135D1127E /* Pods_Monal_Tests.framework */; };
 		3517ED822FCB1456A8D492B1 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C40CE7301D792181A28A1F8 /* Pods_Monal.framework */; };
+		540A3FA924D674960008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FA624D674940008965D /* MLSQLite.m */; };
+		540A3FAA24D674960008965D /* MLSQLite.h in Headers */ = {isa = PBXBuildFile; fileRef = 540A3FA824D674950008965D /* MLSQLite.h */; };
+		540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FAC24D674BD0008965D /* MLSQLite.m */; };
+		540A3FB024D674C90008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FAF24D674C80008965D /* MLSQLite.m */; };
 		540E13A024CDCDB30038FDA0 /* MLProcessLock.m in Sources */ = {isa = PBXBuildFile; fileRef = 540E139F24CDCDB30038FDA0 /* MLProcessLock.m */; };
 		540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */ = {isa = PBXBuildFile; fileRef = 540E13A124CDCE3B0038FDA0 /* MLProcessLock.h */; };
 		540E13A524CF6A8C0038FDA0 /* MLNotificationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */; };
@@ -840,6 +844,11 @@
 		428F57D57919ACB0B97869A6 /* Pods-jrtplib-static-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
 		4425FD9C1F3AFFA64619FF67 /* Pods-jrtplib-static-OSX.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.appstore.xcconfig"; sourceTree = "<group>"; };
 		4C28AE0807330E8B6F972591 /* Pods_NotificaionService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NotificaionService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		540A3FA624D674940008965D /* MLSQLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLSQLite.m; path = ../../../../../../Volumes/cvs/Monal/Monal/Classes/MLSQLite.m; sourceTree = "<group>"; };
+		540A3FA824D674950008965D /* MLSQLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLSQLite.h; path = ../../../../../../Volumes/cvs/Monal/Monal/Classes/MLSQLite.h; sourceTree = "<group>"; };
+		540A3FAC24D674BD0008965D /* MLSQLite.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLSQLite.m; path = ../../../../../../Volumes/cvs/Monal/Monal/Classes/MLSQLite.m; sourceTree = "<group>"; };
+		540A3FAF24D674C80008965D /* MLSQLite.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLSQLite.m; path = ../../../../../../Volumes/cvs/Monal/Monal/Classes/MLSQLite.m; sourceTree = "<group>"; };
+		540A3FB224D674EF0008965D /* MLSQLite.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MLSQLite.h; path = ../../../../../../Volumes/cvs/Monal/Monal/Classes/MLSQLite.h; sourceTree = "<group>"; };
 		540E139F24CDCDB30038FDA0 /* MLProcessLock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLProcessLock.m; sourceTree = "<group>"; };
 		540E13A124CDCE3B0038FDA0 /* MLProcessLock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLProcessLock.h; sourceTree = "<group>"; };
 		540E13A624CF78900038FDA0 /* MLLogFormatter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLLogFormatter.m; sourceTree = "<group>"; };
@@ -973,6 +982,8 @@
 				26352EA5177D21FC00E2C8FF /* Managers */,
 				26F7BB3A1115F8A300712672 /* tools */,
 				2601D9A70FBF255D004DB939 /* DataLayer.m */,
+				540A3FB224D674EF0008965D /* MLSQLite.h */,
+				540A3FAF24D674C80008965D /* MLSQLite.m */,
 				2601D9A80FBF255D004DB939 /* DataLayer.h */,
 				262D9EAB17924532009292B4 /* MLConstants.h */,
 				26EC411117BDE39E0031304D /* MLImageManager.h */,
@@ -1013,6 +1024,8 @@
 		260C51CE177F08CF0039634B /* XMPP */ = {
 			isa = PBXGroup;
 			children = (
+				540A3FA824D674950008965D /* MLSQLite.h */,
+				540A3FA624D674940008965D /* MLSQLite.m */,
 				2661102E238F17D00030A4EE /* Models */,
 				2633CB40231CB7F5006D0277 /* Processors */,
 				2642EBC418693615006A6C12 /* Jingle */,
@@ -1584,6 +1597,7 @@
 		26F7BB3A1115F8A300712672 /* tools */ = {
 			isa = PBXGroup;
 			children = (
+				540A3FAC24D674BD0008965D /* MLSQLite.m */,
 				C18E7579245E8AE900AE8FB7 /* MLPipe.m */,
 				C18E7578245E8AE900AE8FB7 /* MLPipe.h */,
 				C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */,
@@ -1772,6 +1786,7 @@
 				26CC579623A0867400ABB92A /* monalxmpp.h in Headers */,
 				C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */,
 				26537970244208FE007D67D5 /* MLBasePaser.h in Headers */,
+				540A3FAA24D674960008965D /* MLSQLite.h in Headers */,
 				5435BE9B245F97B2006C61BF /* ParseR.h in Headers */,
 				540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */,
 				540E13A924CF78D00038FDA0 /* MLLogFormatter.h in Headers */,
@@ -2422,6 +2437,7 @@
 				26CC57AA23A086C000ABB92A /* XMPPParser.m in Sources */,
 				26CC57CB23A0892800ABB92A /* MLPresenceProcessor.m in Sources */,
 				26CC57A423A086AA00ABB92A /* MLXMPPServer.m in Sources */,
+				540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */,
 				26CC57CA23A0892800ABB92A /* MLIQProcessor.m in Sources */,
 				26CC57D323A08D7100ABB92A /* DataLayer.m in Sources */,
 				26CC57B023A086C000ABB92A /* ParseA.m in Sources */,
@@ -2431,6 +2447,7 @@
 				26CC57A723A086C000ABB92A /* ParseFailed.m in Sources */,
 				26CC57AC23A086C000ABB92A /* ParseMessage.m in Sources */,
 				540E13A024CDCDB30038FDA0 /* MLProcessLock.m in Sources */,
+				540A3FB024D674C90008965D /* MLSQLite.m in Sources */,
 				26CC57A823A086C000ABB92A /* ParseStream.m in Sources */,
 				26CC57C823A0892100ABB92A /* MLMessage.m in Sources */,
 				26CC57A623A086AA00ABB92A /* MLXMPPConnection.m in Sources */,
@@ -2438,6 +2455,7 @@
 				26CC57CF23A08D5B00ABB92A /* jingleCall.m in Sources */,
 				26CC57DA23A08DD800ABB92A /* MLXMPPManager.m in Sources */,
 				26CC57AE23A086C000ABB92A /* ParseFailure.m in Sources */,
+				540A3FA924D674960008965D /* MLSQLite.m in Sources */,
 				26CC57D123A08D5B00ABB92A /* IPAddress.m in Sources */,
 				26CC57D023A08D5B00ABB92A /* RTP.mm in Sources */,
 				26CC57B823A0876300ABB92A /* MLHTTPRequest.m in Sources */,

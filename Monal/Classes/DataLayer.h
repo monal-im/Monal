@@ -7,17 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <sqlite3.h>
 #import "ParsePresence.h"
 #import "MLMessage.h"
 #import "MLContact.h"
 #import "MLConstants.h"
 
 
-@interface DataLayer : NSObject {
-    sqlite3* database;
-}
-
+@interface DataLayer : NSObject
 
 extern NSString *const kAccountID;
 extern NSString *const kDomain;
@@ -44,23 +40,7 @@ extern NSString *const kMessageTypeText;
 extern NSString *const kMessageTypeUrl;
 
 +(DataLayer*) sharedInstance;
-
 -(void) version;
-
-//lowest level command handlers. These are called in sync
--(NSObject*) executeScalar:(NSString*) query andArguments:(NSArray *) args ;
--(NSArray*) executeReader:(NSString*) query andArguments:(NSArray *) args;
--(BOOL) executeNonQuery:(NSString*) query andArguments:(NSArray *) args;
-
-// V2 low level. these are called in async
--(void) executeScalar:(NSString*) query withCompletion: (void (^)(NSObject *))completion;
--(void) executeReader:(NSString*) query withCompletion: (void (^)(NSMutableArray *))completion;
--(void) executeNonQuery:(NSString*) query withCompletion: (void (^)(BOOL))completion;
-
--(void) executeScalar:(NSString*) query andArguments:(NSArray *) args withCompletion: (void (^)(NSObject *))completion;
--(void) executeReader:(NSString*) query andArguments:(NSArray *) args withCompletion: (void (^)(NSMutableArray *))completion;
--(void) executeNonQuery:(NSString*) query andArguments:(NSArray *) args  withCompletion: (void (^)(BOOL))completion;
-
 
 //Roster
 -(NSString *) getRosterVersionForAccount:(NSString*) accountNo;
@@ -171,6 +151,7 @@ extern NSString *const kMessageTypeUrl;
 
 -(NSMutableDictionary *) readStateForAccount:(NSString*) accountNo;
 -(void) persistState:(NSMutableDictionary *) state forAccount:(NSString*) accountNo;
+-(void) getHighestAccountIdWithCompletion:(void (^)(NSObject * accountid)) completion;
 
 #pragma mark - message Commands
 /**

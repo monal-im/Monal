@@ -105,7 +105,7 @@
     
     [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
         if(result) {
-            [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
+            [[DataLayer sharedInstance] getHighestAccountIdWithCompletion:^(NSObject * accountid) {
                 if(accountid) {
                     self.accountno=[NSString stringWithFormat:@"%@",accountid];
                     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];

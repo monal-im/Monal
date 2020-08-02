@@ -116,7 +116,6 @@ An array of Dics what have timers to make sure everything was sent
     return sharedInstance;
 }
 
-
 -(id) init
 {
     self=[super init];

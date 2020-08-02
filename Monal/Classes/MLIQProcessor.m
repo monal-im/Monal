@@ -421,21 +421,8 @@
 
 -(void) omemoResult:(ParseIq *) iqNode {
 #ifndef DISABLE_OMEMO
-    BOOL __block isBackgrounded = NO;
-    if(![HelperTools isAppExtension])
-    {
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-            {
-                isBackgrounded = YES;
-            }
-        });
-    }
-    if(!isBackgrounded)
-    {
-        [self processOMEMODevices:iqNode];
-        [self processOMEMOKeys:iqNode];
-    }
+    [self processOMEMODevices:iqNode];
+    [self processOMEMOKeys:iqNode];
 #endif
 }
 

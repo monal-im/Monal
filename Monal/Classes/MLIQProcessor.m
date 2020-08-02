@@ -242,7 +242,8 @@
             if([iqNode.features containsObject:@"urn:xmpp:carbons:2"])
             {
                 DDLogInfo(@"got disco result with carbons ns");
-                if(!self.connection.usingCarbons2)
+                //don't do this in Notification Service Extension
+                if(!self.connection.usingCarbons2 && ![HelperTools isAppExtension])
                 {
                     DDLogInfo(@"sending enableCarbons iq");
                     if(self.sendIq)

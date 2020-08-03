@@ -1595,24 +1595,23 @@
         nextRow = [self.messageList objectAtIndex:indexPath.row+1];
     }
     
-    MLMessage *priorRow =nil;
+    MLMessage *priorRow = nil;
     if(indexPath.row>0)
     {
         priorRow = [self.messageList objectAtIndex:indexPath.row-1];
     }
     
-    if(row.hasBeenReceived==YES) {
-        cell.messageStatus.text=kDelivered;
-        if(indexPath.row==self.messageList.count-1 ||
-           ![nextRow.actualFrom isEqualToString:self.jid]) {
-            cell.messageStatus.hidden=NO;
-        } else  {
-            cell.messageStatus.hidden=YES;
-        }
-    }
-    else  {
+    if(row.hasBeenReceived)
+        cell.messageStatus.text = kDelivered;
+    else if(row.hasBeenSent)
+        cell.messageStatus.hidden = kSent;
+    else
+        cell.messageStatus.hidden = kSending;
+    
+    if(indexPath.row==self.messageList.count-1 || ![nextRow.actualFrom isEqualToString:self.jid])
+        cell.messageStatus.hidden=NO;
+    else
         cell.messageStatus.hidden=YES;
-    }
     
     cell.messageHistoryId=row.messageDBId;
     BOOL newSender=NO;
@@ -1647,9 +1646,10 @@
     
     cell.parent=self;
     
-    if(!row.hasBeenReceived) {
+    if(!row.hasBeenReceived && row.hasBeenSent)
+    {
         if(row.errorType.length>0) {
-            cell.messageStatus.text =[NSString stringWithFormat:@"Error:%@ - %@", row.errorType, row.errorReason];
+            cell.messageStatus.text =[NSString stringWithFormat:@"Error: %@ - %@", row.errorType, row.errorReason];
             cell.messageStatus.hidden=NO;
         }
     }

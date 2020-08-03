@@ -36,10 +36,10 @@
 +(id) sharedInstanceForFile:(NSString*) dbFile
 {
 	NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-	if(threadData[@"_sqliteInstanceForThread"] && threadData[@"_sqliteInstanceForThread"][dbFile])
-		return threadData[@"_sqliteInstanceForThread"][dbFile];
+	if(threadData[@"_sqliteInstancesForThread"] && threadData[@"_sqliteInstancesForThread"][dbFile])
+		return threadData[@"_sqliteInstancesForThread"][dbFile];
 	MLSQLite* newInstance = [[self alloc] initWithFile:dbFile];
-	threadData[@"_sqliteInstanceForThread"] = @{dbFile: newInstance};          //save thread-local instance
+	threadData[@"_sqliteInstancesForThread"] = @{dbFile: newInstance};          //save thread-local instance
 	threadData[@"_sqliteTransactionRunning"] = [NSNumber numberWithInt:0];     //init data for nested transactions
 	return newInstance;
 }
@@ -63,7 +63,7 @@
     [self executeNonQuery:@"pragma journal_mode=WAL;" andArguments:nil];
     [self executeNonQuery:@"pragma synchronous=NORMAL;" andArguments:nil];
 
-    //truncate faster than del
+    //truncate is faster than delete
     [self executeNonQuery:@"pragma truncate;" andArguments:nil];
 
     return self;
@@ -71,12 +71,45 @@
 
 -(void) dealloc
 {
-    //we don't need to invalidate any entries in the thread dictionary because this dealloc will only happen when a thread is terminate anyway
-    DDLogVerbose(@"Closing database");
+    //this dealloc method will only be called if a thread gets terminated --> do some cleanup
+
+    //invalidate sqlite statements in the thread dict (they will not be deallocated automatically because they are no objc objects)
+    NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+    if(threadData[@"_sqliteStatementCache"])
+    {
+        for(NSString* query in threadData[@"_sqliteStatementCache"])
+        {
+            NSValue* value = threadData[@"_sqliteStatementCache"][query];
+            sqlite3_finalize((sqlite3_stmt*)[value pointerValue]);
+        }
+    }
+    
+    //we don't need to dealloc any objc objects because they will be deallocated automatically
+
+    DDLogVerbose(@"Closing database: %@", _dbFile);
     sqlite3_close(self->database);
 }
 
 #pragma mark - private sql api
+
+-(void) invalidateStatementForQuery:(NSString*) query
+{
+    if(!query)
+        return;
+
+    NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+
+    //init statement cache if neccessary
+    if(!threadData[@"_sqliteStatementCache"])
+        threadData[@"_sqliteStatementCache"] = [[NSMutableDictionary alloc] init];
+
+    //finalize sqlite statement
+    if(threadData[@"_sqliteStatementCache"][query])
+        sqlite3_finalize((sqlite3_stmt*)[threadData[@"_sqliteStatementCache"][query] pointerValue]);
+
+    //invalidate cache entry for this query
+    [threadData[@"_sqliteStatementCache"] removeObjectForKey:query];
+}
 
 -(sqlite3_stmt*) prepareQuery:(NSString*) query withArgs:(NSArray*) args
 {
@@ -92,7 +125,7 @@
         statement = (sqlite3_stmt*)[threadData[@"_sqliteStatementCache"][query] pointerValue];
     else
     {
-        if(sqlite3_prepare_v2(self->database, [query  cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) != SQLITE_OK)
+        if(sqlite3_prepare_v2(self->database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) != SQLITE_OK)
         {
             DDLogError(@"sqlite prepare '%@' failed: %s", query, sqlite3_errmsg(self->database));
             return NULL;
@@ -161,28 +194,39 @@
     return nil;
 }
 
+-(void) throwErrorForQuery:(NSString*) query
+{
+    NSString* error = [NSString stringWithFormat:@"%@ --> %@", query, [NSString stringWithUTF8String:sqlite3_errmsg(self->database)]];
+    @throw [NSException exceptionWithName:@"SQLite3Exception" reason:error userInfo:@{@"query": query}];
+}
+
 #pragma mark - V1 low level
 
 -(void) beginWriteTransaction
 {
 	NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-	threadData[@"_dbTransactionRunning"] = [NSNumber numberWithInt:[threadData[@"_dbTransactionRunning"] intValue] + 1];
-	if([threadData[@"_dbTransactionRunning"] intValue] > 1)
+    DDLogVerbose(@"threadData: %@", threadData);
+	threadData[@"_sqliteTransactionRunning"] = [NSNumber numberWithInt:[threadData[@"_sqliteTransactionRunning"] intValue] + 1];
+	if([threadData[@"_sqliteTransactionRunning"] intValue] > 1)
 		return;			//begin only outermost transaction
 	BOOL retval;
 	do {
 		retval=[self executeNonQuery:@"BEGIN IMMEDIATE TRANSACTION;" andArguments:nil];
+        DDLogVerbose(@"sqlite3 transaction begin query returned: %@", retval ? @"YES" : @"NO");
 		if(!retval)
-			[NSThread sleepForTimeInterval:0.001f];		//wait one millisecond and retry again
+			[NSThread sleepForTimeInterval:1.001f];		//wait one millisecond and retry again
 	} while(!retval);
 }
 
 -(void) endWriteTransaction
 {
 	NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-	threadData[@"_dbTransactionRunning"] = [NSNumber numberWithInt:[threadData[@"_dbTransactionRunning"] intValue] - 1];
-	if([threadData[@"_dbTransactionRunning"] intValue] == 0)
-		[self executeNonQuery:@"COMMIT;" andArguments:nil];		//commit only outermost transaction
+	threadData[@"_sqliteTransactionRunning"] = [NSNumber numberWithInt:[threadData[@"_sqliteTransactionRunning"] intValue] - 1];
+	if([threadData[@"_sqliteTransactionRunning"] intValue] == 0)
+    {
+		BOOL retval=[self executeNonQuery:@"COMMIT;" andArguments:nil];		//commit only outermost transaction
+		DDLogVerbose(@"sqlite3 transaction end query returned: %@", retval ? @"YES" : @"NO");
+    }
 }
 
 -(NSObject*) executeScalar:(NSString*) query andArguments:(NSArray*) args
@@ -192,27 +236,26 @@
     
     NSObject* __block toReturn;
     sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
-    if(statement!=NULL)
+    if(statement != NULL)
     {
-        if(sqlite3_step(statement) == SQLITE_ROW)
+        int step;
+        if((step=sqlite3_step(statement)) == SQLITE_ROW)
         {
             toReturn = [self getColumn:0 ofStatement:statement];
-            while(sqlite3_step(statement) == SQLITE_ROW) {}     //clear data of all other rows
+            while((step=sqlite3_step(statement)) == SQLITE_ROW) {}     //clear data of all other rows
         }
-        else
-        {
-            //DDLogVerbose(@"return nil with no row");
-            toReturn = nil;
-        }
+        if(step != SQLITE_DONE)
+            [self throwErrorForQuery:query];
     }
     else
     {
         //if noting else
         DDLogVerbose(@"returning nil with out OK %@", query);
         toReturn = nil;
-        sqlite3_finalize(statement);
+        [self invalidateStatementForQuery:query];
+        [self throwErrorForQuery:query];
     }
-    
+
     return toReturn;
 }
 
@@ -220,12 +263,13 @@
 {
     if(!query)
         return nil;
-    
+
     NSMutableArray* toReturn = [[NSMutableArray alloc] init];
     sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
     if(statement != NULL)
     {
-        while(sqlite3_step(statement) == SQLITE_ROW)
+        int step;
+        while((step=sqlite3_step(statement)) == SQLITE_ROW)
         {
             NSMutableDictionary* row = [[NSMutableDictionary alloc] init];
             int counter = 0;
@@ -240,15 +284,18 @@
             }
             [toReturn addObject:row];
         }
+        if(step != SQLITE_DONE)
+            [self throwErrorForQuery:query];
     }
     else
     {
         //if noting else
         DDLogVerbose(@"reader nil with sql not ok: %@", query);
         toReturn = nil;
-        sqlite3_finalize(statement);
+        [self invalidateStatementForQuery:query];
+        [self throwErrorForQuery:query];
     }
-    
+
     return toReturn;
 }
 
@@ -260,15 +307,23 @@
     sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
     if(statement != NULL)
     {
-        if(sqlite3_step(statement) == SQLITE_DONE)
+        int step;
+        while((step=sqlite3_step(statement)) == SQLITE_ROW) {}     //clear data of all returned rows
+        if(step == SQLITE_DONE)
             toReturn = YES;
         else
+        {
+            DDLogVerbose(@"sqlite3_step(%@): %d --> %@", query, step, [[NSThread currentThread] threadDictionary]);
+            [self throwErrorForQuery:query];
             toReturn = NO;
+        }
     }
     else
     {
         DDLogError(@"nonquery returning NO with out OK %@", query);
         toReturn = NO;
+        [self invalidateStatementForQuery:query];
+        [self throwErrorForQuery:query];
     }
     return toReturn;
 }

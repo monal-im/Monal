@@ -1257,16 +1257,8 @@ NSString *const kXMPPPresence = @"presence";
                         contact.state=presenceNode.show;
                         contact.statusMessage=presenceNode.status;
 
-                        [[DataLayer sharedInstance] addContact:[presenceNode.user copy] forAccount:self->_accountNo fullname:@"" nickname:@"" andMucNick:nil withCompletion:^(BOOL success) {
-                            if(!success)
-                            {
-                                DDLogVerbose(@"Contact already in list");
-                            }
-                            else
-                            {
-                                DDLogVerbose(@"Contact not already in list");
-                            }
-                        }];
+                        //add contact if possible (ignore already existing contacts)
+                        [[DataLayer sharedInstance] addContact:[presenceNode.user copy] forAccount:self->_accountNo fullname:@"" nickname:@"" andMucNick:nil withCompletion:nil];
 
                         //update buddy state
                         [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self->_accountNo];
@@ -1277,12 +1269,14 @@ NSString *const kXMPPPresence = @"presence";
                         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                             [[DataLayer sharedInstance] setLastInteraction:presenceNode.since forJid:presenceNode.user andAccountNo:self.accountNo];
                         });
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
-                            @"jid": presenceNode.user,
-                            @"accountNo": self.accountNo,
-                            @"lastInteraction": presenceNode.since ? presenceNode.since : [NSNull null],    //nil cannot directly be saved in NSDictionary
-                            @"isTyping": @NO
-                        }];
+                        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                                @"jid": presenceNode.user,
+                                @"accountNo": self.accountNo,
+                                @"lastInteraction": presenceNode.since ? presenceNode.since : [NSNull null],    //nil cannot directly be saved in NSDictionary
+                                @"isTyping": @NO
+                            }];
+                        });
 
                         if(!presenceNode.MUC)
                         {
@@ -1296,7 +1290,7 @@ NSString *const kXMPPPresence = @"presence";
                                     }
                                     else
                                     {
-                                        [[DataLayer sharedInstance]  setContactHash:presenceNode forAccount:self->_accountNo];
+                                        [[DataLayer sharedInstance] setContactHash:presenceNode forAccount:self->_accountNo];
                                         [self getVCard:presenceNode.user];
                                     }
                                 }];
@@ -1313,7 +1307,7 @@ NSString *const kXMPPPresence = @"presence";
                     [[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:self->_accountNo];
                 }
 
-                //handle entity capabilities
+                //handle entity capabilities (this has to be done *after* setOnlineBuddy which sets the ver hash for the resource to "")
                 if(presenceNode.capsHash && presenceNode.user && [presenceNode.user length]>0 && presenceNode.resource && [presenceNode.resource length]>0)
                 {
                     NSString* ver = [[DataLayer sharedInstance] getVerForUser:presenceNode.user andResource:presenceNode.resource];

@@ -603,9 +603,7 @@ NSString *const kXMPPPresence = @"presence";
             //persist these changes
             [self persistState];
             
-            //don't do this in Notification Service Extension
-            if(![HelperTools isAppExtension])
-                [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
+            [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
         }
         
         [self closeSocket];
@@ -1412,9 +1410,7 @@ NSString *const kXMPPPresence = @"presence";
         {
             if(self.resuming)   //resume failed
             {
-                //don't do this in Notification Service Extension
-                if(![HelperTools isAppExtension])
-                    [[DataLayer sharedInstance] resetContactsForAccount:self->_accountNo];
+                [[DataLayer sharedInstance] resetContactsForAccount:self->_accountNo];
 
                 self.resuming=NO;
 
@@ -1432,7 +1428,7 @@ NSString *const kXMPPPresence = @"presence";
             }
             else        //smacks enable failed
             {
-                self.connectionProperties.supportsSM3 = NO;
+                self.connectionProperties.supportsSM3=NO;
 
                 //init session and query disco, roster etc.
                 [self initSession];
@@ -1559,20 +1555,20 @@ NSString *const kXMPPPresence = @"presence";
             else
             {
                 if(streamNode.supportsClientState)
+                {
                     self.connectionProperties.supportsClientState=YES;
+                }
 
                 if(streamNode.supportsSM3)
-                    self.connectionProperties.supportsSM3 = YES;
-                else
                 {
-                    //don't do this in Notification Service Extension
-                    if(![HelperTools isAppExtension])
-                        [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
+                    self.connectionProperties.supportsSM3=YES;
+                } else {
+                    [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
                 }
 
                 if(streamNode.supportsRosterVer)
                 {
-                    self.connectionProperties.supportsRosterVersion = YES;
+                    self.connectionProperties.supportsRosterVersion=YES;
 
                 }
 
@@ -1594,12 +1590,7 @@ NSString *const kXMPPPresence = @"presence";
                     [self send:resumeNode];
                 }
                 else
-                {
-                    //don't do this in Notification Service Extension
-                    if(![HelperTools isAppExtension])
-                        [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
                     [self bindResource];
-                }
             }
         }
         else
@@ -1733,7 +1724,7 @@ NSString *const kXMPPPresence = @"presence";
     //don't use dispatchOnReceiveQueue here because we want to log that this switch happened in the send: call
     if([NSOperationQueue currentQueue]!=_receiveQueue)
     {
-        DDLogWarn(@"SWITCHING %@ TO RECEIVE QUEUE IN SEND (called from outside of receiveQueue): %@", async ? @"ASYNC" : @"SYNC", stanza.XMLString);
+        DDLogWarn(@"SWITCHING TO RECEIVE QUEUE IN SEND (called from outside of receiveQueue): %@", stanza.XMLString);
         [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:!async];
     }
     else
@@ -1872,10 +1863,6 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) persistState
 {
-    //ignore any state in Notification Service Extension
-    if([HelperTools isAppExtension])
-        return;
-    
     //state dictionary
     NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
 
@@ -1927,10 +1914,6 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) readState
 {
-    //ignore any state in Notification Service Extension
-    if([HelperTools isAppExtension])
-        return;
-    
     NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
     if(dic)
     {
@@ -2067,10 +2050,6 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) sendPresence
 {
-    //don't do this in Notification Service Extension
-    if([HelperTools isAppExtension])
-        return;
-    
     //don't send presences if we are not bound
     if(_accountState < kStateBound)
         return;
@@ -2425,10 +2404,6 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) sendCurrentCSIState
 {
-    //don't do this in Notification Service Extension
-    if([HelperTools isAppExtension])
-        return;
-    
     [self dispatchOnReceiveQueue: ^{
         //don't send anything before a resource is bound
         if(self.accountState<kStateBound || !self.connectionProperties.supportsClientState)

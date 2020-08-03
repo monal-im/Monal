@@ -60,7 +60,7 @@ static void logException(NSException* exception)
 -(id) init
 {
     self = [super init];
-    //self.processLock = [[MLProcessLock alloc] initWithProcessName:@"NotificationServiceExtension"];
+    self.processLock = [[MLProcessLock alloc] initWithProcessName:@"NotificationServiceExtension"];
     return self;
 }
 -(void) dealloc

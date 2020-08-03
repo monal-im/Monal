@@ -12,21 +12,27 @@
 #import "MLLogFormatter.h"
 #import "HelperTools.h"
 
-DDQualityOfServiceName const DDQualityOfServiceUserInteractive = @"UI";
-DDQualityOfServiceName const DDQualityOfServiceUserInitiated   = @"IN";
-DDQualityOfServiceName const DDQualityOfServiceDefault         = @"DF";
-DDQualityOfServiceName const DDQualityOfServiceUtility         = @"UT";
-DDQualityOfServiceName const DDQualityOfServiceBackground      = @"BG";
-DDQualityOfServiceName const DDQualityOfServiceUnspecified     = @"UN";
-
 static DDQualityOfServiceName _qos_name(NSUInteger qos) {
     switch ((qos_class_t) qos) {
-        case QOS_CLASS_USER_INTERACTIVE: return DDQualityOfServiceUserInteractive;
-        case QOS_CLASS_USER_INITIATED:   return DDQualityOfServiceUserInitiated;
-        case QOS_CLASS_DEFAULT:          return DDQualityOfServiceDefault;
-        case QOS_CLASS_UTILITY:          return DDQualityOfServiceUtility;
-        case QOS_CLASS_BACKGROUND:       return DDQualityOfServiceBackground;
-        default:                         return DDQualityOfServiceUnspecified;
+        case QOS_CLASS_USER_INTERACTIVE: return @"UI";
+        case QOS_CLASS_USER_INITIATED:   return @"IN";
+        case QOS_CLASS_DEFAULT:          return @"DF";
+        case QOS_CLASS_UTILITY:          return @"UT";
+        case QOS_CLASS_BACKGROUND:       return @"BG";
+        default:                         return @"UN";
+    }
+}
+
+static NSString* _loglevel_name(NSUInteger level) {
+    switch ((DDLogLevel) level) {
+        case DDLogLevelOff:     return @"  OFF";
+        case DDLogLevelError:   return @"ERROR";
+        case DDLogLevelWarning: return @" WARN";
+        case DDLogLevelInfo:    return @" INFO";
+        case DDLogLevelDebug:   return @"DEBUG";
+        case DDLogLevelVerbose: return @" VERB";
+        case DDLogLevelAll:     return @"  ALL";
+        default:                return @" UNKN";
     }
 }
 
@@ -39,13 +45,15 @@ static DDQualityOfServiceName _qos_name(NSUInteger qos) {
 
 -(NSString*) formatLogMessage:(DDLogMessage*) logMessage
 {
-    NSString *timestamp = [self stringFromDate:(logMessage->_timestamp)];
-    NSString *queueThreadLabel = [self queueThreadLabelForLogMessage:logMessage];
+    NSString* timestamp = [self stringFromDate:(logMessage->_timestamp)];
+    NSString* queueThreadLabel = [self queueThreadLabelForLogMessage:logMessage];
 
 #if TARGET_OS_SIMULATOR
-    return [NSString stringWithFormat:@"%@ [%@ (QOS:%@)] %@", [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage->_qos), logMessage->_message];
+    return [NSString stringWithFormat:@"[%@] %@ [%@ (QOS:%@)] %@", _loglevel_name(logMessage->_level), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage->_qos), logMessage->_message];
 #else
-    return [NSString stringWithFormat:@"%@ %@ [%@ (QOS:%@)] %@", timestamp, [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage->_qos), logMessage->_message];
+    if(![queueThreadLabel isEqualToString:logMessage->_threadID])
+        queueThreadLabel = [NSString stringWithFormat:@"%@:%@", logMessage->_threadID, queueThreadLabel];
+    return [NSString stringWithFormat:@"[%@] %@ %@ [%@ (QOS:%@)] %@", _loglevel_name(logMessage->_level), timestamp, [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage->_qos), logMessage->_message];
 #endif
 }
 

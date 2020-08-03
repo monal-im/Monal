@@ -94,7 +94,6 @@
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
-    [nc addObserver:self selector:@selector(handleSendFailedMessage:) name:kMonalSendFailedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleMessageError:) name:kMonalMessageErrorNotice object:nil];
     
@@ -1132,18 +1131,23 @@
 -(void) setMessageId:(NSString *) messageId delivered:(BOOL) delivered
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        int row=0;
-        NSIndexPath *indexPath;
-        for(MLMessage *message in self.messageList)
+        int row = 0;
+        NSIndexPath* indexPath;
+        for(MLMessage* message in self.messageList)
         {
-            if([message.messageId isEqualToString:messageId]) {
-                message.hasBeenSent=delivered;
-                indexPath =[NSIndexPath indexPathForRow:row inSection:0];
+            if([message.messageId isEqualToString:messageId])
+            {
+                message.hasBeenSent = delivered;
+                //we don't want messages that have been received to be marked as not sent
+                if(message.hasBeenReceived && !delivered)
+                    message.hasBeenSent = YES;
+                indexPath = [NSIndexPath indexPathForRow:row inSection:0];
                 break;
             }
             row++;
         }
-        if(indexPath) {
+        if(indexPath)
+        {
             [self->_messageTable beginUpdates];
             [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
             [self->_messageTable endUpdates];
@@ -1154,19 +1158,21 @@
 -(void) setMessageId:(NSString *) messageId received:(BOOL) received
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        int row=0;
-        NSIndexPath *indexPath;
-        for(MLMessage *message in self.messageList)
+        int row = 0;
+        NSIndexPath* indexPath;
+        for(MLMessage* message in self.messageList)
         {
             if([message.messageId isEqualToString:messageId]) {
-                message.hasBeenReceived=received;
-                indexPath =[NSIndexPath indexPathForRow:row inSection:0];
+                message.hasBeenSent = YES;
+                message.hasBeenReceived = received;
+                indexPath = [NSIndexPath indexPathForRow:row inSection:0];
                 break;
             }
             row++;
         }
         
-        if(indexPath) {
+        if(indexPath)
+        {
             [self->_messageTable beginUpdates];
             [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
             [self->_messageTable endUpdates];
@@ -1175,16 +1181,10 @@
 }
 
 
--(void) handleSendFailedMessage:(NSNotification*) notification
-{
-    NSDictionary *dic =notification.userInfo;
-    [self setMessageId:[dic objectForKey:kMessageId]  delivered:NO];
-}
-
 -(void) handleSentMessage:(NSNotification*) notification
 {
-    NSDictionary *dic =notification.userInfo;
-    [self setMessageId:[dic objectForKey:kMessageId]  delivered:YES];
+    NSDictionary* dic = notification.userInfo;
+    [self setMessageId:[dic objectForKey:kMessageId] delivered:YES];
 }
 
 
@@ -1192,22 +1192,25 @@
 {
     NSDictionary *dic =notification.userInfo;
    
-    NSString *messageId= [dic objectForKey:kMessageId];
+    NSString* messageId = [dic objectForKey:kMessageId];
     dispatch_async(dispatch_get_main_queue(), ^{
         int row=0;
         NSIndexPath *indexPath;
         for(MLMessage *message in self.messageList)
         {
-            if([message.messageId isEqualToString:messageId] && !message.hasBeenReceived) {
-                message.errorType=[dic objectForKey:@"errorType"];
-                message.errorReason=[dic objectForKey:@"errorReason"];
+            //we don't want to show errors if the message has been received at least once or if the message wasn't even sent
+            if([message.messageId isEqualToString:messageId] && message.hasBeenSent && !message.hasBeenReceived)
+            {
+                message.errorType = [dic objectForKey:@"errorType"];
+                message.errorReason = [dic objectForKey:@"errorReason"];
                 message.hasBeenSent = NO;
-                indexPath =[NSIndexPath indexPathForRow:row inSection:0];
+                indexPath = [NSIndexPath indexPathForRow:row inSection:0];
                 break;
             }
             row++;
         }
-        if(indexPath) {
+        if(indexPath)
+        {
             [self->_messageTable beginUpdates];
             [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
             [self->_messageTable endUpdates];
@@ -1215,10 +1218,10 @@
     });
 }
 
--(void) refreshMessage:(NSNotification *)notification
+-(void) refreshMessage:(NSNotification*) notification
 {
-    NSDictionary *dic =notification.userInfo;
-    [self setMessageId:[dic  objectForKey:kMessageId]  received:YES];
+    NSDictionary *dic = notification.userInfo;
+    [self setMessageId:[dic  objectForKey:kMessageId] received:YES];
 }
 
 
@@ -1312,19 +1315,19 @@
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Retry sending message?",@ "") message:NSLocalizedString(@"This message failed to send.",@ "") preferredStyle:UIAlertControllerStyleActionSheet];
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Retry",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
-        if([messageArray count]>0) {
-            NSDictionary *dic= [messageArray objectAtIndex:0];
+        if([messageArray count] > 0)
+        {
+            NSDictionary *dic = [messageArray objectAtIndex:0];
             [self sendMessage:[dic objectForKey:@"message"] andMessageID:[dic objectForKey:@"messageid"]];
             [self setMessageId:[dic objectForKey:@"messageid"] delivered:YES]; // for the UI, db will be set in the notification
         }
     }]];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         [self dismissViewControllerAnimated:YES completion:nil];
     }]];
-    alert.popoverPresentationController.sourceView=sender;
+    alert.popoverPresentationController.sourceView = sender;
     
     [self presentViewController:alert animated:YES completion:nil];
-    
 }
 
 #pragma mark - tableview datasource
@@ -1351,7 +1354,7 @@
     return toReturn;
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+-(UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
 {
     MLBaseCell* cell;
     
@@ -1443,7 +1446,8 @@
         cell=imageCell;
         
     }
-    else if ([row.messageType isEqualToString:kMessageTypeUrl]) {
+    else if([row.messageType isEqualToString:kMessageTypeUrl])
+    {
         MLLinkCell *toreturn;
         if([from isEqualToString:self.contact.contactJid]) {
             toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
@@ -1466,13 +1470,17 @@
             [toreturn loadImageWithCompletion:^{
                 
             }];
-        }  else {
+        }
+        else
+        {
             [toreturn loadPreviewWithCompletion:^{
-                if(toreturn.messageTitle.text.length==0) toreturn.messageTitle.text=@" "; // prevent repeated calls
-                [[DataLayer sharedInstance] setMessageId:row.messageId previewText:toreturn.messageTitle.text  andPreviewImage:toreturn.imageUrl.absoluteString];
+                // prevent repeated calls
+                if(toreturn.messageTitle.text.length==0)
+                    toreturn.messageTitle.text = @" ";
+                [[DataLayer sharedInstance] setMessageId:row.messageId previewText:toreturn.messageTitle.text andPreviewImage:toreturn.imageUrl.absoluteString];
             }];
         }
-        cell=toreturn;
+        cell = toreturn;
     } else if ([row.messageType isEqualToString:kMessageTypeGeo]) {
         // Parse latitude and longitude
         NSString* geoPattern = @"^geo:(-?(?:90|[1-8][0-9]|[0-9])(?:\\.[0-9]{1,32})?),(-?(?:180|1[0-7][0-9]|[0-9]{1,2})(?:\\.[0-9]{1,32})?)$";

@@ -42,7 +42,6 @@ typedef void (^monal_void_block_t)();
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
 #define kMLMessageSentToContact @"kMLMessageSentToContact"
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"
-#define kMonalSendFailedMessageNotice @"kMonalSendFailedMessageNotice"
 
 #define kMonalLastInteractionUpdatedNotice @"kMonalLastInteractionUpdatedNotice"
 #define kMonalMessageReceivedNotice @"kMonalMessageReceivedNotice"

@@ -1203,37 +1203,49 @@ static NSDateFormatter* dbFormatter;
 
 -(void) setMessageId:(NSString*) messageid delivered:(BOOL) delivered
 {
-    NSString* query = [NSString stringWithFormat:@"update message_history set delivered=? where messageid=?"];
-    DDLogVerbose(@" setting delivered %@", query);
-    [self.sqliteDatabase executeNonQuery:query  andArguments:@[[NSNumber numberWithBool:delivered], messageid]  withCompletion:nil];
+    //force delivered YES if the message was already received
+    if(!delivered)
+    {
+        if([self.sqliteDatabase executeScalar:@"SELECT messageid FROM message_history WHERE messageid=? && received" andArguments:@[messageid]])
+            delivered = YES;
+    }
+    NSString* query = [NSString stringWithFormat:@"update message_history set delivered=? where messageid=? and not delivered"];
+    DDLogVerbose(@"setting delivered %@", messageid);
+    [self.sqliteDatabase executeNonQuery:query andArguments:@[[NSNumber numberWithBool:delivered], messageid]];
 }
 
 -(void) setMessageId:(NSString*) messageid received:(BOOL) received
 {
-    NSString* query = [NSString stringWithFormat:@"update message_history set received=? where messageid=?"];
-    DDLogVerbose(@" setting received confrmed %@", query);
-    [self.sqliteDatabase executeNonQuery:query andArguments:@[[NSNumber numberWithBool:received], messageid]  withCompletion:nil];
+    NSString* query = [NSString stringWithFormat:@"update message_history set received=?, delivered=? where messageid=?"];
+    DDLogVerbose(@"setting received confrmed %@", messageid);
+    [self.sqliteDatabase executeNonQuery:query andArguments:@[[NSNumber numberWithBool:received], [NSNumber numberWithBool:YES], messageid]];
 }
 
--(void) setMessageId:(NSString*) messageid errorType:(NSString *) errorType errorReason:(NSString *)errorReason
+-(void) setMessageId:(NSString*) messageid errorType:(NSString*) errorType errorReason:(NSString*) errorReason
 {
+    //ignore error if the message was already received by *some* client
+    if([self.sqliteDatabase executeScalar:@"SELECT messageid FROM message_history WHERE messageid=? && received" andArguments:@[messageid]])
+    {
+        DDLogVerbose(@"ignoring message error for %@ [%@, %@]", messageid, errorType, errorReason);
+        return;
+    }
     NSString* query = [NSString stringWithFormat:@"update message_history set errorType=?, errorReason=? where messageid=?"];
-    DDLogVerbose(@" setting message Error %@", query);
-    [self.sqliteDatabase executeNonQuery:query  andArguments:@[errorType, errorReason, messageid]  withCompletion:nil];
+    DDLogVerbose(@"setting message error %@ [%@, %@]", messageid, errorType, errorReason);
+    [self.sqliteDatabase executeNonQuery:query andArguments:@[errorType, errorReason, messageid]  withCompletion:nil];
 }
 
 -(void) setMessageId:(NSString*) messageid messageType:(NSString *) messageType
 {
     NSString* query = [NSString stringWithFormat:@"update message_history set messageType=? where messageid=?"];
-    DDLogVerbose(@" setting message type %@", query);
-    [self.sqliteDatabase executeNonQuery:query  andArguments:@[messageType, messageid]  withCompletion:nil];
+    DDLogVerbose(@"setting message type %@", messageid);
+    [self.sqliteDatabase executeNonQuery:query andArguments:@[messageType, messageid]  withCompletion:nil];
 }
 
 -(void) setMessageId:(NSString*) messageid previewText:(NSString *) text andPreviewImage:(NSString *) image
 {
     if(!messageid) return;
     NSString* query = [NSString stringWithFormat:@"update message_history set previewText=?,  previewImage=? where messageid=?"];
-    DDLogVerbose(@" setting previews type %@", query);
+    DDLogVerbose(@"setting previews type %@", messageid);
     [self.sqliteDatabase executeNonQuery:query  andArguments:@[text?text:@"", image?image:@"", messageid]  withCompletion:nil];
 }
 

@@ -38,14 +38,7 @@ static const int sendMessageTimeoutSeconds = 10;
     void (^_pushCompletion)(UIBackgroundFetchResult result);
     monal_void_block_t _cancelPushTimer;
 }
-
-/**
-An array of Dics what have timers to make sure everything was sent
- */
-@property (nonatomic, strong) NSMutableArray *timerList;
-
 @end
-
 
 @implementation MLXMPPManager
 
@@ -664,45 +657,8 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC  isUpload:(BOOL) isUpload messageId:(NSString *) messageId withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
-    dispatch_source_t sendTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0));
-    dispatch_source_set_timer(sendTimer,
-                                dispatch_time(DISPATCH_TIME_NOW, sendMessageTimeoutSeconds*NSEC_PER_SEC),
-                                DISPATCH_TIME_FOREVER,
-                                5ull * NSEC_PER_SEC);
-
-    dispatch_source_set_event_handler(sendTimer, ^{
-        DDLogError(@"send message  timed out");
-        int counter=0;
-        int removalCounter=-1;
-        for(NSDictionary *dic in  self.timerList) {
-            if([dic objectForKey:kSendTimer] == sendTimer) {
-                [[DataLayer sharedInstance] setMessageId:[dic objectForKey:kMessageId] delivered:NO];
-                if(self) { // chekcing for possible zombie
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalSendFailedMessageNotice object:self userInfo:dic];
-                }
-                removalCounter=counter;
-                break;
-            }
-            counter++;
-        }
-
-        if(removalCounter>=0) {
-            [self.timerList removeObjectAtIndex:removalCounter];
-        }
-
-        dispatch_source_cancel(sendTimer);
-    });
-
-    dispatch_source_set_cancel_handler(sendTimer, ^{
-        DDLogError(@"send message timer cancelled");
-    });
-
-    dispatch_resume(sendTimer);
-    NSDictionary *dic = @{kSendTimer:sendTimer,kMessageId:messageId};
-    [self.timerList addObject:dic];
-
     BOOL success=NO;
-    xmpp* account=[self getConnectedAccountForID:accountNo];
+    xmpp* account = [self getConnectedAccountForID:accountNo];
     if(account)
     {
         success=YES;
@@ -934,42 +890,15 @@ An array of Dics what have timers to make sure everything was sent
 }
 
 
--(void) handleSentMessage:(NSNotification *)notification
+-(void) handleSentMessage:(NSNotification*) notification
 {
     NSDictionary *info = notification.userInfo;
     NSString *messageId = [info objectForKey:kMessageId];
+    DDLogInfo(@"message %@ sent, setting status to delivered", messageId);
     [[DataLayer sharedInstance] setMessageId:messageId delivered:YES];
-    DDLogInfo(@"message %@ sent, removing timer",messageId);
-
-    int counter=0;
-    int removalCounter=-1;
-    for (NSDictionary * dic in self.timerList)
-    {
-        if([[dic objectForKey:kMessageId] isEqualToString:messageId])
-        {
-            dispatch_source_t sendTimer = [dic objectForKey:kSendTimer];
-            dispatch_source_cancel(sendTimer);
-            removalCounter=counter;
-            break;
-        }
-        counter++;
-    }
-
-    if(removalCounter>=0) {
-        [self.timerList removeObjectAtIndex:removalCounter];
-    }
 }
 
 #pragma mark - properties
-
--(NSMutableArray *)timerList
-{
-    if(!_timerList)
-    {
-        _timerList=[[NSMutableArray alloc] init];
-    }
-    return  _timerList;
-}
 
 -(void) cleanArrayOfConnectedAccounts:(NSMutableArray*) dirtySet
 {

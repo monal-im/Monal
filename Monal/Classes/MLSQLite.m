@@ -58,6 +58,28 @@
         DDLogError(@"Error opening database: %@", _dbFile);
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"sqlite3_open_v2() failed" userInfo:nil];
     }
+    
+    //use this observer because dealloc will not be called in the same thread as the sqlite statements got prepared
+    [[NSNotificationCenter defaultCenter] addObserverForName:NSThreadWillExitNotification object:[NSThread currentThread] queue:nil usingBlock:^(NSNotification* notification) {
+        /*NSThread* thread = (NSThread*)notification.object;
+        DDLogInfo(@"Thread exiting, cleaning up prepared statements");
+        NSAssert(thread==[NSThread currentThread], @"THREADS NOT EQUAL: thread=%@ currentThread=%@", thread, [NSThread currentThread]);
+        
+        //invalidate sqlite statements in the thread dict (they will not be deallocated automatically because they are no objc objects)
+        NSMutableDictionary* threadData = [thread threadDictionary];//[[NSThread currentThread] threadDictionary];
+        if(threadData[@"_sqliteStatementCache"])
+        {
+            for(NSString* query in threadData[@"_sqliteStatementCache"])
+            {
+                sqlite3_stmt* statement = (sqlite3_stmt*)[threadData[@"_sqliteStatementCache"][query] pointerValue];
+                //DDLogVerbose(@"invalidating %@ --> %p (%@)[%p]", query, statement, [NSThread currentThread], self->database);
+                sqlite3_finalize(statement);
+            }
+        }*/
+        
+        DDLogInfo(@"Closing database: %@", _dbFile);
+        sqlite3_close(self->database);
+    }];
 
     //use WAL mode for db to speedup access using multiple threads
     [self executeNonQuery:@"pragma journal_mode=WAL;" andArguments:nil];
@@ -67,27 +89,6 @@
     [self executeNonQuery:@"pragma truncate;" andArguments:nil];
 
     return self;
-}
-
--(void) dealloc
-{
-    //this dealloc method will only be called if a thread gets terminated --> do some cleanup
-
-    //invalidate sqlite statements in the thread dict (they will not be deallocated automatically because they are no objc objects)
-    NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-    if(threadData[@"_sqliteStatementCache"])
-    {
-        for(NSString* query in threadData[@"_sqliteStatementCache"])
-        {
-            NSValue* value = threadData[@"_sqliteStatementCache"][query];
-            sqlite3_finalize((sqlite3_stmt*)[value pointerValue]);
-        }
-    }
-    
-    //we don't need to dealloc any objc objects because they will be deallocated automatically
-
-    DDLogVerbose(@"Closing database: %@", _dbFile);
-    sqlite3_close(self->database);
 }
 
 #pragma mark - private sql api
@@ -116,7 +117,7 @@
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
     sqlite3_stmt* statement;
 
-    //init statement cache if neccessary
+    /*//init statement cache if neccessary
     if(!threadData[@"_sqliteStatementCache"])
         threadData[@"_sqliteStatementCache"] = [[NSMutableDictionary alloc] init];
 
@@ -124,35 +125,45 @@
     if(threadData[@"_sqliteStatementCache"][query])
         statement = (sqlite3_stmt*)[threadData[@"_sqliteStatementCache"][query] pointerValue];
     else
-    {
+    {*/
         if(sqlite3_prepare_v2(self->database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) != SQLITE_OK)
         {
             DDLogError(@"sqlite prepare '%@' failed: %s", query, sqlite3_errmsg(self->database));
             return NULL;
         }
-        threadData[@"_sqliteStatementCache"][query] = [NSValue valueWithPointer:statement];
+        /*threadData[@"_sqliteStatementCache"][query] = [NSValue valueWithPointer:statement];
     }
+    //DDLogVerbose(@"prepareQuery: %@ --> %p (%@)[%p]", query, statement, [NSThread currentThread], self->database);*/
     
     //bind args to statement
     sqlite3_reset(statement);
     [args enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if([obj isKindOfClass:[NSNumber class]])
         {
-            NSNumber *number = (NSNumber *) obj;
+            NSNumber* number = (NSNumber*)obj;
             if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]) != SQLITE_OK)
-                DDLogError(@"number bind error");
+            {
+                DDLogError(@"number bind error: %@", number);
+                [self throwErrorForQuery:query];
+            }
         }
         else if([obj isKindOfClass:[NSString class]])
         {
-            NSString *text = (NSString *) obj;
+            NSString* text = (NSString*)obj;
             if(sqlite3_bind_text(statement, (signed)idx+1, [text cStringUsingEncoding:NSUTF8StringEncoding], -1, SQLITE_TRANSIENT) != SQLITE_OK)
-                DDLogError(@"string bind error");
+            {
+                DDLogError(@"text bind error: %@", text);
+                [self throwErrorForQuery:query];
+            }
         }
         else if([obj isKindOfClass:[NSData class]])
         {
-            NSData* data = (NSData *) obj;
+            NSData* data = (NSData*)obj;
             if(sqlite3_bind_blob(statement, (signed)idx+1, [data bytes], (int)data.length, SQLITE_TRANSIENT) != SQLITE_OK)
-                DDLogError(@"blob bind error");
+            {
+                DDLogError(@"blob bind error: %@", data);
+                [self throwErrorForQuery:query];
+            }
         }
     }];
     
@@ -200,21 +211,50 @@
     @throw [NSException exceptionWithName:@"SQLite3Exception" reason:error userInfo:@{@"query": query}];
 }
 
+-(BOOL) executeNonQuery:(NSString*) query andArguments:(NSArray *) args withException:(BOOL) throwException
+{
+    if(!query)
+        return NO;
+    BOOL toReturn;
+    sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
+    if(statement != NULL)
+    {
+        int step;
+        while((step=sqlite3_step(statement)) == SQLITE_ROW) {}     //clear data of all returned rows
+        if(step == SQLITE_DONE)
+            toReturn = YES;
+        else
+        {
+            DDLogVerbose(@"sqlite3_step(%@): %d --> %@", query, step, [[NSThread currentThread] threadDictionary]);
+            if(throwException)
+                [self throwErrorForQuery:query];
+            toReturn = NO;
+        }
+    }
+    else
+    {
+        DDLogError(@"nonquery returning NO with out OK %@", query);
+        toReturn = NO;
+        [self invalidateStatementForQuery:query];
+        [self throwErrorForQuery:query];
+    }
+    sqlite3_reset(statement);
+    return toReturn;
+}
+
 #pragma mark - V1 low level
 
 -(void) beginWriteTransaction
 {
 	NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-    DDLogVerbose(@"threadData: %@", threadData);
 	threadData[@"_sqliteTransactionRunning"] = [NSNumber numberWithInt:[threadData[@"_sqliteTransactionRunning"] intValue] + 1];
 	if([threadData[@"_sqliteTransactionRunning"] intValue] > 1)
 		return;			//begin only outermost transaction
 	BOOL retval;
 	do {
-		retval=[self executeNonQuery:@"BEGIN IMMEDIATE TRANSACTION;" andArguments:nil];
-        DDLogVerbose(@"sqlite3 transaction begin query returned: %@", retval ? @"YES" : @"NO");
+		retval=[self executeNonQuery:@"BEGIN IMMEDIATE TRANSACTION;" andArguments:nil withException:NO];
 		if(!retval)
-			[NSThread sleepForTimeInterval:1.001f];		//wait one millisecond and retry again
+			[NSThread sleepForTimeInterval:0.001f];		//wait one millisecond and retry again
 	} while(!retval);
 }
 
@@ -223,10 +263,7 @@
 	NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
 	threadData[@"_sqliteTransactionRunning"] = [NSNumber numberWithInt:[threadData[@"_sqliteTransactionRunning"] intValue] - 1];
 	if([threadData[@"_sqliteTransactionRunning"] intValue] == 0)
-    {
-		BOOL retval=[self executeNonQuery:@"COMMIT;" andArguments:nil];		//commit only outermost transaction
-		DDLogVerbose(@"sqlite3 transaction end query returned: %@", retval ? @"YES" : @"NO");
-    }
+		[self executeNonQuery:@"COMMIT;" andArguments:nil];		//commit only outermost transaction
 }
 
 -(NSObject*) executeScalar:(NSString*) query andArguments:(NSArray*) args
@@ -255,7 +292,7 @@
         [self invalidateStatementForQuery:query];
         [self throwErrorForQuery:query];
     }
-
+    sqlite3_reset(statement);
     return toReturn;
 }
 
@@ -295,37 +332,13 @@
         [self invalidateStatementForQuery:query];
         [self throwErrorForQuery:query];
     }
-
+    sqlite3_reset(statement);
     return toReturn;
 }
 
 -(BOOL) executeNonQuery:(NSString*) query andArguments:(NSArray *) args
 {
-    if(!query)
-        return NO;
-    BOOL toReturn;
-    sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
-    if(statement != NULL)
-    {
-        int step;
-        while((step=sqlite3_step(statement)) == SQLITE_ROW) {}     //clear data of all returned rows
-        if(step == SQLITE_DONE)
-            toReturn = YES;
-        else
-        {
-            DDLogVerbose(@"sqlite3_step(%@): %d --> %@", query, step, [[NSThread currentThread] threadDictionary]);
-            [self throwErrorForQuery:query];
-            toReturn = NO;
-        }
-    }
-    else
-    {
-        DDLogError(@"nonquery returning NO with out OK %@", query);
-        toReturn = NO;
-        [self invalidateStatementForQuery:query];
-        [self throwErrorForQuery:query];
-    }
-    return toReturn;
+    return [self executeNonQuery:query andArguments:args withException:YES];
 }
 
 #pragma mark - V2 low level
@@ -364,6 +377,11 @@
     BOOL retval = [self executeNonQuery:query andArguments:args];
     if(completion)
         completion(retval);
+}
+
+-(NSNumber*) lastInsertId
+{
+    return [NSNumber numberWithInt:sqlite3_last_insert_rowid(self->database)];
 }
 
 @end

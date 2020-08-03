@@ -25,6 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) executeScalar:(NSString*) query andArguments:(NSArray*) args withCompletion:(void (^)(NSObject*)) completion;
 -(void) executeReader:(NSString*) query andArguments:(NSArray*) args withCompletion:(void (^)(NSMutableArray*)) completion;
 -(void) executeNonQuery:(NSString*) query andArguments:(NSArray*) args  withCompletion:(void (^)(BOOL)) completion;
+-(NSNumber*) lastInsertId;
 
 @end
 

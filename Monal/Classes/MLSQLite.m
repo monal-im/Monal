@@ -84,6 +84,7 @@
     //use WAL mode for db to speedup access using multiple threads
     [self executeNonQuery:@"pragma journal_mode=WAL;" andArguments:nil];
     [self executeNonQuery:@"pragma synchronous=NORMAL;" andArguments:nil];
+    [self executeNonQuery:@"pragma busy_timeout=1000;" andArguments:nil];
 
     //truncate is faster than delete
     [self executeNonQuery:@"pragma truncate;" andArguments:nil];
@@ -93,7 +94,7 @@
 
 #pragma mark - private sql api
 
--(void) invalidateStatementForQuery:(NSString*) query
+/*-(void) invalidateStatementForQuery:(NSString*) query
 {
     if(!query)
         return;
@@ -110,7 +111,7 @@
 
     //invalidate cache entry for this query
     [threadData[@"_sqliteStatementCache"] removeObjectForKey:query];
-}
+}*/
 
 -(sqlite3_stmt*) prepareQuery:(NSString*) query withArgs:(NSArray*) args
 {
@@ -221,6 +222,7 @@
     {
         int step;
         while((step=sqlite3_step(statement)) == SQLITE_ROW) {}     //clear data of all returned rows
+        sqlite3_reset(statement);
         if(step == SQLITE_DONE)
             toReturn = YES;
         else
@@ -235,10 +237,10 @@
     {
         DDLogError(@"nonquery returning NO with out OK %@", query);
         toReturn = NO;
-        [self invalidateStatementForQuery:query];
+        //[self invalidateStatementForQuery:query];
+        sqlite3_finalize(statement);
         [self throwErrorForQuery:query];
     }
-    sqlite3_reset(statement);
     return toReturn;
 }
 
@@ -281,6 +283,7 @@
             toReturn = [self getColumn:0 ofStatement:statement];
             while((step=sqlite3_step(statement)) == SQLITE_ROW) {}     //clear data of all other rows
         }
+        sqlite3_reset(statement);
         if(step != SQLITE_DONE)
             [self throwErrorForQuery:query];
     }
@@ -289,10 +292,10 @@
         //if noting else
         DDLogVerbose(@"returning nil with out OK %@", query);
         toReturn = nil;
-        [self invalidateStatementForQuery:query];
+        //[self invalidateStatementForQuery:query];
+        sqlite3_finalize(statement);
         [self throwErrorForQuery:query];
     }
-    sqlite3_reset(statement);
     return toReturn;
 }
 
@@ -321,6 +324,7 @@
             }
             [toReturn addObject:row];
         }
+        sqlite3_reset(statement);
         if(step != SQLITE_DONE)
             [self throwErrorForQuery:query];
     }
@@ -329,10 +333,10 @@
         //if noting else
         DDLogVerbose(@"reader nil with sql not ok: %@", query);
         toReturn = nil;
-        [self invalidateStatementForQuery:query];
+        //[self invalidateStatementForQuery:query];
+        sqlite3_finalize(statement);
         [self throwErrorForQuery:query];
     }
-    sqlite3_reset(statement);
     return toReturn;
 }
 

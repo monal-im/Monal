@@ -13,7 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 +(BOOL) checkRemoteRunning:(NSString*) processName;
 +(void) waitForRemoteStartup:(NSString*) processName;
 +(void) waitForRemoteTermination:(NSString*) processName;
--(id) initWithProcessName:(NSString*) processName;
++(void) lock;
++(void) unlock;
 
 @end
 

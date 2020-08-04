@@ -16,6 +16,8 @@
 #import "MLPush.h"
 #import "MLImageManager.h"
 #import "ActiveChatsViewController.h"
+#import "IPC.h"
+#import "MLProcessLock.h"
 
 @import NotificationBannerSwift;
 
@@ -23,7 +25,6 @@
 #import "UIColor+Theme.h"
 
 @interface MonalAppDelegate()
-@property (nonatomic, strong) MLProcessLock* processLock;
 @property (nonatomic, weak) ActiveChatsViewController* activeChats;
 @end
 
@@ -203,8 +204,8 @@ static void logException(NSException* exception)
         DDLogInfo(@"Migration complete and written to disk");
     }
     
-    //init process lock
-    self.processLock = [[MLProcessLock alloc] initWithProcessName:@"MainApp"];
+    //init IPC and ProcessLock
+    [IPC initializeForProcess:@"MainApp"];
     
     //log service extension status
     /*dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -222,7 +223,8 @@ static void logException(NSException* exception)
         }
     });*/
 
-    //only proceed with launching if the NotificationServiceExtension is not running
+    //lock current process and only proceed with launching if the NotificationServiceExtension is not running
+    [MLProcessLock lock];
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
     {
         DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");

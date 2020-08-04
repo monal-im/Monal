@@ -48,11 +48,12 @@ static NSString* _loglevel_name(NSUInteger level) {
     NSString* timestamp = [self stringFromDate:(logMessage->_timestamp)];
     NSString* queueThreadLabel = [self queueThreadLabelForLogMessage:logMessage];
 
+    if(![queueThreadLabel isEqualToString:logMessage->_threadID])
+        queueThreadLabel = [NSString stringWithFormat:@"%@:%@", logMessage->_threadID, queueThreadLabel];
+
 #if TARGET_OS_SIMULATOR
     return [NSString stringWithFormat:@"[%@] %@ [%@ (QOS:%@)] %@", _loglevel_name(logMessage->_level), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage->_qos), logMessage->_message];
 #else
-    if(![queueThreadLabel isEqualToString:logMessage->_threadID])
-        queueThreadLabel = [NSString stringWithFormat:@"%@:%@", logMessage->_threadID, queueThreadLabel];
     return [NSString stringWithFormat:@"[%@] %@ %@ [%@ (QOS:%@)] %@", _loglevel_name(logMessage->_level), timestamp, [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage->_qos), logMessage->_message];
 #endif
 }

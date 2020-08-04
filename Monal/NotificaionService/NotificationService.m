@@ -9,6 +9,7 @@
 #import "NotificationService.h"
 #import "MLConstants.h"
 #import "HelperTools.h"
+#import "IPC.h"
 #import "MLProcessLock.h"
 #import "MLXMPPManager.h"
 #import "MLNotificationManager.h"
@@ -26,7 +27,6 @@ static void logException(NSException* exception)
 
 @property (atomic, strong) void (^contentHandler)(UNNotificationContent* contentToDeliver);
 @property (atomic, strong) UNMutableNotificationContent* bestAttemptContent;
-@property (atomic, strong) MLProcessLock* processLock;
 
 @end
 
@@ -41,6 +41,9 @@ static void logException(NSException* exception)
     
     [HelperTools activityLog];
     
+    //init IPC
+    [IPC initializeForProcess:@"NotificationServiceExtension"];
+    
     //handle message notifications by initializing the MLNotificationManager
     [MLNotificationManager sharedInstance];
     
@@ -54,13 +57,13 @@ static void logException(NSException* exception)
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
     DDLogInfo(@"Notification Service Extension started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
-    usleep(100000);     //wait for connectivity check
+    usleep(100000);     //wait for initial connectivity check
 }
 
 -(id) init
 {
     self = [super init];
-    self.processLock = [[MLProcessLock alloc] initWithProcessName:@"NotificationServiceExtension"];
+    [MLProcessLock lock];
     return self;
 }
 -(void) dealloc
@@ -68,6 +71,7 @@ static void logException(NSException* exception)
     DDLogInfo(@"Deallocating notification service extension");
     [DDLog flushLog];
     [self publishLastNotification];      //make sure nothing is left behind
+    [MLProcessLock unlock];
     DDLogInfo(@"Now leaving dealloc");
     [DDLog flushLog];
 }

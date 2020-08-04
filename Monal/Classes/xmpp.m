@@ -107,7 +107,6 @@ NSString *const kXMPPPresence = @"presence";
 
 @property (nonatomic, assign) BOOL resuming;
 @property (nonatomic, strong) NSString* streamID;
-@property (nonatomic, assign) BOOL hasDiscoAndRoster;
 
 /**
  h to go out in r stanza
@@ -603,7 +602,7 @@ NSString *const kXMPPPresence = @"presence";
             //persist these changes
             [self persistState];
             
-            [[DataLayer sharedInstance] resetContactsForAccount:_accountNo];
+            [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
         }
         
         [self closeSocket];
@@ -1410,8 +1409,6 @@ NSString *const kXMPPPresence = @"presence";
         {
             if(self.resuming)   //resume failed
             {
-                [[DataLayer sharedInstance] resetContactsForAccount:self->_accountNo];
-
                 self.resuming=NO;
 
                 //invalidate stream id
@@ -1560,11 +1557,7 @@ NSString *const kXMPPPresence = @"presence";
                 }
 
                 if(streamNode.supportsSM3)
-                {
                     self.connectionProperties.supportsSM3=YES;
-                } else {
-                    [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
-                }
 
                 if(streamNode.supportsRosterVer)
                 {
@@ -1652,7 +1645,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) postConnectNotification
 {
-    NSDictionary *dic =@{@"AccountNo":self.accountNo, @"AccountName": self.connectionProperties.identity.jid};
+    NSDictionary *dic = @{@"AccountNo":self.accountNo, @"AccountName": self.connectionProperties.identity.jid};
     [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
      [self accountStatusChanged];
 }
@@ -1724,7 +1717,7 @@ NSString *const kXMPPPresence = @"presence";
     //don't use dispatchOnReceiveQueue here because we want to log that this switch happened in the send: call
     if([NSOperationQueue currentQueue]!=_receiveQueue)
     {
-        DDLogWarn(@"SWITCHING TO RECEIVE QUEUE IN SEND (called from outside of receiveQueue): %@", stanza.XMLString);
+        DDLogWarn(@"SWITCHING %@ TO RECEIVE QUEUE IN SEND (called from outside of receiveQueue): %@", async ? @"ASYNC" : @"SYNC", stanza.XMLString);
         [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:!async];
     }
     else
@@ -2025,13 +2018,10 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) bindResource
 {
-    _accountState=kStateBinding;
+    _accountState = kStateBinding;
     XMPPIQ* iqNode =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iqNode setBindWithResource:self.connectionProperties.identity.resource];
     [self send:iqNode];
-
-    //now the app is initialized and the next smacks resume will have full disco and presence state information
-    self.hasDiscoAndRoster=YES;
 }
 
 -(void) queryDisco
@@ -2081,6 +2071,9 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) initSession
 {
+    //delete old resources because we get new presences once we're done initializing the session
+    [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
+    
     //we are now bound
     _accountState = kStateBound;
     _connectedTime = [NSDate date];

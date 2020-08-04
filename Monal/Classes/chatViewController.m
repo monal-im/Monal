@@ -24,6 +24,7 @@
 #import "DataLayer.h"
 #import "AESGcm.h"
 #import "HelperTools.h"
+#import "MLChatViewHelper.h"
 
 @import QuartzCore;
 @import MobileCoreServices;
@@ -188,6 +189,16 @@
             }
         }
     });
+}
+
+-(IBAction) toggleEncryption:(id)sender
+{
+#ifndef DISABLE_OMEMO
+    NSArray* devices = [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
+    [MLChatViewHelper<chatViewController*> toggleEncryption:&(self->_encryptChat) forAccount:self.xmppAccount.accountNo forContactJid:self.contact.contactJid withKnownDevices:devices withSelf:self afterToggle:^() {
+        [self displayEncryptionStateInUI];
+    }];
+#endif
 }
 
 -(void) displayEncryptionStateInUI

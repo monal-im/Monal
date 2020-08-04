@@ -267,6 +267,7 @@
 		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
 		C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */ = {isa = PBXBuildFile; fileRef = C18E7578245E8AE900AE8FB7 /* MLPipe.h */; };
 		C18E757C245E8AE900AE8FB7 /* MLPipe.m in Sources */ = {isa = PBXBuildFile; fileRef = C18E7579245E8AE900AE8FB7 /* MLPipe.m */; };
+		C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */; };
 		C1B7DF6C2438883600C7F0C4 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */; };
 		D838DFA541E4102BCA92A60E /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC355146D687D83135E2BBF7 /* Pods_monalxmpp.framework */; };
 		FE9BEACD951D0F8D3EBE264D /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99727E17D81471E803966620 /* Pods_shareSheet.framework */; };
@@ -851,8 +852,8 @@
 		540A3FAC24D674BD0008965D /* MLSQLite.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSQLite.m; sourceTree = "<group>"; };
 		540A3FAF24D674C80008965D /* MLSQLite.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSQLite.m; sourceTree = "<group>"; };
 		540A3FB224D674EF0008965D /* MLSQLite.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSQLite.h; sourceTree = "<group>"; };
-		540BD0D124D8D1F20087A743 /* IPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IPC.h; path = IPC.h; sourceTree = "<group>"; };
-		540BD0D324D8D1FF0087A743 /* IPC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IPC.m; path = IPC.m; sourceTree = "<group>"; };
+		540BD0D124D8D1F20087A743 /* IPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPC.h; sourceTree = "<group>"; };
+		540BD0D324D8D1FF0087A743 /* IPC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPC.m; sourceTree = "<group>"; };
 		540E139F24CDCDB30038FDA0 /* MLProcessLock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLProcessLock.m; sourceTree = "<group>"; };
 		540E13A124CDCE3B0038FDA0 /* MLProcessLock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLProcessLock.h; sourceTree = "<group>"; };
 		540E13A624CF78900038FDA0 /* MLLogFormatter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLLogFormatter.m; sourceTree = "<group>"; };
@@ -889,6 +890,8 @@
 		C15D504A24C727CC002F75BB /* MLLogFileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLLogFileManager.m; sourceTree = "<group>"; };
 		C18E7578245E8AE900AE8FB7 /* MLPipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPipe.h; sourceTree = "<group>"; };
 		C18E7579245E8AE900AE8FB7 /* MLPipe.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPipe.m; sourceTree = "<group>"; };
+		C1A80DA224D9552400B99E01 /* MLChatViewHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatViewHelper.h; sourceTree = "<group>"; };
+		C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatViewHelper.m; sourceTree = "<group>"; };
 		C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelperTools.h; sourceTree = "<group>"; };
 		C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HelperTools.m; sourceTree = "<group>"; };
 		C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/CoreLocation.framework; sourceTree = DEVELOPER_DIR; };
@@ -1147,6 +1150,8 @@
 				26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */,
 				C1414E9B24312F0100948788 /* MLChatMapsCell.h */,
 				C1414E9C24312F0100948788 /* MLChatMapsCell.m */,
+				C1A80DA224D9552400B99E01 /* MLChatViewHelper.h */,
+				C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */,
 			);
 			name = ChatViews;
 			sourceTree = "<group>";
@@ -2296,6 +2301,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				26D89F061A890672009B147C /* MLSwitchCell.m in Sources */,
+				C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */,
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */,
 				26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */,

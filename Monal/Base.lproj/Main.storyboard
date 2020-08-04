@@ -883,7 +883,7 @@
                                             <outlet property="thumbnailImage" destination="GlC-dn-bvj" id="iHP-Iz-z5V"/>
                                         </connections>
                                     </tableViewCell>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
                                         <rect key="frame" x="0.0" y="506" width="414" height="242"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xhf-eh-Dkx" id="BdL-U7-BOc">
@@ -1542,7 +1542,7 @@
                     </view>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="tgd-HR-Cbd">
                         <nil key="title"/>
-                        <view key="titleView" contentMode="scaleToFill" id="frN-Fe-gvs" userLabel="customNav">
+                        <view key="titleView" contentMode="scaleToFill" ambiguous="YES" id="frN-Fe-gvs" userLabel="customNav">
                             <rect key="frame" x="207" y="22" width="0.0" height="0.0"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxY="YES"/>
                             <subviews>
@@ -1589,7 +1589,11 @@
                                     <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" id="qAH-1S-435"/>
                                 </connections>
                             </barButtonItem>
-                            <barButtonItem image="745-unlocked" style="plain" id="wma-QS-7Rc"/>
+                            <barButtonItem image="745-unlocked" style="plain" id="wma-QS-7Rc">
+                                <connections>
+                                    <action selector="toggleEncryption:" destination="5nR-Q5-dQD" id="NXe-fw-72r"/>
+                                </connections>
+                            </barButtonItem>
                         </rightBarButtonItems>
                     </navigationItem>
                     <connections>

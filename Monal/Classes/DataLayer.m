@@ -118,10 +118,15 @@ static NSDateFormatter* dbFormatter;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         newInstance = [[self alloc] init];
-        //check db version on first db open only
-        [self version];
     });
     return newInstance;
+}
+
+-(id) init
+{
+    //check db version on first db open only
+    [self version];
+    return self;
 }
 
 //this is the getter of our readonly "db" property always returning the thread-local instance of the MLSQLite class
@@ -1811,183 +1816,10 @@ static NSDateFormatter* dbFormatter;
     [self.db beginWriteTransaction];
 
     // checking db version and upgrading if necessary
-    DDLogVerbose(@"Database version check");
+    DDLogInfo(@"Database version check");
 
     NSNumber* dbversion=(NSNumber*)[self.db executeScalar:@"select dbversion from dbversion;" andArguments:nil];
-    DDLogVerbose(@"Got db version %@", dbversion);
-
-    if([dbversion doubleValue] < 1.07)
-    {
-        DDLogVerbose(@"Database version <1.07 detected. Performing upgrade");
-        [self.db executeNonQuery:@"create table buddylistOnline (buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null,buddy_name varchar(50), group_name varchar(100));" andArguments:nil];
-        [self.db executeNonQuery:@"update dbversion set dbversion='1.07';" andArguments:nil];
-
-        [[HelperTools defaultsDB] setBool:YES forKey:@"IdleAlert"];
-
-        DDLogVerbose(@"Upgrade to 1.07 success");
-    }
-
-    if([dbversion doubleValue] < 1.071)
-    {
-        DDLogVerbose(@"Database version <1.071 detected. Performing upgrade");
-        [self.db executeNonQuery:@"drop table buddylistOnline;" andArguments:nil];
-
-        [self.db executeNonQuery:@"drop table buddylist;" andArguments:nil];
-        [self.db executeNonQuery:@"drop table messages;" andArguments:nil];
-        [self.db executeNonQuery:@"drop table message_history;" andArguments:nil];
-        [self.db executeNonQuery:@"drop table buddyicon;" andArguments:nil];
-
-        [self.db executeNonQuery:@"create table buddylist(buddy_id integer not null primary key AUTOINCREMENT,account_id integer not null, buddy_name varchar(50) collate nocase, full_name varchar(50),nick_name varchar(50), group_name varchar(50),iconhash varchar(200),filename varchar(100),state varchar(20), status varchar(200),online bool, dirty bool, new bool);" andArguments:nil];
-
-        [self.db executeNonQuery:@"create table messages(message_id integer not null primary key AUTOINCREMENT,account_id integer, message_from varchar(50) collate nocase,message_to varchar(50) collate nocase, timestamp datetime, message blob,notice integer,actual_from varchar(50) collate nocase);" andArguments:nil];
-
-        [self.db executeNonQuery:@"create table message_history(message_history_id integer not null primary key AUTOINCREMENT,account_id integer, message_from varchar(50) collate nocase,message_to varchar(50) collate nocase,timestamp datetime , message blob,actual_from varchar(50) collate nocase);" andArguments:nil];
-
-        [self.db executeNonQuery:@"create table activechats(account_id integer not null, buddy_name varchar(50) collate nocase);" andArguments:nil];
-
-
-        [self.db executeNonQuery:@"update dbversion set dbversion='1.071';" andArguments:nil];
-
-        [[HelperTools defaultsDB] setBool:YES forKey:@"IdleAlert"];
-
-        DDLogVerbose(@"Upgrade to 1.071 success");
-    }
-
-
-    if([dbversion doubleValue] < 1.072)
-    {
-        DDLogVerbose(@"Database version <1.072 detected. Performing upgrade on passwords. ");
-        [self.db executeReader:@"select account_id, password from account" andArguments:nil];
-
-        [self.db executeNonQuery:@"update account set password='';" andArguments:nil];
-    }
-
-
-    if([dbversion doubleValue] < 1.073)
-    {
-        DDLogVerbose(@"Database version <1.073 detected. Performing upgrade on passwords. ");
-
-        //set defaults on upgrade
-        [[HelperTools defaultsDB] setBool:YES forKey:@"OfflineContact"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"MessagePreview"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"Logging"];
-
-        [self.db executeNonQuery:@"update dbversion set dbversion='1.073';" andArguments:nil];
-        DDLogVerbose(@"Upgrade to 1.073 success");
-    }
-
-    if([dbversion doubleValue] < 1.074)
-    {
-        DDLogVerbose(@"Database version <1.074 detected. Performing upgrade on protocols. ");
-
-        [self.db executeNonQuery:@"delete from protocol where protocol_id=3 " andArguments:nil];
-        [self.db executeNonQuery:@"delete from protocol where protocol_id=4 " andArguments:nil];
-        [self.db executeNonQuery:@" create table legacy_caps(capid integer not null primary key ,captext  varchar(20))" andArguments:nil];
-
-        [self.db executeNonQuery:@" insert into legacy_caps values (1,'pmuc-v1');" andArguments:nil];
-        [self.db executeNonQuery:@" insert into legacy_caps values (2,'voice-v1');" andArguments:nil];
-        [self.db executeNonQuery:@" insert into legacy_caps values (3,'camera-v1');" andArguments:nil];
-        [self.db executeNonQuery:@" insert into legacy_caps values (4, 'video-v1');" andArguments:nil];
-
-        [self.db executeNonQuery:@"create table buddy_resources(buddy_id integer,resource varchar(255),ver varchar(20))" andArguments:nil];
-
-        [self.db executeNonQuery:@"create table ver_info(ver varchar(20),cap varchar(255), primary key (ver,cap))" andArguments:nil];
-
-        [self.db executeNonQuery:@"create table buddy_resources_legacy_caps (buddy_id integer,resource varchar(255),capid  integer);" andArguments:nil];
-
-        [self.db executeNonQuery:@"update dbversion set dbversion='1.074';" andArguments:nil];
-        DDLogVerbose(@"Upgrade to 1.074 success");
-    }
-
-    if([dbversion doubleValue] < 1.1)
-    {
-        DDLogVerbose(@"Database version <1.1 detected. Performing upgrade on accounts.");
-
-        [self.db executeNonQuery:@"alter table account add column selfsigned bool;" andArguments:nil];
-        [self.db executeNonQuery:@"alter table account add column oldstyleSSL bool;" andArguments:nil];
-
-        [self.db executeNonQuery:@"update dbversion set dbversion='1.1';" andArguments:nil];
-        DDLogVerbose(@"Upgrade to 1.1 success");
-    }
-
-    if([dbversion doubleValue] < 1.2)
-    {
-        DDLogVerbose(@"Database version <1.2 detected. Performing upgrade on accounts.");
-
-        [self.db executeNonQuery:@"update  buddylist set iconhash=NULL;" andArguments:nil];
-        [self.db executeNonQuery:@"alter table message_history  add column unread bool;" andArguments:nil];
-        [self.db executeNonQuery:@" insert into message_history (account_id,message_from, message_to, timestamp, message, actual_from,unread) select account_id,message_from, message_to, timestamp, message, actual_from, 1  from messages ;" andArguments:nil];
-        [self.db executeNonQuery:@"" andArguments:nil];
-
-        [self.db executeNonQuery:@"update dbversion set dbversion='1.2';" andArguments:nil];
-        DDLogVerbose(@"Upgrade to 1.2 success");
-    }
-
-    //going to from 2.1 beta to final
-    if([dbversion doubleValue] < 1.3)
-    {
-        DDLogVerbose(@"Database version <1.3 detected. Performing upgrade on accounts.");
-
-        [self.db executeNonQuery:@"update  buddylist set iconhash=NULL;" andArguments:nil];
-
-        [self.db executeNonQuery:@"update dbversion set dbversion='1.3';" andArguments:nil];
-        DDLogVerbose(@"Upgrade to 1.3 success");
-    }
-
-    if([dbversion doubleValue] < 1.31)
-    {
-        DDLogVerbose(@"Database version <1.31 detected. Performing upgrade on accounts.");
-
-        [self.db executeNonQuery:@"alter table buddylist add column  Muc bool;" andArguments:nil];
-
-        [self.db executeNonQuery:@"update dbversion set dbversion='1.31';" andArguments:nil];
-        DDLogVerbose(@"Upgrade to 1.31 success");
-    }
-
-    if([dbversion doubleValue] < 1.41)
-    {
-        DDLogVerbose(@"Database version <1.41 detected. Performing upgrade on accounts.");
-
-        [self.db executeNonQuery:@"alter table message_history add column  delivered bool;" andArguments:nil];
-        [self.db executeNonQuery:@"alter table message_history add column  messageid varchar(255);" andArguments:nil];
-        [self.db executeNonQuery:@"update message_history set delivered=1;" andArguments:nil];
-        [self.db executeNonQuery:@"update dbversion set dbversion='1.41';" andArguments:nil];
-
-        DDLogVerbose(@"Upgrade to 1.41 success");
-    }
-
-
-    if([dbversion doubleValue] < 1.42)
-    {
-        DDLogVerbose(@"Database version <1.42 detected. Performing upgrade on accounts.");
-
-        [self.db executeNonQuery:@"delete from protocol where protocol_id=5;" andArguments:nil];
-        [self.db executeNonQuery:@"update dbversion set dbversion='1.42';" andArguments:nil];
-
-        DDLogVerbose(@"Upgrade to 1.41 success");
-    }
-
-    if([dbversion doubleValue] < 1.5)
-    {
-        DDLogVerbose(@"Database version <1.5 detected. Performing upgrade on accounts.");
-
-        [self.db executeNonQuery:@"alter table account add column oauth bool;" andArguments:nil withCompletion:nil];
-        [self.db executeNonQuery:@"update dbversion set dbversion='1.5';" andArguments:nil withCompletion:nil];
-
-        DDLogVerbose(@"Upgrade to 1.5 success");
-    }
-
-    if([dbversion doubleValue] < 1.6)
-    {
-        DDLogVerbose(@"Database version <1.6 detected. Performing upgrade on accounts.");
-
-        [self.db executeNonQuery:@"alter table message_history add column messageType varchar(255);"  withCompletion:nil];
-        [self.db executeNonQuery:@"update dbversion set dbversion='1.6';" withCompletion:nil];
-
-        DDLogVerbose(@"Upgrade to 1.6 success");
-    }
-    
-    // this point forward OSX might have legacy issues
+    DDLogInfo(@"Got db version %@", dbversion);
 
     if([dbversion doubleValue] < 2.0)
     {
@@ -1996,10 +1828,6 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"drop table muc_favorites" withCompletion:nil];
         [self.db executeNonQuery:@"CREATE TABLE IF NOT EXISTS \"muc_favorites\" (\"mucid\" integer NOT NULL primary key autoincrement,\"room\" varchar(255,0),\"nick\" varchar(255,0),\"autojoin\" bool, account_id int);" withCompletion:nil];
         [self.db executeNonQuery:@"update dbversion set dbversion='2.0';" withCompletion:nil];
-        [self.db executeNonQuery:@"alter table buddy_resources add column muc_role varchar(255);" withCompletion:nil];
-        [self.db executeNonQuery:@"alter table buddylist add column muc_subject varchar(255);" withCompletion:nil];
-        [self.db executeNonQuery:@"alter table buddylist add column muc_nick varchar(255);" withCompletion:nil];
-
         DDLogVerbose(@"Upgrade to 2.0 success");
     }
 
@@ -2391,6 +2219,7 @@ static NSDateFormatter* dbFormatter;
     }
     
     [self.db endWriteTransaction];
+    DDLogInfo(@"Database version check done");
     return;
 }
 

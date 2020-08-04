@@ -155,29 +155,29 @@
     switch (indexPath.section) {
         case 0: {
             if(indexPath.row ==0){
-                UITableViewCell *accountCell =[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
-                accountCell.textLabel.text=[NSString stringWithFormat:NSLocalizedString(@"Using Account: %@",@""), [[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:_selectedRow]];
+                UITableViewCell* accountCell = [tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+                accountCell.textLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Using Account: %@",@""), [[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:_selectedRow]];
                 accountCell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
-                cell=accountCell;
-            }
-            else   if(indexPath.row ==1){
-                MLTextInputCell *textCell =[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-                self.contactName =textCell.textInput;
+
+                cell = accountCell;
+            } else if(indexPath.row == 1){
+                MLTextInputCell* textCell = [tableView dequeueReusableCellWithIdentifier:@"TextCell"];
+                self.contactName = textCell.textInput;
                 self.contactName.placeholder = NSLocalizedString(@"Contact Name",@"");
                 self.contactName.delegate=self;
-                cell= textCell;
+
+                cell = textCell;
             }
-            
             break;
         }
         case 1: {
-            cell =[tableView dequeueReusableCellWithIdentifier:@"addButton"];
+            cell = [tableView dequeueReusableCellWithIdentifier:@"addButton"];
             break;
         }
         default:
             break;
     }
-  return cell;
+    return cell;
 }
 
 #pragma mark tableview delegate

@@ -48,7 +48,7 @@ static void logException(NSException* exception)
     [super viewDidLoad];
     [self.navigationController.navigationBar setTintColor:[UIColor whiteColor]];
     [self.navigationController.navigationBar setBackgroundColor:[UIColor monaldarkGreen]];
-    self.navigationController.navigationItem.title = @"Monal";
+    self.navigationController.navigationItem.title = NSLocalizedString(@"Monal", @"");
 }
 
 - (void)presentationAnimationDidFinish {

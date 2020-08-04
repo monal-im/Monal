@@ -279,7 +279,7 @@
 
 -(void) updateNavBarLastInteractionLabel:(NSNotification*) notification
 {
-    NSDate* lastInteractionDate = [NSNull null];
+    NSDate* lastInteractionDate = nil;
     NSString* jid = self.contact.contactJid;
     NSString* accountNo = self.contact.accountId;
     // use supplied data from notification...
@@ -288,7 +288,7 @@
         NSDictionary* data = notification.userInfo;
         if(![jid isEqualToString:data[@"jid"]] || ![accountNo isEqualToString:data[@"accountNo"]])
             return;     // ignore other accounts or contacts
-        if(data[@"isTyping"]==@YES)
+        if([data[@"isTyping"] boolValue] == YES)
         {
             [self stopLastInteractionTimer];
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -309,9 +309,10 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             self.navBarLastInteraction.text = lastInteractionString;
         });
+        
         [self stopLastInteractionTimer];
         // this timer will be called only if needed
-        if(lastInteractionDate && lastInteractionDate!=[NSNull null])
+        if(lastInteractionDate && lastInteractionDate.timeIntervalSince1970 > 0)
             _cancelLastInteractionTimer = [HelperTools startTimer:60 withHandler:updateTime];
     };
     updateTime();
@@ -378,15 +379,15 @@
     NSArray* devices = [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
     if(devices.count == 0) {
         if(self.encryptChat) {
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Encryption Not Supported" message:@"This contact does not appear to have any devices that support encryption." preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:@"Disable Encryption" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Encryption Not Supported", @"") message:NSLocalizedString(@"This contact does not appear to have any devices that support encryption.", @"") preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 // Disable encryption
                 self.encryptChat = NO;
                 [self updateUIElementsOnAccountChange:nil];
                 [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
-            [alert addAction:[UIAlertAction actionWithTitle:@"Ignore" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ignore", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
 
@@ -534,21 +535,9 @@
           {
               self.messageList = newList;
           }
-          
-          
         }];
-      
     }
-    else
-    {
-        newList =[[[DataLayer sharedInstance] messageHistoryDate:self.contact.contactJid forAccount: self.contact.accountId forDate:_day] mutableCopy];
-        
-    }
-    
 }
-
-
-
 
 #pragma mark - textview
 -(void) sendMessage:(NSString *) messageText
@@ -589,7 +578,6 @@
             DDLogError(@"Account should be >0");
             return;
         }
-        NSDictionary* settings=[accounts objectAtIndex:0];
         
         if(!messageID)
         {
@@ -784,8 +772,8 @@
     if(!self.gpsHUD) {
         self.gpsHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         self.gpsHUD.removeFromSuperViewOnHide=NO;
-        self.gpsHUD.label.text =@"GPS";
-        self.gpsHUD.detailsLabel.text =@"Waiting for GPS signal";
+        self.gpsHUD.label.text = NSLocalizedString(@"GPS", @"");
+        self.gpsHUD.detailsLabel.text = NSLocalizedString(@"Waiting for GPS signal", @"");
     }
     // Display HUD
     self.gpsHUD.hidden = NO;
@@ -798,9 +786,9 @@
             self.gpsHUD.hidden = YES;
 
             // Display warning
-            UIAlertController *gpsWarning = [UIAlertController alertControllerWithTitle:@"No GPS location received"
-                                                                                message:@"Monal did not received a gps location. Please try again later." preferredStyle:UIAlertControllerStyleAlert];
-            [gpsWarning addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            UIAlertController *gpsWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No GPS location received", @"")
+                                                                                message:NSLocalizedString(@"Monal did not received a gps location. Please try again later.", @"") preferredStyle:UIAlertControllerStyleAlert];
+            [gpsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ok", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
                 [gpsWarning dismissViewControllerAnimated:YES completion:nil];
             }]];
             [self presentViewController:gpsWarning animated:YES completion:nil];

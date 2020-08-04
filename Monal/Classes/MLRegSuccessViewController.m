@@ -21,7 +21,8 @@
 
 -(void) viewWillAppear:(BOOL)animated
 {
- //set QR code
+    [super viewWillAppear:animated];
+    //set QR code
     self.jid.text= self.registeredAccount; 
 }
 

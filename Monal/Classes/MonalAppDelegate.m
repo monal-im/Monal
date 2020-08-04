@@ -232,14 +232,14 @@ static void logException(NSException* exception)
     //register for local notifications and badges
     UIMutableUserNotificationAction* replyAction = [[UIMutableUserNotificationAction alloc] init];
     replyAction.activationMode = UIUserNotificationActivationModeBackground;
-    replyAction.title = @"Reply";
-    replyAction.identifier = @"ReplyButton";
+    replyAction.title = NSLocalizedString(@"Reply", @"");
+    replyAction.identifier = NSLocalizedString(@"ReplyButton", @"");
     replyAction.destructive = NO;
     replyAction.authenticationRequired = NO;
     replyAction.behavior = UIUserNotificationActionBehaviorTextInput;
     
     UIMutableUserNotificationCategory* actionCategory = [[UIMutableUserNotificationCategory alloc] init];
-    actionCategory.identifier = @"Reply";
+    actionCategory.identifier = NSLocalizedString(@"Reply", @"");
     [actionCategory setActions:@[replyAction] forContext:UIUserNotificationActionContextDefault];
     
     UIUserNotificationSettings* settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge categories:[NSSet setWithObjects:actionCategory,nil]];

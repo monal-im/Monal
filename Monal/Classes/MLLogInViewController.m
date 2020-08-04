@@ -31,6 +31,8 @@
 
 - (void) viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
+    
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(connected) name:kMonalAccountStatusChanged object:nil];
     [nc addObserver:self selector:@selector(error) name:kXMPPError object:nil];

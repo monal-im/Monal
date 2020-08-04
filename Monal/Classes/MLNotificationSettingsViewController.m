@@ -69,6 +69,8 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
 
 -(void) viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
+    
     self.navigationItem.title = NSLocalizedString(@"Notification Settings", @"");
     UNUserNotificationCenter* notificationSettings = [UNUserNotificationCenter currentNotificationCenter];
 

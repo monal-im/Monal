@@ -213,32 +213,32 @@
                 }
                 case 2:
                 {
-                    cell.textLabel.text=NSLocalizedString(@"Offline Contacts", @"");
-                       cell.defaultKey=@"OfflineContact";
-                    cell.switchEnabled=YES;
+                    cell.textLabel.text = NSLocalizedString(@"Offline Contacts", @"");
+                       cell.defaultKey = @"OfflineContact";
+                    cell.switchEnabled = YES;
                     break;
                 }
                 case 3:
                 {
-                    cell.textLabel.text=NSLocalizedString(@"Sort By Status", @"");
-                       cell.defaultKey=@"SortContacts";
-                    cell.switchEnabled=YES;
+                    cell.textLabel.text = NSLocalizedString(@"Sort By Status", @"");
+                       cell.defaultKey = @"SortContacts";
+                    cell.switchEnabled = YES;
                     break;
                 }
                 case 4:
                 {
                     cell.textLabel.text=NSLocalizedString(@"Show Inline Images", @"");
-                    cell.detailTextLabel.text=@"Will make a HTTP HEAD call on all links";
-                    cell.defaultKey=@"ShowImages";
+                    cell.detailTextLabel.text = NSLocalizedString(@"Will make a HTTP HEAD call on all links", @"");
+                    cell.defaultKey = @"ShowImages";
                     cell.switchEnabled=YES;
                     break;
                 }
                 case 5:
                 {
                     cell.textLabel.text=NSLocalizedString(@"Show Inline Geo Location", @"");
-                    cell.detailTextLabel.text=@"";
-                    cell.defaultKey=@"ShowGeoLocation";
-                    cell.switchEnabled=YES;
+                    cell.detailTextLabel.text = @"";
+                    cell.defaultKey = @"ShowGeoLocation";
+                    cell.switchEnabled = YES;
                     break;
                 }
             }

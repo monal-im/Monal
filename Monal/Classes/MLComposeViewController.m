@@ -51,50 +51,41 @@
             
         }
         
-        if(self.contactName.text.length>0)
+        if(self.contactName.text.length > 0)
         {
             xmpp* account;
             
-            if(_selectedRow<[[MLXMPPManager sharedInstance].connectedXMPP count] && _selectedRow>=0) {
+            if(_selectedRow < [[MLXMPPManager sharedInstance].connectedXMPP count] && _selectedRow >= 0) {
                 xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:_selectedRow];
+            
+                NSString* messageID = [[NSUUID UUID] UUIDString];
+                NSString* name = [self.contactName.text copy];
+                NSString* text = [self.message.text copy];
+                BOOL encryptChat = [[DataLayer sharedInstance] shouldEncryptForJid:name andAccountNo:account.accountNo];
 
+                [[DataLayer sharedInstance] addMessageHistoryFrom:account.connectionProperties.identity.jid to:name forAccount:account.accountNo withMessage:text actuallyFrom:account.connectionProperties.identity.jid  withId:messageID encrypted:encryptChat withCompletion:^(BOOL success, NSString *messageType) {
+                }];
+                
+                [[MLXMPPManager sharedInstance] sendMessage:text toContact:name fromAccount:account.accountNo isEncrypted:encryptChat isMUC:NO isUpload:NO messageId:messageID  withCompletionHandler:^(BOOL success, NSString *messageId) {
+                }];
+                
+                
+                [[DataLayer sharedInstance] addActiveBuddies:name forAccount:account.accountNo withCompletion:nil];
             }
-            
-            NSString *messageID =[[NSUUID UUID] UUIDString];
-            NSString *name =[self.contactName.text copy];
-            NSString *text =[self.message.text copy];
-            BOOL encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:name andAccountNo:account.accountNo];
-
-            [[DataLayer sharedInstance] addMessageHistoryFrom:account.connectionProperties.identity.jid to:name forAccount:account.accountNo withMessage:text actuallyFrom:account.connectionProperties.identity.jid  withId:messageID encrypted:encryptChat withCompletion:^(BOOL success, NSString *messageType) {
-                
-            }];
-            
-            [[MLXMPPManager sharedInstance] sendMessage:text toContact:name fromAccount:account.accountNo isEncrypted:encryptChat isMUC:NO isUpload:NO messageId:messageID  withCompletionHandler:^(BOOL success, NSString *messageId) {
-                
-            }];
-            
-            
-            [[DataLayer sharedInstance] addActiveBuddies:name forAccount:account.accountNo withCompletion:nil];
-            
             //dismiss and go to conversation
             [self dismissViewControllerAnimated:YES completion:^{
-               //push new conversation on view conroller
+                //push new conversation on view conroller
             }];
-            
         }
         else
         {
-            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@"") message:NSLocalizedString(@"Recipient name can't be empty",@"") preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-                
+            UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@"") message:NSLocalizedString(@"Recipient name can't be empty", @"") preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             }];
             [messageAlert addAction:closeAction];
             
             [self presentViewController:messageAlert animated:YES completion:nil];
-            
         }
-        
-        
     }
     
     [self close:self];

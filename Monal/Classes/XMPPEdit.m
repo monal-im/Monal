@@ -332,7 +332,7 @@
         switch (indexPath.row)
         {
             case 0: {
-                thecell.cellLabel.text = @"Jabber ID";
+                thecell.cellLabel.text = NSLocalizedString(@"Jabber ID", @"");
                 thecell.toggleSwitch.hidden = YES;
                 thecell.textInputField.tag = 1;
                 thecell.textInputField.keyboardType = UIKeyboardTypeEmailAddress;

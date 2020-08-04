@@ -22,7 +22,7 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 // some typedefs used throughout the project
 typedef void (^contactCompletion)(MLContact *selectedContact);
 typedef void (^accountCompletion)(NSInteger accountRow);
-typedef void (^monal_void_block_t)();
+typedef void (^monal_void_block_t)(void);
 
 
 //some xmpp related constants

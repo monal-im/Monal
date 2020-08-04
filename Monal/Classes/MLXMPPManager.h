@@ -14,7 +14,6 @@
  */
 @interface MLXMPPManager : NSObject
 {
-    dispatch_queue_t _netQueue;
 	dispatch_source_t _pinger;
 }
 

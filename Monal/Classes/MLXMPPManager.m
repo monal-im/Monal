@@ -37,6 +37,7 @@ static const int sendMessageTimeoutSeconds = 10;
     BOOL _hasConnectivity;
     void (^_pushCompletion)(UIBackgroundFetchResult result);
     monal_void_block_t _cancelPushTimer;
+    NSMutableArray* _connectedXMPP;
 }
 @end
 
@@ -138,13 +139,11 @@ static const int sendMessageTimeoutSeconds = 10;
         //only ping when having connectivity
         if(_hasConnectivity)
         {
-            @synchronized(_connectedXMPP) {
-                for(xmpp* xmppAccount in _connectedXMPP)
-                {
-                    if(xmppAccount.accountState>=kStateBound) {
-                        DDLogInfo(@"began a idle ping");
-                        [xmppAccount sendPing:LONG_PING];        //long ping timeout because this is a background/interval ping
-                    }
+            for(xmpp* xmppAccount in [self connectedXMPP])
+            {
+                if(xmppAccount.accountState>=kStateBound) {
+                    DDLogInfo(@"began a idle ping");
+                    [xmppAccount sendPing:LONG_PING];        //long ping timeout because this is a background/interval ping
                 }
             }
         }
@@ -171,13 +170,11 @@ static const int sendMessageTimeoutSeconds = 10;
         {
             DDLogVerbose(@"reachable");
             _hasConnectivity = YES;
-            @synchronized(_connectedXMPP) {
-                for(xmpp* xmppAccount in _connectedXMPP)
-                {
-                    //try to send a ping. if it fails, it will reconnect
-                    DDLogVerbose(@"manager pinging");
-                    [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
-                }
+            for(xmpp* xmppAccount in [self connectedXMPP])
+            {
+                //try to send a ping. if it fails, it will reconnect
+                DDLogVerbose(@"manager pinging");
+                [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
             }
         }
         else
@@ -211,6 +208,13 @@ static const int sendMessageTimeoutSeconds = 10;
         dispatch_source_cancel(_pinger);
 }
 
+-(NSArray*) connectedXMPP
+{
+    @synchronized(_connectedXMPP) {
+        return [[NSArray alloc] initWithArray:_connectedXMPP];
+    }
+}
+
 -(void) catchupFinished:(NSNotification*) notification
 {
     DDLogVerbose(@"### MAM/SMACKS CATCHUP FINISHED ###");
@@ -231,12 +235,10 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(BOOL) allAccountsIdle
 {
-    @synchronized(_connectedXMPP) {
-        for(xmpp* xmppAccount in _connectedXMPP)
-        {
-            if(!xmppAccount.idle)
-                return NO;
-        }
+    for(xmpp* xmppAccount in [self connectedXMPP])
+    {
+        if(!xmppAccount.idle)
+            return NO;
     }
     return YES;
 }
@@ -296,10 +298,8 @@ static const int sendMessageTimeoutSeconds = 10;
             /*
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 DDLogVerbose(@"disconnecting all accounts (we don't need idle connections that could get killed any time anyways)");
-                @synchronized(_connectedXMPP) {
-                    for(xmpp* xmppAccount in _connectedXMPP)
-                        [xmppAccount disconnect];
-                }
+                for(xmpp* xmppAccount in [self connectedXMPP])
+                    [xmppAccount disconnect];
             });
             */
         }
@@ -433,10 +433,8 @@ static const int sendMessageTimeoutSeconds = 10;
     
     //don't block main thread here
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        @synchronized(_connectedXMPP) {
-            for(xmpp* xmppAccount in _connectedXMPP)
-                [xmppAccount setClientInactive];
-        }
+        for(xmpp* xmppAccount in [self connectedXMPP])
+            [xmppAccount setClientInactive];
         [self checkIfBackgroundTaskIsStillNeeded];
     });
 }
@@ -449,13 +447,11 @@ static const int sendMessageTimeoutSeconds = 10;
     
     //don't block main thread here
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        @synchronized(_connectedXMPP) {
-            for(xmpp* xmppAccount in _connectedXMPP)
-            {
-                [xmppAccount setClientActive];
-                if(_hasConnectivity)
-                    [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
-            }
+        for(xmpp* xmppAccount in [self connectedXMPP])
+        {
+            [xmppAccount setClientActive];
+            if(_hasConnectivity)
+                [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         }
     });
 }
@@ -464,11 +460,9 @@ static const int sendMessageTimeoutSeconds = 10;
 {
     //don't block main thread here
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        @synchronized(_connectedXMPP) {
-            for(xmpp* xmppAccount in _connectedXMPP)
-                if(_hasConnectivity)
-                    [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
-        }
+        for(xmpp* xmppAccount in [self connectedXMPP])
+            if(_hasConnectivity)
+                [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
     });
 }
 
@@ -491,7 +485,6 @@ static const int sendMessageTimeoutSeconds = 10;
     return NO;
 }
 
-
 -(NSDate *) connectedTimeFor:(NSString*) accountNo
 {
     xmpp* account = [self getConnectedAccountForID:accountNo];
@@ -500,12 +493,10 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo
 {
-    @synchronized(_connectedXMPP) {
-        for(xmpp* xmppAccount in _connectedXMPP)
-        {
-            if([xmppAccount.accountNo isEqualToString:accountNo])
-                return xmppAccount;
-        }
+    for(xmpp* xmppAccount in [self connectedXMPP])
+    {
+        if([xmppAccount.accountNo isEqualToString:accountNo])
+            return xmppAccount;
     }
     return nil;
 }
@@ -580,24 +571,30 @@ static const int sendMessageTimeoutSeconds = 10;
 {
     int index=0;
     int pos=-1;
+    xmpp* account;
     @synchronized(_connectedXMPP) {
         for(xmpp* xmppAccount in _connectedXMPP)
         {
             if([xmppAccount.accountNo isEqualToString:accountNo] )
             {
-                DDLogVerbose(@"got account and cleaning up.. ");
-                [xmppAccount disconnect:YES];
-                DDLogVerbose(@"done cleaning up account ");
+                account = xmppAccount;
                 pos=index;
                 break;
             }
             index++;
         }
 
-        if((pos>=0) && (pos<[_connectedXMPP count])) {
+        if((pos>=0) && (pos<[_connectedXMPP count]))
+        {
             [_connectedXMPP removeObjectAtIndex:pos];
             DDLogVerbose(@"removed account at pos  %d", pos);
         }
+    }
+    if(account)
+    {
+        DDLogVerbose(@"got account and cleaning up.. ");
+        [account disconnect:YES];
+        DDLogVerbose(@"done cleaning up account ");
     }
 }
 
@@ -614,13 +611,11 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) disconnectAll
 {
-    @synchronized(_connectedXMPP) {
-        for(xmpp* xmppAccount in _connectedXMPP)
-        {
-            //disconnect to prevent endless loops trying to connect
-            DDLogVerbose(@"manager disconnecting");
-            [xmppAccount disconnect];
-        }
+    for(xmpp* xmppAccount in [self connectedXMPP])
+    {
+        //disconnect to prevent endless loops trying to connect
+        DDLogVerbose(@"manager disconnecting");
+        [xmppAccount disconnect];
     }
 }
 
@@ -728,25 +723,24 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) getServiceDetailsForAccount:(NSInteger) row
 {
+    xmpp* account;
     @synchronized(_connectedXMPP) {
         if(row < [_connectedXMPP count] && row>=0)
-        {
-            xmpp* account = [_connectedXMPP objectAtIndex:row];
-            if(account)
-                [account getServiceDetails];
-        }
+            account = [_connectedXMPP objectAtIndex:row];
     }
+    if(account)
+        [account getServiceDetails];
 }
 
 -(NSString*) getAccountNameForConnectedRow:(NSInteger) row
 {
+    xmpp* account;
     @synchronized(_connectedXMPP) {
         if(row<[_connectedXMPP count] && row>=0)
-        {
-            xmpp* account = [_connectedXMPP objectAtIndex:row];
-            return account.connectionProperties.identity.jid;
-        }
+            account = [_connectedXMPP objectAtIndex:row];
     }
+    if(account)
+        return account.connectionProperties.identity.jid;
     return @"";
 }
 
@@ -799,13 +793,13 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void)  joinRoom:(NSString*) roomName  withNick:(NSString *)nick andPassword:(NSString*) password forAccountRow:(NSInteger) row
 {
+    xmpp* account;
     @synchronized(_connectedXMPP) {
         if(row<[_connectedXMPP count] && row>=0)
-        {
-            xmpp* account = [_connectedXMPP objectAtIndex:row];
-            [account joinRoom:roomName withNick:nick andPassword:password];
-        }
+            account = [_connectedXMPP objectAtIndex:row];
     }
+    if(account)
+        [account joinRoom:roomName withNick:nick andPassword:password];
 }
 
 -(void)  leaveRoom:(NSString*) roomName withNick:(NSString *) nick forAccountId:(NSString*) accountId
@@ -863,18 +857,14 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) setStatusMessage:(NSString*) message
 {
-    @synchronized(_connectedXMPP) {
-        for(xmpp* xmppAccount in _connectedXMPP)
-            [xmppAccount setStatusMessageText:message];
-    }
+    for(xmpp* xmppAccount in [self connectedXMPP])
+        [xmppAccount setStatusMessageText:message];
 }
 
 -(void) setAway:(BOOL) isAway
 {
-    @synchronized(_connectedXMPP) {
-        for(xmpp* xmppAccount in _connectedXMPP)
-            [xmppAccount setAway:isAway];
-    }
+    for(xmpp* xmppAccount in [self connectedXMPP])
+        [xmppAccount setAway:isAway];
 }
 
 #pragma mark message signals
@@ -903,17 +893,15 @@ static const int sendMessageTimeoutSeconds = 10;
 -(void) cleanArrayOfConnectedAccounts:(NSMutableArray*) dirtySet
 {
     //yes, this is ineffecient but the size shouldnt ever be huge
-    NSMutableIndexSet *indexSet = [[NSMutableIndexSet alloc] init];
-    @synchronized(_connectedXMPP) {
-        for(xmpp* xmppAccount in _connectedXMPP)
+    NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
+    for(xmpp* xmppAccount in [self connectedXMPP])
+    {
+        NSInteger pos=0;
+        for(MLContact* row in dirtySet)
         {
-            NSInteger pos=0;
-            for(MLContact* row in dirtySet)
-            {
-                if([row.contactJid isEqualToString:xmppAccount.connectionProperties.identity.jid])
-                    [indexSet addIndex:pos];
-                pos++;
-            }
+            if([row.contactJid isEqualToString:xmppAccount.connectionProperties.identity.jid])
+                [indexSet addIndex:pos];
+            pos++;
         }
     }
     [dirtySet removeObjectsAtIndexes:indexSet];
@@ -935,13 +923,11 @@ static const int sendMessageTimeoutSeconds = 10;
     else    //use saved one (push server not reachable via http(s)) --> the old secret might still be valid
         self.pushSecret = [[HelperTools defaultsDB] objectForKey:@"pushSecret"];
 
-    @synchronized(_connectedXMPP) {
-        for(xmpp* xmppAccount in _connectedXMPP)
-        {
-            xmppAccount.pushNode = self.pushNode;
-            xmppAccount.pushSecret = self.pushSecret;
-            [xmppAccount enablePush];
-        }
+    for(xmpp* xmppAccount in [self connectedXMPP])
+    {
+        xmppAccount.pushNode = self.pushNode;
+        xmppAccount.pushSecret = self.pushSecret;
+        [xmppAccount enablePush];
     }
 }
 
@@ -987,10 +973,8 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) sendMessageForConnectedAccounts
 {
-    @synchronized(_connectedXMPP) {
-        for(xmpp* xmppAccount in _connectedXMPP)
-            [self sendOutboxForAccount:xmppAccount.accountNo];
-    }
+    for(xmpp* xmppAccount in [self connectedXMPP])
+        [self sendOutboxForAccount:xmppAccount.accountNo];
 }
 
 @end

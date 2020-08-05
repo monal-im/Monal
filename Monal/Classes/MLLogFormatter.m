@@ -23,18 +23,22 @@ static DDQualityOfServiceName _qos_name(NSUInteger qos) {
     }
 }
 
-static NSString* _loglevel_name(NSUInteger level) {
-    return [NSString stringWithFormat:@"%d", level];
-    switch ((DDLogLevel) level) {
-        case DDLogLevelOff:     return @"  OFF";
-        case DDLogLevelError:   return @"ERROR";
-        case DDLogLevelWarning: return @" WARN";
-        case DDLogLevelInfo:    return @" INFO";
-        case DDLogLevelDebug:   return @"DEBUG";
-        case DDLogLevelVerbose: return @" VERB";
-        case DDLogLevelAll:     return @"  ALL";
-        default:                return @" UNKN";
-    }
+static NSString* _loglevel_name(NSUInteger flag) {
+    if(flag & DDLogLevelOff)
+        return @"  OFF";
+    else if(flag & DDLogLevelError)
+        return @"ERROR";
+    else if(flag & DDLogLevelWarning)
+        return @" WARN";
+    else if(flag & DDLogLevelInfo)
+        return @" INFO";
+    else if(flag & DDLogLevelDebug)
+        return @"DEBUG";
+    else if(flag & DDLogLevelVerbose)
+        return @" VERB";
+    else if(flag & DDLogLevelAll)
+        return @"  ALL";
+    return @" UNKN";
 }
 
 @interface MLLogFormatter ()
@@ -53,9 +57,9 @@ static NSString* _loglevel_name(NSUInteger level) {
         queueThreadLabel = [NSString stringWithFormat:@"%@:%@", logMessage->_threadID, queueThreadLabel];
 
 #if TARGET_OS_SIMULATOR
-    return [NSString stringWithFormat:@"[%@] %@ [%@ (QOS:%@)] %@", _loglevel_name(logMessage->_level), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage->_qos), logMessage->_message];
+    return [NSString stringWithFormat:@"[%@] %@ [%@ (QOS:%@)] %@", _loglevel_name(logMessage->_flag), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage->_qos), logMessage->_message];
 #else
-    return [NSString stringWithFormat:@"[%@] %@ %@ [%@ (QOS:%@)] %@", _loglevel_name(logMessage->_level), timestamp, [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage->_qos), logMessage->_message];
+    return [NSString stringWithFormat:@"[%@] %@ %@ [%@ (QOS:%@)] %@", _loglevel_name(logMessage->_flag), timestamp, [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage->_qos), logMessage->_message];
 #endif
 }
 

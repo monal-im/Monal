@@ -50,9 +50,7 @@ DDLogFileInfo* _logInfo;
 
 -(IBAction)shareAction:(id)sender
 {
-    NSArray* sharedText = [NSArray arrayWithObjects:[self.logView text],  nil];
-    UIActivityViewController* shareController = [[UIActivityViewController alloc] initWithActivityItems:sharedText applicationActivities:nil];
-
+    UIActivityViewController* shareController = [[UIActivityViewController alloc] initWithActivityItems:@[[NSURL fileURLWithPath:_logInfo.filePath]] applicationActivities:nil];
     [self presentViewController:shareController animated:YES completion:^{}];
 }
 

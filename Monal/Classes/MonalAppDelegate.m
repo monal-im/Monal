@@ -31,9 +31,10 @@
 static void logException(NSException* exception)
 {
     [DDLog flushLog];
-    DDLogError(@"CRASH: %@", exception);
+    DDLogError(@"*** CRASH(%@): %@", [exception name], [exception reason]);
     [DDLog flushLog];
-    DDLogError(@"Stack Trace: %@", [exception callStackSymbols]);
+    DDLogError(@"*** UserInfo: %@", [exception userInfo]);
+    DDLogError(@"*** Stack Trace: %@", [exception callStackSymbols]);
     [DDLog flushLog];
 }
 
@@ -156,15 +157,6 @@ static void logException(NSException* exception)
 }
 
 #pragma mark - app life cycle
-
-- (void)userNotificationCenter:(UNUserNotificationCenter *)center
-       willPresentNotification:(UNNotification *)notification
-         withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler;
-{
-    DDLogInfo(@"userNotificationCenter:willPresentNotification:withCompletionHandler called");
-    //throw away (dummy) notifications from notification service extension while main app is running
-    completionHandler(UNNotificationPresentationOptionNone);
-}
 
 - (BOOL)application:(UIApplication*) application willFinishLaunchingWithOptions:(NSDictionary*) launchOptions
 {
@@ -398,6 +390,13 @@ static void logException(NSException* exception)
 {
     DDLogVerbose(@"got didReceiveRemoteNotification: %@", userInfo);
     [[MLXMPPManager sharedInstance] incomingPushWithCompletionHandler:completionHandler];
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter*) center willPresentNotification:(UNNotification*) notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions options)) completionHandler;
+{
+    DDLogInfo(@"userNotificationCenter:willPresentNotification:withCompletionHandler called");
+    //throw away (dummy) notifications from notification service extension while main app is running
+    completionHandler(UNNotificationPresentationOptionNone);
 }
 
 -(void) application:(UIApplication *)application handleActionWithIdentifier:(nullable NSString *)identifier forLocalNotification:(nonnull UILocalNotification *)notification withResponseInfo:(nonnull NSDictionary *)responseInfo completionHandler:(nonnull void (^)(void))completionHandler

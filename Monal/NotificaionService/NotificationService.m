@@ -17,8 +17,9 @@
 static void logException(NSException* exception)
 {
     [DDLog flushLog];
-    DDLogError(@"*** CRASH: %@", exception);
+    DDLogError(@"*** CRASH(%@): %@", [exception name], [exception reason]);
     [DDLog flushLog];
+    DDLogError(@"*** UserInfo: %@", [exception userInfo]);
     DDLogError(@"*** Stack Trace: %@", [exception callStackSymbols]);
     [DDLog flushLog];
 }
@@ -63,13 +64,15 @@ static void logException(NSException* exception)
 
 -(id) init
 {
+    DDLogInfo(@"Initializing notification service extension class");
     self = [super init];
+    self.idleAccounts = [[NSMutableSet alloc] init];
     [MLProcessLock lock];
     return self;
 }
 -(void) dealloc
 {
-    DDLogInfo(@"Deallocating notification service extension");
+    DDLogInfo(@"Deallocating notification service extension class");
     [DDLog flushLog];
     [self publishLastNotification];      //make sure nothing is left behind
     [MLProcessLock unlock];
@@ -175,7 +178,7 @@ static void logException(NSException* exception)
         return;
     //use this to make sure that the async removeDeliveredNotificationsWithIdentifiers: call succeeded before contentHandler is called
     dispatch_async(dispatch_get_main_queue(), ^{
-        usleep(100000);
+        usleep(50000);
         self.contentHandler(content);
         self.bestAttemptContent = nil;
     });
@@ -335,8 +338,8 @@ static void logException(NSException* exception)
         NSString* message = payload[1];
         xmpp* xmppAccount = payload.firstObject;
         DDLogVerbose(@"error(%@): %@", xmppAccount.connectionProperties.identity.jid, message);
-        //this will result in an idle notification ultimately leading to a dummy notification
-        //(or a notification from another account in multi account scenarios)
+        //this will result in an idle notification for this account ultimately leading to a dummy push notification
+        //(or a push notification for a real message coming from another account if we are in a multi account scenario)
         [xmppAccount disconnect];
         
         //display error notification

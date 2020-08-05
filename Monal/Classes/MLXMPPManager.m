@@ -414,10 +414,10 @@ static const int sendMessageTimeoutSeconds = 10;
         completionHandler(UIBackgroundFetchResultNoData);
         return;
     }
-    // should any accounts reconnect?
     _pushCompletion = completionHandler;
+    // should any accounts reconnect?
     [self pingAllAccounts];
-    _cancelPushTimer = [HelperTools startTimer:25.0 withHandler:^{
+    _cancelPushTimer = [HelperTools startTimer:28.0 withHandler:^{
         DDLogWarn(@"### Push timer triggered!! ###");
         _pushCompletion(UIBackgroundFetchResultFailed);
         _pushCompletion = nil;

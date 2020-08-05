@@ -24,7 +24,9 @@
 {
     NSDate* timeout = [[NSDate date] dateByAddingTimeInterval:1];        //1 second timeout for responses
     NSCondition* waiter = [[NSCondition alloc] init];
+    DDLogVerbose(@"Pinging %@", processName);
     [[IPC sharedInstance] sendMessage:@"MLProcessLock.ping" withData:nil to:processName withResponseHandler:^(NSDictionary* response) {
+        DDLogVerbose(@"Got ping response from %@", processName);
         //wake up other thread
         [waiter lock];
         [waiter signal];
@@ -34,20 +36,20 @@
     [waiter lock];
     BOOL timedOut = [waiter waitUntilDate:timeout];
     [waiter unlock];
+    DDLogVerbose(@"checkRemoteRunning:%@ returning %@", processName, timedOut ? @"YES" : @"NO");
     return timedOut;
-    return NO;
 }
 
 +(void) waitForRemoteStartup:(NSString*) processName
 {
     while(![self checkRemoteRunning:processName])
-        ;
+        usleep(1000000);
 }
 
 +(void) waitForRemoteTermination:(NSString*) processName
 {
     while([self checkRemoteRunning:processName])
-        ;
+        usleep(1000000);
 }
 
 +(void) lock
@@ -65,7 +67,10 @@
     IPC* ipc = notification.object;
     NSDictionary* message = notification.userInfo;
     if([message[@"name"] isEqualToString:@"MLProcessLock.ping"])
-        [ipc respondToMessage: message withData:nil];
+    {
+        DDLogVerbose(@"MLProcessLock responding to ping %@", message[@"id"]);
+        [ipc respondToMessage:message withData:nil];
+    }
 }
 
 @end

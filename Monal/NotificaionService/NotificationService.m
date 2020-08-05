@@ -304,7 +304,10 @@ static void logException(NSException* exception)
     
     //ignore repeated idle notifications for already idle accounts
     if([self.idleAccounts containsObject:xmppAccount])
+    {
+        DDLogVerbose(@"Ignoring already idle account: %@", xmppAccount.connectionProperties.identity.jid);
         return;
+    }
     [self.idleAccounts addObject:xmppAccount];
     
     DDLogInfo(@"notification handler: some account idle: %@", xmppAccount.connectionProperties.identity.jid);

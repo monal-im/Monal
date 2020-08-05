@@ -1332,14 +1332,11 @@ NSString *const kXMPPPresence = @"presence";
             [self initSM3];
 
             //save streamID if resume is supported
-            ParseEnabled* enabledNode=parsedStanza;
-            if(enabledNode.resume) {
-                self.streamID=enabledNode.streamID;
-
-            }
-            else {
-                self.streamID=nil;
-            }
+            ParseEnabled* enabledNode = parsedStanza;
+            if(enabledNode.resume)
+                self.streamID = enabledNode.streamID;
+            else
+                self.streamID = nil;
 
             //persist these changes (streamID and initSM3)
             [self persistState];

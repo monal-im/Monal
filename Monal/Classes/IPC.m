@@ -94,6 +94,7 @@ static IPC* _sharedInstance;
         while(YES)
         {
             NSDictionary* message = [self readNextMessage];     //this will be blocking
+            DDLogVerbose(@"Got IPC message: %@", message);
             if(message[@"response_id"])     //handle all responses
             {
                 //call response handler if one is present (ignore the spurious response otherwise)

@@ -27,6 +27,7 @@ static void logException(NSException* exception)
 
 @property (atomic, strong) void (^contentHandler)(UNNotificationContent* contentToDeliver);
 @property (atomic, strong) UNMutableNotificationContent* bestAttemptContent;
+@property (atomic, strong) NSMutableSet* idleAccounts;
 
 @end
 
@@ -245,13 +246,13 @@ static void logException(NSException* exception)
         return;
     }
     
-    /*//just "ignore" this push if the main app is already running
+    //just "ignore" this push if the main app is already running
     if([MLProcessLock checkRemoteRunning:@"MainApp"])
     {
         DDLogInfo(@"main app already running, ignoring push and posting dummy notification");
         [self postDummyNotification];
         return;
-    }*/
+    }
     
     if(![[MLXMPPManager sharedInstance] hasConnectivity])
     {
@@ -259,15 +260,7 @@ static void logException(NSException* exception)
         return;
     }
     
-   /* //disconnect all accounts immediately if main app gets started
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [MLProcessLock waitForRemoteStartup:@"MainApp"];
-        DDLogWarn(@"Main app is now running, disconnecting all accounts and (hopefully) terminate this extension as soon as possible");
-        //disconnected accounts are idle and this extension will be terminated if all accounts are idle in [self nowIdle:]
-        [[MLXMPPManager sharedInstance] disconnectAll];
-    });*/
-    
-    /*if([MLProcessLock checkRemoteRunning:@"MainApp"])
+    if([MLProcessLock checkRemoteRunning:@"MainApp"])
     {
         DDLogInfo(@"NOT calling MLXMPPManager, main app already running");
         [DDLog flushLog];
@@ -275,7 +268,7 @@ static void logException(NSException* exception)
         return;
     }
     else
-    {*/
+    {
         DDLogVerbose(@"calling MLXMPPManager");
         [DDLog flushLog];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
@@ -283,7 +276,15 @@ static void logException(NSException* exception)
         [[MLXMPPManager sharedInstance] connectIfNecessary];
         DDLogVerbose(@"MLXMPPManager called");
         [DDLog flushLog];
-    //}
+        
+        //disconnect all accounts immediately if main app gets started
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            [MLProcessLock waitForRemoteStartup:@"MainApp"];
+            DDLogWarn(@"Main app is now running, disconnecting all accounts and (hopefully) terminate this extension as soon as possible");
+            //disconnected accounts are idle and this extension will be terminated if all accounts are idle in [self nowIdle:]
+            [[MLXMPPManager sharedInstance] disconnectAll];
+        });
+    }
 }
 
 -(void) serviceExtensionTimeWillExpire
@@ -300,6 +301,12 @@ static void logException(NSException* exception)
     //this method will be called inside the receive queue or send queue and immediately disconnect the account
     //this is needed to not leak incoming stanzas while this class is being destructed
     xmpp* xmppAccount = (xmpp*)notification.object;
+    
+    //ignore repeated idle notifications for already idle accounts
+    if([self.idleAccounts containsObject:xmppAccount])
+        return;
+    [self.idleAccounts addObject:xmppAccount];
+    
     DDLogInfo(@"notification handler: some account idle: %@", xmppAccount.connectionProperties.identity.jid);
     [xmppAccount disconnect];
     
@@ -325,6 +332,8 @@ static void logException(NSException* exception)
         NSString* message = payload[1];
         xmpp* xmppAccount = payload.firstObject;
         DDLogVerbose(@"error(%@): %@", xmppAccount.connectionProperties.identity.jid, message);
+        //this will result in an idle notification ultimately leading to a dummy notification
+        //(or a notification from another account in multi account scenarios)
         [xmppAccount disconnect];
         
         //display error notification

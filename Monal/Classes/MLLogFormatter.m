@@ -24,6 +24,7 @@ static DDQualityOfServiceName _qos_name(NSUInteger qos) {
 }
 
 static NSString* _loglevel_name(NSUInteger level) {
+    return [NSString stringWithFormat:@"%d", level];
     switch ((DDLogLevel) level) {
         case DDLogLevelOff:     return @"  OFF";
         case DDLogLevelError:   return @"ERROR";

@@ -205,35 +205,39 @@ static NSMutableDictionary* _typingNotifications;
         [self processHeadline:messageNode];
     }
     
-    //only use "is typing" messages when not older than 2 minutes (always allow "not typing" messages)
-    if([[DataLayer sharedInstance] checkCap:@"http://jabber.org/protocol/chatstates" forUser:messageNode.user andAccountNo:self.accountNo] &&
-        ((messageNode.composing && (!messageNode.delayTimeStamp || [[NSDate date] timeIntervalSinceDate:messageNode.delayTimeStamp] < 120)) ||
-        messageNode.notComposing)
-    )
+    //ignore typing notifications when in appex
+    if(![HelperTools isAppExtension])
     {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
-            @"jid": messageNode.user,
-            @"accountNo": self.accountNo,
-            @"isTyping": messageNode.composing ? @YES : @NO
-        }];
-        //send "not typing" notifications (kMonalLastInteractionUpdatedNotice) 60 seconds after the last isTyping was received
-        @synchronized(_typingNotifications) {
-            //copy needed values into local variables to not retain self by our timer block
-            NSString* account = self.accountNo;
-            NSString* jid = messageNode.user;
-            //abort old timer on new isTyping or isNotTyping message
-            if(_typingNotifications[messageNode.user])
-                ((monal_void_block_t) _typingNotifications[messageNode.user])();
-            //start a new timer for every isTyping message
-            if(messageNode.composing)
-            {
-                _typingNotifications[messageNode.user] = [HelperTools startTimer:60 withHandler:^{
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:[NSNull null] userInfo:@{
-                        @"jid": jid,
-                        @"accountNo": account,
-                        @"isTyping": @NO
+        //only use "is typing" messages when not older than 2 minutes (always allow "not typing" messages)
+        if([[DataLayer sharedInstance] checkCap:@"http://jabber.org/protocol/chatstates" forUser:messageNode.user andAccountNo:self.accountNo] &&
+            ((messageNode.composing && (!messageNode.delayTimeStamp || [[NSDate date] timeIntervalSinceDate:messageNode.delayTimeStamp] < 120)) ||
+            messageNode.notComposing)
+        )
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                @"jid": messageNode.user,
+                @"accountNo": self.accountNo,
+                @"isTyping": messageNode.composing ? @YES : @NO
+            }];
+            //send "not typing" notifications (kMonalLastInteractionUpdatedNotice) 60 seconds after the last isTyping was received
+            @synchronized(_typingNotifications) {
+                //copy needed values into local variables to not retain self by our timer block
+                NSString* account = self.accountNo;
+                NSString* jid = messageNode.user;
+                //abort old timer on new isTyping or isNotTyping message
+                if(_typingNotifications[messageNode.user])
+                    ((monal_void_block_t) _typingNotifications[messageNode.user])();
+                //start a new timer for every isTyping message
+                if(messageNode.composing)
+                {
+                    _typingNotifications[messageNode.user] = [HelperTools startTimer:60 withHandler:^{
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:[NSNull null] userInfo:@{
+                            @"jid": jid,
+                            @"accountNo": account,
+                            @"isTyping": @NO
+                        }];
                     }];
-                }];
+                }
             }
         }
     }

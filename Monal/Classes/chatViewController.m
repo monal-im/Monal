@@ -55,6 +55,10 @@
 @property (nonatomic, assign) BOOL hardwareKeyboardPresent;
 @property (nonatomic, strong) xmpp* xmppAccount;
 
+// Privacy settings that should not be loaded for each action
+@property (nonatomic, assign) BOOL showGeoLocationsInline;
+@property (nonatomic, assign) BOOL sendLastChatState;
+
 @property (nonatomic, strong) NSLayoutConstraint* chatInputConstraintHWKeyboard;
 @property (nonatomic, strong) NSLayoutConstraint* chatInputConstraintSWKeyboard;
 
@@ -75,6 +79,10 @@
             self.jid = [NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
         }
     }];
+
+    // init privacy Settings
+    self.showGeoLocationsInline = [[HelperTools defaultsDB] boolForKey: @"ShowGeoLocation"];
+    self.sendLastChatState = [[HelperTools defaultsDB] boolForKey: @"SendLastChatState"];
 }
 
 -(void) setupWithContact:(MLContact* ) contact
@@ -379,7 +387,7 @@
     NSArray* devices = [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
     if(devices.count == 0) {
         if(self.encryptChat) {
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Encryption Not Supported", @"") message:NSLocalizedString(@"This contact does not appear to have any devices that support encryption.", @"") preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Encryption Not Supported", @"") message:NSLocalizedString(@"This contact does not appear to have any devices that support encryption.", @"") preferredStyle:UIAlertControllerStyleAlert];
             [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 // Disable encryption
                 self.encryptChat = NO;
@@ -627,6 +635,12 @@
         return;
     }
     
+    // Do not send when the user disabled the feature
+    if(!self.sendLastChatState)
+    {
+        return;
+    }
+
     if(isTyping)
     {
         if(!_isTyping)      //started typing? --> send composing chatstate (e.g. typing)
@@ -1501,7 +1515,7 @@
             NSString* longitude = [messageText substringWithRange:longitudeRange];
 
             // Display inline map
-            if([[HelperTools defaultsDB] boolForKey: @"ShowGeoLocation"]) {
+            if(self.showGeoLocationsInline) {
                 MLChatMapsCell* mapsCell;
                 if([from isEqualToString:self.contact.contactJid]) {
                     mapsCell = (MLChatMapsCell *) [tableView dequeueReusableCellWithIdentifier:@"mapsInCell"];

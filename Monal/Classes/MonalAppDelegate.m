@@ -191,7 +191,7 @@ static void logException(NSException* exception)
         [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"pushSecret"] forKey:@"pushSecret"];
         [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"pushNode"] forKey:@"pushNode"];
         
-        [[HelperTools defaultsDB] setBool:@YES forKey:@"DefaulsMigratedToAppGroup"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"DefaulsMigratedToAppGroup"];
         [[HelperTools defaultsDB] synchronize];
         DDLogInfo(@"Migration complete and written to disk");
     }

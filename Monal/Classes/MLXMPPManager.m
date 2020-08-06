@@ -58,44 +58,52 @@ static const int sendMessageTimeoutSeconds = 10;
         [[HelperTools defaultsDB] setBool:YES forKey:@"OfflineContact"];
         [[HelperTools defaultsDB] setBool:NO forKey:@"SortContacts"];
 
-        [[HelperTools defaultsDB] setBool:YES forKey:@"SetDefaults"];
-
+        [[HelperTools defaultsDB] setBool:YES forKey:@"ChatBackgrounds"];
+        
+        // Privacy Settings
         [[HelperTools defaultsDB] setBool:YES forKey:@"ShowImages"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"ShowGeoLocation"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"ChatBackgrounds"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastUserInteraction"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastChatState"];
 
+        [[HelperTools defaultsDB] setBool:YES forKey:@"SetDefaults"];
         [[HelperTools defaultsDB] synchronize];
     }
 
     // on upgrade this one needs to be set to yes. Can be removed later.
-    NSNumber *imagesTest= [[HelperTools defaultsDB] objectForKey:@"ShowImages"];
+    [self upgradeBoolUserSettingsIfUnset:@"ShowImages" toDefault:YES];
 
-    if(imagesTest==nil)
-    {
-          [[HelperTools defaultsDB] setBool:YES  forKey:@"ShowImages"];
-          [[HelperTools defaultsDB] synchronize];
-    }
+    // upgrade ChatBackgrounds
+    [self upgradeBoolUserSettingsIfUnset:@"ChatBackgrounds" toDefault:YES];
 
-    // upgrade
-    NSNumber *background = [[HelperTools defaultsDB] objectForKey:@"ChatBackgrounds"];
-    if(background==nil)
-    {
-        [[HelperTools defaultsDB] setBool:YES  forKey:@"ChatBackgrounds"];
-        [[HelperTools defaultsDB] synchronize];
-    }
-
-    NSNumber *sounds = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
-    if(sounds==nil)
-    {
-        [[HelperTools defaultsDB] setObject:@"alert2" forKey:@"AlertSoundFile"];
-        [[HelperTools defaultsDB] synchronize];
-    }
+    [self upgradeObjectUserSettingsIfUnset:@"AlertSoundFile" toDefault:@"alert2"];
 
     // upgrade ShowGeoLocation
-    NSNumber* mapLocationTest = [[HelperTools defaultsDB] objectForKey:@"ShowGeoLocation"];
-    if(mapLocationTest==nil)
+    [self upgradeBoolUserSettingsIfUnset:@"ShowGeoLocation" toDefault:YES];
+
+    // upgrade SendLastUserInteraction
+    [self upgradeBoolUserSettingsIfUnset:@"SendLastUserInteraction" toDefault:YES];
+
+    // upgrade SendLastChatState
+    [self upgradeBoolUserSettingsIfUnset:@"SendLastChatState" toDefault:YES];
+}
+
+-(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal
+{
+    NSNumber* currentSettingVal = [[HelperTools defaultsDB] objectForKey:settingsName];
+    if(currentSettingVal == nil)
     {
-        [[HelperTools defaultsDB] setBool:YES forKey:@"ShowGeoLocation"];
+        [[HelperTools defaultsDB] setBool:defaultVal forKey:settingsName];
+        [[HelperTools defaultsDB] synchronize];
+    }
+}
+
+-(void) upgradeObjectUserSettingsIfUnset:(NSString*) settingsName toDefault:(nullable id) defaultVal
+{
+    NSNumber* currentSettingVal = [[HelperTools defaultsDB] objectForKey:settingsName];
+    if(currentSettingVal == nil)
+    {
+        [[HelperTools defaultsDB] setObject:defaultVal forKey:settingsName];
         [[HelperTools defaultsDB] synchronize];
     }
 }

@@ -134,6 +134,11 @@ NSString *const kXMPPPresence = @"presence";
  */
 @property (nonatomic, strong) NSString *deviceQueryId;
 
+/**
+    Privacy Settings: Only send idle notifications out when the user allows it
+ */
+@property (nonatomic, assign) BOOL sendPresenceNotifications;
+
 
 @end
 
@@ -180,21 +185,23 @@ NSString *const kXMPPPresence = @"presence";
     if([HelperTools isAppExtension])
     {
         DDLogVerbose(@"Called from extension: CSI inactive");
-        _isCSIActive=NO;        //we are always inactive when called from an extension
+        _isCSIActive = NO;        //we are always inactive when called from an extension
     }
     else
     {
         dispatch_async(dispatch_get_main_queue(), ^{
-            if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+            if([UIApplication sharedApplication].applicationState == UIApplicationStateBackground)
             {
-                _isCSIActive=NO;
+                _isCSIActive = NO;
             }
         });
     }
-    _lastInteractionDate=[NSDate date];     //better default than 1970
+    _lastInteractionDate = [NSDate date];     //better default than 1970
 
-    self.statusMessage=[[HelperTools defaultsDB] stringForKey:@"StatusMessage"];
-    self.awayState=[[HelperTools defaultsDB] boolForKey:@"Away"];
+    self.statusMessage = [[HelperTools defaultsDB] stringForKey:@"StatusMessage"];
+    self.awayState = [[HelperTools defaultsDB] boolForKey:@"Away"];
+
+    self.sendPresenceNotifications = [[HelperTools defaultsDB] boolForKey: @"SendLastUserInteraction"];
 }
 
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSString*) accountNo
@@ -2041,6 +2048,10 @@ NSString *const kXMPPPresence = @"presence";
     if(_accountState < kStateBound)
         return;
     
+    // don't send presence if the user prefers not to do so
+    if(!self.sendPresenceNotifications)
+        return;
+
     XMPPPresence* presence=[[XMPPPresence alloc] initWithHash:_versionHash];
     if(self.statusMessage) [presence setStatus:self.statusMessage];
     if(self.awayState) [presence setAway];

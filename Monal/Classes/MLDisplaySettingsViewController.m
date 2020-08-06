@@ -31,21 +31,17 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.navigationItem.title=NSLocalizedString(@"Display Settings",@"");
+    self.navigationItem.title = NSLocalizedString(@"Display Settings",@"");
    
-    _settingsTable=self.tableView;
-    _settingsTable.delegate=self;
-    _settingsTable.dataSource=self;
-    _settingsTable.backgroundView=nil;
-    
-
+    _settingsTable = self.tableView;
+    _settingsTable.delegate = self;
+    _settingsTable.dataSource = self;
+    _settingsTable.backgroundView = nil;
 }
 
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    
-
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -54,11 +50,10 @@
     [[HelperTools defaultsDB] synchronize];
     
     //update logs if needed
-   if(! [[HelperTools defaultsDB] boolForKey:@"Logging"])
-   {
-       [[DataLayer sharedInstance] messageHistoryCleanAll];
-   }
-  
+    if(! [[HelperTools defaultsDB] boolForKey:@"Logging"])
+    {
+        [[DataLayer sharedInstance] messageHistoryCleanAll];
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -103,17 +98,17 @@
     switch (section) {
         case 0:
         {
-            return NSLocalizedString(@"Status",@"");
+            return NSLocalizedString(@"Status", @"");
             break;
         }
         case 1:
         {
-            return NSLocalizedString(@"Presence",@"");
+            return NSLocalizedString(@"Presence", @"");
             break;
         }
         case 2:
         {
-            return NSLocalizedString(@"General",@"");
+            return NSLocalizedString(@"General", @"");
             break;
         }
         default:
@@ -121,12 +116,8 @@
             return nil;
             break;
         }
-        break;
     }
 }
-
-
-
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -143,7 +134,7 @@
         }
         case 2:
         {
-            return 6;
+            return 4;
             break;
         }
         default:
@@ -225,22 +216,6 @@
                     cell.switchEnabled = YES;
                     break;
                 }
-                case 4:
-                {
-                    cell.textLabel.text=NSLocalizedString(@"Show Inline Images", @"");
-                    cell.detailTextLabel.text = NSLocalizedString(@"Will make a HTTP HEAD call on all links", @"");
-                    cell.defaultKey = @"ShowImages";
-                    cell.switchEnabled=YES;
-                    break;
-                }
-                case 5:
-                {
-                    cell.textLabel.text=NSLocalizedString(@"Show Inline Geo Location", @"");
-                    cell.detailTextLabel.text = @"";
-                    cell.defaultKey = @"ShowGeoLocation";
-                    cell.switchEnabled = YES;
-                    break;
-                }
             }
             return cell; 
             break;
@@ -256,15 +231,9 @@
     return nil;
 }
 
-
-
-
-
 -(IBAction)close:(id)sender
 {
     [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 }
-
-
 
 @end

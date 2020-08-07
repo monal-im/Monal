@@ -11,7 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MLPrivacySettingsViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate>
+@interface MLPrivacySettingsViewController : UITableViewController <UITextFieldDelegate>
 {
     UITextField* _currentField;
 }

@@ -7,6 +7,13 @@
 //
 
 #import "MLPrivacySettingsViewController.h"
+#import "HelperTools.h"
+
+@interface MLPrivacySettingsViewController()
+
+@property (nonatomic, strong) NSArray* sectionArray;
+
+@end
 
 @implementation MLPrivacySettingsViewController
 
@@ -14,12 +21,14 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    self.navigationItem.title = NSLocalizedString(@"Display Settings",@"");
+    self.navigationItem.title = NSLocalizedString(@"Display Settings", @"");
    
     _settingsTable = self.tableView;
     _settingsTable.delegate = self;
     _settingsTable.dataSource = self;
     _settingsTable.backgroundView = nil;
+
+    self.sectionArray = @[NSLocalizedString(@"General", @"")];
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -27,7 +36,14 @@
     [super viewWillAppear:animated];
 }
 
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+}
+
 #pragma mark tableview datasource delegate
+
+
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     return 1;
@@ -35,18 +51,13 @@
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    switch (section) {
-        case 0:
-        {
-            return NSLocalizedString(@"General", @"");
-            break;
-        }
-        default:
-        {
-            return nil;
-            break;
-        }
-    }
+    return [self.sectionArray objectAtIndex:section];
+}
+
+-(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    NSString* sectionTitle = [self tableView:tableView titleForHeaderInSection:section];
+    return [HelperTools MLCustomViewHeaderWithTitle:sectionTitle];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -69,7 +80,7 @@
 {
     
     MLSettingCell* cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
-    cell.parent= self;
+    cell.parent = self;
    
     switch (indexPath.section) {
         case 0:
@@ -78,7 +89,7 @@
             {
                 case 0:
                 {
-                    cell.textLabel.text=NSLocalizedString(@"Show Inline Images", @"");
+                    cell.textLabel.text = NSLocalizedString(@"Show Inline Images", @"");
                     cell.detailTextLabel.text = NSLocalizedString(@"Will make a HTTP HEAD call on all links", @"");
                     cell.defaultKey = @"ShowImages";
                     cell.switchEnabled = YES;
@@ -86,7 +97,7 @@
                 }
                 case 1:
                 {
-                    cell.textLabel.text=NSLocalizedString(@"Show Inline Geo Location", @"");
+                    cell.textLabel.text = NSLocalizedString(@"Show Inline Geo Location", @"");
                     cell.detailTextLabel.text = @"";
                     cell.defaultKey = @"ShowGeoLocation";
                     cell.switchEnabled = YES;
@@ -109,7 +120,7 @@
                         break;
                     }
             }
-            return cell;
+            break;
         }
         default:
         {
@@ -117,8 +128,8 @@
             break;
         }
     }
-
-    return nil;
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    return cell;
 }
 
 -(IBAction)close:(id)sender

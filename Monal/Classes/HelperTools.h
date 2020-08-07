@@ -36,6 +36,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSData *)dataWithHexString:(NSString *)hex;
 + (NSString *)signalHexKeyWithData:(NSData*) data;
 
++(UIView*) MLCustomViewHeaderWithTitle:(NSString*) title;
+
 @end
 
 NS_ASSUME_NONNULL_END

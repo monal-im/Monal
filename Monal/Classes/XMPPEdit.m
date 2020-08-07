@@ -15,7 +15,6 @@
 #import "MLKeysTableViewController.h"
 #import "MLPasswordChangeTableViewController.h"
 
-
 @interface XMPPEdit()
 
 @property (nonatomic, strong) NSString *jid;
@@ -58,53 +57,53 @@
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"ButtonCell"];
     
-    _db= [DataLayer sharedInstance];
+    _db = [DataLayer sharedInstance];
     
     if(![_accountno isEqualToString:@"-1"])
     {
-        self.editMode=true;
+        self.editMode = true;
     }
     
     DDLogVerbose(@"got account number %@", _accountno);
     
-    UITapGestureRecognizer *gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)]; // hides the kkyeboard when you tap outside the editing area
-    gestureRecognizer.cancelsTouchesInView=false; //this prevents it from blocking the button
+    UITapGestureRecognizer* gestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)]; // hides the kkyeboard when you tap outside the editing area
+    gestureRecognizer.cancelsTouchesInView = false; //this prevents it from blocking the button
     [self.tableView addGestureRecognizer:gestureRecognizer];
     
     
-    if(_originIndex.section==0)
+    if(_originIndex.section == 0)
     {
         //edit
         DDLogVerbose(@"reading account number %@", _accountno);
         [_db detailsForAccount:_accountno withCompletion:^(NSArray *result) {
             
-            if(result.count==0 )
+            if(result.count == 0)
             {
                 //present another UI here.
                 return;
                 
             }
             
-            NSDictionary* settings=[result objectAtIndex:0]; //only one row
-            self.initialSettings=settings;
+            NSDictionary* settings = [result objectAtIndex:0]; //only one row
+            self.initialSettings = settings;
             
-            self.jid=[NSString stringWithFormat:@"%@@%@",[settings objectForKey:@"username"],[settings objectForKey:@"domain"]];
+            self.jid = [NSString stringWithFormat:@"%@@%@",[settings objectForKey:@"username"],[settings objectForKey:@"domain"]];
             
-            NSString*pass= [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",self.accountno]];
+            NSString* pass = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",self.accountno]];
             
             if(pass) {
-                self.password =pass;
+                self.password = pass;
             }
             
-            self.server=[settings objectForKey:@"server"];
+            self.server = [settings objectForKey:@"server"];
             
-            self.port=[NSString stringWithFormat:@"%@", [settings objectForKey:@"other_port"]];
-            self.resource=[settings objectForKey:kResource];
+            self.port = [NSString stringWithFormat:@"%@", [settings objectForKey:@"other_port"]];
+            self.resource = [settings objectForKey:kResource];
             
-            self.enabled=[[settings objectForKey:kEnabled] boolValue];
+            self.enabled = [[settings objectForKey:kEnabled] boolValue];
             
-            self.directTLS=[[settings objectForKey:@"directTLS"] boolValue];
-            self.selfSignedSSL=[[settings objectForKey:@"selfsigned"] boolValue];
+            self.directTLS = [[settings objectForKey:@"directTLS"] boolValue];
+            self.selfSignedSSL = [[settings objectForKey:@"selfsigned"] boolValue];
         }];
     }
     else
@@ -114,22 +113,19 @@
         self.directTLS = NO;
         self.selfSignedSSL = NO;
     }
-    self.sectionArray = @[@"Account", @"General", @"Advanced Settings", @""];
+    self.sectionArray = @[NSLocalizedString(@"Account", @""), NSLocalizedString(@"General", @""), NSLocalizedString(@"Advanced Settings", @""), @""];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
     DDLogVerbose(@"xmpp edit view will appear");
-
-
 }
 
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
     DDLogVerbose(@"xmpp edit view will hide");
-
 }
 
 -(void) dealloc
@@ -315,17 +311,16 @@
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath;
 {
     return 40;
-
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     DDLogVerbose(@"xmpp edit view section %ld, row %ld", indexPath.section, indexPath.row);
 
-    MLSwitchCell* thecell=(MLSwitchCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+    MLSwitchCell* thecell = (MLSwitchCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
 
     // load cells from interface builder
-    if(indexPath.section==0)
+    if(indexPath.section == 0)
     {
         //the user
         switch (indexPath.row)
@@ -353,7 +348,6 @@
                 thecell.toggleSwitch.on = self.enabled;
                 break;
             }
-
         }
     }
     else if(indexPath.section == 1)
@@ -448,11 +442,8 @@
                 }
                 break;
             }
-
-
         }
     }
-
     thecell.textInputField.delegate = self;
     if(thecell.textInputField.hidden == YES)
     {
@@ -462,36 +453,15 @@
     return thecell;
 }
 
-
-
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return [self.sectionArray count];
 }
 
-
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    UIView* tempView = [[UIView alloc]initWithFrame:CGRectMake(0,200,300,244)];
-    tempView.backgroundColor = [UIColor clearColor];
-
-    UILabel* tempLabel = [[UILabel alloc]initWithFrame:CGRectMake(15,0,300,44)];
-    tempLabel.backgroundColor = [UIColor clearColor];
-    tempLabel.shadowColor = [UIColor blackColor];
-    tempLabel.shadowOffset = CGSizeMake(0,2);
-    tempLabel.textColor = [UIColor whiteColor]; //here you can change the text color of header.
-    tempLabel.font = [UIFont boldSystemFontOfSize:17.0f];
-    tempLabel.text = [self tableView:tableView titleForHeaderInSection:section ];
-
-    [tempView addSubview:tempLabel];
-
-    tempLabel.textColor = [UIColor darkGrayColor];
-    tempLabel.text =  tempLabel.text.uppercaseString;
-    tempLabel.shadowColor = [UIColor clearColor];
-    tempLabel.font = [UIFont systemFontOfSize:[UIFont systemFontSize]];
-
-    return tempView;
+    NSString* sectionTitle = [self tableView:tableView titleForHeaderInSection:section];
+    return [HelperTools MLCustomViewHeaderWithTitle:sectionTitle];
 }
-
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {

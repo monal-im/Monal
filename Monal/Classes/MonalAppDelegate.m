@@ -31,10 +31,7 @@
 static void logException(NSException* exception)
 {
     [DDLog flushLog];
-    DDLogError(@"*** CRASH(%@): %@", [exception name], [exception reason]);
-    [DDLog flushLog];
-    DDLogError(@"*** UserInfo: %@", [exception userInfo]);
-    DDLogError(@"*** Stack Trace: %@", [exception callStackSymbols]);
+    DDLogError(@"*****************\nCRASH(%@): %@\nUserInfo: %@\nStack Trace: %@", [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
     [DDLog flushLog];
 }
 
@@ -199,23 +196,7 @@ static void logException(NSException* exception)
     //init IPC and ProcessLock
     [IPC initializeForProcess:@"MainApp"];
     
-    //log service extension status
-    /*dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        while(YES)
-        {
-            [MLProcessLock waitForRemoteStartup:@"NotificationServiceExtension"];
-            DDLogWarn(@"NotificationServiceExtension is now running!");
-            [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
-            DDLogWarn(@"NotificationServiceExtension has been terminated!");
-            
-            //trigger view updates
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:self userInfo:nil];
-            });
-        }
-    });*/
-
-    //lock current process and only proceed with launching if the NotificationServiceExtension is not running
+    //lock current process and only proceed with launching if the NotificationServiceExtension is *not* running
     [MLProcessLock lock];
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
     {
@@ -291,7 +272,20 @@ static void logException(NSException* exception)
     //should any accounts connect?
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     
+    //handle updates of the db done by other processes (the NotificationServiceExtension for example)
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ipcRefresh:) name:kMonalIncomingIPC object:@"Monal.refreshUI"];
+    
     return YES;
+}
+
+-(void) ipcRefresh:(NSNotification*) notification
+{
+    NSDictionary* message = notification.userInfo;
+    //trigger view updates
+    dispatch_async(dispatch_get_main_queue(), ^{
+        DDLogInfo(@"Got refreshUI IPC message");
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:self userInfo:nil];
+    });
 }
 
 -(void) applicationDidBecomeActive:(UIApplication*) application
@@ -447,7 +441,8 @@ static void logException(NSException* exception)
 - (void) applicationWillEnterForeground:(UIApplication *)application
 {
     DDLogVerbose(@"Entering FG");
- 
+    [MLProcessLock lock];       //disallow starting of NotificationServiceExtension
+    
     //only proceed with foregrounding if the NotificationServiceExtension is not running
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
     {
@@ -455,7 +450,7 @@ static void logException(NSException* exception)
         [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
     }
     
-    //trigger view updates
+    //trigger view updates (this has to be done because a NotificationServiceExtension could have updated the database some time ago)
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:self userInfo:nil];
     
     [[MLXMPPManager sharedInstance] setClientsActive];
@@ -476,12 +471,12 @@ static void logException(NSException* exception)
     [[HelperTools defaultsDB] synchronize];
 }
 
--(void) applicationDidEnterBackground:(UIApplication *)application
+-(void) applicationDidEnterBackground:(UIApplication*) application
 {
     UIApplicationState state = [application applicationState];
-    if (state == UIApplicationStateInactive)
+    if(state == UIApplicationStateInactive)
         DDLogVerbose(@"Screen lock / incoming call");
-    else if (state == UIApplicationStateBackground)
+    else if(state == UIApplicationStateBackground)
         DDLogVerbose(@"Entering BG");
     
     [self updateUnread];
@@ -506,24 +501,17 @@ static void logException(NSException* exception)
 
 -(void) showConnectionStatus:(NSNotification*) notification
 {
-    NSArray *payload= [notification.object copy];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-           || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))
-        {
-            DDLogDebug(@"not surfacing errors in the background because they are super common");
-        } else  {
-            NSString *message = payload[1]; // this is just the way i set it up a dic might better
-            xmpp *xmppAccount= payload.firstObject;
-
-            NotificationBanner *banner =[[NotificationBanner alloc] initWithTitle:xmppAccount.connectionProperties.identity.jid subtitle:message leftView:nil rightView:nil style:BannerStyleInfo colors:nil];
-           
-            NotificationBannerQueue *queue = [[NotificationBannerQueue alloc] initWithMaxBannersOnScreenSimultaneously:2];
-            
-            [banner showWithQueuePosition:QueuePositionFront bannerPosition:BannerPositionTop queue:queue on:nil];
-            
-        }
-    });
+    if([HelperTools isInBackground])
+        DDLogDebug(@"not surfacing errors in the background because they are super common");
+    else
+    {
+        NSArray* payload = [notification.object copy];
+        NSString* message = payload[1];     // this is just the way i set it up a dic might better
+        xmpp *xmppAccount = payload.firstObject;
+        NotificationBanner* banner = [[NotificationBanner alloc] initWithTitle:xmppAccount.connectionProperties.identity.jid subtitle:message leftView:nil rightView:nil style:BannerStyleInfo colors:nil];
+        NotificationBannerQueue* queue = [[NotificationBannerQueue alloc] initWithMaxBannersOnScreenSimultaneously:2];
+        [banner showWithQueuePosition:QueuePositionFront bannerPosition:BannerPositionTop queue:queue on:nil];
+    }
 }
 
 #pragma mark - mac menu

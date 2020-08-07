@@ -187,14 +187,10 @@ NSString *const kXMPPPresence = @"presence";
         DDLogVerbose(@"Called from extension: CSI inactive");
         _isCSIActive = NO;        //we are always inactive when called from an extension
     }
-    else
+    else if([HelperTools isInBackground])
     {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if([UIApplication sharedApplication].applicationState == UIApplicationStateBackground)
-            {
-                _isCSIActive = NO;
-            }
-        });
+        DDLogVerbose(@"Called in background: CSI inactive");
+        _isCSIActive = NO;
     }
     _lastInteractionDate = [NSDate date];     //better default than 1970
 
@@ -516,18 +512,9 @@ NSString *const kXMPPPresence = @"presence";
         if(_registration || _registrationSubmission)
             return;
         
-        double __block connectTimeout = 8.0;
-        if([HelperTools isAppExtension])
+        double connectTimeout = 8.0;
+        if([HelperTools isAppExtension] || [HelperTools isInBackground])
             connectTimeout = 300.0;     //long timeout if in background
-        else
-        {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-                {
-                    connectTimeout = 300.0;     //long timeout if in background
-                }
-            });
-        }
         _cancelLoginTimer = [HelperTools startTimer:connectTimeout withHandler:^{
             [self dispatchOnReceiveQueue: ^{
                 _cancelLoginTimer = nil;
@@ -776,25 +763,13 @@ NSString *const kXMPPPresence = @"presence";
             return;
         }
         
-        //only proceed with pinging if not concurrent with other processes
-        if(![HelperTools isAppExtension] && [MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
-        {
-            DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination before pinging");
-            [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
-        }
-        if([HelperTools isAppExtension] && [MLProcessLock checkRemoteRunning:@"MainApp"])
-        {
-            DDLogInfo(@"MainApp is running, not pinging");
-            return;
-        }
-        
         if(self.accountState<kStateReconnecting)
         {
             DDLogInfo(@"ping calling reconnect");
             [self reconnect:0];
             return;
         }
-
+        
         if(self.accountState<kStateBound)
         {
             DDLogInfo(@"ping attempted before logged in and bound, ignoring ping.");

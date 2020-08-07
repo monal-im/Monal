@@ -49,19 +49,17 @@
     [[DataLayer sharedInstance] isMutedJid:message.actualFrom withCompletion:^(BOOL muted) {
         if(!muted && message.shouldShowAlert)
         {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || [UIApplication sharedApplication].applicationState==UIApplicationStateInactive)
+            if([HelperTools isInBackground])
+                [self showModernNotificaion:notification];
+            else
+            {
+                //don't show notifications for open chats
+                if(
+                    ![message.from isEqualToString:self.currentContact.contactJid] &&
+                    ![message.to isEqualToString:self.currentContact.contactJid]
+                )
                     [self showModernNotificaion:notification];
-                else
-                {
-                    //don't show notifications for open chats
-                    if(
-                        ![message.from isEqualToString:self.currentContact.contactJid] &&
-                        ![message.to isEqualToString:self.currentContact.contactJid]
-                    )
-                        [self showModernNotificaion:notification];
-                }
-            });
+            }
         }
     }];
 }
@@ -121,7 +119,10 @@
                     content.body = @"";
                 
                 if([HelperTools isAppExtension])
+                {
+                    DDLogVerbose(@"notification manager: REpublishing notification: %@", content.body);
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotification object:content userInfo:nil];
+                }
                 else
                 {
                     DDLogVerbose(@"notification manager: publishing notification directly: %@", content.body);
@@ -137,7 +138,10 @@
             content.body = NSLocalizedString(@"Sent a location 📍", @"");
         
         if([HelperTools isAppExtension])
+        {
+            DDLogVerbose(@"notification manager: REpublishing notification: %@", content.body);
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotification object:content userInfo:nil];
+        }
         else
         {
             DDLogVerbose(@"notification manager: publishing notification directly: %@", content.body);

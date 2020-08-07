@@ -25,6 +25,7 @@ static IPC* _sharedInstance;
 
 +(void) initializeForProcess:(NSString*) processName
 {
+    NSAssert(_responseHandlers==nil, @"Please don't call [IPC initialize:@\"processName\" twice!");
     _responseHandlers = [[NSMutableDictionary alloc] init];
     _sharedInstance = [[self alloc] initWithProcessName:processName];
 }
@@ -94,13 +95,15 @@ static IPC* _sharedInstance;
 -(void) runServer
 {
     //use high prio to make sure this always runs
+    //TODO: use real NSThread here
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
         DDLogInfo(@"Now running IPC server for: %@", _processName);
         while(YES)
         {
             NSDictionary* message = [self readNextMessage];     //this will be blocking
             DDLogVerbose(@"Got IPC message: %@", message);
-            if(message[@"response_to"] && [message[@"response_to"] intValue] > 0)   //handle all responses
+            //handle all responses (don't trigger a kMonalIncomingIPC for responses)
+            if(message[@"response_to"] && [message[@"response_to"] intValue] > 0)
             {
                 //call response handler if one is present (ignore the spurious response otherwise)
                 if(_responseHandlers[message[@"response_to"]])
@@ -109,8 +112,8 @@ static IPC* _sharedInstance;
                     [_responseHandlers removeObjectForKey:message[@"response_to"]];      //responses can only be sent (and handled) once
                 }
             }
-            else        //publish all non-responses
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIncomingIPC object:self userInfo:message];
+            else        //publish all non-responses (using the message name as object allows for filtering by ipc message name)
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIncomingIPC object:message[@"name"] userInfo:message];
         }
     });
 }
@@ -145,7 +148,7 @@ static IPC* _sharedInstance;
     NSNumber* timestamp = [NSNumber numberWithInt:[NSDate date].timeIntervalSince1970];
     [self.db executeNonQuery:@"DELETE FROM ipc WHERE timeout<?;" andArguments:@[timestamp]];
     
-    //load a *single* message from table
+    //load a *single* message from table and delete it afterwards
     NSArray* rows = [self.db executeReader:@"SELECT * FROM ipc WHERE destination=? ORDER BY id ASC LIMIT 1;" andArguments:@[destination]];
     if([rows count])
     {
@@ -171,7 +174,7 @@ static IPC* _sharedInstance;
     [self.db executeNonQuery:@"DELETE FROM ipc WHERE timeout<?;" andArguments:@[timestamp]];
     
     //save message to table
-    NSNumber* timeout = @([timestamp intValue] + 10);        //10 seconds timeout
+    NSNumber* timeout = @([timestamp intValue] + 2);        //2 seconds timeout for every message
     [self.db executeNonQuery:@"INSERT INTO ipc (name, source, destination, data, timeout, response_to) VALUES(?, ?, ?, ?, ?, ?);" andArguments:@[name, _processName, destination, data, timeout, responseId]];
     NSNumber* id = [self.db lastInsertId];
     

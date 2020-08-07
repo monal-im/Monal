@@ -251,21 +251,6 @@ static const int sendMessageTimeoutSeconds = 10;
     return YES;
 }
 
--(BOOL) isInBackground
-{
-    __block BOOL inBackground = NO;
-    if([HelperTools isAppExtension])
-        inBackground = YES;
-    else
-    {
-        [HelperTools dispatchSyncReentrant:^{
-            if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-                inBackground = YES;
-        } onQueue:dispatch_get_main_queue()];
-    }
-    return inBackground;
-}
-
 -(void) checkIfBackgroundTaskIsStillNeeded
 {
     if(![HelperTools isAppExtension])
@@ -279,7 +264,7 @@ static const int sendMessageTimeoutSeconds = 10;
             _pushCompletion = nil;
             _cancelPushTimer = nil;
         }
-        if([self allAccountsIdle] && [self isInBackground])
+        if([self allAccountsIdle] && [HelperTools isInBackground])
         {
             DDLogInfo(@"### All accounts idle, stopping all background tasks ###");
             [DDLog flushLog];
@@ -299,17 +284,11 @@ static const int sendMessageTimeoutSeconds = 10;
                 [_bgFetch setTaskCompletedWithSuccess:YES];
                 stopped = YES;
             }
-            if(!stopped)
+            if(stopped)
+                [MLProcessLock unlock];     //now allow starting of NotificationServiceExtension
+            else
                 DDLogVerbose(@"no background tasks running, nothing to stop");
             [DDLog flushLog];
-            
-            /*
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                DDLogVerbose(@"disconnecting all accounts (we don't need idle connections that could get killed any time anyways)");
-                for(xmpp* xmppAccount in [self connectedXMPP])
-                    [xmppAccount disconnect];
-            });
-            */
         }
     }
 }
@@ -416,7 +395,7 @@ static const int sendMessageTimeoutSeconds = 10;
 -(void) incomingPushWithCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
 {
     DDLogError(@"got incomingPushWithCompletionHandler");
-    if(![self isInBackground])
+    if(![HelperTools isInBackground])
     {
         DDLogError(@"Ignoring incomingPushWithCompletionHandler: because app is in FG!");
         completionHandler(UIBackgroundFetchResultNoData);

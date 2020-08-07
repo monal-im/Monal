@@ -17,10 +17,7 @@
 static void logException(NSException* exception)
 {
     [DDLog flushLog];
-    DDLogError(@"*** CRASH(%@): %@", [exception name], [exception reason]);
-    [DDLog flushLog];
-    DDLogError(@"*** UserInfo: %@", [exception userInfo]);
-    DDLogError(@"*** Stack Trace: %@", [exception callStackSymbols]);
+    DDLogError(@"*****************\nCRASH(%@): %@\nUserInfo: %@\nStack Trace: %@", [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
     [DDLog flushLog];
 }
 
@@ -28,13 +25,14 @@ static void logException(NSException* exception)
 @property (atomic, strong) NSMutableArray* contentList;
 @property (atomic, strong) NSMutableArray* handlerList;
 @property (atomic, strong) NSMutableSet* idleAccounts;
+@property (atomic, strong) NSThread* lockingThread;
 @end
 
 @implementation Push
 
 +(id) instance
 {
-    Push* __block sharedInstance;
+    static Push* sharedInstance;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         sharedInstance = [[Push alloc] init];
@@ -51,6 +49,25 @@ static void logException(NSException* exception)
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(xmppError:) name:kXMPPError object:nil];
     return self;
+}
+
+-(void) dealloc
+{
+    DDLogError(@"Deallocating push singleton");
+    [DDLog flushLog];
+}
+
+-(void) lockingThreadMain
+{
+    //disconnect all accounts immediately if main app gets started
+    [MLProcessLock waitForRemoteStartup:@"MainApp"];
+    //only do this if the thread did not get cancelled (which means our accounts already got disconnected)
+    if(![[NSThread currentThread] isCancelled])
+    {
+        DDLogWarn(@"Main app is now running, disconnecting all accounts and (hopefully) terminate this extension as soon as possible");
+        //disconnected accounts are idle and this extension will be terminated if all accounts are idle in [self nowIdle:]
+        [[MLXMPPManager sharedInstance] disconnectAll];
+    }
 }
 
 -(void) incomingPush:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
@@ -85,13 +102,9 @@ static void logException(NSException* exception)
             DDLogVerbose(@"MLXMPPManager called");
             [DDLog flushLog];
             
-            /*//disconnect all accounts immediately if main app gets started
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                [MLProcessLock waitForRemoteStartup:@"MainApp"];
-                DDLogWarn(@"Main app is now running, disconnecting all accounts and (hopefully) terminate this extension as soon as possible");
-                //disconnected accounts are idle and this extension will be terminated if all accounts are idle in [self nowIdle:]
-                [[MLXMPPManager sharedInstance] disconnectAll];
-            });*/
+            self.lockingThread = [[NSThread alloc] initWithTarget:self selector:@selector(lockingThreadMain:) object:nil];
+            [self.lockingThread setName:@"LockingThread"];
+            [self.lockingThread start];
         }
         else
             ;       //do nothing if not the first call (MLXMPPManager is already connecting)
@@ -127,6 +140,7 @@ static void logException(NSException* exception)
     //repeated calls to this method will do nothing (every handler will already be used and every content will already be posted)
     @synchronized(self) {
         DDLogInfo(@"Disconnecting all accounts and posting all pending notifications");
+        [self.lockingThread cancel];        //kill locking thread (we're done with our extension now)
         [[MLXMPPManager sharedInstance] disconnectAll];
         
         //for debugging
@@ -185,6 +199,7 @@ static void logException(NSException* exception)
         [self.contentList removeObject:content];
         //THIS SQL QUERY HAS TO BE SYNCRONOUS
         [self addBadgeTo:content withCompletion:^{
+            DDLogInfo(@"Posting notification: %@", content.body);
             void (^handler)(UNNotificationContent* contentToDeliver) = [self.handlerList firstObject];
             [self.handlerList removeObject:handler];
             handler(content);
@@ -192,9 +207,6 @@ static void logException(NSException* exception)
     }
     else
     {
-        //TODO: echtes handling wieder einkommentieren
-        [self postNextDummyNotification];
-        /*
         //If this Notification Service Extension run did not yield enough notifications, we have to go another route to be user friendly,
         //because we could have received more apns pushes than xmpp messages waiting (or we have bad network connectivity making it impossible
         //to retrieve all xmpp messages in time)
@@ -244,7 +256,6 @@ static void logException(NSException* exception)
                 }];
             }
         }];
-        */
     }
 }
 
@@ -370,6 +381,7 @@ static void logException(NSException* exception)
 +(void) initialize
 {
     [HelperTools configureLogging];
+    [DDLog flushLog];
     
     //log unhandled exceptions
     NSSetUncaughtExceptionHandler(&logException);
@@ -392,6 +404,7 @@ static void logException(NSException* exception)
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
     DDLogInfo(@"Notification Service Extension started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
+    [DDLog flushLog];
     usleep(100000);     //wait for initial connectivity check
 }
 
@@ -421,7 +434,11 @@ static void logException(NSException* exception)
     }
     
     //proxy to push singleton
+    DDLogVerbose(@"proxying to incomingPush");
+    [DDLog flushLog];
     [[Push instance] incomingPush:contentHandler];
+    DDLogVerbose(@"incomingPush proxy completed");
+    [DDLog flushLog];
 }
 
 -(void) serviceExtensionTimeWillExpire
@@ -430,7 +447,11 @@ static void logException(NSException* exception)
     [DDLog flushLog];
     
     //proxy to push singleton
+    DDLogVerbose(@"proxying to pushExpired");
+    [DDLog flushLog];
     [[Push instance] pushExpired];
+    DDLogVerbose(@"pushExpired proxy completed");
+    [DDLog flushLog];
 }
 
 @end

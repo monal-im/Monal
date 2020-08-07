@@ -67,7 +67,6 @@ typedef void (^monal_void_block_t)(void);
 
 #define kMonalRefresh @"kMonalRefresh"
 #define kMonalContactRefresh @"kMonalContactRefresh"
-#define kMonalRefreshContacts @"kMonalRefreshContacts"
 
 // max count of char's in a single message (both: sending and receiving)
 #define kMonalChatMaxAllowedTextLen 2048

@@ -13,6 +13,22 @@
 @implementation HelperTools
 
 
++(BOOL) isInBackground
+{
+    __block BOOL inBackground = NO;
+    if([HelperTools isAppExtension])
+        inBackground = YES;
+    else
+    {
+        //we don't need to run this on the main thread (its only a readonly bool after all)
+        //[HelperTools dispatchSyncReentrant:^{
+            if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || [UIApplication sharedApplication].applicationState==UIApplicationStateInactive)
+                inBackground = YES;
+        //} onQueue:dispatch_get_main_queue()];
+    }
+    return inBackground;
+}
+
 +(void) dispatchSyncReentrant:(monal_void_block_t) block onQueue:(dispatch_queue_t) queue
 {
     if(!queue)

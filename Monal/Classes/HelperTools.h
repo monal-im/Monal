@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface HelperTools : NSObject
 
++(BOOL) isInBackground;
 +(void) dispatchSyncReentrant:(monal_void_block_t) block onQueue:(dispatch_queue_t) queue;
 +(void) activityLog;
 +(NSUserDefaults*) defaultsDB;

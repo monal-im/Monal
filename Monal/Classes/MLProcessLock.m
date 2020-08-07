@@ -42,19 +42,19 @@
 
 +(void) waitForRemoteStartup:(NSString*) processName
 {
-    while(![self checkRemoteRunning:processName])
-        usleep(1000000);
+    while(![[NSThread currentThread] isCancelled] && ![self checkRemoteRunning:processName])
+        usleep(50000);     //checkRemoteRunning did already wait for its timeout, don't wait too long here
 }
 
 +(void) waitForRemoteTermination:(NSString*) processName
 {
-    while([self checkRemoteRunning:processName])
-        usleep(1000000);
+    while(![[NSThread currentThread] isCancelled] && [self checkRemoteRunning:processName])
+        usleep(1000000);     //checkRemoteRunning did not wait for its timeout, wait here
 }
 
 +(void) lock
 {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ping:) name:kMonalIncomingIPC object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ping:) name:kMonalIncomingIPC object:@"MLProcessLock.ping"];
 }
 
 +(void) unlock
@@ -64,13 +64,9 @@
 
 +(void) ping:(NSNotification*) notification
 {
-    IPC* ipc = notification.object;
     NSDictionary* message = notification.userInfo;
-    if([message[@"name"] isEqualToString:@"MLProcessLock.ping"])
-    {
-        DDLogVerbose(@"MLProcessLock responding to ping %@", message[@"id"]);
-        [ipc respondToMessage:message withData:nil];
-    }
+    DDLogVerbose(@"MLProcessLock responding to ping %@", message[@"id"]);
+    [[IPC sharedInstance] respondToMessage:message withData:nil];
 }
 
 @end

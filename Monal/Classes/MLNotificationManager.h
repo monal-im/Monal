@@ -16,8 +16,6 @@
  */
 @interface MLNotificationManager : NSObject
 
-@property (atomic, strong) UNMutableNotificationContent* lastNotification;
-
 + (MLNotificationManager* )sharedInstance;
 
 /**
@@ -29,8 +27,6 @@
  if in chat with this account's user then dont push messages for this user when not locked
  */
 @property (nonatomic, strong) NSString* currentAccountNo;
-
--(void) publishLastNotification;
 
 /**
  handles the notification. 

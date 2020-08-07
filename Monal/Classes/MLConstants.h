@@ -40,6 +40,7 @@ typedef void (^monal_void_block_t)(void);
 
 //all other constants needed
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
+#define kMonalNewMessageNotification @"kMonalNewMessageNotification"
 #define kMLMessageSentToContact @"kMLMessageSentToContact"
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"
 

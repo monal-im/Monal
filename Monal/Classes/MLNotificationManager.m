@@ -72,29 +72,11 @@
     return [NSString stringWithFormat:@"%@_%@", message.accountId, message.from];
 }
 
--(void) publishLastNotification
-{
-    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-    if(self.lastNotification)
-    {
-        DDLogVerbose(@"notification manager: publishing last notification: %@", self.lastNotification.body);
-        UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:self.lastNotification trigger:nil];
-        [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) { }];
-        self.lastNotification = nil;
-    }
-}
-
 -(void) showModernNotificaion:(NSNotification*) notification
 {
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
-    if([HelperTools isAppExtension])
-    {
-        //publish last notification, we've got a newer one
-        [self publishLastNotification];
-        self.lastNotification = content;
-    }
     
     [[DataLayer sharedInstance] fullNameForContact:message.from inAccount:message.accountId withCompeltion:^(NSString *displayName) {
         
@@ -134,11 +116,13 @@
                 }
                 
                 if(!content.attachments)
-                    content.body = NSLocalizedString(@"Sent an Image 📷",@ "");
+                    content.body = NSLocalizedString(@"Sent an Image 📷", @"");
                 else
                     content.body = @"";
                 
-                if(![HelperTools isAppExtension])
+                if([HelperTools isAppExtension])
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotification object:content userInfo:nil];
+                else
                 {
                     DDLogVerbose(@"notification manager: publishing notification directly: %@", content.body);
                     UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:content trigger:nil];
@@ -148,11 +132,13 @@
             return;
         }
         else if([message.messageType isEqualToString:kMessageTypeUrl])
-            content.body = NSLocalizedString(@"Sent a Link 🔗",@ "");
+            content.body = NSLocalizedString(@"Sent a Link 🔗", @"");
         else if([message.messageType isEqualToString:kMessageTypeGeo])
-            content.body = NSLocalizedString(@"Sent a location 📍",@ "");
+            content.body = NSLocalizedString(@"Sent a location 📍", @"");
         
-        if(![HelperTools isAppExtension])
+        if([HelperTools isAppExtension])
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotification object:content userInfo:nil];
+        else
         {
             DDLogVerbose(@"notification manager: publishing notification directly: %@", content.body);
             UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:content trigger:nil];

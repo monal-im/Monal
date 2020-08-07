@@ -1709,7 +1709,8 @@ static NSDateFormatter* dbFormatter;
         return;
     }
     [self.db beginWriteTransaction];
-    NSString* query = [NSString stringWithFormat:@"select count(buddy_name) from activechats where account_id=? and buddy_name=? "];
+    // Check that we do not add a chat a second time to activechats
+    NSString* query = [NSString stringWithFormat:@"select count(buddy_name) from activechats where account_id=? and buddy_name=?"];
     [self.db executeScalar:query  andArguments:@[accountNo, buddyname] withCompletion:^(NSObject * count) {
         if(count != nil)
         {
@@ -1721,12 +1722,28 @@ static NSDateFormatter* dbFormatter;
                 }
             } else
             {
-                //no
-                NSString* query2 = [NSString stringWithFormat:@"insert into activechats (buddy_name, account_id, lastMessageTime) values (?,?, current_timestamp) "];
-                [self.db executeNonQuery:query2 andArguments:@[buddyname, accountNo] withCompletion:^(BOOL result) {
-                    [self.db endWriteTransaction];
-                    if (completion) {
-                        completion(result);
+                // active chat entry does not exist yet -> insert
+                NSString* query2 = [NSString stringWithFormat:@"select username, domain from account where account_id=?"];
+                [self.db executeReader:query2 andArguments:@[accountNo] withCompletion:^(NSMutableArray* accountVals) {
+                    // Check if we create a chat with our own jid -> should never happen
+                    NSDictionary* firstRow = [accountVals objectAtIndex:0];
+                    NSString* accountJid = [NSString stringWithFormat:@"%@@%@", [firstRow objectForKey:kUsername], [firstRow objectForKey:kDomain]];
+                    if([accountJid isEqualToString:buddyname]) {
+                        // Something is broken
+                        [self.db endWriteTransaction];
+                        DDLogWarn(@"We should never try to create a cheat with our own jid");
+                        if(completion)
+                            completion(NO);
+                        return;
+                    } else {
+                        // insert
+                        NSString* query3 = [NSString stringWithFormat:@"insert into activechats (buddy_name, account_id, lastMessageTime) values (?, ?, current_timestamp)"];
+                        [self.db executeNonQuery:query3 andArguments:@[buddyname, accountNo] withCompletion:^(BOOL result) {
+                            [self.db endWriteTransaction];
+                            if (completion) {
+                                completion(result);
+                            }
+                        }];
                     }
                 }];
             }

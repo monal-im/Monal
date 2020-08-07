@@ -109,12 +109,12 @@
     }
     else
     {
-        self.port=@"5222";
-        self.resource=[HelperTools encodeRandomResource];
-        self.directTLS=NO;
-        self.selfSignedSSL=NO;
+        self.port = @"5222";
+        self.resource = [HelperTools encodeRandomResource];
+        self.directTLS = NO;
+        self.selfSignedSSL = NO;
     }
-    self.sectionArray = @[@"Account", @"Advanced Settings", @""];
+    self.sectionArray = @[@"Account", @"General", @"Advanced Settings", @""];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -145,35 +145,35 @@
 
     DDLogVerbose(@"Saving");
 
-    if([self.jid length]==0)
+    if([self.jid length] == 0)
     {
-        return ;
+        return;
     }
 
     NSString* domain;
     NSString* user;
 
-    if([self.jid characterAtIndex:0]=='@')
+    if([self.jid characterAtIndex:0] == '@')
     {
         //first char =@ means no username in jid
         return;
     }
 
-    NSArray* elements=[self.jid componentsSeparatedByString:@"@"];
+    NSArray* elements = [self.jid componentsSeparatedByString:@"@"];
 
     //if it is a JID
-    if([elements count]>1)
+    if([elements count] > 1)
     {
-        user= [elements objectAtIndex:0];
+        user = [elements objectAtIndex:0];
         domain = [elements objectAtIndex:1];
     }
     else
     {
-        user=self.jid;
-        domain= @"";
+        user = self.jid;
+        domain = @"";
     }
 
-    NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* dic = [[NSMutableDictionary alloc] init];
     [dic setObject:domain forKey:kDomain];
 
     if(user) [dic setObject:user forKey:kUsername];
@@ -195,8 +195,8 @@
     if(!self.editMode)
     {
 
-        if(([self.jid length]==0) &&
-           ([self.password length]==0)
+        if(([self.jid length] == 0) &&
+           ([self.password length] == 0)
            )
         {
             //ignoring blank
@@ -229,8 +229,8 @@
                     }];
                 } else  {
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        UIAlertController* alert= [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Account Exists",@ "") message:NSLocalizedString(@"This account already exists in Monal.",@ "") preferredStyle:UIAlertControllerStyleAlert];
-                        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                        UIAlertController* alert= [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Account Exists",@ "") message:NSLocalizedString(@"This account already exists in Monal.", @"") preferredStyle:UIAlertControllerStyleAlert];
+                        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                             [alert dismissViewControllerAnimated:YES completion:nil];
                         }]];
                         [self presentViewController:alert animated:YES completion:nil];
@@ -252,7 +252,6 @@
             {
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
             }
-            
             [self showSuccessHUD];
         }];
 
@@ -266,8 +265,8 @@
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeCustomView;
         hud.removeFromSuperViewOnHide = YES;
-        hud.label.text = NSLocalizedString(@"Success",@ "");
-        hud.detailsLabel.text = NSLocalizedString(@"The account has been saved",@ "");
+        hud.label.text = NSLocalizedString(@"Success", @"");
+        hud.detailsLabel.text = NSLocalizedString(@"The account has been saved", @"");
         UIImage *image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         hud.customView = [[UIImageView alloc] initWithImage:image];
         [hud hideAnimated:YES afterDelay:1.0f];
@@ -279,10 +278,10 @@
     DDLogVerbose(@"Deleting");
 
     UIAlertController *questionAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Delete Account",@ "") message:NSLocalizedString(@"This will remove this account and the associated data from this device.",@ "") preferredStyle:UIAlertControllerStyleActionSheet];
-    UIAlertAction *noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+    UIAlertAction *noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         //do nothing when "no" was pressed
     }];
-    UIAlertAction *yesAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+    UIAlertAction *yesAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
 
         [SAMKeychain deletePasswordForService:@"Monal"  account:[NSString stringWithFormat:@"%@",self.accountno]];
         [self.db removeAccount:self.accountno];
@@ -292,8 +291,8 @@
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeCustomView;
         hud.removeFromSuperViewOnHide=YES;
-        hud.label.text =NSLocalizedString(@"Success",@ "");
-        hud.detailsLabel.text =NSLocalizedString(@"The account has been deleted",@ "");
+        hud.label.text =NSLocalizedString(@"Success", @"");
+        hud.detailsLabel.text =NSLocalizedString(@"The account has been deleted", @"");
         UIImage *image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         hud.customView = [[UIImageView alloc] initWithImage:image];
         [hud hideAnimated:YES afterDelay:1.0f];
@@ -340,7 +339,7 @@
                 break;
             }
             case 1: {
-                thecell.cellLabel.text = NSLocalizedString(@"Password",@ "");
+                thecell.cellLabel.text = NSLocalizedString(@"Password", @"");
                 thecell.toggleSwitch.hidden = YES;
                 thecell.textInputField.secureTextEntry = YES;
                 thecell.textInputField.tag = 2;
@@ -348,7 +347,7 @@
                 break;
             }
             case 2: {
-                thecell.cellLabel.text = NSLocalizedString(@"Enabled",@ "");
+                thecell.cellLabel.text = NSLocalizedString(@"Enabled", @"");
                 thecell.textInputField.hidden = YES;
                 thecell.toggleSwitch.tag = 1;
                 thecell.toggleSwitch.on = self.enabled;
@@ -357,13 +356,36 @@
 
         }
     }
-    else if (indexPath.section==1)
+    else if(indexPath.section == 1)
+    {
+        switch (indexPath.row)
+        {
+            // general
+            case 0: {
+                thecell.cellLabel.text = NSLocalizedString(@"Message Archive Pref", @"");
+                thecell.toggleSwitch.hidden = YES;
+
+                thecell.textInputField.hidden = YES;
+                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                break;
+            }
+            case 1: {
+                thecell.cellLabel.text = NSLocalizedString(@"My Keys", @"");
+                thecell.toggleSwitch.hidden = YES;
+
+                thecell.textInputField.hidden = YES;
+                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                break;
+            }
+        }
+    }
+    else if(indexPath.section == 2)
     {
         switch (indexPath.row)
         {
             //advanced
             case 0:  {
-                thecell.cellLabel.text = NSLocalizedString(@"Server",@ "");
+                thecell.cellLabel.text = NSLocalizedString(@"Server", @"");
                 thecell.toggleSwitch.hidden = YES;
                 thecell.textInputField.tag = 3;
                 thecell.textInputField.text = self.server;
@@ -372,28 +394,28 @@
                 break;
             }
             case 1:  {
-                thecell.cellLabel.text = NSLocalizedString(@"Port",@ "");
+                thecell.cellLabel.text = NSLocalizedString(@"Port", @"");
                 thecell.toggleSwitch.hidden = YES;
                 thecell.textInputField.tag = 4;
                 thecell.textInputField.text = self.port;
                 break;
             }
             case 2: {
-                thecell.cellLabel.text = NSLocalizedString(@"Direct TLS",@ "");
+                thecell.cellLabel.text = NSLocalizedString(@"Direct TLS", @"");
                 thecell.textInputField.hidden = YES;
                 thecell.toggleSwitch.tag = 2;
                 thecell.toggleSwitch.on = self.directTLS;
                 break;
             }
             case 3: {
-                thecell.cellLabel.text = NSLocalizedString(@"Validate certificate",@ "");
+                thecell.cellLabel.text = NSLocalizedString(@"Validate certificate", @"");
                 thecell.textInputField.hidden = YES;
                 thecell.toggleSwitch.tag = 3;
                 thecell.toggleSwitch.on = !self.selfSignedSSL;
                 break;
             }
             case 4: {
-                thecell.cellLabel.text = NSLocalizedString(@"Message Archive Pref",@ "");
+                thecell.cellLabel.text = NSLocalizedString(@"Change Password", @"");
                 thecell.toggleSwitch.hidden = YES;
 
                 thecell.textInputField.hidden = YES;
@@ -401,23 +423,7 @@
                 break;
             }
             case 5: {
-                thecell.cellLabel.text = NSLocalizedString(@"My Keys",@ "");
-                thecell.toggleSwitch.hidden = YES;
-
-                thecell.textInputField.hidden = YES;
-                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-                break;
-            }
-            case 6: {
-                thecell.cellLabel.text = NSLocalizedString(@"Change Password",@ "");
-                thecell.toggleSwitch.hidden = YES;
-
-                thecell.textInputField.hidden = YES;
-                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-                break;
-            }
-            case 7: {
-                thecell.cellLabel.text = NSLocalizedString(@"Resource",@ "");
+                thecell.cellLabel.text = NSLocalizedString(@"Resource", @ "");
                 thecell.labelRight.text = self.resource;
                 thecell.labelRight.hidden = NO;
                 thecell.toggleSwitch.hidden = YES;
@@ -426,7 +432,7 @@
             }
         }
     }
-    else if (indexPath.section == 2)
+    else if (indexPath.section == 3)
     {
         switch (indexPath.row) {
             case 0:
@@ -498,18 +504,22 @@
     if(section == 0){
         return 3;
     }
-    // Advanced settings
+    // General settings
     else if(section == 1) {
-        return 8;
+        return 2;
     }
-    else if(section == 2 &&  self.editMode == false)
+    // Advanced settings
+    else if(section == 2) {
+        return 6;
+    }
+    else if(section == 3 &&  self.editMode == false)
     {
         return 0;
     }
-    else return 1;
-
-    return 0; //default
-
+    else
+    {
+        return 1;
+    }
 }
 
 #pragma mark -  table view delegate
@@ -517,22 +527,28 @@
 {
     DDLogVerbose(@"selected log section %ld , row %ld", newIndexPath.section, newIndexPath.row);
     
-    if (newIndexPath.section == 1)
+    if(newIndexPath.section == 1)
     {
-        switch (newIndexPath.row)
+        switch(newIndexPath.row)
         {
-            case 4:
+            case 0:
                 [self performSegueWithIdentifier:@"showMAMPref" sender:self];
                 break;
-            case 5:
+            case 1:
                 [self performSegueWithIdentifier:@"showKeyTrust" sender:self];
-                break;
-            case 6:
-                [self performSegueWithIdentifier:@"showPassChange" sender:self];
                 break;
         }
     }
     else if(newIndexPath.section == 2)
+    {
+        switch(newIndexPath.row)
+        {
+            case 4:
+                [self performSegueWithIdentifier:@"showPassChange" sender:self];
+                break;
+        }
+    }
+    else if(newIndexPath.section == 3)
     {
         [self delClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
     }
@@ -541,9 +557,9 @@
 
 -(void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.section == 1)
+    if(indexPath.section == 2)
     {
-        switch (indexPath.row)
+        switch(indexPath.row)
         {
             case 0:
                 [self performSegueWithIdentifier:@"showServerDetails" sender:self];

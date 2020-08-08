@@ -2427,9 +2427,9 @@ static NSDateFormatter* dbFormatter;
     NSArray* params = @[accountNo, jid];
     NSNumber* lastInteractionTime = (NSNumber*)[self.db executeScalar:query andArguments:params];
 
-    //return NSDate object or NSNull, if last interaction is zero
+    //return NSDate object or 1970, if last interaction is zero
     if(![lastInteractionTime integerValue])
-        return nil;
+        return [[NSDate date] initWithTimeIntervalSince1970:0] ;
     return [NSDate dateWithTimeIntervalSince1970:[lastInteractionTime integerValue]];
 }
 

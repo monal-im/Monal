@@ -231,7 +231,7 @@ static NSMutableDictionary* _typingNotifications;
                 if(messageNode.composing)
                 {
                     _typingNotifications[messageNode.user] = [HelperTools startTimer:60 withHandler:^{
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:[NSNull null] userInfo:@{
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:[[NSDate date] initWithTimeIntervalSince1970:0] userInfo:@{
                             @"jid": jid,
                             @"accountNo": account,
                             @"isTyping": @NO

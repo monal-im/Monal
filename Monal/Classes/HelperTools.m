@@ -176,7 +176,7 @@
     unsigned long lastInteractionTime = 0;      //default is zero which corresponds to "online"
 
     // calculate timestamp and clamp it to be not in the future (but only if given)
-    if(lastInteraction && lastInteraction!=[NSNull null])       //NSDictionary does not support nil, so we're using NSNull sometimes
+    if(lastInteraction && [lastInteraction timeIntervalSince1970] != 0)       //NSDictionary does not support nil, so we're using timeSince1970 + 0 sometimes
         lastInteractionTime = MIN([lastInteraction timeIntervalSince1970], currentTimestamp);
 
     if(lastInteractionTime > 0) {

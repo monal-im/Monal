@@ -1252,7 +1252,7 @@ NSString *const kXMPPPresence = @"presence";
                             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
                                 @"jid": presenceNode.user,
                                 @"accountNo": self.accountNo,
-                                @"lastInteraction": presenceNode.since ? presenceNode.since : [NSNull null],    //nil cannot directly be saved in NSDictionary
+                                @"lastInteraction": presenceNode.since ? presenceNode.since : [[NSDate date] initWithTimeIntervalSince1970:0],    //nil cannot directly be saved in NSDictionary
                                 @"isTyping": @NO
                             }];
                         });

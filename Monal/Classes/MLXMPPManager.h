@@ -20,6 +20,7 @@
 + (MLXMPPManager* )sharedInstance;
 
 -(BOOL) allAccountsIdle;
+-(void) configureBackgroundFetchingTask;
 
 #pragma  mark connectivity
 /**

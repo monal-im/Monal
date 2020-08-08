@@ -54,7 +54,7 @@
 
 +(void) lock
 {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ping:) name:kMonalIncomingIPC object:@"MLProcessLock.ping"];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ping:) name:kMonalIncomingIPC object:nil];
 }
 
 +(void) unlock
@@ -65,8 +65,11 @@
 +(void) ping:(NSNotification*) notification
 {
     NSDictionary* message = notification.userInfo;
-    DDLogVerbose(@"MLProcessLock responding to ping %@", message[@"id"]);
-    [[IPC sharedInstance] respondToMessage:message withData:nil];
+    if([message[@"name"] isEqualToString:@"MLProcessLock.ping"])
+    {
+        DDLogVerbose(@"MLProcessLock responding to ping %@", message[@"id"]);
+        [[IPC sharedInstance] respondToMessage:message withData:nil];
+    }
 }
 
 @end

@@ -18,7 +18,6 @@
 @property (atomic, strong) NSMutableArray* contentList;
 @property (atomic, strong) NSMutableArray* handlerList;
 @property (atomic, strong) NSMutableSet* idleAccounts;
-@property (atomic, strong) NSThread* lockingThread;
 @end
 
 @implementation Push
@@ -41,6 +40,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewNotification:) name:kMonalNewMessageNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(xmppError:) name:kXMPPError object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
     return self;
 }
 
@@ -50,27 +50,14 @@
     [DDLog flushLog];
 }
 
--(void) lockingThreadMain
-{
-    //disconnect all accounts immediately if main app gets started
-    [MLProcessLock waitForRemoteStartup:@"MainApp"];
-    //only do this if the thread did not get cancelled (which means our accounts already got disconnected)
-    if(![[NSThread currentThread] isCancelled])
-    {
-        DDLogWarn(@"Main app is now running, disconnecting all accounts and (hopefully) terminate this extension as soon as possible");
-        //disconnected accounts are idle and this extension will be terminated if all accounts are idle in [self nowIdle:]
-        [[MLXMPPManager sharedInstance] disconnectAll];
-    }
-}
-
 -(void) incomingPush:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
 {
     @synchronized(self) {
         DDLogInfo(@"Handling incoming push");
         BOOL first = NO;
-        if(![self.contentList count])
+        if(![self.handlerList count])
         {
-            DDLogInfo(@"First incoming push, locking process and connecting accounts");
+            DDLogInfo(@"First incoming push, locking process");
             self.idleAccounts = [[NSMutableSet alloc] init];
             [MLProcessLock lock];
             first = YES;
@@ -82,22 +69,18 @@
         
         if([MLProcessLock checkRemoteRunning:@"MainApp"])
         {
-            DDLogInfo(@"NOT calling MLXMPPManager, main app already running, posting *all* waiting dummy notifications instead");
+            DDLogInfo(@"NOT connecting accounts, main app already running in foreground, posting *all* waiting dummy notifications instead");
             [DDLog flushLog];
             [self postAllPendingNotifications];
             return;
         }
         else if(first)      //first incoming push --> connect to servers
         {
-            DDLogVerbose(@"calling MLXMPPManager");
+            DDLogVerbose(@"telling backgrounded MainApp to disconnect all accounts");
+            [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"MainApp"];
+            DDLogVerbose(@"connecting accounts");
             [DDLog flushLog];
             [[MLXMPPManager sharedInstance] connectIfNecessary];
-            DDLogVerbose(@"MLXMPPManager called");
-            [DDLog flushLog];
-            
-            self.lockingThread = [[NSThread alloc] initWithTarget:self selector:@selector(lockingThreadMain:) object:nil];
-            [self.lockingThread setName:@"LockingThread"];
-            [self.lockingThread start];
         }
         else
             ;       //do nothing if not the first call (MLXMPPManager is already connecting)
@@ -128,16 +111,35 @@
     }
 }
 
+-(void) incomingIPC:(NSNotification*) notification
+{
+    NSDictionary* message = notification.userInfo;
+    if([message[@"name"] isEqualToString:@"Monal.disconnectAll"])
+    {
+        //disconnected accounts are idle and this extension will be terminated by [self nowIdle:] if all accounts are idle
+        [[MLXMPPManager sharedInstance] disconnectAll];
+    }
+    else if([message[@"name"] isEqualToString:@"Monal.connectIfNecessary"])
+    {
+        //(re)connect all accounts
+        [[MLXMPPManager sharedInstance] connectIfNecessary];
+    }
+}
+
 -(void) postAllPendingNotifications
 {
     //repeated calls to this method will do nothing (every handler will already be used and every content will already be posted)
     @synchronized(self) {
-        DDLogInfo(@"Disconnecting all accounts and posting all pending notifications");
-        [self.lockingThread cancel];        //kill locking thread (we're done with our extension now)
+        DDLogInfo(@"Disconnecting all accounts and posting all pending notifications: %ul / %ul", [self.contentList count], [self.handlerList count]);
         [[MLXMPPManager sharedInstance] disconnectAll];
         
         //for debugging
         [self listNotifications];
+        
+        //post Monal.refreshUI IPC message if we did receive any xmpp message
+        //(this refresh can happen immediately, because we already wrote the messages to db)
+        if([self.contentList count])
+            [[IPC sharedInstance] sendMessage:@"Monal.refreshUI" withData:nil to:@"MainApp"];
         
         //use all pending handlers (except the last one)
         while([self.handlerList count]>1)
@@ -196,6 +198,7 @@
             void (^handler)(UNNotificationContent* contentToDeliver) = [self.handlerList firstObject];
             [self.handlerList removeObject:handler];
             handler(content);
+            DDLogVerbose(@"Notification posted successfully");
         }];
     }
     else
@@ -211,6 +214,7 @@
         //In the "xmpp account has error" case an error notification will be displayed to the user to alert her that something is wrong
         //and afterwards this method will be called (silencing the possibly waiting dummy notification).
         
+        NSCondition* waiter = [[NSCondition alloc] init];
         //try to find an unpublished notification request we can replace
         DDLogVerbose(@"try to find an unpublished notification request we can replace");
         [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
@@ -224,6 +228,11 @@
             if(content)
                 [self addBadgeTo:content withCompletion:^{
                     [self callDelayedContentHandler:content];
+                    
+                    //wake up waiter
+                    [waiter lock];
+                    [waiter signal];
+                    [waiter unlock];
                 }];
             else
             {
@@ -240,29 +249,43 @@
                     if(content)
                         [self addBadgeTo:content withCompletion:^{
                             [self callDelayedContentHandler:content];
+                            
+                            //wake up waiter
+                            [waiter lock];
+                            [waiter signal];
+                            [waiter unlock];
                         }];
                     else
                     {
                         DDLogInfo(@"Could not find any notification to replace, posting dummy notification instead");
                         [self postNextDummyNotification];       //we could not even find a published one --> just publish the dummy notification
+                        
+                        //wake up waiter
+                        [waiter lock];
+                        [waiter signal];
+                        [waiter unlock];
                     }
                 }];
             }
         }];
+        
+        //wait for notification posting to complete before continuing to the next notification
+        [waiter lock];
+        [waiter wait];
+        [waiter unlock];
     }
 }
 
 -(void) callDelayedContentHandler:(UNMutableNotificationContent*) content
 {
     //use this to make sure that the async removeDeliveredNotificationsWithIdentifiers: call succeeded before contentHandler is called
-    dispatch_async(dispatch_get_main_queue(), ^{
-        usleep(50000);
-        @synchronized(self) {
-            void (^handler)(UNNotificationContent* contentToDeliver) = [self.handlerList firstObject];
-            [self.handlerList removeObject:handler];
-            handler(content);
-        }
-    });
+    usleep(100000);
+    @synchronized(self) {
+        void (^handler)(UNNotificationContent* contentToDeliver) = [self.handlerList firstObject];
+        [self.handlerList removeObject:handler];
+        handler(content);
+        DDLogInfo(@"Delayed content handler called for: %@", content.body);
+    }
 }
 
 -(void) postNextDummyNotification
@@ -429,7 +452,9 @@
     //proxy to push singleton
     DDLogVerbose(@"proxying to incomingPush");
     [DDLog flushLog];
-    [[Push instance] incomingPush:contentHandler];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [[Push instance] incomingPush:contentHandler];
+    });
     DDLogVerbose(@"incomingPush proxy completed");
     [DDLog flushLog];
 }
@@ -442,7 +467,9 @@
     //proxy to push singleton
     DDLogVerbose(@"proxying to pushExpired");
     [DDLog flushLog];
-    [[Push instance] pushExpired];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [[Push instance] pushExpired];
+    });
     DDLogVerbose(@"pushExpired proxy completed");
     [DDLog flushLog];
 }

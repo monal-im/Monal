@@ -36,6 +36,11 @@ static IPC* _sharedInstance;
     return _sharedInstance;
 }
 
+-(void) sendMessage:(NSString*) name withData:(NSData*) data to:(NSString*) destination
+{
+    [self sendMessage:name withData:data to:destination withResponseHandler:nil];
+}
+
 -(void) sendMessage:(NSString*) name withData:(NSData*) data to:(NSString*) destination withResponseHandler:(IPC_response_handler_t) responseHandler
 {
     NSNumber* id = [self writeIpcMessage:name withData:data andResponseId:[NSNumber numberWithInt:0] to:destination];
@@ -62,6 +67,8 @@ static IPC* _sharedInstance;
         //create initial database if file not exists
         if(![fileManager fileExistsAtPath:_dbFile])
         {
+            //this can not be used inside a transaction --> turn on WAL mode before executing any other db operations
+            [self.db executeNonQuery:@"pragma journal_mode=WAL;" andArguments:nil];
             [self.db beginWriteTransaction];
             [self.db executeNonQuery:@"CREATE TABLE ipc(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), source VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);" andArguments:nil];
             [self.db executeNonQuery:@"CREATE TABLE versions(name VARCHAR(255) NOT NULL PRIMARY KEY, version INTEGER NOT NULL);" andArguments:nil];
@@ -77,6 +84,7 @@ static IPC* _sharedInstance;
         {
             [self.db executeNonQuery:@"ALTER TABLE ipc ADD COLUMN response_to INTEGER NOT NULL DEFAULT 0;" andArguments:@[]];
         }
+        //any upgrade done --> update version table and delete all old ipc messages
         if([version integerValue] < VERSION)
         {
             //always truncate ipc table on version upgrade
@@ -166,6 +174,8 @@ static IPC* _sharedInstance;
     //empty data is default if not specified
     if(!data)
         data = [[NSData alloc] init];
+    
+    DDLogVerbose(@"writeIpcMessage:%@ withData:%@ andResponseId:%@ to:%@", name, data, responseId, destination);
     
     [self.db beginWriteTransaction];
     

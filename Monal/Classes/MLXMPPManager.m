@@ -126,12 +126,6 @@ static const int sendMessageTimeoutSeconds = 10;
     _bgTask = UIBackgroundTaskInvalid;
     _hasConnectivity = NO;
     
-    if(@available(iOS 13.0, *))
-    {
-        DDLogInfo(@"calling configureBackgroundFetchingTask");
-        [self configureBackgroundFetchingTask];
-    }
-
     [self defaultSettings];
 
     //set up regular ping
@@ -216,6 +210,7 @@ static const int sendMessageTimeoutSeconds = 10;
         dispatch_source_cancel(_pinger);
 }
 
+//this returns a copy to iterate on without the need of a synchronized block while iterating
 -(NSArray*) connectedXMPP
 {
     @synchronized(_connectedXMPP) {
@@ -243,10 +238,10 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(BOOL) allAccountsIdle
 {
-    for(xmpp* xmppAccount in [self connectedXMPP])
-    {
-        if(!xmppAccount.idle)
-            return NO;
+    @synchronized(_connectedXMPP) {
+        for(xmpp* xmppAccount in [self connectedXMPP])
+            if(!xmppAccount.idle)
+                return NO;
     }
     return YES;
 }
@@ -394,7 +389,7 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) incomingPushWithCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
 {
-    DDLogError(@"got incomingPushWithCompletionHandler");
+    DDLogInfo(@"got incomingPushWithCompletionHandler");
     if(![HelperTools isInBackground])
     {
         DDLogError(@"Ignoring incomingPushWithCompletionHandler: because app is in FG!");
@@ -436,9 +431,9 @@ static const int sendMessageTimeoutSeconds = 10;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         for(xmpp* xmppAccount in [self connectedXMPP])
         {
-            [xmppAccount setClientActive];
             if(_hasConnectivity)
                 [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+            [xmppAccount setClientActive];
         }
     });
 }
@@ -608,10 +603,13 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) connectIfNecessary
 {
-    [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray* result) {
-        for(NSDictionary* account in result)
-            [self connectAccountWithDictionary:account];
-    }];
+    //don't block main thread here
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray* result) {
+            for(NSDictionary* account in result)
+                [self connectAccountWithDictionary:account];
+        }];
+    });
 }
 
 -(void) updatePassword:(NSString *) password forAccount:(NSString *) accountNo

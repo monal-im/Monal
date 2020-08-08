@@ -26,11 +26,10 @@ void logException(NSException* exception)
         inBackground = YES;
     else
     {
-        //we don't need to run this on the main thread (its only a readonly bool after all)
-        //[HelperTools dispatchSyncReentrant:^{
+        [HelperTools dispatchSyncReentrant:^{
             if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || [UIApplication sharedApplication].applicationState==UIApplicationStateInactive)
                 inBackground = YES;
-        //} onQueue:dispatch_get_main_queue()];
+        } onQueue:dispatch_get_main_queue()];
     }
     return inBackground;
 }
@@ -39,7 +38,17 @@ void logException(NSException* exception)
 {
     if(!queue)
         queue = dispatch_get_main_queue();
-    if(dispatch_get_current_queue() == queue)
+    
+    //apple docs say that enqueueing blocks for synchronous execution will execute this blocks in the thread the enqueueing came from
+    //(e.g. the tread we are already in).
+    //so when dispatching synchronously from main queue/thread to some "other queue" and from that queue back to the main queue this means:
+    //the block queued for execution in the "other queue" will be executed in the main thread
+    //this holds true even if multiple synchronous queues sit in between the main thread and this dispatchSyncReentrant:onQueue:(main_queue) call
+    
+    //directly call block:
+    //IF: the destination queue is equal to our current queue
+    //OR IF: the destination queue is the main queue and we are already in the main thread (but not the main queue)
+    if(dispatch_get_current_queue() == queue || (queue == dispatch_get_main_queue() && [NSThread isMainThread]))
         block();
     else
         dispatch_sync(queue, block);

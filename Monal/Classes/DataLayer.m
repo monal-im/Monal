@@ -2258,8 +2258,18 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"update dbversion set dbversion='4.81';" andArguments:@[]];
         DDLogVerbose(@"Upgrade to 4.81 success");
     }
-
+    
     [self.db endWriteTransaction];
+    
+    //this has to be done only when upgrading from a db < 4.7 because only older databases use DELETE journal_mode
+    //this is a special case because it can not be done while in a transaction
+    if([dbversion doubleValue] < 4.7)
+    {
+        //set wal mode (this setting is permanent): https://www.sqlite.org/pragma.html#pragma_journal_mode
+        [self.db executeNonQuery:@"pragma journal_mode=WAL;" andArguments:nil];
+        DDLogWarn(@"transaction mode set to WAL");
+    }
+    
     DDLogInfo(@"Database version check done");
     return;
 }

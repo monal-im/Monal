@@ -19,6 +19,7 @@ typedef void (^IPC_response_handler_t)(NSDictionary*);
 
 +(void) initializeForProcess:(NSString*) processName;
 +(id) sharedInstance;
+-(void) sendMessage:(NSString*) name withData:(NSData*) data to:(NSString*) destination;
 -(void) sendMessage:(NSString*) name withData:(NSData*) data to:(NSString*) destination withResponseHandler:(IPC_response_handler_t) responseHandler;
 -(void) respondToMessage:(NSDictionary*) message withData:(NSData*) data;
 

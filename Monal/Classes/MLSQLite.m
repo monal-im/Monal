@@ -21,10 +21,10 @@
 +(void) initialize
 {
     if(sqlite3_config(SQLITE_CONFIG_MULTITHREAD) == SQLITE_OK)
-        DDLogInfo(@"sqlite initialize: Database configured ok");
+        DDLogInfo(@"sqlite initialize: sqlite3 configured ok");
     else
     {
-        DDLogError(@"sqlite initialize: Database not configured ok");
+        DDLogError(@"sqlite initialize: sqlite3 not configured ok");
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"sqlite3_config() failed" userInfo:nil];
     }
     
@@ -87,12 +87,9 @@
         sqlite3_close(self->database);
     }];
 
-    //use WAL mode for db to speedup access using multiple threads
-    [self executeNonQuery:@"pragma journal_mode=WAL;" andArguments:nil];
+    //some settings (e.g. truncate is faster than delete)
+    [self executeNonQuery:@"pragma busy_timeout=4000;" andArguments:nil];
     [self executeNonQuery:@"pragma synchronous=NORMAL;" andArguments:nil];
-    [self executeNonQuery:@"pragma busy_timeout=1000;" andArguments:nil];
-
-    //truncate is faster than delete
     [self executeNonQuery:@"pragma truncate;" andArguments:nil];
 
     return self;
@@ -151,7 +148,7 @@
             if(sqlite3_bind_double(statement, (signed)idx+1, [number doubleValue]) != SQLITE_OK)
             {
                 DDLogError(@"number bind error: %@", number);
-                [self throwErrorForQuery:query];
+                [self throwErrorForQuery:query andArguments:args];
             }
         }
         else if([obj isKindOfClass:[NSString class]])
@@ -160,7 +157,7 @@
             if(sqlite3_bind_text(statement, (signed)idx+1, [text cStringUsingEncoding:NSUTF8StringEncoding], -1, SQLITE_TRANSIENT) != SQLITE_OK)
             {
                 DDLogError(@"text bind error: %@", text);
-                [self throwErrorForQuery:query];
+                [self throwErrorForQuery:query andArguments:args];
             }
         }
         else if([obj isKindOfClass:[NSData class]])
@@ -169,7 +166,7 @@
             if(sqlite3_bind_blob(statement, (signed)idx+1, [data bytes], (int)data.length, SQLITE_TRANSIENT) != SQLITE_OK)
             {
                 DDLogError(@"blob bind error: %@", data);
-                [self throwErrorForQuery:query];
+                [self throwErrorForQuery:query andArguments:args];
             }
         }
     }];
@@ -212,10 +209,10 @@
     return nil;
 }
 
--(void) throwErrorForQuery:(NSString*) query
+-(void) throwErrorForQuery:(NSString*) query andArguments:(NSArray*) args
 {
     NSString* error = [NSString stringWithFormat:@"%@ --> %@", query, [NSString stringWithUTF8String:sqlite3_errmsg(self->database)]];
-    @throw [NSException exceptionWithName:@"SQLite3Exception" reason:error userInfo:@{@"query": query}];
+    @throw [NSException exceptionWithName:@"SQLite3Exception" reason:error userInfo:@{@"query": query, @"args": args ? args : [NSNull null]}];
 }
 
 -(BOOL) executeNonQuery:(NSString*) query andArguments:(NSArray *) args withException:(BOOL) throwException
@@ -235,7 +232,7 @@
         {
             DDLogVerbose(@"sqlite3_step(%@): %d --> %@", query, step, [[NSThread currentThread] threadDictionary]);
             if(throwException)
-                [self throwErrorForQuery:query];
+                [self throwErrorForQuery:query andArguments:args];
             toReturn = NO;
         }
     }
@@ -243,7 +240,7 @@
     {
         DDLogError(@"nonquery returning NO with out OK %@", query);
         toReturn = NO;
-        [self throwErrorForQuery:query];
+        [self throwErrorForQuery:query andArguments:args];
     }
     return toReturn;
 }
@@ -262,7 +259,7 @@
         if(!retval)
         {
             [NSThread sleepForTimeInterval:0.001f];		//wait one millisecond and retry again
-            DDLogVerbose(@"Retrying transaction start...");
+            DDLogWarn(@"Retrying transaction start...");
         }
     } while(!retval);
 }
@@ -292,14 +289,14 @@
         }
         sqlite3_finalize(statement);
         if(step != SQLITE_DONE)
-            [self throwErrorForQuery:query];
+            [self throwErrorForQuery:query andArguments:args];
     }
     else
     {
         //if noting else
         DDLogVerbose(@"returning nil with out OK %@", query);
         toReturn = nil;
-        [self throwErrorForQuery:query];
+        [self throwErrorForQuery:query andArguments:args];
     }
     return toReturn;
 }
@@ -331,14 +328,14 @@
         }
         sqlite3_finalize(statement);
         if(step != SQLITE_DONE)
-            [self throwErrorForQuery:query];
+            [self throwErrorForQuery:query andArguments:args];
     }
     else
     {
         //if noting else
         DDLogVerbose(@"reader nil with sql not ok: %@", query);
         toReturn = nil;
-        [self throwErrorForQuery:query];
+        [self throwErrorForQuery:query andArguments:args];
     }
     return toReturn;
 }

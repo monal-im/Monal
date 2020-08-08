@@ -621,14 +621,6 @@
 
 -(void) sendChatState:(BOOL) isTyping
 {
-    [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId withCompletion:^(NSArray *result) {
-        if(result.count==0)
-        {
-            DDLogError(@"Account should be >0");
-            return;
-        }
-    }];
-    
     if(!self.sendButton.enabled)
     {
         DDLogWarn(@"Account disabled, ignoring chatstate update");

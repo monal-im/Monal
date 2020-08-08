@@ -1565,7 +1565,7 @@ static NSDateFormatter* dbFormatter;
 
 -(void) synchPointforAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion
 {
-    NSString* query = [NSString stringWithFormat:@"select synchpoint from buddylist  where account_id=? order by synchpoint  desc limit 1"];
+    NSString* query = [NSString stringWithFormat:@"select synchpoint from buddylist where account_id=? order by synchpoint  desc limit 1"];
 
     [self.db executeScalar:query andArguments:@[accountNo] withCompletion:^(NSObject* result) {
         if(completion)
@@ -1578,6 +1578,10 @@ static NSDateFormatter* dbFormatter;
             [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 
             NSDate* datetoReturn = [dateFromatter dateFromString:(NSString *)result];
+
+            // We could not parse the string -> default to 0
+            if(datetoReturn == nil)
+                datetoReturn = [[NSDate date] initWithTimeIntervalSince1970:0];
 
             completion(datetoReturn);
         }
@@ -1599,6 +1603,10 @@ static NSDateFormatter* dbFormatter;
             [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 
             NSDate* datetoReturn = [dateFromatter dateFromString:(NSString *)result];
+
+            // We could not parse the string -> default to 0
+            if(datetoReturn == nil)
+                datetoReturn = [[NSDate date] initWithTimeIntervalSince1970:0];
 
             completion(datetoReturn);
         }

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -217,7 +217,7 @@
 		26CC57D723A08D9B00ABB92A /* MLPush.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C01306233025DA001D411D /* MLPush.m */; };
 		26CC57DA23A08DD800ABB92A /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		26CC57E623A08EAA00ABB92A /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
-		26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; platformFilter = ios; };
+		26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		26D0940C22A33E9B009C7AEF /* MLRegisterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */; };
 		26D3476C23A54E67004D6D75 /* MLMessageParserTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D3476B23A54E67004D6D75 /* MLMessageParserTest.m */; };
 		26D437FB23A5643A00242AAA /* MLIQParserTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D437FA23A5643A00242AAA /* MLIQParserTest.m */; };
@@ -2536,7 +2536,6 @@
 		};
 		26CC57EA23A08F3F00ABB92A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			platformFilter = ios;
 			target = 26CC579123A0867400ABB92A /* monalxmpp */;
 			targetProxy = 26CC57E923A08F3F00ABB92A /* PBXContainerItemProxy */;
 		};

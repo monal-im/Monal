@@ -28,15 +28,7 @@
 @property (nonatomic, weak) ActiveChatsViewController* activeChats;
 @end
 
-static void logException(NSException* exception)
-{
-    [DDLog flushLog];
-    DDLogError(@"*****************\nCRASH(%@): %@\nUserInfo: %@\nStack Trace: %@", [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
-    [DDLog flushLog];
-}
-
 @implementation MonalAppDelegate
-
 
 -(void) setUISettings
 {

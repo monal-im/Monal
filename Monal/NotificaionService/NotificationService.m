@@ -14,13 +14,6 @@
 #import "MLXMPPManager.h"
 #import "MLNotificationManager.h"
 
-static void logException(NSException* exception)
-{
-    [DDLog flushLog];
-    DDLogError(@"*****************\nCRASH(%@): %@\nUserInfo: %@\nStack Trace: %@", [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
-    [DDLog flushLog];
-}
-
 @interface Push : NSObject
 @property (atomic, strong) NSMutableArray* contentList;
 @property (atomic, strong) NSMutableArray* handlerList;

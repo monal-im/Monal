@@ -14,15 +14,6 @@
 #import "MLConstants.h"
 #import "HelperTools.h"
 
-static void logException(NSException* exception)
-{
-    [DDLog flushLog];
-    DDLogError(@"*** CRASH: %@", exception);
-    [DDLog flushLog];
-    DDLogError(@"*** Stack Trace: %@", [exception callStackSymbols]);
-    [DDLog flushLog];
-}
-
 @interface ShareViewController ()
 
 @property (nonatomic, strong) NSDictionary* account;

@@ -11,6 +11,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+void logException(NSException* exception);
+
 @interface HelperTools : NSObject
 
 +(BOOL) isInBackground;

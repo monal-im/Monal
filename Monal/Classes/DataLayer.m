@@ -2234,7 +2234,23 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"update dbversion set dbversion='4.80';" andArguments:@[]];
         DDLogVerbose(@"Upgrade to 4.80 success");
     }
-    
+
+    // Remove silly chats
+    if([dbversion doubleValue] < 4.81)
+    {
+        [self.db executeReader:@"select account_id, username, domain from account" andArguments:@[] withCompletion:^(NSMutableArray* results) {
+            for(NSDictionary* row in results) {
+                NSString* accountJid = [NSString stringWithFormat:@"%@@%@", [row objectForKey:kUsername], [row objectForKey:kDomain]];
+                NSString* accountNo = [row objectForKey:kAccountID];
+
+                // delete chats with accountJid == buddy_name
+                [self.db executeNonQuery:@"delete from activechats where account_id=? and buddy_name=?" andArguments:@[accountNo, accountJid]];
+            }
+        }];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.81';" andArguments:@[]];
+        DDLogVerbose(@"Upgrade to 4.81 success");
+    }
+
     [self.db endWriteTransaction];
     DDLogInfo(@"Database version check done");
     return;

@@ -1815,7 +1815,10 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) sendChatState:(BOOL) isTyping toJid:(NSString*) jid
 {
-    XMPPMessage* messageNode =[[XMPPMessage alloc] init];
+    if(self.accountState < kStateBound)
+        return;
+
+    XMPPMessage* messageNode = [[XMPPMessage alloc] init];
     [messageNode.attributes setObject:jid forKey:@"to"];
     [messageNode setNoStoreHint];
     if(isTyping)

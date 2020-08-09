@@ -1207,7 +1207,7 @@ static NSDateFormatter* dbFormatter;
     //force delivered YES if the message was already received
     if(!delivered)
     {
-        if([self.db executeScalar:@"SELECT messageid FROM message_history WHERE messageid=? && received" andArguments:@[messageid]])
+        if([self.db executeScalar:@"SELECT messageid FROM message_history WHERE messageid=? AND received" andArguments:@[messageid]])
             delivered = YES;
     }
     NSString* query = [NSString stringWithFormat:@"update message_history set delivered=? where messageid=? and not delivered"];
@@ -1225,7 +1225,7 @@ static NSDateFormatter* dbFormatter;
 -(void) setMessageId:(NSString*) messageid errorType:(NSString*) errorType errorReason:(NSString*) errorReason
 {
     //ignore error if the message was already received by *some* client
-    if([self.db executeScalar:@"SELECT messageid FROM message_history WHERE messageid=? && received" andArguments:@[messageid]])
+    if([self.db executeScalar:@"SELECT messageid FROM message_history WHERE messageid=? AND received" andArguments:@[messageid]])
     {
         DDLogVerbose(@"ignoring message error for %@ [%@, %@]", messageid, errorType, errorReason);
         return;

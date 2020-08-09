@@ -116,7 +116,7 @@
     [nc addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     [nc addObserver:self selector:@selector(keyboardWillDisappear:) name:UIKeyboardWillHideNotification object:nil];
     
-    [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
+    [nc addObserver:self selector:@selector(handleReceivedMessage:) name:kMonalMessageReceivedNotice object:nil];
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
     [nc addObserver:self selector:@selector(updateUIElementsOnAccountChange:) name:kMonalAccountStatusChanged object:nil];
@@ -1012,14 +1012,15 @@
     [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:self.contact.accountId withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString *messageType) {
         DDLogVerbose(@"added message");
         
-        if(result) {
-            dispatch_async(dispatch_get_main_queue(),
-                           ^{
+        if(result)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
                 MLMessage* messageObj = [[MLMessage alloc] init];
                 messageObj.actualFrom=self.jid;
                 messageObj.from=self.jid;
                 messageObj.timestamp=[NSDate date];
-                messageObj.hasBeenSent=YES;
+                messageObj.hasBeenReceived=NO;
+                messageObj.hasBeenSent=NO;
                 messageObj.messageId=messageId;
                 messageObj.encrypted=self.encryptChat;
                 messageObj.messageType=messageType;
@@ -1042,9 +1043,8 @@
                 }];
             });
         }
-        else {
+        else
             DDLogVerbose(@"failed to add message");
-        }
     }];
     
     // make sure its in active
@@ -1133,7 +1133,7 @@
     }
 }
 
--(void) setMessageId:(NSString *) messageId delivered:(BOOL) delivered
+-(void) setMessageId:(NSString *) messageId sent:(BOOL) sent
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         int row = 0;
@@ -1142,9 +1142,9 @@
         {
             if([message.messageId isEqualToString:messageId])
             {
-                message.hasBeenSent = delivered;
+                message.hasBeenSent = sent;
                 //we don't want messages that have been received to be marked as not sent
-                if(message.hasBeenReceived && !delivered)
+                if(message.hasBeenReceived && !sent)
                     message.hasBeenSent = YES;
                 indexPath = [NSIndexPath indexPathForRow:row inSection:0];
                 break;
@@ -1189,7 +1189,7 @@
 -(void) handleSentMessage:(NSNotification*) notification
 {
     NSDictionary* dic = notification.userInfo;
-    [self setMessageId:[dic objectForKey:kMessageId] delivered:YES];
+    [self setMessageId:[dic objectForKey:kMessageId] sent:YES];
 }
 
 
@@ -1208,7 +1208,6 @@
             {
                 message.errorType = [dic objectForKey:@"errorType"];
                 message.errorReason = [dic objectForKey:@"errorReason"];
-                message.hasBeenSent = NO;
                 indexPath = [NSIndexPath indexPathForRow:row inSection:0];
                 break;
             }
@@ -1223,7 +1222,7 @@
     });
 }
 
--(void) refreshMessage:(NSNotification*) notification
+-(void) handleReceivedMessage:(NSNotification*) notification
 {
     NSDictionary *dic = notification.userInfo;
     [self setMessageId:[dic  objectForKey:kMessageId] received:YES];
@@ -1324,7 +1323,7 @@
         {
             NSDictionary *dic = [messageArray objectAtIndex:0];
             [self sendMessage:[dic objectForKey:@"message"] andMessageID:[dic objectForKey:@"messageid"]];
-            [self setMessageId:[dic objectForKey:@"messageid"] delivered:YES]; // for the UI, db will be set in the notification
+            //[self setMessageId:[dic objectForKey:@"messageid"] sent:YES]; // for the UI, db will be set in the notification
         }
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
@@ -1588,12 +1587,6 @@
         cell.name.hidden=YES;
     }
     
-    if(!row.hasBeenSent){
-        cell.deliveryFailed=YES;
-    } else {
-        cell.deliveryFailed=NO;
-    }
-    
     MLMessage *nextRow =nil;
     if(indexPath.row+1<self.messageList.count)
     {
@@ -1607,56 +1600,51 @@
     }
     
     if(row.hasBeenReceived)
-        cell.messageStatus.text = kDelivered;
+        cell.messageStatus.text = kReceived;
     else if(row.hasBeenSent)
-        cell.messageStatus.hidden = kSent;
+        cell.messageStatus.text = kSent;
     else
-        cell.messageStatus.hidden = kSending;
+        cell.messageStatus.text = kSending;
     
-    if(indexPath.row==self.messageList.count-1 || ![nextRow.actualFrom isEqualToString:self.jid])
+    /*if(indexPath.row==self.messageList.count-1 || ![nextRow.actualFrom isEqualToString:self.jid])
         cell.messageStatus.hidden=NO;
     else
-        cell.messageStatus.hidden=YES;
+        cell.messageStatus.hidden=YES;*/
     
-    cell.messageHistoryId=row.messageDBId;
-    BOOL newSender=NO;
-    if(indexPath.row>0)
+    cell.messageHistoryId = row.messageDBId;
+    BOOL newSender = NO;
+    if(indexPath.row > 0)
     {
-        NSString *priorSender =priorRow.from;
+        NSString *priorSender = priorRow.from;
         if(![priorSender isEqualToString:row.from])
-        {
             newSender=YES;
-        }
     }
     
-    cell.date.text= [self formattedTimeStampWithSource:row.delayTimeStamp?row.delayTimeStamp:row.timestamp];
-    cell.selectionStyle=UITableViewCellSelectionStyleNone;
+    cell.date.text = [self formattedTimeStampWithSource:row.delayTimeStamp ? row.delayTimeStamp : row.timestamp];
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     
     cell.dividerDate.text = [self formattedDateWithSource:row.delayTimeStamp?row.delayTimeStamp:row.timestamp andPriorDate:priorRow.timestamp];
     
     if(row.encrypted)
-    {
-        cell.lockImage.hidden=NO;
-    } else  {
-        cell.lockImage.hidden=YES;
-    }
+        cell.lockImage.hidden = NO;
+    else
+        cell.lockImage.hidden = YES;
     
+    cell.messageStatus.hidden = YES;
     if([row.from isEqualToString:_jid])
     {
-        cell.outBound=YES;
+        cell.outBound = YES;
+        cell.messageStatus.hidden = NO;
     }
-    else  {
-        cell.outBound=NO;
-    }
+    else
+        cell.outBound = NO;
     
-    cell.parent=self;
+    cell.parent = self;
     
-    if(!row.hasBeenReceived && row.hasBeenSent)
+    if(cell.outBound && ([row.errorType length]>0 || [row.errorReason length]>0) && !row.hasBeenReceived && row.hasBeenSent)
     {
-        if(row.errorType.length>0) {
-            cell.messageStatus.text =[NSString stringWithFormat:@"Error: %@ - %@", row.errorType, row.errorReason];
-            cell.messageStatus.hidden=NO;
-        }
+        cell.messageStatus.text = [NSString stringWithFormat:@"Error: %@ - %@", row.errorType, row.errorReason];
+        cell.deliveryFailed = YES;
     }
     
     [cell updateCellWithNewSender:newSender];

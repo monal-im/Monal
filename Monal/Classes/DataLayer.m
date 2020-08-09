@@ -1064,7 +1064,7 @@ static NSDateFormatter* dbFormatter;
     return messageArray;
 }
 
--(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL, NSString*))completion
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL, NSString*))completion
 {
     if(!from || !to || !message) {
         if(completion) completion(NO, nil);
@@ -1108,8 +1108,8 @@ static NSDateFormatter* dbFormatter;
           //do not do this in MUC
             if(!messageType && [actualfrom isEqualToString:from]) {
                 [self messageTypeForMessage:message withKeepThread:YES andCompletion:^(NSString *foundMessageType) {
-                        NSString* query = [NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"];
-                        NSArray* params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"", foundMessageType, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@""];
+                        NSString* query = [NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"];
+                        NSArray* params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:sent], messageid?messageid:@"", foundMessageType, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@""];
                         DDLogVerbose(@"%@", query);
                         [self.db executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
 
@@ -1130,8 +1130,8 @@ static NSDateFormatter* dbFormatter;
                         }];
                 }];
             } else  {
-                NSString* query = [NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"];
-                NSArray* params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:delivered], messageid?messageid:@"", typeToUse, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
+                NSString* query = [NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"];
+                NSArray* params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:sent], messageid?messageid:@"", typeToUse, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
                 DDLogVerbose(@"%@", query);
                 [self.db executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
 
@@ -1202,22 +1202,24 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) setMessageId:(NSString*) messageid delivered:(BOOL) delivered
+-(void) setMessageId:(NSString*) messageid sent:(BOOL) sent
 {
-    //force delivered YES if the message was already received
-    if(!delivered)
+    [self.db beginWriteTransaction];
+    //force sent YES if the message was already received
+    if(!sent)
     {
         if([self.db executeScalar:@"SELECT messageid FROM message_history WHERE messageid=? AND received" andArguments:@[messageid]])
-            delivered = YES;
+            sent = YES;
     }
-    NSString* query = [NSString stringWithFormat:@"update message_history set delivered=? where messageid=? and not delivered"];
-    DDLogVerbose(@"setting delivered %@", messageid);
-    [self.db executeNonQuery:query andArguments:@[[NSNumber numberWithBool:delivered], messageid]];
+    NSString* query = [NSString stringWithFormat:@"update message_history set sent=? where messageid=? and not sent"];
+    DDLogVerbose(@"setting sent %@", messageid);
+    [self.db executeNonQuery:query andArguments:@[[NSNumber numberWithBool:sent], messageid]];
+    [self.db endWriteTransaction];
 }
 
 -(void) setMessageId:(NSString*) messageid received:(BOOL) received
 {
-    NSString* query = [NSString stringWithFormat:@"update message_history set received=?, delivered=? where messageid=?"];
+    NSString* query = [NSString stringWithFormat:@"update message_history set received=?, sent=? where messageid=?"];
     DDLogVerbose(@"setting received confrmed %@", messageid);
     [self.db executeNonQuery:query andArguments:@[[NSNumber numberWithBool:received], [NSNumber numberWithBool:YES], messageid]];
 }
@@ -1303,7 +1305,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date
 {
-    NSString* query = [NSString stringWithFormat:@"select af, message_from, message_to, message, thetime, delivered, message_history_id from (select ifnull(actual_from, message_from) as af, message_from, message_to, message, delivered, timestamp  as thetime, message_history_id, previewImage, previewText from message_history where account_id=? and (message_from=? or message_to=?) and date(timestamp)=? order by message_history_id desc) order by message_history_id asc"];
+    NSString* query = [NSString stringWithFormat:@"select af, message_from, message_to, message, thetime, sent, message_history_id from (select ifnull(actual_from, message_from) as af, message_from, message_to, message, sent, timestamp  as thetime, message_history_id, previewImage, previewText from message_history where account_id=? and (message_from=? or message_to=?) and date(timestamp)=? order by message_history_id desc) order by message_history_id asc"];
     NSArray* params = @[accountNo, buddy, buddy, date];
 
     DDLogVerbose(@"%@", query);
@@ -1437,7 +1439,7 @@ static NSDateFormatter* dbFormatter;
         if(completion) completion(nil);
         return;
     };
-    NSString* query = [NSString stringWithFormat:@"select af, message_from, message_to, account_id, message, thetime, message_history_id, delivered, messageid, messageType, received, encrypted, previewImage, previewText, unread, errorType, errorReason from (select ifnull(actual_from, message_from) as af, message_from, message_to, account_id,   message, received, encrypted, timestamp  as thetime, message_history_id, delivered,messageid, messageType, previewImage, previewText, unread, errorType, errorReason from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 250) order by thetime asc"];
+    NSString* query = [NSString stringWithFormat:@"select af, message_from, message_to, account_id, message, thetime, message_history_id, sent, messageid, messageType, received, encrypted, previewImage, previewText, unread, errorType, errorReason from (select ifnull(actual_from, message_from) as af, message_from, message_to, account_id, message, received, encrypted, timestamp  as thetime, message_history_id, sent,messageid, messageType, previewImage, previewText, unread, errorType, errorReason from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 250) order by thetime asc"];
     NSArray* params = @[accountNo, buddy, buddy];
     [self.db executeReader:query andArguments:params withCompletion:^(NSMutableArray *rawArray) {
         NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:rawArray.count];
@@ -1495,7 +1497,7 @@ static NSDateFormatter* dbFormatter;
 
 -(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId encrypted:(BOOL) encrypted withCompletion:(void (^)(BOOL, NSString *))completion
 {
-    //Message_history going out, from is always the local user. always read, default to  delivered (will be reset by timer if needed)
+    //Message_history going out, from is always the local user. always read and not sent
 
     NSString *cleanedActualFrom = actualfrom;
 
@@ -1509,8 +1511,8 @@ static NSDateFormatter* dbFormatter;
 
         NSArray* parts = [[[NSDate date] description] componentsSeparatedByString:@" "];
         NSString* dateTime = [NSString stringWithFormat:@"%@ %@", [parts objectAtIndex:0],[parts objectAtIndex:1]];
-        NSString* query = [NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, delivered, messageid, messageType, encrypted) values (?,?,?,?,?,?,?,?,?,?,?);"];
-        NSArray* params = @[accountNo, from, to, dateTime, message, cleanedActualFrom,[NSNumber numberWithInteger:0], [NSNumber numberWithInteger:1], messageId, messageType, [NSNumber numberWithInteger:encrypted]];
+        NSString* query = [NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted) values (?,?,?,?,?,?,?,?,?,?,?);"];
+        NSArray* params = @[accountNo, from, to, dateTime, message, cleanedActualFrom, [NSNumber numberWithInteger:0], [NSNumber numberWithInteger:0], messageId, messageType, [NSNumber numberWithInteger:encrypted]];
         [self.db beginWriteTransaction];
         DDLogVerbose(@"%@", query);
         [self.db executeNonQuery:query andArguments:params  withCompletion:^(BOOL result) {
@@ -1590,7 +1592,7 @@ static NSDateFormatter* dbFormatter;
 
 -(void) lastMessageDateForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion
 {
-    NSString* query = [NSString stringWithFormat:@"select timestamp from  message_history where account_id=? and (message_from=? or (message_to=? and delivered=1)) order by timestamp desc limit 1"];
+    NSString* query = [NSString stringWithFormat:@"select timestamp from message_history where account_id=? and (message_from=? or (message_to=? and sent=1)) order by timestamp desc limit 1"];
 
     [self.db executeScalar:query andArguments:@[accountNo, contact, contact] withCompletion:^(NSObject* result) {
         if(completion)
@@ -1615,7 +1617,7 @@ static NSDateFormatter* dbFormatter;
 
 -(void) lastMessageSanzaForAccount:(NSString*) accountNo andJid:(NSString*) jid withCompletion: (void (^)(NSString *))completion
 {
-    NSString* query = [NSString stringWithFormat:@"select stanzaid from  message_history where account_id=? and message_from!=? and stanzaid not null and stanzaid!='' order by timestamp desc limit 1"];
+    NSString* query = [NSString stringWithFormat:@"select stanzaid from message_history where account_id=? and message_from!=? and stanzaid not null and stanzaid!='' order by timestamp desc limit 1"];
 
     [self.db executeScalar:query andArguments:@[accountNo, jid] withCompletion:^(NSObject* result) {
         if(completion)
@@ -1627,7 +1629,7 @@ static NSDateFormatter* dbFormatter;
 
 -(void) lastMessageDateAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion
 {
-    NSString* query = [NSString stringWithFormat:@"select timestamp from  message_history where account_id=? order by timestamp desc limit 1"];
+    NSString* query = [NSString stringWithFormat:@"select timestamp from message_history where account_id=? order by timestamp desc limit 1"];
 
     [self.db executeScalar:query andArguments:@[accountNo] withCompletion:^(NSObject* result) {
         if(completion)
@@ -1810,7 +1812,7 @@ static NSDateFormatter* dbFormatter;
 -(void) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSNumber *))completion
 {
     // count # messages from a specific user in messages table
-    NSString* query = [NSString stringWithFormat:@"select count(message_history_id) from  message_history where unread=1 and account_id=? and message_from=?"];
+    NSString* query = [NSString stringWithFormat:@"select count(message_history_id) from message_history where unread=1 and account_id=? and message_from=?"];
 
     [self.db executeScalar:query andArguments:@[accountNo, buddy] withCompletion:^(NSObject* result) {
         if(completion)
@@ -1824,7 +1826,7 @@ static NSDateFormatter* dbFormatter;
 -(void) countUserMessages:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSNumber *))completion
 {
     // count # messages from a specific user in messages table
-    NSString* query = [NSString stringWithFormat:@"select count(message_history_id) from  message_history where account_id=? and message_from=? or message_to=? "];
+    NSString* query = [NSString stringWithFormat:@"select count(message_history_id) from message_history where account_id=? and message_from=? or message_to=?"];
 
     [self.db executeScalar:query andArguments:@[accountNo, buddy, buddy] withCompletion:^(NSObject* result) {
         if(completion)
@@ -2243,9 +2245,9 @@ static NSDateFormatter* dbFormatter;
         DDLogVerbose(@"Upgrade to 4.80 success");
     }
 
-    // Remove silly chats
     if([dbversion doubleValue] < 4.81)
     {
+        // Remove silly chats
         [self.db executeReader:@"select account_id, username, domain from account" andArguments:@[] withCompletion:^(NSMutableArray* results) {
             for(NSDictionary* row in results) {
                 NSString* accountJid = [NSString stringWithFormat:@"%@@%@", [row objectForKey:kUsername], [row objectForKey:kDomain]];
@@ -2257,6 +2259,19 @@ static NSDateFormatter* dbFormatter;
         }];
         [self.db executeNonQuery:@"update dbversion set dbversion='4.81';" andArguments:@[]];
         DDLogVerbose(@"Upgrade to 4.81 success");
+    }
+    
+    if([dbversion doubleValue] < 4.82)
+    {
+        //use the more appropriate name "sent" for the "delivered" column of message_history
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:@[]];
+        [self.db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;" andArguments:@[]];
+        [self.db executeNonQuery:@"CREATE TABLE 'message_history' (message_history_id integer not null primary key AUTOINCREMENT, account_id integer, message_from text collate nocase, message_to text collate nocase, timestamp datetime, message blob, actual_from text collate nocase, messageid text, messageType text, sent bool, received bool, unread bool, encrypted bool, previewText text, previewImage text, stanzaid text, errorType text, errorReason text);" andArguments:@[]];
+        [self.db executeNonQuery:@"INSERT INTO message_history (message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, sent, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason) SELECT message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, delivered, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason from _message_historyTMP;" andArguments:@[]];
+        [self.db executeNonQuery:@"DROP TABLE _message_historyTMP;" andArguments:@[]];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:@[]];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.82';" andArguments:@[]];
+        DDLogVerbose(@"Upgrade to 4.82 success");
     }
     
     [self.db endWriteTransaction];

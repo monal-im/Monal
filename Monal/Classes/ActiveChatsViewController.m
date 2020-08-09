@@ -94,7 +94,7 @@
             if(self.chatListTable.hasUncommittedUpdates)
                 return;
             
-            [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
+             [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
             self.contacts = cleanActive;
             [self.chatListTable reloadData];
             MonalAppDelegate* appDelegate = (MonalAppDelegate*)[UIApplication sharedApplication].delegate;

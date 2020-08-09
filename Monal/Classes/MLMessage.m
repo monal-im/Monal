@@ -27,7 +27,7 @@
     message.messageType=[dic objectForKey:@"messageType"];
     
     message.hasBeenReceived=[(NSNumber *)[dic objectForKey:@"received"] boolValue];
-    message.hasBeenSent=[(NSNumber *)[dic objectForKey:@"delivered"] boolValue];
+    message.hasBeenSent=[(NSNumber *)[dic objectForKey:@"sent"] boolValue];
     message.encrypted=[(NSNumber *)[dic objectForKey:@"encrypted"] boolValue];
   
     message.unread=[(NSNumber *)[dic objectForKey:@"unread"] boolValue];

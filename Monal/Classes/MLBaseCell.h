@@ -14,7 +14,7 @@
 
 #define kSending NSLocalizedString(@"Sending...", @"")
 #define kSent NSLocalizedString(@"Sent", @"")
-#define kDelivered NSLocalizedString(@"Delivered", @"")
+#define kReceived NSLocalizedString(@"Received", @"")
 #define kRead NSLocalizedString(@"Read", @"")
 
 

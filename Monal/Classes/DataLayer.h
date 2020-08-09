@@ -162,7 +162,7 @@ extern NSString *const kMessageTypeUrl;
 /*
  adds a specified message to the database
  */
--(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL, NSString*))completion;
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL, NSString*))completion;
 
 /**
   checks to see if there is a message with the provided messageid. will return YES if the messageid exists for this account and contact
@@ -170,9 +170,9 @@ extern NSString *const kMessageTypeUrl;
 -(void) hasMessageForId:(NSString*) messageid  onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion;
 
 /*
- Marks a message as delivered. When we know its been sent out on the wire
+ Marks a message as sent. When the server acked it
  */
--(void) setMessageId:(NSString*) messageid delivered:(BOOL) delivered;
+-(void) setMessageId:(NSString*) messageid sent:(BOOL) sent;
 
 /**
  Marked when the client on the other end replies with a recived message

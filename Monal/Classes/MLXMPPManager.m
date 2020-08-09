@@ -867,10 +867,10 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) handleSentMessage:(NSNotification*) notification
 {
-    NSDictionary *info = notification.userInfo;
-    NSString *messageId = [info objectForKey:kMessageId];
-    DDLogInfo(@"message %@ sent, setting status to delivered", messageId);
-    [[DataLayer sharedInstance] setMessageId:messageId delivered:YES];
+    NSDictionary* info = notification.userInfo;
+    NSString* messageId = [info objectForKey:kMessageId];
+    DDLogInfo(@"message %@ sent, setting status accordingly", messageId);
+    [[DataLayer sharedInstance] setMessageId:messageId sent:YES];
 }
 
 #pragma mark - properties

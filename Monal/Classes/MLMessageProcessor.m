@@ -65,8 +65,8 @@ static NSMutableDictionary* _typingNotifications;
         }
         
         //update db
-        [[DataLayer sharedInstance] setMessageId:messageNode.idval errorType:messageNode.errorType?messageNode.errorType:@""
-                                     errorReason:messageNode.errorReason?messageNode.errorReason:@""];
+        [[DataLayer sharedInstance] setMessageId:messageNode.idval errorType:messageNode.errorType ? messageNode.errorType : @""
+                                     errorReason:messageNode.errorReason ? messageNode.errorReason : @""];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageErrorNotice object:nil  userInfo:@{@"MessageID":messageNode.idval,@"errorType":messageNode.errorType?messageNode.errorType:@"",@"errorReason":messageNode.errorReason?messageNode.errorReason:@""
         }];
 
@@ -167,7 +167,7 @@ static NSMutableDictionary* _typingNotifications;
                                                 forAccount:self->_accountNo
                                                   withBody:[body copy]
                                               actuallyfrom:messageNode.actualFrom
-                                                 delivered:YES
+                                                      sent:YES
                                                     unread:unread
                                                  messageId:messageId
                                            serverMessageId:messageNode.stanzaId

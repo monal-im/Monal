@@ -181,7 +181,7 @@ NSString *const kXMPPPresence = @"presence";
     _outputBufferByteCount = 0;
 
     _versionHash = [HelperTools getOwnCapsHash];
-    _isCSIActive = YES;         //default value is yes if no csi state was sent yet
+    _isCSIActive = YES;         //default value is yes if no csi state was set yet
     if([HelperTools isAppExtension])
     {
         DDLogVerbose(@"Called from extension: CSI inactive");
@@ -2337,7 +2337,10 @@ NSString *const kXMPPPresence = @"presence";
     [self dispatchOnReceiveQueue: ^{
         //ignore active --> active transition
         if(_isCSIActive)
+        {
+            DDLogVerbose(@"Ignoring CSI transition from active to active");
             return;
+        }
         
         //record new csi state and send csi nonza
         _isCSIActive = YES;
@@ -2359,7 +2362,10 @@ NSString *const kXMPPPresence = @"presence";
     [self dispatchOnReceiveQueue: ^{
         //ignore inactive --> inactive transition
         if(!_isCSIActive)
+        {
+            DDLogVerbose(@"Ignoring CSI transition from INactive to INactive");
             return;
+        }
         
         //save date as last interaction date (XEP-0319) (e.g. "tag" the end of our interaction)
         _lastInteractionDate = [NSDate date];

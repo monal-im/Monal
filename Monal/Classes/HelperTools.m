@@ -27,7 +27,7 @@ void logException(NSException* exception)
     else
     {
         [HelperTools dispatchSyncReentrant:^{
-            if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || [UIApplication sharedApplication].applicationState==UIApplicationStateInactive)
+            if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                 inBackground = YES;
         } onQueue:dispatch_get_main_queue()];
     }

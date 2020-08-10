@@ -279,9 +279,7 @@ static const int sendMessageTimeoutSeconds = 10;
                 [_bgFetch setTaskCompletedWithSuccess:YES];
                 stopped = YES;
             }
-            if(stopped)
-                [MLProcessLock unlock];     //now allow starting of NotificationServiceExtension
-            else
+            if(!stopped)
                 DDLogVerbose(@"no background tasks running, nothing to stop");
             [DDLog flushLog];
         }

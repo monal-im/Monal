@@ -16,7 +16,7 @@
  */
 @interface MLNotificationManager : NSObject
 
-+ (MLNotificationManager* )sharedInstance;
++(MLNotificationManager*) sharedInstance;
 
 /**
  if in chat with this user then dont push messages for this user when not locked
@@ -34,7 +34,5 @@
  2. foreground will show slider
  */
 -(void) handleNewMessage:(NSNotification *)notification;
-
--(void) postSyncNotificationWithContent:(UNNotificationContent*) content andID:(NSString*) id;
 
 @end

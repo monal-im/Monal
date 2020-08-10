@@ -189,13 +189,9 @@
     //init IPC and ProcessLock
     [IPC initializeForProcess:@"MainApp"];
     
-    //this call did NOT get triggered by a content-available notification while in background
-    //--> lock process and disconnect an already running NotificationServiceExtension
-    if(!launchOptions[@"UIApplicationLaunchOptionsRemoteNotificationKey"])
-    {
-        [MLProcessLock lock];
-        [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
-    }
+    //lock process and disconnect an already running NotificationServiceExtension
+    [MLProcessLock lock];
+    [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
     
     //only proceed with launching if the NotificationServiceExtension is *not* running
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
@@ -269,7 +265,6 @@
         DDLogInfo(@"calling MLXMPPManager configureBackgroundFetchingTask");
         [[MLXMPPManager sharedInstance] configureBackgroundFetchingTask];
     }
-
     
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
@@ -289,19 +284,10 @@
 -(void) incomingIPC:(NSNotification*) notification
 {
     NSDictionary* message = notification.userInfo;
-    //the db got changed by another process (e.g. NotificationServiceExtension etc.) --> update UI
-    if([message[@"name"] isEqualToString:@"Monal.refreshUI"])
-    {
-        //trigger view updates
-        dispatch_async(dispatch_get_main_queue(), ^{
-            DDLogInfo(@"Got refreshUI IPC message");
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:self userInfo:nil];
-        });
-    }
     //another process tells us to disconnect all accounts
     //this could happen if we are connecting (or even connected) in the background and the NotificationServiceExtension got started
     //BUT: only do this if we are in background (we should never receive this if we are foregrounded)
-    else if([message[@"name"] isEqualToString:@"Monal.disconnectAll"])
+    if([message[@"name"] isEqualToString:@"Monal.disconnectAll"])
     {
         DDLogInfo(@"Got disconnectAll IPC message");
         NSAssert([HelperTools isInBackground]==YES, @"Got 'Monal.disconnectAll' while in foreground. This should NEVER happen!");
@@ -469,8 +455,6 @@
 - (void) applicationWillEnterForeground:(UIApplication *)application
 {
     DDLogVerbose(@"Entering FG");
-    //disallow starting of NotificationServiceExtension and kill already running ones
-    [MLProcessLock lock];
     [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
     
     //only proceed with foregrounding if the NotificationServiceExtension is not running

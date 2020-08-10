@@ -484,7 +484,7 @@ NSString *const kXMPPPresence = @"presence";
         }
         if([HelperTools isAppExtension] && [MLProcessLock checkRemoteRunning:@"MainApp"])
         {
-            DDLogInfo(@"MainApp is running, not connecting");
+            DDLogInfo(@"MainApp is running, not connecting (this should transition us into idle state again which will terminate this extension)");
             return;
         }
         
@@ -995,8 +995,6 @@ NSString *const kXMPPPresence = @"presence";
     {
         if([parsedStanza.stanzaType isEqualToString:@"iq"] && [parsedStanza isKindOfClass:[ParseIq class]])
         {
-            [self incrementLastHandledStanza];
-
             ParseIq* iqNode=parsedStanza;
 
 #ifndef DISABLE_OMEMO
@@ -1094,11 +1092,12 @@ NSString *const kXMPPPresence = @"presence";
             if([iqNode.idval isEqualToString:self.jingle.idval]) {
                 [self jingleResult:iqNode];
             }
+            
+            //only mark stanza as handled *after* processing it
+            [self incrementLastHandledStanza];
         }
         else if([parsedStanza.stanzaType  isEqualToString:@"message"] && [parsedStanza isKindOfClass:[ParseMessage class]])
         {
-            [self incrementLastHandledStanza];
-
             ParseMessage* messageNode = parsedStanza;
 
 #ifndef DISABLE_OMEMO
@@ -1179,10 +1178,12 @@ NSString *const kXMPPPresence = @"presence";
 #endif
 
             [messageProcessor processMessage:messageNode];
+            
+            //only mark stanza as handled *after* processing it
+            [self incrementLastHandledStanza];
         }
         else if([parsedStanza.stanzaType  isEqualToString:@"presence"] && [parsedStanza isKindOfClass:[ParsePresence class]])
         {
-            [self incrementLastHandledStanza];
             ParsePresence* presenceNode = parsedStanza;
             NSString *recipient = presenceNode.to;
 
@@ -1307,6 +1308,9 @@ NSString *const kXMPPPresence = @"presence";
                 }
 
             }
+            
+            //only mark stanza as handled *after* processing it
+            [self incrementLastHandledStanza];
         }
         else if([parsedStanza.stanzaType isEqualToString:@"enabled"] && [parsedStanza isKindOfClass:[ParseEnabled class]])
         {
@@ -1548,8 +1552,9 @@ NSString *const kXMPPPresence = @"presence";
                 }
 
                 //test if smacks is supported and allows resume
-                if(self.connectionProperties.supportsSM3 && self.streamID) {
-                    MLXMLNode *resumeNode=[[MLXMLNode alloc] initWithElement:@"resume"];
+                if(self.connectionProperties.supportsSM3 && self.streamID)
+                {
+                    MLXMLNode *resumeNode = [[MLXMLNode alloc] initWithElement:@"resume"];
                     NSDictionary *dic = @{
                         kXMLNS:@"urn:xmpp:sm:3",
                         @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
@@ -1984,9 +1989,8 @@ NSString *const kXMPPPresence = @"presence";
 }
 
 -(void) incrementLastHandledStanza {
-    if(self.connectionProperties.supportsSM3 && self.accountState>=kStateBound) {
-        self.lastHandledInboundStanza=[NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
-    }
+    if(self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
+        self.lastHandledInboundStanza = [NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
 }
 
 -(void) initSM3

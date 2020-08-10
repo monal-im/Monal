@@ -36,25 +36,6 @@
     return self;
 }
 
--(void) postSyncNotificationWithContent:(UNNotificationContent*) content andID:(NSString*) id
-{
-    NSCondition* waiter = [[NSCondition alloc] init];
-    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:(id ? id : [[NSUUID UUID] UUIDString]) content:content trigger:nil];
-    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-        if(error)
-            DDLogError(@"Error posting local notification: %@", error);
-        //the completion is not called in the caller thread, wake up the caller now
-        [waiter lock];
-        [waiter signal];
-        [waiter unlock];
-    }];
-    //wait for notification request completion
-    [waiter lock];
-    [waiter wait];
-    [waiter unlock];
-}
-
 #pragma mark message signals
 
 -(void) handleNewMessage:(NSNotification*) notification
@@ -89,6 +70,30 @@
     return [NSString stringWithFormat:@"%@_%@", message.accountId, message.from];
 }
 
+-(void) publishNotificationContent:(UNMutableNotificationContent*) content withID:(NSString*) idval
+{
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+    
+    //this will add a badge having a minimum of 1 to make sure people see that something happened (even after swiping away all notifications)
+    [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber *result) {
+        NSInteger unread = 0;
+        if(result)
+            unread = [result integerValue];
+        DDLogVerbose(@"Raw badge value: %lu", (long)unread);
+        if(!unread)
+            unread = 1;     //use this as fallback to always show a badge if a notification is shown
+        DDLogInfo(@"Adding badge value: %lu", (long)unread);
+        content.badge = [NSNumber numberWithInteger:unread];
+        
+        DDLogVerbose(@"notification manager: publishing notification: %@", content.body);
+        UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
+        [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+            if(error)
+                DDLogError(@"Error posting local notification: %@", error);
+        }];
+    }];
+}
+
 -(void) showModernNotificaion:(NSNotification*) notification
 {
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
@@ -103,7 +108,7 @@
             content.subtitle = [NSString stringWithFormat:@"%@ says:", message.actualFrom];
         }
         
-        //NSString* idval = [NSString stringWithFormat:@"%@_%@", [self identifierWithNotification:notification], message.messageId];
+        NSString* idval = [NSString stringWithFormat:@"%@_%@", [self identifierWithNotification:notification], message.messageId];
         
         content.body = message.messageText;
         content.threadIdentifier = [self identifierWithNotification:notification];
@@ -136,16 +141,7 @@
                 else
                     content.body = @"";
                 
-                if([HelperTools isAppExtension])
-                {
-                    DDLogVerbose(@"notification manager: REpublishing notification: %@", content.body);
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotification object:content userInfo:nil];
-                }
-                else
-                {
-                    DDLogVerbose(@"notification manager: publishing notification directly: %@", content.body);
-                    [self postSyncNotificationWithContent:content andID:nil];
-                }
+                [self publishNotificationContent:content withID:idval];
             }];
             return;
         }
@@ -154,16 +150,7 @@
         else if([message.messageType isEqualToString:kMessageTypeGeo])
             content.body = NSLocalizedString(@"Sent a location 📍", @"");
         
-        if([HelperTools isAppExtension])
-        {
-            DDLogVerbose(@"notification manager: REpublishing notification: %@", content.body);
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotification object:content userInfo:nil];
-        }
-        else
-        {
-            DDLogVerbose(@"notification manager: publishing notification directly: %@", content.body);
-            [self postSyncNotificationWithContent:content andID:nil];
-        }
+        [self publishNotificationContent:content withID:idval];
     }];
 }
 

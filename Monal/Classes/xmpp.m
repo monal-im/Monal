@@ -269,9 +269,12 @@ NSString *const kXMPPPresence = @"presence";
         DDLogVerbose(@"    [_sendQueue operationCount] = %lu", (unsigned long)[_sendQueue operationCount]);
         if(
             (
+                //test if this account was permanently logged out but still has stanzas pending (this can happen if we have no connectivity for example)
                 _accountState<kStateReconnecting &&
-                !_reconnectInProgress
+                !_reconnectInProgress &&
+                !((unsigned long)[self.unAckedStanzas count])
             ) || (
+                //test if we are connected and idle (e.g. we're done with catchup and neither process any incoming stanzas nor trying to send anything)
                 _catchupDone &&
                 !((unsigned long)[self.unAckedStanzas count]) &&
                 [_receiveQueue operationCount]<=1 &&

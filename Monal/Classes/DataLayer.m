@@ -716,7 +716,7 @@ static NSDateFormatter* dbFormatter;
 
 -(void) addContactRequest:(MLContact *) requestor;
 {
-    NSString* query2 = [NSString stringWithFormat:@"insert into subscriptionRequests (buddy_name, account_id) values (?,?) "];
+    NSString* query2 = [NSString stringWithFormat:@"INSERT OR IGNORE INTO subscriptionRequests (buddy_name, account_id) VALUES (?,?)"];
     [self.db executeNonQuery:query2 andArguments:@[requestor.contactJid, requestor.accountId] ];
 }
 
@@ -2274,8 +2274,6 @@ static NSDateFormatter* dbFormatter;
         DDLogVerbose(@"Upgrade to 4.82 success");
     }
     
-    [self.db endWriteTransaction];
-    
     //this has to be done only when upgrading from a db < 4.7 because only older databases use DELETE journal_mode
     //this is a special case because it can not be done while in a transaction
     if([dbversion doubleValue] < 4.7)
@@ -2284,6 +2282,7 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"pragma journal_mode=WAL;" andArguments:nil];
         DDLogWarn(@"transaction mode set to WAL");
     }
+    [self.db endWriteTransaction];
     
     DDLogInfo(@"Database version check done");
     return;

@@ -137,7 +137,7 @@ NSString *const kXMPPPresence = @"presence";
 /**
     Privacy Settings: Only send idle notifications out when the user allows it
  */
-@property (nonatomic, assign) BOOL sendPresenceNotifications;
+@property (nonatomic, assign) BOOL sendIdleNotifications;
 
 
 @end
@@ -197,7 +197,7 @@ NSString *const kXMPPPresence = @"presence";
     self.statusMessage = [[HelperTools defaultsDB] stringForKey:@"StatusMessage"];
     self.awayState = [[HelperTools defaultsDB] boolForKey:@"Away"];
 
-    self.sendPresenceNotifications = [[HelperTools defaultsDB] boolForKey: @"SendLastUserInteraction"];
+    self.sendIdleNotifications = [[HelperTools defaultsDB] boolForKey: @"SendLastUserInteraction"];
 }
 
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSString*) accountNo
@@ -2028,17 +2028,14 @@ NSString *const kXMPPPresence = @"presence";
     //don't send presences if we are not bound
     if(_accountState < kStateBound)
         return;
-    
-    // don't send presence if the user prefers not to do so
-    if(!self.sendPresenceNotifications)
-        return;
 
     XMPPPresence* presence=[[XMPPPresence alloc] initWithHash:_versionHash];
     if(self.statusMessage) [presence setStatus:self.statusMessage];
     if(self.awayState) [presence setAway];
     
     //send last interaction date if not currently active
-    if(!_isCSIActive)
+    // && the user prefers to send out lastInteraction date
+    if(!_isCSIActive && self.sendIdleNotifications)
         [presence setLastInteraction:_lastInteractionDate];
     
     [self send:presence];

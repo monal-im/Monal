@@ -76,7 +76,7 @@
         }
         else if(first)      //first incoming push --> connect to servers
         {
-            DDLogVerbose(@"telling backgrounded MainApp to disconnect all accounts");
+            DDLogVerbose(@"telling (maybe) backgrounded MainApp to disconnect all accounts");
             [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"MainApp"];
             DDLogVerbose(@"connecting accounts");
             [DDLog flushLog];
@@ -116,11 +116,13 @@
     NSDictionary* message = notification.userInfo;
     if([message[@"name"] isEqualToString:@"Monal.disconnectAll"])
     {
+        DDLogInfo(@"Got disconnectAll IPC message");
         //disconnected accounts are idle and this extension will be terminated by [self nowIdle:] if all accounts are idle
         [[MLXMPPManager sharedInstance] disconnectAll];
     }
     else if([message[@"name"] isEqualToString:@"Monal.connectIfNecessary"])
     {
+        DDLogInfo(@"Got connectIfNecessary IPC message");
         //(re)connect all accounts
         [[MLXMPPManager sharedInstance] connectIfNecessary];
     }
@@ -130,7 +132,7 @@
 {
     //repeated calls to this method will do nothing (every handler will already be used and every content will already be posted)
     @synchronized(self) {
-        DDLogInfo(@"Disconnecting all accounts and posting all pending notifications: %ul / %ul", [self.contentList count], [self.handlerList count]);
+        DDLogInfo(@"Disconnecting all accounts and posting all pending notifications: %lu / %lu", [self.contentList count], [self.handlerList count]);
         [[MLXMPPManager sharedInstance] disconnectAll];
         
         //for debugging
@@ -151,8 +153,9 @@
         {
             UNMutableNotificationContent* content = [self.contentList firstObject];
             [self.contentList removeObject:content];
-            UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:content trigger:nil];
-            [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {}];
+            DDLogInfo(@"Posting local notification: %@", content.body);
+            [[MLNotificationManager sharedInstance] postSyncNotificationWithContent:content andID:nil];
+            DDLogVerbose(@"Notification posted successfully");
         }
         
         //post the last one using the last push handler (if one is left)
@@ -381,9 +384,7 @@
         content.title = xmppAccount.connectionProperties.identity.jid;
         content.body = message;
         content.sound = [UNNotificationSound defaultSound];
-        UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-        UNNotificationRequest* new_request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
-        [center addNotificationRequest:new_request withCompletionHandler:^(NSError * _Nullable error) { }];
+        [[MLNotificationManager sharedInstance] postSyncNotificationWithContent:content andID:idval];
     });
 }
 

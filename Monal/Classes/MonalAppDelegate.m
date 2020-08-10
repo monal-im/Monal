@@ -303,12 +303,14 @@
     //BUT: only do this if we are in background (we should never receive this if we are foregrounded)
     else if([message[@"name"] isEqualToString:@"Monal.disconnectAll"])
     {
+        DDLogInfo(@"Got disconnectAll IPC message");
         NSAssert([HelperTools isInBackground]==YES, @"Got 'Monal.disconnectAll' while in foreground. This should NEVER happen!");
         //disconnect all (currently connecting or already connected) accounts
         [[MLXMPPManager sharedInstance] disconnectAll];
     }
     else if([message[@"name"] isEqualToString:@"Monal.connectIfNecessary"])
     {
+        DDLogInfo(@"Got connectIfNecessary IPC message");
         //(re)connect all accounts
         [[MLXMPPManager sharedInstance] connectIfNecessary];
     }

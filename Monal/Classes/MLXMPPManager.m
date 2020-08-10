@@ -330,7 +330,7 @@ static const int sendMessageTimeoutSeconds = 10;
     unsigned long tick = 0;
     while(1)
     {
-        DDLogVerbose(@"BGTASK TICK: %ul", tick++);
+        DDLogVerbose(@"BGTASK TICK: %lu", tick++);
         [DDLog flushLog];
         [NSThread sleepForTimeInterval:1.000];
     }

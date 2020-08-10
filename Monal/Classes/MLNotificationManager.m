@@ -36,6 +36,25 @@
     return self;
 }
 
+-(void) postSyncNotificationWithContent:(UNNotificationContent*) content andID:(NSString*) id
+{
+    NSCondition* waiter = [[NSCondition alloc] init];
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:(id ? id : [[NSUUID UUID] UUIDString]) content:content trigger:nil];
+    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+        if(error)
+            DDLogError(@"Error posting local notification: %@", error);
+        //the completion is not called in the caller thread, wake up the caller now
+        [waiter lock];
+        [waiter signal];
+        [waiter unlock];
+    }];
+    //wait for notification request completion
+    [waiter lock];
+    [waiter wait];
+    [waiter unlock];
+}
+
 #pragma mark message signals
 
 -(void) handleNewMessage:(NSNotification*) notification
@@ -73,7 +92,6 @@
 -(void) showModernNotificaion:(NSNotification*) notification
 {
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
-    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     
     [[DataLayer sharedInstance] fullNameForContact:message.from inAccount:message.accountId withCompeltion:^(NSString *displayName) {
@@ -126,8 +144,7 @@
                 else
                 {
                     DDLogVerbose(@"notification manager: publishing notification directly: %@", content.body);
-                    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:content trigger:nil];
-                    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) { }];
+                    [self postSyncNotificationWithContent:content andID:nil];
                 }
             }];
             return;
@@ -145,8 +162,7 @@
         else
         {
             DDLogVerbose(@"notification manager: publishing notification directly: %@", content.body);
-            UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:[[NSUUID UUID] UUIDString] content:content trigger:nil];
-            [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) { }];
+            [self postSyncNotificationWithContent:content andID:nil];
         }
     }];
 }

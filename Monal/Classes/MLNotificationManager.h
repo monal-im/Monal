@@ -35,4 +35,6 @@
  */
 -(void) handleNewMessage:(NSNotification *)notification;
 
+-(void) postSyncNotificationWithContent:(UNNotificationContent*) content andID:(NSString*) id;
+
 @end

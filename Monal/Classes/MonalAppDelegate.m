@@ -523,6 +523,8 @@
     [[MLXMPPManager sharedInstance] scheduleBackgroundFetchingTask];        //make sure delivery will be attempted, if needed
     DDLogVerbose(@"|~~| T E R M I N A T E D |~~|");
     [DDLog flushLog];
+    //give the server some more time to send smacks acks (it doesn't matter if we get killed because of this, we're terminating anyways)
+    usleep(1000000);
 }
 
 #pragma mark - error feedback

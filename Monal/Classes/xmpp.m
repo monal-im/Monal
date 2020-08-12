@@ -225,7 +225,7 @@ NSString *const kXMPPPresence = @"presence";
 {
     if([NSOperationQueue currentQueue]!=_receiveQueue)
     {
-        DDLogVerbose(@"DISPATCHING OPERATION ON RECEIVE QUEUE");
+        DDLogVerbose(@"DISPATCHING OPERATION ON RECEIVE QUEUE: %lu", [_receiveQueue operationCount]);
         [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:YES];
     }
     else
@@ -705,8 +705,10 @@ NSString *const kXMPPPresence = @"presence";
     }
     if(!_baseParserDelegate) {
         _baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
-            [_receiveQueue addOperationWithBlock:^{
-                [self processInput:parsedStanza];           // always process stanzas in the receiveQueue
+            // always process stanzas in the receiveQueue
+            //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
+            [self dispatchOnReceiveQueue: ^{
+                [self processInput:parsedStanza];
                 
                 //check idle state if this was the last operation in the _receiveQueue and if so, publish kMonalIdle notification
                 //quickly check our own queue before doing the more heavy (but complete) idle check

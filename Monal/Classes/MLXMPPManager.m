@@ -183,7 +183,7 @@ static const int sendMessageTimeoutSeconds = 10;
         {
             DDLogVerbose(@"NOT reachable");
             _hasConnectivity = NO;
-            BOOL wasIdle = [self allAccountsIdle];      //we have to check that here because diconnect: makes them non-idle (no catchup done yet etc.)
+            BOOL wasIdle = [self allAccountsIdle];      //we have to check that here because disconnect: makes them idle
             [self disconnectAll];
             if(!wasIdle)
             {
@@ -238,11 +238,9 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(BOOL) allAccountsIdle
 {
-    @synchronized(_connectedXMPP) {
-        for(xmpp* xmppAccount in [self connectedXMPP])
-            if(!xmppAccount.idle)
-                return NO;
-    }
+    for(xmpp* xmppAccount in [self connectedXMPP])
+        if(!xmppAccount.idle)
+            return NO;
     return YES;
 }
 
@@ -261,8 +259,9 @@ static const int sendMessageTimeoutSeconds = 10;
         }
         if([self allAccountsIdle] && [HelperTools isInBackground])
         {
-            DDLogInfo(@"### All accounts idle, stopping all background tasks ###");
+            DDLogInfo(@"### All accounts idle, disconnecting and stopping all background tasks ###");
             [DDLog flushLog];
+            [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
             BOOL stopped = NO;
             if(_bgTask != UIBackgroundTaskInvalid)
             {
@@ -297,7 +296,9 @@ static const int sendMessageTimeoutSeconds = 10;
                 _bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
                     DDLogWarn(@"BG WAKE EXPIRING");
                     [DDLog flushLog];
-                    
+
+                    [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
+
                     //schedule a BGProcessingTaskRequest to process this further as soon as possible
                     if(@available(iOS 13.0, *))
                     {
@@ -320,6 +321,7 @@ static const int sendMessageTimeoutSeconds = 10;
     _bgFetch = task;
     task.expirationHandler = ^{
         DDLogError(@"*** BGTASK EXPIRED ***");
+        [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
         _bgFetch = nil;
         [task setTaskCompletedWithSuccess:NO];
         [self scheduleBackgroundFetchingTask];      //schedule new one if neccessary

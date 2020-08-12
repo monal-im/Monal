@@ -60,7 +60,7 @@
         }
         
         //add contentHandler to our list
-        DDLogVerbose(@"Adding content handler to list");
+        DDLogVerbose(@"Adding content handler to list: %lu", [self.handlerList count]);
         [self.handlerList addObject:contentHandler];
         
         if([MLProcessLock checkRemoteRunning:@"MainApp"])
@@ -88,7 +88,7 @@
     @synchronized(self) {
         DDLogInfo(@"Handling expired push");
         //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
-        if([self.handlerList count]>0)
+        if([self.handlerList count])
         {
             void (^handler)(UNNotificationContent* contentToDeliver) = [self.handlerList firstObject];
             [self.handlerList removeObject:handler];
@@ -116,28 +116,33 @@
 
 -(void) feedAllWaitingHandlers
 {
-    //repeated calls to this method will do nothing (every handler will already be used and every content will already be posted)
-    @synchronized(self) {
-        DDLogInfo(@"Disconnecting all accounts and feeding all pending handlers: %lu", [self.handlerList count]);
-        [[MLXMPPManager sharedInstance] disconnectAll];
-        
-        //for debugging
-        [self listNotifications];
-        
-        //feed all waiting handlers with empty notifications to silence them
-        //this will terminate/freeze the app extension afterwards
-        while([self.handlerList count])
-        {
-            void (^handler)(UNNotificationContent* contentToDeliver) = [self.handlerList firstObject];
-            [self.handlerList removeObject:handler];
-            handler(nil);
+    //dispatch in another thread to avoid blocking the thread calling this method (most probably the receiveQueue), which could result in a deadlock
+    //without this dispatch a deadlock could also occur when this method tries to enter the receiveQueue (disconnectAll) while the receive queue
+    //is waiting for the @synchronized(self) block in this method
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        //repeated calls to this method will do nothing (every handler will already be used and every content will already be posted)
+        @synchronized(self) {
+            DDLogInfo(@"Disconnecting all accounts and feeding all pending handlers: %lu", [self.handlerList count]);
+            [[MLXMPPManager sharedInstance] disconnectAll];
+            
+            //for debugging
+            [self listNotifications];
+            
+            //feed all waiting handlers with empty notifications to silence them
+            //this will terminate/freeze the app extension afterwards
+            while([self.handlerList count])
+            {
+                void (^handler)(UNNotificationContent* contentToDeliver) = [self.handlerList firstObject];
+                [self.handlerList removeObject:handler];
+                handler(nil);
+            }
+            
+            //we posted all notifications and disconnected, technically we're not running anymore
+            //(even though our containing process will still be running for a few more seconds)
+            [[NSNotificationCenter defaultCenter] removeObserver:self name:kMonalIncomingIPC object:nil];
+            [MLProcessLock unlock];
         }
-        
-        //we posted all notifications and disconnected, technically we're not running anymore
-        //(even though our containing process will still be running for a few more seconds)
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:kMonalIncomingIPC object:nil];
-        [MLProcessLock unlock];
-    }
+    });
 }
 
 -(void) listNotifications

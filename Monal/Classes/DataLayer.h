@@ -129,17 +129,17 @@ extern NSString *const kMessageTypeUrl;
 -(NSString*) nickName:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 #pragma mark - account commands
--(void) accountListWithCompletion: (void (^)(NSArray* result))completion;
--(void) accountListEnabledWithCompletion: (void (^)(NSArray* result))completion;
+-(NSArray*) accountList;
 -(NSArray*) enabledAccountList;
 -(BOOL) isAccountEnabled:(NSString*) accountNo;
--(void) doesAccountExistUser:(NSString*) user andDomain:(NSString *) domain withCompletion:(void (^)(BOOL result))completion;
--(void) accountIDForUser:(NSString*) user andDomain:(NSString *) domain withCompletion:(void (^)(NSString* result))completion;
+-(BOOL) doesAccountExistUser:(NSString*) user andDomain:(NSString *) domain;
+-(NSNumber*) accountIDForUser:(NSString*) user andDomain:(NSString *) domain;
 
--(void) detailsForAccount:(NSString*) accountNo withCompletion:(void (^)(NSArray* result))completion;
+-(NSArray*) detailsForAccount:(NSString*) accountNo;
+-(NSString*) jidOfAccount:(NSString*) accountNo;
 
 -(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion;
--(void) addAccountWithDictionary:(NSDictionary *) dictionary andCompletion: (void (^)(BOOL))completion;
+-(NSNumber*) addAccountWithDictionary:(NSDictionary *) dictionary;
 
 
 -(BOOL) removeAccount:(NSString*) accountNo;
@@ -151,7 +151,6 @@ extern NSString *const kMessageTypeUrl;
 
 -(NSMutableDictionary *) readStateForAccount:(NSString*) accountNo;
 -(void) persistState:(NSMutableDictionary *) state forAccount:(NSString*) accountNo;
--(void) getHighestAccountIdWithCompletion:(void (^)(NSObject * accountid)) completion;
 
 #pragma mark - message Commands
 /**
@@ -193,7 +192,7 @@ extern NSString *const kMessageTypeUrl;
 -(void) deleteMessageHistory:(NSNumber *) messageNo;
 
 #pragma mark - message history
--(void) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion;
+-(NSMutableArray*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(NSArray *) allMessagesForContact:(NSString* ) buddy forAccount:(NSString *) accountNo;
 -(void) lastMessageForContact:(NSString *) contact forAccount:(NSString *) accountNo withCompletion:(void (^)(NSMutableArray *))completion;
 -(void) lastStanzaIdForAccount:(NSString*) accountNo withCompletion:(void (^)(NSString* lastStanzaId, NSDate* lastStanzaDate)) completion;
@@ -207,7 +206,7 @@ extern NSString *const kMessageTypeUrl;
 /**
  retrieves the date of the the last message to or from this contact
  */
--(void) lastMessageDateForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion;;
+-(NSDate*) lastMessageDateForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 
 -(void) lastMessageDateAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion;
 
@@ -220,19 +219,19 @@ extern NSString *const kMessageTypeUrl;
 -(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId encrypted:(BOOL) encrypted withCompletion:(void (^)(BOOL, NSString *))completion;
 
 #pragma mark active contacts
--(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion;
--(void) activeContactDictWithCompletion: (void (^)(NSMutableArray *))completion;
+-(NSMutableArray*) activeContacts;
+-(NSMutableArray*) activeContactDict;
 -(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
 -(void) removeAllActiveBuddies;
 -(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
--(void) isActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
+-(BOOL) isActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
 -(void) updateActiveBuddy:(NSString*) buddyname setTime:(NSString *)timestamp forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion;
 
 
 
 #pragma mark count unread
--(void) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(NSNumber *))completion;
--(void) countUnreadMessagesWithCompletion: (void (^)(NSNumber *))completion;
+-(NSNumber*) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(NSNumber*) countUnreadMessages;
 //set all unread messages to read
 -(void) setAllMessagesAsRead;
 

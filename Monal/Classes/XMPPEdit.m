@@ -75,36 +75,33 @@
     {
         //edit
         DDLogVerbose(@"reading account number %@", _accountno);
-        [_db detailsForAccount:_accountno withCompletion:^(NSArray *result) {
-            
-            if(result.count == 0)
-            {
-                //present another UI here.
-                return;
-                
-            }
-            
-            NSDictionary* settings = [result objectAtIndex:0]; //only one row
-            self.initialSettings = settings;
-            
-            self.jid = [NSString stringWithFormat:@"%@@%@",[settings objectForKey:@"username"],[settings objectForKey:@"domain"]];
-            
-            NSString* pass = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",self.accountno]];
-            
-            if(pass) {
-                self.password = pass;
-            }
-            
-            self.server = [settings objectForKey:@"server"];
-            
-            self.port = [NSString stringWithFormat:@"%@", [settings objectForKey:@"other_port"]];
-            self.resource = [settings objectForKey:kResource];
-            
-            self.enabled = [[settings objectForKey:kEnabled] boolValue];
-            
-            self.directTLS = [[settings objectForKey:@"directTLS"] boolValue];
-            self.selfSignedSSL = [[settings objectForKey:@"selfsigned"] boolValue];
-        }];
+        NSArray* accountDetails = [_db detailsForAccount:_accountno];
+        if(accountDetails.count == 0)
+        {
+            //present another UI here.
+            return;
+        }
+
+        NSDictionary* settings = [accountDetails objectAtIndex:0]; //only one row
+        self.initialSettings = settings;
+
+        self.jid = [NSString stringWithFormat:@"%@@%@", [settings objectForKey:@"username"], [settings objectForKey:@"domain"]];
+
+        NSString* pass = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@", self.accountno]];
+
+        if(pass) {
+            self.password = pass;
+        }
+
+        self.server = [settings objectForKey:@"server"];
+
+        self.port = [NSString stringWithFormat:@"%@", [settings objectForKey:@"other_port"]];
+        self.resource = [settings objectForKey:kResource];
+
+        self.enabled = [[settings objectForKey:kEnabled] boolValue];
+
+        self.directTLS = [[settings objectForKey:@"directTLS"] boolValue];
+        self.selfSignedSSL = [[settings objectForKey:@"selfsigned"] boolValue];
     }
     else
     {
@@ -199,40 +196,34 @@
         }
         else
         {
-            [[DataLayer sharedInstance] doesAccountExistUser:user andDomain:domain withCompletion:^(BOOL result) {
-                if(!result) {
-                    [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
-                        if(result) {
-                            [self showSuccessHUD];
-                            [[DataLayer sharedInstance] accountIDForUser:user andDomain:domain withCompletion:^(NSString* accountid) {
-                                if(accountid) {
-                                    self.accountno=[NSString stringWithFormat:@"%@",accountid];
-                                    self.editMode=YES;
-                                    [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-                                    [SAMKeychain setPassword:self.password forService:@"Monal" account:self.accountno];
-                                    if(self.enabled)
-                                    {
-                                        DDLogVerbose(@"calling connect... ");
-                                        [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
-                                    }
-                                    else
-                                    {
-                                        [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
-                                    }
-                                }
-                            }];
-                        }
-                    }];
-                } else  {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        UIAlertController* alert= [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Account Exists",@ "") message:NSLocalizedString(@"This account already exists in Monal.", @"") preferredStyle:UIAlertControllerStyleAlert];
-                        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                            [alert dismissViewControllerAnimated:YES completion:nil];
-                        }]];
-                        [self presentViewController:alert animated:YES completion:nil];
-                    });
+            BOOL accountExists = [[DataLayer sharedInstance] doesAccountExistUser:user andDomain:domain];
+            if(!accountExists) {
+                NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
+                if(accountID) {
+                    [self showSuccessHUD];
+                    self.accountno = [NSString stringWithFormat:@"%@", accountID];
+                    self.editMode = YES;
+                    [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
+                    [SAMKeychain setPassword:self.password forService:@"Monal" account:self.accountno];
+                    if(self.enabled)
+                    {
+                        DDLogVerbose(@"calling connect... ");
+                        [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
+                    }
+                    else
+                    {
+                        [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
+                    }
                 }
-            }];
+            } else  {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    UIAlertController* alert= [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Account Exists",@ "") message:NSLocalizedString(@"This account already exists in Monal.", @"") preferredStyle:UIAlertControllerStyleAlert];
+                    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                        [alert dismissViewControllerAnimated:YES completion:nil];
+                    }]];
+                    [self presentViewController:alert animated:YES completion:nil];
+                });
+            }
         }
     }
     else

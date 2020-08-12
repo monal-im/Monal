@@ -130,19 +130,13 @@
                 
                 NSString *passwordText = [self.password.text copy];
                 
-                [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
-                    if(result) {
-                        [[DataLayer sharedInstance] getHighestAccountIdWithCompletion:^(NSObject * accountid) {
-                            if(accountid) {
-                                NSString *accountno=[NSString stringWithFormat:@"%@",accountid];
-                                [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-                                [SAMKeychain setPassword:passwordText forService:@"Monal" account:accountno];
-                                [[MLXMPPManager sharedInstance] connectAccount:accountno];
-                            }
-                        }];
-                    }
-                }];
-                
+                NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
+                if(accountID) {
+                    NSString* accountno = [NSString stringWithFormat:@"%@", accountID];
+                    [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
+                    [SAMKeychain setPassword:passwordText forService:@"Monal" account:accountno];
+                    [[MLXMPPManager sharedInstance] connectAccount:accountno];
+                }
                 [self performSegueWithIdentifier:@"showSuccess" sender:nil];
             }
         });

@@ -72,13 +72,11 @@
 {
     self.hidesBottomBarWhenPushed = YES;
     
-    [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId withCompletion:^(NSArray *result) {
-        NSArray* accountVals = result;
-        if([accountVals count] > 0)
-        {
-            self.jid = [NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
-        }
-    }];
+    NSArray* accountDetails = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId];
+    if([accountDetails count] > 0)
+    {
+        self.jid = [NSString stringWithFormat:@"%@@%@",[[accountDetails objectAtIndex:0] objectForKey:@"username"], [[accountDetails objectAtIndex:0] objectForKey:@"domain"]];
+    }
 
     // init privacy Settings
     self.showGeoLocationsInline = [[HelperTools defaultsDB] boolForKey: @"ShowGeoLocation"];
@@ -509,41 +507,36 @@
 -(void) refreshData
 {
     if(!self.contact.contactJid) return;
-    NSMutableArray *newList;
     if(!_day) {
-      [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId withCompletion:^(NSMutableArray *newList) {
-            [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId withCompletion:^(NSNumber *unread) {
-                      if([unread integerValue]==0) self->_firstmsg=YES;
-                      
-                  }];
-           
-          if(!self.jid) return;
-          MLMessage *unreadStatus = [[MLMessage alloc] init];
-          unreadStatus.messageType=kMessageTypeStatus;
-          unreadStatus.messageText=NSLocalizedString(@"Unread Messages Below",@ "");
-          unreadStatus.actualFrom=self.jid;
-          
-          NSInteger unreadPos = newList.count-1;
-          while(unreadPos>=0)
-          {
-              MLMessage *row = [newList objectAtIndex:unreadPos];
-              if(!row.unread)
-              {
-                  unreadPos++; //move back down one
-                  break;
-              }
-              unreadPos--; //move up the list
-          }
-          
-          if(unreadPos<=newList.count-1 && unreadPos>0) {
-              [newList insertObject:unreadStatus atIndex:unreadPos];
-          }
-          
-          if(newList.count!=self.messageList.count)
-          {
-              self.messageList = newList;
-          }
-        }];
+        NSMutableArray* messages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId];
+        NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId];
+        if([unreadMsgCnt integerValue] == 0) self->_firstmsg=YES;
+                                 
+        if(!self.jid) return;
+        MLMessage* unreadStatus = [[MLMessage alloc] init];
+        unreadStatus.messageType = kMessageTypeStatus;
+        unreadStatus.messageText = NSLocalizedString(@"Unread Messages Below", @ "");
+        unreadStatus.actualFrom = self.jid;
+
+        NSInteger unreadPos = messages.count - 1;
+        while(unreadPos>=0)
+        {
+            MLMessage* row = [messages objectAtIndex:unreadPos];
+            if(!row.unread)
+            {
+                unreadPos++; //move back down one
+                break;
+            }
+            unreadPos--; //move up the list
+        }
+
+        if(unreadPos <= messages.count - 1 && unreadPos > 0) {
+            [messages insertObject:unreadStatus atIndex:unreadPos];
+        }
+        if(messages.count != self.messageList.count)
+        {
+            self.messageList = messages;
+        }
     }
 }
 
@@ -579,44 +572,41 @@
     DDLogVerbose(@"Sending message");
     NSString *newMessageID =messageID?messageID:[[NSUUID UUID] UUIDString];
     //dont readd it, use the exisitng
-    
-    [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId withCompletion:^(NSArray *result) {
-        NSArray *accounts = result;
-        if(accounts.count==0) {
-            DDLogError(@"Account should be >0");
-            return;
-        }
-        
-        if(!messageID)
-        {
-            NSString *contactNameCopy =self.contact.contactJid; //prevent retail cycle
-            NSString *accountNoCopy = self.contact.accountId;
-            BOOL isMucCopy = self.contact.isGroup;
-            BOOL encryptChatCopy = self.encryptChat;
-            MLContact *contactCopy = self.contact;
-            
-            
-            [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
-                [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
-                                    withCompletionHandler:nil];
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:nil userInfo:@{@"contact":contactCopy}];
-            }];
-        }
-        else
-        {
-            [[MLXMPPManager sharedInstance]
-                sendMessage:messageText
-                toContact:self.contact.contactJid
-                fromAccount:self.contact.accountId
-                isEncrypted:self.encryptChat
-                isMUC:self.contact.isGroup
-                isUpload:NO messageId:newMessageID
-                withCompletionHandler:nil
-            ];
-        }
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":self.contact}];
-    }];
+
+    NSArray* accountDetails = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId];
+    if(accountDetails.count == 0) {
+        DDLogError(@"Account should be >0");
+        return;
+    }
+
+    if(!messageID)
+    {
+        NSString *contactNameCopy = self.contact.contactJid; //prevent retail cycle
+        NSString *accountNoCopy = self.contact.accountId;
+        BOOL isMucCopy = self.contact.isGroup;
+        BOOL encryptChatCopy = self.encryptChat;
+        MLContact *contactCopy = self.contact;
+
+        [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
+            [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
+                                withCompletionHandler:nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:nil userInfo:@{@"contact":contactCopy}];
+        }];
+    }
+    else
+    {
+        [[MLXMPPManager sharedInstance]
+            sendMessage:messageText
+            toContact:self.contact.contactJid
+            fromAccount:self.contact.accountId
+            isEncrypted:self.encryptChat
+            isMUC:self.contact.isGroup
+            isUpload:NO messageId:newMessageID
+            withCompletionHandler:nil
+        ];
+    }
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":self.contact}];
 }
 
 -(void) sendChatState:(BOOL) isTyping

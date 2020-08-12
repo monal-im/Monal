@@ -450,19 +450,15 @@
     
     cell.accountNo=[row.accountId integerValue];
     cell.username=row.contactJid;
-    
-    
-    [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:row.accountId withCompletion:^(NSNumber *unread) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            cell.count=[unread integerValue];
-        });
-    }];
-    
-    
+
+    NSNumber* unreadMessagesCnt = [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:row.accountId];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        cell.count = [unreadMessagesCnt integerValue];
+    });
+
     [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
         cell.userImage.image=image;
     }];
-    
     [cell setOrb];
     
     [[DataLayer sharedInstance] isMutedJid:row.contactJid  withCompletion:^(BOOL muted) {
@@ -470,7 +466,6 @@
             cell.muteBadge.hidden=!muted;
         });
     }];
-    
     return cell;
 }
 

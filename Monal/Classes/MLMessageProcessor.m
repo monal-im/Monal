@@ -104,82 +104,82 @@ static NSMutableDictionary* _typingNotifications;
         else
         {
             //if mam but newer than last message we do want an alert..
-            [[DataLayer sharedInstance] lastMessageDateForContact:messageNode.from andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
-                BOOL unread = YES;
-                BOOL showAlert = YES;
-                
-                if(
-                    [messageNode.from isEqualToString:self.jid] ||
-                    (
-                        messageNode.mamResult &&
-                        messageNode.delayTimeStamp &&
-                        lastDate.timeIntervalSince1970 > messageNode.delayTimeStamp.timeIntervalSince1970
-                    )
+            NSDate* lastMsgDate = [[DataLayer sharedInstance] lastMessageDateForContact:messageNode.from andAccount:self.accountNo];
+            if(!lastMsgDate) return; // TODO thilo please check this line
+            
+            BOOL unread = YES;
+            BOOL showAlert = YES;
+            
+            if(
+                [messageNode.from isEqualToString:self.jid] ||
+                (
+                    messageNode.mamResult &&
+                    messageNode.delayTimeStamp &&
+                    lastMsgDate.timeIntervalSince1970 > messageNode.delayTimeStamp.timeIntervalSince1970
                 )
-                {
-                    DDLogVerbose(@"Setting showAlert to NO");
-                    showAlert = NO;
-                    unread = NO;
-                }
-              
-                NSString* messageType = nil;
-                BOOL encrypted = NO;
-                NSString* body = messageNode.messageText;
+            )
+            {
+                DDLogVerbose(@"Setting showAlert to NO");
+                showAlert = NO;
+                unread = NO;
+            }
+          
+            NSString* messageType = nil;
+            BOOL encrypted = NO;
+            NSString* body = messageNode.messageText;
+            
+            if(messageNode.oobURL)
+            {
+                messageType = kMessageTypeImage;
+                body = messageNode.oobURL;
+            }
+            
+            if(decrypted)
+            {
+                body = decrypted;
+                encrypted = YES;
+            }
+            
+            
+            if(!body  && messageNode.subject)
+            {
+                messageType=kMessageTypeStatus;
                 
-                if(messageNode.oobURL)
-                {
-                    messageType = kMessageTypeImage;
-                    body = messageNode.oobURL;
-                }
-                
-                if(decrypted)
-                {
-                    body = decrypted;
-                    encrypted = YES;
-                }
-                
-                
-                if(!body  && messageNode.subject)
-                {
-                    messageType=kMessageTypeStatus;
-                    
-                    [[DataLayer sharedInstance] mucSubjectforAccount:self.accountNo andRoom:messageNode.from withCompletion:^(NSString *currentSubject) {
-                        if(![messageNode.subject isEqualToString:currentSubject])
-                        {
-                            [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
-                            if(self.postPersistAction)
-                                self.postPersistAction(YES, encrypted, showAlert, messageNode.subject, messageType);
-                        }
-                    }];
-                    
-                    return;
-                }
-                
-                NSString *messageId = messageNode.idval;
-                if(!messageId.length)
-                {
-                    DDLogError(@"Empty ID using random UUID");
-                    messageId = [[NSUUID UUID] UUIDString];
-                }
-                
-                [[DataLayer sharedInstance] addMessageFrom:messageNode.from
-                                                        to:recipient
-                                                forAccount:self->_accountNo
-                                                  withBody:[body copy]
-                                              actuallyfrom:messageNode.actualFrom
-                                                      sent:YES
-                                                    unread:unread
-                                                 messageId:messageId
-                                           serverMessageId:messageNode.stanzaId
-                                               messageType:messageType
-                                           andOverrideDate:messageNode.delayTimeStamp
-                                                 encrypted:encrypted
-                                            withCompletion:^(BOOL success, NSString *newMessageType) {
-                    if(self.postPersistAction) {
-                        self.postPersistAction(success, encrypted, showAlert, body, newMessageType);
+                [[DataLayer sharedInstance] mucSubjectforAccount:self.accountNo andRoom:messageNode.from withCompletion:^(NSString *currentSubject) {
+                    if(![messageNode.subject isEqualToString:currentSubject])
+                    {
+                        [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
+                        if(self.postPersistAction)
+                            self.postPersistAction(YES, encrypted, showAlert, messageNode.subject, messageType);
                     }
                 }];
                 
+                return;
+            }
+            
+            NSString *messageId = messageNode.idval;
+            if(!messageId.length)
+            {
+                DDLogError(@"Empty ID using random UUID");
+                messageId = [[NSUUID UUID] UUIDString];
+            }
+            
+            [[DataLayer sharedInstance] addMessageFrom:messageNode.from
+                                                    to:recipient
+                                            forAccount:self->_accountNo
+                                              withBody:[body copy]
+                                          actuallyfrom:messageNode.actualFrom
+                                                  sent:YES
+                                                unread:unread
+                                             messageId:messageId
+                                       serverMessageId:messageNode.stanzaId
+                                           messageType:messageType
+                                       andOverrideDate:messageNode.delayTimeStamp
+                                             encrypted:encrypted
+                                        withCompletion:^(BOOL success, NSString *newMessageType) {
+                if(self.postPersistAction) {
+                    self.postPersistAction(success, encrypted, showAlert, body, newMessageType);
+                }
             }];
         }
     }

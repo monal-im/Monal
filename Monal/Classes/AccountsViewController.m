@@ -73,12 +73,11 @@
 
 -(void) refreshAccountList
 {
-    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.accountList=result;
-            [self.accountsTable reloadData];
-        });
-    }];
+    NSArray* accountList = [[DataLayer sharedInstance] accountList];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.accountList = accountList;
+        [self.accountsTable reloadData];
+    });
 }
 
 

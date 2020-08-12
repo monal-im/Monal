@@ -244,6 +244,11 @@
         [self executeNonQuery:@"COMMIT;" andArguments:nil];		//commit only outermost transaction
 }
 
+-(NSObject*) executeScalar:(NSString*) query
+{
+    return [self executeScalar:query andArguments:@[]];
+}
+
 -(NSObject*) executeScalar:(NSString*) query andArguments:(NSArray*) args
 {
     if(!query)
@@ -271,6 +276,11 @@
         [self throwErrorForQuery:query andArguments:args];
     }
     return toReturn;
+}
+
+-(NSMutableArray*) executeReader:(NSString*) query
+{
+    return [self executeReader:query andArguments:@[]];
 }
 
 -(NSMutableArray*) executeReader:(NSString*) query andArguments:(NSArray*) args

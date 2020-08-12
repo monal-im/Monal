@@ -105,19 +105,13 @@
     [dic setObject:@NO forKey:kSelfSigned];
     [dic setObject:@NO forKey:kDirectTLS];
     
-    [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
-        if(result) {
-            [[DataLayer sharedInstance] getHighestAccountIdWithCompletion:^(NSObject * accountid) {
-                if(accountid) {
-                    self.accountno=[NSString stringWithFormat:@"%@",accountid];
-                    [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-                    [SAMKeychain setPassword:password forService:@"Monal" account:self.accountno];
-                    [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
-                }
-            }];
-        }
-    }];
-    
+    NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
+    if(accountID) {
+        self.accountno=[NSString stringWithFormat:@"%@", accountID];
+        [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
+        [SAMKeychain setPassword:password forService:@"Monal" account:self.accountno];
+        [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
+    }
 }
 
 -(void) connected

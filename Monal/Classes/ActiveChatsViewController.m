@@ -89,18 +89,20 @@
 
 -(void) refreshDisplay
 {
-    [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray* cleanActive) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if(self.chatListTable.hasUncommittedUpdates)
-                return;
-            
-             [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
-            self.contacts = cleanActive;
-            [self.chatListTable reloadData];
-            MonalAppDelegate* appDelegate = (MonalAppDelegate*)[UIApplication sharedApplication].delegate;
-            [appDelegate updateUnread];
-        });
-    }];
+    NSMutableArray* activeContacts = [[DataLayer sharedInstance] activeContacts];
+    if(!activeContacts)
+        return;
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(self.chatListTable.hasUncommittedUpdates)
+            return;
+
+         [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:activeContacts];
+        self.contacts = activeContacts;
+        [self.chatListTable reloadData];
+        MonalAppDelegate* appDelegate = (MonalAppDelegate*)[UIApplication sharedApplication].delegate;
+        [appDelegate updateUnread];
+    });
 }
 
 -(void) refreshContact:(NSNotification*) notification
@@ -380,13 +382,12 @@
     cell.username = row.contactJid;
     cell.count = 0;
     
-    [[DataLayer sharedInstance] countUserUnreadMessages:row.contactJid forAccount:row.accountId withCompletion:^(NSNumber *unread) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if([cell.username isEqualToString:row.contactJid]){
-                cell.count=[unread integerValue];
-            }
-        });
-    }];
+    NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:row.contactJid forAccount:row.accountId];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if([cell.username isEqualToString:row.contactJid]){
+            cell.count = [unreadMsgCnt integerValue];
+        }
+    });
     
     [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:row.accountId withCompletion:^(NSMutableArray *messages) {
         dispatch_async(dispatch_get_main_queue(), ^{

@@ -2566,18 +2566,15 @@ NSString *const kXMPPPresence = @"presence";
     [self send:query];
 }
 
--(void) queryMAMSinceLastMessageDateForContact:(NSString*) contactJid
+-(void) queryMAMSinceLastMessageDateForContact:(NSString *) contactJid
 {
-    if(self.connectionProperties.supportsMam2)
-    {
-        [[DataLayer sharedInstance] lastMessageDateForContact:contactJid andAccount:self.accountNo withCompletion:^(NSDate* lastDate) {
-            if(lastDate)
-            {
-                XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-                [query setMAMQueryFromStart:[lastDate dateByAddingTimeInterval:1] toDate:nil withMax:nil andJid:contactJid];
+    if(self.connectionProperties.supportsMam2) {
+        NSDate* lastMsgDate = [[DataLayer sharedInstance] lastMessageDateForContact:contactJid andAccount:self.accountNo];
+        if(lastMsgDate) {
+            XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+                [query setMAMQueryFromStart:[lastMsgDate dateByAddingTimeInterval:1] toDate:nil withMax:nil andJid:contactJid];
                 [self send:query];
-            }
-        }];
+        }
     }
 }
 

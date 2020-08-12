@@ -519,15 +519,13 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) connectAccount:(NSString*) accountNo
 {
-    [[DataLayer sharedInstance] detailsForAccount:accountNo withCompletion:^(NSArray *result) {
-        NSArray *accounts = result;
-        if(accounts.count == 1) {
-            NSDictionary* account=[accounts objectAtIndex:0];
-            [self connectAccountWithDictionary:account];
-        } else {
-            DDLogVerbose(@"Expected account settings in db for accountNo: %@", accountNo);
-        }
-    }];
+    NSArray* accountDetails = [[DataLayer sharedInstance] detailsForAccount:accountNo];
+    if(accountDetails.count == 1) {
+        NSDictionary* account = [accountDetails objectAtIndex:0];
+        [self connectAccountWithDictionary:account];
+    } else {
+        DDLogVerbose(@"Expected account settings in db for accountNo: %@", accountNo);
+    }
 }
 
 -(void) connectAccountWithDictionary:(NSDictionary*)account
@@ -615,12 +613,11 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) logoutAll
 {
-    [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray* result) {
-        for(NSDictionary* account in result) {
-            DDLogVerbose(@"Disconnecting account %@@%@", [account objectForKey:@"username"], [account objectForKey:@"domain"]);
-            [self disconnectAccount:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
-        }
-    }];
+    NSArray* enabledAccountList = [[DataLayer sharedInstance] enabledAccountList];
+    for(NSDictionary* account in enabledAccountList) {
+        DDLogVerbose(@"Disconnecting account %@@%@", [account objectForKey:@"username"], [account objectForKey:@"domain"]);
+        [self disconnectAccount:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
+    }
 }
 
 -(void) disconnectAll
@@ -635,10 +632,10 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) connectIfNecessary
 {
-    [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray* result) {
-        for(NSDictionary* account in result)
-            [self connectAccountWithDictionary:account];
-    }];
+    NSArray* enabledAccountList = [[DataLayer sharedInstance] enabledAccountList];
+    for(NSDictionary* account in enabledAccountList) {
+        [self connectAccountWithDictionary:account];
+    }
 }
 
 -(void) updatePassword:(NSString *) password forAccount:(NSString *) accountNo

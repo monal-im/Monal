@@ -75,22 +75,21 @@
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     
     //this will add a badge having a minimum of 1 to make sure people see that something happened (even after swiping away all notifications)
-    [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber *result) {
-        NSInteger unread = 0;
-        if(result)
-            unread = [result integerValue];
-        DDLogVerbose(@"Raw badge value: %lu", (long)unread);
-        if(!unread)
-            unread = 1;     //use this as fallback to always show a badge if a notification is shown
-        DDLogInfo(@"Adding badge value: %lu", (long)unread);
-        content.badge = [NSNumber numberWithInteger:unread];
-        
-        DDLogVerbose(@"notification manager: publishing notification: %@", content.body);
-        UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
-        [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-            if(error)
-                DDLogError(@"Error posting local notification: %@", error);
-        }];
+    NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
+    NSInteger unread = 0;
+    if(unreadMsgCnt)
+        unread = [unreadMsgCnt integerValue];
+    DDLogVerbose(@"Raw badge value: %lu", (long)unread);
+    if(!unread)
+        unread = 1;     //use this as fallback to always show a badge if a notification is shown
+    DDLogInfo(@"Adding badge value: %lu", (long)unread);
+    content.badge = [NSNumber numberWithInteger:unread];
+    
+    DDLogVerbose(@"notification manager: publishing notification: %@", content.body);
+    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
+    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+        if(error)
+            DDLogError(@"Error posting local notification: %@", error);
     }];
 }
 

@@ -106,5 +106,15 @@
     }
 }
 
+-(void) setPinned:(BOOL) pinned
+{
+    self.isPinned = pinned;
+    
+    if(pinned) {
+        self.backgroundColor = [UIColor colorWithRed:214.0/255 green:229.0/255 blue:238.0/255 alpha:1];
+    } else {
+        self.backgroundColor = UIColor.clearColor;
+    }
+}
 
 @end

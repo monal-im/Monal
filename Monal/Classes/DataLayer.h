@@ -252,6 +252,9 @@ extern NSString *const kMessageTypeUrl;
 -(void) unBlockJid:(NSString *) jid;
 -(void) isBlockedJid:(NSString *) jid withCompletion: (void (^)(BOOL))completion;
 
+-(BOOL) isPinnedChat:(NSString*) accountNo andBuddyJid:(NSString*) buddyJid;
+-(void) pinChat:(NSString*) accountNo andBuddyJid:(NSString*) buddyJid;
+-(void) unPinChat:(NSString*) accountNo andBuddyJid:(NSString*) buddyJid;
 
 -(BOOL) shouldEncryptForJid:(NSString *) jid andAccountNo:(NSString*) account;
 -(void) encryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo;

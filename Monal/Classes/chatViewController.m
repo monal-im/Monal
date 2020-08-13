@@ -1008,7 +1008,6 @@
         DDLogError(@" not ready to send messages");
         return;
     }
-
     [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:self.contact.accountId withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString *messageType) {
         DDLogVerbose(@"added message");
         
@@ -1016,25 +1015,24 @@
         {
             dispatch_async(dispatch_get_main_queue(), ^{
                 MLMessage* messageObj = [[MLMessage alloc] init];
-                messageObj.actualFrom=self.jid;
-                messageObj.from=self.jid;
-                messageObj.timestamp=[NSDate date];
-                messageObj.hasBeenReceived=NO;
-                messageObj.hasBeenSent=NO;
-                messageObj.messageId=messageId;
-                messageObj.encrypted=self.encryptChat;
-                messageObj.messageType=messageType;
-                messageObj.messageText=message;
+                messageObj.actualFrom = self.jid;
+                messageObj.from = self.jid;
+                messageObj.timestamp = [NSDate date];
+                messageObj.hasBeenReceived = NO;
+                messageObj.hasBeenSent = NO;
+                messageObj.messageId = messageId;
+                messageObj.encrypted = self.encryptChat;
+                messageObj.messageType = messageType;
+                messageObj.messageText = message;
 
                 [self.messageTable performBatchUpdates:^{
                     if(!self.messageList) self.messageList = [[NSMutableArray alloc] init];
                     [self.messageList addObject:messageObj];
                     NSInteger bottom = [self.messageList count]-1;
                     if(bottom>=0) {
-                        NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
+                        NSIndexPath* path1 = [NSIndexPath indexPathForRow:bottom inSection:0];
                         [self->_messageTable insertRowsAtIndexPaths:@[path1]
-                                                   withRowAnimation:UITableViewRowAnimationFade];
-                        
+                                                   withRowAnimation:UITableViewRowAnimationNone];
                     }
                 } completion:^(BOOL finished) {
                     if(completion) completion(result);
@@ -1048,10 +1046,10 @@
     }];
     
     // make sure its in active
-    if(_firstmsg==YES)
+    if(_firstmsg == YES)
     {
         [[DataLayer sharedInstance] addActiveBuddies:to forAccount:self.contact.accountId withCompletion:nil];
-        _firstmsg=NO;
+        _firstmsg = NO;
     }
 }
 

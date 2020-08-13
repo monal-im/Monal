@@ -133,10 +133,6 @@ extern NSString* const kAccountHibernate;
 
 
 /**
- send but optionally tell it to not block. default is to block. 
- */
--(void) send:(MLXMLNode*) stanza async:(BOOL) async;
-/**
  Adds the stanza to the output Queue
  */
 -(void) send:(MLXMLNode* _Nonnull) stanza;

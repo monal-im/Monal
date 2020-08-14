@@ -2294,7 +2294,6 @@ static NSDateFormatter* dbFormatter;
     }
     [self.db endWriteTransaction];
 
-
     DDLogInfo(@"Database version check done");
     return;
 }

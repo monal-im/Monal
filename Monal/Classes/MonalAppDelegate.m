@@ -403,8 +403,8 @@
 - (void)userNotificationCenter:(UNUserNotificationCenter*) center willPresentNotification:(UNNotification*) notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions options)) completionHandler;
 {
     DDLogInfo(@"userNotificationCenter:willPresentNotification:withCompletionHandler called");
-    //throw away (dummy) notifications from notification service extension while main app is running
-    completionHandler(UNNotificationPresentationOptionNone);
+    //show local notifications while the app is open
+    completionHandler(UNNotificationPresentationOptionAlert);
 }
 
 -(void) application:(UIApplication *)application handleActionWithIdentifier:(nullable NSString *)identifier forLocalNotification:(nonnull UILocalNotification *)notification withResponseInfo:(nonnull NSDictionary *)responseInfo completionHandler:(nonnull void (^)(void))completionHandler

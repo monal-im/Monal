@@ -130,7 +130,7 @@ static IPC* _sharedInstance;
         NSString* queueName = [parts objectAtIndex:0];
         if(!queueName || [parts count]<2)
             queueName = @"_default";
-        queueName = [NSString stringWithFormat:@"ipc.queue.%@", queueName];
+        queueName = [NSString stringWithFormat:@"ipc.queue:%@", queueName];
         if(!_ipcQueues[queueName])
             _ipcQueues[queueName] = dispatch_queue_create([queueName cStringUsingEncoding:NSUTF8StringEncoding], DISPATCH_QUEUE_SERIAL);
         

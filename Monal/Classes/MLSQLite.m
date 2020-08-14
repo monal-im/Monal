@@ -193,7 +193,8 @@
     {
         DDLogError(@"nonquery returning NO with out OK %@", query);
         toReturn = NO;
-        [self throwErrorForQuery:query andArguments:args];
+        if(throwException)
+            [self throwErrorForQuery:query andArguments:args];
     }
     return toReturn;
 }

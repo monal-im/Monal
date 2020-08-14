@@ -1583,6 +1583,9 @@ NSString *const kXMPPPresence = @"presence";
                 if(streamNode.supportsRosterVer)
                     self.connectionProperties.supportsRosterVersion=YES;
                 
+                //under rare circumstances/bugs the appex could have changed the smacks state *after* our connect method was called
+                //--> load newest saved smacks state to be up to date even in this case
+                [self readSmacksStateOnly];
                 //test if smacks is supported and allows resume
                 if(self.connectionProperties.supportsSM3 && self.streamID)
                 {
@@ -1919,6 +1922,40 @@ NSString *const kXMPPPresence = @"presence";
             self.streamID,
             _lastInteractionDate
         );
+    }
+}
+
+-(void) readSmacksStateOnly
+{
+    NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
+    if(dic)
+    {
+        //collect smacks state
+        @synchronized(_smacksSyncPoint) {
+            self.lastHandledInboundStanza = [dic objectForKey:@"lastHandledInboundStanza"];
+            self.lastHandledOutboundStanza = [dic objectForKey:@"lastHandledOutboundStanza"];
+            self.lastOutboundStanza = [dic objectForKey:@"lastOutboundStanza"];
+            NSArray* stanzas = [dic objectForKey:@"unAckedStanzas"];
+            self.unAckedStanzas = [stanzas mutableCopy];
+            self.streamID = [dic objectForKey:@"streamID"];
+            
+            //debug output
+            DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n",
+                self.lastHandledInboundStanza,
+                self.lastHandledOutboundStanza,
+                self.lastOutboundStanza,
+                self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
+                self.streamID,
+                _lastInteractionDate
+            );
+            if(self.unAckedStanzas)
+                for(NSDictionary* dic in self.unAckedStanzas)
+                    DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kQueueID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
+            
+            //always reset handler and smacksRequestInFlight when loading smacks state
+            _smacksAckHandler = [[NSMutableArray alloc] init];
+            self.smacksRequestInFlight = NO;
+        }
     }
 }
 

@@ -521,12 +521,14 @@
         DDLogDebug(@"not surfacing errors in the background because they are super common");
     else
     {
-        NSArray* payload = [notification.object copy];
-        NSString* message = payload[1];     // this is just the way i set it up a dic might better
-        xmpp *xmppAccount = payload.firstObject;
-        NotificationBanner* banner = [[NotificationBanner alloc] initWithTitle:xmppAccount.connectionProperties.identity.jid subtitle:message leftView:nil rightView:nil style:BannerStyleInfo colors:nil];
-        NotificationBannerQueue* queue = [[NotificationBannerQueue alloc] initWithMaxBannersOnScreenSimultaneously:2];
-        [banner showWithQueuePosition:QueuePositionFront bannerPosition:BannerPositionTop queue:queue on:nil];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSArray* payload = [notification.object copy];
+            NSString* message = payload[1];     // this is just the way i set it up a dic might better
+            xmpp *xmppAccount = payload.firstObject;
+            NotificationBanner* banner = [[NotificationBanner alloc] initWithTitle:xmppAccount.connectionProperties.identity.jid subtitle:message leftView:nil rightView:nil style:BannerStyleInfo colors:nil];
+            NotificationBannerQueue* queue = [[NotificationBannerQueue alloc] initWithMaxBannersOnScreenSimultaneously:2];
+            [banner showWithQueuePosition:QueuePositionFront bannerPosition:BannerPositionTop queue:queue on:nil];
+        });
     }
 }
 

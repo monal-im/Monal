@@ -67,22 +67,6 @@
     
     //use this observer because dealloc will not be called in the same thread as the sqlite statements got prepared
     [[NSNotificationCenter defaultCenter] addObserverForName:NSThreadWillExitNotification object:[NSThread currentThread] queue:nil usingBlock:^(NSNotification* notification) {
-        /*NSThread* thread = (NSThread*)notification.object;
-        DDLogInfo(@"Thread exiting, cleaning up prepared statements");
-        NSAssert(thread==[NSThread currentThread], @"THREADS NOT EQUAL: thread=%@ currentThread=%@", thread, [NSThread currentThread]);
-        
-        //invalidate sqlite statements in the thread dict (they will not be deallocated automatically because they are no objc objects)
-        NSMutableDictionary* threadData = [thread threadDictionary];//[[NSThread currentThread] threadDictionary];
-        if(threadData[@"_sqliteStatementCache"])
-        {
-            for(NSString* query in threadData[@"_sqliteStatementCache"])
-            {
-                sqlite3_stmt* statement = (sqlite3_stmt*)[threadData[@"_sqliteStatementCache"][query] pointerValue];
-                //DDLogVerbose(@"invalidating %@ --> %p (%@)[%p]", query, statement, [NSThread currentThread], self->database);
-                sqlite3_finalize(statement);
-            }
-        }*/
-        
         DDLogInfo(@"Closing database: %@", _dbFile);
         sqlite3_close(self->database);
     }];
@@ -97,47 +81,16 @@
 
 #pragma mark - private sql api
 
-/*-(void) invalidateStatementForQuery:(NSString*) query
-{
-    if(!query)
-        return;
-
-    NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-
-    //init statement cache if neccessary
-    if(!threadData[@"_sqliteStatementCache"])
-        threadData[@"_sqliteStatementCache"] = [[NSMutableDictionary alloc] init];
-
-    //finalize sqlite statement
-    if(threadData[@"_sqliteStatementCache"][query])
-        sqlite3_finalize((sqlite3_stmt*)[threadData[@"_sqliteStatementCache"][query] pointerValue]);
-
-    //invalidate cache entry for this query
-    [threadData[@"_sqliteStatementCache"] removeObjectForKey:query];
-}*/
-
 -(sqlite3_stmt*) prepareQuery:(NSString*) query withArgs:(NSArray*) args
 {
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
     sqlite3_stmt* statement;
 
-    /*//init statement cache if neccessary
-    if(!threadData[@"_sqliteStatementCache"])
-        threadData[@"_sqliteStatementCache"] = [[NSMutableDictionary alloc] init];
-
-    //check if the statement was already prepared and stored in cache to speed up things
-    if(threadData[@"_sqliteStatementCache"][query])
-        statement = (sqlite3_stmt*)[threadData[@"_sqliteStatementCache"][query] pointerValue];
-    else
-    {*/
-        if(sqlite3_prepare_v2(self->database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) != SQLITE_OK)
-        {
-            DDLogError(@"sqlite prepare '%@' failed: %s", query, sqlite3_errmsg(self->database));
-            return NULL;
-        }
-        /*threadData[@"_sqliteStatementCache"][query] = [NSValue valueWithPointer:statement];
+    if(sqlite3_prepare_v2(self->database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) != SQLITE_OK)
+    {
+        DDLogError(@"sqlite prepare '%@' failed: %s", query, sqlite3_errmsg(self->database));
+        return NULL;
     }
-    //DDLogVerbose(@"prepareQuery: %@ --> %p (%@)[%p]", query, statement, [NSThread currentThread], self->database);*/
     
     //bind args to statement
     sqlite3_reset(statement);

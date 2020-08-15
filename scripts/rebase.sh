@@ -22,4 +22,4 @@ git cherry-pick $first^..tmpcopy
 #git cherry-pick develop..tmpcopy
 git branch -D tmpcopy
 date
-git push --force
+git push --force-with-lease

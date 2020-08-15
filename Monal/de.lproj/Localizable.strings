@@ -125,7 +125,7 @@
 "Please make sure at least one account has connected before trying to add a contact." = "Bitte stelle sicher, dass mindestens ein Konto eine Verbindung hergestellt hat, bevor du versuchst, einen Kontakt hinzuzufügen.";
 "Please enter a password." = "Bitte ein Passwort eingeben.";
 "Please Allow Audio Access" = "Bitte erlaube den Audiozugriff";
-"Play Sounds" = "Sounds abspielen";
+"Play Sounds" = "Töne abspielen";
 "Photos" = "Fotos";
 "Permission Requested" = "Berechtigungsanfrage";
 "Password cannot be empty" = "Passwort darf nicht leer sein";
@@ -215,7 +215,7 @@
 "Encryption Keys" = "Schlüssel";
 "Encrypted message was sent in an older format Monal can't decrypt. Please ask them to update their client. (GCM error)" = "Die verschlüsselte Nachricht wurde in einem älteren Format gesendet, das Monal nicht entschlüsseln kann. Bitte sie, ihren Client zu aktualisieren. (GCM-Fehler)";
 "Enabled" = "Aktiviert";
-"Email Support" = "Hilfe per Email";
+"Email Support" = "Hilfe per E-Mail";
 "Draft: %@" = "Entwurf: %@";
 "Display Settings" = "Bildschirm-Einstellungen";
 "Display" = "Anzeige";

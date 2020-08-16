@@ -6,12 +6,11 @@
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 
+#import <Foundation/Foundation.h>
+#import <notify.h>
 #include <CommonCrypto/CommonDigest.h>
 #import "IPC.h"
 #import "MLSQLite.h"
-
-static NSMutableDictionary* _responseHandlers;
-static IPC* _sharedInstance;
 
 @interface IPC()
 {
@@ -21,7 +20,21 @@ static IPC* _sharedInstance;
 }
 @property (readonly, strong) MLSQLite* db;
 @property (readonly, strong) NSThread* serverThread;
+@property (atomic, strong) NSCondition* serverThreadWaiter;
+
+-(void) incomingDarwinNotification:(NSString*) name;
 @end
+
+static NSMutableDictionary* _responseHandlers;
+static IPC* _sharedInstance;
+static CFNotificationCenterRef _darwinNotificationCenterRef;
+
+//forward notifications to the IPC instance that is waiting (the instance running the server thread)
+void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* observer, CFNotificationName name, const void* object, CFDictionaryRef userInfo)
+{
+    DDLogInfo(@"darwinNotificationCenterCallback called");
+    [(__bridge IPC*)observer incomingDarwinNotification: (__bridge NSString*)name];
+}
 
 @implementation IPC
 
@@ -30,6 +43,7 @@ static IPC* _sharedInstance;
     NSAssert(_responseHandlers==nil, @"Please don't call [IPC initialize:@\"processName\" twice!");
     _responseHandlers = [[NSMutableDictionary alloc] init];
     _sharedInstance = [[self alloc] initWithProcessName:processName];
+    _darwinNotificationCenterRef = CFNotificationCenterGetDarwinNotifyCenter();
 }
 
 +(id) sharedInstance
@@ -40,8 +54,12 @@ static IPC* _sharedInstance;
 
 +(void) terminate
 {
-    //cancel server thread and deallocate everything
+    //cancel server thread and wake it up to let it terminate properly
     [_sharedInstance.serverThread cancel];
+    [_sharedInstance.serverThreadWaiter lock];
+    [_sharedInstance.serverThreadWaiter signal];
+    [_sharedInstance.serverThreadWaiter unlock];
+    //deallocate everything
     _responseHandlers = nil;
     _sharedInstance = nil;
 }
@@ -118,6 +136,9 @@ static IPC* _sharedInstance;
 -(void) serverThreadMain
 {
     DDLogInfo(@"Now running IPC server for '%@'", _processName);
+    //register darwin notification handler for "im.monal.ipc.wakeup" which is used to wake up readNextMessage using the serverThreadWaiter condition
+    self.serverThreadWaiter = [[NSCondition alloc] init];
+    CFNotificationCenterAddObserver(_darwinNotificationCenterRef, (__bridge void*) self, &darwinNotificationCenterCallback, (__bridge CFNotificationName)@"im.monal.ipc.wakeup", NULL, 0);
     while(![[NSThread currentThread] isCancelled])
     {
         NSDictionary* message = [self readNextMessage];     //this will be blocking
@@ -152,7 +173,17 @@ static IPC* _sharedInstance;
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIncomingIPC object:message[@"name"] userInfo:message];
             });
     }
+    //unregister darwin notification handler
+    CFNotificationCenterRemoveObserver(_darwinNotificationCenterRef, (__bridge void*) self, (__bridge CFNotificationName)@"im.monal.ipc.wakeup", NULL);
     DDLogInfo(@"IPC server for '%@' now terminated", _processName);
+}
+
+-(void) incomingDarwinNotification:(NSString*) name
+{
+    DDLogVerbose(@"Got incoming darwin notification: %@", name);
+    [self.serverThreadWaiter lock];
+    [self.serverThreadWaiter signal];
+    [self.serverThreadWaiter unlock];
 }
 
 -(NSDictionary*) readNextMessage
@@ -162,11 +193,13 @@ static IPC* _sharedInstance;
         NSDictionary* data = [self readIpcMessageFor:_processName];
         if(data)
             return data;
-        //TODO: use blocking read on pipe to sleep until data is available instead of usleep()
-        //TODO: alternative: use the last changed timestamp of a dedicated sqlite database
-        usleep(50000);
+        //wait for wakeup (incoming darwin notification or thread termination)
+        DDLogVerbose(@"IPC readNextMessage waiting for wakeup via darwin notification");
+        [self.serverThreadWaiter lock];
+        [self.serverThreadWaiter wait];
+        [self.serverThreadWaiter unlock];
     }
-    return nil;     //thread cancelled or something else happened
+    return nil;     //thread cancelled
 }
 
 //this is the getter of our readonly "db" property always returning the thread-local instance of the MLSQLite class
@@ -219,7 +252,10 @@ static IPC* _sharedInstance;
     NSNumber* id = [self.db lastInsertId];
     
     [self.db endWriteTransaction];
-    //TODO: write to destination pipe to wake up remote process or just use the file changed time of a dedicated sqlite database
+    
+    //send out darwin notification to wake up other processes waiting for IPC
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (__bridge CFNotificationName)@"im.monal.ipc.wakeup", NULL, NULL, NO);
+    
     DDLogVerbose(@"Wrote IPC message %@ to database", id);
     return id;
 }

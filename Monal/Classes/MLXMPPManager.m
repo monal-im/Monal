@@ -413,12 +413,9 @@ static const int sendMessageTimeoutSeconds = 10;
 {
     [self addBackgroundTaskIfNeeded:[self allAccountsIdle]];
     
-    //don't block main thread here
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        for(xmpp* xmppAccount in [self connectedXMPP])
-            [xmppAccount setClientInactive];
-        [self checkIfBackgroundTaskIsStillNeeded];
-    });
+    for(xmpp* xmppAccount in [self connectedXMPP])
+        [xmppAccount setClientInactive];
+    [self checkIfBackgroundTaskIsStillNeeded];
 }
 
 -(void) setClientsActive
@@ -427,25 +424,19 @@ static const int sendMessageTimeoutSeconds = 10;
     
     //*** we don't need to check for a running service extension here because the appdelegate does this already for us ***
     
-    //don't block main thread here
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        for(xmpp* xmppAccount in [self connectedXMPP])
-        {
-            if(_hasConnectivity)
-                [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
-            [xmppAccount setClientActive];
-        }
-    });
+    for(xmpp* xmppAccount in [self connectedXMPP])
+    {
+        if(_hasConnectivity)
+            [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+        [xmppAccount setClientActive];
+    }
 }
 
 -(void) pingAllAccounts
 {
-    //don't block main thread here
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        for(xmpp* xmppAccount in [self connectedXMPP])
-            if(_hasConnectivity)
-                [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
-    });
+    for(xmpp* xmppAccount in [self connectedXMPP])
+        if(_hasConnectivity)
+            [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
 }
 
 -(void) rejectContact:(MLContact*) contact
@@ -603,13 +594,10 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) connectIfNecessary
 {
-    //don't block main thread here
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray* result) {
-            for(NSDictionary* account in result)
-                [self connectAccountWithDictionary:account];
-        }];
-    });
+    [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray* result) {
+        for(NSDictionary* account in result)
+            [self connectAccountWithDictionary:account];
+    }];
 }
 
 -(void) updatePassword:(NSString *) password forAccount:(NSString *) accountNo

@@ -356,7 +356,7 @@
             //no success may mean its already there
             dispatch_async(dispatch_get_main_queue(), ^{
                 [(ActiveChatsViewController *) self.activeChats presentChatWithRow:contact];
-                [(ActiveChatsViewController *) self.activeChats  refreshDisplay];
+                [(ActiveChatsViewController *) self.activeChats refreshDisplay];
             });
         }];
     }

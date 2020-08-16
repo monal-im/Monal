@@ -226,10 +226,20 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) dispatchOnReceiveQueue: (void (^)(void)) operation
 {
+    [self dispatchOnReceiveQueue:operation async:NO];
+}
+
+-(void) dispatchAsyncOnReceiveQueue: (void (^)(void)) operation
+{
+    [self dispatchOnReceiveQueue:operation async:YES];
+}
+
+-(void) dispatchOnReceiveQueue: (void (^)(void)) operation async:(BOOL) async
+{
     if([NSOperationQueue currentQueue]!=_receiveQueue)
     {
-        DDLogVerbose(@"DISPATCHING OPERATION ON RECEIVE QUEUE: %lu", [_receiveQueue operationCount]);
-        [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:YES];
+        DDLogVerbose(@"DISPATCHING ASYNC OPERATION ON RECEIVE QUEUE: %lu", [_receiveQueue operationCount]);
+        [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:!async];
     }
     else
         operation();
@@ -262,35 +272,33 @@ NSString *const kXMPPPresence = @"presence";
     __block BOOL retval = NO;
     //we are idle when we are not connected (and not trying to)
     //or: the catchup is done, no unacked stanzas are left in the smacks queue and receive and send queues are empty (no pending operations)
-    [self dispatchOnReceiveQueue:^{
-        unsigned long unackedCount = 0;
-        @synchronized(_smacksSyncPoint) {
-            unackedCount = (unsigned long)[self.unAckedStanzas count];
-        };
-        DDLogVerbose(@"Idle check:");
-        DDLogVerbose(@"    _accountState < kStateReconnecting = %@", _accountState < kStateReconnecting ? @"YES" : @"NO");
-        DDLogVerbose(@"    _reconnectInProgress = %@", _reconnectInProgress ? @"YES" : @"NO");
-        DDLogVerbose(@"    _catchupDone = %@", _catchupDone ? @"YES" : @"NO");
-        DDLogVerbose(@"    [self.unAckedStanzas count] = %lu", unackedCount);
-        DDLogVerbose(@"    [_receiveQueue operationCount] = %lu", (unsigned long)[_receiveQueue operationCount]);
-        DDLogVerbose(@"    [_sendQueue operationCount] = %lu", (unsigned long)[_sendQueue operationCount]);
-        if(
-            (
-                //test if this account was permanently logged out but still has stanzas pending (this can happen if we have no connectivity for example)
-                _accountState<kStateReconnecting &&
-                !_reconnectInProgress &&
-                !unackedCount
-            ) || (
-                //test if we are connected and idle (e.g. we're done with catchup and neither process any incoming stanzas nor trying to send anything)
-                _catchupDone &&
-                !unackedCount &&
-                [_receiveQueue operationCount]<=1 &&
-                ![_sendQueue operationCount]
-            )
+    unsigned long unackedCount = 0;
+    @synchronized(_smacksSyncPoint) {
+        unackedCount = (unsigned long)[self.unAckedStanzas count];
+    };
+    DDLogVerbose(@"Idle check:");
+    DDLogVerbose(@"    _accountState < kStateReconnecting = %@", _accountState < kStateReconnecting ? @"YES" : @"NO");
+    DDLogVerbose(@"    _reconnectInProgress = %@", _reconnectInProgress ? @"YES" : @"NO");
+    DDLogVerbose(@"    _catchupDone = %@", _catchupDone ? @"YES" : @"NO");
+    DDLogVerbose(@"    [self.unAckedStanzas count] = %lu", unackedCount);
+    DDLogVerbose(@"    [_receiveQueue operationCount] = %lu", (unsigned long)[_receiveQueue operationCount]);
+    DDLogVerbose(@"    [_sendQueue operationCount] = %lu", (unsigned long)[_sendQueue operationCount]);
+    if(
+        (
+            //test if this account was permanently logged out but still has stanzas pending (this can happen if we have no connectivity for example)
+            _accountState<kStateReconnecting &&
+            !_reconnectInProgress &&
+            !unackedCount
+        ) || (
+            //test if we are connected and idle (e.g. we're done with catchup and neither process any incoming stanzas nor trying to send anything)
+            _catchupDone &&
+            !unackedCount &&
+            [_receiveQueue operationCount]<=([NSOperationQueue currentQueue]==_receiveQueue ? 1 : 0) &&
+            ![_sendQueue operationCount]
         )
-            retval=YES;
-        DDLogVerbose(@"--> %@", retval ? @"idle" : @"NOT IDLE");
-    }];
+    )
+        retval=YES;
+    DDLogVerbose(@"--> %@", retval ? @"idle" : @"NOT IDLE");
     return retval;
 }
 
@@ -472,7 +480,7 @@ NSString *const kXMPPPresence = @"presence";
         return;
     }
     
-    [self dispatchOnReceiveQueue: ^{
+    [self dispatchAsyncOnReceiveQueue: ^{
         [_receiveQueue cancelAllOperations];        //stop everything coming after this (we will start a clean connect here!)
         
         if(self.accountState>=kStateReconnecting)
@@ -526,7 +534,7 @@ NSString *const kXMPPPresence = @"presence";
         if([HelperTools isInBackground])
             connectTimeout = 300.0;     //long timeout if in background
         _cancelLoginTimer = [HelperTools startTimer:connectTimeout withHandler:^{
-            [self dispatchOnReceiveQueue: ^{
+            [self dispatchAsyncOnReceiveQueue: ^{
                 _cancelLoginTimer = nil;
                 DDLogInfo(@"login took too long, cancelling and trying to reconnect (potentially using another SRV record)");
                 [self reconnect];
@@ -542,6 +550,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) disconnect:(BOOL) explicitLogout
 {
+    //this has to be synchronous because we want to wait for the disconnect to complete before continuingand unlocking the process in the NSE
     [self dispatchOnReceiveQueue: ^{
         if(_accountState<kStateReconnecting)
         {
@@ -679,7 +688,7 @@ NSString *const kXMPPPresence = @"presence";
         return;
     }
     
-    [self dispatchOnReceiveQueue: ^{
+    [self dispatchAsyncOnReceiveQueue: ^{
         if(_reconnectInProgress)
         {
             DDLogInfo(@"Ignoring reconnect while one already in progress");
@@ -691,7 +700,7 @@ NSString *const kXMPPPresence = @"presence";
 
         DDLogInfo(@"Trying to connect again in %G seconds...", wait);
         [HelperTools startTimer:wait withHandler:^{
-            [self dispatchOnReceiveQueue: ^{
+            [self dispatchAsyncOnReceiveQueue: ^{
                 //there may be another connect/login operation in progress triggered from reachability or another timer
                 if(self.accountState<kStateReconnecting)
                     [self connect];
@@ -767,7 +776,7 @@ NSString *const kXMPPPresence = @"presence";
 -(void) sendPing:(double) timeout
 {
     DDLogVerbose(@"sendPing called");
-    [self dispatchOnReceiveQueue: ^{
+    [self dispatchAsyncOnReceiveQueue: ^{
         DDLogVerbose(@"sendPing called - now inside receiveQueue");
         
         //make sure we are enabled before doing anything
@@ -793,7 +802,7 @@ NSString *const kXMPPPresence = @"presence";
         {
             //start ping timer
             _cancelPingTimer = [HelperTools startTimer:timeout withHandler:^{
-                [self dispatchOnReceiveQueue: ^{
+                [self dispatchAsyncOnReceiveQueue: ^{
                     _cancelPingTimer = nil;
                     DDLogInfo(@"ping took too long, reconnecting");
                     [self reconnect];
@@ -949,6 +958,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) requestSMAck:(BOOL) force
 {
+    //caution: this could be called from sendQueue, too!
     unsigned long unackedCount = 0;
     @synchronized(_smacksSyncPoint) {
         unackedCount = (unsigned long)[self.unAckedStanzas count];
@@ -1678,7 +1688,7 @@ NSString *const kXMPPPresence = @"presence";
 -(void) sendIq:(XMPPIQ*) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler
 {
     //TODO: make invalidateOnDisconnect configurable once we are somehow able to retain the handlers across app restarts
-    [self dispatchOnReceiveQueue:^{
+    [self dispatchAsyncOnReceiveQueue:^{
         if(resultHandler || errorHandler)
             _iqHandlers[[iq getId]] = @{@"id": [iq getId], @"resultHandler":resultHandler, @"errorHandler":errorHandler, @"invalidateOnDisconnect":@YES};
         [self send:iq];
@@ -1721,7 +1731,7 @@ NSString *const kXMPPPresence = @"presence";
                 //increment for next call
                 self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue]+1];
 
-                //persist these changes
+                //persist these changes (this has to be synchronous because we want so pesist sanzas to db before actually sending them)
                 [self persistState];
             }
         }
@@ -2406,7 +2416,7 @@ NSString *const kXMPPPresence = @"presence";
 #pragma mark client state
 -(void) setClientActive
 {
-    [self dispatchOnReceiveQueue: ^{
+    [self dispatchAsyncOnReceiveQueue: ^{
         //ignore active --> active transition
         if(_isCSIActive)
         {
@@ -2431,7 +2441,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) setClientInactive
 {
-    [self dispatchOnReceiveQueue: ^{
+    [self dispatchAsyncOnReceiveQueue: ^{
         //ignore inactive --> inactive transition
         if(!_isCSIActive)
         {
@@ -3040,18 +3050,12 @@ NSString *const kXMPPPresence = @"presence";
         //this reduces the requests to an absolute minimum while still maintaining the rule to request an ack
         //for every stanza (e.g. until the smacks queue is empty) and not sending an ack if one is already in flight
         if(_accountState>=kStateBound)
-        {
-            DDLogVerbose(@"adding smacks request to receiveQueue...");
-            [_receiveQueue addOperationWithBlock: ^{
-                DDLogVerbose(@"calling requestSMAck from receiveQueue...");
-                [self requestSMAck:NO];
-            }];
-        }
+            [self requestSMAck:NO];
         else
-            DDLogWarn(@"no xmpp resource bound, not adding requestSMAck to receiveQueue");
-    } else {
-        DDLogVerbose(@"NOT adding smacks request to receiveQueue...");
+            DDLogWarn(@"no xmpp resource bound, not calling requestSMAck");
     }
+    else
+        DDLogVerbose(@"NOT calling requestSMAck...");
 }
 
 -(BOOL) writeToStream:(NSString*) messageOut

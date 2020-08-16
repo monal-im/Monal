@@ -55,7 +55,6 @@
         {
             DDLogInfo(@"First incoming push, locking process");
             self.idleAccounts = [[NSMutableSet alloc] init];
-            [MLProcessLock lock];
             first = YES;
         }
         
@@ -74,6 +73,7 @@
         {
             DDLogVerbose(@"connecting accounts");
             [DDLog flushLog];
+            [MLProcessLock lock];
             [[MLXMPPManager sharedInstance] connectIfNecessary];
             //handle IPC messages (this should be done *after* calling connectIfNecessary to make sure any disconnectAll messages are handled properly
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
@@ -123,10 +123,16 @@
         //repeated calls to this method will do nothing (every handler will already be used and every content will already be posted)
         @synchronized(self) {
             DDLogInfo(@"Disconnecting all accounts and feeding all pending handlers: %lu", [self.handlerList count]);
+            //this has to be synchronous because we only want to continue if all accounts are completely disconnected
             [[MLXMPPManager sharedInstance] disconnectAll];
             
             //for debugging
             [self listNotifications];
+            
+            //we posted all notifications and disconnected, technically we're not running anymore
+            //(even though our containing process will still be running for a few more seconds)
+            [[NSNotificationCenter defaultCenter] removeObserver:self name:kMonalIncomingIPC object:nil];
+            [MLProcessLock unlock];
             
             //feed all waiting handlers with empty notifications to silence them
             //this will terminate/freeze the app extension afterwards
@@ -136,11 +142,6 @@
                 [self.handlerList removeObject:handler];
                 handler(nil);
             }
-            
-            //we posted all notifications and disconnected, technically we're not running anymore
-            //(even though our containing process will still be running for a few more seconds)
-            [[NSNotificationCenter defaultCenter] removeObserver:self name:kMonalIncomingIPC object:nil];
-            [MLProcessLock unlock];
         }
     });
 }

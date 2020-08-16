@@ -50,16 +50,26 @@ static NSString* _loglevel_name(NSUInteger flag) {
 
 -(NSString*) formatLogMessage:(DDLogMessage*) logMessage
 {
-    NSString* timestamp = [self stringFromDate:(logMessage->_timestamp)];
+    NSArray* filePathComponents = [logMessage.file pathComponents];
+    NSString* file = logMessage.file;
+    if([filePathComponents count]>1)
+        file = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
+    NSString* timestamp = [self stringFromDate:(logMessage.timestamp)];
     NSString* queueThreadLabel = [self queueThreadLabelForLogMessage:logMessage];
 
-    if(![queueThreadLabel isEqualToString:logMessage->_threadID])
-        queueThreadLabel = [NSString stringWithFormat:@"%@:%@", logMessage->_threadID, queueThreadLabel];
+    //remove already appended " (QOS: BLABLA)" because we want to append the QOS part ourselves
+    NSRange range = [queueThreadLabel rangeOfString:@" (QOS: "];
+    if(range.length > 0)
+        queueThreadLabel = [queueThreadLabel substringWithRange:NSMakeRange(0, range.location)];
+    
+    //append the mach thread id if not already present
+    if(![queueThreadLabel isEqualToString:logMessage.threadID])
+        queueThreadLabel = [NSString stringWithFormat:@"%@:%@", logMessage.threadID, queueThreadLabel];
 
 #if TARGET_OS_SIMULATOR
-    return [NSString stringWithFormat:@"[%@] %@ [%@ (QOS:%@)] %@", _loglevel_name(logMessage->_flag), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage->_qos), logMessage->_message];
+    return [NSString stringWithFormat:@"[%@] %@ [%@ (QOS:%@)] %@ at %@:%lu: %@", _loglevel_name(logMessage.flag), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage.qos), logMessage.function, file, (unsigned long)logMessage.line, logMessage.message];
 #else
-    return [NSString stringWithFormat:@"[%@] %@ %@ [%@ (QOS:%@)] %@", _loglevel_name(logMessage->_flag), timestamp, [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage->_qos), logMessage->_message];
+    return [NSString stringWithFormat:@"%@ [%@] %@ [%@ (QOS:%@)] %@ at %@:%lu: %@", timestamp, _loglevel_name(logMessage.flag), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage.qos), logMessage.function, file, (unsigned long)logMessage.line, logMessage.message];
 #endif
 }
 

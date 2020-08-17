@@ -262,9 +262,20 @@ NSString *const kXMPPPresence = @"presence";
     if((object == _sendQueue || object == _receiveQueue) && [@"operationCount" isEqual: keyPath])
     {
         //check idle state if this queue is empty and if so, publish kMonalIdle notification
-        //only do the (more heavy but complete) idle check if we reache zero operations in this observed queue
-        if(![object operationCount] && self.idle)
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
+        //only do the (more heavy but complete) idle check if we reache zero operations in the observed queue
+        //we dispatch the idle check and subsequent notification on the receive queue to account for races
+        //between the idle check and calls to disconnect issued in response to this idle notification
+        //NOTE: yes, doing the check for [_sendQueue operationCount] (inside [self idle]) from the receive queue is not race free
+        //with such disconnects, but: we only want track the send queue on a best effort basis (because network sends are best effort, too)
+        //to some extent we want to make sure every stanza was physically sent out to the network before our app gets frozen by ios
+        //but we don't need to make this completely race free (network "races" can occur far more often than send queue races).
+        //in a race the smacks unacked stanzas array will contain the not yet sent stanzas --> we won't loose stanzas when racing the send queue
+        //with [self disconnect] through an idle check
+        if(![object operationCount])
+            [self dispatchAsyncOnReceiveQueue:^{
+                if(self.idle)
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
+            }];
     }
 }
 
@@ -1050,8 +1061,11 @@ NSString *const kXMPPPresence = @"presence";
 
             //this will be called after mam catchup is complete
             processor.mamFinished = ^() {
-                _catchupDone = YES;
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
+                if(!_catchupDone)
+                {
+                    _catchupDone = YES;
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
+                }
             };
             
             //this will be called after bind
@@ -1427,8 +1441,11 @@ NSString *const kXMPPPresence = @"presence";
                 if(!self.smacksRequestInFlight)
                     [self requestSMAck:YES];    //force sending of the request even if the smacks queue is empty (needed to always trigger the smacks handler below after 1 RTT)
                 [self addSmacksHandler:^{
-                    _catchupDone = YES;
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
+                    if(!_catchupDone)
+                    {
+                        _catchupDone = YES;
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
+                    }
                 }];
             }
 

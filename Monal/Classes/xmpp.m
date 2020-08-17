@@ -171,6 +171,7 @@ NSString *const kXMPPPresence = @"presence";
     _receiveQueue.name = @"receiveQueue";
     _receiveQueue.qualityOfService = NSQualityOfServiceUtility;
     _receiveQueue.maxConcurrentOperationCount = 1;
+    [_receiveQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
 
     _sendQueue = [[NSOperationQueue alloc] init];
     _sendQueue.name = @"sendQueue";
@@ -257,12 +258,12 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) observeValueForKeyPath:(NSString*) keyPath ofObject:(id) object change:(NSDictionary *) change context:(void*) context
 {
-    //check for idle state every time the number of operations in _sendQueue changes
-    if(object == _sendQueue && [@"operationCount" isEqual: keyPath])
+    //check for idle state every time the number of operations in _sendQueue or _receiveQueue changes
+    if((object == _sendQueue || object == _receiveQueue) && [@"operationCount" isEqual: keyPath])
     {
-        //check idle state if _sendQueue is empty and if so, publish kMonalIdle notification
+        //check idle state if this queue is empty and if so, publish kMonalIdle notification
         //only do the (more heavy but complete) idle check if we reache zero operations in this observed queue
-        if(![_sendQueue operationCount] && self.idle)
+        if(![object operationCount] && self.idle)
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
     }
 }
@@ -294,7 +295,7 @@ NSString *const kXMPPPresence = @"presence";
             //test if we are connected and idle (e.g. we're done with catchup and neither process any incoming stanzas nor trying to send anything)
             _catchupDone &&
             !unackedCount &&
-            [_receiveQueue operationCount]<=([NSOperationQueue currentQueue]==_receiveQueue ? 1 : 0) &&
+            ![_receiveQueue operationCount] &&
             ![_sendQueue operationCount]
         )
     )
@@ -730,11 +731,6 @@ NSString *const kXMPPPresence = @"presence";
             //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
             [self dispatchOnReceiveQueue: ^{
                 [self processInput:parsedStanza];
-                
-                //check idle state if this was the last operation in the _receiveQueue and if so, publish kMonalIdle notification
-                //quickly check our own queue before doing the more heavy (but complete) idle check
-                if([_receiveQueue operationCount]<=1 && self.idle)
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
             }];
         }];
     } else {

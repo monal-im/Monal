@@ -18,3 +18,16 @@
 "Cancel" = "Cancelar";
 "Camera" = "Cámara";
 "Apple Push Service" = "Apple Push Service";
+"Accept" = "Aceptar";
+"About" = "A cerca de";
+"[This message is OMEMO encrypted]" = "[Este mensaje está encriptado por OMEMO]";
+"%ld (This device)" = "%ld (Este dispositivo)";
+"%@ (Pending Approval)" = "%@ (Pendiente de aprobación)";
+"Retry" = "Reintenta";
+"Reconnecting" = "Reconectando";
+"Privacy" = "Privacidad";
+"Photos" = "Fotos";
+"Password" = "Contraseña";
+"Notifications" = "Notificaciones";
+"Nothing to see" = "No hay nada que ver";
+"No" = "No";

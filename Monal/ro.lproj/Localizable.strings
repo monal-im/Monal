@@ -56,7 +56,7 @@
 "They can see your keys. You can't see theirs" = "Ei vă pot vedea cheile. Nu le puteți vedea pe ale lor";
 "These are your encryption keys. Each device is a different place you have logged in. You should trust a key when you have verified it." = "Astea sunt cheile dumneavoastră de criptare. Fiecare dispozitiv este un loc diferit în care v-ați conectat. Ar trebui să aveți încredere într-o cheie atunci când ați verificat-o.";
 "These are the modern XMPP capabilities Monal detected on your server after you have logged in." = "Acestea sunt capabilitățile moderne XMPP detectate de Monal pe serverul dumneavoastră după ce v-ați autentificat.";
-"These are SRV resource records found for your domain" = "Acestea sunt înregistrările SRV găsite pentru domeniul dumneavoastră";
+"These are SRV resource records found for your domain" = "Acestea sunt setările SRV găsite pentru domeniul dumneavoastră";
 "There was an error uploading the file to the server" = "A apărut o eroare la încărcarea fișierului pe server";
 "There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person." = "A apărut o eroare la decriptarea acestui mesaj criptat (eroare Signal). Pentru a rezolva acesta încercați să trimiteți un mesaj criptat acestei persoane.";
 "There is no configured email account. Please email info@monal.im ." = "Nu există nici un cont de e-mail configurat. Vă rugăm să trimiteți un e-mail către info@monal.im .";
@@ -78,7 +78,7 @@
 "SSL Error: Host name mismatch" = "Eroare SSL: Nepotrivire nume gazdă";
 "SSL Error: Certificate expired" = "Eroare SSL: Certificat expirat";
 "SSL Error: Certificate chain is invalid" = "Eroare SSL: Lanțul de certificate nu este valid";
-"SRV entry prohibits XMPP connection" = "Intrarea SRV interzice conexiunea XMPP";
+"SRV entry prohibits XMPP connection" = "Setarea SRV interzice conexiunea XMPP";
 "Spread The Word" = "Împrăștie vestea";
 "Sounds courtesy Emrah" = "Sună prin amabilitatea lui Emrah";
 "Sounds" = "Sunete";

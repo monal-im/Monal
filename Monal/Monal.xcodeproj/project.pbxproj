@@ -1862,8 +1862,6 @@
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
-				Japanese,
-				French,
 				cs,
 				da,
 				en,

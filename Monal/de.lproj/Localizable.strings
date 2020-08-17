@@ -2,7 +2,7 @@
 "You are not trapped in a garden. Talk to anyone else without anyone tracking you." = "Du bist nicht in einem goldenen Käfig gefangen. Sprich mit anderen, ohne dass dich jemand verfolgt.";
 "Yes" = "Ja";
 "XMPP" = "XMPP";
-"XEP-0363: HTTP File Upload" = "XEP-0363: Dateiupload über HTTP";
+"XEP-0363: HTTP File Upload" = "XEP-0363: HTTP-Dateitransfer";
 "XEP-0357: Push Notifications" = "XEP-0357: Push-Benachrichtigungen";
 "XEP-0352: Client State Indication" = "XEP-0352: Client-Statusanzeige";
 "XEP-0313: Message Archive Management" = "XEP-0313: Nachrichtenarchivverwaltung";

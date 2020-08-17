@@ -67,16 +67,34 @@
     
     //use this observer because dealloc will not be called in the same thread as the sqlite statements got prepared
     [[NSNotificationCenter defaultCenter] addObserverForName:NSThreadWillExitNotification object:[NSThread currentThread] queue:nil usingBlock:^(NSNotification* notification) {
-        DDLogInfo(@"Closing database: %@", _dbFile);
-        sqlite3_close(self->database);
+        @synchronized(self) {
+            if(self->database)
+            {
+                DDLogInfo(@"Closing database in NSThreadWillExitNotification: %@", _dbFile);
+                sqlite3_close(self->database);
+                self->database = NULL;
+            }
+        }
     }];
 
     //some settings (e.g. truncate is faster than delete)
-    [self executeNonQuery:@"pragma busy_timeout=4000;" andArguments:nil];
+    sqlite3_busy_timeout(self->database, 4000);
     [self executeNonQuery:@"pragma synchronous=NORMAL;" andArguments:nil];
     [self executeNonQuery:@"pragma truncate;" andArguments:nil];
 
     return self;
+}
+
+-(void) dealloc
+{
+    @synchronized(self) {
+        if(self->database)
+        {
+            DDLogInfo(@"Closing database in dealloc: %@", _dbFile);
+            sqlite3_close(self->database);
+            self->database = NULL;
+        }
+    }
 }
 
 #pragma mark - private sql api

@@ -30,7 +30,7 @@
 
 -(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore
 {
-    self=[super init];
+    self = [super init];
     self.accountNo = accountNo;
     self.connection= connection;
     self.signalContext=signalContext;
@@ -40,7 +40,7 @@
 
 -(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection
 {
-    self=[super init];
+    self = [super init];
     self.accountNo = accountNo;
     self.connection= connection;
     return self;
@@ -82,10 +82,9 @@
 
 -(void) processGetIq:(ParseIq *) iqNode
 {
-    
     if(iqNode.ping)
     {
-        XMPPIQ* pong =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+        XMPPIQ* pong = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
         [pong setiqTo:self.connection.identity.domain];
         if(self.sendIq)
             self.sendIq(pong, nil, nil);
@@ -128,11 +127,10 @@
 
 -(void) processResultIq:(ParseIq *) iqNode
 {
-    
     if(iqNode.mam2Last && !iqNode.mam2fin)
     {
-        //RSM paging
-        XMPPIQ* pageQuery =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+        //do RSM paging
+        XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
         [pageQuery setMAMQueryFromStart:nil after:iqNode.mam2Last withMax:nil andJid:nil];
         if(self.sendIq)
             self.sendIq(pageQuery, nil, nil);
@@ -160,9 +158,9 @@
         
         if(self.connection.supportsSM3)
         {
-            MLXMLNode *enableNode =[[MLXMLNode alloc] initWithElement:@"enable"];
+            MLXMLNode *enableNode = [[MLXMLNode alloc] initWithElement:@"enable"];
             NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3",@"resume":@"true" };
-            enableNode.attributes =[dic mutableCopy];
+            enableNode.attributes = [dic mutableCopy];
             if(self.sendIq)
                 self.sendIq(enableNode, nil, nil);
         }
@@ -222,7 +220,7 @@
         
         if(!fullname) fullname=iqNode.user;
         
-        MLContact *contact =[MLContact alloc];
+        MLContact *contact = [MLContact alloc];
         contact.contactJid=iqNode.user;
         contact.fullName= fullname;
         contact.accountId=self.accountNo;
@@ -283,22 +281,20 @@
             
             if([iqNode.features containsObject:@"urn:xmpp:mam:2"])
             {
-                BOOL previousStatus = self.connection.supportsMam2;
-                self.connection.supportsMam2 = YES;
-                DDLogInfo(@"supports mam:2");
-                
-                //ony if it went from NO to YES
-                if(!previousStatus)
+                if(!self.connection.supportsMam2)
                 {
-                    [[DataLayer sharedInstance] lastMessageDateForContact:self.connection.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
-                        
-                        NSDate *dateToUse = lastDate;
-                        if(!dateToUse) dateToUse = [NSDate dateWithTimeIntervalSinceNow:-60*60*24*14]; //two weeks
-                        
-                        XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-                        [query setMAMQueryFromStart:dateToUse toDate:nil withMax:nil andJid:nil];
+                    self.connection.supportsMam2 = YES;
+                    DDLogInfo(@"supports mam:2");
+                    
+                    //query mam since last received message because we could not resume the smacks session
+                    //(we would not have landed here if we were able to resume the smacks session)
+                    //this will do a catchup of everything we might have missed since our last connection
+                    [[DataLayer sharedInstance] lastStanzaIdForAccount:self.accountNo withCompletion:^(NSString* lastStanzaId, NSDate* lastStanzaDate) {
+                        DDLogInfo(@"Querying mam archive after stanzaid %@ and date %@ for catchup", lastStanzaId, lastStanzaDate);
+                        XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+                        [mamQuery setMAMQueryFromStart:nil after:lastStanzaId withMax:nil andJid:nil];
                         if(self.sendIq)
-                            self.sendIq(query, nil, nil);
+                            self.sendIq(mamQuery, nil, nil);
                     }];
                 }
             }
@@ -362,7 +358,7 @@
             if([[contact objectForKey:@"subscription"] isEqualToString:kSubTo])
             {
                 MLContact *contactObj = [[MLContact alloc] init];
-                contactObj.contactJid=[contact objectForKey:@"jid"];
+                contactObj.contactJid = [contact objectForKey:@"jid"];
                 contactObj.accountId=self.accountNo;
                 [[DataLayer sharedInstance] addContactRequest:contactObj];
             }
@@ -370,7 +366,7 @@
             if([[contact objectForKey:@"subscription"] isEqualToString:kSubFrom]) //already subscribed
             {
                 MLContact *contactObj = [[MLContact alloc] init];
-                contactObj.contactJid=[contact objectForKey:@"jid"];
+                contactObj.contactJid = [contact objectForKey:@"jid"];
                 contactObj.accountId=self.accountNo;
                 [[DataLayer sharedInstance] deleteContactRequest:contactObj];
             }
@@ -411,7 +407,7 @@
 -(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
 {
     if(!self.connection.supportsPubSub) return;
-    XMPPIQ* query2 =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
+    XMPPIQ* query2 = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query2 setiqTo:jid];
     [query2 requestBundles:deviceid];
     if(self.sendIq)
@@ -437,7 +433,7 @@
             NSMutableArray *devices= [iqNode.omemoDevices mutableCopy];
             NSSet *deviceSet = [NSSet setWithArray:iqNode.omemoDevices];
             
-            NSString * deviceString=[NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
+            NSString * deviceString = [NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
             if(![deviceSet containsObject:deviceString])
             {
                 [devices addObject:deviceString];
@@ -447,7 +443,7 @@
         }
         
         
-        NSArray *existingDevices=[self.monalSignalStore knownDevicesForAddressName:source];
+        NSArray *existingDevices = [self.monalSignalStore knownDevicesForAddressName:source];
         NSSet *deviceSet = [NSSet setWithArray:existingDevices];
         //only query if the device doesnt exist
         [iqNode.omemoDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -464,7 +460,7 @@
         NSSet *iqSet = [NSSet setWithArray:iqNode.omemoDevices];
         [existingDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSNumber *device  =(NSNumber *)obj;
-            NSString *deviceString  =[NSString stringWithFormat:@"%@", device];
+            NSString *deviceString = [NSString stringWithFormat:@"%@", device];
             if(![iqSet containsObject:deviceString]) {
                 //device was removed
                 SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:(int) device.integerValue];
@@ -521,7 +517,7 @@
 
 -(XMPPIQ *) discoverService:(NSString *) node
 {
-    XMPPIQ *discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
+    XMPPIQ *discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoInfo setiqTo:node];
     [discoInfo setDiscoInfoNode];
     return discoInfo;

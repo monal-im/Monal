@@ -196,6 +196,7 @@ extern NSString *const kMessageTypeUrl;
 -(void) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion;
 -(NSArray *) allMessagesForContact:(NSString* ) buddy forAccount:(NSString *) accountNo;
 -(void) lastMessageForContact:(NSString *) contact forAccount:(NSString *) accountNo withCompletion:(void (^)(NSMutableArray *))completion;
+-(void) lastStanzaIdForAccount:(NSString*) accountNo withCompletion:(void (^)(NSString* lastStanzaId, NSDate* lastStanzaDate)) completion;
 
 -(NSArray *) messageHistoryListDates:(NSString *) buddy forAccount: (NSString *) accountNo;
 -(NSArray *) messageHistoryDate:(NSString *) buddy forAccount:(NSString *) accountNo forDate:(NSString*) date;

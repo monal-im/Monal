@@ -76,6 +76,7 @@ NSString *const kXMPPPresence = @"presence";
     //parser and queue related stuff
     NSXMLParser* _xmlParser;
     MLBasePaser* _baseParserDelegate;
+    NSOperationQueue* _parseQueue;
     NSOperationQueue* _receiveQueue;
     NSOperationQueue* _sendQueue;
 
@@ -169,6 +170,11 @@ NSString *const kXMPPPresence = @"presence";
     _outputQueue = [[NSMutableArray alloc] init];
     _iqHandlers = [[NSMutableDictionary alloc] init];
 
+    _parseQueue = [[NSOperationQueue alloc] init];
+    _parseQueue.name = @"receiveQueue";
+    _parseQueue.qualityOfService = NSQualityOfServiceUtility;
+    _parseQueue.maxConcurrentOperationCount = 1;
+    
     _receiveQueue = [[NSOperationQueue alloc] init];
     _receiveQueue.name = @"receiveQueue";
     _receiveQueue.qualityOfService = NSQualityOfServiceUtility;
@@ -225,6 +231,7 @@ NSString *const kXMPPPresence = @"presence";
     [_receiveQueue removeObserver:self forKeyPath:@"operationCount"];
     [_sendQueue removeObserver:self forKeyPath:@"operationCount"];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [_parseQueue cancelAllOperations];
     [_receiveQueue cancelAllOperations];
     [_sendQueue cancelAllOperations];
 }
@@ -506,6 +513,7 @@ NSString *const kXMPPPresence = @"presence";
     }
     
     [self dispatchAsyncOnReceiveQueue: ^{
+        [_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas from old connections
         [_receiveQueue cancelAllOperations];        //stop everything coming after this (we will start a clean connect here!)
         
         if(self.accountState>=kStateReconnecting)
@@ -583,6 +591,7 @@ NSString *const kXMPPPresence = @"presence";
             return;
         }
         DDLogInfo(@"disconnecting");
+        [_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas (we should be logged out then!)
         [_receiveQueue cancelAllOperations];        //stop everything coming after this (we should be logged out then!)
         
         DDLogInfo(@"stopping running timers");
@@ -687,6 +696,8 @@ NSString *const kXMPPPresence = @"presence";
         _startTLSComplete = NO;
         _catchupDone = NO;
         _accountState = kStateDisconnected;
+        
+        [_parseQueue cancelAllOperations];      //throw away all parsed but not processed stanzas (we should have closed sockets then!)
     }];
 }
 
@@ -747,16 +758,24 @@ NSString *const kXMPPPresence = @"presence";
         DDLogInfo(@"resetting old xml parser");
         [_xmlParser setDelegate:nil];
         [_xmlParser abortParsing];
+        [_parseQueue cancelAllOperations];      //throw away all parsed but not processed stanzas (we aborted the parser right now)
     }
-    if(!_baseParserDelegate) {
+    if(!_baseParserDelegate)
+    {
+        DDLogInfo(@"creating parser delegate");
         _baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
-            // always process stanzas in the receiveQueue
-            //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
-            [self dispatchOnReceiveQueue: ^{
-                [self processInput:parsedStanza];
-            }];
+            //queue up new stanzas onto the parseQueue which will dispatch them synchronously to the receiveQueue
+            [_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                //always process stanzas in the receiveQueue
+                //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
+                [self dispatchOnReceiveQueue: ^{
+                    [self processInput:parsedStanza];
+                }];
+            }]] waitUntilFinished:NO];
         }];
-    } else {
+    }
+    else
+    {
         DDLogInfo(@"resetting parser delegate");
         [_baseParserDelegate reset];
     }
@@ -772,6 +791,8 @@ NSString *const kXMPPPresence = @"presence";
     {
         //stop everything coming after this (we don't want to process stanzas that came in *before* this xmpp stream got started!)
         //if we do not do this we could be prone to attacks injecting xml elements into the new stream before it gets started
+        [_iPipe drainInputStream];
+        [_parseQueue cancelAllOperations];
         [_receiveQueue cancelAllOperations];
     }
     
@@ -784,14 +805,11 @@ NSString *const kXMPPPresence = @"presence";
 
     MLXMLNode* xmlOpening = [[MLXMLNode alloc] initWithElement:@"__xml"];
     [self send:xmlOpening];
-    MLXMLNode* stream = [[MLXMLNode alloc] init];
-    stream.element=@"stream:stream";
-    [stream.attributes setObject:@"jabber:client" forKey:kXMLNS];
+    MLXMLNode* stream = [[MLXMLNode alloc] initWithElement:@"stream:stream" andNamespace:@"jabber:client"];
     [stream.attributes setObject:@"http://etherx.jabber.org/streams" forKey:@"xmlns:stream"];
     [stream.attributes setObject:@"1.0" forKey:@"version"];
-    if(self.connectionProperties.identity.domain) {
+    if(self.connectionProperties.identity.domain)
         [stream.attributes setObject:self.connectionProperties.identity.domain forKey:@"to"];
-    }
     [self send:stream];
 }
 
@@ -1549,7 +1567,6 @@ NSString *const kXMPPPresence = @"presence";
                     _cancelLoginTimer = nil;
                 }
                 self->_loggedInOnce=YES;
-                [_iPipe drainInputStream];
                 [self startXMPPStream:YES];
             }
         }
@@ -1688,7 +1705,7 @@ NSString *const kXMPPPresence = @"presence";
             //perform logic to handle proceed
             if(streamNode.startTLSProceed)
             {
-                [_iPipe drainInputStream];
+                [_iPipe drainInputStream];      //remove all pending data before starting tls handshake
                 [self initTLS];
                 self->_startTLSComplete=YES;
                 //stop everything coming after this (we don't want to process stanzas that came in *before* a secure TLS context was established!)
@@ -2213,10 +2230,7 @@ NSString *const kXMPPPresence = @"presence";
     [self sendPresence];
     [self sendCurrentCSIState];
     
-    //query mam since last received message because we could not resume the smacks session
-    //(we would not have landed here if we were able to resume the smacks session)
-    //this will do a catchup of everything we might have missed since our last connection
-    [self queryMAMSinceLastMessageDate];
+    //mam query will be done in MLIQProcessor once the disco result returns
 }
 
 -(void) setStatusMessageText:(NSString*) message
@@ -2528,7 +2542,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) setMAMPrefs:(NSString *) preference
 {
-    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+    XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
     [query updateMamArchivePrefDefault:preference];
     [self send:query];
 }
@@ -2536,80 +2550,33 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) getMAMPrefs
 {
-    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
+    XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query mamArchivePref];
     [self send:query];
 }
 
 
--(void) setMAMQueryMostRecentForJid:(NSString *)jid
+-(void) setMAMQueryMostRecentForJid:(NSString*) jid
 {
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
     [query setMAMQueryLatestMessagesForJid:jid];
     [self send:query];
 }
 
--(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate withMax:(NSString *) max andJid:(NSString *)jid
+-(void) queryMAMSinceLastMessageDateForContact:(NSString*) contactJid
 {
-    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-    [query setMAMQueryFromStart:startDate toDate:endDate withMax:max andJid:jid];
-    [self send:query];
-}
-
-/* query everything after a certain sanza id
- */
--(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) after withMax:(NSString *) max andJid:(NSString *)jid
-{
-    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-    [query setMAMQueryFromStart:startDate after:after withMax:max andJid:jid];
-    [self send:query];
-}
-
-//-(void) queryMAMSinceLastStanza
-//{
-//    if(self.connectionProperties.supportsMam2) {
-//        [[DataLayer sharedInstance] lastMessageSanzaForAccount:_accountNo  andJid:self.connectionProperties.identity.jid withCompletion:^(NSString *lastStanza) {
-//            if(lastStanza) {
-//                [self setMAMQueryFromStart:nil after:lastStanza andJid:nil];
-//            }
-//        }];
-//    }
-//}
-
-
--(void) queryMAMSinceLastMessageDateForContact:(NSString *) contactJid
-{
-    if(self.connectionProperties.supportsMam2) {
-        [[DataLayer sharedInstance] lastMessageDateForContact:contactJid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
-            if(lastDate) {
-                [self setMAMQueryFromStart:[lastDate dateByAddingTimeInterval:1] toDate:nil  withMax:nil andJid:contactJid];
+    if(self.connectionProperties.supportsMam2)
+    {
+        [[DataLayer sharedInstance] lastMessageDateForContact:contactJid andAccount:self.accountNo withCompletion:^(NSDate* lastDate) {
+            if(lastDate)
+            {
+                XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+                [query setMAMQueryFromStart:[lastDate dateByAddingTimeInterval:1] toDate:nil withMax:nil andJid:contactJid];
+                [self send:query];
             }
         }];
     }
 }
-
--(void) queryMAMSinceLastMessageDate
-{
-    if(self.connectionProperties.supportsMam2) {
-        [[DataLayer sharedInstance] synchPointforAccount:self.accountNo  withCompletion:^(NSDate *synchDate) {
-            [[DataLayer sharedInstance] lastMessageDateForContact:self.connectionProperties.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
-                if(lastDate.timeIntervalSince1970>synchDate.timeIntervalSince1970) {
-                    //TODO: use query with after and mam ID
-                    [self setMAMQueryFromStart:[lastDate dateByAddingTimeInterval:1] toDate:nil withMax:nil andJid:nil];
-                }
-                else  {     // if there is no last date, there are no messages yet.
-                    //TODO: this has a race condition here and doesnt play well with changing the time on the phone
-                    //use the date of the last message received instead!!
-                    NSDate *dateToUse = synchDate;
-                    if(!dateToUse) dateToUse = [NSDate dateWithTimeIntervalSinceNow:-60*60*24*14];  //two weeks
-                    [self setMAMQueryFromStart:dateToUse toDate:nil withMax:nil andJid:nil];
-                }
-                [[DataLayer sharedInstance] setSynchpointforAccount:self.accountNo];
-            }];
-        }];
-    }
-}
-
 
 #pragma mark - MUC
 
@@ -2624,10 +2591,10 @@ NSString *const kXMPPPresence = @"presence";
     }
     else
     {
-        if(!self.connectionProperties.conferenceServer) DDLogInfo(@"no conference server discovered");
-        if(_roomList){
-            [[NSNotificationCenter defaultCenter] postNotificationName: kMLHasRoomsNotice object: self];
-        }
+        if(!self.connectionProperties.conferenceServer)
+            DDLogInfo(@"no conference server discovered");
+        if(_roomList)
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasRoomsNotice object:self];
     }
 }
 

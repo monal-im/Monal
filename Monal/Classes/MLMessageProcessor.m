@@ -193,9 +193,6 @@ static NSMutableDictionary* _typingNotifications;
     {
         //save in DB
         [[DataLayer sharedInstance] setMessageId:messageNode.receivedID received:YES];
-        if(messageNode.stanzaId) {
-            [[DataLayer sharedInstance] setMessageId:messageNode.receivedID stanzaId:messageNode.stanzaId];
-        }
         //Post notice
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageReceivedNotice object:self userInfo:@{@"MessageID":messageNode.receivedID}];
     }

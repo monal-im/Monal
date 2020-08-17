@@ -600,6 +600,11 @@
 		2661102A238F17CB0030A4EE /* MLContact.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContact.m; sourceTree = "<group>"; };
 		2664D28323F2312400CD4085 /* MLAccountPickerViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLAccountPickerViewController.h; sourceTree = "<group>"; };
 		2664D28423F2312400CD4085 /* MLAccountPickerViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAccountPickerViewController.m; sourceTree = "<group>"; };
+		266A0B7924EAC35B00875DF8 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/iosShare.strings; sourceTree = "<group>"; };
+		266A0B7A24EAC35F00875DF8 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Main.strings; sourceTree = "<group>"; };
+		266A0B7B24EAC36100875DF8 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Login.strings; sourceTree = "<group>"; };
+		266A0B7C24EAC36600875DF8 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Settings.strings; sourceTree = "<group>"; };
+		266A0B7D24EAC36900875DF8 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/ContactDetails.strings; sourceTree = "<group>"; };
 		26724D9121B4C1E700F1F46F /* MLComposeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLComposeViewController.h; sourceTree = "<group>"; };
 		26724D9221B4C1E700F1F46F /* MLComposeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLComposeViewController.m; sourceTree = "<group>"; };
 		2673CABB21D8617300256507 /* MLContactDetailHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactDetailHeader.h; sourceTree = "<group>"; };
@@ -784,11 +789,6 @@
 		26E8467824EAC1A200ECE419 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/Settings.strings; sourceTree = "<group>"; };
 		26E8467924EAC1A800ECE419 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/ContactDetails.strings; sourceTree = "<group>"; };
 		26E8467E24EAC1BB00ECE419 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/iosShare.strings; sourceTree = "<group>"; };
-		26E8468524EAC23B00ECE419 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Main.strings; sourceTree = "<group>"; };
-		26E8468624EAC25A00ECE419 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Login.strings; sourceTree = "<group>"; };
-		26E8468724EAC25D00ECE419 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Settings.strings; sourceTree = "<group>"; };
-		26E8468824EAC25F00ECE419 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/ContactDetails.strings; sourceTree = "<group>"; };
-		26E8468924EAC26100ECE419 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/iosShare.strings; sourceTree = "<group>"; };
 		26EC40FA17BDD8560031304D /* ContactDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactDetails.h; sourceTree = "<group>"; };
 		26EC40FB17BDD8560031304D /* ContactDetails.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactDetails.m; sourceTree = "<group>"; };
 		26EC40FD17BDD85F0031304D /* addContact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = addContact.h; sourceTree = "<group>"; };
@@ -1959,6 +1959,7 @@
 				"pt-BR",
 				ro,
 				vi,
+				uk,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
@@ -2509,7 +2510,7 @@
 				26E8467024EAC15000ECE419 /* pt-BR */,
 				26E8467524EAC16D00ECE419 /* ro */,
 				26E8467E24EAC1BB00ECE419 /* vi */,
-				26E8468924EAC26100ECE419 /* uk */,
+				266A0B7924EAC35B00875DF8 /* uk */,
 			);
 			name = iosShare.storyboard;
 			sourceTree = "<group>";
@@ -2534,7 +2535,7 @@
 				26E8466F24EAC14F00ECE419 /* pt-BR */,
 				26E8467424EAC16A00ECE419 /* ro */,
 				26E8467924EAC1A800ECE419 /* vi */,
-				26E8468824EAC25F00ECE419 /* uk */,
+				266A0B7D24EAC36900875DF8 /* uk */,
 			);
 			name = ContactDetails.storyboard;
 			sourceTree = SOURCE_ROOT;
@@ -2559,7 +2560,7 @@
 				26E8466E24EAC14D00ECE419 /* pt-BR */,
 				26E8467324EAC16900ECE419 /* ro */,
 				26E8467824EAC1A200ECE419 /* vi */,
-				26E8468724EAC25D00ECE419 /* uk */,
+				266A0B7C24EAC36600875DF8 /* uk */,
 			);
 			name = Settings.storyboard;
 			sourceTree = SOURCE_ROOT;
@@ -2584,7 +2585,7 @@
 				26E8466D24EAC14B00ECE419 /* pt-BR */,
 				26E8467224EAC16700ECE419 /* ro */,
 				26E8467724EAC19E00ECE419 /* vi */,
-				26E8468624EAC25A00ECE419 /* uk */,
+				266A0B7B24EAC36100875DF8 /* uk */,
 			);
 			name = Login.storyboard;
 			sourceTree = SOURCE_ROOT;
@@ -2609,7 +2610,7 @@
 				26E8466C24EAC14A00ECE419 /* pt-BR */,
 				26E8467124EAC16200ECE419 /* ro */,
 				26E8467624EAC19C00ECE419 /* vi */,
-				26E8468524EAC23B00ECE419 /* uk */,
+				266A0B7A24EAC35F00875DF8 /* uk */,
 			);
 			name = Main.storyboard;
 			sourceTree = SOURCE_ROOT;

@@ -709,6 +709,11 @@
 		26E8462D24EABC0300ECE419 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Settings.strings; sourceTree = "<group>"; };
 		26E8462E24EABC0500ECE419 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/ContactDetails.strings; sourceTree = "<group>"; };
 		26E8462F24EABC0800ECE419 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/iosShare.strings; sourceTree = "<group>"; };
+		26E8463024EABCDE00ECE419 /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = "es-419.lproj/Main.strings"; sourceTree = "<group>"; };
+		26E8463124EABCE600ECE419 /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = "es-419.lproj/Login.strings"; sourceTree = "<group>"; };
+		26E8463224EABCEA00ECE419 /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = "es-419.lproj/Settings.strings"; sourceTree = "<group>"; };
+		26E8463324EABCED00ECE419 /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = "es-419.lproj/ContactDetails.strings"; sourceTree = "<group>"; };
+		26E8463424EABCF100ECE419 /* es-419 */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es-419"; path = "es-419.lproj/iosShare.strings"; sourceTree = "<group>"; };
 		26EC40FA17BDD8560031304D /* ContactDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactDetails.h; sourceTree = "<group>"; };
 		26EC40FB17BDD8560031304D /* ContactDetails.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactDetails.m; sourceTree = "<group>"; };
 		26EC40FD17BDD85F0031304D /* addContact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = addContact.h; sourceTree = "<group>"; };
@@ -1879,6 +1884,7 @@
 				"zh-Hant",
 				Base,
 				de,
+				"es-419",
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
@@ -2414,6 +2420,7 @@
 			children = (
 				26AA70172146BBB900598605 /* Base */,
 				26E8462F24EABC0800ECE419 /* de */,
+				26E8463424EABCF100ECE419 /* es-419 */,
 			);
 			name = iosShare.storyboard;
 			sourceTree = "<group>";
@@ -2423,6 +2430,7 @@
 			children = (
 				26E8462024EABAB400ECE419 /* Base */,
 				26E8462E24EABC0500ECE419 /* de */,
+				26E8463324EABCED00ECE419 /* es-419 */,
 			);
 			name = ContactDetails.storyboard;
 			sourceTree = SOURCE_ROOT;
@@ -2432,6 +2440,7 @@
 			children = (
 				26E8462324EABAD600ECE419 /* Base */,
 				26E8462D24EABC0300ECE419 /* de */,
+				26E8463224EABCEA00ECE419 /* es-419 */,
 			);
 			name = Settings.storyboard;
 			sourceTree = SOURCE_ROOT;
@@ -2441,6 +2450,7 @@
 			children = (
 				26E8462624EABAE200ECE419 /* Base */,
 				26E8462C24EABC0000ECE419 /* de */,
+				26E8463124EABCE600ECE419 /* es-419 */,
 			);
 			name = Login.storyboard;
 			sourceTree = SOURCE_ROOT;
@@ -2450,6 +2460,7 @@
 			children = (
 				26E8462924EABAED00ECE419 /* Base */,
 				26E8462B24EABBFC00ECE419 /* de */,
+				26E8463024EABCDE00ECE419 /* es-419 */,
 			);
 			name = Main.storyboard;
 			sourceTree = SOURCE_ROOT;

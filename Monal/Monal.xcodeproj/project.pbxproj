@@ -150,7 +150,6 @@
 		2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2664D28423F2312400CD4085 /* MLAccountPickerViewController.m */; };
 		2666F018249D380D00372E28 /* MLContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661102A238F17CB0030A4EE /* MLContact.m */; };
 		26724D9321B4C1E700F1F46F /* MLComposeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26724D9221B4C1E700F1F46F /* MLComposeViewController.m */; };
-		2673CABA21D851E600256507 /* ContactDetails.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2673CAB921D851E600256507 /* ContactDetails.storyboard */; };
 		2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABC21D8617300256507 /* MLContactDetailHeader.m */; };
 		2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABF21D9242E00256507 /* MLKeysTableViewController.m */; };
 		2673CAC321D9244B00256507 /* MLResourcesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CAC221D9244B00256507 /* MLResourcesTableViewController.m */; };
@@ -233,6 +232,7 @@
 		26E8461824EAB5CD00ECE419 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8461724EAB5CD00ECE419 /* Main.storyboard */; };
 		26E8461A24EAB5F500ECE419 /* Login.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8461924EAB5F500ECE419 /* Login.storyboard */; };
 		26E8461C24EAB65D00ECE419 /* Settings.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8461B24EAB65D00ECE419 /* Settings.storyboard */; };
+		26E8461E24EABA9900ECE419 /* ContactDetails.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8461D24EABA9900ECE419 /* ContactDetails.storyboard */; };
 		26E88CDA23F3C6B8001E9478 /* MLCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; };
 		26E88CDD23F3C740001E9478 /* MLCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; };
 		26E88CDE23F3C740001E9478 /* MLCrypto.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -602,7 +602,6 @@
 		2664D28423F2312400CD4085 /* MLAccountPickerViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAccountPickerViewController.m; sourceTree = "<group>"; };
 		26724D9121B4C1E700F1F46F /* MLComposeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLComposeViewController.h; sourceTree = "<group>"; };
 		26724D9221B4C1E700F1F46F /* MLComposeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLComposeViewController.m; sourceTree = "<group>"; };
-		2673CAB921D851E600256507 /* ContactDetails.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = ContactDetails.storyboard; sourceTree = "<group>"; };
 		2673CABB21D8617300256507 /* MLContactDetailHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactDetailHeader.h; sourceTree = "<group>"; };
 		2673CABC21D8617300256507 /* MLContactDetailHeader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactDetailHeader.m; sourceTree = "<group>"; };
 		2673CABE21D9242E00256507 /* MLKeysTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLKeysTableViewController.h; sourceTree = "<group>"; };
@@ -704,6 +703,7 @@
 		26E8461724EAB5CD00ECE419 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = SOURCE_ROOT; };
 		26E8461924EAB5F500ECE419 /* Login.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Login.storyboard; sourceTree = SOURCE_ROOT; };
 		26E8461B24EAB65D00ECE419 /* Settings.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Settings.storyboard; sourceTree = SOURCE_ROOT; };
+		26E8461D24EABA9900ECE419 /* ContactDetails.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = ContactDetails.storyboard; sourceTree = SOURCE_ROOT; };
 		26EC40FA17BDD8560031304D /* ContactDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactDetails.h; sourceTree = "<group>"; };
 		26EC40FB17BDD8560031304D /* ContactDetails.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactDetails.m; sourceTree = "<group>"; };
 		26EC40FD17BDD85F0031304D /* addContact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = addContact.h; sourceTree = "<group>"; };
@@ -1232,11 +1232,11 @@
 		268C1E471FDACDD300BD6921 /* Contact Details */ = {
 			isa = PBXGroup;
 			children = (
+				26E8461D24EABA9900ECE419 /* ContactDetails.storyboard */,
 				26EC40FA17BDD8560031304D /* ContactDetails.h */,
 				26EC40FB17BDD8560031304D /* ContactDetails.m */,
 				268C1E481FDAD08700BD6921 /* MLDetailsTableViewCell.h */,
 				268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */,
-				2673CAB921D851E600256507 /* ContactDetails.storyboard */,
 				2673CABB21D8617300256507 /* MLContactDetailHeader.h */,
 				2673CABC21D8617300256507 /* MLContactDetailHeader.m */,
 				2673CABE21D9242E00256507 /* MLKeysTableViewController.h */,
@@ -1929,7 +1929,7 @@
 				26470F521835C4080069E3E0 /* Media.xcassets in Resources */,
 				26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */,
 				26E8461824EAB5CD00ECE419 /* Main.storyboard in Resources */,
-				2673CABA21D851E600256507 /* ContactDetails.storyboard in Resources */,
+				26E8461E24EABA9900ECE419 /* ContactDetails.storyboard in Resources */,
 				26158AF41FFA8A6A00E53BDC /* opensource.html in Resources */,
 				262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */,
 				2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */,

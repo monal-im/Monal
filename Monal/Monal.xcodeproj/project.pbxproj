@@ -229,10 +229,10 @@
 		26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */; };
 		26D89F061A890672009B147C /* MLSwitchCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D89F051A890672009B147C /* MLSwitchCell.m */; };
 		26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */; };
-		26E8461824EAB5CD00ECE419 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8461724EAB5CD00ECE419 /* Main.storyboard */; };
-		26E8461A24EAB5F500ECE419 /* Login.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8461924EAB5F500ECE419 /* Login.storyboard */; };
-		26E8461C24EAB65D00ECE419 /* Settings.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8461B24EAB65D00ECE419 /* Settings.storyboard */; };
-		26E8461E24EABA9900ECE419 /* ContactDetails.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8461D24EABA9900ECE419 /* ContactDetails.storyboard */; };
+		26E8461F24EABAB400ECE419 /* ContactDetails.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462124EABAB400ECE419 /* ContactDetails.storyboard */; };
+		26E8462224EABAD600ECE419 /* Settings.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462424EABAD600ECE419 /* Settings.storyboard */; };
+		26E8462524EABAE200ECE419 /* Login.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462724EABAE200ECE419 /* Login.storyboard */; };
+		26E8462824EABAED00ECE419 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26E8462A24EABAED00ECE419 /* Main.storyboard */; };
 		26E88CDA23F3C6B8001E9478 /* MLCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; };
 		26E88CDD23F3C740001E9478 /* MLCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; };
 		26E88CDE23F3C740001E9478 /* MLCrypto.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -700,10 +700,10 @@
 		26DE9C050FEEFD00000596F6 /* DB definitions */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "DB definitions"; sourceTree = "<group>"; };
 		26E3ED851FEC0CB7008ABDA5 /* MLServerDetails.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLServerDetails.h; sourceTree = "<group>"; };
 		26E3ED861FEC0CB7008ABDA5 /* MLServerDetails.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLServerDetails.m; sourceTree = "<group>"; };
-		26E8461724EAB5CD00ECE419 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = SOURCE_ROOT; };
-		26E8461924EAB5F500ECE419 /* Login.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Login.storyboard; sourceTree = SOURCE_ROOT; };
-		26E8461B24EAB65D00ECE419 /* Settings.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Settings.storyboard; sourceTree = SOURCE_ROOT; };
-		26E8461D24EABA9900ECE419 /* ContactDetails.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = ContactDetails.storyboard; sourceTree = SOURCE_ROOT; };
+		26E8462024EABAB400ECE419 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/ContactDetails.storyboard; sourceTree = "<group>"; };
+		26E8462324EABAD600ECE419 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Settings.storyboard; sourceTree = "<group>"; };
+		26E8462624EABAE200ECE419 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Login.storyboard; sourceTree = "<group>"; };
+		26E8462924EABAED00ECE419 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		26EC40FA17BDD8560031304D /* ContactDetails.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactDetails.h; sourceTree = "<group>"; };
 		26EC40FB17BDD8560031304D /* ContactDetails.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactDetails.m; sourceTree = "<group>"; };
 		26EC40FD17BDD85F0031304D /* addContact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = addContact.h; sourceTree = "<group>"; };
@@ -1033,7 +1033,7 @@
 		2644D4961FF29E1900F46AB5 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
-				26E8461B24EAB65D00ECE419 /* Settings.storyboard */,
+				26E8462424EABAD600ECE419 /* Settings.storyboard */,
 				26B51C4618654D98002134C3 /* LogViewController.h */,
 				26B51C4718654D98002134C3 /* LogViewController.m */,
 				2644D4971FF29E5600F46AB5 /* MLSettingsTableViewController.h */,
@@ -1084,7 +1084,7 @@
 		26715E5E17650AF900684F3D /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				26E8461724EAB5CD00ECE419 /* Main.storyboard */,
+				26E8462A24EABAED00ECE419 /* Main.storyboard */,
 				26F396CE2196830E00EF5720 /* OnBoard */,
 				26DB52111777C83100B50353 /* Modal views */,
 				26DB52121777EA5100B50353 /* Tab views */,
@@ -1232,7 +1232,7 @@
 		268C1E471FDACDD300BD6921 /* Contact Details */ = {
 			isa = PBXGroup;
 			children = (
-				26E8461D24EABA9900ECE419 /* ContactDetails.storyboard */,
+				26E8462124EABAB400ECE419 /* ContactDetails.storyboard */,
 				26EC40FA17BDD8560031304D /* ContactDetails.h */,
 				26EC40FB17BDD8560031304D /* ContactDetails.m */,
 				268C1E481FDAD08700BD6921 /* MLDetailsTableViewCell.h */,
@@ -1456,7 +1456,7 @@
 		26F396CE2196830E00EF5720 /* OnBoard */ = {
 			isa = PBXGroup;
 			children = (
-				26E8461924EAB5F500ECE419 /* Login.storyboard */,
+				26E8462724EABAE200ECE419 /* Login.storyboard */,
 				26D0940B22A33E9B009C7AEF /* MLRegisterViewController.h */,
 				26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */,
 				26F396DB2197507100EF5720 /* GLTintButton.h */,
@@ -1923,18 +1923,18 @@
 			files = (
 				262E51931AD8CAC600788351 /* MLButtonCell.xib in Resources */,
 				2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */,
-				26E8461A24EAB5F500ECE419 /* Login.storyboard in Resources */,
+				26E8462524EABAE200ECE419 /* Login.storyboard in Resources */,
 				264A7E751AA7263600E860E3 /* MLSwitchCell.xib in Resources */,
 				26B0CA8B21AE410E0080B133 /* AlertSounds in Resources */,
 				26470F521835C4080069E3E0 /* Media.xcassets in Resources */,
 				26B2A4BB1B73061400272E63 /* Images.xcassets in Resources */,
-				26E8461824EAB5CD00ECE419 /* Main.storyboard in Resources */,
-				26E8461E24EABA9900ECE419 /* ContactDetails.storyboard in Resources */,
+				26E8462824EABAED00ECE419 /* Main.storyboard in Resources */,
+				26E8461F24EABAB400ECE419 /* ContactDetails.storyboard in Resources */,
 				26158AF41FFA8A6A00E53BDC /* opensource.html in Resources */,
 				262E51981AD8CB7200788351 /* MLTextInputCell.xib in Resources */,
 				2649CE531C51B84C00CD1E80 /* Launch Screen.storyboard in Resources */,
 				26F9794D1ACAC73A0008E005 /* MLContactCell.xib in Resources */,
-				26E8461C24EAB65D00ECE419 /* Settings.storyboard in Resources */,
+				26E8462224EABAD600ECE419 /* Settings.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2414,6 +2414,38 @@
 			);
 			name = iosShare.storyboard;
 			sourceTree = "<group>";
+		};
+		26E8462124EABAB400ECE419 /* ContactDetails.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				26E8462024EABAB400ECE419 /* Base */,
+			);
+			name = ContactDetails.storyboard;
+			sourceTree = SOURCE_ROOT;
+		};
+		26E8462424EABAD600ECE419 /* Settings.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				26E8462324EABAD600ECE419 /* Base */,
+			);
+			name = Settings.storyboard;
+			sourceTree = SOURCE_ROOT;
+		};
+		26E8462724EABAE200ECE419 /* Login.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				26E8462624EABAE200ECE419 /* Base */,
+			);
+			name = Login.storyboard;
+			sourceTree = SOURCE_ROOT;
+		};
+		26E8462A24EABAED00ECE419 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				26E8462924EABAED00ECE419 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXVariantGroup section */
 

@@ -813,6 +813,11 @@
 		26F9794C1ACAC73A0008E005 /* MLContactCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MLContactCell.xib; sourceTree = "<group>"; };
 		26FB468D18B2755A0043094F /* IPAddress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPAddress.h; sourceTree = "<group>"; };
 		26FB468E18B2755A0043094F /* IPAddress.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPAddress.m; sourceTree = "<group>"; };
+		26FC618B24EB2BEE0094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Main.strings"; sourceTree = "<group>"; };
+		26FC618D24EB2BEF0094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Login.strings"; sourceTree = "<group>"; };
+		26FC618E24EB2BF10094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Settings.strings"; sourceTree = "<group>"; };
+		26FC618F24EB2BF20094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/ContactDetails.strings"; sourceTree = "<group>"; };
+		26FC619024EB2BF40094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/iosShare.strings"; sourceTree = "<group>"; };
 		26FDB4341DC16A9800A129E0 /* Monal.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Monal.entitlements; sourceTree = "<group>"; };
 		26FE3BC91C61A6C3003CC230 /* MLResizingTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLResizingTextView.h; sourceTree = "<group>"; };
 		26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLResizingTextView.m; sourceTree = "<group>"; };
@@ -1960,6 +1965,7 @@
 				ro,
 				vi,
 				uk,
+				"zh-Hant",
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
@@ -2511,6 +2517,7 @@
 				26E8467524EAC16D00ECE419 /* ro */,
 				26E8467E24EAC1BB00ECE419 /* vi */,
 				266A0B7924EAC35B00875DF8 /* uk */,
+				26FC619024EB2BF40094C302 /* zh-Hant */,
 			);
 			name = iosShare.storyboard;
 			sourceTree = "<group>";
@@ -2536,6 +2543,7 @@
 				26E8467424EAC16A00ECE419 /* ro */,
 				26E8467924EAC1A800ECE419 /* vi */,
 				266A0B7D24EAC36900875DF8 /* uk */,
+				26FC618F24EB2BF20094C302 /* zh-Hant */,
 			);
 			name = ContactDetails.storyboard;
 			sourceTree = SOURCE_ROOT;
@@ -2561,6 +2569,7 @@
 				26E8467324EAC16900ECE419 /* ro */,
 				26E8467824EAC1A200ECE419 /* vi */,
 				266A0B7C24EAC36600875DF8 /* uk */,
+				26FC618E24EB2BF10094C302 /* zh-Hant */,
 			);
 			name = Settings.storyboard;
 			sourceTree = SOURCE_ROOT;
@@ -2586,6 +2595,7 @@
 				26E8467224EAC16700ECE419 /* ro */,
 				26E8467724EAC19E00ECE419 /* vi */,
 				266A0B7B24EAC36100875DF8 /* uk */,
+				26FC618D24EB2BEF0094C302 /* zh-Hant */,
 			);
 			name = Login.storyboard;
 			sourceTree = SOURCE_ROOT;
@@ -2611,6 +2621,7 @@
 				26E8467124EAC16200ECE419 /* ro */,
 				26E8467624EAC19C00ECE419 /* vi */,
 				266A0B7A24EAC35F00875DF8 /* uk */,
+				26FC618B24EB2BEE0094C302 /* zh-Hant */,
 			);
 			name = Main.storyboard;
 			sourceTree = SOURCE_ROOT;

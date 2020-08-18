@@ -35,11 +35,11 @@
 "Yes" = "Oui";
 "XMPP" = "XMPP";
 "XEP-0363: HTTP File Upload" = "XEP-0363 : Mise en ligne de fichier HTTP";
-"XEP-0357: Push Notifications" = "XEP-0357 : Notifications push";
-"XEP-0352: Client State Indication" = "XEP-0352 : Indication de l'état du client";
-"XEP-0313: Message Archive Management" = "XEP-0313 : Gestion des archives des messages";
-"XEP-0280: Message Carbons" = "XEP-0280 : Message carbones";
-"XEP-0198: Stream Management" = "XEP-0198 : Gestion des flux";
+"XEP-0357: Push Notifications" = "XEP-0357 : Notifications push";
+"XEP-0352: Client State Indication" = "XEP-0352 : Indication de l'état du client";
+"XEP-0313: Message Archive Management" = "XEP-0313 : Gestion des archives des messages";
+"XEP-0280: Message Carbons" = "XEP-0280 : Message carbones";
+"XEP-0198: Stream Management" = "XEP-0198 : Gestion des flux";
 "Will make a HTTP HEAD call on all links" = "Cela fera un appel HTTP HEAD pour tous les liens";
 "Will logout and reconnect any connected accounts." = "Cela vous déconnectera et reconnectera de tous vos comptes connectés.";
 "When you start talking to someone,\n they will show up here." = "Lorsque vous allez commencer à parler à quelqu'un,\nils apparaîtrons ici.";
@@ -282,3 +282,8 @@
 "Accept" = "Accepter";
 "About" = "À propos";
 "%ld (This device)" = "%ld (Cet appareil)";
+"Spread The Word" = "Passez le mot";
+"Sounds courtesy Emrah" = "Avec la permission d'Emrah";
+"Escape The Garden" = "Evasion du jardin";
+"Choices Galore" = "Des choix en grand nombre";
+"(autojoin)" = "(autojoindre)";

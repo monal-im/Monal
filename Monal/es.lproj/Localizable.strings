@@ -1,1 +1,20 @@
-
+"Monal" = "Monal";
+"Message from %@" = "Mensaje de %@";
+"Message" = "Mensaje";
+"Jabber ID" = "Jabber ID";
+"General" = "General";
+"from" = "de";
+"Favorite" = "Favorito";
+"Disconnected" = "Desconectado";
+"Decline" = "Declinar";
+"Could not decrypt message" = "No pudo descifrar el mensaje";
+"Could not change the password" = "No podía cambiar la contraseña";
+"Contacts" = "Contactos";
+"Contact Name" = "Nombre de contacto";
+"Connected since: %@" = "Conectado desde: %@";
+"Connected" = "Conectado";
+"Close" = "Cerrar";
+"Change Password" = "Cambiar la contraseña";
+"Cancel" = "Cancelar";
+"Camera" = "Cámara";
+"Apple Push Service" = "Apple Push Service";

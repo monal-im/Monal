@@ -818,6 +818,11 @@
 		26FC618E24EB2BF10094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Settings.strings"; sourceTree = "<group>"; };
 		26FC618F24EB2BF20094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/ContactDetails.strings"; sourceTree = "<group>"; };
 		26FC619024EB2BF40094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/iosShare.strings"; sourceTree = "<group>"; };
+		26FC619124EB6C220094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
+		26FC619224EB6C240094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Login.strings; sourceTree = "<group>"; };
+		26FC619324EB6C250094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Settings.strings; sourceTree = "<group>"; };
+		26FC619424EB6C260094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/ContactDetails.strings; sourceTree = "<group>"; };
+		26FC619524EB6C270094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/iosShare.strings; sourceTree = "<group>"; };
 		26FDB4341DC16A9800A129E0 /* Monal.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Monal.entitlements; sourceTree = "<group>"; };
 		26FE3BC91C61A6C3003CC230 /* MLResizingTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLResizingTextView.h; sourceTree = "<group>"; };
 		26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLResizingTextView.m; sourceTree = "<group>"; };
@@ -1966,6 +1971,7 @@
 				vi,
 				uk,
 				"zh-Hant",
+				en,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
@@ -2518,6 +2524,7 @@
 				26E8467E24EAC1BB00ECE419 /* vi */,
 				266A0B7924EAC35B00875DF8 /* uk */,
 				26FC619024EB2BF40094C302 /* zh-Hant */,
+				26FC619524EB6C270094C302 /* en */,
 			);
 			name = iosShare.storyboard;
 			sourceTree = "<group>";
@@ -2544,6 +2551,7 @@
 				26E8467924EAC1A800ECE419 /* vi */,
 				266A0B7D24EAC36900875DF8 /* uk */,
 				26FC618F24EB2BF20094C302 /* zh-Hant */,
+				26FC619424EB6C260094C302 /* en */,
 			);
 			name = ContactDetails.storyboard;
 			sourceTree = SOURCE_ROOT;
@@ -2570,6 +2578,7 @@
 				26E8467824EAC1A200ECE419 /* vi */,
 				266A0B7C24EAC36600875DF8 /* uk */,
 				26FC618E24EB2BF10094C302 /* zh-Hant */,
+				26FC619324EB6C250094C302 /* en */,
 			);
 			name = Settings.storyboard;
 			sourceTree = SOURCE_ROOT;
@@ -2596,6 +2605,7 @@
 				26E8467724EAC19E00ECE419 /* vi */,
 				266A0B7B24EAC36100875DF8 /* uk */,
 				26FC618D24EB2BEF0094C302 /* zh-Hant */,
+				26FC619224EB6C240094C302 /* en */,
 			);
 			name = Login.storyboard;
 			sourceTree = SOURCE_ROOT;
@@ -2622,6 +2632,7 @@
 				26E8467624EAC19C00ECE419 /* vi */,
 				266A0B7A24EAC35F00875DF8 /* uk */,
 				26FC618B24EB2BEE0094C302 /* zh-Hant */,
+				26FC619124EB6C220094C302 /* en */,
 			);
 			name = Main.storyboard;
 			sourceTree = SOURCE_ROOT;

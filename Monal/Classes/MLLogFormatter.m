@@ -42,11 +42,18 @@ static NSString* _loglevel_name(NSUInteger flag) {
 }
 
 @interface MLLogFormatter ()
-
+@property (nonatomic) BOOL isConsole;
 @end
 
 
 @implementation MLLogFormatter
+
+-(id) initForConsole:(BOOL) isConsole
+{
+    self = [super init];
+    self.isConsole = isConsole;
+    return self;
+}
 
 -(NSString*) formatLogMessage:(DDLogMessage*) logMessage
 {
@@ -66,11 +73,10 @@ static NSString* _loglevel_name(NSUInteger flag) {
     if(![queueThreadLabel isEqualToString:logMessage.threadID])
         queueThreadLabel = [NSString stringWithFormat:@"%@:%@", logMessage.threadID, queueThreadLabel];
 
-#if TARGET_OS_SIMULATOR
-    return [NSString stringWithFormat:@"[%@] %@ [%@ (QOS:%@)] %@ at %@:%lu: %@", _loglevel_name(logMessage.flag), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage.qos), logMessage.function, file, (unsigned long)logMessage.line, logMessage.message];
-#else
-    return [NSString stringWithFormat:@"%@ [%@] %@ [%@ (QOS:%@)] %@ at %@:%lu: %@", timestamp, _loglevel_name(logMessage.flag), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage.qos), logMessage.function, file, (unsigned long)logMessage.line, logMessage.message];
-#endif
+    if(self.isConsole)
+        return [NSString stringWithFormat:@"[%@] %@ [%@ (QOS:%@)] %@ at %@:%lu: %@", _loglevel_name(logMessage.flag), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage.qos), logMessage.function, file, (unsigned long)logMessage.line, logMessage.message];
+    else
+        return [NSString stringWithFormat:@"%@ [%@] %@ [%@ (QOS:%@)] %@ at %@:%lu: %@", timestamp, _loglevel_name(logMessage.flag), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage.qos), logMessage.function, file, (unsigned long)logMessage.line, logMessage.message];
 }
 
 @end

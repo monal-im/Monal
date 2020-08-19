@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLLogFormatter : DDDispatchQueueLogFormatter
 
+-(id) initForConsole:(BOOL) isConsole;
 -(NSString*) formatLogMessage:(DDLogMessage*) logMessage;
 
 @end

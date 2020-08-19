@@ -8,7 +8,7 @@
 
 #include <CommonCrypto/CommonDigest.h>
 #import "HelperTools.h"
-#import "DataLayer.h"
+#import "MLUDPLogger.h"
 
 @implementation HelperTools
 
@@ -79,20 +79,29 @@ void logException(NSException* exception)
 
 +(DDFileLogger*) configureLogging
 {
-    MLLogFormatter* formatter = [[MLLogFormatter alloc] init];
-    [[DDOSLogger sharedInstance] setLogFormatter:formatter];
+    //console logger
+    [[DDOSLogger sharedInstance] setLogFormatter:[[MLLogFormatter alloc] initForConsole:YES]];
     [DDLog addLogger:[DDOSLogger sharedInstance]];
     
+    //create log formatter for file and network logging
+    MLLogFormatter* formatter = [[MLLogFormatter alloc] initForConsole:NO];
+    
+    //file logger
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
     id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:[containerUrl path]];
     DDFileLogger* fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
     [fileLogger setLogFormatter:formatter];
     fileLogger.rollingFrequency = 60 * 60 * 24;    // 24 hour rolling
-    fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
+    fileLogger.logFileManager.maximumNumberOfLogFiles = 3;
     fileLogger.maximumFileSize = 1024 * 1024 * 64;
     [DDLog addLogger:fileLogger];
     DDLogInfo(@"Logfile dir: %@", [containerUrl path]);
+    
+    //network logger
+    MLUDPLogger* udpLogger = [[MLUDPLogger alloc] init];
+    [udpLogger setLogFormatter:formatter];
+    [DDLog addLogger:udpLogger];
     
     //for debugging when upgrading the app
     NSArray *directoryContents = [fileManager contentsOfDirectoryAtPath:[containerUrl path] error:nil];

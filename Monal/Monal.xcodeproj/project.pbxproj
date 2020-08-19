@@ -259,6 +259,8 @@
 		540F625F24BA951E0008A6D8 /* HelperTools.m in Sources */ = {isa = PBXBuildFile; fileRef = C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */; };
 		5435BE9B245F97B2006C61BF /* ParseR.h in Headers */ = {isa = PBXBuildFile; fileRef = 5435BE99245F97B1006C61BF /* ParseR.h */; };
 		5435BE9C245F97B3006C61BF /* ParseR.m in Sources */ = {isa = PBXBuildFile; fileRef = 5435BE9A245F97B1006C61BF /* ParseR.m */; };
+		5455BC3324EB776F0024D80F /* MLUDPLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 5455BC3024EB776B0024D80F /* MLUDPLogger.m */; };
+		5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = 5455BC3224EB776E0024D80F /* MLUDPLogger.h */; };
 		54D2307E24CB0F4600638D65 /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		54D2308224CB0F5400638D65 /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C28AE0807330E8B6F972591 /* Pods_NotificaionService.framework */; };
 		54D2308424CB10EE00638D65 /* MLLogFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C15D504A24C727CC002F75BB /* MLLogFileManager.m */; };
@@ -858,6 +860,8 @@
 		540E13A824CF78D00038FDA0 /* MLLogFormatter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLLogFormatter.h; sourceTree = "<group>"; };
 		5435BE99245F97B1006C61BF /* ParseR.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParseR.h; sourceTree = "<group>"; };
 		5435BE9A245F97B1006C61BF /* ParseR.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ParseR.m; sourceTree = "<group>"; };
+		5455BC3024EB776B0024D80F /* MLUDPLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLUDPLogger.m; path = MLUDPLogger.m; sourceTree = "<group>"; };
+		5455BC3224EB776E0024D80F /* MLUDPLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLUDPLogger.h; path = MLUDPLogger.h; sourceTree = "<group>"; };
 		5ED93030541F175E7BEB1FC2 /* Pods-NotificaionService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NotificaionService/Pods-NotificaionService.debug.xcconfig"; sourceTree = "<group>"; };
 		5F59B43550E822D135D1127E /* Pods_Monal_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6253B2B3FE987619C2714CF5 /* Pods-Monal Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -1606,6 +1610,8 @@
 		26F7BB3A1115F8A300712672 /* tools */ = {
 			isa = PBXGroup;
 			children = (
+				5455BC3224EB776E0024D80F /* MLUDPLogger.h */,
+				5455BC3024EB776B0024D80F /* MLUDPLogger.m */,
 				540BD0D324D8D1FF0087A743 /* IPC.m */,
 				540BD0D124D8D1F20087A743 /* IPC.h */,
 				540A3FAC24D674BD0008965D /* MLSQLite.m */,
@@ -1803,6 +1809,7 @@
 				540BD0D224D8D1F40087A743 /* IPC.h in Headers */,
 				540E13A924CF78D00038FDA0 /* MLLogFormatter.h in Headers */,
 				26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */,
+				5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2488,6 +2495,7 @@
 				26CC57B723A0876300ABB92A /* MLEncryptedPayload.m in Sources */,
 				26CC57B523A086CC00ABB92A /* XMPPMessage.m in Sources */,
 				26CC57B623A0876300ABB92A /* AESGcm.m in Sources */,
+				5455BC3324EB776F0024D80F /* MLUDPLogger.m in Sources */,
 				26CC57C723A0892100ABB92A /* MLContact.m in Sources */,
 				540F625F24BA951E0008A6D8 /* HelperTools.m in Sources */,
 				26CC57AF23A086C000ABB92A /* ParseEnabled.m in Sources */,

@@ -15,7 +15,7 @@
 /* Class = "UILabel"; text = "Day Change"; ObjectID = "6mV-D5-Rfv"; */
 "6mV-D5-Rfv.text" = "Tagänderung";
 /* Class = "UILabel"; text = "Add a New Contact"; ObjectID = "7Cs-k6-7n4"; */
-"7Cs-k6-7n4.text" = "Add a New Contact";
+"7Cs-k6-7n4.text" = "Neuen Kontakt hinzufügen";
 /* Class = "UILabel"; text = "Join a Group Chat"; ObjectID = "7dx-xo-wIB"; */
 "7dx-xo-wIB.text" = "Einem Gruppen-Chat beitreten";
 /* Class = "UILabel"; text = "Date"; ObjectID = "8oX-KS-wOP"; */
@@ -23,7 +23,7 @@
 /* Class = "UIBarButtonItem"; title = "Previous"; ObjectID = "AtF-5m-xfT"; */
 "AtF-5m-xfT.title" = "Vorherige";
 /* Class = "UIBarButtonItem"; title = "Settings"; ObjectID = "BWH-2I-fSI"; */
-"BWH-2I-fSI.title" = "Settings";
+"BWH-2I-fSI.title" = "Einstellungen";
 /* Class = "UILabel"; text = "Delivered"; ObjectID = "BY7-In-qxm"; */
 "BY7-In-qxm.text" = "Zugestellt";
 /* Class = "UIBarButtonItem"; title = "Info"; ObjectID = "C9Q-7y-bRl"; */
@@ -35,15 +35,15 @@
 /* Class = "UILabel"; text = "Title"; ObjectID = "F7S-Cl-Xop"; */
 "F7S-Cl-Xop.text" = "Titel";
 /* Class = "UINavigationItem"; title = "Contact Requests"; ObjectID = "GI8-WI-wYs"; */
-"GI8-WI-wYs.title" = "Contact Requests";
+"GI8-WI-wYs.title" = "Kontaktanfragen";
 /* Class = "UILabel"; text = "Subtitle"; ObjectID = "Gfw-KN-mew"; */
 "Gfw-KN-mew.text" = "Untertitel";
 /* Class = "UITableViewController"; title = "Edit Group Chat"; ObjectID = "GpF-k7-Z6D"; */
-"GpF-k7-Z6D.title" = "Edit Group Chat";
+"GpF-k7-Z6D.title" = "Gruppenchat bearbeiten";
 /* Class = "UIBarButtonItem"; title = "Next"; ObjectID = "HOk-DV-nls"; */
 "HOk-DV-nls.title" = "Next";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "IGd-kM-9BO"; */
-"IGd-kM-9BO.title" = "Close";
+"IGd-kM-9BO.title" = "Schließen";
 /* Class = "UILabel"; text = "Title"; ObjectID = "JKC-18-hqA"; */
 "JKC-18-hqA.text" = "Titel";
 /* Class = "UILabel"; text = "Send Message"; ObjectID = "KUa-bA-cQb"; */
@@ -51,15 +51,15 @@
 /* Class = "UINavigationItem"; title = "Send A Message "; ObjectID = "MiR-iW-O6e"; */
 "MiR-iW-O6e.title" = "Send A Message ";
 /* Class = "UINavigationItem"; title = "New"; ObjectID = "Msw-bP-HIu"; */
-"Msw-bP-HIu.title" = "New";
+"Msw-bP-HIu.title" = "Neu";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "NyY-WQ-3hC"; */
-"NyY-WQ-3hC.title" = "Close";
+"NyY-WQ-3hC.title" = "Schließen";
 /* Class = "UIBarButtonItem"; title = "Previous"; ObjectID = "OxW-Yc-5ky"; */
 "OxW-Yc-5ky.title" = "Vorherige";
 /* Class = "UIBarButtonItem"; title = "Next"; ObjectID = "PI2-N1-aLJ"; */
 "PI2-N1-aLJ.title" = "Next";
 /* Class = "UIButton"; normalTitle = "Join Group"; ObjectID = "Q7I-qj-4zk"; */
-"Q7I-qj-4zk.normalTitle" = "Join Group";
+"Q7I-qj-4zk.normalTitle" = "Gruppe beitreten";
 /* Class = "UILabel"; text = "Day Change"; ObjectID = "QYx-be-it3"; */
 "QYx-be-it3.text" = "Tagänderung";
 /* Class = "UINavigationItem"; title = "Chats"; ObjectID = "RRa-hC-xrf"; */
@@ -67,9 +67,9 @@
 /* Class = "UILabel"; text = "Label"; ObjectID = "Ra0-Eo-cAh"; */
 "Ra0-Eo-cAh.text" = "Label";
 /* Class = "UILabel"; text = "View Contact Requests"; ObjectID = "SmS-bT-id6"; */
-"SmS-bT-id6.text" = "View Contact Requests";
+"SmS-bT-id6.text" = "Kontaktanfragen anzeigen";
 /* Class = "UIBarButtonItem"; title = "Done"; ObjectID = "TMS-52-ORP"; */
-"TMS-52-ORP.title" = "Done";
+"TMS-52-ORP.title" = "Fertig";
 /* Class = "UILabel"; text = "Name"; ObjectID = "Tdu-SR-34h"; */
 "Tdu-SR-34h.text" = "Name";
 /* Class = "UILabel"; text = "Label"; ObjectID = "VFO-tq-wdS"; */
@@ -77,7 +77,7 @@
 /* Class = "UILabel"; text = "something.com"; ObjectID = "Vgy-m0-M8n"; */
 "Vgy-m0-M8n.text" = "something.com";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "Vtv-sv-ErG"; */
-"Vtv-sv-ErG.title" = "Close";
+"Vtv-sv-ErG.title" = "Schließen";
 /* Class = "UILabel"; text = "Date"; ObjectID = "WlK-KG-Z5M"; */
 "WlK-KG-Z5M.text" = "Date";
 /* Class = "UILabel"; text = "Link Title here is something that should be about two lines"; ObjectID = "WyS-w8-jKs"; */
@@ -95,11 +95,11 @@
 /* Class = "UILabel"; text = "Title"; ObjectID = "fKZ-SZ-6l0"; */
 "fKZ-SZ-6l0.text" = "Titel";
 /* Class = "UIBarButtonItem"; title = "Done"; ObjectID = "gy3-P9-g7W"; */
-"gy3-P9-g7W.title" = "Done";
+"gy3-P9-g7W.title" = "Fertig";
 /* Class = "UILabel"; text = "Day Change"; ObjectID = "h9a-ua-MIo"; */
 "h9a-ua-MIo.text" = "Tagänderung";
 /* Class = "UINavigationItem"; title = "Select An Account"; ObjectID = "heq-Ls-ieg"; */
-"heq-Ls-ieg.title" = "Select An Account";
+"heq-Ls-ieg.title" = "Ein Konto auswählen";
 /* Class = "UITabBarItem"; title = "Item"; ObjectID = "iLC-4b-aDr"; */
 "iLC-4b-aDr.title" = "Item";
 /* Class = "UIButton"; normalTitle = "Send"; ObjectID = "jIW-zk-rUu"; */
@@ -107,7 +107,7 @@
 /* Class = "UITabBarItem"; title = "Chats"; ObjectID = "jh7-be-VPo"; */
 "jh7-be-VPo.title" = "Chats";
 /* Class = "UINavigationItem"; title = "Group Chat"; ObjectID = "k0T-5X-FQu"; */
-"k0T-5X-FQu.title" = "Group Chat";
+"k0T-5X-FQu.title" = "Gruppenchat";
 /* Class = "UILabel"; text = "Title"; ObjectID = "kUT-6q-gUD"; */
 "kUT-6q-gUD.text" = "Titel";
 /* Class = "UIButton"; accessibilityLabel = "Send"; ObjectID = "kYa-y4-X5Z"; */
@@ -121,7 +121,7 @@
 /* Class = "UILabel"; text = "Day Change"; ObjectID = "oUy-5K-yIm"; */
 "oUy-5K-yIm.text" = "Tagänderung";
 /* Class = "UIBarButtonItem"; title = "Compose"; ObjectID = "pyP-qb-mfr"; */
-"pyP-qb-mfr.title" = "Compose";
+"pyP-qb-mfr.title" = "Verfassen";
 /* Class = "UINavigationItem"; title = "Contacts"; ObjectID = "qsR-dX-TO1"; */
 "qsR-dX-TO1.title" = "Contacts";
 /* Class = "UILabel"; text = "Detail"; ObjectID = "sff-9g-z31"; */
@@ -141,8 +141,8 @@
 /* Class = "UILabel"; text = "Day Change"; ObjectID = "x5i-Ok-Bwi"; */
 "x5i-Ok-Bwi.text" = "Tagänderung";
 /* Class = "UINavigationItem"; title = "Edit Group Chat"; ObjectID = "yIE-Ub-BAk"; */
-"yIE-Ub-BAk.title" = "Edit Group Chat";
+"yIE-Ub-BAk.title" = "Gruppenchat bearbeiten";
 /* Class = "UILabel"; text = "lastInteraction"; ObjectID = "zc6-pR-bBL"; */
-"zc6-pR-bBL.text" = "lastInteraction";
+"zc6-pR-bBL.text" = "letzte Aktivität";
 /* Class = "UILabel"; text = "Day Change"; ObjectID = "zsJ-nd-h6v"; */
 "zsJ-nd-h6v.text" = "Tagänderung";

@@ -1,1 +1,14 @@
-
+/* Class = "UINavigationItem"; title = "Welcome"; ObjectID = "yxA-wa-jGH"; */
+"yxA-wa-jGH.title" = "Velkommen";
+/* Class = "UITextField"; placeholder = "Username"; ObjectID = "Tjb-kj-Z5d"; */
+"Tjb-kj-Z5d.placeholder" = "Brukernavn";
+/* Class = "UILabel"; text = "Congratulations!"; ObjectID = "eEG-v1-Mb2"; */
+"eEG-v1-Mb2.text" = "Gratulerer";
+/* Class = "UITextField"; placeholder = "Account@something.com"; ObjectID = "ktr-DL-MYt"; */
+"ktr-DL-MYt.placeholder" = "konto@eksempel.no";
+/* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "29t-GS-Yof"; */
+"29t-GS-Yof.title" = "Lukk";
+/* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "0Tx-nj-jHi"; */
+"0Tx-nj-jHi.title" = "Lukk";
+/* Class = "UILabel"; text = "someone@yax.im"; ObjectID = "0IG-5n-3XF"; */
+"0IG-5n-3XF.text" = "noen@yax.im";

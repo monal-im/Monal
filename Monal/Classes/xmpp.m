@@ -288,17 +288,10 @@ NSString *const kXMPPPresence = @"presence";
     @synchronized(_smacksSyncPoint) {
         unackedCount = (unsigned long)[self.unAckedStanzas count];
     };
-    DDLogVerbose(@"Idle check:\n\t_accountState < kStateReconnecting = %@\n\t_reconnectInProgress = %@\n\t_catchupDone = %@\n\t[self.unAckedStanzas count] = %lu\n\t[_receiveQueue operationCount] = %lu\n\t[_sendQueue operationCount] = %lu",
-        _accountState < kStateReconnecting ? @"YES" : @"NO",
-        _reconnectInProgress ? @"YES" : @"NO",
-        _catchupDone ? @"YES" : @"NO",
-        unackedCount,
-        (unsigned long)[_receiveQueue operationCount],
-        (unsigned long)[_sendQueue operationCount]
-    );
     if(
         (
             //test if this account was permanently logged out but still has stanzas pending (this can happen if we have no connectivity for example)
+            //--> we are not idle in this case because we still have pending outgoing stanzas
             _accountState<kStateReconnecting &&
             !_reconnectInProgress &&
             !unackedCount
@@ -311,7 +304,15 @@ NSString *const kXMPPPresence = @"presence";
         )
     )
         retval=YES;
-    DDLogVerbose(@"--> %@", retval ? @"idle" : @"NOT IDLE");
+    DDLogVerbose(@"Idle check:\n\t_accountState < kStateReconnecting = %@\n\t_reconnectInProgress = %@\n\t_catchupDone = %@\n\t[self.unAckedStanzas count] = %lu\n\t[_receiveQueue operationCount] = %lu\n\t[_sendQueue operationCount] = %lu\n\t--> %@",
+        _accountState < kStateReconnecting ? @"YES" : @"NO",
+        _reconnectInProgress ? @"YES" : @"NO",
+        _catchupDone ? @"YES" : @"NO",
+        unackedCount,
+        (unsigned long)[_receiveQueue operationCount],
+        (unsigned long)[_sendQueue operationCount],
+        retval ? @"idle" : @"NOT IDLE"
+    );
     return retval;
 }
 
@@ -1940,7 +1941,7 @@ NSString *const kXMPPPresence = @"presence";
 
     //debug output
     @synchronized(_smacksSyncPoint) {
-        DDLogVerbose(@"persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n",
+        DDLogVerbose(@"persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@",
             self.lastHandledInboundStanza,
             self.lastHandledOutboundStanza,
             self.lastOutboundStanza,
@@ -1966,7 +1967,7 @@ NSString *const kXMPPPresence = @"presence";
             self.streamID = [dic objectForKey:@"streamID"];
             
             //debug output
-            DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n",
+            DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
                 self.lastOutboundStanza,
@@ -2061,7 +2062,7 @@ NSString *const kXMPPPresence = @"presence";
 
         //debug output
         @synchronized(_smacksSyncPoint) {
-            DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n",
+            DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
                 self.lastOutboundStanza,

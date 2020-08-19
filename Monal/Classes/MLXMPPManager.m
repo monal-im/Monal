@@ -262,25 +262,27 @@ static const int sendMessageTimeoutSeconds = 10;
             DDLogInfo(@"### All accounts idle, disconnecting and stopping all background tasks ###");
             [DDLog flushLog];
             [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
-            BOOL stopped = NO;
-            if(_bgTask != UIBackgroundTaskInvalid)
-            {
-                DDLogVerbose(@"stopping UIKit _bgTask");
+            [HelperTools dispatchSyncReentrant:^{
+                BOOL stopped = NO;
+                if(_bgTask != UIBackgroundTaskInvalid)
+                {
+                    DDLogVerbose(@"stopping UIKit _bgTask");
+                    [DDLog flushLog];
+                    [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
+                    _bgTask = UIBackgroundTaskInvalid;
+                    stopped = YES;
+                }
+                if(_bgFetch)
+                {
+                    DDLogVerbose(@"stopping backgroundFetchingTask");
+                    [DDLog flushLog];
+                    [_bgFetch setTaskCompletedWithSuccess:YES];
+                    stopped = YES;
+                }
+                if(!stopped)
+                    DDLogVerbose(@"no background tasks running, nothing to stop");
                 [DDLog flushLog];
-                [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
-                _bgTask = UIBackgroundTaskInvalid;
-                stopped = YES;
-            }
-            if(_bgFetch)
-            {
-                DDLogVerbose(@"stopping backgroundFetchingTask");
-                [DDLog flushLog];
-                [_bgFetch setTaskCompletedWithSuccess:YES];
-                stopped = YES;
-            }
-            if(!stopped)
-                DDLogVerbose(@"no background tasks running, nothing to stop");
-            [DDLog flushLog];
+            } onQueue:dispatch_get_main_queue()];
         }
     }
 }
@@ -327,6 +329,20 @@ static const int sendMessageTimeoutSeconds = 10;
         [self scheduleBackgroundFetchingTask];      //schedule new one if neccessary
         [DDLog flushLog];
     };
+    
+    if(_hasConnectivity)
+    {
+        for(xmpp* xmppAccount in [self connectedXMPP])
+        {
+            //try to send a ping. if it fails, it will reconnect
+            DDLogVerbose(@"manager pinging");
+            [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+        }
+    }
+    else
+        DDLogVerbose(@"BGTASK has *no* connectivity? That's strange!");
+    
+    //log bgtask ticks
     unsigned long tick = 0;
     while(1)
     {
@@ -342,7 +358,7 @@ static const int sendMessageTimeoutSeconds = 10;
     {
         if(@available(iOS 13.0, *))
         {
-            [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundFetchingTask usingQueue:dispatch_get_main_queue() launchHandler:^(BGTask *task) {
+            [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundFetchingTask usingQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0) launchHandler:^(BGTask *task) {
                 DDLogVerbose(@"RUNNING BGTASK LAUNCH HANDLER");
                 [self handleBackgroundFetchingTask:task];
             }];

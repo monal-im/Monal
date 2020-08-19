@@ -2,8 +2,8 @@ os: osx
 language: objective-c
 xcode_workspace: Monal.xcworkspace
 xcode_scheme: Monal
-xcode_destination: platform=iOS Simulator,OS=13.2.2,name=iPhone 8
-osx_image: xcode11.2
+xcode_destination: platform=iOS Simulator,OS=13.6,name=iPhone 8
+osx_image: xcode11.6
 podfile: Podfile
 before_install:
   - cd Monal

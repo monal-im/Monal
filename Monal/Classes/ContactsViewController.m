@@ -153,7 +153,7 @@
 
 -(void) refreshDisplay
 {
-    if([[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"]) //sort by status
+    if([[HelperTools defaultsDB] boolForKey:@"SortContacts"]) //sort by status
     {
         [[DataLayer sharedInstance] onlineContactsSortedBy:@"Status" withCompeltion:^(NSMutableArray *results) {
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -171,7 +171,7 @@
         }];
     }
     
-    if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+    if([[HelperTools defaultsDB] boolForKey:@"OfflineContact"])
     {
         [[DataLayer sharedInstance] offlineContactsWithCompletion:^(NSMutableArray *results) {
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -339,7 +339,7 @@
         toreturn =1;
     }
     else{
-        if([[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"])
+        if([[HelperTools defaultsDB] boolForKey:@"OfflineContact"])
             toreturn =3;
         else
             toreturn =2;
@@ -521,7 +521,7 @@
         return;
     }
     
-    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(NSLocalizedString(@"Remove %@ from contacts?",@""), nil),contact.fullName ];
+    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?",@""), contact.fullName];
     NSString* detailString =NSLocalizedString(@"They will no longer see when you are online. They may not be able to access your encryption keys.",@"");
     
     BOOL isMUC=contact.isGroup;

@@ -7,11 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLXMLNode.h"
-#import "HelperTools.h"
-
 #import "MLConstants.h"
-#import "MLXMPPConstants.h"
+
+#import "HelperTools.h"
+#import "MLXMLNode.h"
+
+
 #import "jingleCall.h"
 #import "MLDNSLookup.h"
 #import "MLSignalStore.h"
@@ -132,10 +133,6 @@ extern NSString* const kAccountHibernate;
 
 
 /**
- send but optionally tell it to not block. default is to block. 
- */
--(void) send:(MLXMLNode*) stanza async:(BOOL) async;
-/**
  Adds the stanza to the output Queue
  */
 -(void) send:(MLXMLNode* _Nonnull) stanza;
@@ -156,18 +153,6 @@ extern NSString* const kAccountHibernate;
 -(void) approveToRoster:(NSString* _Nonnull) contact;
 
 -(void) rejectFromRoster:(NSString* _Nonnull) contact;
-
-/**
- sets up a background task to reconnect if needed. dEfault wait of 5s
- */
--(void) reconnect;
-
-/**
- reconnect called with a specified wait. if never logged in then wait is 0.
- */
--(void) reconnect:(NSInteger) scheduleWait;
-
-
 
 #pragma mark set connection attributes
 /**

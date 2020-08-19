@@ -47,30 +47,25 @@ NS_ENUM(NSInteger, kSettingSection)
         NSLocalizedString(@"Backgrounds",@""),
         NSLocalizedString(@"Sounds",@""),
         NSLocalizedString(@"Display",@""),
+        NSLocalizedString(@"Privacy Settings",@""),
         NSLocalizedString(@"Chat Logs",@"")
     ];
     self.supportRows = @[
         NSLocalizedString(@"Email Support",@ ""),
         NSLocalizedString(@"Submit A Bug",@ "")
     ];
+
+    self.aboutRows = @[
+        NSLocalizedString(@"Rate Monal",@""),
+        NSLocalizedString(@"Open Source",@""),
+        NSLocalizedString(@"Privacy",@""),
+        NSLocalizedString(@"About",@""),
 #ifdef DEBUG
-    self.aboutRows = @[
-        NSLocalizedString(@"Rate Monal",@""),
-        NSLocalizedString(@"Open Source",@""),
-        NSLocalizedString(@"Privacy",@""),
-        NSLocalizedString(@"About",@""),
         NSLocalizedString(@"Log",@""),
-        NSLocalizedString(@"Version",@"")
-    ];
-#else
-    self.aboutRows = @[
-        NSLocalizedString(@"Rate Monal",@""),
-        NSLocalizedString(@"Open Source",@""),
-        NSLocalizedString(@"Privacy",@""),
-        NSLocalizedString(@"About",@""),
-        NSLocalizedString(@"Version",@"")
-    ];
 #endif
+        NSLocalizedString(@"Version",@"")
+    ];
+
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 #if !TARGET_OS_MACCATALYST
     if (@available(iOS 13.0, *)) {
@@ -121,7 +116,7 @@ NS_ENUM(NSInteger, kSettingSection)
             break;
         }
         case kSettingSectionAbout: {
-            if(indexPath.row==5)
+            if(indexPath.row == (self.aboutRows.count - 1))
             {
                 NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
                 NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
@@ -157,34 +152,39 @@ NS_ENUM(NSInteger, kSettingSection)
                 case 0:
                     [self performSegueWithIdentifier:@"showLogin" sender:self];
                     break;
-                    
+
                 case 1:
                     [self performSegueWithIdentifier:@"showAccounts" sender:self];
                     break;
-                    
+
                 case 2:
                     [self performSegueWithIdentifier:@"showNotification" sender:self];
                     break;
-                    
+
                 case 3:
                     [self performSegueWithIdentifier:@"showBackgrounds" sender:self];
                     break;
+
                 case 4:
                     [self performSegueWithIdentifier:@"showSounds" sender:self];
                     break;
-                    
+
                 case 5:
                     [self performSegueWithIdentifier:@"showDisplay" sender:self];
                     break;
-                    
+
                 case 6:
+                    [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
+                    break;
+
+                case 7:
                     [self performSegueWithIdentifier:@"showChatLog" sender:self];
                     break;
-                    
-                case 7:
+
+                case 8:
                     [self performSegueWithIdentifier:@"showCloud" sender:self];
                     break;
-       
+
                 default:
                     break;
             }

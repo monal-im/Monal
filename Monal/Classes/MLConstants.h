@@ -10,22 +10,38 @@
 #import "MLContact.h"
 
 @import CocoaLumberjack;
-#ifdef  DEBUG
 static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
-#else
-static const DDLogLevel ddLogLevel = DDLogLevelInfo;
-#endif
+#import "MLLogFileManager.h"
+#import "MLLogFormatter.h"
 
 
+//configure app group constants
+#define kAppGroup @"group.monal"
+
+
+// some typedefs used throughout the project
 typedef void (^contactCompletion)(MLContact *selectedContact);
 typedef void (^accountCompletion)(NSInteger accountRow);
-typedef void (^monal_void_block_t)();
+typedef void (^monal_void_block_t)(void);
 
 
+//some xmpp related constants
+#define kRegServer @"yax.im"
+
+#define kXMLNS @"xmlns"
+#define kId @"id"
+#define kJid @"jid"
+
+#define kRegisterNameSpace @"jabber:iq:register"
+#define kDataNameSpace @"jabber:x:data"
+#define kBobNameSpace @"urn:xmpp:bob"
+#define kStanzasNameSpace @"urn:ietf:params:xml:ns:xmpp-stanzas"
+
+
+//all other constants needed
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
 #define kMLMessageSentToContact @"kMLMessageSentToContact"
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"
-#define kMonalSendFailedMessageNotice @"kMonalSendFailedMessageNotice"
 
 #define kMonalLastInteractionUpdatedNotice @"kMonalLastInteractionUpdatedNotice"
 #define kMonalMessageReceivedNotice @"kMonalMessageReceivedNotice"
@@ -48,8 +64,11 @@ typedef void (^monal_void_block_t)();
 #define kMonalAccountStatusChanged @"kMonalAccountStatusChanged"
 #define kMonalAccountAuthRequest @"kMonalAccountAuthRequest"
 
+#define kMonalRefresh @"kMonalRefresh"
 #define kMonalContactRefresh @"kMonalContactRefresh"
-#define kMonalRefreshContacts @"kMonalRefreshContacts"
+
+// max count of char's in a single message (both: sending and receiving)
+#define kMonalChatMaxAllowedTextLen 2048
 
 //contact cells
 #define kusernameKey @"username"

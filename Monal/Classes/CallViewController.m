@@ -31,30 +31,30 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    DDLogVerbose(NSLocalizedString(@"call screen will  appear",@ ""));
-    [UIDevice currentDevice].proximityMonitoringEnabled=YES;
+    DDLogVerbose(@"call screen will appear");
+    [UIDevice currentDevice].proximityMonitoringEnabled = YES;
    
     NSString *contactName ;
     if(self.contact) {
-        contactName=self.contact.contactJid;
-        if(!contactName) {
-            contactName = NSLocalizedString(@"No Contact Selected",@ "");
-            
-        }
-    } 
+        contactName = self.contact.contactJid;
+    }
+    if(!contactName) {
+        contactName = NSLocalizedString(@"No Contact Selected", @ "");
+    }
     
-        self.userName.text=contactName;
+    self.userName.text = contactName;
   
     [[MLImageManager sharedInstance] getIconForContact:contactName andAccount:self.contact.accountId withCompletion:^(UIImage *image) {
-        self.userImage.image=image;
+        self.userImage.image = image;
     }];
     
     [[MLXMPPManager sharedInstance] callContact:self.contact];
-    
 }
 
 -(void) viewDidAppear:(BOOL)animated
 {
+    [super viewDidAppear:animated];
+
     [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
         if(!granted)
         {

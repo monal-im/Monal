@@ -39,20 +39,20 @@
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     if([segue.identifier isEqualToString:@"newContact"])
-       {
-           addContact* newScreen = (addContact *)segue.destinationViewController;
-           newScreen.completion = ^(MLContact *selectedContact) {
-               if(self.selectContact) self.selectContact(selectedContact);
-           };
-       } else
-    if([segue.identifier isEqualToString:@"newGroup"])
+    {
+       addContact* newScreen = (addContact *)segue.destinationViewController;
+       newScreen.completion = ^(MLContact *selectedContact) {
+           if(self.selectContact) self.selectContact(selectedContact);
+       };
+    }
+    else if([segue.identifier isEqualToString:@"newGroup"])
     {
         MLEditGroupViewController* newScreen = (MLEditGroupViewController *)segue.destinationViewController;
         newScreen.completion = ^(MLContact *selectedContact) {
             if(self.selectContact) self.selectContact(selectedContact);
         };
     }
-    if([segue.identifier isEqualToString:@"acceptContact"]) {
+    else if([segue.identifier isEqualToString:@"acceptContact"]) {
         MLSubscriptionTableViewController* newScreen = (MLSubscriptionTableViewController *)segue.destinationViewController;
     }
 }

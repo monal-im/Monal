@@ -11,8 +11,16 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+void logException(NSException* exception);
+
 @interface HelperTools : NSObject
 
++(BOOL) isInBackground;
++(void) dispatchSyncReentrant:(monal_void_block_t) block onQueue:(dispatch_queue_t) queue;
++(void) activityLog;
++(NSUserDefaults*) defaultsDB;
++(DDFileLogger*) configureLogging;
++(BOOL) isAppExtension;
 +(NSString*) generateStringOfFeatureSet:(NSSet*) features;
 +(NSSet*) getOwnFeatureSet;
 +(NSString*) getOwnCapsHash;
@@ -30,6 +38,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)hexadecimalString:(NSData*) data;
 + (NSData *)dataWithHexString:(NSString *)hex;
 + (NSString *)signalHexKeyWithData:(NSData*) data;
+
++(UIView*) MLCustomViewHeaderWithTitle:(NSString*) title;
 
 @end
 

@@ -63,6 +63,8 @@
 
 -(void) viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
+    
     [self refresh];
 }
 
@@ -74,7 +76,7 @@
 
 -(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    return NSLocalizedString(@"Favorite Group Chats (MUC). Tap to join. ",@"");
+    return NSLocalizedString(@"Favorite Group Chats (MUC). Tap to join. ", @"");
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -93,10 +95,10 @@
     
     if(autoJoin.boolValue)
     {
-        cell.detailTextLabel.text= @"(autojoin)";
+        cell.detailTextLabel.text = NSLocalizedString(@"(autojoin)", @"");
     }
     else  {
-        cell.detailTextLabel.text= @"";
+        cell.detailTextLabel.text = @"";
     }
     
     cell.textLabel.text = cellText;

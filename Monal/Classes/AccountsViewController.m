@@ -11,7 +11,7 @@
 #import "XMPPEdit.h"
 #import "MBProgressHUD.h"
 #import "xmpp.h"
-
+#import "HelperTools.h"
 
 @interface AccountsViewController ()
 
@@ -145,25 +145,8 @@
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    UIView *tempView=[[UIView alloc]initWithFrame:CGRectMake(0,200,300,244)];
-    tempView.backgroundColor=[UIColor clearColor];
-    
-    UILabel *tempLabel=[[UILabel alloc]initWithFrame:CGRectMake(15,0,300,44)];
-    tempLabel.backgroundColor=[UIColor clearColor];
-    tempLabel.shadowColor = [UIColor blackColor];
-    tempLabel.shadowOffset = CGSizeMake(0,2);
-    tempLabel.textColor = [UIColor whiteColor]; //here you can change the text color of header.
-    tempLabel.font = [UIFont boldSystemFontOfSize:17.0f];
-    tempLabel.text=[self tableView:tableView titleForHeaderInSection:section ];
-    
-    [tempView addSubview:tempLabel];
-    
-    tempLabel.textColor=[UIColor darkGrayColor];
-    tempLabel.text=  tempLabel.text.uppercaseString;
-    tempLabel.shadowColor =[UIColor clearColor];
-    tempLabel.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
-
-    return tempView;
+    NSString* sectionTitle = [self tableView:tableView titleForHeaderInSection:section];
+    return [HelperTools MLCustomViewHeaderWithTitle:sectionTitle];
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section

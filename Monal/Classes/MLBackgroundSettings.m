@@ -6,6 +6,7 @@
 //  Copyright © 2018 Monal.im. All rights reserved.
 //
 
+#import "HelperTools.h"
 #import "MLBackgroundSettings.h"
 #import "MLSettingCell.h"
 #import "MLImageManager.h"
@@ -70,7 +71,7 @@
             MLSettingCell* cell=[[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
             cell.parent= self;
             cell.switchEnabled=YES;
-            cell.defaultKey=NSLocalizedString(@"ChatBackgrounds",@"");
+            cell.defaultKey=@"ChatBackgrounds";
             cell.textLabel.text=NSLocalizedString(@"Chat Backgrounds",@"");
             toreturn=cell;
             break;
@@ -150,7 +151,7 @@
 {
     self.photos = [NSMutableArray array];
 
-    NSString *currentBackground = [[NSUserDefaults standardUserDefaults] objectForKey:@"BackgroundImage"];
+    NSString *currentBackground = [[HelperTools defaultsDB] objectForKey:@"BackgroundImage"];
     self.selectedIndex=-1;
     // Add photos
     [self.imageList enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -191,7 +192,7 @@
 }
 
 -(void) close {
-    [[NSUserDefaults standardUserDefaults] setObject:[self.imageList objectAtIndex:self.displayedPhotoIndex] forKey:@"BackgroundImage"];
+    [[HelperTools defaultsDB] setObject:[self.imageList objectAtIndex:self.displayedPhotoIndex] forKey:@"BackgroundImage"];
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -201,7 +202,7 @@
     [coordinator coordinateReadingItemAtURL:urls.firstObject options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
         NSData *data =[NSData dataWithContentsOfURL:newURL];
         if([[MLImageManager sharedInstance] saveBackgroundImageData:data]) {
-            [[NSUserDefaults standardUserDefaults] setObject:@"CUSTOM" forKey:@"BackgroundImage"];
+            [[HelperTools defaultsDB] setObject:@"CUSTOM" forKey:@"BackgroundImage"];
         }
     }];
 }
@@ -214,7 +215,7 @@
 
 - (void)photoBrowser:(IDMPhotoBrowser *)photoBrowser didDismissAtPageIndex:(NSUInteger)index
 {
-    [[NSUserDefaults standardUserDefaults] setObject:[self.imageList objectAtIndex:index] forKey:@"BackgroundImage"];
+    [[HelperTools defaultsDB] setObject:[self.imageList objectAtIndex:index] forKey:@"BackgroundImage"];
 }
 
 #pragma mark - image picker delegate
@@ -231,7 +232,7 @@
         {
             
             if([[MLImageManager sharedInstance] saveBackgroundImageData:jpgData]) {
-                [[NSUserDefaults standardUserDefaults] setObject:@"CUSTOM" forKey:@"BackgroundImage"];
+                [[HelperTools defaultsDB] setObject:@"CUSTOM" forKey:@"BackgroundImage"];
             }
             
         }

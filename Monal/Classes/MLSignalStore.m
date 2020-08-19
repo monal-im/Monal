@@ -9,16 +9,40 @@
 #import "MLSignalStore.h"
 #import "SignalProtocolObjC.h"
 #import "DataLayer.h"
+#import "MLSQLite.h"
 
 @interface MLSignalStore()
-@property (nonatomic, strong) NSString *accountId;
+{
+    NSString* _dbPath;
+}
+@property (nonatomic, strong) NSString* accountId;
+@property (readonly, strong) MLSQLite* sqliteDatabase;
 @end
 
 @implementation MLSignalStore
 
++(void) initialize
+{
+    //WE USE THE SAME DATABASE FILE AS THE DataLayer --> this should probably be migrated into the datalayer or use its own sqlite database
+    
+    //make sure the datalayer has migrated the database file to the app group location first
+    [DataLayer initialize];
+}
+
+//this is the getter of our readonly "sqliteDatabase" property always returning the thread-local instance of the MLSQLite class
+-(MLSQLite*) sqliteDatabase
+{
+    //always return thread-local instance of sqlite class (this is important for performance!)
+    return [MLSQLite sharedInstanceForFile:_dbPath];
+}
+
 -(id) initWithAccountId:(NSString *) accountId{
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
+    _dbPath = [[containerUrl path] stringByAppendingPathComponent:@"sworim.sqlite"];
+    
     self.accountId=accountId;
-    NSArray *data= [[DataLayer sharedInstance] executeReader:@"select identityPrivateKey, deviceid,identityPublicKey from signalIdentity where account_id=?" andArguments:@[accountId]];
+    NSArray *data= [self.sqliteDatabase executeReader:@"select identityPrivateKey, deviceid,identityPublicKey from signalIdentity where account_id=?" andArguments:@[accountId]];
     NSDictionary *row = [data firstObject];
    
     if(row)
@@ -54,7 +78,7 @@
 
 -(NSMutableArray *) readPreKeys
 {
-    NSArray *keys= [[DataLayer sharedInstance] executeReader:@"select prekeyid, preKey from signalPreKey where account_id=?" andArguments:@[self.accountId]];
+    NSArray *keys= [self.sqliteDatabase executeReader:@"select prekeyid, preKey from signalPreKey where account_id=?" andArguments:@[self.accountId]];
     NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:keys.count];
     
     for (NSDictionary *row in keys)
@@ -85,7 +109,7 @@
  */
 - (nullable NSData*) sessionRecordForAddress:(SignalAddress*)address
 {
-    NSData *record= (NSData *)[[DataLayer sharedInstance] executeScalar:@"select recordData from signalContactSession where account_id=? and contactName=? and contactDeviceId=?" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId]]];
+    NSData *record= (NSData *)[self.sqliteDatabase executeScalar:@"select recordData from signalContactSession where account_id=? and contactName=? and contactDeviceId=?" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId]]];
     return record;
 }
 
@@ -99,11 +123,11 @@
 {
     if([self sessionRecordForAddress:address])
     {
-        BOOL success=[[DataLayer sharedInstance] executeNonQuery:@"update  signalContactSession set recordData =? where account_id=? and contactName =? and contactDeviceId=?" andArguments:@[recordData, self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId]]];
+        BOOL success=[self.sqliteDatabase executeNonQuery:@"update  signalContactSession set recordData =? where account_id=? and contactName =? and contactDeviceId=?" andArguments:@[recordData, self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId]]];
         return success;
     }
     else {
-        BOOL success=[[DataLayer sharedInstance] executeNonQuery:@"insert into  signalContactSession (account_id,contactName,contactDeviceId,recordData) values  (?,?,?,?)" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId], recordData]];
+        BOOL success=[self.sqliteDatabase executeNonQuery:@"insert into  signalContactSession (account_id,contactName,contactDeviceId,recordData) values  (?,?,?,?)" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId], recordData]];
         return success;
     }
 }
@@ -123,7 +147,7 @@
  */
 - (BOOL) deleteSessionRecordForAddress:(SignalAddress*)address
 {
-  return  [[DataLayer sharedInstance] executeNonQuery:@"delete from signalContactSession where account_id=? and contactName=? and contactDeviceId=?" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId]]];
+  return  [self.sqliteDatabase executeNonQuery:@"delete from signalContactSession where account_id=? and contactName=? and contactDeviceId=?" andArguments:@[self.accountId, address.name, [NSNumber numberWithInteger:address.deviceId]]];
 }
 
 /**
@@ -131,7 +155,7 @@
  */
 - (NSArray<NSNumber*>*) allDeviceIdsForAddressName:(NSString*)addressName
 {
-    NSArray *rows= [[DataLayer sharedInstance] executeReader:@"select distinct contactDeviceId from signalContactSession where account_id=? and contactName=? " andArguments:@[self.accountId, addressName]];
+    NSArray *rows= [self.sqliteDatabase executeReader:@"select distinct contactDeviceId from signalContactSession where account_id=? and contactName=? " andArguments:@[self.accountId, addressName]];
 
     NSMutableArray *devices = [[NSMutableArray alloc] initWithCapacity:rows.count];
     
@@ -148,7 +172,7 @@
 {
     if(!addressName) return nil;
     
-    NSArray *rows= [[DataLayer sharedInstance] executeReader:@"select distinct contactDeviceId from signalContactIdentity where account_id=? and contactName=? " andArguments:@[self.accountId, addressName]];
+    NSArray *rows= [self.sqliteDatabase executeReader:@"select distinct contactDeviceId from signalContactIdentity where account_id=? and contactName=? " andArguments:@[self.accountId, addressName]];
     
     NSMutableArray *devices = [[NSMutableArray alloc] initWithCapacity:rows.count];
     
@@ -169,9 +193,9 @@
 - (int) deleteAllSessionsForAddressName:(NSString*)addressName
 {
     
-    NSNumber *count = (NSNumber *) [[DataLayer sharedInstance] executeScalar:@"count * from  signalContactSession where account_id=? and contactName=? " andArguments:@[self.accountId, addressName]];
+    NSNumber *count = (NSNumber *) [self.sqliteDatabase executeScalar:@"count * from  signalContactSession where account_id=? and contactName=? " andArguments:@[self.accountId, addressName]];
     
-    [[DataLayer sharedInstance] executeNonQuery:@"delete from  signalContactSession where account_id=? and contactName=? " andArguments:@[self.accountId, addressName]];
+    [self.sqliteDatabase executeNonQuery:@"delete from  signalContactSession where account_id=? and contactName=? " andArguments:@[self.accountId, addressName]];
     
     return count.intValue;
 }
@@ -183,7 +207,7 @@
  */
 - (nullable NSData*) loadPreKeyWithId:(uint32_t)preKeyId;
 {
-    NSData *preKeyData= (NSData *)[[DataLayer sharedInstance] executeScalar:@"select prekey from signalPreKey where account_id=? and prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
+    NSData *preKeyData= (NSData *)[self.sqliteDatabase executeScalar:@"select prekey from signalPreKey where account_id=? and prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
     return preKeyData;
 }
 
@@ -193,7 +217,7 @@
  */
 - (BOOL) storePreKey:(NSData*)preKey preKeyId:(uint32_t)preKeyId
 {
-    BOOL success= [[DataLayer sharedInstance] executeNonQuery:@"insert into  signalPreKey (account_id,prekeyid,preKey) values (?,?,?)" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId], preKey]];
+    BOOL success= [self.sqliteDatabase executeNonQuery:@"insert into  signalPreKey (account_id,prekeyid,preKey) values (?,?,?)" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId], preKey]];
      return success;
 }
 
@@ -212,7 +236,7 @@
  */
 - (BOOL) deletePreKeyWithId:(uint32_t)preKeyId
 {
-    return [[DataLayer sharedInstance] executeNonQuery:@"delete  from signalPreKey where account_id=? and prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
+    return [self.sqliteDatabase executeNonQuery:@"delete  from signalPreKey where account_id=? and prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
 
 }
 
@@ -221,7 +245,7 @@
  */
 - (nullable NSData*) loadSignedPreKeyWithId:(uint32_t)signedPreKeyId
 {
-    NSData *key= (NSData *)[[DataLayer sharedInstance] executeScalar:@"select signedPreKey from signalSignedPreKey where account_id=? and signedPreKeyId=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:signedPreKeyId]]];
+    NSData *key= (NSData *)[self.sqliteDatabase executeScalar:@"select signedPreKey from signalSignedPreKey where account_id=? and signedPreKeyId=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:signedPreKeyId]]];
     return key;
 }
 
@@ -230,7 +254,7 @@
  */
 - (BOOL) storeSignedPreKey:(NSData*)signedPreKey signedPreKeyId:(uint32_t)signedPreKeyId
 {
-    BOOL success= [[DataLayer sharedInstance] executeNonQuery:@"insert into  signalSignedPreKey (account_id,signedPreKeyId, signedPreKey) values (?,?,?)" andArguments:@[self.accountId,  [NSNumber numberWithInteger:signedPreKeyId], signedPreKey]];
+    BOOL success= [self.sqliteDatabase executeNonQuery:@"insert into  signalSignedPreKey (account_id,signedPreKeyId, signedPreKey) values (?,?,?)" andArguments:@[self.accountId,  [NSNumber numberWithInteger:signedPreKeyId], signedPreKey]];
     
     return success;
 }
@@ -241,7 +265,7 @@
  */
 - (BOOL) containsSignedPreKeyWithId:(uint32_t)signedPreKeyId
 {
-    NSData *key= (NSData *)[[DataLayer sharedInstance] executeScalar:@"select signedPreKey from signalSignedPreKey where account_id=? and signedPreKeyId=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:signedPreKeyId]]];
+    NSData *key= (NSData *)[self.sqliteDatabase executeScalar:@"select signedPreKey from signalSignedPreKey where account_id=? and signedPreKeyId=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:signedPreKeyId]]];
     return key?YES:NO;
 }
 
@@ -250,7 +274,7 @@
  */
 - (BOOL) removeSignedPreKeyWithId:(uint32_t)signedPreKeyId
 {
-    return [[DataLayer sharedInstance] executeNonQuery:@"delete  from signalSignedPreKey where account_id=? and signedPreKeyId=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:signedPreKeyId]]];
+    return [self.sqliteDatabase executeNonQuery:@"delete  from signalSignedPreKey where account_id=? and signedPreKeyId=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:signedPreKeyId]]];
 }
 
 /**
@@ -263,7 +287,7 @@
 
 - (BOOL) storeIdentityPublicKey:(NSData*)publicKey andPrivateKey:(NSData *) privateKey
 {
-    BOOL success= [[DataLayer sharedInstance] executeNonQuery:@"insert into  signalIdentity (account_id, deviceid,identityPublicKey, identityPrivateKey) values (?,?,?,?)" andArguments:@[self.accountId, [NSNumber numberWithInteger:self.deviceid], publicKey, privateKey]];
+    BOOL success= [self.sqliteDatabase executeNonQuery:@"insert into  signalIdentity (account_id, deviceid,identityPublicKey, identityPrivateKey) values (?,?,?,?)" andArguments:@[self.accountId, [NSNumber numberWithInteger:self.deviceid], publicKey, privateKey]];
     return success;
 }
 
@@ -291,12 +315,12 @@
  */
 - (BOOL) saveIdentity:(SignalAddress*)address identityKey:(nullable NSData*)identityKey;
 {
-    NSData *dbIdentity= (NSData *)[[DataLayer sharedInstance] executeScalar:@"select identity from signalContactIdentity where account_id=? and contactDeviceId=? and contactName=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    NSData *dbIdentity= (NSData *)[self.sqliteDatabase executeScalar:@"select identity from signalContactIdentity where account_id=? and contactDeviceId=? and contactName=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
     if(dbIdentity)
     {
         return YES;
     }
-    BOOL success= [[DataLayer sharedInstance] executeNonQuery:@"insert into signalContactIdentity (account_id,contactName,contactDeviceId,identity,trusted) values (?,?,?,?,1)" andArguments:@[self.accountId,address.name,[NSNumber numberWithInteger:address.deviceId], identityKey]];
+    BOOL success= [self.sqliteDatabase executeNonQuery:@"insert into signalContactIdentity (account_id,contactName,contactDeviceId,identity,trusted) values (?,?,?,?,1)" andArguments:@[self.accountId,address.name,[NSNumber numberWithInteger:address.deviceId], identityKey]];
     return success;
 }
 
@@ -332,17 +356,17 @@
 
 -(NSData *) getIdentityForAddress:(SignalAddress*)address
 {
-    return (NSData *)[[DataLayer sharedInstance] executeScalar:@"select identity from signalContactIdentity where account_id=? and contactDeviceId=? and contactName=? and trusted=1" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    return (NSData *)[self.sqliteDatabase executeScalar:@"select identity from signalContactIdentity where account_id=? and contactDeviceId=? and contactName=? and trusted=1" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
 }
 
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address
 {
-    [[DataLayer sharedInstance] executeNonQuery:@"update signalContactIdentity set trusted=?  where account_id=? and contactDeviceId=? and contactName=?" andArguments:@[[NSNumber numberWithBool:trust], self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    [self.sqliteDatabase executeNonQuery:@"update signalContactIdentity set trusted=?  where account_id=? and contactDeviceId=? and contactName=?" andArguments:@[[NSNumber numberWithBool:trust], self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
 }
 
 -(void) deleteDeviceforAddress:(SignalAddress*)address
 {
-    [[DataLayer sharedInstance] executeNonQuery:@"delete from signalContactIdentity where account_id=? and contactDeviceId=? and contactName=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    [self.sqliteDatabase executeNonQuery:@"delete from signalContactIdentity where account_id=? and contactDeviceId=? and contactName=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
 }
 
 /**
@@ -350,7 +374,7 @@
  */
 -(NSData *) getUntrustedForAddress:(SignalAddress*)address
 {
-    return (NSData *)[[DataLayer sharedInstance] executeScalar:@"select identity from signalContactIdentity where account_id=? and contactDeviceId=? and contactName=? and trusted=0" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    return (NSData *)[self.sqliteDatabase executeScalar:@"select identity from signalContactIdentity where account_id=? and contactDeviceId=? and contactName=? and trusted=0" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
 }
 
 /**
@@ -359,7 +383,7 @@
  */
 - (BOOL) storeSenderKey:(NSData*)senderKey address:(SignalAddress*)address groupId:(NSString*)groupId;
 {
-    BOOL success= [[DataLayer sharedInstance] executeNonQuery:@"insert into signalContactKey (account_id,contactName,contactDeviceId,groupId,senderKey) values (?,?,?,?,?)" andArguments:@[self.accountId,address.name, [NSNumber numberWithInteger:address.deviceId], groupId,senderKey]];
+    BOOL success= [self.sqliteDatabase executeNonQuery:@"insert into signalContactKey (account_id,contactName,contactDeviceId,groupId,senderKey) values (?,?,?,?,?)" andArguments:@[self.accountId,address.name, [NSNumber numberWithInteger:address.deviceId], groupId,senderKey]];
      return success;
 }
 
@@ -369,7 +393,7 @@
  */
 - (nullable NSData*) loadSenderKeyForAddress:(SignalAddress*)address groupId:(NSString*)groupId;
 {
-    NSData *keyData= (NSData *)[[DataLayer sharedInstance] executeScalar:@"select senderKey from signalContactKey where account_id=? and groupId=? and contactDeviceId=? and contactName=?" andArguments:@[self.accountId,groupId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    NSData *keyData= (NSData *)[self.sqliteDatabase executeScalar:@"select senderKey from signalContactKey where account_id=? and groupId=? and contactDeviceId=? and contactName=?" andArguments:@[self.accountId,groupId, [NSNumber numberWithInteger:address.deviceId], address.name]];
     return keyData;
 }
 

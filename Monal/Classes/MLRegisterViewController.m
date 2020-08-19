@@ -132,7 +132,7 @@
                 
                 [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
                     if(result) {
-                        [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
+                        [[DataLayer sharedInstance] getHighestAccountIdWithCompletion:^(NSObject * accountid) {
                             if(accountid) {
                                 NSString *accountno=[NSString stringWithFormat:@"%@",accountid];
                                 [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
@@ -161,7 +161,7 @@
 -(IBAction) useWithoutAccount:(id)sender
 {
     [self dismissViewControllerAnimated:YES completion:nil];
-    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasSeenLogin"];
+    [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
 }
 
 -(IBAction) tapAction:(id)sender

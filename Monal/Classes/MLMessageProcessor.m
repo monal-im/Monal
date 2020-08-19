@@ -65,8 +65,8 @@ static NSMutableDictionary* _typingNotifications;
         }
         
         //update db
-        [[DataLayer sharedInstance] setMessageId:messageNode.idval errorType:messageNode.errorType?messageNode.errorType:@""
-                                     errorReason:messageNode.errorReason?messageNode.errorReason:@""];
+        [[DataLayer sharedInstance] setMessageId:messageNode.idval errorType:messageNode.errorType ? messageNode.errorType : @""
+                                     errorReason:messageNode.errorReason ? messageNode.errorReason : @""];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageErrorNotice object:nil  userInfo:@{@"MessageID":messageNode.idval,@"errorType":messageNode.errorType?messageNode.errorType:@"",@"errorReason":messageNode.errorReason?messageNode.errorReason:@""
         }];
 
@@ -103,33 +103,39 @@ static NSMutableDictionary* _typingNotifications;
         }
         else
         {
-            NSString *jidWithoutResource =self.jid;
-           
             //if mam but newer than last message we do want an alert..
             [[DataLayer sharedInstance] lastMessageDateForContact:messageNode.from andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
-                BOOL unread=YES;
-                BOOL showAlert=YES;
+                BOOL unread = YES;
+                BOOL showAlert = YES;
                 
-                if ([messageNode.from isEqualToString:jidWithoutResource]
-                    || (messageNode.mamResult
-                        && lastDate.timeIntervalSince1970>messageNode.delayTimeStamp.timeIntervalSince1970)) {
-                    unread=NO;
-                    showAlert=NO;
+                if(
+                    [messageNode.from isEqualToString:self.jid] ||
+                    (
+                        messageNode.mamResult &&
+                        messageNode.delayTimeStamp &&
+                        lastDate.timeIntervalSince1970 > messageNode.delayTimeStamp.timeIntervalSince1970
+                    )
+                )
+                {
+                    DDLogVerbose(@"Setting showAlert to NO");
+                    showAlert = NO;
+                    unread = NO;
                 }
               
-                NSString *messageType=nil;
-                BOOL encrypted=NO;
-                NSString *body=messageNode.messageText;
+                NSString* messageType = nil;
+                BOOL encrypted = NO;
+                NSString* body = messageNode.messageText;
                 
                 if(messageNode.oobURL)
                 {
-                    messageType=kMessageTypeImage;
-                    body=messageNode.oobURL;
+                    messageType = kMessageTypeImage;
+                    body = messageNode.oobURL;
                 }
                 
-                if(decrypted) {
-                    body=decrypted;
-                    encrypted=YES;
+                if(decrypted)
+                {
+                    body = decrypted;
+                    encrypted = YES;
                 }
                 
                 
@@ -138,23 +144,22 @@ static NSMutableDictionary* _typingNotifications;
                     messageType=kMessageTypeStatus;
                     
                     [[DataLayer sharedInstance] mucSubjectforAccount:self.accountNo andRoom:messageNode.from withCompletion:^(NSString *currentSubject) {
-                        if(![messageNode.subject isEqualToString:currentSubject]) {
+                        if(![messageNode.subject isEqualToString:currentSubject])
+                        {
                             [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
-                            
-                            if(self.postPersistAction) {
+                            if(self.postPersistAction)
                                 self.postPersistAction(YES, encrypted, showAlert, messageNode.subject, messageType);
-                            }
                         }
                     }];
                     
                     return;
                 }
                 
-                NSString *messageId=messageNode.idval;
-                if(messageId.length==0)
+                NSString *messageId = messageNode.idval;
+                if(!messageId.length)
                 {
-                    DDLogError(@"Empty ID using guid");
-                    messageId=[[NSUUID UUID] UUIDString];
+                    DDLogError(@"Empty ID using random UUID");
+                    messageId = [[NSUUID UUID] UUIDString];
                 }
                 
                 [[DataLayer sharedInstance] addMessageFrom:messageNode.from
@@ -162,7 +167,7 @@ static NSMutableDictionary* _typingNotifications;
                                                 forAccount:self->_accountNo
                                                   withBody:[body copy]
                                               actuallyfrom:messageNode.actualFrom
-                                                 delivered:YES
+                                                      sent:YES
                                                     unread:unread
                                                  messageId:messageId
                                            serverMessageId:messageNode.stanzaId
@@ -200,35 +205,39 @@ static NSMutableDictionary* _typingNotifications;
         [self processHeadline:messageNode];
     }
     
-    //only use "is typing" messages when not older than 2 minutes (always allow "not typing" messages)
-    if([[DataLayer sharedInstance] checkCap:@"http://jabber.org/protocol/chatstates" forUser:messageNode.user andAccountNo:self.accountNo] &&
-        ((messageNode.composing && (!messageNode.delayTimeStamp || [[NSDate date] timeIntervalSinceDate:messageNode.delayTimeStamp] < 120)) ||
-        messageNode.notComposing)
-    )
+    //ignore typing notifications when in appex
+    if(![HelperTools isAppExtension])
     {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
-            @"jid": messageNode.user,
-            @"accountNo": self.accountNo,
-            @"isTyping": messageNode.composing ? @YES : @NO
-        }];
-        //send "not typing" notifications (kMonalLastInteractionUpdatedNotice) 60 seconds after the last isTyping was received
-        @synchronized(_typingNotifications) {
-            //copy needed values into local variables to not retain self by our timer block
-            NSString* account = self.accountNo;
-            NSString* jid = messageNode.user;
-            //abort old timer on new isTyping or isNotTyping message
-            if(_typingNotifications[messageNode.user])
-                ((monal_void_block_t) _typingNotifications[messageNode.user])();
-            //start a new timer for every isTyping message
-            if(messageNode.composing)
-            {
-                _typingNotifications[messageNode.user] = [HelperTools startTimer:60 withHandler:^{
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:[NSNull null] userInfo:@{
-                        @"jid": jid,
-                        @"accountNo": account,
-                        @"isTyping": @NO
+        //only use "is typing" messages when not older than 2 minutes (always allow "not typing" messages)
+        if([[DataLayer sharedInstance] checkCap:@"http://jabber.org/protocol/chatstates" forUser:messageNode.user andAccountNo:self.accountNo] &&
+            ((messageNode.composing && (!messageNode.delayTimeStamp || [[NSDate date] timeIntervalSinceDate:messageNode.delayTimeStamp] < 120)) ||
+            messageNode.notComposing)
+        )
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                @"jid": messageNode.user,
+                @"accountNo": self.accountNo,
+                @"isTyping": messageNode.composing ? @YES : @NO
+            }];
+            //send "not typing" notifications (kMonalLastInteractionUpdatedNotice) 60 seconds after the last isTyping was received
+            @synchronized(_typingNotifications) {
+                //copy needed values into local variables to not retain self by our timer block
+                NSString* account = self.accountNo;
+                NSString* jid = messageNode.user;
+                //abort old timer on new isTyping or isNotTyping message
+                if(_typingNotifications[messageNode.user])
+                    ((monal_void_block_t) _typingNotifications[messageNode.user])();
+                //start a new timer for every isTyping message
+                if(messageNode.composing)
+                {
+                    _typingNotifications[messageNode.user] = [HelperTools startTimer:60 withHandler:^{
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:[[NSDate date] initWithTimeIntervalSince1970:0] userInfo:@{
+                            @"jid": jid,
+                            @"accountNo": account,
+                            @"isTyping": @NO
+                        }];
                     }];
-                }];
+                }
             }
         }
     }

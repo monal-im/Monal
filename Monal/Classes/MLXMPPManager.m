@@ -14,11 +14,7 @@
 #import "MLMessageProcessor.h"
 #import "ParseMessage.h"
 
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
 #import "MonalAppDelegate.h"
-#endif
-#endif
 
 @import Network;
 @import MobileCoreServices;
@@ -27,7 +23,7 @@
 static const NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 //this is in seconds
-#define SHORT_PING 2.0
+#define SHORT_PING 4.0
 #define LONG_PING 16.0
 
 static const int pingFreqencyMinutes = 5;       //about the same Conversations uses
@@ -39,76 +35,80 @@ static const int sendMessageTimeoutSeconds = 10;
     UIBackgroundTaskIdentifier _bgTask;
     BGTask* _bgFetch;
     BOOL _hasConnectivity;
+    void (^_pushCompletion)(UIBackgroundFetchResult result);
+    monal_void_block_t _cancelPushTimer;
+    NSMutableArray* _connectedXMPP;
 }
-
-/**
-An array of Dics what have timers to make sure everything was sent
- */
-@property (nonatomic, strong) NSMutableArray *timerList;
-
 @end
-
 
 @implementation MLXMPPManager
 
 -(void) defaultSettings
 {
-    BOOL setDefaults = [[NSUserDefaults standardUserDefaults] boolForKey:@"SetDefaults"];
+    BOOL setDefaults = [[HelperTools defaultsDB] boolForKey:@"SetDefaults"];
     if(!setDefaults)
     {
-        // [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:@"StatusMessage"];   // we dont want anything set
-        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"Away"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MusicStatus"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Sound"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"MessagePreview"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"Logging"];
+        // [[HelperTools defaultsDB] setObject:@"" forKey:@"StatusMessage"];   // we dont want anything set
+        [[HelperTools defaultsDB] setBool:NO forKey:@"Away"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"MusicStatus"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"Sound"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"MessagePreview"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"Logging"];
 
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"OfflineContact"];
-        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"SortContacts"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"OfflineContact"];
+        [[HelperTools defaultsDB] setBool:NO forKey:@"SortContacts"];
 
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"SetDefaults"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"ChatBackgrounds"];
+        
+        // Privacy Settings
+        [[HelperTools defaultsDB] setBool:YES forKey:@"ShowImages"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"ShowGeoLocation"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastUserInteraction"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastChatState"];
 
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"ShowImages"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"ShowGeoLocation"];
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"ChatBackgrounds"];
-
-        [[NSUserDefaults standardUserDefaults] synchronize];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"SetDefaults"];
+        [[HelperTools defaultsDB] synchronize];
     }
 
     // on upgrade this one needs to be set to yes. Can be removed later.
-    NSNumber *imagesTest= [[NSUserDefaults standardUserDefaults] objectForKey:@"ShowImages"];
+    [self upgradeBoolUserSettingsIfUnset:@"ShowImages" toDefault:YES];
 
-    if(imagesTest==nil)
-    {
-          [[NSUserDefaults standardUserDefaults] setBool:YES  forKey:@"ShowImages"];
-          [[NSUserDefaults standardUserDefaults] synchronize];
-    }
+    // upgrade ChatBackgrounds
+    [self upgradeBoolUserSettingsIfUnset:@"ChatBackgrounds" toDefault:YES];
 
-    // upgrade
-    NSNumber *background = [[NSUserDefaults standardUserDefaults] objectForKey:@"ChatBackgrounds"];
-    if(background==nil)
-    {
-        [[NSUserDefaults standardUserDefaults] setBool:YES  forKey:@"ChatBackgrounds"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-    }
-
-    NSNumber *sounds = [[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"];
-    if(sounds==nil)
-    {
-        [[NSUserDefaults standardUserDefaults] setObject:@"alert2" forKey:@"AlertSoundFile"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-    }
+    [self upgradeObjectUserSettingsIfUnset:@"AlertSoundFile" toDefault:@"alert2"];
 
     // upgrade ShowGeoLocation
-    NSNumber* mapLocationTest = [[NSUserDefaults standardUserDefaults] objectForKey:@"ShowGeoLocation"];
-    if(mapLocationTest==nil)
+    [self upgradeBoolUserSettingsIfUnset:@"ShowGeoLocation" toDefault:YES];
+
+    // upgrade SendLastUserInteraction
+    [self upgradeBoolUserSettingsIfUnset:@"SendLastUserInteraction" toDefault:YES];
+
+    // upgrade SendLastChatState
+    [self upgradeBoolUserSettingsIfUnset:@"SendLastChatState" toDefault:YES];
+}
+
+-(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal
+{
+    NSNumber* currentSettingVal = [[HelperTools defaultsDB] objectForKey:settingsName];
+    if(currentSettingVal == nil)
     {
-        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"ShowGeoLocation"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
+        [[HelperTools defaultsDB] setBool:defaultVal forKey:settingsName];
+        [[HelperTools defaultsDB] synchronize];
     }
 }
 
-+ (MLXMPPManager* )sharedInstance
+-(void) upgradeObjectUserSettingsIfUnset:(NSString*) settingsName toDefault:(nullable id) defaultVal
+{
+    NSNumber* currentSettingVal = [[HelperTools defaultsDB] objectForKey:settingsName];
+    if(currentSettingVal == nil)
+    {
+        [[HelperTools defaultsDB] setObject:defaultVal forKey:settingsName];
+        [[HelperTools defaultsDB] synchronize];
+    }
+}
+
++ (MLXMPPManager*) sharedInstance
 {
     static dispatch_once_t once;
     static MLXMPPManager* sharedInstance;
@@ -118,7 +118,6 @@ An array of Dics what have timers to make sure everything was sent
     return sharedInstance;
 }
 
-
 -(id) init
 {
     self=[super init];
@@ -127,14 +126,6 @@ An array of Dics what have timers to make sure everything was sent
     _bgTask = UIBackgroundTaskInvalid;
     _hasConnectivity = NO;
     
-    if(@available(iOS 13.0, *))
-    {
-        DDLogInfo(@"calling configureBackgroundFetchingTask");
-        [self configureBackgroundFetchingTask];
-    }
-
-    _netQueue = dispatch_queue_create(kMonalNetQueue, DISPATCH_QUEUE_SERIAL);
-
     [self defaultSettings];
 
     //set up regular ping
@@ -150,7 +141,7 @@ An array of Dics what have timers to make sure everything was sent
         //only ping when having connectivity
         if(_hasConnectivity)
         {
-            for(xmpp* xmppAccount in _connectedXMPP)
+            for(xmpp* xmppAccount in [self connectedXMPP])
             {
                 if(xmppAccount.accountState>=kStateBound) {
                     DDLogInfo(@"began a idle ping");
@@ -181,7 +172,7 @@ An array of Dics what have timers to make sure everything was sent
         {
             DDLogVerbose(@"reachable");
             _hasConnectivity = YES;
-            for(xmpp* xmppAccount in _connectedXMPP)
+            for(xmpp* xmppAccount in [self connectedXMPP])
             {
                 //try to send a ping. if it fails, it will reconnect
                 DDLogVerbose(@"manager pinging");
@@ -192,13 +183,8 @@ An array of Dics what have timers to make sure everything was sent
         {
             DDLogVerbose(@"NOT reachable");
             _hasConnectivity = NO;
-            BOOL wasIdle = [self allAccountsIdle];      //we have to check that here because diconnect: makes them non-idle (no catchup done yet etc.)
-            for(xmpp* xmppAccount in _connectedXMPP)
-            {
-                //disconnect to prevent endless loops trying to connect
-                DDLogVerbose(@"manager disconnecting");
-                [xmppAccount disconnect];
-            }
+            BOOL wasIdle = [self allAccountsIdle];      //we have to check that here because disconnect: makes them idle
+            [self disconnectAll];
             if(!wasIdle)
             {
                 DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored");
@@ -224,6 +210,14 @@ An array of Dics what have timers to make sure everything was sent
         dispatch_source_cancel(_pinger);
 }
 
+//this returns a copy to iterate on without the need of a synchronized block while iterating
+-(NSArray*) connectedXMPP
+{
+    @synchronized(_connectedXMPP) {
+        return [[NSArray alloc] initWithArray:_connectedXMPP];
+    }
+}
+
 -(void) catchupFinished:(NSNotification*) notification
 {
     DDLogVerbose(@"### MAM/SMACKS CATCHUP FINISHED ###");
@@ -231,71 +225,94 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) nowIdle:(NSNotification*) notification
 {
-    dispatch_async(self->_netQueue, ^{
-        DDLogVerbose(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
+    DDLogVerbose(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
+    [DDLog flushLog];
+    if(![HelperTools isAppExtension])
+    {
+        DDLogVerbose(@"### NOT EXTENSION --> checking if background is still needed ###");
         [self checkIfBackgroundTaskIsStillNeeded];
-    });
+    }
+    else
+        DDLogVerbose(@"### IN EXTENSION --> ignoring in MLXMPPManager ###");
 }
 
 -(BOOL) allAccountsIdle
 {
-    for(xmpp* xmppAccount in _connectedXMPP)
-    {
+    for(xmpp* xmppAccount in [self connectedXMPP])
         if(!xmppAccount.idle)
             return NO;
-    }
     return YES;
-}
-
--(BOOL) isInBackground
-{
-    __block BOOL inBackground = NO;
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-    void (^block)(void) = ^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-            inBackground = YES;
-    };
-    if(dispatch_get_current_queue() == dispatch_get_main_queue())
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
-#endif
-#endif
-    return inBackground;
 }
 
 -(void) checkIfBackgroundTaskIsStillNeeded
 {
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-        if([self allAccountsIdle] && [self isInBackground])
+    if(![HelperTools isAppExtension])
+    {
+        if([self allAccountsIdle] && _pushCompletion)
         {
-            DDLogInfo(@"### All accounts idle, stopping all background tasks ###");
+            DDLogInfo(@"### All accounts idle, calling push completion handler ###");
+            if(_cancelPushTimer)
+                _cancelPushTimer();
+            _pushCompletion(UIBackgroundFetchResultNewData);
+            _pushCompletion = nil;
+            _cancelPushTimer = nil;
+        }
+        if([self allAccountsIdle] && [HelperTools isInBackground])
+        {
+            DDLogInfo(@"### All accounts idle, disconnecting and stopping all background tasks ###");
+            [DDLog flushLog];
+            [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
+            BOOL stopped = NO;
             if(_bgTask != UIBackgroundTaskInvalid)
             {
                 DDLogVerbose(@"stopping UIKit _bgTask");
+                [DDLog flushLog];
                 [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
                 _bgTask = UIBackgroundTaskInvalid;
+                stopped = YES;
             }
-            else if(_bgFetch)
+            if(_bgFetch)
             {
                 DDLogVerbose(@"stopping backgroundFetchingTask");
+                [DDLog flushLog];
                 [_bgFetch setTaskCompletedWithSuccess:YES];
+                stopped = YES;
             }
-            else
+            if(!stopped)
                 DDLogVerbose(@"no background tasks running, nothing to stop");
-            
-            /*
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                DDLogVerbose(@"disconnecting all accounts (we don't need idle connections that could get killed any time anyways)");
-                for(xmpp* xmppAccount in _connectedXMPP)
-                    [xmppAccount disconnect];
-            }
-            */
+            [DDLog flushLog];
         }
-#endif
-#endif
+    }
+}
+
+-(void) addBackgroundTaskIfNeeded:(BOOL) needed
+{
+    if(![HelperTools isAppExtension] && needed)
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            //start indicating we want to do work even when the app is put into background
+            if(_bgTask == UIBackgroundTaskInvalid)
+            {
+                _bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+                    DDLogWarn(@"BG WAKE EXPIRING");
+                    [DDLog flushLog];
+
+                    [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
+
+                    //schedule a BGProcessingTaskRequest to process this further as soon as possible
+                    if(@available(iOS 13.0, *))
+                    {
+                        DDLogInfo(@"calling scheduleBackgroundFetchingTask");
+                        [self scheduleBackgroundFetchingTask];
+                    }
+                    
+                    [DDLog flushLog];
+                    [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
+                    _bgTask = UIBackgroundTaskInvalid;
+                }];
+            }
+        });
+    }
 }
 
 -(void) handleBackgroundFetchingTask:(BGTask*) task API_AVAILABLE(ios(13.0))
@@ -304,90 +321,122 @@ An array of Dics what have timers to make sure everything was sent
     _bgFetch = task;
     task.expirationHandler = ^{
         DDLogError(@"*** BGTASK EXPIRED ***");
+        [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
         _bgFetch = nil;
         [task setTaskCompletedWithSuccess:NO];
         [self scheduleBackgroundFetchingTask];      //schedule new one if neccessary
+        [DDLog flushLog];
     };
+    unsigned long tick = 0;
+    while(1)
+    {
+        DDLogVerbose(@"BGTASK TICK: %lu", tick++);
+        [DDLog flushLog];
+        [NSThread sleepForTimeInterval:1.000];
+    }
 }
 
 -(void) configureBackgroundFetchingTask
 {
-    if(@available(iOS 13.0, *))
+    if(![HelperTools isAppExtension])
     {
-        [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundFetchingTask usingQueue:nil launchHandler:^(BGTask *task) {
-            DDLogVerbose(@"RUNNING BGTASK LAUNCH HANDLER");
-            [self handleBackgroundFetchingTask:task];
-        }];
-    } else {
-        // No fallback unfortunately
+        if(@available(iOS 13.0, *))
+        {
+            [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundFetchingTask usingQueue:dispatch_get_main_queue() launchHandler:^(BGTask *task) {
+                DDLogVerbose(@"RUNNING BGTASK LAUNCH HANDLER");
+                [self handleBackgroundFetchingTask:task];
+            }];
+        } else {
+            // No fallback unfortunately
+        }
     }
 }
 
 -(void) scheduleBackgroundFetchingTask
 {
-    if(@available(iOS 13.0, *))
+    if(![HelperTools isAppExtension])
     {
-        NSError *error = NULL;
-        // cancel existing task (if any)
-        [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundFetchingTask];
-        // new task
-        BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-        request.requiresNetworkConnectivity = YES;
-        request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
-        BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
-        if(!success) {
-            // Errorcodes https://stackoverflow.com/a/58224050/872051
-            DDLogError(@"Failed to submit BGTask request: %@", error);
-        } else {
-            DDLogVerbose(@"Success submitting BGTask request %@", request);
+        if(@available(iOS 13.0, *))
+        {
+            [HelperTools dispatchSyncReentrant:^{
+                NSError *error = NULL;
+                // cancel existing task (if any)
+                [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundFetchingTask];
+                // new task
+                //BGAppRefreshTaskRequest* request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
+                BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
+                //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
+                request.requiresNetworkConnectivity = YES;
+                request.requiresExternalPower = NO;
+                request.earliestBeginDate = nil;
+                //request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
+                BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
+                if(!success) {
+                    // Errorcodes https://stackoverflow.com/a/58224050/872051
+                    DDLogError(@"Failed to submit BGTask request: %@", error);
+                } else {
+                    DDLogVerbose(@"Success submitting BGTask request %@", request);
+                }
+            } onQueue:dispatch_get_main_queue()];
+        }
+        else
+        {
+            // No fallback unfortunately
+            DDLogError(@"BGTask needed but NOT supported!");
         }
     }
-    else
+}
+
+-(void) incomingPushWithCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
+{
+    DDLogInfo(@"got incomingPushWithCompletionHandler");
+    if(![HelperTools isInBackground])
     {
-        // No fallback unfortunately
-        DDLogError(@"BGTask needed but NOT supported!");
+        DDLogError(@"Ignoring incomingPushWithCompletionHandler: because app is in FG!");
+        completionHandler(UIBackgroundFetchResultNoData);
+        return;
     }
+    _pushCompletion = completionHandler;
+    // should any accounts reconnect?
+    [self pingAllAccounts];
+    _cancelPushTimer = [HelperTools startTimer:28.0 withHandler:^{
+        DDLogWarn(@"### Push timer triggered!! ###");
+        _pushCompletion(UIBackgroundFetchResultFailed);
+        _pushCompletion = nil;
+        _cancelPushTimer = nil;
+    }];
 }
 
 #pragma mark - client state
 
 -(void) setClientsInactive
 {
-    //don't block main thread here
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        for(xmpp* xmppAccount in _connectedXMPP)
-            [xmppAccount setClientInactive];
-        [self checkIfBackgroundTaskIsStillNeeded];
-    });
+    [self addBackgroundTaskIfNeeded:[self allAccountsIdle]];
+    
+    for(xmpp* xmppAccount in [self connectedXMPP])
+        [xmppAccount setClientInactive];
+    [self checkIfBackgroundTaskIsStillNeeded];
 }
 
 -(void) setClientsActive
 {
-    //start indicating we want to do work even when the app is put into background
-    if(_bgTask == UIBackgroundTaskInvalid)
+    [self addBackgroundTaskIfNeeded:YES];
+    
+    //*** we don't need to check for a running service extension here because the appdelegate does this already for us ***
+    
+    for(xmpp* xmppAccount in [self connectedXMPP])
     {
-        _bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-            DDLogWarn(@"BG WAKE EXPIRING");
-            [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
-            _bgTask = UIBackgroundTaskInvalid;
-            
-            //schedule a BGProcessingTaskRequest to process this further as soon as possible
-            if(@available(iOS 13.0, *))
-            {
-                DDLogInfo(@"calling scheduleBackgroundFetchingTask");
-                [self scheduleBackgroundFetchingTask];
-            }
-        }];
+        if(_hasConnectivity)
+            [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+        [xmppAccount setClientActive];
     }
-    //don't block main thread here
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        for(xmpp* xmppAccount in _connectedXMPP)
-        {
-            [xmppAccount setClientActive];
-            if(_hasConnectivity)
-                [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
-        }
-    });
+}
+
+-(void) pingAllAccounts
+{
+    for(xmpp* xmppAccount in [self connectedXMPP])
+        if(_hasConnectivity)
+            [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
 }
 
 -(void) rejectContact:(MLContact*) contact
@@ -406,10 +455,8 @@ An array of Dics what have timers to make sure everything was sent
 {
     xmpp* account = [self getConnectedAccountForID:accountNo];
     if(account.accountState>=kStateBound) return YES;
-
     return NO;
 }
-
 
 -(NSDate *) connectedTimeFor:(NSString*) accountNo
 {
@@ -419,7 +466,7 @@ An array of Dics what have timers to make sure everything was sent
 
 -(xmpp*) getConnectedAccountForID:(NSString*) accountNo
 {
-    for(xmpp* xmppAccount in _connectedXMPP)
+    for(xmpp* xmppAccount in [self connectedXMPP])
     {
         if([xmppAccount.accountNo isEqualToString:accountNo])
             return xmppAccount;
@@ -432,15 +479,13 @@ An array of Dics what have timers to make sure everything was sent
 -(void) connectAccount:(NSString*) accountNo
 {
     [[DataLayer sharedInstance] detailsForAccount:accountNo withCompletion:^(NSArray *result) {
-        dispatch_async(self->_netQueue, ^{
-            NSArray *accounts = result;
-            if(accounts.count == 1) {
-                NSDictionary* account=[accounts objectAtIndex:0];
-                [self connectAccountWithDictionary:account];
-            } else {
-                DDLogVerbose(@"Expected account settings in db for accountNo: %@", accountNo);
-            }
-        });
+        NSArray *accounts = result;
+        if(accounts.count == 1) {
+            NSDictionary* account=[accounts objectAtIndex:0];
+            [self connectAccountWithDictionary:account];
+        } else {
+            DDLogVerbose(@"Expected account settings in db for accountNo: %@", accountNo);
+        }
     }];
 }
 
@@ -458,7 +503,14 @@ An array of Dics what have timers to make sure everything was sent
     }
     DDLogVerbose(@"connecting account %@@%@",[account objectForKey:kUsername], [account objectForKey:kDomain]);
 
-    NSString *password = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
+    NSError* error;
+    NSString *password = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]] error:&error];
+    error = nil;
+    if(error)
+    {
+        DDLogError(@"Keychain error: %@", [NSString stringWithFormat:@"%@", error]);
+        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
+    }
     MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@",[account objectForKey:kUsername],[account objectForKey:kDomain] ] password:password andResource:[account objectForKey:kResource]];
 
     MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andDirectTLS:[[account objectForKey:kDirectTLS] boolValue]];
@@ -472,8 +524,11 @@ An array of Dics what have timers to make sure everything was sent
     [xmppAccount setupSignal];
 #endif
 
-    if(xmppAccount) {
-        [_connectedXMPP addObject:xmppAccount];
+    if(xmppAccount)
+    {
+        @synchronized(_connectedXMPP) {
+            [_connectedXMPP addObject:xmppAccount];
+        }
         if(_hasConnectivity)
         {
             DDLogVerbose(@"starting connect");
@@ -487,59 +542,68 @@ An array of Dics what have timers to make sure everything was sent
 
 -(void) disconnectAccount:(NSString*) accountNo
 {
-    dispatch_async(self->_netQueue, ^{
-        int index=0;
-        int pos=-1;
+    int index=0;
+    int pos=-1;
+    xmpp* account;
+    @synchronized(_connectedXMPP) {
         for(xmpp* xmppAccount in _connectedXMPP)
         {
             if([xmppAccount.accountNo isEqualToString:accountNo] )
             {
-                DDLogVerbose(@"got account and cleaning up.. ");
-                [xmppAccount disconnect:YES];
-                DDLogVerbose(@"done cleaning up account ");
+                account = xmppAccount;
                 pos=index;
                 break;
             }
             index++;
         }
 
-        if((pos>=0) && (pos<[_connectedXMPP count])) {
+        if((pos>=0) && (pos<[_connectedXMPP count]))
+        {
             [_connectedXMPP removeObjectAtIndex:pos];
             DDLogVerbose(@"removed account at pos  %d", pos);
         }
-    });
-
+    }
+    if(account)
+    {
+        DDLogVerbose(@"got account and cleaning up.. ");
+        [account disconnect:YES];
+        DDLogVerbose(@"done cleaning up account ");
+    }
 }
 
 
 -(void) logoutAll
 {
     [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray* result) {
-        dispatch_async(self->_netQueue, ^{
-            for(NSDictionary* account in result) {
-                DDLogVerbose(@"Disconnecting account %@@%@", [account objectForKey:@"username"], [account objectForKey:@"domain"]);
-                [self disconnectAccount:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
-            }
-        });
+        for(NSDictionary* account in result) {
+            DDLogVerbose(@"Disconnecting account %@@%@", [account objectForKey:@"username"], [account objectForKey:@"domain"]);
+            [self disconnectAccount:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
+        }
     }];
+}
+
+-(void) disconnectAll
+{
+    for(xmpp* xmppAccount in [self connectedXMPP])
+    {
+        //disconnect to prevent endless loops trying to connect
+        DDLogVerbose(@"manager disconnecting");
+        [xmppAccount disconnect];
+    }
 }
 
 -(void) connectIfNecessary
 {
     [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray* result) {
-        dispatch_async(self->_netQueue, ^{
-            for(NSDictionary* account in result)
-                [self connectAccountWithDictionary:account];
-        });
+        for(NSDictionary* account in result)
+            [self connectAccountWithDictionary:account];
     }];
 }
 
 -(void) updatePassword:(NSString *) password forAccount:(NSString *) accountNo
 {
-#if TARGET_OS_IPHONE
     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-#endif
-     [SAMKeychain setPassword:password forService:@"Monal" account:accountNo];
+    [SAMKeychain setPassword:password forService:@"Monal" account:accountNo];
     xmpp* xmpp =[self getConnectedAccountForID:accountNo];
     [xmpp.connectionProperties.identity updatPassword:password];
 }
@@ -559,69 +623,25 @@ An array of Dics what have timers to make sure everything was sent
     }];
 }
 
--(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC  isUpload:(BOOL) isUpload messageId:(NSString *) messageId
-withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
+-(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC  isUpload:(BOOL) isUpload messageId:(NSString *) messageId withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 {
-    dispatch_async(_netQueue,
-                   ^{
-                       dispatch_source_t sendTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,self->_netQueue);
+    BOOL success=NO;
+    xmpp* account = [self getConnectedAccountForID:accountNo];
+    if(account)
+    {
+        success=YES;
+        [account sendMessage:message toContact:contact isMUC:isMUC isEncrypted:encrypted isUpload:isUpload andMessageId:messageId];
+    }
 
-                       dispatch_source_set_timer(sendTimer,
-                                                 dispatch_time(DISPATCH_TIME_NOW, sendMessageTimeoutSeconds*NSEC_PER_SEC),
-                                                  DISPATCH_TIME_FOREVER,
-                                                 5ull * NSEC_PER_SEC);
-
-                       dispatch_source_set_event_handler(sendTimer, ^{
-                           DDLogError(@"send message  timed out");
-                           int counter=0;
-                           int removalCounter=-1;
-                           for(NSDictionary *dic in  self.timerList) {
-                               if([dic objectForKey:kSendTimer] == sendTimer) {
-                                   [[DataLayer sharedInstance] setMessageId:[dic objectForKey:kMessageId] delivered:NO];
-                                   if(self) { // chekcing for possible zombie
-                                       [[NSNotificationCenter defaultCenter] postNotificationName:kMonalSendFailedMessageNotice object:self userInfo:dic];
-                                   }
-                                   removalCounter=counter;
-                                   break;
-                               }
-                               counter++;
-                           }
-
-                           if(removalCounter>=0) {
-                               [self.timerList removeObjectAtIndex:removalCounter];
-                           }
-
-                           dispatch_source_cancel(sendTimer);
-                       });
-
-                       dispatch_source_set_cancel_handler(sendTimer, ^{
-                           DDLogError(@"send message timer cancelled");
-                       });
-
-                       dispatch_resume(sendTimer);
-                       NSDictionary *dic = @{kSendTimer:sendTimer,kMessageId:messageId};
-                       [self.timerList addObject:dic];
-
-                       BOOL success=NO;
-                       xmpp* account=[self getConnectedAccountForID:accountNo];
-                       if(account)
-                       {
-                           success=YES;
-                           [account sendMessage:message toContact:contact isMUC:isMUC isEncrypted:encrypted isUpload:isUpload andMessageId:messageId];
-                       }
-
-                       if(completion)
-                           completion(success, messageId);
-                   });
+    if(completion)
+        completion(success, messageId);
 }
 
 -(void) sendChatState:(BOOL) isTyping fromAccount:(NSString*) accountNo toJid:(NSString*) jid
 {
-    dispatch_async(_netQueue, ^{
-        xmpp* account = [self getConnectedAccountForID:accountNo];
-        if(account)
-            [account sendChatState:isTyping toJid:jid];
-    });
+    xmpp* account = [self getConnectedAccountForID:accountNo];
+    if(account)
+        [account sendChatState:isTyping toJid:jid];
 }
 
 
@@ -676,25 +696,24 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 -(void) getServiceDetailsForAccount:(NSInteger) row
 {
-    if(row < [_connectedXMPP count] && row>=0)
-    {
-        xmpp* account =  [_connectedXMPP objectAtIndex:row];
-        dispatch_async(_netQueue, ^{
-            if(account)
-            {
-                [account getServiceDetails];
-            }
-        });
+    xmpp* account;
+    @synchronized(_connectedXMPP) {
+        if(row < [_connectedXMPP count] && row>=0)
+            account = [_connectedXMPP objectAtIndex:row];
     }
+    if(account)
+        [account getServiceDetails];
 }
 
 -(NSString*) getAccountNameForConnectedRow:(NSInteger) row
 {
-    if(row<[_connectedXMPP count] && row>=0)
-    {
-        xmpp* account = [_connectedXMPP objectAtIndex:row];
-        return account.connectionProperties.identity.jid;
+    xmpp* account;
+    @synchronized(_connectedXMPP) {
+        if(row<[_connectedXMPP count] && row>=0)
+            account = [_connectedXMPP objectAtIndex:row];
     }
+    if(account)
+        return account.connectionProperties.identity.jid;
     return @"";
 }
 
@@ -747,10 +766,13 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 -(void)  joinRoom:(NSString*) roomName  withNick:(NSString *)nick andPassword:(NSString*) password forAccountRow:(NSInteger) row
 {
-    if(row<[_connectedXMPP count] && row>=0) {
-        xmpp* account = [_connectedXMPP objectAtIndex:row];
-        [account joinRoom:roomName withNick:nick andPassword:password];
+    xmpp* account;
+    @synchronized(_connectedXMPP) {
+        if(row<[_connectedXMPP count] && row>=0)
+            account = [_connectedXMPP objectAtIndex:row];
     }
+    if(account)
+        [account joinRoom:roomName withNick:nick andPassword:password];
 }
 
 -(void)  leaveRoom:(NSString*) roomName withNick:(NSString *) nick forAccountId:(NSString*) accountId
@@ -769,13 +791,9 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
         for(NSDictionary *row in results)
         {
             NSNumber *autoJoin =[row objectForKey:@"autojoin"] ;
-            if(autoJoin.boolValue) {
-                dispatch_async(self->_netQueue, ^{
-                         [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[NSString stringWithFormat:@"%@", [row objectForKey:kAccountID]]];
-                });
-            }
+            if(autoJoin.boolValue)
+                [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[NSString stringWithFormat:@"%@", [row objectForKey:kAccountID]]];
         }
-
     }];
 }
 
@@ -812,73 +830,44 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 -(void) setStatusMessage:(NSString*) message
 {
-    for(xmpp* xmppAccount in _connectedXMPP)
+    for(xmpp* xmppAccount in [self connectedXMPP])
         [xmppAccount setStatusMessageText:message];
 }
 
 -(void) setAway:(BOOL) isAway
 {
-    for(xmpp* xmppAccount in _connectedXMPP)
+    for(xmpp* xmppAccount in [self connectedXMPP])
         [xmppAccount setAway:isAway];
 }
 
 #pragma mark message signals
 -(void) handleNewMessage:(NSNotification *)notification
 {
-#ifndef TARGET_IS_EXTENSION
-#if TARGET_OS_IPHONE
-    dispatch_async(dispatch_get_main_queue(), ^{
-    MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-    [appDelegate updateUnread];
-    });
-#else
-#endif
-#endif
+    if(![HelperTools isAppExtension])
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
+            [appDelegate updateUnread];
+        });
+    }
 }
 
 
--(void) handleSentMessage:(NSNotification *)notification
+-(void) handleSentMessage:(NSNotification*) notification
 {
-    NSDictionary *info = notification.userInfo;
-    NSString *messageId = [info objectForKey:kMessageId];
-    [[DataLayer sharedInstance] setMessageId:messageId delivered:YES];
-    DDLogInfo(@"message %@ sent, removing timer",messageId);
-
-    int counter=0;
-    int removalCounter=-1;
-    for (NSDictionary * dic in self.timerList)
-    {
-        if([[dic objectForKey:kMessageId] isEqualToString:messageId])
-        {
-            dispatch_source_t sendTimer = [dic objectForKey:kSendTimer];
-            dispatch_source_cancel(sendTimer);
-            removalCounter=counter;
-            break;
-        }
-        counter++;
-    }
-
-    if(removalCounter>=0) {
-        [self.timerList removeObjectAtIndex:removalCounter];
-    }
+    NSDictionary* info = notification.userInfo;
+    NSString* messageId = [info objectForKey:kMessageId];
+    DDLogInfo(@"message %@ sent, setting status accordingly", messageId);
+    [[DataLayer sharedInstance] setMessageId:messageId sent:YES];
 }
 
 #pragma mark - properties
 
--(NSMutableArray *)timerList
-{
-    if(!_timerList)
-    {
-        _timerList=[[NSMutableArray alloc] init];
-    }
-    return  _timerList;
-}
-
 -(void) cleanArrayOfConnectedAccounts:(NSMutableArray*) dirtySet
 {
     //yes, this is ineffecient but the size shouldnt ever be huge
-    NSMutableIndexSet *indexSet=[[NSMutableIndexSet alloc] init];
-    for(xmpp* xmppAccount in _connectedXMPP)
+    NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
+    for(xmpp* xmppAccount in [self connectedXMPP])
     {
         NSInteger pos=0;
         for(MLContact* row in dirtySet)
@@ -887,9 +876,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                 [indexSet addIndex:pos];
             pos++;
         }
-
     }
-
     [dirtySet removeObjectsAtIndexes:indexSet];
 }
 
@@ -898,21 +885,21 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 -(void) setPushNode:(NSString *)node andSecret:(NSString *)secret
 {
-    self.pushNode=node;
-    [[NSUserDefaults standardUserDefaults] setObject:self.pushNode forKey:@"pushNode"];
+    self.pushNode = node;
+    [[HelperTools defaultsDB] setObject:self.pushNode forKey:@"pushNode"];
     
     if(secret)
     {
         self.pushSecret=secret;
-        [[NSUserDefaults standardUserDefaults] setObject:self.pushSecret forKey:@"pushSecret"];
+        [[HelperTools defaultsDB] setObject:self.pushSecret forKey:@"pushSecret"];
     }
     else    //use saved one (push server not reachable via http(s)) --> the old secret might still be valid
-        self.pushSecret=[[NSUserDefaults standardUserDefaults] objectForKey:@"pushSecret"];
+        self.pushSecret = [[HelperTools defaultsDB] objectForKey:@"pushSecret"];
 
-    for(xmpp* xmppAccount in _connectedXMPP)
+    for(xmpp* xmppAccount in [self connectedXMPP])
     {
-        xmppAccount.pushNode=self.pushNode;
-        xmppAccount.pushSecret=self.pushSecret;
+        xmppAccount.pushNode = self.pushNode;
+        xmppAccount.pushSecret = self.pushSecret;
         [xmppAccount enablePush];
     }
 }
@@ -927,9 +914,8 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 }
 
 - (void) sendOutboxForAccount:(NSString *) account{
-    NSUserDefaults* groupDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
-    NSMutableArray* outbox = [[groupDefaults objectForKey:@"outbox"] mutableCopy];
-    NSMutableArray* outboxClean = [[groupDefaults objectForKey:@"outbox"] mutableCopy];
+    NSMutableArray* outbox = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
+    NSMutableArray* outboxClean = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
 
     for (NSDictionary* row in outbox)
     {
@@ -951,7 +937,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
                         }];
                     }
                     [outboxClean removeObject:row];
-                    [groupDefaults setObject:outboxClean forKey:@"outbox"];
+                    [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
                 }
             }];
         }
@@ -960,90 +946,8 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
 
 -(void) sendMessageForConnectedAccounts
 {
-    for(xmpp* xmppAccount in _connectedXMPP)
+    for(xmpp* xmppAccount in [self connectedXMPP])
         [self sendOutboxForAccount:xmppAccount.accountNo];
-}
-
-
-#pragma mark - handling air drop
--(void) parseMessageForData:(NSData *) data
-{
-    //parse message
-//    ParseMessage *messageNode = [[ParseMessage alloc] initWithData:data];
-//    NSArray *cleanParts= [messageNode.to componentsSeparatedByString:@"/"];
-//    NSString *jid= cleanParts[0];
-//
-//    NSArray *parts =[jid componentsSeparatedByString:@"@"];
-//    NSString* user =parts[0];
-//
-//    if(parts.count>1){
-//        NSString *domain= parts[1];
-//
-//        [[DataLayer sharedInstance] accountIDForUser:user andDomain:domain withCompletion:^(NSString *accountNo) {
-//            if(accountNo) {
-//                dispatch_async(dispatch_get_main_queue(), ^{
-//
-//                    MLSignalStore *monalSignalStore = [[MLSignalStore alloc] initWithAccountId:accountNo];
-//
-//                    //signal store
-//                    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:monalSignalStore];
-//                    //signal context
-//                    SignalContext *signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
-//
-//                    //process message
-//                    MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:accountNo jid:jid
-//                                                                                          connection: nil
-//                                                                                          signalContex:signalContext andSignalStore:monalSignalStore];
-//                    messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
-//                        if(success)
-//                        {
-//                            [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:accountNo withCompletion:nil];
-//
-//                            if(messageNode.from  ) {
-//                                NSString* actuallyFrom= messageNode.actualFrom;
-//                                if(!actuallyFrom) actuallyFrom=messageNode.from;
-//
-//                                NSString* messageText=messageNode.messageText;
-//                                if(!messageText) messageText=@"";
-//
-//                                BOOL shouldRefresh = NO;
-//                                if(messageNode.delayTimeStamp)  shouldRefresh =YES;
-//
-//                                NSArray *jidParts= [jid componentsSeparatedByString:@"/"];
-//
-//                                NSString *recipient;
-//                                if([jidParts count]>1) {
-//                                    recipient= jidParts[0];
-//                                }
-//                                if(!recipient) return; // this shouldnt happen
-//
-//                                MLMessage *message = [[MLMessage alloc] init];
-//                                                            message.from=messageNode.from;
-//                                                            message.actualFrom= actuallyFrom;
-//                                                            message.messageText= messageNode.messageText;
-//                                                            message.to=messageNode.to?messageNode.to:recipient;
-//                                                            message.messageId=messageNode.idval?messageNode.idval:@"";
-//                                                            message.accountId=accountNo;
-//                                                            message.encrypted=encrypted;
-//                                                            message.delayTimeStamp=messageNode.delayTimeStamp;
-//                                                            message.timestamp =[NSDate date];
-//                                                            message.shouldShowAlert= showAlert;
-//                                                            message.messageType=kMessageTypeText;
-//
-//
-//                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
-//                            }
-//                        }
-//                        else {
-//                            DDLogError(@"error adding message from data");
-//                        }
-//                    };
-//                    [messageProcessor processMessage:messageNode];
-//
-//                });
-//            }
-//        }];
-//    }
 }
 
 @end

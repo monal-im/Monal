@@ -11,6 +11,8 @@
 
 #import "UIColor+Theme.h"
 #import "MLContact.h"
+#import "MLConstants.h"
+#import "HelperTools.h"
 
 @interface ShareViewController ()
 
@@ -25,27 +27,36 @@
 
 @implementation ShareViewController
 
++(void) initialize
+{
+    [HelperTools configureLogging];
+    
+    //log unhandled exceptions
+    NSSetUncaughtExceptionHandler(&logException);
+}
+
 -(void)viewDidLoad {
     [super viewDidLoad];
     [self.navigationController.navigationBar setTintColor:[UIColor whiteColor]];
     [self.navigationController.navigationBar setBackgroundColor:[UIColor monaldarkGreen]];
-    self.navigationController.navigationItem.title = @"Monal";
+    self.navigationController.navigationItem.title = NSLocalizedString(@"Monal", @"");
 }
 
 - (void)presentationAnimationDidFinish {
-    NSUserDefaults* groupDefaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
-    self.accounts = [groupDefaults objectForKey:@"accounts"];
-    NSData* recipientsData = [groupDefaults objectForKey:@"recipients"];
+    DDLogInfo(@"Monal ShareViewController presentationAnimationDidFinish");
+    
+    self.accounts = [[HelperTools defaultsDB] objectForKey:@"accounts"];
+    NSData* recipientsData = [[HelperTools defaultsDB] objectForKey:@"recipients"];
     
     NSError* error;
     NSSet* objClasses = [NSSet setWithArray:@[[NSMutableArray class], [NSMutableDictionary class]]];
     self.recipients = [NSKeyedUnarchiver unarchivedObjectOfClasses:objClasses fromData:recipientsData error:&error];
     if(error) {
-        NSLog(@"Monal ShareViewController: %@", error);
+        DDLogError(@"Monal ShareViewController: %@", error);
     }
 
-    self.recipient = [groupDefaults objectForKey:@"lastRecipient"];
-    self.account = [groupDefaults objectForKey:@"lastAccount"];
+    self.recipient = [[HelperTools defaultsDB] objectForKey:@"lastRecipient"];
+    self.account = [[HelperTools defaultsDB] objectForKey:@"lastAccount"];
     [self reloadConfigurationItems];
 }
 
@@ -59,7 +70,7 @@
     NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
     
     NSExtensionItem* item = self.extensionContext.inputItems.firstObject;
-    NSLog(@"Attachments = %@", item.attachments);
+    DDLogVerbose(@"Attachments = %@", item.attachments);
     
     for (NSItemProvider* provider in item.attachments)
     {
@@ -71,18 +82,17 @@
                [payload setObject:self.account forKey:@"account"];
                [payload setObject:self.recipient forKey:@"recipient"];
                
-               NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
-               NSMutableArray *outbox=[[groupDefaults objectForKey:@"outbox"] mutableCopy];
+               NSMutableArray *outbox=[[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
                if(!outbox) outbox =[[NSMutableArray alloc] init];
                
                [outbox addObject:payload];
-               [groupDefaults setObject:outbox forKey:@"outbox"];
+               [[HelperTools defaultsDB] setObject:outbox forKey:@"outbox"];
                
                // Save last used account / recipient
-               [groupDefaults setObject:self.account forKey:@"lastAccount"];
-               [groupDefaults setObject:self.recipient forKey:@"lastRecipient"];
+               [[HelperTools defaultsDB] setObject:self.account forKey:@"lastAccount"];
+               [[HelperTools defaultsDB] setObject:self.recipient forKey:@"lastRecipient"];
                
-               [groupDefaults synchronize];
+               [[HelperTools defaultsDB] synchronize];
            }];
        }
     }

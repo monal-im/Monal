@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UserNotifications/UserNotifications.h>
 #import "MLConstants.h"
 #import "DataLayer.h"
 
@@ -14,11 +15,8 @@
  Singleton object that will handle all sliders, alerts and sounds. listens for new message notification. 
  */
 @interface MLNotificationManager : NSObject
-{
-    
-}
 
-+ (MLNotificationManager* )sharedInstance;
++(MLNotificationManager*) sharedInstance;
 
 /**
  if in chat with this user then dont push messages for this user when not locked
@@ -29,7 +27,6 @@
  if in chat with this account's user then dont push messages for this user when not locked
  */
 @property (nonatomic, strong) NSString* currentAccountNo;
-
 
 /**
  handles the notification. 

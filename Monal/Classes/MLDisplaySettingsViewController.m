@@ -6,6 +6,7 @@
 //
 //
 
+#import "HelperTools.h"
 #import "MLDisplaySettingsViewController.h"
 #import "MLConstants.h"
 #import "DataLayer.h"
@@ -30,34 +31,29 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.navigationItem.title=NSLocalizedString(@"Display Settings",@"");
+    self.navigationItem.title = NSLocalizedString(@"Display Settings",@"");
    
-    _settingsTable=self.tableView;
-    _settingsTable.delegate=self;
-    _settingsTable.dataSource=self;
-    _settingsTable.backgroundView=nil;
-    
-
+    _settingsTable = self.tableView;
+    _settingsTable.delegate = self;
+    _settingsTable.dataSource = self;
+    _settingsTable.backgroundView = nil;
 }
 
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    
-
 }
 
 -(void) viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
-    [[NSUserDefaults standardUserDefaults] synchronize];
+    [[HelperTools defaultsDB] synchronize];
     
     //update logs if needed
-   if(! [[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])
-   {
-       [[DataLayer sharedInstance] messageHistoryCleanAll];
-   }
-  
+    if(! [[HelperTools defaultsDB] boolForKey:@"Logging"])
+    {
+        [[DataLayer sharedInstance] messageHistoryCleanAll];
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -75,26 +71,8 @@
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    UIView *tempView=[[UIView alloc]initWithFrame:CGRectMake(0,200,300,244)];
-    tempView.backgroundColor=[UIColor clearColor];
-    
-    UILabel *tempLabel=[[UILabel alloc]initWithFrame:CGRectMake(15,0,300,44)];
-    tempLabel.backgroundColor=[UIColor clearColor];
-    tempLabel.shadowColor = [UIColor blackColor];
-    tempLabel.shadowOffset = CGSizeMake(0,2);
-    tempLabel.textColor = [UIColor whiteColor]; //here you can change the text color of header.
-    tempLabel.font = [UIFont boldSystemFontOfSize:17.0f];
-    tempLabel.text=[self tableView:tableView titleForHeaderInSection:section ];
-    
-    [tempView addSubview:tempLabel];
-    
-    
-    tempLabel.textColor=[UIColor darkGrayColor];
-    tempLabel.text=  tempLabel.text.uppercaseString;
-    tempLabel.shadowColor =[UIColor clearColor];
-    tempLabel.font=[UIFont systemFontOfSize:[UIFont systemFontSize]];
-
-    return tempView;
+    NSString* sectionTitle = [self tableView:tableView titleForHeaderInSection:section];
+    return [HelperTools MLCustomViewHeaderWithTitle:sectionTitle];
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -102,17 +80,17 @@
     switch (section) {
         case 0:
         {
-            return NSLocalizedString(@"Status",@"");
+            return NSLocalizedString(@"Status", @"");
             break;
         }
         case 1:
         {
-            return NSLocalizedString(@"Presence",@"");
+            return NSLocalizedString(@"Presence", @"");
             break;
         }
         case 2:
         {
-            return NSLocalizedString(@"General",@"");
+            return NSLocalizedString(@"General", @"");
             break;
         }
         default:
@@ -120,12 +98,8 @@
             return nil;
             break;
         }
-        break;
     }
 }
-
-
-
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -142,7 +116,7 @@
         }
         case 2:
         {
-            return 6;
+            return 4;
             break;
         }
         default:
@@ -212,32 +186,16 @@
                 }
                 case 2:
                 {
-                    cell.textLabel.text=NSLocalizedString(@"Offline Contacts", @"");
-                       cell.defaultKey=@"OfflineContact";
-                    cell.switchEnabled=YES;
+                    cell.textLabel.text = NSLocalizedString(@"Offline Contacts", @"");
+                       cell.defaultKey = @"OfflineContact";
+                    cell.switchEnabled = YES;
                     break;
                 }
                 case 3:
                 {
-                    cell.textLabel.text=NSLocalizedString(@"Sort By Status", @"");
-                       cell.defaultKey=@"SortContacts";
-                    cell.switchEnabled=YES;
-                    break;
-                }
-                case 4:
-                {
-                    cell.textLabel.text=NSLocalizedString(@"Show Inline Images", @"");
-                    cell.detailTextLabel.text=@"Will make a HTTP HEAD call on all links";
-                    cell.defaultKey=@"ShowImages";
-                    cell.switchEnabled=YES;
-                    break;
-                }
-                case 5:
-                {
-                    cell.textLabel.text=NSLocalizedString(@"Show Inline Geo Location", @"");
-                    cell.detailTextLabel.text=@"";
-                    cell.defaultKey=@"ShowGeoLocation";
-                    cell.switchEnabled=YES;
+                    cell.textLabel.text = NSLocalizedString(@"Sort By Status", @"");
+                       cell.defaultKey = @"SortContacts";
+                    cell.switchEnabled = YES;
                     break;
                 }
             }
@@ -255,15 +213,9 @@
     return nil;
 }
 
-
-
-
-
 -(IBAction)close:(id)sender
 {
     [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 }
-
-
 
 @end

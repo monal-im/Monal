@@ -31,6 +31,8 @@
 
 - (void) viewWillAppear:(BOOL)animated
 {
+    [super viewWillAppear:animated];
+    
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(connected) name:kMonalAccountStatusChanged object:nil];
     [nc addObserver:self selector:@selector(error) name:kXMPPError object:nil];
@@ -105,7 +107,7 @@
     
     [[DataLayer sharedInstance] addAccountWithDictionary:dic andCompletion:^(BOOL result) {
         if(result) {
-            [[DataLayer sharedInstance] executeScalar:@"select max(account_id) from account" withCompletion:^(NSObject * accountid) {
+            [[DataLayer sharedInstance] getHighestAccountIdWithCompletion:^(NSObject * accountid) {
                 if(accountid) {
                     self.accountno=[NSString stringWithFormat:@"%@",accountid];
                     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
@@ -148,7 +150,7 @@
 -(IBAction) useWithoutAccount:(id)sender
 {
     [self dismissViewControllerAnimated:YES completion:nil];
-    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasSeenLogin"];
+    [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
 }
 
 -(IBAction) tapAction:(id)sender

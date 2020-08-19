@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -176,11 +176,9 @@
 		26B51C4918654D98002134C3 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B51C4718654D98002134C3 /* LogViewController.m */; };
 		26B69A75131C522F002FCBEB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B69A74131C522F002FCBEB /* Security.framework */; };
 		26BDECDC1867B7790018670D /* CallViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26BDECDA1867B7790018670D /* CallViewController.m */; };
-		26C1EA681FF937040085547A /* MLOptOutSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C1EA671FF937040085547A /* MLOptOutSettingsViewController.m */; };
 		26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */; };
 		26C836622396CB9200C9F21D /* MLIQProcessorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C836612396CB9200C9F21D /* MLIQProcessorTest.m */; };
 		26CC579623A0867400ABB92A /* monalxmpp.h in Headers */ = {isa = PBXBuildFile; fileRef = 26CC579423A0867400ABB92A /* monalxmpp.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		26CC57A023A0868200ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; platformFilter = ios; };
 		26CC57A223A086AA00ABB92A /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
 		26CC57A323A086AA00ABB92A /* MLDNSLookup.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C4B22321B6B91300610282 /* MLDNSLookup.m */; };
 		26CC57A423A086AA00ABB92A /* MLXMPPServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661100C238F08820030A4EE /* MLXMPPServer.m */; };
@@ -219,7 +217,7 @@
 		26CC57D723A08D9B00ABB92A /* MLPush.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C01306233025DA001D411D /* MLPush.m */; };
 		26CC57DA23A08DD800ABB92A /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		26CC57E623A08EAA00ABB92A /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
-		26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; platformFilter = ios; };
+		26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		26D0940C22A33E9B009C7AEF /* MLRegisterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */; };
 		26D3476C23A54E67004D6D75 /* MLMessageParserTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D3476B23A54E67004D6D75 /* MLMessageParserTest.m */; };
 		26D437FB23A5643A00242AAA /* MLIQParserTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D437FA23A5643A00242AAA /* MLIQParserTest.m */; };
@@ -237,7 +235,6 @@
 		26E88CDD23F3C740001E9478 /* MLCrypto.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; };
 		26E88CDE23F3C740001E9478 /* MLCrypto.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26A711DD23C4D67400FC6A86 /* MLCrypto.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		26EE1B0C21A8F3CE00264B95 /* MLWelcomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE1B0B21A8F3CE00264B95 /* MLWelcomeViewController.m */; };
-		26EE8B1F179B67FA006781F3 /* MLNotificationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */; };
 		26F396D12196836700EF5720 /* MLLogInViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D02196836700EF5720 /* MLLogInViewController.m */; };
 		26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D421968A4100EF5720 /* GLCapsuleView.m */; };
 		26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26F396D821968A8600EF5720 /* GLRoundedView.m */; };
@@ -248,14 +245,29 @@
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
 		322AD0CC78815E4551793930 /* Pods_Monal_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F59B43550E822D135D1127E /* Pods_Monal_Tests.framework */; };
 		3517ED822FCB1456A8D492B1 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C40CE7301D792181A28A1F8 /* Pods_Monal.framework */; };
+		540A3FA924D674960008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FA624D674940008965D /* MLSQLite.m */; };
+		540A3FAA24D674960008965D /* MLSQLite.h in Headers */ = {isa = PBXBuildFile; fileRef = 540A3FA824D674950008965D /* MLSQLite.h */; };
+		540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FAC24D674BD0008965D /* MLSQLite.m */; };
+		540A3FB024D674C90008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FAF24D674C80008965D /* MLSQLite.m */; };
+		540BD0D224D8D1F40087A743 /* IPC.h in Headers */ = {isa = PBXBuildFile; fileRef = 540BD0D124D8D1F20087A743 /* IPC.h */; };
+		540BD0D424D8D2000087A743 /* IPC.m in Sources */ = {isa = PBXBuildFile; fileRef = 540BD0D324D8D1FF0087A743 /* IPC.m */; };
+		540E13A024CDCDB30038FDA0 /* MLProcessLock.m in Sources */ = {isa = PBXBuildFile; fileRef = 540E139F24CDCDB30038FDA0 /* MLProcessLock.m */; };
+		540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */ = {isa = PBXBuildFile; fileRef = 540E13A124CDCE3B0038FDA0 /* MLProcessLock.h */; };
+		540E13A524CF6A8C0038FDA0 /* MLNotificationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */; };
+		540E13A724CF78900038FDA0 /* MLLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 540E13A624CF78900038FDA0 /* MLLogFormatter.m */; };
+		540E13A924CF78D00038FDA0 /* MLLogFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = 540E13A824CF78D00038FDA0 /* MLLogFormatter.h */; };
 		540F625F24BA951E0008A6D8 /* HelperTools.m in Sources */ = {isa = PBXBuildFile; fileRef = C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */; };
 		5435BE9B245F97B2006C61BF /* ParseR.h in Headers */ = {isa = PBXBuildFile; fileRef = 5435BE99245F97B1006C61BF /* ParseR.h */; };
 		5435BE9C245F97B3006C61BF /* ParseR.m in Sources */ = {isa = PBXBuildFile; fileRef = 5435BE9A245F97B1006C61BF /* ParseR.m */; };
-		8C56FAA9FC72C01E0AF98EFE /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C28AE0807330E8B6F972591 /* Pods_NotificaionService.framework */; };
+		54D2307E24CB0F4600638D65 /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
+		54D2308224CB0F5400638D65 /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C28AE0807330E8B6F972591 /* Pods_NotificaionService.framework */; };
+		54D2308424CB10EE00638D65 /* MLLogFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C15D504A24C727CC002F75BB /* MLLogFileManager.m */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
+		C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */; };
 		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
 		C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */ = {isa = PBXBuildFile; fileRef = C18E7578245E8AE900AE8FB7 /* MLPipe.h */; };
 		C18E757C245E8AE900AE8FB7 /* MLPipe.m in Sources */ = {isa = PBXBuildFile; fileRef = C18E7579245E8AE900AE8FB7 /* MLPipe.m */; };
+		C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */; };
 		C1B7DF6C2438883600C7F0C4 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */; };
 		D838DFA541E4102BCA92A60E /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC355146D687D83135E2BBF7 /* Pods_monalxmpp.framework */; };
 		FE9BEACD951D0F8D3EBE264D /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99727E17D81471E803966620 /* Pods_shareSheet.framework */; };
@@ -665,8 +677,6 @@
 		26BDECDA1867B7790018670D /* CallViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallViewController.m; sourceTree = "<group>"; };
 		26C01305233025DA001D411D /* MLPush.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPush.h; sourceTree = "<group>"; };
 		26C01306233025DA001D411D /* MLPush.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPush.m; sourceTree = "<group>"; };
-		26C1EA661FF937040085547A /* MLOptOutSettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLOptOutSettingsViewController.h; sourceTree = "<group>"; };
-		26C1EA671FF937040085547A /* MLOptOutSettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLOptOutSettingsViewController.m; sourceTree = "<group>"; };
 		26C1EA691FF937320085547A /* MLNotificationSettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLNotificationSettingsViewController.h; sourceTree = "<group>"; };
 		26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLNotificationSettingsViewController.m; sourceTree = "<group>"; };
 		26C3456C1C68F9F0007F4BEC /* MLHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLHTTPRequest.h; sourceTree = "<group>"; };
@@ -689,7 +699,6 @@
 		26CF3EAC1780DE5C002B7085 /* ParseIq.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseIq.m; sourceTree = "<group>"; };
 		26CF3EB01780DFD9002B7085 /* XMPPParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPParser.h; sourceTree = "<group>"; };
 		26CF3EB11780DFD9002B7085 /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
-		26D0940622A14D03009C7AEF /* MLXMPPConstants.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLXMPPConstants.h; sourceTree = "<group>"; };
 		26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLRegisterViewController.m; sourceTree = "<group>"; };
 		26D0940B22A33E9B009C7AEF /* MLRegisterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLRegisterViewController.h; sourceTree = "<group>"; };
 		26D3476B23A54E67004D6D75 /* MLMessageParserTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMessageParserTest.m; sourceTree = "<group>"; };
@@ -836,6 +845,17 @@
 		428F57D57919ACB0B97869A6 /* Pods-jrtplib-static-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
 		4425FD9C1F3AFFA64619FF67 /* Pods-jrtplib-static-OSX.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.appstore.xcconfig"; sourceTree = "<group>"; };
 		4C28AE0807330E8B6F972591 /* Pods_NotificaionService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NotificaionService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		540A3FA624D674940008965D /* MLSQLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSQLite.m; sourceTree = "<group>"; };
+		540A3FA824D674950008965D /* MLSQLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSQLite.h; sourceTree = "<group>"; };
+		540A3FAC24D674BD0008965D /* MLSQLite.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSQLite.m; sourceTree = "<group>"; };
+		540A3FAF24D674C80008965D /* MLSQLite.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSQLite.m; sourceTree = "<group>"; };
+		540A3FB224D674EF0008965D /* MLSQLite.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSQLite.h; sourceTree = "<group>"; };
+		540BD0D124D8D1F20087A743 /* IPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPC.h; sourceTree = "<group>"; };
+		540BD0D324D8D1FF0087A743 /* IPC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPC.m; sourceTree = "<group>"; };
+		540E139F24CDCDB30038FDA0 /* MLProcessLock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLProcessLock.m; sourceTree = "<group>"; };
+		540E13A124CDCE3B0038FDA0 /* MLProcessLock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLProcessLock.h; sourceTree = "<group>"; };
+		540E13A624CF78900038FDA0 /* MLLogFormatter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLLogFormatter.m; sourceTree = "<group>"; };
+		540E13A824CF78D00038FDA0 /* MLLogFormatter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLLogFormatter.h; sourceTree = "<group>"; };
 		5435BE99245F97B1006C61BF /* ParseR.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParseR.h; sourceTree = "<group>"; };
 		5435BE9A245F97B1006C61BF /* ParseR.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ParseR.m; sourceTree = "<group>"; };
 		5ED93030541F175E7BEB1FC2 /* Pods-NotificaionService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NotificaionService/Pods-NotificaionService.debug.xcconfig"; sourceTree = "<group>"; };
@@ -862,10 +882,16 @@
 		B93583E9A8D07409E6847BCE /* Pods-Monal-OSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSX.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX.debug.xcconfig"; sourceTree = "<group>"; };
 		C12436122434AB5D00B8F074 /* MLAttributedLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLAttributedLabel.h; sourceTree = "<group>"; };
 		C12436132434AB5D00B8F074 /* MLAttributedLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAttributedLabel.m; sourceTree = "<group>"; };
+		C13EBB8C24DC685C008AADDA /* MLPrivacySettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPrivacySettingsViewController.h; sourceTree = "<group>"; };
+		C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPrivacySettingsViewController.m; sourceTree = "<group>"; };
 		C1414E9B24312F0100948788 /* MLChatMapsCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatMapsCell.h; sourceTree = "<group>"; };
 		C1414E9C24312F0100948788 /* MLChatMapsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatMapsCell.m; sourceTree = "<group>"; };
+		C15D504824C727CC002F75BB /* MLLogFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLLogFileManager.h; sourceTree = "<group>"; };
+		C15D504A24C727CC002F75BB /* MLLogFileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLLogFileManager.m; sourceTree = "<group>"; };
 		C18E7578245E8AE900AE8FB7 /* MLPipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPipe.h; sourceTree = "<group>"; };
 		C18E7579245E8AE900AE8FB7 /* MLPipe.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPipe.m; sourceTree = "<group>"; };
+		C1A80DA224D9552400B99E01 /* MLChatViewHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatViewHelper.h; sourceTree = "<group>"; };
+		C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatViewHelper.m; sourceTree = "<group>"; };
 		C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelperTools.h; sourceTree = "<group>"; };
 		C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HelperTools.m; sourceTree = "<group>"; };
 		C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/CoreLocation.framework; sourceTree = DEVELOPER_DIR; };
@@ -909,8 +935,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26CC57A023A0868200ABB92A /* monalxmpp.framework in Frameworks */,
-				8C56FAA9FC72C01E0AF98EFE /* Pods_NotificaionService.framework in Frameworks */,
+				54D2308224CB0F5400638D65 /* Pods_NotificaionService.framework in Frameworks */,
+				54D2307E24CB0F4600638D65 /* monalxmpp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -963,6 +989,8 @@
 				26352EA5177D21FC00E2C8FF /* Managers */,
 				26F7BB3A1115F8A300712672 /* tools */,
 				2601D9A70FBF255D004DB939 /* DataLayer.m */,
+				540A3FB224D674EF0008965D /* MLSQLite.h */,
+				540A3FAF24D674C80008965D /* MLSQLite.m */,
 				2601D9A80FBF255D004DB939 /* DataLayer.h */,
 				262D9EAB17924532009292B4 /* MLConstants.h */,
 				26EC411117BDE39E0031304D /* MLImageManager.h */,
@@ -1003,6 +1031,8 @@
 		260C51CE177F08CF0039634B /* XMPP */ = {
 			isa = PBXGroup;
 			children = (
+				540A3FA824D674950008965D /* MLSQLite.h */,
+				540A3FA624D674940008965D /* MLSQLite.m */,
 				2661102E238F17D00030A4EE /* Models */,
 				2633CB40231CB7F5006D0277 /* Processors */,
 				2642EBC418693615006A6C12 /* Jingle */,
@@ -1012,9 +1042,6 @@
 				260C51D0177F08F50039634B /* xmpp.m */,
 				26C4B22221B6B91300610282 /* MLDNSLookup.h */,
 				26C4B22321B6B91300610282 /* MLDNSLookup.m */,
-				26D0940622A14D03009C7AEF /* MLXMPPConstants.h */,
-				C18E7578245E8AE900AE8FB7 /* MLPipe.h */,
-				C18E7579245E8AE900AE8FB7 /* MLPipe.m */,
 				2661100B238F08820030A4EE /* MLXMPPServer.h */,
 				2661100C238F08820030A4EE /* MLXMPPServer.m */,
 				26611010238F08980030A4EE /* MLXMPPIdentity.h */,
@@ -1081,6 +1108,8 @@
 		26352EA5177D21FC00E2C8FF /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				C15D504824C727CC002F75BB /* MLLogFileManager.h */,
+				C15D504A24C727CC002F75BB /* MLLogFileManager.m */,
 				26352EA6177D222600E2C8FF /* MLXMPPManager.h */,
 				26352EA7177D222600E2C8FF /* MLXMPPManager.m */,
 			);
@@ -1121,6 +1150,8 @@
 				26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */,
 				C1414E9B24312F0100948788 /* MLChatMapsCell.h */,
 				C1414E9C24312F0100948788 /* MLChatMapsCell.m */,
+				C1A80DA224D9552400B99E01 /* MLChatViewHelper.h */,
+				C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */,
 			);
 			name = ChatViews;
 			sourceTree = "<group>";
@@ -1132,8 +1163,6 @@
 				26B51C4618654D98002134C3 /* LogViewController.h */,
 				26B51C4718654D98002134C3 /* LogViewController.m */,
 				2644D4971FF29E5600F46AB5 /* MLSettingsTableViewController.h */,
-				26C1EA661FF937040085547A /* MLOptOutSettingsViewController.h */,
-				26C1EA671FF937040085547A /* MLOptOutSettingsViewController.m */,
 				2644D4981FF29E5600F46AB5 /* MLSettingsTableViewController.m */,
 				26C1EA691FF937320085547A /* MLNotificationSettingsViewController.h */,
 				26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */,
@@ -1144,6 +1173,8 @@
 				26B0CA8721AE2E3C0080B133 /* MLSoundsTableViewController.h */,
 				26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */,
 				2678A987185A82BE003AF53B /* Chat Logs */,
+				C13EBB8C24DC685C008AADDA /* MLPrivacySettingsViewController.h */,
+				C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -1575,8 +1606,17 @@
 		26F7BB3A1115F8A300712672 /* tools */ = {
 			isa = PBXGroup;
 			children = (
+				540BD0D324D8D1FF0087A743 /* IPC.m */,
+				540BD0D124D8D1F20087A743 /* IPC.h */,
+				540A3FAC24D674BD0008965D /* MLSQLite.m */,
+				C18E7579245E8AE900AE8FB7 /* MLPipe.m */,
+				C18E7578245E8AE900AE8FB7 /* MLPipe.h */,
 				C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */,
 				C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */,
+				540E139F24CDCDB30038FDA0 /* MLProcessLock.m */,
+				540E13A124CDCE3B0038FDA0 /* MLProcessLock.h */,
+				540E13A624CF78900038FDA0 /* MLLogFormatter.m */,
+				540E13A824CF78D00038FDA0 /* MLLogFormatter.h */,
 			);
 			name = tools;
 			sourceTree = "<group>";
@@ -1757,7 +1797,11 @@
 				26CC579623A0867400ABB92A /* monalxmpp.h in Headers */,
 				C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */,
 				26537970244208FE007D67D5 /* MLBasePaser.h in Headers */,
+				540A3FAA24D674960008965D /* MLSQLite.h in Headers */,
 				5435BE9B245F97B2006C61BF /* ParseR.h in Headers */,
+				540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */,
+				540BD0D224D8D1F40087A743 /* IPC.h in Headers */,
+				540E13A924CF78D00038FDA0 /* MLLogFormatter.h in Headers */,
 				26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2257,6 +2301,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				26D89F061A890672009B147C /* MLSwitchCell.m in Sources */,
+				C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */,
+				C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */,
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* MonalAppDelegate.m in Sources */,
 				26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */,
@@ -2288,14 +2334,12 @@
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */,
 				2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */,
-				26C1EA681FF937040085547A /* MLOptOutSettingsViewController.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */,
 				26189C8B238A526500EAD70C /* MLSubscriptionTableViewController.m in Sources */,
 				26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */,
 				C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */,
 				26D59D9020711969006F1DEE /* MLEditGroupViewController.m in Sources */,
-				26EE8B1F179B67FA006781F3 /* MLNotificationManager.m in Sources */,
 				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,
 				26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */,
 				2633CB4723215558006D0277 /* MLXMPPActivityItem.m in Sources */,
@@ -2400,10 +2444,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				540E13A524CF6A8C0038FDA0 /* MLNotificationManager.m in Sources */,
+				54D2308424CB10EE00638D65 /* MLLogFileManager.m in Sources */,
 				26CC57B323A086CC00ABB92A /* XMPPIQ.m in Sources */,
 				26CC57AA23A086C000ABB92A /* XMPPParser.m in Sources */,
 				26CC57CB23A0892800ABB92A /* MLPresenceProcessor.m in Sources */,
 				26CC57A423A086AA00ABB92A /* MLXMPPServer.m in Sources */,
+				540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */,
 				26CC57CA23A0892800ABB92A /* MLIQProcessor.m in Sources */,
 				26CC57D323A08D7100ABB92A /* DataLayer.m in Sources */,
 				26CC57B023A086C000ABB92A /* ParseA.m in Sources */,
@@ -2412,19 +2459,24 @@
 				26CC57D423A08D7100ABB92A /* MLImageManager.m in Sources */,
 				26CC57A723A086C000ABB92A /* ParseFailed.m in Sources */,
 				26CC57AC23A086C000ABB92A /* ParseMessage.m in Sources */,
+				540E13A024CDCDB30038FDA0 /* MLProcessLock.m in Sources */,
+				540A3FB024D674C90008965D /* MLSQLite.m in Sources */,
 				26CC57A823A086C000ABB92A /* ParseStream.m in Sources */,
 				26CC57C823A0892100ABB92A /* MLMessage.m in Sources */,
 				26CC57A623A086AA00ABB92A /* MLXMPPConnection.m in Sources */,
 				26CC57B123A086C000ABB92A /* ParseResumed.m in Sources */,
+				540BD0D424D8D2000087A743 /* IPC.m in Sources */,
 				26CC57CF23A08D5B00ABB92A /* jingleCall.m in Sources */,
 				26CC57DA23A08DD800ABB92A /* MLXMPPManager.m in Sources */,
 				26CC57AE23A086C000ABB92A /* ParseFailure.m in Sources */,
+				540A3FA924D674960008965D /* MLSQLite.m in Sources */,
 				26CC57D123A08D5B00ABB92A /* IPAddress.m in Sources */,
 				26CC57D023A08D5B00ABB92A /* RTP.mm in Sources */,
 				26CC57B823A0876300ABB92A /* MLHTTPRequest.m in Sources */,
 				26CC57A223A086AA00ABB92A /* xmpp.m in Sources */,
 				26CC57AD23A086C000ABB92A /* ParseChallenge.m in Sources */,
 				26CC57B423A086CC00ABB92A /* XMPPPresence.m in Sources */,
+				540E13A724CF78900038FDA0 /* MLLogFormatter.m in Sources */,
 				26CC57C923A0892800ABB92A /* MLMessageProcessor.m in Sources */,
 				26CC57D623A08D7100ABB92A /* MLMetaInfo.m in Sources */,
 				26CC57AB23A086C000ABB92A /* ParsePresence.m in Sources */,
@@ -2479,13 +2531,11 @@
 		};
 		26CC57E823A08F3A00ABB92A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			platformFilter = ios;
 			target = 26CC579123A0867400ABB92A /* monalxmpp */;
 			targetProxy = 26CC57E723A08F3A00ABB92A /* PBXContainerItemProxy */;
 		};
 		26CC57EA23A08F3F00ABB92A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			platformFilter = ios;
 			target = 26CC579123A0867400ABB92A /* monalxmpp */;
 			targetProxy = 26CC57E923A08F3F00ABB92A /* PBXContainerItemProxy */;
 		};
@@ -2676,6 +2726,7 @@
 				INFOPLIST_FILE = "Monal-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
@@ -2729,12 +2780,12 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
-					TARGET_IS_EXTENSION,
+					"TARGET_IS_EXTENSION=1",
 				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = NotificaionService/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2802,7 +2853,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"COCOAPODS=1",
-					TARGET_IS_EXTENSION,
+					"TARGET_IS_EXTENSION=1",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -2811,7 +2862,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = NotificaionService/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2882,7 +2933,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"COCOAPODS=1",
-					TARGET_IS_EXTENSION,
+					"TARGET_IS_EXTENSION=1",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -2891,7 +2942,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = NotificaionService/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -3134,6 +3185,7 @@
 				INFOPLIST_FILE = "Monal-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
@@ -3727,6 +3779,7 @@
 				INFOPLIST_FILE = "Monal-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);

@@ -74,7 +74,7 @@ The of the message in the DB , should be int
 @property (nonatomic, assign) BOOL encrypted;
 
 /*
- whether the text was sent out on the wire not if it was delivered to the recipient
+ whether the text was acked by the server
  */
 @property (nonatomic, assign) BOOL hasBeenSent;
 

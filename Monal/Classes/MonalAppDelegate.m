@@ -9,12 +9,15 @@
 #import "MonalAppDelegate.h"
 
 #import "CallViewController.h"
-
+#import "MLConstants.h"
+#import "HelperTools.h"
 #import "MLNotificationManager.h"
 #import "DataLayer.h"
 #import "MLPush.h"
 #import "MLImageManager.h"
 #import "ActiveChatsViewController.h"
+#import "IPC.h"
+#import "MLProcessLock.h"
 
 @import NotificationBannerSwift;
 
@@ -26,7 +29,6 @@
 @end
 
 @implementation MonalAppDelegate
-
 
 -(void) setUISettings
 {
@@ -130,18 +132,11 @@
 {
     //make sure unread badge matches application badge
     [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber *result) {
-        void (^block)(void) = ^{
+        monal_void_block_t block = ^{
             NSInteger unread = 0;
-            if(result) {
+            if(result)
                 unread = [result integerValue];
-            }
-            
-            if(unread>0) {
-                [UIApplication sharedApplication].applicationIconBadgeNumber = unread;
-            }
-            else {
-                [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
-            }
+            [UIApplication sharedApplication].applicationIconBadgeNumber = unread;
         };
         if(dispatch_get_current_queue() == dispatch_get_main_queue())
             block();
@@ -152,64 +147,90 @@
 
 #pragma mark - app life cycle
 
-- (void)userNotificationCenter:(UNUserNotificationCenter *)center
-       willPresentNotification:(UNNotification *)notification
-         withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler;
+- (BOOL)application:(UIApplication*) application willFinishLaunchingWithOptions:(NSDictionary*) launchOptions
 {
-    completionHandler(UNNotificationPresentationOptionAlert);
+    self.fileLogger = [HelperTools configureLogging];
+    
+    //log unhandled exceptions
+    NSSetUncaughtExceptionHandler(&logException);
+    
+    [HelperTools activityLog];
+    
+    //migrate defaults db to shared app group
+    if(![[HelperTools defaultsDB] boolForKey:@"DefaulsMigratedToAppGroup"])
+    {
+        DDLogInfo(@"Migrating [NSUserDefaults standardUserDefaults] to app group container...");
+        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"MessagePreview"] forKey:@"MessagePreview"];
+        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"ChatBackgrounds"] forKey:@"ChatBackgrounds"];
+        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"ShowGeoLocation"] forKey:@"ShowGeoLocation"];
+        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"] forKey:@"Sound"];
+        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"SetDefaults"] forKey:@"SetDefaults"];
+        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenIntro"] forKey:@"HasSeenIntro"];
+        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeeniOS13Message"] forKey:@"HasSeeniOS13Message"];
+        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenLogin"] forKey:@"HasSeenLogin"];
+        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"] forKey:@"SortContacts"];
+        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"] forKey:@"OfflineContact"];
+        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"] forKey:@"Logging"];
+        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"ShowImages"] forKey:@"ShowImages"];
+        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"] forKey:@"Away"];
+        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"HasUpgradedPushiOS13"] forKey:@"HasUpgradedPushiOS13"];
+        [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"StatusMessage"] forKey:@"StatusMessage"];
+        [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"BackgroundImage"] forKey:@"BackgroundImage"];
+        [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"] forKey:@"AlertSoundFile"];
+        [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"pushSecret"] forKey:@"pushSecret"];
+        [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"pushNode"] forKey:@"pushNode"];
+        
+        [[HelperTools defaultsDB] setBool:YES forKey:@"DefaulsMigratedToAppGroup"];
+        [[HelperTools defaultsDB] synchronize];
+        DDLogInfo(@"Migration complete and written to disk");
+    }
+    DDLogInfo(@"App launching with options: %@", launchOptions);
+    
+    //init IPC and ProcessLock
+    [IPC initializeForProcess:@"MainApp"];
+    
+    //lock process and disconnect an already running NotificationServiceExtension
+    [MLProcessLock lock];
+    [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+    
+    //only proceed with launching if the NotificationServiceExtension is *not* running
+    if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
+    {
+        DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
+        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
+    }
 }
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+- (BOOL)application:(UIApplication*) application didFinishLaunchingWithOptions:(NSDictionary*) launchOptions
 {
-    [DDLog addLogger:[DDOSLogger sharedInstance]];
-    
-#ifdef  DEBUG
-    self.fileLogger = [[DDFileLogger alloc] init];
-    self.fileLogger.rollingFrequency = 60 * 60 * 24; // 24 hour rolling
-    self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
-    self.fileLogger.maximumFileSize=1024 * 1024 * 64;
-    [DDLog addLogger:self.fileLogger];
-#endif
-    
     [UNUserNotificationCenter currentNotificationCenter].delegate=self;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateState:) name:kMLHasConnectedNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
     
-    //ios8 register for local notifications and badges
-    if([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)])
-    {
-        NSSet *categories;
-        
-        UIMutableUserNotificationAction *replyAction = [[UIMutableUserNotificationAction alloc] init];
-        replyAction.activationMode = UIUserNotificationActivationModeBackground;
-        replyAction.title = @"Reply";
-        replyAction.identifier = @"ReplyButton";
-        replyAction.destructive = NO;
-        replyAction.authenticationRequired = NO;
-        replyAction.behavior = UIUserNotificationActionBehaviorTextInput;
-        
-        UIMutableUserNotificationCategory *actionCategory = [[UIMutableUserNotificationCategory alloc] init];
-        actionCategory.identifier = @"Reply";
-        [actionCategory setActions:@[replyAction] forContext:UIUserNotificationActionContextDefault];
-        
-        UIMutableUserNotificationCategory *extensionCategory = [[UIMutableUserNotificationCategory alloc] init];
-        extensionCategory.identifier = @"Extension";
-        
-        categories = [NSSet setWithObjects:actionCategory,extensionCategory,nil];
-        
-        UIUserNotificationSettings *settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge categories:nil];
-        [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
-    }
+    //register for local notifications and badges
+    UIMutableUserNotificationAction* replyAction = [[UIMutableUserNotificationAction alloc] init];
+    replyAction.activationMode = UIUserNotificationActivationModeBackground;
+    replyAction.title = NSLocalizedString(@"Reply", @"");
+    replyAction.identifier = NSLocalizedString(@"ReplyButton", @"");
+    replyAction.destructive = NO;
+    replyAction.authenticationRequired = NO;
+    replyAction.behavior = UIUserNotificationActionBehaviorTextInput;
+    
+    UIMutableUserNotificationCategory* actionCategory = [[UIMutableUserNotificationCategory alloc] init];
+    actionCategory.identifier = NSLocalizedString(@"Reply", @"");
+    [actionCategory setActions:@[replyAction] forContext:UIUserNotificationActionContextDefault];
+    
+    UIUserNotificationSettings* settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge categories:[NSSet setWithObjects:actionCategory,nil]];
+    [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
     
     //register for voip push using pushkit
     if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) {
         // if we are launched in the background, it was from a push. dont do this again.
         if (@available(iOS 13.0, *)) {
             //no more voip mode after ios 13
-            if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasUpgradedPushiOS13"]) {
+            if(![[HelperTools defaultsDB] boolForKey:@"HasUpgradedPushiOS13"]) {
                 MLPush *push = [[MLPush alloc] init];
                 [push unregisterVOIPPush];
-                [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasUpgradedPushiOS13"];
+                [[HelperTools defaultsDB] setBool:YES forKey:@"HasUpgradedPushiOS13"];
             }
             
             [[UIApplication sharedApplication] registerForRemoteNotifications];
@@ -221,21 +242,28 @@
         }
     }
     else  {
-        [MLXMPPManager sharedInstance].pushNode = [[NSUserDefaults standardUserDefaults] objectForKey:@"pushNode"];
-        [MLXMPPManager sharedInstance].pushSecret=[[NSUserDefaults standardUserDefaults] objectForKey:@"pushSecret"];
+        [MLXMPPManager sharedInstance].pushNode = [[HelperTools defaultsDB] objectForKey:@"pushNode"];
+        [MLXMPPManager sharedInstance].pushSecret=[[HelperTools defaultsDB] objectForKey:@"pushSecret"];
         [MLXMPPManager sharedInstance].hasAPNSToken=YES;
         DDLogInfo(@"push node %@", [MLXMPPManager sharedInstance].pushNode);
     }
     
     [self setUISettings];
 
-    // should any accounts connect?
-    [[MLXMPPManager sharedInstance] connectIfNecessary];
-    
     //update logs if needed
-    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"])
+    if(![[HelperTools defaultsDB] boolForKey:@"Logging"])
     {
         [[DataLayer sharedInstance] messageHistoryCleanAll];
+    }
+    
+    //handle message notifications by initializing the MLNotificationManager
+    [MLNotificationManager sharedInstance];
+    
+    //register BGTask
+    if(@available(iOS 13.0, *))
+    {
+        DDLogInfo(@"calling MLXMPPManager configureBackgroundFetchingTask");
+        [[MLXMPPManager sharedInstance] configureBackgroundFetchingTask];
     }
     
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
@@ -243,22 +271,51 @@
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
     DDLogInfo(@"App started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
+    
+    //should any accounts connect?
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
+    
+    //handle IPC messages (this should be done *after* calling connectIfNecessary to make sure any disconnectAll messages are handled properly
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
+    
     return YES;
 }
 
--(void) applicationDidBecomeActive:(UIApplication *)application
+-(void) incomingIPC:(NSNotification*) notification
 {
-    //  [UIApplication sharedApplication].applicationIconBadgeNumber=0;
+    NSDictionary* message = notification.userInfo;
+    //another process tells us to disconnect all accounts
+    //this could happen if we are connecting (or even connected) in the background and the NotificationServiceExtension got started
+    //BUT: only do this if we are in background (we should never receive this if we are foregrounded)
+    if([message[@"name"] isEqualToString:@"Monal.disconnectAll"])
+    {
+        DDLogInfo(@"Got disconnectAll IPC message");
+        NSAssert([HelperTools isInBackground]==YES, @"Got 'Monal.disconnectAll' while in foreground. This should NEVER happen!");
+        //disconnect all (currently connecting or already connected) accounts
+        [[MLXMPPManager sharedInstance] disconnectAll];
+    }
+    else if([message[@"name"] isEqualToString:@"Monal.connectIfNecessary"])
+    {
+        DDLogInfo(@"Got connectIfNecessary IPC message");
+        //(re)connect all accounts
+        [[MLXMPPManager sharedInstance] connectIfNecessary];
+    }
 }
 
--(void) setActiveChatsController: (UIViewController *) activeChats
+-(void) applicationDidBecomeActive:(UIApplication*) application
 {
-    self.activeChats=activeChats;
+    //[UIApplication sharedApplication].applicationIconBadgeNumber=0;
+}
+
+-(void) setActiveChatsController: (UIViewController*) activeChats
+{
+    self.activeChats = activeChats;
 }
 
 #pragma mark - handling urls
 
--(BOOL) openFile:(NSURL *) file {
+-(BOOL) openFile:(NSURL*) file
+{
     NSData *data = [NSData dataWithContentsOfURL:file];
     [[MLXMPPManager sharedInstance] parseMessageForData:data];
     return data?YES:NO;
@@ -299,7 +356,7 @@
             //no success may mean its already there
             dispatch_async(dispatch_get_main_queue(), ^{
                 [(ActiveChatsViewController *) self.activeChats presentChatWithRow:contact];
-                [(ActiveChatsViewController *) self.activeChats  refreshDisplay];
+                [(ActiveChatsViewController *) self.activeChats refreshDisplay];
             });
         }];
     }
@@ -327,7 +384,7 @@
 
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
 {
-    DDLogVerbose(@"entering app with %@", notification);
+    DDLogVerbose(@"entering app with didReceiveLocalNotification: %@", notification);
     
     //iphone
     //make sure tab 0 for chat
@@ -337,6 +394,18 @@
     }
 }
 
+-(void) application:(UIApplication*) application didReceiveRemoteNotification:(NSDictionary*) userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
+{
+    DDLogVerbose(@"got didReceiveRemoteNotification: %@", userInfo);
+    [[MLXMPPManager sharedInstance] incomingPushWithCompletionHandler:completionHandler];
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter*) center willPresentNotification:(UNNotification*) notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions options)) completionHandler;
+{
+    DDLogInfo(@"userNotificationCenter:willPresentNotification:withCompletionHandler called");
+    //show local notifications while the app is open
+    completionHandler(UNNotificationPresentationOptionAlert);
+}
 
 -(void) application:(UIApplication *)application handleActionWithIdentifier:(nullable NSString *)identifier forLocalNotification:(nonnull UILocalNotification *)notification withResponseInfo:(nonnull NSDictionary *)responseInfo completionHandler:(nonnull void (^)(void))completionHandler
 {
@@ -383,48 +452,45 @@
 
 #pragma mark - backgrounding
 
--(void) updateState:(NSNotification *) notification
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        UIApplicationState state = [[UIApplication sharedApplication] applicationState];
-        if (state == UIApplicationStateInactive || state == UIApplicationStateBackground) {
-            [[MLXMPPManager sharedInstance] setClientsInactive];
-        } else {
-             [[MLXMPPManager sharedInstance] setClientsActive];
-        }
-    });
-}
-
 - (void) applicationWillEnterForeground:(UIApplication *)application
 {
     DDLogVerbose(@"Entering FG");
- 
+    [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+    
+    //only proceed with foregrounding if the NotificationServiceExtension is not running
+    if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
+    {
+        DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
+        [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
+    }
+    
+    //trigger view updates (this has to be done because a NotificationServiceExtension could have updated the database some time ago)
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:self userInfo:nil];
+    
     [[MLXMPPManager sharedInstance] setClientsActive];
     [[MLXMPPManager sharedInstance] sendMessageForConnectedAccounts];
 }
 
 -(void) applicationWillResignActive:(UIApplication *)application
 {
-     NSUserDefaults *groupDefaults= [[NSUserDefaults alloc] initWithSuiteName:@"group.monal"];
-
     [[DataLayer sharedInstance] activeContactDictWithCompletion:^(NSMutableArray *cleanActive) {
         NSError* err;
         NSData *archive = [NSKeyedArchiver archivedDataWithRootObject:cleanActive requiringSecureCoding:YES error:&err];
         NSAssert(err == nil, @"%@", err);
-        [groupDefaults setObject:archive forKey:@"recipients"];
-        [groupDefaults synchronize];
+        [[HelperTools defaultsDB] setObject:archive forKey:@"recipients"];
+        [[HelperTools defaultsDB] synchronize];
     }];
     
-    [groupDefaults setObject:[[DataLayer sharedInstance] enabledAccountList] forKey:@"accounts"];
-    [groupDefaults synchronize];
+    [[HelperTools defaultsDB] setObject:[[DataLayer sharedInstance] enabledAccountList] forKey:@"accounts"];
+    [[HelperTools defaultsDB] synchronize];
 }
 
--(void) applicationDidEnterBackground:(UIApplication *)application
+-(void) applicationDidEnterBackground:(UIApplication*) application
 {
     UIApplicationState state = [application applicationState];
-    if (state == UIApplicationStateInactive)
+    if(state == UIApplicationStateInactive)
         DDLogVerbose(@"Screen lock / incoming call");
-    else if (state == UIApplicationStateBackground)
+    else if(state == UIApplicationStateBackground)
         DDLogVerbose(@"Entering BG");
     
     [self updateUnread];
@@ -436,36 +502,34 @@
     DDLogWarn(@"|~~| T E R M I N A T I N G |~~|");
     [self updateUnread];
     DDLogVerbose(@"|~~| 25%% |~~|");
-    [[NSUserDefaults standardUserDefaults] synchronize];
+    [[HelperTools defaultsDB] synchronize];
     DDLogVerbose(@"|~~| 50%% |~~|");
-    [[MLXMPPManager sharedInstance] scheduleBackgroundFetchingTask];        //make sure delivery will be attempted, if needed
-    DDLogVerbose(@"|~~| 75%% |~~|");
     [[MLXMPPManager sharedInstance] setClientsInactive];
+    DDLogVerbose(@"|~~| 75%% |~~|");
+    [[MLXMPPManager sharedInstance] scheduleBackgroundFetchingTask];        //make sure delivery will be attempted, if needed
     DDLogVerbose(@"|~~| T E R M I N A T E D |~~|");
+    [DDLog flushLog];
+    //give the server some more time to send smacks acks (it doesn't matter if we get killed because of this, we're terminating anyways)
+    usleep(1000000);
 }
 
 #pragma mark - error feedback
 
--(void) showConnectionStatus:(NSNotification *) notification
+-(void) showConnectionStatus:(NSNotification*) notification
 {
-    NSArray *payload= [notification.object copy];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if(([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-           || ([UIApplication sharedApplication].applicationState==UIApplicationStateInactive ))
-        {
-            DDLogDebug(@"not surfacing errors in the background because they are super common");
-        } else  {
-            NSString *message = payload[1]; // this is just the way i set it up a dic might better
-            xmpp *xmppAccount= payload.firstObject;
-
-            NotificationBanner *banner =[[NotificationBanner alloc] initWithTitle:xmppAccount.connectionProperties.identity.jid subtitle:message leftView:nil rightView:nil style:BannerStyleInfo colors:nil];
-           
-            NotificationBannerQueue *queue = [[NotificationBannerQueue alloc] initWithMaxBannersOnScreenSimultaneously:2];
-            
+    if([HelperTools isInBackground])
+        DDLogDebug(@"not surfacing errors in the background because they are super common");
+    else
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSArray* payload = [notification.object copy];
+            NSString* message = payload[1];     // this is just the way i set it up a dic might better
+            xmpp *xmppAccount = payload.firstObject;
+            NotificationBanner* banner = [[NotificationBanner alloc] initWithTitle:xmppAccount.connectionProperties.identity.jid subtitle:message leftView:nil rightView:nil style:BannerStyleInfo colors:nil];
+            NotificationBannerQueue* queue = [[NotificationBannerQueue alloc] initWithMaxBannersOnScreenSimultaneously:2];
             [banner showWithQueuePosition:QueuePositionFront bannerPosition:BannerPositionTop queue:queue on:nil];
-            
-        }
-    });
+        });
+    }
 }
 
 #pragma mark - mac menu

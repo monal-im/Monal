@@ -18,6 +18,7 @@
 #import "MLNewViewController.h"
 
 @interface ActiveChatsViewController ()
+
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
 @property (nonatomic, strong)  NSDateFormatter* sourceDateFormat;
 @property (nonatomic, strong)  NSCalendar *gregorian;
@@ -28,7 +29,6 @@
 @property (nonatomic, strong) NSMutableArray* contacts;
 @property (nonatomic, strong) MLContact* lastSelectedUser;
 @property (nonatomic, strong) NSIndexPath *lastSelectedIndexPath;
-
 
 @end
 
@@ -57,9 +57,10 @@
      self.chatListTable.delegate=self;
      self.chatListTable.dataSource=self;
     
-    self.view= self.chatListTable;
+    self.view = self.chatListTable;
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name: kMonalContactRefresh object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalRefresh object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageSent:) name:kMLMessageSentToContact object:nil];
        
@@ -68,73 +69,72 @@
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"ContactCell"];
     
-    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
-    #if !TARGET_OS_MACCATALYST
-    if (@available(iOS 13.0, *)) {
-        self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
-    } else {
-        self.settingsButton.image=[UIImage imageNamed:@"973-user"];
-        self.addButton.image=[UIImage imageNamed:@"907-plus-rounded-square"];
-        self.composeButton.image=[UIImage imageNamed:@"704-compose"];
+    self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeAllVisible;
+#if !TARGET_OS_MACCATALYST
+    if(@available(iOS 13.0, *))
+        self.splitViewController.primaryBackgroundStyle = UISplitViewControllerBackgroundStyleSidebar;
+    else
+    {
+        self.settingsButton.image = [UIImage imageNamed:@"973-user"];
+        self.addButton.image = [UIImage imageNamed:@"907-plus-rounded-square"];
+        self.composeButton.image = [UIImage imageNamed:@"704-compose"];
     }
-    #endif
+#endif
     
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;
     [self setupDateObjects];
-
 }
 
 
 -(void) refreshDisplay
 {
-    [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray *cleanActive) {
+    [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray* cleanActive) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            if(self.chatListTable.hasUncommittedUpdates) return;
+            if(self.chatListTable.hasUncommittedUpdates)
+                return;
             
-            [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
-            self.contacts=cleanActive;
+             [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
+            self.contacts = cleanActive;
             [self.chatListTable reloadData];
-            MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
+            MonalAppDelegate* appDelegate = (MonalAppDelegate*)[UIApplication sharedApplication].delegate;
             [appDelegate updateUnread];
         });
     }];
 }
 
--(void) refreshContact:(NSNotification *) notification
+-(void) refreshContact:(NSNotification*) notification
 {
     MLContact* user = [notification.userInfo objectForKey:@"contact"];;
     [self refreshRowForContact:user];
 }
 
 
--(void) handleNewMessage:(NSNotification *)notification
+-(void) handleNewMessage:(NSNotification*) notification
 {
     MLMessage *message =[notification.userInfo objectForKey:@"message"];
     
-    if([message.messageType isEqualToString:kMessageTypeStatus]) return;
+    if([message.messageType isEqualToString:kMessageTypeStatus])
+        return;
     
-    dispatch_async(dispatch_get_main_queue(),^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground || !message.shouldShowAlert)
-        {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(!message.shouldShowAlert)
             return;
-        }
-        
 
-        __block MLContact *messageContact;
+        __block MLContact* messageContact;
         
-        [self.chatListTable performBatchUpdates:^{
+        [self.chatListTable performBatchUpdates: ^{
             [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                MLContact *rowContact = (MLContact *) obj;
-                if([rowContact.contactJid isEqualToString:message.from]) {
-                    messageContact=rowContact;
-                    NSIndexPath *indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
+                MLContact *rowContact = (MLContact*) obj;
+                if([rowContact.contactJid isEqualToString:message.from])
+                {
+                    messageContact = rowContact;
+                    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:idx inSection:0];
                     [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                    *stop=YES;
+                    *stop = YES;
                 }
             }];
-        }
-                                     completion:^(BOOL finished){
+        } completion:^(BOOL finished) {
             if(!messageContact) {
                 [self refreshDisplay];
             } else  {
@@ -187,7 +187,8 @@
     }
 }
 
--(void) refreshRowForContact:(MLContact *) contact {
+-(void) refreshRowForContact:(MLContact*) contact
+{
     dispatch_async(dispatch_get_main_queue(), ^{
         __block NSIndexPath *indexPath;
         [self.chatListTable performBatchUpdates:^{
@@ -208,27 +209,27 @@
     });
 }
 
--(void) viewWillAppear:(BOOL)animated
+-(void) viewWillAppear:(BOOL) animated
 {
     [super viewWillAppear:animated];
-    self.lastSelectedUser=nil;
+    self.lastSelectedUser = nil;
 }
 
--(void) viewDidAppear:(BOOL)animated
+-(void) viewDidAppear:(BOOL) animated
 {
     [super viewDidAppear:animated];
     if(self.contacts.count==0) {
         [self refreshDisplay];
     }
   
-    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenIntro"]) {
+    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenIntro"]) {
         [self performSegueWithIdentifier:@"showIntro" sender:self];
     }
     else  {
         //for 3->4 release remove later
-        if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeeniOS13Message"]) {
-
-            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Notification Changes",@ "") message:[NSString stringWithFormat:NSLocalizedString(@"Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old experience back.",@ "")] preferredStyle:UIAlertControllerStyleAlert];
+        if(![[HelperTools defaultsDB] boolForKey:@"HasSeeniOS13Message"]) {
+            
+            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Notification Changes",@ "") message:[NSString stringWithFormat:NSLocalizedString(@"Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old expereince back.",@ "")] preferredStyle:UIAlertControllerStyleAlert];
             UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Got it!",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
                 [self dismissViewControllerAnimated:YES completion:nil];
                 
@@ -236,13 +237,13 @@
             
             [messageAlert addAction:acceptAction];
             [self.tabBarController presentViewController:messageAlert animated:YES completion:nil];
-            [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"HasSeeniOS13Message"];
+            [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeeniOS13Message"];
         }
     }
     
 }
 
-- (void)didReceiveMemoryWarning
+-(void) didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
@@ -261,7 +262,7 @@
         welcome.completion = ^(){
             if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
             {
-                if(![[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenLogin"]) {
+                if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"]) {
                     [self performSegueWithIdentifier:@"showLogin" sender:self];
                 }
             }
@@ -500,12 +501,12 @@
     return [[NSAttributedString alloc] initWithString:text attributes:attributes];
 }
 
-- (UIColor *)backgroundColorForEmptyDataSet:(UIScrollView *)scrollView
+-(UIColor*) backgroundColorForEmptyDataSet:(UIScrollView*) scrollView
 {
     return [UIColor colorNamed:@"chats"];
 }
 
-- (BOOL)emptyDataSetShouldDisplay:(UIScrollView *)scrollView
+-(BOOL) emptyDataSetShouldDisplay:(UIScrollView*) scrollView
 {
     BOOL toreturn = (self.contacts.count==0)?YES:NO;
     if(toreturn)
@@ -543,7 +544,7 @@
     }
     
     NSString *dateString = [self.destinationDateFormat stringFromDate:sourceDate];
-    return dateString?dateString:@"";
+    return dateString ? dateString : @"";
 }
 
 -(void) setupDateObjects
@@ -558,10 +559,10 @@
     
     self.gregorian = [[NSCalendar alloc]
                       initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
-    NSDate* now =[NSDate date];
-    self.thisday =[self.gregorian components:NSCalendarUnitDay fromDate:now].day;
-    self.thismonth =[self.gregorian components:NSCalendarUnitMonth fromDate:now].month;
-    self.thisyear =[self.gregorian components:NSCalendarUnitYear fromDate:now].year;
+    NSDate* now = [NSDate date];
+    self.thisday = [self.gregorian components:NSCalendarUnitDay fromDate:now].day;
+    self.thismonth = [self.gregorian components:NSCalendarUnitMonth fromDate:now].month;
+    self.thisyear = [self.gregorian components:NSCalendarUnitYear fromDate:now].year;
     
     
 }

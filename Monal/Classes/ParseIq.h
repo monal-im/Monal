@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "XMPPParser.h"
-#import "MLXMPPConstants.h" 
+ 
 
 @interface ParseIq : XMPPParser
 

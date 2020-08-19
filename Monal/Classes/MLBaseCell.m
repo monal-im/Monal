@@ -6,15 +6,15 @@
 //  Copyright © 2017 Monal.im. All rights reserved.
 //
 
+#import "HelperTools.h"
 #import "MLBaseCell.h"
-
 
 @implementation MLBaseCell
 
 - (void)awakeFromNib {
     [super awakeFromNib];
     
-    BOOL backgrounds = [[NSUserDefaults standardUserDefaults] boolForKey:@"ChatBackgrounds"];
+    BOOL backgrounds = [[HelperTools defaultsDB] boolForKey:@"ChatBackgrounds"];
     if(backgrounds) {
         self.name.textColor=[UIColor whiteColor];
         self.date.textColor=[UIColor whiteColor];

@@ -10,9 +10,7 @@
 #import "HelperTools.h"
 #import "SignalPreKey.h"
 
-#if TARGET_OS_IPHONE
 #import "MLPush.h"
-#endif
 
 NSString *const kiqGetType = @"get";
 NSString *const kiqSetType = @"set";
@@ -419,14 +417,14 @@ NSString *const kiqErrorType = @"error";
     name.element=@"name";
     name.data=@"Monal";
     
-#if TARGET_OS_IPHONE
-    MLXMLNode* os =[[MLXMLNode alloc] init];
-    os.element=@"os";
-    os.data=@"iOS";
-#else
+#if TARGET_OS_MACCATALYST
     MLXMLNode* os =[[MLXMLNode alloc] init];
     os.element=@"os";
     os.data=@"macOS";
+#else
+    MLXMLNode* os =[[MLXMLNode alloc] init];
+    os.element=@"os";
+    os.data=@"iOS";
 #endif
     
     MLXMLNode* appVersion = [[MLXMLNode alloc] initWithElement:@"version"];

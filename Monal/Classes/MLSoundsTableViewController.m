@@ -6,6 +6,7 @@
 //  Copyright © 2018 Monal.im. All rights reserved.
 //
 
+#import "HelperTools.h"
 #import "MLSoundsTableViewController.h"
 #import "MLSettingCell.h"
 #import "MLImageManager.h"
@@ -89,7 +90,7 @@
             UITableViewCell* cell=[tableView dequeueReusableCellWithIdentifier:@"soundCell"];
             cell.textLabel.text= self.soundList[indexPath.row];
              NSString *filename =[NSString stringWithFormat:@"alert%ld", (long)indexPath.row+1];
-            if([filename isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"]]) {
+            if([filename isEqualToString:[[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"]]) {
                 cell.accessoryType=UITableViewCellAccessoryCheckmark;
                 self.selectedIndex= indexPath.row;
             } else  {
@@ -118,7 +119,7 @@
     
     [self playSound:indexPath.row];
     NSString *filename =[NSString stringWithFormat:@"alert%ld", (long)indexPath.row+1];
-    [[NSUserDefaults standardUserDefaults] setObject:filename forKey:@"AlertSoundFile"];
+    [[HelperTools defaultsDB] setObject:filename forKey:@"AlertSoundFile"];
     NSIndexPath *old = [NSIndexPath indexPathForRow:self.selectedIndex inSection:1];
     self.selectedIndex= indexPath.row;
     NSArray *rows =@[old,indexPath];

@@ -7,17 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <sqlite3.h>
 #import "ParsePresence.h"
 #import "MLMessage.h"
 #import "MLContact.h"
 #import "MLConstants.h"
 
 
-@interface DataLayer : NSObject {
-    sqlite3* database;
-}
-
+@interface DataLayer : NSObject
 
 extern NSString *const kAccountID;
 extern NSString *const kDomain;
@@ -43,24 +39,8 @@ extern NSString *const kMessageTypeStatus;
 extern NSString *const kMessageTypeText;
 extern NSString *const kMessageTypeUrl;
 
-+ (DataLayer* )sharedInstance;
-
++(DataLayer*) sharedInstance;
 -(void) version;
-
-//lowest level command handlers. These are called in sync
--(NSObject*) executeScalar:(NSString*) query andArguments:(NSArray *) args ;
--(NSArray*) executeReader:(NSString*) query andArguments:(NSArray *) args;
--(BOOL) executeNonQuery:(NSString*) query andArguments:(NSArray *) args;
-
-// V2 low level. these are called in async
--(void) executeScalar:(NSString*) query withCompletion: (void (^)(NSObject *))completion;
--(void) executeReader:(NSString*) query withCompletion: (void (^)(NSMutableArray *))completion;
--(void) executeNonQuery:(NSString*) query withCompletion: (void (^)(BOOL))completion;
-
--(void) executeScalar:(NSString*) query andArguments:(NSArray *) args withCompletion: (void (^)(NSObject *))completion;
--(void) executeReader:(NSString*) query andArguments:(NSArray *) args withCompletion: (void (^)(NSMutableArray *))completion;
--(void) executeNonQuery:(NSString*) query andArguments:(NSArray *) args  withCompletion: (void (^)(BOOL))completion;
-
 
 //Roster
 -(NSString *) getRosterVersionForAccount:(NSString*) accountNo;
@@ -171,6 +151,7 @@ extern NSString *const kMessageTypeUrl;
 
 -(NSMutableDictionary *) readStateForAccount:(NSString*) accountNo;
 -(void) persistState:(NSMutableDictionary *) state forAccount:(NSString*) accountNo;
+-(void) getHighestAccountIdWithCompletion:(void (^)(NSObject * accountid)) completion;
 
 #pragma mark - message Commands
 /**
@@ -181,7 +162,7 @@ extern NSString *const kMessageTypeUrl;
 /*
  adds a specified message to the database
  */
--(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom delivered:(BOOL) delivered unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL, NSString*))completion;
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL, NSString*))completion;
 
 /**
   checks to see if there is a message with the provided messageid. will return YES if the messageid exists for this account and contact
@@ -189,9 +170,9 @@ extern NSString *const kMessageTypeUrl;
 -(void) hasMessageForId:(NSString*) messageid  onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion;
 
 /*
- Marks a message as delivered. When we know its been sent out on the wire
+ Marks a message as sent. When the server acked it
  */
--(void) setMessageId:(NSString*) messageid delivered:(BOOL) delivered;
+-(void) setMessageId:(NSString*) messageid sent:(BOOL) sent;
 
 /**
  Marked when the client on the other end replies with a recived message

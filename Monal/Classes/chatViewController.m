@@ -24,6 +24,7 @@
 #import "DataLayer.h"
 #import "AESGcm.h"
 #import "HelperTools.h"
+#import "MLChatViewHelper.h"
 
 @import QuartzCore;
 @import MobileCoreServices;
@@ -54,6 +55,10 @@
 @property (nonatomic, assign) BOOL hardwareKeyboardPresent;
 @property (nonatomic, strong) xmpp* xmppAccount;
 
+// Privacy settings that should not be loaded for each action
+@property (nonatomic, assign) BOOL showGeoLocationsInline;
+@property (nonatomic, assign) BOOL sendLastChatState;
+
 @property (nonatomic, strong) NSLayoutConstraint* chatInputConstraintHWKeyboard;
 @property (nonatomic, strong) NSLayoutConstraint* chatInputConstraintSWKeyboard;
 
@@ -65,7 +70,7 @@
 
 -(void) setup
 {
-    self.hidesBottomBarWhenPushed=YES;
+    self.hidesBottomBarWhenPushed = YES;
     
     [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId withCompletion:^(NSArray *result) {
         NSArray* accountVals = result;
@@ -74,6 +79,10 @@
             self.jid = [NSString stringWithFormat:@"%@@%@",[[accountVals objectAtIndex:0] objectForKey:@"username"], [[accountVals objectAtIndex:0] objectForKey:@"domain"]];
         }
     }];
+
+    // init privacy Settings
+    self.showGeoLocationsInline = [[HelperTools defaultsDB] boolForKey: @"ShowGeoLocation"];
+    self.sendLastChatState = [[HelperTools defaultsDB] boolForKey: @"SendLastChatState"];
 }
 
 -(void) setupWithContact:(MLContact* ) contact
@@ -94,20 +103,20 @@
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
-    [nc addObserver:self selector:@selector(handleSendFailedMessage:) name:kMonalSendFailedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleMessageError:) name:kMonalMessageErrorNotice object:nil];
     
     
     [nc addObserver:self selector:@selector(dismissKeyboard:) name:UIApplicationDidEnterBackgroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
+    [nc addObserver:self selector:@selector(handleForeGround) name:kMonalRefresh object:nil];
     
     [nc addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
     [nc addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardDidHideNotification object:nil];
     [nc addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     [nc addObserver:self selector:@selector(keyboardWillDisappear:) name:UIKeyboardWillHideNotification object:nil];
     
-    [nc addObserver:self selector:@selector(refreshMessage:) name:kMonalMessageReceivedNotice object:nil];
+    [nc addObserver:self selector:@selector(handleReceivedMessage:) name:kMonalMessageReceivedNotice object:nil];
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
     [nc addObserver:self selector:@selector(updateUIElementsOnAccountChange:) name:kMonalAccountStatusChanged object:nil];
@@ -190,6 +199,16 @@
     });
 }
 
+-(IBAction) toggleEncryption:(id)sender
+{
+#ifndef DISABLE_OMEMO
+    NSArray* devices = [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
+    [MLChatViewHelper<chatViewController*> toggleEncryption:&(self->_encryptChat) forAccount:self.xmppAccount.accountNo forContactJid:self.contact.contactJid withKnownDevices:devices withSelf:self afterToggle:^() {
+        [self displayEncryptionStateInUI];
+    }];
+#endif
+}
+
 -(void) displayEncryptionStateInUI
 {
     if(self.encryptChat) {
@@ -268,7 +287,7 @@
 
 -(void) updateNavBarLastInteractionLabel:(NSNotification*) notification
 {
-    NSDate* lastInteractionDate = [NSNull null];
+    NSDate* lastInteractionDate = nil;
     NSString* jid = self.contact.contactJid;
     NSString* accountNo = self.contact.accountId;
     // use supplied data from notification...
@@ -277,7 +296,7 @@
         NSDictionary* data = notification.userInfo;
         if(![jid isEqualToString:data[@"jid"]] || ![accountNo isEqualToString:data[@"accountNo"]])
             return;     // ignore other accounts or contacts
-        if(data[@"isTyping"]==@YES)
+        if([data[@"isTyping"] boolValue] == YES)
         {
             [self stopLastInteractionTimer];
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -298,15 +317,16 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             self.navBarLastInteraction.text = lastInteractionString;
         });
+        
         [self stopLastInteractionTimer];
         // this timer will be called only if needed
-        if(lastInteractionDate && lastInteractionDate!=[NSNull null])
+        if(lastInteractionDate && lastInteractionDate.timeIntervalSince1970 > 0)
             _cancelLastInteractionTimer = [HelperTools startTimer:60 withHandler:updateTime];
     };
     updateTime();
 }
 
--(void)viewWillAppear:(BOOL)animated
+-(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
     // Hide normal navigation bar
@@ -367,15 +387,15 @@
     NSArray* devices = [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
     if(devices.count == 0) {
         if(self.encryptChat) {
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Encryption Not Supported" message:@"This contact does not appear to have any devices that support encryption." preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:@"Disable Encryption" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Encryption Not Supported", @"") message:NSLocalizedString(@"This contact does not appear to have any devices that support encryption.", @"") preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 // Disable encryption
                 self.encryptChat = NO;
                 [self updateUIElementsOnAccountChange:nil];
                 [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
-            [alert addAction:[UIAlertAction actionWithTitle:@"Ignore" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ignore", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
 
@@ -426,11 +446,11 @@
 }
 
 -(void) updateBackground {
-    BOOL backgrounds = [[NSUserDefaults standardUserDefaults] boolForKey:@"ChatBackgrounds"];
+    BOOL backgrounds = [[HelperTools defaultsDB] boolForKey:@"ChatBackgrounds"];
     
     if(backgrounds){
         self.backgroundImage.hidden=NO;
-        NSString *imageName= [[NSUserDefaults standardUserDefaults] objectForKey:@"BackgroundImage"];
+        NSString *imageName= [[HelperTools defaultsDB] objectForKey:@"BackgroundImage"];
         if(imageName)
         {
             if([imageName isEqualToString:@"CUSTOM"])
@@ -523,21 +543,9 @@
           {
               self.messageList = newList;
           }
-          
-          
         }];
-      
     }
-    else
-    {
-        newList =[[[DataLayer sharedInstance] messageHistoryDate:self.contact.contactJid forAccount: self.contact.accountId forDate:_day] mutableCopy];
-        
-    }
-    
 }
-
-
-
 
 #pragma mark - textview
 -(void) sendMessage:(NSString *) messageText
@@ -578,7 +586,6 @@
             DDLogError(@"Account should be >0");
             return;
         }
-        NSDictionary* settings=[accounts objectAtIndex:0];
         
         if(!messageID)
         {
@@ -614,20 +621,18 @@
 
 -(void) sendChatState:(BOOL) isTyping
 {
-    [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId withCompletion:^(NSArray *result) {
-        if(result.count==0)
-        {
-            DDLogError(@"Account should be >0");
-            return;
-        }
-    }];
-    
     if(!self.sendButton.enabled)
     {
         DDLogWarn(@"Account disabled, ignoring chatstate update");
         return;
     }
     
+    // Do not send when the user disabled the feature
+    if(!self.sendLastChatState)
+    {
+        return;
+    }
+
     if(isTyping)
     {
         if(!_isTyping)      //started typing? --> send composing chatstate (e.g. typing)
@@ -773,8 +778,8 @@
     if(!self.gpsHUD) {
         self.gpsHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         self.gpsHUD.removeFromSuperViewOnHide=NO;
-        self.gpsHUD.label.text =@"GPS";
-        self.gpsHUD.detailsLabel.text =@"Waiting for GPS signal";
+        self.gpsHUD.label.text = NSLocalizedString(@"GPS", @"");
+        self.gpsHUD.detailsLabel.text = NSLocalizedString(@"Waiting for GPS signal", @"");
     }
     // Display HUD
     self.gpsHUD.hidden = NO;
@@ -787,9 +792,9 @@
             self.gpsHUD.hidden = YES;
 
             // Display warning
-            UIAlertController *gpsWarning = [UIAlertController alertControllerWithTitle:@"No GPS location received"
-                                                                                message:@"Monal did not received a gps location. Please try again later." preferredStyle:UIAlertControllerStyleAlert];
-            [gpsWarning addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            UIAlertController *gpsWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No GPS location received", @"")
+                                                                                message:NSLocalizedString(@"Monal did not received a gps location. Please try again later.", @"") preferredStyle:UIAlertControllerStyleAlert];
+            [gpsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ok", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
                 [gpsWarning dismissViewControllerAnimated:YES completion:nil];
             }]];
             [self presentViewController:gpsWarning animated:YES completion:nil];
@@ -1007,14 +1012,15 @@
     [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:self.contact.accountId withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString *messageType) {
         DDLogVerbose(@"added message");
         
-        if(result) {
-            dispatch_async(dispatch_get_main_queue(),
-                           ^{
+        if(result)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
                 MLMessage* messageObj = [[MLMessage alloc] init];
                 messageObj.actualFrom=self.jid;
                 messageObj.from=self.jid;
                 messageObj.timestamp=[NSDate date];
-                messageObj.hasBeenSent=YES;
+                messageObj.hasBeenReceived=NO;
+                messageObj.hasBeenSent=NO;
                 messageObj.messageId=messageId;
                 messageObj.encrypted=self.encryptChat;
                 messageObj.messageType=messageType;
@@ -1037,9 +1043,8 @@
                 }];
             });
         }
-        else {
+        else
             DDLogVerbose(@"failed to add message");
-        }
     }];
     
     // make sure its in active
@@ -1099,17 +1104,15 @@
         
         [[DataLayer sharedInstance] messageTypeForMessage: message.messageText withKeepThread:YES andCompletion:^(NSString *messageType) {
             
-            dispatch_async(dispatch_get_main_queue(),
-                           ^{
-                NSString *finalMessageType=messageType;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSString* finalMessageType = messageType;
                 if([message.messageType isEqualToString:kMessageTypeStatus])
-                {
-                    finalMessageType =kMessageTypeStatus;
-                }
-                message.messageType=finalMessageType;
+                    finalMessageType = kMessageTypeStatus;
+                message.messageType = finalMessageType;
                 
-                if(!self.messageList) self.messageList=[[NSMutableArray alloc] init];
-                [self.messageList addObject:message]; //TODO maybe we wantt to insert base on delay timestamp..
+                if(!self.messageList)
+                    self.messageList = [[NSMutableArray alloc] init];
+                [self.messageList addObject:message];   //do not insert based on delay timestamp because that would make it possible to fake history entries
                 
                 [self->_messageTable beginUpdates];
                 NSIndexPath *path1;
@@ -1130,24 +1133,26 @@
     }
 }
 
--(void) setMessageId:(NSString *) messageId delivered:(BOOL) delivered
+-(void) setMessageId:(NSString *) messageId sent:(BOOL) sent
 {
-    dispatch_async(dispatch_get_main_queue(),
-                   ^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground) return;
-        
-        int row=0;
-        NSIndexPath *indexPath;
-        for(MLMessage *message in self.messageList)
+    dispatch_async(dispatch_get_main_queue(), ^{
+        int row = 0;
+        NSIndexPath* indexPath;
+        for(MLMessage* message in self.messageList)
         {
-            if([message.messageId isEqualToString:messageId]) {
-                message.hasBeenSent=delivered;
-                indexPath =[NSIndexPath indexPathForRow:row inSection:0];
+            if([message.messageId isEqualToString:messageId])
+            {
+                message.hasBeenSent = sent;
+                //we don't want messages that have been received to be marked as not sent
+                if(message.hasBeenReceived && !sent)
+                    message.hasBeenSent = YES;
+                indexPath = [NSIndexPath indexPathForRow:row inSection:0];
                 break;
             }
             row++;
         }
-        if(indexPath) {
+        if(indexPath)
+        {
             [self->_messageTable beginUpdates];
             [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
             [self->_messageTable endUpdates];
@@ -1157,23 +1162,22 @@
 
 -(void) setMessageId:(NSString *) messageId received:(BOOL) received
 {
-    dispatch_async(dispatch_get_main_queue(),
-                   ^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground) return;
-        
-        int row=0;
-        NSIndexPath *indexPath;
-        for(MLMessage *message in self.messageList)
+    dispatch_async(dispatch_get_main_queue(), ^{
+        int row = 0;
+        NSIndexPath* indexPath;
+        for(MLMessage* message in self.messageList)
         {
             if([message.messageId isEqualToString:messageId]) {
-                message.hasBeenReceived=received;
-                indexPath =[NSIndexPath indexPathForRow:row inSection:0];
+                message.hasBeenSent = YES;
+                message.hasBeenReceived = received;
+                indexPath = [NSIndexPath indexPathForRow:row inSection:0];
                 break;
             }
             row++;
         }
         
-        if(indexPath) {
+        if(indexPath)
+        {
             [self->_messageTable beginUpdates];
             [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
             [self->_messageTable endUpdates];
@@ -1182,42 +1186,35 @@
 }
 
 
--(void) handleSendFailedMessage:(NSNotification *)notification
+-(void) handleSentMessage:(NSNotification*) notification
 {
-    NSDictionary *dic =notification.userInfo;
-    [self setMessageId:[dic objectForKey:kMessageId]  delivered:NO];
-}
-
--(void) handleSentMessage:(NSNotification *)notification
-{
-    NSDictionary *dic =notification.userInfo;
-    [self setMessageId:[dic objectForKey:kMessageId]  delivered:YES];
+    NSDictionary* dic = notification.userInfo;
+    [self setMessageId:[dic objectForKey:kMessageId] sent:YES];
 }
 
 
--(void) handleMessageError:(NSNotification *)notification
+-(void) handleMessageError:(NSNotification*) notification
 {
     NSDictionary *dic =notification.userInfo;
    
-    NSString *messageId= [dic objectForKey:kMessageId];
-    dispatch_async(dispatch_get_main_queue(),
-                   ^{
-        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground) return;
-        
+    NSString* messageId = [dic objectForKey:kMessageId];
+    dispatch_async(dispatch_get_main_queue(), ^{
         int row=0;
         NSIndexPath *indexPath;
         for(MLMessage *message in self.messageList)
         {
-            if([message.messageId isEqualToString:messageId] && !message.hasBeenReceived) {
-                message.errorType=[dic objectForKey:@"errorType"];
-                message.errorReason=[dic objectForKey:@"errorReason"];
-                message.hasBeenSent = NO;
-                indexPath =[NSIndexPath indexPathForRow:row inSection:0];
+            //we don't want to show errors if the message has been received at least once or if the message wasn't even sent
+            if([message.messageId isEqualToString:messageId] && message.hasBeenSent && !message.hasBeenReceived)
+            {
+                message.errorType = [dic objectForKey:@"errorType"];
+                message.errorReason = [dic objectForKey:@"errorReason"];
+                indexPath = [NSIndexPath indexPathForRow:row inSection:0];
                 break;
             }
             row++;
         }
-        if(indexPath) {
+        if(indexPath)
+        {
             [self->_messageTable beginUpdates];
             [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
             [self->_messageTable endUpdates];
@@ -1225,10 +1222,10 @@
     });
 }
 
--(void) refreshMessage:(NSNotification *)notification
+-(void) handleReceivedMessage:(NSNotification*) notification
 {
-    NSDictionary *dic =notification.userInfo;
-    [self setMessageId:[dic  objectForKey:kMessageId]  received:YES];
+    NSDictionary *dic = notification.userInfo;
+    [self setMessageId:[dic  objectForKey:kMessageId] received:YES];
 }
 
 
@@ -1322,19 +1319,19 @@
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Retry sending message?",@ "") message:NSLocalizedString(@"This message failed to send.",@ "") preferredStyle:UIAlertControllerStyleActionSheet];
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Retry",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
-        if([messageArray count]>0) {
-            NSDictionary *dic= [messageArray objectAtIndex:0];
+        if([messageArray count] > 0)
+        {
+            NSDictionary *dic = [messageArray objectAtIndex:0];
             [self sendMessage:[dic objectForKey:@"message"] andMessageID:[dic objectForKey:@"messageid"]];
-            [self setMessageId:[dic objectForKey:@"messageid"] delivered:YES]; // for the UI, db will be set in the notification
+            //[self setMessageId:[dic objectForKey:@"messageid"] sent:YES]; // for the UI, db will be set in the notification
         }
     }]];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         [self dismissViewControllerAnimated:YES completion:nil];
     }]];
-    alert.popoverPresentationController.sourceView=sender;
+    alert.popoverPresentationController.sourceView = sender;
     
     [self presentViewController:alert animated:YES completion:nil];
-    
 }
 
 #pragma mark - tableview datasource
@@ -1361,7 +1358,7 @@
     return toReturn;
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+-(UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
 {
     MLBaseCell* cell;
     
@@ -1374,10 +1371,10 @@
     
     NSString* from = row.from;
     
-    //cut text after 2048 chars to make the message cell work properly (too big texts don't render the text in the cell at all)
+    //cut text after kMonalChatMaxAllowedTextLen chars to make the message cell work properly (too big texts don't render the text in the cell at all)
     NSString* messageText = row.messageText;
-    if([messageText length] > 2048)
-        messageText = [NSString stringWithFormat:@"%@\n[...]", [messageText substringToIndex:2048]];
+    if([messageText length] > kMonalChatMaxAllowedTextLen)
+        messageText = [NSString stringWithFormat:@"%@\n[...]", [messageText substringToIndex:kMonalChatMaxAllowedTextLen]];
     
     if([row.messageType isEqualToString:kMessageTypeStatus])
     {
@@ -1453,7 +1450,8 @@
         cell=imageCell;
         
     }
-    else if ([row.messageType isEqualToString:kMessageTypeUrl]) {
+    else if([row.messageType isEqualToString:kMessageTypeUrl])
+    {
         MLLinkCell *toreturn;
         if([from isEqualToString:self.contact.contactJid]) {
             toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
@@ -1476,13 +1474,17 @@
             [toreturn loadImageWithCompletion:^{
                 
             }];
-        }  else {
+        }
+        else
+        {
             [toreturn loadPreviewWithCompletion:^{
-                if(toreturn.messageTitle.text.length==0) toreturn.messageTitle.text=@" "; // prevent repeated calls
-                [[DataLayer sharedInstance] setMessageId:row.messageId previewText:toreturn.messageTitle.text  andPreviewImage:toreturn.imageUrl.absoluteString];
+                // prevent repeated calls
+                if(toreturn.messageTitle.text.length==0)
+                    toreturn.messageTitle.text = @" ";
+                [[DataLayer sharedInstance] setMessageId:row.messageId previewText:toreturn.messageTitle.text andPreviewImage:toreturn.imageUrl.absoluteString];
             }];
         }
-        cell=toreturn;
+        cell = toreturn;
     } else if ([row.messageType isEqualToString:kMessageTypeGeo]) {
         // Parse latitude and longitude
         NSString* geoPattern = @"^geo:(-?(?:90|[1-8][0-9]|[0-9])(?:\\.[0-9]{1,32})?),(-?(?:180|1[0-7][0-9]|[0-9]{1,2})(?:\\.[0-9]{1,32})?)$";
@@ -1504,7 +1506,7 @@
             NSString* longitude = [messageText substringWithRange:longitudeRange];
 
             // Display inline map
-            if([[NSUserDefaults standardUserDefaults] boolForKey: @"ShowGeoLocation"]) {
+            if(self.showGeoLocationsInline) {
                 MLChatMapsCell* mapsCell;
                 if([from isEqualToString:self.contact.contactJid]) {
                     mapsCell = (MLChatMapsCell *) [tableView dequeueReusableCellWithIdentifier:@"mapsInCell"];
@@ -1585,75 +1587,64 @@
         cell.name.hidden=YES;
     }
     
-    if(!row.hasBeenSent){
-        cell.deliveryFailed=YES;
-    } else {
-        cell.deliveryFailed=NO;
-    }
-    
     MLMessage *nextRow =nil;
     if(indexPath.row+1<self.messageList.count)
     {
         nextRow = [self.messageList objectAtIndex:indexPath.row+1];
     }
     
-    MLMessage *priorRow =nil;
+    MLMessage *priorRow = nil;
     if(indexPath.row>0)
     {
         priorRow = [self.messageList objectAtIndex:indexPath.row-1];
     }
     
-    if(row.hasBeenReceived==YES) {
-        cell.messageStatus.text=kDelivered;
-        if(indexPath.row==self.messageList.count-1 ||
-           ![nextRow.actualFrom isEqualToString:self.jid]) {
-            cell.messageStatus.hidden=NO;
-        } else  {
-            cell.messageStatus.hidden=YES;
-        }
-    }
-    else  {
-        cell.messageStatus.hidden=YES;
-    }
+    if(row.hasBeenReceived)
+        cell.messageStatus.text = kReceived;
+    else if(row.hasBeenSent)
+        cell.messageStatus.text = kSent;
+    else
+        cell.messageStatus.text = kSending;
     
-    cell.messageHistoryId=row.messageDBId;
-    BOOL newSender=NO;
-    if(indexPath.row>0)
+    /*if(indexPath.row==self.messageList.count-1 || ![nextRow.actualFrom isEqualToString:self.jid])
+        cell.messageStatus.hidden=NO;
+    else
+        cell.messageStatus.hidden=YES;*/
+    
+    cell.messageHistoryId = row.messageDBId;
+    BOOL newSender = NO;
+    if(indexPath.row > 0)
     {
-        NSString *priorSender =priorRow.from;
+        NSString *priorSender = priorRow.from;
         if(![priorSender isEqualToString:row.from])
-        {
             newSender=YES;
-        }
     }
     
-    cell.date.text= [self formattedTimeStampWithSource:row.delayTimeStamp?row.delayTimeStamp:row.timestamp];
-    cell.selectionStyle=UITableViewCellSelectionStyleNone;
+    cell.date.text = [self formattedTimeStampWithSource:row.delayTimeStamp ? row.delayTimeStamp : row.timestamp];
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     
     cell.dividerDate.text = [self formattedDateWithSource:row.delayTimeStamp?row.delayTimeStamp:row.timestamp andPriorDate:priorRow.timestamp];
     
     if(row.encrypted)
-    {
-        cell.lockImage.hidden=NO;
-    } else  {
-        cell.lockImage.hidden=YES;
-    }
+        cell.lockImage.hidden = NO;
+    else
+        cell.lockImage.hidden = YES;
     
+    cell.messageStatus.hidden = YES;
     if([row.from isEqualToString:_jid])
     {
-        cell.outBound=YES;
+        cell.outBound = YES;
+        cell.messageStatus.hidden = NO;
     }
-    else  {
-        cell.outBound=NO;
-    }
+    else
+        cell.outBound = NO;
     
-    cell.parent=self;
+    cell.parent = self;
     
-    if(!row.hasBeenReceived) {
-        if(row.errorType.length>0) {
-            cell.messageStatus.text =[NSString stringWithFormat:@"Error:%@ - %@", row.errorType, row.errorReason];
-            cell.messageStatus.hidden=NO;
-        }
+    if(cell.outBound && ([row.errorType length]>0 || [row.errorReason length]>0) && !row.hasBeenReceived && row.hasBeenSent)
+    {
+        cell.messageStatus.text = [NSString stringWithFormat:@"Error: %@ - %@", row.errorType, row.errorReason];
+        cell.deliveryFailed = YES;
     }
     
     [cell updateCellWithNewSender:newSender];
@@ -1762,7 +1753,6 @@
     
 }
 
-
 -(BOOL) canBecomeFirstResponder
 {
     return YES;
@@ -1773,6 +1763,42 @@
     return self.inputContainerView;
 }
 
+// Add new line to chatInput with 'shift + enter'
+-(void) shiftEnterKeyPressed:(UIKeyCommand*)keyCommand
+{
+    if([self.chatInput isFirstResponder]) {
+        // Get current cursor postion
+        NSRange pos = [self.chatInput selectedRange];
+        // Insert \n
+        self.chatInput.text = [self.chatInput.text stringByReplacingCharactersInRange:pos withString:@"\n"];
+    }
+}
+
+// Send message with 'enter' if chatInput is first repsonder
+-(void) enterKeyPressed:(UIKeyCommand*)keyCommand
+{
+    if([self.chatInput isFirstResponder]) {
+        [self resignTextView];
+    }
+}
+
+// Open contact details
+-(void) commandIPressed:(UIKeyCommand*)keyCommand
+{
+    [self performSegueWithIdentifier:@"showDetails" sender:self];
+}
+
+// List of custom hardware key commands
+- (NSArray<UIKeyCommand *> *)keyCommands {
+    return @[
+            // shift + enter
+            [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:UIKeyModifierShift action:@selector(shiftEnterKeyPressed:)],
+            // enter
+            [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(enterKeyPressed:)],
+            // command + i
+            [UIKeyCommand keyCommandWithInput:@"i" modifierFlags:UIKeyModifierCommand action:@selector(commandIPressed:)]
+    ];
+}
 
 # pragma mark - Textview delegate functions
 
@@ -1781,28 +1807,20 @@
     [self scrollToBottom];
 }
 
-
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text
 {
     BOOL shouldInsert = YES;
     
     // Notify that we are typing
     [self sendChatState:YES];
-    
-    if(self.hardwareKeyboardPresent &&  [text isEqualToString:@"\n"])
-    {
-        [self resignTextView];
-        shouldInsert = NO;
-    }
 
-    // Limit text length to 2048
-    const size_t maxAllowedTextLength = 2048;
+    // Limit text length to kMonalChatMaxAllowedTextLen
     if([text isEqualToString:@""]) {
         shouldInsert &= YES;
     } else {
-        shouldInsert &= (range.location + range.length < maxAllowedTextLength);
+        shouldInsert &= (range.location + range.length < kMonalChatMaxAllowedTextLen);
     }
-    shouldInsert &= ([textView.text length] + [text length] - range.length <= maxAllowedTextLength);
+    shouldInsert &= ([textView.text length] + [text length] - range.length <= kMonalChatMaxAllowedTextLen);
 
     return shouldInsert;
 }

@@ -50,15 +50,13 @@ DDLogFileInfo* _logInfo;
 
 -(IBAction)shareAction:(id)sender
 {
-    NSArray* sharedText = [NSArray arrayWithObjects:[self.logView text],  nil];
-    UIActivityViewController* shareController = [[UIActivityViewController alloc] initWithActivityItems:sharedText applicationActivities:nil];
-
+    UIActivityViewController* shareController = [[UIActivityViewController alloc] initWithActivityItems:@[[NSURL fileURLWithPath:_logInfo.filePath]] applicationActivities:nil];
     [self presentViewController:shareController animated:YES completion:^{}];
 }
 
 -(void) reloadLog {
     NSError* error;
-    self.logView.text=[NSString stringWithContentsOfFile:_logInfo.filePath encoding:NSUTF8StringEncoding error:&error];
+    self.logView.text=@"Only shareable for now";    //[NSString stringWithContentsOfFile:_logInfo.filePath encoding:NSUTF8StringEncoding error:&error];
 }
 
 -(void) scrollToBottom {

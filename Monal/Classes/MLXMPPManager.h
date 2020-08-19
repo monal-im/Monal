@@ -9,19 +9,18 @@
 #import <Foundation/Foundation.h>
 #import "xmpp.h"
 
-#define kMonalNetQueue "im.monal.netQueue"
-#define kMonalConnectedListQueue "im.monal.connectedListQueue"
-
 /**
  A singleton to control all of the active XMPP connections
  */
 @interface MLXMPPManager : NSObject
 {
-    dispatch_queue_t _netQueue ;
-    dispatch_source_t _pinger;
+	dispatch_source_t _pinger;
 }
 
 + (MLXMPPManager* )sharedInstance;
+
+-(BOOL) allAccountsIdle;
+-(void) configureBackgroundFetchingTask;
 
 #pragma  mark connectivity
 /**
@@ -33,6 +32,8 @@
  logout all accounts
  */
 -(void) logoutAll;
+
+-(void) disconnectAll;
 
 /**
  disconnects the specified account
@@ -180,6 +181,8 @@ Attempts to upload a file to the  HTTP upload service
 
 -(void) scheduleBackgroundFetchingTask;
 
+-(void) incomingPushWithCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler;
+
 /**
  updtes client state on server as inactive
  */
@@ -189,6 +192,8 @@ Attempts to upload a file to the  HTTP upload service
  sets client state on server as active
  */
 -(void) setClientsActive;
+
+-(void) pingAllAccounts;
 
 /**
  fetch a contacts vCard

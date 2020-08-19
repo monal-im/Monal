@@ -17,6 +17,7 @@
 #import "MLResourcesTableViewController.h"
 #import "MLTextInputCell.h"
 #import "HelperTools.h"
+#import "MLChatViewHelper.h"
 
 
 @interface ContactDetails()
@@ -66,10 +67,12 @@
         
     }
     
-    self.accountNo=self.contact.accountId;
+    self.accountNo = self.contact.accountId;
     //making sure there is an entry at least
     [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" andMucNick:nil  withCompletion:^(BOOL success) {
     }];
+    
+    self.isEncrypted = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.accountNo];
     
     NSDictionary* newSub = [[DataLayer sharedInstance] getSubscriptionForContact:self.contact.contactJid andAccount:self.contact.accountId];
     self.contact.ask = [newSub objectForKey:@"ask"];
@@ -135,6 +138,20 @@
         MLKeysTableViewController* keysVC = segue.destinationViewController;
         keysVC.contact=self.contact;
     }
+}
+
+// Close the current view
+-(void) escapePressed:(UIKeyCommand*)keyCommand
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+// List of custom hardware key commands
+- (NSArray<UIKeyCommand *> *)keyCommands {
+    return @[
+            // esc
+            [UIKeyCommand keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(escapePressed:)],
+    ];
 }
 
 
@@ -212,57 +229,57 @@
                     } else {
                         cell.textInput.text=self.contact.fullName;
                     }
-                    if([cell.textInput.text isEqualToString:@"(null)"])  cell.textInput.text=@"";
-                    cell.textInput.placeholder=NSLocalizedString(@"Set a nickname",@"");
-                    cell.textInput.delegate=self;
+                    if([cell.textInput.text isEqualToString:@"(null)"])  cell.textInput.text = @"";
+                    cell.textInput.placeholder = NSLocalizedString(@"Set a nickname", @"");
+                    cell.textInput.delegate = self;
                 }
-                thecell=cell;
+                thecell = cell;
             }
-            else if(indexPath.row==1) {
-                MLDetailsTableViewCell *cell=  (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"MessageCell"];
+            else if(indexPath.row == 1) {
+                MLDetailsTableViewCell* cell = (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"MessageCell"];
                 if(self.contact.isGroup) {
-                    cell.cellDetails.text=self.contact.groupSubject;
+                    cell.cellDetails.text = self.contact.groupSubject;
                 } else  {
-                    cell.cellDetails.text=self.contact.statusMessage;
-                    if([cell.cellDetails.text isEqualToString:@"(null)"])  cell.cellDetails.text=@"";
+                    cell.cellDetails.text = self.contact.statusMessage;
+                    if([cell.cellDetails.text isEqualToString:@"(null)"])  cell.cellDetails.text = @"";
                 }
-                thecell=cell;
+                thecell = cell;
             }
             else {
-                UITableViewCell *cell=  (UITableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"TableCell"];
+                UITableViewCell* cell=  (UITableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"TableCell"];
                 cell.textLabel.text = NSLocalizedString(@"View Images Received",@"");
-                thecell=cell;
+                thecell = cell;
             }
             break;
         }
         case 2: {
             thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Sub"];
-            if(indexPath.row==0) {
-               thecell.textLabel.text=NSLocalizedString(@"Encryption Keys",@"");
+            if(indexPath.row == 0) {
+               thecell.textLabel.text = NSLocalizedString(@"Encryption Keys", @"");
            } else
-            if(indexPath.row==1) {
+            if(indexPath.row == 1) {
                 if(self.contact.isGroup) {
-                    thecell.textLabel.text=NSLocalizedString(@"Participants",@"");
+                    thecell.textLabel.text = NSLocalizedString(@"Participants", @"");
                 } else {
-                    thecell.textLabel.text=NSLocalizedString(@"Resources",@"");
+                    thecell.textLabel.text = NSLocalizedString(@"Resources", @"");
                 }
             }
-            else if(indexPath.row==2) {
+            else if(indexPath.row == 2) {
                 if(self.contact.isGroup) {
-                    thecell.textLabel.text=NSLocalizedString(@"Leave Conversation",@"");
+                    thecell.textLabel.text = NSLocalizedString(@"Leave Conversation", @"");
                 } else  {
                     if(self.isSubscribed) {
-                        thecell.textLabel.text=NSLocalizedString(@"Remove Contact",@"");
+                        thecell.textLabel.text = NSLocalizedString(@"Remove Contact", @"");
                     } else  {
-                        thecell.textLabel.text=NSLocalizedString(@"Add Contact",@"");
+                        thecell.textLabel.text = NSLocalizedString(@"Add Contact", @"");
                     }
                 }
             }
-            else if(indexPath.row==3) {
-                thecell.textLabel.text=NSLocalizedString(@"Block Sender",@"");
+            else if(indexPath.row == 3) {
+                thecell.textLabel.text = NSLocalizedString(@"Block Sender", @"");
             }
-            else if(indexPath.row==4) {
-                thecell.textLabel.text=NSLocalizedString(@"Unblock Sender",@"");
+            else if(indexPath.row == 4) {
+                thecell.textLabel.text = NSLocalizedString(@"Unblock Sender", @"");
             }
             thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             break;
@@ -274,9 +291,9 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
 {
-    if(section==0)  return 1;
-    if(section==1)  return 3;
-    if(section==2)  return 5;
+    if(section == 0)  return 1;
+    if(section == 1)  return 3;
+    if(section == 2)  return 5;
     
     return 0; //some default shouldnt reach this
 }
@@ -287,11 +304,11 @@
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    NSString* toreturn=nil;
-    if(section==1)
+    NSString* toreturn = nil;
+    if(section == 1)
         toreturn= NSLocalizedString(@"About",@"");
     
-    if(section==2)
+    if(section == 2)
         toreturn= NSLocalizedString(@"Connection Details",@"");
     
     return toreturn;
@@ -305,9 +322,8 @@
     if(indexPath.section==0) return;
     
     if(indexPath.section==1){
-        if(indexPath.row<2) return;
+        if(indexPath.row < 2) return;
         [self showChatImges];
-        
     }
     else  {
         switch(indexPath.row)
@@ -329,7 +345,6 @@
                     }  else  {
                         [self addContact];
                     }
-                    
                 }
                 break;
             }
@@ -346,16 +361,16 @@
 }
 
 -(void) addContact {
-    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(NSLocalizedString(@"Add %@ to your contacts?",@""), nil),self.contact.fullName ];
-    NSString* detailString =NSLocalizedString(@"They will see when you are online. They will be able to send you encrypted messages.",@"");
+    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Add %@ to your contacts?", @""),self.contact.fullName ];
+    NSString* detailString = NSLocalizedString(@"They will see when you are online. They will be able to send you encrypted messages.", @"");
 
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
                                                                    message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [alert dismissViewControllerAnimated:YES completion:nil];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes",@"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         [[MLXMPPManager sharedInstance] addContact:self.contact];
         if([self.contact.state isEqualToString:kSubTo]  || [self.contact.state isEqualToString:kSubNone] ) {
             [[MLXMPPManager sharedInstance] approveContact:self.contact]; //incase there was a pending request
@@ -368,8 +383,8 @@
 }
 
 -(void) removeContact {
-    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(NSLocalizedString(@"Remove %@ from contacts?",@""), nil),self.contact.fullName ];
-    NSString* detailString =NSLocalizedString(@"They will no longer see when you are online. They may not be able to send you encrypted messages.",@"");
+    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", @""), self.contact.fullName];
+    NSString* detailString = NSLocalizedString(@"They will no longer see when you are online. They may not be able to send you encrypted messages.", @"");
        
     BOOL isMUC=self.contact.isGroup;
     if(isMUC)
@@ -400,16 +415,16 @@
 }
 
 -(void) blockContact {
-    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(NSLocalizedString(@"Block %@ from contacting you?",@""), nil),self.contact.fullName ];
-    NSString* detailString =NSLocalizedString(@"This sender will no longer be able to contact you",@"");
+    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Block %@ from contacting you?", @""), self.contact.fullName ];
+    NSString* detailString = NSLocalizedString(@"This sender will no longer be able to contact you",@"");
 
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
                                                                    message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [alert dismissViewControllerAnimated:YES completion:nil];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes",@"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         [[MLXMPPManager sharedInstance] blocked:YES Jid:self.contact];
     }]];
     
@@ -419,16 +434,16 @@
 }
 
 -(void) unBlockContact {
-    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(NSLocalizedString(@"Allow %@ to contact you?",@""), nil),self.contact.fullName ];
+    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Allow %@ to contact you?", @""),self.contact.fullName ];
     NSString* detailString =NSLocalizedString(@"This sender will be able to send you messages",@"");
 
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
                                                                    message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [alert dismissViewControllerAnimated:YES completion:nil];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes",@"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         [[MLXMPPManager sharedInstance] blocked:NO Jid:self.contact];
     }]];
     
@@ -472,7 +487,6 @@
             
             UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
             
-            
             [self presentViewController:nav animated:YES completion:nil];
         } else  {
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Nothing to see",@"") message:NSLocalizedString(@"You have not received any images in this conversation.",@"") preferredStyle:UIAlertControllerStyleAlert];
@@ -481,9 +495,7 @@
             }]];
             [self presentViewController:alert animated:YES completion:nil];
         }
-        
     });
-    
 }
 
 -(void) closePhotos {
@@ -516,44 +528,26 @@
             NSIndexPath *path = [NSIndexPath indexPathForRow:0 inSection:0];
             [self.tableView reloadRowsAtIndexPaths:@[path] withRowAnimation:UITableViewRowAnimationNone];
         });
-        
     }];
 }
 
 -(IBAction) toggleEncryption:(id)sender
 {
 #ifndef DISABLE_OMEMO
-    NSArray *devices= [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
-    if(devices.count>0) {
-        if(self.isEncrypted) {
-            [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.accountNo];
-            [self refreshLock];
-        } else {
-            [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.accountNo];
-            [self refreshLock];
-        }
-        
-    } else  {
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Encryption Not Supported",@"") message:NSLocalizedString(@"This contact does not appear to have any devices that support encryption.",@"") preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            [alert dismissViewControllerAnimated:YES completion:nil];
-        }]];
-        [self presentViewController:alert animated:YES completion:nil];
-        return;
-    }
+    NSArray* devices = [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
+    [MLChatViewHelper<ContactDetails*> toggleEncryption:&(self->_isEncrypted) forAccount:self.accountNo forContactJid:self.contact.contactJid withKnownDevices:devices withSelf:self afterToggle:^() {
+        [self refreshLock];
+    }];
 #endif
 }
 
 -(void) refreshLock
 {
-    self.isEncrypted= [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.accountNo];
-    
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSIndexPath *path = [NSIndexPath indexPathForRow:0 inSection:0];
+        NSIndexPath* path = [NSIndexPath indexPathForRow:0 inSection:0];
         [self.tableView reloadRowsAtIndexPaths:@[path] withRowAnimation:UITableViewRowAnimationNone];
     });
 }
-
 
 #pragma mark - textfield delegate
 
@@ -571,9 +565,9 @@
     if(textField.text.length>0)
         self.navigationItem.title = textField.text;
     else
-        self.navigationItem.title=self.contact.fullName;
+        self.navigationItem.title = self.contact.fullName;
     
-    self.contact.nickName=textField.text;
+    self.contact.nickName = textField.text;
     
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
     

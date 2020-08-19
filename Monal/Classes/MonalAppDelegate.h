@@ -10,6 +10,7 @@
 @import PushKit;
 
 #import "DataLayer.h"
+#import "MLProcessLock.h"
 
 @import UserNotifications;
 
@@ -17,7 +18,7 @@
 @interface MonalAppDelegate : UIResponder <UIApplicationDelegate, PKPushRegistryDelegate, UNUserNotificationCenterDelegate >
 
 @property (nonatomic, strong) UIWindow* window;
-@property (nonatomic, strong) DDFileLogger *fileLogger;
+@property (nonatomic, strong) DDFileLogger* fileLogger;
 
 -(void) updateUnread;
 -(void) handleURL:(NSURL *) url;

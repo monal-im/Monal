@@ -12,6 +12,103 @@
 
 @implementation HelperTools
 
+void logException(NSException* exception)
+{
+    [DDLog flushLog];
+    DDLogError(@"*****************\nCRASH(%@): %@\nUserInfo: %@\nStack Trace: %@", [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
+    [DDLog flushLog];
+}
+
++(BOOL) isInBackground
+{
+    __block BOOL inBackground = NO;
+    if([HelperTools isAppExtension])
+        inBackground = YES;
+    else
+    {
+        [HelperTools dispatchSyncReentrant:^{
+            if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+                inBackground = YES;
+        } onQueue:dispatch_get_main_queue()];
+    }
+    return inBackground;
+}
+
++(void) dispatchSyncReentrant:(monal_void_block_t) block onQueue:(dispatch_queue_t) queue
+{
+    if(!queue)
+        queue = dispatch_get_main_queue();
+    
+    //apple docs say that enqueueing blocks for synchronous execution will execute this blocks in the thread the enqueueing came from
+    //(e.g. the tread we are already in).
+    //so when dispatching synchronously from main queue/thread to some "other queue" and from that queue back to the main queue this means:
+    //the block queued for execution in the "other queue" will be executed in the main thread
+    //this holds true even if multiple synchronous queues sit in between the main thread and this dispatchSyncReentrant:onQueue:(main_queue) call
+    
+    //directly call block:
+    //IF: the destination queue is equal to our current queue
+    //OR IF: the destination queue is the main queue and we are already in the main thread (but not the main queue)
+    if(dispatch_get_current_queue() == queue || (queue == dispatch_get_main_queue() && [NSThread isMainThread]))
+        block();
+    else
+        dispatch_sync(queue, block);
+}
+
++(void) activityLog
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0), ^{
+        BOOL appex = [HelperTools isAppExtension];
+        unsigned long counter = 1;
+        while(counter++)
+        {
+            DDLogInfo(@"activity(%@): %lu", appex ? @"APPEX" : @"MAINAPP", counter);
+            [NSThread sleepForTimeInterval:1];
+        }
+    });
+}
+
++(NSUserDefaults*) defaultsDB
+{
+    static NSUserDefaults* db;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        db = [[NSUserDefaults alloc] initWithSuiteName:kAppGroup];
+    });
+    return db;
+}
+
++(DDFileLogger*) configureLogging
+{
+    MLLogFormatter* formatter = [[MLLogFormatter alloc] init];
+    [[DDOSLogger sharedInstance] setLogFormatter:formatter];
+    [DDLog addLogger:[DDOSLogger sharedInstance]];
+    
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
+    id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:[containerUrl path]];
+    DDFileLogger* fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
+    [fileLogger setLogFormatter:formatter];
+    fileLogger.rollingFrequency = 60 * 60 * 24;    // 24 hour rolling
+    fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
+    fileLogger.maximumFileSize = 1024 * 1024 * 64;
+    [DDLog addLogger:fileLogger];
+    DDLogInfo(@"Logfile dir: %@", [containerUrl path]);
+    
+    //for debugging when upgrading the app
+    NSArray *directoryContents = [fileManager contentsOfDirectoryAtPath:[containerUrl path] error:nil];
+    for(NSString* file in directoryContents)
+    {
+        DDLogInfo(@"File %@/%@", [containerUrl path], file);
+    }
+    
+    return fileLogger;
+}
+
++(BOOL) isAppExtension
+{
+    //dispatch once seems to corrupt this check (nearly always return mainapp even if in appex) --> don't use dispatch once
+    return [[[NSBundle mainBundle] executablePath] containsString:@".appex/"];
+}
 
 +(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features
 {
@@ -94,7 +191,7 @@
     unsigned long lastInteractionTime = 0;      //default is zero which corresponds to "online"
 
     // calculate timestamp and clamp it to be not in the future (but only if given)
-    if(lastInteraction && lastInteraction!=[NSNull null])       //NSDictionary does not support nil, so we're using NSNull sometimes
+    if(lastInteraction && [lastInteraction timeIntervalSince1970] != 0)       //NSDictionary does not support nil, so we're using timeSince1970 + 0 sometimes
         lastInteractionTime = MIN([lastInteraction timeIntervalSince1970], currentTimestamp);
 
     if(lastInteractionTime > 0) {
@@ -333,5 +430,29 @@
     
     return output.uppercaseString;
 }
+
++(UIView*) MLCustomViewHeaderWithTitle:(NSString*) title
+{
+    UIView* tempView = [[UIView alloc]initWithFrame:CGRectMake(0, 200, 300, 244)];
+    tempView.backgroundColor = [UIColor clearColor];
+
+    UILabel* tempLabel = [[UILabel alloc]initWithFrame:CGRectMake(15, 0, 300, 44)];
+    tempLabel.backgroundColor = [UIColor clearColor];
+    tempLabel.shadowColor = [UIColor blackColor];
+    tempLabel.shadowOffset = CGSizeMake(0, 2);
+    tempLabel.textColor = [UIColor whiteColor]; //here you can change the text color of header.
+    tempLabel.font = [UIFont boldSystemFontOfSize:17.0f];
+    tempLabel.text = title;
+
+    [tempView addSubview:tempLabel];
+
+    tempLabel.textColor = [UIColor darkGrayColor];
+    tempLabel.text =  tempLabel.text.uppercaseString;
+    tempLabel.shadowColor = [UIColor clearColor];
+    tempLabel.font = [UIFont systemFontOfSize:[UIFont systemFontSize]];
+
+    return tempView;
+}
+
 
 @end

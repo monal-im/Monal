@@ -15,9 +15,9 @@
 /* Class = "UILabel"; text = "05C8299D ABF17279 01A72DC6 4231E407 B90BEF9D 3746C910 01C5444C 47DC66E6"; ObjectID = "fop-Br-WiN"; */
 "fop-Br-WiN.text" = "05C8299D ABF17279 01A72DC6 4231E407 B90BEF9D 3746C910 01C5444C 47DC66E6";
 /* Class = "UILabel"; text = "Calling"; ObjectID = "ggA-Jy-Lki"; */
-"ggA-Jy-Lki.text" = "Calling";
+"ggA-Jy-Lki.text" = "Aufruf";
 /* Class = "UILabel"; text = "Not a Contact, can't see keys"; ObjectID = "hFV-Qh-Uid"; */
-"hFV-Qh-Uid.text" = "Not a Contact, can't see keys";
+"hFV-Qh-Uid.text" = "Kein Kontakt, kann keine Schlüssel erkennen";
 /* Class = "UILabel"; text = "lastInteraction"; ObjectID = "ksn-PV-E6O"; */
 "ksn-PV-E6O.text" = "letzte Aktivität";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "urj-qd-yc7"; */

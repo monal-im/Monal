@@ -32,7 +32,7 @@
     self.imageList = @[@"Golden_leaves_by_Mauro_Campanelli",
                        @"Stop_the_light_by_Mato_Rachela",
                        @"THE_'OUT'_STANDING_by_ydristi",
-                       @"Tie_My_Boat_by_Ray_García",
+                       @"Tie_My_Boat_by_Ray_Garcia",
                        @"Winter_Fog_by_Daniel_Vesterskov",
                        ];
     

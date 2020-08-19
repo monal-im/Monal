@@ -198,7 +198,7 @@
                 //   detailCell.background.image=image;
             }];
             
-            detailCell.background.image = [UIImage imageNamed:@"Tie_My_Boat_by_Ray_García"];
+            detailCell.background.image = [UIImage imageNamed:@"Tie_My_Boat_by_Ray_Garcia"];
             
             if(self.isMuted) {
                 [detailCell.muteButton setImage:[UIImage imageNamed:@"847-moon-selected"] forState:UIControlStateNormal];

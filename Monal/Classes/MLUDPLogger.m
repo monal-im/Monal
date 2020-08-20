@@ -59,7 +59,7 @@
     NSString* logMsg = logMessage.message;
     if(self->_logFormatter)
         logMsg = [NSString stringWithFormat:@"%@\n", [self->_logFormatter formatLogMessage:logMessage]];
-    NSMutableDictionary* msgDict = @{
+    NSDictionary* msgDict = @{
         @"formattedMessage": logMsg,
         @"message": logMessage.message,
         @"level": [NSNumber numberWithInteger:logMessage.level],

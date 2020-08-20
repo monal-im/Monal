@@ -245,10 +245,8 @@
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
 		322AD0CC78815E4551793930 /* Pods_Monal_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F59B43550E822D135D1127E /* Pods_Monal_Tests.framework */; };
 		3517ED822FCB1456A8D492B1 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C40CE7301D792181A28A1F8 /* Pods_Monal.framework */; };
-		540A3FA924D674960008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FA624D674940008965D /* MLSQLite.m */; };
 		540A3FAA24D674960008965D /* MLSQLite.h in Headers */ = {isa = PBXBuildFile; fileRef = 540A3FA824D674950008965D /* MLSQLite.h */; };
 		540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FAC24D674BD0008965D /* MLSQLite.m */; };
-		540A3FB024D674C90008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FAF24D674C80008965D /* MLSQLite.m */; };
 		540BD0D224D8D1F40087A743 /* IPC.h in Headers */ = {isa = PBXBuildFile; fileRef = 540BD0D124D8D1F20087A743 /* IPC.h */; };
 		540BD0D424D8D2000087A743 /* IPC.m in Sources */ = {isa = PBXBuildFile; fileRef = 540BD0D324D8D1FF0087A743 /* IPC.m */; };
 		540E13A024CDCDB30038FDA0 /* MLProcessLock.m in Sources */ = {isa = PBXBuildFile; fileRef = 540E139F24CDCDB30038FDA0 /* MLProcessLock.m */; };
@@ -1950,7 +1948,7 @@
 			attributes = {
 				CLASSPREFIX = ML;
 				DefaultBuildSystemTypeForWorkspace = Original;
-				LastUpgradeCheck = 0930;
+				LastUpgradeCheck = 1160;
 				ORGANIZATIONNAME = Monal.im;
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
@@ -2467,7 +2465,6 @@
 				26CC57A723A086C000ABB92A /* ParseFailed.m in Sources */,
 				26CC57AC23A086C000ABB92A /* ParseMessage.m in Sources */,
 				540E13A024CDCDB30038FDA0 /* MLProcessLock.m in Sources */,
-				540A3FB024D674C90008965D /* MLSQLite.m in Sources */,
 				26CC57A823A086C000ABB92A /* ParseStream.m in Sources */,
 				26CC57C823A0892100ABB92A /* MLMessage.m in Sources */,
 				26CC57A623A086AA00ABB92A /* MLXMPPConnection.m in Sources */,
@@ -2476,7 +2473,6 @@
 				26CC57CF23A08D5B00ABB92A /* jingleCall.m in Sources */,
 				26CC57DA23A08DD800ABB92A /* MLXMPPManager.m in Sources */,
 				26CC57AE23A086C000ABB92A /* ParseFailure.m in Sources */,
-				540A3FA924D674960008965D /* MLSQLite.m in Sources */,
 				26CC57D123A08D5B00ABB92A /* IPAddress.m in Sources */,
 				26CC57D023A08D5B00ABB92A /* RTP.mm in Sources */,
 				26CC57B823A0876300ABB92A /* MLHTTPRequest.m in Sources */,
@@ -3006,6 +3002,7 @@
 					"@loader_path/Frameworks",
 				);
 				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "im.monal.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
@@ -3056,6 +3053,7 @@
 					"@loader_path/Frameworks",
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "im.monal.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
@@ -3107,6 +3105,7 @@
 					"@loader_path/Frameworks",
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = "im.monal.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;

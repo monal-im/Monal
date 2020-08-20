@@ -94,7 +94,8 @@ NSString *const kXMPPPresence = @"presence";
     BOOL _catchupDone;
     double _exponentialBackoff;
     BOOL _reconnectInProgress;
-    NSObject* _smacksSyncPoint; 
+    NSObject* _smacksSyncPoint;     //only used for @synchronized() blocks
+    BOOL _lastIdleState;
     
     //registration related stuff
     BOOL _registration;
@@ -158,6 +159,7 @@ NSString *const kXMPPPresence = @"presence";
     _startTLSComplete = NO;
     _catchupDone = NO;
     _reconnectInProgress = NO;
+    _lastIdleState=NO;
 
     _SRVDiscoveryDone = NO;
     _discoveredServersList = [[NSMutableArray alloc] init];
@@ -274,7 +276,14 @@ NSString *const kXMPPPresence = @"presence";
         if(![object operationCount])
             [self dispatchAsyncOnReceiveQueue:^{
                 if(self.idle)
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
+                {
+                    //only send out idle notifications if we changed from non-idle to idle state
+                    if(!_lastIdleState)
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
+                    _lastIdleState = YES;
+                }
+                else
+                    _lastIdleState = NO;
             }];
     }
 }

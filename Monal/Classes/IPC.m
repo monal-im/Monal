@@ -32,7 +32,6 @@ static CFNotificationCenterRef _darwinNotificationCenterRef;
 //forward notifications to the IPC instance that is waiting (the instance running the server thread)
 void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* observer, CFNotificationName name, const void* object, CFDictionaryRef userInfo)
 {
-    DDLogInfo(@"darwinNotificationCenterCallback called");
     [(__bridge IPC*)observer incomingDarwinNotification: (__bridge NSString*)name];
 }
 
@@ -55,10 +54,14 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
 +(void) terminate
 {
     //cancel server thread and wake it up to let it terminate properly
-    [_sharedInstance.serverThread cancel];
-    [_sharedInstance.serverThreadWaiter lock];
-    [_sharedInstance.serverThreadWaiter signal];
-    [_sharedInstance.serverThreadWaiter unlock];
+    if(_sharedInstance.serverThread)
+        [_sharedInstance.serverThread cancel];
+    if(_sharedInstance.serverThreadWaiter)
+    {
+        [_sharedInstance.serverThreadWaiter lock];
+        [_sharedInstance.serverThreadWaiter signal];
+        [_sharedInstance.serverThreadWaiter unlock];
+    }
     //deallocate everything
     _responseHandlers = nil;
     _sharedInstance = nil;
@@ -136,9 +139,9 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
 -(void) serverThreadMain
 {
     DDLogInfo(@"Now running IPC server for '%@'", _processName);
-    //register darwin notification handler for "im.monal.ipc.wakeup" which is used to wake up readNextMessage using the serverThreadWaiter condition
+    //register darwin notification handler for "im.monal.ipc.wakeup:<process name>" which is used to wake up readNextMessage using the serverThreadWaiter condition
     self.serverThreadWaiter = [[NSCondition alloc] init];
-    CFNotificationCenterAddObserver(_darwinNotificationCenterRef, (__bridge void*) self, &darwinNotificationCenterCallback, (__bridge CFNotificationName)@"im.monal.ipc.wakeup", NULL, 0);
+    CFNotificationCenterAddObserver(_darwinNotificationCenterRef, (__bridge void*) self, &darwinNotificationCenterCallback, (__bridge CFNotificationName)[NSString stringWithFormat:@"im.monal.ipc.wakeup:%@", _processName], NULL, 0);
     while(![[NSThread currentThread] isCancelled])
     {
         NSDictionary* message = [self readNextMessage];     //this will be blocking
@@ -174,7 +177,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
             });
     }
     //unregister darwin notification handler
-    CFNotificationCenterRemoveObserver(_darwinNotificationCenterRef, (__bridge void*) self, (__bridge CFNotificationName)@"im.monal.ipc.wakeup", NULL);
+    CFNotificationCenterRemoveObserver(_darwinNotificationCenterRef, (__bridge void*) self, (__bridge CFNotificationName)[NSString stringWithFormat:@"im.monal.ipc.wakeup:%@", _processName], NULL);
     DDLogInfo(@"IPC server for '%@' now terminated", _processName);
 }
 
@@ -254,7 +257,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
     [self.db endWriteTransaction];
     
     //send out darwin notification to wake up other processes waiting for IPC
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (__bridge CFNotificationName)@"im.monal.ipc.wakeup", NULL, NULL, NO);
+    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (__bridge CFNotificationName)[NSString stringWithFormat:@"im.monal.ipc.wakeup:%@", destination], NULL, NULL, NO);
     
     DDLogVerbose(@"Wrote IPC message %@ to database", id);
     return id;

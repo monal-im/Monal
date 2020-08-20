@@ -241,7 +241,7 @@ NSString *const kXMPPPresence = @"presence";
 {
     if([NSOperationQueue currentQueue]!=_receiveQueue)
     {
-        DDLogVerbose(@"DISPATCHING %@ OPERATION ON RECEIVE QUEUE: %lu", async ? @"ASYNC" : @"sync", [_receiveQueue operationCount]);
+        DDLogVerbose(@"DISPATCHING %@ OPERATION ON RECEIVE QUEUE: %lu", async ? @"ASYNC" : @"*sync*", [_receiveQueue operationCount]);
         [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:!async];
     }
     else
@@ -290,7 +290,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(BOOL) idle
 {
-    __block BOOL retval = NO;
+    BOOL retval = NO;
     //we are idle when we are not connected (and not trying to)
     //or: the catchup is done, no unacked stanzas are left in the smacks queue and receive and send queues are empty (no pending operations)
     unsigned long unackedCount = 0;
@@ -308,7 +308,7 @@ NSString *const kXMPPPresence = @"presence";
             //test if we are connected and idle (e.g. we're done with catchup and neither process any incoming stanzas nor trying to send anything)
             _catchupDone &&
             !unackedCount &&
-            ![_receiveQueue operationCount] &&
+            [_receiveQueue operationCount] <= ([NSOperationQueue currentQueue]==_receiveQueue ? 1 : 0) &&
             ![_sendQueue operationCount]
         )
     )

@@ -58,3 +58,29 @@
 "8oX-KS-wOP.text" = "Dato";
 /* Class = "UILabel"; text = "Delivered"; ObjectID = "0C4-4V-7mE"; */
 "0C4-4V-7mE.text" = "Levert";
+/* Class = "UILabel"; text = "Name"; ObjectID = "1wW-PP-jdj"; */
+"1wW-PP-jdj.text" = "Navn";
+/* Class = "UIButton"; normalTitle = "Add Contact"; ObjectID = "21P-WC-8yr"; */
+"21P-WC-8yr.normalTitle" = "Legg til kontakt";
+/* Class = "UILabel"; text = "Title"; ObjectID = "4yZ-Nr-4ym"; */
+"4yZ-Nr-4ym.text" = "Tittel";
+/* Class = "UILabel"; text = "Add a New Contact"; ObjectID = "7Cs-k6-7n4"; */
+"7Cs-k6-7n4.text" = "Legg til en ny kontakt";
+/* Class = "UILabel"; text = "Join a Group Chat"; ObjectID = "7dx-xo-wIB"; */
+"7dx-xo-wIB.text" = "Ta del i en gruppesludring";
+/* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "Vtv-sv-ErG"; */
+"Vtv-sv-ErG.title" = "Lukk";
+/* Class = "UILabel"; text = "Title"; ObjectID = "fKZ-SZ-6l0"; */
+"fKZ-SZ-6l0.text" = "Tittel";
+/* Class = "UILabel"; text = "Date"; ObjectID = "wce-ek-LTl"; */
+"wce-ek-LTl.text" = "Dato";
+/* Class = "UILabel"; text = "Detail"; ObjectID = "sff-9g-z31"; */
+"sff-9g-z31.text" = "Detalj";
+/* Class = "UILabel"; text = "Date"; ObjectID = "uDg-Hw-FvA"; */
+"uDg-Hw-FvA.text" = "Dato";
+/* Class = "UILabel"; text = "Name"; ObjectID = "b15-Tl-ako"; */
+"b15-Tl-ako.text" = "Navn";
+/* Class = "UILabel"; text = "Date"; ObjectID = "Xld-jv-Isd"; */
+"Xld-jv-Isd.text" = "Dato";
+/* Class = "UILabel"; text = "Date"; ObjectID = "WlK-KG-Z5M"; */
+"WlK-KG-Z5M.text" = "Dato";

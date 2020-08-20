@@ -185,7 +185,7 @@
 "Jabber ID" = "Jabber-ID";
 "Invalid username" = "Ungültiger Benutzername";
 "Invalid Credentails" = "Ungültige Zugangsdaten";
-"Indicate when a particular device is active or inactive. Saves battery." = "Zeige an wenn ein bestimmtes Gerät aktiv oder inaktiv ist. Spart Akku.";
+"Indicate when a particular device is active or inactive. Saves battery." = "Zeige an, wenn ein bestimmtes Gerät aktiv oder inaktiv ist. Spart Akku.";
 "Incoming Call" = "Eingehender Anruf";
 "Incoming audio call to %@ from %@ " = "Eingehender Audioanruf an %1$@ von %2$@ ";
 "Ignore" = "Ignorieren";
@@ -286,3 +286,4 @@
 "%ld (This device)" = "%ld (Dieses Gerät)";
 "%@ (Pending Approval)" = "%@ (Genehmigung ausstehend)";
 "Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old experience back." = "Aufgrund einiger iOS-Änderungen haben sich die Benachrichtigungen in iOS 13 geändert. Im Moment sehen Sie nur den Hinweis, dass es eine neue Nachricht gibt, und nicht den Text oder den Absender. Ich habe mich dazu entschlossen, dies zu tun, damit Sie eine zuverlässige Nachrichtenübermittlung haben, während ich daran arbeite, Monal auf den neuesten Stand zu bringen, um die alte Erfahrung zurückzugewinnen.";
+"Jabber, Prosody, ejabberd etc.   " = "Jabber, Prosody, ejabberd usw.   ";

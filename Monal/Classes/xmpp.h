@@ -114,6 +114,8 @@ extern NSString* const kAccountHibernate;
 -(void) connect;
 -(void) disconnect;
 -(void) disconnect:(BOOL) explicitLogout;
+-(void) reconnect;
+-(void) reconnect:(double) wait;
 
 /**
  send a message to a contact with xmpp id

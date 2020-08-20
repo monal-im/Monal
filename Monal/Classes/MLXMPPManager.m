@@ -168,27 +168,37 @@ static const int sendMessageTimeoutSeconds = 10;
     nw_path_monitor_set_queue(_path_monitor, q_background);
     nw_path_monitor_set_update_handler(_path_monitor, ^(nw_path_t path) {
         DDLogVerbose(@"*** nw_path_monitor update_handler called");
-        if(nw_path_get_status(path) == nw_path_status_satisfied)
+        if(nw_path_get_status(path) == nw_path_status_satisfied && !_hasConnectivity)
         {
             DDLogVerbose(@"reachable");
             _hasConnectivity = YES;
             for(xmpp* xmppAccount in [self connectedXMPP])
             {
-                //try to send a ping. if it fails, it will reconnect
-                DDLogVerbose(@"manager pinging");
-                [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+                if(![HelperTools isAppExtension])
+                {
+                    //try to send a ping. if it fails, it will reconnect
+                    DDLogVerbose(@"manager pinging");
+                    [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+                }
+                else
+                    [xmppAccount reconnect:0];      //try to immediately reconnect, don't bother pinging
             }
         }
-        else
+        else if(nw_path_get_status(path) != nw_path_status_satisfied && _hasConnectivity)
         {
             DDLogVerbose(@"NOT reachable");
             _hasConnectivity = NO;
-            BOOL wasIdle = [self allAccountsIdle];      //we have to check that here because disconnect: makes them idle
-            [self disconnectAll];
-            if(!wasIdle)
+            //we only want to react on connectivity changes if not in NSE because disconnecting would terminate the NSE
+            //we want do do "polling" reconnects in NSE instead to make sure we try as long as possible until the NSE times out
+            if(![HelperTools isAppExtension])
             {
-                DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored");
-                [self scheduleBackgroundFetchingTask];      //this will automatically start the app if connectivity gets restored
+                BOOL wasIdle = [self allAccountsIdle];      //we have to check that here because disconnect: makes them idle
+                [self disconnectAll];
+                if(!wasIdle)
+                {
+                    DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored");
+                    [self scheduleBackgroundFetchingTask];      //this will automatically start the app if connectivity gets restored
+                }
             }
         }
     });

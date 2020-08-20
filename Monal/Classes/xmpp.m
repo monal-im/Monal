@@ -555,7 +555,7 @@ NSString *const kXMPPPresence = @"presence";
         
         double connectTimeout = 8.0;
         if([HelperTools isInBackground])
-            connectTimeout = 300.0;     //long timeout if in background
+            connectTimeout = 24.0;     //long timeout if in background
         _cancelLoginTimer = [HelperTools startTimer:connectTimeout withHandler:^{
             [self dispatchAsyncOnReceiveQueue: ^{
                 _cancelLoginTimer = nil;

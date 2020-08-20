@@ -238,7 +238,7 @@ NSString *const kXMPPPresence = @"presence";
 {
     if([NSOperationQueue currentQueue]!=_receiveQueue)
     {
-        DDLogVerbose(@"DISPATCHING ASYNC OPERATION ON RECEIVE QUEUE: %lu", [_receiveQueue operationCount]);
+        DDLogVerbose(@"DISPATCHING %@ OPERATION ON RECEIVE QUEUE: %lu", async ? @"ASYNC" : @"sync", [_receiveQueue operationCount]);
         [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:!async];
     }
     else
@@ -276,13 +276,14 @@ NSString *const kXMPPPresence = @"presence";
     @synchronized(_smacksSyncPoint) {
         unackedCount = (unsigned long)[self.unAckedStanzas count];
     };
-    DDLogVerbose(@"Idle check:");
-    DDLogVerbose(@"    _accountState < kStateReconnecting = %@", _accountState < kStateReconnecting ? @"YES" : @"NO");
-    DDLogVerbose(@"    _reconnectInProgress = %@", _reconnectInProgress ? @"YES" : @"NO");
-    DDLogVerbose(@"    _catchupDone = %@", _catchupDone ? @"YES" : @"NO");
-    DDLogVerbose(@"    [self.unAckedStanzas count] = %lu", unackedCount);
-    DDLogVerbose(@"    [_receiveQueue operationCount] = %lu", (unsigned long)[_receiveQueue operationCount]);
-    DDLogVerbose(@"    [_sendQueue operationCount] = %lu", (unsigned long)[_sendQueue operationCount]);
+    DDLogVerbose(@"Idle check:\n\t_accountState < kStateReconnecting = %@\n\t_reconnectInProgress = %@\n\t_catchupDone = %@\n\t[self.unAckedStanzas count] = %lu\n\t[_receiveQueue operationCount] = %lu\n\t[_sendQueue operationCount] = %lu",
+        _accountState < kStateReconnecting ? @"YES" : @"NO",
+        _reconnectInProgress ? @"YES" : @"NO",
+        _catchupDone ? @"YES" : @"NO",
+        unackedCount,
+        (unsigned long)[_receiveQueue operationCount],
+        (unsigned long)[_sendQueue operationCount]
+    );
     if(
         (
             //test if this account was permanently logged out but still has stanzas pending (this can happen if we have no connectivity for example)
@@ -619,6 +620,8 @@ NSString *const kXMPPPresence = @"presence";
             
             [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
         }
+        else
+            [self persistState];
         
         [self closeSocket];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
@@ -862,14 +865,12 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) resendUnackedStanzas
 {
-    /**
-     Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
-     It may also result in mutation on iteration
-    */
     @synchronized(_smacksSyncPoint) {
         NSMutableArray* sendCopy = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
         //remove all stanzas from queue and correct the lastOutboundStanza counter accordingly
         self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue] - [self.unAckedStanzas count]];
+        //Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
+        //It may also result in mutation on iteration
         [self.unAckedStanzas removeAllObjects];
         [sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSDictionary *dic= (NSDictionary *) obj;
@@ -881,10 +882,6 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) resendUnackedMessageStanzasOnly:(NSMutableArray*) stanzas
 {
-    /**
-     Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
-     It may also result in mutation on iteration
-    */
     if(stanzas)
     {
         @synchronized(_smacksSyncPoint) {

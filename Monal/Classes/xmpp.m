@@ -849,18 +849,22 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) addSmacksHandler:(monal_void_block_t) handler
 {
-    [self addSmacksHandler:handler forValue:self.lastOutboundStanza];
+    @synchronized(_smacksSyncPoint) {
+        [self addSmacksHandler:handler forValue:self.lastOutboundStanza];
+    }
 }
 
 -(void) addSmacksHandler:(monal_void_block_t) handler forValue:(NSNumber*) value
 {
-    if([value integerValue]<[self.lastOutboundStanza integerValue])
-    {
-        DDLogError(@"adding smacks handler for value *SMALLER* than current self.lastOutboundStanza, this handler will *never* be triggered!");
-        return;
+    @synchronized(_smacksSyncPoint) {
+        if([value integerValue]<[self.lastOutboundStanza integerValue])
+        {
+            DDLogError(@"adding smacks handler for value *SMALLER* than current self.lastOutboundStanza, this handler will *never* be triggered!");
+            return;
+        }
+        NSDictionary* dic = @{@"value":value, @"handler":handler};
+        [_smacksAckHandler addObject:dic];
     }
-    NSDictionary* dic = @{@"value":value, @"handler":handler};
-    [_smacksAckHandler addObject:dic];
 }
 
 -(void) resendUnackedStanzas
@@ -868,7 +872,7 @@ NSString *const kXMPPPresence = @"presence";
     @synchronized(_smacksSyncPoint) {
         NSMutableArray* sendCopy = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
         //remove all stanzas from queue and correct the lastOutboundStanza counter accordingly
-        self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue] - [self.unAckedStanzas count]];
+        self.lastOutboundStanza = [NSNumber numberWithInteger:[self.lastOutboundStanza integerValue] - [self.unAckedStanzas count]];
         //Send appends to the unacked stanzas. Not removing it now will create an infinite loop.
         //It may also result in mutation on iteration
         [self.unAckedStanzas removeAllObjects];
@@ -903,21 +907,9 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) removeAckedStanzasFromQueue:(NSNumber*) hvalue
 {
-    self.lastHandledOutboundStanza=hvalue;
-    
-    //call registered smacksAckHandler
-    NSMutableArray* discard = [[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
-    for(NSDictionary* dic in _smacksAckHandler)
-    {
-        if([[dic objectForKey:@"value"] integerValue] <= [self.lastHandledOutboundStanza integerValue])
-        {
-            [discard addObject:dic];
-            ((monal_void_block_t) dic[@"handler"])();
-        }
-    }
-    [_smacksAckHandler removeObjectsInArray:discard];
-    
+    NSMutableArray* ackHandlerToCall;
     @synchronized(_smacksSyncPoint) {
+        self.lastHandledOutboundStanza = hvalue;
         if([self.unAckedStanzas count]>0)
         {
             NSMutableArray* iterationArray = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
@@ -950,34 +942,46 @@ NSString *const kXMPPPresence = @"presence";
             if([discard count])
                 [self persistState];
         }
+        
+        //remove registered smacksAckHandler that will be called now
+        ackHandlerToCall = [[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
+        for(NSDictionary* dic in _smacksAckHandler)
+            if([[dic objectForKey:@"value"] integerValue] <= [hvalue integerValue])
+                [ackHandlerToCall addObject:dic];
+        [_smacksAckHandler removeObjectsInArray:ackHandlerToCall];
     }
+    
+    //call registered smacksAckHandler that got sorted out
+    for(NSDictionary* dic in ackHandlerToCall)
+        ((monal_void_block_t)dic[@"handler"])();
 }
 
 -(void) requestSMAck:(BOOL) force
 {
     //caution: this could be called from sendQueue, too!
-    unsigned long unackedCount = 0;
+    MLXMLNode* rNode;
     @synchronized(_smacksSyncPoint) {
-        unackedCount = (unsigned long)[self.unAckedStanzas count];
-    }
-    if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 &&
-        ((!self.smacksRequestInFlight && unackedCount>0) || force)
-    ) {
-        DDLogVerbose(@"requesting smacks ack...");
-        MLXMLNode* rNode =[[MLXMLNode alloc] initWithElement:@"r"];
-        NSDictionary *dic=@{
+        unsigned long unackedCount = (unsigned long)[self.unAckedStanzas count];
+        NSDictionary* dic = @{
             kXMLNS:@"urn:xmpp:sm:3",
             @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
             @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
             @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
             @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", unackedCount],
         };
-        rNode.attributes=[dic mutableCopy];
-        [self send:rNode];
-        self.smacksRequestInFlight=YES;
+        if(self.accountState>=kStateBound && self.connectionProperties.supportsSM3 &&
+            ((!self.smacksRequestInFlight && unackedCount>0) || force)
+        ) {
+            DDLogVerbose(@"requesting smacks ack...");
+            rNode =[[MLXMLNode alloc] initWithElement:@"r"];
+            rNode.attributes=[dic mutableCopy];
+            self.smacksRequestInFlight=YES;
+        }
+        else
+            DDLogDebug(@"no smacks request, there is nothing pending or a request already in flight...");
     }
-    else
-        DDLogDebug(@"no smacks request, there is nothing pending or a request already in flight...");
+    if(rNode)
+        [self send:rNode];
 }
 
 -(void) sendLastAck
@@ -995,17 +999,18 @@ NSString *const kXMPPPresence = @"presence";
     {
         MLXMLNode* aNode = [[MLXMLNode alloc] initWithElement:@"a"];
         unsigned long unackedCount = 0;
+        NSDictionary* dic;
         @synchronized(_smacksSyncPoint) {
             unackedCount = (unsigned long)[self.unAckedStanzas count];
+            dic = @{
+                kXMLNS:@"urn:xmpp:sm:3",
+                @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
+                @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
+                @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
+                @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
+                @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", unackedCount],
+            };
         }
-        NSDictionary* dic = @{
-            kXMLNS:@"urn:xmpp:sm:3",
-            @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
-            @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
-            @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
-            @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
-            @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", unackedCount],
-        };
         aNode.attributes = [dic mutableCopy];
         if(queuedSend)
             [self send:aNode];
@@ -1383,13 +1388,15 @@ NSString *const kXMPPPresence = @"presence";
         else if([parsedStanza.stanzaType isEqualToString:@"a"] && [parsedStanza isKindOfClass:[ParseA class]] &&
             self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
         {
-            ParseA* aNode=parsedStanza;
+            ParseA* aNode = parsedStanza;
 
-            //remove acked messages
-            [self removeAckedStanzasFromQueue:aNode.h];
+            @synchronized(_smacksSyncPoint) {
+                //remove acked messages
+                [self removeAckedStanzasFromQueue:aNode.h];
 
-            self.smacksRequestInFlight=NO;			//ack returned
-            [self requestSMAck:NO];					//request ack again (will only happen if queue is not empty)
+                self.smacksRequestInFlight=NO;			//ack returned
+                [self requestSMAck:NO];					//request ack again (will only happen if queue is not empty)
+            }
         }
         else if([parsedStanza.stanzaType isEqualToString:@"resumed"] && [parsedStanza isKindOfClass:[ParseResumed class]])
         {
@@ -1723,11 +1730,10 @@ NSString *const kXMPPPresence = @"presence";
             }
             @synchronized(_smacksSyncPoint) {
                 DDLogVerbose(@"ADD UNACKED STANZA: %@: %@", self.lastOutboundStanza, queued_stanza.XMLString);
-                NSDictionary *dic = @{kQueueID:self.lastOutboundStanza, kStanza:queued_stanza};
+                NSDictionary* dic = @{kQueueID:self.lastOutboundStanza, kStanza:queued_stanza};
                 [self.unAckedStanzas addObject:dic];
                 //increment for next call
-                self.lastOutboundStanza=[NSNumber numberWithInteger:[self.lastOutboundStanza integerValue]+1];
-
+                self.lastOutboundStanza = [NSNumber numberWithInteger:[self.lastOutboundStanza integerValue] + 1];
                 //persist these changes (this has to be synchronous because we want so pesist sanzas to db before actually sending them)
                 [self persistState];
             }
@@ -2056,16 +2062,20 @@ NSString *const kXMPPPresence = @"presence";
         }
     }
     
-    //always reset handler and smacksRequestInFlight when loading smacks state
-    _smacksAckHandler = [[NSMutableArray alloc] init];
-    self.smacksRequestInFlight = NO;
+    @synchronized(_smacksSyncPoint) {
+        //always reset handler and smacksRequestInFlight when loading smacks state
+        _smacksAckHandler = [[NSMutableArray alloc] init];
+        self.smacksRequestInFlight = NO;
+    }
 }
 
 -(void) incrementLastHandledStanza {
     if(self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
     {
-        self.lastHandledInboundStanza = [NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
-        [self persistState];
+        @synchronized(_smacksSyncPoint) {
+            self.lastHandledInboundStanza = [NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
+            [self persistState];
+        }
     }
 }
 
@@ -2430,6 +2440,7 @@ NSString *const kXMPPPresence = @"presence";
         
         //to make sure this date is newer than the old saved one (even if we now falsely "tag" the beginning of our interaction, not the end)
         //if everything works out as it should and the app does not get killed, we will "tag" the end of our interaction as soon as the app is backgrounded
+        [self readState];       //make sure we operate on the newest state (appex could have changed it!)
         _lastInteractionDate = [NSDate date];
         [self persistState];
         
@@ -2450,6 +2461,7 @@ NSString *const kXMPPPresence = @"presence";
         }
         
         //save date as last interaction date (XEP-0319) (e.g. "tag" the end of our interaction)
+        [self readState];       //make sure we operate on the newest state (appex could have changed it!)
         _lastInteractionDate = [NSDate date];
         [self persistState];
         

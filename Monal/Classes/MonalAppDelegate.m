@@ -132,16 +132,12 @@
 {
     //make sure unread badge matches application badge
     [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber *result) {
-        monal_void_block_t block = ^{
+        [HelperTools dispatchSyncReentrant:^{
             NSInteger unread = 0;
             if(result)
                 unread = [result integerValue];
             [UIApplication sharedApplication].applicationIconBadgeNumber = unread;
-        };
-        if(dispatch_get_current_queue() == dispatch_get_main_queue())
-            block();
-        else
-            dispatch_sync(dispatch_get_main_queue(), block);
+        } onQueue:dispatch_get_main_queue()];
     }];
 }
 

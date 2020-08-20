@@ -287,9 +287,9 @@ static const int sendMessageTimeoutSeconds = 10;
     }
 }
 
--(void) addBackgroundTaskIfNeeded:(BOOL) needed
+-(void) addBackgroundTask
 {
-    if(![HelperTools isAppExtension] && needed)
+    if(![HelperTools isAppExtension])
     {
         dispatch_async(dispatch_get_main_queue(), ^{
             //start indicating we want to do work even when the app is put into background
@@ -427,7 +427,7 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) setClientsInactive
 {
-    [self addBackgroundTaskIfNeeded:[self allAccountsIdle]];
+    [self addBackgroundTask];
     
     for(xmpp* xmppAccount in [self connectedXMPP])
         [xmppAccount setClientInactive];
@@ -436,7 +436,7 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) setClientsActive
 {
-    [self addBackgroundTaskIfNeeded:YES];
+    [self addBackgroundTask];
     
     //*** we don't need to check for a running service extension here because the appdelegate does this already for us ***
     

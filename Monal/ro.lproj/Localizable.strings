@@ -16,7 +16,7 @@
 "XEP-0363: HTTP File Upload" = "XEP-0363: Încărcare fișiere prin HTTP";
 "XEP-0357: Push Notifications" = "XEP-0357: Notificări Push";
 "XEP-0352: Client State Indication" = "XEP-0352: Indicator stare client";
-"XEP-0313: Message Archive Management" = "XEP-0313: Gestionarea arhivelor de mesaje";
+"XEP-0313: Message Archive Management" = "XEP-0313: Gestionarea arhivei de mesaje";
 "XEP-0280: Message Carbons" = "XEP-0280: Copii indigo mesaje";
 "XEP-0198: Stream Management" = "XEP-0198: Management flux";
 "Will make a HTTP HEAD call on all links" = "Se va face o conexiune HEAD HTTP către toate adresele";
@@ -93,15 +93,15 @@
 "Sent a location 📍" = "Trimite locația 📍";
 "Send Typing Notifications" = "Trimitere notificări de tastare";
 "Send Location" = "Trimitere locație";
-"Send Last Interaction Time" = "Trimiteți ora ultimei interacțiuni";
+"Send Last Interaction Time" = "Trimitere ora ultimei interacțiuni";
 "Send A Message" = "Trimite un mesaj";
 "Select sounds that are played with new message notifications. Default is Xylophone." = "Selectați sunetele care sunt redate cu noi notificări de mesaje. Implicit este Xilofon.";
-"Select Message Archive Management (MAM) Preferences " = "Selectare preferințe gestionare arhivare mesaje (MAM) ";
+"Select Message Archive Management (MAM) Preferences " = "Selectare preferințe gestionare arhiva mesaje (MAM) ";
 "Select From Photos" = "Selectare din fotografii";
 "Select File" = "Selectare fișier";
 "Select Background" = "Selectare fundal";
 "Select Action" = "Selectare acțiune";
-"Select a background to display behind conversations" = "Selectați un fundal pentru a afișa în spatele conversațiilor";
+"Select a background to display behind conversations" = "Selectați un fundal pentru a fi afișat în spatele conversațiilor";
 "Select a Background" = "Selectați un fundal";
 "Room" = "Cameră";
 "Retry sending message?" = "Încercați din nou trimiterea mesajului?";
@@ -203,7 +203,7 @@
 "If you want to use VOIP you will need to allow access in Settings-> Privacy-> Microphone." = "Dacă doriți să utilizați apelurile de voce (VOIP) veți avea nevoie să permiteți accesul în Setări-> Intimitate-> Microfon.";
 "If you like Monal, please let others know and leave a review" = "Dacă vă place Monal, vă rugăm să le spuneți și celorlalți și să lăsați o recenzie";
 "If Monal push is off, your device could not talk to push.monal.im. This should also never be off. It requires Apple push service to work first. " = "Dacă serviciul Monal Push este dezactivat, dispozitivul nu poate comunica cu push.monal.im. Acest serviciu nu ar trebui să fie oprit niciodată. Are nevoie însă ca serviciul Apple Push să funcționeze. ";
-"If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission.  Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'. " = "Dacă Monal nu poate afișa notificări, nu veți vedea avertizări atunci când sosește un mesaj. Acest lucru se întâmplă dacă ați apăsat pe \"Refuz\" atunci când Monal a cerut pentru prima dată permisiunea.  Remediați-l mergând la Setări iOS -> Notificări Monal și selectați \"Permiteți notificări\". ";
+"If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission.  Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'. " = "Dacă Monal nu poate afișa notificări, nu veți vedea avertizări atunci când sosește un mesaj. Acest lucru se întâmplă dacă ați apăsat pe \"Refuz\" atunci când Monal a cerut pentru prima dată permisiunea.  Remediați mergând la Setări iOS -> Notificări Monal și selectați \"Permiteți notificări\". ";
 "Hide Chat" = "Ascunde discuție";
 "Hardcoded Hostname" = "Nume de gazdă presetat";
 "Group Information" = "Informații despre grup";
@@ -264,7 +264,7 @@
 "Apple push service should always be on. If it is off, your device can not talk to Apple's server." = "Serviciul Apple Push ar trebui să fie întotdeauna activat. Dacă este dezactivat, dispozitivul nu poate comunica cu serverul Apple.";
 "Apple Push Service" = "Serviciul Apple Push";
 "App" = "Aplicație";
-"Allowing someone to add you as a contact lets them see when you are online. It also allows you to send encrypted messages.  Tap to approve. Swipe to reject." = "Permițând cuiva să vă adauge ca contact, îi permite să vadă când sunteți conectați. De asemenea, vă permite să trimiteți mesaje criptate. Atingeți pentru a aproba. Glisați pentru a respinge.";
+"Allowing someone to add you as a contact lets them see when you are online. It also allows you to send encrypted messages.  Tap to approve. Swipe to reject." = "Permițând cuiva să vă adauge drept contact, îi permiteți să vadă când sunteți conectați. De asemenea, vă permite să trimiteți mesaje criptate. Atingeți pentru a aproba. Glisați pentru a respinge.";
 "Allow %@ to contact you?" = "Permiteți %@ să vă contacteze?";
 "All messages are archived by default." = "Toate mesajele sunt arhivate în mod implicit.";
 "Advanced Settings" = "Setări avansate";

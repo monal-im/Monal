@@ -195,19 +195,17 @@
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         //display an error notification and disconnect this account, leaving the extension running until all accounts are idle
         //(disconnected accounts count as idle)
-        //if no account receives any messages, a dummy notification will be displayed, too.
-        DDLogInfo(@"notification handler: account error --> publishing this as error notifications and disconnecting this account");
+        DDLogInfo(@"notification handler: account error --> publish this as error notification and disconnect the account");
         //extract error contents and disconnect the account
         NSArray* payload = [notification.object copy];
         NSString* message = payload[1];
         xmpp* xmppAccount = payload.firstObject;
         DDLogVerbose(@"error(%@): %@", xmppAccount.connectionProperties.identity.jid, message);
-        //this will result in an idle notification for this account ultimately leading to a dummy push notification
-        //(or a push notification for a real message coming from another account if we are in a multi account scenario)
+        //this will result in an idle notification for this account ultimately leading to the termination of this app extension
         [xmppAccount disconnect];
         
         //display error notification
-        NSString* idval = xmppAccount.connectionProperties.identity.jid;        //use this to only show one error notification per account
+        NSString* idval = xmppAccount.connectionProperties.identity.jid;        //use this to only show the newest error notification per account
         UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
         content.title = xmppAccount.connectionProperties.identity.jid;
         content.body = message;

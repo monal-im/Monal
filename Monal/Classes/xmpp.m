@@ -2063,7 +2063,10 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) incrementLastHandledStanza {
     if(self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
+    {
         self.lastHandledInboundStanza = [NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
+        [self persistState];
+    }
 }
 
 -(void) initSM3

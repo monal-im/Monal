@@ -94,7 +94,8 @@ NSString *const kXMPPPresence = @"presence";
     BOOL _catchupDone;
     double _exponentialBackoff;
     BOOL _reconnectInProgress;
-    NSObject* _smacksSyncPoint; 
+    NSObject* _smacksSyncPoint;     //only used for @synchronized() blocks
+    BOOL _lastIdleState;
     
     //registration related stuff
     BOOL _registration;
@@ -158,6 +159,7 @@ NSString *const kXMPPPresence = @"presence";
     _startTLSComplete = NO;
     _catchupDone = NO;
     _reconnectInProgress = NO;
+    _lastIdleState=NO;
 
     _SRVDiscoveryDone = NO;
     _discoveredServersList = [[NSMutableArray alloc] init];
@@ -171,6 +173,7 @@ NSString *const kXMPPPresence = @"presence";
     _receiveQueue.name = @"receiveQueue";
     _receiveQueue.qualityOfService = NSQualityOfServiceUtility;
     _receiveQueue.maxConcurrentOperationCount = 1;
+    [_receiveQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
 
     _sendQueue = [[NSOperationQueue alloc] init];
     _sendQueue.name = @"sendQueue";
@@ -219,6 +222,8 @@ NSString *const kXMPPPresence = @"presence";
     if(_outputBuffer)
         free(_outputBuffer);
     _outputBuffer = nil;
+    [_receiveQueue removeObserver:self forKeyPath:@"operationCount"];
+    [_sendQueue removeObserver:self forKeyPath:@"operationCount"];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_receiveQueue cancelAllOperations];
     [_sendQueue cancelAllOperations];
@@ -238,7 +243,7 @@ NSString *const kXMPPPresence = @"presence";
 {
     if([NSOperationQueue currentQueue]!=_receiveQueue)
     {
-        DDLogVerbose(@"DISPATCHING %@ OPERATION ON RECEIVE QUEUE: %lu", async ? @"ASYNC" : @"sync", [_receiveQueue operationCount]);
+        DDLogVerbose(@"DISPATCHING %@ OPERATION ON RECEIVE QUEUE: %lu", async ? @"ASYNC" : @"*sync*", [_receiveQueue operationCount]);
         [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:operation]] waitUntilFinished:!async];
     }
     else
@@ -257,36 +262,47 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) observeValueForKeyPath:(NSString*) keyPath ofObject:(id) object change:(NSDictionary *) change context:(void*) context
 {
-    //check for idle state every time the number of operations in _sendQueue changes
-    if(object == _sendQueue && [@"operationCount" isEqual: keyPath])
+    //check for idle state every time the number of operations in _sendQueue or _receiveQueue changes
+    if((object == _sendQueue || object == _receiveQueue) && [@"operationCount" isEqual: keyPath])
     {
-        //check idle state if _sendQueue is empty and if so, publish kMonalIdle notification
-        //only do the (more heavy but complete) idle check if we reache zero operations in this observed queue
-        if(![_sendQueue operationCount] && self.idle)
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
+        //check idle state if this queue is empty and if so, publish kMonalIdle notification
+        //only do the (more heavy but complete) idle check if we reache zero operations in the observed queue
+        //we dispatch the idle check and subsequent notification on the receive queue to account for races
+        //between the idle check and calls to disconnect issued in response to this idle notification
+        //NOTE: yes, doing the check for [_sendQueue operationCount] (inside [self idle]) from the receive queue is not race free
+        //with such disconnects, but: we only want track the send queue on a best effort basis (because network sends are best effort, too)
+        //to some extent we want to make sure every stanza was physically sent out to the network before our app gets frozen by ios
+        //but we don't need to make this completely race free (network "races" can occur far more often than send queue races).
+        //in a race the smacks unacked stanzas array will contain the not yet sent stanzas --> we won't loose stanzas when racing the send queue
+        //with [self disconnect] through an idle check
+        if(![object operationCount])
+            [self dispatchAsyncOnReceiveQueue:^{
+                if(self.idle)
+                {
+                    //only send out idle notifications if we changed from non-idle to idle state
+                    if(!_lastIdleState)
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
+                    _lastIdleState = YES;
+                }
+                else
+                    _lastIdleState = NO;
+            }];
     }
 }
 
 -(BOOL) idle
 {
-    __block BOOL retval = NO;
+    BOOL retval = NO;
     //we are idle when we are not connected (and not trying to)
     //or: the catchup is done, no unacked stanzas are left in the smacks queue and receive and send queues are empty (no pending operations)
     unsigned long unackedCount = 0;
     @synchronized(_smacksSyncPoint) {
         unackedCount = (unsigned long)[self.unAckedStanzas count];
     };
-    DDLogVerbose(@"Idle check:\n\t_accountState < kStateReconnecting = %@\n\t_reconnectInProgress = %@\n\t_catchupDone = %@\n\t[self.unAckedStanzas count] = %lu\n\t[_receiveQueue operationCount] = %lu\n\t[_sendQueue operationCount] = %lu",
-        _accountState < kStateReconnecting ? @"YES" : @"NO",
-        _reconnectInProgress ? @"YES" : @"NO",
-        _catchupDone ? @"YES" : @"NO",
-        unackedCount,
-        (unsigned long)[_receiveQueue operationCount],
-        (unsigned long)[_sendQueue operationCount]
-    );
     if(
         (
             //test if this account was permanently logged out but still has stanzas pending (this can happen if we have no connectivity for example)
+            //--> we are not idle in this case because we still have pending outgoing stanzas
             _accountState<kStateReconnecting &&
             !_reconnectInProgress &&
             !unackedCount
@@ -294,12 +310,20 @@ NSString *const kXMPPPresence = @"presence";
             //test if we are connected and idle (e.g. we're done with catchup and neither process any incoming stanzas nor trying to send anything)
             _catchupDone &&
             !unackedCount &&
-            [_receiveQueue operationCount]<=([NSOperationQueue currentQueue]==_receiveQueue ? 1 : 0) &&
+            [_receiveQueue operationCount] <= ([NSOperationQueue currentQueue]==_receiveQueue ? 1 : 0) &&
             ![_sendQueue operationCount]
         )
     )
         retval=YES;
-    DDLogVerbose(@"--> %@", retval ? @"idle" : @"NOT IDLE");
+    DDLogVerbose(@"Idle check:\n\t_accountState < kStateReconnecting = %@\n\t_reconnectInProgress = %@\n\t_catchupDone = %@\n\t[self.unAckedStanzas count] = %lu\n\t[_receiveQueue operationCount] = %lu\n\t[_sendQueue operationCount] = %lu\n\t--> %@",
+        _accountState < kStateReconnecting ? @"YES" : @"NO",
+        _reconnectInProgress ? @"YES" : @"NO",
+        _catchupDone ? @"YES" : @"NO",
+        unackedCount,
+        (unsigned long)[_receiveQueue operationCount],
+        (unsigned long)[_sendQueue operationCount],
+        retval ? @"idle" : @"NOT IDLE"
+    );
     return retval;
 }
 
@@ -533,7 +557,7 @@ NSString *const kXMPPPresence = @"presence";
         
         double connectTimeout = 8.0;
         if([HelperTools isInBackground])
-            connectTimeout = 300.0;     //long timeout if in background
+            connectTimeout = 24.0;     //long timeout if in background
         _cancelLoginTimer = [HelperTools startTimer:connectTimeout withHandler:^{
             [self dispatchAsyncOnReceiveQueue: ^{
                 _cancelLoginTimer = nil;
@@ -730,11 +754,6 @@ NSString *const kXMPPPresence = @"presence";
             //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
             [self dispatchOnReceiveQueue: ^{
                 [self processInput:parsedStanza];
-                
-                //check idle state if this was the last operation in the _receiveQueue and if so, publish kMonalIdle notification
-                //quickly check our own queue before doing the more heavy (but complete) idle check
-                if([_receiveQueue operationCount]<=1 && self.idle)
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
             }];
         }];
     } else {
@@ -1054,8 +1073,11 @@ NSString *const kXMPPPresence = @"presence";
 
             //this will be called after mam catchup is complete
             processor.mamFinished = ^() {
-                _catchupDone = YES;
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
+                if(!_catchupDone)
+                {
+                    _catchupDone = YES;
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
+                }
             };
             
             //this will be called after bind
@@ -1431,8 +1453,11 @@ NSString *const kXMPPPresence = @"presence";
                 if(!self.smacksRequestInFlight)
                     [self requestSMAck:YES];    //force sending of the request even if the smacks queue is empty (needed to always trigger the smacks handler below after 1 RTT)
                 [self addSmacksHandler:^{
-                    _catchupDone = YES;
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
+                    if(!_catchupDone)
+                    {
+                        _catchupDone = YES;
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
+                    }
                 }];
             }
 
@@ -1927,7 +1952,7 @@ NSString *const kXMPPPresence = @"presence";
 
     //debug output
     @synchronized(_smacksSyncPoint) {
-        DDLogVerbose(@"persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n",
+        DDLogVerbose(@"persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@",
             self.lastHandledInboundStanza,
             self.lastHandledOutboundStanza,
             self.lastOutboundStanza,
@@ -1953,7 +1978,7 @@ NSString *const kXMPPPresence = @"presence";
             self.streamID = [dic objectForKey:@"streamID"];
             
             //debug output
-            DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n",
+            DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
                 self.lastOutboundStanza,
@@ -2048,7 +2073,7 @@ NSString *const kXMPPPresence = @"presence";
 
         //debug output
         @synchronized(_smacksSyncPoint) {
-            DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n",
+            DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
                 self.lastOutboundStanza,

@@ -1652,7 +1652,7 @@ static NSDateFormatter* dbFormatter;
 #pragma mark active chats
 -(void) activeContactsWithCompletion: (void (^)(NSMutableArray *))completion
 {
-    NSString* query = [NSString stringWithFormat:@"select distinct a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id,lastMessageTime, 0 AS 'count', subscription, ask from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by lastMessageTime desc"];
+    NSString* query = [NSString stringWithFormat:@"select distinct a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id, lastMessageTime, 0 AS 'count', subscription, ask, pinned from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by pinned desc, lastMessageTime desc"];
 
     NSDateFormatter* dateFromatter = [[NSDateFormatter alloc] init];
     NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
@@ -2284,9 +2284,16 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"update dbversion set dbversion='4.82';" andArguments:@[]];
         DDLogVerbose(@"Upgrade to 4.82 success");
     }
-    
+
+    if([dbversion doubleValue] < 4.83)
+    {
+        DDLogVerbose(@"Database version <4.83 detected. Performing upgrade on accounts.");
+        [self.db executeNonQuery:@"alter table activechats add column pinned bool DEFAULT FALSE;" andArguments:@[]];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.83';" andArguments:@[]];
+        DDLogVerbose(@"Upgrade to 4.83 success");
+    }
     [self.db endWriteTransaction];
-    
+
     DDLogInfo(@"Database version check done");
     return;
 }
@@ -2420,6 +2427,32 @@ static NSDateFormatter* dbFormatter;
         }
         if(completion) completion(toreturn);
     }];
+}
+
+-(BOOL) isPinnedChat:(NSString*) accountNo andBuddyJid:(NSString*) buddyJid
+{
+    if(!accountNo || !buddyJid) return NO;
+    NSString* query = [NSString stringWithFormat:@"SELECT pinned FROM activechats WHERE account_id=? AND buddy_name=?"];
+    NSNumber* pinnedNum = (NSNumber*)[self.db executeScalar:query andArguments:@[accountNo, buddyJid]];
+    
+    if(pinnedNum) {
+        return [pinnedNum boolValue];
+    } else {
+        return NO;
+    }
+}
+
+-(void) pinChat:(NSString*) accountNo andBuddyJid:(NSString*) buddyJid
+{
+    if(!accountNo || !buddyJid) return;
+    NSString* query = [NSString stringWithFormat:@"UPDATE activechats SET pinned=1 WHERE account_id=? AND buddy_name=?"];
+    [self.db executeNonQuery:query andArguments:@[accountNo, buddyJid]];
+}
+-(void) unPinChat:(NSString*) accountNo andBuddyJid:(NSString*) buddyJid
+{
+    if(!accountNo || !buddyJid) return;
+    NSString* query = [NSString stringWithFormat:@"UPDATE activechats SET pinned=0 WHERE account_id=? AND buddy_name=?"];
+    [self.db executeNonQuery:query andArguments:@[accountNo, buddyJid]];
 }
 
 #pragma mark - Images

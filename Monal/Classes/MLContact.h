@@ -53,6 +53,8 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 @property (nonatomic, assign) BOOL isOnline;
 
+@property (nonatomic, assign) BOOL isPinned;
+
 @property (nonatomic, assign) BOOL isGroup;
 @property (nonatomic, copy) NSString *groupSubject;
 @property (nonatomic, copy) NSString *accountNickInGroup;

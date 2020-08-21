@@ -130,7 +130,6 @@
 "Password cannot be empty" = "Passwort darf nicht leer sein";
 "Password" = "Passwort";
 "Participants" = "Teilnehmer";
-"outgoing" = "ausgehend";
 "Open Source" = "Open Source";
 "Online" = "Online";
 "Ok" = "Ok";
@@ -189,7 +188,6 @@
 "Indicate when a particular device is active or inactive. Saves battery." = "Zeige an wenn ein bestimmtes Gerät aktiv oder inaktiv ist. Spart Akku.";
 "Incoming Call" = "Eingehender Anruf";
 "Incoming audio call to %@ from %@ " = "Eingehender Audioanruf an %1$@ von %2$@ ";
-"incoming" = "eingehend";
 "Ignore" = "Ignorieren";
 "If you want to use VOIP you will need to allow access in Settings-> Privacy-> Microphone." = "Wenn du VoIP verwenden möchtest, musst du den Zugriff unter Einstellungen > Privatsphäre > Mikrofon erlauben.";
 "If you like Monal, please let others know and leave a review" = "Wenn dir Monal gefällt, sage es bitte anderen und hinterlasse einen Bewertung";

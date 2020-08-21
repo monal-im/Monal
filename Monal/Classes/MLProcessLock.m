@@ -54,11 +54,13 @@
 
 +(void) lock
 {
+    DDLogVerbose(@"Locking process...");
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ping:) name:kMonalIncomingIPC object:nil];
 }
 
 +(void) unlock
 {
+    DDLogVerbose(@"Unlocking process...");
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 

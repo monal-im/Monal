@@ -35,28 +35,30 @@ NSString *const kAskSubscribe=@"subscribe";
 
 +(MLContact *) contactFromDictionary:(NSDictionary *) dic
 {
-    MLContact *contact =[[MLContact alloc] init];
-    contact.contactJid=[dic objectForKey:@"buddy_name"];
-    contact.nickName=[dic objectForKey:@"nick_name"];
-    contact.fullName=[dic objectForKey:@"full_name"];
-    contact.imageFile=[dic objectForKey:@"filename"];
-    contact.subscription=[dic objectForKey:@"subscription"];
-    contact.ask=[dic objectForKey:@"ask"];
+    MLContact *contact = [[MLContact alloc] init];
+    contact.contactJid = [dic objectForKey:@"buddy_name"];
+    contact.nickName = [dic objectForKey:@"nick_name"];
+    contact.fullName = [dic objectForKey:@"full_name"];
+    contact.imageFile = [dic objectForKey:@"filename"];
+    contact.subscription = [dic objectForKey:@"subscription"];
+    contact.ask = [dic objectForKey:@"ask"];
     
     contact.accountId=[NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
     
-    contact.groupSubject=[dic objectForKey:@"muc_subject"];
-    contact.accountNickInGroup=[dic objectForKey:@"muc_nick"];
-    contact.isGroup=[[dic objectForKey:@"Muc"] boolValue];
+    contact.groupSubject = [dic objectForKey:@"muc_subject"];
+    contact.accountNickInGroup = [dic objectForKey:@"muc_nick"];
+    contact.isGroup = [[dic objectForKey:@"Muc"] boolValue];
     
-    if(contact.groupSubject.length>0 ||
-       contact.accountNickInGroup.length>0)
-        contact.isGroup=YES;
+    contact.isPinned = [[dic objectForKey:@"pinned"] boolValue];
     
-    contact.statusMessage=[dic objectForKey:@"status"];
-    contact.state=[dic objectForKey:@"state"];
+    if(contact.groupSubject.length > 0 ||
+       contact.accountNickInGroup.length > 0)
+        contact.isGroup = YES;
     
-    contact.unreadCount=[[dic objectForKey:@"count"] integerValue];
+    contact.statusMessage = [dic objectForKey:@"status"];
+    contact.state = [dic objectForKey:@"state"];
+    
+    contact.unreadCount = [[dic objectForKey:@"count"] integerValue];
     return contact;
 }
 
@@ -75,11 +77,11 @@ NSString *const kAskSubscribe=@"subscribe";
     [coder encodeObject:self.imageFile forKey:@"imageFile"];
     [coder encodeObject:self.accountId forKey:@"accountId"];
     [coder encodeBool:self.isGroup forKey:@"isGroup"];
+    [coder encodeBool:self.isPinned forKey:@"isPinned"];
     [coder encodeObject:self.groupSubject forKey:@"groupSubject"];
     [coder encodeObject:self.statusMessage forKey:@"statusMessage"];
     [coder encodeObject:self.state forKey:@"state"];
     [coder encodeInteger:self.unreadCount forKey:@"unreadCount"];
-    
 }
 
 - (nullable instancetype)initWithCoder:(NSCoder *)coder {
@@ -93,6 +95,7 @@ NSString *const kAskSubscribe=@"subscribe";
     self.accountId=[coder decodeObjectForKey:@"accountId"];
     
     self.isGroup=[coder decodeBoolForKey:@"isGroup"];
+    self.isPinned = [coder decodeBoolForKey:@"isPinned"];
     self.groupSubject=[coder decodeObjectForKey:@"groupSubject"];
     self.accountNickInGroup=[coder decodeObjectForKey:@"accountNickInGroup"];
     

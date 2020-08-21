@@ -156,7 +156,6 @@
 "Password cannot be empty" = "Le mot de passe ne peut pas être vide";
 "Password" = "Mot de passe";
 "Participants" = "Participants";
-"outgoing" = "sortant";
 "Open Source" = "Open Source";
 "Online" = "En ligne";
 "Ok" = "Ok";
@@ -213,7 +212,6 @@
 "Invalid Credentails" = "Identifiants invalides";
 "Incoming Call" = "Appel entrant";
 "Incoming audio call to %@ from %@ " = "Appel audio entrant pour %1$@ de %2$@ ";
-"incoming" = "entrant";
 "Ignore" = "Ignorer";
 "If you want to use VOIP you will need to allow access in Settings-> Privacy-> Microphone." = "Si vous souhaitez utiliser VOIP vous devez l'autoriser dans Paramètres -> Confidentialité -> Micro.";
 "If you like Monal, please let others know and leave a review" = "Si vous aimez Monal, merci de le faire savoir et laissez un avis";

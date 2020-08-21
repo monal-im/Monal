@@ -129,7 +129,7 @@
                 if([rowContact.contactJid isEqualToString:message.from])
                 {
                     messageContact = rowContact;
-                    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:idx inSection:0];
+                    NSIndexPath* indexPath = [NSIndexPath indexPathForRow:idx inSection:0];
                     [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                     *stop = YES;
                 }
@@ -155,21 +155,38 @@
 }
 
 -(void) insertOrMoveContact:(MLContact *) contact completion:(void (^ _Nullable)(BOOL finished))completion {
-  NSIndexPath *newPath = [NSIndexPath indexPathForRow:0 inSection:0];
-    __block NSIndexPath *indexPath;
+    __block NSIndexPath *indexPath = nil;
+    __block int firstNonPinnedChat = 0;
+    __block BOOL foundNonPinnedChat = NO;
     [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         MLContact *rowContact = (MLContact *) obj;
         if([rowContact.contactJid isEqualToString:contact.contactJid]) {
-            indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
-            *stop=YES;
+            indexPath = [NSIndexPath indexPathForRow:idx inSection:0];
+            // We can insert a contact at pos 0 if it is pinned
+            if(contact.isPinned) {
+                firstNonPinnedChat = 0;
+                *stop = YES;
+            }
+        }
+        // Cnt the number of pinned contacts -> get first pos of a non pinned contact
+        if(rowContact.isPinned && !foundNonPinnedChat) {
+            firstNonPinnedChat++;
+        } else {
+            foundNonPinnedChat = YES;
+        }
+        // stopp if we found the correct contact position that we want to replace && found the first contact that is not pinned
+        if(indexPath && foundNonPinnedChat) {
+            *stop = YES;
         }
     }];
-    
+
+    NSIndexPath *newPath = [NSIndexPath indexPathForRow:firstNonPinnedChat inSection:0];
+
     if(indexPath) {
-        if(indexPath.row!=0) {
+        if(indexPath.row != 0) {
             [self.chatListTable performBatchUpdates:^{
                 [self.contacts removeObjectAtIndex:indexPath.row];
-                [self.contacts insertObject:contact atIndex:0];
+                [self.contacts insertObject:contact atIndex:firstNonPinnedChat];
                 [self.chatListTable moveRowAtIndexPath:indexPath toIndexPath:newPath];
             } completion:^(BOOL finished) {
                 if(completion) completion(finished);
@@ -178,8 +195,8 @@
     }
     else{
         [self.chatListTable performBatchUpdates:^{
-            [self.contacts insertObject:contact atIndex:0];
-            [self.chatListTable insertRowsAtIndexPaths:@[newPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+            [self.contacts insertObject:contact atIndex:firstNonPinnedChat];
+            [self.chatListTable insertRowsAtIndexPaths:@[newPath] withRowAnimation:UITableViewRowAnimationRight];
         } completion:^(BOOL finished) {
                    [self refreshDisplay]; //to remove empty dataset 
              if(completion) completion(finished);
@@ -195,7 +212,7 @@
             [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 MLContact *rowContact = (MLContact *) obj;
                 if([rowContact.contactJid isEqualToString:contact.contactJid]) {
-                    indexPath =[NSIndexPath indexPathForRow:idx inSection:0];
+                    indexPath = [NSIndexPath indexPathForRow:idx inSection:0];
                     [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                     *stop=YES;
                     return;
@@ -334,16 +351,16 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    MLContactCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
+    MLContactCell* cell = [tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
     if(!cell)
     {
-        cell =[[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
+        cell = [[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
     }
     
     MLContact* row = [self.contacts objectAtIndex:indexPath.row];
     [cell showDisplayName:row.contactDisplayName];
     
-    NSString *state= [row.state  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    NSString* state = [row.state stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     
     if(([state isEqualToString:@"away"]) ||
        ([state isEqualToString:@"dnd"])||
@@ -359,9 +376,9 @@
         cell.status=kStatusOnline;
     }
     
-    cell.accountNo=row.accountId.integerValue;
-    cell.username=row.contactJid;
-    cell.count=0;
+    cell.accountNo = row.accountId.integerValue;
+    cell.username = row.contactJid;
+    cell.count = 0;
     
     [[DataLayer sharedInstance] countUserUnreadMessages:row.contactJid forAccount:row.accountId withCompletion:^(NSNumber *unread) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -409,6 +426,9 @@
     [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
             cell.userImage.image=image;
     }];
+    
+    // mark pinned chats
+    [cell setPinned:row.isPinned];
    
     [cell setOrb];
     return cell;

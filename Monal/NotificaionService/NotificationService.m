@@ -37,6 +37,7 @@
     self.handlerList = [[NSMutableArray alloc] init];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(xmppError:) name:kXMPPError object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
     return self;
 }
 
@@ -53,7 +54,7 @@
         BOOL first = NO;
         if(![self.handlerList count])
         {
-            DDLogInfo(@"First incoming push, locking process");
+            DDLogInfo(@"First incoming push");
             self.idleAccounts = [[NSMutableSet alloc] init];
             first = YES;
         }
@@ -62,6 +63,7 @@
         DDLogVerbose(@"Adding content handler to list: %lu", [self.handlerList count]);
         [self.handlerList addObject:contentHandler];
         
+        //terminate appex if the main app is already running
         if([MLProcessLock checkRemoteRunning:@"MainApp"])
         {
             DDLogInfo(@"NOT connecting accounts, main app already running in foreground, terminating immediately instead");
@@ -69,14 +71,13 @@
             [self feedAllWaitingHandlers];
             return;
         }
-        else if(first)      //first incoming push --> connect to servers
+        
+        if(first)      //first incoming push --> connect to servers
         {
-            DDLogVerbose(@"connecting accounts");
+            DDLogVerbose(@"locking process and connecting accounts");
             [DDLog flushLog];
             [MLProcessLock lock];
             [[MLXMPPManager sharedInstance] connectIfNecessary];
-            //handle IPC messages (this should be done *after* calling connectIfNecessary to make sure any disconnectAll messages are handled properly
-            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
         }
         else
             ;       //do nothing if not the first call (MLXMPPManager is already connecting)
@@ -103,8 +104,7 @@
     if([message[@"name"] isEqualToString:@"Monal.disconnectAll"])
     {
         DDLogInfo(@"Got disconnectAll IPC message");
-        //disconnected accounts are idle and this extension will be terminated by [self nowIdle:] if all accounts are idle
-        [[MLXMPPManager sharedInstance] disconnectAll];
+        [self feedAllWaitingHandlers];
     }
     else if([message[@"name"] isEqualToString:@"Monal.connectIfNecessary"])
     {
@@ -131,7 +131,6 @@
             
             //we posted all notifications and disconnected, technically we're not running anymore
             //(even though our containing process will still be running for a few more seconds)
-            [[NSNotificationCenter defaultCenter] removeObserver:self name:kMonalIncomingIPC object:nil];
             [MLProcessLock unlock];
             
             //feed all waiting handlers with empty notifications to silence them

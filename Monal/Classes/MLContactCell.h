@@ -30,11 +30,15 @@ typedef enum {
 @property (nonatomic, weak) IBOutlet UIButton *badge;
 @property (nonatomic, weak) IBOutlet UIImageView *muteBadge;
 
+@property (nonatomic, assign) BOOL isPinned;
+
 -(void) setOrb;
 
 -(void) showStatusText:(NSString *) text;
 -(void) showStatusTextItalic:(NSString *) text withItalicRange:(NSRange)italicRange;
 -(void) setStatusTextLayout:(NSString *) text;
 -(void) showDisplayName:(NSString *) name;
+
+-(void) setPinned:(BOOL) pinned;
 
 @end

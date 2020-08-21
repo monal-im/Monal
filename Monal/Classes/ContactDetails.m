@@ -21,6 +21,7 @@
 
 
 @interface ContactDetails()
+@property (nonatomic, assign) BOOL isPinned;
 @property (nonatomic, assign) BOOL isMuted;
 @property (nonatomic, assign) BOOL isBlocked;
 @property (nonatomic, assign) BOOL isEncrypted;
@@ -64,7 +65,6 @@
        NSArray* members = [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
         self.groupMemberCount = members.count;
         self.navigationItem.title = NSLocalizedString(@"Group Chat",@"");
-        
     }
     
     self.accountNo = self.contact.accountId;
@@ -73,6 +73,7 @@
     }];
     
     self.isEncrypted = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.accountNo];
+    self.isPinned = [[DataLayer sharedInstance] isPinnedChat:self.accountNo andBuddyJid:self.contact.contactJid];
     
     NSDictionary* newSub = [[DataLayer sharedInstance] getSubscriptionForContact:self.contact.contactJid andAccount:self.contact.accountId];
     self.contact.ask = [newSub objectForKey:@"ask"];
@@ -111,7 +112,6 @@
     
     [self refreshLock];
     [self refreshMute];
-    
 }
 
 -(IBAction) callContact:(id)sender
@@ -198,7 +198,7 @@
                 //   detailCell.background.image=image;
             }];
             
-            detailCell.background.image = [UIImage imageNamed:@"Tie_My_Boat_by_Ray_García"];
+            detailCell.background.image = [UIImage imageNamed:@"Tie_My_Boat_by_Ray_Garcia"];
             
             if(self.isMuted) {
                 [detailCell.muteButton setImage:[UIImage imageNamed:@"847-moon-selected"] forState:UIControlStateNormal];
@@ -281,6 +281,13 @@
             else if(indexPath.row == 4) {
                 thecell.textLabel.text = NSLocalizedString(@"Unblock Sender", @"");
             }
+            else if(indexPath.row == 5)  {
+                if(self.isPinned) {
+                    thecell.textLabel.text = NSLocalizedString(@"Unpin Chat", @"");
+                } else {
+                    thecell.textLabel.text = NSLocalizedString(@"Pin Chat", @"");
+                }
+            }
             thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             break;
         }
@@ -293,7 +300,7 @@
 {
     if(section == 0)  return 1;
     if(section == 1)  return 3;
-    if(section == 2)  return 5;
+    if(section == 2)  return 6;
     
     return 0; //some default shouldnt reach this
 }
@@ -354,6 +361,20 @@
             }
             case 4:  {
                 [self unBlockContact];
+                break;
+            }
+            case 5:  {
+                if(self.isPinned) {
+                    [[DataLayer sharedInstance] unPinChat:self.accountNo andBuddyJid:self.contact.contactJid];
+                } else {
+                    [[DataLayer sharedInstance] pinChat:self.accountNo andBuddyJid:self.contact.contactJid];
+                }
+                self.isPinned = !self.isPinned;
+                self.contact.isPinned = self.isPinned;
+                // Update button text
+                [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                // Update color in activeViewController
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
                 break;
             }
         }

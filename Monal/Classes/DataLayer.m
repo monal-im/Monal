@@ -2252,7 +2252,7 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"update dbversion set dbversion='4.80';" andArguments:@[]];
         DDLogVerbose(@"Upgrade to 4.80 success");
     }
-
+    
     if([dbversion doubleValue] < 4.81)
     {
         // Remove silly chats
@@ -2281,7 +2281,7 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"update dbversion set dbversion='4.82';" andArguments:@[]];
         DDLogVerbose(@"Upgrade to 4.82 success");
     }
-
+    
     if([dbversion doubleValue] < 4.83)
     {
         DDLogVerbose(@"Database version <4.83 detected. Performing upgrade on accounts.");
@@ -2290,7 +2290,7 @@ static NSDateFormatter* dbFormatter;
         DDLogVerbose(@"Upgrade to 4.83 success");
     }
     [self.db endWriteTransaction];
-
+    
     DDLogInfo(@"Database version check done");
     return;
 }

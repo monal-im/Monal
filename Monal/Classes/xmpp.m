@@ -222,6 +222,8 @@ NSString *const kXMPPPresence = @"presence";
     if(_outputBuffer)
         free(_outputBuffer);
     _outputBuffer = nil;
+    [_receiveQueue removeObserver:self forKeyPath:@"operationCount"];
+    [_sendQueue removeObserver:self forKeyPath:@"operationCount"];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_receiveQueue cancelAllOperations];
     [_sendQueue cancelAllOperations];

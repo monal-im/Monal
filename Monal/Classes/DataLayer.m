@@ -1176,7 +1176,7 @@ static NSDateFormatter* dbFormatter;
     {
         DDLogVerbose(@"Updating stanzaid of message_history_id %@ to %@ for (account=%@, messageid=%@, contact=%@)...", historyId, stanzaId, accountNo, messageId, contact);
         //this entry needs an update of its stanzaid
-        [self.db executeNonQuery:@"UPDATE message_history_id SET stanzaid=? WHERE message_history_id=?" andArguments:@[stanzaId, historyId]];
+        [self.db executeNonQuery:@"UPDATE message_history SET stanzaid=? WHERE message_history_id=?" andArguments:@[stanzaId, historyId]];
         return YES;
     }
 

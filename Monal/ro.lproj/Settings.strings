@@ -4,8 +4,8 @@
 "3gZ-1D-g86.title" = "Jurnalele de discuții";
 /* Class = "UINavigationItem"; title = "Accounts"; ObjectID = "GM4-e8-f1D"; */
 "GM4-e8-f1D.title" = "Conturi";
-/* Class = "UITextView"; text = "aaa"; ObjectID = "JYm-gw-Mhc"; */
-"JYm-gw-Mhc.text" = "aaa";
+/* Class = "UITextView"; text = "log_placeholder"; ObjectID = "JYm-gw-Mhc"; */
+"JYm-gw-Mhc.text" = "log_placeholder";
 /* Class = "UILabel"; text = "Detail"; ObjectID = "QNX-n9-Hbx"; */
 "QNX-n9-Hbx.text" = "Detaliu";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "QTE-cG-3LC"; */
@@ -36,7 +36,7 @@
 "kjF-U7-P8y.title" = "Setări";
 /* Class = "UINavigationItem"; title = "Root View Controller"; ObjectID = "mLa-XU-o1Q"; */
 "mLa-XU-o1Q.title" = "Root View Controller";
-/* Class = "UITableViewController"; title = "Notificaions"; ObjectID = "nPR-ET-sg3"; */
+/* Class = "UITableViewController"; title = "Notifications"; ObjectID = "nPR-ET-sg3"; */
 "nPR-ET-sg3.title" = "Notificări";
 /* Class = "UINavigationItem"; title = "Account Edit"; ObjectID = "pa7-vQ-Yz3"; */
 "pa7-vQ-Yz3.title" = "Editare cont";

@@ -8,8 +8,8 @@
 /* Class = "UINavigationItem"; title = "Accounts"; ObjectID = "GM4-e8-f1D"; */
 "GM4-e8-f1D.title" = "Accounts";
 
-/* Class = "UITextView"; text = "aaa"; ObjectID = "JYm-gw-Mhc"; */
-"JYm-gw-Mhc.text" = "aaa";
+/* Class = "UITextView"; text = "log_placeholder"; ObjectID = "JYm-gw-Mhc"; */
+"JYm-gw-Mhc.text" = "log_placeholder";
 
 /* Class = "UILabel"; text = "Detail"; ObjectID = "QNX-n9-Hbx"; */
 "QNX-n9-Hbx.text" = "Detail";

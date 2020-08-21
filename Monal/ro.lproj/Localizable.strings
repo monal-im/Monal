@@ -139,7 +139,6 @@
 "Password cannot be empty" = "Parola nu poate fi goală";
 "Password" = "Parolă";
 "Participants" = "Participanți";
-"outgoing" = "efectuat";
 "Open Source" = "Sursă deschisă";
 "Online" = "Conectat";
 "Ok" = "Bine";
@@ -198,7 +197,6 @@
 "Indicate when a particular device is active or inactive. Saves battery." = "Indică atunci când un anumit dispozitiv este activ sau inactiv. Economisește bateria.";
 "Incoming Call" = "Apel primit";
 "Incoming audio call to %@ from %@ " = "Apel audio primit către %1$@ de la %2$@ ";
-"incoming" = "primit";
 "Ignore" = "Ignoră";
 "If you want to use VOIP you will need to allow access in Settings-> Privacy-> Microphone." = "Dacă doriți să utilizați apelurile de voce (VOIP) veți avea nevoie să permiteți accesul în Setări-> Intimitate-> Microfon.";
 "If you like Monal, please let others know and leave a review" = "Dacă vă place Monal, vă rugăm să le spuneți și celorlalți și să lăsați o recenzie";

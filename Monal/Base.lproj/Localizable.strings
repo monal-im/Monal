@@ -263,9 +263,6 @@
 "Ignore" = "Ignore";
 
 /* No comment provided by engineer. */
-"incoming" = "incoming";
-
-/* No comment provided by engineer. */
 "Incoming audio call to %@ from %@ " = "Incoming audio call to %1$@ from %2$@ ";
 
 /* No comment provided by engineer. */
@@ -438,9 +435,6 @@
 
 /* No comment provided by engineer. */
 "Open Source" = "Open Source";
-
-/* No comment provided by engineer. */
-"outgoing" = "outgoing";
 
 /* No comment provided by engineer. */
 "Participants" = "Participants";

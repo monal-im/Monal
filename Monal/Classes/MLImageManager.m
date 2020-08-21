@@ -92,7 +92,7 @@
      return _inboundImage;
  }
  
-    _inboundImage=[[UIImage imageNamed:NSLocalizedString(@"incoming",@"")]
+    _inboundImage=[[UIImage imageNamed:@"incoming"]
                    resizableImageWithCapInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
     
     return _inboundImage;
@@ -107,7 +107,7 @@
         return _outboundImage;
     }
     
-    _outboundImage=[[UIImage imageNamed:NSLocalizedString(@"outgoing",@"")]
+    _outboundImage=[[UIImage imageNamed:@"outgoing"]
                    resizableImageWithCapInsets:UIEdgeInsetsMake(6, 6, 6, 6)];
     
     return _outboundImage;

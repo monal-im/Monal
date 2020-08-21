@@ -286,3 +286,4 @@
 "%ld (This device)" = "%ld (Acest dispozitiv)";
 "%@ (Pending Approval)" = "%@ (Aprobare în așteptare)";
 "Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old experience back." = "Notificările s-au schimbat în iOS 13 din cauza unor modificări iOS. Deocamdată, veți vedea doar ceva care spune că există un mesaj nou și nu textul sau cine l-a trimis. Am decis să fac acest lucru, astfel încât să aveți mesagerie de încredere în timp ce lucrez pentru a actualiza Monal pentru a reveni vechea experiență.";
+"Jabber, Openfire, Prosody etc. " = "Jabber, Prosody, ejabberd etc.   ";

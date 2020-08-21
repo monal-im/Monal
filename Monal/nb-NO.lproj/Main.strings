@@ -1,0 +1,60 @@
+/* Class = "UILabel"; text = "Name"; ObjectID = "lUi-Cp-nhg"; */
+"lUi-Cp-nhg.text" = "Navn";
+/* Class = "UILabel"; text = "lastInteraction"; ObjectID = "zc6-pR-bBL"; */
+"zc6-pR-bBL.text" = "siste interaksjon";
+/* Class = "UINavigationItem"; title = "Edit Group Chat"; ObjectID = "yIE-Ub-BAk"; */
+"yIE-Ub-BAk.title" = "Rediger gruppesludring";
+/* Class = "UILabel"; text = "Label"; ObjectID = "VFO-tq-wdS"; */
+"VFO-tq-wdS.text" = "Etikett";
+/* Class = "UILabel"; text = "Name"; ObjectID = "Tdu-SR-34h"; */
+"Tdu-SR-34h.text" = "Navn";
+/* Class = "UIBarButtonItem"; title = "Done"; ObjectID = "TMS-52-ORP"; */
+"TMS-52-ORP.title" = "Ferdig";
+/* Class = "UILabel"; text = "View Contact Requests"; ObjectID = "SmS-bT-id6"; */
+"SmS-bT-id6.text" = "Vis kontaktforespørsler";
+/* Class = "UILabel"; text = "Label"; ObjectID = "Ra0-Eo-cAh"; */
+"Ra0-Eo-cAh.text" = "Etikett";
+/* Class = "UINavigationItem"; title = "Chats"; ObjectID = "RRa-hC-xrf"; */
+"RRa-hC-xrf.title" = "Sludringer";
+/* Class = "UIButton"; normalTitle = "Join Group"; ObjectID = "Q7I-qj-4zk"; */
+"Q7I-qj-4zk.normalTitle" = "Ta del i gruppe";
+/* Class = "UIBarButtonItem"; title = "Next"; ObjectID = "PI2-N1-aLJ"; */
+"PI2-N1-aLJ.title" = "Neste";
+/* Class = "UIBarButtonItem"; title = "Previous"; ObjectID = "OxW-Yc-5ky"; */
+"OxW-Yc-5ky.title" = "Forrige";
+/* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "NyY-WQ-3hC"; */
+"NyY-WQ-3hC.title" = "Lukk";
+/* Class = "UINavigationItem"; title = "New"; ObjectID = "Msw-bP-HIu"; */
+"Msw-bP-HIu.title" = "Ny";
+/* Class = "UINavigationItem"; title = "Send A Message "; ObjectID = "MiR-iW-O6e"; */
+"MiR-iW-O6e.title" = "Send en melding ";
+/* Class = "UILabel"; text = "Send Message"; ObjectID = "KUa-bA-cQb"; */
+"KUa-bA-cQb.text" = "Send melding";
+/* Class = "UILabel"; text = "Title"; ObjectID = "JKC-18-hqA"; */
+"JKC-18-hqA.text" = "Tittel";
+/* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "IGd-kM-9BO"; */
+"IGd-kM-9BO.title" = "Lukk";
+/* Class = "UIBarButtonItem"; title = "Next"; ObjectID = "HOk-DV-nls"; */
+"HOk-DV-nls.title" = "Neste";
+/* Class = "UITableViewController"; title = "Edit Group Chat"; ObjectID = "GpF-k7-Z6D"; */
+"GpF-k7-Z6D.title" = "Rediger gruppesludring";
+/* Class = "UINavigationItem"; title = "Contact Requests"; ObjectID = "GI8-WI-wYs"; */
+"GI8-WI-wYs.title" = "Kontaktforespørsler";
+/* Class = "UILabel"; text = "Title"; ObjectID = "F7S-Cl-Xop"; */
+"F7S-Cl-Xop.text" = "Tittel";
+/* Class = "UILabel"; text = "Date"; ObjectID = "F48-Lg-vgK"; */
+"F48-Lg-vgK.text" = "Dato";
+/* Class = "UILabel"; text = "Date"; ObjectID = "Ck2-4Y-eBK"; */
+"Ck2-4Y-eBK.text" = "Dato";
+/* Class = "UIBarButtonItem"; title = "Info"; ObjectID = "C9Q-7y-bRl"; */
+"C9Q-7y-bRl.title" = "Info";
+/* Class = "UILabel"; text = "Delivered"; ObjectID = "BY7-In-qxm"; */
+"BY7-In-qxm.text" = "Levert";
+/* Class = "UIBarButtonItem"; title = "Settings"; ObjectID = "BWH-2I-fSI"; */
+"BWH-2I-fSI.title" = "Innstillinger";
+/* Class = "UIBarButtonItem"; title = "Previous"; ObjectID = "AtF-5m-xfT"; */
+"AtF-5m-xfT.title" = "Forrige";
+/* Class = "UILabel"; text = "Date"; ObjectID = "8oX-KS-wOP"; */
+"8oX-KS-wOP.text" = "Dato";
+/* Class = "UILabel"; text = "Delivered"; ObjectID = "0C4-4V-7mE"; */
+"0C4-4V-7mE.text" = "Levert";

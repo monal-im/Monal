@@ -59,12 +59,17 @@ static const int sendMessageTimeoutSeconds = 10;
         [[HelperTools defaultsDB] setBool:NO forKey:@"SortContacts"];
 
         [[HelperTools defaultsDB] setBool:YES forKey:@"ChatBackgrounds"];
-        
+
         // Privacy Settings
         [[HelperTools defaultsDB] setBool:YES forKey:@"ShowImages"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"ShowGeoLocation"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastUserInteraction"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastChatState"];
+
+        // udp logger
+        [[HelperTools defaultsDB] setBool:NO forKey:@"udpLoggerEnabled"];
+        [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerHostname"];
+        [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerPort"];
 
         [[HelperTools defaultsDB] setBool:YES forKey:@"SetDefaults"];
         [[HelperTools defaultsDB] synchronize];
@@ -86,6 +91,11 @@ static const int sendMessageTimeoutSeconds = 10;
 
     // upgrade SendLastChatState
     [self upgradeBoolUserSettingsIfUnset:@"SendLastChatState" toDefault:YES];
+
+    // upgrade udp logger
+    [self upgradeBoolUserSettingsIfUnset:@"udpLoggerEnabled" toDefault:NO];
+    [self upgradeObjectUserSettingsIfUnset:@"udpLoggerHostname" toDefault:@""];
+    [self upgradeObjectUserSettingsIfUnset:@"udpLoggerPort" toDefault:@""];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal

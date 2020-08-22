@@ -99,13 +99,13 @@ void logException(NSException* exception)
     DDLogInfo(@"Logfile dir: %@", [containerUrl path]);
     
     //network logger (only in alpha build)
-//    if(![kAppGroup isEqualToString:@"group.monal"])
-//    {
-//        MLUDPLogger* udpLogger = [[MLUDPLogger alloc] init];
-//        [udpLogger setLogFormatter:formatter];
-//        [DDLog addLogger:udpLogger];
-//    }
-
+    if(![kAppGroup isEqualToString:@"group.monal"] && [[HelperTools defaultsDB] boolForKey: @"udpLoggerEnabled"])
+    {
+        MLUDPLogger* udpLogger = [[MLUDPLogger alloc] init];
+        [udpLogger setLogFormatter:formatter];
+        [DDLog addLogger:udpLogger];
+    }
+    
     //for debugging when upgrading the app
     NSArray* directoryContents = [fileManager contentsOfDirectoryAtPath:[containerUrl path] error:nil];
     for(NSString* file in directoryContents)

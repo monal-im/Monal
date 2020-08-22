@@ -371,6 +371,7 @@
                 [[DataLayer sharedInstance] deleteContactRequest:contactObj];
             }
             
+            DDLogVerbose(@"Adding contact %@ (%@) to database", [contact objectForKey:@"jid"], [contact objectForKey:@"name"]);
             [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
                                         forAccount:self.accountNo
                                           fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""

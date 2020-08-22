@@ -1,21 +1,17 @@
-
 /* Class = "UILabel"; text = "Trust"; ObjectID = "4kz-Xh-2Ui"; */
 "4kz-Xh-2Ui.text" = "Trust";
 
 /* Class = "UILabel"; text = "jid"; ObjectID = "6bI-Lh-Qhb"; */
 "6bI-Lh-Qhb.text" = "jid";
 
+/* Class = "UILabel"; text = "Device:"; ObjectID = "aTq-lO-Xbf"; */
+"aTq-lO-Xbf.text" = "Device:";
+
 /* Class = "UILabel"; text = "deviceid"; ObjectID = "BIp-1h-2Q5"; */
 "BIp-1h-2Q5.text" = "deviceid";
 
 /* Class = "UILabel"; text = "name"; ObjectID = "DFP-48-Sgb"; */
 "DFP-48-Sgb.text" = "name";
-
-/* Class = "UIButton"; normalTitle = "Cancel"; ObjectID = "X6h-fs-C64"; */
-"X6h-fs-C64.normalTitle" = "Cancel";
-
-/* Class = "UILabel"; text = "Device:"; ObjectID = "aTq-lO-Xbf"; */
-"aTq-lO-Xbf.text" = "Device:";
 
 /* Class = "UITextView"; text = "log_placeholder"; ObjectID = "esK-jI-cAB"; */
 "esK-jI-cAB.text" = "log_placeholder";
@@ -34,3 +30,6 @@
 
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "urj-qd-yc7"; */
 "urj-qd-yc7.title" = "Close";
+
+/* Class = "UIButton"; normalTitle = "Cancel"; ObjectID = "X6h-fs-C64"; */
+"X6h-fs-C64.normalTitle" = "Cancel";

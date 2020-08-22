@@ -859,3 +859,29 @@
 /* No comment provided by engineer. */
 "🔗 A Link" = "🔗 A Link";
 
+/* No comment provided by engineer. */
+"Jabber, Openfire, Prosody etc.   " = "Jabber, Openfire, Prosody etc.   ";
+
+/* No comment provided by engineer. */
+"Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old expereince back." = "Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old expereince back.";
+
+/* No comment provided by engineer. */
+"Pin Chat" = "Pin Chat";
+
+/* No comment provided by engineer. */
+"Read" = "Read";
+
+/* No comment provided by engineer. */
+"Received" = "Received";
+
+/* No comment provided by engineer. */
+"Sending..." = "Sending...";
+
+/* No comment provided by engineer. */
+"Sent" = "Sent";
+
+/* No comment provided by engineer. */
+"Skip" = "Skip";
+
+/* No comment provided by engineer. */
+"Unpin Chat" = "Unpin Chat";

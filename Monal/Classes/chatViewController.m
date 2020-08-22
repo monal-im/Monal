@@ -449,21 +449,21 @@
     BOOL backgrounds = [[HelperTools defaultsDB] boolForKey:@"ChatBackgrounds"];
     
     if(backgrounds){
-        self.backgroundImage.hidden=NO;
-        NSString *imageName= [[HelperTools defaultsDB] objectForKey:@"BackgroundImage"];
+        self.backgroundImage.hidden = NO;
+        NSString* imageName = [[HelperTools defaultsDB] objectForKey:@"BackgroundImage"];
         if(imageName)
         {
             if([imageName isEqualToString:@"CUSTOM"])
             {
-                self.backgroundImage.image=[[MLImageManager sharedInstance] getBackground];
+                self.backgroundImage.image = [[MLImageManager sharedInstance] getBackground];
             } else  {
-                self.backgroundImage.image=[UIImage imageNamed:imageName];
+                self.backgroundImage.image = [UIImage imageNamed:imageName];
             }
         }
-        self.transparentLayer.hidden=NO;
-    }else  {
-        self.backgroundImage.hidden=YES;
-        self.transparentLayer.hidden=YES;
+        self.transparentLayer.hidden = NO;
+    } else {
+        self.backgroundImage.hidden = YES;
+        self.transparentLayer.hidden = YES;
     }
 }
 

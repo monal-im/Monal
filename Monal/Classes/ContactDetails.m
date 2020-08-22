@@ -187,12 +187,16 @@
             
             // Set human readable lastInteraction field
             NSDate* lastInteractionDate = [[DataLayer sharedInstance] lastInteractionOfJid:self.contact.contactJid forAccountNo:self.contact.accountId];
-            detailCell.lastInteraction.text = [NSDateFormatter localizedStringFromDate:lastInteractionDate dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
-            
+            if(lastInteractionDate.timeIntervalSince1970 > 0) {
+                detailCell.lastInteraction.text = [NSDateFormatter localizedStringFromDate:lastInteractionDate dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
+            } else {
+                detailCell.lastInteraction.text = NSLocalizedString(@"Online", @"");
+            }
+
             if(self.contact.isGroup || !self.isSubscribed) {
                 detailCell.lockButton.hidden = YES;
             }
-            
+
             [[MLImageManager sharedInstance] getIconForContact:self.contact.contactJid andAccount:self.contact.accountId withCompletion:^(UIImage *image) {
                 detailCell.buddyIconView.image = image;
                 //   detailCell.background.image=image;

@@ -471,8 +471,8 @@
 		2630FE321AD550C00079F5C0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2633CB41231CB816006D0277 /* MLMessageProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLMessageProcessor.h; sourceTree = "<group>"; };
 		2633CB42231CB816006D0277 /* MLMessageProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMessageProcessor.m; sourceTree = "<group>"; };
-		2633CB4523215558006D0277 /* MLXMPPActivityItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLXMPPActivityItem.h; sourceTree = "<group>"; };
-		2633CB4623215558006D0277 /* MLXMPPActivityItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLXMPPActivityItem.m; sourceTree = "<group>"; };
+		2633CB4523215558006D0277 /* MLXMPPActivityItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MLXMPPActivityItem.h; path = Classes/MLXMPPActivityItem.h; sourceTree = "<group>"; };
+		2633CB4623215558006D0277 /* MLXMPPActivityItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLXMPPActivityItem.m; path = Classes/MLXMPPActivityItem.m; sourceTree = "<group>"; };
 		26347D841790FFDE006FF64F /* MLInfoCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLInfoCell.h; sourceTree = "<group>"; };
 		26347D851790FFDE006FF64F /* MLInfoCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLInfoCell.m; sourceTree = "<group>"; };
 		26352EA6177D222600E2C8FF /* MLXMPPManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXMPPManager.h; sourceTree = "<group>"; };
@@ -676,8 +676,8 @@
 		26B69A74131C522F002FCBEB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		26BDECD91867B7790018670D /* CallViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallViewController.h; sourceTree = "<group>"; };
 		26BDECDA1867B7790018670D /* CallViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallViewController.m; sourceTree = "<group>"; };
-		26C01305233025DA001D411D /* MLPush.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPush.h; sourceTree = "<group>"; };
-		26C01306233025DA001D411D /* MLPush.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPush.m; sourceTree = "<group>"; };
+		26C01305233025DA001D411D /* MLPush.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MLPush.h; path = Classes/MLPush.h; sourceTree = "<group>"; };
+		26C01306233025DA001D411D /* MLPush.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLPush.m; path = Classes/MLPush.m; sourceTree = "<group>"; };
 		26C1EA691FF937320085547A /* MLNotificationSettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLNotificationSettingsViewController.h; sourceTree = "<group>"; };
 		26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLNotificationSettingsViewController.m; sourceTree = "<group>"; };
 		26C3456C1C68F9F0007F4BEC /* MLHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLHTTPRequest.h; sourceTree = "<group>"; };
@@ -706,8 +706,8 @@
 		26D437FA23A5643A00242AAA /* MLIQParserTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLIQParserTest.m; sourceTree = "<group>"; };
 		26D59D8E20711969006F1DEE /* MLEditGroupViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLEditGroupViewController.h; sourceTree = "<group>"; };
 		26D59D8F20711969006F1DEE /* MLEditGroupViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLEditGroupViewController.m; sourceTree = "<group>"; };
-		26D59D9120714F32006F1DEE /* UIColor+Theme.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "UIColor+Theme.h"; sourceTree = "<group>"; };
-		26D59D9220714F32006F1DEE /* UIColor+Theme.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIColor+Theme.m"; sourceTree = "<group>"; };
+		26D59D9120714F32006F1DEE /* UIColor+Theme.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "UIColor+Theme.h"; path = "Classes/UIColor+Theme.h"; sourceTree = "<group>"; };
+		26D59D9220714F32006F1DEE /* UIColor+Theme.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "UIColor+Theme.m"; path = "Classes/UIColor+Theme.m"; sourceTree = "<group>"; };
 		26D7C05C23D6AFD800CA123C /* MLChatInputContainer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatInputContainer.h; sourceTree = "<group>"; };
 		26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatInputContainer.m; sourceTree = "<group>"; };
 		26D89F041A890672009B147C /* MLSwitchCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSwitchCell.h; sourceTree = "<group>"; };

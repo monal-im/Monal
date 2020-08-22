@@ -765,14 +765,17 @@ NSString *const kXMPPPresence = @"presence";
         DDLogInfo(@"creating parser delegate");
         _baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
             //queue up new stanzas onto the parseQueue which will dispatch them synchronously to the receiveQueue
+            //this makes it possible to discard all not already processed but parsed stanzas on disconnect or stream restart etc.
             [_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                 //always process stanzas in the receiveQueue
                 //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
-                [self dispatchOnReceiveQueue: ^{
+                DDLogVerbose(@"Synchronously handling next stanza on receive queue (%lu stanzas queued in parse queue, %lu current operations in receive queue)", [_parseQueue operationCount], [_receiveQueue operationCount]);
+                [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                     [self processInput:parsedStanza];
-                }];
+                }]] waitUntilFinished:YES];
             }]] waitUntilFinished:NO];
         }];
+
     }
     else
     {

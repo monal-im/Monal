@@ -1064,7 +1064,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) processInput:(XMPPParser *) parsedStanza
 {
-    DDLogDebug(@"RECV Stanza: <%@> with namespace '%@'", parsedStanza.stanzaType, parsedStanza.stanzaNameSpace);
+    DDLogDebug(@"RECV Stanza: <%@> with namespace '%@' and id '%@'", parsedStanza.stanzaType, parsedStanza.stanzaNameSpace, parsedStanza.idval);
 
     //process most stanzas/nonzas after having a secure context only
     if(self.connectionProperties.server.isDirectTLS || self->_startTLSComplete)

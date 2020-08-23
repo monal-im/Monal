@@ -30,3 +30,13 @@
 "QTE-cG-3LC.title" = "Lukk";
 /* Class = "UINavigationItem"; title = "Accounts"; ObjectID = "GM4-e8-f1D"; */
 "GM4-e8-f1D.title" = "Kontoer";
+/* Class = "UINavigationItem"; title = "Accounts With Logs"; ObjectID = "wlb-8I-yzZ"; */
+"wlb-8I-yzZ.title" = "Loggførte kontoer";
+/* Class = "UILabel"; text = "Title"; ObjectID = "rLQ-yk-GnZ"; */
+"rLQ-yk-GnZ.text" = "Tittel";
+/* Class = "UILabel"; text = "Detail"; ObjectID = "rF7-34-0sc"; */
+"rF7-34-0sc.text" = "Detalj";
+/* Class = "UITableViewController"; title = "Notificaions"; ObjectID = "nPR-ET-sg3"; */
+"nPR-ET-sg3.title" = "Merknader";
+/* Class = "UITableViewController"; title = "Chat Log"; ObjectID = "3gZ-1D-g86"; */
+"3gZ-1D-g86.title" = "Sludringslogg";

@@ -11,12 +11,7 @@
 #import "HelperTools.h"
 
 @interface DataLayer()
-{
-    NSDateFormatter* dbFormatter;
-}
-
 @property (readonly, strong) MLSQLite* db;
-
 @end
 
 @implementation DataLayer
@@ -1260,8 +1255,8 @@ static NSDateFormatter* dbFormatter;
 -(void) setMessageId:(NSString*) messageid stanzaId:(NSString *) stanzaId
 {
     NSString* query = [NSString stringWithFormat:@"update message_history set stanzaid=? where messageid=?"];
-    DDLogVerbose(@" setting message stanzaid %@", query);
-    [self.db executeNonQuery:query  andArguments:@[stanzaId, messageid]];
+    DDLogVerbose(@"setting message stanzaid %@", query);
+    [self.db executeNonQuery:query andArguments:@[stanzaId, messageid]];
 }
 
 -(void) clearMessages:(NSString*) accountNo
@@ -1543,46 +1538,6 @@ static NSDateFormatter* dbFormatter;
     [self.db executeNonQuery:query andArguments:@[]];
 }
 
--(void)setSynchpointforAccount:(NSString*) accountNo
-{
-    NSString* query = [NSString stringWithFormat:@"update buddylist set synchpoint=?  where account_id=?"];
-
-    NSDateFormatter* dateFromatter = [[NSDateFormatter alloc] init];
-    NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-
-    [dateFromatter setLocale:enUSPOSIXLocale];
-    [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
-    [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-    NSString* synchPoint =[dateFromatter stringFromDate:[NSDate date]];
-
-    [self.db executeNonQuery:query andArguments:@[synchPoint, accountNo]];
-}
-
--(void) synchPointforAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion
-{
-    NSString* query = [NSString stringWithFormat:@"select synchpoint from buddylist where account_id=? order by synchpoint  desc limit 1"];
-
-    [self.db executeScalar:query andArguments:@[accountNo] withCompletion:^(NSObject* result) {
-        if(completion)
-        {
-            NSDateFormatter* dateFromatter = [[NSDateFormatter alloc] init];
-            NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-
-            [dateFromatter setLocale:enUSPOSIXLocale];
-            [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
-            [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-
-            NSDate* datetoReturn = [dateFromatter dateFromString:(NSString *)result];
-
-            // We could not parse the string -> default to 0
-            if(datetoReturn == nil)
-                datetoReturn = [[NSDate date] initWithTimeIntervalSince1970:0];
-
-            completion(datetoReturn);
-        }
-    }];
-}
-
 -(NSDate*) lastMessageDateForContact:(NSString*) contact andAccount:(NSString*) accountNo
 {
     NSString* query = [NSString stringWithFormat:@"select timestamp from message_history where account_id=? and (message_from=? or (message_to=? and sent=1)) order by timestamp desc limit 1"];
@@ -1608,9 +1563,26 @@ static NSDateFormatter* dbFormatter;
 
 -(void) lastStanzaIdForAccount:(NSString*) accountNo withCompletion:(void (^)(NSString* lastStanzaId, NSDate* lastStanzaDate)) completion
 {
-    NSArray* rows = [self.db executeReader:@"SELECT stanzaid FROM message_history WHERE account_id=? AND stanzaid NOT NULL AND stanzaid!='' ORDER BY message_history_id DESC LIMIT 1;" andArguments:@[accountNo]];
+    NSArray* rows;
+    
+    rows = [self.db executeReader:@"SELECT * FROM message_history WHERE account_id=? AND stanzaid NOT NULL AND stanzaid!='' ORDER BY message_history_id DESC LIMIT 1;" andArguments:@[accountNo]];
     if([rows count])
-        completion(rows[0][@"stanzaid"], [dbFormatter dateFromString:rows[0][@"timestamp"]]);
+    {
+        //return only last stanzaid (we don't need a date here)
+        completion(rows[0][@"stanzaid"], nil);
+        return;
+    }
+    
+    rows = [self.db executeReader:@"SELECT * FROM message_history WHERE account_id=? ORDER BY message_history_id DESC LIMIT 1;" andArguments:@[accountNo]];
+    if([rows count])
+    {
+        //no incoming messages in history (but outgoing ones present) --> return only last sent date
+        completion(nil, [dbFormatter dateFromString:(rows[0][@"timestamp"])]);
+        return;
+    }
+    
+    //no history entries found --> return nil for stanzaid and date
+    completion(nil, nil);
 }
 
 -(void) lastMessageDateAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion
@@ -2270,6 +2242,30 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"update dbversion set dbversion='4.83';" andArguments:@[]];
         DDLogVerbose(@"Upgrade to 4.83 success");
     }
+    
+    if([dbversion doubleValue] < 4.84)
+    {
+        DDLogVerbose(@"Database version <4.84 detected. Performing upgrade.");
+        [self.db executeNonQuery:@"DROP TABLE IF EXISTS ipc;" andArguments:@[]];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:@[]];
+        //remove synchPoint from db
+        [self.db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;" andArguments:@[]];
+        [self.db executeNonQuery:@"CREATE TABLE buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(50) collate nocase, full_name varchar(50), nick_name varchar(50), group_name varchar(50), iconhash varchar(200), filename varchar(100), state varchar(20), status varchar(200), online bool, dirty bool, new bool, Muc bool, muc_subject varchar(255), muc_nick varchar(255), backgroundImage text, encrypt bool, subscription varchar(50), ask varchar(50), messageDraft text, lastInteraction INTEGER NOT NULL DEFAULT 0);" andArguments:@[]];
+        [self.db executeNonQuery:@"INSERT INTO buddylist (buddy_id, account_id, buddy_name, full_name, nick_name, group_name, iconhash, filename, state, status, online, dirty, new, Muc, muc_subject, muc_nick, backgroundImage, encrypt, subscription, ask, messageDraft, lastInteraction) SELECT buddy_id, account_id, buddy_name, full_name, nick_name, group_name, iconhash, filename, state, status, online, dirty, new, Muc, muc_subject, muc_nick, backgroundImage, encrypt, subscription, ask, messageDraft, lastInteraction FROM _buddylistTMP;" andArguments:@[]];
+        [self.db executeNonQuery:@"DROP TABLE _buddylistTMP;" andArguments:@[]];
+        [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact on buddylist(buddy_name, account_id);" andArguments:@[]];
+        //make stanzaid, messageid and errorType caseinsensitive and create indixes for stanzaid and messageid
+        [self.db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;" andArguments:@[]];
+        [self.db executeNonQuery:@"CREATE TABLE message_history (message_history_id integer not null primary key AUTOINCREMENT, account_id integer, message_from text collate nocase, message_to text collate nocase, timestamp datetime, message blob, actual_from text collate nocase, messageid text collate nocase, messageType text, sent bool, received bool, unread bool, encrypted bool, previewText text, previewImage text, stanzaid text collate nocase, errorType text collate nocase, errorReason text);" andArguments:@[]];
+        [self.db executeNonQuery:@"INSERT INTO message_history (message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, sent, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason) SELECT message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, sent, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason FROM _message_historyTMP;" andArguments:@[]];
+        [self.db executeNonQuery:@"DROP TABLE _message_historyTMP;" andArguments:@[]];
+        [self.db executeNonQuery:@"CREATE INDEX stanzaidIndex on message_history(stanzaid collate nocase);" andArguments:@[]];
+        [self.db executeNonQuery:@"CREATE INDEX messageidIndex on message_history(messageid collate nocase);" andArguments:@[]];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:@[]];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.84';" andArguments:@[]];
+        DDLogVerbose(@"Upgrade to 4.84 success");
+    }
+    
     [self.db endWriteTransaction];
     
     DDLogInfo(@"Database version check done");

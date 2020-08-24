@@ -173,9 +173,8 @@ NSString *const kiqErrorType = @"error";
 /**
  Get last 50 messages
  */
--(void) setMAMQueryLatestMessagesForJid:(NSString *)jid
+-(void) setMAMQueryLatestMessagesForJid:(NSString*) jid before:(NSString*) uid
 {
-    
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"query";
     [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:kXMLNS];
@@ -209,6 +208,8 @@ NSString *const kiqErrorType = @"error";
     
     MLXMLNode* before =[[MLXMLNode alloc] init];
     before.element=@"before";
+    if(uid)
+        before.data=uid;
     [set.children addObject:before];
     
     [queryNode.children addObject:set];
@@ -232,91 +233,10 @@ NSString *const kiqErrorType = @"error";
 }
 
 /**
- You can send just start or just jid. Setting  endDate alone doesnt make sense.
- If querying all good idea to set a max
- */
--(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate withMax:(NSString *) maxResults  andJid:(NSString *)jid
-{
-    
-    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2"];
-    
-    MLXMLNode* xnode = [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data"];
-    [xnode.attributes setObject:@"submit" forKey:@"type"];
-    
-    MLXMLNode* field1 = [[MLXMLNode alloc] initWithElement:@"field"];
-    [field1.attributes setObject:@"FORM_TYPE" forKey:@"var"];
-    [field1.attributes setObject:@"hidden" forKey:@"type"];
-    
-    MLXMLNode* value =[[MLXMLNode alloc] initWithElement:@"value"];
-    value.data = @"urn:xmpp:mam:2";
-    [field1.children addObject:value];
-    
-    [xnode.children addObject:field1];
-    
-    if(startDate){
-        MLXMLNode* field2 = [[MLXMLNode alloc] initWithElement:@"field"];
-        [field2.attributes setObject:@"start" forKey:@"var"];
-        
-        MLXMLNode* value2 = [[MLXMLNode alloc] initWithElement:@"value"];
-        if(startDate)
-            value2.data = [HelperTools generateDateTimeString:startDate];
-        else
-            value2.data = [HelperTools generateDateTimeString:[NSDate dateWithTimeIntervalSinceReferenceDate:0]];
-        
-        [field2.children addObject:value2];
-        [xnode.children addObject:field2];
-    }
-    
-    if(maxResults)
-    {
-        MLXMLNode* set =[[MLXMLNode alloc] init];
-        set.element=@"set";
-        [set.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:kXMLNS];
-        
-        MLXMLNode* max =[[MLXMLNode alloc] init];
-        max.element=@"max";
-        max.data=maxResults;
-        [set.children addObject:max];
-        [queryNode.children addObject:set];
-        
-    }
-    
-    if(endDate) {
-        MLXMLNode* field3 = [[MLXMLNode alloc] initWithElement:@"field"];
-        [field3.attributes setObject:@"end" forKey:@"var"];
-        
-        MLXMLNode* value3 = [[MLXMLNode alloc] initWithElement:@"value"];
-        if(endDate)
-            value3.data = [HelperTools generateDateTimeString:endDate];
-        else
-            value3.data = [HelperTools generateDateTimeString:[NSDate date]];
-        [field3.children addObject:value3];
-        [xnode.children addObject:field3];
-    }
-    
-    if(jid)
-    {
-        MLXMLNode* field3 = [[MLXMLNode alloc] initWithElement:@"field"];
-        [field3.attributes setObject:@"with" forKey:@"var"];
-        
-        MLXMLNode* value3 =[[MLXMLNode alloc] initWithElement:@"value"];
-        value3.data = jid;
-        [field3.children addObject:value3];
-        
-        [xnode.children addObject:field3];
-    }
-    
-    [queryNode.children addObject:xnode];
-    [self.children addObject:queryNode];
-}
-
-
-/**
  The after here is the id usually received in the last stanza of the mam page
  */
 -(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) uid withMax:(NSString *) maxResults  andJid:(NSString *)jid
 {
-    
     MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2"];
     
     MLXMLNode* xnode = [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data"];

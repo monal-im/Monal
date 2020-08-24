@@ -289,10 +289,15 @@
                     //query mam since last received message because we could not resume the smacks session
                     //(we would not have landed here if we were able to resume the smacks session)
                     //this will do a catchup of everything we might have missed since our last connection
+                    //we possibly receive sent messages, too (this will update the stanzaid in database and gets deduplicate by messageid,
+                    //which is guaranteed to be unique (because monal uses uuids for outgoing messages)
                     [[DataLayer sharedInstance] lastStanzaIdForAccount:self.accountNo withCompletion:^(NSString* lastStanzaId, NSDate* lastStanzaDate) {
-                        DDLogInfo(@"Querying mam archive after stanzaid %@ and date %@ for catchup", lastStanzaId, lastStanzaDate);
+                        DDLogInfo(@"Querying mam:2 archive after stanzaid %@ and date %@ for catchup", lastStanzaId, lastStanzaDate);
                         XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-                        [mamQuery setMAMQueryFromStart:nil after:lastStanzaId withMax:nil andJid:nil];
+                        if(lastStanzaId || lastStanzaDate)
+                            [mamQuery setMAMQueryFromStart:lastStanzaDate after:lastStanzaId withMax:nil andJid:nil];
+                        else
+                            [mamQuery setMAMQueryLatestMessagesForJid:nil before:nil];     //we have an empty history table --> query latest 50 messages
                         if(self.sendIq)
                             self.sendIq(mamQuery, nil, nil);
                     }];

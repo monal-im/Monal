@@ -200,9 +200,6 @@ extern NSString *const kMessageTypeUrl;
 -(NSArray *) messageHistoryListDates:(NSString *) buddy forAccount: (NSString *) accountNo;
 -(NSArray *) messageHistoryDate:(NSString *) buddy forAccount:(NSString *) accountNo forDate:(NSString*) date;
 
--(void) setSynchpointforAccount:(NSString*) accountNo;
--(void) synchPointforAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion;
-
 /**
  retrieves the date of the the last message to or from this contact
  */

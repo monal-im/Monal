@@ -2547,11 +2547,12 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) setMAMPrefs:(NSString *) preference
 {
+    if(!self.connectionProperties.supportsMam2)
+        return;
     XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
     [query updateMamArchivePrefDefault:preference];
     [self send:query];
 }
-
 
 -(void) getMAMPrefs
 {
@@ -2560,24 +2561,11 @@ NSString *const kXMPPPresence = @"presence";
     [self send:query];
 }
 
-
--(void) setMAMQueryMostRecentForJid:(NSString*) jid
+-(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid
 {
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-    [query setMAMQueryLatestMessagesForJid:jid];
+    [query setMAMQueryLatestMessagesForJid:jid before:uid];
     [self send:query];
-}
-
--(void) queryMAMSinceLastMessageDateForContact:(NSString *) contactJid
-{
-    if(self.connectionProperties.supportsMam2) {
-        NSDate* lastMsgDate = [[DataLayer sharedInstance] lastMessageDateForContact:contactJid andAccount:self.accountNo];
-        if(lastMsgDate) {
-            XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-                [query setMAMQueryFromStart:[lastMsgDate dateByAddingTimeInterval:1] toDate:nil withMax:nil andJid:contactJid];
-                [self send:query];
-        }
-    }
 }
 
 #pragma mark - MUC

@@ -229,18 +229,8 @@ Decline a call request
  -(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion;
 
 
--(void) setMAMQueryMostRecentForJid:(NSString *)jid;
-
-/*
- query message archive.
- */
--(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) after  andJid:(NSString *)jid;
-
-
-//-(void) queryMAMSinceLastStanzaForContact:(NSString *) contactJid;
--(void) queryMAMSinceLastMessageDateForContact:(NSString *) contactJid; 
-
--(void) setMAMPrefs:(NSString *) preference;
+-(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid;
+-(void) setMAMPrefs:(NSString*) preference;
 -(void) getMAMPrefs;
 
 /**

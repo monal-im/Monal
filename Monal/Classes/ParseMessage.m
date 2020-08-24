@@ -25,28 +25,27 @@
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
     [super parser:parser didStartElement:elementName namespaceURI:namespaceURI qualifiedName:qName attributes:attributeDict];
-     _messageBuffer=nil;
+     _messageBuffer = nil;
     
     if(([elementName isEqualToString:@"forwarded"])  )
     {
-        State=@"Forwarded";
+        State = @"Forwarded";
         return;
     }
     
-    //comes first to not change state t message below immediatley
+    //comes first to not change state message below immediatley
     if(([elementName isEqualToString:@"message"]) && [State isEqualToString:@"Forwarded"] )
     {
         if([attributeDict objectForKey:@"to"])
         {
-            _to =[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-            _to=[_to lowercaseString];
+            _to = [[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+            _to = [_to lowercaseString];
         }
         
-        if([(NSString *)[attributeDict objectForKey:@"id"] length]>0) {
+        if([(NSString*)[attributeDict objectForKey:@"id"] length]>0) {
             //this is the id of the forwarded message and overwrites the main message stanza's id.
-            _idval =[attributeDict objectForKey:@"id"];
+            _idval = [attributeDict objectForKey:@"id"];
         }
-        
     }
     
     if(([elementName isEqualToString:@"active"]) && [namespaceURI isEqualToString:@"http://jabber.org/protocol/chatstates"])
@@ -83,15 +82,12 @@
         _stanzaId = [attributeDict objectForKey:@"id"];
     }
     
-   
-	if(([elementName isEqualToString:@"message"])  )
-	{
-		DDLogVerbose(@" message type check");
-		_type = [attributeDict objectForKey:@"type"];
-        if(!_stanzaId) _stanzaId = [attributeDict objectForKey:@"id"]; //default to this, may be overridden by urn:xmpp:sid:0 inside message
-        State=@"Message";
-	}
-    
+    if(([elementName isEqualToString:@"message"])  )
+    {
+        DDLogVerbose(@"message type check");
+        _type = [attributeDict objectForKey:@"type"];
+        State = @"Message";
+    }
     
     if([elementName isEqualToString:@"subject"])
     {
@@ -102,14 +98,14 @@
     //ignore error message
 	if([elementName isEqualToString:@"body"])
 	{
-		_hasBody=YES;
+		_hasBody = YES;
 		return;
 	}
 
     if(([elementName isEqualToString:@"message"])
        && ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageGroupChatType]))
     {
-        NSArray*  parts=[[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/"];
+        NSArray* parts = [[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/"];
         if([parts count]>1)
         {
             DDLogVerbose(@"group chat message");
@@ -126,16 +122,19 @@
     else if([elementName isEqualToString:@"message"] &&
             ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageChatType]) )
     {
-        _from=[[_from componentsSeparatedByString:@"/" ] objectAtIndex:0];
-        _to=[[_to  componentsSeparatedByString:@"/" ] objectAtIndex:0];
+        _from = [[_from componentsSeparatedByString:@"/" ] objectAtIndex:0];
+        _to = [[_to  componentsSeparatedByString:@"/" ] objectAtIndex:0];
         
         // carbons are only from myself
-        if([_to isEqualToString:_from]) {
-            _from=[[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-            _to=[[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+        if([_to isEqualToString:_from])
+        {
+            _from = [[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+            _to = [[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
             DDLogVerbose(@"message from %@ to %@", _from, _to);
             return;
-        } else {
+        }
+        else
+        {
             //DDLogError(@"message impersonation");
             return;
         }
@@ -143,98 +142,85 @@
     if([elementName isEqualToString:@"message"] &&
        ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageHeadlineType]) )
     {
-        _from=[[_from componentsSeparatedByString:@"/" ] objectAtIndex:0];
-        _to=[[_to  componentsSeparatedByString:@"/" ] objectAtIndex:0];
-        State=@"Headline";
+        _from = [[_from componentsSeparatedByString:@"/" ] objectAtIndex:0];
+        _to = [[_to  componentsSeparatedByString:@"/" ] objectAtIndex:0];
+        State = @"Headline";
         return;
     }
     
     
     if(([elementName isEqualToString:@"x"])  && ([namespaceURI isEqualToString:@""]))
     {
-        State=@"OOB";
+        State = @"OOB";
         return;
     }
     
     if([State isEqualToString:@"OOB"] && [elementName isEqualToString: @"url"])
     {
         DDLogVerbose(@"OOB Url seen");
-        State=@"OOBUrl";
-        
+        State = @"OOBUrl";
+        return;
+    }
+    
+    //multi user chat
+    //message->user:X
+    if(([State isEqualToString:@"Message"]) && ( ([elementName isEqualToString: @"user:invite"]) || ([elementName isEqualToString: @"invite"]))
+        // && (([[attributeDict objectForKey:@"xmlns:user"] isEqualToString:@"http://jabber.org/protocol/muc#user"]) ||
+        //  ([namespaceURI isEqualToString:@"http://jabber.org/protocol/muc#user"])
+        //   )
+        )
+    {
+        State = @"MucUser";
+        _mucInvite = YES;
+
+        return;
+    }
+    
+    if((([State isEqualToString:@"MucUser"]) && (([elementName isEqualToString: @"user:reason"]))) || ([elementName isEqualToString: @"reason"]))
+    {
+        DDLogVerbose(@"user reason set"); 
+        State = @"MucUserReason";
         return;
     }
     
 
-	//multi user chat
-	//message->user:X
-	if(([State isEqualToString:@"Message"]) && ( ([elementName isEqualToString: @"user:invite"]) || ([elementName isEqualToString: @"invite"]))
-       // && (([[attributeDict objectForKey:@"xmlns:user"] isEqualToString:@"http://jabber.org/protocol/muc#user"]) ||
-       //  ([namespaceURI isEqualToString:@"http://jabber.org/protocol/muc#user"])
-       //   )
-	   )
-	{
-		State=@"MucUser";
-		_mucInvite=YES;
-
-		return;
-	}
-
-
-    
-	if((([State isEqualToString:@"MucUser"]) && (([elementName isEqualToString: @"user:reason"]))) || ([elementName isEqualToString: @"reason"]))
-	{
-		DDLogVerbose(@"user reason set"); 
-		State=@"MucUserReason";
-
-		return;
-	}
-	
-
-	if(([elementName isEqualToString:@"data"])  && ([namespaceURI isEqualToString:@"urn:xmpp:avatar:data"]))
-	{
-        State=@"AvatarData";
-		
-		return;
-	}
-	
+    if(([elementName isEqualToString:@"data"])  && ([namespaceURI isEqualToString:@"urn:xmpp:avatar:data"]))
+    {
+        State = @"AvatarData";
+        return;
+    }
     
     if(([elementName isEqualToString:@"result"])  && ([namespaceURI isEqualToString:@"urn:xmpp:mam:2"]))
     {
-        _mamResult=YES;
-        _idval=[attributeDict objectForKey:kId];
+        _mamResult = YES;
+        _stanzaId = [attributeDict objectForKey:@"id"];
         return;
     }
     
-  
-    
-	if(([elementName isEqualToString:@"html"]) )
-	{
-        State=@"HTML";
-		
-		return;
-	}
-
+    if(([elementName isEqualToString:@"html"]) )
+    {
+        State = @"HTML";
+        return;
+    }
     
     if([elementName isEqualToString:@"request"]  && [namespaceURI isEqualToString:@"urn:xmpp:receipts"] )
     {
-        _requestReceipt=YES;
+        _requestReceipt = YES;
         return;
     }
     
     if([elementName isEqualToString:@"received"]  && [namespaceURI isEqualToString:@"urn:xmpp:receipts"] )
     {
-        _receivedID =[attributeDict objectForKey:@"id"];
+        _receivedID = [attributeDict objectForKey:@"id"];
         return;
     }
-    
-    
     
     if([State isEqualToString:@"Headline"] &&
         [elementName isEqualToString:@"items"]
        && [[attributeDict objectForKey:@"node"] isEqualToString:@"eu.siacs.conversations.axolotl.devicelist"]  )
     {
-        State =@"OMEMODevices";
-        self.devices=[[NSMutableArray alloc] init];
+        State = @"OMEMODevices";
+        self.devices = [[NSMutableArray alloc] init];
         return;
     }
     
@@ -242,8 +228,8 @@
        [elementName isEqualToString:@"list"]
        && [namespaceURI isEqualToString:@"eu.siacs.conversations.axolotl"]  )
     {
-        State =@"OMEMODeviceList";
-        self.devices=[[NSMutableArray alloc] init];
+        State = @"OMEMODeviceList";
+        self.devices = [[NSMutableArray alloc] init];
         return;
     }
     
@@ -256,23 +242,18 @@
         return;
     }
     
-    
-    
     if(([elementName isEqualToString:@"encrypted"])
        && [namespaceURI isEqualToString:@"eu.siacs.conversations.axolotl"]  )
     {
-        State=@"OMEMO";
+        State = @"OMEMO";
         return;
     }
     
-    
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"header"] )
     {
-        _sid=[attributeDict objectForKey:@"sid"];
-        _signalKeys =[[NSMutableArray alloc] init];
-        
+        _sid = [attributeDict objectForKey:@"sid"];
+        _signalKeys = [[NSMutableArray alloc] init];
     }
-    
     
     //store in array
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"]) {
@@ -284,11 +265,11 @@
            || [[attributeDict objectForKey:@"prekey"] isEqualToString:@"true"])
         {
             [self.currentKey setObject:@"1" forKey:@"prekey"];
-        } else  {
-       [self.currentKey setObject:@"0" forKey:@"prekey"];
-            
         }
-       
+        else
+        {
+            [self.currentKey setObject:@"0" forKey:@"prekey"];
+        }
     }
 }
 
@@ -300,11 +281,11 @@
     if([elementName isEqualToString:@"body"])
     {
         if([State isEqualToString:@"HTML"]){
-            _messagHTML=_messageBuffer;
+            _messagHTML = _messageBuffer;
             DDLogVerbose(@"got message HTML %@", self.messagHTML);
         } else
         {
-            _messageText=_messageBuffer;
+            _messageText = _messageBuffer;
             DDLogVerbose(@"got message %@", self.messageText);
         }
     }
@@ -314,44 +295,44 @@
         _from=[_from lowercaseString];
         
         // this is the end of parse
-        if(!_actualFrom) _actualFrom=_from;
-        if(!_messageText) _messageText=_messagHTML;
-        if(!_messageText) _messageText=_messageBuffer; 
+        if(!_actualFrom) _actualFrom = _from;
+        if(!_messageText) _messageText = _messagHTML;
+        if(!_messageText) _messageText = _messageBuffer; 
     }
     
     if([State isEqualToString:@"OOBUrl"] && [elementName isEqualToString:@"url"])
     {
-        _oobURL=_messageBuffer;
-        _messageBuffer=nil;
+        _oobURL = _messageBuffer;
+        _messageBuffer = nil;
     }
     
     if([State isEqualToString:@"AvatarData"])
     {
-        _avatarData=_messageBuffer;
+        _avatarData = _messageBuffer;
     }
     
    if([elementName isEqualToString:@"subject"])
     {
-      _subject=_messageBuffer;
-        _messageBuffer=nil; // specifically so the body doesnt get set 
+      _subject = _messageBuffer;
+        _messageBuffer = nil; // specifically so the body doesnt get set 
     }
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"iv"])
     {
-        _iv=_messageBuffer;
-        _messageBuffer=nil;
+        _iv = _messageBuffer;
+        _messageBuffer = nil;
     }
     
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"payload"])
     {
-        _encryptedPayload=_messageBuffer;
-        _messageBuffer=nil;
+        _encryptedPayload = _messageBuffer;
+        _messageBuffer = nil;
     }
 
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"] &&_messageBuffer)
     {
         [self.currentKey setObject:[_messageBuffer copy] forKey:@"key"];
         [self.signalKeys addObject:self.currentKey];
-        _messageBuffer=nil;
+        _messageBuffer = nil;
     }
 }
 

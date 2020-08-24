@@ -174,6 +174,7 @@ NSString *const kXMPPPresence = @"presence";
     _parseQueue.name = @"receiveQueue";
     _parseQueue.qualityOfService = NSQualityOfServiceUtility;
     _parseQueue.maxConcurrentOperationCount = 1;
+    [_parseQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
     
     _receiveQueue = [[NSOperationQueue alloc] init];
     _receiveQueue.name = @"receiveQueue";
@@ -228,6 +229,7 @@ NSString *const kXMPPPresence = @"presence";
     if(_outputBuffer)
         free(_outputBuffer);
     _outputBuffer = nil;
+    [_parseQueue removeObserver:self forKeyPath:@"operationCount"];
     [_receiveQueue removeObserver:self forKeyPath:@"operationCount"];
     [_sendQueue removeObserver:self forKeyPath:@"operationCount"];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -270,7 +272,7 @@ NSString *const kXMPPPresence = @"presence";
 -(void) observeValueForKeyPath:(NSString*) keyPath ofObject:(id) object change:(NSDictionary *) change context:(void*) context
 {
     //check for idle state every time the number of operations in _sendQueue or _receiveQueue changes
-    if((object == _sendQueue || object == _receiveQueue) && [@"operationCount" isEqual: keyPath])
+    if((object == _sendQueue || object == _receiveQueue || object == _parseQueue) && [@"operationCount" isEqual: keyPath])
     {
         //check idle state if this queue is empty and if so, publish kMonalIdle notification
         //only do the (more heavy but complete) idle check if we reache zero operations in the observed queue

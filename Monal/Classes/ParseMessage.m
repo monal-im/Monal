@@ -94,7 +94,6 @@
         return;
     }
     
-
     //ignore error message
 	if([elementName isEqualToString:@"body"])
 	{
@@ -280,13 +279,14 @@
     
     if([elementName isEqualToString:@"body"])
     {
-        if([State isEqualToString:@"HTML"]){
-            _messagHTML = _messageBuffer;
-            DDLogVerbose(@"got message HTML %@", self.messagHTML);
-        } else
+        if([State isEqualToString:@"HTML"])
+        {
+            DDLogVerbose(@"got (and throwing away) message HTML: %@", _messageBuffer);
+        }
+        else
         {
             _messageText = _messageBuffer;
-            DDLogVerbose(@"got message %@", self.messageText);
+            DDLogVerbose(@"got message: %@", self.messageText);
         }
     }
     
@@ -295,15 +295,13 @@
         _from=[_from lowercaseString];
         
         // this is the end of parse
-        if(!_actualFrom) _actualFrom = _from;
-        if(!_messageText) _messageText = _messagHTML;
-        if(!_messageText) _messageText = _messageBuffer; 
+        if(!_actualFrom)
+            _actualFrom = _from;
     }
     
     if([State isEqualToString:@"OOBUrl"] && [elementName isEqualToString:@"url"])
     {
         _oobURL = _messageBuffer;
-        _messageBuffer = nil;
     }
     
     if([State isEqualToString:@"AvatarData"])
@@ -314,26 +312,24 @@
    if([elementName isEqualToString:@"subject"])
     {
       _subject = _messageBuffer;
-        _messageBuffer = nil; // specifically so the body doesnt get set 
     }
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"iv"])
     {
         _iv = _messageBuffer;
-        _messageBuffer = nil;
     }
     
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"payload"])
     {
         _encryptedPayload = _messageBuffer;
-        _messageBuffer = nil;
     }
 
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"] &&_messageBuffer)
     {
         [self.currentKey setObject:[_messageBuffer copy] forKey:@"key"];
         [self.signalKeys addObject:self.currentKey];
-        _messageBuffer = nil;
     }
+    
+    _messageBuffer = nil;
 }
 
 @end

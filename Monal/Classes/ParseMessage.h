@@ -22,7 +22,6 @@
  */
 @property (nonatomic, copy, readonly) NSString* actualFrom;
 @property (nonatomic, copy, readonly) NSString* messageText;
-@property (nonatomic, copy, readonly) NSString* messagHTML;
 @property (nonatomic, copy, readonly) NSString* subject;
 @property (nonatomic, assign, readonly) BOOL hasBody;
 @property (nonatomic, copy, readonly) NSDate *delayTimeStamp;

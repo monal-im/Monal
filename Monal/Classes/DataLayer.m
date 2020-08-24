@@ -1676,6 +1676,9 @@ static NSDateFormatter* dbFormatter;
     if([self isActiveBuddy:buddyname forAccount:accountNo]) {
         // active chat entry does not exist yet -> insert
         [self.db endWriteTransaction];
+        if (completion) {
+            completion(YES);
+        }
         return;
     }
     
@@ -1694,6 +1697,8 @@ static NSDateFormatter* dbFormatter;
                 NSString* accountJid = [self jidOfAccount:accountNo];
                 if(!accountJid) {
                     [self.db endWriteTransaction];
+                    if(completion)
+                        completion(NO);
                     return;
                 }
 
@@ -1717,6 +1722,8 @@ static NSDateFormatter* dbFormatter;
             }
         } else {
             [self.db endWriteTransaction];
+            if(completion)
+                completion(NO);
         }
     }];
 }

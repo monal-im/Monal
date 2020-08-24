@@ -21,7 +21,6 @@
 
 @interface MLUDPLogger ()
 {
-    NSData* _addr;
     CFSocketRef _cfsocketout;
 }
 @end
@@ -40,14 +39,6 @@
         NULL,
         NULL
     );
-    
-    struct sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_len            = sizeof(addr);
-    addr.sin_family         = AF_INET;
-    addr.sin_port           = htons(PORT);
-    addr.sin_addr.s_addr    = inet_addr(IP);
-    _addr = [NSData dataWithBytes:(const UInt8*)&addr length:sizeof(addr)];
 }
 
 -(void) willRemoveLogger
@@ -56,9 +47,15 @@
 
 -(void) logMessage:(DDLogMessage*) logMessage
 {
+    //early return if deactivated
+    if(![[HelperTools defaultsDB] boolForKey: @"udpLoggerEnabled"])
+        return;
+    
+    //calculate formatted log message
     NSString* logMsg = logMessage.message;
     if(self->_logFormatter)
         logMsg = [NSString stringWithFormat:@"%@\n", [self->_logFormatter formatLogMessage:logMessage]];
+    
     NSDictionary* msgDict = @{
         @"formattedMessage": logMsg,
         @"message": logMessage.message,
@@ -72,7 +69,7 @@
         @"tag": logMessage.tag ? logMessage.tag : [NSNull null],
         @"options": [NSNumber numberWithInteger:logMessage.options],
         @"timestamp": [[[NSISO8601DateFormatter alloc] init] stringFromDate:logMessage.timestamp],
-        @"threadID": logMessage.threadID, // ID as it appears in NSLog calculated from the machThreadID
+        @"threadID": logMessage.threadID,
         @"threadName": logMessage.threadName,
         @"queueLabel": logMessage.queueLabel,
         @"qos": [NSNumber numberWithInteger:logMessage.qos]
@@ -84,9 +81,20 @@
         NSLog(@"MLUDPLogger json encode error: %@", writeError);
         return;
     }
+    
     //you have to comment the following line to send raw json log data
     data = [logMsg dataUsingEncoding:NSUTF8StringEncoding];
-    CFSocketError error = CFSocketSendData(_cfsocketout, (__bridge CFDataRef)_addr, (__bridge CFDataRef)data, 0);
+    
+    //calculate remote addr
+    struct sockaddr_in addr;
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_len            = sizeof(addr);
+    addr.sin_family         = AF_INET;
+    addr.sin_port           = htons([[[HelperTools defaultsDB] stringForKey:@"udpLoggerPort"] integerValue]);
+    addr.sin_addr.s_addr    = inet_addr([[[HelperTools defaultsDB] stringForKey:@"udpLoggerHostname"] UTF8String]);
+    
+    //send log via udp
+    CFSocketError error = CFSocketSendData(_cfsocketout, (__bridge CFDataRef)[NSData dataWithBytes:(const UInt8*)&addr length:sizeof(addr)], (__bridge CFDataRef)data, 0);
     if(error)
         NSLog(@"MLUDPLogger CFSocketSendData error: %ld", (long)error);
 }

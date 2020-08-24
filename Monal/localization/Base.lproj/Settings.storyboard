@@ -565,7 +565,7 @@
                                     </barButtonItem>
                                 </items>
                             </toolbar>
-                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ZMn-v1-NOh" userLabel="logHostname">
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ZMn-v1-NOh" userLabel="logHostname" placeholder="Hostname/IP of Logserver">
                                 <rect key="frame" x="8" y="96" width="200" height="34"/>
                                 <accessibility key="accessibilityConfiguration" hint="UDP Log Hostname"/>
                                 <constraints>
@@ -574,7 +574,7 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="alphabet"/>
                             </textField>
-                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="IVO-3g-xoO" userLabel="logPort">
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="IVO-3g-xoO" userLabel="logPort" placeholder="Port of Logserver">
                                 <rect key="frame" x="216" y="96" width="70" height="34"/>
                                 <accessibility key="accessibilityConfiguration" hint="UDP Log Port"/>
                                 <constraints>

@@ -317,16 +317,18 @@ NSString *const kXMPPPresence = @"presence";
             //test if we are connected and idle (e.g. we're done with catchup and neither process any incoming stanzas nor trying to send anything)
             _catchupDone &&
             !unackedCount &&
+            ![_parseQueue operationCount] &&
             [_receiveQueue operationCount] <= ([NSOperationQueue currentQueue]==_receiveQueue ? 1 : 0) &&
             ![_sendQueue operationCount]
         )
     )
         retval=YES;
-    DDLogVerbose(@"Idle check:\n\t_accountState < kStateReconnecting = %@\n\t_reconnectInProgress = %@\n\t_catchupDone = %@\n\t[self.unAckedStanzas count] = %lu\n\t[_receiveQueue operationCount] = %lu\n\t[_sendQueue operationCount] = %lu\n\t--> %@",
+    DDLogVerbose(@"Idle check:\n\t_accountState < kStateReconnecting = %@\n\t_reconnectInProgress = %@\n\t_catchupDone = %@\n\t[self.unAckedStanzas count] = %lu\n\t[_parseQueue operationCount] = %lu\n\t[_receiveQueue operationCount] = %lu\n\t[_sendQueue operationCount] = %lu\n\t--> %@",
         _accountState < kStateReconnecting ? @"YES" : @"NO",
         _reconnectInProgress ? @"YES" : @"NO",
         _catchupDone ? @"YES" : @"NO",
         unackedCount,
+        (unsigned long)[_parseQueue operationCount],
         (unsigned long)[_receiveQueue operationCount],
         (unsigned long)[_sendQueue operationCount],
         retval ? @"idle" : @"NOT IDLE"

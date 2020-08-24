@@ -99,7 +99,7 @@ void logException(NSException* exception)
     DDLogInfo(@"Logfile dir: %@", [containerUrl path]);
     
     //network logger (only in alpha build)
-    if(![kAppGroup isEqualToString:@"group.monal"] && [[HelperTools defaultsDB] boolForKey: @"udpLoggerEnabled"])
+    if(![kAppGroup isEqualToString:@"group.monal"])
     {
         MLUDPLogger* udpLogger = [[MLUDPLogger alloc] init];
         [udpLogger setLogFormatter:formatter];

@@ -1163,7 +1163,7 @@ static NSDateFormatter* dbFormatter;
 
 -(BOOL) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId toContact:(NSString*) contact onAccount:(NSString*) accountNo
 {
-    if(!accountNo)
+    if(!accountNo || !stanzaId)
         return NO;
     
     NSObject* found = [self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND stanzaid!='' AND stanzaid=?;" andArguments:@[accountNo, stanzaId]];

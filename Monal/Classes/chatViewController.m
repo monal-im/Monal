@@ -189,10 +189,10 @@
  */
 -(void) synchChat {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if(self.xmppAccount.connectionProperties.supportsMam2 & !self.contact.isGroup) {
-            if(self.messageList.count==0) {
-                [self.xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid ];
-            }
+        if(self.messageList.count==0 && !self.contact.isGroup)
+        {
+            //TODO: use this query with non-nil before for endless scrolling
+            [self.xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid before:nil];
         }
     });
 }

@@ -25,6 +25,9 @@
 /* Class = "UITextField"; accessibilityHint = "UDP Log Port"; ObjectID = "IVO-3g-xoO"; */
 "IVO-3g-xoO.accessibilityHint" = "UDP Log Port";
 
+/* Class = "UITextField"; placeholder = "Port of Logserver"; ObjectID = "IVO-3g-xoO"; */
+"IVO-3g-xoO.placeholder" = "Port of Logserver";
+
 /* Class = "UILabel"; text = "Title"; ObjectID = "ivZ-8c-o6a"; */
 "ivZ-8c-o6a.text" = "Titlu";
 
@@ -84,3 +87,6 @@
 
 /* Class = "UITextField"; accessibilityHint = "UDP Log Hostname"; ObjectID = "ZMn-v1-NOh"; */
 "ZMn-v1-NOh.accessibilityHint" = "UDP Log Hostname";
+
+/* Class = "UITextField"; placeholder = "Hostname/IP of Logserver"; ObjectID = "ZMn-v1-NOh"; */
+"ZMn-v1-NOh.placeholder" = "Hostname/IP of Logserver";

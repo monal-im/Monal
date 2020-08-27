@@ -93,7 +93,8 @@
         {
             void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
             [self.handlerList removeObject:handler];
-            handler([[UNNotificationContent alloc] init]);
+            UNNotificationContent* emptyContent = [[UNNotificationContent alloc] init]; // this is used with special extension filtering entitlement
+            handler(emptyContent);
         }
     }
 }
@@ -140,7 +141,7 @@
                 DDLogVerbose(@"Feeding handler");
                 void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
                 [self.handlerList removeObject:handler];
-                UNNotificationContent *emptyContent =[[UNNotificationContent alloc] init]; // this is used with special extension filtering entitlement
+                UNNotificationContent* emptyContent = [[UNNotificationContent alloc] init]; // this is used with special extension filtering entitlement
                 handler(emptyContent);
             }
         }

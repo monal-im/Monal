@@ -93,7 +93,8 @@
         {
             void (^handler)(UNNotificationContent* contentToDeliver) = [self.handlerList firstObject];
             [self.handlerList removeObject:handler];
-            handler(nil);
+            UNNotificationContent *emptyContent =[[UNNotificationContent alloc] init]; // this is used with special extension filtering entitlement
+            handler(emptyContent);
         }
     }
 }

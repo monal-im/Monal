@@ -1,7 +1,7 @@
 PODS:
-  - CocoaLumberjack (3.6.1):
-    - CocoaLumberjack/Core (= 3.6.1)
-  - CocoaLumberjack/Core (3.6.1)
+  - CocoaLumberjack (3.6.2):
+    - CocoaLumberjack/Core (= 3.6.2)
+  - CocoaLumberjack/Core (3.6.2)
   - DACircularProgress (2.3.1)
   - DZNEmptyDataSet (1.8.1)
   - EAIntroView (2.12.0):
@@ -65,7 +65,7 @@ SPEC REPOS:
     - TPCircularBuffer
 
 SPEC CHECKSUMS:
-  CocoaLumberjack: b17ae15142558d08bbacf69775fa10c4abbebcc9
+  CocoaLumberjack: bd155f2dd06c0e0b03f876f7a3ee55693122ec94
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   EAIntroView: 249559079ddfdbe80e5bcb755c04c3b964b2ac27
@@ -83,6 +83,6 @@ SPEC CHECKSUMS:
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 
-PODFILE CHECKSUM: f869c44d7b6014e28d7bcbaa8a3ee3b375617482
+PODFILE CHECKSUM: a1cf6eeb647ee4ac28039f9790796838c8bbc9ed
 
 COCOAPODS: 1.8.4

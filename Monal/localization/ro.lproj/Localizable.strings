@@ -1,0 +1,889 @@
+/* No comment provided by engineer. */
+"ReplyButton" = "ButonRăspuns";
+
+/* No comment provided by engineer. */
+"XMPP" = "XMPP";
+
+/* No comment provided by engineer. */
+"🔗 A Link" = "🔗 o adresă";
+
+/* No comment provided by engineer. */
+"Sent a Link 🔗" = "A trimis o adresă 🔗";
+
+/* No comment provided by engineer. */
+"📷 An Image" = "📷 O imagine";
+
+/* No comment provided by engineer. */
+"📍 A Location" = "📍 O locație";
+
+/* No comment provided by engineer. */
+"Your XMPP account should be in in the format user@domain. For special configurations, use manual setup." = "Contul XMPP trebuie să fie în formatul nume@domeniu. Pentru configurații speciale, utilizați configurarea manuală.";
+
+/* No comment provided by engineer. */
+"You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen." = "Ar trebui să aveți încredere într-o cheie atunci când ați verificat-o. Verificați comparând cheia de mai jos cu cea de pe ecranul persoanei de contact.";
+
+/* No comment provided by engineer. */
+"You need friends for this ride" = "Aveți nevoie de prieteni pentru această plimbare";
+
+/* No comment provided by engineer. */
+"You have not received any images in this conversation." = "Nu ați primit nici o imagine în această conversație.";
+
+/* No comment provided by engineer. */
+"You have been invited to a conversation %@?" = "Ați fost invitați la o conversație %@?";
+
+/* No comment provided by engineer. */
+"You can see their keys. They can't see yours" = "Puteți să le vedeți cheile. Ei nu le pot vedea pe ale dumneavoastră";
+
+/* No comment provided by engineer. */
+"You are set up and connected." = "Sunteți configurați și conectați.";
+
+/* No comment provided by engineer. */
+"You are not trapped in a garden. Talk to anyone else without anyone tracking you." = "Nu sunteți prinși într-o grădină. Vorbiți cu oricine altcineva fără să fiți urmăriți de cineva.";
+
+/* No comment provided by engineer. */
+"Yes" = "Da";
+
+/* No comment provided by engineer. */
+"XEP-0363: HTTP File Upload" = "XEP-0363: Încărcare fișiere prin HTTP";
+
+/* No comment provided by engineer. */
+"XEP-0357: Push Notifications" = "XEP-0357: Notificări Push";
+
+/* No comment provided by engineer. */
+"XEP-0352: Client State Indication" = "XEP-0352: Indicator stare client";
+
+/* No comment provided by engineer. */
+"XEP-0313: Message Archive Management" = "XEP-0313: Gestionarea arhivei de mesaje";
+
+/* No comment provided by engineer. */
+"XEP-0280: Message Carbons" = "XEP-0280: Copii indigo mesaje";
+
+/* No comment provided by engineer. */
+"XEP-0198: Stream Management" = "XEP-0198: Management flux";
+
+/* No comment provided by engineer. */
+"Will make a HTTP HEAD call on all links" = "Se va face o conexiune HEAD HTTP către toate adresele";
+
+/* No comment provided by engineer. */
+"Will logout and reconnect any connected accounts." = "Se va deconecta și reconecta orice cont conectat.";
+
+/* No comment provided by engineer. */
+"When you start talking to someone,\n they will show up here." = "Când începeți să vorbiți cu cineva,\n vor apărea aici.";
+
+/* No comment provided by engineer. */
+"When you have some favorite groups, they will be here for you." = "Când aveți unele grupuri favorite, acestea vor fi aici pentru dumneavoastră.";
+
+/* No comment provided by engineer. */
+"Welcome to Monal" = "Bine ați venit la Monal";
+
+/* No comment provided by engineer. */
+"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet." = "Nu am reușit să vă conectăm contul. Verificați datele de autentificare și asigurați-vă că sunteți conectați la internet.";
+
+/* No comment provided by engineer. */
+"Waiting for GPS signal" = "Se așteaptă semnalul GPS";
+
+/* No comment provided by engineer. */
+"View Images Received" = "Vizualizare imagini primite";
+
+/* No comment provided by engineer. */
+"Version %@ (%@)" = "Versiune %1$@ (%2$@)";
+
+/* No comment provided by engineer. */
+"Version %@ (%@ %@ UTC)" = "Versiune %1$@ (%2$@ %3$@ UTC)";
+
+/* No comment provided by engineer. */
+"Version" = "Versiune";
+
+/* No comment provided by engineer. */
+"Validate certificate" = "Validare certificat";
+
+/* No comment provided by engineer. */
+"Using Account: %@" = "Folosind contul: %@";
+
+/* No comment provided by engineer. */
+"Use your existing account or make a new one on the many servers around the world" = "Folosiți-vă contul existent sau creați unul nou pe numeroasele servere din întreaga lume";
+
+/* No comment provided by engineer. */
+"Uploading file to server" = "Se încarcă fișierul pe server";
+
+/* No comment provided by engineer. */
+"Uploading" = "Se încarcă";
+
+/* No comment provided by engineer. */
+"Upload files to the server to share with others." = "Încărcați fișiere pe server pentru a le partaja cu ceilalți.";
+
+/* No comment provided by engineer. */
+"Unread Messages Below" = "Mesaje necitite mai jos";
+
+/* No comment provided by engineer. */
+"Unnamed" = "Fără nume";
+
+/* No comment provided by engineer. */
+"Unmute" = "Activare sunet";
+
+/* No comment provided by engineer. */
+"Unknown Subcription" = "Abonare necunoscută";
+
+/* No comment provided by engineer. */
+"Unblock Sender" = "Deblocare expeditor";
+
+/* No comment provided by engineer. */
+"Unable to connect to server" = "Nu s-a putut face conectarea la server";
+
+/* No comment provided by engineer. */
+"Typing..." = "Tastează...";
+
+/* No comment provided by engineer. */
+"This will remove this account and the associated data from this device." = "Acesta va elimina acest cont și datele asociate de pe acest dispozitiv.";
+
+/* No comment provided by engineer. */
+"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it." = "Acest server nu pare să accepte încărcările de fișiere HTTP (XEP-0363). Solicitați administratorului să îl activeze.";
+
+/* No comment provided by engineer. */
+"This sender will no longer be able to contact you" = "Acest expeditor nu va mai putea să vă contacteze";
+
+/* No comment provided by engineer. */
+"This sender will be able to send you messages" = "Acest expeditor vă va putea trimite mesaje";
+
+/* No comment provided by engineer. */
+"This message failed to send." = "Acest mesaj nu a putut fi trimis.";
+
+/* No comment provided by engineer. */
+"This contact does not appear to have any devices that support encryption." = "Această persoană de contact nu pare să aibă nici un dispozitiv care să suporte criptare.";
+
+/* No comment provided by engineer. */
+"This account already exists in Monal." = "Acest cont există deja în Monal.";
+
+/* No comment provided by engineer. */
+"They will no longer see when you are online. They may not be able to access your encryption keys." = "Ei nu vor mai vedea atunci când sunteți conectați. Ei s-ar putea să nu poată să vă acceseze cheile de criptare.";
+
+/* No comment provided by engineer. */
+"They will no longer see when you are online. They may not be able to send you encrypted messages." = "Ei nu vor mai vedea atunci când sunteți conectați. Ei s-ar putea să nu poată să vă trimită mesaje criptate.";
+
+/* No comment provided by engineer. */
+"They will see when you are online. They will be able to send you encrypted messages." = "Ei vor vedea atunci când sunteți conectați. Ei pot să vă trimită mesaje criptate.";
+
+/* No comment provided by engineer. */
+"They can see your keys. You can't see theirs" = "Ei vă pot vedea cheile. Nu le puteți vedea pe ale lor";
+
+/* No comment provided by engineer. */
+"These are your encryption keys. Each device is a different place you have logged in. You should trust a key when you have verified it." = "Astea sunt cheile dumneavoastră de criptare. Fiecare dispozitiv este un loc diferit în care v-ați conectat. Ar trebui să aveți încredere într-o cheie atunci când ați verificat-o.";
+
+/* No comment provided by engineer. */
+"These are the modern XMPP capabilities Monal detected on your server after you have logged in." = "Acestea sunt capabilitățile moderne XMPP detectate de Monal pe serverul dumneavoastră după ce v-ați autentificat.";
+
+/* No comment provided by engineer. */
+"These are SRV resource records found for your domain" = "Acestea sunt setările SRV găsite pentru domeniul dumneavoastră";
+
+/* No comment provided by engineer. */
+"There was an error uploading the file to the server" = "A apărut o eroare la încărcarea fișierului pe server";
+
+/* No comment provided by engineer. */
+"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person." = "A apărut o eroare la decriptarea acestui mesaj criptat (eroare Signal). Pentru a rezolva acesta încercați să trimiteți un mesaj criptat acestei persoane.";
+
+/* No comment provided by engineer. */
+"There is no configured email account. Please email info@monal.im ." = "Nu există nici un cont de e-mail configurat. Vă rugăm să trimiteți un e-mail către info@monal.im .";
+
+/* No comment provided by engineer. */
+"The username does not need to have an @ symbol. Please try again." = "Numele de utilizator nu trebuie să aibă un simbol @. Vă rugăm să încercați din nou.";
+
+/* No comment provided by engineer. */
+"The password has been changed" = "Parola a fost modificată";
+
+/* No comment provided by engineer. */
+"The new contact will be added to your contacts list when the person you've added has approved your request." = "Noua persoană de contact va fi adăugată în lista dumneavoastră atunci când persoana pe care ați adăugat-o vă aprobă solicitarea.";
+
+/* No comment provided by engineer. */
+"The account has been saved" = "Contul a fost salvat";
+
+/* No comment provided by engineer. */
+"The account has been deleted" = "Contul a fost șters";
+
+/* No comment provided by engineer. */
+"Tell my contacts when I'm typing" = "Anunță contactele atunci când tastez";
+
+/* No comment provided by engineer. */
+"Synchronize your messages on all loggedin devices." = "Sincronizați mesajele pe toate dispozitivele conectate.";
+
+/* No comment provided by engineer. */
+"Support" = "Asistență tehnică";
+
+/* No comment provided by engineer. */
+"Success!" = "Succes!";
+
+/* No comment provided by engineer. */
+"Success" = "Succes";
+
+/* No comment provided by engineer. */
+"Submit A Bug" = "Trimiteți o eroare";
+
+/* No comment provided by engineer. */
+"Status Message" = "Mesaj de stare";
+
+/* No comment provided by engineer. */
+"Status" = "Stare";
+
+/* No comment provided by engineer. */
+"Start Using Monal" = "Începeți să utilizați Monal";
+
+/* No comment provided by engineer. */
+"SSL Error: Unknown root certificate" = "Eroare SSL: Certificat rădăcină necunoscut";
+
+/* No comment provided by engineer. */
+"SSL Error: Host name mismatch" = "Eroare SSL: Nepotrivire nume gazdă";
+
+/* No comment provided by engineer. */
+"SSL Error: Certificate expired" = "Eroare SSL: Certificat expirat";
+
+/* No comment provided by engineer. */
+"SSL Error: Certificate chain is invalid" = "Eroare SSL: Lanțul de certificate nu este valid";
+
+/* No comment provided by engineer. */
+"SRV entry prohibits XMPP connection" = "Setarea SRV interzice conexiunea XMPP";
+
+/* No comment provided by engineer. */
+"Spread The Word" = "Împrăștie vestea";
+
+/* No comment provided by engineer. */
+"Sounds courtesy Emrah" = "Sună prin amabilitatea lui Emrah";
+
+/* No comment provided by engineer. */
+"Sounds" = "Sunete";
+
+/* No comment provided by engineer. */
+"Sort By Status" = "Sortare după stare";
+
+/* No comment provided by engineer. */
+"Signing Up" = "Înscriere";
+
+/* No comment provided by engineer. */
+"Show Inline Images" = "Afișare imagini în discuție";
+
+/* No comment provided by engineer. */
+"Show Inline Geo Location" = "Afișare locație în discuție";
+
+/* No comment provided by engineer. */
+"Set a nickname" = "Setați un nume";
+
+/* No comment provided by engineer. */
+"Server: %@" = "Server: %@";
+
+/* No comment provided by engineer. */
+"Server" = "Server";
+
+/* No comment provided by engineer. */
+"Sent an Image 📷" = "Trimite o imagine 📷";
+
+/* No comment provided by engineer. */
+"Sent a location 📍" = "Trimite locația 📍";
+
+/* No comment provided by engineer. */
+"Send Typing Notifications" = "Trimitere notificări de tastare";
+
+/* No comment provided by engineer. */
+"Send Location" = "Trimitere locație";
+
+/* No comment provided by engineer. */
+"Send Last Interaction Time" = "Trimitere ora ultimei interacțiuni";
+
+/* No comment provided by engineer. */
+"Send A Message" = "Trimite un mesaj";
+
+/* No comment provided by engineer. */
+"Select sounds that are played with new message notifications. Default is Xylophone." = "Selectați sunetele care sunt redate cu noi notificări de mesaje. Implicit este Xilofon.";
+
+/* No comment provided by engineer. */
+"Select Message Archive Management (MAM) Preferences " = "Selectare preferințe gestionare arhiva mesaje (MAM) ";
+
+/* No comment provided by engineer. */
+"Select From Photos" = "Selectare din fotografii";
+
+/* No comment provided by engineer. */
+"Select File" = "Selectare fișier";
+
+/* No comment provided by engineer. */
+"Select Background" = "Selectare fundal";
+
+/* No comment provided by engineer. */
+"Select Action" = "Selectare acțiune";
+
+/* No comment provided by engineer. */
+"Select a background to display behind conversations" = "Selectați un fundal pentru a fi afișat în spatele conversațiilor";
+
+/* No comment provided by engineer. */
+"Select a Background" = "Selectați un fundal";
+
+/* No comment provided by engineer. */
+"Room" = "Cameră";
+
+/* No comment provided by engineer. */
+"Retry sending message?" = "Încercați din nou trimiterea mesajului?";
+
+/* No comment provided by engineer. */
+"Retry" = "Reîncercare";
+
+/* No comment provided by engineer. */
+"Resume a stream when disconnected. Results in faster reconnect and saves battery life." = "Reluați un flux atunci când este deconectat. Are ca rezultat o reconectare mai rapidă și economisește bateria.";
+
+/* No comment provided by engineer. */
+"Resources" = "Resurse";
+
+/* No comment provided by engineer. */
+"Resource" = "Resursă";
+
+/* No comment provided by engineer. */
+"Reply" = "Răspuns";
+
+/* No comment provided by engineer. */
+"Remove Contact" = "Eliminare persoană de contact";
+
+/* No comment provided by engineer. */
+"Remove %@ from contacts?" = "Eliminați pe %@ din persoane de contact?";
+
+/* No comment provided by engineer. */
+"Reconnecting" = "Reconectare";
+
+/* No comment provided by engineer. */
+"Recipients are usually in the format: username@domain.something" = "Destinatarii sunt de obicei în formatul: nume@domeniu.ceva";
+
+/* No comment provided by engineer. */
+"Recipient name can't be empty" = "Numele destinatarului nu poate fi gol";
+
+/* No comment provided by engineer. */
+"Recipient Name" = "Nume destinatar";
+
+/* No comment provided by engineer. */
+"Recently Seen" = "Văzut(ă) recent";
+
+/* No comment provided by engineer. */
+"Receive push notifications from via Apple even when disconnected. Vastly improves reliability." = "Primiți notificări Push de la Apple chiar și atunci când sunteți deconectat(ă). Îmbunătățește considerabil fiabilitatea.";
+
+/* No comment provided by engineer. */
+"Rebuilding is useful if you are experiencing problems. This will require an app restart to work." = "Reconstruirea este utilă dacă întâmpinați probleme. Acest lucru va necesita o repornire a aplicației pentru a funcționa.";
+
+/* No comment provided by engineer. */
+"Rebuild Tokens" = "Reconstruire jetoane";
+
+/* No comment provided by engineer. */
+"Rate Monal" = "Evaluează Monal";
+
+/* No comment provided by engineer. */
+"Quick Setup" = "Setare rapidă";
+
+/* No comment provided by engineer. */
+"Privacy Settings" = "Setări confidențialitate";
+
+/* No comment provided by engineer. */
+"Privacy" = "Confidențialitate";
+
+/* No comment provided by engineer. */
+"Presence" = "Prezență";
+
+/* No comment provided by engineer. */
+"Port: %@, Is Secure: %@, Prio: %@" = "Port: %1$@, Este sigur: %2$@, Prioritate: %3$@";
+
+/* No comment provided by engineer. */
+"Port" = "Port";
+
+/* No comment provided by engineer. */
+"Please make sure you have entered a username, password." = "Vă rugăm să vă asigurați că ați introdus un nume de utilizator, o parolă.";
+
+/* No comment provided by engineer. */
+"Please make sure you are connected before changing your password." = "Vă rugăm să vă asigurați că sunteți conectat(ă) înainte de a schimba parola.";
+
+/* No comment provided by engineer. */
+"Please make sure at least one account has connected before trying to message someone." = "Vă rugăm să vă asigurați că cel puțin un cont s-a conectat înainte de a încerca să trimiteți un mesaj cuiva.";
+
+/* No comment provided by engineer. */
+"Please make sure at least one account has connected before trying to add a contact." = "Vă rugăm să vă asigurați că cel puțin un cont s-a conectat înainte de a încerca să adăugați un contact.";
+
+/* No comment provided by engineer. */
+"Please enter a password." = "Vă rugăm să introduceți o parolă.";
+
+/* No comment provided by engineer. */
+"Please Allow Audio Access" = "Vă rugăm să permiteți accesul audio";
+
+/* No comment provided by engineer. */
+"Play Sounds" = "Redare sunete";
+
+/* No comment provided by engineer. */
+"Photos" = "Fotografii";
+
+/* No comment provided by engineer. */
+"Permission Requested" = "Permisiune solicitată";
+
+/* No comment provided by engineer. */
+"Password cannot be empty" = "Parola nu poate fi goală";
+
+/* No comment provided by engineer. */
+"Password" = "Parolă";
+
+/* No comment provided by engineer. */
+"Participants" = "Participanți";
+
+/* No comment provided by engineer. */
+"Open Source" = "Sursă deschisă";
+
+/* No comment provided by engineer. */
+"Online" = "Conectat";
+
+/* No comment provided by engineer. */
+"Ok" = "Bine";
+
+/* No comment provided by engineer. */
+"Offline Contacts" = "Contacte deconectate";
+
+/* No comment provided by engineer. */
+"Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old expereince back." = "Notificările s-au schimbat în iOS 13 din cauza unor modificări iOS. Deocamdată veți vedea ceva care spune că există un mesaj nou și nu textul sau cine l-a trimis. Am decis să fac acest lucru, astfel încât să aveți mesagerie de încredere în timp ce lucrez pentru a actualiza Monal și a restaura vechea experiență.";
+
+/* No comment provided by engineer. */
+"Notifications" = "Notificări";
+
+/* No comment provided by engineer. */
+"Notification Settings" = "Setări notificare";
+
+/* No comment provided by engineer. */
+"Notification Changes" = "Modificări notificare";
+
+/* No comment provided by engineer. */
+"Nothing to see" = "Nimic de văzut";
+
+/* No comment provided by engineer. */
+"No one is here" = "Nimeni nu este aici";
+
+/* No comment provided by engineer. */
+"No groups yet" = "Nu există încă grupuri";
+
+/* No comment provided by engineer. */
+"No GPS location received" = "Nu s-a primit nici o locație GPS";
+
+/* No comment provided by engineer. */
+"No Empty Values" = "Nici o valoare goală";
+
+/* No comment provided by engineer. */
+"No Contact Selected" = "Nici un contact selectat";
+
+/* No comment provided by engineer. */
+"No connected accounts" = "Nici un cont conectat";
+
+/* No comment provided by engineer. */
+"No" = "Nu";
+
+/* No comment provided by engineer. */
+"Nickname" = "Nume";
+
+/* No comment provided by engineer. */
+"New Password" = "Parolă nouă";
+
+/* No comment provided by engineer. */
+"Neither can see keys." = "Nici unul nu poate vedea cheile.";
+
+/* No comment provided by engineer. */
+"Name can't be empty" = "Numele nu poate fi gol";
+
+/* No comment provided by engineer. */
+"My Keys" = "Cheile mele";
+
+/* No comment provided by engineer. */
+"My Encryption Keys" = "Cheile mele de criptare";
+
+/* No comment provided by engineer. */
+"Mute" = "Mut";
+
+/* No comment provided by engineer. */
+"Monal uses OMEMO encryption to protect your conversations" = "Monal utilizează criptarea OMEMO pentru a vă proteja conversațiile";
+
+/* No comment provided by engineer. */
+"Monal Push Server" = "Serverul Push Monal";
+
+/* No comment provided by engineer. */
+"Monal does not have access to your location. Please update the location access in your device's Privacy Settings." = "Monal nu are acces la locația dumneavoastră. Actualizați accesul la locație în Setările de confidențialitate ale dispozitivului.";
+
+/* No comment provided by engineer. */
+"Monal did not received a gps location. Please try again later." = "Monal nu a primit o localizare GPS. Vă rugăm să încercați din nou mai târziu.";
+
+/* No comment provided by engineer. */
+"Monal" = "Monal";
+
+/* No comment provided by engineer. */
+"Messages never archived by default." = "Mesajele nu sunt niciodată arhivate în mod implicit.";
+
+/* No comment provided by engineer. */
+"Message was not encrypted for this device. Please make sure the sender trusts deviceid %d and that they have you as a contact." = "Mesajul nu a fost criptat pentru acest dispozitiv. Asigurați-vă că expeditorul are încredere în dispozitivul cu ID %d și că vă are ca persoană de contact.";
+
+/* No comment provided by engineer. */
+"Message Preview" = "Previzualizare mesaj";
+
+/* No comment provided by engineer. */
+"Message from %@" = "Mesaj de la %@";
+
+/* No comment provided by engineer. */
+"Message can't be empty" = "Mesajul nu poate fi gol";
+
+/* No comment provided by engineer. */
+"Message Archive Pref" = "Preferințe arhivare mesaje";
+
+/* No comment provided by engineer. */
+"Message" = "Mesaj";
+
+/* No comment provided by engineer. */
+"Mark all messages as read" = "Marcarea tuturor mesajelor drept citite";
+
+/* No comment provided by engineer. */
+"Logging in" = "Autentificare";
+
+/* No comment provided by engineer. */
+"Log Date" = "Dată jurnal";
+
+/* No comment provided by engineer. */
+"Log Chats" = "Jurnal de discuții";
+
+/* No comment provided by engineer. */
+"Log" = "Jurnal";
+
+/* No comment provided by engineer. */
+"Location Access Needed" = "Accesul la locație este necesar";
+
+/* No comment provided by engineer. */
+"Leave this converstion?" = "Părăsiți această conversație?";
+
+/* No comment provided by engineer. */
+"Leave Conversation" = "Părăsește conversația";
+
+/* No comment provided by engineer. */
+"Last seen: 1 minute ago" = "Văzut(ă) acum un minut";
+
+/* No comment provided by engineer. */
+"Last seen: 1 hour ago" = "Văzut(ă) acum o oră";
+
+/* No comment provided by engineer. */
+"Last seen: 1 day ago" = "Văzut(ă) acum o zi";
+
+/* No comment provided by engineer. */
+"Last seen: %d minutes ago" = "Văzut(ă) acum %d minute";
+
+/* No comment provided by engineer. */
+"Last seen: %d hours ago" = "Văzut(ă) acum %d ore";
+
+/* No comment provided by engineer. */
+"Last seen: %d days ago" = "Văzut(ă) acum %d zile";
+
+/* No comment provided by engineer. */
+"Just seen" = "Văzut(ă) adineauri";
+
+/* No comment provided by engineer. */
+"Join" = "Alăturați-vă";
+
+/* No comment provided by engineer. */
+"Jabber, Openfire, Prosody etc.   " = "Jabber, Openfire, Prosody etc.   ";
+
+/* No comment provided by engineer. */
+"Jabber ID" = "Adresă XMPP";
+
+/* No comment provided by engineer. */
+"Invalid username" = "Nume de utilizator invalid";
+
+/* No comment provided by engineer. */
+"Invalid Credentails" = "Date de autentificare invalide";
+
+/* No comment provided by engineer. */
+"Indicate when a particular device is active or inactive. Saves battery." = "Indică atunci când un anumit dispozitiv este activ sau inactiv. Economisește bateria.";
+
+/* No comment provided by engineer. */
+"Incoming Call" = "Apel primit";
+
+/* No comment provided by engineer. */
+"Incoming audio call to %@ from %@ " = "Apel audio primit către %1$@ de la %2$@ ";
+
+/* No comment provided by engineer. */
+"Ignore" = "Ignoră";
+
+/* No comment provided by engineer. */
+"If you want to use VOIP you will need to allow access in Settings-> Privacy-> Microphone." = "Dacă doriți să utilizați apelurile de voce (VOIP) veți avea nevoie să permiteți accesul în Setări-> Intimitate-> Microfon.";
+
+/* No comment provided by engineer. */
+"If you like Monal, please let others know and leave a review" = "Dacă vă place Monal, vă rugăm să le spuneți și celorlalți și să lăsați o recenzie";
+
+/* No comment provided by engineer. */
+"If Monal push is off, your device could not talk to push.monal.im. This should also never be off. It requires Apple push service to work first. " = "Dacă serviciul Monal Push este dezactivat, dispozitivul nu poate comunica cu push.monal.im. Acest serviciu nu ar trebui să fie oprit niciodată. Are nevoie însă ca serviciul Apple Push să funcționeze. ";
+
+/* No comment provided by engineer. */
+"If Monal can't show notifications, you will not see alerts when a message arrives. This happens if you tapped 'Decline' when Monal first asked permission.  Fix it by going to iOS Settings -> Monal -> Notifications and select 'Allow Notifications'. " = "Dacă Monal nu poate afișa notificări, nu veți vedea avertizări atunci când sosește un mesaj. Acest lucru se întâmplă dacă ați apăsat pe \"Refuz\" atunci când Monal a cerut pentru prima dată permisiunea.  Remediați mergând la Setări iOS -> Notificări Monal și selectați \"Permiteți notificări\". ";
+
+/* No comment provided by engineer. */
+"Hide Chat" = "Ascunde discuție";
+
+/* No comment provided by engineer. */
+"Hardcoded Hostname" = "Nume de gazdă presetat";
+
+/* No comment provided by engineer. */
+"Group Information" = "Informații despre grup";
+
+/* No comment provided by engineer. */
+"Group Chat Invite" = "Invitație la discuție de grup";
+
+/* No comment provided by engineer. */
+"Group Chat" = "Discuție de grup";
+
+/* No comment provided by engineer. */
+"GPS" = "GPS";
+
+/* No comment provided by engineer. */
+"Got it!" = "Am înțeles!";
+
+/* No comment provided by engineer. */
+"General" = "General";
+
+/* No comment provided by engineer. */
+"from" = "de la";
+
+/* No comment provided by engineer. */
+"Favorite Group Chats (MUC). Tap to join. " = "Discuție de grup favorită (MUC). Atingeți pentru a vă alătura. ";
+
+/* No comment provided by engineer. */
+"Favorite" = "Favorit";
+
+/* No comment provided by engineer. */
+"Escape The Garden" = "Scapă din grădină";
+
+/* No comment provided by engineer. */
+"Error decrypting message" = "Eroare la decriptarea mesajului";
+
+/* No comment provided by engineer. */
+"Error" = "Eroare";
+
+/* No comment provided by engineer. */
+"Enter your new password. Passwords may not be empty. They may also be governed by server or company policies." = "Introduceți parola nouă. Parolele nu pot fi goale. Ele pot fi, de asemenea, reglementate de server sau de politicile companiei.";
+
+/* No comment provided by engineer. */
+"Encryption Not Supported" = "Criptarea nu este suportată";
+
+/* No comment provided by engineer. */
+"Encryption Keys" = "Chei de criptare";
+
+/* No comment provided by engineer. */
+"Encrypted message was sent in an older format Monal can't decrypt. Please ask them to update their client. (GCM error)" = "Mesajul criptat a fost trimis într-un format mai vechi pe care Monal nu îl poate decripta. Vă rugăm să le cereți să își actualizeze clientul. (Eroare GCM)";
+
+/* No comment provided by engineer. */
+"Enabled" = "Activat";
+
+/* No comment provided by engineer. */
+"Email Support" = "Asistență prin e-mail";
+
+/* No comment provided by engineer. */
+"Draft: %@" = "Ciornă: %@";
+
+/* No comment provided by engineer. */
+"Display Settings" = "Setări de afișare";
+
+/* No comment provided by engineer. */
+"Display" = "Afișare";
+
+/* No comment provided by engineer. */
+"Disconnected" = "Deconectat";
+
+/* No comment provided by engineer. */
+"Disable Encryption" = "Dezactivare criptare";
+
+/* No comment provided by engineer. */
+"Direct TLS" = "Direct TLS";
+
+/* No comment provided by engineer. */
+"Delete Account" = "Ștergere cont";
+
+/* No comment provided by engineer. */
+"Delete" = "Şterge";
+
+/* No comment provided by engineer. */
+"Default chat backgrounds are from the Ubuntu project." = "Fundalurile implicite sunt din proiectul Ubuntu.";
+
+/* No comment provided by engineer. */
+"Decline" = "Refuză";
+
+/* No comment provided by engineer. */
+"Could not request registration form. Please check your internet connection and try again." = "Nu s-a putut solicita formularul de înregistrare. Verificați conexiunea la internet și încercați din nou.";
+
+/* No comment provided by engineer. */
+"Could not register your username. Please check your code or change the username and try again." = "Nu s-a putut înregistra contul cu numele dumneavoastră de utilizator. Verificați codul sau schimbați numele de utilizator și încercați din nou.";
+
+/* No comment provided by engineer. */
+"Could not decrypt message" = "Nu s-a putut decripta mesajul";
+
+/* No comment provided by engineer. */
+"Could not change the password" = "Nu s-a putut schimba parola";
+
+/* No comment provided by engineer. */
+"Contacts are usually in the format: username@domain.something" = "Contactele sunt, de obicei, în formatul: nume@domeniu.ceva";
+
+/* No comment provided by engineer. */
+"Contacts" = "Contacte";
+
+/* No comment provided by engineer. */
+"Contact Name" = "Nume contact";
+
+/* No comment provided by engineer. */
+"Connection Details" = "Detalii conexiune";
+
+/* No comment provided by engineer. */
+"Connected since: %@" = "Conectat de la: % @";
+
+/* No comment provided by engineer. */
+"Connected" = "Conectat";
+
+/* No comment provided by engineer. */
+"Close" = "Închide";
+
+/* No comment provided by engineer. */
+"Choices Galore" = "Alegeri din belșug";
+
+/* No comment provided by engineer. */
+"Chat Logs" = "Jurnalele de discuții";
+
+/* No comment provided by engineer. */
+"Chat for free with your friends, colleagues and family!" = "Discutați gratuit cu prietenii, colegii și familia!";
+
+/* No comment provided by engineer. */
+"Chat Backgrounds" = "Fundaluri discuție";
+
+/* No comment provided by engineer. */
+"Change Password" = "Schimbare parolă";
+
+/* No comment provided by engineer. */
+"Cancel" = "Anulează";
+
+/* No comment provided by engineer. */
+"Can Show Notifications" = "Poate afișa notificări";
+
+/* No comment provided by engineer. */
+"Camera" = "Aparat foto";
+
+/* No comment provided by engineer. */
+"call screen did disappear" = "ecranul de apel a dispărut";
+
+/* No comment provided by engineer. */
+"Block Sender" = "Blocare expeditor";
+
+/* No comment provided by engineer. */
+"Block %@ from contacting you?" = "Blocați pe %@ să vă contacteze?";
+
+/* No comment provided by engineer. */
+"Backgrounds" = "Fundaluri";
+
+/* No comment provided by engineer. */
+"Away" = "Plecat(ă)";
+
+/* No comment provided by engineer. */
+"Automatically send when you were online" = "Anunță automat când sunteți conectați";
+
+/* No comment provided by engineer. */
+"Auto Join" = "Alăturare automată";
+
+/* No comment provided by engineer. */
+"Archive only if the contact is in roster" = "Arhivează numai dacă aveți în listă contactul";
+
+/* No comment provided by engineer. */
+"Apple push service should always be on. If it is off, your device can not talk to Apple's server." = "Serviciul Apple Push ar trebui să fie întotdeauna activat. Dacă este dezactivat, dispozitivul nu poate comunica cu serverul Apple.";
+
+/* No comment provided by engineer. */
+"Apple Push Service" = "Serviciul Apple Push";
+
+/* No comment provided by engineer. */
+"App" = "Aplicație";
+
+/* No comment provided by engineer. */
+"Allowing someone to add you as a contact lets them see when you are online. It also allows you to send encrypted messages.  Tap to approve. Swipe to reject." = "Permițând cuiva să vă adauge drept contact, îi permiteți să vadă când sunteți conectați. De asemenea, vă permite să trimiteți mesaje criptate. Atingeți pentru a aproba. Glisați pentru a respinge.";
+
+/* No comment provided by engineer. */
+"Allow %@ to contact you?" = "Permiteți %@ să vă contacteze?";
+
+/* No comment provided by engineer. */
+"All messages are archived by default." = "Toate mesajele sunt arhivate în mod implicit.";
+
+/* No comment provided by engineer. */
+"Advanced Settings" = "Setări avansate";
+
+/* No comment provided by engineer. */
+"Advanced" = "Avansate";
+
+/* No comment provided by engineer. */
+"Add new contacts with the + button above. Your friends will pop up here when they can talk" = "Adăugați noi contacte cu butonul + de mai sus. Prietenii tăi vor apărea aici când vor putea vorbi";
+
+/* No comment provided by engineer. */
+"Add New Account" = "Adaugă un cont nou";
+
+/* No comment provided by engineer. */
+"Add Contact" = "Adaugă contact";
+
+/* No comment provided by engineer. */
+"Add %@ to your contacts?" = "Adăugați pe %@ la persoane de contact?";
+
+/* No comment provided by engineer. */
+"Active chat but no messages found in history for %@." = "Chat activ, dar nu au fost găsite mesaje în istoric pentru %@.";
+
+/* No comment provided by engineer. */
+"Accounts With Logs" = "Conturi cu jurnale";
+
+/* No comment provided by engineer. */
+"Accounts" = "Conturi";
+
+/* No comment provided by engineer. */
+"Account: %@" = "Cont: %@";
+
+/* No comment provided by engineer. */
+"Account To Use" = "Cont de utilizat";
+
+/* No comment provided by engineer. */
+"Account Exists" = "Contul există";
+
+/* No comment provided by engineer. */
+"Account" = "Cont";
+
+/* No comment provided by engineer. */
+"Access message archives on the server." = "Accesați arhivele de mesaje pe server.";
+
+/* No comment provided by engineer. */
+"Accept" = "Acceptă";
+
+/* No comment provided by engineer. */
+"About" = "Despre";
+
+/* No comment provided by engineer. */
+"[This message is OMEMO encrypted]" = "[Acest mesaj este criptat OMEMO]";
+
+/* No comment provided by engineer. */
+"(autojoin)" = "(autoconectare)";
+
+/* No comment provided by engineer. */
+"%ld (This device)" = "%ld (Acest dispozitiv)";
+
+/* No comment provided by engineer. */
+"%@ (Pending Approval)" = "%@ (Aprobare în așteptare)";
+
+"Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old experience back." = "Notificările s-au schimbat în iOS 13 din cauza unor modificări iOS. Deocamdată, veți vedea doar ceva care spune că există un mesaj nou și nu textul sau cine l-a trimis. Am decis să fac acest lucru, astfel încât să aveți mesagerie de încredere în timp ce lucrez pentru a actualiza Monal pentru a reveni vechea experiență.";
+
+/* No comment provided by engineer. */
+"Pin Chat" = "Pin Chat";
+
+/* No comment provided by engineer. */
+"Read" = "Read";
+
+/* No comment provided by engineer. */
+"Received" = "Received";
+
+/* No comment provided by engineer. */
+"Sending..." = "Sending...";
+
+/* No comment provided by engineer. */
+"Sent" = "Sent";
+
+/* No comment provided by engineer. */
+"Skip" = "Skip";
+
+/* No comment provided by engineer. */
+"Unpin Chat" = "Unpin Chat";
+
+/* No comment provided by engineer. */
+"Last seen: %@" = "Last seen: %@";
+
+/* No comment provided by engineer. */
+"now" = "now";

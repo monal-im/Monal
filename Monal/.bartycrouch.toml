@@ -1,0 +1,27 @@
+[update]
+tasks = ["interfaces", "code", "normalize"]
+
+[update.interfaces]
+paths = ["."]
+defaultToBase = true
+ignoreEmptyStrings = true
+unstripped = false
+
+[update.code]
+codePaths = ["Classes", "shareSheet-iOS", "monalxmpp", "Monal-iOS", "NotificaionService"]
+localizablePaths = ["localization", "shareSheet-iOS/localization"]
+defaultToKeys = true
+additive = true
+unstripped = false
+plistArguments = true
+
+[update.normalize]
+paths = ["."]
+sourceLocale = "en"
+harmonizeWithSource = true
+sortByKeys = true
+
+[lint]
+paths = ["."]
+duplicateKeys = true
+emptyValues = true

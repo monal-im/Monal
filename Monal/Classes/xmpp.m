@@ -286,15 +286,10 @@ NSString *const kXMPPPresence = @"presence";
         //with [self disconnect] through an idle check
         if(![object operationCount])
             [self dispatchAsyncOnReceiveQueue:^{
-                if(self.idle)
-                {
-                    //only send out idle notifications if we changed from non-idle to idle state
-                    if(!_lastIdleState)
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
-                    _lastIdleState = YES;
-                }
-                else
-                    _lastIdleState = NO;
+                BOOL lastState = _lastIdleState;
+                //only send out idle notifications if we changed from non-idle to idle state
+                if(self.idle && !lastState)
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
             }];
     }
 }
@@ -324,7 +319,8 @@ NSString *const kXMPPPresence = @"presence";
             ![_sendQueue operationCount]
         )
     )
-        retval=YES;
+        retval = YES;
+    _lastIdleState = retval;
     DDLogVerbose(@"Idle check:\n\t_accountState < kStateReconnecting = %@\n\t_reconnectInProgress = %@\n\t_catchupDone = %@\n\t[self.unAckedStanzas count] = %lu\n\t[_parseQueue operationCount] = %lu\n\t[_receiveQueue operationCount] = %lu\n\t[_sendQueue operationCount] = %lu\n\t--> %@",
         _accountState < kStateReconnecting ? @"YES" : @"NO",
         _reconnectInProgress ? @"YES" : @"NO",

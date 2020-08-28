@@ -39,6 +39,11 @@
 @property (nonatomic, strong, readonly) NSString* photoType;
 @property (nonatomic, strong, readonly) NSString* photoBinValue;
 
+// entity software version
+@property (nonatomic, assign, readonly) BOOL entitySoftwareVersion;
+@property (nonatomic, strong, readonly) NSString* entityName;
+@property (nonatomic, strong, readonly) NSString* entityVersion;
+@property (nonatomic, strong, readonly) NSString* entityOs;
 
 //http upload
 @property (nonatomic, strong, readonly) NSString* getURL;

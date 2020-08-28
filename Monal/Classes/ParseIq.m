@@ -455,7 +455,29 @@
         return;
     }
     
-
+    if(([elementName isEqualToString:@"name"]) && [namespaceURI isEqualToString:@"jabber:iq:version"]
+       )
+    {
+        _entityName = [_messageBuffer copy];
+        _entitySoftwareVersion = YES;
+        return;
+    }
+    
+    if(([elementName isEqualToString:@"version"]) && [namespaceURI isEqualToString:@"jabber:iq:version"]
+       )
+    {
+        _entityVersion = [_messageBuffer copy];
+        _entitySoftwareVersion = YES;
+        return;
+    }
+    
+    if(([elementName isEqualToString:@"os"]) && [namespaceURI isEqualToString:@"jabber:iq:version"]
+       )
+    {
+        _entityOs = [_messageBuffer copy];
+        _entitySoftwareVersion = YES;
+        return;
+    }
 }
 
 

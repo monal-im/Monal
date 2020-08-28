@@ -618,6 +618,25 @@ static NSDateFormatter* dbFormatter;
     return resources;
 }
 
+-(NSArray*) softwareVersionInfoForAccount:(NSString*)account andContact:(NSString*)contact
+{
+    if(!account) return nil;
+    NSString* query1 = [NSString stringWithFormat:@"select platform_App_Name, platform_App_Version, platform_OS from buddy_resources where buddy_id in (select buddy_id from buddylist where account_id=? and buddy_name=?)"];
+    NSArray* params = @[account, contact];
+    NSArray* resources = [self.db executeReader:query1 andArguments:params];
+    return resources;
+}
+
+-(void) setSoftwareVersionInfoForAppName:(NSString*)appName
+                      appVersion:(NSString*)appVersion
+                      platformOS:(NSString*)platformOS
+                     withAccount:(NSString*)account
+                      andContact:(NSString*)contact
+{
+    NSString* query = [NSString stringWithFormat:@"update buddy_resources set platform_App_Name=?, platform_App_Version=?, platform_OS=? where buddy_id in (select buddy_id from buddylist where account_id=? and buddy_name=?)"];
+    NSArray* params = @[appName, appVersion, platformOS, account, contact];
+    [self.db executeNonQuery:query andArguments:params];
+}
 
 -(void) setOnlineBuddy:(ParsePresence*) presenceObj forAccount:(NSString *)accountNo
 {
@@ -2199,6 +2218,11 @@ static NSDateFormatter* dbFormatter;
     
     if([dbversion doubleValue] < 4.79)
     {
+	    //Performing upgrade on buddy_resources.
+	    [self.db executeNonQuery:@"ALTER TABLE buddy_resources ADD platform_App_Name text;" andArguments:@[]];
+        [self.db executeNonQuery:@"ALTER TABLE buddy_resources ADD platform_App_Version text;" andArguments:@[]];
+        [self.db executeNonQuery:@"ALTER TABLE buddy_resources ADD platform_OS text;" andArguments:@[]];
+		
         //drop and recreate in 4.77 was faulty (wrong drop syntax), do it right this time
         [self.db executeNonQuery:@"DROP TABLE IF EXISTS ver_info;" andArguments:@[]];
         [self.db executeNonQuery:@"CREATE TABLE ver_info(ver VARCHAR(32), cap VARCHAR(255), PRIMARY KEY (ver,cap));" andArguments:@[]];

@@ -2384,6 +2384,18 @@ NSString *const kXMPPPresence = @"presence";
     [self send:iqVCard];
 }
 
+-(void)getEntitySoftWareVersion:(NSString *) user
+{
+    NSArray *userDataArr = [user componentsSeparatedByString:@"/"];
+    NSString *userWithoutResources = userDataArr[0];
+    
+    if ([[DataLayer sharedInstance] checkCap:@"jabber:iq:version" forUser:userWithoutResources andAccountNo:self.accountNo]) {
+        XMPPIQ* iqEntitySoftWareVersion= [[XMPPIQ alloc] initWithType:kiqGetType];
+        [iqEntitySoftWareVersion getEntitySoftWareVersionTo:user];
+        [self send:iqEntitySoftWareVersion];
+    }
+}
+
 #pragma mark query info
 
 -(void) getServiceDetails

@@ -787,6 +787,25 @@ static const int sendMessageTimeoutSeconds = 10;
     [account getVCard:contact.contactJid];
 }
 
+-(void) getEntitySoftWareVersion:(MLContact *) contact
+{
+    xmpp* account =[self getConnectedAccountForID:contact.accountId];
+    NSArray *contactResourceArr = [[DataLayer sharedInstance] resourcesForContact:contact.contactJid];
+    
+    NSString *xmppId = @"";
+    if ((contactResourceArr == nil) && ([contactResourceArr count] == 0)) {
+        xmppId = [NSString stringWithFormat:@"%@",contact.contactJid];
+    } else {
+        if ([contactResourceArr count] == 0) {
+            xmppId = [NSString stringWithFormat:@"%@",contact.contactJid];
+        } else {
+            xmppId = [NSString stringWithFormat:@"%@/%@",contact.contactJid, [[contactResourceArr objectAtIndex:0] objectForKey:@"resource"] ];
+        }        
+    }
+    
+    [account getEntitySoftWareVersion:xmppId];
+}
+
 -(void) blocked:(BOOL) isBlockd Jid:(MLContact *) contact
 {
     xmpp* account =[self getConnectedAccountForID:contact.accountId];

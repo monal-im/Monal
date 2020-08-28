@@ -244,6 +244,11 @@ Decline a call request
 -(void) getVCard:(NSString* _Nonnull) user;
 
 /**
+ query a user's software version
+ */
+-(void) getEntitySoftWareVersion:(NSString* _Nonnull) user;
+
+/**
  XEP-0191 blocking
  */
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) jid;

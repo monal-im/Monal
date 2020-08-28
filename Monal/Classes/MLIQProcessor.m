@@ -197,6 +197,11 @@
     {
         [self vCardResult:iqNode];
     }
+        
+    if(iqNode.entitySoftwareVersion)
+    {
+        [self iqVersionResult:iqNode];
+    }
 }
 
 #pragma mark - result
@@ -516,6 +521,36 @@
             }
         }];
         
+    }
+}
+
+-(void) iqVersionResult:(ParseIq *) iqNode
+{
+    NSString *iqAppName = iqNode.entityName == nil ? @"":iqNode.entityName;
+    NSString *iqAppVersion = iqNode.entityVersion == nil ? @"":iqNode.entityVersion;
+    NSString *iqPlatformOS = iqNode.entityOs == nil ? @"":iqNode.entityOs;
+    
+    NSArray *versionDBInfoArr = [[DataLayer sharedInstance] softwareVersionInfoForAccount:self.accountNo andContact:iqNode.user];
+    
+    if ((versionDBInfoArr != nil) && ([versionDBInfoArr count] > 0)) {
+        NSDictionary *versionInfoDBDic = versionDBInfoArr[0];
+        
+        if (!([[versionInfoDBDic objectForKey:@"platform_App_Name"] isEqualToString:iqAppName] &&
+            [[versionInfoDBDic objectForKey:@"platform_App_Version"] isEqualToString:iqAppVersion] &&
+            [[versionInfoDBDic objectForKey:@"platform_OS"] isEqualToString:iqPlatformOS]))
+        {
+            [[DataLayer sharedInstance] setSoftwareVersionInfoForAppName:iqAppName
+                                                             appVersion:iqAppVersion
+                                                             platformOS:iqPlatformOS
+                                                            withAccount:self.accountNo
+                                                             andContact:iqNode.user];
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalXmppUserSoftWareVersionRefresh
+                                                                object:self
+                                                              userInfo:@{@"platform_App_Name":iqAppName,
+                                                                      @"platform_App_Version":iqAppVersion,
+                                                                               @"platform_OS":iqPlatformOS}];
+        }
     }
 }
 

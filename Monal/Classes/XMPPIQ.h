@@ -84,6 +84,10 @@ Queries the last page of messages (most recent) for a recipient
 gets vcard info 
  */
 -(void) getVcardTo:(NSString*) to;
+/**
+gets Entity SoftWare Version
+ */
+-(void) getEntitySoftWareVersionTo:(NSString*) to;
 
 /**
 removes a contact from the roster

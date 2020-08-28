@@ -201,6 +201,10 @@ Attempts to upload a file to the  HTTP upload service
 -(void) getVCard:(MLContact*) contact;
 
 /**
+ fetch entity software version
+ */
+-(void) getEntitySoftWareVersion:(MLContact *) contact;
+/**
  Iterates through set and compares with connected accounts. Removes them. useful for active chat. 
  */
 -(void) cleanArrayOfConnectedAccounts:(NSMutableArray*) dirtySet;

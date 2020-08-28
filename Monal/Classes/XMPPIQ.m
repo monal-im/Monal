@@ -390,6 +390,15 @@ NSString *const kiqErrorType = @"error";
     [self.children addObject:vcardNode];
 }
 
+-(void) getEntitySoftWareVersionTo:(NSString*) to
+{
+    [self setiqTo:to];
+    
+    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:version"];
+    
+    [self.children addObject:queryNode];
+}
+
 #pragma mark MUC
 -(void) setInstantRoom
 {

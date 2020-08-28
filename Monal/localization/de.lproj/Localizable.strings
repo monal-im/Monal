@@ -557,7 +557,7 @@
 "Invalid username" = "Ungültiger Benutzername";
 
 /* No comment provided by engineer. */
-"Invalid Credentails" = "Ungültige Zugangsdaten";
+"Invalid Credentials" = "Ungültige Zugangsdaten";
 
 /* No comment provided by engineer. */
 "Indicate when a particular device is active or inactive. Saves battery." = "Zeige an wenn ein bestimmtes Gerät aktiv oder inaktiv ist. Spart Akku.";

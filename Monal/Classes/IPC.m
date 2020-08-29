@@ -102,27 +102,27 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
         if(![fileManager fileExistsAtPath:_dbFile])
         {
             //this can not be used inside a transaction --> turn on WAL mode before executing any other db operations
-            [self.db executeNonQuery:@"pragma journal_mode=WAL;" andArguments:nil];
+            [self.db executeNonQuery:@"pragma journal_mode=WAL;"];
             [self.db beginWriteTransaction];
-            [self.db executeNonQuery:@"CREATE TABLE ipc(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), source VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);" andArguments:nil];
-            [self.db executeNonQuery:@"CREATE TABLE versions(name VARCHAR(255) NOT NULL PRIMARY KEY, version INTEGER NOT NULL);" andArguments:nil];
-            [self.db executeNonQuery:@"INSERT INTO versions (name, version) VALUES('db', '1');" andArguments:nil];
+            [self.db executeNonQuery:@"CREATE TABLE ipc(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), source VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);"];
+            [self.db executeNonQuery:@"CREATE TABLE versions(name VARCHAR(255) NOT NULL PRIMARY KEY, version INTEGER NOT NULL);"];
+            [self.db executeNonQuery:@"INSERT INTO versions (name, version) VALUES('db', '1');"];
         }
         else
             [self.db beginWriteTransaction];
         
         //upgrade database version if needed
-        NSNumber* version = [self.db executeScalar:@"SELECT version FROM versions WHERE name='db';" andArguments:nil];
+        NSNumber* version = (NSNumber*)[self.db executeScalar:@"SELECT version FROM versions WHERE name='db';"];
         DDLogInfo(@"IPC db version: %@", version);
         if([version integerValue] < 2)
         {
-            [self.db executeNonQuery:@"ALTER TABLE ipc ADD COLUMN response_to INTEGER NOT NULL DEFAULT 0;" andArguments:@[]];
+            [self.db executeNonQuery:@"ALTER TABLE ipc ADD COLUMN response_to INTEGER NOT NULL DEFAULT 0;"];
         }
         //any upgrade done --> update version table and delete all old ipc messages
         if([version integerValue] < VERSION)
         {
             //always truncate ipc table on version upgrade
-            [self.db executeNonQuery:@"DELETE FROM ipc;" andArguments:@[]];
+            [self.db executeNonQuery:@"DELETE FROM ipc;"];
             [self.db executeNonQuery:@"UPDATE versions SET version=? WHERE name='db';" andArguments:@[[NSNumber numberWithInt:VERSION]]];
             DDLogInfo(@"IPC db upgraded to version: %d", VERSION);
         }

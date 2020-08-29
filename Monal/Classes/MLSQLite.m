@@ -218,6 +218,7 @@
 
 #pragma mark - V1 low level
 
+
 -(void) beginWriteTransaction
 {
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
@@ -226,7 +227,7 @@
         return;			//begin only outermost transaction
     BOOL retval;
     do {
-        retval=[self executeNonQuery:@"BEGIN IMMEDIATE TRANSACTION;" andArguments:nil withException:NO];
+        retval=[self executeNonQuery:@"BEGIN IMMEDIATE TRANSACTION;" andArguments:@[] withException:NO];
         if(!retval)
         {
             [NSThread sleepForTimeInterval:0.001f];		//wait one millisecond and retry again
@@ -240,7 +241,7 @@
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
     threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:[threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] - 1];
     if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
-        [self executeNonQuery:@"COMMIT;" andArguments:@[]];		//commit only outermost transaction
+        [self executeNonQuery:@"COMMIT;"];		//commit only outermost transaction
 }
 
 -(NSObject*) executeScalar:(NSString*) query

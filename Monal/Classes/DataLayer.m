@@ -137,7 +137,7 @@ static NSDateFormatter* dbFormatter;
 -(NSArray*) accountList
 {
     NSString* query = [NSString stringWithFormat:@"select * from account order by account_id asc"];
-    NSArray* result = [self.db executeReader:query andArguments:@[]];
+    NSArray* result = [self.db executeReader:query];
     return result;
 }
 
@@ -283,16 +283,16 @@ static NSDateFormatter* dbFormatter;
     [self.db beginWriteTransaction];
 
     NSString* query1 = [NSString stringWithFormat:@"delete from buddylist  where account_id=%@;", accountNo];
-    [self.db executeNonQuery:query1 andArguments:@[]];
+    [self.db executeNonQuery:query1];
 
     NSString* query3= [NSString stringWithFormat:@"delete from message_history  where account_id=%@;", accountNo];
-    [self.db executeNonQuery:query3 andArguments:@[]];
+    [self.db executeNonQuery:query3];
 
     NSString* query4= [NSString stringWithFormat:@"delete from activechats  where account_id=%@;", accountNo];
-    [self.db executeNonQuery:query4 andArguments:@[]];
+    [self.db executeNonQuery:query4];
 
     NSString* query = [NSString stringWithFormat:@"delete from account  where account_id=%@;", accountNo];
-    BOOL lastResult = [self.db executeNonQuery:query andArguments:@[]];
+    BOOL lastResult = [self.db executeNonQuery:query];
 
     [self.db endWriteTransaction];
 
@@ -658,7 +658,7 @@ static NSDateFormatter* dbFormatter;
 
     //see how many left
     NSString* query3 = [NSString stringWithFormat:@"select count(buddy_id) from buddy_resources where buddy_id=%@;", buddyid ];
-    NSString* resourceCount = (NSString*)[self.db executeScalar:query3 andArguments:@[]];
+    NSString* resourceCount = (NSString*)[self.db executeScalar:query3];
 
     if([resourceCount integerValue]<1)
     {
@@ -1017,7 +1017,7 @@ static NSDateFormatter* dbFormatter;
 -(NSArray *) messageForHistoryID:(NSInteger) historyID
 {
     NSString* query = [NSString stringWithFormat:@"select message, messageid from message_history where message_history_id=%ld", (long)historyID];
-    NSArray* messageArray= [self.db executeReader:query andArguments:@[]];
+    NSArray* messageArray= [self.db executeReader:query];
     return messageArray;
 }
 
@@ -1196,13 +1196,13 @@ static NSDateFormatter* dbFormatter;
 -(void) clearMessages:(NSString*) accountNo
 {
     NSString* query = [NSString stringWithFormat:@"delete from message_history where account_id=%@", accountNo];
-    [self.db executeNonQuery:query andArguments:@[]];
+    [self.db executeNonQuery:query];
 }
 
 -(void) deleteMessageHistory:(NSNumber*) messageNo
 {
     NSString* query = [NSString stringWithFormat:@"delete from message_history where message_history_id=%@", messageNo];
-    [self.db executeNonQuery:query andArguments:@[]];
+    [self.db executeNonQuery:query];
 }
 
 -(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo
@@ -1328,7 +1328,7 @@ static NSDateFormatter* dbFormatter;
 
     NSString* query1 = [NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
     //DDLogVerbose(query);
-    NSArray* user = [self.db executeReader:query1 andArguments:@[]];
+    NSArray* user = [self.db executeReader:query1];
 
     if([user count]>0)
     {
@@ -1487,7 +1487,7 @@ static NSDateFormatter* dbFormatter;
 {
     NSString* query = [NSString stringWithFormat:@"update message_history set unread=0 where unread=1"];
 
-    [self.db executeNonQuery:query andArguments:@[]];
+    [self.db executeNonQuery:query];
 }
 
 -(NSDate*) lastMessageDateForContact:(NSString*) contact andAccount:(NSString*) accountNo
@@ -1607,7 +1607,7 @@ static NSDateFormatter* dbFormatter;
 
     NSString* query = [NSString stringWithFormat:@"delete from activechats " ];
     //    DDLogVerbose(query);
-    [self.db executeNonQuery:query andArguments:@[]];
+    [self.db executeNonQuery:query];
 }
 
 -(BOOL) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo
@@ -1718,26 +1718,26 @@ static NSDateFormatter* dbFormatter;
     
     //this has to be done only when upgrading from a db < 4.82 because only older databases use DELETE journal_mode
     //this is a special case because it can not be done while in a transaction!!!
-    NSNumber* dbversionWithoutTransaction = (NSNumber*)[self.db executeScalar:@"select dbversion from dbversion;" andArguments:@[]];
+    NSNumber* dbversionWithoutTransaction = (NSNumber*)[self.db executeScalar:@"select dbversion from dbversion;"];
     if([dbversionWithoutTransaction doubleValue] < 4.83)
     {
         //set wal mode (this setting is permanent): https://www.sqlite.org/pragma.html#pragma_journal_mode
-        [self.db executeNonQuery:@"pragma journal_mode=WAL;" andArguments:@[]];
+        [self.db executeNonQuery:@"pragma journal_mode=WAL;"];
         DDLogWarn(@"transaction mode set to WAL");
     }
     
     [self.db beginWriteTransaction];
 
-    NSNumber* dbversion = (NSNumber*)[self.db executeScalar:@"select dbversion from dbversion;" andArguments:@[]];
+    NSNumber* dbversion = (NSNumber*)[self.db executeScalar:@"select dbversion from dbversion;"];
     DDLogInfo(@"Got db version %@", dbversion);
 
     if([dbversion doubleValue] < 2.0)
     {
         DDLogVerbose(@"Database version <2.0 detected. Performing upgrade on accounts.");
 
-        [self.db executeNonQuery:@"drop table muc_favorites" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE TABLE IF NOT EXISTS \"muc_favorites\" (\"mucid\" integer NOT NULL primary key autoincrement,\"room\" varchar(255,0),\"nick\" varchar(255,0),\"autojoin\" bool, account_id int);" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='2.0';" andArguments:@[]];
+        [self.db executeNonQuery:@"drop table muc_favorites"];
+        [self.db executeNonQuery:@"CREATE TABLE IF NOT EXISTS \"muc_favorites\" (\"mucid\" integer NOT NULL primary key autoincrement,\"room\" varchar(255,0),\"nick\" varchar(255,0),\"autojoin\" bool, account_id int);"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='2.0';"];
         DDLogVerbose(@"Upgrade to 2.0 success");
     }
 
@@ -1746,8 +1746,8 @@ static NSDateFormatter* dbFormatter;
         DDLogVerbose(@"Database version <2.1 detected. Performing upgrade on accounts.");
 
 
-        [self.db executeNonQuery:@"alter table message_history add column received bool;" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='2.1';" andArguments:@[]];
+        [self.db executeNonQuery:@"alter table message_history add column received bool;"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='2.1';"];
 
         DDLogVerbose(@"Upgrade to 2.1 success");
     }
@@ -1756,8 +1756,8 @@ static NSDateFormatter* dbFormatter;
     {
         DDLogVerbose(@"Database version <2.2 detected. Performing upgrade.");
 
-        [self.db executeNonQuery:@"alter table buddylist add column synchPoint datetime;" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='2.2';" andArguments:@[]];
+        [self.db executeNonQuery:@"alter table buddylist add column synchPoint datetime;"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='2.2';"];
 
         DDLogVerbose(@"Upgrade to 2.2 success");
     }
@@ -1768,8 +1768,8 @@ static NSDateFormatter* dbFormatter;
 
         NSString* resourceQuery = [NSString stringWithFormat:@"update account set resource='%@';", [HelperTools encodeRandomResource]];
 
-        [self.db executeNonQuery:resourceQuery andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='2.3';" andArguments:@[]];
+        [self.db executeNonQuery:resourceQuery];
+        [self.db executeNonQuery:@"update dbversion set dbversion='2.3';"];
 
         DDLogVerbose(@"Upgrade to 2.3 success");
     }
@@ -1779,24 +1779,24 @@ static NSDateFormatter* dbFormatter;
     {
         DDLogVerbose(@"Database version <3.1 detected. Performing upgrade.");
 
-        [self.db executeNonQuery:@"CREATE TABLE signalIdentity (deviceid int NOT NULL PRIMARY KEY, account_id int NOT NULL unique,identityPublicKey BLOB,identityPrivateKey BLOB)" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE TABLE signalSignedPreKey (account_id int NOT NULL,signedPreKeyId int not null,signedPreKey BLOB);" andArguments:@[]];
+        [self.db executeNonQuery:@"CREATE TABLE signalIdentity (deviceid int NOT NULL PRIMARY KEY, account_id int NOT NULL unique,identityPublicKey BLOB,identityPrivateKey BLOB)"];
+        [self.db executeNonQuery:@"CREATE TABLE signalSignedPreKey (account_id int NOT NULL,signedPreKeyId int not null,signedPreKey BLOB);"];
 
-        [self.db executeNonQuery:@"CREATE TABLE signalPreKey (account_id int NOT NULL,prekeyid int not null,preKey BLOB);" andArguments:@[]];
+        [self.db executeNonQuery:@"CREATE TABLE signalPreKey (account_id int NOT NULL,prekeyid int not null,preKey BLOB);"];
 
-        [self.db executeNonQuery:@"CREATE TABLE signalContactIdentity ( account_id int NOT NULL,contactName text,contactDeviceId int not null,identity BLOB,trusted boolean);" andArguments:@[]];
+        [self.db executeNonQuery:@"CREATE TABLE signalContactIdentity ( account_id int NOT NULL,contactName text,contactDeviceId int not null,identity BLOB,trusted boolean);"];
 
-        [self.db executeNonQuery:@"CREATE TABLE signalContactKey (account_id int NOT NULL,contactName text,contactDeviceId int not null, groupId text,senderKey BLOB);" andArguments:@[]];
+        [self.db executeNonQuery:@"CREATE TABLE signalContactKey (account_id int NOT NULL,contactName text,contactDeviceId int not null, groupId text,senderKey BLOB);"];
 
-        [self.db executeNonQuery:@"  CREATE TABLE signalContactSession (account_id int NOT NULL, contactName text, contactDeviceId int not null, recordData BLOB)" andArguments:@[]];
-        [self.db executeNonQuery:@"alter table message_history add column encrypted bool;" andArguments:@[]];
+        [self.db executeNonQuery:@"  CREATE TABLE signalContactSession (account_id int NOT NULL, contactName text, contactDeviceId int not null, recordData BLOB)"];
+        [self.db executeNonQuery:@"alter table message_history add column encrypted bool;"];
 
-        [self.db executeNonQuery:@"alter table message_history add column previewText text;" andArguments:@[]];
-        [self.db executeNonQuery:@"alter table message_history add column previewImage text;" andArguments:@[]];
+        [self.db executeNonQuery:@"alter table message_history add column previewText text;"];
+        [self.db executeNonQuery:@"alter table message_history add column previewImage text;"];
 
-        [self.db executeNonQuery:@"alter table buddylist add column backgroundImage text;" andArguments:@[]];
+        [self.db executeNonQuery:@"alter table buddylist add column backgroundImage text;"];
 
-        [self.db executeNonQuery:@"update dbversion set dbversion='3.1';" andArguments:@[]];
+        [self.db executeNonQuery:@"update dbversion set dbversion='3.1';"];
 
         DDLogVerbose(@"Upgrade to 3.1 success");
     }
@@ -1806,10 +1806,10 @@ static NSDateFormatter* dbFormatter;
     {
         DDLogVerbose(@"Database version <3.2 detected. Performing upgrade.");
 
-        [self.db executeNonQuery:@"update dbversion set dbversion='3.2';" andArguments:@[]];
+        [self.db executeNonQuery:@"update dbversion set dbversion='3.2';"];
 
-        [self.db executeNonQuery:@"CREATE TABLE muteList (jid varchar(50));" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE TABLE blockList (jid varchar(50));" andArguments:@[]];
+        [self.db executeNonQuery:@"CREATE TABLE muteList (jid varchar(50));"];
+        [self.db executeNonQuery:@"CREATE TABLE blockList (jid varchar(50));"];
 
         DDLogVerbose(@"Upgrade to 3.2 success");
     }
@@ -1817,9 +1817,9 @@ static NSDateFormatter* dbFormatter;
     if([dbversion doubleValue] < 3.3)
     {
         DDLogVerbose(@"Database version <3.3 detected. Performing upgrade.");
-        [self.db executeNonQuery:@"update dbversion set dbversion='3.3';" andArguments:@[]];
+        [self.db executeNonQuery:@"update dbversion set dbversion='3.3';"];
 
-        [self.db executeNonQuery:@"alter table buddylist add column encrypt bool;" andArguments:@[]];
+        [self.db executeNonQuery:@"alter table buddylist add column encrypt bool;"];
 
         DDLogVerbose(@"Upgrade to 3.3 success");
     }
@@ -1827,12 +1827,12 @@ static NSDateFormatter* dbFormatter;
     if([dbversion doubleValue] < 3.4)
     {
         DDLogVerbose(@"Database version <3.4 detected. Performing upgrade.");
-        [self.db executeNonQuery:@"update dbversion set dbversion='3.4';" andArguments:@[]];
+        [self.db executeNonQuery:@"update dbversion set dbversion='3.4';"];
 
-        [self.db executeNonQuery:@" alter table activechats add COLUMN lastMessageTime datetime " andArguments:@[]];
+        [self.db executeNonQuery:@" alter table activechats add COLUMN lastMessageTime datetime "];
 
         //iterate current active and set their times
-        NSArray* active = [self.db executeReader:@"select distinct buddy_name, account_id from activeChats" andArguments:@[]];
+        NSArray* active = [self.db executeReader:@"select distinct buddy_name, account_id from activeChats"];
         [active enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSDictionary* row = (NSDictionary*)obj;
             //get max
@@ -1850,11 +1850,11 @@ static NSDateFormatter* dbFormatter;
     if([dbversion doubleValue] < 3.5)
     {
         DDLogVerbose(@"Database version <3.5 detected. Performing upgrade.");
-        [self.db executeNonQuery:@"update dbversion set dbversion='3.5';" andArguments:@[]];
+        [self.db executeNonQuery:@"update dbversion set dbversion='3.5';"];
 
-        [self.db executeNonQuery:@"CREATE UNIQUE INDEX uniqueContact on buddylist (buddy_name, account_id);" andArguments:@[]];
-        [self.db executeNonQuery:@"delete from buddy_resources" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE UNIQUE INDEX uniqueResource on buddy_resources (buddy_id, resource);" andArguments:@[]];
+        [self.db executeNonQuery:@"CREATE UNIQUE INDEX uniqueContact on buddylist (buddy_name, account_id);"];
+        [self.db executeNonQuery:@"delete from buddy_resources"];
+        [self.db executeNonQuery:@"CREATE UNIQUE INDEX uniqueResource on buddy_resources (buddy_id, resource);"];
 
         DDLogVerbose(@"Upgrade to 3.5 success ");
     }
@@ -1863,9 +1863,9 @@ static NSDateFormatter* dbFormatter;
     if([dbversion doubleValue] < 3.6)
     {
         DDLogVerbose(@"Database version <3.6 detected. Performing upgrade.");
-        [self.db executeNonQuery:@"update dbversion set dbversion='3.6';" andArguments:@[]];
+        [self.db executeNonQuery:@"update dbversion set dbversion='3.6';"];
 
-        [self.db executeNonQuery:@"CREATE TABLE imageCache (url varchar(255), path varchar(255) );" andArguments:@[]];
+        [self.db executeNonQuery:@"CREATE TABLE imageCache (url varchar(255), path varchar(255) );"];
 
         DDLogVerbose(@"Upgrade to 3.6 success");
     }
@@ -1874,9 +1874,9 @@ static NSDateFormatter* dbFormatter;
     {
 
         DDLogVerbose(@"Database version <3.7 detected. Performing upgrade.");
-        [self.db executeNonQuery:@"update dbversion set dbversion='3.7';" andArguments:@[]];
+        [self.db executeNonQuery:@"update dbversion set dbversion='3.7';"];
 
-        [self.db executeNonQuery:@"alter table message_history add column stanzaid text;" andArguments:@[]];
+        [self.db executeNonQuery:@"alter table message_history add column stanzaid text;"];
 
         DDLogVerbose(@"Upgrade to 3.7 success");
     }
@@ -1885,9 +1885,9 @@ static NSDateFormatter* dbFormatter;
     {
         DDLogVerbose(@"Database version <3.8 detected. Performing upgrade on accounts.");
 
-        [self.db executeNonQuery:@"alter table account add column airdrop bool;" andArguments:@[]];
+        [self.db executeNonQuery:@"alter table account add column airdrop bool;"];
 
-        [self.db executeNonQuery:@"update dbversion set dbversion='3.8';" andArguments:@[]];
+        [self.db executeNonQuery:@"update dbversion set dbversion='3.8';"];
         DDLogVerbose(@"Upgrade to 3.8 success");
     }
 
@@ -1895,9 +1895,9 @@ static NSDateFormatter* dbFormatter;
     {
         DDLogVerbose(@"Database version <3.9 detected. Performing upgrade on accounts.");
 
-        [self.db executeNonQuery:@"alter table account add column rosterVersion varchar(50);" andArguments:@[]];
+        [self.db executeNonQuery:@"alter table account add column rosterVersion varchar(50);"];
 
-        [self.db executeNonQuery:@"update dbversion set dbversion='3.9';" andArguments:@[]];
+        [self.db executeNonQuery:@"update dbversion set dbversion='3.9';"];
         DDLogVerbose(@"Upgrade to 3.9 success");
     }
 
@@ -1905,10 +1905,10 @@ static NSDateFormatter* dbFormatter;
      {
          DDLogVerbose(@"Database version <4.0 detected. Performing upgrade on accounts.");
 
-         [self.db executeNonQuery:@"alter table message_history add column errorType varchar(50);" andArguments:@[]];
-         [self.db executeNonQuery:@"alter table message_history add column errorReason varchar(50);" andArguments:@[]];
+         [self.db executeNonQuery:@"alter table message_history add column errorType varchar(50);"];
+         [self.db executeNonQuery:@"alter table message_history add column errorReason varchar(50);"];
 
-         [self.db executeNonQuery:@"update dbversion set dbversion='4.0';" andArguments:@[]];
+         [self.db executeNonQuery:@"update dbversion set dbversion='4.0';"];
          DDLogVerbose(@"Upgrade to 4.0 success");
      }
 
@@ -1916,9 +1916,9 @@ static NSDateFormatter* dbFormatter;
      {
          DDLogVerbose(@"Database version <4.1 detected. Performing upgrade on accounts.");
 
-         [self.db executeNonQuery:@"CREATE TABLE subscriptionRequests(requestid integer not null primary key AUTOINCREMENT,account_id integer not null,buddy_name varchar(50) collate nocase, UNIQUE(account_id,buddy_name))" andArguments:@[]];
+         [self.db executeNonQuery:@"CREATE TABLE subscriptionRequests(requestid integer not null primary key AUTOINCREMENT,account_id integer not null,buddy_name varchar(50) collate nocase, UNIQUE(account_id,buddy_name))"];
 
-         [self.db executeNonQuery:@"update dbversion set dbversion='4.1';" andArguments:@[]];
+         [self.db executeNonQuery:@"update dbversion set dbversion='4.1';"];
          DDLogVerbose(@"Upgrade to 4.1 success");
      }
 
@@ -1926,8 +1926,8 @@ static NSDateFormatter* dbFormatter;
      {
          DDLogVerbose(@"Database version <4.2 detected. Performing upgrade on accounts.");
 
-         NSArray* contacts = [self.db executeReader:@"select distinct account_id, buddy_name, lastMessageTime from activechats;" andArguments:@[]];
-          [self.db executeNonQuery:@"delete from activechats;" andArguments:@[]];
+         NSArray* contacts = [self.db executeReader:@"select distinct account_id, buddy_name, lastMessageTime from activechats;"];
+          [self.db executeNonQuery:@"delete from activechats;"];
          [contacts enumerateObjectsUsingBlock:^(NSDictionary * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
              [self.db executeNonQuery:@"insert into activechats (account_id, buddy_name, lastMessageTime) values (?,?,?);"
                       andArguments:@[
@@ -1937,7 +1937,7 @@ static NSDateFormatter* dbFormatter;
                       ]];
          }];
 
-          NSArray *dupeMessageids= [self.db executeReader:@"select * from (select messageid, count(messageid) as c from message_history   group by messageid) where c>1" andArguments:@[]];
+          NSArray *dupeMessageids= [self.db executeReader:@"select * from (select messageid, count(messageid) as c from message_history   group by messageid) where c>1"];
 
 
          [dupeMessageids enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -1951,45 +1951,45 @@ static NSDateFormatter* dbFormatter;
              }];
          }];
 
-         [self.db executeNonQuery:@"CREATE UNIQUE INDEX ux_account_messageid ON message_history(account_id, messageid)" andArguments:@[]];
+         [self.db executeNonQuery:@"CREATE UNIQUE INDEX ux_account_messageid ON message_history(account_id, messageid)"];
 
-         [self.db executeNonQuery:@"alter table activechats add column lastMesssage blob;" andArguments:@[]];
-         [self.db executeNonQuery:@"CREATE UNIQUE INDEX ux_account_buddy ON activechats(account_id, buddy_name)" andArguments:@[]];
+         [self.db executeNonQuery:@"alter table activechats add column lastMesssage blob;"];
+         [self.db executeNonQuery:@"CREATE UNIQUE INDEX ux_account_buddy ON activechats(account_id, buddy_name)"];
 
-         [self.db executeNonQuery:@"update dbversion set dbversion='4.2';" andArguments:@[]];
+         [self.db executeNonQuery:@"update dbversion set dbversion='4.2';"];
          DDLogVerbose(@"Upgrade to 4.2 success");
      }
 
     if([dbversion doubleValue] < 4.3)
     {
         DDLogVerbose(@"Database version <4.3 detected. Performing upgrade on accounts.");
-        [self.db executeNonQuery:@"alter table buddylist add column subscription varchar(50)" andArguments:@[]];
-        [self.db executeNonQuery:@"alter table buddylist add column ask varchar(50)" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.3';" andArguments:@[]];
+        [self.db executeNonQuery:@"alter table buddylist add column subscription varchar(50)"];
+        [self.db executeNonQuery:@"alter table buddylist add column ask varchar(50)"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.3';"];
         DDLogVerbose(@"Upgrade to 4.3 success");
     }
 
     if([dbversion doubleValue] < 4.4)
     {
         DDLogVerbose(@"Database version <4.4 detected. Performing upgrade on accounts.");
-        [self.db executeNonQuery:@"update account set rosterVersion='0';" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.4';" andArguments:@[]];
+        [self.db executeNonQuery:@"update account set rosterVersion='0';"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.4';"];
         DDLogVerbose(@"Upgrade to 4.4 success");
     }
 
     if([dbversion doubleValue] < 4.5)
     {
         DDLogVerbose(@"Database version <4.5 detected. Performing upgrade on accounts.");
-        [self.db executeNonQuery:@"alter table account add column state blob;" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.5';" andArguments:@[]];
+        [self.db executeNonQuery:@"alter table account add column state blob;"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.5';"];
         DDLogVerbose(@"Upgrade to 4.5 success");
     }
 
     if([dbversion doubleValue] < 4.6)
     {
         DDLogVerbose(@"Database version <4.6 detected. Performing upgrade on accounts.");
-        [self.db executeNonQuery:@"alter table buddylist add column messageDraft text;" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.6';" andArguments:@[]];
+        [self.db executeNonQuery:@"alter table buddylist add column messageDraft text;"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.6';"];
         DDLogVerbose(@"Upgrade to 4.6 success");
     }
 
@@ -1997,14 +1997,14 @@ static NSDateFormatter* dbFormatter;
     {
         DDLogVerbose(@"Database version <4.7 detected. Performing upgrade on accounts.");
         // Delete column password,account_name from account, set default value for rosterVersion to 0, increased varchar size
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:@[]];
-        [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'protocol_id' integer NOT NULL, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'oldstyleSSL' bool, 'oauth' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);" andArguments:@[]];
-        [self.db executeNonQuery:@"INSERT INTO account (account_id, protocol_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state) SELECT account_id, protocol_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state from _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"UPDATE account SET rosterVersion='0' WHERE rosterVersion is NULL;" andArguments:@[]];
-        [self.db executeNonQuery:@"DROP TABLE _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.7';" andArguments:@[]];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+        [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
+        [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'protocol_id' integer NOT NULL, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'oldstyleSSL' bool, 'oauth' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
+        [self.db executeNonQuery:@"INSERT INTO account (account_id, protocol_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state) SELECT account_id, protocol_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state from _accountTMP;"];
+        [self.db executeNonQuery:@"UPDATE account SET rosterVersion='0' WHERE rosterVersion is NULL;"];
+        [self.db executeNonQuery:@"DROP TABLE _accountTMP;"];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.7';"];
         DDLogVerbose(@"Upgrade to 4.7 success");
     }
 
@@ -2012,8 +2012,8 @@ static NSDateFormatter* dbFormatter;
     {
         DDLogVerbose(@"Database version <4.71 detected. Performing upgrade on accounts.");
         // Only reset server to '' when server == domain
-        [self.db executeNonQuery:@"UPDATE account SET server='' where server=domain;" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.71';" andArguments:@[]];
+        [self.db executeNonQuery:@"UPDATE account SET server='' where server=domain;"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.71';"];
         DDLogVerbose(@"Upgrade to 4.71 success");
     }
     
@@ -2021,14 +2021,14 @@ static NSDateFormatter* dbFormatter;
     {
         DDLogVerbose(@"Database version <4.72 detected. Performing upgrade on accounts.");
         // Delete column protocol_id from account and drop protocol table
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:@[]];
-        [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'oldstyleSSL' bool, 'oauth' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);" andArguments:@[]];
-        [self.db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state from _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"DROP TABLE _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:@[]];
-        [self.db executeNonQuery:@"DROP TABLE protocol;" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.72';" andArguments:@[]];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+        [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
+        [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'oldstyleSSL' bool, 'oauth' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
+        [self.db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state from _accountTMP;"];
+        [self.db executeNonQuery:@"DROP TABLE _accountTMP;"];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
+        [self.db executeNonQuery:@"DROP TABLE protocol;"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.72';"];
         DDLogVerbose(@"Upgrade to 4.72 success");
     }
     
@@ -2036,13 +2036,13 @@ static NSDateFormatter* dbFormatter;
     {
         DDLogVerbose(@"Database version <4.73 detected. Performing upgrade on accounts.");
         // Delete column oauth from account
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:@[]];
-        [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'oldstyleSSL' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);" andArguments:@[]];
-        [self.db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, airdrop, rosterVersion, state from _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"DROP TABLE _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.73';" andArguments:@[]];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+        [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
+        [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'oldstyleSSL' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
+        [self.db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, airdrop, rosterVersion, state from _accountTMP;"];
+        [self.db executeNonQuery:@"DROP TABLE _accountTMP;"];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.73';"];
         DDLogVerbose(@"Upgrade to 4.73 success");
     }
     
@@ -2050,13 +2050,13 @@ static NSDateFormatter* dbFormatter;
     {
         DDLogVerbose(@"Database version <4.74 detected. Performing upgrade on accounts.");
         // Rename column oldstyleSSL to directTLS
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:@[]];
-        [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);" andArguments:@[]];
-        [self.db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, directTLS, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, airdrop, rosterVersion, state from _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"DROP TABLE _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.74';" andArguments:@[]];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+        [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
+        [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
+        [self.db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, directTLS, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, airdrop, rosterVersion, state from _accountTMP;"];
+        [self.db executeNonQuery:@"DROP TABLE _accountTMP;"];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.74';"];
         DDLogVerbose(@"Upgrade to 4.74 success");
     }
     
@@ -2064,13 +2064,13 @@ static NSDateFormatter* dbFormatter;
     {
         DDLogVerbose(@"Database version <4.75 detected. Performing upgrade on accounts.");
         // Delete column secure from account
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:@[]];
-        [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);" andArguments:@[]];
-        [self.db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, airdrop, rosterVersion, state from _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"DROP TABLE _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.75';" andArguments:@[]];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+        [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
+        [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
+        [self.db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, airdrop, rosterVersion, state from _accountTMP;"];
+        [self.db executeNonQuery:@"DROP TABLE _accountTMP;"];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.75';"];
         DDLogVerbose(@"Upgrade to 4.75 success");
     }
     
@@ -2078,8 +2078,8 @@ static NSDateFormatter* dbFormatter;
     {
         DDLogVerbose(@"Database version <4.76 detected. Performing upgrade on accounts.");
         // Add column for the last interaction of a contact
-        [self.db executeNonQuery:@"alter table buddylist add column lastInteraction INTEGER NOT NULL DEFAULT 0;" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.76';" andArguments:@[]];
+        [self.db executeNonQuery:@"alter table buddylist add column lastInteraction INTEGER NOT NULL DEFAULT 0;"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.76';"];
         DDLogVerbose(@"Upgrade to 4.76 success");
     }
     
@@ -2087,14 +2087,14 @@ static NSDateFormatter* dbFormatter;
     {
         DDLogVerbose(@"Database version <4.77 detected. Performing upgrade on accounts.");
         // drop legacy caps tables
-        [self.db executeNonQuery:@"DROP TABLE IF EXISTS legacy_caps;" andArguments:@[]];
-        [self.db executeNonQuery:@"DROP TABLE IF EXISTS buddy_resources_legacy_caps;" andArguments:@[]];
+        [self.db executeNonQuery:@"DROP TABLE IF EXISTS legacy_caps;"];
+        [self.db executeNonQuery:@"DROP TABLE IF EXISTS buddy_resources_legacy_caps;"];
         //recreate capabilities cache to make a fresh start
-        [self.db executeNonQuery:@"DROP TABLE IF EXISTS ver_info;" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE TABLE ver_info(ver VARCHAR(32), cap VARCHAR(255), PRIMARY KEY (ver,cap));" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE TABLE ver_timestamp (ver VARCHAR(32), timestamp INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ver));" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE INDEX timeindex ON ver_timestamp(timestamp);"  andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.77';" andArguments:@[]];
+        [self.db executeNonQuery:@"DROP TABLE IF EXISTS ver_info;"];
+        [self.db executeNonQuery:@"CREATE TABLE ver_info(ver VARCHAR(32), cap VARCHAR(255), PRIMARY KEY (ver,cap));"];
+        [self.db executeNonQuery:@"CREATE TABLE ver_timestamp (ver VARCHAR(32), timestamp INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (ver));"];
+        [self.db executeNonQuery:@"CREATE INDEX timeindex ON ver_timestamp(timestamp);" ];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.77';"];
         DDLogVerbose(@"Upgrade to 4.77 success");
     }
     
@@ -2102,20 +2102,20 @@ static NSDateFormatter* dbFormatter;
     {
         DDLogVerbose(@"Database version <4.78 detected. Performing upgrade on accounts.");
         // drop airdrop column
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:@[]];
-        [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);" andArguments:@[]];
-        [self.db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, rosterVersion, state) SELECT account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, rosterVersion, state from _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"DROP TABLE _accountTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.78';" andArguments:@[]];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+        [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
+        [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
+        [self.db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, rosterVersion, state) SELECT account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, rosterVersion, state from _accountTMP;"];
+        [self.db executeNonQuery:@"DROP TABLE _accountTMP;"];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.78';"];
         DDLogVerbose(@"Upgrade to 4.78 success");
     }
     
     if([dbversion doubleValue] < 4.80)
     {
-        [self.db executeNonQuery:@"CREATE TABLE ipc(id integer NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.80';" andArguments:@[]];
+        [self.db executeNonQuery:@"CREATE TABLE ipc(id integer NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.80';"];
         DDLogVerbose(@"Upgrade to 4.80 success");
     }
     
@@ -2130,44 +2130,44 @@ static NSDateFormatter* dbFormatter;
             // delete chats with accountJid == buddy_name
             [self.db executeNonQuery:@"delete from activechats where account_id=? and buddy_name=?" andArguments:@[accountNo, accountJid]];
         }
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.81';" andArguments:@[]];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.81';"];
         DDLogVerbose(@"Upgrade to 4.81 success");
     }
     
     if([dbversion doubleValue] < 4.82)
     {
         //use the more appropriate name "sent" for the "delivered" column of message_history
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:@[]];
-        [self.db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE TABLE 'message_history' (message_history_id integer not null primary key AUTOINCREMENT, account_id integer, message_from text collate nocase, message_to text collate nocase, timestamp datetime, message blob, actual_from text collate nocase, messageid text, messageType text, sent bool, received bool, unread bool, encrypted bool, previewText text, previewImage text, stanzaid text, errorType text, errorReason text);" andArguments:@[]];
-        [self.db executeNonQuery:@"INSERT INTO message_history (message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, sent, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason) SELECT message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, delivered, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason from _message_historyTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"DROP TABLE _message_historyTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.82';" andArguments:@[]];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+        [self.db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;"];
+        [self.db executeNonQuery:@"CREATE TABLE 'message_history' (message_history_id integer not null primary key AUTOINCREMENT, account_id integer, message_from text collate nocase, message_to text collate nocase, timestamp datetime, message blob, actual_from text collate nocase, messageid text, messageType text, sent bool, received bool, unread bool, encrypted bool, previewText text, previewImage text, stanzaid text, errorType text, errorReason text);"];
+        [self.db executeNonQuery:@"INSERT INTO message_history (message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, sent, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason) SELECT message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, delivered, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason from _message_historyTMP;"];
+        [self.db executeNonQuery:@"DROP TABLE _message_historyTMP;"];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.82';"];
         DDLogVerbose(@"Upgrade to 4.82 success");
     }
     
     if([dbversion doubleValue] < 4.83)
     {
         DDLogVerbose(@"Database version <4.83 detected. Performing upgrade on accounts.");
-        [self.db executeNonQuery:@"alter table activechats add column pinned bool DEFAULT FALSE;" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.83';" andArguments:@[]];
+        [self.db executeNonQuery:@"alter table activechats add column pinned bool DEFAULT FALSE;"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.83';"];
         DDLogVerbose(@"Upgrade to 4.83 success");
     }
     
     if([dbversion doubleValue] < 4.84)
     {
         DDLogVerbose(@"Database version <4.84 detected. Performing upgrade.");
-        [self.db executeNonQuery:@"DROP TABLE IF EXISTS ipc;" andArguments:@[]];
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;" andArguments:@[]];
+        [self.db executeNonQuery:@"DROP TABLE IF EXISTS ipc;"];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
         //remove synchPoint from db
-        [self.db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE TABLE buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(50) collate nocase, full_name varchar(50), nick_name varchar(50), group_name varchar(50), iconhash varchar(200), filename varchar(100), state varchar(20), status varchar(200), online bool, dirty bool, new bool, Muc bool, muc_subject varchar(255), muc_nick varchar(255), backgroundImage text, encrypt bool, subscription varchar(50), ask varchar(50), messageDraft text, lastInteraction INTEGER NOT NULL DEFAULT 0);" andArguments:@[]];
-        [self.db executeNonQuery:@"INSERT INTO buddylist (buddy_id, account_id, buddy_name, full_name, nick_name, group_name, iconhash, filename, state, status, online, dirty, new, Muc, muc_subject, muc_nick, backgroundImage, encrypt, subscription, ask, messageDraft, lastInteraction) SELECT buddy_id, account_id, buddy_name, full_name, nick_name, group_name, iconhash, filename, state, status, online, dirty, new, Muc, muc_subject, muc_nick, backgroundImage, encrypt, subscription, ask, messageDraft, lastInteraction FROM _buddylistTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"DROP TABLE _buddylistTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact on buddylist(buddy_name, account_id);" andArguments:@[]];
+        [self.db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;"];
+        [self.db executeNonQuery:@"CREATE TABLE buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(50) collate nocase, full_name varchar(50), nick_name varchar(50), group_name varchar(50), iconhash varchar(200), filename varchar(100), state varchar(20), status varchar(200), online bool, dirty bool, new bool, Muc bool, muc_subject varchar(255), muc_nick varchar(255), backgroundImage text, encrypt bool, subscription varchar(50), ask varchar(50), messageDraft text, lastInteraction INTEGER NOT NULL DEFAULT 0);"];
+        [self.db executeNonQuery:@"INSERT INTO buddylist (buddy_id, account_id, buddy_name, full_name, nick_name, group_name, iconhash, filename, state, status, online, dirty, new, Muc, muc_subject, muc_nick, backgroundImage, encrypt, subscription, ask, messageDraft, lastInteraction) SELECT buddy_id, account_id, buddy_name, full_name, nick_name, group_name, iconhash, filename, state, status, online, dirty, new, Muc, muc_subject, muc_nick, backgroundImage, encrypt, subscription, ask, messageDraft, lastInteraction FROM _buddylistTMP;"];
+        [self.db executeNonQuery:@"DROP TABLE _buddylistTMP;"];
+        [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact on buddylist(buddy_name, account_id);"];
         //make stanzaid, messageid and errorType caseinsensitive and create indixes for stanzaid and messageid
-        [self.db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;" andArguments:@[]];
+        [self.db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;"];
         [self.db executeNonQuery:@"CREATE TABLE message_history (message_history_id integer not null primary key AUTOINCREMENT, account_id integer, message_from text collate nocase, message_to text collate nocase, timestamp datetime, message blob, actual_from text collate nocase, messageid text collate nocase, messageType text, sent bool, received bool, unread bool, encrypted bool, previewText text, previewImage text, stanzaid text collate nocase, errorType text collate nocase, errorReason text);"];
         [self.db executeNonQuery:@"INSERT INTO message_history (message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, sent, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason) SELECT message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, sent, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason FROM _message_historyTMP;"];
         [self.db executeNonQuery:@"DROP TABLE _message_historyTMP;"];

@@ -12,7 +12,7 @@
 #import "HelperTools.h"
 #import "MLXMLNode.h"
 
-
+#import "ParseIq.h"
 #import "jingleCall.h"
 #import "MLDNSLookup.h"
 #import "MLSignalStore.h"
@@ -25,6 +25,7 @@
 #import "MLContact.h"
 
 #import "MLXMPPConnection.h"
+
 
 typedef NS_ENUM (NSInteger, xmppState) {
     kStateLoggedOut = -1,
@@ -138,6 +139,8 @@ extern NSString* const kAccountHibernate;
  Adds the stanza to the output Queue
  */
 -(void) send:(MLXMLNode* _Nonnull) stanza;
+-(void) sendIq:(XMPPIQ* _Nonnull) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler;
+-(void) sendIq:(XMPPIQ* _Nonnull) iq withDelegate:(id) delegate andMethod:(SEL) method andAdditionalArguments:(NSArray*) args;
 
 /**
  removes a contact from the roster
@@ -237,6 +240,8 @@ Decline a call request
  enable APNS push with provided tokens
  */
 -(void) enablePush;
+
+-(void) mamFinished;
 
 /**
  query a user's vcard

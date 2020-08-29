@@ -603,10 +603,9 @@ NSString *const kXMPPPresence = @"presence";
         _cancelPingTimer = nil;
         
         [_iqHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-            [NSThread sleepForTimeInterval:2.0f];
             NSString* id = (NSString*) key;
             NSDictionary* data = (NSDictionary*) obj;
-            if(data[@"invalidateOnDisconnect"])
+            if(data[@"invalidateOnDisconnect"]==@YES && data[@"errorHandler"])
             {
                 DDLogWarn(@"invalidating iq handler for iq id '%@'", id);
                 if(data[@"errorHandler"])
@@ -646,6 +645,7 @@ NSString *const kXMPPPresence = @"presence";
                 //reset smacks state to sane values (this can be done even if smacks is not supported)
                 [self initSM3];
                 self.unAckedStanzas = stanzas;
+                _iqHandlers = [[NSMutableDictionary alloc] init];
 
                 //persist these changes
                 [self persistState];
@@ -1087,18 +1087,21 @@ NSString *const kXMPPPresence = @"presence";
             processor.sendIq=^(MLXMLNode* _Nullable iq, monal_iq_handler_t resultHandler, monal_iq_handler_t errorHandler) {
                 if(iq)
                 {
-                    DDLogInfo(@"sending iq stanza");
+                    DDLogInfo(@"sending iq stanza with handler");
                     [self sendIq:iq withResponseHandler:resultHandler andErrorHandler:errorHandler];
+                }
+            };
+            processor.sendIqWithDelegate=^(MLXMLNode* _Nullable iq, id delegate, SEL method, NSArray* args) {
+                if(iq)
+                {
+                    DDLogInfo(@"sending iq stanza with delegate");
+                    [self sendIq:iq withDelegate:delegate andMethod:method andAdditionalArguments:args];
                 }
             };
 
             //this will be called after mam catchup is complete
             processor.mamFinished = ^() {
-                if(!_catchupDone)
-                {
-                    _catchupDone = YES;
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
-                }
+                [self mamFinished];
             };
             
             //this will be called after bind
@@ -1140,10 +1143,29 @@ NSString *const kXMPPPresence = @"presence";
             //process registered iq handlers
             if(_iqHandlers[iqNode.idval])
             {
+                //call block-handlers
                 if([@"result" isEqualToString:iqNode.type] && _iqHandlers[iqNode.idval][@"resultHandler"])
                     ((monal_iq_handler_t) _iqHandlers[iqNode.idval][@"resultHandler"])(iqNode);
                 else if([@"error" isEqualToString:iqNode.type] && _iqHandlers[iqNode.idval][@"errorHandler"])
                     ((monal_iq_handler_t) _iqHandlers[iqNode.idval][@"errorHandler"])(iqNode);
+                
+                //call class delegate handlers
+                if(_iqHandlers[iqNode.idval][@"delegate"] && _iqHandlers[iqNode.idval][@"method"])
+                {
+                    id cls = NSClassFromString(_iqHandlers[iqNode.idval][@"delegate"]);
+                    SEL sel = NSSelectorFromString(_iqHandlers[iqNode.idval][@"method"]);
+                    DDLogVerbose(@"Calling IQHandler [%@ %@]...", _iqHandlers[iqNode.idval][@"delegate"], _iqHandlers[iqNode.idval][@"method"]);
+                    NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[cls methodSignatureForSelector:sel]];
+                    [inv setTarget:cls];
+                    [inv setSelector:sel];
+                    //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
+                    NSInteger idx = 2;
+                    [inv setArgument:&self atIndex:idx++];
+                    [inv setArgument:&iqNode atIndex:idx++];
+                    for(id arg in _iqHandlers[iqNode.idval][@"arguments"])
+                        [inv setArgument:&arg atIndex:idx++];
+                    [inv invoke];
+                }
                 
                 //remove handler after calling it
                 [_iqHandlers removeObjectForKey:iqNode.idval];
@@ -1247,9 +1269,8 @@ NSString *const kXMPPPresence = @"presence";
                         notify([[DataLayer sharedInstance] addActiveBuddies:messageNode.to forAccount:self->_accountNo]);
                     }
                 }
-                else {
+                else
                     DDLogError(@"error adding message");
-                }
             };
 
 #ifndef DISABLE_OMEMO
@@ -1733,12 +1754,23 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) sendIq:(XMPPIQ*) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler
 {
-    //TODO: make invalidateOnDisconnect configurable once we are somehow able to retain the handlers across app restarts
-    [self dispatchAsyncOnReceiveQueue:^{
-        if(resultHandler || errorHandler)
+    if(resultHandler || errorHandler)
+        @synchronized(_iqHandlers) {
             _iqHandlers[[iq getId]] = @{@"id": [iq getId], @"resultHandler":resultHandler, @"errorHandler":errorHandler, @"invalidateOnDisconnect":@YES};
-        [self send:iq];
-    }];
+        }
+    [self send:iq];
+}
+
+-(void) sendIq:(XMPPIQ*) iq withDelegate:(id) delegate andMethod:(SEL) method andAdditionalArguments:(NSArray*) args
+{
+    if(delegate && method)
+    {
+        DDLogVerbose(@"Adding delegate [%@ %@] to iqHandlers...", NSStringFromClass(delegate), NSStringFromSelector(method));
+        @synchronized(_iqHandlers) {
+            _iqHandlers[[iq getId]] = @{@"id": [iq getId], @"delegate":NSStringFromClass(delegate), @"method":NSStringFromSelector(method), @"arguments":(args ? args : @[]), @"invalidateOnDisconnect":@NO};
+        }
+    }
+    [self send:iq];     //this will also call persistState --> we don't need to do this here explicitly (to make sure our iq delegate is stored to db)
 }
 
 -(void) send:(MLXMLNode*) stanza
@@ -1940,6 +1972,21 @@ NSString *const kXMPPPresence = @"presence";
         [values setValue:[NSDate date] forKey:@"streamTime"];
     }
 
+    NSMutableDictionary* persistentIqHandlers = [[NSMutableDictionary alloc] init];
+    @synchronized(_iqHandlers) {
+        [_iqHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+            NSString* id = (NSString*)key;
+            NSDictionary* data = (NSDictionary*)obj;
+            //only serialize persistent handlers with delegate and method
+            if(data[@"invalidateOnDisconnect"]==@NO && data[@"delegate"] && data[@"method"])
+            {
+                DDLogVerbose(@"saving serialized iq handler for iq '%@'", id);
+                [persistentIqHandlers setObject:data forKey:id];
+            }
+        }];
+    }
+    [values setObject:persistentIqHandlers forKey:@"iqHandlers"];
+
     [values setValue:[self.connectionProperties.serverFeatures copy] forKey:@"serverFeatures"];
     if(self.connectionProperties.uploadServer) {
         [values setObject:self.connectionProperties.uploadServer forKey:@"uploadServer"];
@@ -1969,13 +2016,14 @@ NSString *const kXMPPPresence = @"presence";
 
     //debug output
     @synchronized(_smacksSyncPoint) {
-        DDLogVerbose(@"persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@",
+        DDLogVerbose(@"persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@",
             self.lastHandledInboundStanza,
             self.lastHandledOutboundStanza,
             self.lastOutboundStanza,
             self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
             self.streamID,
-            _lastInteractionDate
+            _lastInteractionDate,
+            persistentIqHandlers
         );
     }
 }
@@ -1995,7 +2043,7 @@ NSString *const kXMPPPresence = @"presence";
             self.streamID = [dic objectForKey:@"streamID"];
             
             //debug output
-            DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
+            DDLogVerbose(@"readSmacksStateOnly:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
                 self.lastOutboundStanza,
@@ -2005,7 +2053,7 @@ NSString *const kXMPPPresence = @"presence";
             );
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
-                    DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kQueueID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
+                    DDLogDebug(@"readSmacksStateOnly unAckedStanza %@: %@", [dic objectForKey:kQueueID], ((MLXMLNode*)[dic objectForKey:kStanza]).XMLString);
             
             //always reset handler and smacksRequestInFlight when loading smacks state
             _smacksAckHandler = [[NSMutableArray alloc] init];
@@ -2028,7 +2076,17 @@ NSString *const kXMPPPresence = @"presence";
             self.unAckedStanzas = [stanzas mutableCopy];
             self.streamID = [dic objectForKey:@"streamID"];
         }
-
+        
+        NSDictionary* persistentIqHandlers = [dic objectForKey:@"iqHandlers"];
+        @synchronized(_iqHandlers) {
+            [persistentIqHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+                NSString* id = (NSString*)key;
+                NSDictionary* data = (NSDictionary*)obj;
+                DDLogWarn(@"Reading serialized iq handler for iq id '%@': [%@ %@]", id, data[@"delegate"], data[@"method"]);
+                [_iqHandlers setObject:data forKey:id];
+            }];
+        }
+        
         self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
         self.connectionProperties.discoveredServices = [dic objectForKey:@"discoveredServices"];
 
@@ -2090,13 +2148,14 @@ NSString *const kXMPPPresence = @"presence";
 
         //debug output
         @synchronized(_smacksSyncPoint) {
-            DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
+            DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@",
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
                 self.lastOutboundStanza,
                 self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
                 self.streamID,
-                _lastInteractionDate
+                _lastInteractionDate,
+                persistentIqHandlers
             );
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
@@ -2200,6 +2259,7 @@ NSString *const kXMPPPresence = @"presence";
     [self postConnectNotification];
     _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
     _exponentialBackoff = 0;
+    _iqHandlers = [[NSMutableDictionary alloc] init];
 
     XMPPIQ* sessionQuery= [[XMPPIQ alloc] initWithType:kiqSetType];
     MLXMLNode* session = [[MLXMLNode alloc] initWithElement:@"session"];
@@ -3148,6 +3208,15 @@ NSString *const kXMPPPresence = @"presence";
     else
     {
         DDLogInfo(@" NOT enabling push: %@ < %@", self.pushNode, self.pushSecret);
+    }
+}
+
+-(void) mamFinished
+{
+    if(!_catchupDone)
+    {
+        _catchupDone = YES;
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
     }
 }
 

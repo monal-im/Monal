@@ -1447,14 +1447,30 @@ static NSDateFormatter* dbFormatter;
     } else return nil;
 }
 
+//message history
+-(NSNumber*) lastMessageHistoryIdForContact:(NSString*) buddy forAccount:(NSString*) accountNo
+{
+    NSNumber* msgHistoryID = (NSNumber*)[self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND (message_from=? OR message_to=?) ORDER BY message_history_id DESC LIMIT 1" andArguments:@[ accountNo, buddy, buddy]];
+    return msgHistoryID;
+}
 
 //message history
 -(NSMutableArray*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-    if(!accountNo ||! buddy) {
+    if(!accountNo || !buddy) {
         return nil;
     };
-    NSString* query = [NSString stringWithFormat:@"select af, message_from, message_to, account_id, message, thetime, message_history_id, sent, messageid, messageType, received, encrypted, previewImage, previewText, unread, errorType, errorReason from (select ifnull(actual_from, message_from) as af, message_from, message_to, account_id, message, received, encrypted, timestamp  as thetime, message_history_id, sent,messageid, messageType, previewImage, previewText, unread, errorType, errorReason from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 250) order by thetime asc"];
+
+    return [self messagesForContact:buddy forAccount:accountNo beforeMsgHistoryID:[self lastMessageHistoryIdForContact:buddy forAccount:accountNo]];
+}
+
+//message history
+-(NSMutableArray*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo beforeMsgHistoryID:(NSNumber*) msgHistoryID
+{
+    if(!accountNo || !buddy || !msgHistoryID) {
+        return nil;
+    };
+    NSString* query = [NSString stringWithFormat:@"select af, message_from, message_to, account_id, message, thetime, message_history_id, sent, messageid, messageType, received, encrypted, previewImage, previewText, unread, errorType, errorReason from (select ifnull(actual_from, message_from) as af, message_from, message_to, account_id, message, received, encrypted, timestamp  as thetime, message_history_id, sent,messageid, messageType, previewImage, previewText, unread, errorType, errorReason from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 50) order by thetime asc"];
     NSArray* params = @[accountNo, buddy, buddy];
     NSArray* result = [self.db executeReader:query andArguments:params];
     NSMutableArray* toReturn = [[NSMutableArray alloc] initWithCapacity:result.count];
@@ -2216,20 +2232,6 @@ static NSDateFormatter* dbFormatter;
         DDLogVerbose(@"Upgrade to 4.78 success");
     }
     
-    if([dbversion doubleValue] < 4.79)
-    {
-	    //Performing upgrade on buddy_resources.
-	    [self.db executeNonQuery:@"ALTER TABLE buddy_resources ADD platform_App_Name text;" andArguments:@[]];
-        [self.db executeNonQuery:@"ALTER TABLE buddy_resources ADD platform_App_Version text;" andArguments:@[]];
-        [self.db executeNonQuery:@"ALTER TABLE buddy_resources ADD platform_OS text;" andArguments:@[]];
-		
-        //drop and recreate in 4.77 was faulty (wrong drop syntax), do it right this time
-        [self.db executeNonQuery:@"DROP TABLE IF EXISTS ver_info;" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE TABLE ver_info(ver VARCHAR(32), cap VARCHAR(255), PRIMARY KEY (ver,cap));" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.79';" andArguments:@[]];
-        DDLogVerbose(@"Upgrade to 4.79 success");
-    }
-    
     if([dbversion doubleValue] < 4.80)
     {
         [self.db executeNonQuery:@"CREATE TABLE ipc(id integer NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);" andArguments:@[]];
@@ -2287,16 +2289,30 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact on buddylist(buddy_name, account_id);" andArguments:@[]];
         //make stanzaid, messageid and errorType caseinsensitive and create indixes for stanzaid and messageid
         [self.db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE TABLE message_history (message_history_id integer not null primary key AUTOINCREMENT, account_id integer, message_from text collate nocase, message_to text collate nocase, timestamp datetime, message blob, actual_from text collate nocase, messageid text collate nocase, messageType text, sent bool, received bool, unread bool, encrypted bool, previewText text, previewImage text, stanzaid text collate nocase, errorType text collate nocase, errorReason text);" andArguments:@[]];
-        [self.db executeNonQuery:@"INSERT INTO message_history (message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, sent, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason) SELECT message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, sent, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason FROM _message_historyTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"DROP TABLE _message_historyTMP;" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE INDEX stanzaidIndex on message_history(stanzaid collate nocase);" andArguments:@[]];
-        [self.db executeNonQuery:@"CREATE INDEX messageidIndex on message_history(messageid collate nocase);" andArguments:@[]];
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:@[]];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.84';" andArguments:@[]];
+        [self.db executeNonQuery:@"CREATE TABLE message_history (message_history_id integer not null primary key AUTOINCREMENT, account_id integer, message_from text collate nocase, message_to text collate nocase, timestamp datetime, message blob, actual_from text collate nocase, messageid text collate nocase, messageType text, sent bool, received bool, unread bool, encrypted bool, previewText text, previewImage text, stanzaid text collate nocase, errorType text collate nocase, errorReason text);"];
+        [self.db executeNonQuery:@"INSERT INTO message_history (message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, sent, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason) SELECT message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, sent, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason FROM _message_historyTMP;"];
+        [self.db executeNonQuery:@"DROP TABLE _message_historyTMP;"];
+        [self.db executeNonQuery:@"CREATE INDEX stanzaidIndex on message_history(stanzaid collate nocase);"];
+        [self.db executeNonQuery:@"CREATE INDEX messageidIndex on message_history(messageid collate nocase);"];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.84';"];
         DDLogVerbose(@"Upgrade to 4.84 success");
     }
     
+    if([dbversion doubleValue] < 4.85)
+    {
+        //Performing upgrade on buddy_resources.
+        [self.db executeNonQuery:@"ALTER TABLE buddy_resources ADD platform_App_Name text;"];
+        [self.db executeNonQuery:@"ALTER TABLE buddy_resources ADD platform_App_Version text;"];
+        [self.db executeNonQuery:@"ALTER TABLE buddy_resources ADD platform_OS text;"];
+
+        //drop and recreate in 4.77 was faulty (wrong drop syntax), do it right this time
+        [self.db executeNonQuery:@"DROP TABLE IF EXISTS ver_info;"];
+        [self.db executeNonQuery:@"CREATE TABLE ver_info(ver VARCHAR(32), cap VARCHAR(255), PRIMARY KEY (ver,cap));"];
+        [self.db executeNonQuery:@"update dbversion set dbversion='4.85';"];
+        DDLogVerbose(@"Upgrade to 4.85 success");
+    }
+
     [self.db endWriteTransaction];
     
     DDLogInfo(@"Database version check done");

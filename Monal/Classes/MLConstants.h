@@ -70,7 +70,11 @@ typedef void (^monal_void_block_t)(void);
 
 // max count of char's in a single message (both: sending and receiving)
 #define kMonalChatMaxAllowedTextLen 2048
+#if TARGET_OS_MACCATALYST
+#define kMonalChatFetchedMsgCnt 75
+#else
 #define kMonalChatFetchedMsgCnt 50
+#endif
 
 //contact cells
 #define kusernameKey @"username"

@@ -1760,7 +1760,11 @@ bool viewIsScrolling = NO;
     CGFloat curOffset = scrollView.contentOffset.y;
 
     // reached top
-    if(curOffset < -180 && !viewIsScrolling) {
+    #if TARGET_OS_MACCATALYST
+    if(curOffset < 20 && !viewIsScrolling) {
+    #else
+    if(curOffset < -140 && !viewIsScrolling) {
+    #endif
         // load old messages
         if([self->_messageTable numberOfRowsInSection:messagesSection] == 0) {
             // FIXME: MAM

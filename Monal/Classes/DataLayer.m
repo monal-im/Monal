@@ -103,7 +103,6 @@ static NSDateFormatter* dbFormatter;
     [dbFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
     
     //open db and update db version
-    MLSQLite* db = [MLSQLite sharedInstanceForFile:dbPath];
     [self version];
 }
 
@@ -1088,7 +1087,7 @@ static NSDateFormatter* dbFormatter;
             DDLogVerbose(@"%@", query);
             BOOL success = [self.db executeNonQuery:query andArguments:params];
             if(success) {
-                BOOL innerSuccess = [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
+                [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
                 [self.db endWriteTransaction];
                 if(completion) {
                     completion(success, messageType);
@@ -1124,7 +1123,7 @@ static NSDateFormatter* dbFormatter;
     if(!contact)
         return NO;
     
-    NSNumber* historyId = [self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND message_from=? AND messageid=?;" andArguments:@[accountNo, contact, messageId]];
+    NSNumber* historyId = (NSNumber*)[self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND message_from=? AND messageid=?;" andArguments:@[accountNo, contact, messageId]];
     if(historyId)
     {
         DDLogVerbose(@"Updating stanzaid of message_history_id %@ to %@ for (account=%@, messageid=%@, contact=%@)...", historyId, stanzaId, accountNo, messageId, contact);

@@ -351,11 +351,11 @@ NSString *const kXMPPPresence = @"presence";
 {
     DDLogInfo(@"configuring/starting tls handshake");
 	NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
-	[settings setObject:self.connectionProperties.identity.domain forKey:kCFStreamSSLPeerName];
+	[settings setObject:self.connectionProperties.identity.domain forKey:(NSString*)kCFStreamSSLPeerName];
 	if(self.connectionProperties.server.selfSignedCert)
 	{
 		DDLogInfo(@"configured self signed SSL");
-		[settings setObject:@NO forKey:kCFStreamSSLValidatesCertificateChain];
+		[settings setObject:@NO forKey:(NSString*)kCFStreamSSLValidatesCertificateChain];
 	}
 
 	//this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
@@ -1071,7 +1071,7 @@ NSString *const kXMPPPresence = @"presence";
     {
         if([parsedStanza.stanzaType isEqualToString:@"iq"] && [parsedStanza isKindOfClass:[ParseIq class]])
         {
-            ParseIq* iqNode=parsedStanza;
+            ParseIq* iqNode = (ParseIq*)parsedStanza;
 
 #ifndef DISABLE_OMEMO
             MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo
@@ -1179,7 +1179,7 @@ NSString *const kXMPPPresence = @"presence";
         }
         else if([parsedStanza.stanzaType  isEqualToString:@"message"] && [parsedStanza isKindOfClass:[ParseMessage class]])
         {
-            ParseMessage* messageNode = parsedStanza;
+            ParseMessage* messageNode = (ParseMessage*)parsedStanza;
 
 #ifndef DISABLE_OMEMO
             MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
@@ -1265,7 +1265,7 @@ NSString *const kXMPPPresence = @"presence";
         }
         else if([parsedStanza.stanzaType  isEqualToString:@"presence"] && [parsedStanza isKindOfClass:[ParsePresence class]])
         {
-            ParsePresence* presenceNode = parsedStanza;
+            ParsePresence* presenceNode = (ParsePresence*)parsedStanza;
             NSString *recipient = presenceNode.to;
 
             //set own jid as recipient, if none given
@@ -1403,7 +1403,7 @@ NSString *const kXMPPPresence = @"presence";
                 [self initSM3];
 
                 //save streamID if resume is supported
-                ParseEnabled* enabledNode = parsedStanza;
+                ParseEnabled* enabledNode = (ParseEnabled*)parsedStanza;
                 if(enabledNode.resume)
                     self.streamID = enabledNode.streamID;
                 else
@@ -1430,7 +1430,7 @@ NSString *const kXMPPPresence = @"presence";
         else if([parsedStanza.stanzaType isEqualToString:@"a"] && [parsedStanza isKindOfClass:[ParseA class]] &&
             self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
         {
-            ParseA* aNode = parsedStanza;
+            ParseA* aNode = (ParseA*)parsedStanza;
 
             @synchronized(_smacksSyncPoint) {
                 //remove acked messages
@@ -1442,7 +1442,7 @@ NSString *const kXMPPPresence = @"presence";
         }
         else if([parsedStanza.stanzaType isEqualToString:@"resumed"] && [parsedStanza isKindOfClass:[ParseResumed class]])
         {
-            ParseResumed* resumeNode = parsedStanza;
+            ParseResumed* resumeNode = (ParseResumed*)parsedStanza;
             self.resuming = NO;
 
             //now we are bound again
@@ -1493,7 +1493,7 @@ NSString *const kXMPPPresence = @"presence";
                     //invalidate stream id
                     self.streamID = nil;
                     //get h value, if server supports smacks revision 1.5.2
-                    ParseFailed* failedNode = parsedStanza;
+                    ParseFailed* failedNode = (ParseFailed*)parsedStanza;
                     DDLogInfo(@"++++++++++++++++++++++++ failed resume: h=%@", failedNode.h);
                     [self removeAckedStanzasFromQueue:failedNode.h];
                     //persist these changes
@@ -1521,7 +1521,7 @@ NSString *const kXMPPPresence = @"presence";
         }
         else if([parsedStanza.stanzaType isEqualToString:@"failure"] && [parsedStanza isKindOfClass:[ParseFailure class]])
         {
-            ParseFailure* failure = parsedStanza;
+            ParseFailure* failure = (ParseFailure*)parsedStanza;
 
             NSString* message = failure.text;
             if(failure.notAuthorized)
@@ -1544,7 +1544,7 @@ NSString *const kXMPPPresence = @"presence";
         }
         else if([parsedStanza.stanzaType isEqualToString:@"challenge"] && [parsedStanza isKindOfClass:[ParseChallenge class]])
         {
-            ParseChallenge* challengeNode = parsedStanza;
+            ParseChallenge* challengeNode = (ParseChallenge*)parsedStanza;
             if(challengeNode.saslChallenge && self.accountState<kStateLoggedIn && (self.connectionProperties.server.isDirectTLS || self->_startTLSComplete))
             {
                 MLXMLNode* responseXML = [[MLXMLNode alloc] initWithElement:@"response" andNamespace:@"urn:ietf:params:xml:ns:xmpp-sasl"];
@@ -1557,7 +1557,7 @@ NSString *const kXMPPPresence = @"presence";
         }
         else if([parsedStanza.stanzaType isEqualToString:@"success"] && [parsedStanza isKindOfClass:[ParseStream class]])
         {
-            ParseStream* streamNode = parsedStanza;
+            ParseStream* streamNode = (ParseStream*)parsedStanza;
             //perform logic to handle proceed
             if(streamNode.SASLSuccess && self.accountState<kStateLoggedIn)
             {
@@ -1585,7 +1585,7 @@ NSString *const kXMPPPresence = @"presence";
         else if([parsedStanza isKindOfClass:[ParseStream class]] &&
             ([parsedStanza.stanzaType isEqualToString:@"stream"] || [parsedStanza.stanzaType isEqualToString:@"features"]))
         {
-            ParseStream* streamNode = parsedStanza;
+            ParseStream* streamNode = (ParseStream*)parsedStanza;
 
             //prevent reconnect attempt
             if(_accountState<kStateHasStream)
@@ -1690,8 +1690,6 @@ NSString *const kXMPPPresence = @"presence";
         else if([parsedStanza isKindOfClass:[ParseStream class]] &&
             ([parsedStanza.stanzaType isEqualToString:@"stream"] || [parsedStanza.stanzaType isEqualToString:@"features"]))
         {
-            ParseStream* streamNode = parsedStanza;
-
             //ignore streamNode.callStartTLS (e.g. starttls stream feature) presence and opportunistically try starttls
             //(this is in accordance to RFC 7590: https://tools.ietf.org/html/rfc7590#section-3.1 )
             if([parsedStanza.stanzaType isEqualToString:@"features"])
@@ -1703,7 +1701,7 @@ NSString *const kXMPPPresence = @"presence";
         }
         else if([parsedStanza.stanzaType isEqualToString:@"proceed"] && [parsedStanza isKindOfClass:[ParseStream class]])
         {
-            ParseStream* streamNode = parsedStanza;
+            ParseStream* streamNode = (ParseStream*)parsedStanza;
             //perform logic to handle proceed
             if(streamNode.startTLSProceed)
             {

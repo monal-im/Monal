@@ -341,7 +341,7 @@
 
 -(NSNumber*) lastInsertId
 {
-    return [NSNumber numberWithInt:sqlite3_last_insert_rowid(self->database)];
+    return [NSNumber numberWithInt:(int)sqlite3_last_insert_rowid(self->database)];
 }
 
 @end

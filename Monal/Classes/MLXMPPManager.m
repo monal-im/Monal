@@ -843,15 +843,13 @@ static const int sendMessageTimeoutSeconds = 10;
 {
     NSDictionary *dic = notification.object;
 
-    [[DataLayer sharedInstance] mucFavoritesForAccount:[dic objectForKey:@"AccountNo"] withCompletion:^(NSMutableArray *results) {
-
-        for(NSDictionary *row in results)
-        {
-            NSNumber *autoJoin =[row objectForKey:@"autojoin"] ;
-            if(autoJoin.boolValue)
-                [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[NSString stringWithFormat:@"%@", [row objectForKey:kAccountID]]];
-        }
-    }];
+    NSMutableArray* results = [[DataLayer sharedInstance] mucFavoritesForAccount:[dic objectForKey:@"AccountNo"]];
+    for(NSDictionary *row in results)
+    {
+        NSNumber *autoJoin =[row objectForKey:@"autojoin"] ;
+        if(autoJoin.boolValue)
+            [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[NSString stringWithFormat:@"%@", [row objectForKey:kAccountID]]];
+    }
 }
 
 #pragma mark - Jingle VOIP

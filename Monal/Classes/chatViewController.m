@@ -359,15 +359,13 @@ enum chatViewControllerSections {
     
     self.placeHolderText.text=[NSString stringWithFormat:NSLocalizedString(@"Message from %@",@ ""), self.jid];
     // Load message draft from db
-    [[DataLayer sharedInstance] loadMessageDraft:self.contact.contactJid forAccount:self.contact.accountId
-        withCompletion:^(NSString* messageDraft) {
-            if([messageDraft length] > 0) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    self.chatInput.text = messageDraft;
-                    self.placeHolderText.hidden = YES;
-                });
-            }
-    }];
+    NSString* messageDraft = [[DataLayer sharedInstance] loadMessageDraft:self.contact.contactJid forAccount:self.contact.accountId];
+    if(messageDraft && [messageDraft length] > 0) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.chatInput.text = messageDraft;
+            self.placeHolderText.hidden = YES;
+        });
+    }
     self.hardwareKeyboardPresent = YES; //default to YES and when keybaord will appears is called, this may be set to NO
     
     // Set correct chatInput height constraints
@@ -417,12 +415,11 @@ enum chatViewControllerSections {
 -(void) viewWillDisappear:(BOOL)animated
 {
     // Save message draft
-    [self saveMessageDraft:^(BOOL success) {
-        if(success) {
-            // Update status message for contact to show current draft
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
-        }
-    }];
+    BOOL success = [self saveMessageDraft];
+    if(success) {
+        // Update status message for contact to show current draft
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+    }
     [super viewWillDisappear:animated];
     [MLNotificationManager sharedInstance].currentAccountNo=nil;
     [MLNotificationManager sharedInstance].currentContact=nil;
@@ -437,10 +434,10 @@ enum chatViewControllerSections {
         [self.messageTable setContentOffset:CGPointMake(0, self.messageTable.contentSize.height - self.messageTable.bounds.size.height) animated:NO];
 }
 
--(void) saveMessageDraft:(void (^)(BOOL))completion
+-(BOOL) saveMessageDraft
 {
     // Save message draft
-    [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text withCompletion:completion];
+    return [[DataLayer sharedInstance] saveMessageDraft:self.contact.contactJid forAccount:self.contact.accountId withComment:self.chatInput.text];
 }
 
 -(void) dealloc
@@ -485,7 +482,7 @@ enum chatViewControllerSections {
 
 -(IBAction)dismissKeyboard:(id)sender
 {
-    [self saveMessageDraft:nil];
+    [self saveMessageDraft];
     [self.chatInput resignFirstResponder];
 }
 
@@ -681,7 +678,7 @@ enum chatViewControllerSections {
     {
         // Reset chatInput -> remove draft from db so that macOS will show the new send message
         [self.chatInput setText:@""];
-        [self saveMessageDraft:nil];
+        [self saveMessageDraft];
         // Send trimmed message
         [self sendMessage:cleanString];
     }
@@ -1044,7 +1041,7 @@ enum chatViewControllerSections {
     // make sure its in active
     if(_firstmsg == YES)
     {
-        [[DataLayer sharedInstance] addActiveBuddies:to forAccount:self.contact.accountId withCompletion:nil];
+        [[DataLayer sharedInstance] addActiveBuddies:to forAccount:self.contact.accountId];
         _firstmsg = NO;
     }
 }
@@ -1096,34 +1093,32 @@ enum chatViewControllerSections {
             //            }
         }
         
-        [[DataLayer sharedInstance] messageTypeForMessage: message.messageText withKeepThread:YES andCompletion:^(NSString *messageType) {
+        NSString* messageType = [[DataLayer sharedInstance] messageTypeForMessage: message.messageText withKeepThread:YES];
             
-            dispatch_async(dispatch_get_main_queue(), ^{
-                NSString* finalMessageType = messageType;
-                if([message.messageType isEqualToString:kMessageTypeStatus])
-                    finalMessageType = kMessageTypeStatus;
-                message.messageType = finalMessageType;
-                
-                if(!self.messageList)
-                    self.messageList = [[NSMutableArray alloc] init];
-                [self.messageList addObject:message];   //do not insert based on delay timestamp because that would make it possible to fake history entries
-                
-                [self->_messageTable beginUpdates];
-                NSIndexPath *path1;
-                NSInteger bottom =  self.messageList.count-1;
-                if(bottom >= 0) {
-                    
-                    path1 = [NSIndexPath indexPathForRow:bottom  inSection:messagesSection];
-                    [self->_messageTable insertRowsAtIndexPaths:@[path1]
-                                               withRowAnimation:UITableViewRowAnimationBottom];
-                }
-                [self->_messageTable endUpdates];
-                
-                [self scrollToBottom];
-                
-                [self refreshCounter];
-            });
-        }];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString* finalMessageType = messageType;
+            if([message.messageType isEqualToString:kMessageTypeStatus])
+                finalMessageType = kMessageTypeStatus;
+            message.messageType = finalMessageType;
+
+            if(!self.messageList)
+                self.messageList = [[NSMutableArray alloc] init];
+            [self.messageList addObject:message];   //do not insert based on delay timestamp because that would make it possible to fake history entries
+
+            [self->_messageTable beginUpdates];
+            NSIndexPath *path1;
+            NSInteger bottom =  self.messageList.count-1;
+            if(bottom >= 0) {
+                path1 = [NSIndexPath indexPathForRow:bottom  inSection:messagesSection];
+                [self->_messageTable insertRowsAtIndexPaths:@[path1]
+                                           withRowAnimation:UITableViewRowAnimationBottom];
+            }
+            [self->_messageTable endUpdates];
+
+            [self scrollToBottom];
+
+            [self refreshCounter];
+        });
     }
 }
 
@@ -1912,7 +1907,7 @@ bool viewIsScrolling = NO;
 
 - (void)keyboardDidHide:(NSNotification*)aNotification
 {
-    [self saveMessageDraft:nil];
+    [self saveMessageDraft];
 
     UIEdgeInsets contentInsets = UIEdgeInsetsZero;
     self.messageTable.contentInset = contentInsets;

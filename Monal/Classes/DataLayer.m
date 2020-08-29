@@ -231,7 +231,7 @@ static NSDateFormatter* dbFormatter;
     return accountJid;
 }
 
--(void) updateAccounWithDictionary:(NSDictionary *) dictionary andCompletion:(void (^)(BOOL))completion
+-(BOOL) updateAccounWithDictionary:(NSDictionary *) dictionary
 {
     NSString* query = [NSString stringWithFormat:@"update account set server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, selfsigned=?, directTLS=? where account_id=?"];
 
@@ -248,7 +248,7 @@ static NSDateFormatter* dbFormatter;
                        [dictionary objectForKey:kAccountID]
     ];
 
-    [self.db executeNonQuery:query andArguments:params withCompletion:completion];
+    return [self.db executeNonQuery:query andArguments:params];
 }
 
 -(NSNumber*) addAccountWithDictionary:(NSDictionary*) dictionary
@@ -330,7 +330,7 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark contact Commands
 
--(void) addContact:(NSString*) contact forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName andMucNick:(NSString*) mucNick withCompletion: (void (^)(BOOL))completion
+-(BOOL) addContact:(NSString*) contact forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName andMucNick:(NSString*) mucNick
 {
     // no blank full names
     NSString* actualfull = fullName;
@@ -339,18 +339,11 @@ static NSDateFormatter* dbFormatter;
 
     NSString* query = [NSString stringWithFormat:@"insert into buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'new', 'online', 'dirty', 'muc', 'muc_nick') values(?, ?, ?, ?, 1, 0, 0, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET account_id=?, buddy_name=?;"];
     if(!(accountNo && contact && actualfull && nickName)) {
-        if(completion)
-        {
-            completion(NO);
-        }
+        return NO;
     } else  {
         NSArray* params = @[accountNo, contact, actualfull, nickName, mucNick?@1:@0, mucNick ? mucNick : @"", accountNo, contact];
-        [self.db executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
-            if(completion)
-            {
-                completion(success);
-            }
-        }];
+        BOOL success = [self.db executeNonQuery:query andArguments:params];
+        return success;
     }
 }
 
@@ -393,33 +386,29 @@ static NSDateFormatter* dbFormatter;
     return (retval != NO);
 }
 
--(void) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo withCompletion: (void (^)(NSArray *))completion
+-(NSArray*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo
 {
-    if(!username || !accountNo) return;
+    if(!username || !accountNo) return nil;
     NSString* query = query = [NSString stringWithFormat:@"select buddy_name, state, status, filename, 0, ifnull(full_name, buddy_name) as full_name, nick_name, account_id, MUC, muc_subject, muc_nick , full_name as raw_full, subscription, ask from buddylist where buddy_name=? and account_id=?"];
-    NSArray *params= @[username, accountNo];
+    NSArray* params = @[username, accountNo];
 
-    [self.db executeReader:query andArguments:params  withCompletion:^(NSArray * results) {
-        if(results!=nil)
-        {
-            DDLogVerbose(@" count: %lu",  (unsigned long)[results count]);
+    NSArray* results = [self.db executeReader:query andArguments:params];
+    if(results != nil)
+    {
+        DDLogVerbose(@" count: %lu",  (unsigned long)[results count]);
 
-        }
-        else
-        {
-            DDLogError(@"buddylist is empty or failed to read");
-        }
+    }
+    else
+    {
+        DDLogError(@"buddylist is empty or failed to read");
+    }
 
-        NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
-        [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSDictionary *dic = (NSDictionary *) obj;
-            [toReturn addObject:[MLContact contactFromDictionary:dic]];
-        }];
-
-        if(completion) {
-            completion(toReturn);
-        }
+    NSMutableArray* toReturn = [[NSMutableArray alloc] initWithCapacity:results.count];
+    [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSDictionary* dic = (NSDictionary *) obj;
+        [toReturn addObject:[MLContact contactFromDictionary:dic]];
     }];
+    return toReturn;
 }
 
 
@@ -452,7 +441,7 @@ static NSDateFormatter* dbFormatter;
     }
 }
 
--(void) onlineContactsSortedBy:(NSString*) sort withCompeltion: (void (^)(NSMutableArray *))completion
+-(NSMutableArray*) onlineContactsSortedBy:(NSString*) sort
 {
     NSString* query = @"";
 
@@ -466,31 +455,27 @@ static NSDateFormatter* dbFormatter;
         query = [NSString stringWithFormat:@"select buddy_name, state, status, filename, 0 as 'count', ifnull(full_name, buddy_name) as full_name, nick_name, MUC, muc_subject, muc_nick, account_id from buddylist where online=1 and subscription='both' order by state, full_name COLLATE NOCASE asc"];
     }
 
-    [self.db executeReader:query withCompletion:^(NSMutableArray *results) {
+    NSMutableArray* results = [self.db executeReader:query];
 
-        NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
-        [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSDictionary *dic = (NSDictionary *) obj;
-            [toReturn addObject:[MLContact contactFromDictionary:dic]];
-        }];
-
-        if(completion) completion(toReturn);
+    NSMutableArray *toReturn = [[NSMutableArray alloc] initWithCapacity:results.count];
+    [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSDictionary *dic = (NSDictionary *) obj;
+        [toReturn addObject:[MLContact contactFromDictionary:dic]];
     }];
+    return toReturn;
 }
 
--(void) offlineContactsWithCompletion: (void (^)(NSMutableArray *))completion
+-(NSMutableArray*) offlineContacts
 {
     NSString* query = [NSString stringWithFormat:@"select buddy_name, A.state, status, filename, 0, ifnull(full_name, buddy_name) as full_name,nick_name, a.account_id, MUC, muc_subject, muc_nick from buddylist as A inner join account as b  on a.account_id=b.account_id  where  online=0 and enabled=1 order by full_name COLLATE NOCASE "];
-    [self.db executeReader:query withCompletion:^(NSMutableArray *results) {
+    NSMutableArray* results = [self.db executeReader:query];
 
-        NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
-        [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSDictionary *dic = (NSDictionary *) obj;
-            [toReturn addObject:[MLContact contactFromDictionary:dic]];
-        }];
-
-        if(completion) completion(toReturn);
+    NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
+    [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSDictionary *dic = (NSDictionary *) obj;
+        [toReturn addObject:[MLContact contactFromDictionary:dic]];
     }];
+    return toReturn;
 }
 
 #pragma mark entity capabilities
@@ -599,13 +584,12 @@ static NSDateFormatter* dbFormatter;
     [self.db beginWriteTransaction];
     //get buddyid for name and account
     NSString* query1 = [NSString stringWithFormat:@"select buddy_id from buddylist where account_id=? and buddy_name=?;"];
-    [self.db executeScalar:query1 andArguments:@[accountNo, presenceObj.user] withCompletion:^(NSObject *buddyid) {
-        if(buddyid)
-        {
-            NSString* query = [NSString stringWithFormat:@"insert or ignore into buddy_resources ('buddy_id', 'resource', 'ver') values (?, ?, '')"];
-            [self.db executeNonQuery:query andArguments:@[buddyid, presenceObj.resource] withCompletion:nil];
-        }
-    }];
+    NSObject* buddyid = [self.db executeScalar:query1 andArguments:@[accountNo, presenceObj.user]];
+    if(buddyid)
+    {
+        NSString* query = [NSString stringWithFormat:@"insert or ignore into buddy_resources ('buddy_id', 'resource', 'ver') values (?, ?, '')"];
+        [self.db executeNonQuery:query andArguments:@[buddyid, presenceObj.resource]];
+    }
     [self.db endWriteTransaction];
 }
 
@@ -643,13 +627,12 @@ static NSDateFormatter* dbFormatter;
 {
     [self.db beginWriteTransaction];
     [self setResourceOnline:presenceObj forAccount:accountNo];
-    [self isBuddyOnline:presenceObj.user forAccount:accountNo withCompletion:^(BOOL isOnline) {
-        if(!isOnline) {
-            NSString* query = [NSString stringWithFormat:@"update buddylist set online=1, new=1, muc=? where account_id=? and  buddy_name=?"];
-            NSArray* params = @[[NSNumber numberWithBool:presenceObj.MUC], accountNo, presenceObj.user ];
-            [self.db executeNonQuery:query andArguments:params];
-        }
-    }];
+    BOOL isOnline = [self isBuddyOnline:presenceObj.user forAccount:accountNo];
+    if(!isOnline) {
+        NSString* query = [NSString stringWithFormat:@"update buddylist set online=1, new=1, muc=? where account_id=? and  buddy_name=?"];
+        NSArray* params = @[[NSNumber numberWithBool:presenceObj.MUC], accountNo, presenceObj.user ];
+        [self.db executeNonQuery:query andArguments:params];
+    }
     [self.db endWriteTransaction];
 }
 
@@ -716,20 +699,18 @@ static NSDateFormatter* dbFormatter;
     return state;
 }
 
--(void) contactRequestsForAccountWithCompletion:(void (^)(NSMutableArray *))completion
+-(NSMutableArray*) contactRequestsForAccount
 {
     NSString* query = [NSString stringWithFormat:@"select account_id, buddy_name from subscriptionRequests"];
 
-     [self.db executeReader:query withCompletion:^(NSMutableArray *results) {
+    NSMutableArray* results = [self.db executeReader:query];
 
-         NSMutableArray* toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
-         [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-             NSDictionary* dic = (NSDictionary *) obj;
-             [toReturn addObject:[MLContact contactFromDictionary:dic]];
-         }];
-
-         if(completion) completion(toReturn);
+     NSMutableArray* toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
+     [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+         NSDictionary* dic = (NSDictionary *) obj;
+         [toReturn addObject:[MLContact contactFromDictionary:dic]];
      }];
+    return toReturn;
 }
 
 -(void) addContactRequest:(MLContact *) requestor;
@@ -840,14 +821,13 @@ static NSDateFormatter* dbFormatter;
     return fullname;
 }
 
--(void) fullNameForContact:(NSString*) contact inAccount:(NSString*) accountNo withCompeltion: (void (^)(NSString *))completion;
+-(NSString*) fullNameForContact:(NSString*) contact inAccount:(NSString*) accountNo
 {
-    if(!accountNo  || !contact) return ;
+    if(!accountNo  || !contact) return nil;
     NSString* query = [NSString stringWithFormat:@"select full_name from buddylist where account_id=? and buddy_name=?"];
     NSArray * params=@[accountNo, contact];
-    [self.db executeScalar:query andArguments:params withCompletion:^(NSObject *name) {
-        if(completion) completion((NSString *)name);
-    }];
+    NSObject* name = [self.db executeScalar:query andArguments:params];
+    return (NSString *)name;
 }
 
 -(void) setContactHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo
@@ -861,86 +841,68 @@ static NSDateFormatter* dbFormatter;
 
 }
 
--(void) contactHash:(NSString*) buddy forAccount:(NSString*) accountNo withCompeltion: (void (^)(NSString *))completion
+-(NSString*) contactHash:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     NSString* query = [NSString stringWithFormat:@"select iconhash from buddylist where account_id=? and buddy_name=?"];
     NSArray* params = @[accountNo, buddy];
-    [self.db executeScalar:query andArguments:params withCompletion:^(NSObject *iconHash) {
-        if(completion)
-        {
-            completion((NSString *)iconHash);
-        }
-    }];
+    NSObject* iconHash = [self.db executeScalar:query andArguments:params];
+    return (NSString *)iconHash;
 }
 
--(void) isContactInList:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
+-(BOOL) isContactInList:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     NSString* query = [NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=? and buddy_name=? "];
     NSArray* params = @[accountNo, buddy];
 
-    [self.db executeScalar:query andArguments:params withCompletion:^(NSObject *value) {
+    NSObject* value = [self.db executeScalar:query andArguments:params];
 
-        NSNumber* count=(NSNumber*)value;
-        BOOL toreturn=NO;
-        if(count!=nil)
-        {
-            NSInteger val=[count integerValue];
-            if(val > 0) {
-                toreturn= YES;
-            }
+    NSNumber* count=(NSNumber*)value;
+    BOOL toreturn = NO;
+    if(count != nil)
+    {
+        NSInteger val = [count integerValue];
+        if(val > 0) {
+            toreturn = YES;
         }
-        if(completion)
-        {
-            completion(toreturn);
-        }
-    }];
+    }
+    return toreturn;
 }
 
--(void) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
+-(BOOL) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     NSString* query = [NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=? and buddy_name=? and online=1 "];
     NSArray* params = @[accountNo, buddy];
 
-    [self.db executeScalar:query andArguments:params withCompletion:^(NSObject *value) {
+    NSObject* value = [self.db executeScalar:query andArguments:params];
 
-        NSNumber* count=(NSNumber*)value;
-        BOOL toreturn=NO;
-        if(count!=nil)
-        {
-            NSInteger val=[count integerValue];
-            if(val>0) {
-                toreturn= YES;
-            }
+    NSNumber* count = (NSNumber*)value;
+    BOOL toreturn = NO;
+    if(count != nil)
+    {
+        NSInteger val = [count integerValue];
+        if(val > 0) {
+            toreturn = YES;
         }
-        if(completion)
-        {
-            completion(toreturn);
-        }
-    }];
+    }
+    return toreturn;
 }
 
--(void) saveMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withComment:(NSString*) comment withCompletion:(void (^)(BOOL))completion
+-(BOOL) saveMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withComment:(NSString*) comment
 {
    [self.db beginWriteTransaction];
     NSString* query = [NSString stringWithFormat:@"update buddylist set messageDraft=? where account_id=? and buddy_name=?"];
     NSArray* params = @[comment, accountNo, buddy];
-    [self.db executeNonQuery:query andArguments:params  withCompletion:^(BOOL success) {
-        [self.db endWriteTransaction];
-        if(completion) {
-                completion(success);
-            }
-    }];
+    BOOL success = [self.db executeNonQuery:query andArguments:params];
+    [self.db endWriteTransaction];
+    return success;
 }
 
--(void) loadMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSString*))completion
+-(NSString*) loadMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     NSString* query = [NSString stringWithFormat:@"SELECT messageDraft from buddylist where account_id=? and buddy_name=?"];
     NSArray* params = @[accountNo, buddy];
-    [self.db executeScalar:query andArguments:params withCompletion:^(NSObject* messageDraft) {
-        if(completion) {
-            completion((NSString *)messageDraft);
-        }
-    }];
+    NSObject* messageDraft = [self.db executeScalar:query andArguments:params];
+    return (NSString*)messageDraft;
 }
 
 #pragma mark MUC
@@ -971,9 +933,9 @@ static NSDateFormatter* dbFormatter;
     return nick;
 }
 
--(void) updateOwnNickName:(NSString *) nick forMuc:(NSString*) room andServer:(NSString*) server forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
+-(BOOL) updateOwnNickName:(NSString *) nick forMuc:(NSString*) room andServer:(NSString*) server forAccount:(NSString*) accountNo
 {
-    NSString *combinedRoom = room;
+    NSString* combinedRoom = room;
     if([combinedRoom componentsSeparatedByString:@"@"].count == 1) {
         combinedRoom = [NSString stringWithFormat:@"%@@%@", room, server];
     }
@@ -982,95 +944,72 @@ static NSDateFormatter* dbFormatter;
     NSArray* params = @[nick, accountNo, combinedRoom];
     DDLogVerbose(@"%@", query);
 
-    [self.db executeNonQuery:query andArguments:params  withCompletion:completion];
+    return [self.db executeNonQuery:query andArguments:params];
 }
 
 
--(void) addMucFavoriteForAccount:(NSString*) accountNo withRoom:(NSString *) room nick:(NSString *)nick autoJoin:(BOOL) autoJoin andCompletion:(void (^)(BOOL))completion
+-(BOOL) addMucFavoriteForAccount:(NSString*) accountNo withRoom:(NSString *) room nick:(NSString *)nick autoJoin:(BOOL) autoJoin
 {
     NSString* query = [NSString stringWithFormat:@"insert into muc_favorites (room, nick, autojoin, account_id) values(?, ?, ?, ?)"];
     NSArray* params = @[room, nick, [NSNumber numberWithBool:autoJoin], accountNo];
     DDLogVerbose(@"%@", query);
 
-    [self.db executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
-        if(completion) {
-            completion(success);
-        }
-
-    }];
+    return [self.db executeNonQuery:query andArguments:params];
 }
 
--(void) updateMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo autoJoin:(BOOL) autoJoin andCompletion:(void (^)(BOOL))completion
+-(BOOL) updateMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo autoJoin:(BOOL) autoJoin
 {
     NSString* query = [NSString stringWithFormat:@"update muc_favorites set autojoin=? where mucid=? and account_id=?"];
     NSArray* params = @[[NSNumber numberWithBool:autoJoin], mucid, [NSNumber numberWithInteger:accountNo]];
     DDLogVerbose(@"%@", query);
 
-    [self.db executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
-        if(completion) {
-            completion(success);
-        }
-    }];
+    return [self.db executeNonQuery:query andArguments:params];
 }
 
--(void) deleteMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo withCompletion:(void (^)(BOOL))completion
+-(BOOL) deleteMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo
 {
     NSString* query = [NSString stringWithFormat:@"delete from muc_favorites where mucid=? and account_id=?"];
     NSArray* params = @[mucid, [NSNumber numberWithInteger:accountNo]];
     DDLogVerbose(@"%@", query);
 
-    [self.db executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
-        if(completion) {
-            completion(success);
-        }
-    }];
+    BOOL success = [self.db executeNonQuery:query andArguments:params];
+    return success;
 }
 
--(void) mucFavoritesForAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion
+-(NSMutableArray*) mucFavoritesForAccount:(NSString*) accountNo
 {
     NSString* query = [NSString stringWithFormat:@"select * from muc_favorites where account_id=%@", accountNo];
     DDLogVerbose(@"%@", query);
-    [self.db executeReader:query withCompletion:^(NSMutableArray *favorites) {
-        if(favorites!=nil) {
-            DDLogVerbose(@"fetched muc favorites");
-        }
-        else{
-            DDLogVerbose(@"could not fetch  muc favorites");
+    NSMutableArray* favorites = [self.db executeReader:query];
+    if(favorites != nil) {
+        DDLogVerbose(@"fetched muc favorites");
+    }
+    else{
+        DDLogVerbose(@"could not fetch  muc favorites");
 
-        }
-
-        if(completion) {
-            completion(favorites);
-        }
-    }];
+    }
+    return favorites;
 }
 
--(void) updateMucSubject:(NSString *) subject forAccount:(NSString*) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(BOOL))completion
+-(BOOL) updateMucSubject:(NSString *) subject forAccount:(NSString*) accountNo andRoom:(NSString *) room
 {
     NSString* query = [NSString stringWithFormat:@"update buddylist set muc_subject=? where account_id=? and buddy_name=?"];
     NSArray* params = @[subject, accountNo, room];
     DDLogVerbose(@"%@", query);
 
-    [self.db executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
-
-        if(completion) {
-            completion(success);
-        }
-
-    }];
+    BOOL success = [self.db executeNonQuery:query andArguments:params];
+    return success;
 }
 
--(void) mucSubjectforAccount:(NSString*) accountNo andRoom:(NSString *) room  withCompletion:(void (^)(NSString* ))completion
+-(NSString*) mucSubjectforAccount:(NSString*) accountNo andRoom:(NSString *) room
 {
     NSString* query = [NSString stringWithFormat:@"select muc_subject from buddylist where account_id=? and buddy_name=?"];
 
     NSArray* params = @[accountNo, room];
     DDLogVerbose(@"%@", query);
 
-    [self.db executeScalar:query andArguments:params withCompletion:^(NSObject *result) {
-        if(completion) completion((NSString *)result);
-    }];
-
+    NSObject* result = [self.db executeScalar:query andArguments:params];
+    return (NSString *)result;
 }
 
 #pragma mark message Commands
@@ -1122,49 +1061,45 @@ static NSDateFormatter* dbFormatter;
         
         //do not do this in MUC
         if(!messageType && [actualfrom isEqualToString:from]) {
-            [self messageTypeForMessage:message withKeepThread:YES andCompletion:^(NSString *foundMessageType) {
-                    NSString* query = [NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"];
-                    NSArray* params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:sent], messageid?messageid:@"", foundMessageType, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@""];
-                    DDLogVerbose(@"%@", query);
-                    [self.db executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
-
-                        if(success) {
-                            [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:^(BOOL innerSuccess) {
-                                [self.db endWriteTransaction];
-                                if(completion) {
-                                    completion(success, messageType);
-                                }
-                            }];
-                        }
-                        else {
-                            [self.db endWriteTransaction];
-                            if(completion) {
-                                completion(success, messageType);
-                            }
-                        }
-                    }];
-            }];
-        } else  {
+            NSString* foundMessageType = [self messageTypeForMessage:message withKeepThread:YES];
             NSString* query = [NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"];
-            NSArray* params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:sent], messageid?messageid:@"", typeToUse, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
+            NSArray* params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:sent], messageid?messageid:@"", foundMessageType, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@""];
             DDLogVerbose(@"%@", query);
-            [self.db executeNonQuery:query andArguments:params withCompletion:^(BOOL success) {
+            BOOL success = [self.db executeNonQuery:query andArguments:params];
 
-                if(success) {
-                    [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo withCompletion:^(BOOL innerSuccess) {
-                        [self.db endWriteTransaction];
-                        if(completion) {
-                            completion(success, messageType);
-                        }
-                    }];
-                }
-                else {
+            if(success) {
+                BOOL innerSuccess = [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
+                if(innerSuccess) {
                     [self.db endWriteTransaction];
                     if(completion) {
                         completion(success, messageType);
                     }
                 }
-            }];
+            }
+            else {
+                [self.db endWriteTransaction];
+                if(completion) {
+                    completion(success, messageType);
+                }
+            }
+        } else  {
+            NSString* query = [NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"];
+            NSArray* params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:sent], messageid?messageid:@"", typeToUse, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
+            DDLogVerbose(@"%@", query);
+            BOOL success = [self.db executeNonQuery:query andArguments:params];
+            if(success) {
+                BOOL innerSuccess = [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
+                [self.db endWriteTransaction];
+                if(completion) {
+                    completion(success, messageType);
+                }
+            }
+            else {
+                [self.db endWriteTransaction];
+                if(completion) {
+                    completion(success, messageType);
+                }
+            }
         }
     }
     else
@@ -1199,27 +1134,6 @@ static NSDateFormatter* dbFormatter;
     }
 
     return NO;
-}
-
--(void) hasMessageForId:(NSString*) messageid onAccount:(NSString *) accountNo andCompletion: (void (^)(BOOL))completion
-{
-    if(!accountNo ) return;
-    NSString* query = [NSString stringWithFormat:@"select messageid from message_history where account_id=? and messageid=? limit 1"];
-    NSArray* params = @[accountNo, messageid?messageid:@""];
-
-    [self.db executeScalar:query andArguments:params withCompletion:^(NSObject* result) {
-
-        BOOL exists=NO;
-        if(result)
-        {
-            exists=YES;
-        }
-
-        if(completion)
-        {
-            completion(exists);
-        }
-    }];
 }
 
 -(void) setMessageId:(NSString*) messageid sent:(BOOL) sent
@@ -1494,30 +1408,28 @@ static NSDateFormatter* dbFormatter;
     return toReturn;
 }
 
--(void) lastMessageForContact:(NSString*) contact forAccount:(NSString*) accountNo withCompletion:(void (^)(NSMutableArray *))completion
+-(NSMutableArray*) lastMessageForContact:(NSString*) contact forAccount:(NSString*) accountNo
 {
-    if(!accountNo ||! contact) return;
+    if(!accountNo ||! contact) return nil;
     NSString* query = [NSString stringWithFormat:@"SELECT message, thetime, messageType FROM (SELECT 1 as messagePrio, bl.messageDraft as message, ac.lastMessageTime as thetime, 'MessageDraft' as messageType FROM buddylist AS bl INNER JOIN activechats AS ac where bl.account_id = ac.account_id and bl.buddy_name = ac.buddy_name and ac.account_id = ? and ac.buddy_name = ? and messageDraft is not NULL and messageDraft != '' UNION SELECT 2 as messagePrio, message, timestamp, messageType from (select message, timestamp, messageType FROM message_history where account_id=? and (message_from =? or message_to=?) ORDER BY message_history_id DESC LIMIT 1) ORDER BY messagePrio ASC LIMIT 1)"];
     NSArray* params = @[accountNo, contact, accountNo, contact, contact];
 
-    [self.db executeReader:query andArguments:params withCompletion:^(NSMutableArray *results) {
-        NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
-        [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSDictionary *dic = (NSDictionary *) obj;
-            [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:dbFormatter]];
-        }];
-
-        if(toReturn!=nil)
-        {
-            DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count]);
-        }
-        else
-        {
-            DDLogError(@"message history is empty or failed to read");
-        }
-
-        if(completion) completion(toReturn);
+    NSMutableArray* results = [self.db executeReader:query andArguments:params];
+    NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
+    [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSDictionary *dic = (NSDictionary *) obj;
+        [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:dbFormatter]];
     }];
+
+    if(toReturn != nil)
+    {
+        DDLogVerbose(@" message history count: %lu", (unsigned long)[toReturn count]);
+    }
+    else
+    {
+        DDLogError(@"message history is empty or failed to read");
+    }
+    return toReturn;
 }
 
 -(void) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
@@ -1540,23 +1452,24 @@ static NSDateFormatter* dbFormatter;
         cleanedActualFrom = from;
     }
 
-    [self messageTypeForMessage:message withKeepThread:YES andCompletion:^(NSString *messageType) {
+    NSString* messageType = [self messageTypeForMessage:message withKeepThread:YES];
 
-        NSArray* parts = [[[NSDate date] description] componentsSeparatedByString:@" "];
-        NSString* dateTime = [NSString stringWithFormat:@"%@ %@", [parts objectAtIndex:0],[parts objectAtIndex:1]];
-        NSString* query = [NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted) values (?,?,?,?,?,?,?,?,?,?,?);"];
-        NSArray* params = @[accountNo, from, to, dateTime, message, cleanedActualFrom, [NSNumber numberWithInteger:0], [NSNumber numberWithInteger:0], messageId, messageType, [NSNumber numberWithInteger:encrypted]];
-        [self.db beginWriteTransaction];
-        DDLogVerbose(@"%@", query);
-        [self.db executeNonQuery:query andArguments:params  withCompletion:^(BOOL result) {
-            [self updateActiveBuddy:to setTime:dateTime forAccount:accountNo withCompletion:^(BOOL innerSuccess) {
-                [self.db endWriteTransaction];
-                if (completion) {
-                    completion(result, messageType);
-                }
-            }];
-        }];
-    }];
+    NSArray* parts = [[[NSDate date] description] componentsSeparatedByString:@" "];
+    NSString* dateTime = [NSString stringWithFormat:@"%@ %@", [parts objectAtIndex:0],[parts objectAtIndex:1]];
+    NSString* query = [NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted) values (?,?,?,?,?,?,?,?,?,?,?);"];
+    NSArray* params = @[accountNo, from, to, dateTime, message, cleanedActualFrom, [NSNumber numberWithInteger:0], [NSNumber numberWithInteger:0], messageId, messageType, [NSNumber numberWithInteger:encrypted]];
+    [self.db beginWriteTransaction];
+    DDLogVerbose(@"%@", query);
+    BOOL result = [self.db executeNonQuery:query andArguments:params];
+    if(result) {
+        BOOL innerSuccess = [self updateActiveBuddy:to setTime:dateTime forAccount:accountNo];
+        if(innerSuccess) {
+            [self.db endWriteTransaction];
+            if (completion) {
+                completion(result, messageType);
+            }
+        }
+    }
 }
 
 //count unread
@@ -1624,25 +1537,21 @@ static NSDateFormatter* dbFormatter;
     completion(nil, nil);
 }
 
--(void) lastMessageDateAccount:(NSString*) accountNo withCompletion: (void (^)(NSDate *))completion
+-(NSDate*) lastMessageDateAccount:(NSString*) accountNo
 {
     NSString* query = [NSString stringWithFormat:@"select timestamp from message_history where account_id=? order by timestamp desc limit 1"];
 
-    [self.db executeScalar:query andArguments:@[accountNo] withCompletion:^(NSObject* result) {
-        if(completion)
-        {
-            NSDateFormatter* dateFromatter = [[NSDateFormatter alloc] init];
-            NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
+    NSObject* result = [self.db executeScalar:query andArguments:@[accountNo]];
 
-            [dateFromatter setLocale:enUSPOSIXLocale];
-            [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
-            [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    NSDateFormatter* dateFromatter = [[NSDateFormatter alloc] init];
+    NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
 
-            NSDate* datetoReturn = [dateFromatter dateFromString:(NSString *)result];
+    [dateFromatter setLocale:enUSPOSIXLocale];
+    [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
+    [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 
-            completion(datetoReturn);
-        }
-    }];
+    NSDate* datetoReturn = [dateFromatter dateFromString:(NSString *)result];
+    return datetoReturn;
 }
 
 
@@ -1701,70 +1610,53 @@ static NSDateFormatter* dbFormatter;
     [self.db executeNonQuery:query andArguments:@[]];
 }
 
--(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
+-(BOOL) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo
 {
     if(!buddyname)
     {
-        if (completion) {
-            completion(NO);
-        }
-        return;
+        return NO;
     }
     [self.db beginWriteTransaction];
     // Check that we do not add a chat a second time to activechats
     if([self isActiveBuddy:buddyname forAccount:accountNo]) {
         // active chat entry does not exist yet -> insert
         [self.db endWriteTransaction];
-        if (completion) {
-            completion(YES);
-        }
-        return;
+        return YES;
     }
     
     NSString* query = [NSString stringWithFormat:@"select count(buddy_name) from activechats where account_id=? and buddy_name=?"];
-    [self.db executeScalar:query  andArguments:@[accountNo, buddyname] withCompletion:^(NSObject * count) {
-        if(count != nil)
-        {
-            NSInteger val=[((NSNumber *)count) integerValue];
-            if(val > 0) {
-                [self.db endWriteTransaction];
-                if (completion) {
-                    completion(NO);
-                }
-            } else
-            {
-                NSString* accountJid = [self jidOfAccount:accountNo];
-                if(!accountJid) {
-                    [self.db endWriteTransaction];
-                    if(completion)
-                        completion(NO);
-                    return;
-                }
-
-                if([accountJid isEqualToString:buddyname]) {
-                    // Something is broken
-                    [self.db endWriteTransaction];
-                    DDLogWarn(@"We should never try to create a cheat with our own jid");
-                    if(completion)
-                        completion(NO);
-                    return;
-                } else {
-                    // insert
-                    NSString* query3 = [NSString stringWithFormat:@"insert into activechats (buddy_name, account_id, lastMessageTime) values (?, ?, current_timestamp)"];
-                    [self.db executeNonQuery:query3 andArguments:@[buddyname, accountNo] withCompletion:^(BOOL result) {
-                        [self.db endWriteTransaction];
-                        if (completion) {
-                            completion(result);
-                        }
-                    }];
-                }
-            }
-        } else {
+    NSObject* count = [self.db executeScalar:query  andArguments:@[accountNo, buddyname]];
+    if(count != nil)
+    {
+        NSInteger val = [((NSNumber *)count) integerValue];
+        if(val > 0) {
             [self.db endWriteTransaction];
-            if(completion)
-                completion(NO);
+            return NO;
+        } else
+        {
+            NSString* accountJid = [self jidOfAccount:accountNo];
+            if(!accountJid) {
+                [self.db endWriteTransaction];
+                return NO;
+            }
+
+            if([accountJid isEqualToString:buddyname]) {
+                // Something is broken
+                [self.db endWriteTransaction];
+                DDLogWarn(@"We should never try to create a cheat with our own jid");
+                return NO;
+            } else {
+                // insert
+                NSString* query3 = [NSString stringWithFormat:@"insert into activechats (buddy_name, account_id, lastMessageTime) values (?, ?, current_timestamp)"];
+                BOOL result = [self.db executeNonQuery:query3 andArguments:@[buddyname, accountNo]];
+                [self.db endWriteTransaction];
+                return result;
+            }
         }
-    }];
+    } else {
+        [self.db endWriteTransaction];
+        return NO;
+    }
 }
 
 
@@ -1781,27 +1673,25 @@ static NSDateFormatter* dbFormatter;
     }
 }
 
--(void) updateActiveBuddy:(NSString*) buddyname setTime:(NSString *)timestamp forAccount:(NSString*) accountNo withCompletion: (void (^)(BOOL))completion
+-(BOOL) updateActiveBuddy:(NSString*) buddyname setTime:(NSString *)timestamp forAccount:(NSString*) accountNo
 {
     NSString* query = [NSString stringWithFormat:@"select lastMessageTime from  activechats where account_id=? and buddy_name=?"];
     [self.db beginWriteTransaction];
-    [self.db executeScalar:query andArguments:@[accountNo, buddyname] withCompletion:^(NSObject *result) {
-        NSString* lastTime = (NSString *) result;
+    NSObject* result = [self.db executeScalar:query andArguments:@[accountNo, buddyname]];
+    NSString* lastTime = (NSString *) result;
 
-        NSDate* lastDate = [dbFormatter dateFromString:lastTime];
-        NSDate* newDate = [dbFormatter dateFromString:timestamp];
+    NSDate* lastDate = [dbFormatter dateFromString:lastTime];
+    NSDate* newDate = [dbFormatter dateFromString:timestamp];
 
-        if(lastDate.timeIntervalSince1970<newDate.timeIntervalSince1970) {
-            NSString* query = [NSString stringWithFormat:@"update activechats set lastMessageTime=? where account_id=? and buddy_name=? "];
-            [self.db executeNonQuery:query andArguments:@[timestamp, accountNo, buddyname] withCompletion:^(BOOL success) {
-                [self.db endWriteTransaction];
-                if(completion) completion(success);
-            }];
-        } else {
-            [self.db endWriteTransaction];
-            if(completion) completion(NO);
-        }
-    }];
+    if(lastDate.timeIntervalSince1970<newDate.timeIntervalSince1970) {
+        NSString* query = [NSString stringWithFormat:@"update activechats set lastMessageTime=? where account_id=? and buddy_name=? "];
+        BOOL success = [self.db executeNonQuery:query andArguments:@[timestamp, accountNo, buddyname]];
+        [self.db endWriteTransaction];
+        return success;
+    } else {
+        [self.db endWriteTransaction];
+        return NO;
+    }
 }
 
 
@@ -1816,20 +1706,6 @@ static NSDateFormatter* dbFormatter;
 
     NSNumber* count = (NSNumber*)[self.db executeScalar:query andArguments:@[accountNo, buddy]];
     return count;
-}
-
-
--(void) countUserMessages:(NSString*) buddy forAccount:(NSString*) accountNo withCompletion:(void (^)(NSNumber *))completion
-{
-    // count # messages from a specific user in messages table
-    NSString* query = [NSString stringWithFormat:@"select count(message_history_id) from message_history where account_id=? and message_from=? or message_to=?"];
-
-    [self.db executeScalar:query andArguments:@[accountNo, buddy, buddy] withCompletion:^(NSObject* result) {
-        if(completion)
-        {
-            completion((NSNumber *)result);
-        }
-    }];
 }
 
 #pragma db Commands
@@ -2246,15 +2122,14 @@ static NSDateFormatter* dbFormatter;
     if([dbversion doubleValue] < 4.81)
     {
         // Remove silly chats
-        [self.db executeReader:@"select account_id, username, domain from account" andArguments:@[] withCompletion:^(NSMutableArray* results) {
-            for(NSDictionary* row in results) {
-                NSString* accountJid = [NSString stringWithFormat:@"%@@%@", [row objectForKey:kUsername], [row objectForKey:kDomain]];
-                NSString* accountNo = [row objectForKey:kAccountID];
+        NSMutableArray* results = [self.db executeReader:@"select account_id, username, domain from account"];
+        for(NSDictionary* row in results) {
+            NSString* accountJid = [NSString stringWithFormat:@"%@@%@", [row objectForKey:kUsername], [row objectForKey:kDomain]];
+            NSString* accountNo = [row objectForKey:kAccountID];
 
-                // delete chats with accountJid == buddy_name
-                [self.db executeNonQuery:@"delete from activechats where account_id=? and buddy_name=?" andArguments:@[accountNo, accountJid]];
-            }
-        }];
+            // delete chats with accountJid == buddy_name
+            [self.db executeNonQuery:@"delete from activechats where account_id=? and buddy_name=?" andArguments:@[accountNo, accountJid]];
+        }
         [self.db executeNonQuery:@"update dbversion set dbversion='4.81';" andArguments:@[]];
         DDLogVerbose(@"Upgrade to 4.81 success");
     }
@@ -2325,15 +2200,12 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark determine message type
 
--(void) messageTypeForMessage:(NSString *) messageString withKeepThread:(BOOL) keepThread andCompletion:(void(^)(NSString *messageType)) completion
+-(NSString*) messageTypeForMessage:(NSString *) messageString withKeepThread:(BOOL) keepThread
 {
     dispatch_semaphore_t semaphore;
     __block NSString* messageType = kMessageTypeText;
     if([messageString rangeOfString:@" "].location != NSNotFound) {
-        if(completion) {
-            completion(messageType);
-        }
-        return;
+        return messageType;
     }
 
     if ([messageString hasPrefix:@"xmpp:"]) {
@@ -2347,7 +2219,7 @@ static NSDateFormatter* dbFormatter;
             request.HTTPMethod = @"HEAD";
             request.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
 
-            if(keepThread && completion)
+            if(keepThread)
                 semaphore = dispatch_semaphore_create(0);
             NSURLSession *session = [NSURLSession sharedSession];
             [[session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError* _Nullable error) {
@@ -2361,30 +2233,18 @@ static NSDateFormatter* dbFormatter;
                     messageType = kMessageTypeUrl;
                 }
 
-                if(completion)
-                {
-                    if(keepThread)
-                        dispatch_semaphore_signal(semaphore);
-                    else
-                        completion(messageType);
-                }
+                if(keepThread)
+                    dispatch_semaphore_signal(semaphore);
             }] resume];
 
-            if(keepThread && completion)
+            if(keepThread)
             {
                 dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-                completion(messageType);
             }
     } else if ([messageString hasPrefix:@"geo:"]) {
         messageType = kMessageTypeGeo;
-
-        if(completion) {
-            completion(messageType);
-        }
-    } else
-        if(completion) {
-            completion(messageType);
-        }
+    }
+    return messageType;
 }
 
 
@@ -2405,20 +2265,19 @@ static NSDateFormatter* dbFormatter;
     [self.db executeNonQuery:query andArguments:params];
 }
 
--(void) isMutedJid:(NSString*) jid withCompletion: (void (^)(BOOL))completion
+-(BOOL) isMutedJid:(NSString*) jid
 {
-    if(!jid) return;
+    if(!jid) return NO;
     NSString* query = [NSString stringWithFormat:@"select count(jid) from muteList where jid=?"];
     NSArray* params = @[jid];
-    [self.db executeScalar:query andArguments:params withCompletion:^(NSObject *val) {
+    NSObject* val = [self.db executeScalar:query andArguments:params];
         NSNumber* count = (NSNumber *) val;
-        BOOL toreturn=NO;
-        if(count.integerValue > 0)
-        {
-            toreturn=YES;
-        }
-        if(completion) completion(toreturn);
-    }];
+    BOOL toreturn = NO;
+    if(count.integerValue > 0)
+    {
+        toreturn = YES;
+    }
+    return toreturn;
 }
 
 
@@ -2438,20 +2297,19 @@ static NSDateFormatter* dbFormatter;
     [self.db executeNonQuery:query andArguments:params];
 }
 
--(void) isBlockedJid:(NSString*) jid withCompletion: (void (^)(BOOL))completion
+-(BOOL) isBlockedJid:(NSString*) jid
 {
-    if(!jid) return completion(NO);
+    if(!jid) return NO;
     NSString* query = [NSString stringWithFormat:@"select count(jid) from blockList where jid=?"];
     NSArray* params = @[jid];
-    [self.db executeScalar:query andArguments:params withCompletion:^(NSObject *val) {
-        NSNumber *count= (NSNumber *) val;
-        BOOL toreturn=NO;
-        if(count.integerValue>0)
-        {
-            toreturn=YES;
-        }
-        if(completion) completion(toreturn);
-    }];
+    NSObject* val = [self.db executeScalar:query andArguments:params];
+    NSNumber* count = (NSNumber *) val;
+    BOOL toreturn = NO;
+    if(count.integerValue > 0)
+    {
+        toreturn = YES;
+    }
+    return toreturn;
 }
 
 -(BOOL) isPinnedChat:(NSString*) accountNo andBuddyJid:(NSString*) buddyJid
@@ -2496,15 +2354,14 @@ static NSDateFormatter* dbFormatter;
     [self.db executeNonQuery:query andArguments:params];
 }
 
--(void) imageCacheForUrl:(NSString*) url withCompletion: (void (^)(NSString *path))completion
+-(NSString*) imageCacheForUrl:(NSString*) url
 {
-    if(!url) return;
+    if(!url) return nil;
     NSString* query = [NSString stringWithFormat:@"select path from imageCache where url=?"];
     NSArray* params = @[url];
-    [self.db executeScalar:query andArguments:params withCompletion:^(NSObject *val) {
-        NSString *path= (NSString *) val;
-        if(completion) completion(path);
-    }];
+    NSObject* val = [self.db executeScalar:query andArguments:params];
+    NSString* path = (NSString *) val;
+    return path;
 }
 
 -(NSMutableArray*) allAttachmentsFromContact:(NSString*) contact forAccount:(NSString*) accountNo

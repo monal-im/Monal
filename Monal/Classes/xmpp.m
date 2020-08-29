@@ -1242,9 +1242,9 @@ NSString *const kXMPPPresence = @"presence";
 
                     if(![messageNode.from isEqualToString:
                         self.connectionProperties.identity.jid]) {
-                        [[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:self->_accountNo withCompletion:notify];
+                        notify([[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:self->_accountNo]);
                     } else  {
-                        [[DataLayer sharedInstance] addActiveBuddies:messageNode.to forAccount:self->_accountNo withCompletion:notify];
+                        notify([[DataLayer sharedInstance] addActiveBuddies:messageNode.to forAccount:self->_accountNo]);
                     }
                 }
                 else {
@@ -1322,7 +1322,7 @@ NSString *const kXMPPPresence = @"presence";
                         contact.statusMessage=presenceNode.status;
 
                         //add contact if possible (ignore already existing contacts)
-                        [[DataLayer sharedInstance] addContact:[presenceNode.user copy] forAccount:self->_accountNo fullname:@"" nickname:@"" andMucNick:nil withCompletion:nil];
+                        [[DataLayer sharedInstance] addContact:[presenceNode.user copy] forAccount:self->_accountNo fullname:@"" nickname:@"" andMucNick:nil];
 
                         //update buddy state
                         [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self->_accountNo];
@@ -1347,17 +1347,16 @@ NSString *const kXMPPPresence = @"presence";
                             //check for vcard change
                             if(presenceNode.photoHash)
                             {
-                                [[DataLayer sharedInstance]  contactHash:[presenceNode.user copy] forAccount:self->_accountNo withCompeltion:^(NSString *iconHash) {
-                                    if([presenceNode.photoHash isEqualToString:iconHash])
-                                    {
-                                        DDLogVerbose(@"photo hash is the  same");
-                                    }
-                                    else
-                                    {
-                                        [[DataLayer sharedInstance] setContactHash:presenceNode forAccount:self->_accountNo];
-                                        [self getVCard:presenceNode.user];
-                                    }
-                                }];
+                                NSString* iconHash = [[DataLayer sharedInstance]  contactHash:[presenceNode.user copy] forAccount:self->_accountNo];
+                                if([presenceNode.photoHash isEqualToString:iconHash])
+                                {
+                                    DDLogVerbose(@"photo hash is the  same");
+                                }
+                                else
+                                {
+                                    [[DataLayer sharedInstance] setContactHash:presenceNode forAccount:self->_accountNo];
+                                    [self getVCard:presenceNode.user];
+                                }
                             }
                         }
                     }
@@ -2360,15 +2359,12 @@ NSString *const kXMPPPresence = @"presence";
 {
     for (NSDictionary *dic in self.rosterList)
     {
-        [[DataLayer sharedInstance] contactForUsername:[dic objectForKey:@"jid"] forAccount:self.accountNo withCompletion:^(NSArray * result) {
-
-            MLContact *row = result.firstObject;
-            if (row.fullName.length==0)
-            {
-                [self getVCard:row.contactJid];
-            }
-
-        }];
+        NSArray* result = [[DataLayer sharedInstance] contactForUsername:[dic objectForKey:@"jid"] forAccount:self.accountNo];
+        MLContact *row = result.firstObject;
+        if (row.fullName.length==0)
+        {
+            [self getVCard:row.contactJid];
+        }
     }
 
 }
@@ -2700,21 +2696,17 @@ NSString *const kXMPPPresence = @"presence";
     //confirmation of set call after we accepted
     if([iqNode.idval isEqualToString:self.jingle.idval])
     {
-        NSString* from= iqNode.user;
-        [[DataLayer sharedInstance] fullNameForContact:from inAccount:self.accountNo withCompeltion:^(NSString *name) {
-            NSString *fullName=name;
-            if(!fullName) fullName=from;
+        NSString* from = iqNode.user;
+        NSString* fullName = [[DataLayer sharedInstance] fullNameForContact:from inAccount:self.accountNo];
+        if(!fullName) fullName = from;
+        NSDictionary* userDic=@{@"buddy_name":from,
+                                @"full_name":fullName,
+                                kAccountID:self->_accountNo
+        };
+        [[NSNotificationCenter defaultCenter]
+         postNotificationName: kMonalCallStartedNotice object: userDic];
 
-            NSDictionary* userDic=@{@"buddy_name":from,
-                                    @"full_name":fullName,
-                                    kAccountID:self->_accountNo
-            };
-
-            [[NSNotificationCenter defaultCenter]
-             postNotificationName: kMonalCallStartedNotice object: userDic];
-
-            [self.jingle rtpConnect];
-        }];
+        [self.jingle rtpConnect];
         return;
     }
 

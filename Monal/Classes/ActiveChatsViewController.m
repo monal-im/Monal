@@ -304,16 +304,15 @@
         UINavigationController *nav = segue.destinationViewController;
         ContactsViewController* contacts = (ContactsViewController *)nav.topViewController;
         contacts.selectContact = ^(MLContact *selectedContact) {
-            [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId withCompletion:^(BOOL success) {
-                //no success may mean its already there
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
-                        NSIndexPath *path =[NSIndexPath indexPathForRow:0 inSection:0];
-                        [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
-                        [self presentChatWithRow:selectedContact];
-                    }];
-                });
-            }];
+            [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId];
+            //no success may mean its already there
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
+                    NSIndexPath *path =[NSIndexPath indexPathForRow:0 inSection:0];
+                    [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
+                    [self presentChatWithRow:selectedContact];
+                }];
+            });
         };
     }
     
@@ -322,17 +321,15 @@
           UINavigationController *nav = segue.destinationViewController;
           MLNewViewController* newScreen = (MLNewViewController *)nav.topViewController;
           newScreen.selectContact = ^(MLContact *selectedContact) {
-              [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId withCompletion:^(BOOL success) {
-                  //no success may mean its already there
-                  dispatch_async(dispatch_get_main_queue(), ^{
-                      [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
-                          NSIndexPath *path =[NSIndexPath indexPathForRow:0 inSection:0];
-                                              [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
-                                              [self presentChatWithRow:selectedContact];
-                      }];
-                  });
-              }];
-              
+              [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId];
+              //no success may mean its already there
+              dispatch_async(dispatch_get_main_queue(), ^{
+                  [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
+                      NSIndexPath *path =[NSIndexPath indexPathForRow:0 inSection:0];
+                                          [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
+                                          [self presentChatWithRow:selectedContact];
+                  }];
+              });
           };
       }
 }
@@ -389,40 +386,38 @@
         }
     });
     
-    [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:row.accountId withCompletion:^(NSMutableArray *messages) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if(messages.count>0)
+    NSMutableArray* messages = [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:row.accountId];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(messages.count > 0)
+        {
+            MLMessage *messageRow = messages[0];
+            if([messageRow.messageType isEqualToString:kMessageTypeUrl])
             {
-                MLMessage *messageRow = messages[0];
-                if([messageRow.messageType isEqualToString:kMessageTypeUrl])
-                {
-                    [cell showStatusText:NSLocalizedString(@"🔗 A Link",@ "")];
-                } else if([messageRow.messageType isEqualToString:kMessageTypeImage])
-                {
-                    [cell showStatusText:NSLocalizedString(@"📷 An Image",@ "")];
-                } else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft]) {
-                    NSString* draftPreview = [NSString stringWithFormat:NSLocalizedString(@"Draft: %@",@ ""), messageRow.messageText];
-                    [cell showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, 6)];
-                } else if([messageRow.messageType isEqualToString:kMessageTypeGeo])
-                {
-                    [cell showStatusText:NSLocalizedString(@"📍 A Location",@ "")];
-                } else  {
-                    [cell showStatusText:messageRow.messageText];
-                }
-                
-                if(messageRow.timestamp) {
-                    cell.time.text = [self formattedDateWithSource:messageRow.timestamp];
-                    cell.time.hidden=NO;
-                } else  {
-                    cell.time.hidden=YES;
-                }
+                [cell showStatusText:NSLocalizedString(@"🔗 A Link",@ "")];
+            } else if([messageRow.messageType isEqualToString:kMessageTypeImage])
+            {
+                [cell showStatusText:NSLocalizedString(@"📷 An Image",@ "")];
+            } else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft]) {
+                NSString* draftPreview = [NSString stringWithFormat:NSLocalizedString(@"Draft: %@",@ ""), messageRow.messageText];
+                [cell showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, 6)];
+            } else if([messageRow.messageType isEqualToString:kMessageTypeGeo])
+            {
+                [cell showStatusText:NSLocalizedString(@"📍 A Location",@ "")];
             } else  {
-                [cell showStatusText:nil];
-                DDLogWarn(NSLocalizedString(@"Active chat but no messages found in history for %@.",@ ""), row.contactJid);
+                [cell showStatusText:messageRow.messageText];
             }
             
-        });
-    }];
+            if(messageRow.timestamp) {
+                cell.time.text = [self formattedDateWithSource:messageRow.timestamp];
+                cell.time.hidden=NO;
+            } else  {
+                cell.time.hidden=YES;
+            }
+        } else  {
+            [cell showStatusText:nil];
+            DDLogWarn(NSLocalizedString(@"Active chat but no messages found in history for %@.",@ ""), row.contactJid);
+        }
+    });
     
     [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
             cell.userImage.image=image;

@@ -79,8 +79,8 @@
 
     //some settings (e.g. truncate is faster than delete)
     sqlite3_busy_timeout(self->database, 4000);
-    [self executeNonQuery:@"pragma synchronous=NORMAL;" andArguments:nil];
-    [self executeNonQuery:@"pragma truncate;" andArguments:nil];
+    [self executeNonQuery:@"pragma synchronous=NORMAL;"];
+    [self executeNonQuery:@"pragma truncate;"];
 
     return self;
 }
@@ -101,7 +101,6 @@
 
 -(sqlite3_stmt*) prepareQuery:(NSString*) query withArgs:(NSArray*) args
 {
-    NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
     sqlite3_stmt* statement;
 
     if(sqlite3_prepare_v2(self->database, [query cStringUsingEncoding:NSUTF8StringEncoding], -1, &statement, NULL) != SQLITE_OK)
@@ -241,7 +240,7 @@
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
     threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:[threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] - 1];
     if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
-        [self executeNonQuery:@"COMMIT;" andArguments:nil];		//commit only outermost transaction
+        [self executeNonQuery:@"COMMIT;" andArguments:@[]];		//commit only outermost transaction
 }
 
 -(NSObject*) executeScalar:(NSString*) query
@@ -336,38 +335,7 @@
 
 -(void) executeScalar:(NSString*) query withCompletion:(void (^)(NSObject*)) completion
 {
-    [self executeScalar:query andArguments:@[] withCompletion:completion];
-}
-
--(void) executeScalar:(NSString*) query andArguments:(NSArray*) args withCompletion:(void (^)(NSObject*)) completion
-{
-    NSObject* retval = [self executeScalar:query andArguments:args];
-    if(completion)
-        completion(retval);
-}
-
--(void) executeReader:(NSString*) query withCompletion:(void (^)(NSMutableArray*)) completion
-{
-    [self executeReader:query andArguments:@[] withCompletion:completion];
-}
-
--(void) executeReader:(NSString*) query andArguments:(NSArray*) args withCompletion:(void (^)(NSMutableArray*)) completion
-{
-    NSMutableArray* retval = [self executeReader:query andArguments:args];
-    if(completion)
-        completion(retval);
-}
-
--(void) executeNonQuery:(NSString*) query withCompletion:(void (^)(BOOL)) completion
-{
-    [self executeNonQuery:query andArguments:@[] withCompletion:completion];
-}
-
--(void) executeNonQuery:(NSString*) query andArguments:(NSArray*) args  withCompletion:(void (^)(BOOL)) completion
-{
-    BOOL retval = [self executeNonQuery:query andArguments:args];
-    if(completion)
-        completion(retval);
+    [self executeScalar:query andArguments:@[]];
 }
 
 -(NSNumber*) lastInsertId

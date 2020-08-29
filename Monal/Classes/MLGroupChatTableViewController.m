@@ -51,13 +51,12 @@
     self.favorites = [[NSMutableArray alloc] init];
     for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
     {
-        [[DataLayer sharedInstance] mucFavoritesForAccount:account.accountNo withCompletion:^(NSMutableArray *results) {
-            [self.favorites addObjectsFromArray:results];
-            dispatch_async(dispatch_get_main_queue(),^(){
-                [self.tableView reloadData];
-            });
+        NSMutableArray* results = [[DataLayer sharedInstance] mucFavoritesForAccount:account.accountNo];
+        [self.favorites addObjectsFromArray:results];
+        dispatch_async(dispatch_get_main_queue(),^(){
+            [self.tableView reloadData];
+        });
             
-        }];
     }
 }
 
@@ -116,14 +115,10 @@
     
     xmpp* xmppAccount =[[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%@",account]];
     
-    [[DataLayer sharedInstance] addContact:[dic objectForKey:@"room"] forAccount:[NSString stringWithFormat:@"%@", account] fullname:@"" nickname:@"" andMucNick:[dic objectForKey:@"nick"] withCompletion:^(BOOL success) {
-        if(success)
-        [[DataLayer sharedInstance] updateOwnNickName:[dic objectForKey:@"nick"] forMuc:[dic objectForKey:@"room"] andServer:xmppAccount.connectionProperties.conferenceServer forAccount:[NSString stringWithFormat:@"%@", account] withCompletion:^(BOOL success) {
-            
-        }];
-        
-    }];
-    
+    BOOL success = [[DataLayer sharedInstance] addContact:[dic objectForKey:@"room"] forAccount:[NSString stringWithFormat:@"%@", account] fullname:@"" nickname:@"" andMucNick:[dic objectForKey:@"nick"]];
+    if(success)
+        [[DataLayer sharedInstance] updateOwnNickName:[dic objectForKey:@"nick"] forMuc:[dic objectForKey:@"room"] andServer:xmppAccount.connectionProperties.conferenceServer forAccount:[NSString stringWithFormat:@"%@", account]];
+
     MLContact *group = [[MLContact alloc] init];
     group.isGroup=YES;
     group.accountId=[NSString stringWithFormat:@"%@", account];
@@ -152,9 +147,7 @@
         
         NSNumber *account=[dic objectForKey:@"account_id"];
   
-        [[DataLayer sharedInstance] deleteMucFavorite:[dic objectForKey:@"mucid"] forAccountId:account.integerValue withCompletion:^(BOOL success) {
-
-        }];
+        [[DataLayer sharedInstance] deleteMucFavorite:[dic objectForKey:@"mucid"] forAccountId:account.integerValue];
  
         [self.favorites removeObjectAtIndex:indexPath.row];
         

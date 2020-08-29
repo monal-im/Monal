@@ -23,13 +23,11 @@
 
 -(void) viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    [[DataLayer sharedInstance] contactRequestsForAccountWithCompletion:^(NSMutableArray *result) {
-        self.requests=result;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.tableView reloadData];
-        });
-    }];
-
+    NSMutableArray* result = [[DataLayer sharedInstance] contactRequestsForAccount];
+    self.requests = result;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.tableView reloadData];
+    });
 }
 
 #pragma mark - Table view data source

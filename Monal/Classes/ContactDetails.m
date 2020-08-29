@@ -72,8 +72,7 @@
     
     self.accountNo = self.contact.accountId;
     //making sure there is an entry at least
-    [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" andMucNick:nil  withCompletion:^(BOOL success) {
-    }];
+    [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" andMucNick:nil];
     
 	if (!self.contact.isGroup) {
         [self querySoftwareVersion];
@@ -593,13 +592,12 @@
 
 -(void) refreshMute
 {
-    [[DataLayer sharedInstance] isMutedJid:self.contact.contactJid withCompletion:^(BOOL muted) {
-        self.isMuted= muted;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSIndexPath *path = [NSIndexPath indexPathForRow:0 inSection:0];
-            [self.tableView reloadRowsAtIndexPaths:@[path] withRowAnimation:UITableViewRowAnimationNone];
-        });
-    }];
+    BOOL muted = [[DataLayer sharedInstance] isMutedJid:self.contact.contactJid];
+    self.isMuted = muted;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSIndexPath *path = [NSIndexPath indexPathForRow:0 inSection:0];
+        [self.tableView reloadRowsAtIndexPaths:@[path] withRowAnimation:UITableViewRowAnimationNone];
+    });
 }
 
 -(IBAction) toggleEncryption:(id)sender

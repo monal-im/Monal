@@ -145,15 +145,13 @@ static NSMutableDictionary* _typingNotifications;
             {
                 messageType=kMessageTypeStatus;
                 
-                [[DataLayer sharedInstance] mucSubjectforAccount:self.accountNo andRoom:messageNode.from withCompletion:^(NSString *currentSubject) {
-                    if(![messageNode.subject isEqualToString:currentSubject])
-                    {
-                        [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from withCompletion:nil];
-                        if(self.postPersistAction)
-                            self.postPersistAction(YES, encrypted, showAlert, messageNode.subject, messageType);
-                    }
-                }];
-                
+                NSString* currentSubject = [[DataLayer sharedInstance] mucSubjectforAccount:self.accountNo andRoom:messageNode.from];
+                if(![messageNode.subject isEqualToString:currentSubject])
+                {
+                    [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from];
+                    if(self.postPersistAction)
+                        self.postPersistAction(YES, encrypted, showAlert, messageNode.subject, messageType);
+                }
                 return;
             }
             

@@ -347,13 +347,12 @@
             [[MLXMPPManager sharedInstance] joinRoom:contact.contactJid withNick:account.connectionProperties.identity.user andPassword:mucPassword forAccounId:contact.accountId];
         }
         
-        [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId withCompletion:^(BOOL success) {
-            //no success may mean its already there
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [(ActiveChatsViewController *) self.activeChats presentChatWithRow:contact];
-                [(ActiveChatsViewController *) self.activeChats refreshDisplay];
-            });
-        }];
+        [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
+        //no success may mean its already there
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [(ActiveChatsViewController *) self.activeChats presentChatWithRow:contact];
+            [(ActiveChatsViewController *) self.activeChats refreshDisplay];
+        });
     }
 }
 

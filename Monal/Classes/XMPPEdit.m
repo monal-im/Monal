@@ -228,8 +228,8 @@
     }
     else
     {
-        [[DataLayer sharedInstance] updateAccounWithDictionary:dic andCompletion:^(BOOL result) {
-
+        BOOL updatedAccount = [[DataLayer sharedInstance] updateAccounWithDictionary:dic];
+        if(updatedAccount) {
             [[MLXMPPManager sharedInstance] updatePassword:self.password forAccount:self.accountno];
             if(self.enabled)
             {
@@ -240,7 +240,7 @@
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
             }
             [self showSuccessHUD];
-        }];
+        }
 
         [[DataLayer sharedInstance] resetContactsForAccount:self.accountno];
     }

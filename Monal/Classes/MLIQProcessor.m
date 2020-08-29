@@ -382,22 +382,19 @@
             }
             
             DDLogVerbose(@"Adding contact %@ (%@) to database", [contact objectForKey:@"jid"], [contact objectForKey:@"name"]);
-            [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
+            BOOL success = [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
                                         forAccount:self.accountNo
                                           fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
                                           nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
-                                        andMucNick:nil
-                                    withCompletion:^(BOOL success) {
+                                                       andMucNick:nil];
                 
-                [[DataLayer sharedInstance] setSubscription:[contact objectForKey:@"subscription"]
-                                                     andAsk:[contact objectForKey:@"ask"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo];
-                
-                if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
-                {
-                    [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo ] ;
-                }
-            }];
+            [[DataLayer sharedInstance] setSubscription:[contact objectForKey:@"subscription"]
+                                                 andAsk:[contact objectForKey:@"ask"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo];
             
+            if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
+            {
+                [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo ] ;
+            }
         }
     }
     

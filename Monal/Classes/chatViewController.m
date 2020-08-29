@@ -1774,6 +1774,8 @@ bool viewIsScrolling = NO;
 
         if([oldMessages count] < kMonalChatFetchedMsgCnt) {
             // FIXME: MAM
+            // currLastMsg.stanzaId
+            // self.contact.contactJid
         }
 
         // Insert old messages into messageTable

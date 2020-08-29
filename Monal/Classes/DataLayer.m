@@ -9,6 +9,7 @@
 #import "DataLayer.h"
 #import "MLSQLite.h"
 #import "HelperTools.h"
+#import "MLConstants.h"
 
 @interface DataLayer()
 @property (readonly, strong) MLSQLite* db;
@@ -1460,8 +1461,10 @@ static NSDateFormatter* dbFormatter;
     if(!accountNo || !buddy) {
         return nil;
     };
-
-    return [self messagesForContact:buddy forAccount:accountNo beforeMsgHistoryID:[self lastMessageHistoryIdForContact:buddy forAccount:accountNo]];
+    NSNumber* lastMsgHistID = [self lastMessageHistoryIdForContact:buddy forAccount:accountNo];
+    // Increment msgHistId -> all messages < msgHistId are feteched
+    lastMsgHistID = [NSNumber numberWithInt:[lastMsgHistID intValue] + 1];
+    return [self messagesForContact:buddy forAccount:accountNo beforeMsgHistoryID:lastMsgHistID];
 }
 
 //message history
@@ -1470,8 +1473,9 @@ static NSDateFormatter* dbFormatter;
     if(!accountNo || !buddy || !msgHistoryID) {
         return nil;
     };
-    NSString* query = [NSString stringWithFormat:@"select af, message_from, message_to, account_id, message, thetime, message_history_id, sent, messageid, messageType, received, encrypted, previewImage, previewText, unread, errorType, errorReason from (select ifnull(actual_from, message_from) as af, message_from, message_to, account_id, message, received, encrypted, timestamp  as thetime, message_history_id, sent,messageid, messageType, previewImage, previewText, unread, errorType, errorReason from message_history where account_id=? and (message_from=? or message_to=?) order by message_history_id desc limit 50) order by thetime asc"];
-    NSArray* params = @[accountNo, buddy, buddy];
+    NSString* query = [NSString stringWithFormat:@"select af, message_from, message_to, account_id, message, thetime, message_history_id, sent, messageid, messageType, received, encrypted, previewImage, previewText, unread, errorType, errorReason from (select ifnull(actual_from, message_from) as af, message_from, message_to, account_id, message, received, encrypted, timestamp  as thetime, message_history_id, sent,messageid, messageType, previewImage, previewText, unread, errorType, errorReason from message_history where account_id=? and (message_from=? or message_to=?) and message_history_id<? order by message_history_id desc limit ?) order by thetime asc"];
+    NSNumber* msgLimit = [NSNumber numberWithInt:kMonalChatFetchedMsgCnt];
+    NSArray* params = @[accountNo, buddy, buddy, msgHistoryID, msgLimit];
     NSArray* result = [self.db executeReader:query andArguments:params];
     NSMutableArray* toReturn = [[NSMutableArray alloc] initWithCapacity:result.count];
     [result enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {

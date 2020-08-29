@@ -70,6 +70,7 @@ typedef void (^monal_void_block_t)(void);
 
 // max count of char's in a single message (both: sending and receiving)
 #define kMonalChatMaxAllowedTextLen 2048
+#define kMonalChatFetchedMsgCnt 50
 
 //contact cells
 #define kusernameKey @"username"
@@ -83,7 +84,7 @@ typedef void (^monal_void_block_t)(void);
 #define kinfoTypeKey @"type"
 #define kinfoStatusKey @"status"
 
-//temp not for relase
+//temp not for release
 #ifndef DEBUG
 #define DEBUG 1
 #endif

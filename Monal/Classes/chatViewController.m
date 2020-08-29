@@ -68,6 +68,12 @@
 
 @implementation chatViewController
 
+enum chatViewControllerSections {
+    reloadBoxSection,
+    messagesSection,
+    chatViewControllerSectionCnt
+};
+
 -(void) setup
 {
     self.hidesBottomBarWhenPushed = YES;
@@ -519,7 +525,7 @@
         unreadStatus.actualFrom = self.jid;
 
         NSInteger unreadPos = messages.count - 1;
-        while(unreadPos>=0)
+        while(unreadPos >= 0)
         {
             MLMessage* row = [messages objectAtIndex:unreadPos];
             if(!row.unread)
@@ -1020,7 +1026,7 @@
                     [self.messageList addObject:messageObj];
                     NSInteger bottom = [self.messageList count]-1;
                     if(bottom>=0) {
-                        NSIndexPath* path1 = [NSIndexPath indexPathForRow:bottom inSection:0];
+                        NSIndexPath* path1 = [NSIndexPath indexPathForRow:bottom inSection:messagesSection];
                         [self->_messageTable insertRowsAtIndexPaths:@[path1]
                                                    withRowAnimation:UITableViewRowAnimationNone];
                     }
@@ -1107,7 +1113,7 @@
                 NSInteger bottom =  self.messageList.count-1;
                 if(bottom >= 0) {
                     
-                    path1 = [NSIndexPath indexPathForRow:bottom  inSection:0];
+                    path1 = [NSIndexPath indexPathForRow:bottom  inSection:messagesSection];
                     [self->_messageTable insertRowsAtIndexPaths:@[path1]
                                                withRowAnimation:UITableViewRowAnimationBottom];
                 }
@@ -1134,7 +1140,7 @@
                 //we don't want messages that have been received to be marked as not sent
                 if(message.hasBeenReceived && !sent)
                     message.hasBeenSent = YES;
-                indexPath = [NSIndexPath indexPathForRow:row inSection:0];
+                indexPath = [NSIndexPath indexPathForRow:row inSection:messagesSection];
                 break;
             }
             row++;
@@ -1158,7 +1164,7 @@
             if([message.messageId isEqualToString:messageId]) {
                 message.hasBeenSent = YES;
                 message.hasBeenReceived = received;
-                indexPath = [NSIndexPath indexPathForRow:row inSection:0];
+                indexPath = [NSIndexPath indexPathForRow:row inSection:messagesSection];
                 break;
             }
             row++;
@@ -1196,7 +1202,7 @@
             {
                 message.errorType = [dic objectForKey:@"errorType"];
                 message.errorReason = [dic objectForKey:@"errorReason"];
-                indexPath = [NSIndexPath indexPathForRow:row inSection:0];
+                indexPath = [NSIndexPath indexPathForRow:row inSection:messagesSection];
                 break;
             }
             row++;
@@ -1221,10 +1227,10 @@
 {
     if(self.messageList.count==0) return;
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSInteger bottom = [self.messageTable numberOfRowsInSection:0];
+        NSInteger bottom = [self.messageTable numberOfRowsInSection:messagesSection];
         if(bottom>0)
         {
-            NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:0];
+            NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:messagesSection];
           //  if(![self.messageTable.indexPathsForVisibleRows containsObject:path1])
             {
                 [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
@@ -1326,17 +1332,17 @@
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 1;
+    return chatViewControllerSectionCnt;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    NSInteger toReturn=0;
+    NSInteger toReturn = 0;
     
     switch (section) {
-        case 0:
+        case messagesSection:
         {
-            toReturn=[self.messageList count];
+            toReturn = [self.messageList count];
             break;
         }
         default:
@@ -1348,6 +1354,11 @@
 
 -(UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
 {
+    if(indexPath.section == reloadBoxSection) {
+        return nil;
+    } else if(indexPath.section != messagesSection)
+        return nil;
+
     MLBaseCell* cell;
     
     MLMessage* row;
@@ -1739,6 +1750,44 @@
 - (void)tableView:(UITableView *)tableView performAction:(SEL)action forRowAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender
 {
     
+}
+
+bool viewIsScrolling = NO;
+
+-(void) scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    // get current scroll position (y-axis)
+    CGFloat curOffset = scrollView.contentOffset.y;
+
+    // reached top
+    if(curOffset < -180 && !viewIsScrolling) {
+        // load old messages
+        if([self->_messageTable numberOfRowsInSection:messagesSection] == 0) {
+            // FIXME: MAM
+            return;
+        }
+        viewIsScrolling = YES;
+        NSIndexPath* firstIndex = [NSIndexPath indexPathForRow:0  inSection:messagesSection];
+
+        // Load older messages from db
+        MLMessage* currLastMsg = [self.messageList objectAtIndex:0];
+        NSMutableArray* oldMessages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId beforeMsgHistoryID:currLastMsg.messageDBId];
+
+        if([oldMessages count] < kMonalChatFetchedMsgCnt) {
+            // FIXME: MAM
+        }
+
+        // Insert old messages into messageTable
+        for(size_t msgIdx = [oldMessages count]; msgIdx > 0; msgIdx--) {
+            MLMessage* msg = [oldMessages objectAtIndex:(msgIdx - 1)];
+            [self->_messageTable beginUpdates];
+            [self.messageList insertObject:msg atIndex:0];
+            [self->_messageTable insertRowsAtIndexPaths:@[firstIndex] withRowAnimation:UITableViewRowAnimationNone];
+            [self->_messageTable endUpdates];
+        }
+    } else {
+        viewIsScrolling = NO;
+    }
 }
 
 -(BOOL) canBecomeFirstResponder

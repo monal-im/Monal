@@ -322,6 +322,11 @@
     return toReturn;
 }
 
+-(BOOL) executeNonQuery:(NSString*) query
+{
+    return [self executeNonQuery:query andArguments:@[] withException:YES];
+}
+
 -(BOOL) executeNonQuery:(NSString*) query andArguments:(NSArray *) args
 {
     return [self executeNonQuery:query andArguments:args withException:YES];
@@ -331,17 +336,7 @@
 
 -(void) executeScalar:(NSString*) query withCompletion:(void (^)(NSObject*)) completion
 {
-    [self executeScalar:query andArguments:nil withCompletion:completion];
-}
-
--(void) executeReader:(NSString*) query withCompletion:(void (^)(NSMutableArray*)) completion
-{
-    [self executeReader:query andArguments:nil withCompletion:completion];
-}
-
--(void) executeNonQuery:(NSString*) query withCompletion:(void (^)(BOOL)) completion
-{
-    [self executeNonQuery:query andArguments:nil withCompletion:completion];
+    [self executeScalar:query andArguments:@[] withCompletion:completion];
 }
 
 -(void) executeScalar:(NSString*) query andArguments:(NSArray*) args withCompletion:(void (^)(NSObject*)) completion
@@ -351,11 +346,21 @@
         completion(retval);
 }
 
+-(void) executeReader:(NSString*) query withCompletion:(void (^)(NSMutableArray*)) completion
+{
+    [self executeReader:query andArguments:@[] withCompletion:completion];
+}
+
 -(void) executeReader:(NSString*) query andArguments:(NSArray*) args withCompletion:(void (^)(NSMutableArray*)) completion
 {
     NSMutableArray* retval = [self executeReader:query andArguments:args];
     if(completion)
         completion(retval);
+}
+
+-(void) executeNonQuery:(NSString*) query withCompletion:(void (^)(BOOL)) completion
+{
+    [self executeNonQuery:query andArguments:@[] withCompletion:completion];
 }
 
 -(void) executeNonQuery:(NSString*) query andArguments:(NSArray*) args  withCompletion:(void (^)(BOOL)) completion

@@ -398,7 +398,11 @@
 {
     DDLogInfo(@"userNotificationCenter:willPresentNotification:withCompletionHandler called");
     //show local notifications while the app is open
-    completionHandler(UNNotificationPresentationOptionAlert);
+    if([notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
+        completionHandler(UNNotificationPresentationOptionNone);
+    } else {
+        completionHandler(UNNotificationPresentationOptionAlert);
+    }
 }
 
 -(void) application:(UIApplication *)application handleActionWithIdentifier:(nullable NSString *)identifier forLocalNotification:(nonnull UILocalNotification *)notification withResponseInfo:(nonnull NSDictionary *)responseInfo completionHandler:(nonnull void (^)(void))completionHandler

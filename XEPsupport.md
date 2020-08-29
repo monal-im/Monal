@@ -25,7 +25,7 @@ _Hint: This is work in progress, everyone is invited to fill up the list._
 |[XEP-0077 In-Band Registration](https://xmpp.org/extensions/xep-0077.html)|:warning:|?|partial, using a hardcoded server|
 |[XEP-0084 User Avatar](https://xmpp.org/extensions/xep-0084.html)|?|?|
 |[XEP-0085 Chat State Notifications](https://xmpp.org/extensions/xep-0085.html)|:heavy_check_mark:|?|[commit](https://github.com/anurodhp/Monal/pull/417/commits/ee5b37e12d7d2cc4e2272baef8375bedfbbe2d82)|
-|[XEP-0092 Software Version](https://xmpp.org/extensions/xep-0092.html)|?|?|
+|[XEP-0092 Software Version](https://xmpp.org/extensions/xep-0092.html)|?|?|pending #432|
 |[XEP-0095 Stream Initiation](https://xmpp.org/extensions/xep-0095.html)|?|?|
 |[XEP-0107 User Mood](https://xmpp.org/extensions/xep-0107.html)|?|?|
 |[XEP-0108 User Activity](https://xmpp.org/extensions/xep-0108.html)|?|?|

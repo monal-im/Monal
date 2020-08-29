@@ -890,3 +890,15 @@
 
 /* No comment provided by engineer. */
 "now" = "now";
+
+/* No comment provided by engineer. */
+"Name: " = "Name: ";
+
+/* No comment provided by engineer. */
+"Os: " = "Os: ";
+
+/* No comment provided by engineer. */
+"Software Version" = "Software Version";
+
+/* No comment provided by engineer. */
+"Version: " = "Version: ";

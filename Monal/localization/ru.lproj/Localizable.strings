@@ -888,3 +888,15 @@
 
 /* No comment provided by engineer. */
 "Jabber, Prosody, ejabberd etc.   " = "Jabber, Prosody, ejabberd etc.   ";
+
+/* No comment provided by engineer. */
+"Name: " = "Name: ";
+
+/* No comment provided by engineer. */
+"Os: " = "Os: ";
+
+/* No comment provided by engineer. */
+"Software Version" = "Software Version";
+
+/* No comment provided by engineer. */
+"Version: " = "Version: ";

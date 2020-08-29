@@ -2329,7 +2329,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) queryOMEMODevicesFrom:(NSString *) jid
 {
-    if(!self.connectionProperties.supportsPubSub) return;
+    if(!self.connectionProperties.supportsPubSub && self.accountState >= kStateBound) return;
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query setiqTo:jid];
     [query requestDevices];

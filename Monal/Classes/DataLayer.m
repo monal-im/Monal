@@ -1212,7 +1212,7 @@ static NSDateFormatter* dbFormatter;
 
     if(accountJid != nil)
     {
-        NSString* query = [NSString stringWithFormat:@"select distinct date(timestamp) as the_date from message_history where account_id=? and message_from=? or message_to=? order by timestamp desc"];
+        NSString* query = [NSString stringWithFormat:@"select distinct date(timestamp) as the_date from message_history where account_id=? and message_from=? or message_to=? order by timestamp, message_history_id desc"];
         NSArray* params = @[accountNo, buddy, buddy];
         //DDLogVerbose(query);
         NSArray* toReturn = [self.db executeReader:query andArguments:params];
@@ -1385,7 +1385,7 @@ static NSDateFormatter* dbFormatter;
     if(!accountNo || !buddy || !msgHistoryID) {
         return nil;
     };
-    NSString* query = [NSString stringWithFormat:@"select af, message_from, message_to, account_id, message, thetime, message_history_id, sent, messageid, messageType, received, encrypted, previewImage, previewText, unread, errorType, errorReason from (select ifnull(actual_from, message_from) as af, message_from, message_to, account_id, message, received, encrypted, timestamp  as thetime, message_history_id, sent,messageid, messageType, previewImage, previewText, unread, errorType, errorReason from message_history where account_id=? and (message_from=? or message_to=?) and message_history_id<? order by message_history_id desc limit ?) order by thetime asc"];
+    NSString* query = [NSString stringWithFormat:@"select af, message_from, message_to, account_id, message, thetime, message_history_id, sent, messageid, messageType, received, encrypted, previewImage, previewText, unread, errorType, errorReason from (select ifnull(actual_from, message_from) as af, message_from, message_to, account_id, message, received, encrypted, timestamp  as thetime, message_history_id, sent,messageid, messageType, previewImage, previewText, unread, errorType, errorReason from message_history where account_id=? and (message_from=? or message_to=?) and message_history_id<? order by message_history_id desc limit ?) order by message_history_id asc"];
     NSNumber* msgLimit = [NSNumber numberWithInt:kMonalChatFetchedMsgCnt];
     NSArray* params = @[accountNo, buddy, buddy, msgHistoryID, msgLimit];
     NSArray* result = [self.db executeReader:query andArguments:params];

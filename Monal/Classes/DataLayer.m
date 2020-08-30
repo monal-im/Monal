@@ -888,11 +888,10 @@ static NSDateFormatter* dbFormatter;
 
 -(BOOL) saveMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withComment:(NSString*) comment
 {
-   [self.db beginWriteTransaction];
     NSString* query = [NSString stringWithFormat:@"update buddylist set messageDraft=? where account_id=? and buddy_name=?"];
     NSArray* params = @[comment, accountNo, buddy];
     BOOL success = [self.db executeNonQuery:query andArguments:params];
-    [self.db endWriteTransaction];
+
     return success;
 }
 

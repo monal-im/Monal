@@ -546,27 +546,6 @@ enum chatViewControllerSections {
     [self sendMessage:messageText andMessageID:nil];
 }
 
--(void) sendWithShareSheet {
-    // MLXMPPActivityItem *item = [[MLXMPPActivityItem alloc] initWithPlaceholderItem:@""];
-    
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths objectAtIndex:0]; // Get documents directory
-    NSString *path =[documentsDirectory stringByAppendingPathComponent:@"message.xmpp"];
-    
-    NSURL *url = [NSURL fileURLWithPath:path];
-    NSArray *items =@[url];
-    //    NSArray *exclude =  @[UIActivityTypePostToTwitter, UIActivityTypePostToFacebook,
-    //                          UIActivityTypePostToWeibo,
-    //                          UIActivityTypeMessage, UIActivityTypeMail,
-    //                          UIActivityTypePrint, UIActivityTypeCopyToPasteboard,
-    //                          UIActivityTypeAssignToContact, UIActivityTypeSaveToCameraRoll,
-    //                          UIActivityTypeAddToReadingList, UIActivityTypePostToFlickr,
-    //                          UIActivityTypePostToVimeo, UIActivityTypePostToTencentWeibo];
-    UIActivityViewController *share = [[UIActivityViewController alloc] initWithActivityItems:items applicationActivities:nil];
-    // share.excludedActivityTypes = exclude;
-    [self presentViewController:share animated:YES completion:nil];
-}
-
 -(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID
 {
     DDLogVerbose(@"Sending message");
@@ -1348,6 +1327,8 @@ enum chatViewControllerSections {
 {
     if(indexPath.section == reloadBoxSection) {
         UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"reloadBox" forIndexPath:indexPath];
+        // Remove selection style (if cell is pressed)
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
         return cell;
     } else if(indexPath.section != messagesSection)
         return nil;
@@ -1648,42 +1629,44 @@ enum chatViewControllerSections {
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [self.chatInput resignFirstResponder];
-    MLBaseCell* cell = [tableView cellForRowAtIndexPath:indexPath];
-    if(cell.link)
-    {
-        if([cell respondsToSelector:@selector(openlink:)]) {
-            [(MLChatCell *)cell openlink:self];
-        } else  {
-            self.photos =[[NSMutableArray alloc] init];
-            MLChatImageCell *imageCell = (MLChatImageCell *) cell;
-            IDMPhoto* photo=[IDMPhoto photoWithImage:imageCell.thumbnailImage.image];
-            // photo.caption=[row objectForKey:@"caption"];
-            [self.photos addObject:photo];
-        }
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if(self.photos.count>0) {
-                IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
-                browser.delegate=self;
-               
-                UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close",@"") style:UIBarButtonItemStyleDone target:self action:@selector(closePhotos)];
-                browser.navigationItem.rightBarButtonItem=close;
-                
-                //                browser.displayActionButton = YES; // Show action button to allow sharing, copying, etc (defaults to YES)
-                //                browser.displayNavArrows = NO; // Whether to display left and right nav arrows on toolbar (defaults to NO)
-                //                browser.displaySelectionButtons = NO; // Whether selection buttons are shown on each image (defaults to NO)
-                //                browser.zoomPhotosToFill = YES; // Images that almost fill the screen will be initially zoomed to fill (defaults to YES)
-                //                browser.alwaysShowControls = NO; // Allows to control whether the bars and controls are always visible or whether they fade away to show the photo full (defaults to NO)
-                //                browser.enableGrid = YES; // Whether to allow the viewing of all the photo thumbnails on a grid (defaults to YES)
-                //                browser.startOnGrid = NO; // Whether to start on the grid of thumbnails instead of the first photo (defaults to NO)
-                //
-                UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
-                
-                
-                [self presentViewController:nav animated:YES completion:nil];
+    if(indexPath.section == reloadBoxSection) {
+        [self loadOldMsgHistory];
+    } else if(indexPath.section == messagesSection) {
+        MLBaseCell* cell = [tableView cellForRowAtIndexPath:indexPath];
+        if(cell.link)
+        {
+            if([cell respondsToSelector:@selector(openlink:)]) {
+                [(MLChatCell *)cell openlink:self];
+            } else  {
+                self.photos = [[NSMutableArray alloc] init];
+                MLChatImageCell* imageCell = (MLChatImageCell *) cell;
+                IDMPhoto* photo = [IDMPhoto photoWithImage:imageCell.thumbnailImage.image];
+                // photo.caption=[row objectForKey:@"caption"];
+                [self.photos addObject:photo];
             }
-        });
-        
+
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if(self.photos.count > 0) {
+                    IDMPhotoBrowser* browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
+                    browser.delegate=self;
+
+                    UIBarButtonItem* close = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close", @"") style:UIBarButtonItemStyleDone target:self action:@selector(closePhotos)];
+                    browser.navigationItem.rightBarButtonItem = close;
+
+                    //                browser.displayActionButton = YES; // Show action button to allow sharing, copying, etc (defaults to YES)
+                    //                browser.displayNavArrows = NO; // Whether to display left and right nav arrows on toolbar (defaults to NO)
+                    //                browser.displaySelectionButtons = NO; // Whether selection buttons are shown on each image (defaults to NO)
+                    //                browser.zoomPhotosToFill = YES; // Images that almost fill the screen will be initially zoomed to fill (defaults to YES)
+                    //                browser.alwaysShowControls = NO; // Allows to control whether the bars and controls are always visible or whether they fade away to show the photo full (defaults to NO)
+                    //                browser.enableGrid = YES; // Whether to allow the viewing of all the photo thumbnails on a grid (defaults to YES)
+                    //                browser.startOnGrid = NO; // Whether to start on the grid of thumbnails instead of the first photo (defaults to NO)
+                    //
+                    UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:browser];
+
+                    [self presentViewController:nav animated:YES completion:nil];
+                }
+            });
+        }
     }
 }
 
@@ -1746,7 +1729,6 @@ enum chatViewControllerSections {
 }
 
 bool viewIsScrolling = NO;
-
 -(void) scrollViewDidScroll:(UIScrollView *)scrollView
 {
     // get current scroll position (y-axis)
@@ -1764,28 +1746,33 @@ bool viewIsScrolling = NO;
             return;
         }
         viewIsScrolling = YES;
-        NSIndexPath* firstIndex = [NSIndexPath indexPathForRow:0  inSection:messagesSection];
-
-        // Load older messages from db
-        MLMessage* currLastMsg = [self.messageList objectAtIndex:0];
-        NSMutableArray* oldMessages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId beforeMsgHistoryID:currLastMsg.messageDBId];
-
-        if([oldMessages count] < kMonalChatFetchedMsgCnt) {
-            // FIXME: MAM
-            // currLastMsg.stanzaId
-            // self.contact.contactJid
-        }
-
-        // Insert old messages into messageTable
-        for(size_t msgIdx = [oldMessages count]; msgIdx > 0; msgIdx--) {
-            MLMessage* msg = [oldMessages objectAtIndex:(msgIdx - 1)];
-            [self->_messageTable beginUpdates];
-            [self.messageList insertObject:msg atIndex:0];
-            [self->_messageTable insertRowsAtIndexPaths:@[firstIndex] withRowAnimation:UITableViewRowAnimationNone];
-            [self->_messageTable endUpdates];
-        }
+        [self loadOldMsgHistory];
     } else {
         viewIsScrolling = NO;
+    }
+}
+    
+-(void) loadOldMsgHistory
+{
+    NSIndexPath* firstIndex = [NSIndexPath indexPathForRow:0  inSection:messagesSection];
+
+    // Load older messages from db
+    MLMessage* currLastMsg = [self.messageList objectAtIndex:0];
+    NSMutableArray* oldMessages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId beforeMsgHistoryID:currLastMsg.messageDBId];
+
+    if([oldMessages count] < kMonalChatFetchedMsgCnt) {
+        // FIXME: MAM
+        // currLastMsg.stanzaId
+        // self.contact.contactJid
+    }
+
+    // Insert old messages into messageTable
+    for(size_t msgIdx = [oldMessages count]; msgIdx > 0; msgIdx--) {
+        MLMessage* msg = [oldMessages objectAtIndex:(msgIdx - 1)];
+        [self->_messageTable beginUpdates];
+        [self.messageList insertObject:msg atIndex:0];
+        [self->_messageTable insertRowsAtIndexPaths:@[firstIndex] withRowAnimation:UITableViewRowAnimationNone];
+        [self->_messageTable endUpdates];
     }
 }
 

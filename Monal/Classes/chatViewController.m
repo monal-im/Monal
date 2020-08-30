@@ -1329,33 +1329,34 @@ enum chatViewControllerSections {
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    NSInteger toReturn = 0;
-    
     switch (section) {
+        case reloadBoxSection:
+            return 1;
+            break;
         case messagesSection:
         {
-            toReturn = [self.messageList count];
+            return [self.messageList count];
             break;
         }
         default:
             break;
     }
-    
-    return toReturn;
+    return 0;
 }
 
 -(UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
 {
     if(indexPath.section == reloadBoxSection) {
-        return nil;
+        UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"reloadBox" forIndexPath:indexPath];
+        return cell;
     } else if(indexPath.section != messagesSection)
         return nil;
 
     MLBaseCell* cell;
     
     MLMessage* row;
-    if(indexPath.row<self.messageList.count) {
-        row= [self.messageList objectAtIndex:indexPath.row];
+    if(indexPath.row < self.messageList.count) {
+        row = [self.messageList objectAtIndex:indexPath.row];
     } else  {
         DDLogError(@"Attempt to access beyond bounds");
     }
@@ -1369,9 +1370,9 @@ enum chatViewControllerSections {
     
     if([row.messageType isEqualToString:kMessageTypeStatus])
     {
-        cell=[tableView dequeueReusableCellWithIdentifier:@"StatusCell"];
+        cell = [tableView dequeueReusableCellWithIdentifier:@"StatusCell"];
         cell.messageBody.text = messageText;
-        cell.link=nil;
+        cell.link = nil;
         return cell;
     }
     
@@ -1381,18 +1382,18 @@ enum chatViewControllerSections {
         {
             if([row.messageType isEqualToString:kMessageTypeUrl])
             {
-                cell=[tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
+                cell = [tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
             } else  {
-                cell=[tableView dequeueReusableCellWithIdentifier:@"textInCell"];
+                cell = [tableView dequeueReusableCellWithIdentifier:@"textInCell"];
             }
         }
         else
         {
             if([row.messageType isEqualToString:kMessageTypeUrl])
             {
-                cell=[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
+                cell = [tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
             } else  {
-                cell=[tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
+                cell = [tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
             }
             
         }
@@ -1401,18 +1402,18 @@ enum chatViewControllerSections {
         {
             if([row.messageType isEqualToString:kMessageTypeUrl])
             {
-                cell=[tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
+                cell = [tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
             }  else  {
-                cell=[tableView dequeueReusableCellWithIdentifier:@"textInCell"];
+                cell = [tableView dequeueReusableCellWithIdentifier:@"textInCell"];
             }
         }
         else
         {
             if([row.messageType isEqualToString:kMessageTypeUrl])
             {
-                cell=[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
+                cell = [tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
             } else  {
-                cell=[tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
+                cell = [tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
             }
         }
         
@@ -1423,27 +1424,27 @@ enum chatViewControllerSections {
         MLChatImageCell* imageCell;
         if([from isEqualToString:self.contact.contactJid])
         {
-            imageCell= (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageInCell"];
+            imageCell = (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageInCell"];
             imageCell.outBound=NO;
         }
         else  {
-            imageCell= (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageOutCell"];
+            imageCell = (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageOutCell"];
             imageCell.outBound=YES;
         }
         
         
         if(![imageCell.link isEqualToString:messageText]){
             imageCell.link = messageText;
-            imageCell.thumbnailImage.image=nil;
-            imageCell.loading=NO;
+            imageCell.thumbnailImage.image = nil;
+            imageCell.loading = NO;
             [imageCell loadImageWithCompletion:^{}];
         }
-        cell=imageCell;
+        cell = imageCell;
         
     }
     else if([row.messageType isEqualToString:kMessageTypeUrl])
     {
-        MLLinkCell *toreturn;
+        MLLinkCell* toreturn;
         if([from isEqualToString:self.contact.contactJid]) {
             toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
         }
@@ -1451,12 +1452,12 @@ enum chatViewControllerSections {
             toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
         }
         
-        NSString * cleanLink=[messageText  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        NSArray *parts = [cleanLink componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        NSString* cleanLink = [messageText  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        NSArray* parts = [cleanLink componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         cell.link = parts[0];
         
-        toreturn.messageBody.text =cell.link;
-        toreturn.link=cell.link;
+        toreturn.messageBody.text = cell.link;
+        toreturn.link = cell.link;
         
         if(row.previewText || row.previewImage)
         {
@@ -1470,7 +1471,7 @@ enum chatViewControllerSections {
         {
             [toreturn loadPreviewWithCompletion:^{
                 // prevent repeated calls
-                if(toreturn.messageTitle.text.length==0)
+                if(toreturn.messageTitle.text.length == 0)
                     toreturn.messageTitle.text = @" ";
                 [[DataLayer sharedInstance] setMessageId:row.messageId previewText:toreturn.messageTitle.text andPreviewImage:toreturn.imageUrl.absoluteString];
             }];
@@ -1479,7 +1480,7 @@ enum chatViewControllerSections {
     } else if ([row.messageType isEqualToString:kMessageTypeGeo]) {
         // Parse latitude and longitude
         NSString* geoPattern = @"^geo:(-?(?:90|[1-8][0-9]|[0-9])(?:\\.[0-9]{1,32})?),(-?(?:180|1[0-7][0-9]|[0-9]{1,2})(?:\\.[0-9]{1,32})?)$";
-        NSError *error = NULL;
+        NSError* error = NULL;
         NSRegularExpression* geoRegex = [NSRegularExpression regularExpressionWithPattern:geoPattern
         options:NSRegularExpressionCaseInsensitive
           error:&error];

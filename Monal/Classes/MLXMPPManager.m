@@ -271,18 +271,10 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) checkIfBackgroundTaskIsStillNeeded
 {
-    if(![HelperTools isAppExtension])
+    if(![HelperTools isAppExtension] && [self allAccountsIdle])
     {
-        if([self allAccountsIdle] && _pushCompletion)
-        {
-            DDLogInfo(@"### All accounts idle, calling push completion handler ###");
-            if(_cancelPushTimer)
-                _cancelPushTimer();
-            _pushCompletion(UIBackgroundFetchResultNewData);
-            _pushCompletion = nil;
-            _cancelPushTimer = nil;
-        }
-        if([self allAccountsIdle] && [HelperTools isInBackground])
+        BOOL background = [HelperTools isInBackground];
+        if(background)
         {
             DDLogInfo(@"### All accounts idle, disconnecting and stopping all background tasks ###");
             [DDLog flushLog];
@@ -308,6 +300,17 @@ static const int sendMessageTimeoutSeconds = 10;
                     DDLogVerbose(@"no background tasks running, nothing to stop");
                 [DDLog flushLog];
             } onQueue:dispatch_get_main_queue()];
+        }
+        if(_pushCompletion)
+        {
+            DDLogInfo(@"### All accounts idle, calling push completion handler ###");
+            [DDLog flushLog];
+            if(_cancelPushTimer)
+                _cancelPushTimer();
+            //we don't need to call disconnectAll if we are in background here, because we already did this in the if above (don't reorder these 2 ifs!)
+            _pushCompletion(UIBackgroundFetchResultNewData);
+            _pushCompletion = nil;
+            _cancelPushTimer = nil;
         }
     }
 }

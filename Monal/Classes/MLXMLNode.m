@@ -14,27 +14,43 @@
 
 -(id) init
 {
-    self=[super init];
-    _attributes=[[NSMutableDictionary alloc] init];
-    _children=[[NSMutableArray alloc] init];
-    _data=nil; 
-    return self; 
-}
-
--(id) initWithElement:(NSString*)element
-{
-    self=[self init];
-    self.element=element;
+    self = [super init];
+    _attributes = [[NSMutableDictionary alloc] init];
+    _children = [[NSMutableArray alloc] init];
+    _data = nil;
     return self;
 }
 
--(id) initWithElement:(NSString*)element andNamespace:(NSString*)xmlns
+-(id) initWithElement:(NSString*) element
 {
-    self=[self init];
-    self.element=element;
+    self = [self init];
+    self.element = element;
+    return self;
+}
+
+-(id) initWithElement:(NSString*) element andNamespace:(NSString*) xmlns
+{
+    self = [self initWithElement:element];
     [self setXMLNS:xmlns];
     return self;
 }
+
+-(id) initWithElement:(NSString*) element andNamespace:(NSString*) xmlns withAttributes:(NSArray*) attributes andChildren:(NSDictionary*) children andData:(NSString*) data
+{
+    self = [self initWithElement:element withAttributes:attributes andChildren:children andData:data];
+    [self setXMLNS:xmlns];
+    return self;
+}
+
+-(id) initWithElement:(NSString*) element withAttributes:(NSArray*) attributes andChildren:(NSDictionary*) children andData:(NSString*) data
+{
+    self = [self initWithElement:element];
+    self.attributes = attributes;
+    self.children = children;
+    self.data = data;
+    return self;
+}
+
 
 -(id) initWithCoder:(NSCoder*)decoder
 {

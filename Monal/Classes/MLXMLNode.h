@@ -18,8 +18,9 @@
  Initilizes with an element type
  */
 -(id) initWithElement:(NSString*)element;
-
 -(id) initWithElement:(NSString*)element andNamespace:(NSString*)xmlns;
+-(id) initWithElement:(NSString*) element andNamespace:(NSString*) xmlns withAttributes:(NSArray*) attributes andChildren:(NSDictionary*) children andData:(NSString*) data;
+-(id) initWithElement:(NSString*) element withAttributes:(NSArray*) attributes andChildren:(NSDictionary*) children andData:(NSString*) data;
 
 /**
  Quickly set an XMLNS attribute

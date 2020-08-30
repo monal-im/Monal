@@ -1511,28 +1511,14 @@ static NSDateFormatter* dbFormatter;
     return datetoReturn;
 }
 
--(void) lastStanzaIdForAccount:(NSString*) accountNo withCompletion:(void (^)(NSString* lastStanzaId, NSDate* lastStanzaDate)) completion
+-(NSString*) lastStanzaIdForAccount:(NSString*) accountNo
 {
-    NSArray* rows;
-    
-    rows = [self.db executeReader:@"SELECT * FROM message_history WHERE account_id=? AND stanzaid NOT NULL AND stanzaid!='' ORDER BY message_history_id DESC LIMIT 1;" andArguments:@[accountNo]];
-    if([rows count])
-    {
-        //return only last stanzaid (we don't need a date here)
-        completion(rows[0][@"stanzaid"], nil);
-        return;
-    }
-    
-    rows = [self.db executeReader:@"SELECT * FROM message_history WHERE account_id=? ORDER BY message_history_id DESC LIMIT 1;" andArguments:@[accountNo]];
-    if([rows count])
-    {
-        //no incoming messages in history (but outgoing ones present) --> return only last sent date
-        completion(nil, [dbFormatter dateFromString:(rows[0][@"timestamp"])]);
-        return;
-    }
-    
-    //no history entries found --> return nil for stanzaid and date
-    completion(nil, nil);
+    return [self.db executeScalar:@"SELECT lastStanzaId FROM account WHERE account_id=?;" andArguments:@[accountNo]];
+}
+
+-(void) setLastStanzaId:(NSString*) lastStanzaId forAccount:(NSString*) accountNo
+{
+    [self.db executeNonQuery:@"UPDATE account SET lastStanzaId=? WHERE account_id=?;" andArguments:@[lastStanzaId, accountNo]];
 }
 
 -(NSDate*) lastMessageDateAccount:(NSString*) accountNo
@@ -1552,8 +1538,8 @@ static NSDateFormatter* dbFormatter;
     return datetoReturn;
 }
 
-
 #pragma mark active chats
+
 -(NSMutableArray*) activeContacts
 {
     NSString* query = [NSString stringWithFormat:@"select distinct a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id, lastMessageTime, 0 AS 'count', subscription, ask, pinned from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by pinned desc, lastMessageTime desc"];
@@ -1707,6 +1693,17 @@ static NSDateFormatter* dbFormatter;
 }
 
 #pragma db Commands
+
+-(void) updateDBTo:(double) version withBlock:(monal_void_block_t) block
+{
+    if([(NSNumber*)[self.db executeScalar:@"SELECT dbversion FROM dbversion;"] doubleValue] < version)
+    {
+        block();
+        NSString* toVersion = [[NSNumber numberWithDouble:version] stringValue];
+        [self.db executeNonQuery:[NSString stringWithFormat:@"UPDATE dbversion SET dbversion='%@';", toVersion]];
+        DDLogDebug(@"Upgrade to %@ success", toVersion);
+    }
+}
 
 -(void) version
 {
@@ -2110,15 +2107,11 @@ static NSDateFormatter* dbFormatter;
         DDLogVerbose(@"Upgrade to 4.78 success");
     }
     
-    if([dbversion doubleValue] < 4.80)
-    {
+    [self updateDBTo:4.80 withBlock:^{
         [self.db executeNonQuery:@"CREATE TABLE ipc(id integer NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);"];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.80';"];
-        DDLogVerbose(@"Upgrade to 4.80 success");
-    }
+    }];
     
-    if([dbversion doubleValue] < 4.81)
-    {
+    [self updateDBTo:4.81 withBlock:^{
         // Remove silly chats
         NSMutableArray* results = [self.db executeReader:@"select account_id, username, domain from account"];
         for(NSDictionary* row in results) {
@@ -2128,12 +2121,9 @@ static NSDateFormatter* dbFormatter;
             // delete chats with accountJid == buddy_name
             [self.db executeNonQuery:@"delete from activechats where account_id=? and buddy_name=?" andArguments:@[accountNo, accountJid]];
         }
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.81';"];
-        DDLogVerbose(@"Upgrade to 4.81 success");
-    }
+    }];
     
-    if([dbversion doubleValue] < 4.82)
-    {
+    [self updateDBTo:4.82 withBlock:^{
         //use the more appropriate name "sent" for the "delivered" column of message_history
         [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
         [self.db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;"];
@@ -2141,20 +2131,14 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"INSERT INTO message_history (message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, sent, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason) SELECT message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, delivered, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason from _message_historyTMP;"];
         [self.db executeNonQuery:@"DROP TABLE _message_historyTMP;"];
         [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.82';"];
-        DDLogVerbose(@"Upgrade to 4.82 success");
-    }
+    }];
     
-    if([dbversion doubleValue] < 4.83)
-    {
+    [self updateDBTo:4.83 withBlock:^{
         DDLogVerbose(@"Database version <4.83 detected. Performing upgrade on accounts.");
         [self.db executeNonQuery:@"alter table activechats add column pinned bool DEFAULT FALSE;"];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.83';"];
-        DDLogVerbose(@"Upgrade to 4.83 success");
-    }
+    }];
     
-    if([dbversion doubleValue] < 4.84)
-    {
+    [self updateDBTo:4.84 withBlock:^{
         DDLogVerbose(@"Database version <4.84 detected. Performing upgrade.");
         [self.db executeNonQuery:@"DROP TABLE IF EXISTS ipc;"];
         [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
@@ -2172,12 +2156,9 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"CREATE INDEX stanzaidIndex on message_history(stanzaid collate nocase);"];
         [self.db executeNonQuery:@"CREATE INDEX messageidIndex on message_history(messageid collate nocase);"];
         [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.84';"];
-        DDLogVerbose(@"Upgrade to 4.84 success");
-    }
+    }];
     
-    if([dbversion doubleValue] < 4.85)
-    {
+    [self updateDBTo:4.85 withBlock:^{
         //Performing upgrade on buddy_resources.
         [self.db executeNonQuery:@"ALTER TABLE buddy_resources ADD platform_App_Name text;"];
         [self.db executeNonQuery:@"ALTER TABLE buddy_resources ADD platform_App_Version text;"];
@@ -2186,9 +2167,11 @@ static NSDateFormatter* dbFormatter;
         //drop and recreate in 4.77 was faulty (wrong drop syntax), do it right this time
         [self.db executeNonQuery:@"DROP TABLE IF EXISTS ver_info;"];
         [self.db executeNonQuery:@"CREATE TABLE ver_info(ver VARCHAR(32), cap VARCHAR(255), PRIMARY KEY (ver,cap));"];
-        [self.db executeNonQuery:@"update dbversion set dbversion='4.85';"];
-        DDLogVerbose(@"Upgrade to 4.85 success");
-    }
+    }];
+    
+    [self updateDBTo:4.86 withBlock:^{
+        [self.db executeNonQuery:@"ALTER TABLE account ADD lastStanzaId text;"];
+    }];
 
     [self.db endWriteTransaction];
     

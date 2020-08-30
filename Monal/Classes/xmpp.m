@@ -1074,12 +1074,12 @@ NSString *const kXMPPPresence = @"presence";
             ParseIq* iqNode = (ParseIq*)parsedStanza;
 
 #ifndef DISABLE_OMEMO
-            MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo
+            MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self
                                                                 connection:self.connectionProperties
                                                                 signalContex:self.signalContext
                                                             andSignalStore:self.monalSignalStore];
 #else
-            MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo
+            MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self
                                                                 connection:self.connectionProperties
                                                                 signalContex:nil
                                                             andSignalStore:nil];
@@ -1264,9 +1264,9 @@ NSString *const kXMPPPresence = @"presence";
 
                     if(![messageNode.from isEqualToString:
                         self.connectionProperties.identity.jid]) {
-                        notify([[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:self->_accountNo]);
+                        notify([[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:self.accountNo]);
                     } else  {
-                        notify([[DataLayer sharedInstance] addActiveBuddies:messageNode.to forAccount:self->_accountNo]);
+                        notify([[DataLayer sharedInstance] addActiveBuddies:messageNode.to forAccount:self.accountNo]);
                     }
                 }
                 else
@@ -1279,7 +1279,20 @@ NSString *const kXMPPPresence = @"presence";
             };
 #endif
 
-            [messageProcessor processMessage:messageNode];
+            //only process mam results when they are not for priming the database with the initial stanzaid (the id will be taken from the iq result)
+            //we do this because we don't want to randomly add one single message to our history db after the user installs the app / adds a new account
+            //if the user wants to see older messages he can retrieve them using the ui
+            if(!(self.ignoreMamResult && messageNode.mamResult))
+            {
+                [messageProcessor processMessage:messageNode];
+                
+                //add newest stanzaid to database if provided in this message stanza
+                if(messageNode.stanzaId)
+                {
+                    DDLogVerbose(@"Updating lastStanzaId in database to: %@", messageNode.stanzaId);
+                    [[DataLayer sharedInstance] setLastStanzaId:messageNode.stanzaId forAccount:self.accountNo];
+                }
+            }
             
             //only mark stanza as handled *after* processing it
             [self incrementLastHandledStanza];
@@ -1343,12 +1356,12 @@ NSString *const kXMPPPresence = @"presence";
                         contact.statusMessage=presenceNode.status;
 
                         //add contact if possible (ignore already existing contacts)
-                        [[DataLayer sharedInstance] addContact:[presenceNode.user copy] forAccount:self->_accountNo fullname:@"" nickname:@"" andMucNick:nil];
+                        [[DataLayer sharedInstance] addContact:[presenceNode.user copy] forAccount:self.accountNo fullname:@"" nickname:@"" andMucNick:nil];
 
                         //update buddy state
-                        [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self->_accountNo];
-                        [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self->_accountNo];
-                        [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self->_accountNo];
+                        [[DataLayer sharedInstance] setOnlineBuddy:presenceNode forAccount:self.accountNo];
+                        [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self.accountNo];
+                        [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self.accountNo];
 
                         //handle last interaction time (dispatch database update in own background thread)
                         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -1368,14 +1381,14 @@ NSString *const kXMPPPresence = @"presence";
                             //check for vcard change
                             if(presenceNode.photoHash)
                             {
-                                NSString* iconHash = [[DataLayer sharedInstance]  contactHash:[presenceNode.user copy] forAccount:self->_accountNo];
+                                NSString* iconHash = [[DataLayer sharedInstance]  contactHash:[presenceNode.user copy] forAccount:self.accountNo];
                                 if([presenceNode.photoHash isEqualToString:iconHash])
                                 {
                                     DDLogVerbose(@"photo hash is the  same");
                                 }
                                 else
                                 {
-                                    [[DataLayer sharedInstance] setContactHash:presenceNode forAccount:self->_accountNo];
+                                    [[DataLayer sharedInstance] setContactHash:presenceNode forAccount:self.accountNo];
                                     [self getVCard:presenceNode.user];
                                 }
                             }
@@ -1388,7 +1401,7 @@ NSString *const kXMPPPresence = @"presence";
                 }
                 else if([presenceNode.type isEqualToString:kpresenceUnavailable])
                 {
-                    [[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:self->_accountNo];
+                    [[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:self.accountNo];
                 }
 
                 //handle entity capabilities (this has to be done *after* setOnlineBuddy which sets the ver hash for the resource to "")
@@ -2759,7 +2772,7 @@ NSString *const kXMPPPresence = @"presence";
         if(!fullName) fullName = from;
         NSDictionary* userDic=@{@"buddy_name":from,
                                 @"full_name":fullName,
-                                kAccountID:self->_accountNo
+                                kAccountID:self.accountNo
         };
         [[NSNotificationCenter defaultCenter]
          postNotificationName: kMonalCallStartedNotice object: userDic];

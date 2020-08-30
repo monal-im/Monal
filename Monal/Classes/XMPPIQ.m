@@ -232,12 +232,38 @@ NSString *const kiqErrorType = @"error";
     [self.children addObject:queryNode];
 }
 
+-(void) setMAMQueryForLatestId
+{
+    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data" withAttributes:@{
+            @"type": @"submit"
+        } andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"field" withAttributes:@{
+                @"var": @"FORM_TYPE",
+                @"type": @"hidden"
+            } andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:@"urn:xmpp:mam:2"]
+            ] andData:nil],
+            [[MLXMLNode alloc] initWithElement:@"field" withAttributes:@{
+                @"var": @"end",
+            } andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:[HelperTools generateDateTimeString:[NSDate date]]]
+            ] andData:nil]
+        ] andData:nil],
+        [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"max" withAttributes:@{} andChildren:@[] andData:@"1"],
+            [[MLXMLNode alloc] initWithElement:@"before"]
+        ] andData:nil]
+    ] andData:nil];
+    [self.children addObject:queryNode];
+}
+
 /**
  The after here is the id usually received in the last stanza of the mam page
  */
 -(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) uid withMax:(NSString *) maxResults  andJid:(NSString *)jid
 {
-    MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2"];
+    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2"];
     
     MLXMLNode* xnode = [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data"];
     [xnode.attributes setObject:@"submit" forKey:@"type"];

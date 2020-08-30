@@ -56,6 +56,7 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @interface xmpp : NSObject <NSStreamDelegate>
 
 @property (nonatomic, readonly) BOOL idle;
+@property (nonatomic) BOOL ignoreMamResult;
 
 @property (nonatomic, strong) NSString* pushNode;
 @property (nonatomic, strong) NSString* pushSecret;

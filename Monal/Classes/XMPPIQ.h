@@ -59,8 +59,9 @@ Queries the last page of messages (most recent) for a recipient
 /*
  @param after stanza id (uid)
 */
- -(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) uid  withMax:(NSString *) maxResults  andJid:(NSString *)jid;
+-(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) uid  withMax:(NSString *) maxResults  andJid:(NSString *)jid;
 
+-(void) setMAMQueryForLatestId;
 
 #pragma mark disco
 /**

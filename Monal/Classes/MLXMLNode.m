@@ -45,7 +45,7 @@
 -(id) initWithElement:(NSString*) element withAttributes:(NSArray*) attributes andChildren:(NSDictionary*) children andData:(NSString*) data
 {
     self = [self initWithElement:element];
-    self.attributes = attributes;
+    [self.attributes addEntriesFromDictionary: [[NSDictionary alloc] initWithDictionary:attributes copyItems:YES]];
     self.children = children;
     self.data = data;
     return self;

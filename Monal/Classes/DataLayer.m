@@ -1067,8 +1067,8 @@ static NSDateFormatter* dbFormatter;
 
             if(success) {
                 BOOL innerSuccess = [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
+                [self.db endWriteTransaction];
                 if(innerSuccess) {
-                    [self.db endWriteTransaction];
                     if(completion) {
                         completion(success, messageType);
                     }

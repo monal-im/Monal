@@ -481,6 +481,7 @@ enum chatViewControllerSections {
 {
     [self saveMessageDraft];
     [self.chatInput resignFirstResponder];
+    [self sendChatState:NO];
 }
 
 #pragma mark message signals
@@ -598,23 +599,23 @@ enum chatViewControllerSections {
     
     // Do not send when the user disabled the feature
     if(!self.sendLastChatState)
-    {
         return;
-    }
 
-    if(isTyping)
+    if(isTyping != _isTyping)       //changed state? --> send typing notification
     {
-        if(!_isTyping)      //started typing? --> send composing chatstate (e.g. typing)
-        {
-            DDLogVerbose(@"Sending chatstate isTyping=%@", isTyping ? @"YES" : @"NO");
-            [[MLXMPPManager sharedInstance] sendChatState:isTyping fromAccount:self.contact.accountId toJid:self.contact.contactJid];
-        }
-        
-        //cancel old timer if existing
-        if(_cancelTypingNotification)
-            _cancelTypingNotification();
-        
-        //start new timer
+        DDLogVerbose(@"Sending chatstate isTyping=%@", isTyping ? @"YES" : @"NO");
+        [[MLXMPPManager sharedInstance] sendChatState:isTyping fromAccount:self.contact.accountId toJid:self.contact.contactJid];
+    }
+    
+    //set internal state
+    _isTyping = isTyping;
+    
+    //cancel old timer if existing
+    if(_cancelTypingNotification)
+        _cancelTypingNotification();
+    
+    //start new timer if we are currently typing
+    if(isTyping)
         _cancelTypingNotification = [HelperTools startTimer:5.0 withHandler:^{
             //no typing interaction in 5 seconds? --> send out active chatstate (e.g. typing ended)
             if(_isTyping)
@@ -624,25 +625,6 @@ enum chatViewControllerSections {
                 [[MLXMPPManager sharedInstance] sendChatState:NO fromAccount:self.contact.accountId toJid:self.contact.contactJid];
             }
         }];
-        
-        //set internal state
-        _isTyping = YES;
-    }
-    else
-    {
-        if(_isTyping)      //stopped typing? --> send active chatstate (e.g. typing ended)
-        {
-            DDLogVerbose(@"Sending chatstate isTyping=%@", isTyping ? @"YES" : @"NO");
-            [[MLXMPPManager sharedInstance] sendChatState:isTyping fromAccount:self.contact.accountId toJid:self.contact.contactJid];
-        }
-        
-        //cancel old timer if existing
-        if(_cancelTypingNotification)
-            _cancelTypingNotification();
-        
-        //set internal state
-        _isTyping = NO;
-    }
 }
 
 -(void)resignTextView
@@ -1895,6 +1877,7 @@ bool viewIsScrolling = NO;
 - (void)keyboardDidHide:(NSNotification*)aNotification
 {
     [self saveMessageDraft];
+    [self sendChatState:NO];
 
     UIEdgeInsets contentInsets = UIEdgeInsetsZero;
     self.messageTable.contentInset = contentInsets;

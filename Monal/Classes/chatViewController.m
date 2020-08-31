@@ -62,6 +62,10 @@
 @property (nonatomic, strong) NSLayoutConstraint* chatInputConstraintHWKeyboard;
 @property (nonatomic, strong) NSLayoutConstraint* chatInputConstraintSWKeyboard;
 
+//infinite scrolling
+@property (atomic) BOOL viewIsScrolling;
+@property (atomic) BOOL isLoadingMam;
+
 @end
 
 @class HelperTools;
@@ -188,19 +192,6 @@ enum chatViewControllerSections {
 -(void) handleForeGround {
     [self refreshData];
     [self reloadTable];
-}
-
-/**
- gets recent messages  to fill an empty chat
- */
--(void) synchChat {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if(self.messageList.count==0 && !self.contact.isGroup)
-        {
-            //TODO: use this query with non-nil before for endless scrolling
-            [self.xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid before:nil];
-        }
-    });
 }
 
 -(IBAction) toggleEncryption:(id)sender
@@ -379,11 +370,9 @@ enum chatViewControllerSections {
     [super viewDidAppear:animated];
     if(!self.contact.contactJid || !self.contact.accountId) return;
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-    [self synchChat];
 #ifndef DISABLE_OMEMO
     if(![self.contact.subscription isEqualToString:kSubBoth] && !self.contact.isGroup) {
         [self.xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
-        
     }
     
     NSArray* devices = [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
@@ -1710,56 +1699,77 @@ enum chatViewControllerSections {
     
 }
 
-bool viewIsScrolling = NO;
 -(void) scrollViewDidScroll:(UIScrollView *)scrollView
 {
+    if(self.contact.isGroup)
+        return;
+    
     // get current scroll position (y-axis)
     CGFloat curOffset = scrollView.contentOffset.y;
 
     // reached top
 #if TARGET_OS_MACCATALYST
-    if(curOffset < 20 && !viewIsScrolling)
+    if(curOffset < 20 && !self.viewIsScrolling)
 #else
-    if(curOffset < -140 && !viewIsScrolling)
+    if(curOffset < -140 && !self.viewIsScrolling)
 #endif
     {
-        // load old messages
-        if([self->_messageTable numberOfRowsInSection:messagesSection] == 0)
-        {
-            // FIXME: MAM
-            return;
-        }
-        viewIsScrolling = YES;
+        self.viewIsScrolling = YES;
         [self loadOldMsgHistory];
     }
     else
-        viewIsScrolling = NO;
+        self.viewIsScrolling = NO;
 }
 
 -(void) loadOldMsgHistory
 {
+    if(self.contact.isGroup)
+        return;
+    
     NSIndexPath* firstIndex = [NSIndexPath indexPathForRow:0  inSection:messagesSection];
 
     // Load older messages from db
-    MLMessage* currLastMsg = [self.messageList objectAtIndex:0];
-    NSMutableArray* oldMessages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId beforeMsgHistoryID:currLastMsg.messageDBId];
+    NSMutableArray* oldMessages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId beforeMsgHistoryID:((MLMessage*)[self.messageList objectAtIndex:0]).messageDBId];
 
-    if([oldMessages count] < kMonalChatFetchedMsgCnt)
+    if(!self.isLoadingMam && [oldMessages count] < kMonalChatFetchedMsgCnt)
     {
-        // FIXME: MAM
-        // currLastMsg.stanzaId
-        // self.contact.contactJid
+        self.isLoadingMam = YES;        //don't allow multiple parallel mam fetches
+        
+        //not all messages in history db have a stanzaId (messages sent by this monal instance won't have one for example)
+        //--> search for the oldest message having a stanzaId and use that one
+        NSString* oldestStanzaId;
+        for(MLMessage* msg in oldMessages)
+            if(msg.stanzaId)
+            {
+                DDLogVerbose(@"Found oldest stanzaId in messages returned from db: %@", msg.stanzaId);
+                oldestStanzaId = msg.stanzaId;
+                break;
+            }
+        if(!oldestStanzaId)
+            for(MLMessage* msg in self.messageList)
+                if(msg.stanzaId)
+                {
+                    DDLogVerbose(@"Found oldest stanzaId in messages already displayed: %@", msg.stanzaId);
+                    oldestStanzaId = msg.stanzaId;
+                    break;
+                }
+        
+        //now load more (older) messages from mam if not
+        DDLogVerbose(@"Loading more messages from mam before stanzaId %@", oldestStanzaId);
+        [self.xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid before:oldestStanzaId withCompletion:^(ParseIq* response) {
+            self.isLoadingMam = NO;     //allow next mam fetch
+        }];
     }
 
     // Insert old messages into messageTable
+    [self->_messageTable beginUpdates];
     for(size_t msgIdx = [oldMessages count]; msgIdx > 0; msgIdx--)
     {
         MLMessage* msg = [oldMessages objectAtIndex:(msgIdx - 1)];
-        [self->_messageTable beginUpdates];
         [self.messageList insertObject:msg atIndex:0];
         [self->_messageTable insertRowsAtIndexPaths:@[firstIndex] withRowAnimation:UITableViewRowAnimationNone];
-        [self->_messageTable endUpdates];
     }
+    [self->_messageTable endUpdates];
 }
 
 -(BOOL) canBecomeFirstResponder

@@ -233,7 +233,7 @@ Decline a call request
  -(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion;
 
 
--(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid;
+-(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid withCompletion:(monal_iq_handler_t) completion;
 -(void) setMAMPrefs:(NSString*) preference;
 -(void) getMAMPrefs;
 

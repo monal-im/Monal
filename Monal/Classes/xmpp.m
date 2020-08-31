@@ -1218,8 +1218,6 @@ NSString *const kXMPPPresence = @"presence";
             messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
                 if(success)
                 {
-                    DDLogVerbose(@"inside messageProcessor.postPersistAction with requestReceipt: %@ and messageNode.from %@ and self jid %@", messageNode.requestReceipt ? @"YES" : @"NO", messageNode.from, self.connectionProperties.identity.jid);
-                    
                     if(messageNode.requestReceipt && ![messageNode.from isEqualToString:self.connectionProperties.identity.jid])
                     {
                         XMPPMessage *receiptNode = [[XMPPMessage alloc] init];
@@ -1233,7 +1231,6 @@ NSString *const kXMPPPresence = @"presence";
                     }
 
                     void(^notify)(BOOL) = ^(BOOL success) {
-                        DDLogVerbose(@"inside notify with messageNode.from: %@", messageNode.from);
                         if(messageNode.from)
                         {
                             NSString* actuallyFrom = messageNode.actualFrom;
@@ -1280,16 +1277,14 @@ NSString *const kXMPPPresence = @"presence";
             //we do this because we don't want to randomly add one single message to our history db after the user installs the app / adds a new account
             //if the user wants to see older messages he can retrieve them using the ui
             if(!(self.ignoreMamResult && messageNode.mamResult))
-            {
                 [messageProcessor processMessage:messageNode];
-                
-                //add newest stanzaid to database *after* processing the message, but only for non-mam messages
-                //(e.g. those messages going forward in time not backwards; mam catchup updates the stanzaid by itself on iq result)
-                if(messageNode.stanzaId && !messageNode.mamResult)
-                {
-                    DDLogVerbose(@"Updating lastStanzaId in database to: %@", messageNode.stanzaId);
-                    [[DataLayer sharedInstance] setLastStanzaId:messageNode.stanzaId forAccount:self.accountNo];
-                }
+            
+            //add newest stanzaid to database *after* processing the message, but only for non-mam messages
+            //(e.g. those messages going forward in time not backwards; mam catchup updates the stanzaid by itself on iq result)
+            if(messageNode.stanzaId && !messageNode.mamResult)
+            {
+                DDLogVerbose(@"Updating lastStanzaId in database to: %@", messageNode.stanzaId);
+                [[DataLayer sharedInstance] setLastStanzaId:messageNode.stanzaId forAccount:self.accountNo];
             }
             
             //only mark stanza as handled *after* processing it
@@ -2636,11 +2631,15 @@ NSString *const kXMPPPresence = @"presence";
     [self send:query];
 }
 
--(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid
+-(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid withCompletion:(monal_iq_handler_t) completion
 {
     XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
     [query setMAMQueryLatestMessagesForJid:jid before:uid];
-    [self send:query];
+    [self sendIq:query withResponseHandler:^(ParseIq* response) {
+        completion(response);
+    } andErrorHandler:^(ParseIq* error) {
+        completion(error);
+    }];
 }
 
 #pragma mark - MUC

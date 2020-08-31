@@ -1218,9 +1218,9 @@ NSString *const kXMPPPresence = @"presence";
             messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
                 if(success)
                 {
-                    if(messageNode.requestReceipt && ![messageNode.from isEqualToString:
-                                                    self.connectionProperties.identity.jid]
-                    )
+                    DDLogVerbose(@"inside messageProcessor.postPersistAction with requestReceipt: %@ and messageNode.from %@ and self jid %@", messageNode.requestReceipt ? @"YES" : @"NO", messageNode.from, self.connectionProperties.identity.jid);
+                    
+                    if(messageNode.requestReceipt && ![messageNode.from isEqualToString:self.connectionProperties.identity.jid])
                     {
                         XMPPMessage *receiptNode = [[XMPPMessage alloc] init];
                         //the message type is needed so that the store hint is accepted by the server
@@ -1233,6 +1233,7 @@ NSString *const kXMPPPresence = @"presence";
                     }
 
                     void(^notify)(BOOL) = ^(BOOL success) {
+                        DDLogVerbose(@"inside notify with messageNode.from: %@", messageNode.from);
                         if(messageNode.from)
                         {
                             NSString* actuallyFrom = messageNode.actualFrom;
@@ -1257,17 +1258,13 @@ NSString *const kXMPPPresence = @"presence";
                             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
                         }
                         else
-                        {
                             DDLogInfo(@"no messageNode.from, not notifying");
-                        }
                     };
 
-                    if(![messageNode.from isEqualToString:
-                        self.connectionProperties.identity.jid]) {
+                    if(![messageNode.from isEqualToString:self.connectionProperties.identity.jid])
                         notify([[DataLayer sharedInstance] addActiveBuddies:messageNode.from forAccount:self.accountNo]);
-                    } else  {
+                    else
                         notify([[DataLayer sharedInstance] addActiveBuddies:messageNode.to forAccount:self.accountNo]);
-                    }
                 }
                 else
                     DDLogError(@"error adding message");
@@ -1286,8 +1283,9 @@ NSString *const kXMPPPresence = @"presence";
             {
                 [messageProcessor processMessage:messageNode];
                 
-                //add newest stanzaid to database if provided in this message stanza
-                if(messageNode.stanzaId)
+                //add newest stanzaid to database *after* processing the message, but only for non-mam messages
+                //(e.g. those messages going forward in time not backwards; mam catchup updates the stanzaid by itself on iq result)
+                if(messageNode.stanzaId && !messageNode.mamResult)
                 {
                     DDLogVerbose(@"Updating lastStanzaId in database to: %@", messageNode.stanzaId);
                     [[DataLayer sharedInstance] setLastStanzaId:messageNode.stanzaId forAccount:self.accountNo];

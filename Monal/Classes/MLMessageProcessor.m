@@ -105,7 +105,6 @@ static NSMutableDictionary* _typingNotifications;
         {
             //if mam but newer than last message we do want an alert..
             NSDate* lastMsgDate = [[DataLayer sharedInstance] lastMessageDateForContact:messageNode.from andAccount:self.accountNo];
-            // if(!lastMsgDate) return; // TODO thilo please check this line
             
             BOOL unread = YES;
             BOOL showAlert = YES;
@@ -115,6 +114,7 @@ static NSMutableDictionary* _typingNotifications;
                 (
                     messageNode.mamResult &&
                     messageNode.delayTimeStamp &&
+                    lastMsgDate &&
                     lastMsgDate.timeIntervalSince1970 > messageNode.delayTimeStamp.timeIntervalSince1970
                 )
             )

@@ -30,6 +30,11 @@
 
 +(void) handleCatchupFor:(xmpp*) account withIqNode:(ParseIq*) iqNode
 {
+    if(iqNode.mam2Last)
+    {
+        DDLogVerbose(@"Updating lastStanzaId in database to: %@", iqNode.mam2Last);
+        [[DataLayer sharedInstance] setLastStanzaId:iqNode.mam2Last forAccount:account.accountNo];
+    }
     if(iqNode.mam2Last && !iqNode.mam2fin)
     {
         DDLogVerbose(@"Paging through mam catchup results with after: %@", iqNode.mam2Last);

@@ -1717,23 +1717,25 @@ bool viewIsScrolling = NO;
     CGFloat curOffset = scrollView.contentOffset.y;
 
     // reached top
-    #if TARGET_OS_MACCATALYST
-    if(curOffset < 20 && !viewIsScrolling) {
-    #else
-    if(curOffset < -140 && !viewIsScrolling) {
-    #endif
+#if TARGET_OS_MACCATALYST
+    if(curOffset < 20 && !viewIsScrolling)
+#else
+    if(curOffset < -140 && !viewIsScrolling)
+#endif
+    {
         // load old messages
-        if([self->_messageTable numberOfRowsInSection:messagesSection] == 0) {
+        if([self->_messageTable numberOfRowsInSection:messagesSection] == 0)
+        {
             // FIXME: MAM
             return;
         }
         viewIsScrolling = YES;
         [self loadOldMsgHistory];
-    } else {
-        viewIsScrolling = NO;
     }
+    else
+        viewIsScrolling = NO;
 }
-    
+
 -(void) loadOldMsgHistory
 {
     NSIndexPath* firstIndex = [NSIndexPath indexPathForRow:0  inSection:messagesSection];
@@ -1742,14 +1744,16 @@ bool viewIsScrolling = NO;
     MLMessage* currLastMsg = [self.messageList objectAtIndex:0];
     NSMutableArray* oldMessages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId beforeMsgHistoryID:currLastMsg.messageDBId];
 
-    if([oldMessages count] < kMonalChatFetchedMsgCnt) {
+    if([oldMessages count] < kMonalChatFetchedMsgCnt)
+    {
         // FIXME: MAM
         // currLastMsg.stanzaId
         // self.contact.contactJid
     }
 
     // Insert old messages into messageTable
-    for(size_t msgIdx = [oldMessages count]; msgIdx > 0; msgIdx--) {
+    for(size_t msgIdx = [oldMessages count]; msgIdx > 0; msgIdx--)
+    {
         MLMessage* msg = [oldMessages objectAtIndex:(msgIdx - 1)];
         [self->_messageTable beginUpdates];
         [self.messageList insertObject:msg atIndex:0];

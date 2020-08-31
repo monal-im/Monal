@@ -1,9 +1,6 @@
 /* Class = "UIButton"; normalTitle = "Add Contact"; ObjectID = "21P-WC-8yr"; */
 "21P-WC-8yr.normalTitle" = "Add Contact";
 
-/* Class = "UILabel"; text = "Title"; ObjectID = "4yZ-Nr-4ym"; */
-"4yZ-Nr-4ym.text" = "Title";
-
 /* Class = "UILabel"; text = "Add a New Contact"; ObjectID = "7Cs-k6-7n4"; */
 "7Cs-k6-7n4.text" = "Add a New Contact";
 
@@ -18,15 +15,6 @@
 
 /* Class = "UIBarButtonItem"; title = "Info"; ObjectID = "C9Q-7y-bRl"; */
 "C9Q-7y-bRl.title" = "Info";
-
-/* Class = "UILabel"; text = "Title"; ObjectID = "F7S-Cl-Xop"; */
-"F7S-Cl-Xop.text" = "Tittel";
-
-/* Class = "UILabel"; text = "Title"; ObjectID = "fKZ-SZ-6l0"; */
-"fKZ-SZ-6l0.text" = "Title";
-
-/* Class = "UILabel"; text = "Subtitle"; ObjectID = "Gfw-KN-mew"; */
-"Gfw-KN-mew.text" = "Subtitle";
 
 /* Class = "UINavigationItem"; title = "Contact Requests"; ObjectID = "GI8-WI-wYs"; */
 "GI8-WI-wYs.title" = "Kontaktforespørsler";
@@ -55,9 +43,6 @@
 /* Class = "UIButton"; normalTitle = "Send"; ObjectID = "jIW-zk-rUu"; */
 "jIW-zk-rUu.normalTitle" = "Send";
 
-/* Class = "UILabel"; text = "Title"; ObjectID = "JKC-18-hqA"; */
-"JKC-18-hqA.text" = "Tittel";
-
 /* Class = "UINavigationItem"; title = "Group Chat"; ObjectID = "k0T-5X-FQu"; */
 "k0T-5X-FQu.title" = "Group Chat";
 
@@ -66,9 +51,6 @@
 
 /* Class = "UILabel"; text = "Send Message"; ObjectID = "KUa-bA-cQb"; */
 "KUa-bA-cQb.text" = "Send melding";
-
-/* Class = "UILabel"; text = "Title"; ObjectID = "kUT-6q-gUD"; */
-"kUT-6q-gUD.text" = "Title";
 
 /* Class = "UINavigationItem"; title = "Send A Message "; ObjectID = "MiR-iW-O6e"; */
 "MiR-iW-O6e.title" = "Send en melding ";

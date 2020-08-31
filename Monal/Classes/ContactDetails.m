@@ -624,9 +624,12 @@
     if (verNotification) {        
         _versionInfoDic = [verNotification.userInfo mutableCopy];
     } else {
-        
-        NSArray *versionDBInfoArr = [[DataLayer sharedInstance] softwareVersionInfoForAccount:self.accountNo andContact:self.contact.contactJid];
-        _versionInfoDic = versionDBInfoArr[0];
+        NSArray* versionDBInfoArr = [[DataLayer sharedInstance] softwareVersionInfoForAccount:self.accountNo andContact:self.contact.contactJid];
+        if(versionDBInfoArr && [versionDBInfoArr count] >= 1) {
+            _versionInfoDic = versionDBInfoArr[0];
+        } else {
+            _versionInfoDic = [[NSMutableDictionary alloc] init];
+        }
     }
     
     dispatch_async(dispatch_get_main_queue(), ^{        
@@ -660,9 +663,11 @@
     else
         self.navigationItem.title = self.contact.fullName;
     
-    self.contact.nickName = textField.text;
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+    if(![self.contact.nickName isEqualToString:textField.text]) {
+        self.contact.nickName = textField.text;
+
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+    }
     
     return YES;
 }

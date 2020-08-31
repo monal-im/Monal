@@ -1037,13 +1037,15 @@ static NSDateFormatter* dbFormatter;
         [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
         NSDate* sourceDate=[NSDate date];
         NSDate* destinationDate;
-        if(messageDate) {
+        if(messageDate)
+        {
             //already GMT no need for conversion
 
             destinationDate= messageDate;
             [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
         }
-        else {
+        else
+        {
             NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
             NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
 
@@ -1058,46 +1060,31 @@ static NSDateFormatter* dbFormatter;
         NSString* dateString = [formatter stringFromDate:destinationDate];
         
         //do not do this in MUC
-        if(!messageType && [actualfrom isEqualToString:from]) {
+        if(!messageType && [actualfrom isEqualToString:from])
+        {
             NSString* foundMessageType = [self messageTypeForMessage:message withKeepThread:YES];
             NSString* query = [NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"];
             NSArray* params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:sent], messageid?messageid:@"", foundMessageType, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@""];
             DDLogVerbose(@"%@", query);
             BOOL success = [self.db executeNonQuery:query andArguments:params];
 
-            if(success) {
-                BOOL innerSuccess = [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
-                [self.db endWriteTransaction];
-                if(innerSuccess) {
-                    if(completion) {
-                        completion(success, messageType);
-                    }
-                }
-            }
-            else {
-                [self.db endWriteTransaction];
-                if(completion) {
-                    completion(success, messageType);
-                }
-            }
-        } else  {
+            if(success)
+                [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
+            [self.db endWriteTransaction];
+            if(completion)
+                completion(success, messageType);
+        }
+        else
+        {
             NSString* query = [NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"];
             NSArray* params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:sent], messageid?messageid:@"", typeToUse, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
             DDLogVerbose(@"%@", query);
             BOOL success = [self.db executeNonQuery:query andArguments:params];
-            if(success) {
+            if(success)
                 [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
-                [self.db endWriteTransaction];
-                if(completion) {
-                    completion(success, messageType);
-                }
-            }
-            else {
-                [self.db endWriteTransaction];
-                if(completion) {
-                    completion(success, messageType);
-                }
-            }
+            [self.db endWriteTransaction];
+            if(completion)
+                completion(success, messageType);
         }
     }
     else

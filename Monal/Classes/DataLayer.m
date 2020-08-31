@@ -1540,9 +1540,9 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark active chats
 
--(NSMutableArray*) activeContacts
+-(NSMutableArray*) activeContacts:(BOOL) pinned
 {
-    NSString* query = [NSString stringWithFormat:@"select distinct a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id, lastMessageTime, 0 AS 'count', subscription, ask, pinned from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by pinned desc, lastMessageTime desc"];
+    NSString* query = [NSString stringWithFormat:@"SELECT a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id, lastMessageTime, 0 AS 'count', subscription, ask, pinned from activechats as a JOIN buddylist AS b WHERE a.buddy_name = b.buddy_name AND a.account_id = b.account_id AND a.pinned=? ORDER BY lastMessageTime DESC"];
 
     NSDateFormatter* dateFromatter = [[NSDateFormatter alloc] init];
     NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
@@ -1551,7 +1551,7 @@ static NSDateFormatter* dbFormatter;
     [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
     [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 
-    NSMutableArray* results = [self.db executeReader:query];
+    NSMutableArray* results = [self.db executeReader:query andArguments:@[[NSNumber numberWithBool:pinned]]];
     NSMutableArray* toReturn = [[NSMutableArray alloc] initWithCapacity:results.count];
     [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSDictionary* dic = (NSDictionary *) obj;

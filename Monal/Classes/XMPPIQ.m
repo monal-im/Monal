@@ -170,71 +170,39 @@ NSString *const kiqErrorType = @"error";
     [self.children addObject:queryNode];
 }
 
-/**
- Get last 50 messages
- */
 -(void) setMAMQueryLatestMessagesForJid:(NSString*) jid before:(NSString*) uid
 {
-    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
-    queryNode.element=@"query";
-    [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:kXMLNS];
-    
-    MLXMLNode* xnode =[[MLXMLNode alloc] init];
-    xnode.element=@"x";
-    [xnode.attributes setObject:@"jabber:x:data" forKey:kXMLNS];
-    [xnode.attributes setObject:@"submit" forKey:@"type"];
-    
-    MLXMLNode* field1 =[[MLXMLNode alloc] init];
-    field1.element=@"field";
-    [field1.attributes setObject:@"FORM_TYPE" forKey:@"var"];
-    [field1.attributes setObject:@"hidden" forKey:@"type"];
-    
-    MLXMLNode* value =[[MLXMLNode alloc] init];
-    value.element=@"value";
-    value.data=@"urn:xmpp:mam:2";
-    [field1.children addObject:value];
-    
-    [xnode.children addObject:field1];
-    
-    //if we are fetching "all" limit with RSM to 50 for now
-    MLXMLNode* set =[[MLXMLNode alloc] init];
-    set.element=@"set";
-    [set.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:kXMLNS];
-    
-    MLXMLNode* max =[[MLXMLNode alloc] init];
-    max.element=@"max";
-    max.data=@"50";
-    [set.children addObject:max];
-    
-    MLXMLNode* before =[[MLXMLNode alloc] init];
-    before.element=@"before";
-    if(uid)
-        before.data=uid;
-    [set.children addObject:before];
-    
-    [queryNode.children addObject:set];
-    
-    if(jid)
-    {
-        MLXMLNode* field3 =[[MLXMLNode alloc] init];
-        field3.element=@"field";
-        [field3.attributes setObject:@"with" forKey:@"var"];
-        
-        MLXMLNode* value3 =[[MLXMLNode alloc] init];
-        value3.element=@"value";
-        value3.data=jid;
-        [field3.children addObject:value3];
-        
-        [xnode.children addObject:field3];
-    }
-    
-    [queryNode.children addObject:xnode];
+    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{
+        @"queryid": @"MLbefore"
+    } andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data" withAttributes:@{
+            @"type": @"submit"
+        } andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"field" withAttributes:@{
+                @"var": @"FORM_TYPE",
+                @"type": @"hidden"
+            } andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:@"urn:xmpp:mam:2"]
+            ] andData:nil],
+            [[MLXMLNode alloc] initWithElement:@"field" withAttributes:@{
+                @"var": @"with",
+            } andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:jid]
+            ] andData:nil]
+        ] andData:nil],
+        [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"max" withAttributes:@{} andChildren:@[] andData:@"100"],
+            [[MLXMLNode alloc] initWithElement:@"before" withAttributes:@{} andChildren:@[] andData:uid]
+        ] andData:nil]
+    ] andData:nil];
     [self.children addObject:queryNode];
 }
 
 -(void) setMAMQueryForLatestId
 {
-    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{} andChildren:@[
+    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{
+        @"queryid": @"MLignore"
+    } andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data" withAttributes:@{
             @"type": @"submit"
         } andChildren:@[
@@ -258,74 +226,26 @@ NSString *const kiqErrorType = @"error";
     [self.children addObject:queryNode];
 }
 
-/**
- The after here is the id usually received in the last stanza of the mam page
- */
--(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) uid withMax:(NSString *) maxResults  andJid:(NSString *)jid
+-(void) setMAMQueryAfter:(NSString*) uid
 {
-    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2"];
-    
-    MLXMLNode* xnode = [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data"];
-    [xnode.attributes setObject:@"submit" forKey:@"type"];
-    
-    MLXMLNode* field1 = [[MLXMLNode alloc] initWithElement:@"field"];
-    [field1.attributes setObject:@"FORM_TYPE" forKey:@"var"];
-    [field1.attributes setObject:@"hidden" forKey:@"type"];
-    
-    MLXMLNode* value =[[MLXMLNode alloc] initWithElement:@"value"];
-    value.data = @"urn:xmpp:mam:2";
-    [field1.children addObject:value];
-    
-    [xnode.children addObject:field1];
-    
-    if(startDate)
-    {
-        MLXMLNode* field2 = [[MLXMLNode alloc] initWithElement:@"field"];
-        [field2.attributes setObject:@"start" forKey:@"var"];
-        
-        MLXMLNode* value2 = [[MLXMLNode alloc] initWithElement:@"value"];
-        if(startDate)
-            value2.data = [HelperTools generateDateTimeString:startDate];
-        else
-            value2.data = [HelperTools generateDateTimeString:[NSDate dateWithTimeIntervalSinceReferenceDate:0]];
-        
-        [field2.children addObject:value2];
-        [xnode.children addObject:field2];
-    }
-    
-    if(jid)
-    {
-        MLXMLNode* field3 = [[MLXMLNode alloc] initWithElement:@"field"];
-        [field3.attributes setObject:@"with" forKey:@"var"];
-        MLXMLNode* value3 = [[MLXMLNode alloc] initWithElement:@"value"];
-        value3.data = jid;
-        [field3.children addObject:value3];
-        [xnode.children addObject:field3];
-    }
-    
-    MLXMLNode* field3 =[[MLXMLNode alloc] init];
-    field3.element=@"set";
-    [field3.attributes setObject:@"http://jabber.org/protocol/rsm" forKey:kXMLNS];
-    
-    if(maxResults)
-    {
-        MLXMLNode* max =[[MLXMLNode alloc] init];
-        max.element=@"max";
-        max.data=maxResults;
-        [field3.children addObject:max];
-    }
-    
-    if(uid)
-    {
-        MLXMLNode* value3 =[[MLXMLNode alloc] init];
-        value3.element=@"after";
-        value3.data=uid;
-        [field3.children addObject:value3];
-    }
-    [queryNode.children addObject:field3];
-    
-    [queryNode.children addObject:xnode];
-    
+    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{
+        @"queryid": @"MLcatchup"
+    } andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data" withAttributes:@{
+            @"type": @"submit"
+        } andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"field" withAttributes:@{
+                @"var": @"FORM_TYPE",
+                @"type": @"hidden"
+            } andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:@"urn:xmpp:mam:2"]
+            ] andData:nil],
+        ] andData:nil],
+        [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"max" withAttributes:@{} andChildren:@[] andData:@"50"],
+            [[MLXMLNode alloc] initWithElement:@"after" withAttributes:@{} andChildren:@[] andData:uid]
+        ] andData:nil]
+    ] andData:nil];
     [self.children addObject:queryNode];
 }
 

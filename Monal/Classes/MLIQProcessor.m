@@ -30,17 +30,12 @@
 
 +(void) handleCatchupFor:(xmpp*) account withIqNode:(ParseIq*) iqNode
 {
-    if(iqNode.mam2Last)
-    {
-        DDLogVerbose(@"Updating lastStanzaId in database to: %@", iqNode.mam2Last);
-        [[DataLayer sharedInstance] setLastStanzaId:iqNode.mam2Last forAccount:account.accountNo];
-    }
     if(iqNode.mam2Last && !iqNode.mam2fin)
     {
         DDLogVerbose(@"Paging through mam catchup results with after: %@", iqNode.mam2Last);
         //do RSM forward paging
         XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-        [pageQuery setMAMQueryFromStart:nil after:iqNode.mam2Last withMax:nil andJid:nil];
+        [pageQuery setMAMQueryAfter:iqNode.mam2Last];
         [account sendIq:pageQuery withDelegate:self andMethod:@selector(handleCatchupFor:withIqNode:) andAdditionalArguments:nil];
     }
     else if(iqNode.mam2fin)
@@ -54,7 +49,6 @@
 {
     DDLogVerbose(@"Got latest stanza id to prime database with: %@", iqNode.mam2Last);
     [[DataLayer sharedInstance] setLastStanzaId:iqNode.mam2Last forAccount:account.accountNo];
-    account.ignoreMamResult = NO;
 }
 
 -(MLIQProcessor *) initWithAccount:(xmpp*) account connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore
@@ -307,16 +301,13 @@
                     if(lastStanzaId)
                     {
                         DDLogInfo(@"Querying mam:2 archive after stanzaid '%@' for catchup", lastStanzaId);
-                        [mamQuery setMAMQueryFromStart:nil after:lastStanzaId withMax:nil andJid:nil];
-                        self.account.ignoreMamResult = NO;      //be sure to not ignore this result (technically not really needed, but better safe than sorry)
+                        [mamQuery setMAMQueryAfter:lastStanzaId];
                         self.sendIqWithDelegate(mamQuery, [self class], @selector(handleCatchupFor:withIqNode:), nil);
                     }
                     else
                     {
                         DDLogInfo(@"Querying mam:2 archive for latest stanzaid to prime database");
                         [mamQuery setMAMQueryForLatestId];
-                        //ignore this mam result because we don't want random messages in our history db but only the latest stanzaid
-                        self.account.ignoreMamResult = YES;
                         self.sendIqWithDelegate(mamQuery, [self class], @selector(handleMamResponseWithLatestIdFor:withIqNode:), nil);
                     }
                 }

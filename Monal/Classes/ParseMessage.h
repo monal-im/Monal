@@ -29,6 +29,7 @@
 @property (nonatomic, copy, readonly) NSString* oobURL;
 @property (nonatomic, assign, readonly) BOOL composing;
 @property (nonatomic, assign, readonly) BOOL notComposing;
+@property (nonatomic, copy, readonly) NSString* mamQueryId;
 
 /** Messages that are requesting a resposne */
 @property (nonatomic, assign, readonly) BOOL requestReceipt;

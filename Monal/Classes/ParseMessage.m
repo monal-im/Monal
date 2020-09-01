@@ -193,6 +193,7 @@
     {
         _mamResult = YES;
         _stanzaId = [attributeDict objectForKey:@"id"];
+        _mamQueryId = [attributeDict objectForKey:@"queryid"];
         return;
     }
     

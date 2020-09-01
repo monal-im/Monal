@@ -1276,12 +1276,12 @@ NSString *const kXMPPPresence = @"presence";
             //only process mam results when they are not for priming the database with the initial stanzaid (the id will be taken from the iq result)
             //we do this because we don't want to randomly add one single message to our history db after the user installs the app / adds a new account
             //if the user wants to see older messages he can retrieve them using the ui
-            if(!(self.ignoreMamResult && messageNode.mamResult))
+            if(!(messageNode.mamResult && [@"MLignore" isEqualToString:messageNode.mamQueryId]))
                 [messageProcessor processMessage:messageNode];
             
-            //add newest stanzaid to database *after* processing the message, but only for non-mam messages
-            //(e.g. those messages going forward in time not backwards; mam catchup updates the stanzaid by itself on iq result)
-            if(messageNode.stanzaId && !messageNode.mamResult)
+            //add newest stanzaid to database *after* processing the message, but only for non-mam messages or mam catchup
+            //(e.g. those messages going forward in time not backwards)
+            if(messageNode.stanzaId && (!messageNode.mamResult || [@"MLcatchup" isEqualToString:messageNode.mamQueryId]))
             {
                 DDLogVerbose(@"Updating lastStanzaId in database to: %@", messageNode.stanzaId);
                 [[DataLayer sharedInstance] setLastStanzaId:messageNode.stanzaId forAccount:self.accountNo];

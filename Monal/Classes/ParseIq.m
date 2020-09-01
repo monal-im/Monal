@@ -179,9 +179,11 @@
         return;
     }
     
-    if([elementName isEqualToString:@"fin"] && [namespaceURI isEqualToString:@"urn:xmpp:mam:2"]  &&  [[attributeDict objectForKey:@"complete"] isEqualToString:@"true"])
+    if([elementName isEqualToString:@"fin"] && [namespaceURI isEqualToString:@"urn:xmpp:mam:2"])
     {
-        _mam2fin =YES;
+        if([[attributeDict objectForKey:@"complete"] isEqualToString:@"true"])
+            _mam2fin = YES;
+        _mamQueryId = [attributeDict objectForKey:@"queryid"];
         return;
     }
     

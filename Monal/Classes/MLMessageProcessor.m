@@ -103,21 +103,11 @@ static NSMutableDictionary* _typingNotifications;
         }
         else
         {
-            //if mam but newer than last message we do want an alert..
-            NSDate* lastMsgDate = [[DataLayer sharedInstance] lastMessageDateForContact:messageNode.from andAccount:self.accountNo];
-            
             BOOL unread = YES;
             BOOL showAlert = YES;
             
-            if(
-                [messageNode.from isEqualToString:self.jid] ||
-                (
-                    messageNode.mamResult &&
-                    messageNode.delayTimeStamp &&
-                    lastMsgDate &&
-                    lastMsgDate.timeIntervalSince1970 > messageNode.delayTimeStamp.timeIntervalSince1970
-                )
-            )
+            //if mam but catchup we do want an alert...
+            if([messageNode.from isEqualToString:self.jid] || (messageNode.mamResult && ![@"MLcatchup" isEqualToString:messageNode.mamQueryId]))
             {
                 DDLogVerbose(@"Setting showAlert to NO");
                 showAlert = NO;
@@ -162,23 +152,33 @@ static NSMutableDictionary* _typingNotifications;
                 messageId = [[NSUUID UUID] UUIDString];
             }
             
-            [[DataLayer sharedInstance] addMessageFrom:messageNode.from
-                                                    to:recipient
-                                            forAccount:self->_accountNo
-                                              withBody:[body copy]
-                                          actuallyfrom:messageNode.actualFrom
-                                                  sent:YES
-                                                unread:unread
-                                             messageId:messageId
-                                       serverMessageId:messageNode.stanzaId
-                                           messageType:messageType
-                                       andOverrideDate:messageNode.delayTimeStamp
-                                             encrypted:encrypted
-                                        withCompletion:^(BOOL success, NSString *newMessageType) {
-                if(self.postPersistAction) {
-                    self.postPersistAction(success, encrypted, showAlert, body, newMessageType);
-                }
-            }];
+            if([@"MLbefore" isEqualToString:messageNode.mamQueryId])
+            {
+                //TODO: handle backwards paging differently (negative database history ids)
+                //TODO: we don't want to call self.postPersistAction here, but do something like this:
+                //[[NSNotificationCenter defaultCenter] postNotificationName:kMonalHistoryMessageNotice object:self.account userInfo:@{@"message":message}];
+                //(see xmpp.m from line 1240 upwards)
+            }
+            else
+            {
+                [[DataLayer sharedInstance] addMessageFrom:messageNode.from
+                                                        to:recipient
+                                                forAccount:self->_accountNo
+                                                withBody:[body copy]
+                                            actuallyfrom:messageNode.actualFrom
+                                                    sent:YES
+                                                    unread:unread
+                                                messageId:messageId
+                                        serverMessageId:messageNode.stanzaId
+                                            messageType:messageType
+                                        andOverrideDate:messageNode.delayTimeStamp
+                                                encrypted:encrypted
+                                            withCompletion:^(BOOL success, NSString *newMessageType) {
+                    if(self.postPersistAction) {
+                        self.postPersistAction(success, encrypted, showAlert, body, newMessageType);
+                    }
+                }];
+            }
         }
     }
     

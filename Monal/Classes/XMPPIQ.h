@@ -51,16 +51,8 @@ FOUNDATION_EXPORT NSString *const kiqErrorType;
  */
 -(void) updateMamArchivePrefDefault:(NSString *) pref;
 
-/**
-Queries the last page of messages (most recent) for a recipient
- */
 -(void) setMAMQueryLatestMessagesForJid:(NSString*) jid before:(NSString*) uid;
-
-/*
- @param after stanza id (uid)
-*/
--(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) uid  withMax:(NSString *) maxResults  andJid:(NSString *)jid;
-
+-(void) setMAMQueryAfter:(NSString*) uid;
 -(void) setMAMQueryForLatestId;
 
 #pragma mark disco

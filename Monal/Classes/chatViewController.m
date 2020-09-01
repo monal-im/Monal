@@ -1075,39 +1075,39 @@ enum msgSentState {
 
 -(void) updateMsgState:(NSString *) messageId withEvent:(size_t) event withOptDic:(NSDictionary*) dic
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSIndexPath* indexPath;
-        for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
+    NSIndexPath* indexPath;
+    for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
+    {
+        // find msg that should be updated
+        MLMessage* msg = [self.messageList objectAtIndex:(msgIdx - 1)];
+        if([msg.messageId isEqualToString:messageId])
         {
-            // find msg that should be updated
-            MLMessage* msg = [self.messageList objectAtIndex:(msgIdx - 1)];
-            if([msg.messageId isEqualToString:messageId])
-            {
-                // Set correct flags
-                if(event == msgSent) {
-                    msg.hasBeenSent = YES;
-                } else if(event == msgRecevied) {
-                    msg.hasBeenSent = YES;
-                    msg.hasBeenReceived = YES;
-                } else if(event == msgErrorAfterSent) {
-                    //we don't want to show errors if the message has been received at least once or if the message wasn't even sent
-                    if(msg.hasBeenSent && !msg.hasBeenReceived)
-                    {
-                        msg.errorType = [dic objectForKey:@"errorType"];
-                        msg.errorReason = [dic objectForKey:@"errorReason"];
-                    }
+            // Set correct flags
+            if(event == msgSent) {
+                msg.hasBeenSent = YES;
+            } else if(event == msgRecevied) {
+                msg.hasBeenSent = YES;
+                msg.hasBeenReceived = YES;
+            } else if(event == msgErrorAfterSent) {
+                //we don't want to show errors if the message has been received at least once or if the message wasn't even sent
+                if(msg.hasBeenSent && !msg.hasBeenReceived)
+                {
+                    msg.errorType = [dic objectForKey:@"errorType"];
+                    msg.errorReason = [dic objectForKey:@"errorReason"];
                 }
-                indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
+            }
+            indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
 
-                // Update table entry
+            // Update table entry
+            dispatch_async(dispatch_get_main_queue(), ^{
                 [self->_messageTable beginUpdates];
                 [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                 [self->_messageTable endUpdates];
+            });
 
-                break;
-            }
+            break;
         }
-    });
+    }
 }
 
 

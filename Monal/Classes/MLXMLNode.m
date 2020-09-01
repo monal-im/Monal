@@ -35,14 +35,14 @@
     return self;
 }
 
--(id) initWithElement:(NSString*) element andNamespace:(NSString*) xmlns withAttributes:(NSArray*) attributes andChildren:(NSDictionary*) children andData:(NSString*) data
+-(id) initWithElement:(NSString*) element andNamespace:(NSString*) xmlns withAttributes:(NSDictionary*) attributes andChildren:(NSArray*) children andData:(NSString*) data
 {
     self = [self initWithElement:element withAttributes:attributes andChildren:children andData:data];
     [self setXMLNS:xmlns];
     return self;
 }
 
--(id) initWithElement:(NSString*) element withAttributes:(NSArray*) attributes andChildren:(NSDictionary*) children andData:(NSString*) data
+-(id) initWithElement:(NSString*) element withAttributes:(NSDictionary*) attributes andChildren:(NSArray*) children andData:(NSString*) data
 {
     self = [self initWithElement:element];
     [self.attributes addEntriesFromDictionary: [[NSDictionary alloc] initWithDictionary:attributes copyItems:YES]];

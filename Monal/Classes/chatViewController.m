@@ -1734,8 +1734,6 @@ enum chatViewControllerSections {
 {
     if(self.contact.isGroup)
         return;
-    
-    NSIndexPath* firstIndex = [NSIndexPath indexPathForRow:0  inSection:messagesSection];
 
     // Load older messages from db
     NSMutableArray* oldMessages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId beforeMsgHistoryID:((MLMessage*)[self.messageList objectAtIndex:0]).messageDBId];
@@ -1771,14 +1769,26 @@ enum chatViewControllerSections {
     }
 
     // Insert old messages into messageTable
+    NSMutableArray* indexArray = [NSMutableArray array];
     [self->_messageTable beginUpdates];
     for(size_t msgIdx = [oldMessages count]; msgIdx > 0; msgIdx--)
     {
         MLMessage* msg = [oldMessages objectAtIndex:(msgIdx - 1)];
         [self.messageList insertObject:msg atIndex:0];
-        [self->_messageTable insertRowsAtIndexPaths:@[firstIndex] withRowAnimation:UITableViewRowAnimationNone];
+        NSIndexPath* newIndexPath = [NSIndexPath indexPathForRow:msgIdx inSection:messagesSection];
+        [indexArray addObject:newIndexPath];
     }
+    [self->_messageTable insertRowsAtIndexPaths:indexArray withRowAnimation:UITableViewRowAnimationNone];
     [self->_messageTable endUpdates];
+
+    size_t scrollRow = NSNotFound;
+    if([self.messageList count] > 0 && [self.messageList count] == [oldMessages count]) {
+        scrollRow = [oldMessages count] - 1;
+    } else if([self.messageList count] > [oldMessages count]) {
+        // >
+        scrollRow = [oldMessages count];
+    }
+    [self->_messageTable scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:scrollRow inSection:messagesSection] atScrollPosition:messagesSection animated:NO];
 }
 
 -(BOOL) canBecomeFirstResponder

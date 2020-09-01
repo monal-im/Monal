@@ -1649,18 +1649,29 @@ enum chatViewControllerSections {
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return YES; // for now
+    if(indexPath.section == reloadBoxSection) {
+        return NO;
+    } else {
+        return YES; // for now
+    }
 }
 
 - (BOOL)tableView:(UITableView *)tableView shouldIndentWhileEditingRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return YES;
+    if(indexPath.section == reloadBoxSection) {
+        return NO;
+    } else {
+        return YES;
+    }
 }
 
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    if(indexPath.section == reloadBoxSection) {
+        return;
+    }
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        MLMessage* message= [self.messageList objectAtIndex:indexPath.row];
+        MLMessage* message = [self.messageList objectAtIndex:indexPath.row];
         
         DDLogVerbose(@"%@", message);
         
@@ -1674,8 +1685,6 @@ enum chatViewControllerSections {
         }
         [self.messageList removeObjectAtIndex:indexPath.row];
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];
-        
-        
     }
 }
 

@@ -1256,6 +1256,17 @@ enum msgSentState {
     return 0;
 }
 
+-(nullable __kindof UITableViewCell*) messageTableCellWithIdentifier:(NSString*) identifier andInbound:(BOOL) inboundDirection fromTable:(UITableView*) tableView
+{
+    NSString* direction = @"In";
+    if(!inboundDirection)
+    {
+        direction = @"Out";
+    }
+    NSString* fullIdentifier = [NSString stringWithFormat:@"%@%@Cell", identifier, direction];
+    return [tableView dequeueReusableCellWithIdentifier:fullIdentifier];
+}
+
 -(UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
 {
     if(indexPath.section == reloadBoxSection) {
@@ -1274,14 +1285,14 @@ enum msgSentState {
     } else  {
         DDLogError(@"Attempt to access beyond bounds");
     }
-    
-    NSString* from = row.from;
-    
+
     //cut text after kMonalChatMaxAllowedTextLen chars to make the message cell work properly (too big texts don't render the text in the cell at all)
     NSString* messageText = row.messageText;
     if([messageText length] > kMonalChatMaxAllowedTextLen)
         messageText = [NSString stringWithFormat:@"%@\n[...]", [messageText substringToIndex:kMonalChatMaxAllowedTextLen]];
-    
+    DDLogWarn(@"msg: %@", messageText);
+    BOOL inDirection = [row.from isEqualToString:self.contact.contactJid];
+
     if([row.messageType isEqualToString:kMessageTypeStatus])
     {
         cell = [tableView dequeueReusableCellWithIdentifier:@"StatusCell"];
@@ -1289,64 +1300,10 @@ enum msgSentState {
         cell.link = nil;
         return cell;
     }
-    
-    if(self.contact.isGroup)
+    else if([row.messageType isEqualToString:kMessageTypeImage])
     {
-        if([from isEqualToString:self.contact.contactJid])
-        {
-            if([row.messageType isEqualToString:kMessageTypeUrl])
-            {
-                cell = [tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
-            } else  {
-                cell = [tableView dequeueReusableCellWithIdentifier:@"textInCell"];
-            }
-        }
-        else
-        {
-            if([row.messageType isEqualToString:kMessageTypeUrl])
-            {
-                cell = [tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
-            } else  {
-                cell = [tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
-            }
-            
-        }
-    } else  {
-        if([from isEqualToString:self.contact.contactJid])
-        {
-            if([row.messageType isEqualToString:kMessageTypeUrl])
-            {
-                cell = [tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
-            }  else  {
-                cell = [tableView dequeueReusableCellWithIdentifier:@"textInCell"];
-            }
-        }
-        else
-        {
-            if([row.messageType isEqualToString:kMessageTypeUrl])
-            {
-                cell = [tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
-            } else  {
-                cell = [tableView dequeueReusableCellWithIdentifier:@"textOutCell"];
-            }
-        }
-        
-    }
-    
-    if([row.messageType isEqualToString:kMessageTypeImage])
-    {
-        MLChatImageCell* imageCell;
-        if([from isEqualToString:self.contact.contactJid])
-        {
-            imageCell = (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageInCell"];
-            imageCell.outBound=NO;
-        }
-        else  {
-            imageCell = (MLChatImageCell *) [tableView dequeueReusableCellWithIdentifier:@"imageOutCell"];
-            imageCell.outBound=YES;
-        }
-        
-        
+        MLChatImageCell* imageCell = (MLChatImageCell *) [self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable: tableView];
+
         if(![imageCell.link isEqualToString:messageText]){
             imageCell.link = messageText;
             imageCell.thumbnailImage.image = nil;
@@ -1354,31 +1311,21 @@ enum msgSentState {
             [imageCell loadImageWithCompletion:^{}];
         }
         cell = imageCell;
-        
     }
     else if([row.messageType isEqualToString:kMessageTypeUrl])
     {
-        MLLinkCell* toreturn;
-        if([from isEqualToString:self.contact.contactJid]) {
-            toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkInCell"];
-        }
-        else  {
-            toreturn=(MLLinkCell *)[tableView dequeueReusableCellWithIdentifier:@"linkOutCell"];
-        }
+        MLLinkCell* toreturn = (MLLinkCell *)[self messageTableCellWithIdentifier:@"link" andInbound:inDirection fromTable: tableView];;
         
-        NSString* cleanLink = [messageText  stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        NSString* cleanLink = [messageText stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSArray* parts = [cleanLink componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        cell.link = parts[0];
-        
-        toreturn.messageBody.text = cell.link;
-        toreturn.link = cell.link;
+        toreturn.link = parts[0];
+        toreturn.messageBody.text = toreturn.link;
         
         if(row.previewText || row.previewImage)
         {
             toreturn.imageUrl = row.previewImage;
             toreturn.messageTitle.text = row.previewText;
             [toreturn loadImageWithCompletion:^{
-                
             }];
         }
         else
@@ -1413,13 +1360,7 @@ enum msgSentState {
 
             // Display inline map
             if(self.showGeoLocationsInline) {
-                MLChatMapsCell* mapsCell;
-                if([from isEqualToString:self.contact.contactJid]) {
-                    mapsCell = (MLChatMapsCell *) [tableView dequeueReusableCellWithIdentifier:@"mapsInCell"];
-                    mapsCell.outBound = NO;
-                } else  {
-                    mapsCell = (MLChatMapsCell *) [tableView dequeueReusableCellWithIdentifier:@"mapsOutCell"];
-                }
+                MLChatMapsCell* mapsCell = (MLChatMapsCell *)[self messageTableCellWithIdentifier:@"maps" andInbound:inDirection fromTable: tableView];
 
                 // Set lat / long used for map view and pin
                 mapsCell.latitude = [latitude doubleValue];
@@ -1428,6 +1369,8 @@ enum msgSentState {
                 [mapsCell loadCoordinatesWithCompletion:^{}];
                 cell = mapsCell;
             } else {
+                // Default to text cell
+                cell = [self messageTableCellWithIdentifier:@"text" andInbound:inDirection fromTable: tableView];
                 NSMutableAttributedString* geoString = [[NSMutableAttributedString alloc] initWithString:messageText];
                 [geoString addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:[geoMatch rangeAtIndex:0]];
 
@@ -1436,10 +1379,12 @@ enum msgSentState {
                 cell.link = [NSString stringWithFormat:@"https://www.openstreetmap.org/?mlat=%@&mlon=%@&zoom=%ldd", latitude, longitude, zoomLayer];
             }
         } else {
-            cell.messageBody.text = messageText;
-            cell.link = nil;
+            DDLogWarn(@"msgs of type kMessageTypeGeo should contain a geo location");
         }
     } else {
+        // Use default text cell
+        cell = [self messageTableCellWithIdentifier:@"text" andInbound:inDirection fromTable: tableView];
+
         // Check if message contains a url
         NSString* lowerCase = [messageText lowercaseString];
         NSRange pos = [lowerCase rangeOfString:@"https://"];
@@ -1483,24 +1428,12 @@ enum msgSentState {
             cell.link = nil;
         }
     }
-    
-    if(self.contact.isGroup)
-    {
-        cell.name.hidden=NO;
-        cell.name.text=row.actualFrom;
-    } else  {
-        cell.name.text=@"";
-        cell.name.hidden=YES;
-    }
-    
-    MLMessage *nextRow =nil;
-    if(indexPath.row+1<self.messageList.count)
-    {
-        nextRow = [self.messageList objectAtIndex:indexPath.row+1];
-    }
-    
-    MLMessage *priorRow = nil;
-    if(indexPath.row>0)
+    // Only display names for groups
+    cell.name.text = self.contact.isGroup ? row.actualFrom : @"";
+    cell.name.hidden = !self.contact.isGroup;
+
+    MLMessage* priorRow = nil;
+    if(indexPath.row > 0)
     {
         priorRow = [self.messageList objectAtIndex:indexPath.row-1];
     }
@@ -1512,42 +1445,29 @@ enum msgSentState {
     else
         cell.messageStatus.text = kSending;
     
-    /*if(indexPath.row==self.messageList.count-1 || ![nextRow.actualFrom isEqualToString:self.jid])
-        cell.messageStatus.hidden=NO;
-    else
-        cell.messageStatus.hidden=YES;*/
-    
     cell.messageHistoryId = row.messageDBId;
     BOOL newSender = NO;
     if(indexPath.row > 0)
     {
-        NSString *priorSender = priorRow.from;
+        NSString* priorSender = priorRow.from;
         if(![priorSender isEqualToString:row.from])
-            newSender=YES;
+            newSender = YES;
     }
-    
     cell.date.text = [self formattedTimeStampWithSource:row.delayTimeStamp ? row.delayTimeStamp : row.timestamp];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     
     cell.dividerDate.text = [self formattedDateWithSource:row.delayTimeStamp?row.delayTimeStamp:row.timestamp andPriorDate:priorRow.timestamp];
     
-    if(row.encrypted)
-        cell.lockImage.hidden = NO;
-    else
-        cell.lockImage.hidden = YES;
-    
-    cell.messageStatus.hidden = YES;
-    if([row.from isEqualToString:_jid])
-    {
-        cell.outBound = YES;
-        cell.messageStatus.hidden = NO;
-    }
-    else
-        cell.outBound = NO;
+    // Do not hide the lockImage if the message was encrypted
+    cell.lockImage.hidden = !row.encrypted;
+    // Set correct layout in/Outbound
+    cell.outBound = !inDirection;
+    // Hide messageStatus on inbound messages
+    cell.messageStatus.hidden = inDirection;
     
     cell.parent = self;
     
-    if(cell.outBound && ([row.errorType length]>0 || [row.errorReason length]>0) && !row.hasBeenReceived && row.hasBeenSent)
+    if(cell.outBound && ([row.errorType length] > 0 || [row.errorReason length] > 0) && !row.hasBeenReceived && row.hasBeenSent)
     {
         cell.messageStatus.text = [NSString stringWithFormat:@"Error: %@ - %@", row.errorType, row.errorReason];
         cell.deliveryFailed = YES;

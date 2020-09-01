@@ -348,7 +348,7 @@ enum chatViewControllerSections {
     
     [self updateBackground];
     
-    self.placeHolderText.text=[NSString stringWithFormat:NSLocalizedString(@"Message from %@",@ ""), self.jid];
+    self.placeHolderText.text = [NSString stringWithFormat:NSLocalizedString(@"Message from %@", @""), self.jid];
     // Load message draft from db
     NSString* messageDraft = [[DataLayer sharedInstance] loadMessageDraft:self.contact.contactJid forAccount:self.contact.accountId];
     if(messageDraft && [messageDraft length] > 0) {
@@ -407,8 +407,8 @@ enum chatViewControllerSections {
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
     }
     [super viewWillDisappear:animated];
-    [MLNotificationManager sharedInstance].currentAccountNo=nil;
-    [MLNotificationManager sharedInstance].currentContact=nil;
+    [MLNotificationManager sharedInstance].currentAccountNo = nil;
+    [MLNotificationManager sharedInstance].currentContact = nil;
     
     [self sendChatState:NO];
     [self stopLastInteractionTimer];
@@ -456,8 +456,6 @@ enum chatViewControllerSections {
 
 
 #pragma mark rotation
-
-
 -(void) viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     [self.chatInput resignFirstResponder];
@@ -486,7 +484,7 @@ enum chatViewControllerSections {
         if(!_day) {
             [[DataLayer sharedInstance] markAsReadBuddy:self.contact.contactJid forAccount:self.contact.accountId];
             
-            MonalAppDelegate* appDelegate= (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
+            MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
             [appDelegate updateUnread];
             
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
@@ -505,7 +503,7 @@ enum chatViewControllerSections {
         if(!self.jid) return;
         MLMessage* unreadStatus = [[MLMessage alloc] init];
         unreadStatus.messageType = kMessageTypeStatus;
-        unreadStatus.messageText = NSLocalizedString(@"Unread Messages Below", @ "");
+        unreadStatus.messageText = NSLocalizedString(@"Unread Messages Below", @"");
         unreadStatus.actualFrom = self.jid;
 
         NSInteger unreadPos = messages.count - 1;
@@ -915,8 +913,8 @@ enum chatViewControllerSections {
     
     NSString *mediaType = info[UIImagePickerControllerMediaType];
     if([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
-        UIImage *selectedImage= info[UIImagePickerControllerEditedImage];
-        if(!selectedImage) selectedImage= info[UIImagePickerControllerOriginalImage];
+        UIImage *selectedImage = info[UIImagePickerControllerEditedImage];
+        if(!selectedImage) selectedImage = info[UIImagePickerControllerOriginalImage];
         NSData *jpgData=  UIImageJPEGRepresentation(selectedImage, 0.5f);
         if(jpgData)
         {
@@ -996,17 +994,17 @@ enum chatViewControllerSections {
 -(void) presentMucInvite:(NSNotification *)notification
 {
     xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-    NSDictionary *userDic = notification.userInfo;
-    NSString *from = [userDic objectForKey:NSLocalizedString(@"from",@"")];
+    NSDictionary* userDic = notification.userInfo;
+    NSString* from = [userDic objectForKey:@"from"];
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"You have been invited to a conversation %@?",@""), from ];
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Group Chat Invite",@"") message:messageString preferredStyle:UIAlertControllerStyleAlert];
+        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"You have been invited to a conversation %@?", @""), from ];
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Group Chat Invite", @"") message:messageString preferredStyle:UIAlertControllerStyleAlert];
         
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Join",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Join", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [xmppAccount joinRoom:from withNick:xmppAccount.connectionProperties.identity.user andPassword:nil];
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
@@ -1753,13 +1751,17 @@ enum chatViewControllerSections {
                 break;
             }
         if(!oldestStanzaId)
+        {
             for(MLMessage* msg in self.messageList)
+            {
                 if(msg.stanzaId)
                 {
                     DDLogVerbose(@"Found oldest stanzaId in messages already displayed: %@", msg.stanzaId);
                     oldestStanzaId = msg.stanzaId;
                     break;
                 }
+            }
+        }
         
         //now load more (older) messages from mam if not
         DDLogVerbose(@"Loading more messages from mam before stanzaId %@", oldestStanzaId);

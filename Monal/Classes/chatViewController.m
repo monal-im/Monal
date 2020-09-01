@@ -1148,12 +1148,12 @@ enum msgSentState {
 
 -(void) scrollToBottom
 {
-    if(self.messageList.count==0) return;
+    if(self.messageList.count == 0) return;
     dispatch_async(dispatch_get_main_queue(), ^{
         NSInteger bottom = [self.messageTable numberOfRowsInSection:messagesSection];
-        if(bottom>0)
+        if(bottom > 0)
         {
-            NSIndexPath *path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:messagesSection];
+            NSIndexPath* path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:messagesSection];
           //  if(![self.messageTable.indexPathsForVisibleRows containsObject:path1])
             {
                 [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
@@ -1174,9 +1174,9 @@ enum msgSentState {
                       initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
     
     NSDate* now =[NSDate date];
-    self.thisday =[self.gregorian components:NSCalendarUnitDay fromDate:now].day;
-    self.thismonth =[self.gregorian components:NSCalendarUnitMonth fromDate:now].month;
-    self.thisyear =[self.gregorian components:NSCalendarUnitYear fromDate:now].year;
+    self.thisday = [self.gregorian components:NSCalendarUnitDay fromDate:now].day;
+    self.thismonth = [self.gregorian components:NSCalendarUnitMonth fromDate:now].month;
+    self.thisyear = [self.gregorian components:NSCalendarUnitYear fromDate:now].year;
 }
 
 
@@ -1185,22 +1185,21 @@ enum msgSentState {
     NSString* dateString;
     if(sourceDate!=nil)
     {
-        
         NSInteger msgday =[self.gregorian components:NSCalendarUnitDay fromDate:sourceDate].day;
         NSInteger msgmonth=[self.gregorian components:NSCalendarUnitMonth fromDate:sourceDate].month;
         NSInteger msgyear =[self.gregorian components:NSCalendarUnitYear fromDate:sourceDate].year;
-        
-        NSInteger priorDay=0;
-        NSInteger priorMonth=0;
-        NSInteger priorYear=0;
-        
+
+        NSInteger priorDay = 0;
+        NSInteger priorMonth = 0;
+        NSInteger priorYear = 0;
+
         if(priorDate) {
-            priorDay =[self.gregorian components:NSCalendarUnitDay fromDate:priorDate].day;
-            priorMonth=[self.gregorian components:NSCalendarUnitMonth fromDate:priorDate].month;
-            priorYear =[self.gregorian components:NSCalendarUnitYear fromDate:priorDate].year;
+            priorDay = [self.gregorian components:NSCalendarUnitDay fromDate:priorDate].day;
+            priorMonth = [self.gregorian components:NSCalendarUnitMonth fromDate:priorDate].month;
+            priorYear = [self.gregorian components:NSCalendarUnitYear fromDate:priorDate].year;
         }
-        
-        if (priorDate && ((priorDay!=msgday) || (priorMonth!=msgmonth) || (priorYear!=msgyear))  )
+
+        if (priorDate && ((priorDay != msgday) || (priorMonth != msgmonth) || (priorYear != msgyear))  )
         {
             //divider, hide time
             [self.destinationDateFormat setTimeStyle:NSDateFormatterNoStyle];
@@ -1209,21 +1208,19 @@ enum msgSentState {
             dateString = [self.destinationDateFormat stringFromDate:sourceDate];
         }
     }
-    
     return dateString;
 }
 
 -(NSString*) formattedTimeStampWithSource:(NSDate *) sourceDate
 {
     NSString* dateString;
-    if(sourceDate!=nil)
+    if(sourceDate != nil)
     {
         [self.destinationDateFormat setDateStyle:NSDateFormatterNoStyle];
         [self.destinationDateFormat setTimeStyle:NSDateFormatterShortStyle];
         
         dateString = [self.destinationDateFormat stringFromDate:sourceDate];
     }
-    
     return dateString;
 }
 
@@ -1233,8 +1230,8 @@ enum msgSentState {
 {
     NSInteger historyId = ((UIButton*) sender).tag;
     
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Retry sending message?",@ "") message:NSLocalizedString(@"This message failed to send.",@ "") preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Retry",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Retry sending message?", @"") message:NSLocalizedString(@"This message failed to send.", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Retry", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
         NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
         if([messageArray count] > 0)
         {

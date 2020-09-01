@@ -251,13 +251,13 @@ NSString *const kiqErrorType = @"error";
 
 -(void) setRemoveFromRoster:(NSString*) jid
 {
-    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
-    queryNode.element=@"query";
+    MLXMLNode* queryNode = [[MLXMLNode alloc] init];
+    queryNode.element = @"query";
     [queryNode.attributes setObject:@"jabber:iq:roster" forKey:kXMLNS];
     [self.children addObject:queryNode];
     
-    MLXMLNode* itemNode =[[MLXMLNode alloc] init];
-    itemNode.element=@"item";
+    MLXMLNode* itemNode = [[MLXMLNode alloc] init];
+    itemNode.element = @"item";
     [itemNode.attributes setObject:jid forKey:@"jid"];
     [itemNode.attributes setObject:@"remove" forKey:@"subscription"];
     [queryNode.children addObject:itemNode];
@@ -265,8 +265,8 @@ NSString *const kiqErrorType = @"error";
 
 -(void) setRosterRequest:(NSString *) version
 {
-    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
-    queryNode.element=@"query";
+    MLXMLNode* queryNode = [[MLXMLNode alloc] init];
+    queryNode.element = @"query";
     [queryNode.attributes setObject:@"jabber:iq:roster" forKey:kXMLNS];
     if(version)
         [queryNode.attributes setObject:version forKey:@"ver"];
@@ -275,22 +275,22 @@ NSString *const kiqErrorType = @"error";
 
 -(void) setVersion
 {
-    MLXMLNode* queryNode =[[MLXMLNode alloc] init];
-    queryNode.element=@"query";
+    MLXMLNode* queryNode = [[MLXMLNode alloc] init];
+    queryNode.element = @"query";
     [queryNode.attributes setObject:@"jabber:iq:version" forKey:kXMLNS];
     
-    MLXMLNode* name =[[MLXMLNode alloc] init];
-    name.element=@"name";
-    name.data=@"Monal";
+    MLXMLNode* name = [[MLXMLNode alloc] init];
+    name.element = @"name";
+    name.data = @"Monal";
     
 #if TARGET_OS_MACCATALYST
-    MLXMLNode* os =[[MLXMLNode alloc] init];
-    os.element=@"os";
-    os.data=@"macOS";
+    MLXMLNode* os = [[MLXMLNode alloc] init];
+    os.element = @"os";
+    os.data = @"macOS";
 #else
-    MLXMLNode* os =[[MLXMLNode alloc] init];
-    os.element=@"os";
-    os.data=@"iOS";
+    MLXMLNode* os = [[MLXMLNode alloc] init];
+    os.element = @"os";
+    os.data = @"iOS";
 #endif
     
     MLXMLNode* appVersion = [[MLXMLNode alloc] initWithElement:@"version"];

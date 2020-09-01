@@ -696,20 +696,21 @@
                                             <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="top" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pull to load more messages" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K3M-5z-C5O">
-                                                    <rect key="frame" x="8" y="11" width="398" height="22"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                    <nil key="textColor"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="top" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Pull to load more messages" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="K3M-5z-C5O">
+                                                    <rect key="frame" x="10" y="14.333333333333336" width="394" height="15.666666666666664"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                                                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstItem="K3M-5z-C5O" firstAttribute="leading" secondItem="Vlg-E1-N3f" secondAttribute="leading" constant="8" id="6ng-fX-ACY"/>
+                                                <constraint firstItem="K3M-5z-C5O" firstAttribute="leading" secondItem="Vlg-E1-N3f" secondAttribute="leading" constant="10" id="6ng-fX-ACY"/>
                                                 <constraint firstItem="K3M-5z-C5O" firstAttribute="centerY" secondItem="Vlg-E1-N3f" secondAttribute="centerY" id="Lo5-8p-LNr"/>
-                                                <constraint firstAttribute="trailing" secondItem="K3M-5z-C5O" secondAttribute="trailing" constant="8" id="YS6-HX-FF1"/>
-                                                <constraint firstItem="K3M-5z-C5O" firstAttribute="top" secondItem="Vlg-E1-N3f" secondAttribute="topMargin" id="pNE-gt-1t2"/>
+                                                <constraint firstAttribute="trailing" secondItem="K3M-5z-C5O" secondAttribute="trailing" constant="10" id="YS6-HX-FF1"/>
+                                                <constraint firstItem="K3M-5z-C5O" firstAttribute="centerX" secondItem="Vlg-E1-N3f" secondAttribute="centerX" id="u3T-hc-b4t"/>
                                             </constraints>
                                         </tableViewCellContentView>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="linkInCell" rowHeight="236" id="GNi-V1-4na" userLabel="linkInCell" customClass="MLLinkCell">
                                         <rect key="frame" x="0.0" y="72" width="414" height="236"/>

@@ -80,6 +80,7 @@ enum chatViewControllerSections {
 
 enum msgSentState {
     msgSent,
+    msgErrorAfterSent,
     msgRecevied
 };
 
@@ -1072,7 +1073,7 @@ enum msgSentState {
     }
 }
 
--(void) setMessageId:(NSString *) messageId withEvent:(size_t) event
+-(void) updateMsgState:(NSString *) messageId withEvent:(size_t) event withOptDic:(NSDictionary*) dic
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         NSIndexPath* indexPath;
@@ -1088,6 +1089,13 @@ enum msgSentState {
                 } else if(event == msgRecevied) {
                     msg.hasBeenSent = YES;
                     msg.hasBeenReceived = YES;
+                } else if(event == msgErrorAfterSent) {
+                    //we don't want to show errors if the message has been received at least once or if the message wasn't even sent
+                    if(msg.hasBeenSent && !msg.hasBeenReceived)
+                    {
+                        msg.errorType = [dic objectForKey:@"errorType"];
+                        msg.errorReason = [dic objectForKey:@"errorReason"];
+                    }
                 }
                 indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
 
@@ -1106,43 +1114,19 @@ enum msgSentState {
 -(void) handleSentMessage:(NSNotification*) notification
 {
     NSDictionary* dic = notification.userInfo;
-    [self setMessageId:[dic objectForKey:kMessageId] withEvent:msgSent];
+    [self updateMsgState:[dic objectForKey:kMessageId] withEvent:msgSent withOptDic:nil];
 }
-
 
 -(void) handleMessageError:(NSNotification*) notification
 {
-    NSDictionary *dic =notification.userInfo;
-   
-    NSString* messageId = [dic objectForKey:kMessageId];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        int row=0;
-        NSIndexPath *indexPath;
-        for(MLMessage *message in self.messageList)
-        {
-            //we don't want to show errors if the message has been received at least once or if the message wasn't even sent
-            if([message.messageId isEqualToString:messageId] && message.hasBeenSent && !message.hasBeenReceived)
-            {
-                message.errorType = [dic objectForKey:@"errorType"];
-                message.errorReason = [dic objectForKey:@"errorReason"];
-                indexPath = [NSIndexPath indexPathForRow:row inSection:messagesSection];
-                break;
-            }
-            row++;
-        }
-        if(indexPath)
-        {
-            [self->_messageTable beginUpdates];
-            [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-            [self->_messageTable endUpdates];
-        }
-    });
+    NSDictionary* dic = notification.userInfo;
+    [self updateMsgState:[dic objectForKey:kMessageId] withEvent:msgErrorAfterSent withOptDic:dic];
 }
 
 -(void) handleReceivedMessage:(NSNotification*) notification
 {
     NSDictionary *dic = notification.userInfo;
-    [self setMessageId:[dic  objectForKey:kMessageId] withEvent:msgRecevied];
+    [self updateMsgState:[dic  objectForKey:kMessageId] withEvent:msgRecevied withOptDic:nil];
 }
 
 

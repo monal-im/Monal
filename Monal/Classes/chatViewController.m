@@ -78,6 +78,11 @@ enum chatViewControllerSections {
     chatViewControllerSectionCnt
 };
 
+enum msgSentState {
+    msgSent,
+    msgRecevied
+};
+
 -(void) setup
 {
     self.hidesBottomBarWhenPushed = YES;
@@ -1067,54 +1072,32 @@ enum chatViewControllerSections {
     }
 }
 
--(void) setMessageId:(NSString *) messageId sent:(BOOL) sent
+-(void) setMessageId:(NSString *) messageId withEvent:(size_t) event
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        int row = 0;
         NSIndexPath* indexPath;
-        for(MLMessage* message in self.messageList)
+        for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
         {
-            if([message.messageId isEqualToString:messageId])
+            // find msg that should be updated
+            MLMessage* msg = [self.messageList objectAtIndex:(msgIdx - 1)];
+            if([msg.messageId isEqualToString:messageId])
             {
-                message.hasBeenSent = sent;
-                //we don't want messages that have been received to be marked as not sent
-                if(message.hasBeenReceived && !sent)
-                    message.hasBeenSent = YES;
-                indexPath = [NSIndexPath indexPathForRow:row inSection:messagesSection];
-                break;
-            }
-            row++;
-        }
-        if(indexPath)
-        {
-            [self->_messageTable beginUpdates];
-            [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-            [self->_messageTable endUpdates];
-        }
-    });
-}
+                // Set correct flags
+                if(event == msgSent) {
+                    msg.hasBeenSent = YES;
+                } else if(event == msgRecevied) {
+                    msg.hasBeenSent = YES;
+                    msg.hasBeenReceived = YES;
+                }
+                indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
 
--(void) setMessageId:(NSString *) messageId received:(BOOL) received
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        int row = 0;
-        NSIndexPath* indexPath;
-        for(MLMessage* message in self.messageList)
-        {
-            if([message.messageId isEqualToString:messageId]) {
-                message.hasBeenSent = YES;
-                message.hasBeenReceived = received;
-                indexPath = [NSIndexPath indexPathForRow:row inSection:messagesSection];
+                // Update table entry
+                [self->_messageTable beginUpdates];
+                [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                [self->_messageTable endUpdates];
+
                 break;
             }
-            row++;
-        }
-        
-        if(indexPath)
-        {
-            [self->_messageTable beginUpdates];
-            [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-            [self->_messageTable endUpdates];
         }
     });
 }
@@ -1123,7 +1106,7 @@ enum chatViewControllerSections {
 -(void) handleSentMessage:(NSNotification*) notification
 {
     NSDictionary* dic = notification.userInfo;
-    [self setMessageId:[dic objectForKey:kMessageId] sent:YES];
+    [self setMessageId:[dic objectForKey:kMessageId] withEvent:msgSent];
 }
 
 
@@ -1159,7 +1142,7 @@ enum chatViewControllerSections {
 -(void) handleReceivedMessage:(NSNotification*) notification
 {
     NSDictionary *dic = notification.userInfo;
-    [self setMessageId:[dic  objectForKey:kMessageId] received:YES];
+    [self setMessageId:[dic  objectForKey:kMessageId] withEvent:msgRecevied];
 }
 
 

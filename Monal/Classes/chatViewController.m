@@ -1383,7 +1383,7 @@ enum msgSentState {
         }
     } else {
         // Use default text cell
-        cell = [self messageTableCellWithIdentifier:@"text" andInbound:inDirection fromTable: tableView];
+        cell = (MLChatCell*)[self messageTableCellWithIdentifier:@"text" andInbound:inDirection fromTable: tableView];
 
         // Check if message contains a url
         NSString* lowerCase = [messageText lowercaseString];
@@ -1408,23 +1408,24 @@ enum msgSentState {
             cell.link = parts[0];
             
             if(cell.link) {
-                NSDictionary *underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
+                NSDictionary* underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
                 NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link attributes:underlineAttribute];
                 NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
                 [stitchedString appendAttributedString:
                  [[NSAttributedString alloc] initWithString:[messageText substringToIndex:pos.location] attributes:nil]];
                 [stitchedString appendAttributedString:underlined];
-                if(pos2.location!=NSNotFound)
+                if(pos2.location != NSNotFound)
                 {
                     NSString* remainder = [messageText substringFromIndex:pos.location+[underlined length]];
                     [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
                 }
-                cell.messageBody.attributedText=stitchedString;
+                cell.messageBody.attributedText = stitchedString;
             }
         }
         else // Default case
         {
-            cell.messageBody.text = messageText;
+            // Reset attributes
+            [cell.messageBody setText:messageText];
             cell.link = nil;
         }
     }

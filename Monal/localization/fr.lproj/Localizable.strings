@@ -289,10 +289,10 @@
 "Pin Chat" = "Pin Chat";
 "Read" = "Lire";
 "Received" = "Reçu";
-"Sending..." = "Envoi en cours…";
+"Sending..." = "Envoi…";
 "Sent" = "Envoyé";
 "Skip" = "Ignorer";
 "Unpin Chat" = "Désépingler la conversation";
-"Last seen: %@" = "Dernière visite : %@";
+"Last seen: %@" = "Vu en dernier : %@";
 "now" = "à l'instant";
 "Jabber, Openfire, Prosody etc. " = "Jabber, Prosody, ejabberd etc.   ";

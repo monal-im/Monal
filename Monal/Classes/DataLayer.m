@@ -388,7 +388,7 @@ static NSDateFormatter* dbFormatter;
 -(NSArray*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo
 {
     if(!username || !accountNo) return nil;
-    NSString* query = query = [NSString stringWithFormat:@"select buddy_name, state, status, filename, 0, ifnull(full_name, buddy_name) as full_name, nick_name, account_id, MUC, muc_subject, muc_nick , full_name as raw_full, subscription, ask from buddylist where buddy_name=? and account_id=?"];
+    NSString* query = query = [NSString stringWithFormat:@"SELECT a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id, lastMessageTime, 0 AS 'count', subscription, ask, pinned from activechats as a JOIN buddylist AS b WHERE a.buddy_name = b.buddy_name AND a.account_id = b.account_id AND a.buddy_name=? and a.account_id=?"];
     NSArray* params = @[username, accountNo];
 
     NSArray* results = [self.db executeReader:query andArguments:params];

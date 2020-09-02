@@ -120,45 +120,36 @@ enum activeChatsControllerSections {
 
 -(void) refreshContact:(NSNotification*) notification
 {
-    MLContact* user = [notification.userInfo objectForKey:@"contact"];;
-    [self insertOrMoveContact:user completion:nil];
-}
-
-
--(void) handleNewMessage:(NSNotification*) notification
-{
-    MLMessage* message = [notification.userInfo objectForKey:@"message"];
+    MLContact* contact = [notification.userInfo objectForKey:@"contact"];;
     
-    if([message.messageType isEqualToString:kMessageTypeStatus])
-        return;
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if(!message.shouldShowAlert)
-            return;
+    if([notification.userInfo objectForKey:@"pinningChanged"]) {
+        // if pinning changed we have to move the user to a other section
+        [self insertOrMoveContact:contact completion:nil];
+    } else {
+        __block NSIndexPath* indexPath = nil;
+        for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt; section++) {
+            if(indexPath)
+                break;
 
-        __block MLContact* messageContact;
-        
-        [self.chatListTable performBatchUpdates: ^{
-            [self.unpinnedContacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                MLContact *rowContact = (MLContact*) obj;
-                if([rowContact.contactJid isEqualToString:message.from])
-                {
-                    messageContact = rowContact;
-                    NSIndexPath* indexPath = [NSIndexPath indexPathForRow:idx inSection:unpinnedChats];
-                    [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            NSMutableArray* curContactArray = [self getChatArrayForSection:section];
+
+            // check if contact is already displayed -> get coresponding indexPath
+            [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                MLContact* rowContact = (MLContact *) obj;
+                if([rowContact.contactJid isEqualToString:contact.contactJid] &&
+                   [rowContact.accountId isEqualToString:contact.accountId]) {
+                    indexPath = [NSIndexPath indexPathForRow:idx inSection:section];
                     *stop = YES;
                 }
             }];
-        } completion:^(BOOL finished) {
-            if(!messageContact) {
-                [self refreshDisplay];
-            } else  {
-                [self insertOrMoveContact:messageContact completion:nil];
-            }
-        }];
-        
-    });
-    
+        }
+        // reload contact entry if we found it
+        if(indexPath) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            });
+        }
+    }
 }
 
 -(void) messageSent:(NSNotification *) notification
@@ -167,6 +158,29 @@ enum activeChatsControllerSections {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self insertOrMoveContact:contact completion:nil];
     });
+}
+
+-(void) handleNewMessage:(NSNotification*) notification
+{
+    MLMessage* newMessage = [notification.userInfo objectForKey:@"message"];
+    xmpp* msgAccount = (xmpp*)notification.object;
+    if([newMessage.messageType isEqualToString:kMessageTypeStatus])
+        return;
+
+    if(!msgAccount)
+        return;
+
+    NSString* buddyContactJid = newMessage.from;
+    if([msgAccount.connectionProperties.identity.jid isEqualToString:newMessage.from]) {
+        buddyContactJid = newMessage.to;
+    }
+    NSArray* contactArr = [[DataLayer sharedInstance] contactForUsername:buddyContactJid forAccount:newMessage.accountId];
+    if(!contactArr || [contactArr count] == 0)
+        return;
+
+    MLContact* contact = [contactArr objectAtIndex:0];
+    // contact.statusMessage = newMessage;
+    [self insertOrMoveContact:contact completion:nil];
 }
 
 -(void) insertOrMoveContact:(MLContact *) contact completion:(void (^ _Nullable)(BOOL finished))completion {
@@ -180,7 +194,8 @@ enum activeChatsControllerSections {
         // check if contact is already displayed -> get coresponding indexPath
         [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             MLContact* rowContact = (MLContact *) obj;
-            if([rowContact.contactJid isEqualToString:contact.contactJid]) {
+            if([rowContact.contactJid isEqualToString:contact.contactJid] &&
+               [rowContact.accountId isEqualToString:contact.accountId]) {
                 indexPath = [NSIndexPath indexPathForRow:idx inSection:section];
                 *stop = YES;
             }
@@ -215,13 +230,13 @@ enum activeChatsControllerSections {
     }
     else {
         // Chats does not exists in active Chats yet
-        [self.chatListTable performBatchUpdates:^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.chatListTable beginUpdates];
             [insertContactToArray insertObject:contact atIndex:0];
             [self.chatListTable insertRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationRight];
-        } completion:^(BOOL finished) {
-            // [self refreshDisplay]; //to remove empty dataset
-            if(completion) completion(finished);
-        }];
+            [self.chatListTable endUpdates];
+            if(completion) completion(YES);
+        });
     }
 }
 
@@ -473,11 +488,11 @@ enum activeChatsControllerSections {
         MLContact* contact = nil;
         // Delete contact from view
         if(indexPath.section == pinnedChats) {
-            [self.pinnedContacts removeObjectAtIndex:indexPath.row];
             contact = [self.pinnedContacts objectAtIndex:indexPath.row];
+            [self.pinnedContacts removeObjectAtIndex:indexPath.row];
         } else {
-            [self.unpinnedContacts removeObjectAtIndex:indexPath.row];
             contact = [self.unpinnedContacts objectAtIndex:indexPath.row];
+            [self.unpinnedContacts removeObjectAtIndex:indexPath.row];
         }
         [self.chatListTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
         // removeActiveBuddy in db

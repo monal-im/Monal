@@ -50,7 +50,10 @@
     if(!muted && message.shouldShowAlert)
     {
         if([HelperTools isInBackground])
+        {
+            DDLogVerbose(@"notification manager got new message notice in background: %@", message.messageText);
             [self showModernNotificaion:notification];
+        }
         else
         {
             //don't show notifications for open chats

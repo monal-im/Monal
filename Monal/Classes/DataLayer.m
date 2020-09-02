@@ -1019,7 +1019,7 @@ static NSDateFormatter* dbFormatter;
     return messageArray;
 }
 
--(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted  withCompletion: (void (^)(BOOL, NSString*))completion
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted backwards:(BOOL) backwards withCompletion: (void (^)(BOOL, NSString*))completion
 {
     if(!from || !to || !message) {
         if(completion) completion(NO, nil);
@@ -1063,11 +1063,22 @@ static NSDateFormatter* dbFormatter;
         if(!messageType && [actualfrom isEqualToString:from])
         {
             NSString* foundMessageType = [self messageTypeForMessage:message withKeepThread:YES];
-            NSString* query = [NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"];
-            NSArray* params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:sent], messageid?messageid:@"", foundMessageType, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@""];
+            NSString* query;
+            NSArray* params;
+            if(backwards)
+            {
+                NSNumber* nextHisoryId = [NSNumber numberWithInt:[(NSNumber*)[self.db executeScalar:@"SELECT MIN(message_history_id) FROM message_history;"] intValue] - 1];
+                query = [NSString stringWithFormat:@"insert into message_history (message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"];
+                params = @[nextHisoryId, accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:sent], messageid?messageid:@"", foundMessageType, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@""];
+            }
+            else
+            {
+                //we use autoincrement here instead of MAX(message_history_id) + 1 to be a little bit faster (but at the cost of "duplicated code")
+                query = [NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"];
+                params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:sent], messageid?messageid:@"", foundMessageType, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@""];
+            }
             DDLogVerbose(@"%@", query);
             BOOL success = [self.db executeNonQuery:query andArguments:params];
-
             if(success)
                 [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
             [self.db endWriteTransaction];
@@ -2008,9 +2019,19 @@ static NSDateFormatter* dbFormatter;
     }];
     
     [self updateDBTo:4.86 withBlock:^{
+        //add new stanzaid field to account table that always points to the last received stanzaid (even if that does not have a body)
         [self.db executeNonQuery:@"ALTER TABLE account ADD lastStanzaId text;"];
     }];
-
+    
+    [self updateDBTo:4.87 withBlock:^{
+        //populate new stanzaid field in account table from message_history table
+        NSString* stanzaId = [self.db executeScalar:@"SELECT stanzaid FROM message_history WHERE stanzaid!='' ORDER BY message_history_id DESC LIMIT 1;"];
+        if(stanzaId && [stanzaId length])
+            [self.db executeNonQuery:@"UPDATE account SET lastStanzaId=?;" andArguments:@[stanzaId]];
+        //remove all old and most probably *wrong* stanzaids from history table
+        [self.db executeNonQuery:@"UPDATE message_history SET stanzaid='';"];
+    }];
+    
     [self.db endWriteTransaction];
     
     DDLogInfo(@"Database version check complete");

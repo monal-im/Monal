@@ -97,6 +97,7 @@ NSString *const kXMPPPresence = @"presence";
     BOOL _reconnectInProgress;
     NSObject* _smacksSyncPoint;     //only used for @synchronized() blocks
     BOOL _lastIdleState;
+    NSMutableDictionary* _mamPageArrays;
     
     //registration related stuff
     BOOL _registration;
@@ -169,6 +170,7 @@ NSString *const kXMPPPresence = @"presence";
     _exponentialBackoff = 0;
     _outputQueue = [[NSMutableArray alloc] init];
     _iqHandlers = [[NSMutableDictionary alloc] init];
+    _mamPageArrays = [[NSMutableDictionary alloc] init];
 
     _parseQueue = [[NSOperationQueue alloc] init];
     _parseQueue.name = @"receiveQueue";
@@ -1199,14 +1201,14 @@ NSString *const kXMPPPresence = @"presence";
             //only mark stanza as handled *after* processing it
             [self incrementLastHandledStanza];
         }
-        else if([parsedStanza.stanzaType  isEqualToString:@"message"] && [parsedStanza isKindOfClass:[ParseMessage class]])
+        else if([parsedStanza.stanzaType isEqualToString:@"message"] && [parsedStanza isKindOfClass:[ParseMessage class]])
         {
             ParseMessage* messageNode = (ParseMessage*)parsedStanza;
 
 #ifndef DISABLE_OMEMO
-            MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+            MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self jid:self.connectionProperties.identity.jid connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
 #else
-            MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid connection:self.connectionProperties signalContex:nil andSignalStore:nil];
+            MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self jid:self.connectionProperties.identity.jid connection:self.connectionProperties signalContex:nil andSignalStore:nil];
 #endif
 
             messageProcessor.sendStanza=^(MLXMLNode * _Nullable nodeResponse) {
@@ -1215,7 +1217,7 @@ NSString *const kXMPPPresence = @"presence";
                 }
             };
 
-            messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType) {
+            messageProcessor.postPersistAction = ^(BOOL success, BOOL encrypted, BOOL showAlert,  NSString* body, NSString* newMessageType) {
                 if(success)
                 {
                     if(messageNode.requestReceipt && ![messageNode.from isEqualToString:self.connectionProperties.identity.jid])
@@ -1233,23 +1235,7 @@ NSString *const kXMPPPresence = @"presence";
                     void(^notify)(BOOL) = ^(BOOL success) {
                         if(messageNode.from)
                         {
-                            NSString* actuallyFrom = messageNode.actualFrom;
-                            if(!actuallyFrom)
-                                actuallyFrom = messageNode.from;
-
-                            MLMessage *message = [[MLMessage alloc] init];
-                            message.from = messageNode.from;
-                            message.actualFrom = actuallyFrom;
-                            message.messageText = body;     //this need to be the processed value since it may be decrypted
-                            message.to = messageNode.to ? messageNode.to : self.connectionProperties.identity.jid;
-                            message.messageId = messageNode.idval ? messageNode.idval : @"";
-                            message.accountId = self.accountNo;
-                            message.encrypted = encrypted;
-                            message.delayTimeStamp = messageNode.delayTimeStamp;
-                            message.timestamp = [NSDate date];
-                            message.shouldShowAlert = showAlert;
-                            message.messageType = newMessageType;
-                            message.hasBeenSent = YES;      //if it came in it has been sent to the server
+                            MLMessage* message = [self parseMessageToMLMessage:messageNode withBody:body andEncrypted:encrypted andShowAlert:showAlert andMessageType:newMessageType];
 
                             DDLogInfo(@"sending out kMonalNewMessageNotice notification");
                             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
@@ -1276,12 +1262,12 @@ NSString *const kXMPPPresence = @"presence";
             //only process mam results when they are not for priming the database with the initial stanzaid (the id will be taken from the iq result)
             //we do this because we don't want to randomly add one single message to our history db after the user installs the app / adds a new account
             //if the user wants to see older messages he can retrieve them using the ui
-            if(!(messageNode.mamResult && [@"MLignore" isEqualToString:messageNode.mamQueryId]))
+            if(!(messageNode.mamResult && [messageNode.mamQueryId hasPrefix:@"MLignore:"]))
                 [messageProcessor processMessage:messageNode];
             
             //add newest stanzaid to database *after* processing the message, but only for non-mam messages or mam catchup
             //(e.g. those messages going forward in time not backwards)
-            if(messageNode.stanzaId && (!messageNode.mamResult || [@"MLcatchup" isEqualToString:messageNode.mamQueryId]))
+            if(messageNode.stanzaId && (!messageNode.mamResult || [messageNode.mamQueryId hasPrefix:@"MLcatchup:"]))
             {
                 DDLogVerbose(@"Updating lastStanzaId in database to: %@", messageNode.stanzaId);
                 [[DataLayer sharedInstance] setLastStanzaId:messageNode.stanzaId forAccount:self.accountNo];
@@ -2631,15 +2617,65 @@ NSString *const kXMPPPresence = @"presence";
     [self send:query];
 }
 
--(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid withCompletion:(monal_iq_handler_t) completion
+-(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid withCompletion:(void (^)(NSArray* _Nullable)) completion
 {
-    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-    [query setMAMQueryLatestMessagesForJid:jid before:uid];
-    [self sendIq:query withResponseHandler:^(ParseIq* response) {
-        completion(response);
-    } andErrorHandler:^(ParseIq* error) {
-        completion(error);
-    }];
+    NSMutableArray* __block messageList = [[NSMutableArray alloc] init];
+    monal_iq_handler_t __block responseHandler;
+    __block void (^query)(NSString* before);
+    responseHandler = ^(ParseIq* response) {
+        //insert messages having a body into the db and check if they are alread in there
+        for(MLMessage* msg in [self getOrderedMamPageFor:response.mamQueryId])
+            if(msg.messageText)
+                [[DataLayer sharedInstance] addMessageFrom:msg.from
+                                                        to:msg.to
+                                                forAccount:self.accountNo
+                                                  withBody:msg.messageText
+                                              actuallyfrom:msg.actualFrom
+                                                      sent:YES              //old history messages have always been sent (they are coming from the server)
+                                                    unread:NO               //old history messages have always been read (we don't want to show them as new)
+                                                 messageId:msg.messageId
+                                           serverMessageId:msg.stanzaId
+                                               messageType:msg.messageType
+                                           andOverrideDate:msg.delayTimeStamp
+                                                 encrypted:msg.encrypted
+                                                 backwards:YES
+                                            withCompletion:^(BOOL success, NSString* newMessageType) {
+                    //add successfully added messages to our display list
+                    if(success)
+                        [messageList addObject:msg];
+                }];
+        DDLogVerbose(@"collected mam:2 before-pages now contain %d messages in summary not already in history", [messageList count]);
+        //call completion to display all messages saved in db if we have enough messages or reached end of mam archive
+        if([messageList count] >= 25)
+            completion(messageList);
+        else
+        {
+            //page through to get more messages (a page possibly contians fewer than 25 messages having a body)
+            //but because we query for 50 stanzas we easily could get more than 25 messages having a body, too
+            if(response.mam2First && !response.mam2fin)
+                query(response.mam2First);
+            else
+            {
+                DDLogVerbose(@"Reached upper end of mam:2 archive, returning %d messages to ui", [messageList count]);
+                completion(messageList);    //can be fewer than 25 messages because we reached the upper end of the mam archive
+            }
+        }
+    };
+    query = ^(NSString* before) {
+        DDLogVerbose(@"Loading (next) mam:2 page before: %@", before);
+        XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+        [query setMAMQueryLatestMessagesForJid:jid before:before];
+        //we always want to use blocks here because we want to make sure we get not interrupted by an app crash/restart
+        //which would make us use incomplete mam pages that would produce holes in history (those are very hard to remove/fill afterwards)
+        [self sendIq:query withResponseHandler:responseHandler andErrorHandler:^(ParseIq* error) {
+            DDLogWarn(@"Got mam:2 before-query error, returning %d messages to ui", [messageList count]);
+            if(![messageList count])
+                completion(nil);            //call completion with nil, if there was an error or xmpp reconnect that prevented us to get any messages
+            else
+                completion(messageList);    //we had an error but did already load some messages --> update ui anyways
+        }];
+    };
+    query(uid);
 }
 
 #pragma mark - MUC
@@ -3070,6 +3106,7 @@ NSString *const kXMPPPresence = @"presence";
 }
 
 #pragma mark network I/O
+
 -(void) writeFromQueue
 {
     if(!_streamHasSpace)
@@ -3201,6 +3238,8 @@ NSString *const kXMPPPresence = @"presence";
     }
 }
 
+#pragma mark misc
+
 -(void) enablePush
 {
     if(
@@ -3228,6 +3267,52 @@ NSString *const kXMPPPresence = @"presence";
         _catchupDone = YES;
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
     }
+}
+
+-(MLMessage* _Nonnull) parseMessageToMLMessage:(ParseMessage* _Nonnull) messageNode withBody:(NSString*_Nonnull) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString* _Nonnull) messageType
+{
+    NSString* actuallyFrom = messageNode.actualFrom;
+    if(!actuallyFrom)
+        actuallyFrom = messageNode.from;
+    MLMessage *message = [[MLMessage alloc] init];
+    message.from = messageNode.from;
+    message.actualFrom = actuallyFrom;
+    message.messageText = [body copy];     //this need to be the processed value since it may be decrypted
+    message.to = messageNode.to ? messageNode.to : self.connectionProperties.identity.jid;
+    message.messageId = messageNode.idval ? messageNode.idval : @"";
+    message.accountId = self.accountNo;
+    message.encrypted = encrypted;
+    message.delayTimeStamp = messageNode.delayTimeStamp;
+    message.timestamp = [NSDate date];
+    message.shouldShowAlert = showAlert;
+    message.messageType = messageType;
+    message.hasBeenSent = YES;      //if it came in it has been sent to the server
+    message.stanzaId = messageNode.stanzaId;
+    return message;
+}
+
+-(void) addMessageToMamPageArray:(ParseMessage* _Nonnull) messageNode withBody:(NSString* _Nonnull) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString* _Nonnull) messageType
+{
+    MLMessage* message = [self parseMessageToMLMessage:messageNode withBody:body andEncrypted:encrypted andShowAlert:showAlert andMessageType:messageType];
+    @synchronized(_mamPageArrays) {
+        if(!_mamPageArrays[messageNode.mamQueryId])
+            _mamPageArrays[messageNode.mamQueryId] = [[NSMutableArray alloc] init];
+        [_mamPageArrays[messageNode.mamQueryId] addObject:message];
+    }
+}
+
+-(NSArray* _Nullable) getOrderedMamPageFor:(NSString* _Nonnull) mamQueryId
+{
+    NSMutableArray* array;
+    @synchronized(_mamPageArrays) {
+        if(!_mamPageArrays[mamQueryId])
+            return @[];     //return empty array if nothing can be found (after app crash etc.)
+        array = _mamPageArrays[mamQueryId];
+        [_mamPageArrays removeObjectForKey:mamQueryId];
+    }
+    if([mamQueryId hasPrefix:@"MLhistory:"])
+        array = [[array reverseObjectEnumerator] allObjects];
+    return [array copy];        //this creates an unmutable array from the mutable one
 }
 
 @end

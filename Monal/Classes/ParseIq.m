@@ -450,6 +450,12 @@
         return;
     }
     
+    if([elementName isEqualToString:@"first"] && [State isEqualToString:@"MAMSet"])
+    {
+        _mam2First=[_messageBuffer copy];
+        return;
+    }
+    
     if(([elementName isEqualToString:@"data"]) && [State isEqualToString:@"RegistrationFormData"]
        )
     {

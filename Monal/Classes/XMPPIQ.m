@@ -173,7 +173,7 @@ NSString *const kiqErrorType = @"error";
 -(void) setMAMQueryLatestMessagesForJid:(NSString*) jid before:(NSString*) uid
 {
     MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{
-        @"queryid": @"MLbefore"
+        @"queryid": [NSString stringWithFormat:@"MLhistory:%@", [[NSUUID UUID] UUIDString]]
     } andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data" withAttributes:@{
             @"type": @"submit"
@@ -191,7 +191,7 @@ NSString *const kiqErrorType = @"error";
             ] andData:nil]
         ] andData:nil],
         [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"max" withAttributes:@{} andChildren:@[] andData:@"100"],
+            [[MLXMLNode alloc] initWithElement:@"max" withAttributes:@{} andChildren:@[] andData:@"50"],
             [[MLXMLNode alloc] initWithElement:@"before" withAttributes:@{} andChildren:@[] andData:uid]
         ] andData:nil]
     ] andData:nil];
@@ -201,7 +201,7 @@ NSString *const kiqErrorType = @"error";
 -(void) setMAMQueryForLatestId
 {
     MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{
-        @"queryid": @"MLignore"
+        @"queryid": [NSString stringWithFormat:@"MLignore:%@", [[NSUUID UUID] UUIDString]]
     } andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data" withAttributes:@{
             @"type": @"submit"
@@ -229,7 +229,7 @@ NSString *const kiqErrorType = @"error";
 -(void) setMAMQueryAfter:(NSString*) uid
 {
     MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{
-        @"queryid": @"MLcatchup"
+        @"queryid": [NSString stringWithFormat:@"MLcatchup:%@", [[NSUUID UUID] UUIDString]]
     } andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data" withAttributes:@{
             @"type": @"submit"

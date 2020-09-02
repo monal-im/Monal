@@ -63,6 +63,7 @@
 @property (nonatomic, strong, readonly) NSString* mam2default;
 @property (nonatomic, assign, readonly) BOOL mam2fin;
 @property (nonatomic, strong, readonly) NSString* mam2Last;
+@property (nonatomic, strong, readonly) NSString* mam2First;
 @property (nonatomic, strong, readonly) NSString* mamQueryId;
 
 //omemo

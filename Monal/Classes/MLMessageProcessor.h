@@ -11,25 +11,26 @@
 #import "MLSignalStore.h"
 #import "SignalContext.h"
 #import "MLXMPPConnection.h"
+#import "xmpp.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void (^messageCompletion)(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType);
 typedef void (^signalCompletion)(void);
-typedef void (^nodeCompletion)( MLXMLNode  * _Nullable nodeResponse);
+typedef void (^nodeCompletion)(MLXMLNode* _Nullable nodeResponse);
 
 @interface MLMessageProcessor : NSObject
 @property (nonatomic, strong) messageCompletion postPersistAction;
 @property (nonatomic, strong) signalCompletion signalAction;
 @property (nonatomic, strong) nodeCompletion sendStanza;
 
--(MLMessageProcessor *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid connection:(MLXMPPConnection *) connection   signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore;
--(MLMessageProcessor *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid connection:(MLXMPPConnection *) connection;
+-(MLMessageProcessor *) initWithAccount:(xmpp*) account jid:(NSString*) jid connection:(MLXMPPConnection*) connection signalContex:(SignalContext*) signalContext andSignalStore:(MLSignalStore*) monalSignalStore;
+-(MLMessageProcessor *) initWithAccount:(xmpp*) account jid:(NSString*) jid connection:(MLXMPPConnection*) connection;
 
 /**
  Process a message, persist it and post relevant notifications
  */
--(void) processMessage:(ParseMessage *) messageNode;
+-(void) processMessage:(ParseMessage*) messageNode;
 
 @end
 

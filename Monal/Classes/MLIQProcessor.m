@@ -49,6 +49,7 @@
 {
     DDLogVerbose(@"Got latest stanza id to prime database with: %@", iqNode.mam2Last);
     [[DataLayer sharedInstance] setLastStanzaId:iqNode.mam2Last forAccount:account.accountNo];
+    [account mamFinished];
 }
 
 -(MLIQProcessor *) initWithAccount:(xmpp*) account connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore

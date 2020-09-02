@@ -13,6 +13,7 @@
 #import "MLXMLNode.h"
 
 #import "ParseIq.h"
+#import "ParseMessage.h"
 #import "jingleCall.h"
 #import "MLDNSLookup.h"
 #import "MLSignalStore.h"
@@ -232,7 +233,7 @@ Decline a call request
  -(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion;
 
 
--(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid withCompletion:(monal_iq_handler_t) completion;
+-(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid withCompletion:(void (^)(NSArray* _Nullable)) completion;
 -(void) setMAMPrefs:(NSString*) preference;
 -(void) getMAMPrefs;
 
@@ -279,5 +280,9 @@ Decline a call request
 
 -(void) requestRegFormWithCompletion:(xmppDataCompletion) completion andErrorCompletion:(xmppCompletion) errorCompletion;
 -(void) registerUser:(NSString* _Nonnull) username withPassword:(NSString* _Nonnull) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
+
+
+-(void) addMessageToMamPageArray:(ParseMessage* _Nonnull) messageNode withBody:(NSString* _Nonnull) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString* _Nonnull) messageType;
+-(NSArray* _Nullable) getOrderedMamPageFor:(NSString* _Nonnull) mamQueryId;
 
 @end

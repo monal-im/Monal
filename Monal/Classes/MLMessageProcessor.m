@@ -17,11 +17,11 @@
 
 
 @interface MLMessageProcessor ()
-@property (atomic, strong) SignalContext *signalContext;
-@property (atomic, strong) MLSignalStore *monalSignalStore;
-@property (nonatomic, strong) NSString *jid;
-@property (nonatomic, strong) NSString *accountNo;
-@property (nonatomic, strong) MLXMPPConnection *connection;
+@property (atomic, strong) SignalContext* signalContext;
+@property (atomic, strong) MLSignalStore* monalSignalStore;
+@property (nonatomic, strong) NSString* jid;
+@property (nonatomic, strong) xmpp* account;
+@property (nonatomic, strong) MLXMPPConnection* connection;
 @end
 
 static NSMutableDictionary* _typingNotifications;
@@ -33,21 +33,20 @@ static NSMutableDictionary* _typingNotifications;
     _typingNotifications = [[NSMutableDictionary alloc] init];
 }
 
--(MLMessageProcessor *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid connection:(MLXMPPConnection *) connection   signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore {
-    self=[super init];
-    self.accountNo = accountNo;
-    self.jid= jid;
-    self.signalContext=signalContext;
-    self.monalSignalStore= monalSignalStore;
-    self.connection= connection;
+-(MLMessageProcessor *) initWithAccount:(xmpp*) account jid:(NSString*) jid connection:(MLXMPPConnection*) connection   signalContex:(SignalContext*) signalContext andSignalStore:(MLSignalStore*) monalSignalStore
+{
+    self = [self initWithAccount:account jid:jid connection:connection];
+    self.signalContext = signalContext;
+    self.monalSignalStore = monalSignalStore;
     return self;
 }
 
--(MLMessageProcessor *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid connection:(MLXMPPConnection *) connection {
-    self=[super init];
-    self.accountNo = accountNo;
-    self.jid= jid;
-    self.connection= connection;
+-(MLMessageProcessor *) initWithAccount:(xmpp*) account jid:(NSString*) jid connection:(MLXMPPConnection*) connection
+{
+    self = [super init];
+    self.account = account;
+    self.jid = jid;
+    self.connection = connection;
     return self;
 }
 
@@ -77,24 +76,20 @@ static NSMutableDictionary* _typingNotifications;
     {
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalReceivedMucInviteNotice object:nil  userInfo:@{@"from":messageNode.from}];
     }
-    NSString *recipient=messageNode.to;
+    NSString* recipient = messageNode.to;
     
     if(!recipient)
-    {
-        recipient= self.jid;
-    }
+        recipient = self.jid;
     
-    NSString *decrypted =[self decryptMessage:messageNode];
+    NSString* decrypted = [self decryptMessage:messageNode];
     
-    if(messageNode.hasBody || messageNode.subject|| decrypted)
+    if(messageNode.hasBody || messageNode.subject || decrypted)
     {
-        NSString *ownNick;
+        NSString* ownNick;
      
         //processed messages already have server name
         if([messageNode.type isEqualToString:kMessageGroupChatType])
-        {
-            ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.from andServer:@"" forAccount:self.accountNo];
-        }
+            ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.from andServer:@"" forAccount:self.account.accountNo];
         
         if (ownNick!=nil && [messageNode.actualFrom isEqualToString:ownNick])
         {
@@ -107,7 +102,7 @@ static NSMutableDictionary* _typingNotifications;
             BOOL showAlert = YES;
             
             //if mam but catchup we do want an alert...
-            if([messageNode.from isEqualToString:self.jid] || (messageNode.mamResult && ![@"MLcatchup" isEqualToString:messageNode.mamQueryId]))
+            if([messageNode.from isEqualToString:self.jid] || (messageNode.mamResult && ![messageNode.mamQueryId hasPrefix:@"MLcatchup:"]))
             {
                 DDLogVerbose(@"Setting showAlert to NO");
                 showAlert = NO;
@@ -130,15 +125,14 @@ static NSMutableDictionary* _typingNotifications;
                 encrypted = YES;
             }
             
-            
-            if(!body  && messageNode.subject)
+            if(!body && messageNode.subject)
             {
                 messageType=kMessageTypeStatus;
                 
-                NSString* currentSubject = [[DataLayer sharedInstance] mucSubjectforAccount:self.accountNo andRoom:messageNode.from];
+                NSString* currentSubject = [[DataLayer sharedInstance] mucSubjectforAccount:self.account.accountNo andRoom:messageNode.from];
                 if(![messageNode.subject isEqualToString:currentSubject])
                 {
-                    [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.accountNo andRoom:messageNode.from];
+                    [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.account.accountNo andRoom:messageNode.from];
                     if(self.postPersistAction)
                         self.postPersistAction(YES, encrypted, showAlert, messageNode.subject, messageType);
                 }
@@ -152,28 +146,27 @@ static NSMutableDictionary* _typingNotifications;
                 messageId = [[NSUUID UUID] UUIDString];
             }
             
-            if([@"MLbefore" isEqualToString:messageNode.mamQueryId])
-            {
-                //TODO: handle backwards paging differently (negative database history ids)
-                //TODO: we don't want to call self.postPersistAction here, but do something like this:
-                //[[NSNotificationCenter defaultCenter] postNotificationName:kMonalHistoryMessageNotice object:self.account userInfo:@{@"message":message}];
-                //(see xmpp.m from line 1240 upwards)
-            }
+            //history messages have to be collected mam-page wise and reordered before inserted into db
+            //because mam always sorts the messages in a page by timestamp in ascending order
+            //we don't want to call postPersistAction, too, beause we don't want to display push notifications for old messages
+            if(messageNode.mamResult && [messageNode.mamQueryId hasPrefix:@"MLhistory:"])
+                [self.account addMessageToMamPageArray:messageNode withBody:body andEncrypted:encrypted andShowAlert:showAlert andMessageType:messageType];
             else
             {
                 [[DataLayer sharedInstance] addMessageFrom:messageNode.from
                                                         to:recipient
-                                                forAccount:self->_accountNo
-                                                withBody:[body copy]
-                                            actuallyfrom:messageNode.actualFrom
-                                                    sent:YES
+                                                forAccount:self.account.accountNo
+                                                  withBody:[body copy]
+                                              actuallyfrom:messageNode.actualFrom
+                                                      sent:YES
                                                     unread:unread
-                                                messageId:messageId
-                                        serverMessageId:messageNode.stanzaId
-                                            messageType:messageType
-                                        andOverrideDate:messageNode.delayTimeStamp
-                                                encrypted:encrypted
-                                            withCompletion:^(BOOL success, NSString *newMessageType) {
+                                                 messageId:messageId
+                                           serverMessageId:messageNode.stanzaId
+                                               messageType:messageType
+                                           andOverrideDate:messageNode.delayTimeStamp
+                                                 encrypted:encrypted
+                                                 backwards:NO
+                                            withCompletion:^(BOOL success, NSString* newMessageType) {
                     if(self.postPersistAction) {
                         self.postPersistAction(success, encrypted, showAlert, body, newMessageType);
                     }
@@ -184,7 +177,7 @@ static NSMutableDictionary* _typingNotifications;
     
     if(messageNode.avatarData)
     {
-        [[MLImageManager sharedInstance] setIconForContact:messageNode.actualFrom andAccount:self->_accountNo WithData:messageNode.avatarData];
+        [[MLImageManager sharedInstance] setIconForContact:messageNode.actualFrom andAccount:self.account.accountNo WithData:messageNode.avatarData];
     }
     
     if(messageNode.receivedID)
@@ -204,20 +197,20 @@ static NSMutableDictionary* _typingNotifications;
     if(![HelperTools isAppExtension])
     {
         //only use "is typing" messages when not older than 2 minutes (always allow "not typing" messages)
-        if([[DataLayer sharedInstance] checkCap:@"http://jabber.org/protocol/chatstates" forUser:messageNode.user andAccountNo:self.accountNo] &&
+        if([[DataLayer sharedInstance] checkCap:@"http://jabber.org/protocol/chatstates" forUser:messageNode.user andAccountNo:self.account.accountNo] &&
             ((messageNode.composing && (!messageNode.delayTimeStamp || [[NSDate date] timeIntervalSinceDate:messageNode.delayTimeStamp] < 120)) ||
             messageNode.notComposing)
         )
         {
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
                 @"jid": messageNode.user,
-                @"accountNo": self.accountNo,
+                @"accountNo": self.account.accountNo,
                 @"isTyping": messageNode.composing ? @YES : @NO
             }];
             //send "not typing" notifications (kMonalLastInteractionUpdatedNotice) 60 seconds after the last isTyping was received
             @synchronized(_typingNotifications) {
                 //copy needed values into local variables to not retain self by our timer block
-                NSString* account = self.accountNo;
+                NSString* account = self.account.accountNo;
                 NSString* jid = messageNode.user;
                 //abort old timer on new isTyping or isNotTyping message
                 if(_typingNotifications[messageNode.user])

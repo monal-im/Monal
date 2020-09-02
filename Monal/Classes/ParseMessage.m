@@ -77,12 +77,12 @@
         _delayTimeStamp = [HelperTools parseDateTimeString:[attributeDict objectForKey:@"stamp"]];
     }
     
-    if([namespaceURI isEqualToString:@"urn:xmpp:sid:0"])
+    if([elementName isEqualToString:@"stanza-id"] && [namespaceURI isEqualToString:@"urn:xmpp:sid:0"])
     {
         _stanzaId = [attributeDict objectForKey:@"id"];
     }
     
-    if(([elementName isEqualToString:@"message"])  )
+    if(([elementName isEqualToString:@"message"]))
     {
         DDLogVerbose(@"message type check");
         _type = [attributeDict objectForKey:@"type"];

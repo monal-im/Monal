@@ -1650,32 +1650,61 @@ enum msgSentState {
         
         //now load more (older) messages from mam if not
         DDLogVerbose(@"Loading more messages from mam before stanzaId %@", oldestStanzaId);
-        [self.xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid before:oldestStanzaId withCompletion:^(ParseIq* response) {
-            self.isLoadingMam = NO;     //allow next mam fetch
+        MBProgressHUD* loaderHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        loaderHUD.label.text = NSLocalizedString(@"Loading more Messages from Server", @"");
+        loaderHUD.mode = MBProgressHUDModeIndeterminate;
+        loaderHUD.removeFromSuperViewOnHide = YES;
+        [self.xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid before:oldestStanzaId withCompletion:^(NSArray* _Nullable messages) {
+            if(!messages)
+            {
+                DDLogError(@"Got backscrolling mam error");
+                //TODO: error happened --> display this to user?
+            }
+            else
+            {
+                DDLogVerbose(@"Got backscrolling mam response: %d", [messages count]);
+                [self insertOldMessages:messages];      //this array is already in reverse order
+            }
+            //allow next mam fetch
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.isLoadingMam = NO;
+                loaderHUD.hidden = YES;
+            });
         }];
     }
+    
+    //use reverse order to insert messages from newest to oldest (bottom to top in chatview)
+    [self insertOldMessages:[[oldMessages reverseObjectEnumerator] allObjects]];
+}
 
-    // Insert old messages into messageTable
-    NSMutableArray* indexArray = [NSMutableArray array];
-    [self->_messageTable beginUpdates];
-    for(size_t msgIdx = [oldMessages count]; msgIdx > 0; msgIdx--)
-    {
-        MLMessage* msg = [oldMessages objectAtIndex:(msgIdx - 1)];
-        [self.messageList insertObject:msg atIndex:0];
-        NSIndexPath* newIndexPath = [NSIndexPath indexPathForRow:msgIdx inSection:messagesSection];
-        [indexArray addObject:newIndexPath];
-    }
-    [self->_messageTable insertRowsAtIndexPaths:indexArray withRowAnimation:UITableViewRowAnimationNone];
-    [self->_messageTable endUpdates];
+-(void) insertOldMessages:(NSArray*) oldMessages
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(!self.messageList)
+            self.messageList = [[NSMutableArray alloc] init];
+        
+        // Insert old messages into messageTable
+        NSMutableArray* indexArray = [NSMutableArray array];
+        for(size_t msgIdx = 0; msgIdx < [oldMessages count]; msgIdx++)
+        {
+            MLMessage* msg = [oldMessages objectAtIndex:msgIdx];
+            [self.messageList insertObject:msg atIndex:0];
+            NSIndexPath* newIndexPath = [NSIndexPath indexPathForRow:msgIdx inSection:messagesSection];
+            [indexArray addObject:newIndexPath];
+        }
+        [self->_messageTable beginUpdates];
+        [self->_messageTable insertRowsAtIndexPaths:indexArray withRowAnimation:UITableViewRowAnimationNone];
+        [self->_messageTable endUpdates];
 
-    size_t scrollRow = NSNotFound;
-    if([self.messageList count] > 0 && [self.messageList count] == [oldMessages count]) {
-        scrollRow = [oldMessages count] - 1;
-    } else if([self.messageList count] > [oldMessages count]) {
-        // >
-        scrollRow = [oldMessages count];
-    }
-    [self->_messageTable scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:scrollRow inSection:messagesSection] atScrollPosition:messagesSection animated:NO];
+        size_t scrollRow = NSNotFound;
+        if([self.messageList count] > 0 && [self.messageList count] == [oldMessages count]) {
+            scrollRow = [oldMessages count] - 1;
+        } else if([self.messageList count] > [oldMessages count]) {
+            // >
+            scrollRow = [oldMessages count];
+        }
+        [self->_messageTable scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:scrollRow inSection:messagesSection] atScrollPosition:messagesSection animated:NO];
+    });
 }
 
 -(BOOL) canBecomeFirstResponder
@@ -1758,8 +1787,8 @@ enum msgSentState {
         self.placeHolderText.hidden = NO;
 }
 
-
 #pragma mark - photo browser delegate
+
 - (NSUInteger)numberOfPhotosInPhotoBrowser:(IDMPhotoBrowser *)photoBrowser {
     return self.photos.count;
 }

@@ -829,7 +829,7 @@ enum msgSentState {
         [gpsAlert setValue:[[UIImage systemImageNamed:@"location"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
     }
     [actionControll addAction:gpsAlert];
-    [actionControll addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+    [actionControll addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
         [actionControll dismissViewControllerAnimated:YES completion:nil];
     }]];
 
@@ -841,20 +841,21 @@ enum msgSentState {
 {
     if(!self.uploadHUD) {
         self.uploadHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-        self.uploadHUD.removeFromSuperViewOnHide=YES;
-        self.uploadHUD.label.text =NSLocalizedString(@"Uploading",@ "");
-        self.uploadHUD.detailsLabel.text =NSLocalizedString(@"Uploading file to server",@ "");
-        
+        self.uploadHUD.removeFromSuperViewOnHide = YES;
+        self.uploadHUD.label.text = NSLocalizedString(@"Uploading", @"");
+        self.uploadHUD.detailsLabel.text = NSLocalizedString(@"Uploading file to server", @"");
+    } else {
+        self.uploadHUD.hidden = NO;
     }
-    NSData *decryptedData= data;
-    NSData *dataToPass= data;
-    MLEncryptedPayload *encrypted;
+    NSData* decryptedData = data;
+    NSData* dataToPass = data;
+    MLEncryptedPayload* encrypted;
     
-    int keySize=32;
+    int keySize = 32;
     if(self.encryptChat) {
         encrypted = [AESGcm encrypt:decryptedData keySize:keySize];
         if(encrypted) {
-            NSMutableData *mutableBody = [encrypted.body mutableCopy];
+            NSMutableData* mutableBody = [encrypted.body mutableCopy];
             [mutableBody appendData:encrypted.authTag];
             dataToPass = [mutableBody copy];
         } else  {
@@ -864,56 +865,49 @@ enum msgSentState {
     
     [[MLXMPPManager sharedInstance]  httpUploadJpegData:dataToPass toContact:self.contact.contactJid onAccount:self.contact.accountId withCompletionHandler:^(NSString *url, NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.uploadHUD.hidden=YES;
+            self.uploadHUD.hidden = YES;
             
             if(url) {
-                NSString *newMessageID =[[NSUUID UUID] UUIDString];
+                NSString* newMessageID = [[NSUUID UUID] UUIDString];
                 
-                NSString *contactJidCopy =self.contact.contactJid; //prevent retail cycle
-                NSString *accountNoCopy = self.contact.accountId;
+                NSString* contactJidCopy = self.contact.contactJid; //prevent retail cycle
+                NSString* accountNoCopy = self.contact.accountId;
                 BOOL isMucCopy = self.contact.isGroup;
                 BOOL encryptChatCopy = self.encryptChat;
                 
-                NSString *urlToPass=url;
+                NSString* urlToPass = url;
                 
                 if(encrypted) {
-                    NSURLComponents *urlComponents = [NSURLComponents componentsWithURL:[NSURL URLWithString:urlToPass] resolvingAgainstBaseURL:NO];
+                    NSURLComponents* urlComponents = [NSURLComponents componentsWithURL:[NSURL URLWithString:urlToPass] resolvingAgainstBaseURL:NO];
                     if(urlComponents) {
                         urlComponents.scheme = @"aesgcm";
                         urlComponents.fragment = [NSString stringWithFormat:@"%@%@",
                                                   [HelperTools hexadecimalString:encrypted.iv],
                                                   [HelperTools hexadecimalString:[encrypted.key subdataWithRange:NSMakeRange(0, keySize)]]];
-                        urlToPass=urlComponents.string;
+                        urlToPass = urlComponents.string;
                     } else  {
                         DDLogError(@"Could not parse URL for conversion to aesgcm:");
                     }
                 }
-                
                 [[MLImageManager sharedInstance] saveImageData:decryptedData forLink:urlToPass];
                 
                 [self addMessageto:self.contact.contactJid withMessage:urlToPass andId:newMessageID withCompletion:^(BOOL success) {
                     [[MLXMPPManager sharedInstance] sendMessage:urlToPass toContact:contactJidCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:YES messageId:newMessageID
                                           withCompletionHandler:nil];
-                    
                 }];
-                
             }
             else  {
-                UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"There was an error uploading the file to the server",@ "") message:[NSString stringWithFormat:@"%@", error.localizedDescription] preferredStyle:UIAlertControllerStyleAlert];
-                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"There was an error uploading the file to the server", @"") message:[NSString stringWithFormat:@"%@", error.localizedDescription] preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                     [alert dismissViewControllerAnimated:YES completion:nil];
                 }]];
                 [self presentViewController:alert animated:YES completion:nil];
             }
         });
-        
     }];
-    
-    
 }
 
-- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,
-                                                                                               id> *)info
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *, id> *)info
 {
     [self dismissViewControllerAnimated:YES completion:nil];
     

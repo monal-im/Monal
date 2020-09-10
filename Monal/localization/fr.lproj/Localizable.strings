@@ -209,7 +209,7 @@
 "Jabber, Openfire, Prosody etc.   " = "Jabber, Openfire, Prosody etc.   ";
 "Jabber ID" = "Identifiant Jabber";
 "Invalid username" = "Nom d'utilisateur invalide";
-"Invalid Credentails" = "Identifiants invalides";
+"Invalid Credentials" = "Identifiants invalides";
 "Incoming Call" = "Appel entrant";
 "Incoming audio call to %@ from %@ " = "Appel audio entrant pour %1$@ de %2$@ ";
 "Ignore" = "Ignorer";

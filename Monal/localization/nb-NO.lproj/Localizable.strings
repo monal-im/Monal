@@ -180,7 +180,7 @@
 "If you want to use VOIP you will need to allow access in Settings-> Privacy-> Microphone." = "If you want to use VOIP you will need to allow access in Settings-> Privacy-> Microphone.";
 "Incoming audio call to %@ from %@ " = "Incoming audio call to %1$@ from %2$@ ";
 "Indicate when a particular device is active or inactive. Saves battery." = "Indicate when a particular device is active or inactive. Saves battery.";
-"Invalid Credentails" = "Invalid Credentails";
+"Invalid Credentials" = "Invalid Credentails";
 "Join" = "Join";
 "Just seen" = "Just seen";
 "Last seen: %d days ago" = "Last seen: %d days ago";

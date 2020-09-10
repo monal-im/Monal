@@ -184,7 +184,7 @@
 "Jabber, Openfire, Prosody etc.   " = "Jabber, Openfire, Prosody usw.   ";
 "Jabber ID" = "Jabber-ID";
 "Invalid username" = "Ungültiger Benutzername";
-"Invalid Credentails" = "Ungültige Zugangsdaten";
+"Invalid Credentials" = "Ungültige Zugangsdaten";
 "Indicate when a particular device is active or inactive. Saves battery." = "Zeige an wenn ein bestimmtes Gerät aktiv oder inaktiv ist. Spart Akku.";
 "Incoming Call" = "Eingehender Anruf";
 "Incoming audio call to %@ from %@ " = "Eingehender Audioanruf an %1$@ von %2$@ ";

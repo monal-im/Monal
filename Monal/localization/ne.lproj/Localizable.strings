@@ -89,7 +89,7 @@
 "Incoming audio call to %@ from %@ " = "Incoming audio call to %1$@ from %2$@ ";
 "Incoming Call" = "Incoming Call";
 "Indicate when a particular device is active or inactive. Saves battery." = "Indicate when a particular device is active or inactive. Saves battery.";
-"Invalid Credentails" = "Invalid Credentails";
+"Invalid Credentials" = "Invalid Credentails";
 "Invalid username" = "Invalid username";
 "Jabber ID" = "Jabber ID";
 "Jabber, Openfire, Prosody etc.   " = "Jabber, Openfire, Prosody etc.   ";

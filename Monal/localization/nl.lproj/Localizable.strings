@@ -89,7 +89,7 @@
 "Incoming Call" = "Inkomend gesprek";
 "Incoming audio call to %@ from %@ " = "Inkomende audio oproep naar %1$@ van %2$@ ";
 "Ignore" = "Negeer";
-"Invalid Credentails" = "Invalid Credentails";
+"Invalid Credentials" = "Invalid Credentails";
 "Invalid username" = "Invalid username";
 "Jabber ID" = "Jabber ID";
 "Jabber, Openfire, Prosody etc.   " = "Jabber, Openfire, Prosody etc.   ";

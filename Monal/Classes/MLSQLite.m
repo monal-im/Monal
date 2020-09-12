@@ -338,13 +338,6 @@
     return [self executeNonQuery:query andArguments:args withException:YES];
 }
 
-#pragma mark - V2 low level
-
--(void) executeScalar:(NSString*) query withCompletion:(void (^)(NSObject*)) completion
-{
-    [self executeScalar:query andArguments:@[]];
-}
-
 -(NSNumber*) lastInsertId
 {
     return [NSNumber numberWithInt:(int)sqlite3_last_insert_rowid(self->_database)];

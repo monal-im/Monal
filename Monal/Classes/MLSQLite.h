@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MLSQLite : NSObject
 
 +(id) sharedInstanceForFile:(NSString*) dbFile;
+
 -(void) beginWriteTransaction;
 -(void) endWriteTransaction;
 
@@ -25,6 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(BOOL) executeNonQuery:(NSString*) query;
 -(BOOL) executeNonQuery:(NSString*) query andArguments:(NSArray *) args;
+
 -(NSNumber*) lastInsertId;
 
 @end

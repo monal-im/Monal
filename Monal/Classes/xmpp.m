@@ -3256,7 +3256,7 @@ NSString *const kXMPPPresence = @"presence";
     }
     else
     {
-        DDLogInfo(@" NOT enabling push: %@ < %@", self.pushNode, self.pushSecret);
+        DDLogInfo(@" NOT enabling push: %@ < %@ (accountState: %d, supportsPush: %@)", self.pushNode, self.pushSecret, self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
     }
 }
 

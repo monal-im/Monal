@@ -63,6 +63,7 @@
 @property (nonatomic, strong) NSLayoutConstraint* chatInputConstraintSWKeyboard;
 
 //infinite scrolling
+@property (atomic) BOOL viewDidAppear;
 @property (atomic) BOOL viewIsScrolling;
 @property (atomic) BOOL isLoadingMam;
 
@@ -330,6 +331,9 @@ enum msgSentState {
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+
+    self.viewDidAppear = NO;
+
     // Hide normal navigation bar
     //[[self navigationController] setNavigationBarHidden:YES animated:NO];
     
@@ -400,8 +404,10 @@ enum msgSentState {
         }
     }
 #endif
-    
+
     [self refreshCounter];
+
+    self.viewDidAppear = YES;
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -1590,6 +1596,10 @@ enum msgSentState {
     if(self.contact.isGroup)
         return;
     
+    // Only load old msgs if the view appeared
+    if(!self.viewDidAppear)
+        return;
+
     // get current scroll position (y-axis)
     CGFloat curOffset = scrollView.contentOffset.y;
 

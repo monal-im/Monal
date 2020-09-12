@@ -67,6 +67,11 @@
 @property (atomic) BOOL viewIsScrolling;
 @property (atomic) BOOL isLoadingMam;
 
+@property (nonatomic, strong) UIButton *lastMsgButton;
+@property (nonatomic, assign) CGFloat lastOffset;
+
+#define lastMsgButtonSize 40.0
+
 @end
 
 @class HelperTools;
@@ -182,6 +187,28 @@ enum msgSentState {
         [self.plusButton setImage:[UIImage imageNamed:@"907-plus-rounded-square"] forState:UIControlStateNormal];
     }
 #endif
+}
+
+-(void) initLastMsgButton
+{
+    unichar arrowSymbol = 0x2193;
+    
+    self.lastMsgButton = [[UIButton alloc] init];
+    float buttonXPos = [UIScreen mainScreen].bounds.size.width - lastMsgButtonSize - 5;
+    float buttonYPos = self.messageTable.contentOffset.y - lastMsgButtonSize;
+    
+    self.lastMsgButton.frame = CGRectMake(buttonXPos, buttonYPos , lastMsgButtonSize, lastMsgButtonSize);
+    self.lastMsgButton.layer.cornerRadius = lastMsgButtonSize/2;
+    self.lastMsgButton.layer.backgroundColor = [UIColor whiteColor].CGColor;
+    [self.lastMsgButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
+    [self.lastMsgButton setTitle:[NSString stringWithCharacters:&arrowSymbol length:1] forState:UIControlStateNormal];
+    self.lastMsgButton.titleLabel.font = [UIFont systemFontOfSize:30.0];
+    self.lastMsgButton.layer.borderColor = [UIColor grayColor].CGColor;
+    self.lastMsgButton.userInteractionEnabled = YES;
+    [self.lastMsgButton setHidden:YES];
+    [self.lastMsgButton addTarget:self action:@selector(scrollToBottom) forControlEvents:UIControlEventTouchDown];
+    
+    [[[UIApplication sharedApplication] keyWindow] addSubview:self.lastMsgButton];
 }
 
 -(void) setChatInputHeightConstraints:(BOOL) hwKeyboardPresent
@@ -406,6 +433,9 @@ enum msgSentState {
 #endif
 
     [self refreshCounter];
+    
+    //init the floating last message button
+    [self initLastMsgButton];
 
     self.viewDidAppear = YES;
 }
@@ -424,6 +454,8 @@ enum msgSentState {
     
     [self sendChatState:NO];
     [self stopLastInteractionTimer];
+    
+    [_lastMsgButton removeFromSuperview];
 }
 
 - (void)viewDidLayoutSubviews {
@@ -1615,6 +1647,20 @@ enum msgSentState {
     }
     else
         self.viewIsScrolling = NO;
+    
+    if (self.lastOffset > curOffset)
+    {
+        [self.lastMsgButton setHidden:NO];
+    }
+    
+    CGFloat bottomLength = scrollView.frame.size.height + curOffset;
+        
+    if (scrollView.contentSize.height <= bottomLength)
+    {
+        [self.lastMsgButton setHidden:YES];
+    }
+        
+    self.lastOffset = curOffset;
 }
 
 -(void) loadOldMsgHistory
@@ -1823,6 +1869,10 @@ enum msgSentState {
     UIEdgeInsets contentInsets = UIEdgeInsetsMake(0.0, 0.0, kbSize.height - 10, 0.0);
     self.messageTable.contentInset = contentInsets;
     self.messageTable.scrollIndicatorInsets = contentInsets;
+    
+    float buttonXPos = self.lastMsgButton.frame.origin.x;
+    float buttonYPos = [UIScreen mainScreen].bounds.size.height - lastMsgButtonSize - kbSize.height - 5;
+    self.lastMsgButton.frame = CGRectMake(buttonXPos, buttonYPos , lastMsgButtonSize, lastMsgButtonSize);
     
     [self scrollToBottom];
 }

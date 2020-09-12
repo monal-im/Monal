@@ -9,7 +9,10 @@
 #import "DataLayer.h"
 #import "MLSQLite.h"
 #import "HelperTools.h"
-#import "MLConstants.h"
+#import "MLXMLNode.h"
+#import "XMPPPresence.h"
+#import "XMPPMessage.h"
+#import "XMPPIQ.h"
 
 @interface DataLayer()
 @property (readonly, strong) MLSQLite* db;
@@ -313,17 +316,38 @@ static NSDateFormatter* dbFormatter;
     NSData* data = (NSData*)[self.db executeScalar:query andArguments:params];
     if(data)
     {
-        NSMutableDictionary* dic=(NSMutableDictionary *) [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        NSError* error;
+        NSMutableDictionary* dic = (NSMutableDictionary*)[NSKeyedUnarchiver unarchivedObjectOfClasses:[[NSSet alloc] initWithArray:@[
+            [NSMutableDictionary class],
+            [NSDictionary class],
+            [NSMutableSet class],
+            [NSSet class],
+            [NSMutableArray class],
+            [NSArray class],
+            [NSNumber class],
+            [NSString class],
+            [NSDate class],
+            [MLXMLNode class],
+            [XMPPIQ class],
+            [XMPPPresence class],
+            [XMPPMessage class]
+        ]] fromData:data error:&error];
+        if(error)
+            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
         return dic;
     }
     return nil;
 }
 
--(void) persistState:(NSMutableDictionary *) state forAccount:(NSString*) accountNo
+-(void) persistState:(NSMutableDictionary*) state forAccount:(NSString*) accountNo
 {
     if(!accountNo || !state) return;
     NSString* query = [NSString stringWithFormat:@"update account set state=? where account_id=?"];
-    NSArray *params = @[[NSKeyedArchiver archivedDataWithRootObject:state], accountNo];
+    NSError* error;
+    NSData* data = [NSKeyedArchiver archivedDataWithRootObject:state requiringSecureCoding:YES error:&error];
+    if(error)
+        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
+    NSArray *params = @[data, accountNo];
     [self.db executeNonQuery:query andArguments:params];
 }
 

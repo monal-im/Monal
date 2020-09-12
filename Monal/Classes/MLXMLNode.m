@@ -9,6 +9,9 @@
 #import "MLXMLNode.h"
 
 #import "HelperTools.h"
+#import "XMPPIQ.h"
+#import "XMPPMessage.h"
+#import "XMPPPresence.h"
 
 @implementation MLXMLNode
 
@@ -46,27 +49,31 @@
 {
     self = [self initWithElement:element];
     [self.attributes addEntriesFromDictionary: [[NSDictionary alloc] initWithDictionary:attributes copyItems:YES]];
-    self.children = children;
+    self.children = [NSMutableArray arrayWithArray:children];
     self.data = data;
     return self;
 }
 
++(BOOL) supportsSecureCoding
+{
+    return YES;
+}
 
--(id) initWithCoder:(NSCoder*)decoder
+-(id) initWithCoder:(NSCoder*) decoder
 {
     self = [super init];
     if(!self)
         return nil;
 
-    _element = [decoder decodeObjectForKey:@"element"];
-    _attributes = [decoder decodeObjectForKey:@"attributes"];
-    _children = [decoder decodeObjectForKey:@"children"];
-    _data = [decoder decodeObjectForKey:@"data"];
+    _element = [decoder decodeObjectOfClass:[NSString class] forKey:@"element"];
+    _attributes = [decoder decodeObjectOfClasses:[[NSSet alloc] initWithArray:@[[NSMutableDictionary class], [NSDictionary class], [NSMutableString class], [NSString class]]] forKey:@"attributes"];
+    _children = [decoder decodeObjectOfClasses:[[NSSet alloc] initWithArray:@[[NSMutableArray class], [NSArray class], [MLXMLNode class], [XMPPIQ class], [XMPPMessage class], [XMPPPresence class]]] forKey:@"children"];
+    _data = [decoder decodeObjectOfClass:[NSString class] forKey:@"data"];
 
     return self;
 }
 
--(void) encodeWithCoder:(NSCoder*)encoder
+-(void) encodeWithCoder:(NSCoder*) encoder
 {
     [encoder encodeObject:_element forKey:@"element"];
     [encoder encodeObject:_attributes forKey:@"attributes"];

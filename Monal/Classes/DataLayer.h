@@ -7,10 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MLConstants.h"
 #import "ParsePresence.h"
 #import "MLMessage.h"
 #import "MLContact.h"
-#import "MLConstants.h"
 
 
 @interface DataLayer : NSObject

@@ -9,10 +9,12 @@
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
 
-@interface MLXMLNode : NSObject <NSCoding>
+@interface MLXMLNode : NSObject <NSSecureCoding>
 {
     
 }
+
++(BOOL) supportsSecureCoding;
 
 /**
  Initilizes with an element type

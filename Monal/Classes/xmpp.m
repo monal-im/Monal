@@ -1961,7 +1961,6 @@ NSString *const kXMPPPresence = @"presence";
         [values setValue:self.lastOutboundStanza forKey:@"lastOutboundStanza"];
         [values setValue:[self.unAckedStanzas copy] forKey:@"unAckedStanzas"];
         [values setValue:self.streamID forKey:@"streamID"];
-        [values setValue:[NSDate date] forKey:@"streamTime"];
     }
 
     NSMutableDictionary* persistentIqHandlers = [[NSMutableDictionary alloc] init];
@@ -2002,13 +2001,15 @@ NSString *const kXMPPPresence = @"presence";
     }
 
     [values setObject:_lastInteractionDate forKey:@"lastInteractionDate"];
+    [values setValue:[NSDate date] forKey:@"stateSavedAt"];
 
     //save state dictionary
     [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
     //debug output
     @synchronized(_smacksSyncPoint) {
-        DDLogVerbose(@"persistState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@",
+        DDLogVerbose(@"persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@",
+            values[@"stateSavedAt"],
             self.lastHandledInboundStanza,
             self.lastHandledOutboundStanza,
             self.lastOutboundStanza,
@@ -2035,7 +2036,8 @@ NSString *const kXMPPPresence = @"presence";
             self.streamID = [dic objectForKey:@"streamID"];
             
             //debug output
-            DDLogVerbose(@"readSmacksStateOnly:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
+            DDLogVerbose(@"readSmacksStateOnly(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
+                dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
                 self.lastOutboundStanza,
@@ -2140,7 +2142,8 @@ NSString *const kXMPPPresence = @"presence";
 
         //debug output
         @synchronized(_smacksSyncPoint) {
-            DDLogVerbose(@"readState:\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@",
+            DDLogVerbose(@"readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@",
+                dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
                 self.lastOutboundStanza,

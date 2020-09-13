@@ -17,6 +17,7 @@ void logException(NSException* exception)
     [DDLog flushLog];
     DDLogError(@"*****************\nCRASH(%@): %@\nUserInfo: %@\nStack Trace: %@", [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
     [DDLog flushLog];
+    usleep(1000000);
 }
 
 +(BOOL) isInBackground

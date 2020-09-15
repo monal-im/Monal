@@ -25,11 +25,12 @@
 #import "AESGcm.h"
 #import "HelperTools.h"
 #import "MLChatViewHelper.h"
+#import "MLChatInputContainer.h"
 
 @import QuartzCore;
 @import MobileCoreServices;
 
-@interface chatViewController()<IDMPhotoBrowserDelegate>
+@interface chatViewController()<IDMPhotoBrowserDelegate, ChatInputActionDelegage>
 {
     BOOL _isTyping;
     monal_void_block_t _cancelTypingNotification;
@@ -195,8 +196,7 @@ enum msgSentState {
     
     self.lastMsgButton = [[UIButton alloc] init];
     float buttonXPos = [UIScreen mainScreen].bounds.size.width - lastMsgButtonSize - 5;
-    float buttonYPos = self.messageTable.contentOffset.y - lastMsgButtonSize;
-    
+    float buttonYPos = self.inputContainerView.frame.origin.y - lastMsgButtonSize - 5;
     self.lastMsgButton.frame = CGRectMake(buttonXPos, buttonYPos , lastMsgButtonSize, lastMsgButtonSize);
     self.lastMsgButton.layer.cornerRadius = lastMsgButtonSize/2;
     self.lastMsgButton.layer.backgroundColor = [UIColor whiteColor].CGColor;
@@ -206,9 +206,14 @@ enum msgSentState {
     self.lastMsgButton.layer.borderColor = [UIColor grayColor].CGColor;
     self.lastMsgButton.userInteractionEnabled = YES;
     [self.lastMsgButton setHidden:YES];
-    [self.lastMsgButton addTarget:self action:@selector(scrollToBottom) forControlEvents:UIControlEventTouchDown];
-    
-    [[[UIApplication sharedApplication] keyWindow] addSubview:self.lastMsgButton];
+    [self.inputContainerView addSubview:self.lastMsgButton];
+    MLChatInputContainer* inputView = (MLChatInputContainer*) self.inputContainerView;
+    inputView.chatInputActionDelegate = self;
+}
+#pragma mark - ChatInputActionDelegage
+-(void)doScrollDownAction
+{
+    [self scrollToBottom];
 }
 
 -(void) setChatInputHeightConstraints:(BOOL) hwKeyboardPresent
@@ -1870,9 +1875,6 @@ enum msgSentState {
     self.messageTable.contentInset = contentInsets;
     self.messageTable.scrollIndicatorInsets = contentInsets;
     
-    float buttonXPos = self.lastMsgButton.frame.origin.x;
-    float buttonYPos = [UIScreen mainScreen].bounds.size.height - lastMsgButtonSize - kbSize.height - 5;
-    self.lastMsgButton.frame = CGRectMake(buttonXPos, buttonYPos , lastMsgButtonSize, lastMsgButtonSize);
     
     [self scrollToBottom];
 }

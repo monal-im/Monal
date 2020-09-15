@@ -5,12 +5,12 @@ import socket
 import json
 import zlib
 import hashlib
-from Crypto.Cipher import AES
+from Cryptodome.Cipher import AES
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
-def decrypt(payload, key):
+def decrypt(ciphertext, key):
     iv = ciphertext[:12]
     if len(iv) != 12:
         raise DataIntegrityError("Cipher text is damaged: invalid iv length")
@@ -52,7 +52,7 @@ while True:
     
     # decrypt raw data
     try:
-        payload = decrypt(payload)
+        payload = decrypt(payload, key)
     except Exception as e:
         eprint(e)
         continue        # process next udp packet

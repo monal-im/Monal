@@ -2,8 +2,6 @@
 "1Hw-bc-mNT.title" = "Root View Controller";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "2FM-6l-v8h"; */
 "2FM-6l-v8h.title" = "Close";
-/* Class = "UITableViewController"; title = "Chat Log"; ObjectID = "3gZ-1D-g86"; */
-"3gZ-1D-g86.title" = "Jurnalele de discuții";
 /* Class = "UINavigationItem"; title = "Display Settings"; ObjectID = "bRa-lQ-kQr"; */
 "bRa-lQ-kQr.title" = "Setări de afișare";
 /* Class = "UIButton"; normalTitle = "Change Password"; ObjectID = "d7c-hm-a1K"; */
@@ -14,10 +12,6 @@
 "gFd-bu-COM.title" = "Setări";
 /* Class = "UINavigationItem"; title = "Accounts"; ObjectID = "GM4-e8-f1D"; */
 "GM4-e8-f1D.title" = "Conturi";
-/* Class = "UITextField"; accessibilityHint = "UDP Log Port"; ObjectID = "IVO-3g-xoO"; */
-"IVO-3g-xoO.accessibilityHint" = "UDP Log Port";
-/* Class = "UITextField"; placeholder = "Port of Logserver"; ObjectID = "IVO-3g-xoO"; */
-"IVO-3g-xoO.placeholder" = "Port of Logserver";
 /* Class = "UITableViewController"; title = "Settings"; ObjectID = "kjF-U7-P8y"; */
 "kjF-U7-P8y.title" = "Setări";
 /* Class = "UINavigationItem"; title = "Root View Controller"; ObjectID = "mLa-XU-o1Q"; */
@@ -48,7 +42,3 @@
 "wlb-8I-yzZ.title" = "Conturi cu jurnale";
 /* Class = "UITabBarItem"; title = "Settings"; ObjectID = "YtW-zK-Qze"; */
 "YtW-zK-Qze.title" = "Setări";
-/* Class = "UITextField"; accessibilityHint = "UDP Log Hostname"; ObjectID = "ZMn-v1-NOh"; */
-"ZMn-v1-NOh.accessibilityHint" = "UDP Log Hostname";
-/* Class = "UITextField"; placeholder = "Hostname/IP of Logserver"; ObjectID = "ZMn-v1-NOh"; */
-"ZMn-v1-NOh.placeholder" = "Hostname/IP of Logserver";

@@ -70,6 +70,7 @@ static const int sendMessageTimeoutSeconds = 10;
         [[HelperTools defaultsDB] setBool:NO forKey:@"udpLoggerEnabled"];
         [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerHostname"];
         [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerPort"];
+        [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerKey"];
 
         [[HelperTools defaultsDB] setBool:YES forKey:@"SetDefaults"];
         [[HelperTools defaultsDB] synchronize];
@@ -101,6 +102,8 @@ static const int sendMessageTimeoutSeconds = 10;
     if([[[HelperTools defaultsDB] stringForKey:@"BackgroundImage"] isEqualToString:@"Tie_My_Boat_by_Ray_García"]) {
         [[HelperTools defaultsDB] setObject:@"Tie_My_Boat_by_Ray_Garcia" forKey:@"BackgroundImage"];
     }
+
+    [self upgradeObjectUserSettingsIfUnset:@"udpLoggerKey" toDefault:@""];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal

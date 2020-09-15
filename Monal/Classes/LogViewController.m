@@ -12,9 +12,10 @@
 
 
 @interface LogViewController ()
-@property (weak, nonatomic) IBOutlet UITextField *logUDPHostname;
-@property (weak, nonatomic) IBOutlet UITextField *logUDPPort;
-@property (weak, nonatomic) IBOutlet UISwitch *logUDPSwitch;
+@property (weak, nonatomic) IBOutlet UITextField* logUDPHostname;
+@property (weak, nonatomic) IBOutlet UITextField* logUDPPort;
+@property (weak, nonatomic) IBOutlet UISwitch* logUDPSwitch;
+@property (weak, nonatomic) IBOutlet UITextField* logUDPAESKey;
 
 @end
 
@@ -49,6 +50,7 @@ DDLogFileInfo* _logInfo;
     self.logUDPSwitch.on = [[HelperTools defaultsDB] boolForKey: @"udpLoggerEnabled"];
     self.logUDPPort.text = [[HelperTools defaultsDB] stringForKey: @"udpLoggerPort"];
     self.logUDPHostname.text = [[HelperTools defaultsDB] stringForKey: @"udpLoggerHostname"];
+    self.logUDPAESKey.text = [[HelperTools defaultsDB] stringForKey:@"udpLoggerKey"];
 
     [self reloadLog];
 
@@ -61,6 +63,7 @@ DDLogFileInfo* _logInfo;
     [[HelperTools defaultsDB] setBool:self.logUDPSwitch.on forKey:@"udpLoggerEnabled"];
     [[HelperTools defaultsDB] setObject:self.logUDPHostname.text forKey:@"udpLoggerHostname"];
     [[HelperTools defaultsDB] setObject:self.logUDPPort.text forKey:@"udpLoggerPort"];
+    [[HelperTools defaultsDB] setObject:self.logUDPAESKey.text forKey:@"udpLoggerKey"];
     [[HelperTools defaultsDB] synchronize];
 }
 

@@ -7,6 +7,7 @@
 //
 
 #include <CommonCrypto/CommonDigest.h>
+#import <CommonCrypto/CommonHMAC.h>
 #import "HelperTools.h"
 #import "MLUDPLogger.h"
 
@@ -18,6 +19,16 @@ void logException(NSException* exception)
     DDLogError(@"*****************\nCRASH(%@): %@\nUserInfo: %@\nStack Trace: %@", [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
     [DDLog flushLog];
     usleep(1000000);
+}
+
++(NSString*) sha256HmacForKey: (NSString*) key andData: (NSString*) data
+{
+	const char* cKey  = [key cStringUsingEncoding: NSUTF8StringEncoding];
+	const char* cData = [data cStringUsingEncoding: NSUTF8StringEncoding];
+	uint8_t cHMAC[CC_SHA256_DIGEST_LENGTH] = {0};
+	CCHmac(kCCHmacAlgSHA256, cKey, [key lengthOfBytesUsingEncoding: NSUTF8StringEncoding], cData, [data lengthOfBytesUsingEncoding: NSUTF8StringEncoding], cHMAC);
+	NSString* retval = [self hexadecimalString: [[NSData alloc] initWithBytes: cHMAC length: sizeof(cHMAC)]];
+	return retval;
 }
 
 +(BOOL) isInBackground

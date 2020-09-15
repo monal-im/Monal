@@ -15,7 +15,7 @@
 #import "MLBasePaser.h"
 
 @interface MLMessageProcessorTest : XCTestCase
-@property (nonatomic, strong) NSString *accountNo;
+@property (nonatomic, strong) xmpp *account;
 @property (nonatomic, strong) NSString *jid;
 @property (nonatomic, strong) NSString *resource;
 @property (nonatomic, strong) MLXMPPConnection *connectionProperties;
@@ -27,9 +27,10 @@
 @implementation MLMessageProcessorTest
 
 - (void)setUp {
-    self.accountNo=@"1";
     self.jid=@"foo@monal.im";
     self.resource=@"Monal-iOS.51";
+    self.account = [[xmpp alloc] init];
+    self.account.accountNo = @"1";
     
     MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:self.jid  password:@"" andResource:self.resource];
 
@@ -37,7 +38,7 @@
  
     self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];
     
-    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:_accountNo];
+    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:self.account.accountNo];
     
     //signal store
     SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
@@ -75,7 +76,7 @@
 //    };
 //    
 //    MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
-//        MLMessageProcessor *processor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.jid connection:nil signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+//        MLMessageProcessor *processor = [[MLMessageProcessor alloc] initWithAccount:self.account.accountNo jid:self.jid connection:nil signalContex:self.signalContext andSignalStore:self.monalSignalStore];
 //        [processor processMessage:parsedStanza];
 //    }];
 //    
@@ -99,7 +100,7 @@
     
 
       MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
-          MLMessageProcessor *processor = [[MLMessageProcessor alloc] initWithAccount:self.accountNo jid:self.jid connection:nil signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+          MLMessageProcessor *processor = [[MLMessageProcessor alloc] initWithAccount:self.account.accountNo jid:self.jid connection:nil signalContex:self.signalContext andSignalStore:self.monalSignalStore];
           [processor processMessage:parsedStanza];
       }];
       

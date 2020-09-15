@@ -9,15 +9,14 @@
 
 #import <Foundation/Foundation.h>
 #import <CoreFoundation/CoreFoundation.h>
+#import <CommonCrypto/CommonDigest.h>
 #import <sys/socket.h>
 #import <arpa/inet.h>
 #import <netinet/in.h>
 #import <zlib.h>
 #import "MLUDPLogger.h"
 #import "HelperTools.h"
-
-#define IP      "192.168.11.3"
-#define PORT    5555
+#import "AESGcm.h"
 
 
 @interface MLUDPLogger ()
@@ -66,7 +65,7 @@
     //   Z_BEST_COMPRESSION
     //   Z_DEFAULT_COMPRESSION
 
-    if (deflateInit2(&strm, Z_DEFAULT_COMPRESSION, Z_DEFLATED, (15+16), 8, Z_DEFAULT_STRATEGY) != Z_OK) return nil;
+    if (deflateInit2(&strm, Z_BEST_COMPRESSION, Z_DEFLATED, (15+16), 8, Z_DEFAULT_STRATEGY) != Z_OK) return nil;
 
     NSMutableData *compressed = [NSMutableData dataWithLength:16384];  // 16K chunks for expansion
 
@@ -118,18 +117,30 @@
         @"qos": [NSNumber numberWithInteger:logMessage.qos]
     };
     NSError* writeError = nil; 
-    NSData* data = [NSJSONSerialization dataWithJSONObject:msgDict options:NSJSONWritingPrettyPrinted error:&writeError];
+    NSData* rawData = [NSJSONSerialization dataWithJSONObject:msgDict options:NSJSONWritingPrettyPrinted error:&writeError];
     if(writeError)
     {
         NSLog(@"MLUDPLogger json encode error: %@", writeError);
         return;
     }
     
-    //you have to comment the following line to send raw json log data
-    //data = [logMsg dataUsingEncoding:NSUTF8StringEncoding];
+    //you have to uncomment the following line to send only the formatted logline
+    //rawData = [logMsg dataUsingEncoding:NSUTF8StringEncoding];
     
     //compress data to account for udp size limits
-    data = [self gzipDeflate:data];
+    rawData = [self gzipDeflate:rawData];
+    
+    //hash raw key string with sha256 to get the correct 256 bit length needed for AES-256
+    //WARNING: THIS DOES NOT ENHANCE ENTROPY!! PLEASE MAKE SURE TO USE A KEY WITH PROPER ENTROPY!!
+    NSData* rawKey = [[[HelperTools defaultsDB] stringForKey:@"udpLoggerKey"] dataUsingEncoding:NSUTF8StringEncoding];
+    NSMutableData* key = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
+    CC_SHA256(rawKey.bytes, (unsigned int)rawKey.length, key.mutableBytes);
+    
+    //encrypt rawData using the "derived" key (see warning above!)
+    MLEncryptedPayload* payload = [AESGcm encrypt:rawData withKey:key];
+    NSMutableData* data  = [NSMutableData dataWithData:payload.iv];
+    [data appendData:payload.authTag];
+    [data appendData:payload.body];
     
     //calculate remote addr
     struct sockaddr_in addr;

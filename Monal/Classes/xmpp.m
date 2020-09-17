@@ -1969,7 +1969,7 @@ NSString *const kXMPPPresence = @"presence";
             NSString* id = (NSString*)key;
             NSDictionary* data = (NSDictionary*)obj;
             //only serialize persistent handlers with delegate and method
-            if(data[@"invalidateOnDisconnect"]==@NO && data[@"delegate"] && data[@"method"])
+            if([data[@"invalidateOnDisconnect"] isEqual:@NO] && data[@"delegate"] && data[@"method"])
             {
                 DDLogVerbose(@"saving serialized iq handler for iq '%@'", id);
                 [persistentIqHandlers setObject:data forKey:id];

@@ -1712,6 +1712,7 @@ enum msgSentState {
         loaderHUD.label.text = NSLocalizedString(@"Loading more Messages from Server", @"");
         loaderHUD.mode = MBProgressHUDModeIndeterminate;
         loaderHUD.removeFromSuperViewOnHide = YES;
+        __weak chatViewController *weakSelf = self;
         [self.xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid before:oldestStanzaId withCompletion:^(NSArray* _Nullable messages) {
             if(!messages)
             {
@@ -1720,12 +1721,12 @@ enum msgSentState {
             }
             else
             {
-                DDLogVerbose(@"Got backscrolling mam response: %d", [messages count]);
-                [self insertOldMessages:messages];      //this array is already in reverse order
+                DDLogVerbose(@"Got backscrolling mam response: %lu", (unsigned long)[messages count]);
+                [weakSelf insertOldMessages:messages];      //this array is already in reverse order
             }
             //allow next mam fetch
             dispatch_async(dispatch_get_main_queue(), ^{
-                self.isLoadingMam = NO;
+                weakSelf.isLoadingMam = NO;
                 loaderHUD.hidden = YES;
             });
         }];

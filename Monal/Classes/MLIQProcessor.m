@@ -48,7 +48,15 @@
 +(void) handleMamResponseWithLatestIdFor:(xmpp*) account withIqNode:(ParseIq*) iqNode
 {
     DDLogVerbose(@"Got latest stanza id to prime database with: %@", iqNode.mam2Last);
-    [[DataLayer sharedInstance] setLastStanzaId:iqNode.mam2Last forAccount:account.accountNo];
+    //only do this if we got a valid stanza id (not null)
+    //if we did not get one we will get one when receiving the next message in this smacks session
+    //if the smacks session times out before we get a message and someone sends us one or more messages before we had a chance to establish
+    //a new smacks session, this messages will get lost because we don't know how to query the archive for this message yet
+    //once we successfully receive the first mam-archived message stanza (could even be an XEP-184 ack for a sent message),
+    //no more messages will get lost
+    //we ignore this single message loss here, because it should be super rare and solving it would be really complicated
+    if(iqNode.mam2Last)
+        [[DataLayer sharedInstance] setLastStanzaId:iqNode.mam2Last forAccount:account.accountNo];
     [account mamFinished];
 }
 

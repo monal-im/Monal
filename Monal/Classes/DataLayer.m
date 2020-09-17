@@ -2050,6 +2050,7 @@ static NSDateFormatter* dbFormatter;
     [self updateDBTo:4.87 withBlock:^{
         //populate new stanzaid field in account table from message_history table
         NSString* stanzaId = [self.db executeScalar:@"SELECT stanzaid FROM message_history WHERE stanzaid!='' ORDER BY message_history_id DESC LIMIT 1;"];
+        DDLogVerbose(@"Populating lastStanzaId with id %@ from history table", stanzaId);
         if(stanzaId && [stanzaId length])
             [self.db executeNonQuery:@"UPDATE account SET lastStanzaId=?;" andArguments:@[stanzaId]];
         //remove all old and most probably *wrong* stanzaids from history table

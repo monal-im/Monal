@@ -231,10 +231,10 @@ NSString *const kXMPPPresence = @"presence";
     if(_outputBuffer)
         free(_outputBuffer);
     _outputBuffer = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_parseQueue removeObserver:self forKeyPath:@"operationCount"];
     [_receiveQueue removeObserver:self forKeyPath:@"operationCount"];
     [_sendQueue removeObserver:self forKeyPath:@"operationCount"];
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_parseQueue cancelAllOperations];
     [_receiveQueue cancelAllOperations];
     [_sendQueue cancelAllOperations];
@@ -281,7 +281,7 @@ NSString *const kXMPPPresence = @"presence";
         //we dispatch the idle check and subsequent notification on the receive queue to account for races
         //between the idle check and calls to disconnect issued in response to this idle notification
         //NOTE: yes, doing the check for [_sendQueue operationCount] (inside [self idle]) from the receive queue is not race free
-        //with such disconnects, but: we only want track the send queue on a best effort basis (because network sends are best effort, too)
+        //with such disconnects, but: we only want to track the send queue on a best effort basis (because network sends are best effort, too)
         //to some extent we want to make sure every stanza was physically sent out to the network before our app gets frozen by ios
         //but we don't need to make this completely race free (network "races" can occur far more often than send queue races).
         //in a race the smacks unacked stanzas array will contain the not yet sent stanzas --> we won't loose stanzas when racing the send queue
@@ -3149,12 +3149,14 @@ NSString *const kXMPPPresence = @"presence";
 
     if(requestAck)
     {
-        //adding the smacks request to the receiveQueue will make sure that we send the request
+        //adding the smacks request to the parseQueue will make sure that we send the request
         //*after* processing an incoming burst of stanzas (which is potentially causing an outgoing burst of stanzas)
         //this reduces the requests to an absolute minimum while still maintaining the rule to request an ack
         //for every stanza (e.g. until the smacks queue is empty) and not sending an ack if one is already in flight
         if(_accountState>=kStateBound)
-            [self requestSMAck:NO];
+            [_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                [self requestSMAck:NO];
+            }]] waitUntilFinished:NO];
         else
             DDLogWarn(@"no xmpp resource bound, not calling requestSMAck");
     }

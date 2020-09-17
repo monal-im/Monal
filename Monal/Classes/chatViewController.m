@@ -1674,7 +1674,10 @@ enum msgSentState {
         return;
 
     // Load older messages from db
-    NSMutableArray* oldMessages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId beforeMsgHistoryID:((MLMessage*)[self.messageList objectAtIndex:0]).messageDBId];
+    NSMutableArray* oldMessages = nil;
+    if( self.messageList.count>0) {
+        [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId beforeMsgHistoryID:((MLMessage*)[self.messageList objectAtIndex:0]).messageDBId];
+    }
 
     if(!self.isLoadingMam && [oldMessages count] < kMonalChatFetchedMsgCnt)
     {

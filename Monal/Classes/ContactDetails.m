@@ -35,6 +35,7 @@
 @property (nonatomic, assign) NSInteger groupMemberCount;
 @property (nonatomic, strong) UIImage *leftImage;
 @property (nonatomic, strong) UIImage *rightImage;
+@property (nonatomic, strong) NSMutableDictionary *versionInfoDic;
 
 @end
 
@@ -49,6 +50,8 @@
     [self.tableView registerNib:[UINib nibWithNibName:@"MLTextInputCell"
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"TextCell"];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshSoftwareVersion:) name: kMonalXmppUserSoftWareVersionRefresh object:nil];
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -69,9 +72,12 @@
     
     self.accountNo = self.contact.accountId;
     //making sure there is an entry at least
-    [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" andMucNick:nil  withCompletion:^(BOOL success) {
-    }];
+    [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" andMucNick:nil];
     
+	if (!self.contact.isGroup) {
+        [self querySoftwareVersion];
+    }
+	
     self.isEncrypted = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.accountNo];
     self.isPinned = [[DataLayer sharedInstance] isPinnedChat:self.accountNo andBuddyJid:self.contact.contactJid];
     
@@ -112,6 +118,13 @@
     
     [self refreshLock];
     [self refreshMute];
+    [self refreshSoftwareVersion:nil];
+}
+
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [[NSNotificationCenter defaultCenter] removeObserver:kMonalXmppUserSoftWareVersionRefresh];
 }
 
 -(IBAction) callContact:(id)sender
@@ -187,12 +200,18 @@
             
             // Set human readable lastInteraction field
             NSDate* lastInteractionDate = [[DataLayer sharedInstance] lastInteractionOfJid:self.contact.contactJid forAccountNo:self.contact.accountId];
-            detailCell.lastInteraction.text = [NSDateFormatter localizedStringFromDate:lastInteractionDate dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
-            
+            NSString* lastInteractionStr;
+            if(lastInteractionDate.timeIntervalSince1970 > 0) {
+                lastInteractionStr = [NSDateFormatter localizedStringFromDate:lastInteractionDate dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
+            } else {
+                lastInteractionStr = NSLocalizedString(@"now", @"");
+            }
+            detailCell.lastInteraction.text = [NSString stringWithFormat:NSLocalizedString(@"Last seen: %@", @""), lastInteractionStr];
+
             if(self.contact.isGroup || !self.isSubscribed) {
                 detailCell.lockButton.hidden = YES;
             }
-            
+
             [[MLImageManager sharedInstance] getIconForContact:self.contact.contactJid andAccount:self.contact.accountId withCompletion:^(UIImage *image) {
                 detailCell.buddyIconView.image = image;
                 //   detailCell.background.image=image;
@@ -290,6 +309,30 @@
             }
             thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             break;
+
+		case 3: {
+            thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Sub"];
+                        
+            switch (indexPath.row) {
+                case 0:
+                    thecell.textLabel.text = [NSString stringWithFormat:@"%@%@",
+                                              NSLocalizedString(@"Name: ",@""),
+                                              (_versionInfoDic[@"platform_App_Name"] == nil) ? @"":_versionInfoDic[@"platform_App_Name"]];
+                    break;
+                case 1:
+                    thecell.textLabel.text = [NSString stringWithFormat:@"%@%@",
+                                              NSLocalizedString(@"Os: ",@""),
+                                              (_versionInfoDic[@"platform_OS"] == nil) ? @"":_versionInfoDic[@"platform_OS"]];
+                    break;
+                case 2:
+                    thecell.textLabel.text = [NSString stringWithFormat:@"%@%@",
+                                              NSLocalizedString(@"Version: ",@""),
+                                              (_versionInfoDic[@"platform_App_Version"] == nil) ? @"":_versionInfoDic[@"platform_App_Version"]];
+                    break;
+                default:
+                    break;
+            }
+        }	
         }
     }
     return thecell;
@@ -301,12 +344,15 @@
     if(section == 0)  return 1;
     if(section == 1)  return 3;
     if(section == 2)  return 6;
+    if(section==3){
+        return [_versionInfoDic count];
+    }
     
     return 0; //some default shouldnt reach this
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 3;
+    return 4;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -318,6 +364,9 @@
     if(section == 2)
         toreturn= NSLocalizedString(@"Connection Details",@"");
     
+    if(section==3)
+        toreturn= NSLocalizedString(@"Software Version",@"");
+    
     return toreturn;
 }
 
@@ -326,7 +375,7 @@
 {
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
     
-    if(indexPath.section==0) return;
+    if(indexPath.section == 0 || indexPath.section == 3) return;
     
     if(indexPath.section==1){
         if(indexPath.row < 2) return;
@@ -374,7 +423,7 @@
                 // Update button text
                 [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
                 // Update color in activeViewController
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact, @"pinningChanged": @YES}];
                 break;
             }
         }
@@ -543,13 +592,12 @@
 
 -(void) refreshMute
 {
-    [[DataLayer sharedInstance] isMutedJid:self.contact.contactJid withCompletion:^(BOOL muted) {
-        self.isMuted= muted;
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSIndexPath *path = [NSIndexPath indexPathForRow:0 inSection:0];
-            [self.tableView reloadRowsAtIndexPaths:@[path] withRowAnimation:UITableViewRowAnimationNone];
-        });
-    }];
+    BOOL muted = [[DataLayer sharedInstance] isMutedJid:self.contact.contactJid];
+    self.isMuted = muted;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSIndexPath *path = [NSIndexPath indexPathForRow:0 inSection:0];
+        [self.tableView reloadRowsAtIndexPaths:@[path] withRowAnimation:UITableViewRowAnimationNone];
+    });
 }
 
 -(IBAction) toggleEncryption:(id)sender
@@ -570,6 +618,33 @@
     });
 }
 
+#pragma mark - refresh software version
+-(void) refreshSoftwareVersion:(NSNotification*) verNotification
+{
+    if (verNotification) {        
+        _versionInfoDic = [verNotification.userInfo mutableCopy];
+    } else {
+        NSArray* versionDBInfoArr = [[DataLayer sharedInstance] softwareVersionInfoForAccount:self.accountNo andContact:self.contact.contactJid];
+        if(versionDBInfoArr && [versionDBInfoArr count] >= 1) {
+            _versionInfoDic = versionDBInfoArr[0];
+        } else {
+            _versionInfoDic = [[NSMutableDictionary alloc] init];
+        }
+    }
+    
+    dispatch_async(dispatch_get_main_queue(), ^{        
+        NSIndexSet *sectionSet = [NSIndexSet indexSetWithIndex:3];
+        [self.tableView reloadSections:sectionSet withRowAnimation:UITableViewRowAnimationNone];
+    });
+}
+
+#pragma mark - Query Software Version
+
+-(void) querySoftwareVersion
+{
+    [[MLXMPPManager sharedInstance] getEntitySoftWareVersion:self.contact];
+}
+
 #pragma mark - textfield delegate
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
@@ -588,9 +663,11 @@
     else
         self.navigationItem.title = self.contact.fullName;
     
-    self.contact.nickName = textField.text;
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+    if(![self.contact.nickName isEqualToString:textField.text]) {
+        self.contact.nickName = textField.text;
+
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+    }
     
     return YES;
 }

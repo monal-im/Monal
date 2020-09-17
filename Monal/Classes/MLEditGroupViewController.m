@@ -253,9 +253,7 @@
     if(self.groupData) {
         NSNumber *account=[self.groupData objectForKey:@"account_id"];
         
-        [[DataLayer sharedInstance] deleteMucFavorite:[self.groupData objectForKey:@"mucid"] forAccountId:account.integerValue withCompletion:^(BOOL success) {
-            
-        }];
+        [[DataLayer sharedInstance] deleteMucFavorite:[self.groupData objectForKey:@"mucid"] forAccountId:account.integerValue];
     }
 }
 
@@ -263,9 +261,7 @@
     if(self.groupData) {
         NSNumber *account=[self.groupData objectForKey:@"account_id"];
 
-        [[DataLayer sharedInstance] updateMucFavorite:[self.groupData objectForKey:@"mucid"] forAccountId:account.integerValue autoJoin:self.autoSwitch.on andCompletion:^(BOOL success) {
-            
-        }];
+        [[DataLayer sharedInstance] updateMucFavorite:[self.groupData objectForKey:@"mucid"] forAccountId:account.integerValue autoJoin:self.autoSwitch.on];
     }
 }
 
@@ -290,7 +286,7 @@
             BOOL autoJoinValue=NO;
             if(self.autoSwitch.on) autoJoinValue=YES;
 
-            [[DataLayer sharedInstance] addMucFavoriteForAccount:account.accountNo withRoom:self.roomField.text nick:self.nickField.text autoJoin:autoJoinValue andCompletion:nil];
+            [[DataLayer sharedInstance] addMucFavoriteForAccount:account.accountNo withRoom:self.roomField.text nick:self.nickField.text autoJoin:autoJoinValue];
         }
 
         NSString *nick=[self.nickField.text copy];
@@ -308,16 +304,14 @@
         group.accountNickInGroup=nick;
         group.contactJid=room;
         
-        [[DataLayer sharedInstance] addContact:combinedRoom forAccount:account.accountNo fullname:@"" nickname:@"" andMucNick:nick  withCompletion:^(BOOL success) {
-            //race condition on creation otherwise
-            [[MLXMPPManager sharedInstance] joinRoom:combinedRoom withNick:nick andPassword:pass forAccountRow:self->_selectedRow];
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if(self.completion) self.completion(group);
-                [self dismissViewControllerAnimated:YES completion:nil];
-            });
-            
-        }];
+        [[DataLayer sharedInstance] addContact:combinedRoom forAccount:account.accountNo fullname:@"" nickname:@"" andMucNick:nick];
+        //race condition on creation otherwise
+        [[MLXMPPManager sharedInstance] joinRoom:combinedRoom withNick:nick andPassword:pass forAccountRow:self->_selectedRow];
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if(self.completion) self.completion(group);
+            [self dismissViewControllerAnimated:YES completion:nil];
+        });
     }
 }
 

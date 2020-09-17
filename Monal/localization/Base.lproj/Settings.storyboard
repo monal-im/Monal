@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="dgM-uB-Aap">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097.3" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="dgM-uB-Aap">
     <device id="retina6_5" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -93,10 +93,10 @@
             </objects>
             <point key="canvasLocation" x="160.86956521739131" y="7742.4107142857138"/>
         </scene>
-        <!--Chat Log-->
+        <!--Accounts With Logs-->
         <scene sceneID="qyy-8k-kaT">
             <objects>
-                <tableViewController title="Chat Log" id="3gZ-1D-g86" customClass="ChatLogsViewController" sceneMemberID="viewController">
+                <tableViewController id="3gZ-1D-g86" customClass="ChatLogsViewController" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="vjI-Ic-XHs">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -387,6 +387,9 @@
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
+                                            <attributedString key="userComments">
+                                                <fragment content="#bc-ignore!"/>
+                                            </attributedString>
                                         </label>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Detail" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="rF7-34-0sc">
                                             <rect key="frame" x="19.999999999999996" y="33.333333333333329" width="32.666666666666664" height="14.333333333333334"/>
@@ -527,15 +530,21 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" ambiguous="YES" editable="NO" text="log_placeholder" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="JYm-gw-Mhc">
-                                <rect key="frame" x="0.0" y="88" width="414" height="725"/>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" text="log_placeholder" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="JYm-gw-Mhc">
+                                <rect key="frame" x="0.0" y="228.66666666666669" width="414" height="584.33333333333326"/>
                                 <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                                 <color key="textColor" systemColor="labelColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                <attributedString key="userComments">
+                                    <fragment content="#bc-ignore!"/>
+                                </attributedString>
                             </textView>
-                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="87s-YI-3sS">
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="87s-YI-3sS">
                                 <rect key="frame" x="0.0" y="769" width="414" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="NmH-31-tX0"/>
+                                </constraints>
                                 <items>
                                     <barButtonItem systemItem="action" id="z1c-Lt-zEe">
                                         <connections>
@@ -562,22 +571,84 @@
                                     </barButtonItem>
                                 </items>
                             </toolbar>
+                            <textField opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Hostname/IP of Logserver" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ZMn-v1-NOh" userLabel="logHostname">
+                                <rect key="frame" x="8" y="96" width="174" height="34"/>
+                                <accessibility key="accessibilityConfiguration" hint="UDP Log Hostname"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="150" id="sYc-az-OgS"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" keyboardType="alphabet"/>
+                                <attributedString key="userComments">
+                                    <fragment content="#bc-ignore!"/>
+                                </attributedString>
+                            </textField>
+                            <textField opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Port of Logserver" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="IVO-3g-xoO" userLabel="logPort">
+                                <rect key="frame" x="190" y="96" width="140.33333333333337" height="34"/>
+                                <accessibility key="accessibilityConfiguration" hint="UDP Log Port"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="40" id="PtZ-Tm-cpv"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" spellCheckingType="no" keyboardType="numberPad"/>
+                                <attributedString key="userComments">
+                                    <fragment content="#bc-ignore!"/>
+                                </attributedString>
+                            </textField>
+                            <textField opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="AES Encryption Key" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="C84-JQ-3RM" userLabel="logAESKey">
+                                <rect key="frame" x="8" y="144" width="322" height="34"/>
+                                <accessibility key="accessibilityConfiguration" hint="UDP Log AES Key"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <attributedString key="userComments">
+                                    <fragment content="#bc-ignore!"/>
+                                </attributedString>
+                            </textField>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="PLEASE MAKE SURE TO USE A KEY WITH PROPER ENTROPY!!" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SEe-lB-dT4" userLabel="logAESHint">
+                                <rect key="frame" x="8" y="180" width="398" height="40.666666666666657"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                                <attributedString key="userComments">
+                                    <fragment content="#bc-ignore!"/>
+                                </attributedString>
+                            </label>
+                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="Cu2-OK-XWy" userLabel="logSwitch">
+                                <rect key="frame" x="357" y="96" width="51" height="31"/>
+                            </switch>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
+                            <constraint firstItem="ZMn-v1-NOh" firstAttribute="leading" secondItem="EB3-va-n1E" secondAttribute="leading" constant="8" id="3GD-k0-pHL"/>
+                            <constraint firstItem="SEe-lB-dT4" firstAttribute="top" secondItem="C84-JQ-3RM" secondAttribute="bottom" constant="8" id="59L-8P-GEM"/>
+                            <constraint firstItem="87s-YI-3sS" firstAttribute="trailing" secondItem="JYm-gw-Mhc" secondAttribute="trailing" id="5yw-SJ-WwJ"/>
+                            <constraint firstItem="C84-JQ-3RM" firstAttribute="top" secondItem="ZMn-v1-NOh" secondAttribute="bottom" constant="8" id="7Jw-q3-ieY"/>
                             <constraint firstItem="JYm-gw-Mhc" firstAttribute="leading" secondItem="EB3-va-n1E" secondAttribute="leading" id="7OF-Xo-ZGa"/>
-                            <constraint firstAttribute="trailing" secondItem="87s-YI-3sS" secondAttribute="trailing" id="Bf1-Gb-UEF"/>
-                            <constraint firstItem="Eub-EA-z0c" firstAttribute="top" secondItem="87s-YI-3sS" secondAttribute="bottom" id="MhG-wQ-YOw"/>
-                            <constraint firstItem="87s-YI-3sS" firstAttribute="leading" secondItem="EB3-va-n1E" secondAttribute="leading" id="TtL-VW-4B2"/>
+                            <constraint firstItem="ZMn-v1-NOh" firstAttribute="top" secondItem="pE0-Vj-loH" secondAttribute="bottom" constant="8" id="EbG-vD-JmE"/>
+                            <constraint firstItem="JYm-gw-Mhc" firstAttribute="top" secondItem="SEe-lB-dT4" secondAttribute="bottom" constant="8" id="FHS-1b-NiB"/>
+                            <constraint firstItem="87s-YI-3sS" firstAttribute="leading" secondItem="JYm-gw-Mhc" secondAttribute="leading" id="NC1-15-YZv"/>
+                            <constraint firstItem="87s-YI-3sS" firstAttribute="bottom" secondItem="JYm-gw-Mhc" secondAttribute="bottom" id="Tl3-hY-90I"/>
+                            <constraint firstItem="JYm-gw-Mhc" firstAttribute="trailing" secondItem="Cu2-OK-XWy" secondAttribute="trailing" constant="8" id="XIc-I7-TLK"/>
                             <constraint firstAttribute="trailing" secondItem="JYm-gw-Mhc" secondAttribute="trailing" id="XJd-3p-CJk"/>
-                            <constraint firstItem="JYm-gw-Mhc" firstAttribute="top" secondItem="pE0-Vj-loH" secondAttribute="bottom" id="ghu-qL-fHv"/>
-                            <constraint firstItem="87s-YI-3sS" firstAttribute="bottom" relation="lessThanOrEqual" secondItem="JYm-gw-Mhc" secondAttribute="bottom" id="vZZ-KP-PaX"/>
+                            <constraint firstItem="IVO-3g-xoO" firstAttribute="top" secondItem="ZMn-v1-NOh" secondAttribute="top" id="YcA-Gu-8XD"/>
+                            <constraint firstItem="Cu2-OK-XWy" firstAttribute="top" secondItem="ZMn-v1-NOh" secondAttribute="top" id="Ylv-xX-nIH"/>
+                            <constraint firstItem="87s-YI-3sS" firstAttribute="bottom" secondItem="EB3-va-n1E" secondAttribute="bottomMargin" id="eHG-WU-Fy0"/>
+                            <constraint firstItem="SEe-lB-dT4" firstAttribute="trailing" secondItem="JYm-gw-Mhc" secondAttribute="trailing" constant="-8" id="gqt-VM-Yx2"/>
+                            <constraint firstItem="Cu2-OK-XWy" firstAttribute="leading" secondItem="IVO-3g-xoO" secondAttribute="trailing" constant="4" id="gsk-iy-FLv"/>
+                            <constraint firstItem="SEe-lB-dT4" firstAttribute="leading" secondItem="JYm-gw-Mhc" secondAttribute="leading" constant="8" id="sag-lv-irY"/>
+                            <constraint firstItem="IVO-3g-xoO" firstAttribute="leading" secondItem="ZMn-v1-NOh" secondAttribute="trailing" constant="8" id="uCX-uh-gi6"/>
+                            <constraint firstItem="C84-JQ-3RM" firstAttribute="trailing" secondItem="IVO-3g-xoO" secondAttribute="trailing" id="uRn-zX-fZ8"/>
+                            <constraint firstItem="C84-JQ-3RM" firstAttribute="leading" secondItem="EB3-va-n1E" secondAttribute="leading" constant="8" id="xQo-3m-Qhd"/>
                         </constraints>
                     </view>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" id="JXM-KH-RYJ"/>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
+                        <outlet property="logUDPAESKey" destination="C84-JQ-3RM" id="pbI-nj-aug"/>
+                        <outlet property="logUDPHostname" destination="ZMn-v1-NOh" id="3qH-Tu-aDJ"/>
+                        <outlet property="logUDPPort" destination="IVO-3g-xoO" id="JeJ-cN-gcZ"/>
+                        <outlet property="logUDPSwitch" destination="Cu2-OK-XWy" id="zTe-dg-rRi"/>
                         <outlet property="logView" destination="JYm-gw-Mhc" id="IRa-EC-O43"/>
                     </connections>
                 </viewController>
@@ -727,6 +798,9 @@
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
+                                            <attributedString key="userComments">
+                                                <fragment content="#bc-ignore!"/>
+                                            </attributedString>
                                         </label>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Detail" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="QNX-n9-Hbx">
                                             <rect key="frame" x="19.999999999999996" y="33.333333333333329" width="32.666666666666664" height="14.333333333333334"/>
@@ -734,6 +808,9 @@
                                             <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
+                                            <attributedString key="userComments">
+                                                <fragment content="#bc-ignore!"/>
+                                            </attributedString>
                                         </label>
                                     </subviews>
                                 </tableViewCellContentView>
@@ -932,11 +1009,11 @@
             <point key="canvasLocation" x="-2523.1884057971015" y="5465.625"/>
         </scene>
     </scenes>
-    <resources>
-        <image name="740-gear" width="28" height="28"/>
-    </resources>
     <inferredMetricsTieBreakers>
         <segue reference="ljw-Ff-MNq"/>
         <segue reference="pZO-HH-rUP"/>
     </inferredMetricsTieBreakers>
+    <resources>
+        <image name="740-gear" width="28" height="28"/>
+    </resources>
 </document>

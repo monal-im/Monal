@@ -155,39 +155,33 @@
 {
     if([[HelperTools defaultsDB] boolForKey:@"SortContacts"]) //sort by status
     {
-        [[DataLayer sharedInstance] onlineContactsSortedBy:@"Status" withCompeltion:^(NSMutableArray *results) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.contacts= results;
-                [self reloadTable];
-            });
-        }];
+        NSMutableArray* results = [[DataLayer sharedInstance] onlineContactsSortedBy:@"Status"];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.contacts= results;
+            [self reloadTable];
+        });
     }
     else {
-        [[DataLayer sharedInstance] onlineContactsSortedBy:@"Name" withCompeltion:^(NSMutableArray *results) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.contacts= results;
-             [self reloadTable];
-            });
-        }];
+        NSMutableArray* results = [[DataLayer sharedInstance] onlineContactsSortedBy:@"Name"];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.contacts= results;
+         [self reloadTable];
+        });
     }
-    
     if([[HelperTools defaultsDB] boolForKey:@"OfflineContact"])
     {
-        [[DataLayer sharedInstance] offlineContactsWithCompletion:^(NSMutableArray *results) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.offlineContacts= results;
-               [self reloadTable];
-            });
-        }];
+        NSMutableArray* results = [[DataLayer sharedInstance] offlineContacts];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.offlineContacts= results;
+           [self reloadTable];
+        });
     }
-    
     if(self.searchResults.count==0)
     {
         dispatch_async(dispatch_get_main_queue(), ^{
           [self reloadTable];
         });
     }
-    
 }
 
 
@@ -450,27 +444,21 @@
     
     cell.accountNo=[row.accountId integerValue];
     cell.username=row.contactJid;
-    
-    
-    [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:row.accountId withCompletion:^(NSNumber *unread) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            cell.count=[unread integerValue];
-        });
-    }];
-    
-    
+
+    NSNumber* unreadMessagesCnt = [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:row.accountId];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        cell.count = [unreadMessagesCnt integerValue];
+    });
+
     [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
         cell.userImage.image=image;
     }];
-    
     [cell setOrb];
     
-    [[DataLayer sharedInstance] isMutedJid:row.contactJid  withCompletion:^(BOOL muted) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            cell.muteBadge.hidden=!muted;
-        });
-    }];
-    
+    BOOL muted = [[DataLayer sharedInstance] isMutedJid:row.contactJid];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        cell.muteBadge.hidden = !muted;
+    });
     return cell;
 }
 

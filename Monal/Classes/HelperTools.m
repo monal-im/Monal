@@ -7,6 +7,7 @@
 //
 
 #include <CommonCrypto/CommonDigest.h>
+#import <CommonCrypto/CommonHMAC.h>
 #import "HelperTools.h"
 #import "MLUDPLogger.h"
 
@@ -17,6 +18,17 @@ void logException(NSException* exception)
     [DDLog flushLog];
     DDLogError(@"*****************\nCRASH(%@): %@\nUserInfo: %@\nStack Trace: %@", [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
     [DDLog flushLog];
+    usleep(1000000);
+}
+
++(NSString*) sha256HmacForKey: (NSString*) key andData: (NSString*) data
+{
+	const char* cKey  = [key cStringUsingEncoding: NSUTF8StringEncoding];
+	const char* cData = [data cStringUsingEncoding: NSUTF8StringEncoding];
+	uint8_t cHMAC[CC_SHA256_DIGEST_LENGTH] = {0};
+	CCHmac(kCCHmacAlgSHA256, cKey, [key lengthOfBytesUsingEncoding: NSUTF8StringEncoding], cData, [data lengthOfBytesUsingEncoding: NSUTF8StringEncoding], cHMAC);
+	NSString* retval = [self hexadecimalString: [[NSData alloc] initWithBytes: cHMAC length: sizeof(cHMAC)]];
+	return retval;
 }
 
 +(BOOL) isInBackground
@@ -99,13 +111,13 @@ void logException(NSException* exception)
     DDLogInfo(@"Logfile dir: %@", [containerUrl path]);
     
     //network logger (only in alpha build)
-//    if(![kAppGroup isEqualToString:@"group.monal"])
-//    {
-//        MLUDPLogger* udpLogger = [[MLUDPLogger alloc] init];
-//        [udpLogger setLogFormatter:formatter];
-//        [DDLog addLogger:udpLogger];
-//    }
-
+    if(![kAppGroup isEqualToString:@"group.monal"])
+    {
+        MLUDPLogger* udpLogger = [[MLUDPLogger alloc] init];
+        [udpLogger setLogFormatter:formatter];
+        [DDLog addLogger:udpLogger];
+    }
+    
     //for debugging when upgrading the app
     NSArray* directoryContents = [fileManager contentsOfDirectoryAtPath:[containerUrl path] error:nil];
     for(NSString* file in directoryContents)
@@ -171,7 +183,8 @@ void logException(NSException* exception)
             @"urn:xmpp:ping",
             @"urn:xmpp:receipts",
             @"urn:xmpp:idle:1",
-            @"http://jabber.org/protocol/chatstates"
+            @"http://jabber.org/protocol/chatstates",
+            @"jabber:iq:version"
         ];
         featuresSet = [[NSSet alloc] initWithArray:featuresArray];
     });

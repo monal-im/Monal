@@ -41,11 +41,9 @@
 - (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
 {
     self.depth++;
-    DDLogDebug(@"Started element: %@ with depth: %ld and namespaceURI: %@", elementName, self.depth, namespaceURI);
     
     if(self.depth <= 2) // stream:stream is 1
     {
-        DDLogDebug(@"Creating new stanza parser for element: %@", elementName);
         [self makeStanzaParser:elementName andNamespaceURI:namespaceURI];
         self.currentStanzaParser.stanzaType=elementName;
         self.currentStanzaParser.stanzaNameSpace=namespaceURI;
@@ -53,6 +51,7 @@
     
     if(!self.currentStanzaParser)
     {
+        DDLogDebug(@"Started element: %@ with depth: %ld and namespaceURI: %@", elementName, self.depth, namespaceURI);
         DDLogError(@"no parser!");
         return;
     }
@@ -140,17 +139,18 @@
 
 
 -(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
-    DDLogDebug(@"Ended element: %@ depth %ld", elementName, self.depth);
     [self.currentStanzaParser parser:parser didEndElement:elementName namespaceURI:namespaceURI qualifiedName:qName];
     
     if(self.depth <=2) {
         if(self.completion) {
             if(!self.currentStanzaParser) {
+                DDLogDebug(@"Ended element: %@ depth %ld", elementName, self.depth);
                 DDLogError(@"No stanza parser. not calling completion");
             } else {
                 self.completion(self.currentStanzaParser);
             }
         } else  {
+            DDLogDebug(@"Ended element: %@ depth %ld", elementName, self.depth);
             DDLogError(@"no completion handler for stanza!");
         }
         self.currentStanzaParser=nil;

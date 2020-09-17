@@ -59,12 +59,18 @@ static const int sendMessageTimeoutSeconds = 10;
         [[HelperTools defaultsDB] setBool:NO forKey:@"SortContacts"];
 
         [[HelperTools defaultsDB] setBool:YES forKey:@"ChatBackgrounds"];
-        
+
         // Privacy Settings
         [[HelperTools defaultsDB] setBool:YES forKey:@"ShowImages"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"ShowGeoLocation"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastUserInteraction"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastChatState"];
+
+        // udp logger
+        [[HelperTools defaultsDB] setBool:NO forKey:@"udpLoggerEnabled"];
+        [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerHostname"];
+        [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerPort"];
+        [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerKey"];
 
         [[HelperTools defaultsDB] setBool:YES forKey:@"SetDefaults"];
         [[HelperTools defaultsDB] synchronize];
@@ -86,6 +92,18 @@ static const int sendMessageTimeoutSeconds = 10;
 
     // upgrade SendLastChatState
     [self upgradeBoolUserSettingsIfUnset:@"SendLastChatState" toDefault:YES];
+
+    // upgrade udp logger
+    [self upgradeBoolUserSettingsIfUnset:@"udpLoggerEnabled" toDefault:NO];
+    [self upgradeObjectUserSettingsIfUnset:@"udpLoggerHostname" toDefault:@""];
+    [self upgradeObjectUserSettingsIfUnset:@"udpLoggerPort" toDefault:@""];
+
+    // upgrade ASCII wallpaper name
+    if([[[HelperTools defaultsDB] stringForKey:@"BackgroundImage"] isEqualToString:@"Tie_My_Boat_by_Ray_García"]) {
+        [[HelperTools defaultsDB] setObject:@"Tie_My_Boat_by_Ray_Garcia" forKey:@"BackgroundImage"];
+    }
+
+    [self upgradeObjectUserSettingsIfUnset:@"udpLoggerKey" toDefault:@""];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal
@@ -256,18 +274,10 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) checkIfBackgroundTaskIsStillNeeded
 {
-    if(![HelperTools isAppExtension])
+    if(![HelperTools isAppExtension] && [self allAccountsIdle])
     {
-        if([self allAccountsIdle] && _pushCompletion)
-        {
-            DDLogInfo(@"### All accounts idle, calling push completion handler ###");
-            if(_cancelPushTimer)
-                _cancelPushTimer();
-            _pushCompletion(UIBackgroundFetchResultNewData);
-            _pushCompletion = nil;
-            _cancelPushTimer = nil;
-        }
-        if([self allAccountsIdle] && [HelperTools isInBackground])
+        BOOL background = [HelperTools isInBackground];
+        if(background)
         {
             DDLogInfo(@"### All accounts idle, disconnecting and stopping all background tasks ###");
             [DDLog flushLog];
@@ -293,6 +303,17 @@ static const int sendMessageTimeoutSeconds = 10;
                     DDLogVerbose(@"no background tasks running, nothing to stop");
                 [DDLog flushLog];
             } onQueue:dispatch_get_main_queue()];
+        }
+        if(_pushCompletion)
+        {
+            DDLogInfo(@"### All accounts idle, calling push completion handler ###");
+            [DDLog flushLog];
+            if(_cancelPushTimer)
+                _cancelPushTimer();
+            //we don't need to call disconnectAll if we are in background here, because we already did this in the if above (don't reorder these 2 ifs!)
+            _pushCompletion(UIBackgroundFetchResultNewData);
+            _pushCompletion = nil;
+            _cancelPushTimer = nil;
         }
     }
 }
@@ -504,15 +525,13 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) connectAccount:(NSString*) accountNo
 {
-    [[DataLayer sharedInstance] detailsForAccount:accountNo withCompletion:^(NSArray *result) {
-        NSArray *accounts = result;
-        if(accounts.count == 1) {
-            NSDictionary* account=[accounts objectAtIndex:0];
-            [self connectAccountWithDictionary:account];
-        } else {
-            DDLogVerbose(@"Expected account settings in db for accountNo: %@", accountNo);
-        }
-    }];
+    NSArray* accountDetails = [[DataLayer sharedInstance] detailsForAccount:accountNo];
+    if(accountDetails.count == 1) {
+        NSDictionary* account = [accountDetails objectAtIndex:0];
+        [self connectAccountWithDictionary:account];
+    } else {
+        DDLogVerbose(@"Expected account settings in db for accountNo: %@", accountNo);
+    }
 }
 
 -(void) connectAccountWithDictionary:(NSDictionary*)account
@@ -600,12 +619,11 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) logoutAll
 {
-    [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray* result) {
-        for(NSDictionary* account in result) {
-            DDLogVerbose(@"Disconnecting account %@@%@", [account objectForKey:@"username"], [account objectForKey:@"domain"]);
-            [self disconnectAccount:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
-        }
-    }];
+    NSArray* enabledAccountList = [[DataLayer sharedInstance] enabledAccountList];
+    for(NSDictionary* account in enabledAccountList) {
+        DDLogVerbose(@"Disconnecting account %@@%@", [account objectForKey:@"username"], [account objectForKey:@"domain"]);
+        [self disconnectAccount:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
+    }
 }
 
 -(void) disconnectAll
@@ -620,10 +638,10 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) connectIfNecessary
 {
-    [[DataLayer sharedInstance] accountListEnabledWithCompletion:^(NSArray* result) {
-        for(NSDictionary* account in result)
-            [self connectAccountWithDictionary:account];
-    }];
+    NSArray* enabledAccountList = [[DataLayer sharedInstance] enabledAccountList];
+    for(NSDictionary* account in enabledAccountList) {
+        [self connectAccountWithDictionary:account];
+    }
 }
 
 -(void) updatePassword:(NSString *) password forAccount:(NSString *) accountNo
@@ -775,6 +793,25 @@ static const int sendMessageTimeoutSeconds = 10;
     [account getVCard:contact.contactJid];
 }
 
+-(void) getEntitySoftWareVersion:(MLContact *) contact
+{
+    xmpp* account =[self getConnectedAccountForID:contact.accountId];
+    NSArray *contactResourceArr = [[DataLayer sharedInstance] resourcesForContact:contact.contactJid];
+    
+    NSString *xmppId = @"";
+    if ((contactResourceArr == nil) && ([contactResourceArr count] == 0)) {
+        xmppId = [NSString stringWithFormat:@"%@",contact.contactJid];
+    } else {
+        if ([contactResourceArr count] == 0) {
+            xmppId = [NSString stringWithFormat:@"%@",contact.contactJid];
+        } else {
+            xmppId = [NSString stringWithFormat:@"%@/%@",contact.contactJid, [[contactResourceArr objectAtIndex:0] objectForKey:@"resource"] ];
+        }        
+    }
+    
+    [account getEntitySoftWareVersion:xmppId];
+}
+
 -(void) blocked:(BOOL) isBlockd Jid:(MLContact *) contact
 {
     xmpp* account =[self getConnectedAccountForID:contact.accountId];
@@ -812,15 +849,13 @@ static const int sendMessageTimeoutSeconds = 10;
 {
     NSDictionary *dic = notification.object;
 
-    [[DataLayer sharedInstance] mucFavoritesForAccount:[dic objectForKey:@"AccountNo"] withCompletion:^(NSMutableArray *results) {
-
-        for(NSDictionary *row in results)
-        {
-            NSNumber *autoJoin =[row objectForKey:@"autojoin"] ;
-            if(autoJoin.boolValue)
-                [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[NSString stringWithFormat:@"%@", [row objectForKey:kAccountID]]];
-        }
-    }];
+    NSMutableArray* results = [[DataLayer sharedInstance] mucFavoritesForAccount:[dic objectForKey:@"AccountNo"]];
+    for(NSDictionary *row in results)
+    {
+        NSNumber *autoJoin =[row objectForKey:@"autojoin"] ;
+        if(autoJoin.boolValue)
+            [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[NSString stringWithFormat:@"%@", [row objectForKey:kAccountID]]];
+    }
 }
 
 #pragma mark - Jingle VOIP

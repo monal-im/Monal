@@ -22,7 +22,6 @@
  */
 @property (nonatomic, copy, readonly) NSString* actualFrom;
 @property (nonatomic, copy, readonly) NSString* messageText;
-@property (nonatomic, copy, readonly) NSString* messagHTML;
 @property (nonatomic, copy, readonly) NSString* subject;
 @property (nonatomic, assign, readonly) BOOL hasBody;
 @property (nonatomic, copy, readonly) NSDate *delayTimeStamp;
@@ -30,6 +29,7 @@
 @property (nonatomic, copy, readonly) NSString* oobURL;
 @property (nonatomic, assign, readonly) BOOL composing;
 @property (nonatomic, assign, readonly) BOOL notComposing;
+@property (nonatomic, copy, readonly) NSString* mamQueryId;
 
 /** Messages that are requesting a resposne */
 @property (nonatomic, assign, readonly) BOOL requestReceipt;

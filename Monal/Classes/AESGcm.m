@@ -16,52 +16,47 @@
 
 @implementation AESGcm
 
-+ (MLEncryptedPayload *) encrypt:(NSData *)body keySize:(int) keySize {
-    if (@available(iOS 13.0, *)) {
++(MLEncryptedPayload*) encrypt:(NSData*) body keySize:(int) keySize
+{
+    uint8_t randomBytes[keySize];
+    if(SecRandomCopyBytes(kSecRandomDefault, keySize, randomBytes)!=0)
+        return nil;
+    NSData* gcmKey = [[NSData alloc] initWithBytes:randomBytes length:keySize];
+    return [self encrypt:body withKey:gcmKey];
+}
+
++(MLEncryptedPayload*) encrypt:(NSData*) body withKey:(NSData*) gcmKey
+{
+    if(@available(iOS 13.0, *))
+    {
         MLCrypto *crypto = [[MLCrypto alloc] init];
-        uint8_t randomBytes[keySize];
-        int result = SecRandomCopyBytes(kSecRandomDefault, keySize, randomBytes);
-        if(result!=0) return nil;
-        NSData *gcmKey = [[NSData alloc] initWithBytes:randomBytes length:keySize];
-
-        EncryptedPayload *payload = [crypto encryptGCMWithKey:gcmKey decryptedContent:body];
-
-        NSMutableData *combinedKey  = [NSMutableData dataWithData:gcmKey];
+        EncryptedPayload* payload = [crypto encryptGCMWithKey:gcmKey decryptedContent:body];
+        NSMutableData* combinedKey = [NSMutableData dataWithData:gcmKey];
         [combinedKey appendData:payload.tag];
-        MLEncryptedPayload *toreturn = [[MLEncryptedPayload alloc] initWithBody:payload.body key:combinedKey iv:payload.iv authTag:payload.tag];
-
-        return  toreturn;
-
+        return [[MLEncryptedPayload alloc] initWithBody:payload.body key:combinedKey iv:payload.iv authTag:payload.tag];
     }
     else
     {
 #if !TARGET_OS_MACCATALYST
-        EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
+        EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
         int outlen;
         unsigned char outbuf[body.length];
         unsigned char tag[16];
         
-        //genreate key and iv
-        
-        unsigned char key[keySize];
-        RAND_bytes(key, sizeof(key));
-        
+        //genreate iv
         unsigned char iv[12];
         RAND_bytes(iv, sizeof(iv));
-        
-        NSData *gcmKey = [[NSData alloc] initWithBytes:key length:keySize];
-        
-        NSData *gcmiv= [[NSData alloc] initWithBytes:iv length:12];
+        NSData* gcmiv = [[NSData alloc] initWithBytes:iv length:12];
         
         NSMutableData *encryptedMessage;
         
         ctx = EVP_CIPHER_CTX_new();
         /* Set cipher type and mode */
-        if(keySize==16) {
+        if([gcmKey length]==16) {
             EVP_EncryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
         }
         
-        if(keySize==32) {
+        if([gcmKey length]==32) {
             EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL);
         }
         /* Set IV length if default 96 bits is not approp riate */
@@ -77,7 +72,6 @@
         /* Finalise: note get no output for GCM */
         EVP_EncryptFinal_ex(ctx, outbuf, &outlen);
         
-        
         /* Get tag */
         EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag);
         //[encryptedMessage appendBytes:tag length:16];
@@ -85,11 +79,8 @@
         NSMutableData *combinedKey  = [NSMutableData dataWithData:gcmKey];
         [combinedKey appendBytes:tag length:16];
         
-        
         EVP_CIPHER_CTX_free(ctx);
-        MLEncryptedPayload *toreturn = [[MLEncryptedPayload alloc] initWithBody:encryptedMessage key:combinedKey iv:gcmiv authTag:[NSData dataWithBytes:tag length:16]];
-        
-        return  toreturn;
+        return [[MLEncryptedPayload alloc] initWithBody:encryptedMessage key:combinedKey iv:gcmiv authTag:[NSData dataWithBytes:tag length:16]];
 #else
         return nil;
 #endif

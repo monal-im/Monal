@@ -12,7 +12,8 @@
 #import "HelperTools.h"
 #import "MLXMLNode.h"
 
-
+#import "ParseIq.h"
+#import "ParseMessage.h"
 #import "jingleCall.h"
 #import "MLDNSLookup.h"
 #import "MLSignalStore.h"
@@ -25,6 +26,7 @@
 #import "MLContact.h"
 
 #import "MLXMPPConnection.h"
+
 
 typedef NS_ENUM (NSInteger, xmppState) {
     kStateLoggedOut = -1,
@@ -138,6 +140,8 @@ extern NSString* const kAccountHibernate;
  Adds the stanza to the output Queue
  */
 -(void) send:(MLXMLNode* _Nonnull) stanza;
+-(void) sendIq:(XMPPIQ* _Nonnull) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler;
+-(void) sendIq:(XMPPIQ* _Nonnull) iq withDelegate:(id) delegate andMethod:(SEL) method andAdditionalArguments:(NSArray*) args;
 
 /**
  removes a contact from the roster
@@ -229,18 +233,8 @@ Decline a call request
  -(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion;
 
 
--(void) setMAMQueryMostRecentForJid:(NSString *)jid;
-
-/*
- query message archive.
- */
--(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) after  andJid:(NSString *)jid;
-
-
-//-(void) queryMAMSinceLastStanzaForContact:(NSString *) contactJid;
--(void) queryMAMSinceLastMessageDateForContact:(NSString *) contactJid; 
-
--(void) setMAMPrefs:(NSString *) preference;
+-(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid withCompletion:(void (^)(NSArray* _Nullable)) completion;
+-(void) setMAMPrefs:(NSString*) preference;
 -(void) getMAMPrefs;
 
 /**
@@ -248,10 +242,17 @@ Decline a call request
  */
 -(void) enablePush;
 
+-(void) mamFinished;
+
 /**
  query a user's vcard
  */
 -(void) getVCard:(NSString* _Nonnull) user;
+
+/**
+ query a user's software version
+ */
+-(void) getEntitySoftWareVersion:(NSString* _Nonnull) user;
 
 /**
  XEP-0191 blocking
@@ -279,5 +280,9 @@ Decline a call request
 
 -(void) requestRegFormWithCompletion:(xmppDataCompletion) completion andErrorCompletion:(xmppCompletion) errorCompletion;
 -(void) registerUser:(NSString* _Nonnull) username withPassword:(NSString* _Nonnull) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
+
+
+-(void) addMessageToMamPageArray:(ParseMessage* _Nonnull) messageNode withBody:(NSString* _Nonnull) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString* _Nonnull) messageType;
+-(NSArray* _Nullable) getOrderedMamPageFor:(NSString* _Nonnull) mamQueryId;
 
 @end

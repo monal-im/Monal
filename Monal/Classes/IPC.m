@@ -17,10 +17,10 @@
     NSString* _processName;
     NSString* _dbFile;
     NSMutableDictionary* _ipcQueues;
+    dispatch_semaphore_t _serverThreadSemaphore;
 }
 @property (readonly, strong) MLSQLite* db;
 @property (readonly, strong) NSThread* serverThread;
-@property (atomic, strong) NSCondition* serverThreadWaiter;
 
 -(void) incomingDarwinNotification:(NSString*) name;
 @end
@@ -39,32 +39,33 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
 
 +(void) initializeForProcess:(NSString*) processName
 {
-    NSAssert(_responseHandlers==nil, @"Please don't call [IPC initialize:@\"processName\" twice!");
-    _responseHandlers = [[NSMutableDictionary alloc] init];
-    _sharedInstance = [[self alloc] initWithProcessName:processName];
-    _darwinNotificationCenterRef = CFNotificationCenterGetDarwinNotifyCenter();
+    @synchronized(self) {
+        NSAssert(_responseHandlers==nil, @"Please don't call [IPC initialize:@\"processName\" twice!");
+        _responseHandlers = [[NSMutableDictionary alloc] init];
+        _sharedInstance = [[self alloc] initWithProcessName:processName];
+        _darwinNotificationCenterRef = CFNotificationCenterGetDarwinNotifyCenter();
+    }
 }
 
 +(id) sharedInstance
 {
-    NSAssert(_responseHandlers!=nil, @"Please call [IPC initialize:@\"processName\" first!");
-    return _sharedInstance;
+    @synchronized(self) {
+        NSAssert(_responseHandlers!=nil, @"Please call [IPC initialize:@\"processName\" first!");
+        return _sharedInstance;
+    }
 }
 
 +(void) terminate
 {
-    //cancel server thread and wake it up to let it terminate properly
-    if(_sharedInstance.serverThread)
-        [_sharedInstance.serverThread cancel];
-    if(_sharedInstance.serverThreadWaiter)
-    {
-        [_sharedInstance.serverThreadWaiter lock];
-        [_sharedInstance.serverThreadWaiter signal];
-        [_sharedInstance.serverThreadWaiter unlock];
+    @synchronized(self) {
+        //cancel server thread and wake it up to let it terminate properly
+        if(_sharedInstance.serverThread)
+            [_sharedInstance.serverThread cancel];
+        dispatch_semaphore_signal(_sharedInstance->_serverThreadSemaphore);
+        //deallocate everything
+        _responseHandlers = nil;
+        _sharedInstance = nil;
     }
-    //deallocate everything
-    _responseHandlers = nil;
-    _sharedInstance = nil;
 }
 
 -(void) sendMessage:(NSString*) name withData:(NSData*) data to:(NSString*) destination
@@ -92,6 +93,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
     _dbFile = [[containerUrl path] stringByAppendingPathComponent:@"ipc.sqlite"];
     _processName = processName;
     _ipcQueues = [[NSMutableDictionary alloc] init];
+    _serverThreadSemaphore = dispatch_semaphore_create(0);
     
     static dispatch_once_t once;
     static const int VERSION = 2;
@@ -100,27 +102,27 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
         if(![fileManager fileExistsAtPath:_dbFile])
         {
             //this can not be used inside a transaction --> turn on WAL mode before executing any other db operations
-            [self.db executeNonQuery:@"pragma journal_mode=WAL;" andArguments:nil];
+            [self.db executeNonQuery:@"pragma journal_mode=WAL;"];
             [self.db beginWriteTransaction];
-            [self.db executeNonQuery:@"CREATE TABLE ipc(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), source VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);" andArguments:nil];
-            [self.db executeNonQuery:@"CREATE TABLE versions(name VARCHAR(255) NOT NULL PRIMARY KEY, version INTEGER NOT NULL);" andArguments:nil];
-            [self.db executeNonQuery:@"INSERT INTO versions (name, version) VALUES('db', '1');" andArguments:nil];
+            [self.db executeNonQuery:@"CREATE TABLE ipc(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), source VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);"];
+            [self.db executeNonQuery:@"CREATE TABLE versions(name VARCHAR(255) NOT NULL PRIMARY KEY, version INTEGER NOT NULL);"];
+            [self.db executeNonQuery:@"INSERT INTO versions (name, version) VALUES('db', '1');"];
         }
         else
             [self.db beginWriteTransaction];
         
         //upgrade database version if needed
-        NSNumber* version = [self.db executeScalar:@"SELECT version FROM versions WHERE name='db';" andArguments:nil];
+        NSNumber* version = (NSNumber*)[self.db executeScalar:@"SELECT version FROM versions WHERE name='db';"];
         DDLogInfo(@"IPC db version: %@", version);
         if([version integerValue] < 2)
         {
-            [self.db executeNonQuery:@"ALTER TABLE ipc ADD COLUMN response_to INTEGER NOT NULL DEFAULT 0;" andArguments:@[]];
+            [self.db executeNonQuery:@"ALTER TABLE ipc ADD COLUMN response_to INTEGER NOT NULL DEFAULT 0;"];
         }
         //any upgrade done --> update version table and delete all old ipc messages
         if([version integerValue] < VERSION)
         {
             //always truncate ipc table on version upgrade
-            [self.db executeNonQuery:@"DELETE FROM ipc;" andArguments:@[]];
+            [self.db executeNonQuery:@"DELETE FROM ipc;"];
             [self.db executeNonQuery:@"UPDATE versions SET version=? WHERE name='db';" andArguments:@[[NSNumber numberWithInt:VERSION]]];
             DDLogInfo(@"IPC db upgraded to version: %d", VERSION);
         }
@@ -139,8 +141,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
 -(void) serverThreadMain
 {
     DDLogInfo(@"Now running IPC server for '%@'", _processName);
-    //register darwin notification handler for "im.monal.ipc.wakeup:<process name>" which is used to wake up readNextMessage using the serverThreadWaiter condition
-    self.serverThreadWaiter = [[NSCondition alloc] init];
+    //register darwin notification handler for "im.monal.ipc.wakeup:<process name>" which is used to wake up readNextMessage using the serverThreadSemaphore
     CFNotificationCenterAddObserver(_darwinNotificationCenterRef, (__bridge void*) self, &darwinNotificationCenterCallback, (__bridge CFNotificationName)[NSString stringWithFormat:@"im.monal.ipc.wakeup:%@", _processName], NULL, 0);
     while(![[NSThread currentThread] isCancelled])
     {
@@ -184,9 +185,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
 -(void) incomingDarwinNotification:(NSString*) name
 {
     DDLogVerbose(@"Got incoming darwin notification: %@", name);
-    [self.serverThreadWaiter lock];
-    [self.serverThreadWaiter signal];
-    [self.serverThreadWaiter unlock];
+    dispatch_semaphore_signal(_serverThreadSemaphore);
 }
 
 -(NSDictionary*) readNextMessage
@@ -198,9 +197,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
             return data;
         //wait for wakeup (incoming darwin notification or thread termination)
         DDLogVerbose(@"IPC readNextMessage waiting for wakeup via darwin notification");
-        [self.serverThreadWaiter lock];
-        [self.serverThreadWaiter wait];
-        [self.serverThreadWaiter unlock];
+        dispatch_semaphore_wait(_serverThreadSemaphore, DISPATCH_TIME_FOREVER);
     }
     return nil;     //thread cancelled
 }

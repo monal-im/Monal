@@ -15,33 +15,65 @@
 
 @interface MLIQProcessor()
 
-@property (nonatomic, strong) SignalContext *signalContext;
-@property (nonatomic, strong) MLSignalStore *monalSignalStore;
-@property (nonatomic, strong) MLXMPPConnection *connection;
-@property (nonatomic, strong) NSString *accountNo;
+@property (nonatomic, strong) SignalContext* signalContext;
+@property (nonatomic, strong) MLSignalStore* monalSignalStore;
+@property (nonatomic, strong) MLXMPPConnection* connection;
+@property (nonatomic, strong) xmpp* account;
 
 @end
 
 /**
- Validate and process an iq elements.
+ Validate and process any iq elements.
  @link https://xmpp.org/rfcs/rfc6120.html#stanzas-semantics-iq
  */
 @implementation MLIQProcessor
 
--(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore
++(void) handleCatchupFor:(xmpp*) account withIqNode:(ParseIq*) iqNode
 {
-    self=[super init];
-    self.accountNo = accountNo;
+    if(iqNode.mam2Last && !iqNode.mam2fin)
+    {
+        DDLogVerbose(@"Paging through mam catchup results with after: %@", iqNode.mam2Last);
+        //do RSM forward paging
+        XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+        [pageQuery setMAMQueryAfter:iqNode.mam2Last];
+        [account sendIq:pageQuery withDelegate:self andMethod:@selector(handleCatchupFor:withIqNode:) andAdditionalArguments:nil];
+    }
+    else if(iqNode.mam2fin)
+    {
+        DDLogVerbose(@"Mam catchup finished");
+        [account mamFinished];
+    }
+}
+
++(void) handleMamResponseWithLatestIdFor:(xmpp*) account withIqNode:(ParseIq*) iqNode
+{
+    DDLogVerbose(@"Got latest stanza id to prime database with: %@", iqNode.mam2Last);
+    //only do this if we got a valid stanza id (not null)
+    //if we did not get one we will get one when receiving the next message in this smacks session
+    //if the smacks session times out before we get a message and someone sends us one or more messages before we had a chance to establish
+    //a new smacks session, this messages will get lost because we don't know how to query the archive for this message yet
+    //once we successfully receive the first mam-archived message stanza (could even be an XEP-184 ack for a sent message),
+    //no more messages will get lost
+    //we ignore this single message loss here, because it should be super rare and solving it would be really complicated
+    if(iqNode.mam2Last)
+        [[DataLayer sharedInstance] setLastStanzaId:iqNode.mam2Last forAccount:account.accountNo];
+    [account mamFinished];
+}
+
+-(MLIQProcessor *) initWithAccount:(xmpp*) account connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore
+{
+    self = [super init];
+    self.account = account;
     self.connection= connection;
     self.signalContext=signalContext;
     self.monalSignalStore= monalSignalStore;
     return self;
 }
 
--(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection
+-(MLIQProcessor *) initWithAccount:(xmpp*) account connection:(MLXMPPConnection *) connection
 {
-    self=[super init];
-    self.accountNo = accountNo;
+    self = [super init];
+    self.account = account;
     self.connection= connection;
     return self;
 }
@@ -82,13 +114,11 @@
 
 -(void) processGetIq:(ParseIq *) iqNode
 {
-    
     if(iqNode.ping)
     {
-        XMPPIQ* pong =[[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
+        XMPPIQ* pong = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
         [pong setiqTo:self.connection.identity.domain];
-        if(self.sendIq)
-            self.sendIq(pong, nil, nil);
+        self.sendIq(pong, nil, nil);
     }
     
     if(iqNode.version)
@@ -96,8 +126,7 @@
         XMPPIQ* versioniq = [[XMPPIQ alloc] initWithId:iqNode.idval andType:kiqResultType];
         [versioniq setiqTo:iqNode.from];
         [versioniq setVersion];
-        if(self.sendIq)
-            self.sendIq(versioniq, nil, nil);
+        self.sendIq(versioniq, nil, nil);
     }
     
     if((iqNode.discoInfo))
@@ -108,8 +137,7 @@
         else
             [discoInfo setiqTo:iqNode.user];
         [discoInfo setDiscoInfoWithFeaturesAndNode:iqNode.queryNode];
-        if(self.sendIq)
-            self.sendIq(discoInfo, nil, nil);
+        self.sendIq(discoInfo, nil, nil);
         
     }
 }
@@ -128,24 +156,6 @@
 
 -(void) processResultIq:(ParseIq *) iqNode
 {
-    
-    if(iqNode.mam2Last && !iqNode.mam2fin)
-    {
-        //RSM paging
-        XMPPIQ* pageQuery =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-        [pageQuery setMAMQueryFromStart:nil after:iqNode.mam2Last withMax:nil andJid:nil];
-        if(self.sendIq)
-            self.sendIq(pageQuery, nil, nil);
-        return;
-    }
-    
-    if(iqNode.mam2fin)
-    {
-        if(self.mamFinished)
-            self.mamFinished();
-        return;
-    }
-    
     // default MAM settings
     if(iqNode.mam2default)
     {
@@ -160,17 +170,15 @@
         
         if(self.connection.supportsSM3)
         {
-            MLXMLNode *enableNode =[[MLXMLNode alloc] initWithElement:@"enable"];
+            MLXMLNode *enableNode = [[MLXMLNode alloc] initWithElement:@"enable"];
             NSDictionary *dic=@{kXMLNS:@"urn:xmpp:sm:3",@"resume":@"true" };
-            enableNode.attributes =[dic mutableCopy];
-            if(self.sendIq)
-                self.sendIq(enableNode, nil, nil);
+            enableNode.attributes = [dic mutableCopy];
+            self.sendIq(enableNode, nil, nil);
         }
         else
         {
             //init session and query disco, roster etc.
-            if(self.initSession)
-                self.initSession();
+            self.initSession();
         }
     }
     
@@ -199,6 +207,11 @@
     {
         [self vCardResult:iqNode];
     }
+        
+    if(iqNode.entitySoftwareVersion)
+    {
+        [self iqVersionResult:iqNode];
+    }
 }
 
 #pragma mark - result
@@ -213,19 +226,19 @@
     if(!fullname) fullname= iqNode.user;
     
     if([fullname stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length>0 ) {
-        [[DataLayer sharedInstance] setFullName:fullname forContact:iqNode.user andAccount:self.accountNo];
+        [[DataLayer sharedInstance] setFullName:fullname forContact:iqNode.user andAccount:self.account.accountNo];
         
         if(iqNode.photoBinValue)
         {
-            [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:self.accountNo WithData:[iqNode.photoBinValue copy]];
+            [[MLImageManager sharedInstance] setIconForContact:iqNode.user andAccount:self.account.accountNo WithData:[iqNode.photoBinValue copy]];
         }
         
         if(!fullname) fullname=iqNode.user;
         
-        MLContact *contact =[MLContact alloc];
+        MLContact *contact = [MLContact alloc];
         contact.contactJid=iqNode.user;
         contact.fullName= fullname;
-        contact.accountId=self.accountNo;
+        contact.accountId=self.account.accountNo;
         
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":contact}];
     }
@@ -245,8 +258,7 @@
                 if(!self.connection.usingCarbons2)
                 {
                     DDLogInfo(@"sending enableCarbons iq");
-                    if(self.sendIq)
-                        self.sendIq([self enableCarbons], nil, nil);
+                    self.sendIq([self enableCarbons], nil, nil);
                 }
             }
             
@@ -270,7 +282,7 @@
                     self.connection.supportsPubSub=YES;
                     *stop=YES;
 #ifndef DISABLE_OMEMO
-                    if(self.sendSignalInitialStanzas) self.sendSignalInitialStanzas();
+                    self.sendSignalInitialStanzas();
 #endif
                 }
             }];
@@ -278,28 +290,35 @@
             if([iqNode.features containsObject:@"urn:xmpp:push:0"])
             {
                 self.connection.supportsPush=YES;
-                if(self.enablePush) self.enablePush();
+                self.enablePush();
             }
             
             if([iqNode.features containsObject:@"urn:xmpp:mam:2"])
             {
-                BOOL previousStatus = self.connection.supportsMam2;
-                self.connection.supportsMam2 = YES;
-                DDLogInfo(@"supports mam:2");
-                
-                //ony if it went from NO to YES
-                if(!previousStatus)
+                if(!self.connection.supportsMam2)
                 {
-                    [[DataLayer sharedInstance] lastMessageDateForContact:self.connection.identity.jid andAccount:self.accountNo withCompletion:^(NSDate *lastDate) {
-                        
-                        NSDate *dateToUse = lastDate;
-                        if(!dateToUse) dateToUse = [NSDate dateWithTimeIntervalSinceNow:-60*60*24*14]; //two weeks
-                        
-                        XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-                        [query setMAMQueryFromStart:dateToUse toDate:nil withMax:nil andJid:nil];
-                        if(self.sendIq)
-                            self.sendIq(query, nil, nil);
-                    }];
+                    self.connection.supportsMam2 = YES;
+                    DDLogInfo(@"supports mam:2");
+                    
+                    //query mam since last received stanza ID because we could not resume the smacks session
+                    //(we would not have landed here if we were able to resume the smacks session)
+                    //this will do a catchup of everything we might have missed since our last connection
+                    //we possibly receive sent messages, too (this will update the stanzaid in database and gets deduplicate by messageid,
+                    //which is guaranteed to be unique (because monal uses uuids for outgoing messages)
+                    NSString* lastStanzaId = [[DataLayer sharedInstance] lastStanzaIdForAccount:self.account.accountNo];
+                    XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+                    if(lastStanzaId)
+                    {
+                        DDLogInfo(@"Querying mam:2 archive after stanzaid '%@' for catchup", lastStanzaId);
+                        [mamQuery setMAMQueryAfter:lastStanzaId];
+                        self.sendIqWithDelegate(mamQuery, [self class], @selector(handleCatchupFor:withIqNode:), nil);
+                    }
+                    else
+                    {
+                        DDLogInfo(@"Querying mam:2 archive for latest stanzaid to prime database");
+                        [mamQuery setMAMQueryForLatestId];
+                        self.sendIqWithDelegate(mamQuery, [self class], @selector(handleMamResponseWithLatestIdFor:withIqNode:), nil);
+                    }
                 }
             }
         }
@@ -324,13 +343,11 @@
         {
             [self.connection.discoveredServices addObject:item];
             if(![[item objectForKey:@"jid"] isEqualToString:self.connection.identity.domain])
-                if(self.sendIq)
-                    self.sendIq([self discoverService:[item objectForKey:@"jid"]], nil, nil);
+                self.sendIq([self discoverService:[item objectForKey:@"jid"]], nil, nil);
         }
         
         // send to bare jid for push etc.
-        if(self.sendIq)
-            self.sendIq([self discoverService:self.connection.identity.jid], nil, nil);
+        self.sendIq([self discoverService:self.connection.identity.jid], nil, nil);
     }
     
     //entity caps of some contact
@@ -349,52 +366,50 @@
     }
     
     if(iqNode.rosterVersion) {
-        [[DataLayer sharedInstance] setRosterVersion:iqNode.rosterVersion forAccount:self.accountNo];
+        [[DataLayer sharedInstance] setRosterVersion:iqNode.rosterVersion forAccount:self.account.accountNo];
     }
     for(NSDictionary* contact in iqNode.items)
     {
         if([[contact objectForKey:@"subscription"] isEqualToString:kSubRemove])
         {
-            [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"jid"] forAccount:self.accountNo];
+            [[DataLayer sharedInstance] removeBuddy:[contact objectForKey:@"jid"] forAccount:self.account.accountNo];
         }
         else
         {
             if([[contact objectForKey:@"subscription"] isEqualToString:kSubTo])
             {
                 MLContact *contactObj = [[MLContact alloc] init];
-                contactObj.contactJid=[contact objectForKey:@"jid"];
-                contactObj.accountId=self.accountNo;
+                contactObj.contactJid = [contact objectForKey:@"jid"];
+                contactObj.accountId=self.account.accountNo;
                 [[DataLayer sharedInstance] addContactRequest:contactObj];
             }
             
             if([[contact objectForKey:@"subscription"] isEqualToString:kSubFrom]) //already subscribed
             {
                 MLContact *contactObj = [[MLContact alloc] init];
-                contactObj.contactJid=[contact objectForKey:@"jid"];
-                contactObj.accountId=self.accountNo;
+                contactObj.contactJid = [contact objectForKey:@"jid"];
+                contactObj.accountId=self.account.accountNo;
                 [[DataLayer sharedInstance] deleteContactRequest:contactObj];
             }
             
-            [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
-                                        forAccount:self.accountNo
+            DDLogVerbose(@"Adding contact %@ (%@) to database", [contact objectForKey:@"jid"], [contact objectForKey:@"name"]);
+            BOOL success = [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
+                                        forAccount:self.account.accountNo
                                           fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
                                           nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
-                                        andMucNick:nil
-                                    withCompletion:^(BOOL success) {
+                                                       andMucNick:nil];
                 
-                [[DataLayer sharedInstance] setSubscription:[contact objectForKey:@"subscription"]
-                                                     andAsk:[contact objectForKey:@"ask"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo];
-                
-                if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
-                {
-                    [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"] forContact:[contact objectForKey:@"jid"] andAccount:self.accountNo ] ;
-                }
-            }];
+            [[DataLayer sharedInstance] setSubscription:[contact objectForKey:@"subscription"]
+                                                 andAsk:[contact objectForKey:@"ask"] forContact:[contact objectForKey:@"jid"] andAccount:self.account.accountNo];
             
+            if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
+            {
+                [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"] forContact:[contact objectForKey:@"jid"] andAccount:self.account.accountNo ] ;
+            }
         }
     }
     
-    if(self.getVcards) self.getVcards();
+    self.getVcards();
     
 }
 
@@ -403,19 +418,17 @@
     
     XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
     [signalDevice publishDevices:devices];
-    if(self.sendIq)
-        self.sendIq(signalDevice, nil, nil);
+    self.sendIq(signalDevice, nil, nil);
 }
 
 
 -(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
 {
     if(!self.connection.supportsPubSub) return;
-    XMPPIQ* query2 =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
+    XMPPIQ* query2 = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query2 setiqTo:jid];
     [query2 requestBundles:deviceid];
-    if(self.sendIq)
-        self.sendIq(query2, nil, nil);
+    self.sendIq(query2, nil, nil);
 }
 
 -(void) omemoResult:(ParseIq *) iqNode {
@@ -437,7 +450,7 @@
             NSMutableArray *devices= [iqNode.omemoDevices mutableCopy];
             NSSet *deviceSet = [NSSet setWithArray:iqNode.omemoDevices];
             
-            NSString * deviceString=[NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
+            NSString * deviceString = [NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
             if(![deviceSet containsObject:deviceString])
             {
                 [devices addObject:deviceString];
@@ -447,7 +460,7 @@
         }
         
         
-        NSArray *existingDevices=[self.monalSignalStore knownDevicesForAddressName:source];
+        NSArray *existingDevices = [self.monalSignalStore knownDevicesForAddressName:source];
         NSSet *deviceSet = [NSSet setWithArray:existingDevices];
         //only query if the device doesnt exist
         [iqNode.omemoDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -464,7 +477,7 @@
         NSSet *iqSet = [NSSet setWithArray:iqNode.omemoDevices];
         [existingDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSNumber *device  =(NSNumber *)obj;
-            NSString *deviceString  =[NSString stringWithFormat:@"%@", device];
+            NSString *deviceString = [NSString stringWithFormat:@"%@", device];
             if(![iqSet containsObject:deviceString]) {
                 //device was removed
                 SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:(int) device.integerValue];
@@ -517,11 +530,41 @@
     }
 }
 
+-(void) iqVersionResult:(ParseIq *) iqNode
+{
+    NSString *iqAppName = iqNode.entityName == nil ? @"":iqNode.entityName;
+    NSString *iqAppVersion = iqNode.entityVersion == nil ? @"":iqNode.entityVersion;
+    NSString *iqPlatformOS = iqNode.entityOs == nil ? @"":iqNode.entityOs;
+    
+    NSArray *versionDBInfoArr = [[DataLayer sharedInstance] softwareVersionInfoForAccount:self.account.accountNo andContact:iqNode.user];
+    
+    if ((versionDBInfoArr != nil) && ([versionDBInfoArr count] > 0)) {
+        NSDictionary *versionInfoDBDic = versionDBInfoArr[0];
+        
+        if (!([[versionInfoDBDic objectForKey:@"platform_App_Name"] isEqualToString:iqAppName] &&
+            [[versionInfoDBDic objectForKey:@"platform_App_Version"] isEqualToString:iqAppVersion] &&
+            [[versionInfoDBDic objectForKey:@"platform_OS"] isEqualToString:iqPlatformOS]))
+        {
+            [[DataLayer sharedInstance] setSoftwareVersionInfoForAppName:iqAppName
+                                                             appVersion:iqAppVersion
+                                                             platformOS:iqPlatformOS
+                                                            withAccount:self.account.accountNo
+                                                             andContact:iqNode.user];
+            
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalXmppUserSoftWareVersionRefresh
+                                                                object:self
+                                                              userInfo:@{@"platform_App_Name":iqAppName,
+                                                                      @"platform_App_Version":iqAppVersion,
+                                                                               @"platform_OS":iqPlatformOS}];
+        }
+    }
+}
+
 #pragma mark - features
 
 -(XMPPIQ *) discoverService:(NSString *) node
 {
-    XMPPIQ *discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
+    XMPPIQ *discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoInfo setiqTo:node];
     [discoInfo setDiscoInfoNode];
     return discoInfo;

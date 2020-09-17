@@ -91,9 +91,9 @@
         //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
         if([self.handlerList count])
         {
-            void (^handler)(UNNotificationContent* contentToDeliver) = [self.handlerList firstObject];
+            void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
             [self.handlerList removeObject:handler];
-            UNNotificationContent *emptyContent =[[UNNotificationContent alloc] init]; // this is used with special extension filtering entitlement
+            UNNotificationContent* emptyContent = [[UNNotificationContent alloc] init]; // this is used with special extension filtering entitlement
             handler(emptyContent);
         }
     }
@@ -138,9 +138,10 @@
             //this will terminate/freeze the app extension afterwards
             while([self.handlerList count])
             {
-                void (^handler)(UNNotificationContent* contentToDeliver) = [self.handlerList firstObject];
+                DDLogVerbose(@"Feeding handler");
+                void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
                 [self.handlerList removeObject:handler];
-                UNNotificationContent *emptyContent =[[UNNotificationContent alloc] init]; // this is used with special extension filtering entitlement
+                UNNotificationContent* emptyContent = [[UNNotificationContent alloc] init]; // this is used with special extension filtering entitlement
                 handler(emptyContent);
             }
         }

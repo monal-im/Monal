@@ -73,12 +73,11 @@
 
 -(void) refreshAccountList
 {
-    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.accountList=result;
-            [self.accountsTable reloadData];
-        });
-    }];
+    NSArray* accountList = [[DataLayer sharedInstance] accountList];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.accountList = accountList;
+        [self.accountsTable reloadData];
+    });
 }
 
 
@@ -110,7 +109,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    self.selected=indexPath;
+    self.selected = indexPath;
     
     [self performSegueWithIdentifier:@"editXMPP" sender:self];
     
@@ -121,17 +120,17 @@
 {
     if([segue.identifier isEqualToString:@"editXMPP"]) {
         
-        XMPPEdit * editor = (XMPPEdit *)segue.destinationViewController;
+        XMPPEdit* editor = (XMPPEdit *)segue.destinationViewController;
     
         editor.originIndex=self.selected;
-        if(self.selected.section==0)
+        if(self.selected.section == 0)
         {
             //existing
-            editor.accountno=[NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:self.selected.row] objectForKey:@"account_id"]];
+            editor.accountno = [NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:self.selected.row] objectForKey:@"account_id"]];
         }
-        else if(self.selected.section==1)
+        else if(self.selected.section == 1)
         {
-            editor.accountno=@"-1";
+            editor.accountno = @"-1";
         }
     }
 }
@@ -205,49 +204,46 @@
     switch (indexPath.section) {
         case 0:
         {
-            UITableViewCell* cell =[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
-            if(cell==nil)
+            UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+            if(cell == nil)
             {
-                cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];
+                cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];
             }
             else
             {
-                cell.accessoryView=nil; 
+                cell.accessoryView = nil;
             }
-            if([(NSString*)[[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"] length]>0) {
-                cell.textLabel.text=[NSString stringWithFormat:@"%@@%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"],
+            if([(NSString*)[[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"] length] > 0) {
+                cell.textLabel.text = [NSString stringWithFormat:@"%@@%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"],
                                      [[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"]];
             }
             else {
-                cell.textLabel.text=[[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"];
+                cell.textLabel.text = [[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"];
             }
             
             
-            UIImageView *accessory =[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
+            UIImageView* accessory = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
             cell.detailTextLabel.text=nil;
             
-            if([[[_accountList objectAtIndex:indexPath.row] objectForKey:@"enabled"] boolValue] ==YES) {
-                   cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
-                if([[MLXMPPManager sharedInstance] isAccountForIdConnected: [NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]]) {
-                    accessory.image=[UIImage imageNamed:NSLocalizedString(@"Connected", @"")];
-                    cell.accessoryView =accessory;
+            if([[[_accountList objectAtIndex:indexPath.row] objectForKey:@"enabled"] boolValue] == YES) {
+                   cell.imageView.image = [UIImage imageNamed:@"888-checkmark"];
+                if([[MLXMPPManager sharedInstance] isAccountForIdConnected: [NSString stringWithFormat:@"%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]]) {
+                    accessory.image = [UIImage imageNamed:@"Connected"];
+                    cell.accessoryView = accessory;
                     
-                    NSDate * connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor: [NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]];
+                    NSDate* connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor: [NSString stringWithFormat:@"%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]];
                     if(connectedTime) {
-                        cell.detailTextLabel.text=[NSString stringWithFormat:NSLocalizedString(@"Connected since: %@", @""),[self.uptimeFormatter stringFromDate:connectedTime]];
+                        cell.detailTextLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Connected since: %@", @""), [self.uptimeFormatter stringFromDate:connectedTime]];
                     }
-                    
                 }
                 else {
-                    accessory.image =[UIImage imageNamed:NSLocalizedString(@"Disconnected", @"")];
-                    cell.accessoryView =accessory;
+                    accessory.image = [UIImage imageNamed:NSLocalizedString(@"Disconnected", @"")];
+                    cell.accessoryView = accessory;
                 }
-       
             }
             else {
-                    cell.imageView.image=[UIImage imageNamed:@"disabled"];
+                    cell.imageView.image = [UIImage imageNamed:@"disabled"];
             }
-         
             return cell;
             break;
         }
@@ -256,15 +252,14 @@
             UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"ProtocolCell"];
             if(cell == nil)
                 cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ProtocolCell"];
-            cell.textLabel.text=NSLocalizedString(@"XMPP", @"");
-            cell.imageView.image=[UIImage imageNamed:@"XMPP"];
-            cell.detailTextLabel.text=NSLocalizedString(@"Jabber, Openfire, Prosody etc.   ", @"");
-            cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+            cell.textLabel.text = NSLocalizedString(@"XMPP", @"");
+            cell.imageView.image = [UIImage imageNamed:@"XMPP"];
+            cell.detailTextLabel.text = NSLocalizedString(@"Jabber, Prosody, ejabberd etc.   ", @"");
+            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
             return cell;
             break;
         }
-            
         default:
         {
             return 0;

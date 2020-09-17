@@ -40,6 +40,7 @@ typedef void (^monal_void_block_t)(void);
 
 //all other constants needed
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
+#define kMonalHistoryMessagesNotice @"kMonalHistoryMessagesNotice"
 #define kMLMessageSentToContact @"kMLMessageSentToContact"
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"
 
@@ -66,9 +67,15 @@ typedef void (^monal_void_block_t)(void);
 
 #define kMonalRefresh @"kMonalRefresh"
 #define kMonalContactRefresh @"kMonalContactRefresh"
+#define kMonalXmppUserSoftWareVersionRefresh @"kMonalXmppUserSoftWareVersionRefresh"
 
 // max count of char's in a single message (both: sending and receiving)
 #define kMonalChatMaxAllowedTextLen 2048
+#if TARGET_OS_MACCATALYST
+#define kMonalChatFetchedMsgCnt 75
+#else
+#define kMonalChatFetchedMsgCnt 50
+#endif
 
 //contact cells
 #define kusernameKey @"username"
@@ -82,7 +89,7 @@ typedef void (^monal_void_block_t)(void);
 #define kinfoTypeKey @"type"
 #define kinfoStatusKey @"status"
 
-//temp not for relase
+//temp not for release
 #ifndef DEBUG
 #define DEBUG 1
 #endif

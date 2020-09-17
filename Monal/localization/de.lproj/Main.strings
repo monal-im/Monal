@@ -1,221 +1,68 @@
-/* Class = "UILabel"; text = "Delivered"; ObjectID = "0C4-4V-7mE"; */
-"0C4-4V-7mE.text" = "Zugestellt";
-
-/* Class = "UILabel"; text = "contactJid"; ObjectID = "0SD-m9-NQW"; */
-"0SD-m9-NQW.text" = "Kontakt JID";
-
-/* Class = "UILabel"; text = "A Status message would go here. That is correct, a status message. "; ObjectID = "15o-hp-DgI"; */
-"15o-hp-DgI.text" = "Eine Statusmeldung würde hier gehen. Das ist korrekt, eine Statusmeldung. ";
-
-/* Class = "UILabel"; text = "Name"; ObjectID = "1wW-PP-jdj"; */
-"1wW-PP-jdj.text" = "Name";
-
 /* Class = "UIButton"; normalTitle = "Add Contact"; ObjectID = "21P-WC-8yr"; */
 "21P-WC-8yr.normalTitle" = "Kontakt hinzufügen";
-
-/* Class = "UILabel"; text = "something.com"; ObjectID = "4KG-8d-uoj"; */
-"4KG-8d-uoj.text" = "irgendwas.com";
-
-/* Class = "UILabel"; text = "Title"; ObjectID = "4yZ-Nr-4ym"; */
-"4yZ-Nr-4ym.text" = "Titel";
-
-/* Class = "UILabel"; text = "Day Change"; ObjectID = "6mV-D5-Rfv"; */
-"6mV-D5-Rfv.text" = "Tagänderung";
-
 /* Class = "UILabel"; text = "Add a New Contact"; ObjectID = "7Cs-k6-7n4"; */
 "7Cs-k6-7n4.text" = "Neuen Kontakt hinzufügen";
-
 /* Class = "UILabel"; text = "Join a Group Chat"; ObjectID = "7dx-xo-wIB"; */
 "7dx-xo-wIB.text" = "Einem Gruppen-Chat beitreten";
-
-/* Class = "UILabel"; text = "Date"; ObjectID = "8oX-KS-wOP"; */
-"8oX-KS-wOP.text" = "Datum";
-
 /* Class = "UIBarButtonItem"; title = "Previous"; ObjectID = "AtF-5m-xfT"; */
 "AtF-5m-xfT.title" = "Vorherige";
-
-/* Class = "UILabel"; text = "Name"; ObjectID = "b15-Tl-ako"; */
-"b15-Tl-ako.text" = "Name";
-
 /* Class = "UIBarButtonItem"; title = "Settings"; ObjectID = "BWH-2I-fSI"; */
 "BWH-2I-fSI.title" = "Einstellungen";
-
-/* Class = "UILabel"; text = "Delivered"; ObjectID = "BY7-In-qxm"; */
-"BY7-In-qxm.text" = "Zugestellt";
-
-/* Class = "UIButton"; accessibilityLabel = "Attach"; ObjectID = "c6B-5o-sqL"; */
-"c6B-5o-sqL.accessibilityLabel" = "Anhängen";
-
 /* Class = "UIBarButtonItem"; title = "Info"; ObjectID = "C9Q-7y-bRl"; */
 "C9Q-7y-bRl.title" = "Info";
-
-/* Class = "UILabel"; text = "Date"; ObjectID = "Ck2-4Y-eBK"; */
-"Ck2-4Y-eBK.text" = "Datum";
-
-/* Class = "UILabel"; text = "Day Change"; ObjectID = "dNE-Hm-yUA"; */
-"dNE-Hm-yUA.text" = "Tagänderung";
-
-/* Class = "UILabel"; text = "Date"; ObjectID = "F48-Lg-vgK"; */
-"F48-Lg-vgK.text" = "Datum";
-
-/* Class = "UILabel"; text = "Title"; ObjectID = "F7S-Cl-Xop"; */
-"F7S-Cl-Xop.text" = "Titel";
-
-/* Class = "UILabel"; text = "Title"; ObjectID = "fKZ-SZ-6l0"; */
-"fKZ-SZ-6l0.text" = "Titel";
-
-/* Class = "UILabel"; text = "Subtitle"; ObjectID = "Gfw-KN-mew"; */
-"Gfw-KN-mew.text" = "Untertitel";
-
 /* Class = "UINavigationItem"; title = "Contact Requests"; ObjectID = "GI8-WI-wYs"; */
 "GI8-WI-wYs.title" = "Kontaktanfragen";
-
 /* Class = "UITableViewController"; title = "Edit Group Chat"; ObjectID = "GpF-k7-Z6D"; */
 "GpF-k7-Z6D.title" = "Gruppenchat bearbeiten";
-
 /* Class = "UIBarButtonItem"; title = "Done"; ObjectID = "gy3-P9-g7W"; */
 "gy3-P9-g7W.title" = "Fertig";
-
-/* Class = "UILabel"; text = "Day Change"; ObjectID = "h9a-ua-MIo"; */
-"h9a-ua-MIo.text" = "Tagänderung";
-
 /* Class = "UINavigationItem"; title = "Select An Account"; ObjectID = "heq-Ls-ieg"; */
 "heq-Ls-ieg.title" = "Ein Konto auswählen";
-
 /* Class = "UIBarButtonItem"; title = "Next"; ObjectID = "HOk-DV-nls"; */
 "HOk-DV-nls.title" = "Weiter";
-
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "IGd-kM-9BO"; */
 "IGd-kM-9BO.title" = "Schließen";
-
 /* Class = "UITabBarItem"; title = "Item"; ObjectID = "iLC-4b-aDr"; */
 "iLC-4b-aDr.title" = "Item";
-
 /* Class = "UITabBarItem"; title = "Chats"; ObjectID = "jh7-be-VPo"; */
 "jh7-be-VPo.title" = "Chats";
-
 /* Class = "UIButton"; normalTitle = "Send"; ObjectID = "jIW-zk-rUu"; */
 "jIW-zk-rUu.normalTitle" = "Senden";
-
-/* Class = "UILabel"; text = "Title"; ObjectID = "JKC-18-hqA"; */
-"JKC-18-hqA.text" = "Titel";
-
 /* Class = "UINavigationItem"; title = "Group Chat"; ObjectID = "k0T-5X-FQu"; */
 "k0T-5X-FQu.title" = "Gruppenchat";
-
+/* Class = "UILabel"; text = "Pull to load more messages"; ObjectID = "K3M-5z-C5O"; */
+"K3M-5z-C5O.text" = "Pull to load more messages";
 /* Class = "UILabel"; text = "Send Message"; ObjectID = "KUa-bA-cQb"; */
 "KUa-bA-cQb.text" = "Nachricht senden";
-
-/* Class = "UILabel"; text = "Title"; ObjectID = "kUT-6q-gUD"; */
-"kUT-6q-gUD.text" = "Titel";
-
-/* Class = "UIButton"; accessibilityLabel = "Send"; ObjectID = "kYa-y4-X5Z"; */
-"kYa-y4-X5Z.accessibilityLabel" = "Senden";
-
-/* Class = "UILabel"; text = "Link Title here is something that should be about two lines"; ObjectID = "loD-fs-EW7"; */
-"loD-fs-EW7.text" = "Link Titel hier ist etwas, das über zwei Zeilen sein sollte";
-
-/* Class = "UILabel"; text = "Name"; ObjectID = "lUi-Cp-nhg"; */
-"lUi-Cp-nhg.text" = "Name";
-
 /* Class = "UINavigationItem"; title = "Send A Message "; ObjectID = "MiR-iW-O6e"; */
 "MiR-iW-O6e.title" = "Nachricht senden ";
-
-/* Class = "UILabel"; text = "Delivered"; ObjectID = "mM6-k0-MKY"; */
-"mM6-k0-MKY.text" = "Zugestellt";
-
 /* Class = "UINavigationItem"; title = "New"; ObjectID = "Msw-bP-HIu"; */
 "Msw-bP-HIu.title" = "Neu";
-
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "NyY-WQ-3hC"; */
 "NyY-WQ-3hC.title" = "Schließen";
-
-/* Class = "UILabel"; text = "Day Change"; ObjectID = "oUy-5K-yIm"; */
-"oUy-5K-yIm.text" = "Tagänderung";
-
 /* Class = "UIBarButtonItem"; title = "Previous"; ObjectID = "OxW-Yc-5ky"; */
 "OxW-Yc-5ky.title" = "Vorherige";
-
 /* Class = "UIBarButtonItem"; title = "Next"; ObjectID = "PI2-N1-aLJ"; */
 "PI2-N1-aLJ.title" = "Weiter";
-
 /* Class = "UIBarButtonItem"; title = "Compose"; ObjectID = "pyP-qb-mfr"; */
 "pyP-qb-mfr.title" = "Verfassen";
-
 /* Class = "UIButton"; normalTitle = "Join Group"; ObjectID = "Q7I-qj-4zk"; */
 "Q7I-qj-4zk.normalTitle" = "Gruppe beitreten";
-
 /* Class = "UINavigationItem"; title = "Contacts"; ObjectID = "qsR-dX-TO1"; */
 "qsR-dX-TO1.title" = "Kontakte";
-
-/* Class = "UILabel"; text = "Day Change"; ObjectID = "QYx-be-it3"; */
-"QYx-be-it3.text" = "Tagänderung";
-
-/* Class = "UILabel"; text = "Label"; ObjectID = "Ra0-Eo-cAh"; */
-"Ra0-Eo-cAh.text" = "Label";
-
 /* Class = "UINavigationItem"; title = "Chats"; ObjectID = "RRa-hC-xrf"; */
 "RRa-hC-xrf.title" = "Chats";
-
 /* Class = "UILabel"; text = "Detail"; ObjectID = "sff-9g-z31"; */
 "sff-9g-z31.text" = "Detail";
-
 /* Class = "UILabel"; text = "View Contact Requests"; ObjectID = "SmS-bT-id6"; */
 "SmS-bT-id6.text" = "Kontaktanfragen anzeigen";
-
-/* Class = "UILabel"; text = "Name"; ObjectID = "Tdu-SR-34h"; */
-"Tdu-SR-34h.text" = "Name";
-
 /* Class = "UIBarButtonItem"; title = "Done"; ObjectID = "TMS-52-ORP"; */
 "TMS-52-ORP.title" = "Fertig";
-
-/* Class = "UILabel"; text = "Date"; ObjectID = "uDg-Hw-FvA"; */
-"uDg-Hw-FvA.text" = "Datum";
-
-/* Class = "UILabel"; text = "Delivered"; ObjectID = "vAj-sV-yOx"; */
-"vAj-sV-yOx.text" = "Zugestellt";
-
-/* Class = "UILabel"; text = "Label"; ObjectID = "VFO-tq-wdS"; */
-"VFO-tq-wdS.text" = "Label";
-
-/* Class = "UILabel"; text = "something.com"; ObjectID = "Vgy-m0-M8n"; */
-"Vgy-m0-M8n.text" = "irgendwas.com";
-
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "Vtv-sv-ErG"; */
 "Vtv-sv-ErG.title" = "Schließen";
-
-/* Class = "UILabel"; text = "Date"; ObjectID = "vWM-SI-3lf"; */
-"vWM-SI-3lf.text" = "Datum";
-
 /* Class = "UINavigationItem"; title = "Add Contact"; ObjectID = "w0d-HZ-N0s"; */
 "w0d-HZ-N0s.title" = "Kontakt hinzufügen";
-
-/* Class = "UILabel"; text = "Date"; ObjectID = "wce-ek-LTl"; */
-"wce-ek-LTl.text" = "Datum";
-
-/* Class = "UILabel"; text = "Date"; ObjectID = "WlK-KG-Z5M"; */
-"WlK-KG-Z5M.text" = "Datum";
-
 /* Class = "UIBarButtonItem"; title = "Add"; ObjectID = "wNA-vF-ohQ"; */
 "wNA-vF-ohQ.title" = "Hinzufügen";
-
-/* Class = "UILabel"; text = "Link Title here is something that should be about two lines"; ObjectID = "WyS-w8-jKs"; */
-"WyS-w8-jKs.text" = "Link Titel hier ist etwas, das über zwei Zeilen sein sollte";
-
-/* Class = "UILabel"; text = "Day Change"; ObjectID = "x5i-Ok-Bwi"; */
-"x5i-Ok-Bwi.text" = "Tagänderung";
-
-/* Class = "UILabel"; text = "Date"; ObjectID = "Xld-jv-Isd"; */
-"Xld-jv-Isd.text" = "Datum";
-
 /* Class = "UINavigationItem"; title = "Edit Group Chat"; ObjectID = "yIE-Ub-BAk"; */
 "yIE-Ub-BAk.title" = "Gruppenchat bearbeiten";
-
-/* Class = "UILabel"; text = "lastInteraction"; ObjectID = "zc6-pR-bBL"; */
-"zc6-pR-bBL.text" = "letzte Aktivität";
-
-/* Class = "UILabel"; text = "Day Change"; ObjectID = "ZQL-lx-CcO"; */
-"ZQL-lx-CcO.text" = "Tagänderung";
-
-/* Class = "UILabel"; text = "Day Change"; ObjectID = "zsJ-nd-h6v"; */
-"zsJ-nd-h6v.text" = "Tagänderung";

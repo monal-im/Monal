@@ -22,22 +22,17 @@
 
 +(BOOL) checkRemoteRunning:(NSString*) processName
 {
-    NSDate* timeout = [[NSDate date] dateByAddingTimeInterval:1];        //1 second timeout for responses
-    NSCondition* waiter = [[NSCondition alloc] init];
+    dispatch_semaphore_t __block semaphore = dispatch_semaphore_create(0);
     DDLogVerbose(@"Pinging %@", processName);
     [[IPC sharedInstance] sendMessage:@"MLProcessLock.ping" withData:nil to:processName withResponseHandler:^(NSDictionary* response) {
         DDLogVerbose(@"Got ping response from %@", processName);
         //wake up other thread
-        [waiter lock];
-        [waiter signal];
-        [waiter unlock];
+        dispatch_semaphore_signal(semaphore);
     }];
-    //wait for response blocking this thread for ~1 second
-    [waiter lock];
-    BOOL timedOut = [waiter waitUntilDate:timeout];
-    [waiter unlock];
-    DDLogVerbose(@"checkRemoteRunning:%@ returning %@", processName, timedOut ? @"YES" : @"NO");
-    return timedOut;
+    //wait for response blocking this thread for 500ms
+    BOOL timedOut = dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5*NSEC_PER_SEC)))!=0;
+    DDLogVerbose(@"checkRemoteRunning:%@ returning %@", processName, !timedOut ? @"YES" : @"NO");
+    return !timedOut;
 }
 
 +(void) waitForRemoteStartup:(NSString*) processName

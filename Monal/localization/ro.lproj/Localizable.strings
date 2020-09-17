@@ -193,7 +193,7 @@
 "Jabber, Openfire, Prosody etc.   " = "Jabber, Openfire, Prosody etc.   ";
 "Jabber ID" = "Adresă XMPP";
 "Invalid username" = "Nume de utilizator invalid";
-"Invalid Credentails" = "Date de autentificare invalide";
+"Invalid Credentials" = "Date de autentificare invalide";
 "Indicate when a particular device is active or inactive. Saves battery." = "Indică atunci când un anumit dispozitiv este activ sau inactiv. Economisește bateria.";
 "Incoming Call" = "Apel primit";
 "Incoming audio call to %@ from %@ " = "Apel audio primit către %1$@ de la %2$@ ";
@@ -295,4 +295,9 @@
 "Unpin Chat" = "Unpin Chat";
 "Last seen: %@" = "Last seen: %@";
 "now" = "now";
-"Jabber, Openfire, Prosody etc. " = "Jabber, Prosody, ejabberd etc.   ";
+"Jabber, Prosody, ejabberd etc.   " = "Jabber, Prosody, ejabberd etc.   ";
+"Loading more Messages from Server" = "Loading more Messages from Server";
+"Name: " = "Name: ";
+"Os: " = "Os: ";
+"Software Version" = "Software Version";
+"Version: " = "Version: ";

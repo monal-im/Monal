@@ -33,6 +33,7 @@
 
 -(id) init
 {
+    self = [super init];
     DDLogInfo(@"Initializing push singleton");
     self.handlerList = [[NSMutableArray alloc] init];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];

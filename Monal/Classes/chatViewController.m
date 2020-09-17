@@ -1762,7 +1762,7 @@ enum msgSentState {
             // >
             scrollRow = [oldMessages count];
         }
-        [self->_messageTable scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:scrollRow inSection:messagesSection] atScrollPosition:messagesSection animated:NO];
+        [self->_messageTable scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:scrollRow inSection:messagesSection] atScrollPosition: (UITableViewScrollPosition) messagesSection animated:NO];
     });
 }
 

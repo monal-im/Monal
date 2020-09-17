@@ -188,6 +188,12 @@ enum msgSentState {
         [self.plusButton setImage:[UIImage imageNamed:@"907-plus-rounded-square"] forState:UIControlStateNormal];
     }
 #endif
+
+    // setup refreshControl for infinite scrolling
+    UIRefreshControl* refreshControl = [[UIRefreshControl alloc] init];
+    [refreshControl addTarget:self action:@selector(loadOldMsgHistory:) forControlEvents:UIControlEventValueChanged];
+    refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:NSLocalizedString(@"Loading more Messages from Server", @"")];
+    [self.messageTable setRefreshControl:refreshControl];
 }
 
 -(void) initLastMsgButton
@@ -1639,19 +1645,6 @@ enum msgSentState {
 
     // get current scroll position (y-axis)
     CGFloat curOffset = scrollView.contentOffset.y;
-
-    // reached top
-#if TARGET_OS_MACCATALYST
-    if(curOffset < 20 && !self.viewIsScrolling)
-#else
-    if(curOffset < -140 && !self.viewIsScrolling)
-#endif
-    {
-        self.viewIsScrolling = YES;
-        [self loadOldMsgHistory];
-    }
-    else
-        self.viewIsScrolling = NO;
     
     if (self.lastOffset > curOffset)
     {
@@ -1670,13 +1663,19 @@ enum msgSentState {
 
 -(void) loadOldMsgHistory
 {
+    [self.messageTable.refreshControl beginRefreshing];
+    [self loadOldMsgHistory:self.messageTable.refreshControl];
+}
+
+-(void) loadOldMsgHistory:(id) sender
+{
     if(self.contact.isGroup)
         return;
 
     // Load older messages from db
     NSMutableArray* oldMessages = nil;
-    if( self.messageList.count>0) {
-        [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId beforeMsgHistoryID:((MLMessage*)[self.messageList objectAtIndex:0]).messageDBId];
+    if(self.messageList.count > 0) {
+        oldMessages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId beforeMsgHistoryID:((MLMessage*)[self.messageList objectAtIndex:0]).messageDBId];
     }
 
     if(!self.isLoadingMam && [oldMessages count] < kMonalChatFetchedMsgCnt)
@@ -1708,10 +1707,6 @@ enum msgSentState {
         
         //now load more (older) messages from mam if not
         DDLogVerbose(@"Loading more messages from mam before stanzaId %@", oldestStanzaId);
-        MBProgressHUD* loaderHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-        loaderHUD.label.text = NSLocalizedString(@"Loading more Messages from Server", @"");
-        loaderHUD.mode = MBProgressHUDModeIndeterminate;
-        loaderHUD.removeFromSuperViewOnHide = YES;
         __weak chatViewController *weakSelf = self;
         [self.xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid before:oldestStanzaId withCompletion:^(NSArray* _Nullable messages) {
             if(!messages)
@@ -1727,9 +1722,15 @@ enum msgSentState {
             //allow next mam fetch
             dispatch_async(dispatch_get_main_queue(), ^{
                 weakSelf.isLoadingMam = NO;
-                loaderHUD.hidden = YES;
+                if(sender)
+                    [(UIRefreshControl *)sender endRefreshing];
             });
         }];
+    }
+    else if(!self.isLoadingMam && [oldMessages count] >= kMonalChatFetchedMsgCnt)
+    {
+        if(sender)
+            [(UIRefreshControl *)sender endRefreshing];
     }
     
     //use reverse order to insert messages from newest to oldest (bottom to top in chatview)

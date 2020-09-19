@@ -101,52 +101,51 @@
 		return;
 	}
 
-    if(([elementName isEqualToString:@"message"])
-       && ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageGroupChatType]))
+	if([elementName isEqualToString:@"message"])
     {
-        NSArray* parts = [[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/"];
-        if([parts count]>1)
+        if([[attributeDict objectForKey:@"type"] isEqualToString:kMessageGroupChatType])
         {
-            DDLogVerbose(@"group chat message");
-            _actualFrom=[parts objectAtIndex:1]; // the user name
-            _from=[parts objectAtIndex:0]; // should be group name
+            NSArray* parts = [[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/"];
+            if([parts count]>1)
+            {
+                DDLogVerbose(@"group chat message");
+                _actualFrom=[parts objectAtIndex:1]; // the user name
+                _from=[parts objectAtIndex:0]; // should be group name
+            }
+            else
+            {
+                DDLogVerbose(@"group chat message from a room ");
+                _from=[attributeDict objectForKey:@"from"];
+            }
+            return;
         }
-        else
+        else if([[attributeDict objectForKey:@"type"] isEqualToString:kMessageHeadlineType])
         {
-            DDLogVerbose(@"group chat message from a room ");
-            _from=[attributeDict objectForKey:@"from"];
-        }
-        return;
-    }
-    else if([elementName isEqualToString:@"message"] &&
-            ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageChatType]) )
-    {
-        _from = [[_from componentsSeparatedByString:@"/" ] objectAtIndex:0];
-        _to = [[_to  componentsSeparatedByString:@"/" ] objectAtIndex:0];
-        
-        // carbons are only from myself
-        if([_to isEqualToString:_from])
-        {
-            _from = [[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-            _to = [[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
-            DDLogVerbose(@"message from %@ to %@", _from, _to);
+            _from = [[_from componentsSeparatedByString:@"/" ] objectAtIndex:0];
+            _to = [[_to  componentsSeparatedByString:@"/" ] objectAtIndex:0];
+            State = @"Headline";
             return;
         }
         else
         {
-            //DDLogError(@"message impersonation");
-            return;
+            _from = [[_from componentsSeparatedByString:@"/" ] objectAtIndex:0];
+            _to = [[_to  componentsSeparatedByString:@"/" ] objectAtIndex:0];
+            
+            // carbons are only from myself
+            if([_to isEqualToString:_from])
+            {
+                _from = [[(NSString*)[attributeDict objectForKey:@"from"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+                _to = [[(NSString*)[attributeDict objectForKey:@"to"] componentsSeparatedByString:@"/" ] objectAtIndex:0];
+                DDLogVerbose(@"message from %@ to %@", _from, _to);
+                return;
+            }
+            else
+            {
+                //DDLogError(@"message impersonation");
+                return;
+            }
         }
     }
-    if([elementName isEqualToString:@"message"] &&
-       ([[attributeDict objectForKey:@"type"] isEqualToString:kMessageHeadlineType]) )
-    {
-        _from = [[_from componentsSeparatedByString:@"/" ] objectAtIndex:0];
-        _to = [[_to  componentsSeparatedByString:@"/" ] objectAtIndex:0];
-        State = @"Headline";
-        return;
-    }
-    
     
     if(([elementName isEqualToString:@"x"])  && ([namespaceURI isEqualToString:@""]))
     {

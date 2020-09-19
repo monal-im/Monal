@@ -100,7 +100,11 @@
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     
-    NSString* displayName = [[DataLayer sharedInstance] fullNameForContact:message.from inAccount:message.accountId];
+    NSString *displayName = [[DataLayer sharedInstance] fullNameForContact:message.from inAccount:message.accountId];
+    NSString *nickName = [[DataLayer sharedInstance] nickName:message.from  forAccount:message.accountId];
+    
+    if(nickName.length>0) displayName= nickName;
+    
     content.title = displayName.length>0 ? displayName : message.from;
 
     if(![message.from isEqualToString:message.actualFrom])

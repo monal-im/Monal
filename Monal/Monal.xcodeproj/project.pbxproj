@@ -267,6 +267,8 @@
 		C18E757C245E8AE900AE8FB7 /* MLPipe.m in Sources */ = {isa = PBXBuildFile; fileRef = C18E7579245E8AE900AE8FB7 /* MLPipe.m */; };
 		C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */; };
 		C1B7DF6C2438883600C7F0C4 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */; };
+		C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */ = {isa = PBXBuildFile; fileRef = C1C839DA24F15DF800BBCF17 /* MLOMEMO.h */; };
+		C1C839DE24F15DF800BBCF17 /* MLOMEMO.m in Sources */ = {isa = PBXBuildFile; fileRef = C1C839DC24F15DF800BBCF17 /* MLOMEMO.m */; };
 		C1E4654824EE517000CA5AAF /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
 		D838DFA541E4102BCA92A60E /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC355146D687D83135E2BBF7 /* Pods_monalxmpp.framework */; };
 		FE9BEACD951D0F8D3EBE264D /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99727E17D81471E803966620 /* Pods_shareSheet.framework */; };
@@ -944,6 +946,8 @@
 		C1C839C424F1254200BBCF17 /* zh-Hant-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant-HK"; path = "localization/zh-Hant-HK.lproj/Settings.strings"; sourceTree = "<group>"; };
 		C1C839C624F1254600BBCF17 /* zh-Hant-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant-HK"; path = "localization/zh-Hant-HK.lproj/ContactDetails.strings"; sourceTree = "<group>"; };
 		C1C839C824F1255600BBCF17 /* zh-Hant-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant-HK"; path = "localization/zh-Hant-HK.lproj/iosShare.strings"; sourceTree = "<group>"; };
+		C1C839DA24F15DF800BBCF17 /* MLOMEMO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLOMEMO.h; sourceTree = "<group>"; };
+		C1C839DC24F15DF800BBCF17 /* MLOMEMO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLOMEMO.m; sourceTree = "<group>"; };
 		C1D27E0D3E8B8D0D625C5D2A /* Pods-monalxmppmac.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmppmac.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-monalxmppmac/Pods-monalxmppmac.adhoc.xcconfig"; sourceTree = "<group>"; };
 		C1E4654724EE517000CA5AAF /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = localization/de.lproj/Localizable.strings; sourceTree = SOURCE_ROOT; };
 		C1E4654924EE51EC00CA5AAF /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = localization/Base.lproj/Localizable.strings; sourceTree = SOURCE_ROOT; };
@@ -1313,6 +1317,8 @@
 		267B671E226A2208003DB850 /* Crypto */ = {
 			isa = PBXGroup;
 			children = (
+				C1C839DA24F15DF800BBCF17 /* MLOMEMO.h */,
+				C1C839DC24F15DF800BBCF17 /* MLOMEMO.m */,
 				267B671A226A200D003DB850 /* AESGcm.h */,
 				267B671B226A200D003DB850 /* AESGcm.m */,
 				267B671F226A222E003DB850 /* MLEncryptedPayload.h */,
@@ -1882,6 +1888,7 @@
 				540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */,
 				540BD0D224D8D1F40087A743 /* IPC.h in Headers */,
 				540E13A924CF78D00038FDA0 /* MLLogFormatter.h in Headers */,
+				C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */,
 				26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */,
 				5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */,
 			);
@@ -2590,6 +2597,7 @@
 				C18E757C245E8AE900AE8FB7 /* MLPipe.m in Sources */,
 				5435BE9C245F97B3006C61BF /* ParseR.m in Sources */,
 				26CC57D523A08D7100ABB92A /* MLSignalStore.m in Sources */,
+				C1C839DE24F15DF800BBCF17 /* MLOMEMO.m in Sources */,
 				26CC57B223A086CC00ABB92A /* MLXMLNode.m in Sources */,
 				26CC57A523A086AA00ABB92A /* MLXMPPIdentity.m in Sources */,
 				26CC57B723A0876300ABB92A /* MLEncryptedPayload.m in Sources */,

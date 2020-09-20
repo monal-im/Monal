@@ -137,7 +137,6 @@ NSString *const kXMPPPresence = @"presence";
 /**
  ID of the signal device query
  */
-@property (nonatomic, strong) NSString *deviceQueryId;
 
 /**
     Privacy Settings: Only send idle notifications out when the user allows it
@@ -150,6 +149,18 @@ NSString *const kXMPPPresence = @"presence";
 
 
 @implementation xmpp
+
+-(id) initWithServer:(nonnull MLXMPPServer *) server andIdentity:(nonnull MLXMPPIdentity *)identity andAccountNo:(NSString*) accountNo
+{
+    self = [super init];
+    self.accountNo = accountNo;
+    self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];
+    [self setupObjects];
+    //read persisted state to make sure we never operate stateless
+    [self readState];
+
+    return self;
+}
 
 -(void) setupObjects
 {
@@ -190,8 +201,11 @@ NSString *const kXMPPPresence = @"presence";
     _sendQueue.maxConcurrentOperationCount = 1;
     [_sendQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
 
+    // Init omemo
+    self.omemo = [[MLOMEMO alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid ressource:self.connectionProperties.identity.resource connectionProps:self.connectionProperties xmppConnection:self];
+
     if(_outputBuffer)
-		free(_outputBuffer);
+        free(_outputBuffer);
     _outputBuffer = nil;
     _outputBufferByteCount = 0;
 
@@ -213,17 +227,6 @@ NSString *const kXMPPPresence = @"presence";
     self.awayState = [[HelperTools defaultsDB] boolForKey:@"Away"];
 
     self.sendIdleNotifications = [[HelperTools defaultsDB] boolForKey: @"SendLastUserInteraction"];
-}
-
--(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSString*) accountNo
-{
-    self = [super init];
-    self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];
-    _accountNo = accountNo;
-    [self setupObjects];
-    //read persisted state to make sure we never operate stateless
-    [self readState];
-    return self;
 }
 
 -(void) dealloc
@@ -900,7 +903,6 @@ NSString *const kXMPPPresence = @"presence";
 }
 
 #pragma mark message ACK
-
 -(void) addSmacksHandler:(monal_void_block_t) handler
 {
     @synchronized(_smacksSyncPoint) {
@@ -1088,15 +1090,13 @@ NSString *const kXMPPPresence = @"presence";
             ParseIq* iqNode = (ParseIq*)parsedStanza;
 
 #ifndef DISABLE_OMEMO
-            MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self
-                                                                connection:self.connectionProperties
-                                                                signalContex:self.signalContext
-                                                            andSignalStore:self.monalSignalStore];
+        MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self
+                                                               connection:self.connectionProperties
+                                                                    omemo:self.omemo];
 #else
-            MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self
-                                                                connection:self.connectionProperties
-                                                                signalContex:nil
-                                                            andSignalStore:nil];
+        MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self
+                                                               connection:self.connectionProperties
+                                    self.omemo:nil];
 #endif
             processor.sendIq=^(MLXMLNode* _Nullable iq, monal_iq_handler_t resultHandler, monal_iq_handler_t errorHandler) {
                 if(iq)
@@ -1142,12 +1142,6 @@ NSString *const kXMPPPresence = @"presence";
                 [self enablePush];
             };
 
-#ifndef DISABLE_OMEMO
-            processor.sendSignalInitialStanzas = ^() {
-                [self sendSignalInitialStanzas];
-            };
-#endif
-
             processor.getVcards = ^() {
                 [self getVcards];
             };
@@ -1186,41 +1180,36 @@ NSString *const kXMPPPresence = @"presence";
             }
 
 #ifndef DISABLE_OMEMO
-            if([iqNode.idval isEqualToString:self.deviceQueryId])
-            {
-                if([iqNode.type isEqualToString:kiqErrorType]) {
-                    //there are no devices published yet
-                    DDLogInfo(@"No signal device items. Adding new to pubsub");
-                    XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
-                    NSString * deviceString=[NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
-                    [signalDevice publishDevices:@[deviceString]];
-                    [self send:signalDevice];
-                }
+        if([iqNode.idval isEqualToString:self.omemo.deviceQueryId])
+        {
+            if([iqNode.type isEqualToString:kiqErrorType]) {
+                //there are no devices published yet
+                [self.omemo sendOMEMODevice];
             }
+        }
 #endif
+        if([iqNode.from isEqualToString:self.connectionProperties.conferenceServer] && iqNode.discoItems)
+        {
+            self->_roomList=iqNode.items;
+            [[NSNotificationCenter defaultCenter]
+            postNotificationName: kMLHasRoomsNotice object: self];
+        }
 
-            if([iqNode.from isEqualToString:self.connectionProperties.conferenceServer] && iqNode.discoItems)
-            {
-                self->_roomList=iqNode.items;
-                [[NSNotificationCenter defaultCenter]
-                postNotificationName: kMLHasRoomsNotice object: self];
-            }
-
-            if([iqNode.idval isEqualToString:self.jingle.idval]) {
-                [self jingleResult:iqNode];
-            }
-            
-            //only mark stanza as handled *after* processing it
-            [self incrementLastHandledStanza];
+        if([iqNode.idval isEqualToString:self.jingle.idval]) {
+            [self jingleResult:iqNode];
+        }
+        
+        //only mark stanza as handled *after* processing it
+        [self incrementLastHandledStanza];
         }
         else if([parsedStanza.stanzaType isEqualToString:@"message"] && [parsedStanza isKindOfClass:[ParseMessage class]])
         {
             ParseMessage* messageNode = (ParseMessage*)parsedStanza;
-
+            MLMessageProcessor* messageProcessor = nil;
 #ifndef DISABLE_OMEMO
-            MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self jid:self.connectionProperties.identity.jid connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+            messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self jid:self.connectionProperties.identity.jid connection:self.connectionProperties omemo:self.omemo];
 #else
-            MLMessageProcessor *messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self jid:self.connectionProperties.identity.jid connection:self.connectionProperties signalContex:nil andSignalStore:nil];
+            messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self jid:self.connectionProperties.identity.jid connection:self.connectionProperties omemo:nil];
 #endif
 
             messageProcessor.sendStanza=^(MLXMLNode * _Nullable nodeResponse) {
@@ -1264,13 +1253,6 @@ NSString *const kXMPPPresence = @"presence";
                 else
                     DDLogError(@"error adding message");
             };
-
-#ifndef DISABLE_OMEMO
-            messageProcessor.signalAction = ^(void) {
-                [self manageMyKeys];
-            };
-#endif
-
             //only process mam results when they are not for priming the database with the initial stanzaid (the id will be taken from the iq result)
             //we do this because we don't want to randomly add one single message to our history db after the user installs the app / adds a new account
             //if the user wants to see older messages he can retrieve them using the ui
@@ -1835,92 +1817,22 @@ NSString *const kXMPPPresence = @"presence";
     XMPPMessage* messageNode =[[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact forKey:@"to"];
     [messageNode setXmppId:messageId ];
+
 #ifndef DISABLE_OMEMO
-    if(self.signalContext && !isMUC && encrypt) {
-        [messageNode setBody:NSLocalizedString(@"[This message is OMEMO encrypted]",@ "")];
-
-        NSArray *devices = [self.monalSignalStore allDeviceIdsForAddressName:contact];
-        NSArray *myDevices = [self.monalSignalStore allDeviceIdsForAddressName:self.connectionProperties.identity.jid];
-        if(devices.count>0 ){
-
-            NSData *messageBytes=[message dataUsingEncoding:NSUTF8StringEncoding];
-
-            MLEncryptedPayload *encryptedPayload = [AESGcm encrypt:messageBytes keySize:16];
-
-            MLXMLNode *encrypted =[[MLXMLNode alloc] initWithElement:@"encrypted"];
-            [encrypted.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:kXMLNS];
-            [messageNode.children addObject:encrypted];
-
-            MLXMLNode *payload =[[MLXMLNode alloc] initWithElement:@"payload"];
-            [payload setData:[HelperTools encodeBase64WithData:encryptedPayload.body]];
-            [encrypted.children addObject:payload];
-
-            NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
-            MLXMLNode *header =[[MLXMLNode alloc] initWithElement:@"header"];
-            [header.attributes setObject:deviceid forKey:@"sid"];
-            [encrypted.children addObject:header];
-
-            MLXMLNode *ivNode =[[MLXMLNode alloc] initWithElement:@"iv"];
-            [ivNode setData:[HelperTools encodeBase64WithData:encryptedPayload.iv]];
-            [header.children addObject:ivNode];
-
-            [devices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                NSNumber *device = (NSNumber *)obj;
-                SignalAddress *address = [[SignalAddress alloc] initWithName:contact deviceId:(uint32_t)device.intValue];
-                NSData *identity=[self.monalSignalStore getIdentityForAddress:address];
-                if([self.monalSignalStore isTrustedIdentity:address identityKey:identity]) {
-
-                    SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
-                    NSError *error;
-                    SignalCiphertext* deviceEncryptedKey=[cipher encryptData:encryptedPayload.key error:&error];
-
-                    MLXMLNode *keyNode =[[MLXMLNode alloc] initWithElement:@"key"];
-                    [keyNode.attributes setObject:[NSString stringWithFormat:@"%@",device] forKey:@"rid"];
-                    if(deviceEncryptedKey.type==SignalCiphertextTypePreKeyMessage)
-                    {
-                        [keyNode.attributes setObject:@"1" forKey:@"prekey"];
-                    }
-
-                    [keyNode setData:[HelperTools encodeBase64WithData:deviceEncryptedKey.data]];
-                    [header.children addObject:keyNode];
-                }
-
-            }];
-
-            [myDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                NSNumber *device = (NSNumber *)obj;
-                SignalAddress *address = [[SignalAddress alloc] initWithName:self.connectionProperties.identity.jid deviceId:(uint32_t)device.intValue];
-                NSData *identity=[self.monalSignalStore getIdentityForAddress:address];
-                if([self.monalSignalStore isTrustedIdentity:address identityKey:identity]) {
-                    SignalSessionCipher *cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
-                    NSError *error;
-                    SignalCiphertext* deviceEncryptedKey=[cipher encryptData:encryptedPayload.key error:&error];
-
-                    MLXMLNode *keyNode =[[MLXMLNode alloc] initWithElement:@"key"];
-                    [keyNode.attributes setObject:[NSString stringWithFormat:@"%@",device] forKey:@"rid"];
-                    if(deviceEncryptedKey.type==SignalCiphertextTypePreKeyMessage)
-                    {
-                        [keyNode.attributes setObject:@"1" forKey:@"prekey"];
-                    }
-
-                    [keyNode setData:[HelperTools encodeBase64WithData:deviceEncryptedKey.data]];
-                    [header.children addObject:keyNode];
-                }
-            }];
-        }
-    }
-    else  {
+    // [encryptMessage:messageNode withMessage:message isMuc:isMuc toContact:contact fromSender:self.connectionProperties.identity.jid]
+    if(encrypt && !isMUC) {
+        [self.omemo encryptMessage:messageNode withMessage:message toContact:contact];
+    } else {
 #endif
         if(isUpload){
             [messageNode setOobUrl:message];
         } else  {
             [messageNode setBody:message];
         }
-
 #ifndef DISABLE_OMEMO
     }
 #endif
-
+        
     if(isMUC)
     {
         [messageNode.attributes setObject:kMessageGroupChatType forKey:@"type"];
@@ -2278,7 +2190,7 @@ NSString *const kXMPPPresence = @"presence";
     //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)
     //--> all of this reasons imply that we had to start a new xmpp stream and our old cached disco data
     //    and other state values are stale now
-	//(smacks state will be reset/cleared later on if appropriate, no need to handle smacks here)
+    //(smacks state will be reset/cleared later on if appropriate, no need to handle smacks here)
     self.connectionProperties.serverFeatures=nil;
     self.connectionProperties.discoveredServices=nil;
     self.connectionProperties.uploadServer=nil;
@@ -2314,100 +2226,6 @@ NSString *const kXMPPPresence = @"presence";
     self.awayState = away;
     [self sendPresence];
 }
-
-#pragma mark - OMEMO
-
-#ifndef DISABLE_OMEMO
--(void) setupSignal
-{
-    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:_accountNo];
-
-    //signal store
-    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
-    //signal context
-    self.signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
-    //signal helper
-    SignalKeyHelper *signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
-
-    if(self.monalSignalStore.deviceid==0)
-    {
-        self.monalSignalStore.deviceid=[signalHelper generateRegistrationId];
-
-        self.monalSignalStore.identityKeyPair= [signalHelper generateIdentityKeyPair];
-        self.monalSignalStore.signedPreKey= [signalHelper generateSignedPreKeyWithIdentity:self.monalSignalStore.identityKeyPair signedPreKeyId:1];
-        self.monalSignalStore.preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:100];
-
-        [self.monalSignalStore saveValues];
-
-        SignalAddress *address = [[SignalAddress alloc] initWithName:self.connectionProperties.identity.jid deviceId:self.monalSignalStore.deviceid];
-        [self.monalSignalStore saveIdentity:address identityKey:self.monalSignalStore.identityKeyPair.publicKey];
-
-    }
-
-}
-
--(void) sendSignalInitialStanzas
-{
-    if(![HelperTools isAppExtension])
-    {
-        [self queryOMEMODevicesFrom:self.connectionProperties.identity.jid];
-        [self sendOMEMOBundle];
-    }
-}
-
-
-
--(void) sendOMEMOBundle
-{
-    if(!self.connectionProperties.supportsPubSub) return;
-    NSString *deviceid=[NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
-    XMPPIQ *signalKeys = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [signalKeys publishKeys:@{@"signedPreKeyPublic":self.monalSignalStore.signedPreKey.keyPair.publicKey, @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature, @"identityKey":self.monalSignalStore.identityKeyPair.publicKey, @"signedPreKeyId": [NSString stringWithFormat:@"%d",self.monalSignalStore.signedPreKey.preKeyId]} andPreKeys:self.monalSignalStore.preKeys withDeviceId:deviceid];
-    [signalKeys.attributes setValue:[NSString stringWithFormat:@"%@/%@",self.connectionProperties.identity.jid, self.connectionProperties.identity.resource ] forKey:@"from"];
-    [self send:signalKeys];
-}
-
--(void) manageMyKeys
-{
-    //get current count. If less than 20
-    NSMutableArray *keys = [self.monalSignalStore readPreKeys];
-    if(keys.count<20) {
-        SignalKeyHelper *signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
-
-        self.monalSignalStore.preKeys= [signalHelper generatePreKeysWithStartingPreKeyId:0 count:80];
-        [self.monalSignalStore saveValues];
-
-        //load up from db (combined list)
-        keys= [self.monalSignalStore readPreKeys];
-        self.monalSignalStore.preKeys = keys;
-        [self sendOMEMOBundle];
-    }
-
-}
-
--(void) subscribeOMEMODevicesFrom:(NSString *) jid
-{
-    if(!self.connectionProperties.supportsPubSub) return;
-       XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-       [query setiqTo:self.connectionProperties.identity.jid];
-       [query subscribeDevices:jid];
-       [self send:query];
-}
-
--(void) queryOMEMODevicesFrom:(NSString *) jid
-{
-    if(!self.connectionProperties.supportsPubSub && self.accountState >= kStateBound) return;
-    XMPPIQ* query =[[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
-    [query setiqTo:jid];
-    [query requestDevices];
-    if([jid isEqualToString:self.connectionProperties.identity.jid]) {
-        self.deviceQueryId=[query.attributes objectForKey:@"id"];
-    }
-
-    [self send:query];
-
-}
-#endif
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
 {
@@ -3180,12 +2998,12 @@ NSString *const kXMPPPresence = @"presence";
 {
     if(!messageOut) {
         DDLogInfo(@"tried to send empty message. returning without doing anything.");
-        return YES;		//pretend we sent the empty "data"
+        return YES;     //pretend we sent the empty "data"
     }
     if(!_streamHasSpace)
     {
         DDLogVerbose(@"no space to write. returning.");
-        return NO;		//no space to write --> stanza has to remain in _outputQueue
+        return NO;      //no space to write --> stanza has to remain in _outputQueue
     }
     if(!_oStream)
     {

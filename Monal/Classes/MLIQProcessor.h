@@ -8,8 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "ParseIq.h"
-#import "MLSignalStore.h"
-#import "SignalContext.h"
+#import "MLOMEMO.h"
 #import "MLXMPPConnection.h"
 #import "XMPPIQ.h"
 #import "MLXMLNode.h"
@@ -21,6 +20,8 @@ typedef void (^iqCompletion)(MLXMLNode* iq, monal_iq_handler_t resultHandler, mo
 typedef void (^iqDelegateCompletion)(MLXMLNode* iq, id delegate, SEL method, NSArray* args);
 typedef void (^processAction)(void);
 
+@class MLOMEMO;
+
 @interface MLIQProcessor : NSObject
 
 @property (nonatomic, strong) iqCompletion sendIq;
@@ -28,21 +29,15 @@ typedef void (^processAction)(void);
 @property (nonatomic, strong) processAction mamFinished;
 @property (nonatomic, strong) processAction initSession;
 @property (nonatomic, strong) processAction enablePush;
-@property (nonatomic, strong) processAction sendSignalInitialStanzas;
 @property (nonatomic, strong) processAction getVcards;
 
--(MLIQProcessor *) initWithAccount:(xmpp*) account connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore;
--(MLIQProcessor *) initWithAccount:(xmpp*) account connection:(MLXMPPConnection *) connection;
+-(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection omemo:(MLOMEMO *)omemo;
+-(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection;
 
 /**
  Process a iq, persist any changes and post notifications
  */
 -(void) processIq:(ParseIq *) messageNode;
-
-/**
- process a node and send out devices
- */
--(void) processOMEMODevices:(ParseIq *) iqNode;
 
 
 @end

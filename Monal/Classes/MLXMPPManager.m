@@ -572,15 +572,13 @@ static const int sendMessageTimeoutSeconds = 10;
     xmppAccount.pushNode=self.pushNode;
     xmppAccount.pushSecret=self.pushSecret;
 
-#ifndef DISABLE_OMEMO
-    [xmppAccount setupSignal];
-#endif
-
     if(xmppAccount)
     {
         @synchronized(_connectedXMPP) {
             [_connectedXMPP addObject:xmppAccount];
         }
+        [_connectedXMPP addObject:xmppAccount];
+
         if(_hasConnectivity)
         {
             DDLogVerbose(@"starting connect");
@@ -662,6 +660,8 @@ static const int sendMessageTimeoutSeconds = 10;
 #pragma mark -  XMPP commands
 -(void) sendMessageAndAddToHistory:(NSString*) message toContact:(NSString*)recipient fromAccount:(NSString*) accountID fromJID:(NSString*) fromJID isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC  isUpload:(BOOL) isUpload withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion {
     NSString* msgid = [[NSUUID UUID] UUIDString];
+
+    NSAssert(message, @"Message should not be nil");
 
     // Save message to history
     [[DataLayer sharedInstance] addMessageHistoryFrom:fromJID to:recipient forAccount:accountID withMessage:message actuallyFrom:fromJID withId:msgid encrypted:encrypted withCompletion:^(BOOL successHist, NSString *messageTypeHist) {
@@ -997,17 +997,19 @@ static const int sendMessageTimeoutSeconds = 10;
             BOOL encryptMessages = [[DataLayer sharedInstance] shouldEncryptForJid:recipient andAccountNo:accountID];
             NSString* fromJID = [NSString stringWithFormat:@"%@@%@", [accountDic objectForKey:@"username"], [accountDic objectForKey:@"domain"]];
 
-            [self sendMessageAndAddToHistory:[row objectForKey:@"url"] toContact:recipient fromAccount:accountID fromJID:fromJID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                if(successSendObject) {
-                    NSString* comment = (NSString*)[row objectForKey:@"comment"];
-                    if(comment.length > 0) {
-                        [self sendMessageAndAddToHistory:comment toContact:recipient fromAccount:accountID fromJID:fromJID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendComment, NSString* messageIdSendComment) {
-                        }];
+            if([[row objectForKey:@"type"] isEqualToString:@"public.url"]) {
+                [self sendMessageAndAddToHistory:[row objectForKey:@"url"] toContact:recipient fromAccount:accountID fromJID:fromJID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                    if(successSendObject) {
+                        NSString* comment = (NSString*)[row objectForKey:@"comment"];
+                        if(comment.length > 0) {
+                            [self sendMessageAndAddToHistory:comment toContact:recipient fromAccount:accountID fromJID:fromJID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendComment, NSString* messageIdSendComment) {
+                            }];
+                        }
+                        [outboxClean removeObject:row];
+                        [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
                     }
-                    [outboxClean removeObject:row];
-                    [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
-                }
-            }];
+                }];
+            }
         }
     }
 }

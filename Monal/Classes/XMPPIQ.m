@@ -693,7 +693,6 @@ NSString *const kiqErrorType = @"error";
 -(void) requestBundles:(NSString*) deviceid
 {
     [self requestNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%@", deviceid]];
-    
 }
 
 #pragma mark - Account Management

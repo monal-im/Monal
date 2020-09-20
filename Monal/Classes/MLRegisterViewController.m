@@ -61,6 +61,7 @@
         [self presentViewController:alert animated:YES completion:nil];
     }];
 }
+
 -(void) createXMPPInstance
 {
     MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:@"nothing@yax.im" password:@"nothing" andResource:@"MonalReg"];

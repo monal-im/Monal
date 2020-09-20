@@ -11,13 +11,14 @@
 #import "DataLayer.h"
 #import "MLImageManager.h"
 #import "HelperTools.h"
+#import "MLOMEMO.h"
 
+@class MLOMEMO;
 
 @interface MLIQProcessor()
 
-@property (nonatomic, strong) SignalContext* signalContext;
-@property (nonatomic, strong) MLSignalStore* monalSignalStore;
-@property (nonatomic, strong) MLXMPPConnection* connection;
+@property (nonatomic, strong) MLOMEMO* omemo;
+@property (nonatomic, strong) MLXMPPConnection *connection;
 @property (nonatomic, strong) xmpp* account;
 
 @end
@@ -60,13 +61,12 @@
     [account mamFinished];
 }
 
--(MLIQProcessor *) initWithAccount:(xmpp*) account connection:(MLXMPPConnection *) connection signalContex:(SignalContext *)signalContext andSignalStore:(MLSignalStore *) monalSignalStore
+-(MLIQProcessor *) initWithAccount:(xmpp*) account connection:(MLXMPPConnection *) connection omemo:(MLOMEMO *)omemo
 {
     self = [super init];
     self.account = account;
     self.connection= connection;
-    self.signalContext=signalContext;
-    self.monalSignalStore= monalSignalStore;
+    self.omemo = omemo;
     return self;
 }
 
@@ -279,11 +279,8 @@
             [iqNode.features.allObjects enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 NSString *feature = (NSString *)obj;
                 if([feature isEqualToString:@"http://jabber.org/protocol/pubsub#publish"]) {
-                    self.connection.supportsPubSub=YES;
-                    *stop=YES;
-#ifndef DISABLE_OMEMO
-                    self.sendSignalInitialStanzas();
-#endif
+                    self.connection.supportsPubSub = YES;
+                    *stop = YES;
                 }
             }];
             
@@ -413,121 +410,27 @@
     
 }
 
--(void) sendOMEMODevices:(NSArray *) devices {
-    if(!self.connection.supportsPubSub) return;
-    
-    XMPPIQ *signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [signalDevice publishDevices:devices];
-    self.sendIq(signalDevice, nil, nil);
-}
-
-
--(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
-{
-    if(!self.connection.supportsPubSub) return;
-    XMPPIQ* query2 = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
-    [query2 setiqTo:jid];
-    [query2 requestBundles:deviceid];
-    self.sendIq(query2, nil, nil);
-}
-
 -(void) omemoResult:(ParseIq *) iqNode {
 #ifndef DISABLE_OMEMO
-    [self processOMEMODevices:iqNode];
-    [self processOMEMOKeys:iqNode];
+    BOOL __block isBackgrounded = NO;
+#ifndef TARGET_IS_EXTENSION
+#if TARGET_OS_IPHONE
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+        {
+            isBackgrounded = YES;
+        }
+    });
 #endif
-}
-
-
--(void) processOMEMODevices:(ParseIq *) iqNode{
-    NSString *source= iqNode.from;
-    if(iqNode.omemoDevices)
+#endif
+    if(!isBackgrounded)
     {
-        
-        if(!source || [source isEqualToString:self.connection.identity.jid])
-        {
-            source=self.connection.identity.jid;
-            NSMutableArray *devices= [iqNode.omemoDevices mutableCopy];
-            NSSet *deviceSet = [NSSet setWithArray:iqNode.omemoDevices];
-            
-            NSString * deviceString = [NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
-            if(![deviceSet containsObject:deviceString])
-            {
-                [devices addObject:deviceString];
-            }
-            
-            [self sendOMEMODevices:devices];
+        if(iqNode.omemoDevices) {
+            [self.omemo processOMEMODevices:iqNode.omemoDevices from:iqNode.from];
         }
-        
-        
-        NSArray *existingDevices = [self.monalSignalStore knownDevicesForAddressName:source];
-        NSSet *deviceSet = [NSSet setWithArray:existingDevices];
-        //only query if the device doesnt exist
-        [iqNode.omemoDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSString *deviceString  =(NSString *)obj;
-            NSNumber *deviceNumber = [NSNumber numberWithInt:deviceString.intValue];
-            if(![deviceSet containsObject:deviceNumber]) {
-                [self queryOMEMOBundleFrom:source andDevice:deviceString];
-            } else  {
-               
-            }
-        }];
-        
-        //if not in device list remove from  knowndevices
-        NSSet *iqSet = [NSSet setWithArray:iqNode.omemoDevices];
-        [existingDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSNumber *device  =(NSNumber *)obj;
-            NSString *deviceString = [NSString stringWithFormat:@"%@", device];
-            if(![iqSet containsObject:deviceString]) {
-                //device was removed
-                SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:(int) device.integerValue];
-                [self.monalSignalStore deleteDeviceforAddress:address];
-            }
-        }];
-        
+        [self.omemo processOMEMOKeys:iqNode];
     }
-    
-}
-
--(void) processOMEMOKeys:(ParseIq *) iqNode{
-    
-    if(iqNode.signedPreKeyPublic && self.signalContext )
-    {
-        NSString *source= iqNode.from;
-        if(!source)
-        {
-            source=self.connection.identity.jid;
-        }
-        
-        uint32_t device =(uint32_t)[iqNode.deviceid intValue];
-        if(!iqNode.deviceid) return;
-        
-        SignalAddress *address = [[SignalAddress alloc] initWithName:source deviceId:device];
-        SignalSessionBuilder *builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
-        
-        [iqNode.preKeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            
-            NSDictionary *row = (NSDictionary *) obj;
-            NSString *keyid = (NSString *)[row objectForKey:@"preKeyId"];
-            NSData *preKeyData = [HelperTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]];
-            if(preKeyData) {
-                SignalPreKeyBundle *bundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
-                                                                                       deviceId:device
-                                                                                       preKeyId:[keyid intValue]
-                                                                                   preKeyPublic:preKeyData
-                                                                                 signedPreKeyId:iqNode.signedPreKeyId.intValue
-                                                                             signedPreKeyPublic:[HelperTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
-                                                                                      signature:[HelperTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
-                                                                                    identityKey:[HelperTools dataWithBase64EncodedString:iqNode.identityKey]
-                                                                                          error:nil];
-                
-                [builder processPreKeyBundle:bundle error:nil];
-            } else  {
-                DDLogError(@"Could not decode base64 prekey %@", row);
-            }
-        }];
-        
-    }
+#endif
 }
 
 -(void) iqVersionResult:(ParseIq *) iqNode

@@ -242,7 +242,7 @@ enum msgSentState {
 -(IBAction) toggleEncryption:(id)sender
 {
 #ifndef DISABLE_OMEMO
-    NSArray* devices = [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
+    NSArray* devices = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid];
     [MLChatViewHelper<chatViewController*> toggleEncryption:&(self->_encryptChat) forAccount:self.xmppAccount.accountNo forContactJid:self.contact.contactJid withKnownDevices:devices withSelf:self afterToggle:^() {
         [self displayEncryptionStateInUI];
     }];
@@ -420,12 +420,8 @@ enum msgSentState {
     if(!self.contact.contactJid || !self.contact.accountId) return;
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
 #ifndef DISABLE_OMEMO
-    if(![self.contact.subscription isEqualToString:kSubBoth] && !self.contact.isGroup) {
-        [self.xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
-    }
-    
-    NSArray* devices = [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
-    if(devices.count == 0) {
+    BOOL omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressNameExist:self.contact.contactJid];
+    if(!omemoDeviceForContactFound) {
         if(self.encryptChat) {
             UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Encryption Not Supported", @"") message:NSLocalizedString(@"This contact does not appear to have any devices that support encryption.", @"") preferredStyle:UIAlertControllerStyleAlert];
             [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
@@ -443,13 +439,25 @@ enum msgSentState {
         }
     }
 #endif
-
     [self refreshCounter];
     
     //init the floating last message button
     [self initLastMsgButton];
 
     self.viewDidAppear = YES;
+
+#ifndef DISABLE_OMEMO
+    // load omemo devices from contact if we have 0 in our store
+    if(![self.xmppAccount.omemo knownDevicesForAddressNameExist:self.contact.contactJid])
+    {
+        [self.xmppAccount.omemo queryOMEMODevicesFrom:self.contact.contactJid];
+        [self.xmppAccount.omemo subscribeOMEMODevicesFrom:self.contact.contactJid];
+        [self.xmppAccount.omemo subscribeOMEMODevicesFrom:self.jid];
+        // FIXME: remove next line after pub sub
+        [self.xmppAccount.omemo queryOMEMODevicesFrom:self.jid];
+        [self.xmppAccount.omemo sendOMEMOBundle];
+    }
+#endif
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -1737,8 +1745,10 @@ enum msgSentState {
             [(UIRefreshControl *)sender endRefreshing];
     }
     
-    //use reverse order to insert messages from newest to oldest (bottom to top in chatview)
-    [self insertOldMessages:[[oldMessages reverseObjectEnumerator] allObjects]];
+    if(oldMessages && [oldMessages count] > 0) {
+        //use reverse order to insert messages from newest to oldest (bottom to top in chatview)
+        [self insertOldMessages:[[oldMessages reverseObjectEnumerator] allObjects]];
+    }
 }
 
 -(void) insertOldMessages:(NSArray*) oldMessages

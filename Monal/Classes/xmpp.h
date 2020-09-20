@@ -17,6 +17,8 @@
 #import "jingleCall.h"
 #import "MLDNSLookup.h"
 #import "MLSignalStore.h"
+#import "MLMessageProcessor.h"
+#import "MLOMEMO.h"
 
 #ifndef DISABLE_OMEMO
 #import "SignalProtocolObjC.h"
@@ -54,6 +56,9 @@ FOUNDATION_EXPORT NSString* const kCompletion;
 typedef void (^xmppCompletion)(BOOL success, NSString *message);
 typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFields);
 
+@class MLOMEMO;
+@class MLMessageProcessor;
+
 @interface xmpp : NSObject <NSStreamDelegate>
 
 @property (nonatomic, readonly) BOOL idle;
@@ -68,7 +73,6 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, strong) NSString *regPass;
 @property (nonatomic, strong) NSString *regCode;
 @property (nonatomic, strong) NSDictionary *regHidden;
-
 
 @property (nonatomic, strong) jingleCall* call;
 
@@ -88,17 +92,14 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, strong) NSArray* discoveredServersList;
 @property (nonatomic, strong) NSMutableArray* usableServersList;
 
+@property (nonatomic, strong) MLOMEMO* omemo;
+
 @property (nonatomic, strong) NSArray* roomList;
 @property (nonatomic, strong) NSArray* rosterList;
 
 //calculated
 @property (nonatomic, strong, readonly) NSString* versionHash;
 @property (nonatomic, strong) NSDate* connectedTime;
-
-#ifndef DISABLE_OMEMO
-@property (atomic, strong) SignalContext* signalContext;
-@property (atomic, strong) MLSignalStore* monalSignalStore;
-#endif
 
 extern NSString *const kMessageId;
 extern NSString *const kSendTimer;
@@ -109,7 +110,6 @@ extern NSString *const kXMPPPresence;
 
 extern NSString* const kAccountState;
 extern NSString* const kAccountHibernate;
-
 
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSString*) accountNo;
 
@@ -259,19 +259,10 @@ Decline a call request
  */
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) jid;
 
-#ifndef DISABLE_OMEMO
-
--(void) subscribeOMEMODevicesFrom:(NSString* _Nonnull) jid;
-/** OMEMO */
--(void) queryOMEMODevicesFrom:(NSString* _Nonnull) jid;
-#endif
-
 /**
  An intentional disconnect to trigger APNS. does not close the stream.
  */
 -(void) disconnectToResumeWithCompletion:(void (^)(void))completion;
-
--(void) setupSignal;
 
 
 #pragma mark - account management

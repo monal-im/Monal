@@ -38,7 +38,8 @@
         }
     }
     
-    if(!_idval) _idval =[attributeDict objectForKey:@"id"] ;
+    if(!_idval) _idval = [attributeDict objectForKey:@"id"] ;
+    DDLogWarn(@"idval id: %@", _idval);
     
     if([attributeDict objectForKey:@"to"])
     {

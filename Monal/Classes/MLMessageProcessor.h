@@ -8,10 +8,9 @@
 
 #import <Foundation/Foundation.h>
 #import "ParseMessage.h"
-#import "MLSignalStore.h"
-#import "SignalContext.h"
 #import "MLXMPPConnection.h"
 #import "xmpp.h"
+#import "MLOMEMO.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -19,13 +18,14 @@ typedef void (^messageCompletion)(BOOL success, BOOL encrypted, BOOL showAlert, 
 typedef void (^signalCompletion)(void);
 typedef void (^nodeCompletion)(MLXMLNode* _Nullable nodeResponse);
 
+@class MLOMEMO;
+@class xmpp;
+
 @interface MLMessageProcessor : NSObject
 @property (nonatomic, strong) messageCompletion postPersistAction;
-@property (nonatomic, strong) signalCompletion signalAction;
 @property (nonatomic, strong) nodeCompletion sendStanza;
 
--(MLMessageProcessor *) initWithAccount:(xmpp*) account jid:(NSString*) jid connection:(MLXMPPConnection*) connection signalContex:(SignalContext*) signalContext andSignalStore:(MLSignalStore*) monalSignalStore;
--(MLMessageProcessor *) initWithAccount:(xmpp*) account jid:(NSString*) jid connection:(MLXMPPConnection*) connection;
+-(MLMessageProcessor *) initWithAccount:(xmpp*) account jid:(NSString *) jid connection:(MLXMPPConnection *) connection omemo:(MLOMEMO*) omemo;
 
 /**
  Process a message, persist it and post relevant notifications

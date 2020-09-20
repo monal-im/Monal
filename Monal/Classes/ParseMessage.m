@@ -256,10 +256,10 @@
     
     //store in array
     if([State isEqualToString:@"OMEMO"] && [elementName isEqualToString:@"key"]) {
-        
         self.currentKey =[[NSMutableDictionary alloc] init];
         [self.currentKey setObject:[attributeDict objectForKey:@"rid"] forKey:@"rid"];
         
+        // Check if key is preKey
         if([[attributeDict objectForKey:@"prekey"] isEqualToString:@"1"]
            || [[attributeDict objectForKey:@"prekey"] isEqualToString:@"true"])
         {

@@ -71,7 +71,6 @@ static const size_t MAX_OMEMO_KEYS = 120;
         self.monalSignalStore.signedPreKey = [signalHelper generateSignedPreKeyWithIdentity:self.monalSignalStore.identityKeyPair signedPreKeyId:1];
         // Generate single use keys
         [self generateNewKeysIfNeeded];
-        [self.monalSignalStore saveValues];
         [self sendOMEMOBundle];
 
         SignalAddress* address = [[SignalAddress alloc] initWithName:self._senderJid deviceId:self.monalSignalStore.deviceid];
@@ -123,19 +122,16 @@ static const size_t MAX_OMEMO_KEYS = 120;
 -(void) generateNewKeysIfNeeded
 {
     // generate new keys if less than MIN_OMEMO_KEYS are available
-    NSMutableArray* keys = [self.monalSignalStore readPreKeys];
-    if(keys.count < MIN_OMEMO_KEYS) {
+    int preKeyCount = [self.monalSignalStore getPreKeyCount];
+    if(preKeyCount < MIN_OMEMO_KEYS) {
         SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self._signalContext];
 
         // Generate new keys so that we have a total of MAX_OMEMO_KEYS keys again
-        // TODO why are we starting at 0?
-        size_t cntKeysNeeded = MAX_OMEMO_KEYS - keys.count;
-        self.monalSignalStore.preKeys = [signalHelper generatePreKeysWithStartingPreKeyId:0 count:cntKeysNeeded];
+        int lastPreyKedId = [self.monalSignalStore getHighestPreyKeyId];
+        size_t cntKeysNeeded = MAX_OMEMO_KEYS - preKeyCount;
+        // Start generating with keyId > last send key id
+        self.monalSignalStore.preKeys = [signalHelper generatePreKeysWithStartingPreKeyId:(lastPreyKedId + 1) count:cntKeysNeeded];
         [self.monalSignalStore saveValues];
-
-        // load up from db (combined list)
-        keys = [self.monalSignalStore readPreKeys];
-        self.monalSignalStore.preKeys = keys;
 
         // send out new omemo bundle
         [self sendOMEMOBundle];
@@ -152,41 +148,40 @@ static const size_t MAX_OMEMO_KEYS = 120;
     if(self.xmppConnection) [self.xmppConnection send:bundleQuery];
 }
 
--(void) processOMEMODevices:(NSArray *) receivedDevices from:(NSString *) source
+-(void) processOMEMODevices:(NSArray<NSString*>*) receivedDevicesStr from:(NSString *) source
 {
+    // convert device ids to NSNumber array
+    NSMutableSet<NSNumber*>* receivedDevices = [[NSMutableSet alloc] init];
+    for(NSString* device in receivedDevicesStr) {
+        [receivedDevices addObject:[NSNumber numberWithInt:device.intValue]];
+    }
     if(receivedDevices)
     {
         NSAssert(self._senderJid == self._connection.identity.jid, @"connection jid should be equal to the senderJid");
 
-        NSArray* existingDevices = [self.monalSignalStore knownDevicesForAddressName:source];
-        NSSet* deviceSet = [NSSet setWithArray:existingDevices];
+        NSArray<NSNumber*>* existingDevices = [self.monalSignalStore knownDevicesForAddressName:source];
 
         // query omemo bundles from devices that are not in our signalStorage
         // TODO: queryOMEMOBundleFrom when sending first msg without session
-        [receivedDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSString* deviceString = (NSString *)obj;
-            NSNumber* deviceNumber = [NSNumber numberWithInt:deviceString.intValue];
-            if(![deviceSet containsObject:deviceNumber]) {
-                [self queryOMEMOBundleFrom:source andDevice:deviceString];
+        for(NSNumber* deviceId in receivedDevices) {
+            if(![existingDevices containsObject:deviceId]) {
+                [self queryOMEMOBundleFrom:source andDevice:[deviceId stringValue]];
             }
-        }];
+        }
 
         // remove devices from our signalStorage when they are no longer published
-        NSSet* iqSet = [NSSet setWithArray:receivedDevices];
-        [existingDevices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSNumber* device = (NSNumber *)obj;
-            NSString* deviceString = [NSString stringWithFormat:@"%@", device];
-            if(![iqSet containsObject:deviceString]) {
+        for(NSNumber* deviceId in existingDevices) {
+            if(![receivedDevices containsObject:deviceId]) {
                 // only delete other devices from signal store && keep our own entry
-                if(!([source isEqualToString:self._senderJid] && device.intValue == self.monalSignalStore.deviceid))
-                    [self deleteDeviceForSource:source andRid:device.intValue];
+                if(!([source isEqualToString:self._senderJid] && deviceId.intValue == self.monalSignalStore.deviceid))
+                    [self deleteDeviceForSource:source andRid:deviceId.intValue];
             }
-        }];
+        };
 
         // Send our own device id when it is missing on the server
         if(!source || [source isEqualToString:self._senderJid])
         {
-            [self sendOMEMODevice:receivedDevices];
+            [self sendOMEMODevice:receivedDevices force:NO];
         }
     }
 }
@@ -224,30 +219,25 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
 
 
--(void) sendOMEMODevice
+-(void) sendOMEMODeviceWithForce:(BOOL) force
 {
     NSArray* ownCachedDevices = [self knownDevicesForAddressName:self._senderJid];
-    [self sendOMEMODevice:ownCachedDevices];
+    NSSet<NSNumber*>* ownCachedDevicesSet = [[NSSet alloc] initWithArray:ownCachedDevices];
+    [self sendOMEMODevice:ownCachedDevicesSet force:force];
 }
 
--(void) sendOMEMODevice:(NSArray *) receivedDevices
+-(void) sendOMEMODevice:(NSSet<NSNumber*>*) receivedDevices force:(BOOL) force
 {
     if(!self._connection.supportsPubSub || (self.xmppConnection.accountState < kStateBound && ![self.xmppConnection isHibernated])) return;
-    NSMutableArray* devices;
+    NSMutableSet<NSNumber*>* devices = [[NSMutableSet alloc] init];
     if(receivedDevices && [receivedDevices count] > 0) {
-        devices = [receivedDevices mutableCopy];
-    } else {
-        devices = [[NSMutableArray alloc] init];
+        [devices unionSet:receivedDevices];
     }
 
-    NSSet* deviceSet = [NSSet setWithArray:devices];
-
-    NSString* deviceString = [NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
-
     // Check if our own device string is already in our set
-    if(![deviceSet containsObject:deviceString])
+    if(![devices containsObject:[NSNumber numberWithInt:self.monalSignalStore.deviceid]] || force)
     {
-        [devices addObject:deviceString];
+        [devices addObject:[NSNumber numberWithInt:self.monalSignalStore.deviceid]];
 
         XMPPIQ* signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
         [signalDevice publishDevices:devices];
@@ -376,16 +366,15 @@ static const size_t MAX_OMEMO_KEYS = 120;
         return NSLocalizedString(@"Error decrypting message", @"");
     }
 
-    __block NSDictionary* messageKey;
-    [messageNode.signalKeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSDictionary* currentKey = (NSDictionary *) obj;
+    NSDictionary* messageKey;
+    for(NSDictionary* currentKey in messageNode.signalKeys) {
         NSString* rid = [currentKey objectForKey:@"rid"];
         if(rid.intValue == self.monalSignalStore.deviceid)
         {
             messageKey = currentKey;
-            *stop = YES;
+            break;
         }
-    }];
+    };
     if(!messageKey)
     {
         DDLogError(@"Message was not encrypted for this device: %d", self.monalSignalStore.deviceid);
@@ -418,7 +407,6 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
         if(messagetype == SignalCiphertextTypePreKeyMessage)
         {
-
             [self generateNewKeysIfNeeded];
             // TODO: remove key with rid from our bundle
             // TODO: repulish own keys

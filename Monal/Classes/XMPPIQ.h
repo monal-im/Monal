@@ -135,22 +135,22 @@ removes a contact from the roster
 
 #pragma mark Signal
 
--(void) subscribeDevices:(NSString*) jid;
+-(void) subscribeDevices:(NSString*  _Nonnull) jid;
 
 /**
  publishes a device.
  */
--(void) publishDevices:(NSArray*) devices;
+-(void) publishDevices:(NSSet<NSNumber*>* _Nonnull) devices;
 
 /**
  publishes signal keys and prekeys
  */
--(void) publishKeys:(NSDictionary *) keys andPreKeys:(NSArray *) prekeys withDeviceId:(NSString*) deviceid;
+-(void) publishKeys:(NSDictionary *) keys andPreKeys:(NSArray *) prekeys withDeviceId:(NSString* _Nonnull) deviceid;
 
 
 #pragma mark - pubsub
 
--(void) requestBundles:(NSString*) deviceid;
+-(void) requestBundles:(NSString* _Nonnull) deviceid;
 -(void) requestDevices;
 
 

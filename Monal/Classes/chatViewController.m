@@ -448,12 +448,11 @@ enum msgSentState {
 
 #ifndef DISABLE_OMEMO
     // load omemo devices from contact if we have 0 in our store
-    if(![self.xmppAccount.omemo knownDevicesForAddressNameExist:self.contact.contactJid])
+    // FIXME: OMEMO true
+    if(![self.xmppAccount.omemo knownDevicesForAddressNameExist:self.contact.contactJid] || YES)
     {
         [self.xmppAccount.omemo queryOMEMODevicesFrom:self.contact.contactJid];
         [self.xmppAccount.omemo subscribeOMEMODevicesFrom:self.contact.contactJid];
-        [self.xmppAccount.omemo subscribeOMEMODevicesFrom:self.jid];
-        // FIXME: remove next line after pub sub
         [self.xmppAccount.omemo queryOMEMODevicesFrom:self.jid];
         [self.xmppAccount.omemo sendOMEMOBundle];
     }

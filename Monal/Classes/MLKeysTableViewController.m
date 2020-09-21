@@ -143,7 +143,7 @@ enum MLKeysTableViewControllerSections {
             NSNumber* device = [self.devices objectAtIndex:indexPath.row];
             [self.account.omemo deleteDeviceForSource:self.contact.contactJid andRid:device.intValue];
             // Send own updated omemo devices
-            [self.account.omemo sendOMEMODevice];
+            [self.account.omemo sendOMEMODeviceWithForce:YES];
 
             // delete device from tableView
             [self.devices removeObjectAtIndex:indexPath.row];

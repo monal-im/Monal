@@ -13,7 +13,7 @@
 @property (nonatomic, assign) u_int32_t deviceid;
 @property (nonatomic, strong) SignalIdentityKeyPair *identityKeyPair;
 @property (nonatomic, strong) SignalSignedPreKey *signedPreKey;
-@property (nonatomic, strong) NSArray *preKeys;
+@property (nonatomic, strong) NSArray<SignalPreKey*>* preKeys;
 
 -(id) initWithAccountId:(NSString *) accountId;
 -(void) saveValues;
@@ -27,4 +27,9 @@
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 -(void) deleteDeviceforAddress:(SignalAddress*)address;
 -(void) deletePreKeyWithRid:(NSNumber*) rid;
+
+-(int) getHighestPreyKeyId;
+-(int) getPreKeyCount;
+
+
 @end

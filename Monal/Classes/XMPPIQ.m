@@ -573,31 +573,30 @@ NSString *const kiqErrorType = @"error";
 }
 
 
--(void) publishDevices:(NSArray*) devices
+-(void) publishDevices:(NSSet<NSNumber*>*) devices
 {
-    MLXMLNode* pubsubNode =[[MLXMLNode alloc] init];
-    pubsubNode.element=@"pubsub";
+    MLXMLNode* pubsubNode = [[MLXMLNode alloc] init];
+    pubsubNode.element = @"pubsub";
     [pubsubNode.attributes setObject:@"http://jabber.org/protocol/pubsub" forKey:kXMLNS];
     
-    MLXMLNode* publish =[[MLXMLNode alloc] init];
-    publish.element=@"publish";
+    MLXMLNode* publish = [[MLXMLNode alloc] init];
+    publish.element = @"publish";
     [publish.attributes setObject:@"eu.siacs.conversations.axolotl.devicelist" forKey:@"node"];
     
     MLXMLNode* itemNode =[[MLXMLNode alloc] initWithElement:@"item"];
     [itemNode.attributes setObject:@"current" forKey:kId];
     
-    MLXMLNode* listNode =[[MLXMLNode alloc] init];
+    MLXMLNode* listNode = [[MLXMLNode alloc] init];
     listNode.element=@"list";
     [listNode.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:kXMLNS];
     
-    [devices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSString *deviceid= (NSString *)obj;
-        MLXMLNode* device =[[MLXMLNode alloc] init];
-        device.element=@"device";
+    for(NSNumber* deviceNum in devices) {
+        NSString* deviceid= [deviceNum stringValue];
+        MLXMLNode* device = [[MLXMLNode alloc] init];
+        device.element = @"device";
         [device.attributes setObject:deviceid forKey:kId];
         [listNode.children addObject:device];
-    }];
-  
+    }
     [itemNode.children addObject:listNode];
     
     [publish.children addObject:itemNode];
@@ -610,52 +609,49 @@ NSString *const kiqErrorType = @"error";
 
 -(void) publishKeys:(NSDictionary *) keys andPreKeys:(NSArray *) prekeys withDeviceId:(NSString*) deviceid
 {
-    MLXMLNode* pubsubNode =[[MLXMLNode alloc] init];
-    pubsubNode.element=@"pubsub";
+    MLXMLNode* pubsubNode = [[MLXMLNode alloc] init];
+    pubsubNode.element = @"pubsub";
     [pubsubNode.attributes setObject:@"http://jabber.org/protocol/pubsub" forKey:kXMLNS];
     
-    MLXMLNode* publish =[[MLXMLNode alloc] init];
-    publish.element=@"publish";
+    MLXMLNode* publish = [[MLXMLNode alloc] init];
+    publish.element = @"publish";
     [publish.attributes setObject:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%@", deviceid] forKey:@"node"];
     
-    MLXMLNode* itemNode =[[MLXMLNode alloc] init];
-    itemNode.element=@"item";
+    MLXMLNode* itemNode = [[MLXMLNode alloc] init];
+    itemNode.element = @"item";
     [itemNode.attributes setObject:@"current" forKey:kId];
     
-    MLXMLNode* bundle =[[MLXMLNode alloc] init];
-    bundle.element=@"bundle";
+    MLXMLNode* bundle = [[MLXMLNode alloc] init];
+    bundle.element = @"bundle";
     [bundle.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:kXMLNS];
     
-    MLXMLNode* signedPreKeyPublic =[[MLXMLNode alloc] init];
-    signedPreKeyPublic.element=@"signedPreKeyPublic";
+    MLXMLNode* signedPreKeyPublic = [[MLXMLNode alloc] init];
+    signedPreKeyPublic.element = @"signedPreKeyPublic";
     [signedPreKeyPublic.attributes setObject:[keys objectForKey:@"signedPreKeyId"] forKey:@"signedPreKeyId"];
     signedPreKeyPublic.data = [HelperTools encodeBase64WithData: [keys objectForKey:@"signedPreKeyPublic"]];
     [bundle.children addObject:signedPreKeyPublic];
     
     
-    MLXMLNode* signedPreKeySignature =[[MLXMLNode alloc] init];
-    signedPreKeySignature.element=@"signedPreKeySignature";
+    MLXMLNode* signedPreKeySignature = [[MLXMLNode alloc] init];
+    signedPreKeySignature.element = @"signedPreKeySignature";
     signedPreKeySignature.data = [HelperTools encodeBase64WithData:[keys objectForKey:@"signedPreKeySignature"]];
     [bundle.children addObject:signedPreKeySignature];
     
-    MLXMLNode* identityKey =[[MLXMLNode alloc] init];
-    identityKey.element=@"identityKey";
+    MLXMLNode* identityKey = [[MLXMLNode alloc] init];
+    identityKey.element = @"identityKey";
     identityKey.data = [HelperTools encodeBase64WithData:[keys objectForKey:@"identityKey"]];
     [bundle.children addObject:identityKey];
     
-    MLXMLNode* prekeyNode =[[MLXMLNode alloc] init];
-    prekeyNode.element=@"prekeys";
+    MLXMLNode* prekeyNode = [[MLXMLNode alloc] init];
+    prekeyNode.element = @"prekeys";
 
-    [prekeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        SignalPreKey *prekey=(SignalPreKey *) obj;
-        
-        MLXMLNode* preKeyPublic =[[MLXMLNode alloc] init];
-        preKeyPublic.element=@"preKeyPublic";
+    for(SignalPreKey* prekey in prekeys) {
+        MLXMLNode* preKeyPublic = [[MLXMLNode alloc] init];
+        preKeyPublic.element = @"preKeyPublic";
         [preKeyPublic.attributes setObject:[NSString stringWithFormat:@"%d", prekey.preKeyId] forKey:@"preKeyId"];
         preKeyPublic.data = [HelperTools encodeBase64WithData:prekey.keyPair.publicKey];
         [prekeyNode.children addObject:preKeyPublic];
-        
-    }];
+    };
     
     [bundle.children addObject:prekeyNode];
     [itemNode.children addObject:bundle];

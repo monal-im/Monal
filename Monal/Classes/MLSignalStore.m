@@ -90,6 +90,23 @@
     return array; 
 }
 
+-(int) getHighestPreyKeyId
+{
+    NSNumber* highestId = (NSNumber*)[self.sqliteDatabase executeScalar:@"select prekeyid from signalPreKey where account_id=? ORDER BY prekeyid DESC LIMIT 1" andArguments:@[self.accountId]];
+
+    if(!highestId) {
+        return 0; // Default value -> first preKeyId will be 1
+    } else {
+        return highestId.intValue;
+    }
+}
+
+-(int) getPreKeyCount
+{
+    NSNumber* count = (NSNumber*)[self.sqliteDatabase executeScalar:@"select count(prekeyid) from signalPreKey where account_id=?" andArguments:@[self.accountId]];
+    return count.intValue;
+}
+
 -(void) saveValues
 {
     [self storeSignedPreKey:self.signedPreKey.serializedData signedPreKeyId:1];
@@ -99,7 +116,6 @@
     {
         [self storePreKey:key.serializedData preKeyId:key.preKeyId];
     }
-    
 }
 
 /**
@@ -208,7 +224,7 @@
  */
 - (nullable NSData*) loadPreKeyWithId:(uint32_t)preKeyId;
 {
-    NSData *preKeyData= (NSData *)[self.sqliteDatabase executeScalar:@"select prekey from signalPreKey where account_id=? and prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
+    NSData* preKeyData = (NSData *)[self.sqliteDatabase executeScalar:@"select prekey from signalPreKey where account_id=? and prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
     return preKeyData;
 }
 
@@ -218,7 +234,12 @@
  */
 - (BOOL) storePreKey:(NSData*)preKey preKeyId:(uint32_t)preKeyId
 {
-    BOOL success= [self.sqliteDatabase executeNonQuery:@"insert into signalPreKey (account_id, prekeyid, preKey) values (?,?,?)" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId], preKey]];
+    // Only store new preKeys
+    NSNumber* preKeyCnt = (NSNumber*)[self.sqliteDatabase executeScalar:@"SELECT count(*) FROM signalPreKey WHERE account_id=? AND prekeyid=? AND preKey=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId], preKey]];
+    if(preKeyCnt.intValue > 0)
+        return YES;
+
+    BOOL success = [self.sqliteDatabase executeNonQuery:@"insert into signalPreKey (account_id, prekeyid, preKey) values (?,?,?)" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId], preKey]];
      return success;
 }
 

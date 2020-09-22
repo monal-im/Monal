@@ -1488,8 +1488,10 @@ static NSDateFormatter* dbFormatter;
             if (completion) {
                 completion(result, messageType);
             }
+            return;
         }
     }
+    [self.db endWriteTransaction];
 }
 
 //count unread

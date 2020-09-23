@@ -19,7 +19,7 @@
 +(MLEncryptedPayload*) encrypt:(NSData*) body keySize:(int) keySize
 {
     uint8_t randomBytes[keySize];
-    if(SecRandomCopyBytes(kSecRandomDefault, keySize, randomBytes)!=0)
+    if(SecRandomCopyBytes(kSecRandomDefault, keySize, randomBytes) != 0)
         return nil;
     NSData* gcmKey = [[NSData alloc] initWithBytes:randomBytes length:keySize];
     return [self encrypt:body withKey:gcmKey];
@@ -29,7 +29,7 @@
 {
     if(@available(iOS 13.0, *))
     {
-        MLCrypto *crypto = [[MLCrypto alloc] init];
+        MLCrypto* crypto = [[MLCrypto alloc] init];
         EncryptedPayload* payload = [crypto encryptGCMWithKey:gcmKey decryptedContent:body];
         NSMutableData* combinedKey = [NSMutableData dataWithData:gcmKey];
         [combinedKey appendData:payload.tag];
@@ -43,10 +43,7 @@
         unsigned char outbuf[body.length];
         unsigned char tag[16];
         
-        //genreate iv
-        unsigned char iv[12];
-        RAND_bytes(iv, sizeof(iv));
-        NSData* gcmiv = [[NSData alloc] initWithBytes:iv length:12];
+        NSData* gcmiv = [self genIV];
         
         NSMutableData *encryptedMessage;
         
@@ -84,6 +81,20 @@
 #else
         return nil;
 #endif
+    }
+}
+
++(NSData*) genIV
+{
+    if(@available(iOS 13.0, *)) {
+        MLCrypto* crypto = [[MLCrypto alloc] init];
+        return [crypto genIV];
+    } else {
+        //generate iv
+        unsigned char iv[12];
+        RAND_bytes(iv, sizeof(iv));
+        NSData* gcmiv = [[NSData alloc] initWithBytes:iv length:12];
+        return gcmiv;
     }
 }
 

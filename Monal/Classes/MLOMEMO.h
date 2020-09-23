@@ -28,7 +28,6 @@ NS_ASSUME_NONNULL_BEGIN
  * handle omemo iq's
  */
 -(void) sendOMEMOBundle;
--(void) subscribeOMEMODevicesFrom:(NSString *) jid;
 -(void) queryOMEMODevicesFrom:(NSString *) jid;
 -(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid;
 -(void) sendOMEMODeviceWithForce:(BOOL) force;

@@ -185,7 +185,7 @@ static NSMutableDictionary* _typingNotifications;
     }
 
     if([messageNode check:@"/{jabber:client}message<type=headline>/{http://jabber.org/protocol/pubsub#event}event/items<node=eu\\.siacs\\.conversations\\.axolotl\\.devicelist>/item/{eu.siacs.conversations.axolotl}list"]) {
-        NSArray<NSNumber*>* deviceIds = [messageNode find:@"/{jabber:client}message<type=headline>/{http://jabber.org/protocol/pubsub#event}event/items<node=eu\\.siacs\\.conversations\\.axolotl\\.devicelist>/item/{eu.siacs.conversations.axolotl}list/device@id|int"];
+        NSArray<NSNumber*>* deviceIds = [messageNode find:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event/items<node=eu\\.siacs\\.conversations\\.axolotl\\.devicelist>/item/{eu.siacs.conversations.axolotl}list/device@id|int"];
         NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
         [account.omemo processOMEMODevices:deviceSet from:messageNode.fromUser];
     }

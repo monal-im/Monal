@@ -43,47 +43,55 @@
     
     self.accountId = accountId;
     NSArray* data = [self.sqliteDatabase executeReader:@"select identityPrivateKey, deviceid, identityPublicKey from signalIdentity where account_id=?" andArguments:@[accountId]];
-    NSDictionary *row = [data firstObject];
+    NSDictionary* row = [data firstObject];
 
     if(row)
     {
-        self.deviceid=[(NSNumber *)[row objectForKey:@"deviceid"] unsignedIntValue];
+        self.deviceid = [(NSNumber *)[row objectForKey:@"deviceid"] unsignedIntValue];
         
-        NSData *idKeyPub = [row objectForKey:@"identityPublicKey"];
-        NSData *idKeyPrivate = [row objectForKey:@"identityPrivateKey"];
+        NSData* idKeyPub = [row objectForKey:@"identityPublicKey"];
+        NSData* idKeyPrivate = [row objectForKey:@"identityPrivateKey"];
         
-        NSError *error;
-        self.identityKeyPair=[[SignalIdentityKeyPair alloc] initWithPublicKey:idKeyPub privateKey:idKeyPrivate error:nil];
+        NSError* error;
+        self.identityKeyPair = [[SignalIdentityKeyPair alloc] initWithPublicKey:idKeyPub privateKey:idKeyPrivate error:nil];
         if(error)
         {
             NSLog(@"prekey error %@", error);
             return self;
         }
         
-        self.signedPreKey=[[SignalSignedPreKey alloc] initWithSerializedData:[self loadSignedPreKeyWithId:1] error:&error];
+        self.signedPreKey = [[SignalSignedPreKey alloc] initWithSerializedData:[self loadSignedPreKeyWithId:1] error:&error];
         
         if(error)
         {
             NSLog(@"signed prekey error %@", error);
             return self;
         }
-        
-        NSMutableArray *array = [self readPreKeys];
-    
-        self.preKeys=array;
+        // remove old keys that should no longer be available
+        [self cleanupKeys];
+        NSMutableArray* array = [self readPreKeys];
+        self.preKeys = array;
     }
 
     return self; 
 }
 
+-(void) cleanupKeys
+{
+    // remove old keys that have been remove a long time ago from pubsub
+    [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalPreKey WHERE account_id=? AND pubSubRemovalTimestamp IS NOT NULL AND pubSubRemovalTimestamp <= date('now', '-14 day')" andArguments:@[self.accountId]];
+    // mark old unused keys to be removed from pubsub
+    [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP WHERE account_id=? AND keyUsed=0 AND pubSubRemovalTimestamp IS  NULL AND creationTimestamp<= date('now','-14 day')" andArguments:@[self.accountId]];
+}
+
 -(NSMutableArray *) readPreKeys
 {
-    NSArray *keys= [self.sqliteDatabase executeReader:@"select prekeyid, preKey from signalPreKey where account_id=?" andArguments:@[self.accountId]];
-    NSMutableArray *array = [[NSMutableArray alloc] initWithCapacity:keys.count];
+    NSArray* keys = [self.sqliteDatabase executeReader:@"SELECT prekeyid, preKey FROM signalPreKey WHERE account_id=? AND keyUsed=0" andArguments:@[self.accountId]];
+    NSMutableArray* array = [[NSMutableArray alloc] initWithCapacity:keys.count];
     
-    for (NSDictionary *row in keys)
+    for (NSDictionary* row in keys)
     {
-        SignalPreKey *key = [[SignalPreKey alloc] initWithSerializedData:[row objectForKey:@"preKey"] error:nil];
+        SignalPreKey* key = [[SignalPreKey alloc] initWithSerializedData:[row objectForKey:@"preKey"] error:nil];
         [array addObject:key];
     }
     
@@ -92,7 +100,7 @@
 
 -(int) getHighestPreyKeyId
 {
-    NSNumber* highestId = (NSNumber*)[self.sqliteDatabase executeScalar:@"select prekeyid from signalPreKey where account_id=? ORDER BY prekeyid DESC LIMIT 1" andArguments:@[self.accountId]];
+    NSNumber* highestId = (NSNumber*)[self.sqliteDatabase executeScalar:@"SELECT prekeyid FROM signalPreKey WHERE account_id=? ORDER BY prekeyid DESC LIMIT 1" andArguments:@[self.accountId]];
 
     if(!highestId) {
         return 0; // Default value -> first preKeyId will be 1
@@ -103,7 +111,7 @@
 
 -(int) getPreKeyCount
 {
-    NSNumber* count = (NSNumber*)[self.sqliteDatabase executeScalar:@"select count(prekeyid) from signalPreKey where account_id=?" andArguments:@[self.accountId]];
+    NSNumber* count = (NSNumber*)[self.sqliteDatabase executeScalar:@"SELECT count(prekeyid) FROM signalPreKey WHERE account_id=? AND pubSubRemovalTimestamp IS NULL AND keyUsed=0" andArguments:@[self.accountId]];
     return count.intValue;
 }
 
@@ -224,7 +232,7 @@
  */
 - (nullable NSData*) loadPreKeyWithId:(uint32_t)preKeyId;
 {
-    NSData* preKeyData = (NSData *)[self.sqliteDatabase executeScalar:@"select prekey from signalPreKey where account_id=? and prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
+    NSData* preKeyData = (NSData *)[self.sqliteDatabase executeScalar:@"SELECT prekey FROM signalPreKey WHERE account_id=? AND prekeyid=? AND keyUsed=0" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
     return preKeyData;
 }
 
@@ -239,7 +247,7 @@
     if(preKeyCnt.intValue > 0)
         return YES;
 
-    BOOL success = [self.sqliteDatabase executeNonQuery:@"insert into signalPreKey (account_id, prekeyid, preKey) values (?,?,?)" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId], preKey]];
+    BOOL success = [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalPreKey (account_id, prekeyid, preKey) VALUES (?,?,?)" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId], preKey]];
      return success;
 }
 
@@ -258,7 +266,8 @@
  */
 - (BOOL) deletePreKeyWithId:(uint32_t)preKeyId
 {
-    return [self.sqliteDatabase executeNonQuery:@"delete from signalPreKey where account_id=? and prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
+    // only mark the key for deletion -> key should be removed from pubSub
+    return [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP, keyUsed=1 WHERE account_id=? AND prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
 }
 
 /**

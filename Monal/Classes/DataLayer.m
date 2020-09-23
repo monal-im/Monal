@@ -2052,12 +2052,22 @@ static NSDateFormatter* dbFormatter;
     
     [self updateDBTo:4.87 withBlock:^{
         //populate new stanzaid field in account table from message_history table
-        NSString* stanzaId = [self.db executeScalar:@"SELECT stanzaid FROM message_history WHERE stanzaid!='' ORDER BY message_history_id DESC LIMIT 1;"];
+        NSString* stanzaId = (NSString*)[self.db executeScalar:@"SELECT stanzaid FROM message_history WHERE stanzaid!='' ORDER BY message_history_id DESC LIMIT 1;"];
         DDLogVerbose(@"Populating lastStanzaId with id %@ from history table", stanzaId);
         if(stanzaId && [stanzaId length])
             [self.db executeNonQuery:@"UPDATE account SET lastStanzaId=?;" andArguments:@[stanzaId]];
         //remove all old and most probably *wrong* stanzaids from history table
         [self.db executeNonQuery:@"UPDATE message_history SET stanzaid='';"];
+    }];
+
+    [self updateDBTo:4.9 withBlock:^{
+        // add timestamps to omemo prekeys
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+        [self.db executeNonQuery:@"ALTER TABLE signalPreKey RENAME TO _signalPreKeyTMP;"];
+        [self.db executeNonQuery:@"CREATE TABLE 'signalPreKey' ('account_id' int NOT NULL, 'prekeyid' int NOT NULL, 'preKey' BLOB, 'creationTimestamp' INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP, 'pubSubRemovalTimestamp' INTEGER DEFAULT NULL, 'keyUsed' INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (account_id, prekeyid, preKey));"];
+        [self.db executeNonQuery:@"INSERT INTO signalPreKey (account_id, prekeyid, preKey) SELECT account_id, prekeyid, preKey FROM _signalPreKeyTMP;"];
+        [self.db executeNonQuery:@"DROP TABLE _signalPreKeyTMP;"];
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
     }];
     
     [self.db endWriteTransaction];

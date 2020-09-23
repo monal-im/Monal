@@ -27,6 +27,9 @@
 @property (nonatomic, strong) MLXMPPConnection* _connection;
 
 @property (nonatomic, strong) xmpp* xmppConnection;
+
+// jid -> @[deviceID1, deviceID2]
+@property (nonatomic, strong) NSMutableDictionary* devicesWithBrokenSession;
 @end
 
 static const size_t MIN_OMEMO_KEYS = 25;
@@ -43,6 +46,8 @@ static const size_t MAX_OMEMO_KEYS = 120;
     self._accountNo = accountNo;
     self._connection = connectionProps;
     self.xmppConnection = xmppConnection;
+
+    self.devicesWithBrokenSession = [[NSMutableDictionary alloc] init];
 
     [self setupSignal];
 
@@ -90,15 +95,6 @@ static const size_t MAX_OMEMO_KEYS = 120;
     [signalKeys.attributes setValue:[NSString stringWithFormat:@"%@/%@", self._senderJid, self._accountRessource] forKey:@"from"];
 
     if(self.xmppConnection) [self.xmppConnection send:signalKeys];
-}
-
--(void) subscribeOMEMODevicesFrom:(NSString *) jid
-{
-    if(!self._connection.supportsPubSub || (self.xmppConnection.accountState < kStateBound && ![self.xmppConnection isHibernated])) return;
-    XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-    [query setiqTo:self._senderJid];
-    [query subscribeDevices:jid];
-    if(self.xmppConnection) [self.xmppConnection send:query];
 }
 
 -(void) queryOMEMODevicesFrom:(NSString *) jid
@@ -162,7 +158,6 @@ static const size_t MAX_OMEMO_KEYS = 120;
                 [self queryOMEMOBundleFrom:source andDevice:[deviceId stringValue]];
             }
         }
-
         // remove devices from our signalStorage when they are no longer published
         for(NSNumber* deviceId in existingDevices) {
             if(![receivedDevices containsObject:deviceId]) {
@@ -170,8 +165,7 @@ static const size_t MAX_OMEMO_KEYS = 120;
                 if(!([source isEqualToString:self._senderJid] && deviceId.intValue == self.monalSignalStore.deviceid))
                     [self deleteDeviceForSource:source andRid:deviceId.intValue];
             }
-        };
-
+        }
         // Send our own device id when it is missing on the server
         if(!source || [source isEqualToString:self._senderJid])
         {
@@ -251,7 +245,7 @@ static const size_t MAX_OMEMO_KEYS = 120;
         if(!rid)
             return;
 
-        NSArray* bundles = [publishElement find:@"{http://jabber.org/protocol/pubsub}item/{eu.siacs.conversations.axolotl}bundle"];
+        NSArray* bundles = [publishElement find:@"item/{eu.siacs.conversations.axolotl}bundle"];
 
         // there should only be one bundle per device
         if([bundles count] != 1) {
@@ -287,7 +281,7 @@ static const size_t MAX_OMEMO_KEYS = 120;
             [dict setObject:[bundle findFirst:query] forKey:@"preKey"];
             [preKeys addObject:dict];
         }
-
+        // save preKeys to local storage
         for(NSDictionary* row in preKeys) {
             NSString* keyid = (NSString *)[row objectForKey:@"preKeyId"];
             NSData* preKeyData = [row objectForKey:@"preKey"];
@@ -306,13 +300,19 @@ static const size_t MAX_OMEMO_KEYS = 120;
                 DDLogError(@"Could not decode base64 prekey %@", row);
             }
         }
+        // Build new session when a device session is marked as broken
+        NSSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:source];
+        if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:[NSNumber numberWithInt:[rid intValue]]]) {
+            DDLogInfo(@"Fixing broken session for %@ deviceID: %@", source, rid);
+            // FIXME: build new session
+            // FIXME: only for trusted devices
+        }
     }
 }
 
 -(void) addEncryptionKeyForAllDevices:(NSArray*) devices encryptForJid:(NSString*) encryptForJid withEncryptedPayload:(MLEncryptedPayload*) encryptedPayload withXMLHeader:(MLXMLNode*) xmlHeader {
     // Encrypt message for all devices known from the recipient
-    [devices enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSNumber* device = (NSNumber *)obj;
+    for(NSNumber* device in devices) {
         SignalAddress* address = [[SignalAddress alloc] initWithName:encryptForJid deviceId:(uint32_t)device.intValue];
 
         NSData* identity = [self.monalSignalStore getIdentityForAddress:address];
@@ -333,7 +333,42 @@ static const size_t MAX_OMEMO_KEYS = 120;
             [keyNode setData:[HelperTools encodeBase64WithData:deviceEncryptedKey.data]];
             [xmlHeader.children addObject:keyNode];
         }
-    }];
+    }
+}
+
+// TODO: sendNewKeyTransport
+-(void) sendNewKeyTransport:(NSString*) contact
+{
+    if(!self._connection.supportsPubSub || (self.xmppConnection.accountState < kStateBound && ![self.xmppConnection isHibernated])) return;
+
+    XMPPMessage* messageNode = [[XMPPMessage alloc] init];
+    [messageNode.attributes setObject:contact forKey:@"to"];
+    [messageNode setXmppId:[[NSUUID UUID] UUIDString]];
+
+    MLXMLNode* encrypted = [[MLXMLNode alloc] initWithElement:@"encrypted"];
+    [encrypted.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:kXMLNS];
+    [messageNode.children addObject:encrypted];
+
+    // Get own device id
+    NSString* deviceid = [NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
+    MLXMLNode* header = [[MLXMLNode alloc] initWithElement:@"header"];
+    [header.attributes setObject:deviceid forKey:@"sid"];
+    [encrypted.children addObject:header];
+
+    MLXMLNode* ivNode = [[MLXMLNode alloc] initWithElement:@"iv"];
+    [ivNode setData:[HelperTools encodeBase64WithData:[AESGcm genIV]]];
+    [header.children addObject:ivNode];
+
+    NSArray* devices = [self.monalSignalStore allDeviceIdsForAddressName:contact];
+    NSArray* myDevices = [self.monalSignalStore allDeviceIdsForAddressName:self._senderJid];
+
+    // FIXME: encrypt for devices
+    // [self addEncryptionKeyForAllDevices:devices encryptForJid:contact withEncryptedPayload:encryptedPayload withXMLHeader:header];
+
+    // [self addEncryptionKeyForAllDevices:myDevices encryptForJid:self._senderJid withEncryptedPayload:encryptedPayload withXMLHeader:header];
+
+    // Send
+    if(self.xmppConnection) [self.xmppConnection send:messageNode];
 }
 
 -(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString*) message toContact:(NSString*) toContact
@@ -361,12 +396,12 @@ static const size_t MAX_OMEMO_KEYS = 120;
         [encrypted.children addObject:payload];
 
         // Get own device id
-        NSString* deviceid = [NSString stringWithFormat:@"%d",self.monalSignalStore.deviceid];
+        NSString* deviceid = [NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
         MLXMLNode* header = [[MLXMLNode alloc] initWithElement:@"header"];
         [header.attributes setObject:deviceid forKey:@"sid"];
         [encrypted.children addObject:header];
 
-        MLXMLNode* ivNode =[[MLXMLNode alloc] initWithElement:@"iv"];
+        MLXMLNode* ivNode = [[MLXMLNode alloc] initWithElement:@"iv"];
         [ivNode setData:[HelperTools encodeBase64WithData:encryptedPayload.iv]];
         [header.children addObject:ivNode];
 
@@ -374,6 +409,28 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
         [self addEncryptionKeyForAllDevices:myDevices encryptForJid:self._senderJid withEncryptedPayload:encryptedPayload withXMLHeader:header];
     }
+}
+
+-(void) needNewSessionForContact:(NSString*) contact andDevice:(NSNumber*) deviceId
+{
+    // get set of broken device sessions for the given contact
+    NSMutableSet<NSNumber*>* devicesWithInvalSession = [self.devicesWithBrokenSession objectForKey:contact];
+    if(!devicesWithInvalSession) {
+        // first broken session for contact -> create new set
+        devicesWithInvalSession = [[NSMutableSet<NSNumber*> alloc] init];
+    }
+    // add device to broken session contact set
+    [devicesWithInvalSession addObject:deviceId];
+    [self.devicesWithBrokenSession setObject:devicesWithInvalSession forKey:contact];
+
+    // delete broken session from our storage
+    SignalAddress* address = [[SignalAddress alloc] initWithName:contact deviceId:(uint32_t)deviceId.intValue];
+    [self.monalSignalStore deleteSessionRecordForAddress:address];
+
+    // request device bundle again -> check for new preKeys
+    // use received preKeys to build new session
+    [self queryOMEMOBundleFrom:contact andDevice:deviceId.stringValue];
+    // rebuild session when preKeys of the requested bundle arrived
 }
 
 -(NSString *) decryptMessage:(XMPPMessage *) messageNode
@@ -403,6 +460,7 @@ static const size_t MAX_OMEMO_KEYS = 120;
     {
         DDLogError(@"Message was not encrypted for this device: %d", self.monalSignalStore.deviceid);
         [self->signalLock unlock];
+        [self needNewSessionForContact:messageNode.fromUser andDevice:sid];
         return [NSString stringWithFormat:NSLocalizedString(@"Message was not encrypted for this device. Please make sure the sender trusts deviceid %d and that they have you as a contact.", @""), self.monalSignalStore.deviceid];
     } else {
         SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self._signalContext];
@@ -424,6 +482,7 @@ static const size_t MAX_OMEMO_KEYS = 120;
         if(error) {
             DDLogError(@"Could not decrypt to obtain key: %@", error);
             [self->signalLock unlock];
+            [self needNewSessionForContact:messageNode.fromUser andDevice:sid];
             return [NSString stringWithFormat:@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person. (%@)", error];
         }
         NSData* key;
@@ -431,14 +490,16 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
         if(messagetype == SignalCiphertextTypePreKeyMessage)
         {
+            // check if we need to generate new preKeys
             [self generateNewKeysIfNeeded];
-            // TODO: remove key with rid from our bundle
-            // TODO: repulish own keys
+            // send new bundle without the used peyKey
+            [self sendOMEMOBundle];
         }
 
         if(!decryptedKey){
             DDLogError(@"Could not decrypt to obtain key.");
             [self->signalLock unlock];
+            [self needNewSessionForContact:messageNode.fromUser andDevice:sid];
             return NSLocalizedString(@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person.", @"");
         }
         else  {

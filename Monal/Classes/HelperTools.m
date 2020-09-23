@@ -50,6 +50,13 @@ void logException(NSException* exception)
 #endif
 }
 
++(BOOL) xml2bool:(NSString*) xml
+{
+    if(xml && ([xml isEqualToString:@"1"] || [xml isEqualToString:@"true"]))
+        return YES;
+    return NO;
+}
+
 +(NSString*) sha256HmacForKey: (NSString*) key andData: (NSString*) data
 {
 	const char* cKey  = [key cStringUsingEncoding: NSUTF8StringEncoding];
@@ -120,12 +127,13 @@ void logException(NSException* exception)
 
 +(DDFileLogger*) configureLogging
 {
-    //console logger
-    [[DDOSLogger sharedInstance] setLogFormatter:[[MLLogFormatter alloc] initForConsole:YES]];
-    [DDLog addLogger:[DDOSLogger sharedInstance]];
+    //console logger (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
+    [[DDTTYLogger sharedInstance] setLogFormatter:[[MLLogFormatter alloc] init]];
+    [[DDTTYLogger sharedInstance] setColorsEnabled:YES];
+    [DDLog addLogger:[DDTTYLogger sharedInstance]];
     
     //create log formatter for file and network logging
-    MLLogFormatter* formatter = [[MLLogFormatter alloc] initForConsole:NO];
+    MLLogFormatter* formatter = [[MLLogFormatter alloc] init];
     
     //file logger
     NSFileManager* fileManager = [NSFileManager defaultManager];

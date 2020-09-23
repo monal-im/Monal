@@ -42,18 +42,10 @@ static NSString* _loglevel_name(NSUInteger flag) {
 }
 
 @interface MLLogFormatter ()
-@property (nonatomic) BOOL isConsole;
 @end
 
 
 @implementation MLLogFormatter
-
--(id) initForConsole:(BOOL) isConsole
-{
-    self = [super init];
-    self.isConsole = isConsole;
-    return self;
-}
 
 -(NSString*) formatLogMessage:(DDLogMessage*) logMessage
 {
@@ -64,7 +56,7 @@ static NSString* _loglevel_name(NSUInteger flag) {
     NSString* timestamp = [self stringFromDate:(logMessage.timestamp)];
     NSString* queueThreadLabel = [self queueThreadLabelForLogMessage:logMessage];
 
-    //remove already appended " (QOS: BLABLA)" because we want to append the QOS part ourselves
+    //remove already appended " (QOS: XXX)" because we want to append the QOS part ourselves
     NSRange range = [queueThreadLabel rangeOfString:@" (QOS: "];
     if(range.length > 0)
         queueThreadLabel = [queueThreadLabel substringWithRange:NSMakeRange(0, range.location)];
@@ -73,10 +65,7 @@ static NSString* _loglevel_name(NSUInteger flag) {
     if(![queueThreadLabel isEqualToString:logMessage.threadID])
         queueThreadLabel = [NSString stringWithFormat:@"%@:%@", logMessage.threadID, queueThreadLabel];
 
-    if(self.isConsole)
-        return [NSString stringWithFormat:@"[%@] %@ [%@ (QOS:%@)] %@ at %@:%lu: %@", _loglevel_name(logMessage.flag), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage.qos), logMessage.function, file, (unsigned long)logMessage.line, logMessage.message];
-    else
-        return [NSString stringWithFormat:@"%@ [%@] %@ [%@ (QOS:%@)] %@ at %@:%lu: %@", timestamp, _loglevel_name(logMessage.flag), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage.qos), logMessage.function, file, (unsigned long)logMessage.line, logMessage.message];
+    return [NSString stringWithFormat:@"%@ [%@] %@ [%@ (QOS:%@)] %@ at %@:%lu: %@", timestamp, _loglevel_name(logMessage.flag), [HelperTools isAppExtension] ? @"*appex*" : @"mainapp", queueThreadLabel, _qos_name(logMessage.qos), logMessage.function, file, (unsigned long)logMessage.line, logMessage.message];
 }
 
 @end

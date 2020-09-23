@@ -16,6 +16,7 @@ void logException(NSException* exception);
 @interface HelperTools : NSObject
 
 +(void) configureFileProtectionFor:(NSString*) file;
++(BOOL) xml2bool:(NSString*) xml;
 +(NSString*) sha256HmacForKey: (NSString*) key andData: (NSString*) data;
 +(BOOL) isInBackground;
 +(void) dispatchSyncReentrant:(monal_void_block_t) block onQueue:(dispatch_queue_t) queue;

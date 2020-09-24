@@ -201,9 +201,7 @@ enum msgSentState {
     unichar arrowSymbol = 0x2193;
     
     self.lastMsgButton = [[UIButton alloc] init];
-    float buttonXPos = [UIScreen mainScreen].bounds.size.width - lastMsgButtonSize - 5;
-    float buttonYPos = self.inputContainerView.frame.origin.y - lastMsgButtonSize - 5;
-    self.lastMsgButton.frame = CGRectMake(buttonXPos, buttonYPos , lastMsgButtonSize, lastMsgButtonSize);
+    [self lastMsgButtonPositionConfigWithSize:self.inputContainerView.bounds.size];
     self.lastMsgButton.layer.cornerRadius = lastMsgButtonSize/2;
     self.lastMsgButton.layer.backgroundColor = [UIColor whiteColor].CGColor;
     [self.lastMsgButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
@@ -215,6 +213,13 @@ enum msgSentState {
     [self.inputContainerView addSubview:self.lastMsgButton];
     MLChatInputContainer* inputView = (MLChatInputContainer*) self.inputContainerView;
     inputView.chatInputActionDelegate = self;
+}
+
+-(void) lastMsgButtonPositionConfigWithSize:(CGSize)size
+{
+    float buttonXPos = size.width - lastMsgButtonSize - 5;
+    float buttonYPos = self.inputContainerView.frame.origin.y - lastMsgButtonSize - 5;
+    self.lastMsgButton.frame = CGRectMake(buttonXPos, buttonYPos , lastMsgButtonSize, lastMsgButtonSize);
 }
 #pragma mark - ChatInputActionDelegage
 -(void)doScrollDownAction
@@ -522,6 +527,11 @@ enum msgSentState {
 -(void) viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     [self.chatInput resignFirstResponder];
+    
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+    } completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        [self lastMsgButtonPositionConfigWithSize:[UIApplication sharedApplication].keyWindow.bounds.size];
+    }];
 }
 
 

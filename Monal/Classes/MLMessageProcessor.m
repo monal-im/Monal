@@ -33,7 +33,8 @@ static NSMutableDictionary* _typingNotifications;
     _typingNotifications = [[NSMutableDictionary alloc] init];
 }
 
--(MLMessageProcessor *) initWithAccount:(xmpp*) account jid:(NSString *) jid connection:(MLXMPPConnection *) connection omemo:(MLOMEMO*) omemo {
+-(MLMessageProcessor*) initWithAccount:(xmpp*) account jid:(NSString*) jid connection:(MLXMPPConnection*) connection omemo:(MLOMEMO*) omemo
+{
     self.account = account;
     self.jid = jid;
     self.connection = connection;
@@ -41,31 +42,41 @@ static NSMutableDictionary* _typingNotifications;
     return self;
 }
 
-
--(void) processMessage:(ParseMessage *) messageNode
+-(void) processMessage:(XMPPMessage*) messageNode andOuterMessage:(XMPPMessage*) outerMessageNode
 {
-    if([messageNode.type isEqualToString:kMessageErrorType])
+    if([messageNode check:@"/<type=error>"])
     {
         DDLogError(@"Error type message received");
         
-        if(!messageNode.idval.length)
+        if(![messageNode check:@"/@id"])
         {
             DDLogError(@"Ignoring error messages having an empty ID");
             return;
         }
         
         //update db
-        [[DataLayer sharedInstance] setMessageId:messageNode.idval errorType:messageNode.errorType ? messageNode.errorType : @""
-                                     errorReason:messageNode.errorReason ? messageNode.errorReason : @""];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageErrorNotice object:nil  userInfo:@{@"MessageID":messageNode.idval,@"errorType":messageNode.errorType?messageNode.errorType:@"",@"errorReason":messageNode.errorReason?messageNode.errorReason:@""
+        [[DataLayer sharedInstance]
+            setMessageId:[messageNode findFirst:@"/@id"]
+            errorType:[messageNode findFirst:@"error@type"] ? [messageNode findFirst:@"error@type"] : @""
+            errorReason:[messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"] ? [messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"] : @""
+        ];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageErrorNotice object:nil userInfo:@{
+            @"MessageID": [messageNode findFirst:@"/@id"],
+            @"errorType": [messageNode findFirst:@"error@type"] ? [messageNode findFirst:@"error@type"] : @"",
+            @"errorReason": [messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"] ? [messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"] : @""
         }];
 
         return;
     }
     
-    if(messageNode.mucInvite)
+    
+    NSString* stanzaid = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];
+    if(!stanzaid)
+        stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
+        
+    if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
     {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalReceivedMucInviteNotice object:nil  userInfo:@{@"from":messageNode.from}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalReceivedMucInviteNotice object:nil userInfo:@{@"from": messageNode.from}];
     }
     NSString* recipient = messageNode.to;
     
@@ -75,19 +86,23 @@ static NSMutableDictionary* _typingNotifications;
     }
     
     NSString* decrypted;
-    if(messageNode.encryptedPayload) {
+    if([messageNode check:@"/{jabber:client}message/{eu.siacs.conversations.axolotl}encrypted/payload"]) {
         decrypted = [self.omemo decryptMessage:messageNode];
     }
     
-    if(messageNode.hasBody || messageNode.subject || decrypted)
+    if([messageNode check:@"body"] || [messageNode check:@"/<type=headline>/subject#"] || decrypted)
     {
         NSString* ownNick;
-     
-        //processed messages already have server name
-        if([messageNode.type isEqualToString:kMessageGroupChatType])
-            ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.from andServer:@"" forAccount:self.account.accountNo];
+        NSString* actualFrom = messageNode.fromUser;
         
-        if (ownNick!=nil && [messageNode.actualFrom isEqualToString:ownNick])
+        //processed messages already have server name
+        if([messageNode check:@"/<type=groupchat>"])
+        {
+            ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.from andServer:@"" forAccount:self.account.accountNo];
+            actualFrom = messageNode.fromResource;
+            messageNode.from = messageNode.fromUser;
+        }
+        if(ownNick && actualFrom && [actualFrom isEqualToString:ownNick])
         {
             DDLogDebug(@"Dropping muc echo");
             return;
@@ -97,8 +112,14 @@ static NSMutableDictionary* _typingNotifications;
             BOOL unread = YES;
             BOOL showAlert = YES;
             
-            //if mam but catchup we do want an alert...
-            if([messageNode.from isEqualToString:self.jid] || (messageNode.mamResult && ![messageNode.mamQueryId hasPrefix:@"MLcatchup:"]))
+            //if incoming or mam catchup we do want an alert, otherwise we don't
+            if(
+                [messageNode.fromUser isEqualToString:self.jid] ||
+                (
+                    [outerMessageNode check:@"{urn:xmpp:mam:2}result"] &&
+                    ![[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLcatchup:"]
+                )
+            )
             {
                 DDLogVerbose(@"Setting showAlert to NO");
                 showAlert = NO;
@@ -107,12 +128,12 @@ static NSMutableDictionary* _typingNotifications;
           
             NSString* messageType = nil;
             BOOL encrypted = NO;
-            NSString* body = messageNode.messageText;
+            NSString* body = [messageNode findFirst:@"body#"];
             
-            if(messageNode.oobURL)
+            if([messageNode check:@"{jabber:x:oob}x/url#"])
             {
                 messageType = kMessageTypeImage;
-                body = messageNode.oobURL;
+                body = [messageNode findFirst:@"{jabber:x:oob}x/url#"];
             }
             
             if(decrypted)
@@ -121,21 +142,21 @@ static NSMutableDictionary* _typingNotifications;
                 encrypted = YES;
             }
             
-            if(!body && messageNode.subject)
+            if(!body && [messageNode check:@"/<type=headline>/subject#"])
             {
-                messageType=kMessageTypeStatus;
+                messageType = kMessageTypeStatus;
                 
                 NSString* currentSubject = [[DataLayer sharedInstance] mucSubjectforAccount:self.account.accountNo andRoom:messageNode.from];
-                if(![messageNode.subject isEqualToString:currentSubject])
+                if(![[messageNode findFirst:@"/<type=headline>/subject#"] isEqualToString:currentSubject])
                 {
-                    [[DataLayer sharedInstance] updateMucSubject:messageNode.subject forAccount:self.account.accountNo andRoom:messageNode.from];
+                    [[DataLayer sharedInstance] updateMucSubject:[messageNode findFirst:@"/<type=headline>/subject#"] forAccount:self.account.accountNo andRoom:messageNode.from];
                     if(self.postPersistAction)
-                        self.postPersistAction(YES, encrypted, showAlert, messageNode.subject, messageType);
+                        self.postPersistAction(messageNode, outerMessageNode, YES, encrypted, showAlert, [messageNode findFirst:@"/<type=headline>/subject#"], messageType, actualFrom);
                 }
                 return;
             }
             
-            NSString *messageId = messageNode.idval;
+            NSString* messageId = [messageNode findFirst:@"/@id"];
             if(!messageId.length)
             {
                 DDLogError(@"Empty ID using random UUID");
@@ -145,94 +166,129 @@ static NSMutableDictionary* _typingNotifications;
             //history messages have to be collected mam-page wise and reordered before inserted into db
             //because mam always sorts the messages in a page by timestamp in ascending order
             //we don't want to call postPersistAction, too, beause we don't want to display push notifications for old messages
-            if(messageNode.mamResult && [messageNode.mamQueryId hasPrefix:@"MLhistory:"])
-                [self.account addMessageToMamPageArray:messageNode withBody:body andEncrypted:encrypted andShowAlert:showAlert andMessageType:messageType];
+            if([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLhistory:"])
+                [self.account addMessageToMamPageArray:messageNode forOuterMessageNode:outerMessageNode withBody:body andEncrypted:encrypted andShowAlert:showAlert andMessageType:messageType];
             else
             {
-                [[DataLayer sharedInstance] addMessageFrom:messageNode.from
+                [[DataLayer sharedInstance] addMessageFrom:messageNode.fromUser
                                                         to:recipient
                                                 forAccount:self.account.accountNo
                                                   withBody:[body copy]
-                                              actuallyfrom:messageNode.actualFrom
+                                              actuallyfrom:actualFrom
                                                       sent:YES
                                                     unread:unread
                                                  messageId:messageId
-                                           serverMessageId:messageNode.stanzaId
+                                           serverMessageId:stanzaid
                                                messageType:messageType
-                                           andOverrideDate:messageNode.delayTimeStamp
+                                           andOverrideDate:[messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"]
                                                  encrypted:encrypted
                                                  backwards:NO
                                             withCompletion:^(BOOL success, NSString* newMessageType) {
                     if(self.postPersistAction) {
-                        self.postPersistAction(success, encrypted, showAlert, body, newMessageType);
+                        self.postPersistAction(messageNode, outerMessageNode, success, encrypted, showAlert, body, newMessageType, actualFrom);
                     }
                 }];
             }
         }
     }
     
+    /*TODO: avatar data must be handled via pubsub
     if(messageNode.avatarData)
     {
         [[MLImageManager sharedInstance] setIconForContact:messageNode.actualFrom andAccount:self.account.accountNo WithData:messageNode.avatarData];
     }
+    */
     
-    if(messageNode.receivedID)
+    if([messageNode check:@"{urn:xmpp:receipts}received@id"])
     {
         //save in DB
-        [[DataLayer sharedInstance] setMessageId:messageNode.receivedID received:YES];
+        [[DataLayer sharedInstance] setMessageId:[messageNode findFirst:@"{urn:xmpp:receipts}received@id"] received:YES];
         //Post notice
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageReceivedNotice object:self userInfo:@{@"MessageID":messageNode.receivedID}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageReceivedNotice object:self userInfo:@{@"MessageID": [messageNode findFirst:@"{urn:xmpp:receipts}received@id"]}];
     }
-    
-    if([messageNode.type isEqualToString:kMessageHeadlineType])
-    {
-        [self processHeadline:messageNode];
+
+    if([messageNode check:@"/{jabber:client}message<type=headline>/{http://jabber.org/protocol/pubsub#event}event/items<node=eu\\.siacs\\.conversations\\.axolotl\\.devicelist>/item/{eu.siacs.conversations.axolotl}list"]) {
+        NSArray<NSNumber*>* deviceIds = [messageNode find:@"/{jabber:client}message<type=headline>/{http://jabber.org/protocol/pubsub#event}event/items<node=eu\\.siacs\\.conversations\\.axolotl\\.devicelist>/item/{eu.siacs.conversations.axolotl}list/device@id|int"];
+        NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
+        [self.omemo processOMEMODevices:deviceSet from:messageNode.fromUser];
     }
-    
+
     //ignore typing notifications when in appex
     if(![HelperTools isAppExtension])
     {
         //only use "is typing" messages when not older than 2 minutes (always allow "not typing" messages)
-        if([[DataLayer sharedInstance] checkCap:@"http://jabber.org/protocol/chatstates" forUser:messageNode.user andAccountNo:self.account.accountNo] &&
-            ((messageNode.composing && (!messageNode.delayTimeStamp || [[NSDate date] timeIntervalSinceDate:messageNode.delayTimeStamp] < 120)) ||
-            messageNode.notComposing)
+        if(
+            [messageNode check:@"{http://jabber.org/protocol/chatstates}*"] &&
+            [[DataLayer sharedInstance] checkCap:@"http://jabber.org/protocol/chatstates" forUser:messageNode.fromUser andAccountNo:self.account.accountNo]
         )
         {
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
-                @"jid": messageNode.user,
-                @"accountNo": self.account.accountNo,
-                @"isTyping": messageNode.composing ? @YES : @NO
-            }];
-            //send "not typing" notifications (kMonalLastInteractionUpdatedNotice) 60 seconds after the last isTyping was received
-            @synchronized(_typingNotifications) {
-                //copy needed values into local variables to not retain self by our timer block
-                NSString* account = self.account.accountNo;
-                NSString* jid = messageNode.user;
-                //abort old timer on new isTyping or isNotTyping message
-                if(_typingNotifications[messageNode.user])
-                    ((monal_void_block_t) _typingNotifications[messageNode.user])();
-                //start a new timer for every isTyping message
-                if(messageNode.composing)
-                {
-                    _typingNotifications[messageNode.user] = [HelperTools startTimer:60 withHandler:^{
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:[[NSDate date] initWithTimeIntervalSince1970:0] userInfo:@{
-                            @"jid": jid,
-                            @"accountNo": account,
-                            @"isTyping": @NO
+            //deduce state
+            BOOL composing = NO;
+            BOOL notComposing = NO;
+            if([@"active" isEqualToString:[messageNode findFirst:@"{http://jabber.org/protocol/chatstates}*$"]])
+            {
+                composing = NO;
+                notComposing = YES;
+            }
+            
+            if([@"composing" isEqualToString:[messageNode findFirst:@"{http://jabber.org/protocol/chatstates}*$"]])
+            {
+                composing = YES;
+                notComposing = NO;
+            }
+            
+            if([@"paused" isEqualToString:[messageNode findFirst:@"{http://jabber.org/protocol/chatstates}*$"]])
+            {
+                composing = NO;
+                notComposing = YES;
+            }
+            
+            if([@"inactive" isEqualToString:[messageNode findFirst:@"{http://jabber.org/protocol/chatstates}*$"]])
+            {
+                composing = NO;
+                notComposing = YES;
+            }
+            
+            //handle state
+            if(
+                (
+                    composing &&
+                    (
+                        ![messageNode check:@"{urn:xmpp:delay}delay@stamp"] ||
+                        [[NSDate date] timeIntervalSinceDate:[messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"]] < 120
+                    )
+                ) ||
+                notComposing
+            )
+            {
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                    @"jid": messageNode.fromUser,
+                    @"accountNo": self.account.accountNo,
+                    @"isTyping": composing ? @YES : @NO
+                }];
+                //send "not typing" notifications (kMonalLastInteractionUpdatedNotice) 60 seconds after the last isTyping was received
+                @synchronized(_typingNotifications) {
+                    //copy needed values into local variables to not retain self by our timer block
+                    NSString* account = self.account.accountNo;
+                    NSString* jid = messageNode.fromUser;
+                    //abort old timer on new isTyping or isNotTyping message
+                    if(_typingNotifications[messageNode.fromUser])
+                        ((monal_void_block_t) _typingNotifications[messageNode.fromUser])();
+                    //start a new timer for every isTyping message
+                    if(composing)
+                    {
+                        _typingNotifications[messageNode.fromUser] = [HelperTools startTimer:60 withHandler:^{
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:[[NSDate date] initWithTimeIntervalSince1970:0] userInfo:@{
+                                @"jid": jid,
+                                @"accountNo": account,
+                                @"isTyping": @NO
+                            }];
                         }];
-                    }];
+                    }
                 }
             }
         }
     }
-}
-    
--(void) processHeadline:(ParseMessage *) messageNode
-{
-     if(messageNode.devices)
-     {
-         [self.omemo processOMEMODevices:messageNode.devices from:messageNode.from];
-     }
 }
 
 @end

@@ -8,9 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import "MLXMPPConnection.h"
-#import "ParseMessage.h"
 #import "xmpp.h"
-#import "ParseIq.h"
+#import "XMPPMessage.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -34,14 +33,14 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid;
 -(void) sendOMEMODeviceWithForce:(BOOL) force;
 -(void) sendOMEMODevice:(NSSet<NSNumber*> *) receivedDevices force:(BOOL) force;
--(void) processOMEMODevices:(NSArray *) receivedDevices from:(NSString *) source;
+-(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString *) source;
 -(void) processOMEMOKeys:(ParseIq *) iqNode;
 
 /*
  * encrypting / decrypting messages
  */
 -(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString*) message toContact:(NSString*) toContact;
--(NSString *) decryptMessage:(ParseMessage *) messageNode;
+-(NSString *) decryptMessage:(XMPPMessage *) messageNode;
 
 
 -(BOOL) knownDevicesForAddressNameExist:(NSString*) addressName;

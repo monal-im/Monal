@@ -6,15 +6,14 @@
 //
 //
 
-#import "MLXMLNode.h"
+#import "XMPPStanza.h"
 
+FOUNDATION_EXPORT NSString* const kiqGetType;
+FOUNDATION_EXPORT NSString* const kiqSetType;
+FOUNDATION_EXPORT NSString* const kiqResultType;
+FOUNDATION_EXPORT NSString* const kiqErrorType;
 
-FOUNDATION_EXPORT NSString *const kiqGetType;
-FOUNDATION_EXPORT NSString *const kiqSetType;
-FOUNDATION_EXPORT NSString *const kiqResultType;
-FOUNDATION_EXPORT NSString *const kiqErrorType;
-
-@interface XMPPIQ : MLXMLNode
+@interface XMPPIQ : XMPPStanza
 
 -(id) initWithId:(NSString*) iqid andType:(NSString*) iqType;
 -(id) initWithType:(NSString*) iqType;
@@ -162,3 +161,5 @@ removes a contact from the roster
 -(void) registerUser:(NSString *) user withPassword:(NSString *) newPass captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields;
 
 @end
+
+typedef void (^monal_iq_handler_t)(XMPPIQ*);

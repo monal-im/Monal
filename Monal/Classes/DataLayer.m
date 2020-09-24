@@ -597,18 +597,18 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark presence functions
 
--(void) setResourceOnline:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
+-(void) setResourceOnline:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo
 {
-    if(!presenceObj.resource)
+    if(!presenceObj.fromResource)
         return;
     [self.db beginWriteTransaction];
     //get buddyid for name and account
     NSString* query1 = [NSString stringWithFormat:@"select buddy_id from buddylist where account_id=? and buddy_name=?;"];
-    NSObject* buddyid = [self.db executeScalar:query1 andArguments:@[accountNo, presenceObj.user]];
+    NSObject* buddyid = [self.db executeScalar:query1 andArguments:@[accountNo, presenceObj.fromUser]];
     if(buddyid)
     {
         NSString* query = [NSString stringWithFormat:@"insert or ignore into buddy_resources ('buddy_id', 'resource', 'ver') values (?, ?, '')"];
-        [self.db executeNonQuery:query andArguments:@[buddyid, presenceObj.resource]];
+        [self.db executeNonQuery:query andArguments:@[buddyid, presenceObj.fromResource]];
     }
     [self.db endWriteTransaction];
 }
@@ -643,24 +643,24 @@ static NSDateFormatter* dbFormatter;
     [self.db executeNonQuery:query andArguments:params];
 }
 
--(void) setOnlineBuddy:(ParsePresence*) presenceObj forAccount:(NSString *)accountNo
+-(void) setOnlineBuddy:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo
 {
     [self.db beginWriteTransaction];
     [self setResourceOnline:presenceObj forAccount:accountNo];
-    BOOL isOnline = [self isBuddyOnline:presenceObj.user forAccount:accountNo];
+    BOOL isOnline = [self isBuddyOnline:presenceObj.fromUser forAccount:accountNo];
     if(!isOnline) {
         NSString* query = [NSString stringWithFormat:@"update buddylist set online=1, new=1, muc=? where account_id=? and  buddy_name=?"];
-        NSArray* params = @[[NSNumber numberWithBool:presenceObj.MUC], accountNo, presenceObj.user ];
+        NSArray* params = @[[NSNumber numberWithBool:[presenceObj check:@"{http://jabber.org/protocol/muc#user}x"]], accountNo, presenceObj.fromUser];
         [self.db executeNonQuery:query andArguments:params];
     }
     [self.db endWriteTransaction];
 }
 
--(BOOL) setOfflineBuddy:(ParsePresence *)presenceObj forAccount:(NSString *)accountNo
+-(BOOL) setOfflineBuddy:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo
 {
     [self.db beginWriteTransaction];
     NSString* query1 = [NSString stringWithFormat:@" select buddy_id from buddylist where account_id=? and  buddy_name=?;"];
-    NSArray* params=@[accountNo, presenceObj.user];
+    NSArray* params=@[accountNo, presenceObj.fromUser];
     NSString* buddyid = (NSString*)[self.db executeScalar:query1 andArguments:params];
     if(buddyid == nil)
     {
@@ -669,7 +669,7 @@ static NSDateFormatter* dbFormatter;
     }
 
     NSString* query2 = [NSString stringWithFormat:@"delete from buddy_resources where buddy_id=? and resource=?"];
-    NSArray* params2 = @[buddyid, presenceObj.resource?presenceObj.resource:@""];
+    NSArray* params2 = @[buddyid, presenceObj.fromResource ? presenceObj.fromResource : @""];
     if([self.db executeNonQuery:query2 andArguments:params2] == NO)
     {
         [self.db endWriteTransaction];
@@ -683,7 +683,7 @@ static NSDateFormatter* dbFormatter;
     if([resourceCount integerValue]<1)
     {
         NSString* query = [NSString stringWithFormat:@"update buddylist set online=0, state='offline', dirty=1 where account_id=? and buddy_name=?;"];
-        NSArray* params4 = @[accountNo, presenceObj.user];
+        NSArray* params4 = @[accountNo, presenceObj.fromUser];
         BOOL retval = [self.db executeNonQuery:query andArguments:params4];
         [self.db endWriteTransaction];
         return retval;
@@ -695,19 +695,21 @@ static NSDateFormatter* dbFormatter;
     }
 }
 
--(void) setBuddyState:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) setBuddyState:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
 {
+    if(![presenceObj check:@"show#"])
+        return;
     NSString* toPass;
     //data length check
-    if([presenceObj.show length] > 20)
-        toPass = [presenceObj.show substringToIndex:19];
+    if([[presenceObj findFirst:@"show#"] length] > 20)
+        toPass = [[presenceObj findFirst:@"show#"] substringToIndex:19];
     else
-        toPass = presenceObj.show;
+        toPass = [presenceObj findFirst:@"show#"];
     if(!toPass)
-        toPass= @"";
+        toPass = @"";
 
     NSString* query = [NSString stringWithFormat:@"update buddylist set state=?, dirty=1 where account_id=? and  buddy_name=?;"];
-    [self.db executeNonQuery:query andArguments:@[toPass, accountNo, presenceObj.user]];
+    [self.db executeNonQuery:query andArguments:@[toPass, accountNo, presenceObj.fromUser]];
 }
 
 -(NSString*) buddyState:(NSString*) buddy forAccount:(NSString*) accountNo
@@ -745,19 +747,21 @@ static NSDateFormatter* dbFormatter;
     [self.db executeNonQuery:query2 andArguments:@[requestor.contactJid, requestor.accountId] ];
 }
 
--(void) setBuddyStatus:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo
+-(void) setBuddyStatus:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo
 {
+    if(![presenceObj check:@"status#"])
+        return;
     NSString* toPass;
     //data length check
-    if([presenceObj.status length] > 200)
-        toPass = [presenceObj.status substringToIndex:199];
+    if([[presenceObj findFirst:@"status#"] length] > 200)
+        toPass = [[presenceObj findFirst:@"status#"] substringToIndex:199];
     else
-        toPass = presenceObj.status;
+        toPass = [presenceObj findFirst:@"status#"];
     if(!toPass)
         toPass = @"";
 
     NSString* query = [NSString stringWithFormat:@"update buddylist set status=?, dirty=1 where account_id=? and  buddy_name=?;"];
-    [self.db executeNonQuery:query andArguments:@[toPass, accountNo, presenceObj.user]];
+    [self.db executeNonQuery:query andArguments:@[toPass, accountNo, presenceObj.fromUser]];
 }
 
 -(NSString*) buddyStatus:(NSString*) buddy forAccount:(NSString*) accountNo
@@ -850,13 +854,16 @@ static NSDateFormatter* dbFormatter;
     return (NSString *)name;
 }
 
--(void) setContactHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo
+-(void) setContactHash:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo
 {
-    NSString* hash=presenceObj.photoHash;
-    if(!hash) hash= @"";
+    if(![presenceObj check:@"{vcard-temp:x:update}x/photo#"])
+        return;
+    NSString* hash = [presenceObj findFirst:@"{vcard-temp:x:update}x/photo#"];
+    if(!hash)
+        hash = @"";
     //data length check
     NSString* query = [NSString stringWithFormat:@"update buddylist set iconhash=?, dirty=1 where account_id=? and buddy_name=?;"];
-    NSArray* params = @[hash, accountNo, presenceObj.user];
+    NSArray* params = @[hash, accountNo, presenceObj.fromUser];
     [self.db executeNonQuery:query  andArguments:params];
 
 }
@@ -1130,12 +1137,15 @@ static NSDateFormatter* dbFormatter;
 
 -(BOOL) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId toContact:(NSString*) contact onAccount:(NSString*) accountNo
 {
-    if(!accountNo || !stanzaId)
+    if(!accountNo)
         return NO;
     
-    NSObject* found = [self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND stanzaid!='' AND stanzaid=?;" andArguments:@[accountNo, stanzaId]];
-    if(found)
-        return YES;
+    if(stanzaId)
+    {
+        NSObject* found = [self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND stanzaid!='' AND stanzaid=?;" andArguments:@[accountNo, stanzaId]];
+        if(found)
+            return YES;
+    }
     
     //we check message ids per contact to increase uniqueness and abort here if no contact was provided
     if(!contact)

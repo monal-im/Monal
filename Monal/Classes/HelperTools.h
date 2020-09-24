@@ -17,6 +17,7 @@ void logException(NSException* exception);
 
 +(void) configureFileProtectionFor:(NSString*) file;
 +(BOOL) xml2bool:(NSString*) xml;
++(NSDictionary*) splitJid:(NSString*) jid;
 +(void) postSendingErrorNotification;
 +(NSString*) sha256HmacForKey: (NSString*) key andData: (NSString*) data;
 +(BOOL) isInBackground;

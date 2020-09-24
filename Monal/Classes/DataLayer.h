@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
-#import "ParsePresence.h"
+#import "XMPPPresence.h"
 #import "MLMessage.h"
 #import "MLContact.h"
 
@@ -74,14 +74,14 @@ extern NSString *const kMessageTypeUrl;
 -(void) setCaps:(NSSet*) caps forVer:(NSString*) ver;
 
 #pragma mark  presence functions
--(void) setResourceOnline:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
--(void) setOnlineBuddy:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
--(BOOL) setOfflineBuddy:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) setResourceOnline:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
+-(void) setOnlineBuddy:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
+-(BOOL) setOfflineBuddy:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
 
--(void) setBuddyStatus:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) setBuddyStatus:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
 -(NSString*) buddyStatus:(NSString*) buddy forAccount:(NSString*) accountNo;
 
--(void) setBuddyState:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) setBuddyState:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
 -(NSString*) buddyState:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 -(NSMutableArray*) contactRequestsForAccount;
@@ -93,7 +93,7 @@ extern NSString *const kMessageTypeUrl;
 -(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSString*) accountNo;
 -(NSString*) fullNameForContact:(NSString*) contact inAccount:(NSString*) accountNo;
 
--(void) setContactHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) setContactHash:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
 -(NSString*) contactHash:(NSString*) contact forAccount:(NSString*) accountNo;
 
 -(BOOL) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo;

@@ -52,7 +52,31 @@ void logException(NSException* exception)
 #endif
 }
 
--(void) postSendingErrorNotification
++(NSDictionary*) splitJid:(NSString*) jid
+{
+    NSMutableDictionary* retval = [[NSMutableDictionary alloc] init];
+    NSArray* parts = [jid componentsSeparatedByString:@"/"];
+    
+    retval[@"user"] = [[parts objectAtIndex:0] lowercaseString];        //intended to not break code that expects lowercase
+    if([parts count]>1 && ![[parts objectAtIndex:1] isEqualToString:@""])
+        retval[@"resource"] = [parts objectAtIndex:1];                  //resources are case sensitive
+    parts = [retval[@"user"] componentsSeparatedByString:@"@"];
+    if([parts count]>1)
+    {
+        retval[@"node"] = [[parts objectAtIndex:0] lowercaseString];    //intended to not break code that expects lowercase
+        retval[@"host"] = [[parts objectAtIndex:1] lowercaseString];    //intended to not break code that expects lowercase
+    }
+    else
+        retval[@"host"] = [[parts objectAtIndex:0] lowercaseString];    //intended to not break code that expects lowercase
+    
+    //log sanity check errors
+    if([retval[@"host"] isEqualToString:@""])
+        DDLogError(@"jid '%@' has no host part!", jid);
+    
+    return retval;
+}
+
++(void) postSendingErrorNotification
 {
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     content.title = NSLocalizedString(@"Could not synchronize", @"");

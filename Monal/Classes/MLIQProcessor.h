@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "ParseIq.h"
+#import "XMPPIQ.h"
 #import "MLOMEMO.h"
 #import "MLXMPPConnection.h"
 #import "XMPPIQ.h"
@@ -31,13 +31,13 @@ typedef void (^processAction)(void);
 @property (nonatomic, strong) processAction enablePush;
 @property (nonatomic, strong) processAction getVcards;
 
--(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection omemo:(MLOMEMO *)omemo;
--(MLIQProcessor *) initWithAccount:(NSString *) accountNo connection:(MLXMPPConnection *) connection;
+-(MLIQProcessor*) initWithAccount:(NSString*) accountNo connection:(MLXMPPConnection*) connection omemo:(MLOMEMO*) omemo;
+-(MLIQProcessor*) initWithAccount:(NSString*) accountNo connection:(MLXMPPConnection*) connection;
 
 /**
  Process a iq, persist any changes and post notifications
  */
--(void) processIq:(ParseIq *) messageNode;
+-(void) processIq:(XMPPIQ*) messageNode;
 
 
 @end

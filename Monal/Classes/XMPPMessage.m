@@ -19,8 +19,14 @@ NSString* const kMessageHeadlineType=@"headline";
 
 -(id) init
 {
-    self= [super init];
-    self.element=@"message";
+    self = [super init];
+    self.element = @"message";
+    return self;
+}
+
+-(id) initWithXMPPMessage:(XMPPMessage*) msg
+{
+    self = [self initWithElement:msg.element withAttributes:msg.attributes andChildren:msg.children andData:msg.data];
     return self;
 }
 
@@ -31,7 +37,7 @@ NSString* const kMessageHeadlineType=@"headline";
 
 -(NSString *) xmppId
 {
-    return  [self.attributes objectForKey:@"id"];
+    return [self.attributes objectForKey:@"id"];
 }
 
 -(void) setBody:(NSString*) messageBody
@@ -39,7 +45,7 @@ NSString* const kMessageHeadlineType=@"headline";
     MLXMLNode* body =[[MLXMLNode alloc] init];
     body.element=@"body";
     body.data=messageBody;
-    [self.children addObject:body];
+    [self addChild:body];
 }
 
 -(void) setOobUrl:(NSString*) link
@@ -50,8 +56,8 @@ NSString* const kMessageHeadlineType=@"headline";
     MLXMLNode* url =[[MLXMLNode alloc] init];
     url.element=@"url";
     url.data=link;
-    [oob.children addObject:url];
-    [self.children addObject:oob];
+    [oob addChild:url];
+    [self addChild:oob];
     
     [self setBody:link]; // fallback
 }
@@ -65,24 +71,23 @@ NSString* const kMessageHeadlineType=@"headline";
     received.element=@"received";
     [received.attributes setValue:@"urn:xmpp:receipts" forKey:kXMLNS];
     [received.attributes setValue:messageId forKey:@"id"];
-    [self.children addObject:received];
+    [self addChild:received];
 }
-
 
 -(void) setStoreHint
 {
     MLXMLNode* store =[[MLXMLNode alloc] init];
     store.element=@"store";
     [store.attributes setValue:@"urn:xmpp:hints" forKey:kXMLNS];
-    [self.children addObject:store];
+    [self addChild:store];
 }
 
 -(void) setNoStoreHint
 {
     MLXMLNode* store = [[MLXMLNode alloc] initWithElement:@"no-store" andNamespace:@"urn:xmpp:hints"];
-    [self.children addObject:store];
+    [self addChild:store];
     MLXMLNode* storage = [[MLXMLNode alloc] initWithElement:@"no-storage" andNamespace:@"urn:xmpp:hints"];
-    [self.children addObject:storage];
+    [self addChild:storage];
 }
 
 @end

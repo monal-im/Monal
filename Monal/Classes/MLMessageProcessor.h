@@ -7,14 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "ParseMessage.h"
 #import "MLXMPPConnection.h"
 #import "xmpp.h"
 #import "MLOMEMO.h"
+#import "XMPPMessage.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void (^messageCompletion)(BOOL success, BOOL encrypted, BOOL showAlert,  NSString *body, NSString *newMessageType);
+typedef void (^messageCompletion)(XMPPMessage* messageNode, XMPPMessage* outerMessageNode, BOOL success, BOOL encrypted, BOOL showAlert, NSString* body, NSString* newMessageType, NSString* actualFrom);
 typedef void (^signalCompletion)(void);
 typedef void (^nodeCompletion)(MLXMLNode* _Nullable nodeResponse);
 
@@ -25,12 +25,12 @@ typedef void (^nodeCompletion)(MLXMLNode* _Nullable nodeResponse);
 @property (nonatomic, strong) messageCompletion postPersistAction;
 @property (nonatomic, strong) nodeCompletion sendStanza;
 
--(MLMessageProcessor *) initWithAccount:(xmpp*) account jid:(NSString *) jid connection:(MLXMPPConnection *) connection omemo:(MLOMEMO*) omemo;
+-(MLMessageProcessor*) initWithAccount:(xmpp*) account jid:(NSString*) jid connection:(MLXMPPConnection*) connection omemo:(MLOMEMO*) omemo;
 
 /**
  Process a message, persist it and post relevant notifications
  */
--(void) processMessage:(ParseMessage*) messageNode;
+-(void) processMessage:(XMPPMessage*) messageNode andOuterMessage:(XMPPMessage*) outerMessageNode;
 
 @end
 

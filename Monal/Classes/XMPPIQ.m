@@ -12,13 +12,12 @@
 
 #import "MLPush.h"
 
-NSString *const kiqGetType = @"get";
-NSString *const kiqSetType = @"set";
-NSString *const kiqResultType = @"result";
-NSString *const kiqErrorType = @"error";
+NSString* const kiqGetType = @"get";
+NSString* const kiqSetType = @"set";
+NSString* const kiqResultType = @"result";
+NSString* const kiqErrorType = @"error";
 
 @implementation XMPPIQ
-
 
 -(id) initWithId:(NSString*) iqid andType:(NSString*) iqType
 {
@@ -55,13 +54,13 @@ NSString *const kiqErrorType = @"error";
     [enableNode.attributes setObject:@"urn:xmpp:push:0" forKey:kXMLNS];
     [enableNode.attributes setObject:[MLPush pushServer] forKey:@"jid"];
     [enableNode.attributes setObject:node forKey:@"node"];
-    [self.children addObject:enableNode];
+    [self addChild:enableNode];
     
     MLXMLNode* xNode =[[MLXMLNode alloc] init];
     xNode.element=@"x";
     [xNode.attributes setObject:@"jabber:x:data" forKey:kXMLNS];
     [xNode.attributes setObject:@"submit" forKey:@"type"];
-    [enableNode.children addObject:xNode];
+    [enableNode addChild:xNode];
     
     MLXMLNode* formTypeFieldNode =[[MLXMLNode alloc] init];
     formTypeFieldNode.element=@"field";
@@ -69,8 +68,8 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* formTypeValueNode =[[MLXMLNode alloc] init];
     formTypeValueNode.element=@"value";
     formTypeValueNode.data=@"http://jabber.org/protocol/pubsub#publish-options";
-    [formTypeFieldNode.children addObject:formTypeValueNode];
-    [xNode.children addObject:formTypeFieldNode];
+    [formTypeFieldNode addChild:formTypeValueNode];
+    [xNode addChild:formTypeFieldNode];
     
     MLXMLNode* secretFieldNode =[[MLXMLNode alloc] init];
     secretFieldNode.element=@"field";
@@ -78,8 +77,8 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* secretValueNode =[[MLXMLNode alloc] init];
     secretValueNode.element=@"value";
     secretValueNode.data=secret;
-    [secretFieldNode.children addObject:secretValueNode];
-    [xNode.children addObject:secretFieldNode];
+    [secretFieldNode addChild:secretValueNode];
+    [xNode addChild:secretFieldNode];
 }
 
 -(void) setPushDisableWithNode:(NSString *)node
@@ -89,7 +88,7 @@ NSString *const kiqErrorType = @"error";
     [disableNode.attributes setObject:@"urn:xmpp:push:0" forKey:kXMLNS];
     [disableNode.attributes setObject:[MLPush pushServer] forKey:@"jid"];
     [disableNode.attributes setObject:node forKey:@"node"];
-    [self.children addObject:disableNode];
+    [self addChild:disableNode];
 }
 
 -(void) setBindWithResource:(NSString*) resource
@@ -98,20 +97,20 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* bindNode =[[MLXMLNode alloc] initWithElement:@"bind" andNamespace:@"urn:ietf:params:xml:ns:xmpp-bind"];
     MLXMLNode* resourceNode = [[MLXMLNode alloc] initWithElement:@"resource"];
     resourceNode.data = resource;
-    [bindNode.children addObject:resourceNode];
-    [self.children addObject:bindNode];
+    [bindNode addChild:resourceNode];
+    [self addChild:bindNode];
 }
 
 -(void) setDiscoInfoNode
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#info"];
-    [self.children addObject:queryNode];
+    [self addChild:queryNode];
 }
 
 -(void) setDiscoItemNode
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#items"];
-    [self.children addObject:queryNode];
+    [self addChild:queryNode];
 }
 
 -(void) setDiscoInfoWithFeaturesAndNode:(NSString*) node
@@ -124,16 +123,16 @@ NSString *const kiqErrorType = @"error";
     {
         MLXMLNode* featureNode = [[MLXMLNode alloc] initWithElement:@"feature"];
         featureNode.attributes[@"var"] = feature;
-        [queryNode.children addObject:featureNode];
+        [queryNode addChild:featureNode];
     }
     
     MLXMLNode* identityNode = [[MLXMLNode alloc] initWithElement:@"identity"];
     identityNode.attributes[@"category"] = @"client";
     identityNode.attributes[@"type"] = @"phone";
     identityNode.attributes[@"name"] = [NSString stringWithFormat:@"Monal %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
-    [queryNode.children addObject:identityNode];
+    [queryNode addChild:identityNode];
     
-    [self.children addObject:queryNode];
+    [self addChild:queryNode];
 }
 
 -(void) setiqTo:(NSString*) to
@@ -145,7 +144,7 @@ NSString *const kiqErrorType = @"error";
 -(void) setPing
 {
     MLXMLNode* pingNode = [[MLXMLNode alloc] initWithElement:@"ping" andNamespace:@"urn:xmpp:ping"];
-    [self.children addObject:pingNode];
+    [self addChild:pingNode];
 }
 
 #pragma mark - MAM
@@ -155,7 +154,7 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];
     queryNode.element=@"prefs";
     [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:kXMLNS];
-    [self.children addObject:queryNode];
+    [self addChild:queryNode];
 }
 
 -(void) updateMamArchivePrefDefault:(NSString *) pref
@@ -167,7 +166,7 @@ NSString *const kiqErrorType = @"error";
     queryNode.element=@"prefs";
     [queryNode.attributes setObject:@"urn:xmpp:mam:2" forKey:kXMLNS];
     [queryNode.attributes setObject:pref forKey:@"default"];
-    [self.children addObject:queryNode];
+    [self addChild:queryNode];
 }
 
 -(void) setMAMQueryLatestMessagesForJid:(NSString*) jid before:(NSString*) uid
@@ -195,7 +194,7 @@ NSString *const kiqErrorType = @"error";
             [[MLXMLNode alloc] initWithElement:@"before" withAttributes:@{} andChildren:@[] andData:uid]
         ] andData:nil]
     ] andData:nil];
-    [self.children addObject:queryNode];
+    [self addChild:queryNode];
 }
 
 -(void) setMAMQueryForLatestId
@@ -223,7 +222,7 @@ NSString *const kiqErrorType = @"error";
             [[MLXMLNode alloc] initWithElement:@"before"]
         ] andData:nil]
     ] andData:nil];
-    [self.children addObject:queryNode];
+    [self addChild:queryNode];
 }
 
 -(void) setMAMQueryAfter:(NSString*) uid
@@ -246,7 +245,7 @@ NSString *const kiqErrorType = @"error";
             [[MLXMLNode alloc] initWithElement:@"after" withAttributes:@{} andChildren:@[] andData:uid]
         ] andData:nil]
     ] andData:nil];
-    [self.children addObject:queryNode];
+    [self addChild:queryNode];
 }
 
 -(void) setRemoveFromRoster:(NSString*) jid
@@ -254,13 +253,13 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* queryNode = [[MLXMLNode alloc] init];
     queryNode.element = @"query";
     [queryNode.attributes setObject:@"jabber:iq:roster" forKey:kXMLNS];
-    [self.children addObject:queryNode];
+    [self addChild:queryNode];
     
     MLXMLNode* itemNode = [[MLXMLNode alloc] init];
     itemNode.element = @"item";
     [itemNode.attributes setObject:jid forKey:@"jid"];
     [itemNode.attributes setObject:@"remove" forKey:@"subscription"];
-    [queryNode.children addObject:itemNode];
+    [queryNode addChild:itemNode];
 }
 
 -(void) setRosterRequest:(NSString *) version
@@ -270,7 +269,7 @@ NSString *const kiqErrorType = @"error";
     [queryNode.attributes setObject:@"jabber:iq:roster" forKey:kXMLNS];
     if(version)
         [queryNode.attributes setObject:version forKey:@"ver"];
-    [self.children addObject:queryNode];
+    [self addChild:queryNode];
 }
 
 -(void) setVersion
@@ -296,10 +295,10 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* appVersion = [[MLXMLNode alloc] initWithElement:@"version"];
     appVersion.data = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     
-    [queryNode.children addObject:name];
-    [queryNode.children addObject:os];
-    [queryNode.children addObject:appVersion];
-    [self.children addObject:queryNode];
+    [queryNode addChild:name];
+    [queryNode addChild:os];
+    [queryNode addChild:appVersion];
+    [self addChild:queryNode];
 }
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
@@ -308,9 +307,9 @@ NSString *const kiqErrorType = @"error";
     
     MLXMLNode* itemNode = [[MLXMLNode alloc] initWithElement:@"item"];
     [itemNode.attributes setObject:blockedJid forKey:kJid];
-    [blockNode.children addObject:itemNode];
+    [blockNode addChild:itemNode];
     
-    [self.children addObject:blockNode];
+    [self addChild:blockNode];
 }
 
 -(void) httpUploadforFile:(NSString *) file ofSize:(NSNumber *) filesize andContentType:(NSString *) contentType
@@ -319,7 +318,7 @@ NSString *const kiqErrorType = @"error";
     requestNode.attributes[@"filename"] = file;
     requestNode.attributes[@"size"] = [NSString stringWithFormat:@"%@", filesize];
     requestNode.attributes[@"content-type"] = contentType;
-    [self.children addObject:requestNode];
+    [self addChild:requestNode];
 }
 
 
@@ -333,7 +332,7 @@ NSString *const kiqErrorType = @"error";
     vcardNode.element=@"vCard";
     [vcardNode setXMLNS:@"vcard-temp"];
     
-    [self.children addObject:vcardNode];
+    [self addChild:vcardNode];
 }
 
 -(void) getEntitySoftWareVersionTo:(NSString*) to
@@ -342,7 +341,7 @@ NSString *const kiqErrorType = @"error";
     
     MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:version"];
     
-    [self.children addObject:queryNode];
+    [self addChild:queryNode];
 }
 
 #pragma mark MUC
@@ -357,8 +356,8 @@ NSString *const kiqErrorType = @"error";
     [xNode.attributes setObject:@"jabber:x:data" forKey:kXMLNS];
     [xNode.attributes setObject:@"submit" forKey:@"type"];
     
-    [queryNode.children addObject:xNode];
-    [self.children addObject:queryNode];
+    [queryNode addChild:xNode];
+    [self addChild:queryNode];
 }
 
 #pragma mark Jingle
@@ -392,7 +391,7 @@ NSString *const kiqErrorType = @"error";
     [payload.attributes setObject:@"8000" forKey:@"clockrate"];
     [payload.attributes setObject:@"1" forKey:@"channels"];
     
-    [description.children addObject:payload];
+    [description addChild:payload];
     
     MLXMLNode* transport =[[MLXMLNode alloc] init];
     transport.element=@"transport";
@@ -415,14 +414,14 @@ NSString *const kiqErrorType = @"error";
     [candidate2.attributes setObject:@"monal002" forKey:@"id"];
     [candidate2.attributes setObject:@"0" forKey:@"generation"];
     
-    [transport.children addObject:candidate1];
-    [transport.children addObject:candidate2];
+    [transport addChild:candidate1];
+    [transport addChild:candidate2];
     
-    [contentNode.children addObject:description];
-    [contentNode.children addObject:transport];
+    [contentNode addChild:description];
+    [contentNode addChild:transport];
     
-    [jingleNode.children addObject:contentNode];
-    [self.children addObject:jingleNode];
+    [jingleNode addChild:contentNode];
+    [self addChild:jingleNode];
     
     
 //        [query appendFormat:@" <iq to='%@/%@' id='%@' type='set'> <jingle xmlns='urn:xmpp:jingle:1' action='session-initiate' initiator='%@' responder='%@' sid='%@'>
@@ -471,7 +470,7 @@ NSString *const kiqErrorType = @"error";
     [payload.attributes setObject:@"8000" forKey:@"clockrate"];
     [payload.attributes setObject:@"1" forKey:@"channels"];
     
-    [description.children addObject:payload];
+    [description addChild:payload];
     
     MLXMLNode* transport =[[MLXMLNode alloc] init];
     transport.element=@"transport";
@@ -494,14 +493,14 @@ NSString *const kiqErrorType = @"error";
     [candidate2.attributes setObject:@"monal002" forKey:@"id"];
     [candidate2.attributes setObject:@"0" forKey:@"generation"];
     
-    [transport.children addObject:candidate1];
-    [transport.children addObject:candidate2];
+    [transport addChild:candidate1];
+    [transport addChild:candidate2];
     
-    [contentNode.children addObject:description];
-    [contentNode.children addObject:transport];
+    [contentNode addChild:description];
+    [contentNode addChild:transport];
     
-    [jingleNode.children addObject:contentNode];
-    [self.children addObject:jingleNode];
+    [jingleNode addChild:contentNode];
+    [self addChild:jingleNode];
     
 }
 -(void) setJingleDeclineTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info
@@ -520,9 +519,9 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* decline =[[MLXMLNode alloc] init];
     decline.element=@"decline";
     
-    [reason.children addObject:decline] ;
-    [jingleNode.children addObject:reason];
-    [self.children addObject:jingleNode];
+    [reason addChild:decline] ;
+    [jingleNode addChild:reason];
+    [self addChild:jingleNode];
     
 }
 
@@ -548,9 +547,9 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* success =[[MLXMLNode alloc] init];
     success.element=@"success";
 
-    [reason.children addObject:success] ;
-    [jingleNode.children addObject:reason];
-    [self.children addObject:jingleNode];
+    [reason addChild:success] ;
+    [jingleNode addChild:reason];
+    [self addChild:jingleNode];
 
   
 }
@@ -567,9 +566,9 @@ NSString *const kiqErrorType = @"error";
     subscribe.element=@"subscribe";
     [subscribe.attributes setObject:@"eu.siacs.conversations.axolotl.devicelist" forKey:@"node"];
     [subscribe.attributes setObject:jid forKey:@"jid"];
-    [pubsubNode.children addObject:subscribe];
+    [pubsubNode addChild:subscribe];
     
-    [self.children addObject:pubsubNode];
+    [self addChild:pubsubNode];
 }
 
 
@@ -595,14 +594,14 @@ NSString *const kiqErrorType = @"error";
         MLXMLNode* device = [[MLXMLNode alloc] init];
         device.element = @"device";
         [device.attributes setObject:deviceid forKey:kId];
-        [listNode.children addObject:device];
+        [listNode addChild:device];
     }
-    [itemNode.children addObject:listNode];
+    [itemNode addChild:listNode];
     
-    [publish.children addObject:itemNode];
-    [pubsubNode.children addObject:publish];
+    [publish addChild:itemNode];
+    [pubsubNode addChild:publish];
     
-    [self.children addObject:pubsubNode];
+    [self addChild:pubsubNode];
 }
 
 
@@ -629,18 +628,18 @@ NSString *const kiqErrorType = @"error";
     signedPreKeyPublic.element = @"signedPreKeyPublic";
     [signedPreKeyPublic.attributes setObject:[keys objectForKey:@"signedPreKeyId"] forKey:@"signedPreKeyId"];
     signedPreKeyPublic.data = [HelperTools encodeBase64WithData: [keys objectForKey:@"signedPreKeyPublic"]];
-    [bundle.children addObject:signedPreKeyPublic];
+    [bundle addChild:signedPreKeyPublic];
     
     
     MLXMLNode* signedPreKeySignature = [[MLXMLNode alloc] init];
     signedPreKeySignature.element = @"signedPreKeySignature";
     signedPreKeySignature.data = [HelperTools encodeBase64WithData:[keys objectForKey:@"signedPreKeySignature"]];
-    [bundle.children addObject:signedPreKeySignature];
+    [bundle addChild:signedPreKeySignature];
     
     MLXMLNode* identityKey = [[MLXMLNode alloc] init];
     identityKey.element = @"identityKey";
     identityKey.data = [HelperTools encodeBase64WithData:[keys objectForKey:@"identityKey"]];
-    [bundle.children addObject:identityKey];
+    [bundle addChild:identityKey];
     
     MLXMLNode* prekeyNode = [[MLXMLNode alloc] init];
     prekeyNode.element = @"prekeys";
@@ -650,16 +649,16 @@ NSString *const kiqErrorType = @"error";
         preKeyPublic.element = @"preKeyPublic";
         [preKeyPublic.attributes setObject:[NSString stringWithFormat:@"%d", prekey.preKeyId] forKey:@"preKeyId"];
         preKeyPublic.data = [HelperTools encodeBase64WithData:prekey.keyPair.publicKey];
-        [prekeyNode.children addObject:preKeyPublic];
+        [prekeyNode addChild:preKeyPublic];
     };
     
-    [bundle.children addObject:prekeyNode];
-    [itemNode.children addObject:bundle];
+    [bundle addChild:prekeyNode];
+    [itemNode addChild:bundle];
     
-    [publish.children addObject:itemNode];
-    [pubsubNode.children addObject:publish];
+    [publish addChild:itemNode];
+    [pubsubNode addChild:publish];
     
-    [self.children addObject:pubsubNode];
+    [self addChild:pubsubNode];
 }
 
 
@@ -675,8 +674,8 @@ NSString *const kiqErrorType = @"error";
     [subscribe.attributes setObject:node forKey:@"node"];
 //[subscribe.attributes setObject:@"1" forKey:@"max_items"];
     
-    [pubsubNode.children addObject:subscribe];
-    [self.children addObject:pubsubNode];
+    [pubsubNode addChild:subscribe];
+    [self addChild:pubsubNode];
     
 }
 
@@ -697,7 +696,7 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* query =[[MLXMLNode alloc] init];
     query.element=@"query";
     [query setXMLNS:kRegisterNameSpace];
-    [self.children addObject:query];
+    [self addChild:query];
 }
 
 /*
@@ -721,7 +720,7 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* usernameValue =[[MLXMLNode alloc] init];
     usernameValue.element=@"value";
     usernameValue.data=user;
-    [username.children addObject:usernameValue];
+    [username addChild:usernameValue];
     
     MLXMLNode* password =[[MLXMLNode alloc] init];
     password.element=@"field";
@@ -729,7 +728,7 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* passwordValue =[[MLXMLNode alloc] init];
     passwordValue.element=@"value";
     passwordValue.data=newPass;
-     [password.children addObject:passwordValue];
+     [password addChild:passwordValue];
     
     MLXMLNode* ocr =[[MLXMLNode alloc] init];
     ocr.element=@"field";
@@ -737,7 +736,7 @@ NSString *const kiqErrorType = @"error";
     MLXMLNode* ocrValue =[[MLXMLNode alloc] init];
     ocrValue.element=@"value";
     ocrValue.data=captcha;
-    [ocr.children addObject:ocrValue];
+    [ocr addChild:ocrValue];
     
     [hiddenFields enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
        
@@ -747,19 +746,19 @@ NSString *const kiqErrorType = @"error";
         MLXMLNode* fieldValue =[[MLXMLNode alloc] init];
         fieldValue.element=@"value";
         fieldValue.data=obj;
-        [field.children addObject:fieldValue];
+        [field addChild:fieldValue];
         
-        [x.children addObject:field];
+        [x addChild:field];
         
     }];
     
-    [x.children addObject:username];
-    [x.children addObject:password];
-    [x.children addObject:ocr];
+    [x addChild:username];
+    [x addChild:password];
+    [x addChild:ocr];
     
-    [query.children addObject:x];
+    [query addChild:x];
     
-    [self.children addObject:query];
+    [self addChild:query];
 }
 
 -(void) changePasswordForUser:(NSString *) user newPassword:(NSString *)newPass
@@ -776,10 +775,10 @@ NSString *const kiqErrorType = @"error";
     password.element=@"password";
     password.data=newPass;
    
-    [query.children addObject:username];
-    [query.children addObject:password];
+    [query addChild:username];
+    [query addChild:password];
     
-    [self.children addObject:query];
+    [self addChild:query];
     
 }
 

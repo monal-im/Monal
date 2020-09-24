@@ -14,7 +14,6 @@
 #import "HelperTools.h"
 #import "XMPPIQ.h"
 #import "xmpp.h"
-#import "ParseIq.h"
 
 
 @interface MLOMEMO ()
@@ -148,13 +147,8 @@ static const size_t MAX_OMEMO_KEYS = 120;
     if(self.xmppConnection) [self.xmppConnection send:bundleQuery];
 }
 
--(void) processOMEMODevices:(NSArray<NSString*>*) receivedDevicesStr from:(NSString *) source
+-(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString *) source
 {
-    // convert device ids to NSNumber array
-    NSMutableSet<NSNumber*>* receivedDevices = [[NSMutableSet alloc] init];
-    for(NSString* device in receivedDevicesStr) {
-        [receivedDevices addObject:[NSNumber numberWithInt:device.intValue]];
-    }
     if(receivedDevices)
     {
         NSAssert(self._senderJid == self._connection.identity.jid, @"connection jid should be equal to the senderJid");
@@ -245,41 +239,73 @@ static const size_t MAX_OMEMO_KEYS = 120;
     }
 }
 
--(void) processOMEMOKeys:(ParseIq *) iqNode
+-(void) processOMEMOKeys:(XMPPIQ*) iqNode
 {
-    if(iqNode.signedPreKeyPublic && self._signalContext)
-    {
-        NSString* source = iqNode.from;
+    assert(self._signalContext);
+    for(MLXMLNode* publishElement in [iqNode find:@"{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>"]) {
+        NSString* bundleName = [publishElement findFirst:@"/@node"];
+        if(!bundleName)
+            return;
+        // get rid
+        NSString* rid = [bundleName componentsSeparatedByString:@":"][1];
+        if(!rid)
+            return;
+
+        NSArray* bundles = [publishElement find:@"{http://jabber.org/protocol/pubsub}item/{eu.siacs.conversations.axolotl}bundle"];
+
+        // there should only be one bundle per device
+        if([bundles count] != 1) {
+            return;
+        }
+
+        MLXMLNode* bundle = [bundles firstObject];
+
+        // parse
+        NSData* signedPreKeyPublic = [bundle findFirst:@"signedPreKeyPublic#|base64"];
+        NSString* signedPreKeyPublicId = [bundle findFirst:@"signedPreKeyPublic@signedPreKeyId"];
+        NSData* signedPreKeySignature = [bundle findFirst:@"signedPreKeySignature#|base64"];
+        NSData* identityKey = [bundle findFirst:@"identityKey#|base64"];
+        
+        if(!signedPreKeyPublic || !signedPreKeyPublicId || !signedPreKeySignature || !identityKey)
+            return;
+        
+        NSString* source = iqNode.fromUser;
         if(!source)
         {
             source = self._senderJid;
         }
-
-        uint32_t device = (uint32_t)[iqNode.deviceid intValue];
-        if(!iqNode.deviceid) return;
-
+        
+        uint32_t device = (uint32_t)[rid intValue];
         SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:device];
         SignalSessionBuilder* builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self._signalContext];
+        NSMutableArray* preKeys = [[NSMutableArray alloc] init];
+        NSArray<NSNumber*>* preKeyIds = [bundle find:@"prekeys/preKeyPublic@preKeyId|int"];
+        for(NSNumber* preKey in preKeyIds) {
+            NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
+            [dict setObject:preKey forKey:@"preKeyId"];
+            NSString* query = [NSString stringWithFormat:@"prekeys/preKeyPublic<preKeyId=%@>#|base64", preKey.stringValue];
+            [dict setObject:[bundle findFirst:query] forKey:@"preKey"];
+            [preKeys addObject:dict];
+        }
 
-        [iqNode.preKeys enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSDictionary* row = (NSDictionary *) obj;
+        for(NSDictionary* row in preKeys) {
             NSString* keyid = (NSString *)[row objectForKey:@"preKeyId"];
-            NSData* preKeyData = [HelperTools dataWithBase64EncodedString:[row objectForKey:@"preKey"]];
+            NSData* preKeyData = [row objectForKey:@"preKey"];
             if(preKeyData) {
-                SignalPreKeyBundle *bundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
+                SignalPreKeyBundle* keyBundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
                                                                                 deviceId:device
                                                                                        preKeyId:[keyid intValue]
                                                                                    preKeyPublic:preKeyData
-                                                                                 signedPreKeyId:iqNode.signedPreKeyId.intValue
-                                                                             signedPreKeyPublic:[HelperTools dataWithBase64EncodedString:iqNode.signedPreKeyPublic]
-                                                                                      signature:[HelperTools dataWithBase64EncodedString:iqNode.signedPreKeySignature]
-                                                                                    identityKey:[HelperTools dataWithBase64EncodedString:iqNode.identityKey]
+                                                                                 signedPreKeyId:signedPreKeyPublicId.intValue
+                                                                             signedPreKeyPublic:signedPreKeyPublic
+                                                                                      signature:signedPreKeySignature
+                                                                                    identityKey:identityKey
                                                                                           error:nil];
-                [builder processPreKeyBundle:bundle error:nil];
+                [builder processPreKeyBundle:keyBundle error:nil];
             } else  {
                 DDLogError(@"Could not decode base64 prekey %@", row);
             }
-        }];
+        }
     }
 }
 
@@ -350,31 +376,29 @@ static const size_t MAX_OMEMO_KEYS = 120;
     }
 }
 
--(NSString *) decryptMessage:(ParseMessage *) messageNode
+-(NSString *) decryptMessage:(XMPPMessage *) messageNode
 {
-    if(!messageNode.encryptedPayload) {
+    if(![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/payload"]) {
         DDLogDebug(@"DecrypMessage called but the message is not encrypted");
         return nil;
     }
 
     [self->signalLock lock];
 
-    SignalAddress* address = [[SignalAddress alloc] initWithName:messageNode.from.lowercaseString deviceId:(uint32_t)messageNode.sid.intValue];
+    NSNumber* sid = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|int"];
+    SignalAddress* address = [[SignalAddress alloc] initWithName:messageNode.fromUser deviceId:(uint32_t)sid.intValue];
     if(!self._signalContext) {
         DDLogError(@"Missing signal context");
         [self->signalLock unlock];
         return NSLocalizedString(@"Error decrypting message", @"");
     }
 
-    NSDictionary* messageKey;
-    for(NSDictionary* currentKey in messageNode.signalKeys) {
-        NSString* rid = [currentKey objectForKey:@"rid"];
-        if(rid.intValue == self.monalSignalStore.deviceid)
-        {
-            messageKey = currentKey;
-            break;
-        }
-    };
+    NSString* deviceKeyPath = [NSString stringWithFormat:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>#|base64", self.monalSignalStore.deviceid];
+    NSString* deviceKeyPathPreKey = [NSString stringWithFormat:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>@prekey|bool", self.monalSignalStore.deviceid];
+    
+    NSData* messageKey = [messageNode findFirst:deviceKeyPath];
+    BOOL devicePreKey = [messageNode findFirst:deviceKeyPathPreKey];
+    
     if(!messageKey)
     {
         DDLogError(@"Message was not encrypted for this device: %d", self.monalSignalStore.deviceid);
@@ -385,14 +409,14 @@ static const size_t MAX_OMEMO_KEYS = 120;
         SignalCiphertextType messagetype;
 
         // Check if message is encrypted with a prekey
-        if([[messageKey objectForKey:@"prekey"] isEqualToString:@"1"])
+        if(devicePreKey)
         {
             messagetype = SignalCiphertextTypePreKeyMessage;
         } else  {
             messagetype = SignalCiphertextTypeMessage;
         }
 
-        NSData* decoded = [HelperTools dataWithBase64EncodedString:[messageKey objectForKey:@"key"]];
+        NSData* decoded = messageKey;
 
         SignalCiphertext* ciphertext = [[SignalCiphertext alloc] initWithData:decoded type:messagetype];
         NSError* error;
@@ -427,8 +451,11 @@ static const size_t MAX_OMEMO_KEYS = 120;
                 key = decryptedKey;
             }
             if(key){
-                NSData* iv = [HelperTools dataWithBase64EncodedString:messageNode.iv];
-                NSData* decodedPayload = [HelperTools dataWithBase64EncodedString:messageNode.encryptedPayload];
+                NSString* ivStr = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header/iv#"];
+                NSString* encryptedPayload = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/payload#"];
+
+                NSData* iv = [HelperTools dataWithBase64EncodedString:ivStr];
+                NSData* decodedPayload = [HelperTools dataWithBase64EncodedString:encryptedPayload];
 
                 NSData* decData = [AESGcm decrypt:decodedPayload withKey:key andIv:iv withAuth:auth];
                 if(!decData) {

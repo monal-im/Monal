@@ -276,17 +276,13 @@
         //features advertised on our own jid/account
         if([iqNode.from isEqualToString:self.connection.identity.jid])
         {
-            [iqNode.features.allObjects enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                NSString *feature = (NSString *)obj;
-                if([feature isEqualToString:@"http://jabber.org/protocol/pubsub#publish"]) {
-                    self.connection.supportsPubSub = YES;
-                    *stop = YES;
-                }
-            }];
+            if([iqNode.features containsObject:@"http://jabber.org/protocol/pubsub#publish"]) {
+                self.connection.supportsPubSub = YES;
+            }
             
             if([iqNode.features containsObject:@"urn:xmpp:push:0"])
             {
-                self.connection.supportsPush=YES;
+                self.connection.supportsPush = YES;
                 self.enablePush();
             }
             

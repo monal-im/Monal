@@ -1931,7 +1931,7 @@ NSString *const kXMPPPresence = @"presence";
 
     //debug output
     @synchronized(_smacksSyncPoint) {
-        DDLogVerbose(@"persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@",
+        DDLogVerbose(@"persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d",
             values[@"stateSavedAt"],
             self.lastHandledInboundStanza,
             self.lastHandledOutboundStanza,
@@ -1939,7 +1939,10 @@ NSString *const kXMPPPresence = @"presence";
             self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
             self.streamID,
             _lastInteractionDate,
-            persistentIqHandlers
+            persistentIqHandlers,
+            self.connectionProperties.supportsPush,
+            self.connectionProperties.supportsHTTPUpload,
+            self.connectionProperties.pushEnabled
         );
     }
 }
@@ -2065,7 +2068,7 @@ NSString *const kXMPPPresence = @"presence";
 
         //debug output
         @synchronized(_smacksSyncPoint) {
-            DDLogVerbose(@"readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@",
+            DDLogVerbose(@"readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d",
                 dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
@@ -2073,7 +2076,10 @@ NSString *const kXMPPPresence = @"presence";
                 self.unAckedStanzas ? [self.unAckedStanzas count] : 0, self.unAckedStanzas ? "" : " (NIL)",
                 self.streamID,
                 _lastInteractionDate,
-                persistentIqHandlers
+                persistentIqHandlers,
+                self.connectionProperties.supportsPush,
+                self.connectionProperties.supportsHTTPUpload,
+                self.connectionProperties.pushEnabled
             );
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
@@ -2179,7 +2185,7 @@ NSString *const kXMPPPresence = @"presence";
     _exponentialBackoff = 0;
     _iqHandlers = [[NSMutableDictionary alloc] init];
 
-    XMPPIQ* sessionQuery= [[XMPPIQ alloc] initWithType:kiqSetType];
+    XMPPIQ* sessionQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
     MLXMLNode* session = [[MLXMLNode alloc] initWithElement:@"session"];
     [session setXMLNS:@"urn:ietf:params:xml:ns:xmpp-session"];
     [sessionQuery.children addObject:session];
@@ -2190,17 +2196,17 @@ NSString *const kXMPPPresence = @"presence";
     //--> all of this reasons imply that we had to start a new xmpp stream and our old cached disco data
     //    and other state values are stale now
     //(smacks state will be reset/cleared later on if appropriate, no need to handle smacks here)
-    self.connectionProperties.serverFeatures=nil;
-    self.connectionProperties.discoveredServices=nil;
-    self.connectionProperties.uploadServer=nil;
-    self.connectionProperties.conferenceServer=nil;
-    self.connectionProperties.usingCarbons2=NO;
-    self.connectionProperties.supportsPush=NO;
-    self.connectionProperties.supportsClientState=NO;
-    self.connectionProperties.supportsMam2=NO;
-    self.connectionProperties.supportsPubSub=NO;
-    self.connectionProperties.supportsHTTPUpload=NO;
-    self.connectionProperties.supportsPing=NO;
+    self.connectionProperties.serverFeatures = nil;
+    self.connectionProperties.discoveredServices = nil;
+    self.connectionProperties.uploadServer = nil;
+    self.connectionProperties.conferenceServer = nil;
+    self.connectionProperties.usingCarbons2 = NO;
+    self.connectionProperties.supportsPush = NO;
+    self.connectionProperties.supportsClientState = NO;
+    self.connectionProperties.supportsMam2 = NO;
+    self.connectionProperties.supportsPubSub = NO;
+    self.connectionProperties.supportsHTTPUpload = NO;
+    self.connectionProperties.supportsPing = NO;
 
     //now fetch roster, request disco and send initial presence
     [self fetchRoster];

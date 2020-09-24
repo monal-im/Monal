@@ -206,7 +206,6 @@
 "Last seen: %d days ago" = "Vu pour la dernière fois : Il y a %d jours";
 "Just seen" = "Vu à l'instant";
 "Join" = "Rejoindre";
-"Jabber, Openfire, Prosody etc.   " = "Jabber, Openfire, Prosody etc.   ";
 "Jabber ID" = "Identifiant Jabber";
 "Invalid username" = "Nom d'utilisateur invalide";
 "Invalid Credentials" = "Identifiants invalides";
@@ -300,5 +299,7 @@
 "Name: " = "Nom : ";
 "Os: " = "Système d'exploitation : ";
 "Software Version" = "Software Version";
-"Version: " = "Version : ";
 "Jabber, Openfire, Prosody etc. " = "Jabber, Prosody, ejabberd etc.   ";
+"Version: " = "Version: ";
+"Could not synchronize" = "Could not synchronize";
+"Please open the app to retry" = "Please open the app to retry";

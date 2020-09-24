@@ -190,7 +190,6 @@
 "Last seen: %d days ago" = "Văzut(ă) acum %d zile";
 "Just seen" = "Văzut(ă) adineauri";
 "Join" = "Alăturați-vă";
-"Jabber, Openfire, Prosody etc.   " = "Jabber, Openfire, Prosody etc.   ";
 "Jabber ID" = "Adresă XMPP";
 "Invalid username" = "Nume de utilizator invalid";
 "Invalid Credentials" = "Date de autentificare invalide";
@@ -302,3 +301,5 @@
 "Software Version" = "Software Version";
 "Version: " = "Version: ";
 "Jabber, Openfire, Prosody etc. " = "Jabber, Prosody, ejabberd etc.   ";
+"Could not synchronize" = "Could not synchronize";
+"Please open the app to retry" = "Please open the app to retry";

@@ -303,3 +303,5 @@
 "Version: " = "Version: ";
 "Loading more Messages from Server" = "Loading more Messages from Server";
 "Invalid Credentials" = "Invalid Credentials";
+"Could not synchronize" = "Could not synchronize";
+"Please open the app to retry" = "Please open the app to retry";

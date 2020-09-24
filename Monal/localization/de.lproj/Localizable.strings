@@ -181,7 +181,6 @@
 "Last seen: %d days ago" = "Zuletzt gesehen: vor %d Tagen";
 "Just seen" = "Gerade gesehen";
 "Join" = "Beitreten";
-"Jabber, Openfire, Prosody etc.   " = "Jabber, Openfire, Prosody usw.   ";
 "Jabber ID" = "Jabber-ID";
 "Invalid username" = "Ungültiger Benutzername";
 "Invalid Credentials" = "Ungültige Zugangsdaten";
@@ -302,3 +301,5 @@
 "Software Version" = "Software Version";
 "Version: " = "Version: ";
 "Jabber, Openfire, Prosody etc. " = "Jabber, Prosody, ejabberd usw.   ";
+"Could not synchronize" = "Could not synchronize";
+"Please open the app to retry" = "Please open the app to retry";

@@ -89,6 +89,10 @@
 {
     @synchronized(self) {
         DDLogInfo(@"Handling expired push");
+        
+        if([self.handlerList count]==1)
+            [HelperTools postSendingErrorNotification];
+        
         //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
         if([self.handlerList count])
         {
@@ -198,7 +202,7 @@
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         //display an error notification and disconnect this account, leaving the extension running until all accounts are idle
         //(disconnected accounts count as idle)
-        DDLogInfo(@"notification handler: account error --> publish this as error notification and disconnect the account");
+        DDLogInfo(@"notification handler: account error --> publishing this as error notification and disconnecting this account");
         //extract error contents and disconnect the account
         NSArray* payload = [notification.object copy];
         NSString* message = payload[1];

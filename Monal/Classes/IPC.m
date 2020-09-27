@@ -42,8 +42,8 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
     @synchronized(self) {
         NSAssert(_responseHandlers==nil, @"Please don't call [IPC initialize:@\"processName\" twice!");
         _responseHandlers = [[NSMutableDictionary alloc] init];
-        _sharedInstance = [[self alloc] initWithProcessName:processName];
         _darwinNotificationCenterRef = CFNotificationCenterGetDarwinNotifyCenter();
+        _sharedInstance = [[self alloc] initWithProcessName:processName];       //has to be last because it starts the thread which needs those global vars
     }
 }
 

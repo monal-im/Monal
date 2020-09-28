@@ -17,10 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MLXMPPConnection : NSObject
 
-@property (nonatomic, readonly) MLXMPPServer *server;
-@property (nonatomic, readonly) MLXMPPIdentity *identity;
-
-@property (nonatomic, readonly) NSString* boundJid;
+@property (nonatomic, readonly) MLXMPPServer* server;
+@property (nonatomic, readonly) MLXMPPIdentity* identity;
 
 //State
 
@@ -53,8 +51,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 -(id) initWithServer:(MLXMPPServer *) server andIdentity:(MLXMPPIdentity *) identity;
-
--(void) bindJid:(NSString *)jid;
 
 @end
 

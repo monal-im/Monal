@@ -57,13 +57,13 @@ static NSMutableDictionary* _typingNotifications;
         //update db
         [[DataLayer sharedInstance]
             setMessageId:[messageNode findFirst:@"/@id"]
-            errorType:[messageNode findFirst:@"error@type"] ? [messageNode findFirst:@"error@type"] : @""
-            errorReason:[messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"] ? [messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"] : @""
+            errorType:[messageNode check:@"error@type"] ? [messageNode findFirst:@"error@type"] : @""
+            errorReason:[messageNode check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"] ? [messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"] : @""
         ];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageErrorNotice object:nil userInfo:@{
             @"MessageID": [messageNode findFirst:@"/@id"],
-            @"errorType": [messageNode findFirst:@"error@type"] ? [messageNode findFirst:@"error@type"] : @"",
-            @"errorReason": [messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"] ? [messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"] : @""
+            @"errorType": [messageNode check:@"error@type"] ? [messageNode findFirst:@"error@type"] : @"",
+            @"errorReason": [messageNode check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"] ? [messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"] : @""
         }];
 
         return;
@@ -71,24 +71,20 @@ static NSMutableDictionary* _typingNotifications;
     
     
     NSString* stanzaid = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];
-    if(!stanzaid)
+    //check stnaza-id @by according to the rules outlined in XEP-0359
+    if(!stanzaid && [self.jid isEqualToString:[messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@by"]])
         stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
         
     if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
-    {
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalReceivedMucInviteNotice object:nil userInfo:@{@"from": messageNode.from}];
-    }
+
     NSString* recipient = messageNode.to;
-    
     if(!recipient)
-    {
         recipient = self.jid;
-    }
     
     NSString* decrypted;
-    if([messageNode check:@"/{jabber:client}message/{eu.siacs.conversations.axolotl}encrypted/payload"]) {
+    if([messageNode check:@"/{jabber:client}message/{eu.siacs.conversations.axolotl}encrypted/payload"])
         decrypted = [self.omemo decryptMessage:messageNode];
-    }
     
     if([messageNode check:@"body"] || [messageNode check:@"/<type=headline>/subject#"] || decrypted)
     {
@@ -98,9 +94,8 @@ static NSMutableDictionary* _typingNotifications;
         //processed messages already have server name
         if([messageNode check:@"/<type=groupchat>"])
         {
-            ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.from andServer:@"" forAccount:self.account.accountNo];
+            ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser andServer:@"" forAccount:self.account.accountNo];
             actualFrom = messageNode.fromResource;
-            messageNode.from = messageNode.fromUser;
         }
         if(ownNick && actualFrom && [actualFrom isEqualToString:ownNick])
         {
@@ -130,11 +125,8 @@ static NSMutableDictionary* _typingNotifications;
             BOOL encrypted = NO;
             NSString* body = [messageNode findFirst:@"body#"];
             
-            if([messageNode check:@"{jabber:x:oob}x/url#"])
-            {
+            if(body && [body isEqualToString:[messageNode findFirst:@"{jabber:x:oob}x/url#"]])
                 messageType = kMessageTypeImage;
-                body = [messageNode findFirst:@"{jabber:x:oob}x/url#"];
-            }
             
             if(decrypted)
             {
@@ -146,10 +138,10 @@ static NSMutableDictionary* _typingNotifications;
             {
                 messageType = kMessageTypeStatus;
                 
-                NSString* currentSubject = [[DataLayer sharedInstance] mucSubjectforAccount:self.account.accountNo andRoom:messageNode.from];
+                NSString* currentSubject = [[DataLayer sharedInstance] mucSubjectforAccount:self.account.accountNo andRoom:messageNode.fromUser];
                 if(![[messageNode findFirst:@"/<type=headline>/subject#"] isEqualToString:currentSubject])
                 {
-                    [[DataLayer sharedInstance] updateMucSubject:[messageNode findFirst:@"/<type=headline>/subject#"] forAccount:self.account.accountNo andRoom:messageNode.from];
+                    [[DataLayer sharedInstance] updateMucSubject:[messageNode findFirst:@"/<type=headline>/subject#"] forAccount:self.account.accountNo andRoom:messageNode.fromUser];
                     if(self.postPersistAction)
                         self.postPersistAction(messageNode, outerMessageNode, YES, encrypted, showAlert, [messageNode findFirst:@"/<type=headline>/subject#"], messageType, actualFrom);
                 }
@@ -224,30 +216,14 @@ static NSMutableDictionary* _typingNotifications;
         {
             //deduce state
             BOOL composing = NO;
-            BOOL notComposing = NO;
             if([@"active" isEqualToString:[messageNode findFirst:@"{http://jabber.org/protocol/chatstates}*$"]])
-            {
                 composing = NO;
-                notComposing = YES;
-            }
-            
-            if([@"composing" isEqualToString:[messageNode findFirst:@"{http://jabber.org/protocol/chatstates}*$"]])
-            {
+            else if([@"composing" isEqualToString:[messageNode findFirst:@"{http://jabber.org/protocol/chatstates}*$"]])
                 composing = YES;
-                notComposing = NO;
-            }
-            
-            if([@"paused" isEqualToString:[messageNode findFirst:@"{http://jabber.org/protocol/chatstates}*$"]])
-            {
+            else if([@"paused" isEqualToString:[messageNode findFirst:@"{http://jabber.org/protocol/chatstates}*$"]])
                 composing = NO;
-                notComposing = YES;
-            }
-            
-            if([@"inactive" isEqualToString:[messageNode findFirst:@"{http://jabber.org/protocol/chatstates}*$"]])
-            {
+            else if([@"inactive" isEqualToString:[messageNode findFirst:@"{http://jabber.org/protocol/chatstates}*$"]])
                 composing = NO;
-                notComposing = YES;
-            }
             
             //handle state
             if(
@@ -258,7 +234,7 @@ static NSMutableDictionary* _typingNotifications;
                         [[NSDate date] timeIntervalSinceDate:[messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"]] < 120
                     )
                 ) ||
-                notComposing
+                !composing
             )
             {
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{

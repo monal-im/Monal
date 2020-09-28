@@ -62,7 +62,6 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:0 ];
 }
 
 - (void)didReceiveMemoryWarning {

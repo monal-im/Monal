@@ -24,21 +24,18 @@ typedef void (^processAction)(void);
 
 @interface MLIQProcessor : NSObject
 
-@property (nonatomic, strong) iqCompletion sendIq;
-@property (nonatomic, strong) iqDelegateCompletion sendIqWithDelegate;
-@property (nonatomic, strong) processAction mamFinished;
-@property (nonatomic, strong) processAction initSession;
-@property (nonatomic, strong) processAction enablePush;
-@property (nonatomic, strong) processAction getVcards;
-
--(MLIQProcessor*) initWithAccount:(NSString*) accountNo connection:(MLXMPPConnection*) connection omemo:(MLOMEMO*) omemo;
--(MLIQProcessor*) initWithAccount:(NSString*) accountNo connection:(MLXMPPConnection*) connection;
-
 /**
  Process a iq, persist any changes and post notifications
  */
--(void) processIq:(XMPPIQ*) messageNode;
++(void) processIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account;
 
++(void) handleBindFor:(xmpp*) account withIqNode:(XMPPIQ*) iqNode;
++(void) handleRosterFor:(xmpp*) account withIqNode:(XMPPIQ*) iqNode;
++(void) handleAccountDiscoInfo:(xmpp*) account withIqNode:(XMPPIQ*) iqNode;
++(void) handleServerDiscoInfo:(xmpp*) account withIqNode:(XMPPIQ*) iqNode;
++(void) handleServiceDiscoInfo:(xmpp*) account withIqNode:(XMPPIQ*) iqNode;
++(void) handleServerDiscoItems:(xmpp*) account withIqNode:(XMPPIQ*) iqNode;
++(void) handleEntityCapsDisco:(xmpp*) account withIqNode:(XMPPIQ*) iqNode;
 
 @end
 

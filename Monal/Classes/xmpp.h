@@ -117,6 +117,8 @@ extern NSString* const kAccountHibernate;
 -(void) reconnect;
 -(void) reconnect:(double) wait;
 
+-(BOOL) isHibernated;
+
 /**
  send a message to a contact with xmpp id
  */
@@ -168,18 +170,6 @@ sets the status message. makes xmpp call
 sets away xmpp call.
  */
 -(void) setAway:(BOOL) away;
-
-/**
- request futher service detail
- */
--(void) getServiceDetails;
-
--(BOOL) isHibernated;
-
-/**
- get list of rooms on conference server
- */
--(void) getConferenceRooms;
 
 /**
  join a room on the conference server
@@ -271,7 +261,12 @@ Decline a call request
 -(void) registerUser:(NSString* _Nonnull) username withPassword:(NSString* _Nonnull) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
 
 
+#pragma mark - internal stuff for processors
+
 -(void) addMessageToMamPageArray:(XMPPMessage* _Nonnull) messageNode forOuterMessageNode:(XMPPMessage* _Nonnull) outerMessageNode withBody:(NSString* _Nonnull) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString* _Nonnull) messageType;
 -(NSArray* _Nullable) getOrderedMamPageFor:(NSString* _Nonnull) mamQueryId;
+-(void) bindResource:(NSString*) resource;
+-(void) initSession;
+-(void) getVcards;
 
 @end

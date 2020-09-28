@@ -93,7 +93,6 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setBindWithResource:(NSString*) resource
 {
-
     MLXMLNode* bindNode =[[MLXMLNode alloc] initWithElement:@"bind" andNamespace:@"urn:ietf:params:xml:ns:xmpp-bind"];
     MLXMLNode* resourceNode = [[MLXMLNode alloc] initWithElement:@"resource"];
     resourceNode.data = resource;

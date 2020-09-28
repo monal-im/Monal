@@ -80,7 +80,6 @@ NSString *const kXMPPPresence = @"presence";
 
     //does not reset at disconnect
     BOOL _loggedInOnce;
-    BOOL _hasRequestedServerInfo;
     BOOL _isCSIActive;
     NSDate* _lastInteractionDate;
     
@@ -767,6 +766,14 @@ NSString *const kXMPPPresence = @"presence";
 
 #pragma mark XMPP
 
+-(BOOL) isHibernated
+{
+    //don't allow sending "hibernated stanzas" while reconnecting, that can trigger xmpp stream errors
+    BOOL hibernated = (_accountState < kStateReconnecting);
+    hibernated &= (_streamID != nil);
+    return hibernated;
+}
+
 -(void) startXMPPStream:(BOOL) clearReceiveQueue
 {
     if(_xmlParser!=nil)
@@ -1096,65 +1103,6 @@ NSString *const kXMPPPresence = @"presence";
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
 #ifndef DISABLE_OMEMO
-        IQprocessor = [[MLIQProcessor alloc] initWithAccount:self
-                                                            connection:self.connectionProperties
-                                                                omemo:self.omemo];
-#else
-        IQprocessor = [[MLIQProcessor alloc] initWithAccount:self
-                                                            connection:self.connectionProperties
-                                self.omemo:nil];
-#endif
-        IQprocessor.sendIq=^(MLXMLNode* _Nullable iq, monal_iq_handler_t resultHandler, monal_iq_handler_t errorHandler) {
-            if(iq)
-            {
-                DDLogInfo(@"sending iq stanza with handler");
-                [self sendIq:iq withResponseHandler:resultHandler andErrorHandler:errorHandler];
-            }
-        };
-        IQprocessor.sendIqWithDelegate=^(MLXMLNode* _Nullable iq, id delegate, SEL method, NSArray* args) {
-            if(iq)
-            {
-                DDLogInfo(@"sending iq stanza with delegate");
-                [self sendIq:iq withDelegate:delegate andMethod:method andAdditionalArguments:args];
-            }
-        };
-
-        //this will be called after mam catchup is complete
-        IQprocessor.mamFinished = ^() {
-            [self mamFinished];
-        };
-        
-        //this will be called after bind
-        IQprocessor.initSession = ^() {
-            //init session and query disco, roster etc.
-            [self initSession];
-
-            //only do this if smacks is not supported because handling of the old queue will be already done on smacks enable/failed enable
-            if(!self.connectionProperties.supportsSM3)
-            {
-                @synchronized(_smacksSyncPoint) {
-                    //resend stanzas still in the outgoing queue and clear it afterwards
-                    //this happens if the server has internal problems and advertises smacks support
-                    //but failes to resume the stream as well as to enable smacks on the new stream
-                    //clean up those stanzas to only include message stanzas because iqs don't survive a session change
-                    //message duplicates are possible in this scenario, but that's better than dropping messages
-                    //the self.unAckedStanzas queue is not touched by initSession() above because smacks is disabled at this point
-                    [self resendUnackedMessageStanzasOnly:self.unAckedStanzas];
-                }
-            }
-        };
-
-        IQprocessor.enablePush = ^() {
-            [self enablePush];
-        };
-
-        IQprocessor.getVcards = ^() {
-            [self getVcards];
-        };
-        
-        //************************************************************************************************************
-        
-#ifndef DISABLE_OMEMO
         messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self jid:self.connectionProperties.identity.jid connection:self.connectionProperties omemo:self.omemo];
 #else
         messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self jid:self.connectionProperties.identity.jid connection:self.connectionProperties omemo:nil];
@@ -1211,7 +1159,6 @@ NSString *const kXMPPPresence = @"presence";
         if([parsedStanza check:@"/{jabber:client}iq"] && [parsedStanza check:@"/@id"] && [parsedStanza check:@"/@type"])   //sanity: check if iq id and type attributes are present
         {
             XMPPIQ* iqNode = (XMPPIQ*)parsedStanza;
-            [IQprocessor processIq:iqNode];
             
             //process registered iq handlers
             if(_iqHandlers[[iqNode findFirst:@"/@id"]])
@@ -1243,24 +1190,22 @@ NSString *const kXMPPPresence = @"presence";
                 //remove handler after calling it
                 [_iqHandlers removeObjectForKey:[iqNode findFirst:@"/@id"]];
             }
+            else            //only process iqs that have not already been handled by a registered iq handler
+            {
+                [MLIQProcessor processIq:iqNode forAccount:self];
 
 #ifndef DISABLE_OMEMO
-            if([[iqNode findFirst:@"/@id"] isEqualToString:self.omemo.deviceQueryId])
-            {
-                if([[iqNode findFirst:@"/@type"] isEqualToString:kiqErrorType]) {
-                    //there are no devices published yet
-                    [self.omemo sendOMEMODeviceWithForce:NO];
+                if([[iqNode findFirst:@"/@id"] isEqualToString:self.omemo.deviceQueryId])
+                {
+                    if([[iqNode findFirst:@"/@type"] isEqualToString:kiqErrorType]) {
+                        //there are no devices published yet
+                        [self.omemo sendOMEMODeviceWithForce:NO];
+                    }
                 }
-            }
 #endif
-            if([iqNode.from isEqualToString:self.connectionProperties.conferenceServer] && [iqNode check:@"{http://jabber.org/protocol/disco#items}query"])
-            {
-                self->_roomList = [iqNode find:@"{http://jabber.org/protocol/disco#items}query/item@@"];
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasRoomsNotice object:self];
+                if([[iqNode findFirst:@"/@id"] isEqualToString:self.jingle.idval])
+                    [self jingleResult:iqNode];
             }
-
-            if([[iqNode findFirst:@"/@id"] isEqualToString:self.jingle.idval])
-                [self jingleResult:iqNode];
             
             //only mark stanza as handled *after* processing it
             [self incrementLastHandledStanza];
@@ -1274,7 +1219,7 @@ NSString *const kXMPPPresence = @"presence";
             //the original "outer" message will be kept in outerMessageNode while the forwarded stanza will be stored in messageNode
             if([outerMessageNode check:@"{urn:xmpp:mam:2}result"])          //mam result
             {
-                if([outerMessageNode check:@"/@from"])
+                if(outerMessageNode.from)
                 {
                     DDLogError(@"mam results don't have a from attribute on the outer message stanzas, ignoring this spoofed mam result!");
                     //even these stanzas have do be counted by smacks
@@ -1291,7 +1236,7 @@ NSString *const kXMPPPresence = @"presence";
             }
             else if([outerMessageNode check:@"{urn:xmpp:carbons:2}*"])     //carbon copy
             {
-                if(![self.connectionProperties.identity.jid isEqualToString:[outerMessageNode findFirst:@"/@from"]])
+                if(![self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from])
                 {
                     DDLogError(@"carbon copies must be from our bare jid, ignoring this spoofed carbon copy!");
                     //even these stanzas have do be counted by smacks
@@ -1316,7 +1261,8 @@ NSString *const kXMPPPresence = @"presence";
             //add newest stanzaid to database *after* processing the message, but only for non-mam messages or mam catchup
             //(e.g. those messages going forward in time not backwards)
             NSString* stanzaid = [outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLcatchup:"] ? [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"] : nil;
-            if(!stanzaid)
+            //check stnaza-id @by according to the rules outlined in XEP-0359
+            if(!stanzaid && [self.connectionProperties.identity.jid isEqualToString:[messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@by"]])
                 stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
             if(stanzaid)
             {
@@ -1434,8 +1380,12 @@ NSString *const kXMPPPresence = @"presence";
                 //handle entity capabilities (this has to be done *after* setOnlineBuddy which sets the ver hash for the resource to "")
                 if([presenceNode check:@"{http://jabber.org/protocol/caps}c@hash"] && [presenceNode check:@"{http://jabber.org/protocol/caps}c@ver"] && presenceNode.fromUser && presenceNode.fromResource)
                 {
+                    BOOL shouldQueryCaps = NO;
                     if(![@"sha-1" isEqualToString:[presenceNode findFirst:@"{http://jabber.org/protocol/caps}c@hash"]])
-                        DDLogWarn(@"Unknown caps hash algo '%@'", [presenceNode findFirst:@"{http://jabber.org/protocol/caps}c@hash"]);
+                    {
+                        DDLogWarn(@"Unknown caps hash algo '%@', querying disco without checking hash!", [presenceNode findFirst:@"{http://jabber.org/protocol/caps}c@hash"]);
+                        shouldQueryCaps = YES;
+                    }
                     else
                     {
                         NSString* newVer = [presenceNode findFirst:@"{http://jabber.org/protocol/caps}c@ver"];
@@ -1446,11 +1396,16 @@ NSString *const kXMPPPresence = @"presence";
                         if(![[DataLayer sharedInstance] getCapsforVer:newVer])
                         {
                             DDLogInfo(@"Presence included unknown caps hash %@, querying disco", newVer);
-                            XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
-                            [discoInfo setiqTo:presenceNode.from];
-                            [discoInfo setDiscoInfoNode];
-                            [self send:discoInfo];
+                            shouldQueryCaps = YES;
                         }
+                    }
+                    
+                    if(shouldQueryCaps)
+                    {
+                        XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
+                        [discoInfo setiqTo:presenceNode.from];
+                        [discoInfo setDiscoInfoNode];
+                        [self sendIq:discoInfo withDelegate:[MLIQProcessor class] andMethod:@selector(handleEntityCapsDisco:withIqNode:) andAdditionalArguments:nil];
                     }
                 }
 
@@ -1571,7 +1526,7 @@ NSString *const kXMPPPresence = @"presence";
                 }
 
                 //if resume failed. bind  a new resource like normal (supportsSM3 is still YES here but switches to NO on failed enable)
-                [self bindResource];
+                [self bindResource:self.connectionProperties.identity.resource];
             }
             else        //smacks enable failed
             {
@@ -1579,14 +1534,6 @@ NSString *const kXMPPPresence = @"presence";
 
                 //init session and query disco, roster etc.
                 [self initSession];
-
-                //resend stanzas still in the outgoing queue and clear it afterwards
-                //this happens if the server has internal problems and advertises smacks support
-                //but failes to resume the stream as well as to enable smacks on the new stream
-                //clean up those stanzas to only include message stanzas because iqs don't survive a session change
-                //message duplicates are possible in this scenario, but that's better than dropping messages
-                //the self.unAckedStanzas queue is not touched by initSession() above because smacks is disabled at this point
-                [self resendUnackedMessageStanzasOnly:self.unAckedStanzas];
             }
         }
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}failure"])
@@ -1725,7 +1672,7 @@ NSString *const kXMPPPresence = @"presence";
                     [self send:resumeNode];
                 }
                 else
-                    [self bindResource];
+                    [self bindResource:self.connectionProperties.identity.resource];
             }
         }
         else
@@ -1934,12 +1881,10 @@ NSString *const kXMPPPresence = @"presence";
     [values setObject:persistentIqHandlers forKey:@"iqHandlers"];
 
     [values setValue:[self.connectionProperties.serverFeatures copy] forKey:@"serverFeatures"];
-    if(self.connectionProperties.uploadServer) {
+    if(self.connectionProperties.uploadServer)
         [values setObject:self.connectionProperties.uploadServer forKey:@"uploadServer"];
-    }
-    if(self.connectionProperties.conferenceServer) {
+    if(self.connectionProperties.conferenceServer)
         [values setObject:self.connectionProperties.conferenceServer forKey:@"conferenceServer"];
-    }
 
     [values setObject:[NSNumber numberWithBool:_loggedInOnce] forKey:@"loggedInOnce"];
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
@@ -1952,9 +1897,7 @@ NSString *const kXMPPPresence = @"presence";
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
 
     if(self.connectionProperties.discoveredServices)
-    {
         [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
-    }
 
     [values setObject:_lastInteractionDate forKey:@"lastInteractionDate"];
     [values setValue:[NSDate date] forKey:@"stateSavedAt"];
@@ -2157,25 +2100,30 @@ NSString *const kXMPPPresence = @"presence";
     }
 }
 
--(void) bindResource
+-(void) bindResource:(NSString*) resource
 {
     _accountState = kStateBinding;
     XMPPIQ* iqNode =[[XMPPIQ alloc] initWithType:kiqSetType];
-    [iqNode setBindWithResource:self.connectionProperties.identity.resource];
-    [self send:iqNode];
+    [iqNode setBindWithResource:resource];
+    [self sendIq:iqNode withDelegate:[MLIQProcessor class] andMethod:@selector(handleBindFor:withIqNode:) andAdditionalArguments:nil];
 }
 
 -(void) queryDisco
 {
-    XMPPIQ* discoItems = [[XMPPIQ alloc] initWithType:kiqGetType];
-    [discoItems setiqTo:self.connectionProperties.identity.domain];
-    [discoItems setDiscoItemNode];
-    [self send:discoItems];
-
+    XMPPIQ* accountInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
+    [accountInfo setiqTo:self.connectionProperties.identity.jid];
+    [accountInfo setDiscoInfoNode];
+    [self sendIq:accountInfo withDelegate:[MLIQProcessor class] andMethod:@selector(handleAccountDiscoInfo:withIqNode:) andAdditionalArguments:nil];
+    
     XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoInfo setiqTo:self.connectionProperties.identity.domain];
     [discoInfo setDiscoInfoNode];
-    [self send:discoInfo];
+    [self sendIq:discoInfo withDelegate:[MLIQProcessor class] andMethod:@selector(handleServerDiscoInfo:withIqNode:) andAdditionalArguments:nil];
+    
+    XMPPIQ* discoItems = [[XMPPIQ alloc] initWithType:kiqGetType];
+    [discoItems setiqTo:self.connectionProperties.identity.domain];
+    [discoItems setDiscoItemNode];
+    [self sendIq:discoItems withDelegate:[MLIQProcessor class] andMethod:@selector(handleServerDiscoItems:withIqNode:) andAdditionalArguments:nil];
 }
 
 
@@ -2199,15 +2147,12 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) fetchRoster
 {
-    XMPPIQ* roster=[[XMPPIQ alloc] initWithType:kiqGetType];
-    NSString *rosterVer;
+    XMPPIQ* roster = [[XMPPIQ alloc] initWithType:kiqGetType];
+    NSString* rosterVer;
     if(self.connectionProperties.supportsRosterVersion)
-    {
-        rosterVer=[[DataLayer sharedInstance] getRosterVersionForAccount:self.accountNo];
-    }
+        rosterVer = [[DataLayer sharedInstance] getRosterVersionForAccount:self.accountNo];
     [roster setRosterRequest:rosterVer];
-
-    [self send:roster];
+    [self sendIq:roster withDelegate:[MLIQProcessor class] andMethod:@selector(handleRosterFor:withIqNode:) andAdditionalArguments:nil];
 }
 
 
@@ -2223,12 +2168,6 @@ NSString *const kXMPPPresence = @"presence";
     _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
     _exponentialBackoff = 0;
     _iqHandlers = [[NSMutableDictionary alloc] init];
-
-    XMPPIQ* sessionQuery = [[XMPPIQ alloc] initWithType:kiqSetType];
-    MLXMLNode* session = [[MLXMLNode alloc] initWithElement:@"session"];
-    [session setXMLNS:@"urn:ietf:params:xml:ns:xmpp-session"];
-    [sessionQuery addChild:session];
-    [self send:sessionQuery];
 
     //force new disco queries because we landed here because of a failed smacks resume
     //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)
@@ -2253,7 +2192,20 @@ NSString *const kXMPPPresence = @"presence";
     [self sendPresence];
     [self sendCurrentCSIState];
     
+    //only do this if smacks is not supported because handling of the old queue will be already done on smacks enable/failed enable
+    if(!self.connectionProperties.supportsSM3)
+    {
+        //resend stanzas still in the outgoing queue and clear it afterwards
+        //this happens if the server has internal problems and advertises smacks support
+        //but failes to resume the stream as well as to enable smacks on the new stream
+        //clean up those stanzas to only include message stanzas because iqs don't survive a session change
+        //message duplicates are possible in this scenario, but that's better than dropping messages
+        //the self.unAckedStanzas queue is not touched by initSession() above because smacks is disabled at this point
+        [self resendUnackedMessageStanzasOnly:self.unAckedStanzas];
+    }
+    
     //mam query will be done in MLIQProcessor once the disco result returns
+    
 #ifndef DISABLE_OMEMO
     // omemo
     [self.omemo queryOMEMODevicesFrom:self.connectionProperties.identity.jid];
@@ -2320,46 +2272,6 @@ NSString *const kXMPPPresence = @"presence";
         [self send:iqEntitySoftWareVersion];
     }
 }
-
-#pragma mark query info
-
--(void) getServiceDetails
-{
-    if(_hasRequestedServerInfo)
-        return;  // no need to call again on disconnect
-
-    if(!self.connectionProperties.discoveredServices)
-    {
-        DDLogInfo(@"no discovered services");
-        return;
-    }
-
-    for (NSDictionary *item in self.connectionProperties.discoveredServices)
-    {
-        XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
-        NSString* jid = [item objectForKey:@"jid"];
-        if(jid)
-        {
-            [discoInfo setiqTo:jid];
-            [discoInfo setDiscoInfoNode];
-            [self send:discoInfo];
-
-            _hasRequestedServerInfo=YES;
-        } else
-        {
-            DDLogError(@"no jid on info");
-        }
-    }
-}
-
--(BOOL) isHibernated
-{
-    //don't allow sending "hibernated stanzas" while reconnecting, that can trigger xmpp stream errors
-    BOOL hibernated = (_accountState < kStateReconnecting);
-    hibernated &= (_streamID != nil);
-    return hibernated;
-}
-
 
 #pragma mark HTTP upload
 
@@ -2499,7 +2411,16 @@ NSString *const kXMPPPresence = @"presence";
 {
     XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query mamArchivePref];
-    [self send:query];
+    //this can be a non persistent iq handler because getMAMPrefs is only called from the ui
+    //THIS HAS TO BE CHANGED IF THIS METHOD IS CALLED FROM OTHER MORE PERSISTENT PLACES
+    [self sendIq:query withResponseHandler:^(XMPPIQ* response) {
+        if([response check:@"{urn:xmpp:mam:2}prefs@default"])
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMLMAMPref object:@{@"mamPref": [response findFirst:@"{urn:xmpp:mam:2}prefs@default"]}];
+        else
+            DDLogError(@"MAM prefs query returned unexpected result: %@", response);
+    } andErrorHandler:^(XMPPIQ* error) {
+        DDLogError(@"MAM prefs query returned an error: %@", error);
+    }];
 }
 
 -(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid withCompletion:(void (^)(NSArray* _Nullable)) completion
@@ -2569,25 +2490,6 @@ NSString *const kXMPPPresence = @"presence";
 }
 
 #pragma mark - MUC
-
--(void) getConferenceRooms
-{
-    if(self.connectionProperties.conferenceServer && !_roomList)
-    {
-        XMPPIQ *discoInfo =[[XMPPIQ alloc] initWithType:kiqGetType];
-        [discoInfo setiqTo:self.connectionProperties.conferenceServer];
-        [discoInfo setDiscoInfoNode];
-        [self send:discoInfo];
-    }
-    else
-    {
-        if(!self.connectionProperties.conferenceServer)
-            DDLogInfo(@"no conference server discovered");
-        if(_roomList)
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasRoomsNotice object:self];
-    }
-}
-
 
 -(void) joinRoom:(NSString*)room withNick:(NSString*)nick andPassword:(NSString *)password
 {

@@ -62,11 +62,6 @@
 -(void) blocked:(BOOL) isBlockd Jid:(MLContact *) contact;
 
 /**
- Gets service details for account
- */
--(void) getServiceDetailsForAccount:(NSInteger) row;
-
-/**
  Returns the user set name of the conencted account
  */
 -(NSString*) getAccountNameForConnectedRow:(NSInteger) row;

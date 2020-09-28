@@ -108,10 +108,7 @@
     [super viewWillAppear:animated];
     
     if([[MLXMPPManager sharedInstance].connectedXMPP count]==1)
-    {
-        [[MLXMPPManager sharedInstance] getServiceDetailsForAccount:0];
         _selectedRow=0;
-    }
 }
 
 #pragma mark tableview datasource delegate

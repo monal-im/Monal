@@ -49,7 +49,6 @@ typedef void (^monal_void_block_t)(void);
 #define kMonalMessageErrorNotice @"kMonalMessageErrorNotice"
 #define kMonalReceivedMucInviteNotice @"kMonalReceivedMucInviteNotice"
 
-#define kMLHasRoomsNotice @"kMLHasRoomsNotice"
 #define kMLHasConnectedNotice @"kMLHasConnectedNotice"
 #define kMonalFinishedCatchup @"kMonalFinishedCatchup"
 #define kMonalIdle @"kMonalIdle"

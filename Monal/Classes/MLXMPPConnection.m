@@ -10,25 +10,19 @@
 
 @interface MLXMPPConnection ()
 
-@property (nonatomic) MLXMPPServer *server;
-@property (nonatomic) MLXMPPIdentity *identity;
-@property (nonatomic) NSString* resource;
-@property (nonatomic, strong) NSString* boundJid;
+@property (nonatomic) MLXMPPServer* server;
+@property (nonatomic) MLXMPPIdentity* identity;
 
 @end
 
 @implementation MLXMPPConnection
 
--(id) initWithServer:(MLXMPPServer *) server andIdentity:(MLXMPPIdentity *) identity {
-    self=[super init];
-    self.server=server;
-    self.identity=identity;
-    return self;
-}
-
--(void) bindJid:(NSString *)jid
+-(id) initWithServer:(MLXMPPServer*) server andIdentity:(MLXMPPIdentity*) identity
 {
-    self.boundJid=jid;
+    self = [super init];
+    self.server = server;
+    self.identity = identity;
+    return self;
 }
 
 @end

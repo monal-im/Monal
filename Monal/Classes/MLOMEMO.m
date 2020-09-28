@@ -151,7 +151,7 @@ static const size_t MAX_OMEMO_KEYS = 120;
 {
     if(receivedDevices)
     {
-        NSAssert(self._senderJid == self._connection.identity.jid, @"connection jid should be equal to the senderJid");
+        NSAssert([self._senderJid isEqualToString:self._connection.identity.jid], @"connection jid should be equal to the senderJid");
 
         NSArray<NSNumber*>* existingDevices = [self.monalSignalStore knownDevicesForAddressName:source];
 

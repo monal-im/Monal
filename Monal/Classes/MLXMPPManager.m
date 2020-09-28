@@ -741,17 +741,6 @@ static const int sendMessageTimeoutSeconds = 10;
 
 #pragma mark - getting details
 
--(void) getServiceDetailsForAccount:(NSInteger) row
-{
-    xmpp* account;
-    @synchronized(_connectedXMPP) {
-        if(row < [_connectedXMPP count] && row>=0)
-            account = [_connectedXMPP objectAtIndex:row];
-    }
-    if(account)
-        [account getServiceDetails];
-}
-
 -(NSString*) getAccountNameForConnectedRow:(NSInteger) row
 {
     xmpp* account;

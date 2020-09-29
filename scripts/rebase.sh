@@ -13,6 +13,7 @@ git branch tmpcopy
 git log develop..upstream/develop > ../changes.txt
 first="$(git log --grep='\*\*\* INITIAL ALPHA COMMIT \*\*\*' --since='Mon Jun 8 16:33:25 2020 +0200' --author='tmolitor-stud-tu' --oneline --no-abbrev-commit tmpcopy | awk '{print $1}')"
 git reset --hard upstream/develop
+touch ../changes.txt
 ls -l ../changes.txt
 mv ../changes.txt changes.txt
 git add changes.txt
@@ -21,5 +22,6 @@ git cherry-pick $first^..tmpcopy
 #this would contain old commits now rebased/changed in Monal
 #git cherry-pick develop..tmpcopy
 git branch -D tmpcopy
+git remote remove upstream
 date
 git push --force-with-lease

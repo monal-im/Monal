@@ -133,6 +133,16 @@ static NSRegularExpression* componentParserRegex;
     [_attributes setObject:[xmlns copy] forKey:kXMLNS];
 }
 
++(MLXMLNode*) createFormEntry:(NSString*) name withValue:(NSString*) value andType:(NSString*) type
+{
+    MLXMLNode* retval = [[MLXMLNode alloc] initWithElement:@"field" withAttributes:@{@"var":name} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{@"var":name} andChildren:@[] andData:value]
+    ] andData:nil];
+    if(type)
+        retval.attributes[@"type"] = type;
+    return retval;
+}
+
 -(void) addChild:(MLXMLNode*) child
 {
     MLXMLNode* copy = [child copy];

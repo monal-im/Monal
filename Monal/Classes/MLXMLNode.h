@@ -40,6 +40,8 @@
  */
 -(void) setXMLNS:(NSString*) xmlns;
 
++(MLXMLNode*) createFormEntry:(NSString*) name withValue:(NSString*) value andType:(NSString*) type;
+
 /**
  Generates an XML String suitable for writing based on the node
  */

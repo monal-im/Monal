@@ -47,38 +47,20 @@ NSString* const kiqErrorType = @"error";
 }
 
 #pragma mark iq set
--(void) setPushEnableWithNode:(NSString *)node andSecret:(NSString *)secret
+
+-(void) setPushEnableWithNode:(NSString*) node andSecret:(NSString*) secret
 {
-    MLXMLNode* enableNode =[[MLXMLNode alloc] init];
-    enableNode.element=@"enable";
-    [enableNode.attributes setObject:@"urn:xmpp:push:0" forKey:kXMLNS];
-    [enableNode.attributes setObject:[MLPush pushServer] forKey:@"jid"];
-    [enableNode.attributes setObject:node forKey:@"node"];
-    [self addChild:enableNode];
-    
-    MLXMLNode* xNode =[[MLXMLNode alloc] init];
-    xNode.element=@"x";
-    [xNode.attributes setObject:@"jabber:x:data" forKey:kXMLNS];
-    [xNode.attributes setObject:@"submit" forKey:@"type"];
-    [enableNode addChild:xNode];
-    
-    MLXMLNode* formTypeFieldNode =[[MLXMLNode alloc] init];
-    formTypeFieldNode.element=@"field";
-    [formTypeFieldNode.attributes setObject:@"FORM_TYPE" forKey:@"var"];
-    MLXMLNode* formTypeValueNode =[[MLXMLNode alloc] init];
-    formTypeValueNode.element=@"value";
-    formTypeValueNode.data=@"http://jabber.org/protocol/pubsub#publish-options";
-    [formTypeFieldNode addChild:formTypeValueNode];
-    [xNode addChild:formTypeFieldNode];
-    
-    MLXMLNode* secretFieldNode =[[MLXMLNode alloc] init];
-    secretFieldNode.element=@"field";
-    [secretFieldNode.attributes setObject:@"secret" forKey:@"var"];
-    MLXMLNode* secretValueNode =[[MLXMLNode alloc] init];
-    secretValueNode.element=@"value";
-    secretValueNode.data=secret;
-    [secretFieldNode addChild:secretValueNode];
-    [xNode addChild:secretFieldNode];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
+        @"jid": [MLPush pushServer],
+        @"node": node
+    } andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data" withAttributes:@{
+            @"type": @"submit"
+        } andChildren:@[
+            [MLXMLNode createFormEntry:@"FORM_TYPE" withValue:@"http://jabber.org/protocol/pubsub#publish-options" andType:nil],
+            [MLXMLNode createFormEntry:@"secret" withValue:secret andType:nil]
+        ] andData:nil]
+    ] andData:nil]];
 }
 
 -(void) setPushDisableWithNode:(NSString *)node

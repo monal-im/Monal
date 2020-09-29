@@ -1098,59 +1098,6 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) processInput:(MLXMLNode*) parsedStanza
 {
-    static MLIQProcessor* IQprocessor;
-    static MLMessageProcessor* messageProcessor;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-#ifndef DISABLE_OMEMO
-        messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self jid:self.connectionProperties.identity.jid connection:self.connectionProperties omemo:self.omemo];
-#else
-        messageProcessor = [[MLMessageProcessor alloc] initWithAccount:self jid:self.connectionProperties.identity.jid connection:self.connectionProperties omemo:nil];
-#endif
-
-        messageProcessor.sendStanza=^(MLXMLNode * _Nullable nodeResponse) {
-            if(nodeResponse) {
-                [self send:nodeResponse];
-            }
-        };
-        
-        messageProcessor.postPersistAction = ^(XMPPMessage* messageNode, XMPPMessage* outerMessageNode, BOOL success, BOOL encrypted, BOOL showAlert,  NSString* body, NSString* newMessageType, NSString* actualFrom) {
-            if(success)
-            {
-                if([messageNode check:@"{urn:xmpp:receipts}request"] && ![messageNode.fromUser isEqualToString:self.connectionProperties.identity.jid])
-                {
-                    XMPPMessage* receiptNode = [[XMPPMessage alloc] init];
-                    //the message type is needed so that the store hint is accepted by the server
-                    [receiptNode.attributes setObject:[messageNode findFirst:@"/@type"] forKey:@"type"];
-                    [receiptNode.attributes setObject:messageNode.fromUser forKey:@"to"];
-                    [receiptNode setXmppId:[[NSUUID UUID] UUIDString]];
-                    [receiptNode setReceipt:[messageNode findFirst:@"/@id"]];
-                    [receiptNode setStoreHint];
-                    [self send:receiptNode];
-                }
-
-                void(^notify)(BOOL) = ^(BOOL success) {
-                    if(messageNode.fromUser)
-                    {
-                        MLMessage* message = [self parseMessageToMLMessage:messageNode withBody:body andEncrypted:encrypted andShowAlert:showAlert andMessageType:newMessageType andActualFrom:actualFrom];
-
-                        DDLogInfo(@"sending out kMonalNewMessageNotice notification");
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:self userInfo:@{@"message":message}];
-                    }
-                    else
-                        DDLogInfo(@"no messageNode.from, not notifying");
-                };
-
-                if(![messageNode.fromUser isEqualToString:self.connectionProperties.identity.jid])
-                    notify([[DataLayer sharedInstance] addActiveBuddies:messageNode.fromUser forAccount:self.accountNo]);
-                else
-                    notify([[DataLayer sharedInstance] addActiveBuddies:messageNode.to forAccount:self.accountNo]);
-            }
-            else
-                DDLogError(@"error adding message");
-        };
-    });
-    
     DDLogDebug(@"RECV Stanza: %@", parsedStanza);
     
     //only process most stanzas/nonzas after having a secure context
@@ -1256,7 +1203,7 @@ NSString *const kXMPPPresence = @"presence";
             //we do this because we don't want to randomly add one single message to our history db after the user installs the app / adds a new account
             //if the user wants to see older messages he can retrieve them using the ui (endless upscrolling through mam)
             if(!([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLignore:"]))
-                [messageProcessor processMessage:messageNode andOuterMessage:outerMessageNode];
+                [MLMessageProcessor processMessage:messageNode andOuterMessage:outerMessageNode forAccount:self];
             
             //add newest stanzaid to database *after* processing the message, but only for non-mam messages or mam catchup
             //(e.g. those messages going forward in time not backwards)

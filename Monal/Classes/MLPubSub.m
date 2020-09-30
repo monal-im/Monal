@@ -15,18 +15,12 @@
     xmpp* _account;
     NSMutableDictionary* _handlers;
     NSMutableDictionary* _cache;
+    NSMutableDictionary* _configuredNodes;
 }
 @end
 
 
 @implementation MLPubSub
-
-+(NSArray*) getDesiredNodesList
-{
-    return @[
-        @"eu.siacs.conversations.axolotl.devicelist"
-    ];
-}
 
 -(id) initWithAccount:(xmpp* _Nonnull) account
 {
@@ -35,6 +29,25 @@
     _handlers = [[NSMutableDictionary alloc] init];
     _cache = [[NSMutableDictionary alloc] init];
     return self;
+}
+
+-(void) registerInterestForNode:(NSString* _Nonnull) node withPersistentCaching:(BOOL) caching
+{
+    @synchronized(_cache) {
+        _configuredNodes[node] = caching ? @YES : @NO;
+        _cache[node][@"persistentCache"] = _configuredNodes[node];
+        [_account setPubSubNotificationsForNodes:[_configuredNodes allKeys]];
+    }
+}
+
+-(void) unregisterInterestForNode:(NSString* _Nonnull) node
+{
+    @synchronized(_cache) {
+        //deactivate persistent cache but keep cached data (we always cache data, even for nodes not registered for automatic refres through "+notify")
+        if(_cache[node])
+            _cache[node][@"persistentCache"] = @NO;
+        [_configuredNodes removeObjectForKey:node];
+    }
 }
 
 -(void) registerHandler:(monal_pubsub_handler_t) handler forNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nullable) jid
@@ -71,14 +84,16 @@
     [_handlers[node] removeObjectForKey:jid];
 }
 
--(NSArray* _Nullable) getCachedDataForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid
+-(NSDictionary* _Nullable) getCachedDataForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid
 {
-    if(_cache[jid] && _cache[jid][node])
-        return [[NSDictionary alloc] initWithDictionary:_cache[jid][node] copyItems:YES];
-    return nil;
+    @synchronized(_cache) {
+        if(_cache[node] && _cache[node][@"data"][jid])
+            return [[NSDictionary alloc] initWithDictionary:_cache[node][@"data"][jid] copyItems:YES];
+        return nil;
+    }
 }
 
--(void) forceRefreshForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid
+-(void) forceRefreshForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid withCompletion:(monal_pubsub_fetch_completion_t _Nullable) completion
 {
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqGetType to:jid];
     [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
@@ -86,8 +101,11 @@
     ] andData:nil]];
     [_account sendIq:query withResponseHandler:^(XMPPIQ* result) {
         [self handleItems:[result find:@"{http://jabber.org/protocol/pubsub#event}event/items"] fromJid:result.fromUser];
-    } andErrorHandler:^(XMPPIQ* error){
-        //ignore errors for now
+        if(completion)
+            completion(YES, result);
+    } andErrorHandler:^(XMPPIQ* error) {
+        if(completion)
+            completion(NO, error);
     }];
 }
 
@@ -108,12 +126,26 @@
 
 -(NSDictionary*) getInternalData
 {
-    return [[NSDictionary alloc] initWithDictionary:_cache copyItems:YES];
+    @synchronized(_cache) {
+        return [[NSDictionary alloc] initWithDictionary:_cache copyItems:YES];
+    }
 }
 
 -(void) setInternalData:(NSDictionary*) data
 {
-    _cache = [NSMutableDictionary dictionaryWithDictionary:data];
+    @synchronized(_cache) {
+        _cache = [NSMutableDictionary dictionaryWithDictionary:data];
+    }
+}
+
+-(void) invalidateCache
+{
+    @synchronized(_cache) {
+        //only invalidate non-persistent items in cache
+        for(NSString* node in _cache)
+            if(!_cache[node][@"persistentCache"])
+                [_cache removeObjectForKey:node];
+    }
 }
 
 -(void) handleHeadlineMessage:(XMPPMessage* _Nonnull) messageNode
@@ -134,16 +166,23 @@
         jid = _account.connectionProperties.identity.jid;
     
     NSString* node = [items findFirst:@"/@node"];
-    if(!_cache[jid])
-        _cache[jid] = [[NSMutableDictionary alloc] init];
-    if(!_cache[jid][node])
-        _cache[jid][node] = [[NSMutableDictionary alloc] init];
-    for(MLXMLNode* item in [items find:@"item"])
-    {
-        NSString* itemId = [item findFirst:@"/@id"];
-        if(!itemId)
-            itemId = @"";
-        _cache[jid][node][itemId] = item;
+    
+    @synchronized(_cache) {
+        if(!_cache[node])
+        {
+            _cache[node] = [[NSMutableDictionary alloc] init];
+            _cache[node][@"persistentCache"] = _configuredNodes[node] ? @YES : @NO;
+            _cache[node][@"data"] = [[NSMutableDictionary alloc] init];
+        }
+        if(!_cache[node][@"data"][jid])
+            _cache[node][@"data"][jid] = [[NSMutableDictionary alloc] init];
+        for(MLXMLNode* item in [items find:@"item"])
+        {
+            NSString* itemId = [item findFirst:@"/@id"];
+            if(!itemId)
+                itemId = @"";
+            _cache[node][@"data"][jid][itemId] = item;
+        }
     }
     
     //call handlers for this node/jid combination
@@ -152,15 +191,17 @@
 
 -(void) callHandlersForNode:(NSString*) node andJid:(NSString*) jid
 {
-    if(!_cache[jid] || !_cache[jid][node])
-        return;
-    
-    if(_handlers[node])
-    {
-        if(_handlers[node][jid])
-            ((monal_pubsub_handler_t)_handlers[node][jid])([self getCachedDataForNode:node andBareJid:jid]);
-        if(_handlers[node][@""])
-            ((monal_pubsub_handler_t)_handlers[node][@""])([self getCachedDataForNode:node andBareJid:jid]);
+    @synchronized(_cache) {
+        if(!_cache[node] || !_cache[node][jid])
+            return;
+        
+        if(_handlers[node])
+        {
+            if(_handlers[node][jid])
+                ((monal_pubsub_handler_t)_handlers[node][jid])([self getCachedDataForNode:node andBareJid:jid]);
+            if(_handlers[node][@""])
+                ((monal_pubsub_handler_t)_handlers[node][@""])([self getCachedDataForNode:node andBareJid:jid]);
+        }
     }
 }
 

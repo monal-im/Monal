@@ -224,15 +224,9 @@ void logException(NSException* exception)
     return hashedBase64;
 }
 
-+(NSString*) getOwnCapsHash
-{
-    NSString* client = [NSString stringWithFormat:@"client/phone//Monal %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
-    return [self getEntityCapsHashForIdentities:@[client] andFeatures:[self getOwnFeatureSet]];
-}
-
 +(NSSet*) getOwnFeatureSet
 {
-    static NSMutableSet* featuresSet;
+    static NSSet* featuresSet;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSArray* featuresArray = @[
@@ -253,11 +247,9 @@ void logException(NSException* exception)
             @"http://jabber.org/protocol/chatstates",
             @"jabber:iq:version"
         ];
-        featuresSet = [[NSMutableSet alloc] initWithArray:featuresArray];
-        for(NSString* pubsubNode in [MLPubSub getDesiredNodesList])
-            [featuresSet addObject:[NSString stringWithFormat:@"%@+notify", pubsubNode]];
+        featuresSet = [[NSSet alloc] initWithArray:featuresArray];
     });
-    return featuresSet;
+    return [[NSSet alloc] initWithSet:featuresSet copyItems:NO];
 }
 
 +(NSString*) generateStringOfFeatureSet:(NSSet*) features

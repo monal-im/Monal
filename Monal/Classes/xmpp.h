@@ -98,7 +98,6 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, strong) NSArray* rosterList;
 
 //calculated
-@property (nonatomic, strong, readonly) NSString* versionHash;
 @property (nonatomic, strong) NSDate* connectedTime;
 
 extern NSString *const kMessageId;
@@ -120,6 +119,7 @@ extern NSString* const kAccountHibernate;
 -(void) reconnect:(double) wait;
 
 -(BOOL) isHibernated;
+-(void) setPubSubNotificationsForNodes:(NSArray* _Nonnull) nodes;
 
 /**
  send a message to a contact with xmpp id

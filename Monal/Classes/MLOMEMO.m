@@ -51,6 +51,8 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
     [self setupSignal];
 
+    [self.xmppConnection.pubsub registerInterestForNode:@"eu.siacs.conversations.axolotl.devicelist" withPersistentCaching:YES];
+    
     return self;
 }
 

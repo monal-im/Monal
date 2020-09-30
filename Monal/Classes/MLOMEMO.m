@@ -65,6 +65,9 @@ static const size_t MAX_OMEMO_KEYS = 120;
     // signal helper
     SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self._signalContext];
 
+    // init MLPubSub handler
+    // TODO: register handler
+
     if(self.monalSignalStore.deviceid == 0)
     {
         // Generate a new device id
@@ -88,13 +91,7 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
 -(void) sendOMEMOBundle
 {
-    if(!self._connection.supportsPubSub || (self.xmppConnection.accountState < kStateBound && ![self.xmppConnection isHibernated])) return;
-    NSString* deviceid = [NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
-    XMPPIQ* signalKeys = [[XMPPIQ alloc] initWithType:kiqSetType];
-    [signalKeys publishKeys:@{@"signedPreKeyPublic":self.monalSignalStore.signedPreKey.keyPair.publicKey, @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature, @"identityKey":self.monalSignalStore.identityKeyPair.publicKey, @"signedPreKeyId": [NSString stringWithFormat:@"%d",self.monalSignalStore.signedPreKey.preKeyId]} andPreKeys:self.monalSignalStore.preKeys withDeviceId:deviceid];
-    [signalKeys.attributes setValue:[NSString stringWithFormat:@"%@/%@", self._senderJid, self._accountRessource] forKey:@"from"];
-
-    if(self.xmppConnection) [self.xmppConnection send:signalKeys];
+    [self publishKeysViaPubSub:@{@"signedPreKeyPublic":self.monalSignalStore.signedPreKey.keyPair.publicKey, @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature, @"identityKey":self.monalSignalStore.identityKeyPair.publicKey, @"signedPreKeyId": [NSString stringWithFormat:@"%d",self.monalSignalStore.signedPreKey.preKeyId]} andPreKeys:self.monalSignalStore.preKeys withDeviceId:self.monalSignalStore.deviceid];
 }
 
 -(void) queryOMEMODevicesFrom:(NSString *) jid
@@ -216,7 +213,6 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
 -(void) sendOMEMODevice:(NSSet<NSNumber*>*) receivedDevices force:(BOOL) force
 {
-    if(!self._connection.supportsPubSub || (self.xmppConnection.accountState < kStateBound && ![self.xmppConnection isHibernated])) return;
     NSMutableSet<NSNumber*>* devices = [[NSMutableSet alloc] init];
     if(receivedDevices && [receivedDevices count] > 0) {
         [devices unionSet:receivedDevices];
@@ -227,9 +223,7 @@ static const size_t MAX_OMEMO_KEYS = 120;
     {
         [devices addObject:[NSNumber numberWithInt:self.monalSignalStore.deviceid]];
 
-        XMPPIQ* signalDevice = [[XMPPIQ alloc] initWithType:kiqSetType];
-        [signalDevice publishDevices:devices];
-        if(self.xmppConnection) [self.xmppConnection send:signalDevice];
+        [self publishDevicesViaPubSub:devices];
     }
 }
 
@@ -295,7 +289,11 @@ static const size_t MAX_OMEMO_KEYS = 120;
                                                                                       signature:signedPreKeySignature
                                                                                     identityKey:identityKey
                                                                                           error:nil];
-                [builder processPreKeyBundle:keyBundle error:nil];
+                NSError* error;
+                [builder processPreKeyBundle:keyBundle error:&error];
+                if(error) {
+                    DDLogWarn(@"Error creating preKeyBundle: %@", error);
+                }
             } else  {
                 DDLogError(@"Could not decode base64 prekey %@", row);
             }
@@ -537,6 +535,81 @@ static const size_t MAX_OMEMO_KEYS = 120;
             }
         }
     }
+}
+
+
+// create IQ messages
+#pragma mark - signal
+/**
+ publishes a device.
+ */
+-(void) publishDevicesViaPubSub:(NSSet<NSNumber*>*) devices
+{
+    MLXMLNode* itemNode = [[MLXMLNode alloc] initWithElement:@"item"];
+    [itemNode.attributes setObject:@"current" forKey:kId];
+
+    MLXMLNode* listNode = [[MLXMLNode alloc] init];
+    listNode.element=@"list";
+    [listNode.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:kXMLNS];
+
+    for(NSNumber* deviceNum in devices) {
+        NSString* deviceid = [deviceNum stringValue];
+        MLXMLNode* device = [[MLXMLNode alloc] init];
+        device.element = @"device";
+        [device.attributes setObject:deviceid forKey:kId];
+        [listNode addChild:device];
+    }
+    [itemNode addChild:listNode];
+
+    // publish devices via pubsub
+    [self.xmppConnection.pubsub publish:@[itemNode] onNode:@"eu.siacs.conversations.axolotl.devicelist"];
+}
+
+/**
+ publishes signal keys and prekeys
+ */
+-(void) publishKeysViaPubSub:(NSDictionary *) keys andPreKeys:(NSArray *) prekeys withDeviceId:(u_int32_t) deviceid
+{
+    MLXMLNode* itemNode = [[MLXMLNode alloc] init];
+    itemNode.element = @"item";
+    [itemNode.attributes setObject:@"current" forKey:kId];
+
+    MLXMLNode* bundle = [[MLXMLNode alloc] init];
+    bundle.element = @"bundle";
+    [bundle.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:kXMLNS];
+
+    MLXMLNode* signedPreKeyPublic = [[MLXMLNode alloc] init];
+    signedPreKeyPublic.element = @"signedPreKeyPublic";
+    [signedPreKeyPublic.attributes setObject:[keys objectForKey:@"signedPreKeyId"] forKey:@"signedPreKeyId"];
+    signedPreKeyPublic.data = [HelperTools encodeBase64WithData: [keys objectForKey:@"signedPreKeyPublic"]];
+    [bundle addChild:signedPreKeyPublic];
+
+    MLXMLNode* signedPreKeySignature = [[MLXMLNode alloc] init];
+    signedPreKeySignature.element = @"signedPreKeySignature";
+    signedPreKeySignature.data = [HelperTools encodeBase64WithData:[keys objectForKey:@"signedPreKeySignature"]];
+    [bundle addChild:signedPreKeySignature];
+
+    MLXMLNode* identityKey = [[MLXMLNode alloc] init];
+    identityKey.element = @"identityKey";
+    identityKey.data = [HelperTools encodeBase64WithData:[keys objectForKey:@"identityKey"]];
+    [bundle addChild:identityKey];
+
+    MLXMLNode* prekeyNode = [[MLXMLNode alloc] init];
+    prekeyNode.element = @"prekeys";
+
+    for(SignalPreKey* prekey in prekeys) {
+        MLXMLNode* preKeyPublic = [[MLXMLNode alloc] init];
+        preKeyPublic.element = @"preKeyPublic";
+        [preKeyPublic.attributes setObject:[NSString stringWithFormat:@"%d", prekey.preKeyId] forKey:@"preKeyId"];
+        preKeyPublic.data = [HelperTools encodeBase64WithData:prekey.keyPair.publicKey];
+        [prekeyNode addChild:preKeyPublic];
+    };
+
+    [bundle addChild:prekeyNode];
+    [itemNode addChild:bundle];
+
+    // send bundle via pubsub interface
+    [self.xmppConnection.pubsub publish:@[itemNode] onNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%u", deviceid]];
 }
 
 @end

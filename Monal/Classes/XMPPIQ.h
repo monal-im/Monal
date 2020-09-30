@@ -132,22 +132,6 @@ removes a contact from the roster
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid;
 
-
-#pragma mark Signal
-
--(void) subscribeDevices:(NSString*  _Nonnull) jid;
-
-/**
- publishes a device.
- */
--(void) publishDevices:(NSSet<NSNumber*>* _Nonnull) devices;
-
-/**
- publishes signal keys and prekeys
- */
--(void) publishKeys:(NSDictionary *) keys andPreKeys:(NSArray *) prekeys withDeviceId:(NSString* _Nonnull) deviceid;
-
-
 #pragma mark - pubsub
 
 -(void) requestBundles:(NSString* _Nonnull) deviceid;

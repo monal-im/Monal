@@ -16,6 +16,7 @@
 #import "MLDNSLookup.h"
 #import "MLSignalStore.h"
 #import "MLMessageProcessor.h"
+#import "MLPubSub.h"
 #import "MLOMEMO.h"
 
 #ifndef DISABLE_OMEMO
@@ -91,6 +92,7 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, strong) NSMutableArray* usableServersList;
 
 @property (nonatomic, strong) MLOMEMO* omemo;
+@property (nonatomic, strong) MLPubSub* pubsub;
 
 @property (nonatomic, strong) NSArray* roomList;
 @property (nonatomic, strong) NSArray* rosterList;

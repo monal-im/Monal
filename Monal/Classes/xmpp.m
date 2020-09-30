@@ -199,6 +199,9 @@ NSString *const kXMPPPresence = @"presence";
     _sendQueue.maxConcurrentOperationCount = 1;
     [_sendQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
 
+    //init pubsub
+    self.pubsub = [[MLPubSub alloc] initWithAccount:self];
+    
     // Init omemo
     self.omemo = [[MLOMEMO alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid ressource:self.connectionProperties.identity.resource connectionProps:self.connectionProperties xmppConnection:self];
 
@@ -1832,7 +1835,8 @@ NSString *const kXMPPPresence = @"presence";
         [values setObject:self.connectionProperties.uploadServer forKey:@"uploadServer"];
     if(self.connectionProperties.conferenceServer)
         [values setObject:self.connectionProperties.conferenceServer forKey:@"conferenceServer"];
-
+    
+    [values setObject:[self.pubsub getInternalData] forKey:@"pubsubData"];
     [values setObject:[NSNumber numberWithBool:_loggedInOnce] forKey:@"loggedInOnce"];
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
@@ -1938,6 +1942,9 @@ NSString *const kXMPPPresence = @"presence";
             self.connectionProperties.supportsHTTPUpload = YES;
         self.connectionProperties.conferenceServer = [dic objectForKey:@"conferenceServer"];
 
+        if([dic objectForKey:@"pubsubData"])
+            [self.pubsub setInternalData:[dic objectForKey:@"pubsubData"]];
+        
         if([dic objectForKey:@"loggedInOnce"])
         {
             NSNumber* loggedInOnce = [dic objectForKey:@"loggedInOnce"];

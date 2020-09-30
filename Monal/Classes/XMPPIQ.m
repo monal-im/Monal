@@ -21,8 +21,7 @@ NSString* const kiqErrorType = @"error";
 
 -(id) initWithId:(NSString*) iqid andType:(NSString*) iqType
 {
-    self=[super init];
-    self.element=@"iq";
+    self = [super initWithElement:@"iq"];
     if(iqid && iqType)
     {
         [self setId:iqid];
@@ -34,6 +33,13 @@ NSString* const kiqErrorType = @"error";
 -(id) initWithType:(NSString*) iqType
 {
     return [self initWithId:[[NSUUID UUID] UUIDString] andType:iqType];
+}
+
+-(id) initWithType:(NSString*) iqType to:(NSString*) to
+{
+    self = [self initWithType:iqType];
+    [self setiqTo:to];
+    return self;
 }
 
 -(NSString*) getId

@@ -9,6 +9,7 @@
 #include <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
 #import "HelperTools.h"
+#import "MLPubSub.h"
 #import "MLUDPLogger.h"
 
 @import UserNotifications;
@@ -231,11 +232,10 @@ void logException(NSException* exception)
 
 +(NSSet*) getOwnFeatureSet
 {
-    static NSSet* featuresSet;
+    static NSMutableSet* featuresSet;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSArray* featuresArray = @[
-            @"eu.siacs.conversations.axolotl.devicelist+notify",
             @"http://jabber.org/protocol/caps",
             @"http://jabber.org/protocol/disco#info",
             @"http://jabber.org/protocol/disco#items",
@@ -253,7 +253,9 @@ void logException(NSException* exception)
             @"http://jabber.org/protocol/chatstates",
             @"jabber:iq:version"
         ];
-        featuresSet = [[NSSet alloc] initWithArray:featuresArray];
+        featuresSet = [[NSMutableSet alloc] initWithArray:featuresArray];
+        for(NSString* pubsubNode in [MLPubSub getDesiredNodesList])
+            [featuresSet addObject:[NSString stringWithFormat:@"%@+notify", pubsubNode]];
     });
     return featuresSet;
 }

@@ -14,6 +14,7 @@
 #import "MLConstants.h"
 #import "MLImageManager.h"
 #import "XMPPIQ.h"
+#import "MLPubSub.h"
 #import "MLOMEMO.h"
 
 
@@ -183,6 +184,9 @@ static NSMutableDictionary* _typingNotifications;
         //Post notice
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageReceivedNotice object:self userInfo:@{@"MessageID": [messageNode findFirst:@"{urn:xmpp:receipts}received@id"]}];
     }
+    
+    if([messageNode check:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event"])
+        [account.pubsub handleHeadlineMessage:messageNode];
 
     if([messageNode check:@"/{jabber:client}message<type=headline>/{http://jabber.org/protocol/pubsub#event}event/items<node=eu\\.siacs\\.conversations\\.axolotl\\.devicelist>/item/{eu.siacs.conversations.axolotl}list"]) {
         NSArray<NSNumber*>* deviceIds = [messageNode find:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event/items<node=eu\\.siacs\\.conversations\\.axolotl\\.devicelist>/item/{eu.siacs.conversations.axolotl}list/device@id|int"];

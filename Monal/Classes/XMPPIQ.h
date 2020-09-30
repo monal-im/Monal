@@ -17,6 +17,7 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
 
 -(id) initWithId:(NSString*) iqid andType:(NSString*) iqType;
 -(id) initWithType:(NSString*) iqType;
+-(id) initWithType:(NSString*) iqType to:(NSString*) to;
 
 -(NSString*) getId;
 -(void) setId:(NSString*) id;

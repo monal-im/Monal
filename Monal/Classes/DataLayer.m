@@ -721,6 +721,15 @@ static NSDateFormatter* dbFormatter;
     return state;
 }
 
+-(BOOL) hasContactRequestForAccount:(NSString*) accountNo andBuddyName:(NSString*) buddy
+{
+    NSString* query = [NSString stringWithFormat:@"SELECT count(*) FROM subscriptionRequests WHERE account_id=? AND buddy_name=?"];
+
+    NSNumber* result = (NSNumber*)[self.db executeScalar:query andArguments:@[accountNo, buddy]];
+
+    return result.intValue == 1;
+}
+
 -(NSMutableArray*) contactRequestsForAccount
 {
     NSString* query = [NSString stringWithFormat:@"select account_id, buddy_name from subscriptionRequests"];

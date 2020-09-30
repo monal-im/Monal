@@ -44,6 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL pushEnabled;
 @property (nonatomic, assign) BOOL usingCarbons2;
 @property (nonatomic, assign) BOOL supportsRosterVersion;
+@property (nonatomic, assign) BOOL supportsRosterPreApproval;
 
 @property (nonatomic, assign) BOOL supportsBlocking;
 @property (nonatomic, assign) BOOL supportsPing;

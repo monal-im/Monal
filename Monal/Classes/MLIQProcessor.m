@@ -225,21 +225,24 @@
         }
         else
         {
+            MLContact* contactObj = [[MLContact alloc] init];
+            contactObj.contactJid = [contact objectForKey:@"jid"];
+            contactObj.accountId = account.accountNo;
+
             if([[contact objectForKey:@"subscription"] isEqualToString:kSubTo])
             {
-                MLContact *contactObj = [[MLContact alloc] init];
-                contactObj.contactJid = [contact objectForKey:@"jid"];
-                contactObj.accountId = account.accountNo;
                 [[DataLayer sharedInstance] addContactRequest:contactObj];
             }
-            
-            if([[contact objectForKey:@"subscription"] isEqualToString:kSubFrom]) //already subscribed
+            else if([[contact objectForKey:@"subscription"] isEqualToString:kSubFrom]) //already subscribed
             {
-                MLContact *contactObj = [[MLContact alloc] init];
-                contactObj.contactJid = [contact objectForKey:@"jid"];
-                contactObj.accountId = account.accountNo;
                 [[DataLayer sharedInstance] deleteContactRequest:contactObj];
             }
+            else if([[contact objectForKey:@"subscription"] isEqualToString:kSubBoth])
+            {
+                // We and the contact are interested
+                [[DataLayer sharedInstance] deleteContactRequest:contactObj];
+            }
+
             
             DDLogVerbose(@"Adding contact %@ (%@) to database", [contact objectForKey:@"jid"], [contact objectForKey:@"name"]);
             BOOL success = [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]

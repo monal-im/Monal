@@ -37,12 +37,25 @@
         if(self.contactName.text.length > 0)
         {
             xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:_selectedRow];
-            
+
             MLContact* contactObj = [[MLContact alloc] init];
                       contactObj.contactJid = self.contactName.text;
                       contactObj.accountId = account.accountNo;
             
             [[MLXMPPManager sharedInstance] addContact:contactObj];
+            BOOL approve = NO;
+            // approve contact ahead of time if possible
+            if(account.connectionProperties.supportsRosterPreApproval) {
+                approve = YES;
+            } else if([[DataLayer sharedInstance] hasContactRequestForAccount:account.accountNo andBuddyName:contactObj.contactJid]) {
+                approve = YES;
+            }
+            if(approve) {
+                // delete existing contact request if exists
+                [[DataLayer sharedInstance] deleteContactRequest:contactObj];
+                // and approve the new contact
+                [[MLXMPPManager sharedInstance] approveContact:contactObj];
+            }
 
             UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Permission Requested", @"") message:NSLocalizedString(@"The new contact will be added to your contacts list when the person you've added has approved your request.", @"") preferredStyle:UIAlertControllerStyleAlert];
             UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
@@ -50,7 +63,7 @@
                 [self dismissViewControllerAnimated:YES completion:nil];
             }];
             [messageAlert addAction:closeAction];
-            
+
             [self presentViewController:messageAlert animated:YES completion:nil];
         }
         else

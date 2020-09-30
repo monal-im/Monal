@@ -84,6 +84,7 @@ extern NSString *const kMessageTypeUrl;
 -(void) setBuddyState:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
 -(NSString*) buddyState:(NSString*) buddy forAccount:(NSString*) accountNo;
 
+-(BOOL) hasContactRequestForAccount:(NSString*) accountNo andBuddyName:(NSString*) buddy;
 -(NSMutableArray*) contactRequestsForAccount;
 -(void) addContactRequest:(MLContact *) requestor;
 -(void) deleteContactRequest:(MLContact *) requestor; 

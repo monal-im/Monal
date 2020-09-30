@@ -1235,11 +1235,15 @@ NSString *const kXMPPPresence = @"presence";
             {
                 if([[presenceNode findFirst:@"/@type"] isEqualToString:kpresencesSubscribe])
                 {
-                    MLContact *contact = [[MLContact alloc] init];
+                    MLContact* contact = [[MLContact alloc] init];
                     contact.accountId = self.accountNo;
                     contact.contactJid = presenceNode.fromUser;
 
-                    [[DataLayer sharedInstance] addContactRequest:contact];
+                    // check if we need a contact request
+                    NSDictionary* contactSub = [[DataLayer sharedInstance] getSubscriptionForContact:contact.contactJid andAccount:contact.accountId];
+                    if(!contactSub || ![[contactSub objectForKey:@"subscription"] isEqualToString:kSubBoth]) {
+                        [[DataLayer sharedInstance] addContactRequest:contact];
+                    }
                 }
 
                 if([presenceNode check:@"{http://jabber.org/protocol/muc#user}x"])
@@ -1596,6 +1600,8 @@ NSString *const kXMPPPresence = @"presence";
                     self.connectionProperties.supportsSM3 = YES;
                 if([parsedStanza check:@"{urn:xmpp:features:rosterver}ver"])
                     self.connectionProperties.supportsRosterVersion = YES;
+                if([parsedStanza check:@"{urn:xmpp:features:pre-approval}sub"])
+                    self.connectionProperties.supportsRosterPreApproval = YES;
                 
                 //under rare circumstances/bugs the appex could have changed the smacks state *after* our connect method was called
                 //--> load newest saved smacks state to be up to date even in this case
@@ -1846,6 +1852,8 @@ NSString *const kXMPPPresence = @"presence";
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
+    [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsRosterPreApproval] forKey:@"supportsRosterPreApproval"];
+    
 
     if(self.connectionProperties.discoveredServices)
         [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
@@ -2002,6 +2010,12 @@ NSString *const kXMPPPresence = @"presence";
         if([dic objectForKey:@"lastInteractionDate"])
             _lastInteractionDate = [dic objectForKey:@"lastInteractionDate"];
 
+        if([dic objectForKey:@"supportsRosterPreApproval"])
+        {
+            NSNumber* supportsRosterPreApproval = [dic objectForKey:@"supportsRosterPreApproval"];
+            self.connectionProperties.supportsRosterPreApproval = supportsRosterPreApproval.boolValue;
+        }
+
         //debug output
         @synchronized(_smacksSyncPoint) {
             DDLogVerbose(@"readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d",
@@ -2139,6 +2153,7 @@ NSString *const kXMPPPresence = @"presence";
     self.connectionProperties.supportsPubSub = NO;
     self.connectionProperties.supportsHTTPUpload = NO;
     self.connectionProperties.supportsPing = NO;
+    self.connectionProperties.supportsRosterPreApproval = NO;
 
     //now fetch roster, request disco and send initial presence
     [self fetchRoster];

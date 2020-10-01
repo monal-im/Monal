@@ -1256,6 +1256,7 @@ NSString *const kXMPPPresence = @"presence";
             if([presenceNode.fromUser isEqualToString:self.connectionProperties.identity.jid])
             {
                 //ignore self presences for now
+                DDLogInfo(@"ignoring presence from self");
             }
             else
             {
@@ -1358,7 +1359,12 @@ NSString *const kXMPPPresence = @"presence";
                 }
 
                 //handle entity capabilities (this has to be done *after* setOnlineBuddy which sets the ver hash for the resource to "")
-                if([presenceNode check:@"{http://jabber.org/protocol/caps}c@hash"] && [presenceNode check:@"{http://jabber.org/protocol/caps}c@ver"] && presenceNode.fromUser && presenceNode.fromResource)
+                if(
+                    [presenceNode check:@"{http://jabber.org/protocol/caps}c@hash"] &&
+                    [presenceNode check:@"{http://jabber.org/protocol/caps}c@ver"] &&
+                    presenceNode.fromUser &&
+                    presenceNode.fromResource
+                )
                 {
                     BOOL shouldQueryCaps = NO;
                     if(![@"sha-1" isEqualToString:[presenceNode findFirst:@"{http://jabber.org/protocol/caps}c@hash"]])

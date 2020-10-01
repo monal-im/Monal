@@ -601,20 +601,20 @@ static NSDateFormatter* dbFormatter;
 {
     if(!presenceObj.fromResource)
         return;
-    [self.db beginWriteTransaction];
-    //get buddyid for name and account
-    NSString* query1 = [NSString stringWithFormat:@"select buddy_id from buddylist where account_id=? and buddy_name=?;"];
-    NSObject* buddyid = [self.db executeScalar:query1 andArguments:@[accountNo, presenceObj.fromUser]];
-    if(buddyid)
-    {
-        NSString* query = [NSString stringWithFormat:@"insert or ignore into buddy_resources ('buddy_id', 'resource', 'ver') values (?, ?, '')"];
-        [self.db executeNonQuery:query andArguments:@[buddyid, presenceObj.fromResource]];
-    }
-    [self.db endWriteTransaction];
+    [self.db writeTransaction:^{
+        //get buddyid for name and account
+        NSString* query1 = [NSString stringWithFormat:@"select buddy_id from buddylist where account_id=? and buddy_name=?;"];
+        NSObject* buddyid = [self.db executeScalar:query1 andArguments:@[accountNo, presenceObj.fromUser]];
+        if(buddyid)
+        {
+            NSString* query = [NSString stringWithFormat:@"insert or ignore into buddy_resources ('buddy_id', 'resource', 'ver') values (?, ?, '')"];
+            [self.db executeNonQuery:query andArguments:@[buddyid, presenceObj.fromResource]];
+        }
+    }];
 }
 
 
--(NSArray*)resourcesForContact:(NSString*)contact
+-(NSArray*) resourcesForContact:(NSString*) contact
 {
     if(!contact) return nil;
     NSString* query1 = [NSString stringWithFormat:@" select resource from buddy_resources as A inner join buddylist as B on a.buddy_id=b.buddy_id where  buddy_name=?  "];
@@ -645,15 +645,15 @@ static NSDateFormatter* dbFormatter;
 
 -(void) setOnlineBuddy:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo
 {
-    [self.db beginWriteTransaction];
-    [self setResourceOnline:presenceObj forAccount:accountNo];
-    BOOL isOnline = [self isBuddyOnline:presenceObj.fromUser forAccount:accountNo];
-    if(!isOnline) {
-        NSString* query = [NSString stringWithFormat:@"update buddylist set online=1, new=1, muc=? where account_id=? and  buddy_name=?"];
-        NSArray* params = @[[NSNumber numberWithBool:[presenceObj check:@"{http://jabber.org/protocol/muc#user}x"]], accountNo, presenceObj.fromUser];
-        [self.db executeNonQuery:query andArguments:params];
-    }
-    [self.db endWriteTransaction];
+    [self.db writeTransaction:^{
+        [self setResourceOnline:presenceObj forAccount:accountNo];
+        if(![self isBuddyOnline:presenceObj.fromUser forAccount:accountNo])
+        {
+            NSString* query = [NSString stringWithFormat:@"update buddylist set online=1, new=1, muc=? where account_id=? and  buddy_name=?"];
+            NSArray* params = @[[NSNumber numberWithBool:[presenceObj check:@"{http://jabber.org/protocol/muc#user}x"]], accountNo, presenceObj.fromUser];
+            [self.db executeNonQuery:query andArguments:params];
+        }
+    }];
 }
 
 -(BOOL) setOfflineBuddy:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo
@@ -697,16 +697,15 @@ static NSDateFormatter* dbFormatter;
 
 -(void) setBuddyState:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
 {
-    if(![presenceObj check:@"show#"])
-        return;
-    NSString* toPass;
-    //data length check
-    if([[presenceObj findFirst:@"show#"] length] > 20)
-        toPass = [[presenceObj findFirst:@"show#"] substringToIndex:19];
-    else
-        toPass = [presenceObj findFirst:@"show#"];
-    if(!toPass)
-        toPass = @"";
+    NSString* toPass = @"";
+    if([presenceObj check:@"show#"])
+    {
+        //data length check
+        if([[presenceObj findFirst:@"show#"] length] > 20)
+            toPass = [[presenceObj findFirst:@"show#"] substringToIndex:19];
+        else
+            toPass = [presenceObj findFirst:@"show#"];
+    }
 
     NSString* query = [NSString stringWithFormat:@"update buddylist set state=?, dirty=1 where account_id=? and  buddy_name=?;"];
     [self.db executeNonQuery:query andArguments:@[toPass, accountNo, presenceObj.fromUser]];
@@ -758,16 +757,15 @@ static NSDateFormatter* dbFormatter;
 
 -(void) setBuddyStatus:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo
 {
-    if(![presenceObj check:@"status#"])
-        return;
-    NSString* toPass;
-    //data length check
-    if([[presenceObj findFirst:@"status#"] length] > 200)
-        toPass = [[presenceObj findFirst:@"status#"] substringToIndex:199];
-    else
-        toPass = [presenceObj findFirst:@"status#"];
-    if(!toPass)
-        toPass = @"";
+    NSString* toPass = @"";
+    if([presenceObj check:@"status#"])
+    {
+        //data length check
+        if([[presenceObj findFirst:@"status#"] length] > 200)
+            toPass = [[presenceObj findFirst:@"status#"] substringToIndex:199];
+        else
+            toPass = [presenceObj findFirst:@"status#"];
+    }
 
     NSString* query = [NSString stringWithFormat:@"update buddylist set status=?, dirty=1 where account_id=? and  buddy_name=?;"];
     [self.db executeNonQuery:query andArguments:@[toPass, accountNo, presenceObj.fromUser]];
@@ -906,21 +904,10 @@ static NSDateFormatter* dbFormatter;
 
 -(BOOL) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-    NSString* query = [NSString stringWithFormat:@"select count(buddy_id) from buddylist where account_id=? and buddy_name=? and online=1 "];
-    NSArray* params = @[accountNo, buddy];
-
-    NSObject* value = [self.db executeScalar:query andArguments:params];
-
-    NSNumber* count = (NSNumber*)value;
-    BOOL toreturn = NO;
-    if(count != nil)
-    {
-        NSInteger val = [count integerValue];
-        if(val > 0) {
-            toreturn = YES;
-        }
-    }
-    return toreturn;
+    NSNumber* count = [self.db executeScalar:@"select count(buddy_id) from buddylist where account_id=? and buddy_name=? and online=1;" andArguments:@[accountNo, buddy]];
+    if(count != nil && [count integerValue] > 0)
+        return YES;
+    return NO;
 }
 
 -(BOOL) saveMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withComment:(NSString*) comment

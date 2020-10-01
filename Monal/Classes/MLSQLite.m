@@ -157,7 +157,7 @@
     return statement;
 }
 
--(NSObject*) getColumn:(int) column ofStatement:(sqlite3_stmt*) statement
+-(id) getColumn:(int) column ofStatement:(sqlite3_stmt*) statement
 {
     switch(sqlite3_column_type(statement, column))
     {
@@ -231,6 +231,21 @@
 
 #pragma mark - V1 low level
 
+-(void) writeTransaction:(monal_void_block_t) operations
+{
+    [self returningWriteTransaction:^(void){
+        operations();
+        return (NSObject*)nil;      //dummy return value
+    }];
+}
+
+-(id) returningWriteTransaction:(monal_sqlite_operations_t) operations
+{
+    [self beginWriteTransaction];
+    id retval = operations();
+    [self endWriteTransaction];
+    return retval;
+}
 
 -(void) beginWriteTransaction
 {
@@ -257,17 +272,17 @@
         [self executeNonQuery:@"COMMIT;"];		//commit only outermost transaction
 }
 
--(NSObject*) executeScalar:(NSString*) query
+-(id) executeScalar:(NSString*) query
 {
     return [self executeScalar:query andArguments:@[]];
 }
 
--(NSObject*) executeScalar:(NSString*) query andArguments:(NSArray*) args
+-(id) executeScalar:(NSString*) query andArguments:(NSArray*) args
 {
     if(!query)
         return nil;
     
-    NSObject* __block toReturn;
+    id __block toReturn;
     sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
     if(statement != NULL)
     {

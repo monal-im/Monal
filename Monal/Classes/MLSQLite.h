@@ -11,15 +11,19 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef id (^monal_sqlite_operations_t)(void);
+
 @interface MLSQLite : NSObject
 
 +(id) sharedInstanceForFile:(NSString*) dbFile;
 
+-(void) writeTransaction:(monal_void_block_t) operations;
+-(id) returningWriteTransaction:(monal_sqlite_operations_t) operations;
 -(void) beginWriteTransaction;
 -(void) endWriteTransaction;
 
--(NSObject*) executeScalar:(NSString*) query;
--(NSObject*) executeScalar:(NSString*) query andArguments:(NSArray*) args;
+-(id) executeScalar:(NSString*) query;
+-(id) executeScalar:(NSString*) query andArguments:(NSArray*) args;
 
 -(NSMutableArray*) executeReader:(NSString*) query;
 -(NSMutableArray*) executeReader:(NSString*) query andArguments:(NSArray*) args;

@@ -843,14 +843,26 @@ NSString *const kXMPPPresence = @"presence";
             DDLogInfo(@"ping attempted before logged in and bound, ignoring ping.");
             return;
         }
+        else if(_cancelPingTimer)
+        {
+            DDLogInfo(@"ping already sent, ignoring second ping request.");
+            return;
+        }
         else
         {
             //start ping timer
             _cancelPingTimer = [HelperTools startTimer:timeout withHandler:^{
                 [self dispatchAsyncOnReceiveQueue: ^{
                     _cancelPingTimer = nil;
-                    DDLogInfo(@"ping took too long, reconnecting");
-                    [self reconnect];
+                    //check if someone already called reconnect or disconnect while we were waiting for the ping
+                    //(which was called while we still were >= kStateBound)
+                    if(self.accountState<kStateBound)
+                        DDLogInfo(@"ping took too long, but reconnect or disconnect already in progress, ignoring");
+                    else
+                    {
+                        DDLogInfo(@"ping took too long, reconnecting");
+                        [self reconnect];
+                    }
                 }];
             }];
             monal_void_block_t handler = ^{

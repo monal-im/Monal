@@ -379,6 +379,7 @@ enum msgSentState {
         [[NSNotificationCenter defaultCenter] removeObserver:self];
         self.inputContainerView.hidden = YES;
         [self refreshData];
+        [self updateUIElementsOnAccountChange:nil];
         [self updateNavBarLastInteractionLabel:nil];
         return;
     }

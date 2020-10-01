@@ -1350,14 +1350,16 @@ static NSDateFormatter* dbFormatter;
     //DDLogVerbose(query);
     NSArray* user = [self.db executeReader:query1];
 
+    NSString * ownUsername = [NSString stringWithFormat:@"%@@%@",
+                              ((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]),
+                              ((NSString *)[[user objectAtIndex:0] objectForKey:@"domain"])  ];
+    
     if([user count]>0)
     {
 
         NSString* query = [NSString stringWithFormat:@"select x.* from(select distinct buddy_name as thename ,'', nick_name, message_from as buddy_name, filename, a.account_id from message_history as a left outer join buddylist as b on a.message_from=b.buddy_name and a.account_id=b.account_id where a.account_id=?  union select distinct message_to as thename ,'',  nick_name, message_to as buddy_name,  filename, a.account_id from message_history as a left outer join buddylist as b on a.message_to=b.buddy_name and a.account_id=b.account_id where a.account_id=?  and message_to!=\"(null)\" )  as x where buddy_name!=?  order by thename COLLATE NOCASE "];
         NSArray* params = @[accountNo, accountNo,
-                          ((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]),
-                          // ((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]),
-                          ((NSString *)[[user objectAtIndex:0] objectForKey:@"domain"])  ];
+                           ownUsername];
         //DDLogVerbose(query);
         NSArray* results = [self.db executeReader:query andArguments:params];
 

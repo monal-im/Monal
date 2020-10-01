@@ -20,20 +20,19 @@
 
 typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 
-static const NSString* kBackgroundFetchingTask = @"im.monal.fetch";
+static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 //this is in seconds
 #define SHORT_PING 4.0
 #define LONG_PING 16.0
 
 static const int pingFreqencyMinutes = 5;       //about the same Conversations uses
-static const int sendMessageTimeoutSeconds = 10;
 
 @interface MLXMPPManager()
 {
     nw_path_monitor_t _path_monitor;
     UIBackgroundTaskIdentifier _bgTask;
-    BGTask* _bgFetch;
+    API_AVAILABLE(ios(13.0)) BGTask* _bgFetch;
     BOOL _hasConnectivity;
     NSMutableDictionary* _pushCompletions;
     NSMutableArray* _connectedXMPP;
@@ -357,14 +356,15 @@ static const int sendMessageTimeoutSeconds = 10;
 {
     DDLogVerbose(@"RUNNING BGTASK");
     _bgFetch = task;
+    __weak BGTask* weakTask = task;
     task.expirationHandler = ^{
         DDLogWarn(@"*** BGTASK EXPIRED ***");
-        [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
         _bgFetch = nil;
-        [task setTaskCompletedWithSuccess:NO];
+        [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
+        [HelperTools postSendingErrorNotification];
+        [weakTask setTaskCompletedWithSuccess:NO];
         [self scheduleBackgroundFetchingTask];      //schedule new one if neccessary
         [DDLog flushLog];
-        [HelperTools postSendingErrorNotification];
     };
     
     if(_hasConnectivity)
@@ -580,7 +580,6 @@ static const int sendMessageTimeoutSeconds = 10;
         @synchronized(_connectedXMPP) {
             [_connectedXMPP addObject:xmppAccount];
         }
-        [_connectedXMPP addObject:xmppAccount];
 
         if(_hasConnectivity)
         {

@@ -167,8 +167,6 @@ Attempts to upload a file to the  HTTP upload service
  */
 -(void) handleNewMessage:(NSNotification*) notification;
 
--(void) resetForeground;
-
 /**
  updates delivery status after message has been sent
  */
@@ -206,11 +204,6 @@ Attempts to upload a file to the  HTTP upload service
 
 -(void) setPushNode:(NSString*) node andSecret:(NSString*)secret;
 
-
-
 -(void) sendMessageForConnectedAccounts;
-
--(void) parseMessageForData:(NSData*) data;
-
 
 @end

@@ -309,13 +309,6 @@
 
 #pragma mark - handling urls
 
--(BOOL) openFile:(NSURL*) file
-{
-    NSData *data = [NSData dataWithContentsOfURL:file];
-    [[MLXMPPManager sharedInstance] parseMessageForData:data];
-    return data?YES:NO;
-}
-
 /**
  xmpp:romeo@montague.net?message;subject=Test%20Message;body=Here%27s%20a%20test%20message
           or

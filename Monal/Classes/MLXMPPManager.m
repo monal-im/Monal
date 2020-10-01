@@ -18,6 +18,8 @@
 @import MobileCoreServices;
 @import SAMKeychain;
 
+typedef void (^pushCompletion)(UIBackgroundFetchResult result);
+
 static const NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 //this is in seconds
@@ -33,8 +35,7 @@ static const int sendMessageTimeoutSeconds = 10;
     UIBackgroundTaskIdentifier _bgTask;
     BGTask* _bgFetch;
     BOOL _hasConnectivity;
-    void (^_pushCompletion)(UIBackgroundFetchResult result);
-    monal_void_block_t _cancelPushTimer;
+    NSMutableDictionary* _pushCompletions;
     NSMutableArray* _connectedXMPP;
 }
 @end
@@ -301,16 +302,18 @@ static const int sendMessageTimeoutSeconds = 10;
                     [DDLog flushLog];
                 } onQueue:dispatch_get_main_queue()];
             }
-            if(_pushCompletion)
+            if([_pushCompletions count])
             {
-                DDLogInfo(@"### All accounts idle, calling push completion handler ###");
-                [DDLog flushLog];
-                if(_cancelPushTimer)
-                    _cancelPushTimer();
                 //we don't need to call disconnectAll if we are in background here, because we already did this in the if above (don't reorder these 2 ifs!)
-                _pushCompletion(UIBackgroundFetchResultNewData);
-                _pushCompletion = nil;
-                _cancelPushTimer = nil;
+                DDLogInfo(@"### All accounts idle, calling push completion handlers ###");
+                [DDLog flushLog];
+                for(NSString* completionId in _pushCompletions)
+                {
+                    //cancel running timer and push completion handler
+                    ((monal_void_block_t)_pushCompletions[completionId][@"timer"])();
+                    ((pushCompletion)_pushCompletions[completionId][@"handler"])(UIBackgroundFetchResultNewData);
+                    [_pushCompletions removeObjectForKey:completionId];
+                }
             }
         }
         else
@@ -446,15 +449,19 @@ static const int sendMessageTimeoutSeconds = 10;
         completionHandler(UIBackgroundFetchResultNoData);
         return;
     }
-    _pushCompletion = completionHandler;
     // should any accounts reconnect?
     [self pingAllAccounts];
-    _cancelPushTimer = [HelperTools startTimer:28.0 withHandler:^{
-        DDLogWarn(@"### Push timer triggered!! ###");
-        _pushCompletion(UIBackgroundFetchResultFailed);
-        _pushCompletion = nil;
-        _cancelPushTimer = nil;
-    }];
+    
+    //register push completion handler and associated timer
+    NSString* completionId = [[NSUUID UUID] UUIDString];
+    _pushCompletions[completionId] = @{
+        @"handler": completionHandler,
+        @"timer": [HelperTools startTimer:28.0 withHandler:^{
+            DDLogWarn(@"### Push timer triggered!! ###");
+            [_pushCompletions removeObjectForKey:completionId];
+            completionHandler(UIBackgroundFetchResultFailed);
+        }]
+    };
 }
 
 #pragma mark - client state

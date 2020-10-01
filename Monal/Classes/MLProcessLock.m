@@ -22,15 +22,15 @@
 
 +(BOOL) checkRemoteRunning:(NSString*) processName
 {
-    dispatch_semaphore_t __block semaphore = dispatch_semaphore_create(0);
+    __block NSCondition* condition = [[NSCondition alloc] init];
     DDLogVerbose(@"Pinging %@", processName);
     [[IPC sharedInstance] sendMessage:@"MLProcessLock.ping" withData:nil to:processName withResponseHandler:^(NSDictionary* response) {
         DDLogVerbose(@"Got ping response from %@", processName);
         //wake up other thread
-        dispatch_semaphore_signal(semaphore);
+        [condition signal];
     }];
     //wait for response blocking this thread for 500ms
-    BOOL timedOut = dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5*NSEC_PER_SEC)))!=0;
+    BOOL timedOut = ![condition waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
     DDLogVerbose(@"checkRemoteRunning:%@ returning %@", processName, !timedOut ? @"YES" : @"NO");
     return !timedOut;
 }
@@ -38,13 +38,13 @@
 +(void) waitForRemoteStartup:(NSString*) processName
 {
     while(![[NSThread currentThread] isCancelled] && ![self checkRemoteRunning:processName])
-        usleep(50000);     //checkRemoteRunning did already wait for its timeout, don't wait too long here
+        usleep(50000);      //checkRemoteRunning did already wait for its timeout, don't wait too long here
 }
 
 +(void) waitForRemoteTermination:(NSString*) processName
 {
     while(![[NSThread currentThread] isCancelled] && [self checkRemoteRunning:processName])
-        usleep(1000000);     //checkRemoteRunning did not wait for its timeout, wait here
+        usleep(1000000);    //checkRemoteRunning did not wait for its timeout, wait here
 }
 
 +(void) lock

@@ -17,7 +17,7 @@
     NSString* _processName;
     NSString* _dbFile;
     NSMutableDictionary* _ipcQueues;
-    dispatch_semaphore_t _serverThreadSemaphore;
+    NSCondition* _serverThreadCondition;
 }
 @property (readonly, strong) MLSQLite* db;
 @property (readonly, strong) NSThread* serverThread;
@@ -61,19 +61,19 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
         //cancel server thread and wake it up to let it terminate properly
         if(_sharedInstance.serverThread)
             [_sharedInstance.serverThread cancel];
-        dispatch_semaphore_signal(_sharedInstance->_serverThreadSemaphore);
+        [_sharedInstance->_serverThreadCondition signal];
         //deallocate everything
         _responseHandlers = nil;
         _sharedInstance = nil;
     }
 }
 
--(void) sendMessage:(NSString*) name withData:(NSData*) data to:(NSString*) destination
+-(void) sendMessage:(NSString*) name withData:(NSData* _Nullable) data to:(NSString*) destination
 {
     [self sendMessage:name withData:data to:destination withResponseHandler:nil];
 }
 
--(void) sendMessage:(NSString*) name withData:(NSData*) data to:(NSString*) destination withResponseHandler:(IPC_response_handler_t) responseHandler
+-(void) sendMessage:(NSString*) name withData:(NSData* _Nullable) data to:(NSString*) destination withResponseHandler:(IPC_response_handler_t) responseHandler
 {
     NSNumber* id = [self writeIpcMessage:name withData:data andResponseId:[NSNumber numberWithInt:0] to:destination];
     //save response handler for later execution (if one is specified)
@@ -81,7 +81,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
         _responseHandlers[id] = responseHandler;
 }
 
--(void) respondToMessage:(NSDictionary*) message withData:(NSData*) data
+-(void) respondToMessage:(NSDictionary*) message withData:(NSData* _Nullable) data
 {
     [self writeIpcMessage:message[@"name"] withData:data andResponseId:message[@"id"] to:message[@"source"]];
 }
@@ -93,7 +93,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
     _dbFile = [[containerUrl path] stringByAppendingPathComponent:@"ipc.sqlite"];
     _processName = processName;
     _ipcQueues = [[NSMutableDictionary alloc] init];
-    _serverThreadSemaphore = dispatch_semaphore_create(0);
+    _serverThreadCondition = [[NSCondition alloc] init];
     
     static dispatch_once_t once;
     static const int VERSION = 2;
@@ -141,7 +141,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
 -(void) serverThreadMain
 {
     DDLogInfo(@"Now running IPC server for '%@'", _processName);
-    //register darwin notification handler for "im.monal.ipc.wakeup:<process name>" which is used to wake up readNextMessage using the serverThreadSemaphore
+    //register darwin notification handler for "im.monal.ipc.wakeup:<process name>" which is used to wake up readNextMessage using the NSCondition
     CFNotificationCenterAddObserver(_darwinNotificationCenterRef, (__bridge void*) self, &darwinNotificationCenterCallback, (__bridge CFNotificationName)[NSString stringWithFormat:@"im.monal.ipc.wakeup:%@", _processName], NULL, 0);
     while(![[NSThread currentThread] isCancelled])
     {
@@ -185,7 +185,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
 -(void) incomingDarwinNotification:(NSString*) name
 {
     DDLogVerbose(@"Got incoming darwin notification: %@", name);
-    dispatch_semaphore_signal(_serverThreadSemaphore);
+    [_serverThreadCondition signal];
 }
 
 -(NSDictionary*) readNextMessage
@@ -197,7 +197,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
             return data;
         //wait for wakeup (incoming darwin notification or thread termination)
         DDLogVerbose(@"IPC readNextMessage waiting for wakeup via darwin notification");
-        dispatch_semaphore_wait(_serverThreadSemaphore, DISPATCH_TIME_FOREVER);
+        [_serverThreadCondition wait];
     }
     return nil;     //thread cancelled
 }
@@ -232,7 +232,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
     return retval;
 }
 
--(NSNumber*) writeIpcMessage:(NSString*) name withData:(NSData*) data andResponseId:(NSNumber*) responseId to:(NSString*) destination
+-(NSNumber*) writeIpcMessage:(NSString*) name withData:(NSData* _Nullable) data andResponseId:(NSNumber*) responseId to:(NSString*) destination
 {
     //empty data is default if not specified
     if(!data)

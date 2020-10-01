@@ -372,15 +372,15 @@ enum msgSentState {
 
     self.viewDidAppear = NO;
 
-    // Hide normal navigation bar
-    //[[self navigationController] setNavigationBarHidden:YES animated:NO];
-    
     [MLNotificationManager sharedInstance].currentAccountNo=self.contact.accountId;
     [MLNotificationManager sharedInstance].currentContact=self.contact;
-    
+
     if(self.day) {
         [[NSNotificationCenter defaultCenter] removeObserver:self];
         self.inputContainerView.hidden = YES;
+        [self refreshData];
+        [self updateNavBarLastInteractionLabel:nil];
+        return;
     }
     else {
         self.inputContainerView.hidden = NO;
@@ -580,6 +580,9 @@ enum msgSentState {
         {
             self.messageList = messages;
         }
+    }
+    else  { // load log for this day
+        self.messageList = [[[DataLayer sharedInstance] messageHistoryDateForContact:self.contact.contactJid forAccount:self.contact.accountId forDate:self.day] mutableCopy];
     }
 }
 

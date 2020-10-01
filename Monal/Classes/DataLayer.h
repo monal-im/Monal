@@ -200,7 +200,7 @@ extern NSString *const kMessageTypeUrl;
 -(void) setLastStanzaId:(NSString*) lastStanzaId forAccount:(NSString*) accountNo;
 
 -(NSArray *) messageHistoryListDates:(NSString *) buddy forAccount: (NSString *) accountNo;
--(NSArray *) messageHistoryDate:(NSString *) buddy forAccount:(NSString *) accountNo forDate:(NSString*) date;
+-(NSArray *) messageHistoryDateForContact:(NSString *) buddy forAccount:(NSString *) accountNo forDate:(NSString*) date;
 
 /**
  retrieves the date of the the last message to or from this contact

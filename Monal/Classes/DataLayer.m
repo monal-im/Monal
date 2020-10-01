@@ -1227,9 +1227,6 @@ static NSDateFormatter* dbFormatter;
 
 -(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo
 {
-    //returns a list of  buddy's with message history
-
-    //DDLogVerbose(query);
     NSString* accountJid = [self jidOfAccount:accountNo];
 
     if(accountJid != nil)
@@ -1254,10 +1251,10 @@ static NSDateFormatter* dbFormatter;
     } else return nil;
 }
 
--(NSArray*) messageHistoryDate:(NSString*) buddy forAccount:(NSString*) accountNo forDate:(NSString*) date
+-(NSArray*) messageHistoryDateForContact:(NSString*) contact forAccount:(NSString*) accountNo forDate:(NSString*) date
 {
     NSString* query = [NSString stringWithFormat:@"select af, message_from, message_to, message, thetime, sent, message_history_id from (select ifnull(actual_from, message_from) as af, message_from, message_to, message, sent, timestamp  as thetime, message_history_id, previewImage, previewText from message_history where account_id=? and (message_from=? or message_to=?) and date(timestamp)=? order by message_history_id desc) order by message_history_id asc"];
-    NSArray* params = @[accountNo, buddy, buddy, date];
+    NSArray* params = @[accountNo, contact, contact, date];
 
     DDLogVerbose(@"%@", query);
     NSArray* results = [self.db executeReader:query andArguments:params];
@@ -1345,21 +1342,13 @@ static NSDateFormatter* dbFormatter;
 -(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo
 {
     //returns a list of  buddy's with message history
-
-    NSString* query1 = [NSString stringWithFormat:@"select username, domain from account where account_id=%@", accountNo];
-    //DDLogVerbose(query);
-    NSArray* user = [self.db executeReader:query1];
-
-    NSString * ownUsername = [NSString stringWithFormat:@"%@@%@",
-                              ((NSString *)[[user objectAtIndex:0] objectForKey:@"username"]),
-                              ((NSString *)[[user objectAtIndex:0] objectForKey:@"domain"])  ];
-    
-    if([user count]>0)
+    NSString* accountJid = [self jidOfAccount:accountNo];
+    if(accountJid)
     {
 
         NSString* query = [NSString stringWithFormat:@"select x.* from(select distinct buddy_name as thename ,'', nick_name, message_from as buddy_name, filename, a.account_id from message_history as a left outer join buddylist as b on a.message_from=b.buddy_name and a.account_id=b.account_id where a.account_id=?  union select distinct message_to as thename ,'',  nick_name, message_to as buddy_name,  filename, a.account_id from message_history as a left outer join buddylist as b on a.message_to=b.buddy_name and a.account_id=b.account_id where a.account_id=?  and message_to!=\"(null)\" )  as x where buddy_name!=?  order by thename COLLATE NOCASE "];
         NSArray* params = @[accountNo, accountNo,
-                           ownUsername];
+                            accountJid];
         //DDLogVerbose(query);
         NSArray* results = [self.db executeReader:query andArguments:params];
 

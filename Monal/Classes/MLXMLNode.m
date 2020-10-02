@@ -91,7 +91,7 @@ static NSRegularExpression* componentParserRegex;
 
 -(id) initWithCoder:(NSCoder*) decoder
 {
-    self = [super init];
+    self = [self init];
     if(!self)
         return nil;
 

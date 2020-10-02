@@ -82,7 +82,6 @@ NSString *const kXMPPPresence = @"presence";
     BOOL _loggedInOnce;
     BOOL _isCSIActive;
     NSDate* _lastInteractionDate;
-    NSString* _versionHash;
     
     //internal handlers and flags
     monal_void_block_t _cancelLoginTimer;
@@ -153,15 +152,34 @@ NSString *const kXMPPPresence = @"presence";
     self = [super init];
     self.accountNo = accountNo;
     self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];
+    
+    //setup ivars
     [self setupObjects];
+    
     //read persisted state to make sure we never operate stateless
+    //WARNING: pubsub node registrations can only be made *after* the first readState call
     [self readState];
-
+    
+    // Init omemo
+    self.omemo = [[MLOMEMO alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid ressource:self.connectionProperties.identity.resource connectionProps:self.connectionProperties xmppConnection:self];
     return self;
 }
 
 -(void) setupObjects
 {
+    //initialize _capsIdentity, _capsFeatures and _capsHash
+    _capsIdentity = [[MLXMLNode alloc] initWithElement:@"identity" withAttributes:@{
+        @"category": @"client",
+        @"type": @"phone",
+        @"name": [NSString stringWithFormat:@"Monal %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]]
+    } andChildren:@[] andData:nil];
+    _capsFeatures = [HelperTools getOwnFeatureSet];
+    NSString* client = [NSString stringWithFormat:@"%@/%@//%@", [_capsIdentity findFirst:@"/@category"], [_capsIdentity findFirst:@"/@type"], [_capsIdentity findFirst:@"/@name"]];
+    [self setCapsHash:[HelperTools getEntityCapsHashForIdentities:@[client] andFeatures:_capsFeatures]];
+    
+    //init pubsub as early as possible to allow other classes or other parts of this file to register pubsub nodes they are interested in
+    self.pubsub = [[MLPubSub alloc] initWithAccount:self];
+    
     _smacksLockObject = [[NSObject alloc] init];
     _accountState = kStateLoggedOut;
     _registration = NO;
@@ -198,20 +216,11 @@ NSString *const kXMPPPresence = @"presence";
     _sendQueue.qualityOfService = NSQualityOfServiceUtility;
     _sendQueue.maxConcurrentOperationCount = 1;
     [_sendQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
-
-    //init pubsub
-    self.pubsub = [[MLPubSub alloc] initWithAccount:self];
     
-    // Init omemo
-    self.omemo = [[MLOMEMO alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid ressource:self.connectionProperties.identity.resource connectionProps:self.connectionProperties xmppConnection:self];
-
     if(_outputBuffer)
         free(_outputBuffer);
     _outputBuffer = nil;
     _outputBufferByteCount = 0;
-
-    //default is an empty pubsub nodes list
-    [self setPubSubNotificationsForNodes:@[]];
     
     _isCSIActive = YES;         //default value is yes if no csi state was set yet
     if([HelperTools isAppExtension])
@@ -246,28 +255,31 @@ NSString *const kXMPPPresence = @"presence";
     [_sendQueue cancelAllOperations];
 }
 
--(void) setVersionHash:(NSString* _Nonnull) hash
+-(void) setCapsHash:(NSString* _Nonnull) hash
 {
     //check if the hash has changed and broadcast a new presence after updating the property
-    if(![hash isEqualToString:_versionHash])
+    if(![hash isEqualToString:_capsHash])
     {
-        _versionHash = hash;
+        DDLogInfo(@"New caps hash: %@", hash);
+        _capsHash = hash;
         [self sendPresence];        //broadcast new version hash (will be ignored if we are not bound)
     }
 }
 
 -(void) setPubSubNotificationsForNodes:(NSArray* _Nonnull) nodes
 {
-    static NSString* client;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        client = [NSString stringWithFormat:@"client/phone//Monal %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
-    });
+    NSString* client = [NSString stringWithFormat:@"%@/%@//%@", [_capsIdentity findFirst:@"/@category"], [_capsIdentity findFirst:@"/@type"], [_capsIdentity findFirst:@"/@name"]];
     NSMutableSet* featuresSet = [[NSMutableSet alloc] initWithSet:[HelperTools getOwnFeatureSet]];
     for(NSString* pubsubNode in nodes)
+    {
+        DDLogInfo(@"Added additional caps feature for pubsub node: %@", pubsubNode);
         [featuresSet addObject:[NSString stringWithFormat:@"%@+notify", pubsubNode]];
-    [self setVersionHash:[HelperTools getEntityCapsHashForIdentities:@[client] andFeatures:featuresSet]];
-
+    }
+    _capsFeatures = featuresSet;
+    [self setCapsHash:[HelperTools getEntityCapsHashForIdentities:@[client] andFeatures:_capsFeatures]];
+    
+    //the pubsub implementation changed state --> persist these changes
+    [self persistState];
 }
 
 -(void) invalidXMLError
@@ -1122,6 +1134,19 @@ NSString *const kXMPPPresence = @"presence";
     }
 }
 
+-(void) stanzaHandled:(XMPPStanza* _Nonnull) stanza
+{
+    if(self.connectionProperties.supportsSM3)
+    {
+        //this will count any stanza between our bind result and smacks enable result but gets reset once the smacks enable result surfaces
+        //(e.g. the counting will be ignored later)
+        if(self.accountState>=kStateBound)
+            [self incrementLastHandledStanza];
+    }
+    else
+        [self persistState];        //make sure we persist our sate, even if smacks is not supported
+}
+
 
 #pragma mark - stanza handling
 
@@ -1184,7 +1209,7 @@ NSString *const kXMPPPresence = @"presence";
             }
             
             //only mark stanza as handled *after* processing it
-            [self incrementLastHandledStanza];
+            [self stanzaHandled:iqNode];
         }
         else if([parsedStanza check:@"/{jabber:client}message"])
         {
@@ -1247,7 +1272,7 @@ NSString *const kXMPPPresence = @"presence";
             }
             
             //only mark stanza as handled *after* processing it
-            [self incrementLastHandledStanza];
+            [self stanzaHandled:messageNode];
         }
         else if([parsedStanza check:@"/{jabber:client}presence"])
         {
@@ -1290,7 +1315,7 @@ NSString *const kXMPPPresence = @"presence";
 
                     if([[presenceNode findFirst:@"/@type"] isEqualToString:kpresenceUnavailable])
                     {
-                        [self incrementLastHandledStanza];
+                        [self stanzaHandled:presenceNode];
                         //handle this differently later
                         return;
                     }
@@ -1398,7 +1423,7 @@ NSString *const kXMPPPresence = @"presence";
             }
             
             //only mark stanza as handled *after* processing it
-            [self incrementLastHandledStanza];
+            [self stanzaHandled:presenceNode];
         }
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}enabled"])
         {
@@ -1891,7 +1916,6 @@ NSString *const kXMPPPresence = @"presence";
         [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
 
     [values setObject:_lastInteractionDate forKey:@"lastInteractionDate"];
-    [values setObject:_versionHash forKey:@"versionHash"];
     [values setValue:[NSDate date] forKey:@"stateSavedAt"];
 
     //save state dictionary
@@ -2040,9 +2064,6 @@ NSString *const kXMPPPresence = @"presence";
             self.connectionProperties.supportsPing = supportsPing.boolValue;
         }
 
-        if([dic objectForKey:@"versionHash"])
-            _versionHash = [dic objectForKey:@"versionHash"];
-        
         if([dic objectForKey:@"lastInteractionDate"])
             _lastInteractionDate = [dic objectForKey:@"lastInteractionDate"];
 
@@ -2135,8 +2156,8 @@ NSString *const kXMPPPresence = @"presence";
     //don't send presences if we are not bound
     if(_accountState < kStateBound)
         return;
-
-    XMPPPresence* presence = [[XMPPPresence alloc] initWithHash:_versionHash];
+    
+    XMPPPresence* presence = [[XMPPPresence alloc] initWithHash:_capsHash];
     if(self.statusMessage)
         [presence setStatus:self.statusMessage];
     if(self.awayState)

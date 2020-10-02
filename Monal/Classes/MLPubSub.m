@@ -28,7 +28,13 @@
     _account = account;
     _handlers = [[NSMutableDictionary alloc] init];
     _cache = [[NSMutableDictionary alloc] init];
+    _configuredNodes = [[NSMutableDictionary alloc] init];
     return self;
+}
+
+-(void) registerInterestForNode:(NSString* _Nonnull) node
+{
+    [self registerInterestForNode:node withPersistentCaching:NO];
 }
 
 -(void) registerInterestForNode:(NSString* _Nonnull) node withPersistentCaching:(BOOL) caching
@@ -47,20 +53,20 @@
         if(_cache[node])
             _cache[node][@"persistentCache"] = @NO;
         [_configuredNodes removeObjectForKey:node];
+        [_account setPubSubNotificationsForNodes:[_configuredNodes allKeys]];
     }
 }
 
--(void) registerHandler:(monal_pubsub_handler_t) handler forNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nullable) jid
+-(void) registerForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nullable) jid withHandler:(monal_pubsub_handler_t) handler
 {
     //empty jid means "all jids"
     if(!jid)
         jid = @"";
     
     //sanity check
-    NSSet* desiredNodeList = [[NSSet alloc] initWithArray:[MLPubSub getDesiredNodesList]];
-    if(![desiredNodeList containsObject:node])
-        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"PubSub node '%@' can not be registered because it is not listed in the PubSub getDesiredNodesList array!" userInfo:@{
-            @"desiredNodeList": desiredNodeList,
+    if(!_configuredNodes[node])
+        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"PubSub node '%@' can not be registered because it is not listed in the PubSub configuredNodes dictionary!" userInfo:@{
+            @"configuredNodes": _configuredNodes,
             @"node": [node stringByAppendingString:@"+notify"]
         }];
     
@@ -73,7 +79,7 @@
     [self callHandlersForNode:node andJid:jid];
 }
 
--(void) unregisterHandlerForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nullable) jid
+-(void) unregisterForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nullable) jid
 {
     //empty jid means "all jids"
     if(!jid)
@@ -84,12 +90,12 @@
     [_handlers[node] removeObjectForKey:jid];
 }
 
--(NSDictionary* _Nullable) getCachedDataForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid
+-(NSDictionary* _Nonnull) getCachedDataForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid
 {
     @synchronized(_cache) {
         if(_cache[node] && _cache[node][@"data"][jid])
             return [[NSDictionary alloc] initWithDictionary:_cache[node][@"data"][jid] copyItems:YES];
-        return nil;
+        return [[NSDictionary alloc] init];
     }
 }
 
@@ -127,14 +133,21 @@
 -(NSDictionary*) getInternalData
 {
     @synchronized(_cache) {
-        return [[NSDictionary alloc] initWithDictionary:_cache copyItems:YES];
+        return @{
+            @"cache": [[NSDictionary alloc] initWithDictionary:_cache copyItems:YES],
+            @"interest": _configuredNodes
+        };
     }
 }
 
--(void) setInternalData:(NSDictionary*) data
+-(void) setInternalData:(NSDictionary* _Nonnull) data
 {
     @synchronized(_cache) {
-        _cache = [NSMutableDictionary dictionaryWithDictionary:data];
+        _cache = [NSMutableDictionary dictionaryWithDictionary:data[@"cache"]];
+        //read _configuredNodes but don't overwrite cache settings of already configured nodes
+        for(NSString* entry in [data[@"interest"] allKeys])
+            if(_configuredNodes[entry] == nil)
+                _configuredNodes[entry] = data[@"interest"][entry];
     }
 }
 
@@ -156,6 +169,8 @@
 
 //*** internal methods below
 
+//NOTE: this will called for iq or message stanzas carrying pubsub data.
+//We don't need to persist our updated cache because xmpp.m will do that automatically after every handled stanza
 -(void) handleItems:(MLXMLNode* _Nullable) items fromJid:(NSString* _Nullable) jid
 {
     if(!items)
@@ -198,9 +213,9 @@
         if(_handlers[node])
         {
             if(_handlers[node][jid])
-                ((monal_pubsub_handler_t)_handlers[node][jid])([self getCachedDataForNode:node andBareJid:jid]);
+                ((monal_pubsub_handler_t)_handlers[node][jid])([self getCachedDataForNode:node andBareJid:jid], jid);
             if(_handlers[node][@""])
-                ((monal_pubsub_handler_t)_handlers[node][@""])([self getCachedDataForNode:node andBareJid:jid]);
+                ((monal_pubsub_handler_t)_handlers[node][@""])([self getCachedDataForNode:node andBareJid:jid], jid);
         }
     }
 }

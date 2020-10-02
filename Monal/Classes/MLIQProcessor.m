@@ -58,9 +58,8 @@
     
     if([iqNode check:@"{http://jabber.org/protocol/disco#info}query"])
     {
-        XMPPIQ* discoInfoResponse = [[XMPPIQ alloc] initWithId:[iqNode findFirst:@"/@id"] andType:kiqResultType];
-        [discoInfoResponse setiqTo:iqNode.from];
-        [discoInfoResponse setDiscoInfoWithFeaturesAndNode:[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query@node"]];
+        XMPPIQ* discoInfoResponse = [[XMPPIQ alloc] initAsResponseTo:iqNode withType:kiqResultType];
+        [discoInfoResponse setDiscoInfoWithFeatures:account.capsFeatures identity:account.capsIdentity andNode:[iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query@node"]];
         [account send:discoInfoResponse];
     }
 }

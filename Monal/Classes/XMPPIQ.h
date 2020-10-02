@@ -18,6 +18,7 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
 -(id) initWithId:(NSString*) iqid andType:(NSString*) iqType;
 -(id) initWithType:(NSString*) iqType;
 -(id) initWithType:(NSString*) iqType to:(NSString*) to;
+-(id) initAsResponseTo:(XMPPIQ*) iq withType:(NSString*) iqType;
 
 -(NSString*) getId;
 -(void) setId:(NSString*) id;
@@ -60,7 +61,7 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
  makes a disco info response for the server.
  @param node param passed is the xmpp node attribute that came in with the iq get
  */
--(void) setDiscoInfoWithFeaturesAndNode:(NSString*) node;
+-(void) setDiscoInfoWithFeatures:(NSSet*) features identity:(MLXMLNode*) identity andNode:(NSString*) node;
 
 /**
  sets up a disco info query node

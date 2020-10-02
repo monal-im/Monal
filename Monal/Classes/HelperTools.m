@@ -249,7 +249,7 @@ void logException(NSException* exception)
         ];
         featuresSet = [[NSSet alloc] initWithArray:featuresArray];
     });
-    return [[NSSet alloc] initWithSet:featuresSet copyItems:NO];
+    return featuresSet;
 }
 
 +(NSString*) generateStringOfFeatureSet:(NSSet*) features

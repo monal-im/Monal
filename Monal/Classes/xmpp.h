@@ -99,6 +99,9 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 
 //calculated
 @property (nonatomic, strong) NSDate* connectedTime;
+@property (nonatomic, strong, readonly) MLXMLNode* capsIdentity;
+@property (nonatomic, strong, readonly) NSSet* capsFeatures;
+@property (nonatomic, strong, readonly) NSString* capsHash;
 
 extern NSString *const kMessageId;
 extern NSString *const kSendTimer;

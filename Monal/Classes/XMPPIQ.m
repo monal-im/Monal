@@ -38,7 +38,16 @@ NSString* const kiqErrorType = @"error";
 -(id) initWithType:(NSString*) iqType to:(NSString*) to
 {
     self = [self initWithType:iqType];
-    [self setiqTo:to];
+    if(to)
+        [self setiqTo:to];
+    return self;
+}
+
+-(id) initAsResponseTo:(XMPPIQ*) iq withType:(NSString*) iqType
+{
+    self = [self initWithId:[iq findFirst:@"/@id"] andType:iqType];
+    if(iq.from)
+        [self setiqTo:iq.from];
     return self;
 }
 
@@ -100,24 +109,20 @@ NSString* const kiqErrorType = @"error";
     [self addChild:queryNode];
 }
 
--(void) setDiscoInfoWithFeaturesAndNode:(NSString*) node
+-(void) setDiscoInfoWithFeatures:(NSSet*) features identity:(MLXMLNode*) identity andNode:(NSString*) node
 {
     MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#info"];
     if(node)
         [queryNode.attributes setObject:node forKey:@"node"];
     
-    for(NSString* feature in [HelperTools getOwnFeatureSet])
+    for(NSString* feature in features)
     {
         MLXMLNode* featureNode = [[MLXMLNode alloc] initWithElement:@"feature"];
         featureNode.attributes[@"var"] = feature;
         [queryNode addChild:featureNode];
     }
     
-    MLXMLNode* identityNode = [[MLXMLNode alloc] initWithElement:@"identity"];
-    identityNode.attributes[@"category"] = @"client";
-    identityNode.attributes[@"type"] = @"phone";
-    identityNode.attributes[@"name"] = [NSString stringWithFormat:@"Monal %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
-    [queryNode addChild:identityNode];
+    [queryNode addChild:identity];
     
     [self addChild:queryNode];
 }

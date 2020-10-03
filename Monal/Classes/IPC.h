@@ -20,9 +20,9 @@ typedef void (^IPC_response_handler_t)(NSDictionary*);
 +(void) initializeForProcess:(NSString*) processName;
 +(id) sharedInstance;
 +(void) terminate;
--(void) sendMessage:(NSString*) name withData:(NSData*) data to:(NSString*) destination;
--(void) sendMessage:(NSString*) name withData:(NSData*) data to:(NSString*) destination withResponseHandler:(IPC_response_handler_t) responseHandler;
--(void) respondToMessage:(NSDictionary*) message withData:(NSData*) data;
+-(void) sendMessage:(NSString*) name withData:(NSData* _Nullable) data to:(NSString*) destination;
+-(void) sendMessage:(NSString*) name withData:(NSData* _Nullable) data to:(NSString*) destination withResponseHandler:(IPC_response_handler_t) responseHandler;
+-(void) respondToMessage:(NSDictionary*) message withData:(NSData* _Nullable) data;
 
 @end
 

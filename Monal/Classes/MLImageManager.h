@@ -30,7 +30,7 @@
 /**
  Takes the string from the xmpp icon vcard info and stores it in an appropropriate place. 
  */
--(void) setIconForContact:(NSString*_Nonnull) contact andAccount:(NSString*_Nonnull) accountNo WithData:(NSString*_Nonnull) data ;
+-(void) setIconForContact:(NSString*_Nonnull) contact andAccount:(NSString*_Nonnull) accountNo WithData:(NSData*_Nonnull) data ;
 
 -(BOOL) saveBackgroundImageData:(NSData *_Nonnull) data;
 

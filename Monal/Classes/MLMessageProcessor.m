@@ -170,13 +170,6 @@ static NSMutableDictionary* _typingNotifications;
         }
     }
     
-    /*TODO: avatar data must be handled via pubsub
-    if(messageNode.avatarData)
-    {
-        [[MLImageManager sharedInstance] setIconForContact:messageNode.actualFrom andAccount:account.accountNo WithData:messageNode.avatarData];
-    }
-    */
-    
     if([messageNode check:@"{urn:xmpp:receipts}received@id"])
     {
         //save in DB

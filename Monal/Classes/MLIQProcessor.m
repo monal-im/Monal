@@ -415,7 +415,7 @@
         [[DataLayer sharedInstance] setFullName:fullname forContact:iqNode.fromUser andAccount:account.accountNo];
         
         if([iqNode check:@"{vcard-temp}vCard/PHOTO/BINVAL#"])
-            [[MLImageManager sharedInstance] setIconForContact:iqNode.fromUser andAccount:account.accountNo WithData:[iqNode findFirst:@"{vcard-temp}vCard/PHOTO/BINVAL#"]];
+            [[MLImageManager sharedInstance] setIconForContact:iqNode.fromUser andAccount:account.accountNo WithData:[iqNode findFirst:@"{vcard-temp}vCard/PHOTO/BINVAL#|base64"]];
         
         MLContact *contact = [MLContact alloc];
         contact.contactJid = iqNode.fromUser;

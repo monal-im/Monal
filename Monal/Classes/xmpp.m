@@ -162,6 +162,10 @@ NSString *const kXMPPPresence = @"presence";
     
     // Init omemo
     self.omemo = [[MLOMEMO alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid ressource:self.connectionProperties.identity.resource connectionProps:self.connectionProperties xmppConnection:self];
+    
+    //pubsub avatar handling (XEP-0084)
+    [self handleAvatars];
+    
     return self;
 }
 
@@ -3140,6 +3144,48 @@ NSString *const kXMPPPresence = @"presence";
     if([mamQueryId hasPrefix:@"MLhistory:"])
         array = [[array reverseObjectEnumerator] allObjects];
     return [array copy];        //this creates an unmutable array from the mutable one
+}
+
+-(void) handleAvatars
+{
+    //we want to get automatic avatar metadata updates
+    [self.pubsub registerInterestForNode:@"urn:xmpp:avatar:metadata"];
+    
+    //register handler for avatar metadata coming from *any* jid
+    [self.pubsub registerForNode:@"urn:xmpp:avatar:metadata" andBareJid:nil withHandler:^(NSDictionary* items, NSString* jid) {
+        for(NSString* avatarHash in items)
+        {
+            //if this returns NO, we don't have a copy of this image yet --> lets fetch it
+            if(![self updateAvatarWithHash:avatarHash andJid:jid])
+            {
+                [self.pubsub forceRefreshForNode:@"urn:xmpp:avatar:data" andBareJid:jid withCompletion:^(BOOL success, XMPPIQ* rawResponse) {
+                    //ignore errors here (e.g. simply don't update the avatar image)
+                    //(this should never happen if other clients and servers behave properly)
+                    if(!success)
+                    {
+                        DDLogError(@"Got avatar image fetch error: %@", rawResponse);
+                        return;
+                    }
+                    //ignore if the avatar data can not be found (should never happen if other clients behave properly)
+                    if(![self updateAvatarWithHash:avatarHash andJid:jid])
+                        DDLogError(@"Got avatar image data error for avatar hash %@ of contact %@", avatarHash, jid);
+                }];
+            }
+            break;      //we only want to process the first item
+        }
+    }];
+}
+
+-(BOOL) updateAvatarWithHash:(NSString*) avatarHash andJid:(NSString*) jid
+{
+    //check if we already have a cached copy of the avatar image data and use it if possible
+    NSDictionary* avatarData = [self.pubsub getCachedDataForNode:@"urn:xmpp:avatar:data" andBareJid:jid];
+    if(avatarData[avatarHash])
+    {
+        [[MLImageManager sharedInstance] setIconForContact:jid andAccount:self.accountNo WithData:[avatarData[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]];
+        return YES;
+    }
+    return NO;
 }
 
 @end

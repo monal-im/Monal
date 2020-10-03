@@ -119,7 +119,7 @@
     return [NSString stringWithFormat:@"%@.png", [contact lowercaseString]];;
 }
 
--(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSString*) data
+-(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSData*) data
 {
     if(!data) return; 
 //documents directory/buddyicons/account no/contact
@@ -141,7 +141,7 @@
         [fileManager removeItemAtPath:writablePath error:nil];
     }
 
-    if([[HelperTools dataWithBase64EncodedString:data] writeToFile:writablePath atomically:NO] )
+    if([data writeToFile:writablePath atomically:NO])
     {
         DDLogVerbose(@"wrote image to file");
     }

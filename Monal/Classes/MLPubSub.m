@@ -41,7 +41,8 @@
 {
     @synchronized(_cache) {
         _configuredNodes[node] = caching ? @YES : @NO;
-        _cache[node][@"persistentCache"] = _configuredNodes[node];
+        if(_cache[node])
+            _cache[node][@"persistentCache"] = _configuredNodes[node];
         [_account setPubSubNotificationsForNodes:[_configuredNodes allKeys]];
     }
 }
@@ -64,11 +65,14 @@
         jid = @"";
     
     //sanity check
-    if(!_configuredNodes[node])
-        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"PubSub node '%@' can not be registered because it is not listed in the PubSub configuredNodes dictionary!" userInfo:@{
-            @"configuredNodes": _configuredNodes,
-            @"node": [node stringByAppendingString:@"+notify"]
-        }];
+    //we are using @synchronized(_cache) for _configuredNodes here because all other parts accessing _configuredNodes are already synchronized via _cache
+    @synchronized(_cache) {
+        if(!_configuredNodes[node])
+            @throw [NSException exceptionWithName:@"RuntimeException" reason:@"PubSub node '%@' can not be registered because it is not listed in the PubSub configuredNodes dictionary!" userInfo:@{
+                @"configuredNodes": _configuredNodes,
+                @"node": [node stringByAppendingString:@"+notify"]
+            }];
+    }
     
     //save handler
     if(!_handlers[node])
@@ -134,7 +138,7 @@
 {
     @synchronized(_cache) {
         return @{
-            @"cache": [[NSDictionary alloc] initWithDictionary:_cache copyItems:YES],
+            @"cache": _cache,
             @"interest": _configuredNodes
         };
     }
@@ -143,11 +147,13 @@
 -(void) setInternalData:(NSDictionary* _Nonnull) data
 {
     @synchronized(_cache) {
-        _cache = [NSMutableDictionary dictionaryWithDictionary:data[@"cache"]];
+        _cache = data[@"cache"];
         //read _configuredNodes but don't overwrite cache settings of already configured nodes
         for(NSString* entry in [data[@"interest"] allKeys])
             if(_configuredNodes[entry] == nil)
                 _configuredNodes[entry] = data[@"interest"][entry];
+        //update caps hash according to our new _configuredNodes dictionary
+        [_account setPubSubNotificationsForNodes:[_configuredNodes allKeys]];
     }
 }
 

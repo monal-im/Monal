@@ -2066,6 +2066,11 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
     }];
     
+    [self updateDBTo:4.91 withBlock:^{
+        //truncate internal account state to create a clean working set
+        [self.db executeNonQuery:@"UPDATE account SET state=NULL;"];
+    }];
+    
     [self.db endWriteTransaction];
     
     DDLogInfo(@"Database version check complete");

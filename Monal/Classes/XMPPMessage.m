@@ -27,15 +27,21 @@ NSString* const kMessageHeadlineType=@"headline";
 -(id) initWithXMPPMessage:(XMPPMessage*) msg
 {
     self = [self initWithElement:msg.element withAttributes:msg.attributes andChildren:msg.children andData:msg.data];
+    [self setXmppId:[[NSUUID UUID] UUIDString]];        //default value, can be overwritten later on
     return self;
 }
 
 -(void) setXmppId:(NSString*) idval
 {
     [self.attributes setObject:idval forKey:@"id"];
+    //add origin id to indicate we are using uuids for our stanza ids
+    if([self check:@"{urn:xmpp:sid:0}origin-id"])       //modify existing origin id
+        ((XMPPMessage*)[self findFirst:@"{urn:xmpp:sid:0}origin-id"]).attributes[@"id"] = idval;
+    else
+        [self addChild:[[MLXMLNode alloc] initWithElement:@"origin-id" andNamespace:@"urn:xmpp:sid:0" withAttributes:@{@"id":idval} andChildren:@[] andData:nil]];
 }
 
--(NSString *) xmppId
+-(NSString*) xmppId
 {
     return [self.attributes objectForKey:@"id"];
 }

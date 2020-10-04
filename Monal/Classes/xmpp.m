@@ -1810,9 +1810,9 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString *) messageId
 {
-    XMPPMessage* messageNode =[[XMPPMessage alloc] init];
+    XMPPMessage* messageNode = [[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact forKey:@"to"];
-    [messageNode setXmppId:messageId ];
+    [messageNode setXmppId:messageId];
 
 #ifndef DISABLE_OMEMO
     if(encrypt && !isMUC) {

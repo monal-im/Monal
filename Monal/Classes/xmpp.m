@@ -1224,9 +1224,9 @@ NSString *const kXMPPPresence = @"presence";
             //the original "outer" message will be kept in outerMessageNode while the forwarded stanza will be stored in messageNode
             if([outerMessageNode check:@"{urn:xmpp:mam:2}result"])          //mam result
             {
-                if(outerMessageNode.from)
+                if(outerMessageNode.from && ![self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from])
                 {
-                    DDLogError(@"mam results don't have a from attribute on the outer message stanzas, ignoring this spoofed mam result!");
+                    DDLogError(@"mam results must be from our bare jid, ignoring this spoofed mam result!");
                     //even these stanzas have do be counted by smacks
                     [self incrementLastHandledStanza];
                     return;
@@ -1241,7 +1241,7 @@ NSString *const kXMPPPresence = @"presence";
             }
             else if([outerMessageNode check:@"{urn:xmpp:carbons:2}*"])     //carbon copy
             {
-                if(![self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from])
+                if(outerMessageNode.from && ![self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from])
                 {
                     DDLogError(@"carbon copies must be from our bare jid, ignoring this spoofed carbon copy!");
                     //even these stanzas have do be counted by smacks

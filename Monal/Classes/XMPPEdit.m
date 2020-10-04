@@ -75,14 +75,13 @@
     {
         //edit
         DDLogVerbose(@"reading account number %@", _accountno);
-        NSArray* accountDetails = [_db detailsForAccount:_accountno];
-        if(accountDetails.count == 0)
+        NSDictionary* settings = [_db detailsForAccount:_accountno];
+        if(!settings)
         {
             //present another UI here.
             return;
         }
 
-        NSDictionary* settings = [accountDetails objectAtIndex:0]; //only one row
         self.initialSettings = settings;
 
         self.jid = [NSString stringWithFormat:@"%@@%@", [settings objectForKey:@"username"], [settings objectForKey:@"domain"]];

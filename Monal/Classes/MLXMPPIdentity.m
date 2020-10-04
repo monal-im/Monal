@@ -23,8 +23,9 @@
 {
     self = [super init];
     self.jid = jid;
-    self.password = password;
     self.resource = resource;
+    _fullJid = resource ? [NSString stringWithFormat:@"%@/%@", jid, resource] : jid;
+    self.password = password;
     
     NSArray* elements = [self.jid componentsSeparatedByString:@"@"];
     self.user = elements[0];
@@ -41,6 +42,7 @@
 
 -(void) bindJid:(NSString*) jid
 {
+    _fullJid = jid;
     NSDictionary* parts = [HelperTools splitJid:jid];
     self.jid = parts[@"user"];
     self.resource = parts[@"resource"];

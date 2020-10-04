@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (atomic) NSString* jid;
 @property (atomic) NSString* resource;
+@property (atomic, readonly) NSString* fullJid;
 
 @property (atomic, readonly) NSString* user;
 @property (atomic, readonly) NSString* password;

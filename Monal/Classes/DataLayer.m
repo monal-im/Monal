@@ -198,20 +198,19 @@ static NSDateFormatter* dbFormatter;
     return result.count > 0;
 }
 
--(NSArray*) detailsForAccount:(NSString*) accountNo
+-(NSDictionary*) detailsForAccount:(NSString*) accountNo
 {
-    if(!accountNo) return nil;
-    NSString* query = [NSString stringWithFormat:@"select * from account where account_id=?"];
-    NSArray* result =[self.db executeReader:query andArguments:@[accountNo]];
-    if(result != nil)
+    if(!accountNo)
+        return nil;
+    NSArray* result = [self.db executeReader:@"select * from account where account_id=?;" andArguments:@[accountNo]];
+    if(result != nil && [result count])
     {
-        DDLogVerbose(@" count: %lu", (unsigned long)[result count]);
+        DDLogVerbose(@"count: %lu", (unsigned long)[result count]);
+        return result[0];
     }
     else
-    {
         DDLogError(@"account list is empty or failed to read");
-    }
-    return result;
+    return nil;
 }
 
 -(NSString*) jidOfAccount:(NSString*) accountNo

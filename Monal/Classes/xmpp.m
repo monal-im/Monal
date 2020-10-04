@@ -1157,6 +1157,7 @@ NSString *const kXMPPPresence = @"presence";
 -(void) processInput:(MLXMLNode*) parsedStanza
 {
     DDLogDebug(@"RECV Stanza: %@", parsedStanza);
+    DDLogError(@"full jid: %@", self.connectionProperties.identity.fullJid);
     
     //only process most stanzas/nonzas after having a secure context
     if(self.connectionProperties.server.isDirectTLS || self->_startTLSComplete)
@@ -1164,6 +1165,12 @@ NSString *const kXMPPPresence = @"presence";
         if([parsedStanza check:@"/{jabber:client}iq"] && [parsedStanza check:@"/@id"] && [parsedStanza check:@"/@type"])   //sanity: check if iq id and type attributes are present
         {
             XMPPIQ* iqNode = (XMPPIQ*)parsedStanza;
+            
+            //sanitize: no from or to always means own bare jid
+            if(!iqNode.from)
+                iqNode.from = self.connectionProperties.identity.jid;
+            if(!iqNode.to)
+                iqNode.to = self.connectionProperties.identity.fullJid;
             
             //process registered iq handlers
             if(_iqHandlers[[iqNode findFirst:@"/@id"]])
@@ -1220,11 +1227,18 @@ NSString *const kXMPPPresence = @"presence";
             //outerMessageNode and messageNode are the same for messages not carrying a carbon copy or mam result
             XMPPMessage* outerMessageNode = (XMPPMessage*)parsedStanza;
             XMPPMessage* messageNode = outerMessageNode;
+            
+            //sanitize outer node: no from or to always means own bare jid
+            if(!outerMessageNode.from)
+                outerMessageNode.from = self.connectionProperties.identity.jid;
+            if(!outerMessageNode.to)
+                outerMessageNode.to = self.connectionProperties.identity.fullJid;
+            
             //extract inner message if mam result or carbon copy
             //the original "outer" message will be kept in outerMessageNode while the forwarded stanza will be stored in messageNode
             if([outerMessageNode check:@"{urn:xmpp:mam:2}result"])          //mam result
             {
-                if(outerMessageNode.from && ![self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from])
+                if(![self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from])
                 {
                     DDLogError(@"mam results must be from our bare jid, ignoring this spoofed mam result!");
                     //even these stanzas have do be counted by smacks
@@ -1241,7 +1255,7 @@ NSString *const kXMPPPresence = @"presence";
             }
             else if([outerMessageNode check:@"{urn:xmpp:carbons:2}*"])     //carbon copy
             {
-                if(outerMessageNode.from && ![self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from])
+                if(![self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from])
                 {
                     DDLogError(@"carbon copies must be from our bare jid, ignoring this spoofed carbon copy!");
                     //even these stanzas have do be counted by smacks
@@ -1256,6 +1270,12 @@ NSString *const kXMPPPresence = @"presence";
                 if([outerMessageNode check:@"{urn:xmpp:delay}delay"] && ![messageNode check:@"{urn:xmpp:delay}delay"])
                     [messageNode addChild:[outerMessageNode findFirst:@"{urn:xmpp:delay}delay"]];
             }
+            
+            //sanitize inner node: no from or to always means own bare jid
+            if(!messageNode.from)
+                messageNode.from = self.connectionProperties.identity.jid;
+            if(!messageNode.to)
+                messageNode.to = self.connectionProperties.identity.fullJid;
             
             //only process mam results when they are *not* for priming the database with the initial stanzaid (the id will be taken from the iq result)
             //we do this because we don't want to randomly add one single message to our history db after the user installs the app / adds a new account
@@ -1281,6 +1301,12 @@ NSString *const kXMPPPresence = @"presence";
         else if([parsedStanza check:@"/{jabber:client}presence"])
         {
             XMPPPresence* presenceNode = (XMPPPresence*)parsedStanza;
+            
+            //sanitize: no from or to always means own bare jid
+            if(!presenceNode.from)
+                presenceNode.from = self.connectionProperties.identity.jid;
+            if(!presenceNode.to)
+                presenceNode.to = self.connectionProperties.identity.fullJid;
 
             if([presenceNode.fromUser isEqualToString:self.connectionProperties.identity.jid])
             {

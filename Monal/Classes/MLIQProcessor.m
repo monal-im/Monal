@@ -174,7 +174,12 @@
     
     DDLogInfo(@"Binding to jid: %@", [iqNode findFirst:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/jid#"]);
     [account.connectionProperties.identity bindJid:[iqNode findFirst:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/jid#"]];
-    DDLogDebug(@"After bind: jid=%@, resource=%@", account.connectionProperties.identity.jid, account.connectionProperties.identity.resource);
+    DDLogDebug(@"After bind: jid=%@, resource=%@, fullJid=%@", account.connectionProperties.identity.jid, account.connectionProperties.identity.resource, account.connectionProperties.identity.fullJid);
+    
+    //update resource in db (could be changed by server)
+    NSMutableDictionary* accountDict = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo]];
+    accountDict[kResource] = account.connectionProperties.identity.resource;
+    [[DataLayer sharedInstance] updateAccounWithDictionary:accountDict];
     
     if(account.connectionProperties.supportsSM3)
     {

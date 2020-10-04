@@ -67,10 +67,6 @@ static NSMutableDictionary* _typingNotifications;
     if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalReceivedMucInviteNotice object:nil userInfo:@{@"from": messageNode.from}];
 
-    NSString* recipient = messageNode.to;
-    if(!recipient)
-        recipient = account.connectionProperties.identity.jid;
-    
     NSString* decrypted;
     if([messageNode check:@"/{jabber:client}message/{eu.siacs.conversations.axolotl}encrypted/payload"])
         decrypted = [account.omemo decryptMessage:messageNode];
@@ -151,7 +147,7 @@ static NSMutableDictionary* _typingNotifications;
             else
             {
                 [[DataLayer sharedInstance] addMessageFrom:messageNode.fromUser
-                                                        to:recipient
+                                                        to:messageNode.toUser
                                                 forAccount:account.accountNo
                                                   withBody:[body copy]
                                               actuallyfrom:actualFrom
@@ -279,7 +275,7 @@ static NSMutableDictionary* _typingNotifications;
         if(![messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
             notify([[DataLayer sharedInstance] addActiveBuddies:messageNode.fromUser forAccount:account.accountNo]);
         else
-            notify([[DataLayer sharedInstance] addActiveBuddies:messageNode.to forAccount:account.accountNo]);
+            notify([[DataLayer sharedInstance] addActiveBuddies:messageNode.toUser forAccount:account.accountNo]);
     }
     else
         DDLogError(@"error adding message");

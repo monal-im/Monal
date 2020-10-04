@@ -535,13 +535,11 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) connectAccount:(NSString*) accountNo
 {
-    NSArray* accountDetails = [[DataLayer sharedInstance] detailsForAccount:accountNo];
-    if(accountDetails.count == 1) {
-        NSDictionary* account = [accountDetails objectAtIndex:0];
+    NSDictionary* account = [[DataLayer sharedInstance] detailsForAccount:accountNo];
+    if(!account)
+        DDLogError(@"Expected account settings in db for accountNo: %@", accountNo);
+    else
         [self connectAccountWithDictionary:account];
-    } else {
-        DDLogVerbose(@"Expected account settings in db for accountNo: %@", accountNo);
-    }
 }
 
 -(void) connectAccountWithDictionary:(NSDictionary*)account
@@ -549,11 +547,11 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
     if(existing)
     {
-        DDLogVerbose(@"existing account just pinging.");
+        DDLogInfo(@"existing account just pinging.");
         if(_hasConnectivity)
             [existing sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         else
-            DDLogVerbose(@"NOT pinging because no connectivity.");
+            DDLogWarn(@"NOT pinging because no connectivity.");
         return;
     }
     DDLogVerbose(@"connecting account %@@%@",[account objectForKey:kUsername], [account objectForKey:kDomain]);
@@ -583,11 +581,11 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
         if(_hasConnectivity)
         {
-            DDLogVerbose(@"starting connect");
+            DDLogInfo(@"starting connect");
             [xmppAccount connect];
         }
         else
-            DDLogVerbose(@"NOT connecting because no connectivity.");
+            DDLogWarn(@"NOT connecting because no connectivity.");
     }
 }
 

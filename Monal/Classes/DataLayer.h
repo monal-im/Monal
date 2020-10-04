@@ -137,7 +137,7 @@ extern NSString *const kMessageTypeUrl;
 -(BOOL) doesAccountExistUser:(NSString*) user andDomain:(NSString *) domain;
 -(NSNumber*) accountIDForUser:(NSString*) user andDomain:(NSString *) domain;
 
--(NSArray*) detailsForAccount:(NSString*) accountNo;
+-(NSDictionary*) detailsForAccount:(NSString*) accountNo;
 -(NSString*) jidOfAccount:(NSString*) accountNo;
 
 -(BOOL) updateAccounWithDictionary:(NSDictionary *) dictionary;

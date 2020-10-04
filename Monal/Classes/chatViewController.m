@@ -95,11 +95,9 @@ enum msgSentState {
 {
     self.hidesBottomBarWhenPushed = YES;
     
-    NSArray* accountDetails = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId];
-    if([accountDetails count] > 0)
-    {
-        self.jid = [NSString stringWithFormat:@"%@@%@",[[accountDetails objectAtIndex:0] objectForKey:@"username"], [[accountDetails objectAtIndex:0] objectForKey:@"domain"]];
-    }
+    NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId];
+    if(accountDict)
+        self.jid = [NSString stringWithFormat:@"%@@%@",[accountDict objectForKey:@"username"], [accountDict objectForKey:@"domain"]];
 
     // init privacy Settings
     self.showGeoLocationsInline = [[HelperTools defaultsDB] boolForKey: @"ShowGeoLocation"];
@@ -616,9 +614,10 @@ enum msgSentState {
     NSString *newMessageID =messageID?messageID:[[NSUUID UUID] UUIDString];
     //dont readd it, use the exisitng
 
-    NSArray* accountDetails = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId];
-    if(accountDetails.count == 0) {
-        DDLogError(@"Account should be >0");
+    NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId];
+    if(!accountDict)
+    {
+        DDLogError(@"Account not found!");
         return;
     }
 

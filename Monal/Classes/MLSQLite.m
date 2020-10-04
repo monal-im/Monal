@@ -77,7 +77,7 @@
         @synchronized(self) {
             NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
             if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 1)
-                @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Transaction leak in NSThreadWillExitNotification: trying to close sqlite3 connection while still transaction open" userInfo:threadData];
+                @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Transaction leak in NSThreadWillExitNotification: trying to close sqlite3 connection while transaction still open" userInfo:threadData];
             if(self->_database)
             {
                 DDLogInfo(@"Closing database in NSThreadWillExitNotification: %@", _dbFile);
@@ -88,9 +88,10 @@
     }];
 
     //some settings (e.g. truncate is faster than delete)
+    //this uses the private api because we have no thread local instance added to the threadData dictionary yet (and public apis check that)
     sqlite3_busy_timeout(self->_database, 4000);
-    [self executeNonQuery:@"pragma synchronous=NORMAL;"];
-    [self executeNonQuery:@"pragma truncate;"];
+    [self executeNonQuery:@"pragma synchronous=NORMAL;" andArguments:@[] withException:YES];
+    [self executeNonQuery:@"pragma truncate;" andArguments:@[] withException:YES];
 
     return self;
 }
@@ -100,7 +101,7 @@
     @synchronized(self) {
         NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
         if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 1)
-            @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Transaction leak in dealloc: trying to close sqlite3 connection while still transaction open" userInfo:threadData];
+            @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Transaction leak in dealloc: trying to close sqlite3 connection while transaction still open" userInfo:threadData];
         if(self->_database)
         {
             DDLogInfo(@"Closing database in dealloc: %@", _dbFile);
@@ -195,13 +196,23 @@
 -(void) throwErrorForQuery:(NSString*) query andArguments:(NSArray*) args
 {
     NSString* error = [NSString stringWithFormat:@"%@ --> %@", query, [NSString stringWithUTF8String:sqlite3_errmsg(self->_database)]];
-    @throw [NSException exceptionWithName:@"SQLite3Exception" reason:error userInfo:@{@"query": query, @"args": args ? args : [NSNull null]}];
+    @throw [NSException exceptionWithName:@"SQLite3Exception" reason:error userInfo:@{@"query": query ? query : [NSNull null], @"args": args ? args : [NSNull null]}];
+}
+
+-(void) testThreadInstanceForQuery:(NSString*) query andArguments:(NSArray*) args
+{
+    NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+    if(!threadData[@"_sqliteInstancesForThread"] || !threadData[@"_sqliteInstancesForThread"][_dbFile] || self != threadData[@"_sqliteInstancesForThread"][_dbFile])
+        @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Shared instance of MLSQLite used in wrong thread!" userInfo:@{@"query": query ? query : [NSNull null], @"args": args ? args : [NSNull null]}];
 }
 
 -(BOOL) executeNonQuery:(NSString*) query andArguments:(NSArray *) args withException:(BOOL) throwException
 {
     if(!query)
         return NO;
+    
+    //NOTE: we are not checking the thread instance here in this private api, but in the public api proxy methods
+    
     BOOL toReturn;
     sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
     if(statement != NULL)
@@ -222,14 +233,14 @@
     else
     {
         DDLogError(@"nonquery returning NO with out OK %@", query);
-        toReturn = NO;
         if(throwException)
             [self throwErrorForQuery:query andArguments:args];
+        toReturn = NO;
     }
     return toReturn;
 }
 
-#pragma mark - V1 low level
+#pragma mark - public API
 
 -(void) writeTransaction:(monal_void_block_t) operations
 {
@@ -249,6 +260,7 @@
 
 -(void) beginWriteTransaction
 {
+    [self testThreadInstanceForQuery:@"beginWriteTransaction" andArguments:nil];
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
     threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] + 1)];
     if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 1)
@@ -266,6 +278,7 @@
 
 -(void) endWriteTransaction
 {
+    [self testThreadInstanceForQuery:@"endWriteTransaction" andArguments:nil];
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
     threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:[threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] - 1];
     if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
@@ -281,6 +294,8 @@
 {
     if(!query)
         return nil;
+    
+    [self testThreadInstanceForQuery:query andArguments:args];
     
     id __block toReturn;
     sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
@@ -315,6 +330,8 @@
 {
     if(!query)
         return nil;
+    
+    [self testThreadInstanceForQuery:query andArguments:args];
 
     NSMutableArray* toReturn = [[NSMutableArray alloc] init];
     sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
@@ -352,16 +369,19 @@
 
 -(BOOL) executeNonQuery:(NSString*) query
 {
+    [self testThreadInstanceForQuery:query andArguments:@[]];
     return [self executeNonQuery:query andArguments:@[] withException:YES];
 }
 
--(BOOL) executeNonQuery:(NSString*) query andArguments:(NSArray *) args
+-(BOOL) executeNonQuery:(NSString*) query andArguments:(NSArray*) args
 {
+    [self testThreadInstanceForQuery:query andArguments:args];
     return [self executeNonQuery:query andArguments:args withException:YES];
 }
 
 -(NSNumber*) lastInsertId
 {
+    [self testThreadInstanceForQuery:@"lastInsertId" andArguments:nil];
     return [NSNumber numberWithInt:(int)sqlite3_last_insert_rowid(self->_database)];
 }
 

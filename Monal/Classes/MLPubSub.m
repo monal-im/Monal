@@ -79,8 +79,10 @@
         _handlers[node] = [[NSMutableDictionary alloc] init];
     _handlers[node][jid] = handler;
     
-    //call handlers directly if we have already cached data
-    [self callHandlersForNode:node andJid:jid];
+    //call handlers directly (will only be done if we already have some cached data available)
+    if(_cache[node])
+        for(NSString* jidEntry in _cache[node])
+            [self callHandlersForNode:node andJid:jidEntry];
 }
 
 -(void) unregisterForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nullable) jid
@@ -175,7 +177,7 @@
 
 //*** internal methods below
 
-//NOTE: this will called for iq or message stanzas carrying pubsub data.
+//NOTE: this will be called for iq or message stanzas carrying pubsub data.
 //We don't need to persist our updated cache because xmpp.m will do that automatically after every handled stanza
 -(void) handleItems:(MLXMLNode* _Nullable) items fromJid:(NSString* _Nullable) jid
 {
@@ -187,7 +189,7 @@
         jid = _account.connectionProperties.identity.jid;
     
     NSString* node = [items findFirst:@"/@node"];
-    
+    BOOL updated = NO;
     @synchronized(_cache) {
         if(!_cache[node])
         {
@@ -202,12 +204,17 @@
             NSString* itemId = [item findFirst:@"/@id"];
             if(!itemId)
                 itemId = @"";
-            _cache[node][@"data"][jid][itemId] = item;
+            if(!_cache[node][@"data"][jid][itemId] || ![[_cache[node][@"data"][jid][itemId] XMLString] isEqualToString:[item XMLString]])
+            {
+                updated = YES;
+                _cache[node][@"data"][jid][itemId] = item;
+            }
         }
     }
     
-    //call handlers for this node/jid combination
-    [self callHandlersForNode:node andJid:jid];
+    //only call handlers for this node/jid combination if something has changed
+    if(updated)
+        [self callHandlersForNode:node andJid:jid];
 }
 
 -(void) callHandlersForNode:(NSString*) node andJid:(NSString*) jid

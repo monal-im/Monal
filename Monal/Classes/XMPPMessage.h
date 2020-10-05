@@ -44,6 +44,8 @@ FOUNDATION_EXPORT NSString* const kMessageHeadlineType;
  sets the receipt child element
  */
 -(void) setReceipt:(NSString*) messageId;
+-(void) setChatmarkerReceipt:(NSString*) messageId;
+-(void) setDisplayed:(NSString*) messageId;
 
 /**
  Hint saying the message should be stored

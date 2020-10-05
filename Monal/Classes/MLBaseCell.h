@@ -15,7 +15,7 @@
 #define kSending NSLocalizedString(@"Sending...", @"")
 #define kSent NSLocalizedString(@"Sent", @"")
 #define kReceived NSLocalizedString(@"Received", @"")
-#define kRead NSLocalizedString(@"Read", @"")
+#define kDisplayed NSLocalizedString(@"Read", @"")
 
 
 @interface MLBaseCell : UITableViewCell

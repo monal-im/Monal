@@ -1157,7 +1157,6 @@ NSString *const kXMPPPresence = @"presence";
 -(void) processInput:(MLXMLNode*) parsedStanza
 {
     DDLogDebug(@"RECV Stanza: %@", parsedStanza);
-    DDLogError(@"full jid: %@", self.connectionProperties.identity.fullJid);
     
     //only process most stanzas/nonzas after having a secure context
     if(self.connectionProperties.server.isDirectTLS || self->_startTLSComplete)
@@ -1859,10 +1858,8 @@ NSString *const kXMPPPresence = @"presence";
         [messageNode.attributes setObject:kMessageGroupChatType forKey:@"type"];
     } else  {
         [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
-
-        MLXMLNode *request =[[MLXMLNode alloc] initWithElement:@"request"];
-        [request.attributes setObject:@"urn:xmpp:receipts" forKey:kXMLNS];
-        [messageNode addChild:request];
+        [messageNode addChild:[[MLXMLNode alloc] initWithElement:@"request" andNamespace:@"urn:xmpp:receipts"]];
+        [messageNode addChild:[[MLXMLNode alloc] initWithElement:@"markable" andNamespace:@"urn:xmpp:chat-markers:0"]];
     }
 
     //for MAM
@@ -2504,6 +2501,7 @@ NSString *const kXMPPPresence = @"presence";
                                            andOverrideDate:msg.delayTimeStamp
                                                  encrypted:msg.encrypted
                                                  backwards:YES
+                                       displayMarkerWanted:NO
                                             withCompletion:^(BOOL success, NSString* newMessageType) {
                     //add successfully added messages to our display list
                     if(success)
@@ -3145,6 +3143,7 @@ NSString *const kXMPPPresence = @"presence";
     message.messageType = messageType;
     message.hasBeenSent = YES;      //if it came in it has been sent to the server
     message.stanzaId = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
+    message.displayMarkerWanted = [messageNode check:@"{urn:xmpp:chat-markers:0}markable"];
     return message;
 }
 
@@ -3218,6 +3217,17 @@ NSString *const kXMPPPresence = @"presence";
         return YES;
     }
     return NO;
+}
+
+-(void) sendDisplayMarkerForId:(NSString*) messageid to:(NSString*) to
+{
+    XMPPMessage* displayedNode = [[XMPPMessage alloc] init];
+    //the message type is needed so that the store hint is accepted by the server
+    displayedNode.attributes[@"type"] = kMessageChatType;
+    displayedNode.attributes[@"to"] = to;
+    [displayedNode setDisplayed:messageid];
+    [displayedNode setStoreHint];
+    [self send:displayedNode];
 }
 
 @end

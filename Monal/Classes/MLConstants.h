@@ -40,12 +40,14 @@ typedef void (^monal_void_block_t)(void);
 
 //all other constants needed
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
+#define kMonalDisplayedMessageNotice @"kMonalDisplayedMessageNotice"
 #define kMonalHistoryMessagesNotice @"kMonalHistoryMessagesNotice"
 #define kMLMessageSentToContact @"kMLMessageSentToContact"
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"
 
 #define kMonalLastInteractionUpdatedNotice @"kMonalLastInteractionUpdatedNotice"
 #define kMonalMessageReceivedNotice @"kMonalMessageReceivedNotice"
+#define kMonalMessageDisplayedNotice @"kMonalMessageDisplayedNotice"
 #define kMonalMessageErrorNotice @"kMonalMessageErrorNotice"
 #define kMonalReceivedMucInviteNotice @"kMonalReceivedMucInviteNotice"
 

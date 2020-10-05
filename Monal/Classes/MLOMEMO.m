@@ -282,20 +282,28 @@ static const size_t MAX_OMEMO_KEYS = 120;
             NSString* keyid = (NSString *)[row objectForKey:@"preKeyId"];
             NSData* preKeyData = [row objectForKey:@"preKey"];
             if(preKeyData) {
-                SignalPreKeyBundle* keyBundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
-                                                                                deviceId:device
-                                                                                       preKeyId:[keyid intValue]
-                                                                                   preKeyPublic:preKeyData
-                                                                                 signedPreKeyId:signedPreKeyPublicId.intValue
-                                                                             signedPreKeyPublic:signedPreKeyPublic
-                                                                                      signature:signedPreKeySignature
-                                                                                    identityKey:identityKey
-                                                                                          error:nil];
-                NSError* error;
-                [builder processPreKeyBundle:keyBundle error:&error];
-                if(error) {
-                    DDLogWarn(@"Error creating preKeyBundle: %@", error);
-                }
+                //parallelize prekey bundle processing
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                    DDLogDebug(@"Generating keyBundle for key id %@...", keyid);
+                    SignalPreKeyBundle* keyBundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
+                                                                                    deviceId:device
+                                                                                        preKeyId:[keyid intValue]
+                                                                                    preKeyPublic:preKeyData
+                                                                                    signedPreKeyId:signedPreKeyPublicId.intValue
+                                                                                signedPreKeyPublic:signedPreKeyPublic
+                                                                                        signature:signedPreKeySignature
+                                                                                        identityKey:identityKey
+                                                                                            error:nil];
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                        NSError* error;
+                        DDLogDebug(@"Processing keyBundle for key id %@...", keyid);
+                        [builder processPreKeyBundle:keyBundle error:&error];
+                        DDLogDebug(@"Done processing keyBundle for key id %@...", keyid);
+                        if(error) {
+                            DDLogWarn(@"Error creating preKeyBundle: %@", error);
+                        }
+                    });
+                });
             } else  {
                 DDLogError(@"Could not decode base64 prekey %@", row);
             }

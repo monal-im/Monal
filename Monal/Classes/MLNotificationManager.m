@@ -33,6 +33,7 @@
 {
     self = [super init];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDisplayedMessage:) name:kMonalDisplayedMessageNotice object:nil];
     return self;
 }
 
@@ -66,9 +67,28 @@
     }
 }
 
--(NSString*) identifierWithNotification:(NSNotification*) notification
+-(void) handleDisplayedMessage:(NSNotification*) notification
 {
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
+    
+    if([message.messageType isEqualToString:kMessageTypeStatus])
+        return;
+    
+    DDLogVerbose(@"notification manager got displayed message notice: %@", message.messageId);
+    NSString* idval = [self identifierWithMessage:message];
+    
+    [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
+    [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
+}
+
+-(NSString*) identifierWithMessage:(MLMessage*) message
+{
+    return [NSString stringWithFormat:@"%@_%@", [self threadIdentifierWithMessage:message], message.messageId];
+}
+
+-(NSString*) threadIdentifierWithMessage:(MLMessage*) message
+{
     return [NSString stringWithFormat:@"%@_%@", message.accountId, message.from];
 }
 
@@ -112,10 +132,10 @@
         content.subtitle = [NSString stringWithFormat:@"%@ says:", message.actualFrom];
     }
 
-    NSString* idval = [NSString stringWithFormat:@"%@_%@", [self identifierWithNotification:notification], message.messageId];
+    NSString* idval = [self identifierWithMessage:message];
 
     content.body = message.messageText;
-    content.threadIdentifier = [self identifierWithNotification:notification];
+    content.threadIdentifier = [self threadIdentifierWithMessage:message];
     content.categoryIdentifier = @"Reply";
 
     if([[HelperTools defaultsDB] boolForKey:@"Sound"])

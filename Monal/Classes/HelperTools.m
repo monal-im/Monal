@@ -239,13 +239,13 @@ void logException(NSException* exception)
             @"urn:xmpp:jingle:apps:rtp:audio",
             @"urn:xmpp:jingle:transports:raw-udp:0",
             @"urn:xmpp:jingle:transports:raw-udp:1",
-            @"urn:xmpp:receipts",
             @"jabber:x:oob",
             @"urn:xmpp:ping",
             @"urn:xmpp:receipts",
             @"urn:xmpp:idle:1",
             @"http://jabber.org/protocol/chatstates",
-            @"jabber:iq:version"
+            @"jabber:iq:version",
+            @"urn:xmpp:chat-markers:0"
         ];
         featuresSet = [[NSSet alloc] initWithArray:featuresArray];
     });

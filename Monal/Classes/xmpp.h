@@ -274,5 +274,6 @@ Decline a call request
 -(void) initSession;
 -(void) getVcards;
 -(MLMessage* _Nonnull) parseMessageToMLMessage:(XMPPMessage* _Nonnull) messageNode withBody:(NSString*_Nonnull) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString* _Nonnull) messageType andActualFrom:(NSString*) actualFrom;
+-(void) sendDisplayMarkerForId:(NSString*) messageid to:(NSString*) to;
 
 @end

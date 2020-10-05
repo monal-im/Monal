@@ -88,7 +88,8 @@ enum chatViewControllerSections {
 enum msgSentState {
     msgSent,
     msgErrorAfterSent,
-    msgRecevied
+    msgRecevied,
+    msgDisplayed
 };
 
 -(void) setup
@@ -104,7 +105,7 @@ enum msgSentState {
     self.sendLastChatState = [[HelperTools defaultsDB] boolForKey: @"SendLastChatState"];
 }
 
--(void) setupWithContact:(MLContact* ) contact
+-(void) setupWithContact:(MLContact*) contact
 {
     self.contact = contact;
     [self setup];
@@ -136,6 +137,7 @@ enum msgSentState {
     [nc addObserver:self selector:@selector(keyboardWillDisappear:) name:UIKeyboardWillHideNotification object:nil];
     
     [nc addObserver:self selector:@selector(handleReceivedMessage:) name:kMonalMessageReceivedNotice object:nil];
+    [nc addObserver:self selector:@selector(handleDisplayedMessage:) name:kMonalMessageDisplayedNotice object:nil];
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
     [nc addObserver:self selector:@selector(updateUIElementsOnAccountChange:) name:kMonalAccountStatusChanged object:nil];
@@ -548,16 +550,27 @@ enum msgSentState {
 {
     if(self.navigationController.topViewController==self)
     {
-        if([MLNotificationManager sharedInstance].currentContact!=self.contact) {
+        if([MLNotificationManager sharedInstance].currentContact!=self.contact)
             return;
-        }
         
-        if(!_day) {
-            [[DataLayer sharedInstance] markAsReadBuddy:self.contact.contactJid forAccount:self.contact.accountId];
+        if(!_day)
+        {
+            //get list of unread messages
+            NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountId tillStanzaId:nil wasOutgoing:NO];
             
+            //send displayed marker for last unread message (XEP-0333)
+            MLMessage* lastUnreadMessage = [unread lastObject];
+            if(lastUnreadMessage)
+            {
+                DDLogDebug(@"Marking as displayed: %@", lastUnreadMessage.messageId);
+                [[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId] sendDisplayMarkerForId:lastUnreadMessage.messageId to:lastUnreadMessage.from];
+            }
+            
+            //update app badge
             MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
             [appDelegate updateUnread];
             
+            //refresh contact in active contacts view
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
         }
     }
@@ -1025,6 +1038,7 @@ enum msgSentState {
                 messageObj.actualFrom = self.jid;
                 messageObj.from = self.jid;
                 messageObj.timestamp = [NSDate date];
+                messageObj.hasBeenDisplayed = NO;
                 messageObj.hasBeenReceived = NO;
                 messageObj.hasBeenSent = NO;
                 messageObj.messageId = messageId;
@@ -1147,11 +1161,19 @@ enum msgSentState {
         {
             // Set correct flags
             if(event == msgSent) {
+                DDLogVerbose(@"got msgSent event for messageid: %@", messageId);
                 msg.hasBeenSent = YES;
             } else if(event == msgRecevied) {
+                DDLogVerbose(@"got msgRecevied event for messageid: %@", messageId);
                 msg.hasBeenSent = YES;
                 msg.hasBeenReceived = YES;
+            } else if(event == msgDisplayed) {
+                DDLogVerbose(@"got msgDisplayed event for messageid: %@", messageId);
+                msg.hasBeenSent = YES;
+                msg.hasBeenReceived = YES;
+                msg.hasBeenDisplayed = YES;
             } else if(event == msgErrorAfterSent) {
+                DDLogVerbose(@"got msgErrorAfterSent event for messageid: %@", messageId);
                 //we don't want to show errors if the message has been received at least once or if the message wasn't even sent
                 if(msg.hasBeenSent && !msg.hasBeenReceived)
                 {
@@ -1189,7 +1211,13 @@ enum msgSentState {
 -(void) handleReceivedMessage:(NSNotification*) notification
 {
     NSDictionary *dic = notification.userInfo;
-    [self updateMsgState:[dic  objectForKey:kMessageId] withEvent:msgRecevied withOptDic:nil];
+    [self updateMsgState:[dic objectForKey:kMessageId] withEvent:msgRecevied withOptDic:nil];
+}
+
+-(void) handleDisplayedMessage:(NSNotification*) notification
+{
+    NSDictionary *dic = notification.userInfo;
+    [self updateMsgState:[dic objectForKey:kMessageId] withEvent:msgDisplayed withOptDic:nil];
 }
 
 
@@ -1502,7 +1530,9 @@ enum msgSentState {
         priorRow = [self.messageList objectAtIndex:indexPath.row-1];
     }
     
-    if(row.hasBeenReceived)
+    if(row.hasBeenDisplayed)
+        cell.messageStatus.text = kDisplayed;
+    else if(row.hasBeenReceived)
         cell.messageStatus.text = kReceived;
     else if(row.hasBeenSent)
         cell.messageStatus.text = kSent;

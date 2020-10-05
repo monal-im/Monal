@@ -22,8 +22,17 @@
 static NSRegularExpression* pathSplitterRegex;
 static NSRegularExpression* componentParserRegex;
 
+#ifdef QueryStatistics
+    static NSMutableDictionary* statistics;
+#endif
+
 +(void) initialize
 {
+#ifdef QueryStatistics
+    statistics = [[NSMutableDictionary alloc] init];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
+#endif
+    
     //compile regexes only once (see https://unicode-org.github.io/icu/userguide/strings/regexp.html for syntax)
     pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^((\\{[^}]+\\})?([^/]+))?(/.*)?" options:NSRegularExpressionCaseInsensitive error:nil];
     componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?(\\<([^=]+)=([^>]+)\\>)?((@[a-zA-Z0-9_:-]+|@@|#|\\$)(\\|(bool|int|float|datetime|base64))?)?" options:NSRegularExpressionCaseInsensitive error:nil];
@@ -45,12 +54,32 @@ static NSRegularExpression* componentParserRegex;
 //     [self print_debug:@"{jabber:client}iq@@" inTree:parsedStanza];
 }
 
++(void) nowIdle:(NSNotification*) notification
+{
+#ifdef QueryStatistics
+    NSMutableDictionary* sortedStatistics = [[NSMutableDictionary alloc] init];
+    @synchronized(statistics) {
+        NSArray* sortedKeys = [statistics keysSortedByValueUsingComparator: ^(id obj1, id obj2) {
+            if([obj1 integerValue] > [obj2 integerValue])
+                return (NSComparisonResult)NSOrderedDescending;
+            if([obj1 integerValue] < [obj2 integerValue])
+                return (NSComparisonResult)NSOrderedAscending;
+            return (NSComparisonResult)NSOrderedSame;
+        }];
+        for(NSString* key in sortedKeys)
+            DDLogDebug(@"STATISTICS: %@ = %@", key, statistics[key]);
+            //sortedStatistics[key] = statistics[key];
+    }
+    //DDLogDebug(@"XML QUERY STATISTICS: %@", sortedStatistics);
+#endif
+}
+
 -(id) init
 {
     self = [super init];
     _attributes = [[NSMutableDictionary alloc] init];
     _children = [[NSMutableArray alloc] init];
-    _data = @"";
+    _data = nil;
     _depth = 0;
     self.cache = [[NSMutableDictionary alloc] init];
     return self;
@@ -193,6 +222,14 @@ static NSRegularExpression* componentParserRegex;
         if(self.cache[queryString])
             return self.cache[queryString];
     }
+    
+#ifdef QueryStatistics
+    @synchronized(statistics) {
+        if(!statistics[queryString])
+            statistics[queryString] = @0;
+        statistics[queryString] = [NSNumber numberWithInteger:[statistics[queryString] integerValue] + 1];
+    }
+#endif
     
     //shortcut syntax for queries operating directly on this node
     //this translates "/@attr", "/#" or "/$" into their correct form "/{*}*@attr", "/{*}*#" or "/{*}*$"

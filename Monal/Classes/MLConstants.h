@@ -95,7 +95,10 @@ typedef void (^monal_void_block_t)(void);
 #define DEBUG 1
 #endif
 
-//temp for  a release
+//use this to completely disable omemo in build
 //#ifndef DISABLE_OMEMO
 //#define DISABLE_OMEMO 1
 //#endif
+
+//build MLXMLNode query statistics (will only optimize MLXMLNode queries if *not* defined)
+//#define QueryStatistics 1

@@ -832,6 +832,37 @@ NSString *const kXMPPPresence = @"presence";
     {
         DDLogInfo(@"creating parser delegate");
         _baseParserDelegate = [[MLBasePaser alloc] initWithCompletion:^(MLXMLNode* _Nullable parsedStanza) {
+#ifndef QueryStatistics
+            //prime query cache by doing the most used queries in this thread ahead of the receiveQueue processing
+            //only preprocess MLXMLNode queries to prime the cache if enough xml nodes are already queued
+            //(we don't want to slow down processing by this)
+            if([_parseQueue operationCount] > 1)
+            {
+                //this list contains the upper part of the 0.75 percentile of the statistically most used queries
+                [parsedStanza find:@"/@id"];
+                [parsedStanza find:@"/{urn:xmpp:sm:3}r"];
+                [parsedStanza find:@"/{urn:xmpp:sm:3}a"];
+                [parsedStanza find:@"/@type"];
+                [parsedStanza find:@"{urn:xmpp:sid:0}origin-id"];
+                [parsedStanza find:@"/{jabber:client}presence"];
+                [parsedStanza find:@"/{jabber:client}message"];
+                [parsedStanza find:@"/@h|int"];
+                [parsedStanza find:@"{urn:xmpp:delay}delay"];
+                [parsedStanza find:@"/{jabber:client}message/{eu.siacs.conversations.axolotl}encrypted/payload"];
+                [parsedStanza find:@"{http://jabber.org/protocol/muc#user}x/invite"];
+                [parsedStanza find:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event"];
+                [parsedStanza find:@"/<type=error>"];
+                [parsedStanza find:@"{urn:xmpp:receipts}received@id"];
+                [parsedStanza find:@"{http://jabber.org/protocol/chatstates}*"];
+                [parsedStanza find:@"{eu.siacs.conversations.axolotl}encrypted/payload"];
+                [parsedStanza find:@"{urn:xmpp:sid:0}stanza-id@by"];
+                [parsedStanza find:@"{urn:xmpp:mam:2}result"];
+                [parsedStanza find:@"{urn:xmpp:chat-markers:0}displayed@id"];
+                [parsedStanza find:@"body"];
+                [parsedStanza find:@"{urn:xmpp:mam:2}result@id"];
+                [parsedStanza find:@"{urn:xmpp:carbons:2}*"];
+            }
+#endif
             //queue up new stanzas onto the parseQueue which will dispatch them synchronously to the receiveQueue
             //this makes it possible to discard all not already processed but parsed stanzas on disconnect or stream restart etc.
             [_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
@@ -1161,141 +1192,23 @@ NSString *const kXMPPPresence = @"presence";
     //only process most stanzas/nonzas after having a secure context
     if(self.connectionProperties.server.isDirectTLS || self->_startTLSComplete)
     {
-        if([parsedStanza check:@"/{jabber:client}iq"] && [parsedStanza check:@"/@id"] && [parsedStanza check:@"/@type"])   //sanity: check if iq id and type attributes are present
+        if([parsedStanza check:@"/{urn:xmpp:sm:3}r"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
         {
-            XMPPIQ* iqNode = (XMPPIQ*)parsedStanza;
-            
-            //sanitize: no from or to always means own bare jid
-            if(!iqNode.from)
-                iqNode.from = self.connectionProperties.identity.jid;
-            if(!iqNode.to)
-                iqNode.to = self.connectionProperties.identity.fullJid;
-            
-            //process registered iq handlers
-            if(_iqHandlers[[iqNode findFirst:@"/@id"]])
-            {
-                //call block-handlers
-                if([@"result" isEqualToString:[iqNode findFirst:@"/@type"]] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"resultHandler"])
-                    ((monal_iq_handler_t) _iqHandlers[[iqNode findFirst:@"/@id"]][@"resultHandler"])(iqNode);
-                else if([@"error" isEqualToString:[iqNode findFirst:@"/@type"]] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"errorHandler"])
-                    ((monal_iq_handler_t) _iqHandlers[[iqNode findFirst:@"/@id"]][@"errorHandler"])(iqNode);
-                
-                //call class delegate handlers
-                if(_iqHandlers[[iqNode findFirst:@"/@id"]][@"delegate"] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"method"])
-                {
-                    id cls = NSClassFromString(_iqHandlers[[iqNode findFirst:@"/@id"]][@"delegate"]);
-                    SEL sel = NSSelectorFromString(_iqHandlers[[iqNode findFirst:@"/@id"]][@"method"]);
-                    DDLogVerbose(@"Calling IQHandler [%@ %@]...", _iqHandlers[[iqNode findFirst:@"/@id"]][@"delegate"], _iqHandlers[[iqNode findFirst:@"/@id"]][@"method"]);
-                    NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[cls methodSignatureForSelector:sel]];
-                    [inv setTarget:cls];
-                    [inv setSelector:sel];
-                    //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
-                    NSInteger idx = 2;
-                    [inv setArgument:&self atIndex:idx++];
-                    [inv setArgument:&iqNode atIndex:idx++];
-                    for(id arg in _iqHandlers[[iqNode findFirst:@"/@id"]][@"arguments"])
-                        [inv setArgument:&arg atIndex:idx++];
-                    [inv invoke];
-                }
-                
-                //remove handler after calling it
-                [_iqHandlers removeObjectForKey:[iqNode findFirst:@"/@id"]];
-            }
-            else            //only process iqs that have not already been handled by a registered iq handler
-            {
-                [MLIQProcessor processIq:iqNode forAccount:self];
-
-#ifndef DISABLE_OMEMO
-                if([[iqNode findFirst:@"/@id"] isEqualToString:self.omemo.deviceQueryId])
-                {
-                    if([[iqNode findFirst:@"/@type"] isEqualToString:kiqErrorType]) {
-                        //there are no devices published yet
-                        [self.omemo sendOMEMODeviceWithForce:NO];
-                    }
-                }
-#endif
-                if([[iqNode findFirst:@"/@id"] isEqualToString:self.jingle.idval])
-                    [self jingleResult:iqNode];
-            }
-            
-            //only mark stanza as handled *after* processing it
-            [self stanzaHandled:iqNode];
+            [self sendSMAck:YES];
         }
-        else if([parsedStanza check:@"/{jabber:client}message"])
+        else if([parsedStanza check:@"/{urn:xmpp:sm:3}a"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
         {
-            //outerMessageNode and messageNode are the same for messages not carrying a carbon copy or mam result
-            XMPPMessage* outerMessageNode = (XMPPMessage*)parsedStanza;
-            XMPPMessage* messageNode = outerMessageNode;
+            NSString* h = [parsedStanza findFirst:@"/@h|int"];
+            if(!h)
+                return [self invalidXMLError];
             
-            //sanitize outer node: no from or to always means own bare jid
-            if(!outerMessageNode.from)
-                outerMessageNode.from = self.connectionProperties.identity.jid;
-            if(!outerMessageNode.to)
-                outerMessageNode.to = self.connectionProperties.identity.fullJid;
-            
-            //extract inner message if mam result or carbon copy
-            //the original "outer" message will be kept in outerMessageNode while the forwarded stanza will be stored in messageNode
-            if([outerMessageNode check:@"{urn:xmpp:mam:2}result"])          //mam result
-            {
-                if(![self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from])
-                {
-                    DDLogError(@"mam results must be from our bare jid, ignoring this spoofed mam result!");
-                    //even these stanzas have do be counted by smacks
-                    [self incrementLastHandledStanza];
-                    return;
-                }
-                //create a new XMPPMessage node instead of only a MLXMLNode because messages have some convenience properties and methods
-                messageNode = [[XMPPMessage alloc] initWithXMPPMessage:[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{jabber:client}message"]];
-                
-                //move mam:2 delay timestamp into forwarded message stanza if the forwarded stanza does not have one already
-                //that makes parsing a lot easier later on and should not do any harm, even when resending/forwarding this inner stanza
-                if([outerMessageNode check:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{urn:xmpp:delay}delay"] && ![messageNode check:@"{urn:xmpp:delay}delay"])
-                    [messageNode addChild:[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{urn:xmpp:delay}delay"]];
+            @synchronized(_smacksLockObject) {
+                //remove acked messages
+                [self removeAckedStanzasFromQueue:h];
+
+                self.smacksRequestInFlight=NO;			//ack returned
+                [self requestSMAck:NO];					//request ack again (will only happen if queue is not empty)
             }
-            else if([outerMessageNode check:@"{urn:xmpp:carbons:2}*"])     //carbon copy
-            {
-                if(![self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from])
-                {
-                    DDLogError(@"carbon copies must be from our bare jid, ignoring this spoofed carbon copy!");
-                    //even these stanzas have do be counted by smacks
-                    [self incrementLastHandledStanza];
-                    return;
-                }
-                //create a new XMPPMessage node instead of only a MLXMLNode because messages have some convenience properties and methods
-                messageNode = [[XMPPMessage alloc] initWithXMPPMessage:[outerMessageNode findFirst:@"{urn:xmpp:carbons:2}*/{urn:xmpp:forward:0}forwarded/{jabber:client}message"]];
-                
-                //move carbon copy delay timestamp into forwarded message stanza if the forwarded stanza does not have one already
-                //that makes parsing a lot easier later on and should not do any harm, even when resending/forwarding this inner stanza
-                if([outerMessageNode check:@"{urn:xmpp:delay}delay"] && ![messageNode check:@"{urn:xmpp:delay}delay"])
-                    [messageNode addChild:[outerMessageNode findFirst:@"{urn:xmpp:delay}delay"]];
-            }
-            
-            //sanitize inner node: no from or to always means own bare jid
-            if(!messageNode.from)
-                messageNode.from = self.connectionProperties.identity.jid;
-            if(!messageNode.to)
-                messageNode.to = self.connectionProperties.identity.fullJid;
-            
-            //only process mam results when they are *not* for priming the database with the initial stanzaid (the id will be taken from the iq result)
-            //we do this because we don't want to randomly add one single message to our history db after the user installs the app / adds a new account
-            //if the user wants to see older messages he can retrieve them using the ui (endless upscrolling through mam)
-            if(!([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLignore:"]))
-                [MLMessageProcessor processMessage:messageNode andOuterMessage:outerMessageNode forAccount:self];
-            
-            //add newest stanzaid to database *after* processing the message, but only for non-mam messages or mam catchup
-            //(e.g. those messages going forward in time not backwards)
-            NSString* stanzaid = [outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLcatchup:"] ? [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"] : nil;
-            //check stnaza-id @by according to the rules outlined in XEP-0359
-            if(!stanzaid && [self.connectionProperties.identity.jid isEqualToString:[messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@by"]])
-                stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
-            if(stanzaid)
-            {
-                DDLogVerbose(@"Updating lastStanzaId in database to: %@", stanzaid);
-                [[DataLayer sharedInstance] setLastStanzaId:stanzaid forAccount:self.accountNo];
-            }
-            
-            //only mark stanza as handled *after* processing it
-            [self stanzaHandled:messageNode];
         }
         else if([parsedStanza check:@"/{jabber:client}presence"])
         {
@@ -1454,6 +1367,142 @@ NSString *const kXMPPPresence = @"presence";
             //only mark stanza as handled *after* processing it
             [self stanzaHandled:presenceNode];
         }
+        else if([parsedStanza check:@"/{jabber:client}message"])
+        {
+            //outerMessageNode and messageNode are the same for messages not carrying a carbon copy or mam result
+            XMPPMessage* outerMessageNode = (XMPPMessage*)parsedStanza;
+            XMPPMessage* messageNode = outerMessageNode;
+            
+            //sanitize outer node: no from or to always means own bare jid
+            if(!outerMessageNode.from)
+                outerMessageNode.from = self.connectionProperties.identity.jid;
+            if(!outerMessageNode.to)
+                outerMessageNode.to = self.connectionProperties.identity.fullJid;
+            
+            //extract inner message if mam result or carbon copy
+            //the original "outer" message will be kept in outerMessageNode while the forwarded stanza will be stored in messageNode
+            if([outerMessageNode check:@"{urn:xmpp:mam:2}result"])          //mam result
+            {
+                if(![self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from])
+                {
+                    DDLogError(@"mam results must be from our bare jid, ignoring this spoofed mam result!");
+                    //even these stanzas have do be counted by smacks
+                    [self incrementLastHandledStanza];
+                    return;
+                }
+                //create a new XMPPMessage node instead of only a MLXMLNode because messages have some convenience properties and methods
+                messageNode = [[XMPPMessage alloc] initWithXMPPMessage:[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{jabber:client}message"]];
+                
+                //move mam:2 delay timestamp into forwarded message stanza if the forwarded stanza does not have one already
+                //that makes parsing a lot easier later on and should not do any harm, even when resending/forwarding this inner stanza
+                if([outerMessageNode check:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{urn:xmpp:delay}delay"] && ![messageNode check:@"{urn:xmpp:delay}delay"])
+                    [messageNode addChild:[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{urn:xmpp:delay}delay"]];
+            }
+            else if([outerMessageNode check:@"{urn:xmpp:carbons:2}*"])     //carbon copy
+            {
+                if(![self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from])
+                {
+                    DDLogError(@"carbon copies must be from our bare jid, ignoring this spoofed carbon copy!");
+                    //even these stanzas have do be counted by smacks
+                    [self incrementLastHandledStanza];
+                    return;
+                }
+                //create a new XMPPMessage node instead of only a MLXMLNode because messages have some convenience properties and methods
+                messageNode = [[XMPPMessage alloc] initWithXMPPMessage:[outerMessageNode findFirst:@"{urn:xmpp:carbons:2}*/{urn:xmpp:forward:0}forwarded/{jabber:client}message"]];
+                
+                //move carbon copy delay timestamp into forwarded message stanza if the forwarded stanza does not have one already
+                //that makes parsing a lot easier later on and should not do any harm, even when resending/forwarding this inner stanza
+                if([outerMessageNode check:@"{urn:xmpp:delay}delay"] && ![messageNode check:@"{urn:xmpp:delay}delay"])
+                    [messageNode addChild:[outerMessageNode findFirst:@"{urn:xmpp:delay}delay"]];
+            }
+            
+            //sanitize inner node: no from or to always means own bare jid
+            if(!messageNode.from)
+                messageNode.from = self.connectionProperties.identity.jid;
+            if(!messageNode.to)
+                messageNode.to = self.connectionProperties.identity.fullJid;
+            
+            //only process mam results when they are *not* for priming the database with the initial stanzaid (the id will be taken from the iq result)
+            //we do this because we don't want to randomly add one single message to our history db after the user installs the app / adds a new account
+            //if the user wants to see older messages he can retrieve them using the ui (endless upscrolling through mam)
+            if(!([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLignore:"]))
+                [MLMessageProcessor processMessage:messageNode andOuterMessage:outerMessageNode forAccount:self];
+            
+            //add newest stanzaid to database *after* processing the message, but only for non-mam messages or mam catchup
+            //(e.g. those messages going forward in time not backwards)
+            NSString* stanzaid = [outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLcatchup:"] ? [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"] : nil;
+            //check stnaza-id @by according to the rules outlined in XEP-0359
+            if(!stanzaid && [self.connectionProperties.identity.jid isEqualToString:[messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@by"]])
+                stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
+            if(stanzaid)
+            {
+                DDLogVerbose(@"Updating lastStanzaId in database to: %@", stanzaid);
+                [[DataLayer sharedInstance] setLastStanzaId:stanzaid forAccount:self.accountNo];
+            }
+            
+            //only mark stanza as handled *after* processing it
+            [self stanzaHandled:messageNode];
+        }
+        else if([parsedStanza check:@"/{jabber:client}iq"] && [parsedStanza check:@"/@id"] && [parsedStanza check:@"/@type"])   //sanity: check if iq id and type attributes are present
+        {
+            XMPPIQ* iqNode = (XMPPIQ*)parsedStanza;
+            
+            //sanitize: no from or to always means own bare jid
+            if(!iqNode.from)
+                iqNode.from = self.connectionProperties.identity.jid;
+            if(!iqNode.to)
+                iqNode.to = self.connectionProperties.identity.fullJid;
+            
+            //process registered iq handlers
+            if(_iqHandlers[[iqNode findFirst:@"/@id"]])
+            {
+                //call block-handlers
+                if([@"result" isEqualToString:[iqNode findFirst:@"/@type"]] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"resultHandler"])
+                    ((monal_iq_handler_t) _iqHandlers[[iqNode findFirst:@"/@id"]][@"resultHandler"])(iqNode);
+                else if([@"error" isEqualToString:[iqNode findFirst:@"/@type"]] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"errorHandler"])
+                    ((monal_iq_handler_t) _iqHandlers[[iqNode findFirst:@"/@id"]][@"errorHandler"])(iqNode);
+                
+                //call class delegate handlers
+                if(_iqHandlers[[iqNode findFirst:@"/@id"]][@"delegate"] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"method"])
+                {
+                    id cls = NSClassFromString(_iqHandlers[[iqNode findFirst:@"/@id"]][@"delegate"]);
+                    SEL sel = NSSelectorFromString(_iqHandlers[[iqNode findFirst:@"/@id"]][@"method"]);
+                    DDLogVerbose(@"Calling IQHandler [%@ %@]...", _iqHandlers[[iqNode findFirst:@"/@id"]][@"delegate"], _iqHandlers[[iqNode findFirst:@"/@id"]][@"method"]);
+                    NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[cls methodSignatureForSelector:sel]];
+                    [inv setTarget:cls];
+                    [inv setSelector:sel];
+                    //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
+                    NSInteger idx = 2;
+                    [inv setArgument:&self atIndex:idx++];
+                    [inv setArgument:&iqNode atIndex:idx++];
+                    for(id arg in _iqHandlers[[iqNode findFirst:@"/@id"]][@"arguments"])
+                        [inv setArgument:&arg atIndex:idx++];
+                    [inv invoke];
+                }
+                
+                //remove handler after calling it
+                [_iqHandlers removeObjectForKey:[iqNode findFirst:@"/@id"]];
+            }
+            else            //only process iqs that have not already been handled by a registered iq handler
+            {
+                [MLIQProcessor processIq:iqNode forAccount:self];
+
+#ifndef DISABLE_OMEMO
+                if([[iqNode findFirst:@"/@id"] isEqualToString:self.omemo.deviceQueryId])
+                {
+                    if([[iqNode findFirst:@"/@type"] isEqualToString:kiqErrorType]) {
+                        //there are no devices published yet
+                        [self.omemo sendOMEMODeviceWithForce:NO];
+                    }
+                }
+#endif
+                if([[iqNode findFirst:@"/@id"] isEqualToString:self.jingle.idval])
+                    [self jingleResult:iqNode];
+            }
+            
+            //only mark stanza as handled *after* processing it
+            [self stanzaHandled:iqNode];
+        }
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}enabled"])
         {
             NSMutableArray* stanzas;
@@ -1482,24 +1531,6 @@ NSString *const kXMPPPresence = @"presence";
             //clean up those stanzas to only include message stanzas because iqs don't survive a session change
             //message duplicates are possible in this scenario, but that's better than dropping messages
             [self resendUnackedMessageStanzasOnly:stanzas];
-        }
-        else if([parsedStanza check:@"/{urn:xmpp:sm:3}r"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
-        {
-            [self sendSMAck:YES];
-        }
-        else if([parsedStanza check:@"/{urn:xmpp:sm:3}a"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
-        {
-            NSString* h = [parsedStanza findFirst:@"/@h|int"];
-            if(!h)
-                return [self invalidXMLError];
-            
-            @synchronized(_smacksLockObject) {
-                //remove acked messages
-                [self removeAckedStanzasFromQueue:h];
-
-                self.smacksRequestInFlight=NO;			//ack returned
-                [self requestSMAck:NO];					//request ack again (will only happen if queue is not empty)
-            }
         }
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}resumed"] && self.connectionProperties.supportsSM3 && self.accountState<kStateBound)
         {

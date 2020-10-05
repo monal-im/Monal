@@ -77,7 +77,10 @@
         @synchronized(self) {
             NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
             if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 1)
+            {
+                DDLogError(@"Transaction leak in NSThreadWillExitNotification: trying to close sqlite3 connection while transaction still open");
                 @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Transaction leak in NSThreadWillExitNotification: trying to close sqlite3 connection while transaction still open" userInfo:threadData];
+            }
             if(self->_database)
             {
                 DDLogInfo(@"Closing database in NSThreadWillExitNotification: %@", _dbFile);
@@ -101,7 +104,10 @@
     @synchronized(self) {
         NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
         if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 1)
+        {
+            DDLogError(@"Transaction leak in dealloc: trying to close sqlite3 connection while transaction still open");
             @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Transaction leak in dealloc: trying to close sqlite3 connection while transaction still open" userInfo:threadData];
+        }
         if(self->_database)
         {
             DDLogInfo(@"Closing database in dealloc: %@", _dbFile);
@@ -196,6 +202,7 @@
 -(void) throwErrorForQuery:(NSString*) query andArguments:(NSArray*) args
 {
     NSString* error = [NSString stringWithFormat:@"%@ --> %@", query, [NSString stringWithUTF8String:sqlite3_errmsg(self->_database)]];
+    DDLogError(@"SQLite Exception: %@ for query '%@' having params %@", error, query ? query : @"", args ? args : @[]);
     @throw [NSException exceptionWithName:@"SQLite3Exception" reason:error userInfo:@{@"query": query ? query : [NSNull null], @"args": args ? args : [NSNull null]}];
 }
 
@@ -203,7 +210,10 @@
 {
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
     if(!threadData[@"_sqliteInstancesForThread"] || !threadData[@"_sqliteInstancesForThread"][_dbFile] || self != threadData[@"_sqliteInstancesForThread"][_dbFile])
+    {
+        DDLogError(@"Shared instance of MLSQLite used in wrong thread for query '%@' having params %@", query ? query : @"", args ? args : @[]);
         @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Shared instance of MLSQLite used in wrong thread!" userInfo:@{@"query": query ? query : [NSNull null], @"args": args ? args : [NSNull null]}];
+    }
 }
 
 -(BOOL) executeNonQuery:(NSString*) query andArguments:(NSArray *) args withException:(BOOL) throwException

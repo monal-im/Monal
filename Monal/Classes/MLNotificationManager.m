@@ -6,6 +6,7 @@
 //
 //
 
+#import "MonalAppDelegate.h"
 #import "HelperTools.h"
 #import "MLNotificationManager.h"
 #import "MLImageManager.h"
@@ -80,6 +81,10 @@
     
     [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
     [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
+    
+    //update app badge
+    MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
+    [appDelegate updateUnread];
 }
 
 -(NSString*) identifierWithMessage:(MLMessage*) message

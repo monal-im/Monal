@@ -26,6 +26,7 @@
 #import "HelperTools.h"
 #import "MLChatViewHelper.h"
 #import "MLChatInputContainer.h"
+#import "MLXEPSlashMeHandler.h"
 
 @import QuartzCore;
 @import MobileCoreServices;
@@ -1516,7 +1517,36 @@ enum msgSentState {
         else // Default case
         {
             // Reset attributes
-            [cell.messageBody setText:messageText];
+            //XEP-0245: The slash me Command
+            if ([messageText hasPrefix:@"/me "] && (![row.from isEqualToString:self.jid]))
+            {
+                UIFont* italicFont = [UIFont italicSystemFontOfSize:cell.messageBody.font.pointSize];
+                
+                NSString* nickName = @"";
+                NSString* fullName = @"";
+                if (!self.contact.isGroup)
+                {
+                    nickName = self.contact.contactDisplayName;
+                    fullName = self.contact.fullName;
+                }
+                
+                NSMutableAttributedString* attributedMsgString = [[MLXEPSlashMeHandler sharedInstance] attributedStringSlashMeWithAccountId:self.contact.accountId
+                                                                                                                                      buddy:row.from
+                                                                                                                                   nickName:nickName
+                                                                                                                                   fullName:fullName
+                                                                                                                                 actualFrom:row.actualFrom
+                                                                                                                                    message:messageText
+                                                                                                                                    isGroup:self.contact.isGroup
+                                                                                                                                   withFont:italicFont];
+                
+                [cell.messageBody setAttributedText:attributedMsgString];
+            } else {                
+                // Reset attributes
+                UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize];
+                [cell.messageBody setFont:originalFont];
+                
+                [cell.messageBody setText:messageText];
+            }
             cell.link = nil;
         }
     }

@@ -11,6 +11,7 @@
 #import "MLNotificationManager.h"
 #import "MLImageManager.h"
 #import "MLMessage.h"
+#import "MLXEPSlashMeHandler.h"
 @import UserNotifications;
 @import CoreServices;
 
@@ -139,7 +140,22 @@
 
     NSString* idval = [self identifierWithMessage:message];
 
-    content.body = message.messageText;
+    NSString *msgText = message.messageText;
+
+    //XEP-0245: The slash me Command
+    if ([message.messageText hasPrefix:@"/me "])
+    {
+        BOOL isMuc = [[DataLayer sharedInstance] isBuddyMuc:message.from forAccount:message.accountId];        
+        msgText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:message.accountId
+                                                                             buddy:message.from
+                                                                          nickName:nickName
+                                                                          fullName:displayName
+                                                                        actualFrom:message.actualFrom
+                                                                           message:message.messageText
+                                                                           isGroup:isMuc];
+    }
+    
+    content.body = msgText;
     content.threadIdentifier = [self threadIdentifierWithMessage:message];
     content.categoryIdentifier = @"Reply";
 

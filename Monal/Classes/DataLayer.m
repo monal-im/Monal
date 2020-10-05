@@ -1616,6 +1616,11 @@ static NSDateFormatter* dbFormatter;
     return datetoReturn;
 }
 
+-(NSString*)lastMessageActualFromByHistoryId:(NSNumber*) lastMsgHistoryId
+{
+    return [self.db executeScalar:@"select actual_from from message_history where message_history_id=? order by timestamp desc limit 1" andArguments:@[lastMsgHistoryId]];
+}
+
 #pragma mark active chats
 
 -(NSMutableArray*) activeContacts:(BOOL) pinned

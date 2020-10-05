@@ -16,6 +16,7 @@
 #import "MLWelcomeViewController.h"
 #import "ContactsViewController.h"
 #import "MLNewViewController.h"
+#import "MLXEPSlashMeHandler.h"
 
 @interface ActiveChatsViewController ()
 
@@ -439,7 +440,27 @@ enum activeChatsControllerSections {
             {
                 [cell showStatusText:NSLocalizedString(@"📍 A Location", @"")];
             } else  {
-                [cell showStatusText:messageRow.messageText];
+                //XEP-0245: The slash me Command
+                if ([messageRow.messageText hasPrefix:@"/me "])
+                {
+                    NSNumber* lastMsgHistoryId = [[DataLayer sharedInstance] lastMessageHistoryIdForContact:row.contactJid forAccount:row.accountId];
+                    NSString* lastMsgActualFrom = [[DataLayer sharedInstance] lastMessageActualFromByHistoryId:lastMsgHistoryId];
+                    NSString* replacedMessageText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:row.accountId
+                                                                                                               buddy:row.contactJid
+                                                                                                            nickName:row.nickName
+                                                                                                            fullName:row.fullName
+                                                                                                          actualFrom:lastMsgActualFrom
+                                                                                                             message:messageRow.messageText
+                                                                                                             isGroup:row.isGroup];
+                    
+                    NSRange replacedMsgAttrRange = NSMakeRange(0, replacedMessageText.length);
+                    
+                    [cell showStatusTextItalic:replacedMessageText withItalicRange:replacedMsgAttrRange];
+                }
+                else
+                {
+                    [cell showStatusText:messageRow.messageText];
+                }
             }
             if(messageRow.timestamp) {
                 cell.time.text = [self formattedDateWithSource:messageRow.timestamp];

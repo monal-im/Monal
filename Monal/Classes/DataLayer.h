@@ -219,6 +219,11 @@ extern NSString *const kMessageTypeUrl;
 
 -(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId encrypted:(BOOL) encrypted withCompletion:(void (^)(BOOL, NSString *))completion;
 
+/**
+retrieves the actual_from of the the last message from hisroty id
+*/
+-(NSString*)lastMessageActualFromByHistoryId:(NSNumber*) lastMsgHistoryId;
+
 #pragma mark active contacts
 -(NSMutableArray*) activeContacts:(BOOL) pinned;
 -(NSMutableArray*) activeContactDict;

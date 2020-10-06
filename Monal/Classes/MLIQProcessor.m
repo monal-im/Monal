@@ -388,14 +388,8 @@
     if(![iqNode.from isEqualToString:account.connectionProperties.identity.domain])
     {
         NSMutableArray* identities = [[NSMutableArray alloc] init];
-        for(NSDictionary* attrs in [iqNode find:@"http://jabber.org/protocol/disco#info/identity@@"])
-            [identities addObject:[NSString stringWithFormat:@"%@/%@/%@/%@",
-                attrs[@"category"] ? attrs[@"category"] : @"",
-                attrs[@"type"] ? attrs[@"type"] : @"",
-                //TODO: check if the xml parser parses this to 'xml:lang' or 'lang' and change accordingly
-                attrs[@"lang"] ? attrs[@"lang"] : @"",
-                attrs[@"name"] ? attrs[@"name"] : @""
-            ]];
+        for(MLXMLNode* identity in [iqNode find:@"http://jabber.org/protocol/disco#info/identity"])
+            [identities addObject:[NSString stringWithFormat:@"%@/%@//%@", [identity findFirst:@"/@category"], [identity findFirst:@"/@type"], [identity findFirst:@"/@name"]]];
         NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
         NSString* ver = [HelperTools getEntityCapsHashForIdentities:identities andFeatures:features];
         [[DataLayer sharedInstance] setCaps:features forVer:ver];

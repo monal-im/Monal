@@ -272,46 +272,50 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         
         if(![HelperTools isAppExtension])
         {
-            DDLogVerbose(@"### NOT EXTENSION --> checking if background is still needed ###");
-            BOOL background = [HelperTools isInBackground];
-            if(background)
-            {
-                DDLogInfo(@"### All accounts idle, disconnecting and stopping all background tasks ###");
-                [DDLog flushLog];
-                [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
-                [HelperTools dispatchSyncReentrant:^{
-                    BOOL stopped = NO;
-                    if(_bgTask != UIBackgroundTaskInvalid)
-                    {
-                        DDLogVerbose(@"stopping UIKit _bgTask");
-                        [DDLog flushLog];
-                        [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
-                        _bgTask = UIBackgroundTaskInvalid;
-                        stopped = YES;
-                    }
-                    if(_bgFetch)
-                    {
-                        DDLogVerbose(@"stopping backgroundFetchingTask");
-                        [DDLog flushLog];
-                        [_bgFetch setTaskCompletedWithSuccess:YES];
-                        stopped = YES;
-                    }
-                    if(!stopped)
-                        DDLogVerbose(@"no background tasks running, nothing to stop");
-                    [DDLog flushLog];
-                } onQueue:dispatch_get_main_queue()];
-            }
-            if([_pushCompletions count])
-            {
-                //we don't need to call disconnectAll if we are in background here, because we already did this in the if above (don't reorder these 2 ifs!)
-                DDLogInfo(@"### All accounts idle, calling push completion handlers ###");
-                [DDLog flushLog];
-                for(NSString* completionId in _pushCompletions)
+            //use a synchronized block to disconnect only once
+            @synchronized(self) {
+                DDLogVerbose(@"### NOT EXTENSION --> checking if background is still needed ###");
+                BOOL background = [HelperTools isInBackground];
+                if(background)
                 {
-                    //cancel running timer and push completion handler
-                    ((monal_void_block_t)_pushCompletions[completionId][@"timer"])();
-                    ((pushCompletion)_pushCompletions[completionId][@"handler"])(UIBackgroundFetchResultNewData);
-                    [_pushCompletions removeObjectForKey:completionId];
+                    DDLogInfo(@"### All accounts idle, disconnecting and stopping all background tasks ###");
+                    [DDLog flushLog];
+                    [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
+                    [HelperTools dispatchSyncReentrant:^{
+                        BOOL stopped = NO;
+                        if(_bgTask != UIBackgroundTaskInvalid)
+                        {
+                            DDLogVerbose(@"stopping UIKit _bgTask");
+                            [DDLog flushLog];
+                            [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
+                            _bgTask = UIBackgroundTaskInvalid;
+                            stopped = YES;
+                        }
+                        if(_bgFetch)
+                        {
+                            DDLogVerbose(@"stopping backgroundFetchingTask");
+                            [DDLog flushLog];
+                            [_bgFetch setTaskCompletedWithSuccess:YES];
+                            _bgFetch = nil;
+                            stopped = YES;
+                        }
+                        if(!stopped)
+                            DDLogVerbose(@"no background tasks running, nothing to stop");
+                        [DDLog flushLog];
+                    } onQueue:dispatch_get_main_queue()];
+                }
+                if([_pushCompletions count])
+                {
+                    //we don't need to call disconnectAll if we are in background here, because we already did this in the if above (don't reorder these 2 ifs!)
+                    DDLogInfo(@"### All accounts idle, calling push completion handlers ###");
+                    [DDLog flushLog];
+                    for(NSString* completionId in _pushCompletions)
+                    {
+                        //cancel running timer and push completion handler
+                        ((monal_void_block_t)_pushCompletions[completionId][@"timer"])();
+                        ((pushCompletion)_pushCompletions[completionId][@"handler"])(UIBackgroundFetchResultNewData);
+                        [_pushCompletions removeObjectForKey:completionId];
+                    }
                 }
             }
         }

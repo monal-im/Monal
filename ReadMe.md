@@ -37,6 +37,9 @@ Take a look at this list to get information on [supported XEPs by Monal](https:/
 Monal is licensed under the BSD license. Any code contributions should be compatible with that license.  ** NO GPL ** .  By contributing to this project, you agree that your code is not GPL or any similarly restrictive license. You agree that your code can be used to publish in App stores such as Apple's that use DRM.
 
 ### Pull Requests
-I take pull requests. Please  use the develop branch to make changes. Please review those general issues #322 and #363.
+I take pull requests. Please  use the develop branch to make changes. Please take a look at:
+
+- [Overview: Tasks and Issues](https://github.com/anurodhp/Monal/issues/322) 
+- [Support Monal](https://github.com/anurodhp/Monal/issues/363)
 
 Monal is licensed under the BSD license. Any code contributions should be compatible with that license.  ** NO GPL ** .  By contributing to this project, you agree that your code is not GPL or any similarly restrictive license. You agree that your code can be used to publish in App stores such as Apple's that use DRM.

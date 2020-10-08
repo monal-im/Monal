@@ -164,7 +164,7 @@
 {
     @synchronized(_cache) {
         //only invalidate non-persistent items in cache
-        for(NSString* node in _cache)
+        for(NSString* node in [_cache allKeys])
             if(!_cache[node][@"persistentCache"] || ![_cache[node][@"persistentCache"] boolValue])
             {
                 DDLogInfo(@"Invalidating pubsub cache entry for node '%@'", node);

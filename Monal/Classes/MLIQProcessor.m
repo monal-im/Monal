@@ -385,15 +385,12 @@
 //entity caps of some contact
 +(void) handleEntityCapsDisco:(xmpp*) account withIqNode:(XMPPIQ*) iqNode
 {
-    if(![iqNode.from isEqualToString:account.connectionProperties.identity.domain])
-    {
-        NSMutableArray* identities = [[NSMutableArray alloc] init];
-        for(MLXMLNode* identity in [iqNode find:@"http://jabber.org/protocol/disco#info/identity"])
-            [identities addObject:[NSString stringWithFormat:@"%@/%@//%@", [identity findFirst:@"/@category"], [identity findFirst:@"/@type"], [identity findFirst:@"/@name"]]];
-        NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
-        NSString* ver = [HelperTools getEntityCapsHashForIdentities:identities andFeatures:features];
-        [[DataLayer sharedInstance] setCaps:features forVer:ver];
-    }
+    NSMutableArray* identities = [[NSMutableArray alloc] init];
+    for(MLXMLNode* identity in [iqNode find:@"{http://jabber.org/protocol/disco#info}query/identity"])
+        [identities addObject:[NSString stringWithFormat:@"%@/%@//%@", [identity findFirst:@"/@category"], [identity findFirst:@"/@type"], [identity findFirst:@"/@name"]]];
+    NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
+    NSString* ver = [HelperTools getEntityCapsHashForIdentities:identities andFeatures:features];
+    [[DataLayer sharedInstance] setCaps:features forVer:ver];
 }
 
 //TODO: use the pubsub based xeps for this instead of the old vcard values

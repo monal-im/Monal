@@ -3215,16 +3215,21 @@ NSString *const kXMPPPresence = @"presence";
     
     //register handler for avatar metadata coming from *any* jid
     [self.pubsub registerForNode:@"urn:xmpp:avatar:metadata" andBareJid:nil withHandler:^(NSDictionary* items, NSString* jid) {
+        DDLogDebug(@"Got new avatar metadata from '%@'", jid);
         for(NSString* entry in items)
         {
             NSString* avatarHash = [items[entry] findFirst:@"{urn:xmpp:avatar:metadata}metadata/info@id"];
             if(!avatarHash)     //the user disabled his avatar
+            {
+                DDLogInfo(@"User %@ disabled his avatar", jid);
                 [[MLImageManager sharedInstance] setIconForContact:jid andAccount:self.accountNo WithData:nil];
+            }
             else
             {
                 //if this returns NO, we don't have a copy of this image yet --> lets fetch it
                 if(![self updateAvatarWithHash:avatarHash andJid:jid])
                 {
+                    DDLogInfo(@"Fetching new avatar data for hash '%@' and jid '%@'", avatarHash, jid);
                     [self.pubsub forceRefreshForNode:@"urn:xmpp:avatar:data" andBareJid:jid withCompletion:^(BOOL success, XMPPIQ* rawResponse) {
                         //ignore errors here (e.g. simply don't update the avatar image)
                         //(this should never happen if other clients and servers behave properly)
@@ -3236,11 +3241,17 @@ NSString *const kXMPPPresence = @"presence";
                         //ignore if the avatar data can not be found (should never happen if other clients behave properly)
                         if(![self updateAvatarWithHash:avatarHash andJid:jid])
                             DDLogError(@"Got avatar image data error for avatar hash %@ of contact %@", avatarHash, jid);
+                        else
+                            DDLogInfo(@"Avatar of '%@' updated successfully", jid);
                     }];
                 }
+                else
+                    DDLogInfo(@"Avatar of '%@' updated successfully", jid);
             }
             break;      //we only want to process the first item
         }
+        if([items count] > 1)
+            DDLogError(@"Got more than one avatar metadata item!");
     }];
 }
 
@@ -3250,9 +3261,11 @@ NSString *const kXMPPPresence = @"presence";
     NSDictionary* avatarData = [self.pubsub getCachedDataForNode:@"urn:xmpp:avatar:data" andBareJid:jid];
     if(avatarData[avatarHash])
     {
+        DDLogDebug(@"Already cached new avatar data for hash '%@' and jid '%@'", avatarHash, jid);
         [[MLImageManager sharedInstance] setIconForContact:jid andAccount:self.accountNo WithData:[avatarData[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]];
         return YES;
     }
+    DDLogDebug(@"No cached avatar data for hash '%@' and jid '%@'", avatarHash, jid);
     return NO;
 }
 

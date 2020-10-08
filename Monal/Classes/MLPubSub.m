@@ -65,13 +65,13 @@
         jid = @"";
     
     //sanity check
-    //we are using @synchronized(_cache) for _configuredNodes here because all other parts accessing _configuredNodes are already synchronized via _cache
+    //we are using @synchronized(_cache) for _configuredNodes here because all other parts accessing _configuredNodes are already synchronized via _cache, too
     @synchronized(_cache) {
-        if(_configuredNodes[node] != nil)
-            @throw [NSException exceptionWithName:@"RuntimeException" reason:@"PubSub node '%@' can not be registered because it is not listed in the PubSub configuredNodes dictionary!" userInfo:@{
-                @"configuredNodes": _configuredNodes,
-                @"node": [node stringByAppendingString:@"+notify"]
-            }];
+        if(_configuredNodes[node] == nil)
+        {
+            DDLogWarn(@"Trying to register data handler for node '%@', but no interest was registered for this node using 'registerInterestForNode:withPersistentCaching:' first! Registering interest for this node with non-persistent cache setting.", node);
+            [self registerInterestForNode:node withPersistentCaching:NO];
+        }
     }
     
     //save handler

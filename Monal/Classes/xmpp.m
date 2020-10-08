@@ -416,7 +416,7 @@ NSString *const kXMPPPresence = @"presence";
 
 	//this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
 	DDLogInfo(@"configuring SSL handshake");
-	if(CFReadStreamSetProperty((__bridge CFReadStreamRef)self->_oStream, kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings))
+	if(CFWriteStreamSetProperty((__bridge CFWriteStreamRef)self->_oStream, kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings))
 		DDLogInfo(@"Set TLS properties on streams. Security level %@", [self->_oStream propertyForKey:NSStreamSocketSecurityLevelKey]);
 	else
 	{
@@ -664,7 +664,7 @@ NSString *const kXMPPPresence = @"presence";
         [_iqHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
             NSString* id = (NSString*) key;
             NSDictionary* data = (NSDictionary*) obj;
-            if(data[@"invalidateOnDisconnect"]==@YES && data[@"errorHandler"])
+            if([data[@"invalidateOnDisconnect"] boolValue] && data[@"errorHandler"])
             {
                 DDLogWarn(@"invalidating iq handler for iq id '%@'", id);
                 if(data[@"errorHandler"])
@@ -1693,12 +1693,10 @@ NSString *const kXMPPPresence = @"presence";
                 }
                 else
                 {
-                    //look at menchanisms presented
-                    NSMutableDictionary* supportedSaslMechanisms = [[NSMutableDictionary alloc] init];
-                    for(NSString* mechanism in [parsedStanza find:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism#"])
-                        supportedSaslMechanisms[mechanism] = @YES;
+                    //extract menchanisms presented
+                    NSSet* supportedSaslMechanisms = [NSSet setWithArray:[parsedStanza find:@"{urn:ietf:params:xml:ns:xmpp-sasl}mechanisms/mechanism#"]];
                     
-                    if(supportedSaslMechanisms[@"PLAIN"])
+                    if([supportedSaslMechanisms containsObject:@"PLAIN"])
                     {
                         [self send:[[MLXMLNode alloc]
                             initWithElement:@"auth"

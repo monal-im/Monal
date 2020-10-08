@@ -67,7 +67,7 @@
     //sanity check
     //we are using @synchronized(_cache) for _configuredNodes here because all other parts accessing _configuredNodes are already synchronized via _cache
     @synchronized(_cache) {
-        if(!_configuredNodes[node])
+        if(_configuredNodes[node] != nil)
             @throw [NSException exceptionWithName:@"RuntimeException" reason:@"PubSub node '%@' can not be registered because it is not listed in the PubSub configuredNodes dictionary!" userInfo:@{
                 @"configuredNodes": _configuredNodes,
                 @"node": [node stringByAppendingString:@"+notify"]
@@ -165,7 +165,7 @@
     @synchronized(_cache) {
         //only invalidate non-persistent items in cache
         for(NSString* node in _cache)
-            if(!_cache[node][@"persistentCache"])
+            if(!_cache[node][@"persistentCache"] || ![_cache[node][@"persistentCache"] boolValue])
             {
                 DDLogInfo(@"Invalidating pubsub cache entry for node '%@'", node);
                 [_cache removeObjectForKey:node];
@@ -198,7 +198,7 @@
         if(!_cache[node])
         {
             _cache[node] = [[NSMutableDictionary alloc] init];
-            _cache[node][@"persistentCache"] = _configuredNodes[node] ? @YES : @NO;
+            _cache[node][@"persistentCache"] = _configuredNodes[node] && [_configuredNodes[node] boolValue] ? @YES : @NO;
             _cache[node][@"data"] = [[NSMutableDictionary alloc] init];
         }
         if(!_cache[node][@"data"][jid])

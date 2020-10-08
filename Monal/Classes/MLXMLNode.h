@@ -9,17 +9,20 @@
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
 
-@interface MLXMLNode : NSObject <NSCoding>
+@interface MLXMLNode : NSObject <NSSecureCoding>
 {
     
 }
+
++(BOOL) supportsSecureCoding;
 
 /**
  Initilizes with an element type
  */
 -(id) initWithElement:(NSString*)element;
-
 -(id) initWithElement:(NSString*)element andNamespace:(NSString*)xmlns;
+-(id) initWithElement:(NSString*) element andNamespace:(NSString*) xmlns withAttributes:(NSDictionary*) attributes andChildren:(NSArray*) children andData:(NSString*) data;
+-(id) initWithElement:(NSString*) element withAttributes:(NSDictionary*) attributes andChildren:(NSArray*) children andData:(NSString*) data;
 
 /**
  Quickly set an XMLNS attribute

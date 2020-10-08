@@ -8,7 +8,6 @@
 
 #import "MLContactCell.h"
 #import "MLConstants.h"
-#import "UIColor+Theme.h"
 #import <QuartzCore/QuartzCore.h>
 
 @interface MLContactCell()
@@ -112,7 +111,7 @@
     self.isPinned = pinned;
     
     if(pinned) {
-        self.backgroundColor =  [UIColor monaldarkGreen];
+        self.backgroundColor =  [UIColor colorNamed:@"activeChatsPinnedColor"];
     } else {
         self.backgroundColor = UIColor.clearColor;
     }

@@ -180,7 +180,7 @@
 "If you want to use VOIP you will need to allow access in Settings-> Privacy-> Microphone." = "If you want to use VOIP you will need to allow access in Settings-> Privacy-> Microphone.";
 "Incoming audio call to %@ from %@ " = "Incoming audio call to %1$@ from %2$@ ";
 "Indicate when a particular device is active or inactive. Saves battery." = "Indicate when a particular device is active or inactive. Saves battery.";
-"Invalid Credentails" = "Invalid Credentails";
+"Invalid Credentials" = "Invalid Credentails";
 "Join" = "Join";
 "Just seen" = "Just seen";
 "Last seen: %d days ago" = "Last seen: %d days ago";
@@ -294,7 +294,13 @@
 "📍 A Location" = "📍 A Location";
 "📷 An Image" = "📷 An Image";
 "🔗 A Link" = "🔗 A Link";
-"Last seen: %@" = "Last seen: %@";
-"now" = "now";
 "Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old experience back." = "Merknader har blitt endret i iOS 13. Foreløpig vil du se at noen har sagt noe og at det er en ny melding, og ikke teksten eller hvem som sendte den. Jeg har besluttet å gjøre dette slik at du har pålitelig meldingstjeneste mens jeg prøver å få den gamle funksjonaliteten til å virke igjen.";
 "Jabber, Openfire, Prosody etc. " = "Jabber, Prosody, ejabberd etc.   ";
+"Last seen: %@" = "Last seen: %@";
+"now" = "now";
+"Jabber, Prosody, ejabberd etc.   " = "Jabber, Prosody, ejabberd etc.   ";
+"Loading more Messages from Server" = "Loading more Messages from Server";
+"Name: " = "Name: ";
+"Os: " = "Os: ";
+"Software Version" = "Software Version";
+"Version: " = "Version: ";

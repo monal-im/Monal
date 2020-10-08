@@ -7,6 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
+#import "xmpp.h"
 #import "ParseIq.h"
 #import "MLIQProcessor.h"
 #import "MLXMPPConnection.h"
@@ -15,7 +16,7 @@
 
 @interface MLIQProcessorTest : XCTestCase
 
-@property (nonatomic, strong) NSString *accountNo;
+@property (nonatomic, strong) xmpp *account;
 @property (nonatomic, strong) NSString *jid;
 @property (nonatomic, strong) NSString *resource;
 @property (nonatomic, strong) MLXMPPConnection *connectionProperties;
@@ -28,9 +29,10 @@
 @implementation MLIQProcessorTest
 
 - (void)setUp {
-    self.accountNo=@"1";
     self.jid=@"foo@monal.im";
     self.resource=@"Monal-iOS.51";
+    self.account = [[xmpp alloc] init];
+    self.account.accountNo = @"1";
     
     MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:self.jid  password:@"" andResource:self.resource];
 
@@ -38,7 +40,7 @@
  
     self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];
     
-    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:_accountNo];
+    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:self.account.accountNo];
     
     //signal store
     SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
@@ -72,9 +74,10 @@
     NSString  *sample= @"<iq id='C923CE5C-2FC6-4ADD-AEFE-0AE04A99FD00' type='result'><bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'><jid>foo@monal.im/Monal-iOS.51</jid></bind></iq>";
         
     MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
-        MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
-            [processor processIq: (ParseIq *)parsedStanza];
-         XCTAssert([self.connectionProperties.boundJid isEqualToString:@"foo@monal.im/Monal-iOS.51"]);
+        MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.account connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+        processor.initSession = ^{ };       //dummy handler
+        [processor processIq: (ParseIq *)parsedStanza];
+        XCTAssert([self.connectionProperties.boundJid isEqualToString:@"foo@monal.im/Monal-iOS.51"]);
     }];
     
     [self parseString:sample withDelegate:baseParserDelegate];
@@ -86,18 +89,15 @@
     NSString  *sample= @"<iq id='E9A2584E-9FD1-47D6-82AB-F9C50571D791' to='anu@yax.im/Monal-iOS.26' type='result'><query ver='56' xmlns='jabber:iq:roster'><item jid='support@404.city' subscription='none'/><item jid='monal1@xmpp.jp' subscription='both'/></query></iq>";
     
     XCTestExpectation *vcard= [[XCTestExpectation alloc] initWithDescription:@"vcard"];
-     
+    
     MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
-        MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+        MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.account connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
         processor.getVcards = ^{
             [vcard fulfill];
         };
         [processor processIq: (ParseIq *)parsedStanza];
-        
     }];
-    
     [self parseString:sample withDelegate:baseParserDelegate];
-    
     [self waitForExpectations:@[vcard] timeout:5];
 
 }
@@ -108,13 +108,12 @@
     XCTestExpectation *vcard= [[XCTestExpectation alloc] initWithDescription:@"vcard"];
     
     MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
-        MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
-            [processor processIq: (ParseIq *)parsedStanza];
-            processor.getVcards = ^{
-                [vcard fulfill];
-            };
+        MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.account connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+        processor.getVcards = ^{
+            [vcard fulfill];
+        };
+        [processor processIq: (ParseIq *)parsedStanza];
     }];
-    
     [self parseString:sample withDelegate:baseParserDelegate];
 
 }
@@ -128,7 +127,7 @@
     XCTNSNotificationExpectation *expectation=[[XCTNSNotificationExpectation alloc] initWithName:kMonalContactRefresh object:nil];
     
     MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
-        MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.accountNo connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+        MLIQProcessor *processor = [[MLIQProcessor alloc] initWithAccount:self.account connection:self.connectionProperties signalContex:self.signalContext andSignalStore:self.monalSignalStore];
             [processor processIq: (ParseIq *)parsedStanza];
     }];
     

@@ -45,13 +45,11 @@
 {
     [super viewWillAppear:animated];
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
-    [[DataLayer sharedInstance] accountListWithCompletion:^(NSArray *result) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self->_tableData=result;
-            [self->_chatLogTable reloadData];
-        });
-        
-    }];
+    NSArray* accountList = [[DataLayer sharedInstance] accountList];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self->_tableData = accountList;
+        [self->_chatLogTable reloadData];
+    });
 }
 
 #pragma mark tableview datasource delegate

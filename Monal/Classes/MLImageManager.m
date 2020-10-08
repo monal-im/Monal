@@ -250,9 +250,8 @@
 }
 
 -(void) filePathForURL:(NSString *)url wuthCompletion:(void (^)(NSString * _Nullable path)) completionHandler {
-    [[DataLayer sharedInstance] imageCacheForUrl:url withCompletion:^(NSString *path) {
-        if(completionHandler) completionHandler(path);
-    }];
+    NSString* path = [[DataLayer sharedInstance] imageCacheForUrl:url];
+    if(completionHandler) completionHandler(path);
 }
 
 -(NSString *) savefilePathforURL:(NSString *)url {

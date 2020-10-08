@@ -131,14 +131,13 @@
 -(void) updateUnread
 {
     //make sure unread badge matches application badge
-    [[DataLayer sharedInstance] countUnreadMessagesWithCompletion:^(NSNumber *result) {
-        [HelperTools dispatchSyncReentrant:^{
-            NSInteger unread = 0;
-            if(result)
-                unread = [result integerValue];
-            [UIApplication sharedApplication].applicationIconBadgeNumber = unread;
-        } onQueue:dispatch_get_main_queue()];
-    }];
+    NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
+    [HelperTools dispatchSyncReentrant:^{
+        NSInteger unread = 0;
+        if(unreadMsgCnt)
+            unread = [unreadMsgCnt integerValue];
+        [UIApplication sharedApplication].applicationIconBadgeNumber = unread;
+    } onQueue:dispatch_get_main_queue()];
 }
 
 #pragma mark - app life cycle
@@ -348,13 +347,12 @@
             [[MLXMPPManager sharedInstance] joinRoom:contact.contactJid withNick:account.connectionProperties.identity.user andPassword:mucPassword forAccounId:contact.accountId];
         }
         
-        [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId withCompletion:^(BOOL success) {
-            //no success may mean its already there
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [(ActiveChatsViewController *) self.activeChats presentChatWithRow:contact];
-                [(ActiveChatsViewController *) self.activeChats refreshDisplay];
-            });
-        }];
+        [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
+        //no success may mean its already there
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [(ActiveChatsViewController *) self.activeChats presentChatWithRow:contact];
+            [(ActiveChatsViewController *) self.activeChats refreshDisplay];
+        });
     }
 }
 
@@ -400,7 +398,11 @@
 {
     DDLogInfo(@"userNotificationCenter:willPresentNotification:withCompletionHandler called");
     //show local notifications while the app is open
-    completionHandler(UNNotificationPresentationOptionAlert);
+    if([notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
+        completionHandler(UNNotificationPresentationOptionNone);
+    } else {
+        completionHandler(UNNotificationPresentationOptionAlert);
+    }
 }
 
 -(void) application:(UIApplication *)application handleActionWithIdentifier:(nullable NSString *)identifier forLocalNotification:(nonnull UILocalNotification *)notification withResponseInfo:(nonnull NSDictionary *)responseInfo completionHandler:(nonnull void (^)(void))completionHandler
@@ -469,13 +471,15 @@
 
 -(void) applicationWillResignActive:(UIApplication *)application
 {
-    [[DataLayer sharedInstance] activeContactDictWithCompletion:^(NSMutableArray *cleanActive) {
-        NSError* err;
-        NSData *archive = [NSKeyedArchiver archivedDataWithRootObject:cleanActive requiringSecureCoding:YES error:&err];
-        NSAssert(err == nil, @"%@", err);
-        [[HelperTools defaultsDB] setObject:archive forKey:@"recipients"];
-        [[HelperTools defaultsDB] synchronize];
-    }];
+    NSMutableArray* activeContacts = [[DataLayer sharedInstance] activeContactDict];
+    if(!activeContacts)
+        return;
+
+    NSError* err;
+    NSData* archive = [NSKeyedArchiver archivedDataWithRootObject:activeContacts requiringSecureCoding:YES error:&err];
+    NSAssert(err == nil, @"%@", err);
+    [[HelperTools defaultsDB] setObject:archive forKey:@"recipients"];
+    [[HelperTools defaultsDB] synchronize];
     
     [[HelperTools defaultsDB] setObject:[[DataLayer sharedInstance] enabledAccountList] forKey:@"accounts"];
     [[HelperTools defaultsDB] synchronize];

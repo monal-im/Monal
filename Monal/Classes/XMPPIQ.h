@@ -51,21 +51,9 @@ FOUNDATION_EXPORT NSString *const kiqErrorType;
  */
 -(void) updateMamArchivePrefDefault:(NSString *) pref;
 
-/**
-Queries the last page of messages (most recent) for a recipient
- */
--(void) setMAMQueryLatestMessagesForJid:(NSString *)jid;
-
-/**
- makes iq for mam query since a date and time for jid. If no date is provided, will query all. If no jid is provided it will query all
- */
--(void) setMAMQueryFromStart:(NSDate *) startDate toDate:(NSDate *) endDate   withMax:(NSString *) maxResults andJid:(NSString *)jid;
-
-/*
- @param after  stanza id (uid)
-*/
- -(void) setMAMQueryFromStart:(NSDate *) startDate after:(NSString *) uid  withMax:(NSString *) maxResults  andJid:(NSString *)jid;
-
+-(void) setMAMQueryLatestMessagesForJid:(NSString*) jid before:(NSString*) uid;
+-(void) setMAMQueryAfter:(NSString*) uid;
+-(void) setMAMQueryForLatestId;
 
 #pragma mark disco
 /**
@@ -89,6 +77,10 @@ Queries the last page of messages (most recent) for a recipient
 gets vcard info 
  */
 -(void) getVcardTo:(NSString*) to;
+/**
+gets Entity SoftWare Version
+ */
+-(void) getEntitySoftWareVersionTo:(NSString*) to;
 
 /**
 removes a contact from the roster

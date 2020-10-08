@@ -149,7 +149,6 @@
 		265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */; };
 		2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2664D28423F2312400CD4085 /* MLAccountPickerViewController.m */; };
 		2666F018249D380D00372E28 /* MLContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661102A238F17CB0030A4EE /* MLContact.m */; };
-		26724D9321B4C1E700F1F46F /* MLComposeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26724D9221B4C1E700F1F46F /* MLComposeViewController.m */; };
 		2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABC21D8617300256507 /* MLContactDetailHeader.m */; };
 		2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABF21D9242E00256507 /* MLKeysTableViewController.m */; };
 		2673CAC321D9244B00256507 /* MLResourcesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CAC221D9244B00256507 /* MLResourcesTableViewController.m */; };
@@ -245,7 +244,6 @@
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
 		322AD0CC78815E4551793930 /* Pods_Monal_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F59B43550E822D135D1127E /* Pods_Monal_Tests.framework */; };
 		3517ED822FCB1456A8D492B1 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C40CE7301D792181A28A1F8 /* Pods_Monal.framework */; };
-		540A3FAA24D674960008965D /* MLSQLite.h in Headers */ = {isa = PBXBuildFile; fileRef = 540A3FA824D674950008965D /* MLSQLite.h */; };
 		540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FAC24D674BD0008965D /* MLSQLite.m */; };
 		540BD0D224D8D1F40087A743 /* IPC.h in Headers */ = {isa = PBXBuildFile; fileRef = 540BD0D124D8D1F20087A743 /* IPC.h */; };
 		540BD0D424D8D2000087A743 /* IPC.m in Sources */ = {isa = PBXBuildFile; fileRef = 540BD0D324D8D1FF0087A743 /* IPC.m */; };
@@ -618,8 +616,6 @@
 		266A0B7B24EAC36100875DF8 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = localization/uk.lproj/Login.strings; sourceTree = "<group>"; };
 		266A0B7C24EAC36600875DF8 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = localization/uk.lproj/Settings.strings; sourceTree = "<group>"; };
 		266A0B7D24EAC36900875DF8 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = localization/uk.lproj/ContactDetails.strings; sourceTree = "<group>"; };
-		26724D9121B4C1E700F1F46F /* MLComposeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLComposeViewController.h; sourceTree = "<group>"; };
-		26724D9221B4C1E700F1F46F /* MLComposeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLComposeViewController.m; sourceTree = "<group>"; };
 		2673CABB21D8617300256507 /* MLContactDetailHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLContactDetailHeader.h; sourceTree = "<group>"; };
 		2673CABC21D8617300256507 /* MLContactDetailHeader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLContactDetailHeader.m; sourceTree = "<group>"; };
 		2673CABE21D9242E00256507 /* MLKeysTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLKeysTableViewController.h; sourceTree = "<group>"; };
@@ -841,8 +837,6 @@
 		428F57D57919ACB0B97869A6 /* Pods-jrtplib-static-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
 		4425FD9C1F3AFFA64619FF67 /* Pods-jrtplib-static-OSX.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.appstore.xcconfig"; sourceTree = "<group>"; };
 		4C28AE0807330E8B6F972591 /* Pods_NotificaionService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NotificaionService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		540A3FA624D674940008965D /* MLSQLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSQLite.m; sourceTree = "<group>"; };
-		540A3FA824D674950008965D /* MLSQLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSQLite.h; sourceTree = "<group>"; };
 		540A3FAC24D674BD0008965D /* MLSQLite.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSQLite.m; sourceTree = "<group>"; };
 		540A3FAF24D674C80008965D /* MLSQLite.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSQLite.m; sourceTree = "<group>"; };
 		540A3FB224D674EF0008965D /* MLSQLite.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSQLite.h; sourceTree = "<group>"; };
@@ -1111,8 +1105,6 @@
 		260C51CE177F08CF0039634B /* XMPP */ = {
 			isa = PBXGroup;
 			children = (
-				540A3FA824D674950008965D /* MLSQLite.h */,
-				540A3FA624D674940008965D /* MLSQLite.m */,
 				2661102E238F17D00030A4EE /* Models */,
 				2633CB40231CB7F5006D0277 /* Processors */,
 				2642EBC418693615006A6C12 /* Jingle */,
@@ -1224,8 +1216,6 @@
 				2644D4941FF046E800F46AB5 /* MLBaseCell.m */,
 				263DFAC12187D0E00038E716 /* MLLinkCell.h */,
 				263DFAC22187D0E00038E716 /* MLLinkCell.m */,
-				26724D9121B4C1E700F1F46F /* MLComposeViewController.h */,
-				26724D9221B4C1E700F1F46F /* MLComposeViewController.m */,
 				26D7C05C23D6AFD800CA123C /* MLChatInputContainer.h */,
 				26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */,
 				C1414E9B24312F0100948788 /* MLChatMapsCell.h */,
@@ -1888,7 +1878,6 @@
 				26CC579623A0867400ABB92A /* monalxmpp.h in Headers */,
 				C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */,
 				26537970244208FE007D67D5 /* MLBasePaser.h in Headers */,
-				540A3FAA24D674960008965D /* MLSQLite.h in Headers */,
 				5435BE9B245F97B2006C61BF /* ParseR.h in Headers */,
 				540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */,
 				540BD0D224D8D1F40087A743 /* IPC.h in Headers */,
@@ -2394,7 +2383,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# https://github.com/Flinesoft/BartyCrouch#exclude-specific-views--nslocalizedstrings-from-localization\nif which bartycrouch > /dev/null; then\n    bartycrouch update -x\n    bartycrouch lint -x\nelse\n    echo \"warning: BartyCrouch not installed, download it from https://github.com/Flinesoft/BartyCrouch\"\nfi\n";
+			shellScript = "bash ../scripts/updateLocalization.sh\n";
 		};
 		E5EBCF72C8A7028D3B4EB323 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2430,7 +2419,6 @@
 				26B51C4918654D98002134C3 /* LogViewController.m in Sources */,
 				26529F5217FA7B260057F199 /* addContact.m in Sources */,
 				262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */,
-				26724D9321B4C1E700F1F46F /* MLComposeViewController.m in Sources */,
 				263DFAC32187D0E00038E716 /* MLLinkCell.m in Sources */,
 				261A6281176C055400059090 /* ContactsViewController.m in Sources */,
 				26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */,
@@ -2916,7 +2904,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)",
-					"$(PROJECT_DIR)/Monal-iOS/External",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -2934,10 +2921,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Pods/OpenSSL-Universal/lib-macos",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
 				MARKETING_VERSION = 4.8;
 				OTHER_LDFLAGS = "$(inherited)";
@@ -2990,7 +2974,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				INFOPLIST_FILE = NotificaionService/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.3;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -3069,7 +3053,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = NotificaionService/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.3;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -3150,7 +3134,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_FILE = NotificaionService/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.3;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -3388,7 +3372,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)",
-					"$(PROJECT_DIR)/Monal-iOS/External",
 				);
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -3401,10 +3384,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Pods/OpenSSL-Universal/lib-macos",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
 				MARKETING_VERSION = 4.8;
 				OTHER_LDFLAGS = "$(inherited)";
@@ -3982,7 +3962,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)",
-					"$(PROJECT_DIR)/Monal-iOS/External",
 				);
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -3995,10 +3974,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Pods/OpenSSL-Universal/lib-macos",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
 				MARKETING_VERSION = 4.8;
 				OTHER_LDFLAGS = "$(inherited)";

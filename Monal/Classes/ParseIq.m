@@ -179,9 +179,11 @@
         return;
     }
     
-    if([elementName isEqualToString:@"fin"] && [namespaceURI isEqualToString:@"urn:xmpp:mam:2"]  &&  [[attributeDict objectForKey:@"complete"] isEqualToString:@"true"])
+    if([elementName isEqualToString:@"fin"] && [namespaceURI isEqualToString:@"urn:xmpp:mam:2"])
     {
-        _mam2fin =YES;
+        if([[attributeDict objectForKey:@"complete"] isEqualToString:@"true"])
+            _mam2fin = YES;
+        _mamQueryId = [attributeDict objectForKey:@"queryid"];
         return;
     }
     
@@ -448,6 +450,12 @@
         return;
     }
     
+    if([elementName isEqualToString:@"first"] && [State isEqualToString:@"MAMSet"])
+    {
+        _mam2First=[_messageBuffer copy];
+        return;
+    }
+    
     if(([elementName isEqualToString:@"data"]) && [State isEqualToString:@"RegistrationFormData"]
        )
     {
@@ -455,7 +463,29 @@
         return;
     }
     
-
+    if(([elementName isEqualToString:@"name"]) && [namespaceURI isEqualToString:@"jabber:iq:version"]
+       )
+    {
+        _entityName = [_messageBuffer copy];
+        _entitySoftwareVersion = YES;
+        return;
+    }
+    
+    if(([elementName isEqualToString:@"version"]) && [namespaceURI isEqualToString:@"jabber:iq:version"]
+       )
+    {
+        _entityVersion = [_messageBuffer copy];
+        _entitySoftwareVersion = YES;
+        return;
+    }
+    
+    if(([elementName isEqualToString:@"os"]) && [namespaceURI isEqualToString:@"jabber:iq:version"]
+       )
+    {
+        _entityOs = [_messageBuffer copy];
+        _entitySoftwareVersion = YES;
+        return;
+    }
 }
 
 

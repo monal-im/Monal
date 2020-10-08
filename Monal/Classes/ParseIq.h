@@ -39,6 +39,11 @@
 @property (nonatomic, strong, readonly) NSString* photoType;
 @property (nonatomic, strong, readonly) NSString* photoBinValue;
 
+// entity software version
+@property (nonatomic, assign, readonly) BOOL entitySoftwareVersion;
+@property (nonatomic, strong, readonly) NSString* entityName;
+@property (nonatomic, strong, readonly) NSString* entityVersion;
+@property (nonatomic, strong, readonly) NSString* entityOs;
 
 //http upload
 @property (nonatomic, strong, readonly) NSString* getURL;
@@ -58,6 +63,8 @@
 @property (nonatomic, strong, readonly) NSString* mam2default;
 @property (nonatomic, assign, readonly) BOOL mam2fin;
 @property (nonatomic, strong, readonly) NSString* mam2Last;
+@property (nonatomic, strong, readonly) NSString* mam2First;
+@property (nonatomic, strong, readonly) NSString* mamQueryId;
 
 //omemo
 @property (nonatomic, strong, readonly) NSMutableArray* preKeys; //Array with dic of signalprekey, key id

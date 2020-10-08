@@ -17,7 +17,6 @@
 
 /**
  Performs a HTTP call with the specified verb (GET,  PUT, POST etc) to a url . Completion handler will be called with the result as dictinary or array.
- @param arguments 
  @param postedData optional
  */
 + (void) sendWithVerb:(NSString *) verb  path:(NSString *)path headers:(NSDictionary *) headers withArguments:(NSDictionary *) arguments  data:(NSData *) postedData andCompletionHandler:(void (^)(NSError *error, id result)) completion;

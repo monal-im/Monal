@@ -17,4 +17,4 @@ assignees: ''
 
 
 ---
-[ ] I have cross-check this overview https://github.com/anurodhp/Monal/issues/322 as well es filtered for regarding labels https://github.com/anurodhp/Monal/labels
+[ ] I have cross-check this overview https://github.com/anurodhp/Monal/issues/322 as well es filtered for related labels https://github.com/anurodhp/Monal/labels

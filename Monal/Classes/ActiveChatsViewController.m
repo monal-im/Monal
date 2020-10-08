@@ -26,13 +26,21 @@
 @property (nonatomic, assign)  NSInteger thismonth;
 @property (nonatomic, assign)  NSInteger thisday;
 
-@property (nonatomic, strong) NSMutableArray* contacts;
+@property (nonatomic, strong) NSMutableArray* unpinnedContacts;
+@property (nonatomic, strong) NSMutableArray* pinnedContacts;
+
 @property (nonatomic, strong) MLContact* lastSelectedUser;
 @property (nonatomic, strong) NSIndexPath *lastSelectedIndexPath;
 
 @end
 
 @implementation ActiveChatsViewController
+
+enum activeChatsControllerSections {
+    pinnedChats,
+    unpinnedChats,
+    activeChatsViewControllerSectionCnt
+};
 
 #pragma mark view lifecycle
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -89,61 +97,59 @@
 
 -(void) refreshDisplay
 {
-    [[DataLayer sharedInstance] activeContactsWithCompletion:^(NSMutableArray* cleanActive) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if(self.chatListTable.hasUncommittedUpdates)
-                return;
-            
-             [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:cleanActive];
-            self.contacts = cleanActive;
-            [self.chatListTable reloadData];
-            MonalAppDelegate* appDelegate = (MonalAppDelegate*)[UIApplication sharedApplication].delegate;
-            [appDelegate updateUnread];
-        });
-    }];
+    NSMutableArray* activeContactsUnpinned = [[DataLayer sharedInstance] activeContacts:NO];
+    NSMutableArray* activeContactsPinned = [[DataLayer sharedInstance] activeContacts:YES];
+    if(!activeContactsUnpinned || ! activeContactsPinned)
+        return;
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(self.chatListTable.hasUncommittedUpdates)
+            return;
+        // Remove self chats (contact == self) FIXME
+        [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:activeContactsUnpinned];
+        [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:activeContactsPinned];
+
+        self.unpinnedContacts = activeContactsUnpinned;
+        self.pinnedContacts = activeContactsPinned;
+
+        [self.chatListTable reloadData];
+        MonalAppDelegate* appDelegate = (MonalAppDelegate*)[UIApplication sharedApplication].delegate;
+        [appDelegate updateUnread];
+    });
 }
 
 -(void) refreshContact:(NSNotification*) notification
 {
-    MLContact* user = [notification.userInfo objectForKey:@"contact"];;
-    [self refreshRowForContact:user];
-}
-
-
--(void) handleNewMessage:(NSNotification*) notification
-{
-    MLMessage *message =[notification.userInfo objectForKey:@"message"];
+    MLContact* contact = [notification.userInfo objectForKey:@"contact"];;
     
-    if([message.messageType isEqualToString:kMessageTypeStatus])
-        return;
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if(!message.shouldShowAlert)
-            return;
+    if([notification.userInfo objectForKey:@"pinningChanged"]) {
+        // if pinning changed we have to move the user to a other section
+        [self insertOrMoveContact:contact completion:nil];
+    } else {
+        __block NSIndexPath* indexPath = nil;
+        for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt; section++) {
+            if(indexPath)
+                break;
 
-        __block MLContact* messageContact;
-        
-        [self.chatListTable performBatchUpdates: ^{
-            [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                MLContact *rowContact = (MLContact*) obj;
-                if([rowContact.contactJid isEqualToString:message.from])
-                {
-                    messageContact = rowContact;
-                    NSIndexPath* indexPath = [NSIndexPath indexPathForRow:idx inSection:0];
-                    [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            NSMutableArray* curContactArray = [self getChatArrayForSection:section];
+
+            // check if contact is already displayed -> get coresponding indexPath
+            [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                MLContact* rowContact = (MLContact *) obj;
+                if([rowContact.contactJid isEqualToString:contact.contactJid] &&
+                   [rowContact.accountId isEqualToString:contact.accountId]) {
+                    indexPath = [NSIndexPath indexPathForRow:idx inSection:section];
                     *stop = YES;
                 }
             }];
-        } completion:^(BOOL finished) {
-            if(!messageContact) {
-                [self refreshDisplay];
-            } else  {
-                [self insertOrMoveContact:messageContact completion:nil];
-            }
-        }];
-        
-    });
-    
+        }
+        // reload contact entry if we found it
+        if(indexPath) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+            });
+        }
+    }
 }
 
 -(void) messageSent:(NSNotification *) notification
@@ -154,76 +160,84 @@
     });
 }
 
+-(void) handleNewMessage:(NSNotification*) notification
+{
+    MLMessage* newMessage = [notification.userInfo objectForKey:@"message"];
+    xmpp* msgAccount = (xmpp*)notification.object;
+    if([newMessage.messageType isEqualToString:kMessageTypeStatus])
+        return;
+
+    if(!msgAccount)
+        return;
+
+    NSString* buddyContactJid = newMessage.from;
+    if([msgAccount.connectionProperties.identity.jid isEqualToString:newMessage.from]) {
+        buddyContactJid = newMessage.to;
+    }
+    NSArray* contactArr = [[DataLayer sharedInstance] contactForUsername:buddyContactJid forAccount:newMessage.accountId];
+    if(!contactArr || [contactArr count] == 0)
+        return;
+
+    MLContact* contact = [contactArr objectAtIndex:0];
+    // contact.statusMessage = newMessage;
+    [self insertOrMoveContact:contact completion:nil];
+}
+
 -(void) insertOrMoveContact:(MLContact *) contact completion:(void (^ _Nullable)(BOOL finished))completion {
-    __block NSIndexPath *indexPath = nil;
-    __block int firstNonPinnedChat = 0;
-    __block BOOL foundNonPinnedChat = NO;
-    [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        MLContact *rowContact = (MLContact *) obj;
-        if([rowContact.contactJid isEqualToString:contact.contactJid]) {
-            indexPath = [NSIndexPath indexPathForRow:idx inSection:0];
-            // We can insert a contact at pos 0 if it is pinned
-            if(contact.isPinned) {
-                firstNonPinnedChat = 0;
+    __block NSIndexPath* indexPath = nil;
+    for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt; section++) {
+        if(indexPath)
+            break;
+
+        NSMutableArray* curContactArray = [self getChatArrayForSection:section];
+
+        // check if contact is already displayed -> get coresponding indexPath
+        [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            MLContact* rowContact = (MLContact *) obj;
+            if([rowContact.contactJid isEqualToString:contact.contactJid] &&
+               [rowContact.accountId isEqualToString:contact.accountId]) {
+                indexPath = [NSIndexPath indexPathForRow:idx inSection:section];
                 *stop = YES;
             }
-        }
-        // Cnt the number of pinned contacts -> get first pos of a non pinned contact
-        if(rowContact.isPinned && !foundNonPinnedChat) {
-            firstNonPinnedChat++;
-        } else {
-            foundNonPinnedChat = YES;
-        }
-        // stopp if we found the correct contact position that we want to replace && found the first contact that is not pinned
-        if(indexPath && foundNonPinnedChat) {
-            *stop = YES;
-        }
-    }];
+        }];
+    }
 
-    NSIndexPath *newPath = [NSIndexPath indexPathForRow:firstNonPinnedChat inSection:0];
+    size_t insertInSection = unpinnedChats;
+    if(contact.isPinned) {
+        insertInSection = pinnedChats;
+    }
+    NSMutableArray* insertContactToArray = [self getChatArrayForSection:insertInSection];
+    NSIndexPath* insertAtPath = [NSIndexPath indexPathForRow:0 inSection:insertInSection];
 
-    if(indexPath) {
-        if(indexPath.row != 0) {
+    if(indexPath && insertAtPath.section == indexPath.section && insertAtPath.row == indexPath.row) {
+        [insertContactToArray replaceObjectAtIndex:insertAtPath.row  withObject:contact];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.chatListTable reloadRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationNone];
+        });
+        return;
+    } else if(indexPath) {
+        // Contact is already in out active chats list
+        NSMutableArray* removeContactFromArray = [self getChatArrayForSection:indexPath.section];
+        dispatch_async(dispatch_get_main_queue(), ^{
             [self.chatListTable performBatchUpdates:^{
-                [self.contacts removeObjectAtIndex:indexPath.row];
-                [self.contacts insertObject:contact atIndex:firstNonPinnedChat];
-                [self.chatListTable moveRowAtIndexPath:indexPath toIndexPath:newPath];
+                [removeContactFromArray removeObjectAtIndex:indexPath.row];
+                [insertContactToArray insertObject:contact atIndex:0];
+                [self.chatListTable moveRowAtIndexPath:indexPath toIndexPath:insertAtPath];
             } completion:^(BOOL finished) {
                 if(completion) completion(finished);
             }];
-        }
+        });
     }
-    else{
-        [self.chatListTable performBatchUpdates:^{
-            [self.contacts insertObject:contact atIndex:firstNonPinnedChat];
-            [self.chatListTable insertRowsAtIndexPaths:@[newPath] withRowAnimation:UITableViewRowAnimationRight];
-        } completion:^(BOOL finished) {
-                   [self refreshDisplay]; //to remove empty dataset 
-             if(completion) completion(finished);
-        }];
+    else {
+        // Chats does not exists in active Chats yet
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.chatListTable beginUpdates];
+            [insertContactToArray insertObject:contact atIndex:0];
+            [self.chatListTable insertRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationRight];
+            [self.chatListTable endUpdates];
+            if(completion) completion(YES);
+        });
     }
-}
-
--(void) refreshRowForContact:(MLContact*) contact
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        __block NSIndexPath *indexPath;
-        [self.chatListTable performBatchUpdates:^{
-            [self.contacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                MLContact *rowContact = (MLContact *) obj;
-                if([rowContact.contactJid isEqualToString:contact.contactJid]) {
-                    indexPath = [NSIndexPath indexPathForRow:idx inSection:0];
-                    [self.chatListTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-                    *stop=YES;
-                    return;
-                }
-            }];
-        } completion:^(BOOL finished){
-            if(indexPath.row==self.lastSelectedIndexPath.row && !self.navigationController.splitViewController.collapsed) {
-                [self.tableView selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
-            }
-        } ];
-    });
 }
 
 -(void) viewWillAppear:(BOOL) animated
@@ -235,7 +249,7 @@
 -(void) viewDidAppear:(BOOL) animated
 {
     [super viewDidAppear:animated];
-    if(self.contacts.count==0) {
+    if(self.unpinnedContacts.count == 0) {
         [self refreshDisplay];
     }
   
@@ -251,13 +265,11 @@
                 [self dismissViewControllerAnimated:YES completion:nil];
                 
             }];
-            
             [messageAlert addAction:acceptAction];
             [self.tabBarController presentViewController:messageAlert animated:YES completion:nil];
             [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeeniOS13Message"];
         }
     }
-    
 }
 
 -(void) didReceiveMemoryWarning
@@ -277,7 +289,7 @@
     {
         MLWelcomeViewController* welcome = (MLWelcomeViewController *) segue.destinationViewController;
         welcome.completion = ^(){
-            if([[MLXMPPManager sharedInstance].connectedXMPP count]==0)
+            if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
             {
                 if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"]) {
                     [self performSegueWithIdentifier:@"showLogin" sender:self];
@@ -299,54 +311,68 @@
     }
     else if([segue.identifier isEqualToString:@"showContacts"])
     {
-        UINavigationController *nav = segue.destinationViewController;
+        UINavigationController* nav = segue.destinationViewController;
         ContactsViewController* contacts = (ContactsViewController *)nav.topViewController;
-        contacts.selectContact = ^(MLContact *selectedContact) {
-            [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId withCompletion:^(BOOL success) {
-                //no success may mean its already there
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
-                        NSIndexPath *path =[NSIndexPath indexPathForRow:0 inSection:0];
-                        [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
-                        [self presentChatWithRow:selectedContact];
-                    }];
-                });
-            }];
+        contacts.selectContact = ^(MLContact* selectedContact) {
+            [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId];
+            //no success may mean its already there
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
+                    size_t sectionToUse = unpinnedChats; // Default is not pinned
+                    if(selectedContact.isPinned) {
+                        sectionToUse = pinnedChats; // Insert in pinned section
+                    }
+                    NSIndexPath* path = [NSIndexPath indexPathForRow:0 inSection:sectionToUse];
+                    [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
+                    [self presentChatWithRow:selectedContact];
+                }];
+            });
         };
     }
-    
     else if([segue.identifier isEqualToString:@"showNew"])
       {
-          UINavigationController *nav = segue.destinationViewController;
+          UINavigationController* nav = segue.destinationViewController;
           MLNewViewController* newScreen = (MLNewViewController *)nav.topViewController;
           newScreen.selectContact = ^(MLContact *selectedContact) {
-              [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId withCompletion:^(BOOL success) {
-                  //no success may mean its already there
-                  dispatch_async(dispatch_get_main_queue(), ^{
-                      [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
-                          NSIndexPath *path =[NSIndexPath indexPathForRow:0 inSection:0];
-                                              [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
-                                              [self presentChatWithRow:selectedContact];
-                      }];
-                  });
-              }];
-              
+              [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId];
+              //no success may mean its already there
+              dispatch_async(dispatch_get_main_queue(), ^{
+                  [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
+                      NSIndexPath* path = [NSIndexPath indexPathForRow:0 inSection:unpinnedChats];
+                                        [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
+                                          [self presentChatWithRow:selectedContact];
+                  }];
+              });
           };
       }
 }
 
-
-
+-(NSMutableArray*) getChatArrayForSection:(size_t) section
+{
+    NSMutableArray* chatArray = nil;
+    if(section == pinnedChats) {
+        chatArray = self.pinnedContacts;
+    } else if(section == unpinnedChats) {
+        chatArray = self.unpinnedContacts;
+    }
+    return chatArray;
+}
 #pragma mark - tableview datasource
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 1;
+    return activeChatsViewControllerSectionCnt;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-   return [self.contacts count];
+    if(section == pinnedChats) {
+        return [self.pinnedContacts count];
+    } else if(section == unpinnedChats) {
+        return [self.unpinnedContacts count];
+    } else {
+        return 0;
+    }
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -356,8 +382,16 @@
     {
         cell = [[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
     }
-    
-    MLContact* row = [self.contacts objectAtIndex:indexPath.row];
+    MLContact* row = nil;
+    // Select correct contact array
+    if(indexPath.section == pinnedChats) {
+        row = [self.pinnedContacts objectAtIndex:indexPath.row];
+        // mark pinned chats
+        [cell setPinned:YES];
+    } else {
+        row = [self.unpinnedContacts objectAtIndex:indexPath.row];
+        [cell setPinned:NO];
+    }
     [cell showDisplayName:row.contactDisplayName];
     
     NSString* state = [row.state stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -367,69 +401,60 @@
        ([state isEqualToString:@"xa"])
        )
     {
-        cell.status=kStatusAway;
+        cell.status = kStatusAway;
     }
     else if([state isEqualToString:@"offline"]) {
-        cell.status=kStatusOffline;
+        cell.status = kStatusOffline;
     }
     else if([state isEqualToString:@"(null)"] || [state isEqualToString:@""]) {
-        cell.status=kStatusOnline;
+        cell.status = kStatusOnline;
     }
     
     cell.accountNo = row.accountId.integerValue;
     cell.username = row.contactJid;
     cell.count = 0;
     
-    [[DataLayer sharedInstance] countUserUnreadMessages:row.contactJid forAccount:row.accountId withCompletion:^(NSNumber *unread) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if([cell.username isEqualToString:row.contactJid]){
-                cell.count=[unread integerValue];
-            }
-        });
-    }];
+    NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:row.contactJid forAccount:row.accountId];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if([cell.username isEqualToString:row.contactJid]){
+            cell.count = [unreadMsgCnt integerValue];
+        }
+    });
     
-    [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:row.accountId withCompletion:^(NSMutableArray *messages) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if(messages.count>0)
+    NSMutableArray* messages = [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:row.accountId];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(messages.count > 0)
+        {
+            MLMessage *messageRow = messages[0];
+            if([messageRow.messageType isEqualToString:kMessageTypeUrl])
             {
-                MLMessage *messageRow = messages[0];
-                if([messageRow.messageType isEqualToString:kMessageTypeUrl])
-                {
-                    [cell showStatusText:NSLocalizedString(@"🔗 A Link",@ "")];
-                } else if([messageRow.messageType isEqualToString:kMessageTypeImage])
-                {
-                    [cell showStatusText:NSLocalizedString(@"📷 An Image",@ "")];
-                } else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft]) {
-                    NSString* draftPreview = [NSString stringWithFormat:NSLocalizedString(@"Draft: %@",@ ""), messageRow.messageText];
-                    [cell showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, 6)];
-                } else if([messageRow.messageType isEqualToString:kMessageTypeGeo])
-                {
-                    [cell showStatusText:NSLocalizedString(@"📍 A Location",@ "")];
-                } else  {
-                    [cell showStatusText:messageRow.messageText];
-                }
-                
-                if(messageRow.timestamp) {
-                    cell.time.text = [self formattedDateWithSource:messageRow.timestamp];
-                    cell.time.hidden=NO;
-                } else  {
-                    cell.time.hidden=YES;
-                }
+                [cell showStatusText:NSLocalizedString(@"🔗 A Link", @"")];
+            } else if([messageRow.messageType isEqualToString:kMessageTypeImage])
+            {
+                [cell showStatusText:NSLocalizedString(@"📷 An Image", @"")];
+            } else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft]) {
+                NSString* draftPreview = [NSString stringWithFormat:NSLocalizedString(@"Draft: %@", @""), messageRow.messageText];
+                [cell showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, 6)];
+            } else if([messageRow.messageType isEqualToString:kMessageTypeGeo])
+            {
+                [cell showStatusText:NSLocalizedString(@"📍 A Location", @"")];
             } else  {
-                [cell showStatusText:nil];
-                DDLogWarn(NSLocalizedString(@"Active chat but no messages found in history for %@.",@ ""), row.contactJid);
+                [cell showStatusText:messageRow.messageText];
             }
-            
-        });
-    }];
-    
+            if(messageRow.timestamp) {
+                cell.time.text = [self formattedDateWithSource:messageRow.timestamp];
+                cell.time.hidden = NO;
+            } else  {
+                cell.time.hidden = YES;
+            }
+        } else  {
+            [cell showStatusText:nil];
+            DDLogWarn(NSLocalizedString(@"Active chat but no messages found in history for %@.", @""), row.contactJid);
+        }
+    });
     [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
-            cell.userImage.image=image;
+            cell.userImage.image = image;
     }];
-    
-    // mark pinned chats
-    [cell setPinned:row.isPinned];
-   
     [cell setOrb];
     return cell;
 }
@@ -460,30 +485,40 @@
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        MLContact* contact= [self.contacts objectAtIndex:indexPath.row];
-        
-        [[DataLayer sharedInstance] removeActiveBuddy:contact.contactJid forAccount:contact.accountId];
-        [self.contacts removeObjectAtIndex:indexPath.row];
+        MLContact* contact = nil;
+        // Delete contact from view
+        if(indexPath.section == pinnedChats) {
+            contact = [self.pinnedContacts objectAtIndex:indexPath.row];
+            [self.pinnedContacts removeObjectAtIndex:indexPath.row];
+        } else {
+            contact = [self.unpinnedContacts objectAtIndex:indexPath.row];
+            [self.unpinnedContacts removeObjectAtIndex:indexPath.row];
+        }
         [self.chatListTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
-        
+        // removeActiveBuddy in db
+        [[DataLayer sharedInstance] removeActiveBuddy:contact.contactJid forAccount:contact.accountId];
     }
 }
 
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     self.lastSelectedIndexPath = indexPath;
-    MLContact* selected = self.contacts[indexPath.row];
-    
+    MLContact* selected = nil;
+    if(indexPath.section == pinnedChats) {
+        selected = self.pinnedContacts[indexPath.row];
+    } else {
+        selected = self.unpinnedContacts[indexPath.row];
+    }
     // Only open contact chat when it is not opened yet -> macOS
     if(selected.contactJid == self.lastSelectedUser.contactJid) return;
     
-    [self presentChatWithRow:[self.contacts objectAtIndex:indexPath.row]];
-    self.lastSelectedUser = [self.contacts objectAtIndex:indexPath.row];
+    [self presentChatWithRow:selected];
+    self.lastSelectedUser = selected;
 }
 
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
-    NSDictionary *contactDic = [self.contacts objectAtIndex:indexPath.row];
+    NSDictionary* contactDic = [self.unpinnedContacts objectAtIndex:indexPath.row];
 
     [self performSegueWithIdentifier:@"showDetails" sender:contactDic];
 }
@@ -498,9 +533,9 @@
 
 - (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView
 {
-    NSString *text = NSLocalizedString(@"No one is here",@ "");
+    NSString* text = NSLocalizedString(@"No one is here", @"");
     
-    NSDictionary *attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
+    NSDictionary* attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
                                  NSForegroundColorAttributeName: [UIColor darkGrayColor]};
     
     return [[NSAttributedString alloc] initWithString:text attributes:attributes];
@@ -508,13 +543,13 @@
 
 - (NSAttributedString *)descriptionForEmptyDataSet:(UIScrollView *)scrollView
 {
-    NSString *text = NSLocalizedString(@"When you start talking to someone,\n they will show up here.",@ "");
+    NSString* text = NSLocalizedString(@"When you start talking to someone,\n they will show up here.", @"");
     
-    NSMutableParagraphStyle *paragraph = [NSMutableParagraphStyle new];
+    NSMutableParagraphStyle* paragraph = [NSMutableParagraphStyle new];
     paragraph.lineBreakMode = NSLineBreakByWordWrapping;
     paragraph.alignment = NSTextAlignmentCenter;
     
-    NSDictionary *attributes = @{NSFontAttributeName: [UIFont systemFontOfSize:14.0f],
+    NSDictionary* attributes = @{NSFontAttributeName: [UIFont systemFontOfSize:14.0f],
                                  NSForegroundColorAttributeName: [UIColor lightGrayColor],
                                  NSParagraphStyleAttributeName: paragraph};
     
@@ -528,7 +563,7 @@
 
 -(BOOL) emptyDataSetShouldDisplay:(UIScrollView*) scrollView
 {
-    BOOL toreturn = (self.contacts.count==0)?YES:NO;
+    BOOL toreturn = (self.unpinnedContacts.count==0)?YES:NO;
     if(toreturn)
     {
         // A little trick for removing the cell separators
@@ -541,15 +576,15 @@
 
 -(NSString*) formattedDateWithSource:(NSDate*) sourceDate
 {
-    NSInteger msgday =[self.gregorian components:NSCalendarUnitDay fromDate:sourceDate].day;
-    NSInteger msgmonth=[self.gregorian components:NSCalendarUnitMonth fromDate:sourceDate].month;
-    NSInteger msgyear =[self.gregorian components:NSCalendarUnitYear fromDate:sourceDate].year;
+    NSInteger msgday = [self.gregorian components:NSCalendarUnitDay fromDate:sourceDate].day;
+    NSInteger msgmonth = [self.gregorian components:NSCalendarUnitMonth fromDate:sourceDate].month;
+    NSInteger msgyear = [self.gregorian components:NSCalendarUnitYear fromDate:sourceDate].year;
     
-    BOOL showFullDate=YES;
+    BOOL showFullDate = YES;
     
     //if([sourceDate timeIntervalSinceDate:priorDate]<60*60) showFullDate=NO;
     
-    if (((self.thisday!=msgday) || (self.thismonth!=msgmonth) || (self.thisyear!=msgyear)) && showFullDate )
+    if (((self.thisday != msgday) || (self.thismonth != msgmonth) || (self.thisyear != msgyear)) && showFullDate )
     {
         // note: if it isnt the same day we want to show the full  day
         [self.destinationDateFormat setDateStyle:NSDateFormatterMediumStyle];

@@ -98,7 +98,9 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
 -(void) queryOMEMODevicesFrom:(NSString *) jid
 {
-    if(!self._connection.supportsPubSub || (self.xmppConnection.accountState < kStateBound && ![self.xmppConnection isHibernated])) return;
+    if(!self._connection.supportsPubSub)
+        return;
+    
     XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query setiqTo:jid];
     [query requestDevices];
@@ -134,7 +136,9 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
 -(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
 {
-    if(!self._connection.supportsPubSub || (self.xmppConnection.accountState < kStateBound && ![self.xmppConnection isHibernated])) return;
+    if(!self._connection.supportsPubSub)
+        return;
+    
     XMPPIQ* bundleQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [bundleQuery setiqTo:jid];
     [bundleQuery requestBundles:deviceid];
@@ -347,7 +351,8 @@ static const size_t MAX_OMEMO_KEYS = 120;
 // TODO: sendNewKeyTransport
 -(void) sendNewKeyTransport:(NSString*) contact
 {
-    if(!self._connection.supportsPubSub || (self.xmppConnection.accountState < kStateBound && ![self.xmppConnection isHibernated])) return;
+    if(!self._connection.supportsPubSub)
+        return;
 
     XMPPMessage* messageNode = [[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact forKey:@"to"];

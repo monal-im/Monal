@@ -321,7 +321,6 @@ NSString *const kXMPPPresence = @"presence";
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil userInfo:@{
             kAccountID:self.accountNo,
             kAccountState:[[NSNumber alloc] initWithInt:(int)self.accountState],
-            kAccountHibernate:[NSNumber numberWithBool:[self isHibernated]]
     }];
 }
 
@@ -662,13 +661,13 @@ NSString *const kXMPPPresence = @"presence";
         _cancelReconnectTimer = nil;
         
         [_iqHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-            NSString* id = (NSString*) key;
-            NSDictionary* data = (NSDictionary*) obj;
-            if([data[@"invalidateOnDisconnect"] boolValue] && data[@"errorHandler"])
+            NSString* id = (NSString*)key;
+            NSDictionary* data = (NSDictionary*)obj;
+            if(data[@"errorHandler"])
             {
                 DDLogWarn(@"invalidating iq handler for iq id '%@'", id);
                 if(data[@"errorHandler"])
-                    ((monal_iq_handler_t) data[@"errorHandler"])(nil);
+                    ((monal_iq_handler_t)data[@"errorHandler"])(nil);
             }
         }];
         
@@ -810,14 +809,6 @@ NSString *const kXMPPPresence = @"presence";
 }
 
 #pragma mark XMPP
-
--(BOOL) isHibernated
-{
-    //don't allow sending "hibernated stanzas" while reconnecting, that can trigger xmpp stream errors
-    BOOL hibernated = (_accountState < kStateReconnecting);
-    hibernated &= (_streamID != nil);
-    return hibernated;
-}
 
 -(void) startXMPPStream:(BOOL) clearReceiveQueue
 {
@@ -1046,7 +1037,7 @@ NSString *const kXMPPPresence = @"presence";
                 NSDictionary* dic = (NSDictionary *) obj;
                 MLXMLNode* stanza = [dic objectForKey:kStanza];
                 if([stanza.element isEqualToString:@"message"])		//only resend message stanzas because of the smacks error condition
-                    [self send:stanza];
+                    [self send:stanza withSmacks:self.connectionProperties.supportsSM3];
             }];
             //persist these changes (the queue can now be empty because smacks enable failed
             //or contain all the resent stanzas (e.g. only resume failed))
@@ -1173,8 +1164,8 @@ NSString *const kXMPPPresence = @"presence";
 {
     if(self.connectionProperties.supportsSM3)
     {
-        //this will count any stanza between our bind result and smacks enable result but gets reset once the smacks enable result surfaces
-        //(e.g. the counting will be ignored later)
+        //this will count any stanza between our bind result and smacks enable result but gets reset to sane values
+        //once the smacks enable result surfaces (e.g. the wrong counting will be ignored later)
         if(self.accountState>=kStateBound)
             [self incrementLastHandledStanza];
     }
@@ -1586,34 +1577,33 @@ NSString *const kXMPPPresence = @"presence";
 
             [self postConnectNotification];
         }
-        else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"])      // smacks resume or smacks enable failed
+        else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState<kStateBound && self.resuming)
         {
-            if(self.resuming)   //resume failed
-            {
-                self.resuming = NO;
-
-                @synchronized(_smacksLockObject) {
-                    //invalidate stream id
-                    self.streamID = nil;
-                    //get h value, if server supports smacks revision 1.5.2
-                    NSString* h = [parsedStanza findFirst:@"/@h|int"];
-                    DDLogInfo(@"++++++++++++++++++++++++ failed resume: h=%@", h);
-                    if(h)
-                        [self removeAckedStanzasFromQueue:h];
-                    //persist these changes
-                    [self persistState];
-                }
-
-                //if resume failed. bind  a new resource like normal (supportsSM3 is still YES here but switches to NO on failed enable)
-                [self bindResource:self.connectionProperties.identity.resource];
+            //we landed here because smacks resume failed
+            
+            self.resuming = NO;
+            @synchronized(_smacksLockObject) {
+                //invalidate stream id
+                self.streamID = nil;
+                //get h value, if server supports smacks revision 1.5.2
+                NSString* h = [parsedStanza findFirst:@"/@h|int"];
+                DDLogInfo(@"++++++++++++++++++++++++ failed resume: h=%@", h);
+                if(h)
+                    [self removeAckedStanzasFromQueue:h];
+                //persist these changes
+                [self persistState];
             }
-            else        //smacks enable failed
-            {
-                self.connectionProperties.supportsSM3 = NO;
 
-                //init session and query disco, roster etc.
-                [self initSession];
-            }
+            //bind  a new resource like normal on failed resume (supportsSM3 is still YES here but switches to NO on failed enable later on, if necessary)
+            [self bindResource:self.connectionProperties.identity.resource];
+        }
+        else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound && !self.resuming)
+        {
+            //we landed here because smacks enable failed
+            
+            self.connectionProperties.supportsSM3 = NO;
+            //init session and query disco, roster etc.
+            [self initSession];
         }
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}failure"])
         {
@@ -1812,7 +1802,7 @@ NSString *const kXMPPPresence = @"presence";
 {
     if(resultHandler || errorHandler)
         @synchronized(_iqHandlers) {
-            _iqHandlers[[iq getId]] = @{@"id": [iq getId], @"resultHandler":resultHandler, @"errorHandler":errorHandler, @"invalidateOnDisconnect":@YES};
+            _iqHandlers[[iq getId]] = @{@"id": [iq getId], @"resultHandler":resultHandler, @"errorHandler":errorHandler};
         }
     [self send:iq];
 }
@@ -1823,7 +1813,19 @@ NSString *const kXMPPPresence = @"presence";
     {
         DDLogVerbose(@"Adding delegate [%@ %@] to iqHandlers...", NSStringFromClass(delegate), NSStringFromSelector(method));
         @synchronized(_iqHandlers) {
-            _iqHandlers[[iq getId]] = @{@"id": [iq getId], @"delegate":NSStringFromClass(delegate), @"method":NSStringFromSelector(method), @"arguments":(args ? args : @[]), @"invalidateOnDisconnect":@NO};
+            _iqHandlers[[iq getId]] = @{@"id":[iq getId], @"delegate":NSStringFromClass(delegate), @"method":NSStringFromSelector(method), @"arguments":(args ? args : @[])};
+        }
+    }
+    [self send:iq];     //this will also call persistState --> we don't need to do this here explicitly (to make sure our iq delegate is stored to db)
+}
+
+-(void) sendIq:(XMPPIQ*) iq withDelegate:(id) delegate andMethod:(SEL) method andInvalidationMethod:(SEL) invalidationMethod andAdditionalArguments:(NSArray*) args
+{
+    if(delegate && method && invalidationMethod)
+    {
+        DDLogVerbose(@"Adding delegate [%@ %@] to iqHandlers...", NSStringFromClass(delegate), NSStringFromSelector(method));
+        @synchronized(_iqHandlers) {
+            _iqHandlers[[iq getId]] = @{@"id":[iq getId], @"delegate":NSStringFromClass(delegate), @"method":NSStringFromSelector(method), @"invalidationMethod":NSStringFromSelector(invalidationMethod), @"arguments":(args ? args : @[])};
         }
     }
     [self send:iq];     //this will also call persistState --> we don't need to do this here explicitly (to make sure our iq delegate is stored to db)
@@ -1831,34 +1833,40 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) send:(MLXMLNode*) stanza
 {
+    //proxy to real send
+    [self send:stanza withSmacks:YES];
+}
+
+-(void) send:(MLXMLNode*) stanza withSmacks:(BOOL) withSmacks
+{
     if(!stanza)
         return;
     
-    if(((self.accountState>=kStateBound && self.connectionProperties.supportsSM3) || [self isHibernated]))
+    //always add stanzas (not nonzas!) to smacks queue to be resent later (if withSmacks=YES)
+    if(withSmacks && [stanza isKindOfClass:[XMPPStanza class]])
     {
-        //only count stanzas, not nonzas
-        if([stanza isKindOfClass:[XMPPStanza class]])
+        XMPPStanza* queued_stanza = [stanza copy];
+        if(![queued_stanza.element isEqualToString:@"iq"])      //add delay tag to message or presence stanzas but not to iq stanzas
         {
-            XMPPStanza* queued_stanza = [stanza copy];
-            if(![queued_stanza.element isEqualToString:@"iq"])      //add delay tag to message or presence stanzas but not to iq stanzas
-            {
-                //only add a delay tag if not already present
-                if(![queued_stanza check:@"{urn:xmpp:delay}delay"])
-                   [queued_stanza addDelayTagFrom:self.connectionProperties.identity.jid];
-            }
-            @synchronized(_smacksLockObject) {
-                DDLogVerbose(@"ADD UNACKED STANZA: %@: %@", self.lastOutboundStanza, queued_stanza);
-                NSDictionary* dic = @{kQueueID:self.lastOutboundStanza, kStanza:queued_stanza};
-                [self.unAckedStanzas addObject:dic];
-                //increment for next call
-                self.lastOutboundStanza = [NSNumber numberWithInteger:[self.lastOutboundStanza integerValue] + 1];
-                //persist these changes (this has to be synchronous because we want so persist sanzas to db before actually sending them)
-                [self persistState];
-            }
+            //only add a delay tag if not already present
+            if(![queued_stanza check:@"{urn:xmpp:delay}delay"])
+                [queued_stanza addDelayTagFrom:self.connectionProperties.identity.jid];
+        }
+        @synchronized(_smacksLockObject) {
+            DDLogVerbose(@"ADD UNACKED STANZA: %@: %@", self.lastOutboundStanza, queued_stanza);
+            NSDictionary* dic = @{kQueueID:self.lastOutboundStanza, kStanza:queued_stanza};
+            [self.unAckedStanzas addObject:dic];
+            //increment for next call
+            self.lastOutboundStanza = [NSNumber numberWithInteger:[self.lastOutboundStanza integerValue] + 1];
+            //persist these changes (this has to be synchronous because we want so persist sanzas to db before actually sending them)
+            [self persistState];
         }
     }
     
-    if(self.accountState>kStateDisconnected)
+    //only send nonzas if we are >kStateDisconnected and stanzas if we are >=kStateBound
+    //only exception: an outgoing bind request stanza that is allowed before we are bound
+    BOOL isBindRequest = [stanza isKindOfClass:[XMPPStanza class]] && [stanza check:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/resource"];
+    if(self.accountState>=kStateBound || (self.accountState>kStateDisconnected && (![stanza isKindOfClass:[XMPPStanza class]] || isBindRequest)))
     {
         [_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
             DDLogDebug(@"SEND: %@", stanza);
@@ -1948,7 +1956,7 @@ NSString *const kXMPPPresence = @"presence";
             NSString* id = (NSString*)key;
             NSDictionary* data = (NSDictionary*)obj;
             //only serialize persistent handlers with delegate and method
-            if([data[@"invalidateOnDisconnect"] isEqual:@NO] && data[@"delegate"] && data[@"method"])
+            if(data[@"delegate"] && data[@"method"])
             {
                 DDLogVerbose(@"saving serialized iq handler for iq '%@'", id);
                 [persistentIqHandlers setObject:data forKey:id];
@@ -2257,6 +2265,30 @@ NSString *const kXMPPPresence = @"presence";
     [self postConnectNotification];
     _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
     _exponentialBackoff = 0;
+    
+    //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
+    [_iqHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        NSString* iqid = (NSString*)key;
+        NSDictionary* data = (NSDictionary*)obj;
+        DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
+        if(data[@"errorHandler"])
+            ((monal_iq_handler_t)data[@"errorHandler"])(nil);
+        else if(data[@"delegate"] && data[@"invalidationMethod"])
+        {
+            id cls = NSClassFromString(data[@"delegate"]);
+            SEL sel = NSSelectorFromString(data[@"invalidationMethod"]);
+            DDLogVerbose(@"Calling IQHandler invalidation method [%@ %@]...", data[@"delegate"], data[@"invalidationMethod"]);
+            NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[cls methodSignatureForSelector:sel]];
+            [inv setTarget:cls];
+            [inv setSelector:sel];
+            //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
+            NSInteger idx = 2;
+            [inv setArgument:&self atIndex:idx++];
+            for(id arg in data[@"arguments"])
+                [inv setArgument:&arg atIndex:idx++];
+            [inv invoke];
+        }
+    }];
     _iqHandlers = [[NSMutableDictionary alloc] init];
 
     //force new disco queries because we landed here because of a failed smacks resume
@@ -2289,10 +2321,10 @@ NSString *const kXMPPPresence = @"presence";
     {
         //resend stanzas still in the outgoing queue and clear it afterwards
         //this happens if the server has internal problems and advertises smacks support
-        //but failes to resume the stream as well as to enable smacks on the new stream
+        //but fails to resume the stream as well as to enable smacks on the new stream
         //clean up those stanzas to only include message stanzas because iqs don't survive a session change
         //message duplicates are possible in this scenario, but that's better than dropping messages
-        //the self.unAckedStanzas queue is not touched by initSession() above because smacks is disabled at this point
+        //initSession() above does not add message stanzas to the self.unAckedStanzas queue --> this is safe to do
         [self resendUnackedMessageStanzasOnly:self.unAckedStanzas];
     }
     
@@ -2544,7 +2576,7 @@ NSString *const kXMPPPresence = @"presence";
                     if(success)
                         [messageList addObject:msg];
                 }];
-        DDLogVerbose(@"collected mam:2 before-pages now contain %d messages in summary not already in history", [messageList count]);
+        DDLogVerbose(@"collected mam:2 before-pages now contain %lu messages in summary not already in history", (unsigned long)[messageList count]);
         //call completion to display all messages saved in db if we have enough messages or reached end of mam archive
         if([messageList count] >= 25)
             completion(messageList);
@@ -2561,7 +2593,7 @@ NSString *const kXMPPPresence = @"presence";
             }
             else
             {
-                DDLogVerbose(@"Reached upper end of mam:2 archive, returning %d messages to ui", [messageList count]);
+                DDLogVerbose(@"Reached upper end of mam:2 archive, returning %lu messages to ui", (unsigned long)[messageList count]);
                 completion(messageList);    //can be fewer than 25 messages because we reached the upper end of the mam archive
             }
         }
@@ -2573,7 +2605,7 @@ NSString *const kXMPPPresence = @"presence";
         //we always want to use blocks here because we want to make sure we get not interrupted by an app crash/restart
         //which would make us use incomplete mam pages that would produce holes in history (those are very hard to remove/fill afterwards)
         [self sendIq:query withResponseHandler:responseHandler andErrorHandler:^(XMPPIQ* error) {
-            DDLogWarn(@"Got mam:2 before-query error, returning %d messages to ui", [messageList count]);
+            DDLogWarn(@"Got mam:2 before-query error, returning %lu messages to ui", (unsigned long)[messageList count]);
             if(![messageList count])
                 completion(nil);            //call completion with nil, if there was an error or xmpp reconnect that prevented us to get any messages
             else
@@ -3152,7 +3184,7 @@ NSString *const kXMPPPresence = @"presence";
     }
     else
     {
-        DDLogInfo(@" NOT enabling push: %@ < %@ (accountState: %d, supportsPush: %@)", self.pushNode, self.pushSecret, self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
+        DDLogInfo(@"NOT enabling push: %@ < %@ (accountState: %d, supportsPush: %@)", self.pushNode, self.pushSecret, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
     }
 }
 

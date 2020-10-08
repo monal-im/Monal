@@ -121,7 +121,6 @@ extern NSString* const kAccountHibernate;
 -(void) reconnect;
 -(void) reconnect:(double) wait;
 
--(BOOL) isHibernated;
 -(void) setPubSubNotificationsForNodes:(NSArray* _Nonnull) nodes;
 
 /**
@@ -147,6 +146,7 @@ extern NSString* const kAccountHibernate;
 -(void) send:(MLXMLNode* _Nonnull) stanza;
 -(void) sendIq:(XMPPIQ* _Nonnull) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler;
 -(void) sendIq:(XMPPIQ* _Nonnull) iq withDelegate:(id) delegate andMethod:(SEL) method andAdditionalArguments:(NSArray*) args;
+-(void) sendIq:(XMPPIQ* _Nonnull) iq withDelegate:(id) delegate andMethod:(SEL) method andInvalidationMethod:(SEL) invalidationMethod andAdditionalArguments:(NSArray*) args;
 
 /**
  removes a contact from the roster

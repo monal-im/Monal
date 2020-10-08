@@ -265,7 +265,7 @@ enum msgSentState {
 }
 
 // TODO use notification
--(void) updateUIElementsOnAccountChange:(xmppState) accountState isHibernated:(BOOL) isHibernated
+-(void) updateUIElementsOnAccountChangeTo:(xmppState) accountState
 {
     if(!self.contact.accountId) return;
 
@@ -281,10 +281,7 @@ enum msgSentState {
     if(![[DataLayer sharedInstance] isAccountEnabled:self.contact.accountId])
         sendButtonEnabled = NO;
     
-    if(isHibernated == YES)
-        jidLabelText = [NSString stringWithFormat:@"%@ [%@]", contactDisplayName, @"Hibernated"];
-    else
-        jidLabelText = [NSString stringWithFormat:@"%@", contactDisplayName];
+    jidLabelText = [NSString stringWithFormat:@"%@", contactDisplayName];
 
     if(self.contact.isGroup) {
         NSArray* members = [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
@@ -314,13 +311,13 @@ enum msgSentState {
         if(![accountNo isEqualToString:self.xmppAccount.accountNo])
             return;
         
-        if(accountNo && accountState && accountHibernate)
-            [self updateUIElementsOnAccountChange:(xmppState)[accountState intValue] isHibernated:[accountHibernate boolValue]];
+        if(accountNo && accountState)
+            [self updateUIElementsOnAccountChangeTo:(xmppState)[accountState intValue]];
     }
     else
     {
         xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-        [self updateUIElementsOnAccountChange:kStateLoggedIn isHibernated:[xmppAccount isHibernated]];
+        [self updateUIElementsOnAccountChangeTo:kStateLoggedIn];
     }
 }
 

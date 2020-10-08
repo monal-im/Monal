@@ -127,7 +127,7 @@ enum MLKeysTableViewControllerSections {
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
     // We can only delete devices if we are bound or hibernated
-    if(self.account.accountState < kStateBound && ![self.account isHibernated]) return NO;
+    if(self.account.accountState < kStateBound) return NO;
 
     // Only allow deleting other keys from this account
     return self.ownKeys && indexPath.row != self.ownKeyRow && indexPath.section == keysSection;

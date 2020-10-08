@@ -81,7 +81,7 @@
     
     //call handlers directly (will only be done if we already have some cached data available)
     if(_cache[node])
-        for(NSString* jidEntry in _cache[node])
+        for(NSString* jidEntry in _cache[node][@"data"])
             [self callHandlersForNode:node andJid:jidEntry];
 }
 
@@ -225,11 +225,15 @@
 {
     DDLogInfo(@"Calling pubsub handlers for node '%@' (and jid '%@')", node, jid);
     @synchronized(_cache) {
-        if(!_cache[node] || !_cache[node][jid])
+        if(!_cache[node] || !_cache[node][@"data"][jid])
+        {
+            DDLogWarn(@"Pubsub cache empty: %@", _cache);
             return;
+        }
         
         if(_handlers[node])
         {
+            DDLogDebug(@"Calling pubsub handlers: %@", _handlers[node]);
             if(_handlers[node][jid])
                 ((monal_pubsub_handler_t)_handlers[node][jid])([self getCachedDataForNode:node andBareJid:jid], jid);
             if(_handlers[node][@""])

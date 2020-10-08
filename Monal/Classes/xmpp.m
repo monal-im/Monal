@@ -1431,7 +1431,7 @@ NSString *const kXMPPPresence = @"presence";
             //add newest stanzaid to database *after* processing the message, but only for non-mam messages or mam catchup
             //(e.g. those messages going forward in time not backwards)
             NSString* stanzaid = [outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLcatchup:"] ? [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"] : nil;
-            //check stnaza-id @by according to the rules outlined in XEP-0359
+            //if not from mam response: use stanzaid from message and check stnaza-id @by according to the rules outlined in XEP-0359
             if(!stanzaid && [self.connectionProperties.identity.jid isEqualToString:[messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@by"]])
                 stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
             if(stanzaid)
@@ -1443,9 +1443,17 @@ NSString *const kXMPPPresence = @"presence";
             //only mark stanza as handled *after* processing it
             [self stanzaHandled:messageNode];
         }
-        else if([parsedStanza check:@"/{jabber:client}iq"] && [parsedStanza check:@"/@id"] && [parsedStanza check:@"/@type"])   //sanity: check if iq id and type attributes are present
+        else if([parsedStanza check:@"/{jabber:client}iq"])
         {
             XMPPIQ* iqNode = (XMPPIQ*)parsedStanza;
+            
+            //sanity: check if iq id and type attributes are present and throw it away if not
+            if(![parsedStanza check:@"/@id"] || ![parsedStanza check:@"/@type"])
+            {
+                //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
+                [self stanzaHandled:iqNode];
+                return;
+            }
             
             //sanitize: no from or to always means own bare jid
             if(!iqNode.from)

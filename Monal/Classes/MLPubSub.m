@@ -123,6 +123,7 @@
 
 -(void) publish:(NSArray* _Nonnull) items onNode:(NSString* _Nonnull) node
 {
+    DDLogDebug(@"Publishing pubsub node '%@'", node);
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
     [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"publish" withAttributes:@{@"node": node} andChildren:items andData:nil]
@@ -165,7 +166,10 @@
         //only invalidate non-persistent items in cache
         for(NSString* node in _cache)
             if(!_cache[node][@"persistentCache"])
+            {
+                DDLogInfo(@"Invalidating pubsub cache entry for node '%@'", node);
                 [_cache removeObjectForKey:node];
+            }
     }
 }
 
@@ -182,14 +186,14 @@
 -(void) handleItems:(MLXMLNode* _Nullable) items fromJid:(NSString* _Nullable) jid
 {
     if(!items)
+    {
+        DDLogWarn(@"Got pubsub data without any items!");
         return;
-    
-    //default from is own account
-    if(!jid)
-        jid = _account.connectionProperties.identity.jid;
+    }
     
     NSString* node = [items findFirst:@"/@node"];
     BOOL updated = NO;
+    DDLogDebug(@"Adding pubsub data from jid '%@' for node '%@' to our cache", jid, node);
     @synchronized(_cache) {
         if(!_cache[node])
         {
@@ -219,6 +223,7 @@
 
 -(void) callHandlersForNode:(NSString*) node andJid:(NSString*) jid
 {
+    DDLogInfo(@"Calling pubsub handlers for node '%@' (and jid '%@')", node, jid);
     @synchronized(_cache) {
         if(!_cache[node] || !_cache[node][jid])
             return;

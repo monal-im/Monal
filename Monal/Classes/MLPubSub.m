@@ -112,7 +112,7 @@
         [[MLXMLNode alloc] initWithElement:@"items" withAttributes:@{@"node": node} andChildren:@[] andData:nil]
     ] andData:nil]];
     [_account sendIq:query withResponseHandler:^(XMPPIQ* result) {
-        [self handleItems:[result find:@"{http://jabber.org/protocol/pubsub#event}event/items"] fromJid:result.fromUser];
+        [self handleItems:[result findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:result.fromUser];
         if(completion)
             completion(YES, result);
     } andErrorHandler:^(XMPPIQ* error) {
@@ -218,7 +218,10 @@
     
     //only call handlers for this node/jid combination if something has changed
     if(updated)
+    {
+        DDLogDebug(@"cached data got updated, calling handlers");
         [self callHandlersForNode:node andJid:jid];
+    }
 }
 
 -(void) callHandlersForNode:(NSString*) node andJid:(NSString*) jid
@@ -238,6 +241,7 @@
                 ((monal_pubsub_handler_t)_handlers[node][jid])([self getCachedDataForNode:node andBareJid:jid], jid);
             if(_handlers[node][@""])
                 ((monal_pubsub_handler_t)_handlers[node][@""])([self getCachedDataForNode:node andBareJid:jid], jid);
+            DDLogDebug(@"All pubsub handlers called");
         }
     }
 }

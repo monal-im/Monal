@@ -3273,13 +3273,13 @@ NSString *const kXMPPPresence = @"presence";
                         }
                         //ignore if the avatar data can not be found (should never happen if other clients behave properly)
                         if(![self updateAvatarWithHash:avatarHash andJid:jid])
-                            DDLogError(@"Got avatar image data error for avatar hash %@ of contact %@", avatarHash, jid);
+                            DDLogError(@"Avatar image data error for avatar hash %@ of contact %@", avatarHash, jid);
                         else
-                            DDLogInfo(@"Avatar of '%@' updated successfully", jid);
+                            DDLogInfo(@"Avatar of '%@' fetched and updated successfully", jid);
                     }];
                 }
                 else
-                    DDLogInfo(@"Avatar of '%@' updated successfully", jid);
+                    DDLogInfo(@"Avatar of '%@' updated successfully from cache", jid);
             }
             break;      //we only want to process the first item
         }
@@ -3294,7 +3294,7 @@ NSString *const kXMPPPresence = @"presence";
     NSDictionary* avatarData = [self.pubsub getCachedDataForNode:@"urn:xmpp:avatar:data" andBareJid:jid];
     if(avatarData[avatarHash])
     {
-        DDLogDebug(@"Already cached new avatar data for hash '%@' and jid '%@'", avatarHash, jid);
+        DDLogDebug(@"Found (cached) avatar data for hash '%@' and jid '%@'", avatarHash, jid);
         [[MLImageManager sharedInstance] setIconForContact:jid andAccount:self.accountNo WithData:[avatarData[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]];
         return YES;
     }

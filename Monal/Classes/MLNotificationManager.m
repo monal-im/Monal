@@ -84,8 +84,10 @@
     [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
     
     //update app badge
-    MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-    [appDelegate updateUnread];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
+        [appDelegate updateUnread];
+    });
 }
 
 -(NSString*) identifierWithMessage:(MLMessage*) message

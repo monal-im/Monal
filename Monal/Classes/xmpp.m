@@ -338,6 +338,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) cleanupSendQueue
 {
+    DDLogVerbose(@"Cleaning up sendQueue");
     [_sendQueue cancelAllOperations];
     [_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
         self->_outputQueue=[[NSMutableArray alloc] init];
@@ -347,6 +348,7 @@ NSString *const kXMPPPresence = @"presence";
         self->_outputBufferByteCount = 0;
         self->_streamHasSpace = NO;
     }]] waitUntilFinished:YES];
+    DDLogVerbose(@"Cleanup of sendQueue finished");
 }
 
 -(void) initTLS
@@ -566,8 +568,6 @@ NSString *const kXMPPPresence = @"presence";
             return;
         
         double connectTimeout = 8.0;
-        if([HelperTools isInBackground])
-            connectTimeout = 24.0;     //long timeout if in background
         _cancelLoginTimer = [HelperTools startTimer:connectTimeout withHandler:^{
             [self dispatchAsyncOnReceiveQueue: ^{
                 _cancelLoginTimer = nil;
@@ -3042,6 +3042,7 @@ NSString *const kXMPPPresence = @"presence";
         case NSStreamEventOpenCompleted:
         {
             DDLogVerbose(@"Stream open completed");
+            break;
         }
         
         //for writing

@@ -443,13 +443,11 @@ enum activeChatsControllerSections {
                 //XEP-0245: The slash me Command
                 if ([messageRow.messageText hasPrefix:@"/me "])
                 {
-                    NSNumber* lastMsgHistoryId = [[DataLayer sharedInstance] lastMessageHistoryIdForContact:row.contactJid forAccount:row.accountId];
-                    NSString* lastMsgActualFrom = [[DataLayer sharedInstance] lastMessageActualFromByHistoryId:lastMsgHistoryId];
                     NSString* replacedMessageText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:row.accountId
                                                                                                                buddy:row.contactJid
                                                                                                             nickName:row.nickName
                                                                                                             fullName:row.fullName
-                                                                                                          actualFrom:lastMsgActualFrom
+                                                                                                          actualFrom:messageRow.actualFrom
                                                                                                              message:messageRow.messageText
                                                                                                              isGroup:row.isGroup];
                     

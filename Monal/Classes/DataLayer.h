@@ -94,8 +94,8 @@ extern NSString *const kMessageTypeUrl;
 -(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSString*) accountNo;
 -(NSString*) fullNameForContact:(NSString*) contact inAccount:(NSString*) accountNo;
 
--(void) setContactHash:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
--(NSString*) contactHash:(NSString*) contact forAccount:(NSString*) accountNo;
+-(void) setAvatarHash:(NSString*) hash forContact:(NSString*) contact andAccount:(NSString*) accountNo;
+-(NSString*) getAvatarHashForContact:(NSString*) buddy andAccount:(NSString*) accountNo;
 
 -(BOOL) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo;
 

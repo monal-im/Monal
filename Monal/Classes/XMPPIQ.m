@@ -316,17 +316,6 @@ NSString* const kiqErrorType = @"error";
 
 #pragma mark iq get
 
--(void) getVcardTo:(NSString*) to
-{
-    [self setiqTo:to];
-
-    MLXMLNode* vcardNode =[[MLXMLNode alloc] init];
-    vcardNode.element=@"vCard";
-    [vcardNode setXMLNS:@"vcard-temp"];
-    
-    [self addChild:vcardNode];
-}
-
 -(void) getEntitySoftWareVersionTo:(NSString*) to
 {
     [self setiqTo:to];

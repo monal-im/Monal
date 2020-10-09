@@ -59,7 +59,6 @@
     [super viewWillAppear:animated];
     if(!self.contact) return;
     
-    [[MLXMPPManager sharedInstance] getVCard:self.contact];
     self.tableView.rowHeight = UITableViewAutomaticDimension;
     
     self.navigationItem.title = self.contact.contactDisplayName;

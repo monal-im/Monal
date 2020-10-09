@@ -860,26 +860,15 @@ static NSDateFormatter* dbFormatter;
     return (NSString *)name;
 }
 
--(void) setContactHash:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo
+-(void) setAvatarHash:(NSString*) hash forContact:(NSString*) contact andAccount:(NSString*) accountNo
 {
-    if(![presenceObj check:@"{vcard-temp:x:update}x/photo#"])
-        return;
-    NSString* hash = [presenceObj findFirst:@"{vcard-temp:x:update}x/photo#"];
-    if(!hash)
-        hash = @"";
-    //data length check
-    NSString* query = [NSString stringWithFormat:@"update buddylist set iconhash=?, dirty=1 where account_id=? and buddy_name=?;"];
-    NSArray* params = @[hash, accountNo, presenceObj.fromUser];
-    [self.db executeNonQuery:query  andArguments:params];
+    [self.db executeNonQuery:@"update buddylist set iconhash=?, dirty=1 where account_id=? and buddy_name=?;" andArguments:@[hash, accountNo, contact]];
 
 }
 
--(NSString*) contactHash:(NSString*) buddy forAccount:(NSString*) accountNo
+-(NSString*) getAvatarHashForContact:(NSString*) buddy andAccount:(NSString*) accountNo
 {
-    NSString* query = [NSString stringWithFormat:@"select iconhash from buddylist where account_id=? and buddy_name=?"];
-    NSArray* params = @[accountNo, buddy];
-    NSObject* iconHash = [self.db executeScalar:query andArguments:params];
-    return (NSString *)iconHash;
+    return [self.db executeScalar:@"select iconhash from buddylist where account_id=? and buddy_name=?" andArguments:@[accountNo, buddy]];
 }
 
 -(BOOL) isContactInList:(NSString*) buddy forAccount:(NSString*) accountNo

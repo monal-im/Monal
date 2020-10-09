@@ -85,9 +85,6 @@
         [self omemoResult:iqNode forAccount:account];
     }
     
-    if([iqNode check:@"{vcard-temp}vCard"])
-        [self vCardResult:iqNode forAccount:account];
-    
     if([iqNode check:@"{jabber:iq:version}query"])
         [self iqVersionResult:iqNode forAccount:account];
 }
@@ -267,8 +264,6 @@
     
     if([iqNode check:@"{jabber:iq:roster}query@ver"])
         [[DataLayer sharedInstance] setRosterVersion:[iqNode findFirst:@"{jabber:iq:roster}query@ver"] forAccount:account.accountNo];
-    
-    [account getVcards];
 }
 
 //features advertised on our own jid/account
@@ -391,35 +386,6 @@
     NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
     NSString* ver = [HelperTools getEntityCapsHashForIdentities:identities andFeatures:features];
     [[DataLayer sharedInstance] setCaps:features forVer:ver];
-}
-
-//TODO: use the pubsub based xeps for this instead of the old vcard values
-+(void) vCardResult:(XMPPIQ*) iqNode forAccount:(xmpp*) account
-{
-    if(!iqNode.fromUser)
-    {
-        DDLogError(@"iq with vcard but not user");
-        return;
-    }
-    
-    NSString* fullname = [iqNode findFirst:@"{vcard-temp}vCard/FN#"];
-    if(!fullname)
-        fullname = iqNode.fromUser;
-    
-    if([fullname stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length > 0)
-    {
-        [[DataLayer sharedInstance] setFullName:fullname forContact:iqNode.fromUser andAccount:account.accountNo];
-        
-        if([iqNode check:@"{vcard-temp}vCard/PHOTO/BINVAL#"])
-            [[MLImageManager sharedInstance] setIconForContact:iqNode.fromUser andAccount:account.accountNo WithData:[iqNode findFirst:@"{vcard-temp}vCard/PHOTO/BINVAL#|base64"]];
-        
-        MLContact *contact = [MLContact alloc];
-        contact.contactJid = iqNode.fromUser;
-        contact.fullName = fullname;
-        contact.accountId = account.accountNo;
-        
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{@"contact": contact}];
-    }
 }
 
 +(void) omemoResult:(XMPPIQ*) iqNode forAccount:(xmpp*) account

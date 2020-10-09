@@ -189,11 +189,6 @@ Attempts to upload a file to the  HTTP upload service
 -(void) pingAllAccounts;
 
 /**
- fetch a contacts vCard
- */
--(void) getVCard:(MLContact*) contact;
-
-/**
  fetch entity software version
  */
 -(void) getEntitySoftWareVersion:(MLContact *) contact;

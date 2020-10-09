@@ -74,10 +74,7 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
 -(void) setDiscoItemNode;
 
 #pragma mark roster
-/**
-gets vcard info 
- */
--(void) getVcardTo:(NSString*) to;
+
 /**
 gets Entity SoftWare Version
  */

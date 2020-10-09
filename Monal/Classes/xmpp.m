@@ -1287,24 +1287,6 @@ NSString *const kXMPPPresence = @"presence";
                                 @"isTyping": @NO
                             }];
                         });
-
-                        if(![presenceNode check:@"{http://jabber.org/protocol/muc#user}x"])
-                        {
-                            //check for vcard change
-                            if([presenceNode check:@"{vcard-temp:x:update}x/photo#"])
-                            {
-                                NSString* iconHash = [[DataLayer sharedInstance] contactHash:presenceNode.fromUser forAccount:self.accountNo];
-                                if([[presenceNode findFirst:@"{vcard-temp:x:update}x/photo#"] isEqualToString:iconHash])
-                                {
-                                    DDLogVerbose(@"photo hash is the  same");
-                                }
-                                else
-                                {
-                                    [[DataLayer sharedInstance] setContactHash:presenceNode forAccount:self.accountNo];
-                                    [self getVCard:presenceNode.fromUser];
-                                }
-                            }
-                        }
                     }
                     else
                     {
@@ -2363,27 +2345,6 @@ NSString *const kXMPPPresence = @"presence";
 
 #pragma mark vcard
 
--(void) getVcards
-{
-    for (NSDictionary *dic in self.rosterList)
-    {
-        NSArray* result = [[DataLayer sharedInstance] contactForUsername:[dic objectForKey:@"jid"] forAccount:self.accountNo];
-        MLContact *row = result.firstObject;
-        if (row.fullName.length==0)
-        {
-            [self getVCard:row.contactJid];
-        }
-    }
-
-}
-
--(void)getVCard:(NSString *) user
-{
-    XMPPIQ* iqVCard= [[XMPPIQ alloc] initWithType:kiqGetType];
-    [iqVCard getVcardTo:user];
-    [self send:iqVCard];
-}
-
 -(void)getEntitySoftWareVersion:(NSString *) user
 {
     NSArray *userDataArr = [user componentsSeparatedByString:@"/"];
@@ -3256,9 +3217,16 @@ NSString *const kXMPPPresence = @"presence";
             {
                 DDLogInfo(@"User %@ disabled his avatar", jid);
                 [[MLImageManager sharedInstance] setIconForContact:jid andAccount:self.accountNo WithData:nil];
+                [[DataLayer sharedInstance] setAvatarHash:@"" forContact:jid andAccount:self.accountNo];
             }
             else
             {
+                NSString* currentHash = [[DataLayer sharedInstance] getAvatarHashForContact:jid andAccount:self.accountNo];
+                if([avatarHash isEqualToString:currentHash ])
+                {
+                    DDLogInfo(@"Avatar hash is the same, we don't need to update our avatar image data");
+                    break;
+                }
                 //if this returns NO, we don't have a copy of this image yet --> lets fetch it
                 if(![self updateAvatarWithHash:avatarHash andJid:jid])
                 {
@@ -3296,6 +3264,7 @@ NSString *const kXMPPPresence = @"presence";
     {
         DDLogDebug(@"Found (cached) avatar data for hash '%@' and jid '%@'", avatarHash, jid);
         [[MLImageManager sharedInstance] setIconForContact:jid andAccount:self.accountNo WithData:[avatarData[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]];
+        [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:jid andAccount:self.accountNo];
         return YES;
     }
     DDLogDebug(@"No cached avatar data for hash '%@' and jid '%@'", avatarHash, jid);
@@ -3312,5 +3281,15 @@ NSString *const kXMPPPresence = @"presence";
     [displayedNode setStoreHint];
     [self send:displayedNode];
 }
+
+/*TODO: user nickname XEP-0172 needs this:
+[[DataLayer sharedInstance] setFullName:fullname forContact:iqNode.fromUser andAccount:account.accountNo];
+
+MLContact *contact = [MLContact alloc];
+contact.contactJid = iqNode.fromUser;
+contact.fullName = fullname;
+contact.accountId = account.accountNo;
+[[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{@"contact": contact}];
+*/
 
 @end

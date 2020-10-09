@@ -1,7 +1,7 @@
 PODS:
-  - CocoaLumberjack (3.6.2):
-    - CocoaLumberjack/Core (= 3.6.2)
-  - CocoaLumberjack/Core (3.6.2)
+  - CocoaLumberjack (3.7.0):
+    - CocoaLumberjack/Core (= 3.7.0)
+  - CocoaLumberjack/Core (3.7.0)
   - DACircularProgress (2.3.1)
   - DZNEmptyDataSet (1.8.1)
   - EAIntroView (2.12.0):
@@ -11,7 +11,7 @@ PODS:
     - DACircularProgress
     - pop
     - SDWebImage
-  - MarqueeLabel (4.0.2)
+  - MarqueeLabel (4.0.5)
   - MBProgressHUD (1.2.0)
   - NotificationBannerSwift (3.0.2):
     - MarqueeLabel (~> 4.0.0)
@@ -65,13 +65,13 @@ SPEC REPOS:
     - TPCircularBuffer
 
 SPEC CHECKSUMS:
-  CocoaLumberjack: bd155f2dd06c0e0b03f876f7a3ee55693122ec94
+  CocoaLumberjack: e8955b9d337ac307103b0a34fd141c32f27e53c5
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   EAIntroView: 249559079ddfdbe80e5bcb755c04c3b964b2ac27
   EARestrictedScrollView: b0c2a3f92fb2610bb44d71c5e4893777c89e45ef
   IDMPhotoBrowser: 4bb459b1faffc228e92bccdf7c54ad6d6b7e8c37
-  MarqueeLabel: f762aa681ae201f66c1d511858b171f75d83013a
+  MarqueeLabel: 00cc0bcd087111dca575878b3531af980559707d
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   NotificationBannerSwift: 713e20f21b6105f4a36a00e5d9fa414a930d3d8e
   OpenSSL-Universal: ff34003318d5e1163e9529b08470708e389ffcdd

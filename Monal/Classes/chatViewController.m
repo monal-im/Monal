@@ -69,6 +69,7 @@
 @property (atomic) BOOL viewDidAppear;
 @property (atomic) BOOL viewIsScrolling;
 @property (atomic) BOOL isLoadingMam;
+@property (atomic) BOOL moreMessagesAvailable;
 
 @property (nonatomic, strong) UIButton *lastMsgButton;
 @property (nonatomic, assign) CGFloat lastOffset;
@@ -196,6 +197,7 @@ enum msgSentState {
     [refreshControl addTarget:self action:@selector(loadOldMsgHistory:) forControlEvents:UIControlEventValueChanged];
     refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:NSLocalizedString(@"Loading more Messages from Server", @"")];
     [self.messageTable setRefreshControl:refreshControl];
+    self.moreMessagesAvailable = YES;
 }
 
 -(void) initLastMsgButton
@@ -415,6 +417,12 @@ enum msgSentState {
     // Set correct chatInput height constraints
     [self setChatInputHeightConstraints:self.hardwareKeyboardPresent];
     [self scrollToBottom];
+
+    // Allow  autoloading of more messages after a few seconds
+    monal_void_block_t __block allowAutoLoading = ^{
+        self.viewIsScrolling = NO;
+    };
+    [HelperTools startTimer:2 withHandler:allowAutoLoading];
 }
 
 
@@ -1357,6 +1365,20 @@ enum msgSentState {
     return [tableView dequeueReusableCellWithIdentifier:fullIdentifier];
 }
 
+-(void) tableView:(UITableView*) tableView willDisplayCell:(nonnull UITableViewCell *)cell forRowAtIndexPath:(nonnull NSIndexPath *)indexPath
+{
+    if(indexPath.section == messagesSection && indexPath.row == 0) {
+        if(self.moreMessagesAvailable && !self.viewIsScrolling) {
+            [self loadOldMsgHistory];
+            // Allow loading of more messages after a few seconds
+            monal_void_block_t __block allowAutoLoading = ^{
+                self.viewIsScrolling = NO;
+            };
+            [HelperTools startTimer:10 withHandler:allowAutoLoading];
+        }
+    }
+}
+
 -(UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
 {
     if(indexPath.section == reloadBoxSection) {
@@ -1795,10 +1817,14 @@ enum msgSentState {
             if(!messages)
             {
                 DDLogError(@"Got backscrolling mam error");
+                weakSelf.moreMessagesAvailable = NO;
                 //TODO: error happened --> display this to user?
             }
             else
             {
+                if([messages count] == 0) {
+                    weakSelf.moreMessagesAvailable = NO;
+                }
                 DDLogVerbose(@"Got backscrolling mam response: %lu", (unsigned long)[messages count]);
                 [weakSelf insertOldMessages:messages];      //this array is already in reverse order
             }
@@ -1828,6 +1854,7 @@ enum msgSentState {
         if(!self.messageList)
             self.messageList = [[NSMutableArray alloc] init];
         
+        CGSize sizeBeforeAddingMessages = [self->_messageTable contentSize];
         // Insert old messages into messageTable
         NSMutableArray* indexArray = [NSMutableArray array];
         for(size_t msgIdx = 0; msgIdx < [oldMessages count]; msgIdx++)
@@ -1839,16 +1866,12 @@ enum msgSentState {
         }
         [self->_messageTable beginUpdates];
         [self->_messageTable insertRowsAtIndexPaths:indexArray withRowAnimation:UITableViewRowAnimationNone];
+        // keep old position - scrolling may stop
+        CGSize sizeAfterAddingMessages = [self->_messageTable contentSize];
+        CGPoint contentOffset = self->_messageTable.contentOffset;
+        CGPoint newOffset = CGPointMake(contentOffset.x, contentOffset.y + sizeAfterAddingMessages.height - sizeBeforeAddingMessages.height);
+        self->_messageTable.contentOffset = newOffset;
         [self->_messageTable endUpdates];
-
-        size_t scrollRow = NSNotFound;
-        if([self.messageList count] > 0 && [self.messageList count] == [oldMessages count]) {
-            scrollRow = [oldMessages count] - 1;
-        } else if([self.messageList count] > [oldMessages count]) {
-            // >
-            scrollRow = [oldMessages count];
-        }
-        [self->_messageTable scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:scrollRow inSection:messagesSection] atScrollPosition: (UITableViewScrollPosition) messagesSection animated:NO];
     });
 }
 

@@ -153,7 +153,22 @@
     //send log via udp
     CFSocketError error = CFSocketSendData(_cfsocketout, (__bridge CFDataRef)[NSData dataWithBytes:(const UInt8*)&addr length:sizeof(addr)], (__bridge CFDataRef)data, 0);
     if(error)
-        NSLog(@"MLUDPLogger CFSocketSendData error: %ld", (long)error);
+    {
+        _cfsocketout = CFSocketCreate(
+            kCFAllocatorDefault,
+            PF_INET,
+            SOCK_DGRAM,
+            IPPROTO_UDP,
+            kCFSocketNoCallBack,
+            NULL,
+            NULL
+        );
+        
+        //try again
+        CFSocketError error = CFSocketSendData(_cfsocketout, (__bridge CFDataRef)[NSData dataWithBytes:(const UInt8*)&addr length:sizeof(addr)], (__bridge CFDataRef)data, 0);
+        if(error)
+            NSLog(@"MLUDPLogger CFSocketSendData error: %ld", (long)error);
+    }
 }
 
 @end

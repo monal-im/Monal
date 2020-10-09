@@ -140,6 +140,12 @@ static NSDateFormatter* dbFormatter;
     return result;
 }
 
+-(NSNumber*) enabledAccountCnts
+{
+    NSString* query = [NSString stringWithFormat:@"SELECT COUNT(*) FROM account WHERE enabled=1"];
+    return (NSNumber*)[self.db executeScalar:query];
+}
+
 -(NSArray*) enabledAccountList
 {
     NSString* query = [NSString stringWithFormat:@"select * from account where enabled=1 order by account_id asc"];

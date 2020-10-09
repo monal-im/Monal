@@ -284,6 +284,24 @@ enum activeChatsControllerSections {
     [self  performSegueWithIdentifier:@"showConversation" sender:row];
 }
 
+/*
+ * return YES if no enabled account was found && a alert will open
+ */
+-(BOOL) showAccountNumberWarningIfNeeded
+{
+    // Only open contacts list / roster if at least one account is enabled
+    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0) {
+        // Show warning
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No enabled account found", @"") message:NSLocalizedString(@"Please add a new account under settings first. If you already added your account you may need to enable it under settings", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+        return YES;
+    }
+    return NO;
+}
+
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     if([segue.identifier isEqualToString:@"showIntro"])
@@ -306,12 +324,17 @@ enum activeChatsControllerSections {
     }
     else if([segue.identifier isEqualToString:@"showDetails"])
     {
-        UINavigationController *nav = segue.destinationViewController;
+        UINavigationController* nav = segue.destinationViewController;
         ContactDetails* details = (ContactDetails *)nav.topViewController;
         details.contact= sender;
     }
     else if([segue.identifier isEqualToString:@"showContacts"])
     {
+        // Only segue if at least one account is enabled
+        if([self showAccountNumberWarningIfNeeded]) {
+            return;
+        }
+
         UINavigationController* nav = segue.destinationViewController;
         ContactsViewController* contacts = (ContactsViewController *)nav.topViewController;
         contacts.selectContact = ^(MLContact* selectedContact) {
@@ -332,6 +355,10 @@ enum activeChatsControllerSections {
     }
     else if([segue.identifier isEqualToString:@"showNew"])
       {
+          // Only segue if at least one account is enabled
+          if([self showAccountNumberWarningIfNeeded]) {
+              return;
+          }
           UINavigationController* nav = segue.destinationViewController;
           MLNewViewController* newScreen = (MLNewViewController *)nav.topViewController;
           newScreen.selectContact = ^(MLContact *selectedContact) {
@@ -488,7 +515,7 @@ enum activeChatsControllerSections {
 
 
 -(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return NSLocalizedString(@"Hide Chat",@ "");
+    return NSLocalizedString(@"Hide Chat", @"");
 }
 
 
@@ -643,6 +670,10 @@ enum activeChatsControllerSections {
 
 #pragma mark -mac menu
 -(void) showNew {
+    // Only segue if at least one account is enabled
+    if([self showAccountNumberWarningIfNeeded]) {
+        return;
+    }
     [self performSegueWithIdentifier:@"showContacts" sender:self];
 }
 

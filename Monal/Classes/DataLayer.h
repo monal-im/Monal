@@ -132,6 +132,7 @@ extern NSString *const kMessageTypeUrl;
 
 #pragma mark - account commands
 -(NSArray*) accountList;
+-(NSNumber*) enabledAccountCnts;
 -(NSArray*) enabledAccountList;
 -(BOOL) isAccountEnabled:(NSString*) accountNo;
 -(BOOL) doesAccountExistUser:(NSString*) user andDomain:(NSString *) domain;

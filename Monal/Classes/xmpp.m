@@ -394,12 +394,15 @@ NSString *const kXMPPPresence = @"presence";
     DDLogVerbose(@"Cleaning up sendQueue");
     [_sendQueue cancelAllOperations];
     [_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-        self->_outputQueue=[[NSMutableArray alloc] init];
+        DDLogVerbose(@"Cleaning up sendQueue [internal]");
+        [_sendQueue cancelAllOperations];
+        self->_outputQueue = [[NSMutableArray alloc] init];
         if(self->_outputBuffer)
             free(self->_outputBuffer);
         self->_outputBuffer = nil;
         self->_outputBufferByteCount = 0;
         self->_streamHasSpace = NO;
+        DDLogVerbose(@"Cleanup of sendQueue finished [internal]");
     }]] waitUntilFinished:YES];
     DDLogVerbose(@"Cleanup of sendQueue finished");
 }

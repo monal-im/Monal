@@ -305,3 +305,5 @@
 "Invalid Credentials" = "Invalid Credentials";
 "Could not synchronize" = "Could not synchronize";
 "Please open the app to retry" = "Please open the app to retry";
+/* mac only string */
+"Scroll down to load more messages" = "Scroll down to load more messages";

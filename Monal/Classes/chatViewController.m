@@ -11,6 +11,7 @@
 #import "MLLinkCell.h"
 #import "MLChatImageCell.h"
 #import "MLChatMapsCell.h"
+#import "MLReloadCell.h"
 
 #import "MLConstants.h"
 #import "MonalAppDelegate.h"
@@ -1359,7 +1360,12 @@ enum msgSentState {
 -(UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
 {
     if(indexPath.section == reloadBoxSection) {
-        UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"reloadBox" forIndexPath:indexPath];
+        MLReloadCell* cell = (MLReloadCell*)[tableView dequeueReusableCellWithIdentifier:@"reloadBox" forIndexPath:indexPath];
+        #if TARGET_OS_MACCATALYST
+            // "Pull" could be a bit misleading on a mac
+            cell.reloadLabel.text = NSLocalizedString(@"Scroll down to load more messages", @"mac only string");
+        #endif
+
         // Remove selection style (if cell is pressed)
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         return cell;

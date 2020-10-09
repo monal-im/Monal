@@ -162,9 +162,13 @@ void logException(NSException* exception)
 +(DDFileLogger*) configureLogging
 {
     //console logger (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
+#ifdef TARGET_IPHONE_SIMULATOR
     [[DDTTYLogger sharedInstance] setLogFormatter:[[MLLogFormatter alloc] init]];
-    [[DDTTYLogger sharedInstance] setColorsEnabled:YES];
     [DDLog addLogger:[DDTTYLogger sharedInstance]];
+#else
+    [[DDOSLogger sharedInstance] setLogFormatter:[[MLLogFormatter alloc] init]];
+    [DDLog addLogger:[DDOSLogger sharedInstance]];
+#endif
     
     //create log formatter for file and network logging
     MLLogFormatter* formatter = [[MLLogFormatter alloc] init];

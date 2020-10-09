@@ -13,7 +13,7 @@
 //stanzas
 #import "XMPPIQ.h"
 #import "XMPPPresence.h"
-#import "XMPPMEssage.h"
+#import "XMPPMessage.h"
 
 
 NS_ASSUME_NONNULL_BEGIN

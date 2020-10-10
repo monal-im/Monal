@@ -21,6 +21,7 @@ NSString* const kMessageHeadlineType=@"headline";
 {
     self = [super init];
     self.element = @"message";
+    [self setXMLNS:@"jabber:client"];
     [self setXmppId:[[NSUUID UUID] UUIDString]];        //default value, can be overwritten later on
     return self;
 }

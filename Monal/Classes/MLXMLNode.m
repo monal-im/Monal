@@ -519,6 +519,7 @@ static NSRegularExpression* componentParserRegex;
     if(!_element)
         return nil; // sanity check
     
+    //special handling of xml start tag
     if([_element isEqualToString:@"__xml"])
          return [NSString stringWithFormat:@"<?xml version='1.0'?>"];
     

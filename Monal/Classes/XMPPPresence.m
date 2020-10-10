@@ -15,6 +15,7 @@
 {
     self = [super init];
     self.element = @"presence";
+    [self setXMLNS:@"jabber:client"];
     self.attributes[@"id"] = [[NSUUID UUID] UUIDString];
     return self;
 }

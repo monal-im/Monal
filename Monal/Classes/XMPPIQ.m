@@ -22,6 +22,7 @@ NSString* const kiqErrorType = @"error";
 -(id) initWithId:(NSString*) iqid andType:(NSString*) iqType
 {
     self = [super initWithElement:@"iq"];
+    [self setXMLNS:@"jabber:client"];
     if(iqid && iqType)
     {
         [self setId:iqid];

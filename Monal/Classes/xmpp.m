@@ -1968,7 +1968,6 @@ NSString *const kXMPPPresence = @"presence";
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
     [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsRosterPreApproval] forKey:@"supportsRosterPreApproval"];
     
-
     if(self.connectionProperties.discoveredServices)
         [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
 

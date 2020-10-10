@@ -102,3 +102,10 @@ typedef void (^monal_void_block_t)(void);
 
 //build MLXMLNode query statistics (will only optimize MLXMLNode queries if *not* defined)
 //#define QueryStatistics 1
+
+
+typedef enum NotificationPrivacySettingOption {
+    DisplayNameAndMessage,
+    DisplayOnlyName,
+    DisplayOnlyPlaceholder
+} NotificationPrivacySettingOption;

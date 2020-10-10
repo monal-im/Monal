@@ -13,6 +13,7 @@
 #import "DataLayer.h"
 #import "HelperTools.h"
 #import "MonalAppDelegate.h"
+#import "MLConstants.h"
 
 @import Network;
 @import MobileCoreServices;
@@ -64,6 +65,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastUserInteraction"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastChatState"];
 
+        // Message Settings / Privacy
+        [[HelperTools defaultsDB] setInteger:DisplayNameAndMessage forKey:@"NotificationPrivacySetting"];
+
         // udp logger
         [[HelperTools defaultsDB] setBool:NO forKey:@"udpLoggerEnabled"];
         [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerHostname"];
@@ -102,6 +106,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     }
 
     [self upgradeObjectUserSettingsIfUnset:@"udpLoggerKey" toDefault:@""];
+
+    // upgrade Message Settings / Privacy
+    [self upgradeIntegerUserSettingsIfUnset:@"NotificationPrivacySetting" toDefault:DisplayNameAndMessage];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal
@@ -110,6 +117,16 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     if(currentSettingVal == nil)
     {
         [[HelperTools defaultsDB] setBool:defaultVal forKey:settingsName];
+        [[HelperTools defaultsDB] synchronize];
+    }
+}
+
+-(void) upgradeIntegerUserSettingsIfUnset:(NSString*) settingsName toDefault:(NSInteger) defaultVal
+{
+    NSNumber* currentSettingVal = [[HelperTools defaultsDB] objectForKey:settingsName];
+    if(currentSettingVal == nil)
+    {
+        [[HelperTools defaultsDB] setInteger:defaultVal forKey:settingsName];
         [[HelperTools defaultsDB] synchronize];
     }
 }

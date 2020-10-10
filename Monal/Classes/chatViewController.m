@@ -308,18 +308,16 @@ enum msgSentState {
         // Check if all objects of the notification are present
         NSString* accountNo = [userInfo objectForKey:kAccountID];
         NSNumber* accountState = [userInfo objectForKey:kAccountState];
-        NSNumber* accountHibernate = [userInfo objectForKey:kAccountHibernate];
-        
+
         // Only parse account changes for our current opened account
         if(![accountNo isEqualToString:self.xmppAccount.accountNo])
             return;
-        
+
         if(accountNo && accountState)
             [self updateUIElementsOnAccountChangeTo:(xmppState)[accountState intValue]];
     }
     else
     {
-        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
         [self updateUIElementsOnAccountChangeTo:kStateLoggedIn];
     }
 }

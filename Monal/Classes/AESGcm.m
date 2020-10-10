@@ -79,6 +79,7 @@
         EVP_CIPHER_CTX_free(ctx);
         return [[MLEncryptedPayload alloc] initWithBody:encryptedMessage key:combinedKey iv:gcmiv authTag:[NSData dataWithBytes:tag length:16]];
 #else
+        assert(false);
         return nil;
 #endif
     }
@@ -90,11 +91,16 @@
         MLCrypto* crypto = [[MLCrypto alloc] init];
         return [crypto genIV];
     } else {
+#if !TARGET_OS_MACCATALYST
         //generate iv
         unsigned char iv[12];
         RAND_bytes(iv, sizeof(iv));
         NSData* gcmiv = [[NSData alloc] initWithBytes:iv length:12];
         return gcmiv;
+#else
+        assert(false);
+        return nil;
+#endif
     }
 }
 
@@ -157,6 +163,7 @@
         EVP_CIPHER_CTX_free(ctx);
         return  decdata;
 #else
+        assert(false);
         return nil;
 #endif
     }

@@ -69,7 +69,7 @@ static NSDateFormatter* dbFormatter;
         DDLogInfo(@"initialize: old AND new db files present, delete new one and start from scratch");
         [fileManager removeItemAtPath:writableDBPath error:&error];
         if(error)
-            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
+            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
     }
     
     //old install is being upgraded --> copy old database to new app group path
@@ -78,11 +78,11 @@ static NSDateFormatter* dbFormatter;
         DDLogInfo(@"initialize: copying existing DB from OLD path to new app group one: %@ --> %@", oldDBPath, writableDBPath);
         [fileManager copyItemAtPath:oldDBPath toPath:writableDBPath error:&error];
         if(error)
-            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
+            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
         DDLogInfo(@"initialize: removing old DB at: %@", oldDBPath);
         [fileManager removeItemAtPath:oldDBPath error:&error];
         if(error)
-            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
+            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
     }
     
     //the file still does not exist (e.g. fresh install) --> copy default database to app group path
@@ -93,11 +93,8 @@ static NSDateFormatter* dbFormatter;
         NSError* error;
         [fileManager copyItemAtPath:defaultDBPath toPath:writableDBPath error:&error];
         if(error)
-            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
+            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
     }
-    
-    NSDictionary *attributes = @{NSFileProtectionKey:NSFileProtectionCompleteUntilFirstUserAuthentication};
-    [fileManager setAttributes:attributes ofItemAtPath:writableDBPath error:&error];
     
     //init global state
     dbPath = writableDBPath;
@@ -333,7 +330,7 @@ static NSDateFormatter* dbFormatter;
             [XMPPMessage class]
         ]] fromData:data error:&error];
         if(error)
-            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
+            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
         return dic;
     }
     return nil;
@@ -346,7 +343,7 @@ static NSDateFormatter* dbFormatter;
     NSError* error;
     NSData* data = [NSKeyedArchiver archivedDataWithRootObject:state requiringSecureCoding:YES error:&error];
     if(error)
-        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:nil];
+        @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
     NSArray *params = @[data, accountNo];
     [self.db executeNonQuery:query andArguments:params];
 }

@@ -13,12 +13,41 @@
 
 @implementation HelperTools
 
+static NSMutableDictionary* protectedFiles;
+
++(void) initialize
+{
+    protectedFiles = [[NSMutableDictionary alloc] init];
+}
+
 void logException(NSException* exception)
 {
     [DDLog flushLog];
     DDLogError(@"*****************\nCRASH(%@): %@\nUserInfo: %@\nStack Trace: %@", [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
     [DDLog flushLog];
     usleep(1000000);
+}
+
++(void) configureFileProtectionFor:(NSString*) file
+{
+#if TARGET_OS_IPHONE
+    @synchronized(protectedFiles) {
+        if(protectedFiles[file])
+            return;
+        NSFileManager* fileManager = [NSFileManager defaultManager];
+        if([fileManager fileExistsAtPath:file])
+        {
+            NSError* error;
+            [fileManager setAttributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} ofItemAtPath:file error:&error];
+            if(error)
+            {
+                DDLogError(@"Error configuring database file protection level for: %@", file);
+                @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
+            }
+            protectedFiles[file] = @YES;
+        }
+    }
+#endif
 }
 
 +(NSString*) sha256HmacForKey: (NSString*) key andData: (NSString*) data

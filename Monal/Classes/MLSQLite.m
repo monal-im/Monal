@@ -8,6 +8,7 @@
 
 #import <sqlite3.h>
 #import "MLSQLite.h"
+#import "HelperTools.h"
 
 @interface MLSQLite()
 {
@@ -54,6 +55,12 @@
 {
     _dbFile = dbFile;
     DDLogVerbose(@"db path %@", _dbFile);
+    
+    //mark all files to stay unlocked even if device gets locked again
+    [HelperTools configureFileProtectionFor:_dbFile];
+    [HelperTools configureFileProtectionFor:[NSString stringWithFormat:@"%@-wal", _dbFile]];
+    [HelperTools configureFileProtectionFor:[NSString stringWithFormat:@"%@-shm", _dbFile]];
+    
     if(sqlite3_open_v2([_dbFile UTF8String], &(self->_database), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nil) == SQLITE_OK)
     {
         DDLogInfo(@"Database opened: %@", _dbFile);

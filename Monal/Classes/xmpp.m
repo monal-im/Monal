@@ -1850,7 +1850,7 @@ NSString *const kXMPPPresence = @"presence";
     
     //only send nonzas if we are >kStateDisconnected and stanzas if we are >=kStateBound
     //only exception: an outgoing bind request stanza that is allowed before we are bound
-    BOOL isBindRequest = [stanza isKindOfClass:[XMPPStanza class]] && [stanza check:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/resource"];
+    BOOL isBindRequest = [stanza isKindOfClass:[XMPPIQ class]] && [stanza check:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/resource"];
     if(self.accountState>=kStateBound || (self.accountState>kStateDisconnected && (![stanza isKindOfClass:[XMPPStanza class]] || isBindRequest)))
     {
         [_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{

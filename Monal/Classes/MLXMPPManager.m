@@ -1001,19 +1001,17 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             BOOL encryptMessages = [[DataLayer sharedInstance] shouldEncryptForJid:recipient andAccountNo:accountID];
             NSString* fromJID = [NSString stringWithFormat:@"%@@%@", [accountDic objectForKey:@"username"], [accountDic objectForKey:@"domain"]];
 
-            if([[row objectForKey:@"type"] isEqualToString:@"public.url"]) {
-                [self sendMessageAndAddToHistory:[row objectForKey:@"url"] toContact:recipient fromAccount:accountID fromJID:fromJID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                    if(successSendObject) {
-                        NSString* comment = (NSString*)[row objectForKey:@"comment"];
-                        if(comment.length > 0) {
-                            [self sendMessageAndAddToHistory:comment toContact:recipient fromAccount:accountID fromJID:fromJID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendComment, NSString* messageIdSendComment) {
-                            }];
-                        }
-                        [outboxClean removeObject:row];
-                        [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
-                    }
+            if([row objectForKey:@"comment"]) {
+                [self sendMessageAndAddToHistory:[row objectForKey:@"comment"] toContact:recipient fromAccount:accountID fromJID:fromJID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
                 }];
             }
+            if([row objectForKey:@"url"]) {
+                [self sendMessageAndAddToHistory:[row objectForKey:@"url"] toContact:recipient fromAccount:accountID fromJID:fromJID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                }];
+            }
+            // remove msg even after error
+            [outboxClean removeObject:row];
+            [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
         }
     }
 }

@@ -1022,7 +1022,7 @@ NSString *const kXMPPPresence = @"presence";
         [self.unAckedStanzas removeAllObjects];
         [sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             NSDictionary *dic= (NSDictionary *) obj;
-            [self send:(MLXMLNode*)[dic objectForKey:kStanza]];
+            [self send:(XMPPStanza*)[dic objectForKey:kStanza]];
         }];
         [self persistState];
     }
@@ -1038,7 +1038,7 @@ NSString *const kXMPPPresence = @"presence";
             [stanzas removeAllObjects];
             [sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 NSDictionary* dic = (NSDictionary *) obj;
-                MLXMLNode* stanza = [dic objectForKey:kStanza];
+                XMPPStanza* stanza = [dic objectForKey:kStanza];
                 if([stanza.element isEqualToString:@"message"])		//only resend message stanzas because of the smacks error condition
                     [self send:stanza withSmacks:self.connectionProperties.supportsSM3];
             }];

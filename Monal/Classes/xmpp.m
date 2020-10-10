@@ -185,24 +185,25 @@ NSString *const kXMPPPresence = @"presence";
     self.pubsub = [[MLPubSub alloc] initWithAccount:self];
     
     _smacksLockObject = [[NSObject alloc] init];
+    [self initSM3];
+    
     _accountState = kStateLoggedOut;
     _registration = NO;
     _registrationSubmission = NO;
-
     _startTLSComplete = NO;
     _catchupDone = NO;
     _reconnectInProgress = NO;
     _lastIdleState = NO;
+    _outputQueue = [[NSMutableArray alloc] init];
+    _iqHandlers = [[NSMutableDictionary alloc] init];
+    _mamPageArrays = [[NSMutableDictionary alloc] init];
 
     _SRVDiscoveryDone = NO;
     _discoveredServersList = [[NSMutableArray alloc] init];
     if(!_usableServersList)
         _usableServersList = [[NSMutableArray alloc] init];
     _exponentialBackoff = 0;
-    _outputQueue = [[NSMutableArray alloc] init];
-    _iqHandlers = [[NSMutableDictionary alloc] init];
-    _mamPageArrays = [[NSMutableDictionary alloc] init];
-
+    
     _parseQueue = [[NSOperationQueue alloc] init];
     _parseQueue.name = @"receiveQueue";
     _parseQueue.qualityOfService = NSQualityOfServiceUtility;
@@ -220,7 +221,6 @@ NSString *const kXMPPPresence = @"presence";
     _sendQueue.qualityOfService = NSQualityOfServiceUtility;
     _sendQueue.maxConcurrentOperationCount = 1;
     [_sendQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
-    
     if(_outputBuffer)
         free(_outputBuffer);
     _outputBuffer = nil;

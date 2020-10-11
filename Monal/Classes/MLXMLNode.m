@@ -369,12 +369,13 @@ static NSRegularExpression* componentParserRegex;
                         @"parsedEntry": parsedEntry
                     }];
                 
+                id singleResult = nil;
                 if([parsedEntry[@"extractionCommand"] isEqualToString:@"#"] && node.data)
-                    [results addObject:[self processConversionCommand:parsedEntry[@"conversionCommand"] forXMLString:node.data]];
+                    singleResult = [self processConversionCommand:parsedEntry[@"conversionCommand"] forXMLString:node.data];
                 else if([parsedEntry[@"extractionCommand"] isEqualToString:@"@"] && node.attributes[parsedEntry[@"attribute"]])
-                    [results addObject:[self processConversionCommand:parsedEntry[@"conversionCommand"] forXMLString:node.attributes[parsedEntry[@"attribute"]]]];
+                    singleResult = [self processConversionCommand:parsedEntry[@"conversionCommand"] forXMLString:node.attributes[parsedEntry[@"attribute"]]];
                 else if([parsedEntry[@"extractionCommand"] isEqualToString:@"$"] && node.element)
-                    [results addObject:[self processConversionCommand:parsedEntry[@"conversionCommand"] forXMLString:node.element]];
+                    singleResult = [self processConversionCommand:parsedEntry[@"conversionCommand"] forXMLString:node.element];
                 else if([parsedEntry[@"extractionCommand"] isEqualToString:@"@"] && [parsedEntry[@"attribute"] isEqualToString:@"@"])
                 {
                     if(parsedEntry[@"conversionCommand"])
@@ -384,8 +385,10 @@ static NSRegularExpression* componentParserRegex;
                             @"pathComponent": pathComponent,
                             @"parsedEntry": parsedEntry
                         }];
-                    [results addObject:node.attributes];
+                    singleResult = node.attributes;
                 }
+                if(singleResult)
+                    [results addObject:singleResult];
             }
             else
             {

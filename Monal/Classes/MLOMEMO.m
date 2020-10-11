@@ -275,10 +275,13 @@ static const size_t MAX_OMEMO_KEYS = 120;
         NSMutableArray* preKeys = [[NSMutableArray alloc] init];
         NSArray<NSNumber*>* preKeyIds = [bundle find:@"prekeys/preKeyPublic@preKeyId|int"];
         for(NSNumber* preKey in preKeyIds) {
+            NSString* query = [NSString stringWithFormat:@"prekeys/preKeyPublic<preKeyId=%@>#|base64", preKey];
+            NSData* key = [bundle findFirst:query];
+            if(!key)
+                continue;
             NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
             [dict setObject:preKey forKey:@"preKeyId"];
-            NSString* query = [NSString stringWithFormat:@"prekeys/preKeyPublic<preKeyId=%@>#|base64", preKey.stringValue];
-            [dict setObject:[bundle findFirst:query] forKey:@"preKey"];
+            [dict setObject:key forKey:@"preKey"];
             [preKeys addObject:dict];
         }
         // save preKeys to local storage

@@ -69,8 +69,10 @@
     @synchronized(_cache) {
         if(_configuredNodes[node] == nil)
         {
-            DDLogWarn(@"Trying to register data handler for node '%@', but no interest was registered for this node using 'registerInterestForNode:withPersistentCaching:' first! Registering interest for this node with non-persistent cache setting.", node);
-            [self registerInterestForNode:node withPersistentCaching:NO];
+            @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Trying to register data handler for node '%@', but no interest was registered for this node using 'registerInterestForNode:withPersistentCaching:' first!" userInfo:@{
+                @"node": node,
+                @"jid": jid
+            }];
         }
     }
     
@@ -82,7 +84,7 @@
     //call handlers directly (will only be done if we already have some cached data available)
     if(_cache[node])
         for(NSString* jidEntry in _cache[node][@"data"])
-            [self callHandlersForNode:node andJid:jidEntry];
+            [self callHandlersForNode:node andJid:jidEntry andChangedIdList:[[NSSet alloc] init]];
 }
 
 -(void) unregisterForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nullable) jid
@@ -105,33 +107,173 @@
     }
 }
 
--(void) forceRefreshForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid withCompletion:(monal_pubsub_fetch_completion_t _Nullable) completion
+-(void) forceRefreshForPersistentNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid andItemsList:(NSArray* _Nonnull) itemsList
 {
+    //check if the node cache is persistent and throw an error if not (use forceRefreshForNode:andBareJid:withCompletion: in this case)
+    if(!_configuredNodes[node] || ![_configuredNodes[node] boolValue])
+        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"forceRefreshForPersistentNode:andBareJid:andItemsList: can not be used on non-persistent nodes! Use forceRefreshForNode:andBareJid:andItemsList:withCompletion: instead." userInfo:@{
+            @"node": node,
+            @"jid": jid,
+            @"itemsList": itemsList
+        }];
+    
+    //clear old cache before querying (new) data
+    @synchronized(_cache) {
+        if(_cache[node])
+        {
+            if(![itemsList count])
+                _cache[node][@"data"][jid] = [[NSMutableDictionary alloc] init];
+            else if(_cache[node][@"data"][jid])
+                for(NSString* itemId in itemsList)
+                    [_cache[node][@"data"][jid] removeObjectForKey:itemId];
+        }
+    }
+    
+    //build list of items to query (empty list means all items)
+    NSMutableArray* queryItems = [[NSMutableArray alloc] init];
+    for(NSString* itemId in itemsList)
+        [queryItems addObject:[[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": itemId} andChildren:@[] andData:nil]];
+    
+    //build query
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqGetType to:jid];
     [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"items" withAttributes:@{@"node": node} andChildren:@[] andData:nil]
+        [[MLXMLNode alloc] initWithElement:@"items" withAttributes:@{@"node": node} andChildren:queryItems andData:nil]
     ] andData:nil]];
-    [_account sendIq:query withResponseHandler:^(XMPPIQ* result) {
-        [self handleItems:[result findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:result.fromUser];
-        if(completion)
-            completion(YES, result);
-    } andErrorHandler:^(XMPPIQ* error) {
-        if(completion)
-            completion(NO, error);
-    }];
+    [_account sendIq:query withDelegate:[self class] andMethod:@selector(handleRefreshResultFor:withIqNode:andUpdated:andNode:andJid:andQueryItems:) andAdditionalArguments:@[[NSNumber numberWithBool:NO], jid, queryItems]];
 }
 
--(void) publish:(NSArray* _Nonnull) items onNode:(NSString* _Nonnull) node
+-(void) forceRefreshForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid andItemsList:(NSArray* _Nonnull) itemsList withCompletion:(monal_pubsub_fetch_completion_t _Nullable) completion
 {
-    DDLogDebug(@"Publishing pubsub node '%@'", node);
+    //check if the node cache is persistent and throw an error if so (use forceRefreshForPersistentNode:andBareJid:andItemsList: in this case)
+    if(_configuredNodes[node] && [_configuredNodes[node] boolValue])
+        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"forceRefreshForNode:andBareJid:andItemsList:withCompletion: can not be used on persistent nodes! Use forceRefreshForPersistentNode:andBareJid:andItemsList: instead (and the new data handler called by it instead of a completion handler)." userInfo:@{
+            @"node": node,
+            @"jid": jid,
+            @"itemsList": itemsList
+        }];
+    
+    //build list of items to query (empty list means all items)
+    NSMutableArray* queryItems = [[NSMutableArray alloc] init];
+    for(NSString* itemId in itemsList)
+        [queryItems addObject:[[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": itemId} andChildren:@[] andData:nil]];
+    
+    //build query
+    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqGetType to:jid];
+    [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"items" withAttributes:@{@"node": node} andChildren:queryItems andData:nil]
+    ] andData:nil]];
+    
+    __block BOOL firstResult = YES;
+    __block BOOL updated = NO;
+    __block monal_iq_handler_t errorHandler = ^(XMPPIQ* error) {
+        DDLogWarn(@"Got error iq for pubsub request: %@", error);
+        if(completion)
+            completion(NO, error);
+    };
+    __block monal_iq_handler_t resultHandler = ^(XMPPIQ* result) {
+        //remove possibly updated data and not when doing the query to keep the cache intact in case the app gets killed/diconnected
+        //after sending the query but before getting the (new) results
+        if(firstResult)
+        {
+            firstResult = NO;
+            
+            //clear old cache before processing (new) data
+            @synchronized(_cache) {
+                if(_cache[node])
+                {
+                    if(![itemsList count])
+                        _cache[node][@"data"][jid] = [[NSMutableDictionary alloc] init];
+                    else if(_cache[node][@"data"][jid])
+                        for(NSString* itemId in itemsList)
+                            [_cache[node][@"data"][jid] removeObjectForKey:itemId];
+                }
+            }
+        }
+        
+        //check for rsm paging
+        NSString* first = [result findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/first#"];
+        NSString* last = [result findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/last#"];
+        if(!last || [last isEqualToString:first])       //no rsm at all or reached end of rsm --> process data *and* inform handlers of new data
+        {
+            updated = [self handleItems:[result findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:result.fromUser updated:updated informHandlers:YES];
+            if(completion)
+                completion(YES, [NSNumber numberWithBool:updated]);
+        }
+        else if(first && last)
+        {
+            //only process data but *don't* inform handlers of new data because it is still partial
+            updated = [self handleItems:[result findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:result.fromUser updated:updated informHandlers:NO];
+            
+            XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqGetType to:jid];
+            [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"items" withAttributes:@{@"node": node} andChildren:queryItems andData:nil],
+                [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
+                    [[MLXMLNode alloc] initWithElement:@"after" withAttributes:@{} andChildren:@[] andData:last]
+                ] andData:nil]
+            ] andData:nil]];
+            [_account sendIq:query withResponseHandler:resultHandler andErrorHandler:errorHandler];
+        }
+    };
+    [_account sendIq:query withResponseHandler:resultHandler andErrorHandler:errorHandler];
+}
+
+-(void) publishItems:(NSArray* _Nonnull) items onNode:(NSString* _Nonnull) node
+{
+    NSMutableSet* itemsList = [[NSMutableSet alloc] init];
+    for(MLXMLNode* item in items)
+        [itemsList addObject:[item findFirst:@"/@id"]];
+    DDLogDebug(@"Publishing items on node '%@': %@", node, itemsList);
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
     [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"publish" withAttributes:@{@"node": node} andChildren:items andData:nil]
     ] andData:nil]];
     [_account sendIq:query withResponseHandler:^(XMPPIQ* result) {
         //ignore publish result
+    } andErrorHandler:^(XMPPIQ* error) {
+        DDLogError(@"Publish failed: %@", error);
+    }];
+}
+
+-(void) retractItemsWithIds:(NSArray* _Nonnull) itemIds onNode:(NSString* _Nonnull) node
+{
+    DDLogDebug(@"Deleting items on node '%@': %@", node, [NSSet setWithArray:itemIds]);
+    NSMutableArray* queryItems = [[NSMutableArray alloc] init];
+    for(NSString* itemId in itemIds)
+        [queryItems addObject:[[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": itemId} andChildren:@[] andData:nil]];
+    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"retract" withAttributes:@{@"node": node} andChildren:queryItems andData:nil]
+    ] andData:nil]];
+    [_account sendIq:query withResponseHandler:^(XMPPIQ* result) {
+        //ignore delete result
     } andErrorHandler:^(XMPPIQ* error){
-        //ignore publish errors for now
+        DDLogError(@"Retract failed: %@", error);
+    }];
+}
+
+-(void) purgeNode:(NSString* _Nonnull) node
+{
+    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"purge" withAttributes:@{@"node": node} andChildren:@[] andData:nil]
+    ] andData:nil]];
+    [_account sendIq:query withResponseHandler:^(XMPPIQ* result) {
+        //ignore purge result
+    } andErrorHandler:^(XMPPIQ* error){
+        DDLogError(@"Purge failed: %@", error);
+    }];
+}
+
+-(void) deleteNode:(NSString* _Nonnull) node
+{
+    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub#owner" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"delete" withAttributes:@{@"node": node} andChildren:@[] andData:nil]
+    ] andData:nil]];
+    [_account sendIq:query withResponseHandler:^(XMPPIQ* result) {
+        //ignore delete result
+    } andErrorHandler:^(XMPPIQ* error){
+        DDLogError(@"Delete failed: %@", error);
     }];
 }
 
@@ -175,25 +317,100 @@
 
 -(void) handleHeadlineMessage:(XMPPMessage* _Nonnull) messageNode
 {
-    //TODO: handle node deletion as well
-    [self handleItems:[messageNode findFirst:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event/items"] fromJid:messageNode.fromUser];
+    //handle node deletion or purge
+    if(
+        [messageNode check:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event/delete"] ||
+        [messageNode check:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event/purge"]
+    )
+    {
+        NSString* node = [messageNode findFirst:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event/{*}*@node"];
+        if(!node)
+        {
+            DDLogWarn(@"Got pubsub data without node attribute!");
+            return;
+        }
+        if(_cache[node])
+            _cache[node][@"data"] = [[NSMutableDictionary alloc] init];
+        [self callHandlersForNode:node andJid:messageNode.fromUser andChangedIdList:[[NSSet alloc] init]];
+        return;     //we are done here (no items node for purge or delete)
+    }
+    
+    MLXMLNode* items = [messageNode findFirst:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event/items"];
+    if(!items)
+    {
+        DDLogWarn(@"Got pubsub event data without items node, ignoring!");
+        return;
+    }
+    //handle xep-0060 6.5.6 (check if payload is included or if it has to be fetched separately)
+    if([items check:@"item/{*}*"])
+        [self handleItems:items fromJid:messageNode.fromUser updated:NO informHandlers:YES];
+    else
+    {
+        NSString* node = [items findFirst:@"/@node"];
+        if(!node)
+        {
+            DDLogWarn(@"Got pubsub data without node attribute!");
+            return;
+        }
+        if(_configuredNodes[node] && [_configuredNodes[node] boolValue])
+            [self forceRefreshForPersistentNode:node andBareJid:messageNode.fromUser andItemsList:[items find:@"item@id"]];
+        else
+            [self forceRefreshForNode:node andBareJid:messageNode.fromUser andItemsList:[items find:@"item@id"] withCompletion:nil];
+    }
+    //handle item deletion
+    if([items check:@"retract"])
+        [self handleRetraction:items fromJid:messageNode.fromUser updated:NO informHandlers:YES];
+}
+
++(void) handleRefreshResultFor:(xmpp*) account withIqNode:(XMPPIQ*) iqNode andUpdated:(NSNumber*) updated andNode:(NSString*) node andJid:(NSString*) jid andQueryItems:(NSMutableArray*) queryItems
+{
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogWarn(@"Got error iq for pubsub request: %@", iqNode);
+        return;
+    }
+    
+    MLPubSub* me = account.pubsub;
+    NSString* first = [iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/first#"];
+    NSString* last = [iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/last#"];
+    //check for rsm paging
+    if(!last || [last isEqualToString:first])       //no rsm at all or reached end of rsm --> process data *and* inform handlers of new data
+        [me handleItems:[iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:iqNode.fromUser updated:[updated boolValue] informHandlers:YES];
+    else if(first && last)
+    {
+        //only process data but *don't* inform handlers of new data because it is still partial
+        BOOL newUpdated = [me handleItems:[iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:iqNode.fromUser updated:[updated boolValue] informHandlers:NO];
+        XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqGetType to:jid];
+        [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"items" withAttributes:@{@"node": node} andChildren:queryItems andData:nil],
+            [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"after" withAttributes:@{} andChildren:@[] andData:last]
+            ] andData:nil]
+        ] andData:nil]];
+        [account sendIq:query withDelegate:[self class] andMethod:@selector(handleRefreshResultFor:withIqNode:andUpdated:andNode:andJid:andQueryItems:) andAdditionalArguments:@[[NSNumber numberWithBool:newUpdated], jid, queryItems]];
+    }
 }
 
 //*** internal methods below
 
-//NOTE: this will be called for iq or message stanzas carrying pubsub data.
+//NOTE: this will be called for iq *or* message stanzas carrying pubsub data.
 //We don't need to persist our updated cache because xmpp.m will do that automatically after every handled stanza
--(void) handleItems:(MLXMLNode* _Nullable) items fromJid:(NSString* _Nullable) jid
+-(BOOL) handleItems:(MLXMLNode* _Nullable) items fromJid:(NSString* _Nullable) jid updated:(BOOL) updated informHandlers:(BOOL) informHandlers
 {
     if(!items)
     {
-        DDLogWarn(@"Got pubsub data without any items!");
-        return;
+        DDLogWarn(@"Got pubsub data without items node!");
+        return updated;
     }
     
     NSString* node = [items findFirst:@"/@node"];
-    BOOL updated = NO;
+    if(!node)
+    {
+        DDLogWarn(@"Got pubsub data without node attribute!");
+        return updated;
+    }
     DDLogDebug(@"Adding pubsub data from jid '%@' for node '%@' to our cache", jid, node);
+    NSMutableSet* idList = [[NSMutableSet alloc] init];
     @synchronized(_cache) {
         if(!_cache[node])
         {
@@ -212,19 +429,71 @@
             {
                 updated = YES;
                 _cache[node][@"data"][jid][itemId] = item;
+                [idList addObject:itemId];
             }
         }
     }
-    
-    //only call handlers for this node/jid combination if something has changed
-    if(updated)
+
+    //only call handlers for this node/jid combination if something has changed (and if we should do so)
+    if(informHandlers && updated)
     {
-        DDLogDebug(@"cached data got updated, calling handlers");
-        [self callHandlersForNode:node andJid:jid];
+        DDLogDebug(@"Cached data got updated, calling handlers");
+        [self callHandlersForNode:node andJid:jid andChangedIdList:idList];
     }
+    
+    return updated;
 }
 
--(void) callHandlersForNode:(NSString*) node andJid:(NSString*) jid
+//NOTE: this will be called for message stanzas carrying pubsub data.
+//We don't need to persist our updated cache because xmpp.m will do that automatically after every handled stanza
+-(BOOL) handleRetraction:(MLXMLNode* _Nullable) items fromJid:(NSString* _Nullable) jid updated:(BOOL) updated informHandlers:(BOOL) informHandlers
+{
+    if(!items)
+    {
+        DDLogWarn(@"Got pubsub data without items node!");
+        return updated;
+    }
+    
+    NSString* node = [items findFirst:@"/@node"];
+    if(!node)
+    {
+        DDLogWarn(@"Got pubsub data without node attribute!");
+        return updated;
+    }
+    DDLogDebug(@"Removing some pubsub items from jid '%@' for node '%@' from our cache", jid, node);
+    NSMutableSet* idList = [[NSMutableSet alloc] init];
+    @synchronized(_cache) {
+        if(!_cache[node] || !_cache[node][@"data"][jid])
+        {
+            DDLogInfo(@"Nothing in cache, nothing to delete");
+            return updated;
+        }
+        for(MLXMLNode* item in [items find:@"retract"])
+        {
+            NSString* itemId = [item findFirst:@"/@id"];
+            if(!itemId)
+                itemId = @"";
+            if(_cache[node][@"data"][jid][itemId])
+            {
+                DDLogDebug(@"Deleting pubsub item with id '%@' from jid '%@' for node '%@'", itemId, jid, node);
+                updated = YES;
+                [_cache[node][@"data"][jid] removeObjectForKey:itemId];
+                [idList addObject:itemId];
+            }
+        }
+    }
+
+    //only call handlers for this node/jid combination if something has changed (and if we should do so)
+    if(informHandlers && updated)
+    {
+        DDLogDebug(@"Cached data got updated, calling handlers");
+        [self callHandlersForNode:node andJid:jid andChangedIdList:idList];
+    }
+    
+    return updated;
+}
+
+-(void) callHandlersForNode:(NSString*) node andJid:(NSString*) jid andChangedIdList:(NSSet*) changedIdList
 {
     DDLogInfo(@"Calling pubsub handlers for node '%@' (and jid '%@')", node, jid);
     @synchronized(_cache) {
@@ -238,9 +507,9 @@
         {
             DDLogDebug(@"Calling pubsub handlers: %@", _handlers[node]);
             if(_handlers[node][jid])
-                ((monal_pubsub_handler_t)_handlers[node][jid])([self getCachedDataForNode:node andBareJid:jid], jid);
+                ((monal_pubsub_handler_t)_handlers[node][jid])([self getCachedDataForNode:node andBareJid:jid], jid, changedIdList);
             if(_handlers[node][@""])
-                ((monal_pubsub_handler_t)_handlers[node][@""])([self getCachedDataForNode:node andBareJid:jid], jid);
+                ((monal_pubsub_handler_t)_handlers[node][@""])([self getCachedDataForNode:node andBareJid:jid], jid, changedIdList);
             DDLogDebug(@"All pubsub handlers called");
         }
     }

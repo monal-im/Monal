@@ -580,7 +580,7 @@ static const size_t MAX_OMEMO_KEYS = 120;
     [itemNode addChild:listNode];
 
     // publish devices via pubsub
-    [self.xmppConnection.pubsub publish:@[itemNode] onNode:@"eu.siacs.conversations.axolotl.devicelist"];
+    [self.xmppConnection.pubsub publishItems:@[itemNode] onNode:@"eu.siacs.conversations.axolotl.devicelist"];
 }
 
 /**
@@ -627,7 +627,7 @@ static const size_t MAX_OMEMO_KEYS = 120;
     [itemNode addChild:bundle];
 
     // send bundle via pubsub interface
-    [self.xmppConnection.pubsub publish:@[itemNode] onNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%u", deviceid]];
+    [self.xmppConnection.pubsub publishItems:@[itemNode] onNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%u", deviceid]];
 }
 
 @end

@@ -16,8 +16,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void (^monal_pubsub_handler_t)(NSDictionary* _Nonnull items, NSString* _Nonnull jid);
-typedef void (^monal_pubsub_fetch_completion_t)(BOOL success, XMPPIQ* _Nonnull rawResponse);
+typedef void (^monal_pubsub_handler_t)(NSDictionary* _Nonnull items, NSString* _Nonnull jid, NSSet* _Nonnull changedIdList);
+typedef void (^monal_pubsub_fetch_completion_t)(BOOL success, id additionalData);
 
 @interface MLPubSub : NSObject
 {
@@ -29,15 +29,23 @@ typedef void (^monal_pubsub_fetch_completion_t)(BOOL success, XMPPIQ* _Nonnull r
 -(void) unregisterInterestForNode:(NSString* _Nonnull) node;
 -(void) registerForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nullable) jid withHandler:(monal_pubsub_handler_t) handler;
 -(void) unregisterForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nullable) jid;
+
 -(NSDictionary* _Nonnull) getCachedDataForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid;
--(void) forceRefreshForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid withCompletion:(monal_pubsub_fetch_completion_t _Nullable) completion;
--(void) publish:(NSArray* _Nonnull) items onNode:(NSString* _Nonnull) node;
+-(void) forceRefreshForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid andItemsList:(NSArray* _Nonnull) itemsList withCompletion:(monal_pubsub_fetch_completion_t _Nullable) completion;
+-(void) forceRefreshForPersistentNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid andItemsList:(NSArray* _Nonnull) itemsList;
+
+-(void) publishItems:(NSArray* _Nonnull) items onNode:(NSString* _Nonnull) node;
+-(void) retractItemsWithIds:(NSArray* _Nonnull) itemIds onNode:(NSString* _Nonnull) node;
+-(void) purgeNode:(NSString* _Nonnull) node;
+-(void) deleteNode:(NSString* _Nonnull) node;
+
 
 //methods internal to our framework
 -(NSDictionary*) getInternalData;
 -(void) setInternalData:(NSDictionary* _Nonnull) data;
 -(void) invalidateCache;
 -(void) handleHeadlineMessage:(XMPPMessage* _Nonnull) messageNode;
++(void) handleRefreshResultFor:(xmpp*) account withIqNode:(XMPPIQ*) iqNode andUpdated:(NSNumber*) updated andNode:(NSString*) node andJid:(NSString*) jid andQueryItems:(NSMutableArray*) queryItems;
 
 @end
 

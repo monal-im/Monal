@@ -3210,7 +3210,7 @@ NSString *const kXMPPPresence = @"presence";
     [self.pubsub registerInterestForNode:@"urn:xmpp:avatar:metadata"];
     
     //register handler for avatar metadata coming from *any* jid
-    [self.pubsub registerForNode:@"urn:xmpp:avatar:metadata" andBareJid:nil withHandler:^(NSDictionary* items, NSString* jid) {
+    [self.pubsub registerForNode:@"urn:xmpp:avatar:metadata" andBareJid:nil withHandler:^(NSDictionary* items, NSString* jid, NSSet* changedIdList) {
         DDLogDebug(@"Got new avatar metadata from '%@'", jid);
         for(NSString* entry in items)
         {
@@ -3233,12 +3233,12 @@ NSString *const kXMPPPresence = @"presence";
                 if(![self updateAvatarWithHash:avatarHash andJid:jid])
                 {
                     DDLogInfo(@"Fetching new avatar data for hash '%@' and jid '%@'", avatarHash, jid);
-                    [self.pubsub forceRefreshForNode:@"urn:xmpp:avatar:data" andBareJid:jid withCompletion:^(BOOL success, XMPPIQ* rawResponse) {
+                    [self.pubsub forceRefreshForNode:@"urn:xmpp:avatar:data" andBareJid:jid andItemsList:@[avatarHash] withCompletion:^(BOOL success, id additionalData) {
                         //ignore errors here (e.g. simply don't update the avatar image)
                         //(this should never happen if other clients and servers behave properly)
                         if(!success)
                         {
-                            DDLogError(@"Got avatar image fetch error: %@", rawResponse);
+                            DDLogError(@"Got avatar image fetch error: %@", additionalData);
                             return;
                         }
                         //ignore if the avatar data can not be found (should never happen if other clients behave properly)

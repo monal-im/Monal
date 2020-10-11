@@ -21,6 +21,7 @@
 
 static NSRegularExpression* pathSplitterRegex;
 static NSRegularExpression* componentParserRegex;
+static NSRegularExpression* attributeFilterRegex;
 
 #ifdef QueryStatistics
     static NSMutableDictionary* statistics;
@@ -35,7 +36,8 @@ static NSRegularExpression* componentParserRegex;
     
     //compile regexes only once (see https://unicode-org.github.io/icu/userguide/strings/regexp.html for syntax)
     pathSplitterRegex = [NSRegularExpression regularExpressionWithPattern:@"^((\\{[^}]+\\})?([^/]+))?(/.*)?" options:NSRegularExpressionCaseInsensitive error:nil];
-    componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?(\\<([^=]+)=([^>]+)\\>)?((@[a-zA-Z0-9_:-]+|@@|#|\\$)(\\|(bool|int|float|datetime|base64))?)?" options:NSRegularExpressionCaseInsensitive error:nil];
+    componentParserRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\{(\\*|[^}]+)\\})?([!a-zA-Z0-9_:-]+|\\*|\\.\\.)?((\\<[^=]+=[^>]+\\>)*)((@[a-zA-Z0-9_:-]+|@@|#|\\$)(\\|(bool|int|float|datetime|base64))?)?" options:NSRegularExpressionCaseInsensitive error:nil];
+    attributeFilterRegex = [NSRegularExpression regularExpressionWithPattern:@"\\<([^=]+)=([^>]+)\\>" options:NSRegularExpressionCaseInsensitive error:nil];
 
 //     testcases for stanza
 //     <stream:features><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'><mechanism>SCRAM-SHA-1</mechanism><mechanism>PLAIN</mechanism><mechanism>SCRAM-SHA-1-PLUS</mechanism></mechanisms></stream:features>
@@ -350,12 +352,22 @@ static NSRegularExpression* componentParserRegex;
             ) &&
             (!parsedEntry[@"namespace"] || [parsedEntry[@"namespace"] isEqualToString:node.attributes[@"xmlns"]])
         ) {
-            //check for attribute filter (if given)
-            if(parsedEntry[@"attributeFilter"] && node.attributes[parsedEntry[@"attributeFilter"][@"name"]])
+            //check for attribute filters (if given)
+            if(parsedEntry[@"attributeFilters"] && [parsedEntry[@"attributeFilters"] count])
             {
-                NSArray* matches = [parsedEntry[@"attributeFilter"][@"value"] matchesInString:node.attributes[parsedEntry[@"attributeFilter"][@"name"]] options:0 range:NSMakeRange(0, [node.attributes[parsedEntry[@"attributeFilter"][@"name"]] length])];
-                if(![matches count])
-                    continue;       //this node does *not* fullfill the attribute filter regex
+                BOOL ok = YES;
+                for(NSDictionary* filter in parsedEntry[@"attributeFilters"])
+                    if(node.attributes[filter[@"name"]])
+                    {
+                        NSArray* matches = [filter[@"value"] matchesInString:node.attributes[filter[@"name"]] options:0 range:NSMakeRange(0, [node.attributes[filter[@"name"]] length])];
+                        if(![matches count])
+                        {
+                            ok = NO;        //this node does *not* fullfill the attribute filter regex
+                            break;
+                        }
+                    }
+                if(!ok)
+                    continue;               //this node does *not* fullfill the attribute filter regex
             }
             //check if we should process an extraction command (only allowed if we're at the end of the query)
             if(parsedEntry[@"extractionCommand"])
@@ -458,31 +470,42 @@ static NSRegularExpression* componentParserRegex;
     NSTextCheckingResult* match = matches.firstObject;
     NSRange namespaceRange = [match rangeAtIndex:2];
     NSRange elementNameRange = [match rangeAtIndex:3];
-    NSRange attributeFilterNameRange = [match rangeAtIndex:5];
-    NSRange attributeFilterValueRange = [match rangeAtIndex:6];
-    NSRange extractionCommandRange = [match rangeAtIndex:8];
-    NSRange conversionCommandRange = [match rangeAtIndex:10];
+    NSRange attributeFilterRange = [match rangeAtIndex:4];
+    NSRange extractionCommandRange = [match rangeAtIndex:7];
+    NSRange conversionCommandRange = [match rangeAtIndex:9];
     if(namespaceRange.location != NSNotFound)
         retval[@"namespace"] = [entry substringWithRange:namespaceRange];
     if(elementNameRange.location != NSNotFound)
         retval[@"elementName"] = [entry substringWithRange:elementNameRange];
-    if(attributeFilterNameRange.location != NSNotFound && attributeFilterValueRange.location != NSNotFound)
+    if(attributeFilterRange.location != NSNotFound && attributeFilterRange.length > 0)
     {
-        NSString* attributeFilterName = [entry substringWithRange:attributeFilterNameRange];
-        NSString* attributeFilterValue = [entry substringWithRange:attributeFilterValueRange];
-        NSError* error;
-        retval[@"attributeFilter"] = @{
-            @"name": attributeFilterName,
-            //this regex will be cached in parsed form in the local cache of this method
-            @"value": [NSRegularExpression regularExpressionWithPattern:attributeFilterValue options:NSRegularExpressionCaseInsensitive error:&error]
-        };
-        if(error)
-            @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Attribute filter regex can not be compiled!" userInfo:@{
-                @"node": self,
-                @"filterName": attributeFilterName,
-                @"filterValue": attributeFilterValue,
-                @"error": error
+        retval[@"attributeFilters"] = [[NSMutableArray alloc] init];
+        NSString* atrributeFilters = [entry substringWithRange:attributeFilterRange];
+        NSArray* attributeFilterMatches = [attributeFilterRegex matchesInString:atrributeFilters options:0 range:NSMakeRange(0, [atrributeFilters length])];
+        for(NSTextCheckingResult* attributeFilterMatch in attributeFilterMatches)
+        {
+            NSRange attributeFilterNameRange = [attributeFilterMatch rangeAtIndex:1];
+            NSRange attributeFilterValueRange = [attributeFilterMatch rangeAtIndex:2];
+            if(attributeFilterNameRange.location == NSNotFound || attributeFilterValueRange.location == NSNotFound)
+                continue;       //ignore incomplete matches
+            
+            NSString* attributeFilterName = [atrributeFilters substringWithRange:attributeFilterNameRange];
+            NSString* attributeFilterValue = [atrributeFilters substringWithRange:attributeFilterValueRange];
+            NSError* error;
+            [retval[@"attributeFilters"] addObject:@{
+                @"name": attributeFilterName,
+                //this regex will be cached in parsed form in the local cache of this method
+                @"value": [NSRegularExpression regularExpressionWithPattern:attributeFilterValue options:NSRegularExpressionCaseInsensitive error:&error]
             }];
+            if(error)
+                @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Attribute filter regex can not be compiled!" userInfo:@{
+                    @"node": self,
+                    @"queryEntry": entry,
+                    @"filterName": attributeFilterName,
+                    @"filterValue": attributeFilterValue,
+                    @"error": error
+                }];
+        }
     }
     if(extractionCommandRange.location != NSNotFound)
     {

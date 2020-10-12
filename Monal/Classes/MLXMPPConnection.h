@@ -27,12 +27,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 
 //server details
-@property (nonatomic, strong) NSSet *serverFeatures;
+@property (nonatomic, strong) NSSet* _Nullable serverFeatures;
 
 @property (nonatomic, strong)  NSMutableArray* _Nullable discoveredServices;
-@property (nonatomic, strong)  NSString* uploadServer;
+@property (nonatomic, strong)  NSString* _Nullable uploadServer;
 
-@property (nonatomic, strong)  NSString* conferenceServer;
+@property (nonatomic, strong)  NSString* _Nullable conferenceServer;
 
 @property (nonatomic, assign) BOOL supportsHTTPUpload;
 // client state
@@ -51,7 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL supportsPubSub;
 
 
--(id) initWithServer:(MLXMPPServer *) server andIdentity:(MLXMPPIdentity *) identity;
+-(id) initWithServer:(MLXMPPServer*) server andIdentity:(MLXMPPIdentity*) identity;
 
 @end
 

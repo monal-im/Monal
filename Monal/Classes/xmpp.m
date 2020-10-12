@@ -1187,7 +1187,7 @@ NSString *const kXMPPPresence = @"presence";
         }
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}a"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
         {
-            NSString* h = [parsedStanza findFirst:@"/@h|int"];
+            NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
             if(!h)
                 return [self invalidXMLError];
             
@@ -1452,10 +1452,10 @@ NSString *const kXMPPPresence = @"presence";
                     [inv setSelector:sel];
                     //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
                     NSInteger idx = 2;
-                    [inv setArgument:&self atIndex:idx++];
+                    [inv setArgument:(void* _Nonnull)&self atIndex:idx++];
                     [inv setArgument:&iqNode atIndex:idx++];
                     for(id arg in _iqHandlers[[iqNode findFirst:@"/@id"]][@"arguments"])
-                        [inv setArgument:&arg atIndex:idx++];
+                        [inv setArgument:(void* _Nonnull)&arg atIndex:idx++];
                     [inv invoke];
                 }
                 
@@ -1513,7 +1513,7 @@ NSString *const kXMPPPresence = @"presence";
         }
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}resumed"] && self.connectionProperties.supportsSM3 && self.accountState<kStateBound)
         {
-            NSString* h = [parsedStanza findFirst:@"/@h|int"];
+            NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
             if(!h)
                 return [self invalidXMLError];
             
@@ -1546,10 +1546,12 @@ NSString *const kXMPPPresence = @"presence";
                 //request an ack to accomplish this if stanza replay did not already trigger one (smacksRequestInFlight is false if replay did not trigger one)
                 if(!self.smacksRequestInFlight)
                     [self requestSMAck:YES];    //force sending of the request even if the smacks queue is empty (needed to always trigger the smacks handler below after 1 RTT)
+                weakify(self);
                 [self addSmacksHandler:^{
-                    if(!_catchupDone)
+                    strongify(self);
+                    if(!self->_catchupDone)
                     {
-                        _catchupDone = YES;
+                        self->_catchupDone = YES;
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
                     }
                 }];
@@ -1566,7 +1568,7 @@ NSString *const kXMPPPresence = @"presence";
                 //invalidate stream id
                 self.streamID = nil;
                 //get h value, if server supports smacks revision 1.5.2
-                NSString* h = [parsedStanza findFirst:@"/@h|int"];
+                NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
                 DDLogInfo(@"++++++++++++++++++++++++ failed resume: h=%@", h);
                 if(h)
                     [self removeAckedStanzasFromQueue:h];
@@ -2260,9 +2262,9 @@ NSString *const kXMPPPresence = @"presence";
             [inv setSelector:sel];
             //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
             NSInteger idx = 2;
-            [inv setArgument:&self atIndex:idx++];
+            [inv setArgument:(void* _Nonnull)&self atIndex:idx++];
             for(id arg in data[@"arguments"])
-                [inv setArgument:&arg atIndex:idx++];
+                [inv setArgument:(void* _Nonnull)&arg atIndex:idx++];
             [inv invoke];
         }
     }];
@@ -3140,7 +3142,7 @@ NSString *const kXMPPPresence = @"presence";
     }
     else
     {
-        DDLogInfo(@"NOT enabling push: %@ < %@ (accountState: %d, supportsPush: %@)", self.pushNode, self.pushSecret, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
+        DDLogInfo(@"NOT enabling push: %@ < %@ (accountState: %ld, supportsPush: %@)", self.pushNode, self.pushSecret, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
     }
 }
 
@@ -3185,16 +3187,16 @@ NSString *const kXMPPPresence = @"presence";
 
 -(NSArray* _Nullable) getOrderedMamPageFor:(NSString* _Nonnull) mamQueryId
 {
-    NSMutableArray* array;
+    NSArray* array;
     @synchronized(_mamPageArrays) {
         if(!_mamPageArrays[mamQueryId])
             return @[];     //return empty array if nothing can be found (after app crash etc.)
-        array = _mamPageArrays[mamQueryId];
+        array = [_mamPageArrays[mamQueryId] copy];          //this creates an unmutable array from the mutable one
         [_mamPageArrays removeObjectForKey:mamQueryId];
     }
     if([mamQueryId hasPrefix:@"MLhistory:"])
         array = [[array reverseObjectEnumerator] allObjects];
-    return [array copy];        //this creates an unmutable array from the mutable one
+    return array;
 }
 
 -(void) handleAvatars

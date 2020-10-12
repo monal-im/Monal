@@ -60,7 +60,7 @@
     //sanity check
     //we are using @synchronized(_cache) for _configuredNodes here because all other parts accessing _configuredNodes are already synchronized via _cache, too
     @synchronized(_cache) {
-        if([_configuredNodes containsObject:node] == nil)
+        if(![_configuredNodes containsObject:node])
             DDLogWarn(@"POSSIBLE IMPLEMENTATION ERROR: Trying to register data handler for node '%@', but no interest was registered for this node using 'registerInterestForNode:withPersistentCaching:' first. This handler will only be called on manual data update!", node);
     }
     
@@ -123,7 +123,7 @@
     [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"items" withAttributes:@{@"node": node} andChildren:queryItems andData:nil]
     ] andData:nil]];
-    [_account sendIq:query withDelegate:[self class] andMethod:@selector(handleRefreshResultFor:withIqNode:andUpdated:andNode:andJid:andQueryItems:) andAdditionalArguments:@[[NSNumber numberWithBool:NO], jid, queryItems, handler]];
+    [_account sendIq:query withDelegate:[self class] andMethod:@selector(handleRefreshResultFor:withIqNode:andUpdated:andNode:andJid:andQueryItems:andHandler:) andAdditionalArguments:@[[NSNumber numberWithBool:NO], jid, queryItems, handler]];
 }
 
 +(void) handleRefreshResultFor:(xmpp*) account withIqNode:(XMPPIQ*) iqNode andUpdated:(NSNumber*) updated andNode:(NSString*) node andJid:(NSString*) jid andQueryItems:(NSMutableArray*) queryItems andHandler:(NSDictionary*) handler
@@ -144,7 +144,7 @@
         [inv setArgument:&account atIndex:idx++];
         [inv setArgument:&jid atIndex:idx++];
         [inv setArgument:&iqNode atIndex:idx++];            //passing this MLXMLNode means "an error occured"
-        for(id arg in handler[@"arguments"])
+        for(id _Nonnull arg in handler[@"arguments"])
             [inv setArgument:&arg atIndex:idx++];
         [inv invoke];
     }
@@ -170,7 +170,7 @@
         [inv setArgument:&jid atIndex:idx++];
         MLXMLNode* nilPointer = nil;
         [inv setArgument:&nilPointer atIndex:idx++];        //nil pointer means "no error occured"
-        for(id arg in handler[@"arguments"])
+        for(id _Nonnull arg in handler[@"arguments"])
             [inv setArgument:&arg atIndex:idx++];
         [inv invoke];
     }
@@ -185,7 +185,7 @@
                 [[MLXMLNode alloc] initWithElement:@"after" withAttributes:@{} andChildren:@[] andData:last]
             ] andData:nil]
         ] andData:nil]];
-        [account sendIq:query withDelegate:[self class] andMethod:@selector(handleRefreshResultFor:withIqNode:andUpdated:andNode:andJid:andQueryItems:) andAdditionalArguments:@[[NSNumber numberWithBool:newUpdated], jid, queryItems]];
+        [account sendIq:query withDelegate:[self class] andMethod:@selector(handleRefreshResultFor:withIqNode:andUpdated:andNode:andJid:andQueryItems:andHandler:) andAdditionalArguments:@[[NSNumber numberWithBool:newUpdated], jid, queryItems]];
     }
 }
 

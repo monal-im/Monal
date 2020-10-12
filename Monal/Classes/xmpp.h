@@ -247,11 +247,6 @@ Decline a call request
  */
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) jid;
 
-/**
- An intentional disconnect to trigger APNS. does not close the stream.
- */
--(void) disconnectToResumeWithCompletion:(void (^)(void))completion;
-
 
 #pragma mark - account management
 

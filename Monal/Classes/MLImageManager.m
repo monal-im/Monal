@@ -119,7 +119,7 @@
     return [NSString stringWithFormat:@"%@.png", [contact lowercaseString]];;
 }
 
--(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSData*) data
+-(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSData* _Nullable) data
 {
     //documents directory/buddyicons/account no/contact
     

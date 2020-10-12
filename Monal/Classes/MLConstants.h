@@ -19,10 +19,20 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 #define kAppGroup @"group.monal"
 
 
-// some typedefs used throughout the project
+//some typedefs used throughout the project
 typedef void (^contactCompletion)(MLContact *selectedContact);
 typedef void (^accountCompletion)(NSInteger accountRow);
 typedef void (^monal_void_block_t)(void);
+typedef enum NotificationPrivacySettingOption {
+    DisplayNameAndMessage,
+    DisplayOnlyName,
+    DisplayOnlyPlaceholder
+} NotificationPrivacySettingOption;
+
+
+//some useful macros
+#define weakify(var) __weak typeof(var) AHKWeak_##var = var;
+#define strongify(var) _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wshadow\"") __strong typeof(var) var = AHKWeak_##var; _Pragma("clang diagnostic pop")
 
 
 //some xmpp related constants
@@ -104,8 +114,4 @@ typedef void (^monal_void_block_t)(void);
 //#define QueryStatistics 1
 
 
-typedef enum NotificationPrivacySettingOption {
-    DisplayNameAndMessage,
-    DisplayOnlyName,
-    DisplayOnlyPlaceholder
-} NotificationPrivacySettingOption;
+

@@ -14,8 +14,6 @@
 @class xmpp;
 @class XMPPMessage;
 
-NS_ASSUME_NONNULL_BEGIN
-
 typedef void (^monal_pubsub_handler_t)(NSDictionary* _Nonnull items, NSString* _Nonnull jid, NSSet* _Nonnull changedIdList);
 typedef void (^monal_pubsub_fetch_completion_t)(BOOL success, id additionalData);
 
@@ -51,5 +49,3 @@ typedef void (^monal_pubsub_fetch_completion_t)(BOOL success, id additionalData)
 +(void) handleRefreshResultFor:(xmpp*) account withIqNode:(XMPPIQ*) iqNode andUpdated:(NSNumber*) updated andNode:(NSString*) node andJid:(NSString*) jid andQueryItems:(NSMutableArray*) queryItems andHandler:(NSDictionary*) handler;
 
 @end
-
-NS_ASSUME_NONNULL_END

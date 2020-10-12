@@ -149,22 +149,26 @@ NSString *const kXMPPPresence = @"presence";
 
 -(id) initWithServer:(nonnull MLXMPPServer *) server andIdentity:(nonnull MLXMPPIdentity *)identity andAccountNo:(NSString*) accountNo
 {
+    //initialize ivars depending on provided arguments
     self = [super init];
     self.accountNo = accountNo;
     self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];
     
-    //setup ivars
+    //setup all other ivars
     [self setupObjects];
     
-    //read persisted state to make sure we never operate stateless
-    //WARNING: pubsub node registrations should only be made *after* the first readState call
-    [self readState];
-    
-    // Init omemo
-    self.omemo = [[MLOMEMO alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid ressource:self.connectionProperties.identity.resource connectionProps:self.connectionProperties xmppConnection:self];
-    
-    //pubsub avatar handling (XEP-0084)
-    [self handleAvatars];
+    //make sure the rest of our initialization is done on the freshly created (and thus empty) receive queue
+    [self dispatchOnReceiveQueue:^{
+        //read persisted state to make sure we never operate stateless
+        //WARNING: pubsub node registrations should only be made *after* the first readState call
+        [self readState];
+        
+        // Init omemo
+        self.omemo = [[MLOMEMO alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid ressource:self.connectionProperties.identity.resource connectionProps:self.connectionProperties xmppConnection:self];
+        
+        //pubsub avatar handling (XEP-0084)
+        [self handleAvatars];
+    }];
     
     return self;
 }

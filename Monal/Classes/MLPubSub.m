@@ -79,11 +79,6 @@
     if(!_handlers[node])
         _handlers[node] = [[NSMutableDictionary alloc] init];
     _handlers[node][jid] = handler;
-    
-    //call handlers directly (will only be done if we already have some cached data available)
-    if(_cache[node])
-        for(NSString* jidEntry in _cache[node][@"data"])
-            [self callHandlersForNode:node andJid:jidEntry andChangedIdList:[[NSSet alloc] init]];
 }
 
 -(void) unregisterForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nullable) jid

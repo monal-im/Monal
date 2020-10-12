@@ -1001,10 +1001,12 @@ NSString *const kXMPPPresence = @"presence";
 -(void) addSmacksHandler:(monal_void_block_t) handler forValue:(NSNumber*) value
 {
     @synchronized(_smacksLockObject) {
-        if([value integerValue]<[self.lastOutboundStanza integerValue])
+        if([value integerValue] < [self.lastOutboundStanza integerValue])
         {
-            DDLogError(@"adding smacks handler for value *SMALLER* than current self.lastOutboundStanza, this handler will *never* be triggered!");
-            return;
+            @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Trying to add smacks handler for value *SMALLER* than current self.lastOutboundStanza, this handler would *never* be triggered!" userInfo:@{
+                @"lastOutboundStanza": self.lastOutboundStanza,
+                @"value": value,
+            }];
         }
         NSDictionary* dic = @{@"value":value, @"handler":handler};
         [_smacksAckHandler addObject:dic];
@@ -1014,6 +1016,7 @@ NSString *const kXMPPPresence = @"presence";
 -(void) resendUnackedStanzas
 {
     @synchronized(_smacksLockObject) {
+        DDLogInfo(@"Resending unacked stanzas...");
         NSMutableArray* sendCopy = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
         //remove all stanzas from queue and correct the lastOutboundStanza counter accordingly
         self.lastOutboundStanza = [NSNumber numberWithInteger:[self.lastOutboundStanza integerValue] - [self.unAckedStanzas count]];
@@ -1033,6 +1036,7 @@ NSString *const kXMPPPresence = @"presence";
     if(stanzas)
     {
         @synchronized(_smacksLockObject) {
+            DDLogWarn(@"Resending unacked message stanzas only...");
             NSMutableArray* sendCopy = [[NSMutableArray alloc] initWithArray:stanzas];
             //clear queue because we don't want to repeat resending these stanzas later if the var stanzas points to self.unAckedStanzas here
             [stanzas removeAllObjects];

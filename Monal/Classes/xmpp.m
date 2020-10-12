@@ -93,7 +93,7 @@ NSString *const kXMPPPresence = @"presence";
     BOOL _catchupDone;
     double _exponentialBackoff;
     BOOL _reconnectInProgress;
-    NSObject* _smacksLockObject;     //only used for @synchronized() blocks
+    NSObject* _stateLockObject;     //only used for @synchronized() blocks
     BOOL _lastIdleState;
     NSMutableDictionary* _mamPageArrays;
     
@@ -157,7 +157,7 @@ NSString *const kXMPPPresence = @"presence";
     [self setupObjects];
     
     //read persisted state to make sure we never operate stateless
-    //WARNING: pubsub node registrations can only be made *after* the first readState call
+    //WARNING: pubsub node registrations should only be made *after* the first readState call
     [self readState];
     
     // Init omemo
@@ -184,7 +184,7 @@ NSString *const kXMPPPresence = @"presence";
     //init pubsub as early as possible to allow other classes or other parts of this file to register pubsub nodes they are interested in
     self.pubsub = [[MLPubSub alloc] initWithAccount:self];
     
-    _smacksLockObject = [[NSObject alloc] init];
+    _stateLockObject = [[NSObject alloc] init];
     [self initSM3];
     
     _accountState = kStateLoggedOut;
@@ -266,7 +266,9 @@ NSString *const kXMPPPresence = @"presence";
     {
         DDLogInfo(@"New caps hash: %@", hash);
         _capsHash = hash;
-        [self sendPresence];        //broadcast new version hash (will be ignored if we are not bound)
+        //broadcast new version hash (will be ignored if we are not bound)
+        if(_accountState >= kStateBound)
+            [self sendPresence];
     }
 }
 
@@ -282,8 +284,11 @@ NSString *const kXMPPPresence = @"presence";
     _capsFeatures = featuresSet;
     [self setCapsHash:[HelperTools getEntityCapsHashForIdentities:@[client] andFeatures:_capsFeatures]];
     
-    //the pubsub implementation changed state --> persist these changes
-    [self persistState];
+    //the pubsub implementation changed state --> persist these changes if we are bound
+    //we can ignore state changes before we are bound because those will not broadcast any presences nor receive any data
+    //or change the pubsub cache/state in any other way
+    if(_accountState >= kStateBound)
+        [self persistState];
 }
 
 -(void) invalidXMLError
@@ -355,9 +360,9 @@ NSString *const kXMPPPresence = @"presence";
     //we are idle when we are not connected (and not trying to)
     //or: the catchup is done, no unacked stanzas are left in the smacks queue and receive and send queues are empty (no pending operations)
     unsigned long unackedCount = 0;
-    @synchronized(_smacksLockObject) {
+    @synchronized(_stateLockObject) {
         unackedCount = (unsigned long)[self.unAckedStanzas count];
-    };
+    }
     if(
         (
             //test if this account was permanently logged out but still has stanzas pending (this can happen if we have no connectivity for example)
@@ -697,7 +702,7 @@ NSString *const kXMPPPresence = @"presence";
                 [self writeToStream:stream.XMLString]; // dont even bother queueing
             }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
 
-            @synchronized(_smacksLockObject) {
+            @synchronized(_stateLockObject) {
                 //preserve unAckedStanzas even on explicitLogout and resend them on next connect
                 //if we don't do this, messages could get lost when logging out directly after sending them
                 //and: sending messages twice is less intrusive than silently loosing them
@@ -993,14 +998,14 @@ NSString *const kXMPPPresence = @"presence";
 #pragma mark message ACK
 -(void) addSmacksHandler:(monal_void_block_t) handler
 {
-    @synchronized(_smacksLockObject) {
+    @synchronized(_stateLockObject) {
         [self addSmacksHandler:handler forValue:self.lastOutboundStanza];
     }
 }
 
 -(void) addSmacksHandler:(monal_void_block_t) handler forValue:(NSNumber*) value
 {
-    @synchronized(_smacksLockObject) {
+    @synchronized(_stateLockObject) {
         if([value integerValue] < [self.lastOutboundStanza integerValue])
         {
             @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Trying to add smacks handler for value *SMALLER* than current self.lastOutboundStanza, this handler would *never* be triggered!" userInfo:@{
@@ -1015,7 +1020,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) resendUnackedStanzas
 {
-    @synchronized(_smacksLockObject) {
+    @synchronized(_stateLockObject) {
         DDLogInfo(@"Resending unacked stanzas...");
         NSMutableArray* sendCopy = [[NSMutableArray alloc] initWithArray:self.unAckedStanzas];
         //remove all stanzas from queue and correct the lastOutboundStanza counter accordingly
@@ -1035,7 +1040,7 @@ NSString *const kXMPPPresence = @"presence";
 {
     if(stanzas)
     {
-        @synchronized(_smacksLockObject) {
+        @synchronized(_stateLockObject) {
             DDLogWarn(@"Resending unacked message stanzas only...");
             NSMutableArray* sendCopy = [[NSMutableArray alloc] initWithArray:stanzas];
             //clear queue because we don't want to repeat resending these stanzas later if the var stanzas points to self.unAckedStanzas here
@@ -1056,7 +1061,7 @@ NSString *const kXMPPPresence = @"presence";
 -(void) removeAckedStanzasFromQueue:(NSNumber*) hvalue
 {
     NSMutableArray* ackHandlerToCall;
-    @synchronized(_smacksLockObject) {
+    @synchronized(_stateLockObject) {
         self.lastHandledOutboundStanza = hvalue;
         if([self.unAckedStanzas count]>0)
         {
@@ -1108,7 +1113,7 @@ NSString *const kXMPPPresence = @"presence";
 {
     //caution: this could be called from sendQueue, too!
     MLXMLNode* rNode;
-    @synchronized(_smacksLockObject) {
+    @synchronized(_stateLockObject) {
         unsigned long unackedCount = (unsigned long)[self.unAckedStanzas count];
         NSDictionary* dic = @{
             @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
@@ -1145,7 +1150,7 @@ NSString *const kXMPPPresence = @"presence";
     {
         unsigned long unackedCount = 0;
         NSDictionary* dic;
-        @synchronized(_smacksLockObject) {
+        @synchronized(_stateLockObject) {
             unackedCount = (unsigned long)[self.unAckedStanzas count];
             dic = @{
                 @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
@@ -1162,20 +1167,6 @@ NSString *const kXMPPPresence = @"presence";
             [self writeToStream:[aNode XMLString]];		// dont even bother queueing
     }
 }
-
--(void) stanzaHandled:(XMPPStanza* _Nonnull) stanza
-{
-    if(self.connectionProperties.supportsSM3)
-    {
-        //this will count any stanza between our bind result and smacks enable result but gets reset to sane values
-        //once the smacks enable result surfaces (e.g. the wrong counting will be ignored later)
-        if(self.accountState>=kStateBound)
-            [self incrementLastHandledStanza];
-    }
-    else
-        [self persistState];        //make sure we persist our sate, even if smacks is not supported
-}
-
 
 #pragma mark - stanza handling
 
@@ -1196,7 +1187,7 @@ NSString *const kXMPPPresence = @"presence";
             if(!h)
                 return [self invalidXMLError];
             
-            @synchronized(_smacksLockObject) {
+            @synchronized(_stateLockObject) {
                 //remove acked messages
                 [self removeAckedStanzasFromQueue:h];
 
@@ -1251,7 +1242,7 @@ NSString *const kXMPPPresence = @"presence";
 
                     if([[presenceNode findFirst:@"/@type"] isEqualToString:kpresenceUnavailable])
                     {
-                        [self stanzaHandled:presenceNode];
+                        [self incrementLastHandledStanza];
                         //handle this differently later
                         return;
                     }
@@ -1341,7 +1332,7 @@ NSString *const kXMPPPresence = @"presence";
             }
             
             //only mark stanza as handled *after* processing it
-            [self stanzaHandled:presenceNode];
+            [self incrementLastHandledStanza];
         }
         else if([parsedStanza check:@"/{jabber:client}message"])
         {
@@ -1417,7 +1408,7 @@ NSString *const kXMPPPresence = @"presence";
             }
             
             //only mark stanza as handled *after* processing it
-            [self stanzaHandled:messageNode];
+            [self incrementLastHandledStanza];
         }
         else if([parsedStanza check:@"/{jabber:client}iq"])
         {
@@ -1427,7 +1418,7 @@ NSString *const kXMPPPresence = @"presence";
             if(![parsedStanza check:@"/@id"] || ![parsedStanza check:@"/@type"])
             {
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
-                [self stanzaHandled:iqNode];
+                [self incrementLastHandledStanza];
                 return;
             }
             
@@ -1485,12 +1476,12 @@ NSString *const kXMPPPresence = @"presence";
             }
             
             //only mark stanza as handled *after* processing it
-            [self stanzaHandled:iqNode];
+            [self incrementLastHandledStanza];
         }
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}enabled"])
         {
             NSMutableArray* stanzas;
-            @synchronized(_smacksLockObject) {
+            @synchronized(_stateLockObject) {
                 //save old unAckedStanzas queue before it is cleared
                 stanzas = self.unAckedStanzas;
 
@@ -1530,7 +1521,7 @@ NSString *const kXMPPPresence = @"presence";
             _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
             _exponentialBackoff = 0;
 
-            @synchronized(_smacksLockObject) {
+            @synchronized(_stateLockObject) {
                 //remove already delivered stanzas and resend the (still) unacked ones
                 [self removeAckedStanzasFromQueue:h];
                 [self resendUnackedStanzas];
@@ -1545,7 +1536,7 @@ NSString *const kXMPPPresence = @"presence";
                 [self sendPresence];
             }
 
-            @synchronized(_smacksLockObject) {
+            @synchronized(_stateLockObject) {
                 //signal finished catchup if our current outgoing stanza counter is acked, this introduces an additional roundtrip to make sure
                 //all stanzas the *server* wanted to replay have been received, too
                 //request an ack to accomplish this if stanza replay did not already trigger one (smacksRequestInFlight is false if replay did not trigger one)
@@ -1567,7 +1558,7 @@ NSString *const kXMPPPresence = @"presence";
             //we landed here because smacks resume failed
             
             self.resuming = NO;
-            @synchronized(_smacksLockObject) {
+            @synchronized(_stateLockObject) {
                 //invalidate stream id
                 self.streamID = nil;
                 //get h value, if server supports smacks revision 1.5.2
@@ -1701,15 +1692,15 @@ NSString *const kXMPPPresence = @"presence";
                 if([parsedStanza check:@"{urn:xmpp:features:pre-approval}sub"])
                     self.connectionProperties.supportsRosterPreApproval = YES;
                 
-                //under rare circumstances/bugs the appex could have changed the smacks state *after* our connect method was called
-                //--> load newest saved smacks state to be up to date even in this case
-                [self readSmacksStateOnly];
-                //test if smacks is supported and allows resume
-                if(self.connectionProperties.supportsSM3 && self.streamID)
-                {
-                    NSDictionary* dic;
-                    @synchronized(_smacksLockObject) {
-                        dic = @{
+                MLXMLNode* resumeNode = nil;
+                @synchronized(_stateLockObject) {
+                    //under rare circumstances/bugs the appex could have changed the smacks state *after* our connect method was called
+                    //--> load newest saved smacks state to be up to date even in this case
+                    [self readSmacksStateOnly];
+                    //test if smacks is supported and allows resume
+                    if(self.connectionProperties.supportsSM3 && self.streamID)
+                    {
+                        NSDictionary* dic = @{
                             @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
                             @"previd":self.streamID,
                             
@@ -1718,13 +1709,15 @@ NSString *const kXMPPPresence = @"presence";
                             @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
                             @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", (unsigned long)[self.unAckedStanzas count]]
                         };
+                        resumeNode = [[MLXMLNode alloc] initWithElement:@"resume" andNamespace:@"urn:xmpp:sm:3" withAttributes:dic andChildren:@[] andData:nil];
+                        self.resuming = YES;      //this is needed to distinguish a failed smacks resume and a failed smacks enable later on
                     }
-                    MLXMLNode* resumeNode = [[MLXMLNode alloc] initWithElement:@"resume" andNamespace:@"urn:xmpp:sm:3" withAttributes:dic andChildren:@[] andData:nil];
-                    self.resuming = YES;      //this is needed to distinguish a failed smacks resume and a failed smacks enable later on
-                    [self send:resumeNode];
                 }
+                if(resumeNode)
+                    [self send:resumeNode];
                 else
                     [self bindResource:self.connectionProperties.identity.resource];
+                
             }
         }
         else
@@ -1835,13 +1828,13 @@ NSString *const kXMPPPresence = @"presence";
             if(![queued_stanza check:@"{urn:xmpp:delay}delay"])
                 [queued_stanza addDelayTagFrom:self.connectionProperties.identity.jid];
         }
-        @synchronized(_smacksLockObject) {
+        @synchronized(_stateLockObject) {
             DDLogVerbose(@"ADD UNACKED STANZA: %@: %@", self.lastOutboundStanza, queued_stanza);
             NSDictionary* dic = @{kQueueID:self.lastOutboundStanza, kStanza:queued_stanza};
             [self.unAckedStanzas addObject:dic];
             //increment for next call
             self.lastOutboundStanza = [NSNumber numberWithInteger:[self.lastOutboundStanza integerValue] + 1];
-            //persist these changes (this has to be synchronous because we want so persist sanzas to db before actually sending them)
+            //persist these changes (this has to be synchronous because we want so persist stanzas to db before actually sending them)
             [self persistState];
         }
     }
@@ -1921,62 +1914,60 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) persistState
 {
-    //state dictionary
-    NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
+    @synchronized(_stateLockObject) {
+        //state dictionary
+        NSMutableDictionary* values = [[NSMutableDictionary alloc] init];
 
-    //collect smacks state
-    @synchronized(_smacksLockObject) {
+        //collect smacks state
         [values setValue:self.lastHandledInboundStanza forKey:@"lastHandledInboundStanza"];
         [values setValue:self.lastHandledOutboundStanza forKey:@"lastHandledOutboundStanza"];
         [values setValue:self.lastOutboundStanza forKey:@"lastOutboundStanza"];
         [values setValue:[self.unAckedStanzas copy] forKey:@"unAckedStanzas"];
         [values setValue:self.streamID forKey:@"streamID"];
-    }
 
-    NSMutableDictionary* persistentIqHandlers = [[NSMutableDictionary alloc] init];
-    @synchronized(_iqHandlers) {
-        [_iqHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-            NSString* id = (NSString*)key;
-            NSDictionary* data = (NSDictionary*)obj;
-            //only serialize persistent handlers with delegate and method
-            if(data[@"delegate"] && data[@"method"])
-            {
-                DDLogVerbose(@"saving serialized iq handler for iq '%@'", id);
-                [persistentIqHandlers setObject:data forKey:id];
-            }
-        }];
-    }
-    [values setObject:persistentIqHandlers forKey:@"iqHandlers"];
+        NSMutableDictionary* persistentIqHandlers = [[NSMutableDictionary alloc] init];
+        @synchronized(_iqHandlers) {
+            [_iqHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+                NSString* id = (NSString*)key;
+                NSDictionary* data = (NSDictionary*)obj;
+                //only serialize persistent handlers with delegate and method
+                if(data[@"delegate"] && data[@"method"])
+                {
+                    DDLogVerbose(@"saving serialized iq handler for iq '%@'", id);
+                    [persistentIqHandlers setObject:data forKey:id];
+                }
+            }];
+        }
+        [values setObject:persistentIqHandlers forKey:@"iqHandlers"];
 
-    [values setValue:[self.connectionProperties.serverFeatures copy] forKey:@"serverFeatures"];
-    if(self.connectionProperties.uploadServer)
-        [values setObject:self.connectionProperties.uploadServer forKey:@"uploadServer"];
-    if(self.connectionProperties.conferenceServer)
-        [values setObject:self.connectionProperties.conferenceServer forKey:@"conferenceServer"];
-    
-    [values setObject:[self.pubsub getInternalData] forKey:@"pubsubData"];
-    [values setObject:[NSNumber numberWithBool:_loggedInOnce] forKey:@"loggedInOnce"];
-    [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
-    [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
-    [values setObject:[NSNumber numberWithBool:self.connectionProperties.pushEnabled] forKey:@"pushEnabled"];
-    [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
-    [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
-    [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
-    [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
-    [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
-    [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsRosterPreApproval] forKey:@"supportsRosterPreApproval"];
-    
-    if(self.connectionProperties.discoveredServices)
-        [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
+        [values setValue:[self.connectionProperties.serverFeatures copy] forKey:@"serverFeatures"];
+        if(self.connectionProperties.uploadServer)
+            [values setObject:self.connectionProperties.uploadServer forKey:@"uploadServer"];
+        if(self.connectionProperties.conferenceServer)
+            [values setObject:self.connectionProperties.conferenceServer forKey:@"conferenceServer"];
+        
+        [values setObject:[self.pubsub getInternalData] forKey:@"pubsubData"];
+        [values setObject:[NSNumber numberWithBool:_loggedInOnce] forKey:@"loggedInOnce"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.pushEnabled] forKey:@"pushEnabled"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsClientState] forKey:@"supportsClientState"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsMam2] forKey:@"supportsMAM"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPubSub] forKey:@"supportsPubSub"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsRosterPreApproval] forKey:@"supportsRosterPreApproval"];
+        
+        if(self.connectionProperties.discoveredServices)
+            [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
 
-    [values setObject:_lastInteractionDate forKey:@"lastInteractionDate"];
-    [values setValue:[NSDate date] forKey:@"stateSavedAt"];
+        [values setObject:_lastInteractionDate forKey:@"lastInteractionDate"];
+        [values setValue:[NSDate date] forKey:@"stateSavedAt"];
 
-    //save state dictionary
-    [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
+        //save state dictionary
+        [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
-    //debug output
-    @synchronized(_smacksLockObject) {
+        //debug output
         DDLogVerbose(@"persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d",
             values[@"stateSavedAt"],
             self.lastHandledInboundStanza,
@@ -1995,11 +1986,11 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) readSmacksStateOnly
 {
-    NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
-    if(dic)
-    {
-        //collect smacks state
-        @synchronized(_smacksLockObject) {
+    @synchronized(_stateLockObject) {
+        NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
+        if(dic)
+        {
+            //collect smacks state
             self.lastHandledInboundStanza = [dic objectForKey:@"lastHandledInboundStanza"];
             self.lastHandledOutboundStanza = [dic objectForKey:@"lastHandledOutboundStanza"];
             self.lastOutboundStanza = [dic objectForKey:@"lastOutboundStanza"];
@@ -2030,105 +2021,103 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) readState
 {
-    NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
-    if(dic)
-    {
-        //collect smacks state
-        @synchronized(_smacksLockObject) {
+    @synchronized(_stateLockObject) {
+        NSMutableDictionary* dic = [[DataLayer sharedInstance] readStateForAccount:self.accountNo];
+        if(dic)
+        {
+            //collect smacks state
             self.lastHandledInboundStanza = [dic objectForKey:@"lastHandledInboundStanza"];
             self.lastHandledOutboundStanza = [dic objectForKey:@"lastHandledOutboundStanza"];
             self.lastOutboundStanza = [dic objectForKey:@"lastOutboundStanza"];
             NSArray* stanzas = [dic objectForKey:@"unAckedStanzas"];
             self.unAckedStanzas = [stanzas mutableCopy];
             self.streamID = [dic objectForKey:@"streamID"];
-        }
-        
-        NSDictionary* persistentIqHandlers = [dic objectForKey:@"iqHandlers"];
-        @synchronized(_iqHandlers) {
-            [persistentIqHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-                NSString* id = (NSString*)key;
-                NSDictionary* data = (NSDictionary*)obj;
-                DDLogWarn(@"Reading serialized iq handler for iq id '%@': [%@ %@]", id, data[@"delegate"], data[@"method"]);
-                [_iqHandlers setObject:data forKey:id];
-            }];
-        }
-        
-        self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
-        self.connectionProperties.discoveredServices = [dic objectForKey:@"discoveredServices"];
+            
+            NSDictionary* persistentIqHandlers = [dic objectForKey:@"iqHandlers"];
+            @synchronized(_iqHandlers) {
+                [persistentIqHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+                    NSString* id = (NSString*)key;
+                    NSDictionary* data = (NSDictionary*)obj;
+                    DDLogWarn(@"Reading serialized iq handler for iq id '%@': [%@ %@]", id, data[@"delegate"], data[@"method"]);
+                    [_iqHandlers setObject:data forKey:id];
+                }];
+            }
+            
+            self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
+            self.connectionProperties.discoveredServices = [dic objectForKey:@"discoveredServices"];
 
-        self.connectionProperties.uploadServer = [dic objectForKey:@"uploadServer"];
-        if(self.connectionProperties.uploadServer)
-            self.connectionProperties.supportsHTTPUpload = YES;
-        self.connectionProperties.conferenceServer = [dic objectForKey:@"conferenceServer"];
+            self.connectionProperties.uploadServer = [dic objectForKey:@"uploadServer"];
+            if(self.connectionProperties.uploadServer)
+                self.connectionProperties.supportsHTTPUpload = YES;
+            self.connectionProperties.conferenceServer = [dic objectForKey:@"conferenceServer"];
 
-        if([dic objectForKey:@"pubsubData"])
-            [self.pubsub setInternalData:[dic objectForKey:@"pubsubData"]];
-        
-        if([dic objectForKey:@"loggedInOnce"])
-        {
-            NSNumber* loggedInOnce = [dic objectForKey:@"loggedInOnce"];
-            _loggedInOnce = loggedInOnce.boolValue;
-        }
+            if([dic objectForKey:@"pubsubData"])
+                [self.pubsub setInternalData:[dic objectForKey:@"pubsubData"]];
+            
+            if([dic objectForKey:@"loggedInOnce"])
+            {
+                NSNumber* loggedInOnce = [dic objectForKey:@"loggedInOnce"];
+                _loggedInOnce = loggedInOnce.boolValue;
+            }
 
-        if([dic objectForKey:@"usingCarbons2"])
-        {
-            NSNumber* carbonsNumber = [dic objectForKey:@"usingCarbons2"];
-            self.connectionProperties.usingCarbons2 = carbonsNumber.boolValue;
-        }
+            if([dic objectForKey:@"usingCarbons2"])
+            {
+                NSNumber* carbonsNumber = [dic objectForKey:@"usingCarbons2"];
+                self.connectionProperties.usingCarbons2 = carbonsNumber.boolValue;
+            }
 
-        if([dic objectForKey:@"supportsPush"])
-        {
-            NSNumber* pushNumber = [dic objectForKey:@"supportsPush"];
-            self.connectionProperties.supportsPush = pushNumber.boolValue;
-        }
+            if([dic objectForKey:@"supportsPush"])
+            {
+                NSNumber* pushNumber = [dic objectForKey:@"supportsPush"];
+                self.connectionProperties.supportsPush = pushNumber.boolValue;
+            }
 
-        if([dic objectForKey:@"pushEnabled"])
-        {
-            NSNumber* pushEnabled = [dic objectForKey:@"pushEnabled"];
-            self.connectionProperties.pushEnabled = pushEnabled.boolValue;
-        }
+            if([dic objectForKey:@"pushEnabled"])
+            {
+                NSNumber* pushEnabled = [dic objectForKey:@"pushEnabled"];
+                self.connectionProperties.pushEnabled = pushEnabled.boolValue;
+            }
 
-        if([dic objectForKey:@"supportsClientState"])
-        {
-            NSNumber* csiNumber = [dic objectForKey:@"supportsClientState"];
-            self.connectionProperties.supportsClientState = csiNumber.boolValue;
-        }
+            if([dic objectForKey:@"supportsClientState"])
+            {
+                NSNumber* csiNumber = [dic objectForKey:@"supportsClientState"];
+                self.connectionProperties.supportsClientState = csiNumber.boolValue;
+            }
 
-        if([dic objectForKey:@"supportsMAM"])
-        {
-            NSNumber* mamNumber = [dic objectForKey:@"supportsMAM"];
-            self.connectionProperties.supportsMam2 = mamNumber.boolValue;
-        }
+            if([dic objectForKey:@"supportsMAM"])
+            {
+                NSNumber* mamNumber = [dic objectForKey:@"supportsMAM"];
+                self.connectionProperties.supportsMam2 = mamNumber.boolValue;
+            }
 
-        if([dic objectForKey:@"supportsPubSub"])
-        {
-            NSNumber* supportsPubSub = [dic objectForKey:@"supportsPubSub"];
-            self.connectionProperties.supportsPubSub = supportsPubSub.boolValue;
-        }
+            if([dic objectForKey:@"supportsPubSub"])
+            {
+                NSNumber* supportsPubSub = [dic objectForKey:@"supportsPubSub"];
+                self.connectionProperties.supportsPubSub = supportsPubSub.boolValue;
+            }
 
-        if([dic objectForKey:@"supportsHTTPUpload"])
-        {
-            NSNumber* supportsHTTPUpload = [dic objectForKey:@"supportsHTTPUpload"];
-            self.connectionProperties.supportsHTTPUpload = supportsHTTPUpload.boolValue;
-        }
+            if([dic objectForKey:@"supportsHTTPUpload"])
+            {
+                NSNumber* supportsHTTPUpload = [dic objectForKey:@"supportsHTTPUpload"];
+                self.connectionProperties.supportsHTTPUpload = supportsHTTPUpload.boolValue;
+            }
 
-        if([dic objectForKey:@"supportsPing"])
-        {
-            NSNumber* supportsPing = [dic objectForKey:@"supportsPing"];
-            self.connectionProperties.supportsPing = supportsPing.boolValue;
-        }
+            if([dic objectForKey:@"supportsPing"])
+            {
+                NSNumber* supportsPing = [dic objectForKey:@"supportsPing"];
+                self.connectionProperties.supportsPing = supportsPing.boolValue;
+            }
 
-        if([dic objectForKey:@"lastInteractionDate"])
-            _lastInteractionDate = [dic objectForKey:@"lastInteractionDate"];
+            if([dic objectForKey:@"lastInteractionDate"])
+                _lastInteractionDate = [dic objectForKey:@"lastInteractionDate"];
 
-        if([dic objectForKey:@"supportsRosterPreApproval"])
-        {
-            NSNumber* supportsRosterPreApproval = [dic objectForKey:@"supportsRosterPreApproval"];
-            self.connectionProperties.supportsRosterPreApproval = supportsRosterPreApproval.boolValue;
-        }
+            if([dic objectForKey:@"supportsRosterPreApproval"])
+            {
+                NSNumber* supportsRosterPreApproval = [dic objectForKey:@"supportsRosterPreApproval"];
+                self.connectionProperties.supportsRosterPreApproval = supportsRosterPreApproval.boolValue;
+            }
 
-        //debug output
-        @synchronized(_smacksLockObject) {
+            //debug output
             DDLogVerbose(@"readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d",
                 dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
@@ -2146,29 +2135,31 @@ NSString *const kXMPPPresence = @"presence";
                 for(NSDictionary* dic in self.unAckedStanzas)
                     DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kQueueID], [dic objectForKey:kStanza]);
         }
-    }
-    
-    @synchronized(_smacksLockObject) {
+        
         //always reset handler and smacksRequestInFlight when loading smacks state
         _smacksAckHandler = [[NSMutableArray alloc] init];
         self.smacksRequestInFlight = NO;
     }
 }
 
--(void) incrementLastHandledStanza {
-    if(self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
-    {
-        @synchronized(_smacksLockObject) {
-            self.lastHandledInboundStanza = [NSNumber numberWithInteger: [self.lastHandledInboundStanza integerValue]+1];
-            [self persistState];
+-(void) incrementLastHandledStanza
+{
+    @synchronized(_stateLockObject) {
+        if(self.connectionProperties.supportsSM3)
+        {
+            //this will count any stanza between our bind result and smacks enable result but gets reset to sane values
+            //once the smacks enable result surfaces (e.g. the wrong counting will be ignored later)
+            if(self.accountState>=kStateBound)
+                self.lastHandledInboundStanza = [NSNumber numberWithInteger:[self.lastHandledInboundStanza integerValue] + 1];
         }
+        [self persistState];        //make sure we persist our state, even if smacks is not supported
     }
 }
 
 -(void) initSM3
 {
     //initialize smacks state
-    @synchronized(_smacksLockObject) {
+    @synchronized(_stateLockObject) {
         self.lastHandledInboundStanza = [NSNumber numberWithInteger:0];
         self.lastHandledOutboundStanza = [NSNumber numberWithInteger:0];
         self.lastOutboundStanza = [NSNumber numberWithInteger:0];

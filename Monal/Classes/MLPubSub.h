@@ -34,7 +34,7 @@ typedef void (^monal_pubsub_fetch_completion_t)(BOOL success, id additionalData)
 -(void) forceRefreshForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid andItemsList:(NSArray* _Nonnull) itemsList withCompletion:(monal_pubsub_fetch_completion_t _Nullable) completion;
 -(void) forceRefreshForPersistentNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid andItemsList:(NSArray* _Nonnull) itemsList;
 
--(void) publishItems:(NSArray* _Nonnull) items onNode:(NSString* _Nonnull) node;
+-(void) publishItems:(NSArray* _Nonnull) items onNode:(NSString* _Nonnull) node withAccessModel:(NSString* _Nullable) accessModel;
 -(void) retractItemsWithIds:(NSArray* _Nonnull) itemIds onNode:(NSString* _Nonnull) node;
 -(void) purgeNode:(NSString* _Nonnull) node;
 -(void) deleteNode:(NSString* _Nonnull) node;

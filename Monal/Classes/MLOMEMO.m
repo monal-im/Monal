@@ -51,8 +51,6 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
     [self setupSignal];
 
-    [self.xmppConnection.pubsub registerInterestForNode:@"eu.siacs.conversations.axolotl.devicelist" withPersistentCaching:YES];
-    
     return self;
 }
 
@@ -68,7 +66,9 @@ static const size_t MAX_OMEMO_KEYS = 120;
     SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self._signalContext];
 
     // init MLPubSub handler
-    // TODO: register handler
+    [self.xmppConnection.pubsub registerInterestForNode:@"eu.siacs.conversations.axolotl.devicelist" withPersistentCaching:YES];
+
+    // TODO: register pubsub handler for devicelist
 
     if(self.monalSignalStore.deviceid == 0)
     {
@@ -93,7 +93,12 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
 -(void) sendOMEMOBundle
 {
-    [self publishKeysViaPubSub:@{@"signedPreKeyPublic":self.monalSignalStore.signedPreKey.keyPair.publicKey, @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature, @"identityKey":self.monalSignalStore.identityKeyPair.publicKey, @"signedPreKeyId": [NSString stringWithFormat:@"%d",self.monalSignalStore.signedPreKey.preKeyId]} andPreKeys:self.monalSignalStore.preKeys withDeviceId:self.monalSignalStore.deviceid];
+    [self publishKeysViaPubSub:@{
+        @"signedPreKeyPublic":self.monalSignalStore.signedPreKey.keyPair.publicKey,
+        @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature,
+        @"identityKey":self.monalSignalStore.identityKeyPair.publicKey,
+        @"signedPreKeyId": [NSString stringWithFormat:@"%d",self.monalSignalStore.signedPreKey.preKeyId]
+    } andPreKeys:self.monalSignalStore.preKeys withDeviceId:self.monalSignalStore.deviceid];
 }
 
 -(void) queryOMEMODevicesFrom:(NSString *) jid
@@ -580,7 +585,7 @@ static const size_t MAX_OMEMO_KEYS = 120;
     [itemNode addChild:listNode];
 
     // publish devices via pubsub
-    [self.xmppConnection.pubsub publishItems:@[itemNode] onNode:@"eu.siacs.conversations.axolotl.devicelist"];
+    [self.xmppConnection.pubsub publishItems:@[itemNode] onNode:@"eu.siacs.conversations.axolotl.devicelist" withAccessModel:@"open"];
 }
 
 /**
@@ -627,7 +632,7 @@ static const size_t MAX_OMEMO_KEYS = 120;
     [itemNode addChild:bundle];
 
     // send bundle via pubsub interface
-    [self.xmppConnection.pubsub publishItems:@[itemNode] onNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%u", deviceid]];
+    [self.xmppConnection.pubsub publishItems:@[itemNode] onNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%u", deviceid] withAccessModel:@"open"];
 }
 
 @end

@@ -8,7 +8,7 @@
 
 #import "MLPubSub.h"
 #import "xmpp.h"
-
+#import "XMPPDataForm.h"
 
 @interface MLPubSub ()
 {
@@ -18,7 +18,6 @@
     NSMutableDictionary* _configuredNodes;
 }
 @end
-
 
 @implementation MLPubSub
 
@@ -217,15 +216,23 @@
     [_account sendIq:query withResponseHandler:resultHandler andErrorHandler:errorHandler];
 }
 
--(void) publishItems:(NSArray* _Nonnull) items onNode:(NSString* _Nonnull) node
+-(void) publishItems:(NSArray* _Nonnull) items onNode:(NSString* _Nonnull) node withAccessModel:(NSString* _Nullable) accessModel
 {
+    if(!accessModel || ![@[@"open", @"presence", @"roster", @"authorize", @"whitelist"] containsObject:accessModel])
+        accessModel = @"whitelist";     //default to private
     NSMutableSet* itemsList = [[NSMutableSet alloc] init];
     for(MLXMLNode* item in items)
         [itemsList addObject:[item findFirst:@"/@id"]];
     DDLogDebug(@"Publishing items on node '%@': %@", node, itemsList);
     XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqSetType];
     [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"publish" withAttributes:@{@"node": node} andChildren:items andData:nil]
+        [[MLXMLNode alloc] initWithElement:@"publish" withAttributes:@{@"node": node} andChildren:items andData:nil],
+        [[MLXMLNode alloc] initWithElement:@"publish-options" withAttributes:@{} andChildren:@[
+            [[XMPPDataForm alloc] initWithType:@"submit" formType:@"http://jabber.org/protocol/pubsub#publish-options" andDictionary:@{
+                @"pubsub#persist_items": @"true",
+                @"pubsub#access_model": accessModel
+            }]
+        ] andData:nil]
     ] andData:nil]];
     [_account sendIq:query withResponseHandler:^(XMPPIQ* result) {
         //ignore publish result

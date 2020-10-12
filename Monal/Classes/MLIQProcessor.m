@@ -279,9 +279,10 @@
     NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
     
     if(
-        [iqNode check:@"{http://jabber.org/protocol/disco#info}query/identity<category=pubsub><type=pep>"] &&
-        [features containsObject:@"http://jabber.org/protocol/pubsub#publish"] &&
-        [features containsObject:@"http://jabber.org/protocol/pubsub#filtered-notifications"]
+        [iqNode check:@"{http://jabber.org/protocol/disco#info}query/identity<category=pubsub><type=pep>"] &&       //xep-0163 support
+        [features containsObject:@"http://jabber.org/protocol/pubsub#publish"] &&                                   //xep-0060 support
+        [features containsObject:@"http://jabber.org/protocol/pubsub#filtered-notifications"] &&                    //xep-0163 support
+        [features containsObject:@"http://jabber.org/protocol/pubsub#publish-options"]                              //xep-0223 support
     )
         account.connectionProperties.supportsPubSub = YES;
     

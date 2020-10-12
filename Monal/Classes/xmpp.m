@@ -703,7 +703,7 @@ NSString *const kXMPPPresence = @"presence";
                 //close stream
                 MLXMLNode* stream = [[MLXMLNode alloc] init];
                 stream.element = @"/stream:stream"; //hack to close stream
-                [self writeToStream:stream.XMLString]; // dont even bother queueing
+                [self writeToStream:[stream XMLString]]; // dont even bother queueing
             }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
 
             @synchronized(_stateLockObject) {
@@ -724,7 +724,12 @@ NSString *const kXMPPPresence = @"presence";
             [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
         }
         else
+        {
+            //send one last ack before closing the stream (xep version 1.5.2)
+            if(self.accountState>=kStateBound)
+                [self sendLastAck];
             [self persistState];
+        }
         
         [self closeSocket];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
@@ -1567,7 +1572,7 @@ NSString *const kXMPPPresence = @"presence";
             @synchronized(_stateLockObject) {
                 //invalidate stream id
                 self.streamID = nil;
-                //get h value, if server supports smacks revision 1.5.2
+                //get h value, if server supports smacks revision 1.5
                 NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
                 DDLogInfo(@"++++++++++++++++++++++++ failed resume: h=%@", h);
                 if(h)

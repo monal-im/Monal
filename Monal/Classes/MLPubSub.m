@@ -15,7 +15,7 @@
     xmpp* _account;
     NSMutableDictionary* _handlers;
     NSMutableDictionary* _cache;
-    NSMutableDictionary* _configuredNodes;
+    NSMutableSet* _configuredNodes;
 }
 @end
 
@@ -27,33 +27,27 @@
     _account = account;
     _handlers = [[NSMutableDictionary alloc] init];
     _cache = [[NSMutableDictionary alloc] init];
-    _configuredNodes = [[NSMutableDictionary alloc] init];
+    _configuredNodes = [[NSMutableSet alloc] init];
     return self;
 }
 
 -(void) registerInterestForNode:(NSString* _Nonnull) node
 {
-    [self registerInterestForNode:node withPersistentCaching:NO];
-}
-
--(void) registerInterestForNode:(NSString* _Nonnull) node withPersistentCaching:(BOOL) caching
-{
+    //we are using @synchronized(_cache) for _configuredNodes here because all other parts accessing _configuredNodes are already synchronized via _cache, too
     @synchronized(_cache) {
-        _configuredNodes[node] = caching ? @YES : @NO;
-        if(_cache[node])
-            _cache[node][@"persistentCache"] = _configuredNodes[node];
-        [_account setPubSubNotificationsForNodes:[_configuredNodes allKeys]];
+        [_configuredNodes addObject:node];
+        [_account setPubSubNotificationsForNodes:_configuredNodes];
     }
 }
 
 -(void) unregisterInterestForNode:(NSString* _Nonnull) node
 {
     @synchronized(_cache) {
-        //deactivate persistent cache but keep cached data (we always cache data, even for nodes not registered for automatic refres through "+notify")
+        //clear cache for node (can be refilled again by force refresh or by registering an interest again)
         if(_cache[node])
-            _cache[node][@"persistentCache"] = @NO;
-        [_configuredNodes removeObjectForKey:node];
-        [_account setPubSubNotificationsForNodes:[_configuredNodes allKeys]];
+            [_cache removeObjectForKey:node];
+        [_configuredNodes removeObject:node];
+        [_account setPubSubNotificationsForNodes:_configuredNodes];
     }
 }
 
@@ -66,13 +60,8 @@
     //sanity check
     //we are using @synchronized(_cache) for _configuredNodes here because all other parts accessing _configuredNodes are already synchronized via _cache, too
     @synchronized(_cache) {
-        if(_configuredNodes[node] == nil)
-        {
-            @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Trying to register data handler for node '%@', but no interest was registered for this node using 'registerInterestForNode:withPersistentCaching:' first!" userInfo:@{
-                @"node": node,
-                @"jid": jid
-            }];
-        }
+        if([_configuredNodes containsObject:node] == nil)
+            DDLogWarn(@"POSSIBLE IMPLEMENTATION ERROR: Trying to register data handler for node '%@', but no interest was registered for this node using 'registerInterestForNode:withPersistentCaching:' first. This handler will only be called on manual data update!", node);
     }
     
     //save handler
@@ -101,16 +90,8 @@
     }
 }
 
--(void) forceRefreshForPersistentNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid andItemsList:(NSArray* _Nonnull) itemsList
+-(void) forceRefreshForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid andItemsList:(NSArray* _Nonnull) itemsList withDelegate:(id _Nullable) delegate andMethod:(SEL _Nullable) method andAdditionalArguments:(NSArray* _Nullable) args
 {
-    //check if the node cache is persistent and throw an error if not (use forceRefreshForNode:andBareJid:withCompletion: in this case)
-    if(!_configuredNodes[node] || ![_configuredNodes[node] boolValue])
-        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"forceRefreshForPersistentNode:andBareJid:andItemsList: can not be used on non-persistent nodes! Use forceRefreshForNode:andBareJid:andItemsList:withCompletion: instead." userInfo:@{
-            @"node": node,
-            @"jid": jid,
-            @"itemsList": itemsList
-        }];
-    
     //clear old cache before querying (new) data
     @synchronized(_cache) {
         if(_cache[node])
@@ -123,6 +104,15 @@
         }
     }
     
+    DDLogInfo(@"Force refreshing node '%@' at jid '%@' using callback [%@ %@]...", node, jid, NSStringFromClass(delegate), NSStringFromSelector(method));
+    NSDictionary* handler = @{};
+    if(delegate && method)
+        handler = @{
+            @"delegate": NSStringFromClass(delegate),
+            @"method": NSStringFromSelector(method),
+            @"arguments": (args ? args : @[])
+        };
+    
     //build list of items to query (empty list means all items)
     NSMutableArray* queryItems = [[NSMutableArray alloc] init];
     for(NSString* itemId in itemsList)
@@ -133,82 +123,70 @@
     [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"items" withAttributes:@{@"node": node} andChildren:queryItems andData:nil]
     ] andData:nil]];
-    [_account sendIq:query withDelegate:[self class] andMethod:@selector(handleRefreshResultFor:withIqNode:andUpdated:andNode:andJid:andQueryItems:) andAdditionalArguments:@[[NSNumber numberWithBool:NO], jid, queryItems]];
+    [_account sendIq:query withDelegate:[self class] andMethod:@selector(handleRefreshResultFor:withIqNode:andUpdated:andNode:andJid:andQueryItems:) andAdditionalArguments:@[[NSNumber numberWithBool:NO], jid, queryItems, handler]];
 }
 
--(void) forceRefreshForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid andItemsList:(NSArray* _Nonnull) itemsList withCompletion:(monal_pubsub_fetch_completion_t _Nullable) completion
++(void) handleRefreshResultFor:(xmpp*) account withIqNode:(XMPPIQ*) iqNode andUpdated:(NSNumber*) updated andNode:(NSString*) node andJid:(NSString*) jid andQueryItems:(NSMutableArray*) queryItems andHandler:(NSDictionary*) handler
 {
-    //check if the node cache is persistent and throw an error if so (use forceRefreshForPersistentNode:andBareJid:andItemsList: in this case)
-    if(_configuredNodes[node] && [_configuredNodes[node] boolValue])
-        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"forceRefreshForNode:andBareJid:andItemsList:withCompletion: can not be used on persistent nodes! Use forceRefreshForPersistentNode:andBareJid:andItemsList: instead (and the new data handler called by it instead of a completion handler)." userInfo:@{
-            @"node": node,
-            @"jid": jid,
-            @"itemsList": itemsList
-        }];
-    
-    //build list of items to query (empty list means all items)
-    NSMutableArray* queryItems = [[NSMutableArray alloc] init];
-    for(NSString* itemId in itemsList)
-        [queryItems addObject:[[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": itemId} andChildren:@[] andData:nil]];
-    
-    //build query
-    XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqGetType to:jid];
-    [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"items" withAttributes:@{@"node": node} andChildren:queryItems andData:nil]
-    ] andData:nil]];
-    
-    __block BOOL firstResult = YES;
-    __block BOOL updated = NO;
-    __block monal_iq_handler_t errorHandler = ^(XMPPIQ* error) {
-        DDLogWarn(@"Got error iq for pubsub request: %@", error);
-        if(completion)
-            completion(NO, error);
-    };
-    __block monal_iq_handler_t resultHandler = ^(XMPPIQ* result) {
-        //remove possibly updated data and not when doing the query to keep the cache intact in case the app gets killed/diconnected
-        //after sending the query but before getting the (new) results
-        if(firstResult)
-        {
-            firstResult = NO;
-            
-            //clear old cache before processing (new) data
-            @synchronized(_cache) {
-                if(_cache[node])
-                {
-                    if(![itemsList count])
-                        _cache[node][@"data"][jid] = [[NSMutableDictionary alloc] init];
-                    else if(_cache[node][@"data"][jid])
-                        for(NSString* itemId in itemsList)
-                            [_cache[node][@"data"][jid] removeObjectForKey:itemId];
-                }
-            }
-        }
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogWarn(@"Got error iq for pubsub refresh request: %@", iqNode);
         
-        //check for rsm paging
-        NSString* first = [result findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/first#"];
-        NSString* last = [result findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/last#"];
-        if(!last || [last isEqualToString:first])       //no rsm at all or reached end of rsm --> process data *and* inform handlers of new data
-        {
-            updated = [self handleItems:[result findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:result.fromUser updated:updated informHandlers:YES];
-            if(completion)
-                completion(YES, [NSNumber numberWithBool:updated]);
-        }
-        else if(first && last)
-        {
-            //only process data but *don't* inform handlers of new data because it is still partial
-            updated = [self handleItems:[result findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:result.fromUser updated:updated informHandlers:NO];
-            
-            XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqGetType to:jid];
-            [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"items" withAttributes:@{@"node": node} andChildren:queryItems andData:nil],
-                [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
-                    [[MLXMLNode alloc] initWithElement:@"after" withAttributes:@{} andChildren:@[] andData:last]
-                ] andData:nil]
-            ] andData:nil]];
-            [_account sendIq:query withResponseHandler:resultHandler andErrorHandler:errorHandler];
-        }
-    };
-    [_account sendIq:query withResponseHandler:resultHandler andErrorHandler:errorHandler];
+        //call force refresh callback with error
+        id cls = NSClassFromString(handler[@"delegate"]);
+        SEL sel = NSSelectorFromString(handler[@"method"]);
+        DDLogVerbose(@"Calling force refresh callback [%@ %@] with error...", handler[@"delegate"], handler[@"method"]);
+        NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[cls methodSignatureForSelector:sel]];
+        [inv setTarget:cls];
+        [inv setSelector:sel];
+        //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
+        NSInteger idx = 2;
+        [inv setArgument:&account atIndex:idx++];
+        [inv setArgument:&jid atIndex:idx++];
+        [inv setArgument:&iqNode atIndex:idx++];            //passing this MLXMLNode means "an error occured"
+        for(id arg in handler[@"arguments"])
+            [inv setArgument:&arg atIndex:idx++];
+        [inv invoke];
+    }
+    
+    MLPubSub* me = account.pubsub;
+    NSString* first = [iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/first#"];
+    NSString* last = [iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/last#"];
+    //check for rsm paging
+    if(!last || [last isEqualToString:first])       //no rsm at all or reached end of rsm --> process data *and* inform handlers of new data
+    {
+        [me handleItems:[iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:iqNode.fromUser updated:[updated boolValue] informHandlers:YES];
+        
+        //call force refresh callback *after* calling data handlers (if there are any)
+        id cls = NSClassFromString(handler[@"delegate"]);
+        SEL sel = NSSelectorFromString(handler[@"method"]);
+        DDLogVerbose(@"Calling force refresh callback [%@ %@]...", handler[@"delegate"], handler[@"method"]);
+        NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[cls methodSignatureForSelector:sel]];
+        [inv setTarget:cls];
+        [inv setSelector:sel];
+        //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
+        NSInteger idx = 2;
+        [inv setArgument:&account atIndex:idx++];
+        [inv setArgument:&jid atIndex:idx++];
+        MLXMLNode* nilPointer = nil;
+        [inv setArgument:&nilPointer atIndex:idx++];        //nil pointer means "no error occured"
+        for(id arg in handler[@"arguments"])
+            [inv setArgument:&arg atIndex:idx++];
+        [inv invoke];
+    }
+    else if(first && last)
+    {
+        //only process data but *don't* inform handlers of new data because it is still partial
+        BOOL newUpdated = [me handleItems:[iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:iqNode.fromUser updated:[updated boolValue] informHandlers:NO];
+        XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqGetType to:jid];
+        [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"items" withAttributes:@{@"node": node} andChildren:queryItems andData:nil],
+            [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"after" withAttributes:@{} andChildren:@[] andData:last]
+            ] andData:nil]
+        ] andData:nil]];
+        [account sendIq:query withDelegate:[self class] andMethod:@selector(handleRefreshResultFor:withIqNode:andUpdated:andNode:andJid:andQueryItems:) andAdditionalArguments:@[[NSNumber numberWithBool:newUpdated], jid, queryItems]];
+    }
 }
 
 -(void) publishItems:(NSArray* _Nonnull) items onNode:(NSString* _Nonnull) node withAccessModel:(NSString* _Nullable) accessModel
@@ -295,12 +273,9 @@
 {
     @synchronized(_cache) {
         _cache = data[@"cache"];
-        //read _configuredNodes but don't overwrite cache settings of already configured nodes
-        for(NSString* entry in [data[@"interest"] allKeys])
-            if(_configuredNodes[entry] == nil)
-                _configuredNodes[entry] = data[@"interest"][entry];
+        _configuredNodes = data[@"interest"];
         //update caps hash according to our new _configuredNodes dictionary
-        [_account setPubSubNotificationsForNodes:[_configuredNodes allKeys]];
+        [_account setPubSubNotificationsForNodes:_configuredNodes];
     }
 }
 
@@ -309,11 +284,10 @@
     @synchronized(_cache) {
         //only invalidate non-persistent items in cache
         for(NSString* node in [_cache allKeys])
-            if(!_cache[node][@"persistentCache"] || ![_cache[node][@"persistentCache"] boolValue])
-            {
-                DDLogInfo(@"Invalidating pubsub cache entry for node '%@'", node);
-                [_cache removeObjectForKey:node];
-            }
+        {
+            DDLogInfo(@"Invalidating pubsub cache entry for node '%@'", node);
+            [_cache removeObjectForKey:node];
+        }
     }
 }
 
@@ -354,43 +328,11 @@
             DDLogWarn(@"Got pubsub data without node attribute!");
             return;
         }
-        if(_configuredNodes[node] && [_configuredNodes[node] boolValue])
-            [self forceRefreshForPersistentNode:node andBareJid:messageNode.fromUser andItemsList:[items find:@"item@id"]];
-        else
-            [self forceRefreshForNode:node andBareJid:messageNode.fromUser andItemsList:[items find:@"item@id"] withCompletion:nil];
+        [self forceRefreshForNode:node andBareJid:messageNode.fromUser andItemsList:[items find:@"item@id"] withDelegate:nil andMethod:nil andAdditionalArguments:nil];
     }
     //handle item deletion
     if([items check:@"retract"])
         [self handleRetraction:items fromJid:messageNode.fromUser updated:NO informHandlers:YES];
-}
-
-+(void) handleRefreshResultFor:(xmpp*) account withIqNode:(XMPPIQ*) iqNode andUpdated:(NSNumber*) updated andNode:(NSString*) node andJid:(NSString*) jid andQueryItems:(NSMutableArray*) queryItems
-{
-    if([iqNode check:@"/<type=error>"])
-    {
-        DDLogWarn(@"Got error iq for pubsub request: %@", iqNode);
-        return;
-    }
-    
-    MLPubSub* me = account.pubsub;
-    NSString* first = [iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/first#"];
-    NSString* last = [iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/{http://jabber.org/protocol/rsm}set/last#"];
-    //check for rsm paging
-    if(!last || [last isEqualToString:first])       //no rsm at all or reached end of rsm --> process data *and* inform handlers of new data
-        [me handleItems:[iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:iqNode.fromUser updated:[updated boolValue] informHandlers:YES];
-    else if(first && last)
-    {
-        //only process data but *don't* inform handlers of new data because it is still partial
-        BOOL newUpdated = [me handleItems:[iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:iqNode.fromUser updated:[updated boolValue] informHandlers:NO];
-        XMPPIQ* query = [[XMPPIQ alloc] initWithType:kiqGetType to:jid];
-        [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"items" withAttributes:@{@"node": node} andChildren:queryItems andData:nil],
-            [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"after" withAttributes:@{} andChildren:@[] andData:last]
-            ] andData:nil]
-        ] andData:nil]];
-        [account sendIq:query withDelegate:[self class] andMethod:@selector(handleRefreshResultFor:withIqNode:andUpdated:andNode:andJid:andQueryItems:) andAdditionalArguments:@[[NSNumber numberWithBool:newUpdated], jid, queryItems]];
-    }
 }
 
 //*** internal methods below
@@ -417,7 +359,6 @@
         if(!_cache[node])
         {
             _cache[node] = [[NSMutableDictionary alloc] init];
-            _cache[node][@"persistentCache"] = _configuredNodes[node] && [_configuredNodes[node] boolValue] ? @YES : @NO;
             _cache[node][@"data"] = [[NSMutableDictionary alloc] init];
         }
         if(!_cache[node][@"data"][jid])

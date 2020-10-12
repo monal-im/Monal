@@ -276,7 +276,7 @@ NSString *const kXMPPPresence = @"presence";
     }
 }
 
--(void) setPubSubNotificationsForNodes:(NSArray* _Nonnull) nodes
+-(void) setPubSubNotificationsForNodes:(NSSet* _Nonnull) nodes
 {
     NSString* client = [NSString stringWithFormat:@"%@/%@//%@", [_capsIdentity findFirst:@"/@category"], [_capsIdentity findFirst:@"/@type"], [_capsIdentity findFirst:@"/@name"]];
     NSMutableSet* featuresSet = [[NSMutableSet alloc] initWithSet:[HelperTools getOwnFeatureSet]];
@@ -3217,7 +3217,7 @@ NSString *const kXMPPPresence = @"presence";
             else
             {
                 NSString* currentHash = [[DataLayer sharedInstance] getAvatarHashForContact:jid andAccount:self.accountNo];
-                if([avatarHash isEqualToString:currentHash ])
+                if([avatarHash isEqualToString:currentHash])
                 {
                     DDLogInfo(@"Avatar hash is the same, we don't need to update our avatar image data");
                     break;
@@ -3226,20 +3226,7 @@ NSString *const kXMPPPresence = @"presence";
                 if(![self updateAvatarWithHash:avatarHash andJid:jid])
                 {
                     DDLogInfo(@"Fetching new avatar data for hash '%@' and jid '%@'", avatarHash, jid);
-                    [self.pubsub forceRefreshForNode:@"urn:xmpp:avatar:data" andBareJid:jid andItemsList:@[avatarHash] withCompletion:^(BOOL success, id additionalData) {
-                        //ignore errors here (e.g. simply don't update the avatar image)
-                        //(this should never happen if other clients and servers behave properly)
-                        if(!success)
-                        {
-                            DDLogError(@"Got avatar image fetch error: %@", additionalData);
-                            return;
-                        }
-                        //ignore if the avatar data can not be found (should never happen if other clients behave properly)
-                        if(![self updateAvatarWithHash:avatarHash andJid:jid])
-                            DDLogError(@"Avatar image data error for avatar hash %@ of contact %@", avatarHash, jid);
-                        else
-                            DDLogInfo(@"Avatar of '%@' fetched and updated successfully", jid);
-                    }];
+                    [self.pubsub forceRefreshForNode:@"urn:xmpp:avatar:data" andBareJid:jid andItemsList:@[avatarHash] withDelegate:[self class] andMethod:@selector(handlePubSubForceRefreshResultForAccount:andJid:withError:andAvatarHash:) andAdditionalArguments:@[avatarHash]];
                 }
                 else
                     DDLogInfo(@"Avatar of '%@' updated successfully from cache", jid);
@@ -3249,6 +3236,23 @@ NSString *const kXMPPPresence = @"presence";
         if([items count] > 1)
             DDLogError(@"Got more than one avatar metadata item!");
     }];
+}
+
++(void) handlePubSubForceRefreshResultForAccount:(xmpp*) account andJid:(NSString*) jid withError:(MLXMLNode*) errorIq andAvatarHash:(NSString*) avatarHash
+{
+    //ignore errors here (e.g. simply don't update the avatar image)
+    //(this should never happen if other clients and servers behave properly)
+    if(errorIq)
+    {
+        DDLogError(@"Got avatar image fetch error: %@", errorIq);
+        return;
+    }
+    
+    //ignore if the avatar data can not be found (should never happen if other clients behave properly)
+    if(![account updateAvatarWithHash:avatarHash andJid:jid])
+        DDLogError(@"Avatar image data error for avatar hash %@ of contact %@", avatarHash, jid);
+    else
+        DDLogInfo(@"Avatar of '%@' fetched and updated successfully", jid);
 }
 
 -(BOOL) updateAvatarWithHash:(NSString*) avatarHash andJid:(NSString*) jid

@@ -66,7 +66,7 @@ static const size_t MAX_OMEMO_KEYS = 120;
     SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self._signalContext];
 
     // init MLPubSub handler
-    [self.xmppConnection.pubsub registerInterestForNode:@"eu.siacs.conversations.axolotl.devicelist" withPersistentCaching:YES];
+    [self.xmppConnection.pubsub registerInterestForNode:@"eu.siacs.conversations.axolotl.devicelist"];
 
     // TODO: register pubsub handler for devicelist
 

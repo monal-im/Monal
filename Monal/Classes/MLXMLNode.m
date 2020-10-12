@@ -15,6 +15,8 @@
 
 @interface MLXMLNode()
 @property (atomic, strong) NSMutableDictionary* cache;
+@property (atomic, readwrite) NSMutableDictionary* attributes;
+@property (atomic, readwrite) MLXMLNode* parent;
 @end
 
 @implementation MLXMLNode
@@ -82,7 +84,6 @@ static NSRegularExpression* attributeFilterRegex;
     _attributes = [[NSMutableDictionary alloc] init];
     _children = [[NSMutableArray alloc] init];
     _data = nil;
-    _depth = 0;
     self.cache = [[NSMutableDictionary alloc] init];
     return self;
 }
@@ -176,6 +177,8 @@ static NSRegularExpression* attributeFilterRegex;
 
 -(void) addChild:(MLXMLNode*) child
 {
+    if(!child)
+        return;
     MLXMLNode* copy = [child copy];
     copy.parent = self;
     //namespace inheritance (will be stripped by XMLString later on)
@@ -188,6 +191,15 @@ static NSRegularExpression* attributeFilterRegex;
         node.cache = [[NSMutableDictionary alloc] init];
     //this one can be removed if the query path component ".." is removed from our language
     [copy invalidateCache];
+}
+
+-(void) removeChild:(MLXMLNode*) child
+{
+    if(!child)
+        return;
+    NSInteger index = [_children indexOfObject:child];
+    if(index != NSNotFound)
+        [_children removeObjectAtIndex:index];
 }
 
 -(void) invalidateCache
@@ -284,7 +296,7 @@ static NSRegularExpression* attributeFilterRegex;
     NSTextCheckingResult* match = matches.firstObject;
     NSRange pathComponentRange = [match rangeAtIndex:1];
     NSRange restRange = [match rangeAtIndex:4];
-    if(pathComponentRange.location == NSNotFound)
+    if(pathComponentRange.location == NSNotFound || !pathComponentRange.length)
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"XML query has syntax errors (could not extract first path component)!" userInfo:@{
             @"node": self,
             @"queryString": queryString,
@@ -463,10 +475,10 @@ static NSRegularExpression* attributeFilterRegex;
     NSMutableDictionary* retval = [[NSMutableDictionary alloc] init];
     NSArray* matches = [componentParserRegex matchesInString:entry options:0 range:NSMakeRange(0, [entry length])];
     if(![matches count])
-        @synchronized(localCache) {
-            localCache[entry] = [retval copy];
-            return retval;      //return empty array
-        }
+        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Could not parse path component!" userInfo:@{
+            @"node": self,
+            @"queryEntry": entry
+        }];
     NSTextCheckingResult* match = matches.firstObject;
     NSRange namespaceRange = [match rangeAtIndex:2];
     NSRange elementNameRange = [match rangeAtIndex:3];

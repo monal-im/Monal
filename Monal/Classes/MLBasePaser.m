@@ -8,6 +8,10 @@
 
 #import "MLBasePaser.h"
 
+@interface MLXMLNode()
+@property (atomic, readwrite) MLXMLNode* parent;
+@end
+
 @interface MLBasePaser ()
 {
     MLXMLNode* _currentNode;
@@ -56,7 +60,6 @@
     newNode = [newNode initWithElement:elementName andNamespace:namespaceURI withAttributes:attributeDict andChildren:@[] andData:nil];
     
     //add new node to tree
-    newNode.depth = _depth;     //set parser depth on newly created node
     if(_currentNode)
         newNode.parent = _currentNode;
     _currentNode = newNode;

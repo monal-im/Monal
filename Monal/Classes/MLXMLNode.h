@@ -55,6 +55,11 @@
 -(void) addChild:(MLXMLNode*) child;
 
 /**
+ Removes child by reference
+ */
+-(void) removeChild:(MLXMLNode*) child;
+
+/**
  The name of the element itself. 
  */
 @property (atomic, strong) NSString* element;
@@ -62,12 +67,12 @@
 /**
  Attributes are given keys as they will be printed in the XML
  */
-@property (atomic, strong) NSMutableDictionary* attributes;
+@property (atomic, readonly) NSMutableDictionary* attributes;
 
 /**
  Children are XMLnodes
  */
-@property (atomic, strong) NSMutableArray* children;
+@property (atomic, readonly) NSMutableArray* children;
 
 /**
  String to be inserted into the data field between elements. AKA inner text.
@@ -75,13 +80,8 @@
 @property (atomic, strong) NSString* data;
 
 /**
- One-based depth this node was encountered at in XML stream (always 0 for locally generated nodes)
- */
-@property (atomic, assign) NSInteger* depth;
-
-/**
  Parent node of this one (if any)
  */
-@property (atomic, strong) MLXMLNode* parent;
+@property (atomic, readonly) MLXMLNode* parent;
 
 @end

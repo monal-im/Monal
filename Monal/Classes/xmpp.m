@@ -1107,7 +1107,6 @@ NSString *const kXMPPPresence = @"presence";
     @synchronized(_smacksLockObject) {
         unsigned long unackedCount = (unsigned long)[self.unAckedStanzas count];
         NSDictionary* dic = @{
-            kXMLNS:@"urn:xmpp:sm:3",
             @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
             @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
             @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
@@ -1117,9 +1116,8 @@ NSString *const kXMPPPresence = @"presence";
             ((!self.smacksRequestInFlight && unackedCount>0) || force)
         ) {
             DDLogVerbose(@"requesting smacks ack...");
-            rNode =[[MLXMLNode alloc] initWithElement:@"r"];
-            rNode.attributes=[dic mutableCopy];
-            self.smacksRequestInFlight=YES;
+            rNode = [[MLXMLNode alloc] initWithElement:@"r" andNamespace:@"urn:xmpp:sm:3" withAttributes:dic andChildren:@[] andData:nil];
+            self.smacksRequestInFlight = YES;
         }
         else
             DDLogDebug(@"no smacks request, there is nothing pending or a request already in flight...");
@@ -1141,13 +1139,11 @@ NSString *const kXMPPPresence = @"presence";
 {
     if(self.connectionProperties.supportsSM3)
     {
-        MLXMLNode* aNode = [[MLXMLNode alloc] initWithElement:@"a"];
         unsigned long unackedCount = 0;
         NSDictionary* dic;
         @synchronized(_smacksLockObject) {
             unackedCount = (unsigned long)[self.unAckedStanzas count];
             dic = @{
-                kXMLNS:@"urn:xmpp:sm:3",
                 @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
                 @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
                 @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
@@ -1155,11 +1151,11 @@ NSString *const kXMPPPresence = @"presence";
                 @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", unackedCount],
             };
         }
-        aNode.attributes = [dic mutableCopy];
+        MLXMLNode* aNode = [[MLXMLNode alloc] initWithElement:@"a" andNamespace:@"urn:xmpp:sm:3" withAttributes:dic andChildren:@[] andData:nil];
         if(queuedSend)
             [self send:aNode];
         else      //this should only be done from sendQueue (e.g. by sendLastAck())
-            [self writeToStream:aNode.XMLString];		// dont even bother queueing
+            [self writeToStream:[aNode XMLString]];		// dont even bother queueing
     }
 }
 
@@ -1707,11 +1703,9 @@ NSString *const kXMPPPresence = @"presence";
                 //test if smacks is supported and allows resume
                 if(self.connectionProperties.supportsSM3 && self.streamID)
                 {
-                    MLXMLNode *resumeNode = [[MLXMLNode alloc] initWithElement:@"resume"];
                     NSDictionary* dic;
                     @synchronized(_smacksLockObject) {
                         dic = @{
-                            kXMLNS:@"urn:xmpp:sm:3",
                             @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
                             @"previd":self.streamID,
                             
@@ -1721,7 +1715,7 @@ NSString *const kXMPPPresence = @"presence";
                             @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", (unsigned long)[self.unAckedStanzas count]]
                         };
                     }
-                    resumeNode.attributes = [dic mutableCopy];
+                    MLXMLNode* resumeNode = [[MLXMLNode alloc] initWithElement:@"resume" andNamespace:@"urn:xmpp:sm:3" withAttributes:dic andChildren:@[] andData:nil];
                     self.resuming = YES;      //this is needed to distinguish a failed smacks resume and a failed smacks enable later on
                     [self send:resumeNode];
                 }

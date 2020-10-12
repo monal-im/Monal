@@ -123,7 +123,7 @@
     [query addChild:[[MLXMLNode alloc] initWithElement:@"pubsub" andNamespace:@"http://jabber.org/protocol/pubsub" withAttributes:@{} andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"items" withAttributes:@{@"node": node} andChildren:queryItems andData:nil]
     ] andData:nil]];
-    [_account sendIq:query withDelegate:[self class] andMethod:@selector(handleRefreshResultFor:withIqNode:andUpdated:andNode:andJid:andQueryItems:andHandler:) andAdditionalArguments:@[[NSNumber numberWithBool:NO], jid, queryItems, handler]];
+    [_account sendIq:query withDelegate:[self class] andMethod:@selector(handleRefreshResultFor:withIqNode:andUpdated:andNode:andJid:andQueryItems:andHandler:) andAdditionalArguments:@[[NSNumber numberWithBool:NO], node, jid, queryItems, handler]];
 }
 
 +(void) handleRefreshResultFor:(xmpp*) account withIqNode:(XMPPIQ*) iqNode andUpdated:(NSNumber*) updated andNode:(NSString*) node andJid:(NSString*) jid andQueryItems:(NSMutableArray*) queryItems andHandler:(NSDictionary*) handler
@@ -132,21 +132,24 @@
     {
         DDLogWarn(@"Got error iq for pubsub refresh request: %@", iqNode);
         
-        //call force refresh callback with error
-        id cls = NSClassFromString(handler[@"delegate"]);
-        SEL sel = NSSelectorFromString(handler[@"method"]);
-        DDLogVerbose(@"Calling force refresh callback [%@ %@] with error...", handler[@"delegate"], handler[@"method"]);
-        NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[cls methodSignatureForSelector:sel]];
-        [inv setTarget:cls];
-        [inv setSelector:sel];
-        //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
-        NSInteger idx = 2;
-        [inv setArgument:&account atIndex:idx++];
-        [inv setArgument:&jid atIndex:idx++];
-        [inv setArgument:&iqNode atIndex:idx++];            //passing this MLXMLNode means "an error occured"
-        for(id _Nonnull arg in handler[@"arguments"])
-            [inv setArgument:&arg atIndex:idx++];
-        [inv invoke];
+        //call force refresh callback (if given) with error
+        if(handler[@"delegate"] && handler[@"method"])
+        {
+            id cls = NSClassFromString(handler[@"delegate"]);
+            SEL sel = NSSelectorFromString(handler[@"method"]);
+            DDLogVerbose(@"Calling force refresh callback [%@ %@] with error...", handler[@"delegate"], handler[@"method"]);
+            NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[cls methodSignatureForSelector:sel]];
+            [inv setTarget:cls];
+            [inv setSelector:sel];
+            //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
+            NSInteger idx = 2;
+            [inv setArgument:&account atIndex:idx++];
+            [inv setArgument:&jid atIndex:idx++];
+            [inv setArgument:&iqNode atIndex:idx++];            //passing this MLXMLNode means "an error occured"
+            for(id _Nonnull arg in handler[@"arguments"])
+                [inv setArgument:&arg atIndex:idx++];
+            [inv invoke];
+        }
     }
     
     MLPubSub* me = account.pubsub;
@@ -157,22 +160,25 @@
     {
         [me handleItems:[iqNode findFirst:@"{http://jabber.org/protocol/pubsub}pubsub/items"] fromJid:iqNode.fromUser updated:[updated boolValue] informHandlers:YES];
         
-        //call force refresh callback *after* calling data handlers (if there are any)
-        id cls = NSClassFromString(handler[@"delegate"]);
-        SEL sel = NSSelectorFromString(handler[@"method"]);
-        DDLogVerbose(@"Calling force refresh callback [%@ %@]...", handler[@"delegate"], handler[@"method"]);
-        NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[cls methodSignatureForSelector:sel]];
-        [inv setTarget:cls];
-        [inv setSelector:sel];
-        //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
-        NSInteger idx = 2;
-        [inv setArgument:&account atIndex:idx++];
-        [inv setArgument:&jid atIndex:idx++];
-        MLXMLNode* nilPointer = nil;
-        [inv setArgument:&nilPointer atIndex:idx++];        //nil pointer means "no error occured"
-        for(id _Nonnull arg in handler[@"arguments"])
-            [inv setArgument:&arg atIndex:idx++];
-        [inv invoke];
+        //call force refresh callback (if given) *after* calling data handlers
+        if(handler[@"delegate"] && handler[@"method"])
+        {
+            id cls = NSClassFromString(handler[@"delegate"]);
+            SEL sel = NSSelectorFromString(handler[@"method"]);
+            DDLogVerbose(@"Calling force refresh callback [%@ %@]...", handler[@"delegate"], handler[@"method"]);
+            NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[cls methodSignatureForSelector:sel]];
+            [inv setTarget:cls];
+            [inv setSelector:sel];
+            //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
+            NSInteger idx = 2;
+            [inv setArgument:&account atIndex:idx++];
+            [inv setArgument:&jid atIndex:idx++];
+            MLXMLNode* nilPointer = nil;
+            [inv setArgument:&nilPointer atIndex:idx++];        //nil pointer means "no error occured"
+            for(id _Nonnull arg in handler[@"arguments"])
+                [inv setArgument:&arg atIndex:idx++];
+            [inv invoke];
+        }
     }
     else if(first && last)
     {
@@ -185,7 +191,7 @@
                 [[MLXMLNode alloc] initWithElement:@"after" withAttributes:@{} andChildren:@[] andData:last]
             ] andData:nil]
         ] andData:nil]];
-        [account sendIq:query withDelegate:[self class] andMethod:@selector(handleRefreshResultFor:withIqNode:andUpdated:andNode:andJid:andQueryItems:andHandler:) andAdditionalArguments:@[[NSNumber numberWithBool:newUpdated], jid, queryItems]];
+        [account sendIq:query withDelegate:[self class] andMethod:@selector(handleRefreshResultFor:withIqNode:andUpdated:andNode:andJid:andQueryItems:andHandler:) andAdditionalArguments:@[[NSNumber numberWithBool:newUpdated], node, jid, queryItems, handler]];
     }
 }
 
@@ -264,7 +270,8 @@
     @synchronized(_cache) {
         return @{
             @"cache": _cache,
-            @"interest": _configuredNodes
+            @"interest": _configuredNodes,
+            @"version": @1
         };
     }
 }
@@ -272,6 +279,8 @@
 -(void) setInternalData:(NSDictionary* _Nonnull) data
 {
     @synchronized(_cache) {
+        if(!data[@"version"] || ![data[@"version"] isEqualToNumber:@1])
+            return;     //ignore old data
         _cache = data[@"cache"];
         _configuredNodes = data[@"interest"];
         //update caps hash according to our new _configuredNodes dictionary

@@ -195,7 +195,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(autoJoinRoom:) name:kMLHasConnectedNotice object:nil];
 
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sendOutbox:) name:kMLHasConnectedNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sendOutbox:) name:kMonalFinishedCatchup object:nil];
 
     _path_monitor = nw_path_monitor_create();
     nw_path_monitor_set_queue(_path_monitor, q_background);
@@ -688,10 +688,13 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [[DataLayer sharedInstance] addMessageHistoryFrom:fromJID to:recipient forAccount:accountID withMessage:message actuallyFrom:fromJID withId:msgid encrypted:encrypted withCompletion:^(BOOL successHist, NSString *messageTypeHist) {
         // Send message
         if(successHist) {
+            DDLogInfo(@"Message added to history, now sending...");
             [self sendMessage:message toContact:recipient fromAccount:accountID isEncrypted:encrypted isMUC:NO  isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString *messageIdSend) {
                 if(successSend) completion(successSend, messageIdSend);
             }];
         }
+        else
+            DDLogError(@"Could not add message to history!");
     }];
 }
 
@@ -979,20 +982,20 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 #pragma mark - share sheet added
 
 -(void) sendOutbox: (NSNotification *) notification {
-    NSDictionary *dic = notification.object;
-    NSString *account= [dic objectForKey:@"AccountNo"];
-
+    xmpp* account = notification.object;
     [self sendOutboxForAccount:account];
 }
 
-- (void) sendOutboxForAccount:(NSString *) account{
+- (void) sendOutboxForAccount:(xmpp*) account
+{
     NSMutableArray* outbox = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
     NSMutableArray* outboxClean = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
 
-    for (NSDictionary* row in outbox)
+    DDLogInfo(@"Got message outbox: %@", outbox);
+    for(NSDictionary* row in outbox)
     {
         NSDictionary* accountDic = [row objectForKey:@"account"] ;
-        if([[accountDic objectForKey:kAccountID] integerValue] == [account integerValue])
+        if([[accountDic objectForKey:kAccountID] integerValue] == [account.accountNo integerValue])
         {
             NSString* accountID = [NSString stringWithFormat:@"%@", [accountDic objectForKey:kAccountID]];
             NSString* recipient = [row objectForKey:@"recipient"];
@@ -1014,12 +1017,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
         }
     }
-}
-
--(void) sendMessageForConnectedAccounts
-{
-    for(xmpp* xmppAccount in [self connectedXMPP])
-        [self sendOutboxForAccount:xmppAccount.accountNo];
 }
 
 @end

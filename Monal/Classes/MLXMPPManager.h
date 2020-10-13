@@ -199,6 +199,4 @@ Attempts to upload a file to the  HTTP upload service
 
 -(void) setPushNode:(NSString*) node andSecret:(NSString*)secret;
 
--(void) sendMessageForConnectedAccounts;
-
 @end

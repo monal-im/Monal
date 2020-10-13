@@ -211,10 +211,10 @@
     replyAction.behavior = UIUserNotificationActionBehaviorTextInput;
     
     UIMutableUserNotificationCategory* actionCategory = [[UIMutableUserNotificationCategory alloc] init];
-    actionCategory.identifier = NSLocalizedString(@"Reply", @"");
+    actionCategory.identifier = NSLocalizedString(@"message", @"");
     [actionCategory setActions:@[replyAction] forContext:UIUserNotificationActionContextDefault];
     
-    UIUserNotificationSettings* settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge categories:[NSSet setWithObjects:actionCategory,nil]];
+    UIUserNotificationSettings* settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert categories:[NSSet setWithObjects:actionCategory, nil]];
     [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
     
     //register for voip push using pushkit
@@ -453,7 +453,6 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:self userInfo:nil];
     
     [[MLXMPPManager sharedInstance] setClientsActive];
-    [[MLXMPPManager sharedInstance] sendMessageForConnectedAccounts];
 }
 
 -(void) applicationWillResignActive:(UIApplication *)application

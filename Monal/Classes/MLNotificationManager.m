@@ -154,7 +154,7 @@
         NSString* msgText = message.messageText;
 
         //XEP-0245: The slash me Command
-        if ([message.messageText hasPrefix:@"/me "])
+        if([message.messageText hasPrefix:@"/me "])
         {
             BOOL isMuc = [[DataLayer sharedInstance] isBuddyMuc:message.from forAccount:message.accountId];
             msgText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:message.accountId
@@ -168,7 +168,7 @@
         if(self.notificationPrivacySetting == DisplayNameAndMessage) {
             content.body = msgText;
             content.threadIdentifier = [self threadIdentifierWithMessage:message];
-            content.categoryIdentifier = @"Reply";
+            content.categoryIdentifier = @"message";
         }
 
         if([[HelperTools defaultsDB] boolForKey:@"Sound"])

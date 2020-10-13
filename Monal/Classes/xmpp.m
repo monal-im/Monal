@@ -157,18 +157,15 @@ NSString *const kXMPPPresence = @"presence";
     //setup all other ivars
     [self setupObjects];
     
-    //make sure the rest of our initialization is done on the freshly created (and thus empty) receive queue
-    [self dispatchOnReceiveQueue:^{
-        //read persisted state to make sure we never operate stateless
-        //WARNING: pubsub node registrations should only be made *after* the first readState call
-        [self readState];
-        
-        // Init omemo
-        self.omemo = [[MLOMEMO alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid ressource:self.connectionProperties.identity.resource connectionProps:self.connectionProperties xmppConnection:self];
-        
-        //pubsub avatar handling (XEP-0084)
-        [self handleAvatars];
-    }];
+    //read persisted state to make sure we never operate stateless
+    //WARNING: pubsub node registrations should only be made *after* the first readState call
+    [self readState];
+    
+    // Init omemo
+    self.omemo = [[MLOMEMO alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid ressource:self.connectionProperties.identity.resource connectionProps:self.connectionProperties xmppConnection:self];
+    
+    //pubsub avatar handling (XEP-0084)
+    [self handleAvatars];
     
     return self;
 }
@@ -585,12 +582,23 @@ NSString *const kXMPPPresence = @"presence";
         [_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas from old connections
         [_receiveQueue cancelAllOperations];        //stop everything coming after this (we will start a clean connect here!)
         
-        if(self.accountState>=kStateReconnecting)
+        //sanity check
+        if(self.accountState >= kStateReconnecting)
         {
-            DDLogError(@"assymetrical call to login without a teardown logout, calling reconnect...");
+            DDLogError(@"asymmetrical call to login without a teardown logout, calling reconnect...");
             [self reconnect];
             return;
         }
+        
+        //make sure we are still enabled ("-1" is used for the account registration process and never saved to db)
+        if(![@"-1" isEqualToString:self.accountNo] && ![[DataLayer sharedInstance] isAccountEnabled:self.accountNo])
+        {
+            DDLogError(@"Account '%@' not enabled anymore, ignoring login", self.accountNo);
+            return;
+        }
+        
+        //mark this account as currently connecting
+        _accountState = kStateReconnecting;
         
         //only proceed with connection if not concurrent with other processes
         DDLogVerbose(@"Checking remote process lock...");
@@ -602,18 +610,11 @@ NSString *const kXMPPPresence = @"presence";
         if([HelperTools isAppExtension] && [MLProcessLock checkRemoteRunning:@"MainApp"])
         {
             DDLogInfo(@"MainApp is running, not connecting (this should transition us into idle state again which will terminate this extension)");
-            return;
-        }
-        
-        //make sure we are still enabled ("-1" is used for the account registration process and never saved to db
-        if(![@"-1" isEqualToString:self.accountNo] && ![[DataLayer sharedInstance] isAccountEnabled:self.accountNo])
-        {
-            DDLogError(@"Account '%@' not enabled anymore, ignoring login", self.accountNo);
+            _accountState = kStateDisconnected;
             return;
         }
         
         DDLogInfo(@"XMPP connnect start");
-        _accountState=kStateReconnecting;
         _startTLSComplete = NO;
         _catchupDone = NO;
         
@@ -624,7 +625,7 @@ NSString *const kXMPPPresence = @"presence";
         if([self connectionTask])
         {
             DDLogError(@"Server disallows xmpp connections for account '%@', ignoring login", self.accountNo);
-            _accountState=kStateDisconnected;
+            _accountState = kStateDisconnected;
             return;
         }
         
@@ -1826,8 +1827,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) send:(MLXMLNode*) stanza withSmacks:(BOOL) withSmacks
 {
-    if(!stanza)
-        return;
+    NSAssert(stanza, @"stanza to send should not be nil");
     
     //always add stanzas (not nonzas!) to smacks queue to be resent later (if withSmacks=YES)
     if(withSmacks && [stanza isKindOfClass:[XMPPStanza class]])
@@ -1861,6 +1861,8 @@ NSString *const kXMPPPresence = @"presence";
             [self writeFromQueue];      // try to send if there is space
         }]];
     }
+    else
+        DDLogDebug(@"NOT ADDING STANZA TO SEND QUEUE: %@", stanza);
 }
 
 #pragma mark messaging

@@ -150,7 +150,8 @@
     NSString* idval = [self identifierWithMessage:message];
 
     // only show msgText if allowed
-    if(self.notificationPrivacySetting == DisplayNameAndMessage) {
+    if(self.notificationPrivacySetting == DisplayNameAndMessage)
+    {
         NSString* msgText = message.messageText;
 
         //XEP-0245: The slash me Command
@@ -165,11 +166,15 @@
                                                                                message:message.messageText
                                                                                isGroup:isMuc];
         }
-        if(self.notificationPrivacySetting == DisplayNameAndMessage) {
-            content.body = msgText;
-            content.threadIdentifier = [self threadIdentifierWithMessage:message];
-            content.categoryIdentifier = @"message";
-        }
+        
+        content.body = msgText;
+        content.threadIdentifier = [self threadIdentifierWithMessage:message];
+        content.categoryIdentifier = @"message";
+        content.userInfo = @{
+            @"from": message.from,
+            @"accountId": message.accountId,
+            @"messageId": message.messageId
+        };
 
         if([[HelperTools defaultsDB] boolForKey:@"Sound"])
         {

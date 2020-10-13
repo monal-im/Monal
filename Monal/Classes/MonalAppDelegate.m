@@ -91,25 +91,16 @@
 }
 
 // Handle incoming pushes
--(void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
+-(void) pushRegistry:(PKPushRegistry*) registry didReceiveIncomingPushWithPayload:(PKPushPayload*) payload forType:(PKPushType) type withCompletionHandler:(void (^)(void)) completion
 {
     DDLogInfo(@"incoming voip push notfication: %@", [payload dictionaryPayload]);
     if([UIApplication sharedApplication].applicationState==UIApplicationStateActive) return;
-    if (@available(iOS 13.0, *)) {
+    if(@available(iOS 13.0, *))
         DDLogError(@"Voip push shouldnt arrive on ios13.");
-    }
-    else  {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-                DDLogInfo(@"voip push wake expiring");
-                [[UIApplication sharedApplication] endBackgroundTask:tempTask];
-                tempTask=UIBackgroundTaskInvalid;
-            }];
-            
-            [[MLXMPPManager sharedInstance] connectIfNecessary];
-            DDLogInfo(@"voip push wake complete");
-        });
-    }
+    else
+        [[MLXMPPManager sharedInstance] incomingPushWithCompletionHandler:^(UIBackgroundFetchResult result) {
+            completion();
+        }];
 }
 
 #endif
@@ -198,24 +189,39 @@
 
 - (BOOL)application:(UIApplication*) application didFinishLaunchingWithOptions:(NSDictionary*) launchOptions
 {
-    [UNUserNotificationCenter currentNotificationCenter].delegate=self;
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+    center.delegate = self;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
     
-    //register for local notifications and badges
-    UIMutableUserNotificationAction* replyAction = [[UIMutableUserNotificationAction alloc] init];
-    replyAction.activationMode = UIUserNotificationActivationModeBackground;
-    replyAction.title = NSLocalizedString(@"Reply", @"");
-    replyAction.identifier = NSLocalizedString(@"ReplyButton", @"");
-    replyAction.destructive = NO;
-    replyAction.authenticationRequired = NO;
-    replyAction.behavior = UIUserNotificationActionBehaviorTextInput;
+    UNNotificationAction* replyAction = [UNTextInputNotificationAction
+        actionWithIdentifier:@"REPLY_ACTION"
+        title:NSLocalizedString(@"Reply", @"")
+        options:UNNotificationActionOptionNone
+        textInputButtonTitle:NSLocalizedString(@"Send", @"")
+        textInputPlaceholder:NSLocalizedString(@"Your answer", @"")
+    ];
+    UNNotificationAction* markAsReadAction = [UNNotificationAction
+        actionWithIdentifier:@"MARK_AS_READ_ACTION"
+        title:NSLocalizedString(@"Mark as read", @"")
+        options:UNNotificationActionOptionNone
+    ];
+    UNNotificationCategory* messageCategory;
+    if(@available(iOS 13.0, *))
+        messageCategory = [UNNotificationCategory
+            categoryWithIdentifier:@"message"
+            actions:@[replyAction, markAsReadAction]
+            intentIdentifiers:@[]
+            options:UNNotificationCategoryOptionAllowAnnouncement
+        ];
+    else
+        messageCategory = [UNNotificationCategory
+            categoryWithIdentifier:@"message"
+            actions:@[replyAction, markAsReadAction]
+            intentIdentifiers:@[]
+            options:UNNotificationCategoryOptionNone
+        ];
     
-    UIMutableUserNotificationCategory* actionCategory = [[UIMutableUserNotificationCategory alloc] init];
-    actionCategory.identifier = NSLocalizedString(@"message", @"");
-    [actionCategory setActions:@[replyAction] forContext:UIUserNotificationActionContextDefault];
-    
-    UIUserNotificationSettings* settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert categories:[NSSet setWithObjects:actionCategory, nil]];
-    [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
+    [center setNotificationCategories:[NSSet setWithObjects:messageCategory, nil]];
     
     //register for voip push using pushkit
     if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) {
@@ -304,7 +310,7 @@
 
 -(void) setActiveChatsController: (UIViewController*) activeChats
 {
-    self.activeChats = activeChats;
+    self.activeChats = (ActiveChatsViewController*)activeChats;
 }
 
 #pragma mark - handling urls
@@ -364,23 +370,6 @@
 
 #pragma mark  - user notifications
 
--(void) application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
-{
-    DDLogVerbose(@"did register for local notifications");
-}
-
-- (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
-{
-    DDLogVerbose(@"entering app with didReceiveLocalNotification: %@", notification);
-    
-    //iphone
-    //make sure tab 0 for chat
-    if([notification.userInfo objectForKey:@"from"]) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalPresentChat object:nil  userInfo:notification.userInfo];
-        
-    }
-}
-
 -(void) application:(UIApplication*) application didReceiveRemoteNotification:(NSDictionary*) userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
 {
     DDLogVerbose(@"got didReceiveRemoteNotification: %@", userInfo);
@@ -398,33 +387,57 @@
     }
 }
 
--(void) application:(UIApplication *)application handleActionWithIdentifier:(nullable NSString *)identifier forLocalNotification:(nonnull UILocalNotification *)notification withResponseInfo:(nonnull NSDictionary *)responseInfo completionHandler:(nonnull void (^)(void))completionHandler
+-(void) userNotificationCenter:(UNUserNotificationCenter*) center didReceiveNotificationResponse:(UNNotificationResponse*) response withCompletionHandler:(void (^)(void)) completionHandler
 {
-    if ([notification.category isEqualToString:@"Reply"]) {
-        if ([identifier isEqualToString:@"ReplyButton"]) {
-            NSString *message = responseInfo[UIUserNotificationActionResponseTypedTextKey];
-            if (message.length > 0) {
-                
-                if([notification.userInfo objectForKey:@"from"]) {
-                    
-                    NSString *replyingAccount = [notification.userInfo objectForKey:@"to"];
-                    
-                    NSString *messageID =[[NSUUID UUID] UUIDString];
-                    
-                    BOOL encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:[notification.userInfo objectForKey:@"from"] andAccountNo:[notification.userInfo objectForKey:@"accountNo"]];
-                    
-                    [[DataLayer sharedInstance] addMessageHistoryFrom:replyingAccount to:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:@"accountNo"] withMessage:message actuallyFrom:replyingAccount withId:messageID encrypted:encryptChat withCompletion:^(BOOL success, NSString *messageType) {
-                        
-                    }];
-                    
-                    [[MLXMPPManager sharedInstance] sendMessage:message toContact:[notification.userInfo objectForKey:@"from"] fromAccount:[notification.userInfo objectForKey:@"accountNo"] isEncrypted:encryptChat isMUC:NO isUpload:NO messageId:messageID  withCompletionHandler:^(BOOL success, NSString *messageId) {
-                        
-                    }];
-                }
-            }
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
+    
+    NSString* from = response.notification.request.content.userInfo[@"from"];
+    NSString* accountId = response.notification.request.content.userInfo[@"accountId"];
+    NSString* messageId = response.notification.request.content.userInfo[@"messageId"];
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountId];
+    NSAssert(from, @"from should not be nil");
+    NSAssert(accountId, @"accountId should not be nil");
+    NSAssert(messageId, @"messageId should not be nil");
+    NSAssert(account, @"account should not be nil");
+    if([response.actionIdentifier isEqualToString:@"REPLY_ACTION"])
+    {
+        DDLogInfo(@"REPLY_ACTION triggered...");
+        UNTextInputNotificationResponse* textResponse = (UNTextInputNotificationResponse*) response;
+        if(!textResponse.userText.length)
+        {
+            DDLogWarn(@"User tried to send empty text response!");
+            return;
         }
+        
+        BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:from andAccountNo:accountId];
+        BOOL isMuc = [[DataLayer sharedInstance] isBuddyMuc:from forAccount:accountId];
+        [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:textResponse.userText toContact:from fromAccount:accountId isEncrypted:encrypted isMUC:isMuc isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+            DDLogInfo(@"REPLY_ACTION success=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", messageIdSentObject);
+        }];
     }
-    if(completionHandler) completionHandler();
+    else if([response.actionIdentifier isEqualToString:@"MARK_AS_READ_ACTION"])
+    {
+        DDLogInfo(@"MARK_AS_READ_ACTION triggered...");
+        NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:from andAccount:accountId tillStanzaId:messageId wasOutgoing:NO];
+        DDLogDebug(@"Marked as read: %@", unread);
+        
+        //remove notifications of all remotely read messages (indicated by sending a response message)
+        for(MLMessage* msg in unread)
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
+            [account sendDisplayMarkerForId:msg.messageId to:msg.from];
+        }
+        
+        //update unread count in active chats list
+        MLContact* contact = [MLContact alloc];
+        contact.contactJid = from;
+        contact.accountId = accountId;
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{@"contact": contact}];
+        
+        [self updateUnread];
+    }
+    if(completionHandler)
+        completionHandler();
 }
 
 

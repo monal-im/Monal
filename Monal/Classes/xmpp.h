@@ -148,6 +148,9 @@ extern NSString* const kAccountHibernate;
 -(void) sendIq:(XMPPIQ* _Nonnull) iq withDelegate:(id) delegate andMethod:(SEL) method andAdditionalArguments:(NSArray*) args;
 -(void) sendIq:(XMPPIQ* _Nonnull) iq withDelegate:(id) delegate andMethod:(SEL) method andInvalidationMethod:(SEL) invalidationMethod andAdditionalArguments:(NSArray*) args;
 
+-(void) addSmacksHandler:(monal_void_block_t) handler;
+-(void) addSmacksHandler:(monal_void_block_t) handler forValue:(NSNumber*) value;
+
 /**
  removes a contact from the roster
  */
@@ -218,7 +221,6 @@ Decline a call request
  notifies the server client is in foreground
  */
 -(void) setClientInactive;
-
 
 /*
  HTTP upload

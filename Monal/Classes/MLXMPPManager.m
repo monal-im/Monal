@@ -565,7 +565,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) connectAccountWithDictionary:(NSDictionary*)account
 {
-    xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
+    xmpp* existing = [self getConnectedAccountForID:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
     if(existing)
     {
         DDLogInfo(@"existing account just pinging.");
@@ -664,6 +664,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) connectIfNecessary
 {
+    [self addBackgroundTask];
     NSArray* enabledAccountList = [[DataLayer sharedInstance] enabledAccountList];
     for(NSDictionary* account in enabledAccountList) {
         [self connectAccountWithDictionary:account];
@@ -679,17 +680,29 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 }
 
 #pragma mark -  XMPP commands
--(void) sendMessageAndAddToHistory:(NSString*) message toContact:(NSString*)recipient fromAccount:(NSString*) accountID fromJID:(NSString*) fromJID isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC  isUpload:(BOOL) isUpload withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion {
+-(void) sendMessageAndAddToHistory:(NSString*) message toContact:(NSString*) recipient fromAccount:(NSString*) accountID isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC isUpload:(BOOL) isUpload withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
+{
     NSString* msgid = [[NSUUID UUID] UUIDString];
+    xmpp* account = [self getConnectedAccountForID:accountID];
+    MLContact* contact = [[DataLayer sharedInstance] contactForUsername:recipient forAccount:accountID];
 
     NSAssert(message, @"Message should not be nil");
-
+    NSAssert(account, @"Account should not be nil");
+    NSAssert(account, @"Contact should not be nil");
+    
     // Save message to history
-    [[DataLayer sharedInstance] addMessageHistoryFrom:fromJID to:recipient forAccount:accountID withMessage:message actuallyFrom:fromJID withId:msgid encrypted:encrypted withCompletion:^(BOOL successHist, NSString *messageTypeHist) {
+    [[DataLayer sharedInstance] addMessageHistoryFrom:account.connectionProperties.identity.jid
+                                                   to:recipient
+                                           forAccount:accountID
+                                          withMessage:message
+                                         actuallyFrom:(isMUC ? contact.accountNickInGroup : account.connectionProperties.identity.jid)
+                                               withId:msgid
+                                            encrypted:encrypted
+                                       withCompletion:^(BOOL successHist, NSString *messageTypeHist) {
         // Send message
         if(successHist) {
             DDLogInfo(@"Message added to history, now sending...");
-            [self sendMessage:message toContact:recipient fromAccount:accountID isEncrypted:encrypted isMUC:NO  isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString *messageIdSend) {
+            [self sendMessage:message toContact:recipient fromAccount:accountID isEncrypted:encrypted isMUC:isMUC isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString *messageIdSend) {
                 if(successSend) completion(successSend, messageIdSend);
             }];
         }
@@ -788,7 +801,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
     if(account)
     {
-
         if(contact.isGroup)
         {
             //if MUC
@@ -803,8 +815,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) addContact:(MLContact *) contact
 {
-    xmpp* account =[self getConnectedAccountForID:contact.accountId];
-     [account addToRoster:contact.contactJid];
+    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    [account addToRoster:contact.contactJid];
 }
 
 -(void) getEntitySoftWareVersion:(MLContact *) contact
@@ -852,7 +864,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [account joinRoom:roomName withNick:nick andPassword:password];
 }
 
--(void)  leaveRoom:(NSString*) roomName withNick:(NSString *) nick forAccountId:(NSString*) accountId
+-(void) leaveRoom:(NSString*) roomName withNick:(NSString *) nick forAccountId:(NSString*) accountId
 {
     xmpp* account= [self getConnectedAccountForID:accountId];
     [account leaveRoom:roomName withNick:nick];
@@ -1002,14 +1014,13 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             NSAssert(recipient != nil, @"Recipient missing");
             NSAssert(recipient != nil, @"Recipient missing");
             BOOL encryptMessages = [[DataLayer sharedInstance] shouldEncryptForJid:recipient andAccountNo:accountID];
-            NSString* fromJID = [NSString stringWithFormat:@"%@@%@", [accountDic objectForKey:@"username"], [accountDic objectForKey:@"domain"]];
 
             if([row objectForKey:@"comment"]) {
-                [self sendMessageAndAddToHistory:[row objectForKey:@"comment"] toContact:recipient fromAccount:accountID fromJID:fromJID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                [self sendMessageAndAddToHistory:[row objectForKey:@"comment"] toContact:recipient fromAccount:accountID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
                 }];
             }
             if([row objectForKey:@"url"]) {
-                [self sendMessageAndAddToHistory:[row objectForKey:@"url"] toContact:recipient fromAccount:accountID fromJID:fromJID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                [self sendMessageAndAddToHistory:[row objectForKey:@"url"] toContact:recipient fromAccount:accountID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
                 }];
             }
             // remove msg even after error

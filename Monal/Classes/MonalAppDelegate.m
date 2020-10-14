@@ -410,6 +410,10 @@
             return;
         }
         
+        //mark messages as read because we are replying
+        [[DataLayer sharedInstance] markMessagesAsReadForBuddy:from andAccount:accountId tillStanzaId:messageId wasOutgoing:NO];
+        [self updateUnread];
+        
         BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:from andAccountNo:accountId];
         BOOL isMuc = [[DataLayer sharedInstance] isBuddyMuc:from forAccount:accountId];
         [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:textResponse.userText toContact:from fromAccount:accountId isEncrypted:encrypted isMUC:isMuc isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {

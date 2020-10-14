@@ -223,7 +223,7 @@ static NSMutableDictionary* _typingNotifications;
         NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:messageNode.fromUser andAccount:account.accountNo tillStanzaId:[messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"] wasOutgoing:YES];
         DDLogDebug(@"Marked as displayed: %@", unread);
         for(MLMessage* msg in unread)
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageDisplayedNotice object:account userInfo:@{@"message":msg, kMessageId:[messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"]}];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageDisplayedNotice object:account userInfo:@{@"message":msg, kMessageId:msg.messageId}];
     }
     
     //incoming chat markers from own account (carbon copy)

@@ -1187,6 +1187,7 @@ enum msgSentState {
                     msg.errorReason = [dic objectForKey:@"errorReason"];
                 }
             }
+            
             indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
 
             // Update table entry

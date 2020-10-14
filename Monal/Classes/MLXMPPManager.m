@@ -504,6 +504,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     for(xmpp* xmppAccount in [self connectedXMPP])
     {
+        [xmppAccount unfreezed];
         if(_hasConnectivity)
             [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         [xmppAccount setClientActive];
@@ -513,8 +514,11 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 -(void) pingAllAccounts
 {
     for(xmpp* xmppAccount in [self connectedXMPP])
+    {
+        [xmppAccount unfreezed];
         if(_hasConnectivity)
             [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+    }
 }
 
 -(void) rejectContact:(MLContact*) contact
@@ -568,7 +572,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     xmpp* existing = [self getConnectedAccountForID:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
     if(existing)
     {
-        DDLogInfo(@"existing account just pinging.");
+        DDLogInfo(@"existing account, calling unfreezed");
+        [existing unfreezed];
+        DDLogInfo(@"existing account, just pinging.");
         if(_hasConnectivity)
             [existing sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         else

@@ -115,6 +115,7 @@ extern NSString* const kAccountHibernate;
 
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSString*) accountNo;
 
+-(void) unfreezed;
 -(void) connect;
 -(void) disconnect;
 -(void) disconnect:(BOOL) explicitLogout;

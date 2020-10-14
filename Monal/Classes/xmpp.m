@@ -570,6 +570,15 @@ NSString *const kXMPPPresence = @"presence";
     return NO;
 }
 
+-(void) unfreezed
+{
+    if(self.accountState < kStateReconnecting)
+    {
+        //(re)read persisted state (could be changed by appex)
+        [self readState];
+    }
+}
+
 -(void) connect
 {
     if(![[MLXMPPManager sharedInstance] hasConnectivity])

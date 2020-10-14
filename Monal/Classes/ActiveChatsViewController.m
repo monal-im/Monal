@@ -128,10 +128,7 @@ enum activeChatsControllerSections {
         [self insertOrMoveContact:contact completion:nil];
     } else {
         __block NSIndexPath* indexPath = nil;
-        for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt; section++) {
-            if(indexPath)
-                break;
-
+        for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt && !indexPath; section++) {
             NSMutableArray* curContactArray = [self getChatArrayForSection:section];
 
             // check if contact is already displayed -> get coresponding indexPath
@@ -186,10 +183,7 @@ enum activeChatsControllerSections {
 
 -(void) insertOrMoveContact:(MLContact *) contact completion:(void (^ _Nullable)(BOOL finished))completion {
     __block NSIndexPath* indexPath = nil;
-    for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt; section++) {
-        if(indexPath)
-            break;
-
+    for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt && !indexPath; section++) {
         NSMutableArray* curContactArray = [self getChatArrayForSection:section];
 
         // check if contact is already displayed -> get coresponding indexPath

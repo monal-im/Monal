@@ -127,6 +127,7 @@
         NSInteger unread = 0;
         if(unreadMsgCnt)
             unread = [unreadMsgCnt integerValue];
+        DDLogInfo(@"Updating unread badge to: %ld", (long)unread);
         [UIApplication sharedApplication].applicationIconBadgeNumber = unread;
     } onQueue:dispatch_get_main_queue()];
 }

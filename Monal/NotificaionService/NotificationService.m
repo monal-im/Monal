@@ -98,8 +98,7 @@
         {
             void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
             [self.handlerList removeObject:handler];
-            UNNotificationContent* emptyContent = [[UNNotificationContent alloc] init]; // this is used with special extension filtering entitlement
-            handler(emptyContent);
+            [self callHandler:handler];
         }
     }
 }
@@ -118,6 +117,17 @@
         //(re)connect all accounts
         [[MLXMPPManager sharedInstance] connectIfNecessary];
     }
+}
+
+-(void) callHandler:(void (^)(UNNotificationContent*)) handler
+{
+    //this is used with special extension filtering entitlement which does not show notifications with empty body, title and subtitle
+    //but: app badge updates are still performed: use this to make sure the badge is up to date, even if a message got marked as read (by XEP-0333 etc.)
+    UNMutableNotificationContent* emptyContent = [[UNMutableNotificationContent alloc] init];
+    NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
+    DDLogInfo(@"Updating unread badge to: %@", unreadMsgCnt);
+    emptyContent.badge = unreadMsgCnt;
+    handler(emptyContent);
 }
 
 -(void) feedAllWaitingHandlers
@@ -146,8 +156,7 @@
                 DDLogVerbose(@"Feeding handler");
                 void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
                 [self.handlerList removeObject:handler];
-                UNNotificationContent* emptyContent = [[UNNotificationContent alloc] init]; // this is used with special extension filtering entitlement
-                handler(emptyContent);
+                [self callHandler:handler];
             }
         }
     });

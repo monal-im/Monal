@@ -55,6 +55,8 @@
         newNode = [XMPPMessage alloc];
     else if(_depth == 2 && [elementName isEqualToString:@"presence"] && [namespaceURI isEqualToString:@"jabber:client"])
         newNode = [XMPPPresence alloc];
+    else if([elementName isEqualToString:@"x"] && [namespaceURI isEqualToString:@"jabber:x:data"])
+        newNode = [XMPPDataForm alloc];
     else
         newNode = [MLXMLNode alloc];
     newNode = [newNode initWithElement:elementName andNamespace:namespaceURI withAttributes:attributeDict andChildren:@[] andData:nil];

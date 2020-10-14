@@ -14,6 +14,7 @@
 #import "XMPPIQ.h"
 #import "XMPPPresence.h"
 #import "XMPPMessage.h"
+#import "XMPPDataForm.h"
 
 
 NS_ASSUME_NONNULL_BEGIN

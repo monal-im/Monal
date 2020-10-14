@@ -1038,6 +1038,9 @@ enum msgSentState {
         
         if(result)
         {
+            if(completion)
+                completion(result);
+            
             dispatch_async(dispatch_get_main_queue(), ^{
                 MLMessage* messageObj = [[MLMessage alloc] init];
                 messageObj.actualFrom = self.jid;
@@ -1061,8 +1064,6 @@ enum msgSentState {
                                                    withRowAnimation:UITableViewRowAnimationNone];
                     }
                 } completion:^(BOOL finished) {
-                    if(completion) completion(result);
-
                     [self scrollToBottom];
                 }];
             });

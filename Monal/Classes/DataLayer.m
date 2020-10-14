@@ -1527,14 +1527,16 @@ static NSDateFormatter* dbFormatter;
     NSString* dateTime = [NSString stringWithFormat:@"%@ %@", [parts objectAtIndex:0],[parts objectAtIndex:1]];
     NSString* query = [NSString stringWithFormat:@"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, displayMarkerWanted) values (?,?,?,?,?,?,?,?,?,?,?,?);"];
     NSArray* params = @[accountNo, from, to, dateTime, message, cleanedActualFrom, [NSNumber numberWithBool:NO], [NSNumber numberWithBool:NO], messageId, messageType, [NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:YES]];
-    [self.db beginWriteTransaction];
-    DDLogVerbose(@"%@", query);
-    BOOL result = [self.db executeNonQuery:query andArguments:params];
-    if(result)
-        [self updateActiveBuddy:to setTime:dateTime forAccount:accountNo];
-    [self.db endWriteTransaction];
-    if(completion)
-        completion(result, messageType);
+    
+    [self.db writeTransaction:^{
+        DDLogVerbose(@"%@", query);
+        BOOL result = [self.db executeNonQuery:query andArguments:params];
+        if(result)
+            [self updateActiveBuddy:to setTime:dateTime forAccount:accountNo];
+        //include this completion handler in our db transaction to include the smacks queue update in the same transaction as the our history update
+        if(completion)
+            completion(result, messageType);
+    }];
 }
 
 //count unread

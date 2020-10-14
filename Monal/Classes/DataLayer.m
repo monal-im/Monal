@@ -208,7 +208,7 @@ static NSDateFormatter* dbFormatter;
 {
     if(!accountNo)
         return nil;
-    NSArray* result = [self.db executeReader:@"select * from account where account_id=?;" andArguments:@[accountNo]];
+    NSArray* result = [self.db executeReader:@"select account_id, directTLS, domain, enabled, lastStanzaId, other_port, resource, rosterVersion, selfsigned, server, username from account where account_id=?;" andArguments:@[accountNo]];
     if(result != nil && [result count])
     {
         DDLogVerbose(@"count: %lu", (unsigned long)[result count]);

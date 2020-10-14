@@ -1530,17 +1530,11 @@ static NSDateFormatter* dbFormatter;
     [self.db beginWriteTransaction];
     DDLogVerbose(@"%@", query);
     BOOL result = [self.db executeNonQuery:query andArguments:params];
-    if(result) {
-        BOOL innerSuccess = [self updateActiveBuddy:to setTime:dateTime forAccount:accountNo];
-        if(innerSuccess) {
-            [self.db endWriteTransaction];
-            if (completion) {
-                completion(result, messageType);
-            }
-            return;
-        }
-    }
+    if(result)
+        [self updateActiveBuddy:to setTime:dateTime forAccount:accountNo];
     [self.db endWriteTransaction];
+    if(completion)
+        completion(result, messageType);
 }
 
 //count unread

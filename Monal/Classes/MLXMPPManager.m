@@ -703,8 +703,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         if(successHist) {
             DDLogInfo(@"Message added to history, now sending...");
             [self sendMessage:message toContact:recipient fromAccount:accountID isEncrypted:encrypted isMUC:isMUC isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString *messageIdSend) {
-                if(successSend) completion(successSend, messageIdSend);
+                if(successSend)
+                    completion(successSend, messageIdSend);
             }];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":contact}];
         }
         else
             DDLogError(@"Could not add message to history!");

@@ -126,7 +126,7 @@
     [_account sendIq:query withDelegate:[self class] andMethod:@selector(handleRefreshResultFor:withIqNode:andUpdated:andNode:andJid:andQueryItems:andHandler:) andAdditionalArguments:@[[NSNumber numberWithBool:NO], node, jid, queryItems, handler]];
 }
 
-+(void) handleRefreshResultFor:(xmpp*) account withIqNode:(XMPPIQ*) iqNode andUpdated:(NSNumber*) updated andNode:(NSString*) node andJid:(NSString*) jid andQueryItems:(NSMutableArray*) queryItems andHandler:(NSDictionary*) handler
++(void) handleRefreshResultFor:(xmpp* _Nonnull) account withIqNode:(XMPPIQ* _Nonnull) iqNode andUpdated:(NSNumber* _Nonnull) updated andNode:(NSString* _Nonnull) node andJid:(NSString* _Nonnull) jid andQueryItems:(NSMutableArray* _Nonnull) queryItems andHandler:(NSDictionary* _Nonnull) handler
 {
     if([iqNode check:@"/<type=error>"])
     {
@@ -147,7 +147,7 @@
             [inv setArgument:&jid atIndex:idx++];
             [inv setArgument:&iqNode atIndex:idx++];            //passing this MLXMLNode means "an error occured"
             for(id _Nonnull arg in handler[@"arguments"])
-                [inv setArgument:&arg atIndex:idx++];
+                [inv setArgument:(void* _Nonnull)&arg atIndex:idx++];
             [inv invoke];
         }
     }
@@ -176,7 +176,7 @@
             MLXMLNode* nilPointer = nil;
             [inv setArgument:&nilPointer atIndex:idx++];        //nil pointer means "no error occured"
             for(id _Nonnull arg in handler[@"arguments"])
-                [inv setArgument:&arg atIndex:idx++];
+                [inv setArgument:(void* _Nonnull)&arg atIndex:idx++];
             [inv invoke];
         }
     }

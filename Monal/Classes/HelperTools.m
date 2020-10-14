@@ -16,13 +16,6 @@
 
 @implementation HelperTools
 
-static NSMutableDictionary* protectedFiles;
-
-+(void) initialize
-{
-    protectedFiles = [[NSMutableDictionary alloc] init];
-}
-
 void logException(NSException* exception)
 {
     [DDLog flushLog];
@@ -34,29 +27,21 @@ void logException(NSException* exception)
 +(void) configureFileProtectionFor:(NSString*) file
 {
 #if TARGET_OS_IPHONE
-    @synchronized(protectedFiles) {
-        if(protectedFiles[file])
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    if([fileManager fileExistsAtPath:file])
+    {
+        DDLogError(@"protecting file '%@'...", file);
+        NSError* error;
+        [fileManager setAttributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} ofItemAtPath:file error:&error];
+        DDLogError(@"file '%@' now protected", file);
+        if(error)
         {
-            DDLogError(@"file '%@' already protected!", file);
-            return;
+            DDLogError(@"Error configuring database file protection level for: %@", file);
+            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
         }
-        NSFileManager* fileManager = [NSFileManager defaultManager];
-        if([fileManager fileExistsAtPath:file])
-        {
-            DDLogError(@"protecting file '%@'...", file);
-            NSError* error;
-            [fileManager setAttributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} ofItemAtPath:file error:&error];
-            DDLogError(@"file '%@' now protected", file);
-            if(error)
-            {
-                DDLogError(@"Error configuring database file protection level for: %@", file);
-                @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
-            }
-            protectedFiles[file] = @YES;
-        }
-        else
-            DDLogError(@"file '%@' does not exist!", file);
     }
+    else
+        DDLogError(@"file '%@' does not exist!", file);
 #endif
 }
 
@@ -168,21 +153,23 @@ void logException(NSException* exception)
 
 +(DDFileLogger*) configureLogging
 {
+    //create log formatter
+    MLLogFormatter* formatter = [[MLLogFormatter alloc] init];
+    
     //console logger (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
 #ifdef TARGET_IPHONE_SIMULATOR
-    [[DDTTYLogger sharedInstance] setLogFormatter:[[MLLogFormatter alloc] init]];
+    [[DDTTYLogger sharedInstance] setLogFormatter:formatter];
     [DDLog addLogger:[DDTTYLogger sharedInstance]];
 #else
-    [[DDOSLogger sharedInstance] setLogFormatter:[[MLLogFormatter alloc] init]];
+    [[DDOSLogger sharedInstance] setLogFormatter:formatter];
     [DDLog addLogger:[DDOSLogger sharedInstance]];
 #endif
     
-    //create log formatter for file and network logging
-    MLLogFormatter* formatter = [[MLLogFormatter alloc] init];
-    
-    //file logger
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
+    DDLogInfo(@"Logfile dir: %@", [containerUrl path]);
+    
+    //file logger
     id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:[containerUrl path]];
     DDFileLogger* fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
     [fileLogger setLogFormatter:formatter];
@@ -190,19 +177,24 @@ void logException(NSException* exception)
     fileLogger.logFileManager.maximumNumberOfLogFiles = 3;
     fileLogger.maximumFileSize = 1024 * 1024 * 64;
     [DDLog addLogger:fileLogger];
-    DDLogInfo(@"Logfile dir: %@", [containerUrl path]);
     
     //network logger
     MLUDPLogger* udpLogger = [[MLUDPLogger alloc] init];
     [udpLogger setLogFormatter:formatter];
     [DDLog addLogger:udpLogger];
     
+    //log version info as early as possible
+    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+    NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
+    NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
+    NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
+    DDLogInfo(@"Starting: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
+    [DDLog flushLog];
+    
     //for debugging when upgrading the app
     NSArray* directoryContents = [fileManager contentsOfDirectoryAtPath:[containerUrl path] error:nil];
     for(NSString* file in directoryContents)
-    {
-        DDLogInfo(@"File %@/%@", [containerUrl path], file);
-    }
+        DDLogVerbose(@"File %@/%@", [containerUrl path], file);
     
     return fileLogger;
 }
@@ -387,7 +379,7 @@ void logException(NSException* exception)
     return [self startTimer:timeout withHandler:handler andCancelHandler:nil];
 }
 
-+(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t) cancelHandler
++(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler
 {
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     if(timeout<=0.001)

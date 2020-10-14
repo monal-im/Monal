@@ -49,5 +49,5 @@
  */
 -(void) purgeCache;
 
--(void) saveImageData:(NSData *) data forLink:(NSString *) link;
+-(void) saveImageData:(NSData* _Nonnull) data forLink:(NSString* _Nonnull) link;
 @end

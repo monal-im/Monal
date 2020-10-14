@@ -11,7 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef id (^monal_sqlite_operations_t)(void);
+typedef id _Nullable (^monal_sqlite_operations_t)(void);
 
 @interface MLSQLite : NSObject
 

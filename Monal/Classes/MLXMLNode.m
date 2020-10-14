@@ -165,16 +165,6 @@ static NSRegularExpression* attributeFilterRegex;
     [_attributes setObject:[xmlns copy] forKey:kXMLNS];
 }
 
-+(MLXMLNode*) createFormEntry:(NSString*) name withValue:(NSString*) value andType:(NSString*) type
-{
-    MLXMLNode* retval = [[MLXMLNode alloc] initWithElement:@"field" withAttributes:@{@"var":name} andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{@"var":name} andChildren:@[] andData:value]
-    ] andData:nil];
-    if(type)
-        retval.attributes[@"type"] = type;
-    return retval;
-}
-
 -(void) addChild:(MLXMLNode*) child
 {
     if(!child)
@@ -335,7 +325,7 @@ static NSRegularExpression* attributeFilterRegex;
     
     //if no namespace was given, use the parent one (no namespace means the namespace will be inherited)
     //this will allow all namespaces "{*}" if the nodes in nodesToCheck don't have a parent at all
-    if(!parsedEntry[@"namespace"] || [parsedEntry[@"namespace"] isEqualToString:@""] && ((MLXMLNode*)nodesToCheck[0]).parent)
+    if((!parsedEntry[@"namespace"] || [parsedEntry[@"namespace"] isEqualToString:@""]) && ((MLXMLNode*)nodesToCheck[0]).parent)
         parsedEntry[@"namespace"] = ((MLXMLNode*)nodesToCheck[0]).parent.attributes[@"xmlns"];      //all nodesToCheck have the same parent, just pick the first one
     
     //"*" is just syntactic sugar for an empty namespace name which means "any namespace allowed"

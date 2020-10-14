@@ -53,7 +53,7 @@
 
 -(void) setField:(NSString* _Nonnull) name withType:(NSString*) type andValue:(NSString* _Nonnull) value
 {
-    NSArray* attrs = type ? @{@"type": type, @"var": name} : @{@"var": name};
+    NSDictionary* attrs = type ? @{@"type": type, @"var": name} : @{@"var": name};
     [self removeChild:[self findFirst:[NSString stringWithFormat:@"field<var=%@>", name]]];
     [self addChild:[[MLXMLNode alloc] initWithElement:@"field" withAttributes:attrs andChildren:@[
         [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:value]

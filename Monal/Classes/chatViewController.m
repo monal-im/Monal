@@ -1812,25 +1812,26 @@ enum msgSentState {
         
         //now load more (older) messages from mam if not
         DDLogVerbose(@"Loading more messages from mam before stanzaId %@", oldestStanzaId);
-        __weak chatViewController *weakSelf = self;
+        weakify(self);
         [self.xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid before:oldestStanzaId withCompletion:^(NSArray* _Nullable messages) {
+            strongify(self);
             if(!messages)
             {
                 DDLogError(@"Got backscrolling mam error");
-                weakSelf.moreMessagesAvailable = NO;
+                self.moreMessagesAvailable = NO;
                 //TODO: error happened --> display this to user?
             }
             else
             {
                 if([messages count] == 0) {
-                    weakSelf.moreMessagesAvailable = NO;
+                    self.moreMessagesAvailable = NO;
                 }
                 DDLogVerbose(@"Got backscrolling mam response: %lu", (unsigned long)[messages count]);
-                [weakSelf insertOldMessages:messages];      //this array is already in reverse order
+                [self insertOldMessages:messages];      //this array is already in reverse order
             }
             //allow next mam fetch
             dispatch_async(dispatch_get_main_queue(), ^{
-                weakSelf.isLoadingMam = NO;
+                self.isLoadingMam = NO;
                 if(sender)
                     [(UIRefreshControl *)sender endRefreshing];
             });

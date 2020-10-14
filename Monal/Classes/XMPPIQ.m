@@ -7,6 +7,7 @@
 //
 
 #import "XMPPIQ.h"
+#import "XMPPDataForm.h"
 #import "HelperTools.h"
 #import "SignalPreKey.h"
 
@@ -70,12 +71,9 @@ NSString* const kiqErrorType = @"error";
         @"jid": [MLPush pushServer],
         @"node": node
     } andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data" withAttributes:@{
-            @"type": @"submit"
-        } andChildren:@[
-            [MLXMLNode createFormEntry:@"FORM_TYPE" withValue:@"http://jabber.org/protocol/pubsub#publish-options" andType:nil],
-            [MLXMLNode createFormEntry:@"secret" withValue:secret andType:nil]
-        ] andData:nil]
+        [[XMPPDataForm alloc] initWithType:@"submit" formType:@"http://jabber.org/protocol/pubsub#publish-options" andDictionary:@{
+            @"secret": secret
+        }]
     ] andData:nil]];
 }
 

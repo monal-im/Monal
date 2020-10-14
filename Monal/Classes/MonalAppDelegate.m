@@ -186,6 +186,8 @@
         DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
         [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
     }
+    
+    return YES;
 }
 
 - (BOOL)application:(UIApplication*) application didFinishLaunchingWithOptions:(NSDictionary*) launchOptions

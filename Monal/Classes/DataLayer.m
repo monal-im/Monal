@@ -355,7 +355,7 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark contact Commands
 
--(BOOL) addContact:(NSString*) contact forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName andMucNick:(NSString*) mucNick
+-(BOOL) addContact:(NSString*) contact forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName andMucNick:(NSString* _Nullable) mucNick
 {
     // no blank full names
     NSString* actualfull = fullName;
@@ -577,7 +577,7 @@ static NSDateFormatter* dbFormatter;
     
     //cleanup old entries
     NSString* query3 = [NSString stringWithFormat:@"SELECT ver FROM ver_timestamp WHERE timestamp<?"];
-    NSArray* params3 = @[[NSNumber numberWithInt:[timestamp integerValue] - (86400 * 28)]];     //cache timeout is 28 days
+    NSArray* params3 = @[[NSNumber numberWithInteger:[timestamp integerValue] - (86400 * 28)]];     //cache timeout is 28 days
     NSArray* oldEntries = [self.db executeReader:query3 andArguments:params3];
     if(oldEntries)
         for(NSDictionary* row in oldEntries)

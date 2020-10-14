@@ -15,7 +15,6 @@
 @class XMPPMessage;
 
 typedef void (^monal_pubsub_handler_t)(NSDictionary* _Nonnull items, NSString* _Nonnull jid, NSSet* _Nonnull changedIdList);
-typedef void (^monal_pubsub_fetch_completion_t)(BOOL success, id additionalData);
 
 @interface MLPubSub : NSObject
 {
@@ -26,7 +25,7 @@ typedef void (^monal_pubsub_fetch_completion_t)(BOOL success, id additionalData)
 -(void) unregisterInterestForNode:(NSString* _Nonnull) node;
 
 //register data handlers
--(void) registerForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nullable) jid withHandler:(monal_pubsub_handler_t) handler;
+-(void) registerForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nullable) jid withHandler:(monal_pubsub_handler_t _Nonnull) handler;
 -(void) unregisterForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nullable) jid;
 
 //manually get cached data or force refresh it
@@ -41,11 +40,11 @@ typedef void (^monal_pubsub_fetch_completion_t)(BOOL success, id additionalData)
 
 
 //methods internal to our framework
--(id) initWithAccount:(xmpp* _Nonnull) account;
--(NSDictionary*) getInternalData;
+-(id _Nonnull) initWithAccount:(xmpp* _Nonnull) account;
+-(NSDictionary* _Nonnull) getInternalData;
 -(void) setInternalData:(NSDictionary* _Nonnull) data;
 -(void) invalidateCache;
 -(void) handleHeadlineMessage:(XMPPMessage* _Nonnull) messageNode;
-+(void) handleRefreshResultFor:(xmpp*) account withIqNode:(XMPPIQ*) iqNode andUpdated:(NSNumber*) updated andNode:(NSString*) node andJid:(NSString*) jid andQueryItems:(NSMutableArray*) queryItems andHandler:(NSDictionary*) handler;
++(void) handleRefreshResultFor:(xmpp* _Nonnull) account withIqNode:(XMPPIQ* _Nonnull) iqNode andUpdated:(NSNumber* _Nonnull) updated andNode:(NSString* _Nonnull) node andJid:(NSString* _Nonnull) jid andQueryItems:(NSMutableArray* _Nonnull) queryItems andHandler:(NSDictionary* _Nonnull) handler;
 
 @end

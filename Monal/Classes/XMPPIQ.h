@@ -139,10 +139,10 @@ removes a contact from the roster
 -(void) requestNode:(NSString*) node;
 
 #pragma mark - account
--(void) changePasswordForUser:(NSString *) user newPassword:(NSString *)newPsss;
+-(void) changePasswordForUser:(NSString* _Nonnull) user newPassword:(NSString* _Nonnull) newPsss;
 -(void) getRegistrationFields;
--(void) registerUser:(NSString *) user withPassword:(NSString *) newPass captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields;
+-(void) registerUser:(NSString* _Nonnull) user withPassword:(NSString* _Nonnull) newPass captcha:(NSString* _Nonnull) captcha andHiddenFields:(NSDictionary* _Nonnull) hiddenFields;
 
 @end
 
-typedef void (^monal_iq_handler_t)(XMPPIQ*);
+typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);

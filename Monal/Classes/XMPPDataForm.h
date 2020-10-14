@@ -19,11 +19,11 @@
 
 -(void) setFieldWithDictionary:(NSDictionary* _Nonnull) field;
 -(void) setField:(NSString* _Nonnull) name withValue:(NSString* _Nonnull) value;
--(void) setField:(NSString* _Nonnull) name withType:(NSString*) type andValue:(NSString* _Nonnull) value;
+-(void) setField:(NSString* _Nonnull) name withType:(NSString* _Nonnull) type andValue:(NSString* _Nonnull) value;
 -(NSDictionary* _Nullable) getField:(NSString* _Nonnull) name;
 -(void) removeField:(NSString* _Nonnull) name;
 
--(id) objectForKeyedSubscript:(NSString* _Nonnull) key;
+-(id _Nullable) objectForKeyedSubscript:(NSString* _Nonnull) key;
 -(void) setObject:(id _Nullable) obj forKeyedSubscript:(NSString* _Nonnull) key;
 
 @property (atomic, strong) NSString* _Nonnull type;

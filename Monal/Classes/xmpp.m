@@ -1210,8 +1210,8 @@ NSString *const kXMPPPresence = @"presence";
                 //remove acked messages
                 [self removeAckedStanzasFromQueue:h];
 
-                self.smacksRequestInFlight=NO;			//ack returned
-                [self requestSMAck:NO];					//request ack again (will only happen if queue is not empty)
+                self.smacksRequestInFlight = NO;        //ack returned
+                [self requestSMAck:NO];                 //request ack again (will only happen if queue is not empty)
             }
         }
         else if([parsedStanza check:@"/{jabber:client}presence"])
@@ -1563,10 +1563,12 @@ NSString *const kXMPPPresence = @"presence";
                     [self requestSMAck:YES];    //force sending of the request even if the smacks queue is empty (needed to always trigger the smacks handler below after 1 RTT)
                 weakify(self);
                 [self addSmacksHandler:^{
+                    DDLogVerbose(@"Inside resume smacks handler: catchup done");
                     strongify(self);
                     if(!self->_catchupDone)
                     {
                         self->_catchupDone = YES;
+                        DDLogVerbose(@"Now posting kMonalFinishedCatchup notification");
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
                     }
                 }];
@@ -2034,10 +2036,10 @@ NSString *const kXMPPPresence = @"presence";
                 for(NSDictionary* dic in self.unAckedStanzas)
                     DDLogDebug(@"readSmacksStateOnly unAckedStanza %@: %@", [dic objectForKey:kQueueID], [dic objectForKey:kStanza]);
             
-            //always reset handler and smacksRequestInFlight when loading smacks state
-            _smacksAckHandler = [[NSMutableArray alloc] init];
-            self.smacksRequestInFlight = NO;
         }
+        //always reset handler and smacksRequestInFlight when loading smacks state
+        _smacksAckHandler = [[NSMutableArray alloc] init];
+        self.smacksRequestInFlight = NO;
     }
 }
 

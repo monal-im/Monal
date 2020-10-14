@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface MLXMLNode : NSObject <NSSecureCoding>
 {
     
@@ -21,26 +23,24 @@
  */
 -(id) initWithElement:(NSString*) element;
 -(id) initWithElement:(NSString*) element andNamespace:(NSString*) xmlns;
--(id) initWithElement:(NSString*) element andNamespace:(NSString*) xmlns withAttributes:(NSDictionary*) attributes andChildren:(NSArray*) children andData:(NSString*) data;
--(id) initWithElement:(NSString*) element withAttributes:(NSDictionary*) attributes andChildren:(NSArray*) children andData:(NSString*) data;
+-(id) initWithElement:(NSString*) element andNamespace:(NSString*) xmlns withAttributes:(NSDictionary*) attributes andChildren:(NSArray*) children andData:(NSString* _Nullable) data;
+-(id) initWithElement:(NSString*) element withAttributes:(NSDictionary*) attributes andChildren:(NSArray*) children andData:(NSString* _Nullable) data;
 
 /**
  Query for text contents, elementNames, attributes or child elements
  */
--(NSArray*) find:(NSString* _Nonnull) queryString;
--(id) findFirst:(NSString* _Nonnull) queryString;
+-(NSArray*) find:(NSString*) queryString;
+-(id _Nullable) findFirst:(NSString*) queryString;
 
 /**
  Check if the current node matches the queryString and/or its extraction command would return something
  */
--(BOOL) check:(NSString* _Nonnull) queryString;
+-(BOOL) check:(NSString*) queryString;
 
 /**
  Quickly set an XMLNS attribute
  */
 -(void) setXMLNS:(NSString*) xmlns;
-
-+(MLXMLNode*) createFormEntry:(NSString*) name withValue:(NSString*) value andType:(NSString*) type;
 
 /**
  Generates an XML String suitable for writing based on the node
@@ -77,11 +77,13 @@
 /**
  String to be inserted into the data field between elements. AKA inner text.
  */
-@property (atomic, strong) NSString* data;
+@property (atomic, strong) NSString* _Nullable data;
 
 /**
  Parent node of this one (if any)
  */
-@property (atomic, readonly) MLXMLNode* parent;
+@property (atomic, readonly) MLXMLNode* _Nullable parent;
 
 @end
+
+NS_ASSUME_NONNULL_END

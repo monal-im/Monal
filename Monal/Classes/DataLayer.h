@@ -12,32 +12,33 @@
 #import "MLMessage.h"
 #import "MLContact.h"
 
+NS_ASSUME_NONNULL_BEGIN
 
 @interface DataLayer : NSObject
 
-extern NSString *const kAccountID;
-extern NSString *const kDomain;
-extern NSString *const kEnabled;
+extern NSString* const kAccountID;
+extern NSString* const kDomain;
+extern NSString* const kEnabled;
 
-extern NSString *const kServer;
-extern NSString *const kPort;
-extern NSString *const kResource;
-extern NSString *const kDirectTLS;
-extern NSString *const kSelfSigned;
+extern NSString* const kServer;
+extern NSString* const kPort;
+extern NSString* const kResource;
+extern NSString* const kDirectTLS;
+extern NSString* const kSelfSigned;
 
-extern NSString *const kUsername;
-extern NSString *const kFullName;
+extern NSString* const kUsername;
+extern NSString* const kFullName;
 
-extern NSString *const kContactName;
-extern NSString *const kCount;
+extern NSString* const kContactName;
+extern NSString* const kCount;
 
-extern NSString *const kMessageType;
-extern NSString *const kMessageTypeGeo;
-extern NSString *const kMessageTypeImage;
-extern NSString *const kMessageTypeMessageDraft;
-extern NSString *const kMessageTypeStatus;
-extern NSString *const kMessageTypeText;
-extern NSString *const kMessageTypeUrl;
+extern NSString* const kMessageType;
+extern NSString* const kMessageTypeGeo;
+extern NSString* const kMessageTypeImage;
+extern NSString* const kMessageTypeMessageDraft;
+extern NSString* const kMessageTypeStatus;
+extern NSString* const kMessageTypeText;
+extern NSString* const kMessageTypeUrl;
 
 +(DataLayer*) sharedInstance;
 -(void) version;
@@ -47,7 +48,7 @@ extern NSString *const kMessageTypeUrl;
 -(void) setRosterVersion:(NSString *) version forAccount: (NSString*) accountNo;
 
 // Buddy Commands
--(BOOL) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName andMucNick:(NSString *) mucNick;
+-(BOOL) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName andMucNick:(NSString* _Nullable) mucNick;
 -(void) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(BOOL) clearBuddies:(NSString*) accountNo;
 -(MLContact*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo;
@@ -275,5 +276,6 @@ retrieves the actual_from of the the last message from hisroty id
 -(NSDictionary *) getSubscriptionForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 -(void) setSubscription:(NSString *)sub andAsk:(NSString*) ask forContact:(NSString*) contact andAccount:(NSString*) accountNo;
 
-
 @end
+
+NS_ASSUME_NONNULL_END

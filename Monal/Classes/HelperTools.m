@@ -36,12 +36,17 @@ void logException(NSException* exception)
 #if TARGET_OS_IPHONE
     @synchronized(protectedFiles) {
         if(protectedFiles[file])
+        {
+            DDLogError(@"file '%@' already protected!", file);
             return;
+        }
         NSFileManager* fileManager = [NSFileManager defaultManager];
         if([fileManager fileExistsAtPath:file])
         {
+            DDLogError(@"protecting file '%@'...", file);
             NSError* error;
             [fileManager setAttributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} ofItemAtPath:file error:&error];
+            DDLogError(@"file '%@' now protected", file);
             if(error)
             {
                 DDLogError(@"Error configuring database file protection level for: %@", file);
@@ -49,6 +54,8 @@ void logException(NSException* exception)
             }
             protectedFiles[file] = @YES;
         }
+        else
+            DDLogError(@"file '%@' does not exist!", file);
     }
 #endif
 }

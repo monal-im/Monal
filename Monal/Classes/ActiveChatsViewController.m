@@ -72,7 +72,6 @@ enum activeChatsControllerSections {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageSent:) name:kMLMessageSentToContact object:nil];
-       
     
     [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell"
                                                bundle:[NSBundle mainBundle]]
@@ -172,11 +171,11 @@ enum activeChatsControllerSections {
     if([msgAccount.connectionProperties.identity.jid isEqualToString:newMessage.from]) {
         buddyContactJid = newMessage.to;
     }
-    NSArray* contactArr = [[DataLayer sharedInstance] contactForUsername:buddyContactJid forAccount:newMessage.accountId];
-    if(!contactArr || [contactArr count] == 0)
-        return;
 
-    MLContact* contact = [contactArr objectAtIndex:0];
+    MLContact* contact = [[DataLayer sharedInstance] contactForUsername:buddyContactJid forAccount:newMessage.accountId];
+    if(!contact)
+        return;
+    
     // contact.statusMessage = newMessage;
     [self insertOrMoveContact:contact completion:nil];
 }

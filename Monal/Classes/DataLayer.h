@@ -50,7 +50,7 @@ extern NSString *const kMessageTypeUrl;
 -(BOOL) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName andMucNick:(NSString *) mucNick;
 -(void) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(BOOL) clearBuddies:(NSString*) accountNo;
--(NSArray*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo;
+-(MLContact*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo;
 
 /**
  should be called when a new session needs to be established

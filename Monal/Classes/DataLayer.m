@@ -411,29 +411,19 @@ static NSDateFormatter* dbFormatter;
     return (retval != NO);
 }
 
--(NSArray*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo
+-(MLContact*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo
 {
-    if(!username || !accountNo) return nil;
-    NSString* query = query = [NSString stringWithFormat:@"SELECT a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id, lastMessageTime, 0 AS 'count', subscription, ask, pinned from activechats as a JOIN buddylist AS b WHERE a.buddy_name = b.buddy_name AND a.account_id = b.account_id AND a.buddy_name=? and a.account_id=?"];
-    NSArray* params = @[username, accountNo];
-
-    NSArray* results = [self.db executeReader:query andArguments:params];
-    if(results != nil)
+    if(!username || !accountNo)
+        return nil;
+    
+    NSArray* results = [self.db executeReader:@"SELECT a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id, lastMessageTime, 0 AS 'count', subscription, ask, pinned from activechats as a JOIN buddylist AS b WHERE a.buddy_name = b.buddy_name AND a.account_id = b.account_id AND a.buddy_name=? and a.account_id=?" andArguments:@[username, accountNo]];
+    if(results != nil && [results count] != 1)
     {
-        DDLogVerbose(@" count: %lu",  (unsigned long)[results count]);
-
+        DDLogError(@"unexpected contact count for %@ in account %@: %lu",  username, accountNo, (unsigned long)[results count]);
+        return nil;
     }
-    else
-    {
-        DDLogError(@"buddylist is empty or failed to read");
-    }
-
-    NSMutableArray* toReturn = [[NSMutableArray alloc] initWithCapacity:results.count];
-    [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSDictionary* dic = (NSDictionary *) obj;
-        [toReturn addObject:[MLContact contactFromDictionary:dic]];
-    }];
-    return toReturn;
+    
+    return [MLContact contactFromDictionary:results[0]];
 }
 
 

@@ -694,7 +694,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
     NSAssert(message, @"Message should not be nil");
     NSAssert(account, @"Account should not be nil");
-    NSAssert(account, @"Contact should not be nil");
+    NSAssert(contact, @"Contact should not be nil");
     
     // Save message to history
     [[DataLayer sharedInstance] addMessageHistoryFrom:account.connectionProperties.identity.jid
@@ -712,6 +712,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                 if(successSend)
                     completion(successSend, messageIdSend);
             }];
+            DDLogVerbose(@"Notifying active chats of change for contact %@", contact);
             [[NSNotificationCenter defaultCenter] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":contact}];
         }
         else

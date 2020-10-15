@@ -1121,30 +1121,32 @@ static NSDateFormatter* dbFormatter;
     if(!accountNo)
         return NO;
     
-    if(stanzaId)
-    {
-        NSObject* found = [self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND stanzaid!='' AND stanzaid=?;" andArguments:@[accountNo, stanzaId]];
-        if(found)
-            return YES;
-    }
-    
-    //we check message ids per contact to increase uniqueness and abort here if no contact was provided
-    if(!contact)
-        return NO;
-    
-    NSNumber* historyId = (NSNumber*)[self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND message_from=? AND messageid=?;" andArguments:@[accountNo, contact, messageId]];
-    if(historyId)
-    {
+    return [[self.db returningWriteTransaction:^{
         if(stanzaId)
         {
-            DDLogVerbose(@"Updating stanzaid of message_history_id %@ to %@ for (account=%@, messageid=%@, contact=%@)...", historyId, stanzaId, accountNo, messageId, contact);
-            //this entry needs an update of its stanzaid
-            [self.db executeNonQuery:@"UPDATE message_history SET stanzaid=? WHERE message_history_id=?" andArguments:@[stanzaId, historyId]];
+            NSObject* found = [self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND stanzaid!='' AND stanzaid=?;" andArguments:@[accountNo, stanzaId]];
+            if(found)
+                return @YES;
         }
-        return YES;
-    }
-
-    return NO;
+        
+        //we check message ids per contact to increase uniqueness and abort here if no contact was provided
+        if(!contact)
+            return @NO;
+        
+        NSNumber* historyId = (NSNumber*)[self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND message_from=? AND messageid=?;" andArguments:@[accountNo, contact, messageId]];
+        if(historyId)
+        {
+            if(stanzaId)
+            {
+                DDLogVerbose(@"Updating stanzaid of message_history_id %@ to %@ for (account=%@, messageid=%@, contact=%@)...", historyId, stanzaId, accountNo, messageId, contact);
+                //this entry needs an update of its stanzaid
+                [self.db executeNonQuery:@"UPDATE message_history SET stanzaid=? WHERE message_history_id=?" andArguments:@[stanzaId, historyId]];
+            }
+            return @YES;
+        }
+        
+        return @NO;
+    }] boolValue];
 }
 
 -(void) setMessageId:(NSString*) messageid sent:(BOOL) sent

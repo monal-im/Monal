@@ -139,7 +139,7 @@ static NSMutableDictionary* _typingNotifications;
                 if(![[messageNode findFirst:@"/<type=headline>/subject#"] isEqualToString:currentSubject])
                 {
                     [[DataLayer sharedInstance] updateMucSubject:[messageNode findFirst:@"/<type=headline>/subject#"] forAccount:account.accountNo andRoom:messageNode.fromUser];
-                    [self postPersistActionForAccount:account andMessage:messageNode andOuterMessage:outerMessageNode andSuccess:YES andEncrypted:encrypted andShowAlert:showAlert andBody:[messageNode findFirst:@"/<type=headline>/subject#"] andMessageType:messageType andActualFrom:actualFrom];
+                    [self postPersistActionForAccount:account andMessage:messageNode andOuterMessage:outerMessageNode andSuccess:YES andEncrypted:encrypted andShowAlert:showAlert andBody:[messageNode findFirst:@"/<type=headline>/subject#"] andMessageType:messageType andActualFrom:actualFrom andHistoryId:nil];
                 }
                 return;
             }
@@ -172,8 +172,8 @@ static NSMutableDictionary* _typingNotifications;
                                                  encrypted:encrypted
                                                  backwards:NO
                                        displayMarkerWanted:[messageNode check:@"{urn:xmpp:chat-markers:0}markable"]
-                                            withCompletion:^(BOOL success, NSString* newMessageType) {
-                    [self postPersistActionForAccount:account andMessage:messageNode andOuterMessage:outerMessageNode andSuccess:success andEncrypted:encrypted andShowAlert:showAlert andBody:body andMessageType:newMessageType andActualFrom:actualFrom];
+                                            withCompletion:^(BOOL success, NSString* newMessageType, NSNumber* historyId) {
+                    [self postPersistActionForAccount:account andMessage:messageNode andOuterMessage:outerMessageNode andSuccess:success andEncrypted:encrypted andShowAlert:showAlert andBody:body andMessageType:newMessageType andActualFrom:actualFrom andHistoryId:historyId];
                 }];
                 
                 //check if we have an outgoing message sent from another client on our account
@@ -314,7 +314,7 @@ static NSMutableDictionary* _typingNotifications;
     }
 }
 
-+(void) postPersistActionForAccount:(xmpp*) account andMessage:(XMPPMessage*) messageNode andOuterMessage:(XMPPMessage*) outerMessageNode andSuccess:(BOOL) success andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andBody:(NSString*) body andMessageType:(NSString*) newMessageType andActualFrom:(NSString*) actualFrom
++(void) postPersistActionForAccount:(xmpp*) account andMessage:(XMPPMessage*) messageNode andOuterMessage:(XMPPMessage*) outerMessageNode andSuccess:(BOOL) success andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andBody:(NSString*) body andMessageType:(NSString*) newMessageType andActualFrom:(NSString*) actualFrom andHistoryId:(NSNumber*) historyId
 {
     if(success)
     {
@@ -342,7 +342,10 @@ static NSMutableDictionary* _typingNotifications;
         
         DDLogInfo(@"sending out kMonalNewMessageNotice notification");
         MLMessage* message = [account parseMessageToMLMessage:messageNode withBody:body andEncrypted:encrypted andShowAlert:showAlert andMessageType:newMessageType andActualFrom:actualFrom];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{@"message":message}];
+        if(historyId)
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{@"message":message, @"historyId":historyId}];
+        else
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{@"message":message}];
     }
     else
         DDLogError(@"error adding message");

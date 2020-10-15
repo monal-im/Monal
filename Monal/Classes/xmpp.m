@@ -2551,7 +2551,7 @@ NSString *const kXMPPPresence = @"presence";
                                                  encrypted:msg.encrypted
                                                  backwards:YES
                                        displayMarkerWanted:NO
-                                            withCompletion:^(BOOL success, NSString* newMessageType) {
+                                            withCompletion:^(BOOL success, NSString* newMessageType, NSNumber* historyId) {
                     //add successfully added messages to our display list
                     if(success)
                         [messageList addObject:msg];

@@ -1028,10 +1028,12 @@ static NSDateFormatter* dbFormatter;
     return messageArray;
 }
 
--(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted backwards:(BOOL) backwards displayMarkerWanted:(BOOL) displayMarkerWanted withCompletion: (void (^)(BOOL, NSString*))completion
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted backwards:(BOOL) backwards displayMarkerWanted:(BOOL) displayMarkerWanted withCompletion: (void (^)(BOOL, NSString*, NSNumber*))completion
 {
-    if(!from || !to || !message) {
-        if(completion) completion(NO, nil);
+    if(!from || !to || !message)
+    {
+        if(completion)
+            completion(NO, nil, nil);
         return;
     }
 
@@ -1088,11 +1090,12 @@ static NSDateFormatter* dbFormatter;
             }
             DDLogVerbose(@"%@", query);
             BOOL success = [self.db executeNonQuery:query andArguments:params];
+            NSNumber* historyId = [self.db lastInsertId];
             if(success)
                 [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
             [self.db endWriteTransaction];
             if(completion)
-                completion(success, messageType);
+                completion(success, messageType, historyId);
         }
         else
         {
@@ -1100,11 +1103,12 @@ static NSDateFormatter* dbFormatter;
             NSArray* params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:sent], messageid?messageid:@"", typeToUse, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
             DDLogVerbose(@"%@", query);
             BOOL success = [self.db executeNonQuery:query andArguments:params];
+            NSNumber* historyId = [self.db lastInsertId];
             if(success)
                 [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
             [self.db endWriteTransaction];
             if(completion)
-                completion(success, messageType);
+                completion(success, messageType, historyId);
         }
     }
     else
@@ -1112,7 +1116,7 @@ static NSDateFormatter* dbFormatter;
         DDLogError(@"Message(%@) %@ with stanzaid %@ already existing, ignoring history update", accountNo, messageid, stanzaid);
         [self.db endWriteTransaction];
         if(completion)
-            completion(NO, nil);
+            completion(NO, nil, nil);
     }
 }
 

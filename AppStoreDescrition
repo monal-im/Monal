@@ -1,0 +1,25 @@
+There has never been a better time to get into XMPP, a free public chat network that no one controls or owns. 
+Monal is a fast and user friendly way to use the decentral XMPP protocol (known as Jabber). Just download the app, login or register and you are ready 
+to chat in minutes. Monal attempts to create a decent chat experience with XMPP in the Apple ecosystem.
+
+Notable features:
+
+- Open Source and free software (BSD 2-Clause License)
+- No Ads! Strong focus on privacy. Monal does not track you and does not have data metric software 
+included and does not read any personal information. 
+- With the XMPP protocol a direct connection to your server ensures you can keep control of your data.
+- Encrypted chat with OMEMO
+- Monal will work with corporate XMPP servers that require a VPN
+- MUC multi-user chat integration
+
+The software is availbale on iOS and MacOS.
+
+Monal implements XEP modules and extensions to ensure an enjoying mobile communication experience:
+
+- XEP-0357: Push Notifications
+- XEP-0280: Message Carbons
+- XEP-0198: Stream Management
+- XEP-0199: XMPP Ping to maintain connections
+- XEP-0313: Message Archive Management
+- XEP-0352: Client State Indication
+- XEP-0363: HTTP File Upload

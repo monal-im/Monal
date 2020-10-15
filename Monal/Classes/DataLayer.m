@@ -2380,4 +2380,58 @@ static NSDateFormatter* dbFormatter;
     return;
 }
 
+#pragma mark History Message Search (search keyword in message, message_from, actual_from, messageType)
+
+-(NSArray*)searchResultOfHistoryMessageWithKeyWords:(NSString*)keyword accountNo:(NSString*) accountNo
+{
+    if(!keyword || !accountNo) return nil;
+    NSString *likeString = [NSString stringWithFormat:@"%%%@%%", keyword];
+    NSString* query = [NSString stringWithFormat:@"select actual_from as af, message_from, message_to, account_id, message, timestamp  as thetime, message_history_id, sent, messageid, messageType, received, encrypted, previewImage, previewText, unread, errorType, errorReason, stanzaid from message_history where account_id = ? and (message like ? or message_from like ? or actual_from like ? or messageType like ?) order by timestamp"];
+    
+    NSArray* params = @[accountNo, likeString, likeString, likeString, likeString];
+    NSArray* result = [self.db executeReader:query andArguments:params];
+    NSMutableArray* toReturn = [[NSMutableArray alloc] initWithCapacity:result.count];
+    for (NSDictionary* dic in result)
+    {
+        [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:dbFormatter]];
+    }
+    
+    if(toReturn!=nil)
+    {
+        DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count]);
+    }
+    else
+    {
+        DDLogError(@"message history is empty or failed to read");
+    }
+    return toReturn;
+}
+
+#pragma mark History Message Search (search keyword in message, message_from, actual_from, messageType)
+
+-(NSArray*)searchResultOfHistoryMessageWithKeyWords:(NSString*)keyword accountNo:(NSString*) accountNo betweenBuddy:(NSString * _Nonnull) accountJid1 andBuddy:(NSString * _Nonnull)accountJid2
+{
+    if(!keyword || !accountNo) return nil;
+    NSString *likeString = [NSString stringWithFormat:@"%%%@%%", keyword];
+    NSString* query = [NSString stringWithFormat:@"select actual_from as af, message_from, message_to, account_id, message, timestamp  as thetime0, message_history_id, sent, messageid, messageType, received, encrypted, previewImage, previewText, unread, errorType, errorReason, stanzaid from message_history where account_id = ? and (message like ?) and (((message_from = ?) and (message_to = ?)) or ((message_from = ?) and (message_to = ?)) ) order by timestamp"];
+    
+    NSArray* params = @[accountNo, likeString, accountJid1, accountJid2, accountJid2, accountJid1];
+    
+    NSArray* result = [self.db executeReader:query andArguments:params];
+    NSMutableArray* toReturn = [[NSMutableArray alloc] initWithCapacity:result.count];
+    for (NSDictionary* dic in result)
+    {
+        [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:dbFormatter]];
+    }
+    
+    if(toReturn!=nil)
+    {
+        DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count]);
+    }
+    else
+    {
+        DDLogError(@"message history is empty or failed to read");
+    }
+    return toReturn;
+}
 @end

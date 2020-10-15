@@ -272,6 +272,20 @@ retrieves the actual_from of the the last message from hisroty id
 -(NSDictionary *) getSubscriptionForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 -(void) setSubscription:(NSString *)sub andAsk:(NSString*) ask forContact:(NSString*) contact andAccount:(NSString*) accountNo;
 
+#pragma mark History Message Search
+/*
+ search message by keyword in message, message_from, actual_from, messageType.
+ */
+-(NSArray* _Nullable) searchResultOfHistoryMessageWithKeyWords:(NSString* _Nonnull) keyword
+                                             accountNo:(NSString*  _Nonnull) accountNo;
+
+/*
+ search message by keyword in message, message_from, actual_from, messageType.
+ */
+-(NSArray* _Nullable) searchResultOfHistoryMessageWithKeyWords:(NSString* _Nonnull) keyword
+                                             accountNo:(NSString*  _Nonnull) accountNo
+                                          betweenBuddy:(NSString*  _Nonnull) accountJid1
+                                              andBuddy:(NSString*  _Nonnull) accountJid2;
 @end
 
 NS_ASSUME_NONNULL_END

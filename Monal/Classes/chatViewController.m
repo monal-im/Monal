@@ -28,12 +28,13 @@
 #import "MLChatViewHelper.h"
 #import "MLChatInputContainer.h"
 #import "MLXEPSlashMeHandler.h"
+#import "MLSearchViewController.h"
 
 @import QuartzCore;
 @import MobileCoreServices;
 @import AVFoundation;
 
-@interface chatViewController()<IDMPhotoBrowserDelegate, ChatInputActionDelegage>
+@interface chatViewController()<IDMPhotoBrowserDelegate, ChatInputActionDelegage, UISearchControllerDelegate, SearchResultDeleagte>
 {
     BOOL _isTyping;
     monal_void_block_t _cancelTypingNotification;
@@ -74,6 +75,11 @@
 
 @property (nonatomic, strong) UIButton *lastMsgButton;
 @property (nonatomic, assign) CGFloat lastOffset;
+
+//SearchViewController, SearchResultViewController
+@property (nonatomic, strong) MLSearchViewController* searchController;
+@property (nonatomic, strong) NSMutableArray* searchResultMessageList;
+
 
 #define lastMsgButtonSize 40.0
 
@@ -200,6 +206,8 @@ enum msgSentState {
     refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:NSLocalizedString(@"Loading more Messages from Server", @"")];
     [self.messageTable setRefreshControl:refreshControl];
     self.moreMessagesAvailable = YES;
+    //Init search button item.
+    [self initSearchButtonItem];
 }
 
 -(void) initLastMsgButton
@@ -232,6 +240,129 @@ enum msgSentState {
 {
     [self scrollToBottom];
 }
+
+#pragma mark - SearchViewController
+-(void) initSearchViewControler
+{
+    self.searchController = [[MLSearchViewController alloc] initWithSearchResultsController:nil];
+    [self.searchController setObscuresBackgroundDuringPresentation:NO];
+    self.searchController.searchResultDelegate = self;
+    self.searchController.jid = self.jid;
+    self.searchResultMessageList = [[NSMutableArray alloc] init];
+}
+
+-(void) initSearchButtonItem
+{
+    UIBarButtonItem* seachButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSearch
+                                                                                 target:self
+                                                                                 action:@selector(showSeachButtonAction)];
+    
+    NSMutableArray* rightBarButtons = [self.navigationItem.rightBarButtonItems mutableCopy];
+    [rightBarButtons addObject:seachButton];
+    self.navigationItem.rightBarButtonItems = rightBarButtons;
+}
+
+-(void) showSeachButtonAction
+{
+    self.searchController.contact = self.contact;
+    [self presentViewController:self.searchController animated:NO completion:nil];
+}
+
+-(void) dismissSearchViewControllerAction
+{
+    [self.searchController dismissViewControllerAnimated:NO completion:nil];
+}
+
+#pragma mark - SearchResultVCActionDelegate
+
+-(void) doGoSearchResultAction:(NSNumber*)nextDBId
+{
+    NSNumber* messagePathIdx = [self.searchController getMessageIndexPathForDBId:nextDBId];
+    if (messagePathIdx != nil)
+    {
+        long nextPathIdx = [messagePathIdx longValue];
+        NSIndexPath* msgIdxPath = [NSIndexPath indexPathForRow:nextPathIdx inSection:messagesSection];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.messageTable scrollToRowAtIndexPath:msgIdxPath atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
+            MLBaseCell* selectedCell = [self.messageTable cellForRowAtIndexPath:msgIdxPath];
+            UIColor *originColor = [selectedCell.backgroundColor copy];
+            selectedCell.backgroundColor = [UIColor lightGrayColor];
+                        
+            [UIView animateWithDuration:0.2 delay:0.2 options:UIViewAnimationOptionCurveLinear animations:^{
+                selectedCell.backgroundColor = originColor;
+            } completion:nil];
+        });
+    }
+}
+
+-(void)doReloadHistoryForSearch
+{
+    [self loadOldMsgHistory];
+}
+
+- (void)doReloadActionForAllTableView
+{
+    [self.messageTable reloadData];
+}
+
+- (void)doGetMsgData
+{
+    for (int idx = 0; idx<self.messageList.count; idx++)
+    {
+        MLMessage* msg = [self.messageList objectAtIndex:idx];
+        [self doSetMsgPathIdx:idx withDBId:msg.messageDBId];
+    }
+}
+
+-(void) doSetNotLoadingHistory
+{
+    if (self.searchController.isActive)
+    {
+        self.searchController.isLoadingHistory = NO;
+        [self.searchController setResultToolBar];
+        if (self.searchController.isGoingUp)
+        {
+            [self.searchController doPreviousAction];
+        }
+        else
+        {
+            [self.searchController doNextAction];
+        }
+    }
+    [self doGetMsgData];
+}
+
+
+-(void) doSetMsgPathIdx:(NSInteger) pathIdx withDBId:(NSNumber *) messageDBId
+{
+    if(messageDBId)
+    {
+        [self.searchController setMessageIndexPath:[NSNumber numberWithInteger:pathIdx] withDBId:messageDBId];
+    }
+}
+
+-(BOOL) isContainKeyword:(NSNumber *) messageDBId
+{
+    if ([self.searchController getMessageIndexPathForDBId:messageDBId])
+    {
+        return YES;
+    }
+    
+    return NO;
+}
+
+-(void) resetHistoryAttributeForCell:(MLBaseCell*) cell
+{
+    if (!cell.messageBody.text) return;
+    
+    NSMutableAttributedString *defaultAttrString = [[NSMutableAttributedString alloc] initWithString:cell.messageBody.text];
+    NSInteger textLength = (cell.messageBody.text == nil) ? 0: cell.messageBody.text.length;
+    NSRange defaultTextRange = NSMakeRange(0, textLength);
+    [defaultAttrString addAttribute:NSBackgroundColorAttributeName value:[UIColor clearColor] range:defaultTextRange];
+    cell.messageBody.attributedText = defaultAttrString;
+    cell.textLabel.backgroundColor = [UIColor clearColor];
+}
+
 
 -(void) setChatInputHeightConstraints:(BOOL) hwKeyboardPresent
 {
@@ -475,6 +606,8 @@ enum msgSentState {
         [self.xmppAccount.omemo sendOMEMOBundle];
     }
 #endif
+
+	[self initSearchViewControler];
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -622,6 +755,8 @@ enum msgSentState {
         {
             self.messageList = messages;
         }
+        
+		[self doSetNotLoadingHistory];
     }
     else  { // load log for this day
         self.messageList = [[[DataLayer sharedInstance] messageHistoryDateForContact:self.contact.contactJid forAccount:self.contact.accountId forDate:self.day] mutableCopy];
@@ -1135,7 +1270,7 @@ enum msgSentState {
             if([message.messageType isEqualToString:kMessageTypeStatus])
                 finalMessageType = kMessageTypeStatus;
             message.messageType = finalMessageType;
-
+            
             if(!self.messageList)
                 self.messageList = [[NSMutableArray alloc] init];
             [self.messageList addObject:message];   //do not insert based on delay timestamp because that would make it possible to fake history entries
@@ -1151,7 +1286,14 @@ enum msgSentState {
             [self->_messageTable endUpdates];
 
             [self scrollToBottom];
-
+            
+            if (self.searchController.isActive)
+            {
+                [self doSetMsgPathIdx:bottom withDBId:message.messageDBId];
+                [self.searchController getSearchData:self.self.searchController.searchBar.text];
+                [self.searchController setResultToolBar];
+            }            
+            
             [self refreshCounter];
         });
     }
@@ -1619,6 +1761,18 @@ enum msgSentState {
     }
     
     [cell updateCellWithNewSender:newSender];
+        
+    [self resetHistoryAttributeForCell:cell];
+    if (self.searchController.isActive)
+    {
+        if ([self.searchController isDBIdExited:row.messageDBId])
+        {
+            NSMutableAttributedString *attributedMsgString = [self.searchController doSearchKeyword:self.searchController.searchBar.text
+                                                                                             onText:messageText
+                                                                                         andInbound:inDirection];
+            [cell.messageBody setAttributedText:attributedMsgString];
+        }
+    }
     
     return cell;
 }
@@ -1843,6 +1997,10 @@ enum msgSentState {
         //use reverse order to insert messages from newest to oldest (bottom to top in chatview)
         [self insertOldMessages:[[oldMessages reverseObjectEnumerator] allObjects]];
     }
+    else
+    {
+        [self doSetNotLoadingHistory];
+    }
 }
 
 -(void) insertOldMessages:(NSArray*) oldMessages
@@ -1869,6 +2027,8 @@ enum msgSentState {
         CGPoint newOffset = CGPointMake(contentOffset.x, contentOffset.y + sizeAfterAddingMessages.height - sizeBeforeAddingMessages.height);
         self->_messageTable.contentOffset = newOffset;
         [self->_messageTable endUpdates];
+		
+		[self doSetNotLoadingHistory];
     });
 }
 
@@ -1907,6 +2067,12 @@ enum msgSentState {
     [self performSegueWithIdentifier:@"showDetails" sender:self];
 }
 
+// Open search ViewController
+-(void) commandFPressed:(UIKeyCommand*)keyCommand
+{
+    [self showSeachButtonAction];
+}
+
 // List of custom hardware key commands
 - (NSArray<UIKeyCommand *> *)keyCommands {
     return @[
@@ -1915,7 +2081,9 @@ enum msgSentState {
             // enter
             [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(enterKeyPressed:)],
             // command + i
-            [UIKeyCommand keyCommandWithInput:@"i" modifierFlags:UIKeyModifierCommand action:@selector(commandIPressed:)]
+            [UIKeyCommand keyCommandWithInput:@"i" modifierFlags:UIKeyModifierCommand action:@selector(commandIPressed:)],
+            // command + f
+            [UIKeyCommand keyCommandWithInput:@"f" modifierFlags:UIKeyModifierCommand action:@selector(commandFPressed:)]
     ];
 }
 

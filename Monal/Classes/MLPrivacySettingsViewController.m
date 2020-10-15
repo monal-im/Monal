@@ -65,7 +65,7 @@
     switch (section) {
         case 0:
         {
-            return 4;
+            return 6;
             break;
         }
         default:
@@ -112,13 +112,29 @@
                     break;
                 }
                 case 3:
-                    {
-                        cell.textLabel.text = NSLocalizedString(@"Send Typing Notifications", @"");
-                        cell.detailTextLabel.text = NSLocalizedString(@"Tell my contacts when I'm typing", @"");
-                        cell.defaultKey = @"SendLastChatState";
-                        cell.switchEnabled = YES;
-                        break;
-                    }
+                {
+                    cell.textLabel.text = NSLocalizedString(@"Send Typing Notifications", @"");
+                    cell.detailTextLabel.text = NSLocalizedString(@"Tell my contacts when I'm typing", @"");
+                    cell.defaultKey = @"SendLastChatState";
+                    cell.switchEnabled = YES;
+                    break;
+                }
+                case 4:
+                {
+                    cell.textLabel.text = NSLocalizedString(@"Send message received state", @"");
+                    cell.detailTextLabel.text = NSLocalizedString(@"Tell my contacts if my device received a message", @"");
+                    cell.defaultKey = @"SendReceivedMarkers";
+                    cell.switchEnabled = YES;
+                    break;
+                }
+                case 5:
+                {
+                    cell.textLabel.text = NSLocalizedString(@"Sync Read-Markers", @"");
+                    cell.detailTextLabel.text = NSLocalizedString(@"Tell my contacts if I've read a message", @"");
+                    cell.defaultKey = @"SendDisplayedMarkers";
+                    cell.switchEnabled = YES;
+                    break;
+                }
             }
             break;
         }

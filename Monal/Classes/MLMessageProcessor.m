@@ -319,6 +319,7 @@ static NSMutableDictionary* _typingNotifications;
     if(success)
     {
         if(
+            [[HelperTools defaultsDB] boolForKey:@"SendReceivedMarkers"] &&
             ([messageNode check:@"{urn:xmpp:receipts}request"] || [messageNode check:@"{urn:xmpp:chat-markers:0}markable"]) &&
             ![messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid]
         )

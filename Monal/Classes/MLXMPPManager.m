@@ -64,6 +64,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [[HelperTools defaultsDB] setBool:YES forKey:@"ShowGeoLocation"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastUserInteraction"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastChatState"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"SendReceivedMarkers"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"SendDisplayedMarkers"];
 
         // Message Settings / Privacy
         [[HelperTools defaultsDB] setInteger:DisplayNameAndMessage forKey:@"NotificationPrivacySetting"];
@@ -94,6 +96,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
     // upgrade SendLastChatState
     [self upgradeBoolUserSettingsIfUnset:@"SendLastChatState" toDefault:YES];
+
+    // upgrade received and displayed markers
+    [self upgradeBoolUserSettingsIfUnset:@"SendReceivedMarkers" toDefault:YES];
+    [self upgradeBoolUserSettingsIfUnset:@"SendDisplayedMarkers" toDefault:YES];
 
     // upgrade udp logger
     [self upgradeBoolUserSettingsIfUnset:@"udpLoggerEnabled" toDefault:NO];

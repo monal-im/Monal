@@ -3296,6 +3296,9 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void) sendDisplayMarkerForId:(NSString*) messageid to:(NSString*) to
 {
+    if(![[HelperTools defaultsDB] boolForKey:@"SendDisplayedMarkers"])
+        return;
+    
     XMPPMessage* displayedNode = [[XMPPMessage alloc] init];
     //the message type is needed so that the store hint is accepted by the server
     displayedNode.attributes[@"type"] = kMessageChatType;

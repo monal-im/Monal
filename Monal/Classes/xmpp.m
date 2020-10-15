@@ -1383,6 +1383,8 @@ NSString *const kXMPPPresence = @"presence";
                 //that makes parsing a lot easier later on and should not do any harm, even when resending/forwarding this inner stanza
                 if([outerMessageNode check:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{urn:xmpp:delay}delay"] && ![messageNode check:@"{urn:xmpp:delay}delay"])
                     [messageNode addChild:[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{urn:xmpp:delay}delay"]];
+                
+                DDLogDebug(@"mam extracted, messageNode is now: %@", messageNode);
             }
             else if([outerMessageNode check:@"{urn:xmpp:carbons:2}*"])     //carbon copy
             {
@@ -1400,6 +1402,8 @@ NSString *const kXMPPPresence = @"presence";
                 //that makes parsing a lot easier later on and should not do any harm, even when resending/forwarding this inner stanza
                 if([outerMessageNode check:@"{urn:xmpp:delay}delay"] && ![messageNode check:@"{urn:xmpp:delay}delay"])
                     [messageNode addChild:[outerMessageNode findFirst:@"{urn:xmpp:delay}delay"]];
+                
+                DDLogDebug(@"carbon extracted, messageNode is now: %@", messageNode);
             }
             
             //sanitize inner node: no from or to always means own bare jid

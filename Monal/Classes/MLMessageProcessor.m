@@ -206,12 +206,19 @@ static NSMutableDictionary* _typingNotifications;
     )
     {
         //save in DB
+        NSString* id;
         if([messageNode check:@"{urn:xmpp:receipts}received@id"])
-            [[DataLayer sharedInstance] setMessageId:[messageNode findFirst:@"{urn:xmpp:receipts}received@id"] received:YES];
+        {
+            id = [messageNode findFirst:@"{urn:xmpp:receipts}received@id"];
+            [[DataLayer sharedInstance] setMessageId:id received:YES];
+        }
         else
-            [[DataLayer sharedInstance] setMessageId:[messageNode findFirst:@"{urn:xmpp:chat-markers:0}received@id"] received:YES];
+        {
+            id = [messageNode findFirst:@"{urn:xmpp:chat-markers:0}received@id"];
+            [[DataLayer sharedInstance] setMessageId:id received:YES];
+        }
         //Post notice
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageReceivedNotice object:self userInfo:@{@"MessageID": [messageNode findFirst:@"{urn:xmpp:receipts}received@id"]}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageReceivedNotice object:self userInfo:@{@"MessageID": id}];
     }
     
     //incoming chat markers from contact

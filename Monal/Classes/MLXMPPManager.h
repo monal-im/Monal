@@ -191,7 +191,7 @@ Attempts to upload a file to the  HTTP upload service
 /**
  fetch entity software version
  */
--(void) getEntitySoftWareVersion:(MLContact *) contact;
+-(void) getEntitySoftWareVersionForContact:(MLContact *) contact andResource:(NSString*) resource;
 /**
  Iterates through set and compares with connected accounts. Removes them. useful for active chat. 
  */

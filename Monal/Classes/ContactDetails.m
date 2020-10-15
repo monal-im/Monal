@@ -50,8 +50,6 @@
     [self.tableView registerNib:[UINib nibWithNibName:@"MLTextInputCell"
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"TextCell"];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshSoftwareVersion:) name: kMonalXmppUserSoftWareVersionRefresh object:nil];
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -72,10 +70,6 @@
     self.accountNo = self.contact.accountId;
     //making sure there is an entry at least
     [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" andMucNick:nil];
-    
-	if (!self.contact.isGroup) {
-        [self querySoftwareVersion];
-    }
 	
     self.isEncrypted = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.accountNo];
     self.isPinned = [[DataLayer sharedInstance] isPinnedChat:self.accountNo andBuddyJid:self.contact.contactJid];
@@ -114,13 +108,11 @@
     
     [self refreshLock];
     [self refreshMute];
-    [self refreshSoftwareVersion:nil];
 }
 
 -(void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [[NSNotificationCenter defaultCenter] removeObserver:kMonalXmppUserSoftWareVersionRefresh];
 }
 
 -(IBAction) callContact:(id)sender
@@ -305,30 +297,6 @@
             }
             thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             break;
-
-		case 3: {
-            thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Sub"];
-                        
-            switch (indexPath.row) {
-                case 0:
-                    thecell.textLabel.text = [NSString stringWithFormat:@"%@%@",
-                                              NSLocalizedString(@"Name: ",@""),
-                                              (_versionInfoDic[@"platform_App_Name"] == nil) ? @"":_versionInfoDic[@"platform_App_Name"]];
-                    break;
-                case 1:
-                    thecell.textLabel.text = [NSString stringWithFormat:@"%@%@",
-                                              NSLocalizedString(@"Os: ",@""),
-                                              (_versionInfoDic[@"platform_OS"] == nil) ? @"":_versionInfoDic[@"platform_OS"]];
-                    break;
-                case 2:
-                    thecell.textLabel.text = [NSString stringWithFormat:@"%@%@",
-                                              NSLocalizedString(@"Version: ",@""),
-                                              (_versionInfoDic[@"platform_App_Version"] == nil) ? @"":_versionInfoDic[@"platform_App_Version"]];
-                    break;
-                default:
-                    break;
-            }
-        }	
         }
     }
     return thecell;
@@ -359,9 +327,6 @@
     
     if(section == 2)
         toreturn= NSLocalizedString(@"Connection Details",@"");
-    
-    if(section==3)
-        toreturn= NSLocalizedString(@"Software Version",@"");
     
     return toreturn;
 }
@@ -612,33 +577,6 @@
         NSIndexPath* path = [NSIndexPath indexPathForRow:0 inSection:0];
         [self.tableView reloadRowsAtIndexPaths:@[path] withRowAnimation:UITableViewRowAnimationNone];
     });
-}
-
-#pragma mark - refresh software version
--(void) refreshSoftwareVersion:(NSNotification*) verNotification
-{
-    if (verNotification) {        
-        _versionInfoDic = [verNotification.userInfo mutableCopy];
-    } else {
-        NSArray* versionDBInfoArr = [[DataLayer sharedInstance] softwareVersionInfoForAccount:self.accountNo andContact:self.contact.contactJid];
-        if(versionDBInfoArr && [versionDBInfoArr count] >= 1) {
-            _versionInfoDic = versionDBInfoArr[0];
-        } else {
-            _versionInfoDic = [[NSMutableDictionary alloc] init];
-        }
-    }
-    
-    dispatch_async(dispatch_get_main_queue(), ^{        
-        NSIndexSet *sectionSet = [NSIndexSet indexSetWithIndex:3];
-        [self.tableView reloadSections:sectionSet withRowAnimation:UITableViewRowAnimationNone];
-    });
-}
-
-#pragma mark - Query Software Version
-
--(void) querySoftwareVersion
-{
-    [[MLXMPPManager sharedInstance] getEntitySoftWareVersion:self.contact];
 }
 
 #pragma mark - textfield delegate

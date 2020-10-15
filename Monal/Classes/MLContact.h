@@ -20,6 +20,10 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 @interface MLContact : NSObject <NSCoding>
 
++(MLContact*) contactFromDictionary:(NSDictionary*) dic;
++(MLContact*) contactFromDictionary:(NSDictionary*) dic withDateFormatter:(NSDateFormatter*) formatter;
+
+
 /**
  account number in the database should be an integer
  */
@@ -63,12 +67,11 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 @property (nonatomic, copy) NSString *ask; //whether we have tried to subscribe 
 
 /**
- picks nick, full or jid to display
+ picks nick, full or note part of jid to display
  */
--(NSString *) contactDisplayName;
+-(NSString*) contactDisplayName;
 
-+(MLContact *) contactFromDictionary:(NSDictionary *) dic;
-+(MLContact *) contactFromDictionary:(NSDictionary *) dic withDateFormatter:(NSDateFormatter *) formatter;
+-(void) updateWithContact:(MLContact*) contact;
 
 @end
 

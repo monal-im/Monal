@@ -498,8 +498,8 @@
         return;
     }
     
-    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", @""), contact.fullName];
-    NSString* detailString =NSLocalizedString(@"They will no longer see when you are online. They may not be able to access your encryption keys.", @"");
+    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", @""), contact.contactJid];
+    NSString* detailString = NSLocalizedString(@"They will no longer see when you are online. They may not be able to access your encryption keys.", @"");
     
     BOOL isMUC=contact.isGroup;
     if(isMUC)

@@ -131,14 +131,11 @@
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     
-    NSString* displayName = [[DataLayer sharedInstance] fullNameForContact:message.from inAccount:message.accountId];
-    NSString* nickName = [[DataLayer sharedInstance] nickName:message.from  forAccount:message.accountId];
-    
-    if(nickName.length > 0) displayName = nickName;
+    MLContact* contact = [[DataLayer sharedInstance] contactForUsername:message.from forAccount:message.accountId];
     
     // Only show contact name if allowed
     if(self.notificationPrivacySetting <= DisplayOnlyName) {
-        content.title = displayName.length>0 ? displayName : message.from;
+        content.title = [contact contactDisplayName];
 
         if(![message.from isEqualToString:message.actualFrom])
         {
@@ -159,9 +156,7 @@
         {
             BOOL isMuc = [[DataLayer sharedInstance] isBuddyMuc:message.from forAccount:message.accountId];
             msgText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:message.accountId
-                                                                                 buddy:message.from
-                                                                              nickName:nickName
-                                                                              fullName:displayName
+                                                                           displayName:[contact contactDisplayName]
                                                                             actualFrom:message.actualFrom
                                                                                message:message.messageText
                                                                                isGroup:isMuc];

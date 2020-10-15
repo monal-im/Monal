@@ -21,42 +21,12 @@
     return sharedInstance;
 }
 
-- (NSString*)stringSlashMeWithAccountId:(NSString*)accountId buddy:(NSString*)buddy nickName:(NSString*)nickName fullName:(NSString*)fullName actualFrom:(NSString*)actualFrom message:(NSString*)msg isGroup:(BOOL) isGroup
+- (NSString*)stringSlashMeWithAccountId:(NSString*)accountId displayName:(NSString*) displayName actualFrom:(NSString*)actualFrom message:(NSString*)msg isGroup:(BOOL) isGroup
 {
     NSRange replacedRange = NSMakeRange(0, 3);
     
-    NSString* displayName = @"";
-    
-    if (isGroup)
-    {
-        
-        if (actualFrom != nil)
-        {
-            displayName = actualFrom;
-        }
-        else
-        {
-            displayName = @"";
-        }
-    }
-    else
-    {
-        if (fullName == nil || fullName.length == 0)
-        {
-            if (nickName == nil  || nickName.length == 0)
-            {
-                displayName = buddy;
-            }
-            else
-            {
-                displayName = nickName;
-            }
-        }
-        else
-        {
-            displayName = fullName;
-        }
-    }
+    if(isGroup && actualFrom != nil)
+        displayName = actualFrom;
     
     NSMutableString *replacedMessageText = [[NSMutableString alloc] initWithString:msg];
     NSMutableString *replacedName  = [[NSMutableString alloc] initWithString:[NSString stringWithFormat:@"* %@",displayName]];
@@ -66,12 +36,10 @@
     return replacedMessageText;
 }
 
-- (NSMutableAttributedString*)attributedStringSlashMeWithAccountId:(NSString*)accountId buddy:(NSString*)buddy nickName:(NSString*)nickName fullName:(NSString*)fullName actualFrom:(NSString*)actualFrom message:(NSString*)msg isGroup:(BOOL) isGroup withFont:(UIFont*) font
+- (NSMutableAttributedString*)attributedStringSlashMeWithAccountId:(NSString*)accountId displayName:(NSString*) displayName actualFrom:(NSString*)actualFrom message:(NSString*)msg isGroup:(BOOL) isGroup withFont:(UIFont*) font
 {
     NSString* resultString = [self stringSlashMeWithAccountId:(NSString*)accountId
-                                                        buddy:buddy
-                                                     nickName:nickName
-                                                     fullName:fullName
+                                                  displayName:displayName
                                                    actualFrom:actualFrom
                                                       message:msg
                                                       isGroup:isGroup];

@@ -169,6 +169,8 @@ extern NSString* const kAccountHibernate;
 
 -(void) rejectFromRoster:(NSString* _Nonnull) contact;
 
+-(void) updateRosterItem:(NSString* _Nonnull) jid withName:(NSString* _Nonnull) name;
+
 #pragma mark set connection attributes
 /**
 sets the status message. makes xmpp call

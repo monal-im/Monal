@@ -243,22 +243,22 @@
                 // We and the contact are interested
                 [[DataLayer sharedInstance] deleteContactRequest:contactObj];
             }
-
             
             DDLogVerbose(@"Adding contact %@ (%@) to database", [contact objectForKey:@"jid"], [contact objectForKey:@"name"]);
             BOOL success = [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
                                         forAccount:account.accountNo
-                                          fullname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
-                                          nickname:[contact objectForKey:@"name"]?[contact objectForKey:@"name"]:@""
-                                                       andMucNick:nil];
+                                          fullname:@""
+                                          nickname:[contact objectForKey:@"name"] ? [contact objectForKey:@"name"] : @""
+                                        andMucNick:nil];
                 
             [[DataLayer sharedInstance] setSubscription:[contact objectForKey:@"subscription"]
-                                                 andAsk:[contact objectForKey:@"ask"] forContact:[contact objectForKey:@"jid"] andAccount:account.accountNo];
+                                                 andAsk:[contact objectForKey:@"ask"]
+                                             forContact:[contact objectForKey:@"jid"]
+                                             andAccount:account.accountNo];
             
-            if(!success && ((NSString *)[contact objectForKey:@"name"]).length>0)
-            {
-                [[DataLayer sharedInstance] setFullName:[contact objectForKey:@"name"] forContact:[contact objectForKey:@"jid"] andAccount:account.accountNo ] ;
-            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                @"contact": [[DataLayer sharedInstance] contactForUsername:[contact objectForKey:@"jid"] forAccount:account.accountNo]
+            }];
         }
     }
     

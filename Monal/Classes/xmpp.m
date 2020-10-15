@@ -2254,7 +2254,6 @@ NSString *const kXMPPPresence = @"presence";
     [self sendIq:roster withDelegate:[MLIQProcessor class] andMethod:@selector(handleRosterFor:withIqNode:) andAdditionalArguments:nil];
 }
 
-
 -(void) initSession
 {
     //delete old resources because we get new presences once we're done initializing the session
@@ -2655,6 +2654,14 @@ NSString *const kXMPPPresence = @"presence";
     [self send:presence2];
 }
 
+-(void) updateRosterItem:(NSString*) jid withName:(NSString*) name
+{
+    XMPPIQ* roster = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [roster setUpdateRosterItem:jid withName:name];
+    //this delegate will handle errors (result responses don't include any data that could be processed and will be ignored)
+    [self sendIq:roster withDelegate:[MLIQProcessor class] andMethod:@selector(handleRosterFor:withIqNode:) andAdditionalArguments:nil];
+}
+
 #pragma mark - Jingle calls
 -(void)call:(MLContact*) contact
 {
@@ -2700,7 +2707,7 @@ NSString *const kXMPPPresence = @"presence";
     if([[iqNode findFirst:@"/@id"] isEqualToString:self.jingle.idval])
     {
         NSString* from = iqNode.fromUser;
-        NSString* fullName = [[DataLayer sharedInstance] fullNameForContact:from inAccount:self.accountNo];
+        NSString* fullName = from;
         if(!fullName) fullName = from;
         NSDictionary* userDic=@{@"buddy_name":from,
                                 @"full_name":fullName,
@@ -3310,12 +3317,6 @@ NSString *const kXMPPPresence = @"presence";
 
 /*TODO: user nickname XEP-0172 needs this:
 [[DataLayer sharedInstance] setFullName:fullname forContact:iqNode.fromUser andAccount:account.accountNo];
-
-MLContact *contact = [MLContact alloc];
-contact.contactJid = iqNode.fromUser;
-contact.fullName = fullname;
-contact.accountId = account.accountNo;
-[[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{@"contact": contact}];
 */
 
 @end

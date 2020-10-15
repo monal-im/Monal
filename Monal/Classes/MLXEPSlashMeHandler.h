@@ -19,9 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
  By using NSString without attributes.
  */
 - (NSString*)stringSlashMeWithAccountId:(NSString*)accountId
-                                  buddy:(NSString*)buddy
-                               nickName:(NSString*)nickName
-                               fullName:(NSString*)fullName
+							displayName:(NSString*)displayName
                              actualFrom:(NSString*)actualFrom
                                 message:(NSString*)msg
                                 isGroup:(BOOL) isGroup;
@@ -30,9 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 By using NSString with attributes.
 */
 - (NSMutableAttributedString*)attributedStringSlashMeWithAccountId:(NSString*)accountId
-                                                             buddy:(NSString*)buddy
-                                                          nickName:(NSString*)nickName
-                                                          fullName:(NSString*)fullName
+													   displayName:(NSString*)displayName
                                                         actualFrom:(NSString*)actualFrom
                                                            message:(NSString*)msg
                                                            isGroup:(BOOL)isGroup

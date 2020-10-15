@@ -143,6 +143,7 @@ enum msgSentState {
     [nc addObserver:self selector:@selector(handleDisplayedMessage:) name:kMonalMessageDisplayedNotice object:nil];
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
+    [nc addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
     [nc addObserver:self selector:@selector(updateUIElementsOnAccountChange:) name:kMonalAccountStatusChanged object:nil];
     [nc addObserver:self selector:@selector(updateNavBarLastInteractionLabel:) name:kMonalLastInteractionUpdatedNotice object:nil];
     
@@ -267,8 +268,14 @@ enum msgSentState {
     }
 }
 
-// TODO use notification
--(void) updateUIElementsOnAccountChangeTo:(xmppState) accountState
+-(void) refreshContact:(NSNotification*) notification
+{
+    MLContact* contact = [notification.userInfo objectForKey:@"contact"];
+    if(self.contact && [self.contact.contactJid isEqualToString:contact.contactJid] && [self.contact.accountId isEqual:contact.accountId])
+        [self updateUIElements];
+}
+
+-(void) updateUIElements
 {
     if(!self.contact.accountId) return;
 
@@ -314,11 +321,11 @@ enum msgSentState {
             return;
 
         if(accountNo && accountState)
-            [self updateUIElementsOnAccountChangeTo:(xmppState)[accountState intValue]];
+            [self updateUIElements];
     }
     else
     {
-        [self updateUIElementsOnAccountChangeTo:kStateLoggedIn];
+        [self updateUIElements];
     }
 }
 
@@ -383,7 +390,7 @@ enum msgSentState {
         [[NSNotificationCenter defaultCenter] removeObserver:self];
         self.inputContainerView.hidden = YES;
         [self refreshData];
-        [self updateUIElementsOnAccountChange:nil];
+        [self updateUIElements];
         [self updateNavBarLastInteractionLabel:nil];
         return;
     }
@@ -395,7 +402,7 @@ enum msgSentState {
         self.encryptChat = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
     }
     [self handleForeGround];
-    [self updateUIElementsOnAccountChange:nil];
+    [self updateUIElements];
     [self updateNavBarLastInteractionLabel:nil];
     [self displayEncryptionStateInUI];
     
@@ -437,7 +444,7 @@ enum msgSentState {
             [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 // Disable encryption
                 self.encryptChat = NO;
-                [self updateUIElementsOnAccountChange:nil];
+                [self updateUIElements];
                 [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
@@ -475,7 +482,7 @@ enum msgSentState {
     BOOL success = [self saveMessageDraft];
     if(success) {
         // Update status message for contact to show current draft
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
     }
     [super viewWillDisappear:animated];
     [MLNotificationManager sharedInstance].currentAccountNo = nil;
@@ -576,7 +583,7 @@ enum msgSentState {
             [appDelegate updateUnread];
             
             //refresh contact in active contacts view
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
         }
     }
 }
@@ -641,16 +648,12 @@ enum msgSentState {
 
     if(!messageID)
     {
-        NSString *contactNameCopy = self.contact.contactJid; //prevent retail cycle
-        NSString *accountNoCopy = self.contact.accountId;
-        BOOL isMucCopy = self.contact.isGroup;
-        BOOL encryptChatCopy = self.encryptChat;
-        MLContact *contactCopy = self.contact;
-
+        weakify(self);
         [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
-            [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
+            strongify(self);
+            [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:NO messageId:newMessageID
                                 withCompletionHandler:nil];
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:nil userInfo:@{@"contact":contactCopy}];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
         }];
     }
     else
@@ -957,11 +960,6 @@ enum msgSentState {
             if(url) {
                 NSString* newMessageID = [[NSUUID UUID] UUIDString];
                 
-                NSString* contactJidCopy = self.contact.contactJid; //prevent retail cycle
-                NSString* accountNoCopy = self.contact.accountId;
-                BOOL isMucCopy = self.contact.isGroup;
-                BOOL encryptChatCopy = self.encryptChat;
-                
                 NSString* urlToPass = url;
                 
                 if(encrypted) {
@@ -978,8 +976,10 @@ enum msgSentState {
                 }
                 [[MLImageManager sharedInstance] saveImageData:decryptedData forLink:urlToPass];
                 
+                weakify(self);
                 [self addMessageto:self.contact.contactJid withMessage:urlToPass andId:newMessageID withCompletion:^(BOOL success) {
-                    [[MLXMPPManager sharedInstance] sendMessage:urlToPass toContact:contactJidCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:YES messageId:newMessageID
+                    strongify(self);
+                    [[MLXMPPManager sharedInstance] sendMessage:urlToPass toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:YES messageId:newMessageID
                                           withCompletionHandler:nil];
                 }];
             }
@@ -1547,18 +1547,8 @@ enum msgSentState {
             {
                 UIFont* italicFont = [UIFont italicSystemFontOfSize:cell.messageBody.font.pointSize];
                 
-                NSString* nickName = @"";
-                NSString* fullName = @"";
-                if (!self.contact.isGroup)
-                {
-                    nickName = self.contact.contactDisplayName;
-                    fullName = self.contact.fullName;
-                }
-                
                 NSMutableAttributedString* attributedMsgString = [[MLXEPSlashMeHandler sharedInstance] attributedStringSlashMeWithAccountId:self.contact.accountId
-                                                                                                                                      buddy:row.from
-                                                                                                                                   nickName:nickName
-                                                                                                                                   fullName:fullName
+                                                                                                                                displayName:[self.contact contactDisplayName]
                                                                                                                                  actualFrom:row.actualFrom
                                                                                                                                     message:messageText
                                                                                                                                     isGroup:self.contact.isGroup

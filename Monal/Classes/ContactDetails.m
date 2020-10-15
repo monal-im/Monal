@@ -7,6 +7,7 @@
 //
 
 #import "ContactDetails.h"
+#import "MBProgressHUD.h"
 #import "MLImageManager.h"
 #import "MLConstants.h"
 #import "CallViewController.h"
@@ -36,7 +37,7 @@
 @property (nonatomic, strong) UIImage *leftImage;
 @property (nonatomic, strong) UIImage *rightImage;
 @property (nonatomic, strong) NSMutableDictionary *versionInfoDic;
-
+@property (nonatomic, strong) MBProgressHUD* saveHUD;
 @end
 
 @class HelperTools;
@@ -50,6 +51,8 @@
     [self.tableView registerNib:[UINib nibWithNibName:@"MLTextInputCell"
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"TextCell"];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -69,7 +72,7 @@
     
     self.accountNo = self.contact.accountId;
     //making sure there is an entry at least
-    [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" andMucNick:nil];
+    [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo fullname:@"" nickname:@"" andMucNick:nil];
 	
     self.isEncrypted = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.accountNo];
     self.isPinned = [[DataLayer sharedInstance] isPinnedChat:self.accountNo andBuddyJid:self.contact.contactJid];
@@ -177,7 +180,7 @@
             // Set jid field
             if(self.contact.isGroup) {
                detailCell.jid.text=[NSString stringWithFormat:@"%@ (%lu)", self.contact.contactJid, self.groupMemberCount];
-                //for how hide things that arent relevant
+                //hide things that aren't relevant
                 detailCell.phoneButton.hidden = YES;
                 detailCell.isContact.hidden = YES;
             } else {
@@ -230,14 +233,8 @@
                     cell.textInput.enabled=NO;
                     cell.textInput.text=self.contact.accountNickInGroup;
                 } else  {
-                    NSString* nickName=self.contact.nickName;
-                    if([[nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
-                        cell.textInput.text=nickName;
-                    } else {
-                        cell.textInput.text=self.contact.fullName;
-                    }
-                    if([cell.textInput.text isEqualToString:@"(null)"])  cell.textInput.text = @"";
-                    cell.textInput.placeholder = NSLocalizedString(@"Set a nickname", @"");
+                    cell.textInput.text=[self.contact contactDisplayName];
+                    cell.textInput.placeholder = NSLocalizedString(@"Set a nickname for this contact", @"");
                     cell.textInput.delegate = self;
                 }
                 thecell = cell;
@@ -248,7 +245,8 @@
                     cell.cellDetails.text = self.contact.groupSubject;
                 } else  {
                     cell.cellDetails.text = self.contact.statusMessage;
-                    if([cell.cellDetails.text isEqualToString:@"(null)"])  cell.cellDetails.text = @"";
+                    if([cell.cellDetails.text isEqualToString:@"(null)"])
+                        cell.cellDetails.text = @"";
                 }
                 thecell = cell;
             }
@@ -274,10 +272,10 @@
             else if(indexPath.row == 2) {
                 if(self.contact.isGroup) {
                     thecell.textLabel.text = NSLocalizedString(@"Leave Conversation", @"");
-                } else  {
+                } else {
                     if(self.isSubscribed) {
                         thecell.textLabel.text = NSLocalizedString(@"Remove Contact", @"");
-                    } else  {
+                    } else {
                         thecell.textLabel.text = NSLocalizedString(@"Add Contact", @"");
                     }
                 }
@@ -384,7 +382,7 @@
                 // Update button text
                 [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
                 // Update color in activeViewController
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact, @"pinningChanged": @YES}];
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact":self.contact, @"pinningChanged": @YES}];
                 break;
             }
         }
@@ -392,7 +390,7 @@
 }
 
 -(void) addContact {
-    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Add %@ to your contacts?", @""),self.contact.fullName ];
+    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Add %@ to your contacts?", @""), self.contact.contactJid];
     NSString* detailString = NSLocalizedString(@"They will see when you are online. They will be able to send you encrypted messages.", @"");
 
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
@@ -414,7 +412,7 @@
 }
 
 -(void) removeContact {
-    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", @""), self.contact.fullName];
+    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", @""), self.contact.contactJid];
     NSString* detailString = NSLocalizedString(@"They will no longer see when you are online. They may not be able to send you encrypted messages.", @"");
        
     BOOL isMUC=self.contact.isGroup;
@@ -446,7 +444,7 @@
 }
 
 -(void) blockContact {
-    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Block %@ from contacting you?", @""), self.contact.fullName ];
+    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Block %@ from contacting you?", @""), self.contact.contactJid];
     NSString* detailString = NSLocalizedString(@"This sender will no longer be able to contact you",@"");
 
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
@@ -465,7 +463,7 @@
 }
 
 -(void) unBlockContact {
-    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Allow %@ to contact you?", @""),self.contact.fullName ];
+    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Allow %@ to contact you?", @""), self.contact.contactJid];
     NSString* detailString =NSLocalizedString(@"This sender will be able to send you messages",@"");
 
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
@@ -587,20 +585,31 @@
     return YES;
 }
 
+-(void) refreshContact:(NSNotification*) notification
+{
+    weakify(self);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        strongify(self);
+        self.navigationItem.title = [self.contact contactDisplayName];
+        if(self.saveHUD)
+            self.saveHUD.hidden = YES;
+    });
+}
 
 -(BOOL) textFieldShouldEndEditing:(UITextField *)textField {
-    if(!textField) return NO;
-    [[DataLayer sharedInstance] setNickName:textField.text forContact:self.contact.contactJid andAccount:self.accountNo];
+    if(!textField)
+        return NO;
     
-    if(textField.text.length>0)
-        self.navigationItem.title = textField.text;
-    else
-        self.navigationItem.title = self.contact.fullName;
-    
-    if(![self.contact.nickName isEqualToString:textField.text]) {
-        self.contact.nickName = textField.text;
-
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+    //update roster on our server if the nick changed
+    if(!self.contact.nickName || ![self.contact.nickName isEqualToString:textField.text])
+    {
+        //no need to update our db here, this will be done automatically on incoming roster push that gets initiated by our roster set with the new name
+        [self.xmppAccount updateRosterItem:self.contact.contactJid withName:textField.text];
+        
+        self.saveHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        self.saveHUD.label.text = NSLocalizedString(@"Saving changes to server",@"");
+        self.saveHUD.mode = MBProgressHUDModeIndeterminate;
+        self.saveHUD.removeFromSuperViewOnHide = YES;
     }
     
     return YES;

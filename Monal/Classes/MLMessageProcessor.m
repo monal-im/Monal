@@ -191,10 +191,9 @@ static NSMutableDictionary* _typingNotifications;
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
                     
                     //update unread count in active chats list
-                    MLContact* contact = [MLContact alloc];
-                    contact.contactJid = messageNode.toUser;
-                    contact.accountId = account.accountNo;
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{@"contact": contact}];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                        @"contact": [[DataLayer sharedInstance] contactForUsername:messageNode.toUser forAccount:account.accountNo]
+                    }];
                 }
             }
         }
@@ -247,10 +246,9 @@ static NSMutableDictionary* _typingNotifications;
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
         
         //update unread count in active chats list
-        MLContact* contact = [MLContact alloc];
-        contact.contactJid = messageNode.toUser;
-        contact.accountId = account.accountNo;
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{@"contact": contact}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+            @"contact": [[DataLayer sharedInstance] contactForUsername:messageNode.toUser forAccount:account.accountNo]
+        }];
     }
     
     //ignore typing notifications when in appex

@@ -97,8 +97,8 @@ enum activeChatsControllerSections {
 
 -(void) refreshDisplay
 {
-    NSMutableArray* activeContactsUnpinned = [[DataLayer sharedInstance] activeContacts:NO];
-    NSMutableArray* activeContactsPinned = [[DataLayer sharedInstance] activeContacts:YES];
+    NSMutableArray* activeContactsUnpinned = [[DataLayer sharedInstance] activeContactsWithPinned:NO];
+    NSMutableArray* activeContactsPinned = [[DataLayer sharedInstance] activeContactsWithPinned:YES];
     if(!activeContactsUnpinned || ! activeContactsPinned)
         return;
 
@@ -120,7 +120,7 @@ enum activeChatsControllerSections {
 
 -(void) refreshContact:(NSNotification*) notification
 {
-    MLContact* contact = [notification.userInfo objectForKey:@"contact"];;
+    MLContact* contact = [notification.userInfo objectForKey:@"contact"];
     
     if([notification.userInfo objectForKey:@"pinningChanged"]) {
         // if pinning changed we have to move the user to a other section
@@ -132,9 +132,13 @@ enum activeChatsControllerSections {
 
             // check if contact is already displayed -> get coresponding indexPath
             [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                MLContact* rowContact = (MLContact *) obj;
-                if([rowContact.contactJid isEqualToString:contact.contactJid] &&
-                   [rowContact.accountId isEqualToString:contact.accountId]) {
+                MLContact* rowContact = (MLContact*)obj;
+                if(
+                    [rowContact.contactJid isEqualToString:contact.contactJid] &&
+                    [rowContact.accountId isEqualToString:contact.accountId]
+                ) {
+                    //this MLContact instance is used in various ui parts, not just this file --> update all properties but keep the instance intact
+                    [rowContact updateWithContact:contact];
                     indexPath = [NSIndexPath indexPathForRow:idx inSection:section];
                     *stop = YES;
                 }
@@ -464,9 +468,7 @@ enum activeChatsControllerSections {
                 if ([messageRow.messageText hasPrefix:@"/me "])
                 {
                     NSString* replacedMessageText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:row.accountId
-                                                                                                               buddy:row.contactJid
-                                                                                                            nickName:row.nickName
-                                                                                                            fullName:row.fullName
+                                                                                                         displayName:[row contactDisplayName]
                                                                                                           actualFrom:messageRow.actualFrom
                                                                                                              message:messageRow.messageText
                                                                                                              isGroup:row.isGroup];

@@ -22,7 +22,6 @@
 
 NSString* const kAccountID = @"account_id";
 NSString* const kAccountState = @"account_state";
-NSString* const kAccountHibernate = @"account_hibernate";
 
 //used for account rows
 NSString *const kDomain = @"domain";
@@ -35,7 +34,6 @@ NSString *const kDirectTLS = @"directTLS";
 NSString *const kSelfSigned = @"selfsigned";
 
 NSString *const kUsername = @"username";
-NSString *const kFullName = @"full_name";
 
 NSString *const kMessageType = @"messageType";
 NSString *const kMessageTypeGeo = @"Geo";
@@ -44,10 +42,6 @@ NSString *const kMessageTypeMessageDraft = @"MessageDraft";
 NSString *const kMessageTypeStatus = @"Status";
 NSString *const kMessageTypeText = @"Text";
 NSString *const kMessageTypeUrl = @"Url";
-
-// used for contact rows
-NSString *const kContactName = @"buddy_name";
-NSString *const kCount = @"count";
 
 static NSString* dbPath;
 static NSDateFormatter* dbFormatter;
@@ -357,16 +351,20 @@ static NSDateFormatter* dbFormatter;
 
 -(BOOL) addContact:(NSString*) contact forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName andMucNick:(NSString* _Nullable) mucNick
 {
-    // no blank full names
-    NSString* actualfull = fullName;
-    if([[actualfull stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] == 0)
-        actualfull = contact;
-
-    NSString* query = [NSString stringWithFormat:@"insert into buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'new', 'online', 'dirty', 'muc', 'muc_nick') values(?, ?, ?, ?, 1, 0, 0, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET account_id=?, buddy_name=?;"];
-    if(!(accountNo && contact && actualfull && nickName)) {
+    //data length check
+    NSString* toPass;
+    NSString* cleanNickName = [nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if([cleanNickName length]>50)
+        toPass = [cleanNickName substringToIndex:49];
+    else
+        toPass = cleanNickName;
+    
+    NSString* query = @"insert into buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'new', 'online', 'dirty', 'muc', 'muc_nick') values(?, ?, ?, ?, 1, 0, 0, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET account_id=?, buddy_name=?, nick_name=?;";
+    if(!accountNo || !contact)
         return NO;
-    } else  {
-        NSArray* params = @[accountNo, contact, actualfull, nickName, mucNick?@1:@0, mucNick ? mucNick : @"", accountNo, contact];
+    else
+    {
+        NSArray* params = @[accountNo, contact, fullName, toPass, mucNick?@1:@0, mucNick ? mucNick : @"", accountNo, contact, toPass];
         BOOL success = [self.db executeNonQuery:query andArguments:params];
         return success;
     }
@@ -416,7 +414,7 @@ static NSDateFormatter* dbFormatter;
     if(!username || !accountNo)
         return nil;
     
-    NSArray* results = [self.db executeReader:@"SELECT a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id, lastMessageTime, 0 AS 'count', subscription, ask, pinned from activechats as a JOIN buddylist AS b WHERE a.buddy_name = b.buddy_name AND a.account_id = b.account_id AND a.buddy_name=? and a.account_id=?" andArguments:@[username, accountNo]];
+    NSArray* results = [self.db executeReader:@"SELECT a.buddy_name,  state, status,  filename, b.full_name, b.nick_name, muc_subject, muc_nick, a.account_id, lastMessageTime, 0 AS 'count', subscription, ask, pinned from activechats as a JOIN buddylist AS b WHERE a.buddy_name = b.buddy_name AND a.account_id = b.account_id AND a.buddy_name=? and a.account_id=?" andArguments:@[username, accountNo]];
     if(results != nil && [results count] != 1)
     {
         DDLogError(@"unexpected contact count for %@ in account %@: %lu",  username, accountNo, (unsigned long)[results count]);
@@ -431,7 +429,7 @@ static NSDateFormatter* dbFormatter;
 {
     NSString *likeString = [NSString stringWithFormat:@"%%%@%%", search];
     NSString* query = @"";
-    query = [NSString stringWithFormat:@"select buddy_name, state, status, filename, 0 as 'count', ifnull(full_name, buddy_name) as full_name, account_id, online from buddylist where buddy_name like ? or full_name like ? order by full_name COLLATE NOCASE asc "];
+    query = [NSString stringWithFormat:@"select buddy_name, state, status, filename, 0 as 'count', full_name, nick_name, account_id, online from buddylist where buddy_name like ? or full_name like ? or nick_name like ? order by full_name, nick_name, buddy_name COLLATE NOCASE asc "];
 
     NSArray *params = @[likeString, likeString];
 
@@ -462,12 +460,12 @@ static NSDateFormatter* dbFormatter;
 
     if([sort isEqualToString:@"Name"])
     {
-        query = [NSString stringWithFormat:@"select buddy_name, state, status,filename, 0 as 'count', ifnull(full_name, buddy_name) as full_name, nick_name, MUC, muc_subject, muc_nick, account_id from buddylist where online=1 and subscription='both'  order by full_name COLLATE NOCASE asc"];
+        query = [NSString stringWithFormat:@"select buddy_name, state, status,filename, 0 as 'count', full_name, nick_name, MUC, muc_subject, muc_nick, account_id from buddylist where online=1 and subscription='both' order by nick_name, full_name, buddy_name COLLATE NOCASE asc"];
     }
 
     if([sort isEqualToString:@"Status"])
     {
-        query = [NSString stringWithFormat:@"select buddy_name, state, status, filename, 0 as 'count', ifnull(full_name, buddy_name) as full_name, nick_name, MUC, muc_subject, muc_nick, account_id from buddylist where online=1 and subscription='both' order by state, full_name COLLATE NOCASE asc"];
+        query = [NSString stringWithFormat:@"select buddy_name, state, status, filename, 0 as 'count', full_name, nick_name, MUC, muc_subject, muc_nick, account_id from buddylist where online=1 and subscription='both' order by state, nick_name, full_name, buddy_name COLLATE NOCASE asc"];
     }
 
     NSMutableArray* results = [self.db executeReader:query];
@@ -482,7 +480,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSMutableArray*) offlineContacts
 {
-    NSString* query = [NSString stringWithFormat:@"select buddy_name, A.state, status, filename, 0, ifnull(full_name, buddy_name) as full_name,nick_name, a.account_id, MUC, muc_subject, muc_nick from buddylist as A inner join account as b  on a.account_id=b.account_id  where  online=0 and enabled=1 order by full_name COLLATE NOCASE "];
+    NSString* query = [NSString stringWithFormat:@"select buddy_name, A.state, status, filename, 0, full_name, nick_name, a.account_id, MUC, muc_subject, muc_nick from buddylist as A inner join account as b  on a.account_id=b.account_id  where  online=0 and enabled=1 order by nick_name, full_name, buddy_name COLLATE NOCASE "];
     NSMutableArray* results = [self.db executeReader:query];
 
     NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
@@ -813,48 +811,20 @@ static NSDateFormatter* dbFormatter;
 
 -(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSString*) accountNo
 {
-    NSString* toPass;
     //data length check
+    NSString* toPass;
+    NSString* cleanFullName = [fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if([cleanFullName length]>50)
+        toPass = [cleanFullName substringToIndex:49];
+    else
+        toPass = cleanFullName;
 
-    NSString *cleanFullName =[fullName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    if([cleanFullName length]>50) toPass=[cleanFullName substringToIndex:49]; else toPass=cleanFullName;
-
-    if(!toPass) return;
+    if(!toPass)
+        return;
 
     NSString* query = [NSString stringWithFormat:@"update buddylist set full_name=?, dirty=1 where account_id=? and  buddy_name=?"];
     NSArray* params = @[toPass , accountNo, contact];
     [self.db executeNonQuery:query  andArguments:params];
-}
-
--(void) setNickName:(NSString*) nickName forContact:(NSString*) buddy andAccount:(NSString*) accountNo
-{
-    if(!nickName || !buddy) return;
-    NSString* toPass;
-    //data length check
-
-    if([nickName length]>50) toPass=[nickName substringToIndex:49]; else toPass=nickName;
-    NSString* query = [NSString stringWithFormat:@"update buddylist set nick_name=?, dirty=1 where account_id=? and  buddy_name=?"];
-    NSArray* params = @[toPass, accountNo, buddy];
-
-    [self.db executeNonQuery:query andArguments:params];
-}
-
--(NSString*) nickName:(NSString*) buddy forAccount:(NSString*) accountNo;
-{
-    if(!accountNo  || !buddy) return nil;
-    NSString* query = [NSString stringWithFormat:@"select nick_name from buddylist where account_id=? and buddy_name=?"];
-    NSArray * params=@[accountNo, buddy];
-    NSString* fullname= (NSString*)[self.db executeScalar:query andArguments:params];
-    return fullname;
-}
-
--(NSString*) fullNameForContact:(NSString*) contact inAccount:(NSString*) accountNo
-{
-    if(!accountNo  || !contact) return nil;
-    NSString* query = [NSString stringWithFormat:@"select full_name from buddylist where account_id=? and buddy_name=?"];
-    NSArray * params=@[accountNo, contact];
-    NSObject* name = [self.db executeScalar:query andArguments:params];
-    return (NSString *)name;
 }
 
 -(void) setAvatarHash:(NSString*) hash forContact:(NSString*) contact andAccount:(NSString*) accountNo
@@ -1611,9 +1581,9 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark active chats
 
--(NSMutableArray*) activeContacts:(BOOL) pinned
+-(NSMutableArray*) activeContactsWithPinned:(BOOL) pinned
 {
-    NSString* query = [NSString stringWithFormat:@"SELECT a.buddy_name,  state, status,  filename, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, muc_subject, muc_nick, a.account_id, lastMessageTime, 0 AS 'count', subscription, ask, pinned from activechats as a JOIN buddylist AS b WHERE a.buddy_name = b.buddy_name AND a.account_id = b.account_id AND a.pinned=? ORDER BY lastMessageTime DESC"];
+    NSString* query = [NSString stringWithFormat:@"SELECT a.buddy_name,  state, status,  filename, b.full_name, b.nick_name, muc_subject, muc_nick, a.account_id, lastMessageTime, 0 AS 'count', subscription, ask, pinned from activechats as a JOIN buddylist AS b WHERE a.buddy_name = b.buddy_name AND a.account_id = b.account_id AND a.pinned=? ORDER BY lastMessageTime DESC"];
 
     NSDateFormatter* dateFromatter = [[NSDateFormatter alloc] init];
     NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
@@ -1633,13 +1603,20 @@ static NSDateFormatter* dbFormatter;
 
 -(NSMutableArray*) activeContactDict
 {
-    NSString* query = [NSString stringWithFormat:@"select  distinct a.buddy_name, ifnull(b.full_name, a.buddy_name) AS full_name, nick_name, a.account_id from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by lastMessageTime desc"];
+    NSString* query = [NSString stringWithFormat:@"select  distinct a.buddy_name, b.full_name, b.nick_name, a.account_id from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by lastMessageTime desc"];
 
     NSMutableArray* results = [self.db executeReader:query];
     
     NSMutableArray* toReturn = [[NSMutableArray alloc] initWithCapacity:results.count];
     [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSDictionary* dic = (NSDictionary *) obj;
+        NSMutableDictionary* dic = [[NSMutableDictionary alloc] initWithDictionary:(NSDictionary*)obj];
+        if(!dic[@"full_name"] || ![dic[@"full_name"] length])
+        {
+            //default is local part, see https://docs.modernxmpp.org/client/design/#contexts
+            //see also: MLContact.m (the only other source that decides what to use as display name)
+            NSDictionary* jidParts = [HelperTools splitJid:dic[@"buddy_name"]];
+            dic[@"full_name"] = jidParts[@"node"];
+        }
         [toReturn addObject:dic];
     }];
     return toReturn;
@@ -2122,6 +2099,15 @@ static NSDateFormatter* dbFormatter;
         //add displayed and displayMarkerWanted fields
         [self.db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN displayed BOOL DEFAULT FALSE;"];
         [self.db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN displayMarkerWanted BOOL DEFAULT FALSE;"];
+    }];
+    
+    [self updateDBTo:4.93 withBlock:^{
+        //full_name should not be buddy_name anymore, but the user provided XEP-0172 nickname
+        //and nick_name will be the roster name, if given
+        //if none of these two are given, the local part of the jid (called node in prosody and in jidSplit:) will be used, like in other clients
+        //see also https://docs.modernxmpp.org/client/design/#contexts
+        [self.db executeNonQuery:@"UPDATE buddylist SET full_name='' WHERE full_name=buddy_name;"];
+        [self.db executeNonQuery:@"UPDATE account SET rosterVersion=?;" andArguments:@[@""]];
     }];
     
     [self.db endWriteTransaction];

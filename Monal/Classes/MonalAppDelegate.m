@@ -436,10 +436,9 @@
         }
         
         //update unread count in active chats list
-        MLContact* contact = [MLContact alloc];
-        contact.contactJid = from;
-        contact.accountId = accountId;
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{@"contact": contact}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+            @"contact": [[DataLayer sharedInstance] contactForUsername:from forAccount:accountId]
+        }];
         
         [self updateUnread];
     }

@@ -27,10 +27,6 @@ extern NSString* const kDirectTLS;
 extern NSString* const kSelfSigned;
 
 extern NSString* const kUsername;
-extern NSString* const kFullName;
-
-extern NSString* const kContactName;
-extern NSString* const kCount;
 
 extern NSString* const kMessageType;
 extern NSString* const kMessageTypeGeo;
@@ -98,7 +94,7 @@ extern NSString* const kMessageTypeUrl;
 #pragma mark Contact info
 
 -(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSString*) accountNo;
--(NSString*) fullNameForContact:(NSString*) contact inAccount:(NSString*) accountNo;
+-(void) setNickName:(NSString*) nickName forContact:(NSString*) buddy andAccount:(NSString*) accountNo;
 
 -(void) setAvatarHash:(NSString*) hash forContact:(NSString*) contact andAccount:(NSString*) accountNo;
 -(NSString*) getAvatarHashForContact:(NSString*) buddy andAccount:(NSString*) accountNo;
@@ -130,11 +126,6 @@ extern NSString* const kMessageTypeUrl;
  Calls with YES if contact  has already been added to the database for this account
  */
 -(BOOL) isContactInList:(NSString*) buddy forAccount:(NSString*) accountNo;
-
-
-#pragma mark - vcard commands
--(void) setNickName:(NSString*) nickName forContact:(NSString*) buddy andAccount:(NSString*) accountNo;
--(NSString*) nickName:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 #pragma mark - account commands
 -(NSArray*) accountList;
@@ -232,7 +223,7 @@ retrieves the actual_from of the the last message from hisroty id
 -(NSString*)lastMessageActualFromByHistoryId:(NSNumber*) lastMsgHistoryId;
 
 #pragma mark active contacts
--(NSMutableArray*) activeContacts:(BOOL) pinned;
+-(NSMutableArray*) activeContactsWithPinned:(BOOL) pinned;
 -(NSMutableArray*) activeContactDict;
 -(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
 -(void) removeAllActiveBuddies;

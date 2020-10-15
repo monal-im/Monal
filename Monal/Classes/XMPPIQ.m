@@ -241,19 +241,25 @@ NSString* const kiqErrorType = @"error";
 
 -(void) setRemoveFromRoster:(NSString*) jid
 {
-    MLXMLNode* queryNode = [[MLXMLNode alloc] init];
-    queryNode.element = @"query";
-    [queryNode.attributes setObject:@"jabber:iq:roster" forKey:kXMLNS];
-    [self addChild:queryNode];
-    
-    MLXMLNode* itemNode = [[MLXMLNode alloc] init];
-    itemNode.element = @"item";
-    [itemNode.attributes setObject:jid forKey:@"jid"];
-    [itemNode.attributes setObject:@"remove" forKey:@"subscription"];
-    [queryNode addChild:itemNode];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:roster" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{
+            @"jid": jid,
+            @"subscription": @"remove"
+        } andChildren:@[] andData:nil]
+    ] andData:nil]];
 }
 
--(void) setRosterRequest:(NSString *) version
+-(void) setUpdateRosterItem:(NSString* _Nonnull) jid withName:(NSString* _Nonnull) name
+{
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:roster" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{
+            @"jid": jid,
+            @"name": name,
+        } andChildren:@[] andData:nil]
+    ] andData:nil]];
+}
+
+-(void) setRosterRequest:(NSString*) version
 {
     MLXMLNode* queryNode = [[MLXMLNode alloc] init];
     queryNode.element = @"query";

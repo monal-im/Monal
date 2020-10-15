@@ -30,18 +30,19 @@ void logException(NSException* exception)
     NSFileManager* fileManager = [NSFileManager defaultManager];
     if([fileManager fileExistsAtPath:file])
     {
-        DDLogError(@"protecting file '%@'...", file);
+        DDLogVerbose(@"protecting file '%@'...", file);
         NSError* error;
         [fileManager setAttributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} ofItemAtPath:file error:&error];
-        DDLogError(@"file '%@' now protected", file);
         if(error)
         {
             DDLogError(@"Error configuring database file protection level for: %@", file);
             @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
         }
+        else
+            DDLogVerbose(@"file '%@' now protected", file);
     }
     else
-        DDLogError(@"file '%@' does not exist!", file);
+        DDLogVerbose(@"file '%@' does not exist!", file);
 #endif
 }
 

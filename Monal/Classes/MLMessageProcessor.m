@@ -89,7 +89,7 @@ static NSMutableDictionary* _typingNotifications;
         NSString* actualFrom = messageNode.fromUser;
         
         //processed messages already have server name
-        if([messageNode check:@"/<type=groupchat>"])
+        if([messageNode check:@"/<type=groupchat>"] && messageNode.fromResource)
         {
             ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser andServer:@"" forAccount:account.accountNo];
             actualFrom = messageNode.fromResource;

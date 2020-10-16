@@ -66,6 +66,7 @@ NSString *const kAskSubscribe=@"subscribe";
     contact.statusMessage = [dic objectForKey:@"status"];
     contact.state = [dic objectForKey:@"state"];
     contact.unreadCount = [[dic objectForKey:@"count"] integerValue];
+    contact.isActiveChat = [[dic objectForKey:@"isActiveChat"] boolValue];
     //make sure isGroup is set correctly
     if(contact.groupSubject.length > 0 || contact.accountNickInGroup.length > 0)
         contact.isGroup = YES;
@@ -98,6 +99,7 @@ NSString *const kAskSubscribe=@"subscribe";
     [coder encodeObject:self.state forKey:@"state"];
     [coder encodeInteger:self.unreadCount forKey:@"unreadCount"];
     [coder encodeObject:self.lastMessageTime forKey:@"lastMessageTime"];
+    [coder encodeBool:self.isActiveChat forKey:@"isActiveChat"];
 }
 
 -(instancetype) initWithCoder:(NSCoder*) coder
@@ -118,6 +120,7 @@ NSString *const kAskSubscribe=@"subscribe";
     self.state = [coder decodeObjectForKey:@"state"];
     self.unreadCount = [coder decodeIntegerForKey:@"unreadCount"];
     self.lastMessageTime = [coder decodeObjectForKey:@"lastMessageTime"];
+    self.isActiveChat = [coder decodeBoolForKey:@"isActiveChat"];
     return self;
 }
 
@@ -138,6 +141,7 @@ NSString *const kAskSubscribe=@"subscribe";
     self.state = contact.state;
     self.unreadCount = contact.unreadCount;
     self.lastMessageTime = contact.lastMessageTime;
+    self.isActiveChat = contact.isActiveChat;
 }
 
 @end

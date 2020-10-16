@@ -109,7 +109,8 @@ static const size_t MAX_OMEMO_KEYS = 120;
     XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query setiqTo:jid];
     [query requestDevices];
-    if([jid isEqualToString:self._senderJid]) {
+    if([jid isEqualToString:self._senderJid])
+    {
         // save our own last omemo query id for matching against our own device list received from the server
         self.deviceQueryId = [query.attributes objectForKey:@"id"];
     }
@@ -124,7 +125,8 @@ static const size_t MAX_OMEMO_KEYS = 120;
 {
     // generate new keys if less than MIN_OMEMO_KEYS are available
     int preKeyCount = [self.monalSignalStore getPreKeyCount];
-    if(preKeyCount < MIN_OMEMO_KEYS) {
+    if(preKeyCount < MIN_OMEMO_KEYS)
+    {
         SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self._signalContext];
 
         // Generate new keys so that we have a total of MAX_OMEMO_KEYS keys again
@@ -161,14 +163,18 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
         // query omemo bundles from devices that are not in our signalStorage
         // TODO: queryOMEMOBundleFrom when sending first msg without session
-        for(NSNumber* deviceId in receivedDevices) {
-            if(![existingDevices containsObject:deviceId]) {
+        for(NSNumber* deviceId in receivedDevices)
+        {
+            if(![existingDevices containsObject:deviceId])
+            {
                 [self queryOMEMOBundleFrom:source andDevice:[deviceId stringValue]];
             }
         }
         // remove devices from our signalStorage when they are no longer published
-        for(NSNumber* deviceId in existingDevices) {
-            if(![receivedDevices containsObject:deviceId]) {
+        for(NSNumber* deviceId in existingDevices)
+        {
+            if(![receivedDevices containsObject:deviceId])
+            {
                 // only delete other devices from signal store && keep our own entry
                 if(!([source isEqualToString:self._senderJid] && deviceId.intValue == self.monalSignalStore.deviceid))
                     [self deleteDeviceForSource:source andRid:deviceId.intValue];
@@ -241,7 +247,8 @@ static const size_t MAX_OMEMO_KEYS = 120;
 -(void) processOMEMOKeys:(XMPPIQ*) iqNode
 {
     assert(self._signalContext);
-    for(MLXMLNode* publishElement in [iqNode find:@"{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>"]) {
+    for(MLXMLNode* publishElement in [iqNode find:@"{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>"])
+    {
         NSString* bundleName = [publishElement findFirst:@"/@node"];
         if(!bundleName)
             return;
@@ -279,7 +286,8 @@ static const size_t MAX_OMEMO_KEYS = 120;
         SignalSessionBuilder* builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self._signalContext];
         NSMutableArray* preKeys = [[NSMutableArray alloc] init];
         NSArray<NSNumber*>* preKeyIds = [bundle find:@"prekeys/preKeyPublic@preKeyId|int"];
-        for(NSNumber* preKey in preKeyIds) {
+        for(NSNumber* preKey in preKeyIds)
+        {
             NSString* query = [NSString stringWithFormat:@"prekeys/preKeyPublic<preKeyId=%@>#|base64", preKey];
             NSData* key = [bundle findFirst:query];
             if(!key)
@@ -290,7 +298,8 @@ static const size_t MAX_OMEMO_KEYS = 120;
             [preKeys addObject:dict];
         }
         // save preKeys to local storage
-        for(NSDictionary* row in preKeys) {
+        for(NSDictionary* row in preKeys)
+        {
             NSString* keyid = (NSString *)[row objectForKey:@"preKeyId"];
             NSData* preKeyData = [row objectForKey:@"preKey"];
             if(preKeyData) {
@@ -316,13 +325,16 @@ static const size_t MAX_OMEMO_KEYS = 120;
                         }
                     });
                 });
-            } else  {
+            }
+            else
+            {
                 DDLogError(@"Could not decode base64 prekey %@", row);
             }
         }
         // Build new session when a device session is marked as broken
         NSSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:source];
-        if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:[NSNumber numberWithInt:[rid intValue]]]) {
+        if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:[NSNumber numberWithInt:[rid intValue]]])
+        {
             DDLogInfo(@"Fixing broken session for %@ deviceID: %@", source, rid);
             // FIXME: build new session
             // FIXME: only for trusted devices
@@ -332,13 +344,15 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
 -(void) addEncryptionKeyForAllDevices:(NSArray*) devices encryptForJid:(NSString*) encryptForJid withEncryptedPayload:(MLEncryptedPayload*) encryptedPayload withXMLHeader:(MLXMLNode*) xmlHeader {
     // Encrypt message for all devices known from the recipient
-    for(NSNumber* device in devices) {
+    for(NSNumber* device in devices)
+    {
         SignalAddress* address = [[SignalAddress alloc] initWithName:encryptForJid deviceId:(uint32_t)device.intValue];
 
         NSData* identity = [self.monalSignalStore getIdentityForAddress:address];
 
         // Only add encryption key for devices that are trusted
-        if([self.monalSignalStore isTrustedIdentity:address identityKey:identity]) {
+        if([self.monalSignalStore isTrustedIdentity:address identityKey:identity])
+        {
             SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self._signalContext];
             NSError* error;
             SignalCiphertext* deviceEncryptedKey = [cipher encryptData:encryptedPayload.key error:&error];
@@ -402,7 +416,8 @@ static const size_t MAX_OMEMO_KEYS = 120;
     NSArray* myDevices = [self.monalSignalStore allDeviceIdsForAddressName:self._senderJid];
 
     // Check if we found omemo keys from the recipient
-    if(devices.count > 0) {
+    if(devices.count > 0)
+    {
         NSData* messageBytes = [message dataUsingEncoding:NSUTF8StringEncoding];
 
         // Encrypt message
@@ -436,7 +451,8 @@ static const size_t MAX_OMEMO_KEYS = 120;
 {
     // get set of broken device sessions for the given contact
     NSMutableSet<NSNumber*>* devicesWithInvalSession = [self.devicesWithBrokenSession objectForKey:contact];
-    if(!devicesWithInvalSession) {
+    if(!devicesWithInvalSession)
+    {
         // first broken session for contact -> create new set
         devicesWithInvalSession = [[NSMutableSet<NSNumber*> alloc] init];
     }
@@ -456,7 +472,8 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
 -(NSString *) decryptMessage:(XMPPMessage *) messageNode
 {
-    if(![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/payload"]) {
+    if(![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/payload"])
+    {
         DDLogDebug(@"DecrypMessage called but the message is not encrypted");
         return nil;
     }
@@ -465,7 +482,8 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
     NSNumber* sid = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|int"];
     SignalAddress* address = [[SignalAddress alloc] initWithName:messageNode.fromUser deviceId:(uint32_t)sid.intValue];
-    if(!self._signalContext) {
+    if(!self._signalContext)
+    {
         DDLogError(@"Missing signal context");
         [self->signalLock unlock];
         return NSLocalizedString(@"Error decrypting message", @"");
@@ -483,7 +501,9 @@ static const size_t MAX_OMEMO_KEYS = 120;
         [self->signalLock unlock];
         [self needNewSessionForContact:messageNode.fromUser andDevice:sid];
         return [NSString stringWithFormat:NSLocalizedString(@"Message was not encrypted for this device. Please make sure the sender trusts deviceid %d and that they have you as a contact.", @""), self.monalSignalStore.deviceid];
-    } else {
+    }
+    else
+    {
         SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self._signalContext];
         SignalCiphertextType messagetype;
 
@@ -517,19 +537,22 @@ static const size_t MAX_OMEMO_KEYS = 120;
             [self sendOMEMOBundle];
         }
 
-        if(!decryptedKey){
+        if(!decryptedKey)
+        {
             DDLogError(@"Could not decrypt to obtain key.");
             [self->signalLock unlock];
             [self needNewSessionForContact:messageNode.fromUser andDevice:sid];
             return NSLocalizedString(@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person.", @"");
         }
-        else  {
+        else
+        {
             if(decryptedKey.length == 16 * 2)
             {
                 key = [decryptedKey subdataWithRange:NSMakeRange(0, 16)];
                 auth = [decryptedKey subdataWithRange:NSMakeRange(16, 16)];
             }
-            else {
+            else
+            {
                 key = decryptedKey;
             }
             if(key){
@@ -545,13 +568,16 @@ static const size_t MAX_OMEMO_KEYS = 120;
                     [self->signalLock unlock];
                      return NSLocalizedString(@"Encrypted message was sent in an older format Monal can't decrypt. Please ask them to update their client. (GCM error)", @"");
                 }
-                else  {
+                else
+                {
                     DDLogInfo(@"Decrypted message passing bask string.");
                 }
                 NSString* messageString = [[NSString alloc] initWithData:decData encoding:NSUTF8StringEncoding];
                 [self->signalLock unlock];
                 return messageString;
-            } else  {
+            }
+            else
+            {
                 DDLogError(@"Could not get key");
                 [self->signalLock unlock];
                 return NSLocalizedString(@"Could not decrypt message", @"");
@@ -575,7 +601,8 @@ static const size_t MAX_OMEMO_KEYS = 120;
     listNode.element=@"list";
     [listNode.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:kXMLNS];
 
-    for(NSNumber* deviceNum in devices) {
+    for(NSNumber* deviceNum in devices)
+    {
         NSString* deviceid = [deviceNum stringValue];
         MLXMLNode* device = [[MLXMLNode alloc] init];
         device.element = @"device";
@@ -620,7 +647,8 @@ static const size_t MAX_OMEMO_KEYS = 120;
     MLXMLNode* prekeyNode = [[MLXMLNode alloc] init];
     prekeyNode.element = @"prekeys";
 
-    for(SignalPreKey* prekey in prekeys) {
+    for(SignalPreKey* prekey in prekeys)
+    {
         MLXMLNode* preKeyPublic = [[MLXMLNode alloc] init];
         preKeyPublic.element = @"preKeyPublic";
         [preKeyPublic.attributes setObject:[NSString stringWithFormat:@"%d", prekey.preKeyId] forKey:@"preKeyId"];

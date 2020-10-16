@@ -310,3 +310,12 @@
 "Please add a new account under settings first. If you already added your account you may need to enable it under settings" = "Please add a new account under settings first. If you already added your account you may need to enable it under settings";
 "New Message" = "New Message";
 "Open app to see more" = "Open app to see more";
+"Mark as read" = "Mark as read";
+"Saving changes to server" = "Saving changes to server";
+"Send" = "Send";
+"Send message received state" = "Send message received state";
+"Set a nickname for this contact" = "Set a nickname for this contact";
+"Sync Read-Markers" = "Sync Read-Markers";
+"Tell my contacts if I've read a message" = "Tell my contacts if I've read a message";
+"Tell my contacts if my device received a message" = "Tell my contacts if my device received a message";
+"Your answer" = "Your answer";

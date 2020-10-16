@@ -419,7 +419,14 @@ static NSDateFormatter* dbFormatter;
     if(!username || !accountNo)
         return nil;
     
-    NSArray* results = [self.db executeReader:@"SELECT a.buddy_name,  state, status,  filename, b.full_name, b.nick_name, muc_subject, muc_nick, a.account_id, lastMessageTime, 0 AS 'count', subscription, ask, pinned from activechats as a JOIN buddylist AS b WHERE a.buddy_name = b.buddy_name AND a.account_id = b.account_id AND a.buddy_name=? and a.account_id=?" andArguments:@[username, accountNo]];
+    NSArray* results = [self.db executeReader:@"SELECT b.buddy_name, state, status, filename, b.full_name, b.nick_name, muc_subject, muc_nick, b.account_id, lastMessageTime, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', \
+        CASE \
+            WHEN a.buddy_name IS NOT NULL THEN 1 \
+            ELSE 0 \
+        END AS 'isActiveChat' \
+        FROM buddylist AS b LEFT JOIN activechats AS a \
+        ON a.buddy_name = b.buddy_name AND a.account_id = b.account_id \
+        WHERE a.buddy_name=? and a.account_id=?" andArguments:@[username, accountNo]];
     if(results != nil && [results count] != 1)
     {
         DDLogError(@"unexpected contact count for %@ in account %@: %lu with results: %@",  username, accountNo, (unsigned long)[results count], results);

@@ -245,7 +245,7 @@
             }
             
             DDLogVerbose(@"Adding contact %@ (%@) to database", [contact objectForKey:@"jid"], [contact objectForKey:@"name"]);
-            BOOL success = [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
+            [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
                                         forAccount:account.accountNo
                                           fullname:@""
                                           nickname:[contact objectForKey:@"name"] ? [contact objectForKey:@"name"] : @""
@@ -256,9 +256,13 @@
                                              forContact:[contact objectForKey:@"jid"]
                                              andAccount:account.accountNo];
             
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                @"contact": [[DataLayer sharedInstance] contactForUsername:[contact objectForKey:@"jid"] forAccount:account.accountNo]
-            }];
+            MLContact* contactDetails = [[DataLayer sharedInstance] contactForUsername:[contact objectForKey:@"jid"] forAccount:account.accountNo];
+            if(contactDetails)
+            {
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                    @"contact": contactDetails
+                }];
+            }
         }
     }
     

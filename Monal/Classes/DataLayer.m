@@ -353,8 +353,13 @@ static NSDateFormatter* dbFormatter;
 {
     //data length check
     NSString* toPass;
-    NSString* cleanNickName = [nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    if([cleanNickName length]>50)
+    NSString* cleanNickName;
+    if(!nickName) {
+        cleanNickName = @"";
+    } else {
+        cleanNickName = [nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    }
+    if([cleanNickName length] > 50)
         toPass = [cleanNickName substringToIndex:49];
     else
         toPass = cleanNickName;
@@ -417,7 +422,7 @@ static NSDateFormatter* dbFormatter;
     NSArray* results = [self.db executeReader:@"SELECT a.buddy_name,  state, status,  filename, b.full_name, b.nick_name, muc_subject, muc_nick, a.account_id, lastMessageTime, 0 AS 'count', subscription, ask, pinned from activechats as a JOIN buddylist AS b WHERE a.buddy_name = b.buddy_name AND a.account_id = b.account_id AND a.buddy_name=? and a.account_id=?" andArguments:@[username, accountNo]];
     if(results != nil && [results count] != 1)
     {
-        DDLogError(@"unexpected contact count for %@ in account %@: %lu",  username, accountNo, (unsigned long)[results count]);
+        DDLogError(@"unexpected contact count for %@ in account %@: %lu with results: %@",  username, accountNo, (unsigned long)[results count], results);
         return nil;
     }
     

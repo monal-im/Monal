@@ -392,6 +392,7 @@
 
 -(void) userNotificationCenter:(UNUserNotificationCenter*) center didReceiveNotificationResponse:(UNNotificationResponse*) response withCompletionHandler:(void (^)(void)) completionHandler
 {
+    DDLogVerbose(@"notification action triggered for %@", response.notification.request.content.userInfo);
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     
     NSString* from = response.notification.request.content.userInfo[@"from"];

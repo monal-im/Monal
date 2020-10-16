@@ -14,10 +14,14 @@
 #import "MLMAMPrefTableViewController.h"
 #import "MLKeysTableViewController.h"
 #import "MLPasswordChangeTableViewController.h"
+#import "MLImageManager.h"
+
+@import MobileCoreServices;
 
 @interface XMPPEdit()
 
 @property (nonatomic, strong) NSString *jid;
+@property (nonatomic, strong) NSString *userName;
 @property (nonatomic, strong) NSString *password;
 @property (nonatomic, strong) NSString *resource;
 @property (nonatomic, strong) NSString *server;
@@ -30,7 +34,10 @@
 @property (nonatomic, weak) UITextField *currentTextField;
 
 @property (nonatomic, strong) NSDictionary *initialSettings;
+@property (nonatomic, strong) UIDocumentPickerViewController *imagePicker;
 
+@property (nonatomic, strong) UIImageView *userAvatarImageView;
+@property (nonatomic, strong) NSString *base64ImgString;
 @end
 
 
@@ -109,7 +116,15 @@
         self.directTLS = NO;
         self.selfSignedSSL = NO;
     }
-    self.sectionArray = @[NSLocalizedString(@"Account", @""), NSLocalizedString(@"General", @""), NSLocalizedString(@"Advanced Settings", @""), @""];
+    self.sectionArray = @[@"", NSLocalizedString(@"Account", @""), NSLocalizedString(@"General", @""), NSLocalizedString(@"Advanced Settings", @""), @""];
+    
+#if TARGET_OS_MACCATALYST
+    //UTI @"public.data" for everything
+    NSString *images = (NSString *)kUTTypeImage;
+    self.imagePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images] inMode:UIDocumentPickerModeImport];
+    self.imagePicker.allowsMultipleSelection = NO;
+    self.imagePicker.delegate = self;
+#endif
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -290,7 +305,7 @@
 
     [questionAlert addAction:noAction];
     [questionAlert addAction:yesAction];
-    questionAlert.popoverPresentationController.sourceView=sender;
+    questionAlert.popoverPresentationController.sourceView = sender;
 
     [self presentViewController:questionAlert animated:YES completion:nil];
 
@@ -298,7 +313,19 @@
 
 #pragma mark table view datasource methods
 
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath;
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    if (section == 0)
+    {
+        return 100;
+    }
+    else
+    {
+        return UITableViewAutomaticDimension;
+    }
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     return 40;
 }
@@ -310,7 +337,7 @@
     MLSwitchCell* thecell = (MLSwitchCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
 
     // load cells from interface builder
-    if(indexPath.section == 0)
+    if(indexPath.section == 1)
     {
         //the user
         switch (indexPath.row)
@@ -332,6 +359,14 @@
                 break;
             }
             case 2: {
+                thecell.cellLabel.text = NSLocalizedString(@"My Name/Nickname", @"");
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.tag = 3;
+                thecell.textInputField.keyboardType = UIKeyboardTypeDefault;
+                thecell.textInputField.text = self.userName;
+                break;
+            }
+            case 3: {
                 thecell.cellLabel.text = NSLocalizedString(@"Enabled", @"");
                 thecell.textInputField.hidden = YES;
                 thecell.toggleSwitch.tag = 1;
@@ -340,7 +375,7 @@
             }
         }
     }
-    else if(indexPath.section == 1)
+    else if(indexPath.section == 2)
     {
         switch (indexPath.row)
         {
@@ -363,7 +398,7 @@
             }
         }
     }
-    else if(indexPath.section == 2)
+    else if(indexPath.section == 3)
     {
         switch (indexPath.row)
         {
@@ -416,7 +451,7 @@
             }
         }
     }
-    else if (indexPath.section == 3)
+    else if (indexPath.section == 4)
     {
         switch (indexPath.row) {
             case 0:
@@ -449,8 +484,35 @@
 
 -(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    NSString* sectionTitle = [self tableView:tableView titleForHeaderInSection:section];
-    return [HelperTools MLCustomViewHeaderWithTitle:sectionTitle];
+    if (section == 0)
+    {
+        UIView *avatarView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.frame.size.width, 100)];
+        avatarView.backgroundColor = [UIColor clearColor];
+        avatarView.userInteractionEnabled = YES;
+        
+        self.userAvatarImageView = [[UIImageView alloc] initWithFrame:CGRectMake((self.tableView.frame.size.width - 90)/2 , 25, 90, 90)];
+        self.userAvatarImageView.layer.cornerRadius =  self.userAvatarImageView.frame.size.height / 2;
+        self.userAvatarImageView.layer.borderWidth = 2.0f;
+        self.userAvatarImageView.layer.borderColor = ([UIColor clearColor]).CGColor;
+        self.userAvatarImageView.clipsToBounds = YES;
+        self.userAvatarImageView.userInteractionEnabled = YES;
+        
+        UITapGestureRecognizer *touchUserAvatarRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(getPhotoAction:)];
+        [self.userAvatarImageView addGestureRecognizer:touchUserAvatarRecognizer];
+        
+        [[MLImageManager sharedInstance] getIconForContact:self.jid andAccount:self.accountno withCompletion:^(UIImage *image) {
+            [self.userAvatarImageView setImage:image];
+        }];
+        
+        [avatarView addSubview:self.userAvatarImageView];
+        
+        return avatarView;
+    }
+    else
+    {
+        NSString* sectionTitle = [self tableView:tableView titleForHeaderInSection:section];
+        return [HelperTools MLCustomViewHeaderWithTitle:sectionTitle];
+    }
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -460,19 +522,23 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    // account
+    
     if(section == 0){
-        return 3;
+        return 0;
+    }
+    // account
+    else if(section == 1){
+        return 4;
     }
     // General settings
-    else if(section == 1) {
+    else if(section == 2) {
         return 2;
     }
     // Advanced settings
-    else if(section == 2) {
+    else if(section == 3) {
         return 6;
     }
-    else if(section == 3 &&  self.editMode == false)
+    else if(section == 4 &&  self.editMode == false)
     {
         return 0;
     }
@@ -487,7 +553,7 @@
 {
     DDLogVerbose(@"selected log section %ld , row %ld", newIndexPath.section, newIndexPath.row);
     
-    if(newIndexPath.section == 1)
+    if(newIndexPath.section == 2)
     {
         switch(newIndexPath.row)
         {
@@ -499,7 +565,7 @@
                 break;
         }
     }
-    else if(newIndexPath.section == 2)
+    else if(newIndexPath.section == 3)
     {
         switch(newIndexPath.row)
         {
@@ -508,7 +574,7 @@
                 break;
         }
     }
-    else if(newIndexPath.section == 3)
+    else if(newIndexPath.section == 4)
     {
         [self delClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
     }
@@ -517,7 +583,7 @@
 
 -(void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath
 {
-    if(indexPath.section == 2)
+    if(indexPath.section == 3)
     {
         switch(indexPath.row)
         {
@@ -655,5 +721,123 @@
     }
 }
 
+#pragma mark - doc picker
+-(void)pickImgFile:(id)sender
+{
+    [self presentViewController:self.imagePicker animated:YES completion:nil];
+
+    return;
+}
+
+- (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls
+{
+    NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] init];
+    [coordinator coordinateReadingItemAtURL:urls.firstObject options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
+        NSData *data =[NSData dataWithContentsOfURL:newURL];
+        UIImage *pickImg = [UIImage imageWithData:data];
+        [self convertUIImageToPngData:pickImg];
+    }];
+}
+
+-(void)getPhotoAction:(UIGestureRecognizer *) recognizer
+{
+    xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+
+    if (!account) return;
+    
+    UIAlertController *actionControll = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Select Action",@ "")
+                                                                            message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+
+#if TARGET_OS_MACCATALYST
+    [self pickImgFile:nil];
+#else
+    UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
+    imagePicker.delegate = self;
+
+    UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+        [self presentViewController:imagePicker animated:YES completion:nil];
+    }];
+
+    UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+            if(granted)
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self presentViewController:imagePicker animated:YES completion:nil];
+                });
+            }
+        }];
+    }];
+
+    // Set image
+    if (@available(iOS 13.0, *)) {
+        [cameraAction setValue:[[UIImage systemImageNamed:@"camera"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+        [photosAction setValue:[[UIImage systemImageNamed:@"photo"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+    } else {
+        [cameraAction setValue:[[UIImage imageNamed:@"714-camera"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+    }
+    [actionControll addAction:cameraAction];
+    [actionControll addAction:photosAction];
+#endif
+    
+    // Set image
+    [actionControll addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        [actionControll dismissViewControllerAnimated:YES completion:nil];
+    }]];
+
+    actionControll.popoverPresentationController.sourceView = self.userAvatarImageView;
+    [self presentViewController:actionControll animated:YES completion:nil];
+}
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *, id> *)info
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+    
+    NSString *mediaType = info[UIImagePickerControllerMediaType];
+    if([mediaType isEqualToString:(NSString*) kUTTypeImage]) {
+        UIImage *selectedImage = info[UIImagePickerControllerEditedImage];
+        if(!selectedImage) selectedImage = info[UIImagePickerControllerOriginalImage];
+        [self convertUIImageToPngData:selectedImage];
+    }
+}
+
+-(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+-(void)convertUIImageToPngData:(UIImage*) selectedImg
+{
+    NSData *pngData=  UIImagePNGRepresentation(selectedImg);
+    self.base64ImgString = [HelperTools encodeBase64WithData:pngData];
+    if(pngData)
+    {
+        UIImage *avatarPngImg = [UIImage imageWithData:pngData];
+        if (avatarPngImg)
+        {
+            [self.userAvatarImageView setImage:avatarPngImg];
+        }
+        else
+        {
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@ "")
+                                                                           message:NSLocalizedString(@"Can't convert the image to png file.",@ "") preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                [alert dismissViewControllerAnimated:YES completion:nil];
+            }]];
+            [self presentViewController:alert animated:YES completion:nil];
+        }
+    }
+    else
+    {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@ "")
+                                                                       message:NSLocalizedString(@"Can't convert the image to png file.",@ "") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+    }
+}
 
 @end

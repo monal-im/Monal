@@ -12,7 +12,7 @@
 #import "MLXMPPManager.h"
 
 
-@interface XMPPEdit: UITableViewController <UITextFieldDelegate> {
+@interface XMPPEdit: UITableViewController <UITextFieldDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate> {
 	IBOutlet UILabel *JIDLabel;
 }
 

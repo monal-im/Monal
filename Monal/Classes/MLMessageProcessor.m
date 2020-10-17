@@ -57,32 +57,34 @@ static NSMutableDictionary* _typingNotifications;
 
         return;
     }
-    
+
     //TODO: remove this omemo stuff and use pubsub instead
     if([messageNode check:@"/{jabber:client}message<type=headline>/{http://jabber.org/protocol/pubsub#event}event/items<node=eu\\.siacs\\.conversations\\.axolotl\\.devicelist>/item/{eu.siacs.conversations.axolotl}list"]) {
         NSArray<NSNumber*>* deviceIds = [messageNode find:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event/items<node=eu\\.siacs\\.conversations\\.axolotl\\.devicelist>/item/{eu.siacs.conversations.axolotl}list/device@id|int"];
         NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
         [account.omemo processOMEMODevices:deviceSet from:messageNode.fromUser];
     }
-    
+
     if([messageNode check:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event"])
     {
         [account.pubsub handleHeadlineMessage:messageNode];
         return;
     }
-    
+
     NSString* stanzaid = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];
     //check stnaza-id @by according to the rules outlined in XEP-0359
     if(!stanzaid && [account.connectionProperties.identity.jid isEqualToString:[messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@by"]])
         stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
-    
+
     if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalReceivedMucInviteNotice object:nil userInfo:@{@"from": messageNode.from}];
 
     NSString* decrypted;
-    if([messageNode check:@"/{jabber:client}message/{eu.siacs.conversations.axolotl}encrypted/payload"])
+    if([messageNode check:@"/{jabber:client}message/{eu.siacs.conversations.axolotl}encrypted/header"])
+    {
         decrypted = [account.omemo decryptMessage:messageNode];
-    
+    }
+
     if([messageNode check:@"body"] || [messageNode check:@"/<type=headline>/subject#"] || decrypted)
     {
         NSString* ownNick;

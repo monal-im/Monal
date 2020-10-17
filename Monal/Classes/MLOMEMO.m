@@ -38,10 +38,11 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
 @implementation MLOMEMO
 
+const int KEY_SIZE = 16;
+
 -(MLOMEMO *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid ressource:(NSString*) ressource connectionProps:(MLXMPPConnection *) connectionProps xmppConnection:(xmpp*) xmppConnection
 {
     self = [super init];
-    self->signalLock = [NSLock new];
     self._senderJid = jid;
     self._accountRessource = ressource;
     self._accountNo = accountNo;
@@ -121,8 +122,9 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
 /*
  * generates new omemo keys if we have less than MIN_OMEMO_KEYS left
+ * returns YES if keys were generated and the new omemo bundle was send
  */
--(void) generateNewKeysIfNeeded
+-(BOOL) generateNewKeysIfNeeded
 {
     // generate new keys if less than MIN_OMEMO_KEYS are available
     int preKeyCount = [self.monalSignalStore getPreKeyCount];
@@ -139,7 +141,9 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
         // send out new omemo bundle
         [self sendOMEMOBundle];
+        return YES;
     }
+    return NO;
 }
 
 -(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
@@ -181,6 +185,7 @@ static const size_t MAX_OMEMO_KEYS = 120;
                     [self deleteDeviceForSource:source andRid:deviceId.intValue];
             }
         }
+        // TODO: delete deviceid from new session array
         // Send our own device id when it is missing on the server
         if(!source || [source isEqualToString:self._senderJid])
         {
@@ -231,8 +236,9 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
 -(void) sendOMEMODevice:(NSSet<NSNumber*>*) receivedDevices force:(BOOL) force
 {
-    NSMutableSet<NSNumber*>* devices = [[NSMutableSet alloc] init];
-    if(receivedDevices && [receivedDevices count] > 0) {
+        NSMutableSet<NSNumber*>* devices = [[NSMutableSet alloc] init];
+    if(receivedDevices && [receivedDevices count] > 0)
+    {
         [devices unionSet:receivedDevices];
     }
 
@@ -305,27 +311,28 @@ static const size_t MAX_OMEMO_KEYS = 120;
             NSData* preKeyData = [row objectForKey:@"preKey"];
             if(preKeyData) {
                 //parallelize prekey bundle processing
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                     DDLogDebug(@"Generating keyBundle for key id %@...", keyid);
                     SignalPreKeyBundle* keyBundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
-                                                                                    deviceId:device
-                                                                                        preKeyId:[keyid intValue]
-                                                                                    preKeyPublic:preKeyData
-                                                                                    signedPreKeyId:signedPreKeyPublicId.intValue
+                                                                                deviceId:device
+                                                                                preKeyId:[keyid intValue]
+                                                                                preKeyPublic:preKeyData
+                                                                                signedPreKeyId:signedPreKeyPublicId.intValue
                                                                                 signedPreKeyPublic:signedPreKeyPublic
-                                                                                        signature:signedPreKeySignature
-                                                                                        identityKey:identityKey
-                                                                                            error:nil];
-                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                                                                                signature:signedPreKeySignature
+                                                                                identityKey:identityKey
+                                                                                error:nil];
+                    // dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                         NSError* error;
                         DDLogDebug(@"Processing keyBundle for key id %@...", keyid);
                         [builder processPreKeyBundle:keyBundle error:&error];
                         DDLogDebug(@"Done processing keyBundle for key id %@...", keyid);
-                        if(error) {
+                        if(error)
+                        {
                             DDLogWarn(@"Error creating preKeyBundle: %@", error);
                         }
-                    });
-                });
+                    // });
+                // });
             }
             else
             {
@@ -333,12 +340,26 @@ static const size_t MAX_OMEMO_KEYS = 120;
             }
         }
         // Build new session when a device session is marked as broken
-        NSSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:source];
-        if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:[NSNumber numberWithInt:[rid intValue]]])
+        NSMutableSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:source];
+        NSNumber* ridNum = [NSNumber numberWithInt:[rid intValue]];
+        if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:ridNum])
         {
-            DDLogInfo(@"Fixing broken session for %@ deviceID: %@", source, rid);
-            // FIXME: build new session
-            // FIXME: only for trusted devices
+            // Remove device from list
+            [devicesWithBrokenSession removeObject:ridNum];
+            [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:source];
+            if([devicesWithBrokenSession count] != 0) {
+                return;
+            }
+            // The needed device bundle for this contact/device was fetched
+            // Send new keys
+            XMPPMessage* messageNode = [[XMPPMessage alloc] init];
+            [messageNode.attributes setObject:source forKey:@"to"];
+            [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
+            [messageNode setXmppId:[[NSUUID UUID] UUIDString]];
+
+            // Send KeyTransportElement only to the one device (overrideDevices)
+            [self encryptMessage:messageNode withMessage:nil toContact:source];
+            if(self.xmppConnection) [self.xmppConnection send:messageNode];
         }
     }
 }
@@ -347,6 +368,10 @@ static const size_t MAX_OMEMO_KEYS = 120;
     // Encrypt message for all devices known from the recipient
     for(NSNumber* device in devices)
     {
+        // Do not encrypt for our own device
+        if(device.intValue == self.monalSignalStore.deviceid && [encryptForJid isEqualToString:self._senderJid]) {
+            continue;
+        }
         SignalAddress* address = [[SignalAddress alloc] initWithName:encryptForJid deviceId:(uint32_t)device.intValue];
 
         NSData* identity = [self.monalSignalStore getIdentityForAddress:address];
@@ -371,66 +396,47 @@ static const size_t MAX_OMEMO_KEYS = 120;
     }
 }
 
-// TODO: sendNewKeyTransport
--(void) sendNewKeyTransport:(NSString*) contact
+-(void) encryptMessage:(XMPPMessage *)messageNode withMessage:(NSString *)message toContact:(NSString *)toContact
 {
-    if(!self._connection.supportsPubSub)
-        return;
-
-    XMPPMessage* messageNode = [[XMPPMessage alloc] init];
-    [messageNode.attributes setObject:contact forKey:@"to"];
-    [messageNode setXmppId:[[NSUUID UUID] UUIDString]];
-
-    MLXMLNode* encrypted = [[MLXMLNode alloc] initWithElement:@"encrypted"];
-    [encrypted.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:kXMLNS];
-    [messageNode.children addObject:encrypted];
-
-    // Get own device id
-    NSString* deviceid = [NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
-    MLXMLNode* header = [[MLXMLNode alloc] initWithElement:@"header"];
-    [header.attributes setObject:deviceid forKey:@"sid"];
-    [encrypted.children addObject:header];
-
-    MLXMLNode* ivNode = [[MLXMLNode alloc] initWithElement:@"iv"];
-    [ivNode setData:[HelperTools encodeBase64WithData:[AESGcm genIV]]];
-    [header.children addObject:ivNode];
-
-    NSArray* devices = [self.monalSignalStore allDeviceIdsForAddressName:contact];
-    NSArray* myDevices = [self.monalSignalStore allDeviceIdsForAddressName:self._senderJid];
-
-    // FIXME: encrypt for devices
-    // [self addEncryptionKeyForAllDevices:devices encryptForJid:contact withEncryptedPayload:encryptedPayload withXMLHeader:header];
-
-    // [self addEncryptionKeyForAllDevices:myDevices encryptForJid:self._senderJid withEncryptedPayload:encryptedPayload withXMLHeader:header];
-
-    // Send
-    if(self.xmppConnection) [self.xmppConnection send:messageNode];
+    [self encryptMessage:messageNode withMessage:message toContact:toContact overrideDevices:nil];
 }
 
--(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString*) message toContact:(NSString*) toContact
+-(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString*) message toContact:(NSString*) toContact overrideDevices:(NSArray<NSNumber*>* _Nullable) overrideDevices
 {
     NSAssert(self._signalContext, @"_signalContext should be inited.");
 
-    [messageNode setBody:NSLocalizedString(@"[This message is OMEMO encrypted]", @"")];
+    if(message)
+    {
+        [messageNode setBody:@"[This message is OMEMO encrypted]"];
+    } else {
+        // KeyTransportElements should not contain a body
+    }
 
     NSArray* devices = [self.monalSignalStore allDeviceIdsForAddressName:toContact];
     NSArray* myDevices = [self.monalSignalStore allDeviceIdsForAddressName:self._senderJid];
 
     // Check if we found omemo keys from the recipient
-    if(devices.count > 0)
+    if(devices.count > 0 || overrideDevices.count > 0)
     {
-        NSData* messageBytes = [message dataUsingEncoding:NSUTF8StringEncoding];
-
-        // Encrypt message
-        MLEncryptedPayload* encryptedPayload = [AESGcm encrypt:messageBytes keySize:16];
-
         MLXMLNode* encrypted = [[MLXMLNode alloc] initWithElement:@"encrypted"];
         [encrypted.attributes setObject:@"eu.siacs.conversations.axolotl" forKey:kXMLNS];
         [messageNode.children addObject:encrypted];
 
-        MLXMLNode* payload = [[MLXMLNode alloc] initWithElement:@"payload"];
-        [payload setData:[HelperTools encodeBase64WithData:encryptedPayload.body]];
-        [encrypted.children addObject:payload];
+        MLEncryptedPayload* encryptedPayload;
+        if(message)
+        {
+            NSData* messageBytes = [message dataUsingEncoding:NSUTF8StringEncoding];
+
+            // Encrypt message
+            encryptedPayload = [AESGcm encrypt:messageBytes keySize:KEY_SIZE];
+
+            MLXMLNode* payload = [[MLXMLNode alloc] initWithElement:@"payload"];
+            [payload setData:[HelperTools encodeBase64WithData:encryptedPayload.body]];
+            [encrypted.children addObject:payload];
+        } else {
+            // There is no message that can be encrypted -> create new session keys
+            encryptedPayload = [[MLEncryptedPayload alloc] initWithKey:[AESGcm genKey:KEY_SIZE] iv:[AESGcm genIV]];
+        }
 
         // Get own device id
         NSString* deviceid = [NSString stringWithFormat:@"%d", self.monalSignalStore.deviceid];
@@ -442,14 +448,30 @@ static const size_t MAX_OMEMO_KEYS = 120;
         [ivNode setData:[HelperTools encodeBase64WithData:encryptedPayload.iv]];
         [header.children addObject:ivNode];
 
-        [self addEncryptionKeyForAllDevices:devices encryptForJid:toContact withEncryptedPayload:encryptedPayload withXMLHeader:header];
+        if(!overrideDevices)
+        {
+            // normal encryption -> add encryption for all of our own devices as well as to all of our contact's devices
+            [self addEncryptionKeyForAllDevices:devices encryptForJid:toContact withEncryptedPayload:encryptedPayload withXMLHeader:header];
 
-        [self addEncryptionKeyForAllDevices:myDevices encryptForJid:self._senderJid withEncryptedPayload:encryptedPayload withXMLHeader:header];
+            [self addEncryptionKeyForAllDevices:myDevices encryptForJid:self._senderJid withEncryptedPayload:encryptedPayload withXMLHeader:header];
+        }
+        else
+        {
+            // We sometimes need to send a message only to one specific device
+            // all devices in overrideDevices must belong to a single jid.
+            [self addEncryptionKeyForAllDevices:overrideDevices encryptForJid:toContact withEncryptedPayload:encryptedPayload withXMLHeader:header];
+        }
     }
 }
 
 -(void) needNewSessionForContact:(NSString*) contact andDevice:(NSNumber*) deviceId
 {
+    if(deviceId.intValue == self.monalSignalStore.deviceid)
+    {
+        // We should not generate a new session to our own device
+        return;
+    }
+
     // get set of broken device sessions for the given contact
     NSMutableSet<NSNumber*>* devicesWithInvalSession = [self.devicesWithBrokenSession objectForKey:contact];
     if(!devicesWithInvalSession)
@@ -473,21 +495,25 @@ static const size_t MAX_OMEMO_KEYS = 120;
 
 -(NSString *) decryptMessage:(XMPPMessage *) messageNode
 {
-    if(![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/payload"])
+    if(![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"])
     {
-        DDLogDebug(@"DecrypMessage called but the message is not encrypted");
+        DDLogDebug(@"DecryptMessage called but the message has no encryption header");
         return nil;
     }
-
-    [self->signalLock lock];
+    BOOL isKeyTransportElement = ![messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/payload"];
 
     NSNumber* sid = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|int"];
     SignalAddress* address = [[SignalAddress alloc] initWithName:messageNode.fromUser deviceId:(uint32_t)sid.intValue];
     if(!self._signalContext)
     {
         DDLogError(@"Missing signal context");
-        [self->signalLock unlock];
         return NSLocalizedString(@"Error decrypting message", @"");
+    }
+    // check if we received our own bundle
+    if([messageNode.fromUser isEqualToString:self._senderJid] && sid.intValue == self.monalSignalStore.deviceid)
+    {
+        // Nothing to do
+        return nil;
     }
 
     NSString* deviceKeyPath = [NSString stringWithFormat:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>#|base64", self.monalSignalStore.deviceid];
@@ -496,10 +522,15 @@ static const size_t MAX_OMEMO_KEYS = 120;
     NSData* messageKey = [messageNode findFirst:deviceKeyPath];
     BOOL devicePreKey = [messageNode findFirst:deviceKeyPathPreKey];
     
-    if(!messageKey)
+    if(!messageKey && isKeyTransportElement)
+    {
+        // Received KeyTransportElement without our own rid included
+        // Ignore it
+        return nil;
+    }
+    else if(!messageKey)
     {
         DDLogError(@"Message was not encrypted for this device: %d", self.monalSignalStore.deviceid);
-        [self->signalLock unlock];
         [self needNewSessionForContact:messageNode.fromUser andDevice:sid];
         return [NSString stringWithFormat:NSLocalizedString(@"Message was not encrypted for this device. Please make sure the sender trusts deviceid %d and that they have you as a contact.", @""), self.monalSignalStore.deviceid];
     }
@@ -523,7 +554,6 @@ static const size_t MAX_OMEMO_KEYS = 120;
         NSData* decryptedKey = [cipher decryptCiphertext:ciphertext error:&error];
         if(error) {
             DDLogError(@"Could not decrypt to obtain key: %@", error);
-            [self->signalLock unlock];
             [self needNewSessionForContact:messageNode.fromUser andDevice:sid];
             return [NSString stringWithFormat:@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person. (%@)", error];
         }
@@ -533,20 +563,38 @@ static const size_t MAX_OMEMO_KEYS = 120;
         if(messagetype == SignalCiphertextTypePreKeyMessage)
         {
             // check if we need to generate new preKeys
-            [self generateNewKeysIfNeeded];
-            // send new bundle without the used peyKey
-            [self sendOMEMOBundle];
+            if(![self generateNewKeysIfNeeded]) {
+                // send new bundle without the used peyKey if no new keys were generated
+                [self sendOMEMOBundle];
+            }
+            else {
+                // nothing todo as generateNewKeysIfNeeded sends out the new bundle if new keys were generated
+            }
         }
 
         if(!decryptedKey)
         {
             DDLogError(@"Could not decrypt to obtain key.");
-            [self->signalLock unlock];
             [self needNewSessionForContact:messageNode.fromUser andDevice:sid];
             return NSLocalizedString(@"There was an error decrypting this encrypted message (Signal error). To resolve this, try sending an encrypted message to this person.", @"");
         }
         else
         {
+            // We seem to have a valid session -> remove device from broken session list
+            NSMutableSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:messageNode.fromUser];
+            if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:sid])
+            {
+                // Remove device from list
+                [devicesWithBrokenSession removeObject:sid];
+                [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:messageNode.fromUser];
+            }
+            // if no payload is available -> KeyTransportElement
+            if(isKeyTransportElement)
+            {
+                // nothing to do
+                DDLogInfo(@"KeyTransportElement received");
+                return [NSString stringWithFormat:@"TMP: KeyTransportElement received from device: %@", sid];
+            }
             if(decryptedKey.length == 16 * 2)
             {
                 key = [decryptedKey subdataWithRange:NSMakeRange(0, 16)];
@@ -566,7 +614,6 @@ static const size_t MAX_OMEMO_KEYS = 120;
                 NSData* decData = [AESGcm decrypt:decodedPayload withKey:key andIv:iv withAuth:auth];
                 if(!decData) {
                     DDLogError(@"Could not decrypt message with key that was decrypted.");
-                    [self->signalLock unlock];
                      return NSLocalizedString(@"Encrypted message was sent in an older format Monal can't decrypt. Please ask them to update their client. (GCM error)", @"");
                 }
                 else
@@ -574,13 +621,11 @@ static const size_t MAX_OMEMO_KEYS = 120;
                     DDLogInfo(@"Decrypted message passing bask string.");
                 }
                 NSString* messageString = [[NSString alloc] initWithData:decData encoding:NSUTF8StringEncoding];
-                [self->signalLock unlock];
                 return messageString;
             }
             else
             {
                 DDLogError(@"Could not get key");
-                [self->signalLock unlock];
                 return NSLocalizedString(@"Could not decrypt message", @"");
             }
         }

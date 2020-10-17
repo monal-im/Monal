@@ -39,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 /*
  * encrypting / decrypting messages
  */
--(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString*) message toContact:(NSString*) toContact;
+-(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString* _Nullable) message toContact:(NSString*) toContact;
 -(NSString *) decryptMessage:(XMPPMessage *) messageNode;
 
 
@@ -50,6 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 -(NSData *) getIdentityForAddress:(SignalAddress*)address;
+
 
 @end
 

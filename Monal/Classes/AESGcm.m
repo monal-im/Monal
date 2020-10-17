@@ -18,10 +18,11 @@
 
 +(MLEncryptedPayload*) encrypt:(NSData*) body keySize:(int) keySize
 {
-    uint8_t randomBytes[keySize];
-    if(SecRandomCopyBytes(kSecRandomDefault, keySize, randomBytes) != 0)
+    NSData* gcmKey = [self genKey:keySize];
+    if(!gcmKey)
+    {
         return nil;
-    NSData* gcmKey = [[NSData alloc] initWithBytes:randomBytes length:keySize];
+    }
     return [self encrypt:body withKey:gcmKey];
 }
 
@@ -102,6 +103,14 @@
         return nil;
 #endif
     }
+}
+
++(NSData*) genKey:(int) keySize
+{
+    uint8_t randomBytes[keySize];
+    if(SecRandomCopyBytes(kSecRandomDefault, keySize, randomBytes) != 0)
+        return nil;
+    return [[NSData alloc] initWithBytes:randomBytes length:keySize];
 }
 
 + (NSData *) decrypt:(NSData *)body withKey:(NSData *) key andIv:(NSData *)iv withAuth:( NSData * _Nullable )  auth {

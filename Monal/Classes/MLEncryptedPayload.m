@@ -27,4 +27,14 @@
     return self;
 }
 
+-(MLEncryptedPayload *) initWithKey:(NSData *) key iv:(NSData *) iv
+{
+    self = [super init];
+    self.body = nil;
+    self.key = key;
+    self.iv = iv;
+    self.authTag = nil;
+    return self;
+}
+
 @end

@@ -93,7 +93,7 @@
     self.lastSelectedContact=nil;
     [self refreshDisplay];
     
-    if(self.contacts.count+self.offlineContacts.count==0)
+    if(self.contacts.count+self.offlineContacts.count == 0)
     {
         [self reloadTable];
     }
@@ -128,7 +128,7 @@
             
             [[MLXMPPManager sharedInstance] handleCall:dic withResponse:YES];
         }];
-        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Decline" ,@"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Decline" , @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             [[MLXMPPManager sharedInstance] handleCall:dic withResponse:NO];
         }];
         [messageAlert addAction:closeAction];
@@ -356,17 +356,17 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    MLContact* row =nil;
-    if(self.searchResults.count>0) {
+    MLContact* row = nil;
+    if(self.searchResults.count > 0) {
         row = [self.searchResults objectAtIndex:indexPath.row];
     }
     else
     {
-        if(indexPath.section==konlineSection)
+        if(indexPath.section == konlineSection)
         {
             row = [self.contacts objectAtIndex:indexPath.row];
         }
-        else if(indexPath.section==kofflineSection)
+        else if(indexPath.section == kofflineSection)
         {
             row = [self.offlineContacts objectAtIndex:indexPath.row];
         }
@@ -375,15 +375,15 @@
         }
     }
     
-    MLContactCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
+    MLContactCell* cell = [tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
     if(!cell)
     {
-        cell =[[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
+        cell = [[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
     }
     
-    cell.count=0;
-    cell.userImage.image=nil;
-    cell.statusText.text=@"";
+    cell.count = 0;
+    cell.userImage.image = nil;
+    cell.statusText.text = @"";
     
     [cell showDisplayName:row.contactDisplayName];
     
@@ -398,34 +398,33 @@
         [cell showStatusText:row.groupSubject];
     }
     
-    if(tableView ==self.view) {
-        if(indexPath.section==konlineSection)
+    if(tableView == self.view) {
+        if(indexPath.section == konlineSection)
         {
-            NSString* stateString=[row.state stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] ;
+            NSString* stateString = [row.state stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] ;
             
             if(([stateString isEqualToString:@"away"]) ||
                ([stateString isEqualToString:@"dnd"])||
                ([stateString isEqualToString:@"xa"])
                )
             {
-                cell.status=kStatusAway;
+                cell.status = kStatusAway;
             }
             else if([row.state isEqualToString:@"(null)"] ||
                     [row.state isEqualToString:@""])
                 cell.status=kStatusOnline;
         }
-        else  if(indexPath.section==kofflineSection) {
+        else  if(indexPath.section == kofflineSection) {
             cell.status=kStatusOffline;
         }}
     else {
-        
-        if(row.isOnline==YES)
+        if(row.isOnline == YES)
         {
-            cell.status=kStatusOnline;
+            cell.status = kStatusOnline;
         }
         else
         {
-            cell.status=kStatusOffline;
+            cell.status = kStatusOffline;
         }
     }
     
@@ -611,7 +610,7 @@
 
 - (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView
 {
-    NSString *text = NSLocalizedString(@"You need friends for this ride",@"");
+    NSString *text = NSLocalizedString(@"You need friends for this ride", @"");
     
     NSDictionary *attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
                                  NSForegroundColorAttributeName: [UIColor darkGrayColor]};
@@ -621,7 +620,7 @@
 
 - (NSAttributedString *)descriptionForEmptyDataSet:(UIScrollView *)scrollView
 {
-    NSString *text = NSLocalizedString(@"Add new contacts with the + button above. Your friends will pop up here when they can talk",@"");
+    NSString *text = NSLocalizedString(@"Add new contacts with the + button above. Your friends will pop up here when they can talk", @"");
     
     NSMutableParagraphStyle *paragraph = [NSMutableParagraphStyle new];
     paragraph.lineBreakMode = NSLineBreakByWordWrapping;

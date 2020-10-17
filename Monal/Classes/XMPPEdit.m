@@ -22,7 +22,7 @@
 @interface XMPPEdit()
 
 @property (nonatomic, strong) NSString *jid;
-@property (nonatomic, strong) NSString *userName;
+@property (nonatomic, strong) NSString *rosterName;
 @property (nonatomic, strong) NSString *password;
 @property (nonatomic, strong) NSString *resource;
 @property (nonatomic, strong) NSString *server;
@@ -109,6 +109,8 @@
 
         self.directTLS = [[settings objectForKey:@"directTLS"] boolValue];
         self.selfSignedSSL = [[settings objectForKey:@"selfsigned"] boolValue];
+        
+        self.rosterName = [settings objectForKey:@"rosterName"];
     }
     else
     {
@@ -221,14 +223,12 @@
                     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
                     [SAMKeychain setPassword:self.password forService:@"Monal" account:self.accountno];
                     if(self.enabled)
-                    {
-                        DDLogVerbose(@"calling connect... ");
                         [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
-                    }
                     else
-                    {
                         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
-                    }
+                    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+                    [account publishRosterName:self.rosterName];
+                    [self showSuccessHUD];
                 }
             } else  {
                 dispatch_async(dispatch_get_main_queue(), ^{
@@ -247,17 +247,13 @@
         if(updatedAccount) {
             [[MLXMPPManager sharedInstance] updatePassword:self.password forAccount:self.accountno];
             if(self.enabled)
-            {
                 [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
-            }
             else
-            {
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
-            }
+            xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+            [account publishRosterName:self.rosterName];
             [self showSuccessHUD];
         }
-
-        [[DataLayer sharedInstance] resetContactsForAccount:self.accountno];
     }
 }
 
@@ -344,27 +340,27 @@
         switch (indexPath.row)
         {
             case 0: {
-                thecell.cellLabel.text = NSLocalizedString(@"Jabber ID", @"");
+                thecell.cellLabel.text = NSLocalizedString(@"Display Name", @"");
                 thecell.toggleSwitch.hidden = YES;
                 thecell.textInputField.tag = 1;
+                thecell.textInputField.keyboardType = UIKeyboardTypeDefault;
+                thecell.textInputField.text = self.rosterName;
+                break;
+            }
+            case 1: {
+                thecell.cellLabel.text = NSLocalizedString(@"Jabber ID", @"");
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.tag = 2;
                 thecell.textInputField.keyboardType = UIKeyboardTypeEmailAddress;
                 thecell.textInputField.text = self.jid;
                 break;
             }
-            case 1: {
+            case 2: {
                 thecell.cellLabel.text = NSLocalizedString(@"Password", @"");
                 thecell.toggleSwitch.hidden = YES;
                 thecell.textInputField.secureTextEntry = YES;
-                thecell.textInputField.tag = 2;
-                thecell.textInputField.text = self.password;
-                break;
-            }
-            case 2: {
-                thecell.cellLabel.text = NSLocalizedString(@"My Name/Nickname", @"");
-                thecell.toggleSwitch.hidden = YES;
                 thecell.textInputField.tag = 3;
-                thecell.textInputField.keyboardType = UIKeyboardTypeDefault;
-                thecell.textInputField.text = self.userName;
+                thecell.textInputField.text = self.password;
                 break;
             }
             case 3: {
@@ -407,7 +403,7 @@
             case 0:  {
                 thecell.cellLabel.text = NSLocalizedString(@"Server", @"");
                 thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.tag = 3;
+                thecell.textInputField.tag = 4;
                 thecell.textInputField.text = self.server;
                 thecell.textInputField.placeholder = NSLocalizedString(@"Hardcoded Hostname", @"");
                 thecell.accessoryType = UITableViewCellAccessoryDetailButton;
@@ -416,7 +412,7 @@
             case 1:  {
                 thecell.cellLabel.text = NSLocalizedString(@"Port", @"");
                 thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.tag = 4;
+                thecell.textInputField.tag = 5;
                 thecell.textInputField.text = self.port;
                 break;
             }
@@ -539,7 +535,7 @@
     else if(section == 3) {
         return 6;
     }
-    else if(section == 4 &&  self.editMode == false)
+    else if(section == 4 && !self.editMode)
     {
         return 0;
     }
@@ -652,23 +648,23 @@
 {
     switch (textField.tag) {
         case 1: {
-            self.jid = textField.text;
+            self.rosterName = textField.text;
             break;
         }
         case 2: {
-            self.password = textField.text;
+            self.jid = textField.text;
             break;
         }
         case 3: {
-            self.server = textField.text;
+            self.password = textField.text;
             break;
         }
         case 4: {
-            self.port = textField.text;
+            self.server = textField.text;
             break;
         }
         case 5: {
-            self.resource = textField.text;
+            self.port = textField.text;
             break;
         }
         default:

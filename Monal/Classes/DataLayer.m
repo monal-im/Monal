@@ -32,6 +32,7 @@ NSString *const kPort = @"other_port";
 NSString *const kResource = @"resource";
 NSString *const kDirectTLS = @"directTLS";
 NSString *const kSelfSigned = @"selfsigned";
+NSString *const kRosterName = @"rosterName";
 
 NSString *const kUsername = @"username";
 
@@ -202,7 +203,7 @@ static NSDateFormatter* dbFormatter;
 {
     if(!accountNo)
         return nil;
-    NSArray* result = [self.db executeReader:@"select account_id, directTLS, domain, enabled, lastStanzaId, other_port, resource, rosterVersion, selfsigned, server, username from account where account_id=?;" andArguments:@[accountNo]];
+    NSArray* result = [self.db executeReader:@"SELECT account_id, directTLS, domain, enabled, lastStanzaId, other_port, resource, rosterVersion, selfsigned, server, username, rosterName FROM account WHERE account_id=?;" andArguments:@[accountNo]];
     if(result != nil && [result count])
     {
         DDLogVerbose(@"count: %lu", (unsigned long)[result count]);
@@ -231,7 +232,7 @@ static NSDateFormatter* dbFormatter;
 
 -(BOOL) updateAccounWithDictionary:(NSDictionary *) dictionary
 {
-    NSString* query = [NSString stringWithFormat:@"update account set server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, selfsigned=?, directTLS=? where account_id=?"];
+    NSString* query = [NSString stringWithFormat:@"UPDATE account SET server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, selfsigned=?, directTLS=?, rosterName=? WHERE account_id=?;"];
 
     NSString* server = (NSString *) [dictionary objectForKey:kServer];
     NSString* port = (NSString *)[dictionary objectForKey:kPort];
@@ -243,7 +244,8 @@ static NSDateFormatter* dbFormatter;
                        [dictionary objectForKey:kEnabled],
                        [dictionary objectForKey:kSelfSigned],
                        [dictionary objectForKey:kDirectTLS],
-                       [dictionary objectForKey:kAccountID]
+                       [dictionary objectForKey:kAccountID],
+                        [dictionary objectForKey:kRosterName] == nil ? @"" : ((NSString*)[dictionary objectForKey:kRosterName])
     ];
 
     return [self.db executeNonQuery:query andArguments:params];
@@ -251,7 +253,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSNumber*) addAccountWithDictionary:(NSDictionary*) dictionary
 {
-    NSString* query = [NSString stringWithFormat:@"insert into account (server, other_port, resource, domain, enabled, selfsigned, directTLS, username) values(?, ?, ?, ?, ?, ?, ?, ?);"];
+    NSString* query = [NSString stringWithFormat:@"INSERT INTO account (server, other_port, resource, domain, enabled, selfsigned, directTLS, username, rosterName) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);"];
     
     NSString* server = (NSString*) [dictionary objectForKey:kServer];
     NSString* port = (NSString*)[dictionary objectForKey:kPort];
@@ -263,7 +265,8 @@ static NSDateFormatter* dbFormatter;
         [dictionary objectForKey:kEnabled] ,
         [dictionary objectForKey:kSelfSigned],
         [dictionary objectForKey:kDirectTLS],
-        ((NSString *)[dictionary objectForKey:kUsername])
+        ((NSString *)[dictionary objectForKey:kUsername]),
+        [dictionary objectForKey:kRosterName] == nil ? @"" : ((NSString *)[dictionary objectForKey:kRosterName])
     ];
     BOOL result = [self.db executeNonQuery:query andArguments:params];
     // return the accountID
@@ -2120,6 +2123,10 @@ static NSDateFormatter* dbFormatter;
         //see also https://docs.modernxmpp.org/client/design/#contexts
         [self.db executeNonQuery:@"UPDATE buddylist SET full_name='' WHERE full_name=buddy_name;"];
         [self.db executeNonQuery:@"UPDATE account SET rosterVersion=?;" andArguments:@[@""]];
+    }];
+    
+    [self updateDBTo:4.94 withBlock:^{
+        [self.db executeNonQuery:@"ALTER TABLE account ADD COLUMN rosterName TEXT;"];
     }];
     
     [self.db endWriteTransaction];

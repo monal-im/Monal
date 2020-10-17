@@ -258,6 +258,7 @@ Decline a call request
 -(void) requestRegFormWithCompletion:(xmppDataCompletion) completion andErrorCompletion:(xmppCompletion) errorCompletion;
 -(void) registerUser:(NSString*) username withPassword:(NSString*) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
 
+-(void) publishRosterName:(NSString* _Nullable) rosterName;
 
 #pragma mark - internal stuff for processors
 

@@ -25,6 +25,7 @@ extern NSString* const kPort;
 extern NSString* const kResource;
 extern NSString* const kDirectTLS;
 extern NSString* const kSelfSigned;
+extern NSString* const kRosterName;
 
 extern NSString* const kUsername;
 

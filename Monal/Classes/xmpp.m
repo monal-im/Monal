@@ -178,6 +178,9 @@ NSString *const kXMPPPresence = @"presence";
     //pubsub avatar handling (XEP-0084)
     [self handleAvatars];
     
+    //pubsub nickname handling (XEP-0172)
+    [self handleRosterNames];
+    
     return self;
 }
 
@@ -3326,8 +3329,43 @@ NSString *const kXMPPPresence = @"presence";
     [self send:displayedNode];
 }
 
-/*TODO: user nickname XEP-0172 needs this:
-[[DataLayer sharedInstance] setFullName:fullname forContact:iqNode.fromUser andAccount:account.accountNo];
-*/
+-(void) handleRosterNames
+{
+    //we want to get automatic roster name updates
+    [self.pubsub registerInterestForNode:@"http://jabber.org/protocol/nick"];
+    
+    //register handler for roster names coming from *any* jid
+    [self.pubsub registerForNode:@"http://jabber.org/protocol/nick" andBareJid:nil withHandler:^(NSDictionary* items, NSString* jid, NSSet* changedIdList) {
+        for(NSString* itemId in items)
+        {
+            if([jid isEqualToString:self.connectionProperties.identity.jid])        //own roster name
+            {
+                DDLogInfo(@"Got own nickname: %@", [items[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"]);
+                NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:self.accountNo] copyItems:NO];
+                accountDic[kRosterName] = [items[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"];
+                [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
+            }
+            else                                                                    //roster name of contact
+            {
+                DDLogInfo(@"Got nickname of %@: %@", jid, [items[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"]);
+                [[DataLayer sharedInstance] setFullName:[items[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"] forContact:jid andAccount:self.accountNo];
+            }
+            break;      //we only need the first item (there should be only one item in the first place)
+        }
+    }];
+}
+
+-(void) publishRosterName:(NSString* _Nullable) rosterName
+{
+    DDLogInfo(@"Publishing own nickname: %@", rosterName);
+    if(!rosterName || !rosterName.length)
+        [self.pubsub deleteNode:@"http://jabber.org/protocol/nick"];
+    else
+        [self.pubsub publishItems:@[
+            [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{} andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"nick" andNamespace:@"http://jabber.org/protocol/nick" withAttributes:@{} andChildren:@[] andData:rosterName]
+            ] andData:nil]
+        ] onNode:@"http://jabber.org/protocol/nick" withAccessModel:@"presence"];
+}
 
 @end

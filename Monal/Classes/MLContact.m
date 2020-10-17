@@ -8,6 +8,7 @@
 
 #import "MLContact.h"
 #import "HelperTools.h"
+#import "DataLayer.h"
 
 
 NSString *const kSubBoth=@"both";
@@ -20,33 +21,49 @@ NSString *const kAskSubscribe=@"subscribe";
 
 @implementation MLContact
 
++(NSString*) ownDisplayNameForAccountNo:(NSString*) accountNo andOwnJid:(NSString*)jid
+{
+    NSString* displayName;
+    NSDictionary* accountDic = [[DataLayer sharedInstance] detailsForAccount:accountNo];
+    displayName = accountDic[kRosterName];
+    if(!displayName || !displayName.length)
+    {
+        //default is local part, see https://docs.modernxmpp.org/client/design/#contexts
+        //see also: MLContact.m (the only other source that decides what to use as display name)
+        NSDictionary* jidParts = [HelperTools splitJid:jid];
+        displayName = jidParts[@"node"];
+    }
+    DDLogVerbose(@"Calculated ownDisplayName for '%@': %@", jid, displayName);
+    return displayName;
+}
+
 -(NSString*) contactDisplayName
 {
-    NSString* retval;
+    NSString* displayName;
     if(self.isGroup && self.accountNickInGroup && self.accountNickInGroup.length)
     {
         DDLogVerbose(@"Using accountNickInGroup: %@", self.accountNickInGroup);
-        retval = self.accountNickInGroup;
+        displayName = self.accountNickInGroup;
     }
     else if(self.nickName && self.nickName.length > 0)
     {
         DDLogVerbose(@"Using nickName: %@", self.nickName);
-        retval = self.nickName;
+        displayName = self.nickName;
     }
     else if(self.fullName && self.fullName.length > 0)
     {
         DDLogVerbose(@"Using fullName: %@", self.fullName);
-        retval = self.fullName;
+        displayName = self.fullName;
     }
     else
     {
         //default is local part, see https://docs.modernxmpp.org/client/design/#contexts
         NSDictionary* jidParts = [HelperTools splitJid:self.contactJid];
-        retval = jidParts[@"node"];
+        displayName = jidParts[@"node"];
         DDLogVerbose(@"Using default: %@", jidParts[@"node"]);
     }
-    DDLogVerbose(@"Calculated contactDisplayName for '%@': %@", self.contactJid, retval);
-    return retval;
+    DDLogVerbose(@"Calculated contactDisplayName for '%@': %@", self.contactJid, displayName);
+    return displayName;
 }
 
 +(MLContact*) contactFromDictionary:(NSDictionary*) dic

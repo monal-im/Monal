@@ -1544,12 +1544,17 @@ enum msgSentState {
         {
             // Reset attributes
             //XEP-0245: The slash me Command
-            if ([messageText hasPrefix:@"/me "] && (![row.from isEqualToString:self.jid]))
+            if([messageText hasPrefix:@"/me "])
             {
+                NSString* displayName;
+                if([row.from isEqualToString:self.jid])
+                    displayName = [MLContact ownDisplayNameForAccountNo:self.contact.accountId andOwnJid:self.jid];
+                else
+                    displayName = [self.contact contactDisplayName];
                 UIFont* italicFont = [UIFont italicSystemFontOfSize:cell.messageBody.font.pointSize];
                 
                 NSMutableAttributedString* attributedMsgString = [[MLXEPSlashMeHandler sharedInstance] attributedStringSlashMeWithAccountId:self.contact.accountId
-                                                                                                                                displayName:[self.contact contactDisplayName]
+                                                                                                                                displayName:displayName
                                                                                                                                  actualFrom:row.actualFrom
                                                                                                                                     message:messageText
                                                                                                                                     isGroup:self.contact.isGroup

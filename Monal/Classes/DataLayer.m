@@ -1404,8 +1404,8 @@ static NSDateFormatter* dbFormatter;
 -(NSMutableArray*) lastMessageForContact:(NSString*) contact forAccount:(NSString*) accountNo
 {
     if(!accountNo ||! contact) return nil;
-    NSString* query = [NSString stringWithFormat:@"SELECT message, thetime, messageType FROM (SELECT 1 as messagePrio, bl.messageDraft as message, ac.lastMessageTime as thetime, 'MessageDraft' as messageType FROM buddylist AS bl INNER JOIN activechats AS ac where bl.account_id = ac.account_id and bl.buddy_name = ac.buddy_name and ac.account_id = ? and ac.buddy_name = ? and messageDraft is not NULL and messageDraft != '' UNION SELECT 2 as messagePrio, message, timestamp, messageType from (select message, timestamp, messageType FROM message_history where account_id=? and (message_from =? or message_to=?) ORDER BY message_history_id DESC LIMIT 1) ORDER BY messagePrio ASC LIMIT 1)"];
-    NSArray* params = @[accountNo, contact, accountNo, contact, contact];
+    NSString* query = [NSString stringWithFormat:@"SELECT message, thetime, messageType, message_to, message_from, actual_from AS 'af' FROM (SELECT 1 AS messagePrio, bl.messageDraft AS message, ac.lastMessageTime AS thetime, 'MessageDraft' AS messageType, ? AS message_to, '' AS message_from, '' AS actual_from FROM buddylist AS bl INNER JOIN activechats AS ac WHERE bl.account_id = ac.account_id AND bl.buddy_name = ac.buddy_name AND ac.account_id=? AND ac.buddy_name=? AND messageDraft IS NOT NULL AND messageDraft != '' UNION SELECT 2 AS messagePrio, message, timestamp, messageType, message_to, message_from, actual_from FROM (SELECT message, timestamp, messageType, message_to, message_from, actual_from FROM message_history WHERE account_id=? AND (message_from=? OR message_to=?) ORDER BY message_history_id DESC LIMIT 1) ORDER BY messagePrio ASC LIMIT 1);"];
+    NSArray* params = @[contact, accountNo, contact, accountNo, contact, contact];
 
     NSMutableArray* results = [self.db executeReader:query andArguments:params];
     NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];

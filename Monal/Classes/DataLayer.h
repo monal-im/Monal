@@ -95,7 +95,6 @@ extern NSString* const kMessageTypeUrl;
 #pragma mark Contact info
 
 -(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSString*) accountNo;
--(void) setNickName:(NSString*) nickName forContact:(NSString*) buddy andAccount:(NSString*) accountNo;
 
 -(void) setAvatarHash:(NSString*) hash forContact:(NSString*) contact andAccount:(NSString*) accountNo;
 -(NSString*) getAvatarHashForContact:(NSString*) buddy andAccount:(NSString*) accountNo;

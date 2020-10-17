@@ -465,10 +465,17 @@ enum activeChatsControllerSections {
                 [cell showStatusText:NSLocalizedString(@"📍 A Location", @"")];
             } else  {
                 //XEP-0245: The slash me Command
-                if ([messageRow.messageText hasPrefix:@"/me "])
+                NSString* displayName;
+                NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:row.accountId];
+                NSString* ownJid = [NSString stringWithFormat:@"%@@%@",[accountDict objectForKey:@"username"], [accountDict objectForKey:@"domain"]];
+                if([messageRow.actualFrom isEqualToString:ownJid])
+                    displayName = [MLContact ownDisplayNameForAccountNo:row.accountId andOwnJid:ownJid];
+                else
+                    displayName = [row contactDisplayName];
+                if([messageRow.messageText hasPrefix:@"/me "])
                 {
                     NSString* replacedMessageText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:row.accountId
-                                                                                                         displayName:[row contactDisplayName]
+                                                                                                         displayName:displayName
                                                                                                           actualFrom:messageRow.actualFrom
                                                                                                              message:messageRow.messageText
                                                                                                              isGroup:row.isGroup];

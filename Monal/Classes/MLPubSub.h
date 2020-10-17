@@ -8,11 +8,10 @@
 
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
-#import "MLXMLNode.h"
-#import "XMPPIQ.h"
 
 @class xmpp;
 @class XMPPMessage;
+@class XMPPIQ;
 
 typedef void (^monal_pubsub_handler_t)(NSDictionary* _Nonnull items, NSString* _Nonnull jid, NSSet* _Nonnull changedIdList);
 

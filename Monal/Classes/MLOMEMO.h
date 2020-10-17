@@ -10,11 +10,12 @@
 #import "MLXMPPConnection.h"
 #import "xmpp.h"
 #import "XMPPMessage.h"
+#import "MLSignalStore.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class xmpp;
-@class ParseIq;
+@class XMPPIQ;
 
 @interface MLOMEMO : NSObject {
     NSLock* signalLock;
@@ -33,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) sendOMEMODeviceWithForce:(BOOL) force;
 -(void) sendOMEMODevice:(NSSet<NSNumber*> *) receivedDevices force:(BOOL) force;
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString *) source;
--(void) processOMEMOKeys:(ParseIq *) iqNode;
+-(void) processOMEMOKeys:(XMPPIQ*) iqNode;
 
 /*
  * encrypting / decrypting messages

@@ -23,6 +23,7 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 typedef void (^contactCompletion)(MLContact *selectedContact);
 typedef void (^accountCompletion)(NSInteger accountRow);
 typedef void (^monal_void_block_t)(void);
+
 typedef enum NotificationPrivacySettingOption {
     DisplayNameAndMessage,
     DisplayOnlyName,

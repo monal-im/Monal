@@ -16,7 +16,7 @@
 #import "MLConstants.h"
 #import "MonalAppDelegate.h"
 #import "MBProgressHUD.h"
-
+#import "MLOMEMO.h"
 
 #import "IDMPhotoBrowser.h"
 #import "ContactDetails.h"
@@ -31,6 +31,7 @@
 
 @import QuartzCore;
 @import MobileCoreServices;
+@import AVFoundation;
 
 @interface chatViewController()<IDMPhotoBrowserDelegate, ChatInputActionDelegage>
 {

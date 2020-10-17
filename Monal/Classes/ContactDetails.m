@@ -19,6 +19,7 @@
 #import "MLTextInputCell.h"
 #import "HelperTools.h"
 #import "MLChatViewHelper.h"
+#import "MLOMEMO.h"
 
 
 @interface ContactDetails()

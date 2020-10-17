@@ -8,7 +8,11 @@
 
 #import "MLPubSub.h"
 #import "xmpp.h"
+#import "MLXMLNode.h"
 #import "XMPPDataForm.h"
+#import "XMPPStanza.h"
+#import "XMPPIQ.h"
+#import "XMPPMessage.h"
 
 @interface MLPubSub ()
 {

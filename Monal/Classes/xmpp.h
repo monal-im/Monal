@@ -10,24 +10,13 @@
 #import "MLConstants.h"
 
 #import "HelperTools.h"
-#import "MLXMLNode.h"
-
-#import "jingleCall.h"
-#import "MLDNSLookup.h"
-#import "MLSignalStore.h"
-#import "MLMessageProcessor.h"
-#import "MLPubSub.h"
-#import "MLOMEMO.h"
-
-#ifndef DISABLE_OMEMO
-#import "SignalProtocolObjC.h"
-#endif
 
 #import "MLMessage.h"
 #import "MLContact.h"
 
 #import "MLXMPPConnection.h"
 
+NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM (NSInteger, xmppState) {
     kStateLoggedOut = -1,
@@ -52,11 +41,20 @@ FOUNDATION_EXPORT NSString* const kData;
 FOUNDATION_EXPORT NSString* const kContact;
 FOUNDATION_EXPORT NSString* const kCompletion;
 
-typedef void (^xmppCompletion)(BOOL success, NSString *message);
-typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFields);
-
+@class jingleCall;
+@class MLPubSub;
+@class MLXMLNode;
+@class XMPPDataForm;
+@class XMPPStanza;
+@class XMPPIQ;
+@class XMPPMessage;
+@class XMPPPresence;
 @class MLOMEMO;
 @class MLMessageProcessor;
+
+typedef void (^xmppCompletion)(BOOL success, NSString *message);
+typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFields);
+typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 @interface xmpp : NSObject <NSStreamDelegate>
 
@@ -122,12 +120,12 @@ extern NSString* const kAccountHibernate;
 -(void) reconnect;
 -(void) reconnect:(double) wait;
 
--(void) setPubSubNotificationsForNodes:(NSSet* _Nonnull) nodes;
+-(void) setPubSubNotificationsForNodes:(NSSet*) nodes;
 
 /**
  send a message to a contact with xmpp id
  */
--(void) sendMessage:(NSString* _Nonnull) message toContact:(NSString* _Nonnull) contact isMUC:(BOOL) isMUC isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString *) messageId ;
+-(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString *) messageId ;
 -(void) sendChatState:(BOOL) isTyping toJid:(NSString*) jid;
 
 /**
@@ -144,10 +142,10 @@ extern NSString* const kAccountHibernate;
 /**
  Adds the stanza to the output Queue
  */
--(void) send:(MLXMLNode* _Nonnull) stanza;
--(void) sendIq:(XMPPIQ* _Nonnull) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler;
--(void) sendIq:(XMPPIQ* _Nonnull) iq withDelegate:(id) delegate andMethod:(SEL) method andAdditionalArguments:(NSArray*) args;
--(void) sendIq:(XMPPIQ* _Nonnull) iq withDelegate:(id) delegate andMethod:(SEL) method andInvalidationMethod:(SEL) invalidationMethod andAdditionalArguments:(NSArray*) args;
+-(void) send:(MLXMLNode*) stanza;
+-(void) sendIq:(XMPPIQ*) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler;
+-(void) sendIq:(XMPPIQ*) iq withDelegate:(id) delegate andMethod:(SEL) method andAdditionalArguments:(NSArray* _Nullable) args;
+-(void) sendIq:(XMPPIQ*) iq withDelegate:(id) delegate andMethod:(SEL) method andInvalidationMethod:(SEL) invalidationMethod andAdditionalArguments:(NSArray* _Nullable) args;
 
 -(void) addSmacksHandler:(monal_void_block_t) handler;
 -(void) addSmacksHandler:(monal_void_block_t) handler forValue:(NSNumber*) value;
@@ -155,21 +153,21 @@ extern NSString* const kAccountHibernate;
 /**
  removes a contact from the roster
  */
--(void) removeFromRoster:(NSString* _Nonnull) contact;
+-(void) removeFromRoster:(NSString*) contact;
 
 /**
  adds a new contact to the roster
  */
--(void) addToRoster:(NSString* _Nonnull) contact;
+-(void) addToRoster:(NSString*) contact;
 
 /**
  adds a new contact to the roster
  */
--(void) approveToRoster:(NSString* _Nonnull) contact;
+-(void) approveToRoster:(NSString*) contact;
 
--(void) rejectFromRoster:(NSString* _Nonnull) contact;
+-(void) rejectFromRoster:(NSString*) contact;
 
--(void) updateRosterItem:(NSString* _Nonnull) jid withName:(NSString* _Nonnull) name;
+-(void) updateRosterItem:(NSString*) jid withName:(NSString*) name;
 
 #pragma mark set connection attributes
 /**
@@ -185,34 +183,34 @@ sets away xmpp call.
 /**
  join a room on the conference server
  */
--(void) joinRoom:(NSString* _Nonnull) room withNick:(NSString* _Nullable) nick andPassword:(NSString* _Nullable)password;
+-(void) joinRoom:(NSString*) room withNick:(NSString* _Nullable) nick andPassword:(NSString* _Nullable)password;
 
 /**
  leave specific room. the nick name is the name used in the room.
  it is arbitrary and it may not match any other hame.
  */
--(void) leaveRoom:(NSString* _Nonnull) room withNick:(NSString* _Nullable) nick;
+-(void) leaveRoom:(NSString*) room withNick:(NSString* _Nullable) nick;
 
 #pragma mark Jingle
 /**
  Calls a contact
  */
--(void)call:(MLContact* _Nonnull) contact;
+-(void)call:(MLContact*) contact;
 
 /**
 Hangs up current call with contact
  */
--(void)hangup:(MLContact* _Nonnull) contact;
+-(void)hangup:(MLContact*) contact;
 
 /**
 Decline a call request
  */
--(void)declineCall:(NSDictionary* _Nonnull) contact;
+-(void)declineCall:(NSDictionary*) contact;
 
 /**
  accept call request
  */
--(void)acceptCall:(NSDictionary* _Nonnull) contact;
+-(void)acceptCall:(NSDictionary*) contact;
 
 
 /*
@@ -245,29 +243,31 @@ Decline a call request
 /**
  query a user's software version
  */
--(void) getEntitySoftWareVersion:(NSString* _Nonnull) user;
+-(void) getEntitySoftWareVersion:(NSString*) user;
 
 /**
  XEP-0191 blocking
  */
--(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) jid;
+-(void) setBlocked:(BOOL) blocked forJid:(NSString*) jid;
 
 
 #pragma mark - account management
 
--(void) changePassword:(NSString* _Nonnull) newPass withCompletion:(xmppCompletion _Nullable) completion;
+-(void) changePassword:(NSString*) newPass withCompletion:(xmppCompletion _Nullable) completion;
 
 -(void) requestRegFormWithCompletion:(xmppDataCompletion) completion andErrorCompletion:(xmppCompletion) errorCompletion;
--(void) registerUser:(NSString* _Nonnull) username withPassword:(NSString* _Nonnull) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
+-(void) registerUser:(NSString*) username withPassword:(NSString*) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
 
 
 #pragma mark - internal stuff for processors
 
--(void) addMessageToMamPageArray:(XMPPMessage* _Nonnull) messageNode forOuterMessageNode:(XMPPMessage* _Nonnull) outerMessageNode withBody:(NSString* _Nonnull) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString* _Nonnull) messageType;
--(NSArray* _Nullable) getOrderedMamPageFor:(NSString* _Nonnull) mamQueryId;
+-(void) addMessageToMamPageArray:(XMPPMessage*) messageNode forOuterMessageNode:(XMPPMessage*) outerMessageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType;
+-(NSArray* _Nullable) getOrderedMamPageFor:(NSString*) mamQueryId;
 -(void) bindResource:(NSString*) resource;
 -(void) initSession;
--(MLMessage* _Nonnull) parseMessageToMLMessage:(XMPPMessage* _Nonnull) messageNode withBody:(NSString*_Nonnull) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString* _Nonnull) messageType andActualFrom:(NSString*) actualFrom;
+-(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType andActualFrom:(NSString*) actualFrom;
 -(void) sendDisplayMarkerForId:(NSString*) messageid to:(NSString*) to;
 
 @end
+
+NS_ASSUME_NONNULL_END

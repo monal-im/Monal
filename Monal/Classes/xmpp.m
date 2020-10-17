@@ -11,6 +11,12 @@
 #import <Security/SecureTransport.h>
 
 #import "xmpp.h"
+#import "jingleCall.h"
+#import "MLDNSLookup.h"
+#import "MLSignalStore.h"
+#import "MLPubSub.h"
+#import "MLOMEMO.h"
+
 #import "MLPipe.h"
 #import "MLProcessLock.h"
 #import "DataLayer.h"
@@ -23,6 +29,7 @@
 #import "MLBasePaser.h"
 #import "MLXMLNode.h"
 #import "XMPPStanza.h"
+#import "XMPPDataForm.h"
 #import "XMPPIQ.h"
 #import "XMPPPresence.h"
 #import "XMPPMessage.h"
@@ -33,6 +40,10 @@
 
 #import "MLHTTPRequest.h"
 #import "AESGcm.h"
+#ifndef DISABLE_OMEMO
+#import "SignalProtocolObjC.h"
+#endif
+
 
 #define kConnectTimeout 20ull //seconds
 #define kPingTimeout 120ull //seconds

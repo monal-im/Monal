@@ -9,6 +9,7 @@
 #import "MLKeysTableViewController.h"
 #import "MLXMPPManager.h"
 #import "MLKeyCell.h"
+#import "MLOMEMO.h"
 
 @interface MLKeysTableViewController ()
 

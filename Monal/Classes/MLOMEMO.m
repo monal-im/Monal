@@ -14,6 +14,7 @@
 #import "HelperTools.h"
 #import "XMPPIQ.h"
 #import "xmpp.h"
+#import "MLPubSub.h"
 
 
 @interface MLOMEMO ()

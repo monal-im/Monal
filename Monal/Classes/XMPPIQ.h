@@ -146,5 +146,3 @@ removes a contact from the roster
 -(void) registerUser:(NSString* _Nonnull) user withPassword:(NSString* _Nonnull) newPass captcha:(NSString* _Nonnull) captcha andHiddenFields:(NSDictionary* _Nonnull) hiddenFields;
 
 @end
-
-typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);

@@ -17,6 +17,7 @@
 #import "MLImageManager.h"
 
 @import MobileCoreServices;
+@import AVFoundation;
 
 @interface XMPPEdit()
 

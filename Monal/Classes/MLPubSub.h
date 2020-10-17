@@ -9,41 +9,45 @@
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class xmpp;
 @class XMPPMessage;
-@class XMPPIQ;
+@class MLXMLNode;
 
-typedef void (^monal_pubsub_handler_t)(NSDictionary* _Nonnull items, NSString* _Nonnull jid, NSSet* _Nonnull changedIdList);
+typedef void (^monal_pubsub_handler_t)(NSDictionary* items, NSString* jid, NSSet* changedIdList);
 
 @interface MLPubSub : NSObject
 {
 }
 
 //activate/deactivate automatic data updates and configure caching mode
--(void) registerInterestForNode:(NSString* _Nonnull) node;
--(void) unregisterInterestForNode:(NSString* _Nonnull) node;
+-(void) registerInterestForNode:(NSString*) node;
+-(void) unregisterInterestForNode:(NSString*) node;
 
 //register data handlers
--(void) registerForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nullable) jid withHandler:(monal_pubsub_handler_t _Nonnull) handler;
--(void) unregisterForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nullable) jid;
+-(void) registerForNode:(NSString*) node andBareJid:(NSString* _Nullable) jid withHandler:(monal_pubsub_handler_t) handler;
+-(void) unregisterForNode:(NSString*) node andBareJid:(NSString* _Nullable) jid;
 
 //manually get cached data or force refresh it
--(NSDictionary* _Nonnull) getCachedDataForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid;
--(void) forceRefreshForNode:(NSString* _Nonnull) node andBareJid:(NSString* _Nonnull) jid andItemsList:(NSArray* _Nonnull) itemsList withDelegate:(id _Nullable) delegate andMethod:(SEL _Nullable) method andAdditionalArguments:(NSArray* _Nullable) args;
+-(NSDictionary*) getCachedDataForNode:(NSString*) node andBareJid:(NSString*) jid;
+-(void) forceRefreshForNode:(NSString*) node andBareJid:(NSString*) jid andItemsList:(NSArray*) itemsList withDelegate:(id _Nullable) delegate andMethod:(SEL _Nullable) method andAdditionalArguments:(NSArray* _Nullable) args;
 
 //publish/retract/delete/truncate data
--(void) publishItems:(NSArray* _Nonnull) items onNode:(NSString* _Nonnull) node withAccessModel:(NSString* _Nullable) accessModel;
--(void) retractItemsWithIds:(NSArray* _Nonnull) itemIds onNode:(NSString* _Nonnull) node;
--(void) purgeNode:(NSString* _Nonnull) node;
--(void) deleteNode:(NSString* _Nonnull) node;
+-(void) configureNode:(NSString*) node withAccessModel:(NSString* _Nullable) accessModel withDelegate:(id _Nullable) delegate andMethod:(SEL _Nullable) method andAdditionalArguments:(NSArray* _Nullable) args;
+-(void) publishItem:(MLXMLNode*) item onNode:(NSString*) node withAccessModel:(NSString* _Nullable) accessModel;
+-(void) retractItemWithId:(NSString*) itemId onNode:(NSString*) node;
+-(void) purgeNode:(NSString*) node;
+-(void) deleteNode:(NSString*) node;
 
 
 //methods internal to our framework
--(id _Nonnull) initWithAccount:(xmpp* _Nonnull) account;
--(NSDictionary* _Nonnull) getInternalData;
--(void) setInternalData:(NSDictionary* _Nonnull) data;
+-(id) initWithAccount:(xmpp*) account;
+-(NSDictionary*) getInternalData;
+-(void) setInternalData:(NSDictionary*) data;
 -(void) invalidateCache;
--(void) handleHeadlineMessage:(XMPPMessage* _Nonnull) messageNode;
-+(void) handleRefreshResultFor:(xmpp* _Nonnull) account withIqNode:(XMPPIQ* _Nonnull) iqNode andUpdated:(NSNumber* _Nonnull) updated andNode:(NSString* _Nonnull) node andJid:(NSString* _Nonnull) jid andQueryItems:(NSMutableArray* _Nonnull) queryItems andHandler:(NSDictionary* _Nonnull) handler;
+-(void) handleHeadlineMessage:(XMPPMessage*) messageNode;
 
 @end
+
+NS_ASSUME_NONNULL_END

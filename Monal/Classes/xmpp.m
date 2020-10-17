@@ -287,7 +287,7 @@ NSString *const kXMPPPresence = @"presence";
     }
 }
 
--(void) setPubSubNotificationsForNodes:(NSSet* _Nonnull) nodes
+-(void) setPubSubNotificationsForNodes:(NSSet* _Nonnull) nodes persistState:(BOOL) persistState
 {
     NSString* client = [NSString stringWithFormat:@"%@/%@//%@", [_capsIdentity findFirst:@"/@category"], [_capsIdentity findFirst:@"/@type"], [_capsIdentity findFirst:@"/@name"]];
     NSMutableSet* featuresSet = [[NSMutableSet alloc] initWithSet:[HelperTools getOwnFeatureSet]];
@@ -299,10 +299,8 @@ NSString *const kXMPPPresence = @"presence";
     _capsFeatures = featuresSet;
     [self setCapsHash:[HelperTools getEntityCapsHashForIdentities:@[client] andFeatures:_capsFeatures]];
     
-    //the pubsub implementation changed state --> persist these changes if we are bound
-    //we can ignore state changes before we are bound because those will not broadcast any presences nor receive any data
-    //or change the pubsub cache/state in any other way
-    if(_accountState >= kStateBound)
+    //persist this new state if the pubsub implementation tells us to
+    if(persistState)
         [self persistState];
 }
 
@@ -2010,7 +2008,7 @@ NSString *const kXMPPPresence = @"presence";
         [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
         //debug output
-        DDLogVerbose(@"persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d",
+        DDLogVerbose(@"persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d",
             values[@"stateSavedAt"],
             self.lastHandledInboundStanza,
             self.lastHandledOutboundStanza,
@@ -2021,7 +2019,8 @@ NSString *const kXMPPPresence = @"presence";
             persistentIqHandlers,
             self.connectionProperties.supportsPush,
             self.connectionProperties.supportsHTTPUpload,
-            self.connectionProperties.pushEnabled
+            self.connectionProperties.pushEnabled,
+            self.connectionProperties.supportsPubSub
         );
     }
 }
@@ -2087,80 +2086,78 @@ NSString *const kXMPPPresence = @"presence";
             
             self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
             self.connectionProperties.discoveredServices = [dic objectForKey:@"discoveredServices"];
-
+            
             self.connectionProperties.uploadServer = [dic objectForKey:@"uploadServer"];
-            if(self.connectionProperties.uploadServer)
-                self.connectionProperties.supportsHTTPUpload = YES;
             self.connectionProperties.conferenceServer = [dic objectForKey:@"conferenceServer"];
-
-            if([dic objectForKey:@"pubsubData"])
-                [self.pubsub setInternalData:[dic objectForKey:@"pubsubData"]];
             
             if([dic objectForKey:@"loggedInOnce"])
             {
                 NSNumber* loggedInOnce = [dic objectForKey:@"loggedInOnce"];
                 _loggedInOnce = loggedInOnce.boolValue;
             }
-
+            
             if([dic objectForKey:@"usingCarbons2"])
             {
                 NSNumber* carbonsNumber = [dic objectForKey:@"usingCarbons2"];
                 self.connectionProperties.usingCarbons2 = carbonsNumber.boolValue;
             }
-
+            
             if([dic objectForKey:@"supportsPush"])
             {
                 NSNumber* pushNumber = [dic objectForKey:@"supportsPush"];
                 self.connectionProperties.supportsPush = pushNumber.boolValue;
             }
-
+            
             if([dic objectForKey:@"pushEnabled"])
             {
                 NSNumber* pushEnabled = [dic objectForKey:@"pushEnabled"];
                 self.connectionProperties.pushEnabled = pushEnabled.boolValue;
             }
-
+            
             if([dic objectForKey:@"supportsClientState"])
             {
                 NSNumber* csiNumber = [dic objectForKey:@"supportsClientState"];
                 self.connectionProperties.supportsClientState = csiNumber.boolValue;
             }
-
+            
             if([dic objectForKey:@"supportsMAM"])
             {
                 NSNumber* mamNumber = [dic objectForKey:@"supportsMAM"];
                 self.connectionProperties.supportsMam2 = mamNumber.boolValue;
             }
-
+            
             if([dic objectForKey:@"supportsPubSub"])
             {
                 NSNumber* supportsPubSub = [dic objectForKey:@"supportsPubSub"];
                 self.connectionProperties.supportsPubSub = supportsPubSub.boolValue;
             }
-
+            
             if([dic objectForKey:@"supportsHTTPUpload"])
             {
                 NSNumber* supportsHTTPUpload = [dic objectForKey:@"supportsHTTPUpload"];
                 self.connectionProperties.supportsHTTPUpload = supportsHTTPUpload.boolValue;
             }
-
+            
             if([dic objectForKey:@"supportsPing"])
             {
                 NSNumber* supportsPing = [dic objectForKey:@"supportsPing"];
                 self.connectionProperties.supportsPing = supportsPing.boolValue;
             }
-
+            
             if([dic objectForKey:@"lastInteractionDate"])
                 _lastInteractionDate = [dic objectForKey:@"lastInteractionDate"];
-
+            
             if([dic objectForKey:@"supportsRosterPreApproval"])
             {
                 NSNumber* supportsRosterPreApproval = [dic objectForKey:@"supportsRosterPreApproval"];
                 self.connectionProperties.supportsRosterPreApproval = supportsRosterPreApproval.boolValue;
             }
-
+            
+            if([dic objectForKey:@"pubsubData"])
+                [self.pubsub setInternalData:[dic objectForKey:@"pubsubData"]];
+            
             //debug output
-            DDLogVerbose(@"readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d",
+            DDLogVerbose(@"readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d",
                 dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
@@ -2171,7 +2168,8 @@ NSString *const kXMPPPresence = @"presence";
                 persistentIqHandlers,
                 self.connectionProperties.supportsPush,
                 self.connectionProperties.supportsHTTPUpload,
-                self.connectionProperties.pushEnabled
+                self.connectionProperties.pushEnabled,
+                self.connectionProperties.supportsPubSub
             );
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
@@ -2326,6 +2324,8 @@ NSString *const kXMPPPresence = @"presence";
 
     //now fetch roster, request disco and send initial presence
     [self fetchRoster];
+    //query disco *before* sending out our first presence because this presence will trigger pubsub "headline" updates and we want to know
+    //if and what pubsub features the server supports, before handling that
     [self queryDisco];
     [self sendPresence];
     [self sendCurrentCSIState];
@@ -3198,7 +3198,7 @@ NSString *const kXMPPPresence = @"presence";
     }
 }
 
--(MLMessage* _Nonnull) parseMessageToMLMessage:(XMPPMessage* _Nonnull) messageNode withBody:(NSString*_Nonnull) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString* _Nonnull) messageType andActualFrom:(NSString*) actualFrom
+-(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType andActualFrom:(NSString*) actualFrom
 {
     MLMessage* message = [[MLMessage alloc] init];
     message.from = messageNode.fromUser;
@@ -3336,7 +3336,7 @@ NSString *const kXMPPPresence = @"presence";
     
     //register handler for roster names coming from *any* jid
     [self.pubsub registerForNode:@"http://jabber.org/protocol/nick" andBareJid:nil withHandler:^(NSDictionary* items, NSString* jid, NSSet* changedIdList) {
-        for(NSString* itemId in items)
+        for(NSString* itemId in changedIdList)
         {
             if([jid isEqualToString:self.connectionProperties.identity.jid])        //own roster name
             {
@@ -3349,6 +3349,11 @@ NSString *const kXMPPPresence = @"presence";
             {
                 DDLogInfo(@"Got nickname of %@: %@", jid, [items[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"]);
                 [[DataLayer sharedInstance] setFullName:[items[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"] forContact:jid andAccount:self.accountNo];
+                MLContact* contact = [[DataLayer sharedInstance] contactForUsername:jid forAccount:self.accountNo];
+                if(contact)     //ignore updates for jids not in our roster
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{
+                        @"contact": contact
+                    }];
             }
             break;      //we only need the first item (there should be only one item in the first place)
         }
@@ -3361,11 +3366,11 @@ NSString *const kXMPPPresence = @"presence";
     if(!rosterName || !rosterName.length)
         [self.pubsub deleteNode:@"http://jabber.org/protocol/nick"];
     else
-        [self.pubsub publishItems:@[
-            [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{} andChildren:@[
+        [self.pubsub publishItem:
+            [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": @"current"} andChildren:@[
                 [[MLXMLNode alloc] initWithElement:@"nick" andNamespace:@"http://jabber.org/protocol/nick" withAttributes:@{} andChildren:@[] andData:rosterName]
             ] andData:nil]
-        ] onNode:@"http://jabber.org/protocol/nick" withAccessModel:@"presence"];
+        onNode:@"http://jabber.org/protocol/nick" withAccessModel:@"presence"];
 }
 
 @end

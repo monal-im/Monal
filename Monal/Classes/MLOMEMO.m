@@ -658,7 +658,7 @@ const int KEY_SIZE = 16;
     [itemNode addChild:listNode];
 
     // publish devices via pubsub
-    [self.xmppConnection.pubsub publishItems:@[itemNode] onNode:@"eu.siacs.conversations.axolotl.devicelist" withAccessModel:@"open"];
+    [self.xmppConnection.pubsub publishItem:itemNode onNode:@"eu.siacs.conversations.axolotl.devicelist" withAccessModel:@"open"];
 }
 
 /**
@@ -706,7 +706,7 @@ const int KEY_SIZE = 16;
     [itemNode addChild:bundle];
 
     // send bundle via pubsub interface
-    [self.xmppConnection.pubsub publishItems:@[itemNode] onNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%u", deviceid] withAccessModel:@"open"];
+    [self.xmppConnection.pubsub publishItem:itemNode onNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%u", deviceid] withAccessModel:@"open"];
 }
 
 @end

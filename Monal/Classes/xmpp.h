@@ -52,7 +52,7 @@ FOUNDATION_EXPORT NSString* const kCompletion;
 @class MLOMEMO;
 @class MLMessageProcessor;
 
-typedef void (^xmppCompletion)(BOOL success, NSString *message);
+typedef void (^xmppCompletion)(BOOL success, NSString* _Nullable message);
 typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFields);
 typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
@@ -120,7 +120,7 @@ extern NSString* const kAccountHibernate;
 -(void) reconnect;
 -(void) reconnect:(double) wait;
 
--(void) setPubSubNotificationsForNodes:(NSSet*) nodes;
+-(void) setPubSubNotificationsForNodes:(NSSet* _Nonnull) nodes persistState:(BOOL) persistState;
 
 /**
  send a message to a contact with xmpp id
@@ -266,7 +266,7 @@ Decline a call request
 -(NSArray* _Nullable) getOrderedMamPageFor:(NSString*) mamQueryId;
 -(void) bindResource:(NSString*) resource;
 -(void) initSession;
--(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType andActualFrom:(NSString*) actualFrom;
+-(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType andActualFrom:(NSString* _Nullable) actualFrom;
 -(void) sendDisplayMarkerForId:(NSString*) messageid to:(NSString*) to;
 
 @end

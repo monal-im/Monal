@@ -244,8 +244,8 @@ static NSDateFormatter* dbFormatter;
                        [dictionary objectForKey:kEnabled],
                        [dictionary objectForKey:kSelfSigned],
                        [dictionary objectForKey:kDirectTLS],
-                       [dictionary objectForKey:kAccountID],
-                        [dictionary objectForKey:kRosterName] == nil ? @"" : ((NSString*)[dictionary objectForKey:kRosterName])
+                       [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @"",
+                       [dictionary objectForKey:kAccountID]
     ];
 
     return [self.db executeNonQuery:query andArguments:params];
@@ -266,7 +266,7 @@ static NSDateFormatter* dbFormatter;
         [dictionary objectForKey:kSelfSigned],
         [dictionary objectForKey:kDirectTLS],
         ((NSString *)[dictionary objectForKey:kUsername]),
-        [dictionary objectForKey:kRosterName] == nil ? @"" : ((NSString *)[dictionary objectForKey:kRosterName])
+        [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @""
     ];
     BOOL result = [self.db executeNonQuery:query andArguments:params];
     // return the accountID

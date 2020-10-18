@@ -31,13 +31,7 @@
 -(id _Nonnull) initWithType:(NSString* _Nonnull) type formType:(NSString* _Nonnull) formType andDictionary:(NSDictionary* _Nonnull) vars
 {
     self = [self initWithType:type andFormType:formType];
-    for(NSString* key in vars)
-    {
-        if([vars[key] isKindOfClass:[NSDictionary class]])
-            [self setFieldWithDictionary:vars[key]];
-        else
-            self[key] = vars[key];
-    }
+    [self addEntriesFromDictionary:vars];
     return self;
 }
 
@@ -62,43 +56,26 @@
 
 -(NSDictionary* _Nullable) getField:(NSString* _Nonnull) name
 {
-    MLXMLNode* fieldNode = [self findFirst:[NSString stringWithFormat:@"field<var=%@>", name]];
+    MLXMLNode* fieldNode = [self findFirst:[NSString stringWithFormat:@"field<var=%@>", [NSRegularExpression escapedPatternForString:name]]];
     if(!fieldNode)
         return nil;
     if([fieldNode findFirst:@"/@type"])
         return @{
             @"name": [fieldNode findFirst:@"/@var"],
             @"type": [fieldNode findFirst:@"/@type"],
-            @"value": [fieldNode findFirst:@"value#"]
+            @"value": [fieldNode findFirst:@"value#"],
+            @"options": [fieldNode find:@"option/value#"]
         };
     return @{
         @"name": [fieldNode findFirst:@"/@var"],
-        @"value": [fieldNode findFirst:@"value#"]
+        @"value": [fieldNode findFirst:@"value#"],
+        @"options": [fieldNode find:@"option/value#"]
     };
 }
 
 -(void) removeField:(NSString* _Nonnull) name
 {
-    [self removeChild:[self findFirst:[NSString stringWithFormat:@"field<var=%@>", name]]];
-}
-
--(id _Nullable) objectForKeyedSubscript:(NSString* _Nonnull) key
-{
-    return [self findFirst:[NSString stringWithFormat:@"field<var=%@>/value#", key]];
-}
-
--(void) setObject:(id _Nullable) obj forKeyedSubscript:(NSString*) key
-{
-    if(!obj)
-        return [self removeChild:[self findFirst:[NSString stringWithFormat:@"field<var=%@>", key]]];
-    MLXMLNode* fieldNode = [self findFirst:[NSString stringWithFormat:@"field<var=%@>", key]];
-    if(!fieldNode)
-        return [self setField:key withValue:[NSString stringWithFormat:@"%@", obj]];
-    MLXMLNode* valueNode = [fieldNode findFirst:@"value"];
-    if(!valueNode)
-        [fieldNode addChild:[[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:[NSString stringWithFormat:@"%@", obj]]];
-    else
-        valueNode.data = [NSString stringWithFormat:@"%@", obj];
+    [self removeChild:[self findFirst:[NSString stringWithFormat:@"field<var=%@>", [NSRegularExpression escapedPatternForString:name]]]];
 }
 
 -(void) setType:(NSString* _Nonnull) type
@@ -117,6 +94,108 @@
 -(NSString*) formType
 {
     return self[@"FORM_TYPE"];
+}
+
+//*** NSMutableDictionary interface below
+
+-(id _Nullable) objectForKeyedSubscript:(NSString* _Nonnull) key
+{
+    return [self findFirst:[NSString stringWithFormat:@"field<var=%@>/value#", [NSRegularExpression escapedPatternForString:key]]];
+}
+
+-(void) setObject:(id _Nullable) obj forKeyedSubscript:(NSString*) key
+{
+    if(!obj)
+        return [self removeChild:[self findFirst:[NSString stringWithFormat:@"field<var=%@>", [NSRegularExpression escapedPatternForString:key]]]];
+    MLXMLNode* fieldNode = [self findFirst:[NSString stringWithFormat:@"field<var=%@>", [NSRegularExpression escapedPatternForString:key]]];
+    if(!fieldNode)
+        return [self setField:key withValue:[NSString stringWithFormat:@"%@", obj]];
+    MLXMLNode* valueNode = [fieldNode findFirst:@"value"];
+    if(!valueNode)
+        [fieldNode addChild:[[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:[NSString stringWithFormat:@"%@", obj]]];
+    else
+        valueNode.data = [NSString stringWithFormat:@"%@", obj];
+}
+
+-(NSArray*) allKeys
+{
+    return [self findFirst:@"field@var"];
+}
+
+-(NSArray*) allValues
+{
+    return [self findFirst:@"field/value#"];
+}
+
+-(NSUInteger) count
+{
+    return [[self allKeys] count];
+}
+
+-(NSArray*) allKeysForObject:(id) anObject
+{
+    NSMutableArray* retval = [[NSMutableArray alloc] init];
+    for(MLXMLNode* field in [self find:@"field"])
+        if([anObject isEqual:[field findFirst:@"value#"]])
+            [retval addObject:[field findFirst:@"/@var"]];
+    return retval;
+}
+
+-(id) valueForKey:(NSString*) key
+{
+    return [self findFirst:[NSString stringWithFormat:@"field<var=%@>/value#", [NSRegularExpression escapedPatternForString:key]]];
+}
+
+-(id) objectForKey:(NSString*) key
+{
+    return [self valueForKey:key];
+}
+
+-(void) removeObjectForKey:(NSString*) key
+{
+    [self removeField:key];
+}
+
+-(void) removeAllObjects
+{
+    for(MLXMLNode* child in self.children)
+        [self removeChild:child];
+}
+
+-(void) removeObjectsForKeys:(NSArray*) keyArray
+{
+    for(NSString* key in keyArray)
+        [self removeObjectForKey:key];
+}
+
+-(void) setObject:(NSString*) value forKey:(NSString*) key
+{
+    [self setField:key withValue:value];
+}
+
+-(void) setValue:(NSString*) value forKey:(NSString*) key
+{
+    if(!value)
+        [self removeObjectForKey:key];
+    else
+        [self setObject:value forKey:key];
+}
+
+-(void) addEntriesFromDictionary:(NSDictionary*) vars
+{
+    for(NSString* key in vars)
+    {
+        if([vars[key] isKindOfClass:[NSDictionary class]])
+            [self setFieldWithDictionary:vars[key]];
+        else
+            self[key] = vars[key];
+    }
+}
+
+-(void) setDictionary:(NSDictionary*) vars
+{
+    [self removeAllObjects];
+    [self addEntriesFromDictionary:vars];
 }
 
 @end

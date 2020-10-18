@@ -190,6 +190,9 @@ static NSRegularExpression* attributeFilterRegex;
     NSInteger index = [_children indexOfObject:child];
     if(index != NSNotFound)
         [_children removeObjectAtIndex:index];
+    //invalidate caches of all nodes upstream in our tree
+    for(MLXMLNode* node = self; node; node = node.parent)
+        node.cache = [[NSMutableDictionary alloc] init];
 }
 
 -(void) invalidateCache

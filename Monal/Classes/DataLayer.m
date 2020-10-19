@@ -412,12 +412,14 @@ static NSDateFormatter* dbFormatter;
         END AS 'isActiveChat' \
         FROM buddylist AS b LEFT JOIN activechats AS a \
         ON a.buddy_name = b.buddy_name AND a.account_id = b.account_id \
-        WHERE a.buddy_name=? and a.account_id=?" andArguments:@[username, accountNo]];
+        WHERE b.buddy_name=? AND b.account_id=?;" andArguments:@[username, accountNo]];
     if(results != nil && [results count] != 1)
-    {
-        DDLogError(@"unexpected contact count for %@ in account %@: %lu with results: %@",  username, accountNo, (unsigned long)[results count], results);
-        return nil;
-    }
+        @throw [NSException exceptionWithName:@"DataLayerError" reason:@"unexpected contact count" userInfo:@{
+            @"usrname": username,
+            @"accountNo": accountNo,
+            @"count": [NSNumber numberWithInteger:[results count]],
+            @"results": results
+        }];
     
     return [MLContact contactFromDictionary:results[0]];
 }

@@ -24,6 +24,34 @@ void logException(NSException* exception)
     usleep(1000000);
 }
 
++(void) callStaticHandler:(NSDictionary*) handler withDefaultArguments:(NSArray*) defaultArgs
+{
+    if(handler[@"delegate"] && handler[@"method"])
+    {
+        id cls = NSClassFromString(handler[@"delegate"]);
+        SEL sel = NSSelectorFromString(handler[@"method"]);
+        DDLogVerbose(@"Calling callback [%@ %@]...", handler[@"delegate"], handler[@"method"]);
+        NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[cls methodSignatureForSelector:sel]];
+        [inv setTarget:cls];
+        [inv setSelector:sel];
+        //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
+        NSInteger idx = 2;
+        NSObject* nilArgument = nil;
+        //default arguments of the caller
+        if(defaultArgs)
+            for(id _Nonnull arg in defaultArgs)
+                if(arg == [NSNull null])
+                    [inv setArgument:&nilArgument atIndex:idx++];
+                else
+                    [inv setArgument:(void* _Nonnull)&arg atIndex:idx++];
+        //additional arguments bound to the handler
+        if(handler[@"arguments"])
+            for(id _Nonnull arg in handler[@"arguments"])
+                [inv setArgument:(void* _Nonnull)&arg atIndex:idx++];
+        [inv invoke];
+    }
+}
+
 +(void) configureFileProtectionFor:(NSString*) file
 {
 #if TARGET_OS_IPHONE

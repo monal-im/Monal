@@ -1466,29 +1466,12 @@ NSString *const kXMPPPresence = @"presence";
             //process registered iq handlers
             if(_iqHandlers[[iqNode findFirst:@"/@id"]])
             {
-                //call block-handlers
                 if([@"result" isEqualToString:[iqNode findFirst:@"/@type"]] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"resultHandler"])
                     ((monal_iq_handler_t) _iqHandlers[[iqNode findFirst:@"/@id"]][@"resultHandler"])(iqNode);
                 else if([@"error" isEqualToString:[iqNode findFirst:@"/@type"]] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"errorHandler"])
                     ((monal_iq_handler_t) _iqHandlers[[iqNode findFirst:@"/@id"]][@"errorHandler"])(iqNode);
-                
-                //call class delegate handlers
-                if(_iqHandlers[[iqNode findFirst:@"/@id"]][@"delegate"] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"method"])
-                {
-                    id cls = NSClassFromString(_iqHandlers[[iqNode findFirst:@"/@id"]][@"delegate"]);
-                    SEL sel = NSSelectorFromString(_iqHandlers[[iqNode findFirst:@"/@id"]][@"method"]);
-                    DDLogVerbose(@"Calling IQHandler [%@ %@]...", _iqHandlers[[iqNode findFirst:@"/@id"]][@"delegate"], _iqHandlers[[iqNode findFirst:@"/@id"]][@"method"]);
-                    NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[cls methodSignatureForSelector:sel]];
-                    [inv setTarget:cls];
-                    [inv setSelector:sel];
-                    //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
-                    NSInteger idx = 2;
-                    [inv setArgument:(void* _Nonnull)&self atIndex:idx++];
-                    [inv setArgument:&iqNode atIndex:idx++];
-                    for(id arg in _iqHandlers[[iqNode findFirst:@"/@id"]][@"arguments"])
-                        [inv setArgument:(void* _Nonnull)&arg atIndex:idx++];
-                    [inv invoke];
-                }
+                else if(_iqHandlers[[iqNode findFirst:@"/@id"]][@"delegate"] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"method"])
+                    [HelperTools callStaticHandler:_iqHandlers[[iqNode findFirst:@"/@id"]] withDefaultArguments:@[self, iqNode]];
                 
                 //remove handler after calling it
                 [_iqHandlers removeObjectForKey:[iqNode findFirst:@"/@id"]];
@@ -2287,18 +2270,12 @@ NSString *const kXMPPPresence = @"presence";
             ((monal_iq_handler_t)data[@"errorHandler"])(nil);
         else if(data[@"delegate"] && data[@"invalidationMethod"])
         {
-            id cls = NSClassFromString(data[@"delegate"]);
-            SEL sel = NSSelectorFromString(data[@"invalidationMethod"]);
             DDLogVerbose(@"Calling IQHandler invalidation method [%@ %@]...", data[@"delegate"], data[@"invalidationMethod"]);
-            NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[cls methodSignatureForSelector:sel]];
-            [inv setTarget:cls];
-            [inv setSelector:sel];
-            //arguments 0 and 1 are self and _cmd respectively, automatically set by NSInvocation
-            NSInteger idx = 2;
-            [inv setArgument:(void* _Nonnull)&self atIndex:idx++];
-            for(id arg in data[@"arguments"])
-                [inv setArgument:(void* _Nonnull)&arg atIndex:idx++];
-            [inv invoke];
+            [HelperTools callStaticHandler:@{
+                @"delegate": data[@"delegate"],
+                @"method": data[@"invalidationMethod"],
+                @"arguments": data[@"arguments"] ? data[@"arguments"] : @[]
+            } withDefaultArguments:@[self]];
         }
     }];
     _iqHandlers = [[NSMutableDictionary alloc] init];

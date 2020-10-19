@@ -252,15 +252,22 @@
 
 #pragma mark - public API
 
--(void) writeTransaction:(monal_void_block_t) operations
+-(void) voidWriteTransaction:(monal_void_block_t) operations
 {
-    [self returningWriteTransaction:^(void){
+    [self idWriteTransaction:^(void){
         operations();
         return (NSObject*)nil;      //dummy return value
     }];
 }
 
--(id) returningWriteTransaction:(monal_sqlite_operations_t) operations
+-(BOOL) boolWriteTransaction:(monal_sqlite_bool_operations_t) operations
+{
+    return [[self idWriteTransaction:^(void){
+        return [NSNumber numberWithBool:operations()];
+    }] boolValue];
+}
+
+-(id) idWriteTransaction:(monal_sqlite_operations_t) operations
 {
     [self beginWriteTransaction];
     id retval = operations();

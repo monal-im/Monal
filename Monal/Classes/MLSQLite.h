@@ -12,13 +12,15 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef id _Nullable (^monal_sqlite_operations_t)(void);
+typedef BOOL (^monal_sqlite_bool_operations_t)(void);
 
 @interface MLSQLite : NSObject
 
 +(id) sharedInstanceForFile:(NSString*) dbFile;
 
--(void) writeTransaction:(monal_void_block_t) operations;
--(id) returningWriteTransaction:(monal_sqlite_operations_t) operations;
+-(void) voidWriteTransaction:(monal_void_block_t) operations;
+-(BOOL) boolWriteTransaction:(monal_sqlite_bool_operations_t) operations;
+-(id) idWriteTransaction:(monal_sqlite_operations_t) operations;
 -(void) beginWriteTransaction;
 -(void) endWriteTransaction;
 

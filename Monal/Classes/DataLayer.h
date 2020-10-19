@@ -226,7 +226,6 @@ retrieves the actual_from of the the last message from hisroty id
 -(NSMutableArray*) activeContactsWithPinned:(BOOL) pinned;
 -(NSMutableArray*) activeContactDict;
 -(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
--(void) removeAllActiveBuddies;
 -(BOOL) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo;
 -(BOOL) isActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
 -(BOOL) updateActiveBuddy:(NSString*) buddyname setTime:(NSString *)timestamp forAccount:(NSString*) accountNo;

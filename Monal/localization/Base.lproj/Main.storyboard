@@ -955,7 +955,7 @@
                                             <outlet property="thumbnailImage" destination="GlC-dn-bvj" id="iHP-Iz-z5V"/>
                                         </connections>
                                     </tableViewCell>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
                                         <rect key="frame" x="0.0" y="550" width="414" height="242"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xhf-eh-Dkx" id="BdL-U7-BOc">
@@ -1681,55 +1681,6 @@
                     </view>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="tgd-HR-Cbd">
                         <nil key="title"/>
-                        <view key="titleView" contentMode="scaleToFill" id="frN-Fe-gvs" userLabel="customNav">
-                            <rect key="frame" x="207" y="22" width="0.0" height="0.0"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxY="YES"/>
-                            <subviews>
-                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="lastInteraction" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zc6-pR-bBL" userLabel="lastInteraction">
-                                    <rect key="frame" x="37.999999999999993" y="26" width="69.333333333333314" height="12"/>
-                                    <constraints>
-                                        <constraint firstAttribute="height" constant="12" id="dMx-SD-Wv8"/>
-                                    </constraints>
-                                    <fontDescription key="fontDescription" type="system" pointSize="10"/>
-                                    <nil key="textColor"/>
-                                    <nil key="highlightedColor"/>
-                                    <attributedString key="userComments">
-                                        <fragment content="#bc-ignore!"/>
-                                    </attributedString>
-                                </label>
-                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="WsB-Ch-jda" userLabel="icon">
-                                    <rect key="frame" x="0.0" y="7" width="30" height="30"/>
-                                    <constraints>
-                                        <constraint firstAttribute="width" secondItem="WsB-Ch-jda" secondAttribute="height" multiplier="1:1" id="FIw-ml-AvD"/>
-                                        <constraint firstAttribute="width" constant="30" id="ft2-Cg-mAc"/>
-                                    </constraints>
-                                </imageView>
-                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="contactJid" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0SD-m9-NQW" userLabel="contactJid">
-                                    <rect key="frame" x="38.000000000000007" y="7" width="72.666666666666686" height="18"/>
-                                    <constraints>
-                                        <constraint firstAttribute="height" constant="18" id="c9f-Cs-SJe"/>
-                                    </constraints>
-                                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
-                                    <nil key="textColor"/>
-                                    <nil key="highlightedColor"/>
-                                    <attributedString key="userComments">
-                                        <fragment content="#bc-ignore!"/>
-                                    </attributedString>
-                                </label>
-                            </subviews>
-                            <viewLayoutGuide key="safeArea" id="gCc-qP-qCc"/>
-                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            <constraints>
-                                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="0SD-m9-NQW" secondAttribute="trailing" constant="42" id="5wS-HN-u6s"/>
-                                <constraint firstItem="zc6-pR-bBL" firstAttribute="top" secondItem="0SD-m9-NQW" secondAttribute="bottom" constant="1" id="EmX-vc-Txa"/>
-                                <constraint firstItem="WsB-Ch-jda" firstAttribute="top" secondItem="frN-Fe-gvs" secondAttribute="top" constant="7" id="JL2-Hh-oqV"/>
-                                <constraint firstItem="zc6-pR-bBL" firstAttribute="top" secondItem="0SD-m9-NQW" secondAttribute="bottom" constant="1" id="idu-HT-q9P"/>
-                                <constraint firstItem="0SD-m9-NQW" firstAttribute="top" secondItem="frN-Fe-gvs" secondAttribute="top" constant="7" id="jl7-4s-6HA"/>
-                                <constraint firstItem="WsB-Ch-jda" firstAttribute="leading" secondItem="frN-Fe-gvs" secondAttribute="leading" id="lbV-Hw-4R6"/>
-                                <constraint firstItem="zc6-pR-bBL" firstAttribute="leading" secondItem="WsB-Ch-jda" secondAttribute="trailing" constant="8" id="rOD-oE-9IY"/>
-                                <constraint firstItem="0SD-m9-NQW" firstAttribute="leading" secondItem="WsB-Ch-jda" secondAttribute="trailing" constant="8" id="spr-UI-eGq"/>
-                            </constraints>
-                        </view>
                         <rightBarButtonItems>
                             <barButtonItem title="Info" image="info.circle" catalog="system" id="C9Q-7y-bRl">
                                 <connections>
@@ -1748,11 +1699,7 @@
                         <outlet property="chatInput" destination="jiV-U5-fDl" id="gQc-PG-STp"/>
                         <outlet property="inputContainerView" destination="eXr-Xg-TCZ" id="cve-rB-fhR"/>
                         <outlet property="messageTable" destination="Kkq-aZ-5fP" id="RhH-Dt-heG"/>
-                        <outlet property="navBarContactJid" destination="0SD-m9-NQW" id="0W4-aD-fUS"/>
-                        <outlet property="navBarContainerView" destination="frN-Fe-gvs" id="8Mz-D4-OCX"/>
                         <outlet property="navBarEncryptToggleButton" destination="wma-QS-7Rc" id="Gdh-0J-pJK"/>
-                        <outlet property="navBarIcon" destination="WsB-Ch-jda" id="2nQ-dC-CiU"/>
-                        <outlet property="navBarLastInteraction" destination="zc6-pR-bBL" id="5dx-Hz-DJD"/>
                         <outlet property="placeHolderText" destination="KUa-bA-cQb" id="62v-fn-lf2"/>
                         <outlet property="plusButton" destination="c6B-5o-sqL" id="eKA-Yp-C43"/>
                         <outlet property="sendButton" destination="kYa-y4-X5Z" id="efC-cC-umG"/>
@@ -1910,12 +1857,27 @@
         <image name="Tie_My_Boat_by_Ray_Garcia" width="563" height="1218"/>
         <image name="info.circle" catalog="system" width="128" height="121"/>
         <image name="paperplane.fill" catalog="system" width="128" height="118"/>
-        <image name="person.3.fill" catalog="system" width="128" height="61"/>
+        <image name="person.3.fill" catalog="system" width="32" height="32"/>
         <image name="person.crop.circle" catalog="system" width="128" height="121"/>
         <image name="plus" catalog="system" width="128" height="113"/>
         <image name="square.and.pencil" catalog="system" width="128" height="115"/>
         <systemColor name="darkTextColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="darkTextColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="darkTextColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="groupTableViewBackgroundColor">
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="groupTableViewBackgroundColor">
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="groupTableViewBackgroundColor">
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="groupTableViewBackgroundColor">
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

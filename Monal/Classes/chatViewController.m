@@ -126,6 +126,9 @@ enum msgSentState {
 -(void) viewDidLoad
 {
     [super viewDidLoad];
+    
+    [self initNavigationBarItems];
+    
     [self setupDateObjects];
     containerView = self.view;
     self.messageTable.scrollsToTop = YES;
@@ -208,6 +211,27 @@ enum msgSentState {
     self.moreMessagesAvailable = YES;
     //Init search button item.
     [self initSearchButtonItem];
+}
+
+-(void) initNavigationBarItems
+{
+    UIView *cusView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 200, self.navigationController.navigationBar.frame.size.height)];
+    //cusView.backgroundColor = [UIColor redColor];
+
+    self.navBarIcon = [[UIImageView alloc] initWithFrame:CGRectMake(0, 7, 30, 30)];
+    self.navBarContactJid = [[UILabel alloc] initWithFrame:CGRectMake(38, 7, 200, 18)];
+    self.navBarLastInteraction = [[UILabel alloc] initWithFrame:CGRectMake(38, 26, 200, 12)];
+
+    [self.navBarContactJid setFont:[UIFont systemFontOfSize:15.0]];
+    [self.navBarLastInteraction setFont:[UIFont systemFontOfSize:10.0]];
+
+    [cusView addSubview:self.navBarIcon];
+    [cusView addSubview:self.navBarContactJid];
+    [cusView addSubview:self.navBarLastInteraction];
+    UITapGestureRecognizer *customViewTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(commandIPressed:)];
+    [cusView addGestureRecognizer:customViewTapRecognizer];
+    self.navigationItem.leftBarButtonItems = @[[[UIBarButtonItem alloc] initWithCustomView:cusView]];
+    self.navigationItem.leftItemsSupplementBackButton = YES;
 }
 
 -(void) initLastMsgButton

@@ -317,6 +317,8 @@ enum activeChatsControllerSections {
     {
         UINavigationController *nav = segue.destinationViewController;
         chatViewController *chatVC = (chatViewController *)nav.topViewController;
+        UIBarButtonItem *barButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
+        self.navigationItem.backBarButtonItem = barButtonItem;
         [chatVC setupWithContact:sender];
     }
     else if([segue.identifier isEqualToString:@"showDetails"])

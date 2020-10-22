@@ -1424,6 +1424,10 @@ NSString *const kXMPPPresence = @"presence";
             if(!messageNode.to)
                 messageNode.to = self.connectionProperties.identity.fullJid;
             
+            DDLogVerbose(@"Incoming outer message from='%@' to='%@' -- inner message from='%@' to='%@'", outerMessageNode.from, outerMessageNode.to, messageNode.from, messageNode.to);
+            DDLogVerbose(@"Raw outer from value: '%@', raw inner from value: '%@'", outerMessageNode.attributes[@"from"], messageNode.attributes[@"from"]);
+            DDLogVerbose(@"Raw outer to value: '%@', raw inner to value: '%@'", outerMessageNode.attributes[@"to"], messageNode.attributes[@"to"]);
+            
             //only process mam results when they are *not* for priming the database with the initial stanzaid (the id will be taken from the iq result)
             //we do this because we don't want to randomly add one single message to our history db after the user installs the app / adds a new account
             //if the user wants to see older messages he can retrieve them using the ui (endless upscrolling through mam)

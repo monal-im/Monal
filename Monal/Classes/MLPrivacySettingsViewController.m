@@ -423,5 +423,6 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
         default:
             break;
     }
+    [[HelperTools defaultsDB] synchronize];
 }
 @end

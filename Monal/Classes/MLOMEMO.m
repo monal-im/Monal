@@ -592,8 +592,12 @@ const int KEY_SIZE = 16;
             if(isKeyTransportElement)
             {
                 // nothing to do
-                DDLogInfo(@"KeyTransportElement received");
-                return [NSString stringWithFormat:@"TMP: KeyTransportElement received from device: %@", sid];
+                DDLogInfo(@"KeyTransportElement received from device: %@", sid);
+#ifdef DEBUG
+                return [NSString stringWithFormat:@"ALPHA_DEBUG_MESSAGE: KeyTransportElement received from device: %@", sid];
+#else
+                return nil;
+#endif
             }
             if(decryptedKey.length == 16 * 2)
             {

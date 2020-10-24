@@ -247,7 +247,6 @@
             DDLogVerbose(@"Adding contact %@ (%@) to database", [contact objectForKey:@"jid"], [contact objectForKey:@"name"]);
             [[DataLayer sharedInstance] addContact:[contact objectForKey:@"jid"]
                                         forAccount:account.accountNo
-                                          fullname:@""
                                           nickname:[contact objectForKey:@"name"] ? [contact objectForKey:@"name"] : @""
                                         andMucNick:nil];
                 

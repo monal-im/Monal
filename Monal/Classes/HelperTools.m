@@ -71,17 +71,21 @@ void logException(NSException* exception)
         //default arguments of the caller
         if(defaultArgs)
             for(id _Nonnull arg in defaultArgs)
+            {
                 if(arg == [NSNull null])
                     [inv setArgument:&nilArgument atIndex:idx++];
                 else
                     [inv setArgument:(void* _Nonnull)&arg atIndex:idx++];
+            }
         //additional arguments bound to the handler
         if(handler[@"arguments"])
             for(id _Nonnull arg in handler[@"arguments"])
+            {
                 if(arg == [NSNull null])
                     [inv setArgument:&nilArgument atIndex:idx++];
                 else
                     [inv setArgument:(void* _Nonnull)&arg atIndex:idx++];
+            }
         [inv invoke];
     }
 }

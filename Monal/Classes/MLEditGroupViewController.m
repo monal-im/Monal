@@ -303,7 +303,7 @@
         group.accountNickInGroup=nick;
         group.contactJid=room;
         
-        [[DataLayer sharedInstance] addContact:combinedRoom forAccount:account.accountNo fullname:@"" nickname:@"" andMucNick:nick];
+        [[DataLayer sharedInstance] addContact:combinedRoom forAccount:account.accountNo nickname:@"" andMucNick:nick];
         //race condition on creation otherwise
         [[MLXMPPManager sharedInstance] joinRoom:combinedRoom withNick:nick andPassword:pass forAccountRow:self->_selectedRow];
 

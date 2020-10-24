@@ -339,30 +339,37 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark contact Commands
 
--(BOOL) addContact:(NSString*) contact forAccount:(NSString*) accountNo fullname:(NSString*) fullName nickname:(NSString*) nickName andMucNick:(NSString* _Nullable) mucNick
+-(BOOL) addContact:(NSString*) contact forAccount:(NSString*) accountNo nickname:(NSString*) nickName andMucNick:(NSString* _Nullable) mucNick
 {
-    //data length check
-    NSString* toPass;
-    NSString* cleanNickName;
-    if(!nickName) {
-        cleanNickName = @"";
-    } else {
-        cleanNickName = [nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    }
-    if([cleanNickName length] > 50)
-        toPass = [cleanNickName substringToIndex:49];
-    else
-        toPass = cleanNickName;
-    
-    NSString* query = @"insert into buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'new', 'online', 'dirty', 'muc', 'muc_nick') values(?, ?, ?, ?, 1, 0, 0, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET account_id=?, buddy_name=?, nick_name=?;";
-    if(!accountNo || !contact)
-        return NO;
-    else
-    {
-        NSArray* params = @[accountNo, contact, fullName, toPass, mucNick?@1:@0, mucNick ? mucNick : @"", accountNo, contact, toPass];
-        BOOL success = [self.db executeNonQuery:query andArguments:params];
-        return success;
-    }
+    return [self.db boolWriteTransaction:^{
+        //data length check
+        NSString* toPass;
+        NSString* cleanNickName;
+        if(!nickName)
+        {
+            //use already existing nickname, if none was given
+            cleanNickName = [self.db executeScalar:@"SELECT nick_name FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, contact]];
+            //fall back to an empty one if this contact is not already in our db
+            if(!cleanNickName)
+                cleanNickName = @"";
+        } else {
+            cleanNickName = [nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        }
+        if([cleanNickName length] > 50)
+            toPass = [cleanNickName substringToIndex:49];
+        else
+            toPass = cleanNickName;
+        
+        NSString* query = @"INSERT INTO buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'new', 'online', 'dirty', 'muc', 'muc_nick') VALUES(?, ?, ?, ?, 1, 0, 0, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET nick_name=?;";
+        if(!accountNo || !contact)
+            return NO;
+        else
+        {
+            NSArray* params = @[accountNo, contact, @"", toPass, mucNick?@1:@0, mucNick ? mucNick : @"", toPass];
+            BOOL success = [self.db executeNonQuery:query andArguments:params];
+            return success;
+        }
+    }];
 }
 
 -(void) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
@@ -1747,7 +1754,7 @@ static NSDateFormatter* dbFormatter;
         }];
 
         [self updateDBTo:2.3 withBlock:^{
-            [self.db executeNonQuery:@"UPDATE account SET resource=?;" andArguments:[HelperTools encodeRandomResource]];
+            [self.db executeNonQuery:@"UPDATE account SET resource=?;" andArguments:@[[HelperTools encodeRandomResource]]];
         }];
 
         //OMEMO begins below

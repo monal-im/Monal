@@ -72,9 +72,7 @@
     }
     
     self.accountNo = self.contact.accountId;
-    //making sure there is an entry at least
-    [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo fullname:@"" nickname:@"" andMucNick:nil];
-	
+    
     self.isEncrypted = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.accountNo];
     self.isPinned = [[DataLayer sharedInstance] isPinnedChat:self.accountNo andBuddyJid:self.contact.contactJid];
     

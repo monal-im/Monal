@@ -115,7 +115,7 @@
     
     xmpp* xmppAccount =[[MLXMPPManager sharedInstance] getConnectedAccountForID:account];
     
-    BOOL success = [[DataLayer sharedInstance] addContact:[dic objectForKey:@"room"] forAccount:account fullname:@"" nickname:@"" andMucNick:[dic objectForKey:@"nick"]];
+    BOOL success = [[DataLayer sharedInstance] addContact:[dic objectForKey:@"room"] forAccount:account nickname:@"" andMucNick:[dic objectForKey:@"nick"]];
     if(success)
         [[DataLayer sharedInstance] updateOwnNickName:[dic objectForKey:@"nick"] forMuc:[dic objectForKey:@"room"] andServer:xmppAccount.connectionProperties.conferenceServer forAccount:account];
 

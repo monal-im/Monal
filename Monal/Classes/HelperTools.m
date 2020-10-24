@@ -52,9 +52,9 @@ void logException(NSException* exception)
 
 +(void) callStaticHandler:(NSDictionary*) handler withDefaultArguments:(NSArray*) defaultArgs
 {
-    if(handler[@"delegate"] && handler[@"method"] && handler[@"defaultParameterCount"] && handler[@"overallParameterCount"])
+    if(handler[@"delegate"] && handler[@"method"])
     {
-        if([defaultArgs count] != [handler[@"defaultParameterCount"] integerValue])
+        if(handler[@"defaultParameterCount"] && [defaultArgs count] != [handler[@"defaultParameterCount"] integerValue])
             @throw [NSException exceptionWithName:@"ParameterError" reason:[NSString stringWithFormat:@"Number of defaultArgs given for %@ not equal to the expected default parameter count", [self staticHandlerToString:handler]] userInfo:@{
                 @"defaultParameterCount": handler[@"overallParameterCount"],
                 @"defaultArgs": defaultArgs

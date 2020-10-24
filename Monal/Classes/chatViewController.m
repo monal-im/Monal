@@ -447,7 +447,7 @@ enum msgSentState {
     if(![[DataLayer sharedInstance] isAccountEnabled:self.contact.accountId])
         sendButtonEnabled = NO;
     
-    jidLabelText = [NSString stringWithFormat:@"%@", contactDisplayName];
+    jidLabelText = contactDisplayName;
 
     if(self.contact.isGroup) {
         NSArray* members = [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];

@@ -68,7 +68,7 @@ const int KEY_SIZE = 16;
     SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self._signalContext];
 
     // init MLPubSub handler
-    [self.xmppConnection.pubsub registerInterestForNode:@"eu.siacs.conversations.axolotl.devicelist"];
+    [self.xmppConnection.pubsub registerForNode:@"eu.siacs.conversations.axolotl.devicelist" withHandler:[HelperTools createStaticHandlerWithDelegate:[self class] andMethod:@selector(devicelistHandlerFor:withNode:jid:type:andData:) andAdditionalArguments:nil]];
 
     // TODO: register pubsub handler for devicelist
 
@@ -91,6 +91,13 @@ const int KEY_SIZE = 16;
         [self queryOMEMODevicesFrom:self._senderJid];
         // FIXME: query queryOMEMODevicesFrom after connected -> state change
     }
+}
+
++(void) devicelistHandlerFor:(xmpp*) account withNode:(NSString*) node jid:(NSString*) jid type:(NSString*) type andData:(NSDictionary*) data
+{
+    //type will be "publish", "retract", "purge" or "delete", "publish" and "retract" will have the data dictionary filled with id --> data pairs
+    //the data for "publish" is the item node with the given id, the data for "retract" is always @YES
+    DDLogWarn(@"UNIMPLEMENTED PEP OMEMO DEVICELIST PUSH");
 }
 
 -(void) sendOMEMOBundle
@@ -662,7 +669,10 @@ const int KEY_SIZE = 16;
     [itemNode addChild:listNode];
 
     // publish devices via pubsub
-    [self.xmppConnection.pubsub publishItem:itemNode onNode:@"eu.siacs.conversations.axolotl.devicelist" withAccessModel:@"open"];
+    [self.xmppConnection.pubsub publishItem:itemNode onNode:@"eu.siacs.conversations.axolotl.devicelist" withConfigOptions:@{
+        @"pubsub#persist_items": @"true",
+        @"pubsub#access_model": @"open"
+    }];
 }
 
 /**
@@ -710,7 +720,10 @@ const int KEY_SIZE = 16;
     [itemNode addChild:bundle];
 
     // send bundle via pubsub interface
-    [self.xmppConnection.pubsub publishItem:itemNode onNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%u", deviceid] withAccessModel:@"open"];
+    [self.xmppConnection.pubsub publishItem:itemNode onNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%u", deviceid] withConfigOptions:@{
+        @"pubsub#persist_items": @"true",
+        @"pubsub#access_model": @"open"
+    }];
 }
 
 @end

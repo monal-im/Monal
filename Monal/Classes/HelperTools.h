@@ -15,6 +15,8 @@ void logException(NSException* exception);
 
 @interface HelperTools : NSObject
 
++(NSString*) staticHandlerToString:(NSDictionary*) handler;
++(NSDictionary*) createStaticHandlerWithDelegate:(id) delegate andMethod:(SEL) method andAdditionalArguments:(NSArray* _Nullable) args;
 +(void) callStaticHandler:(NSDictionary*) handler withDefaultArguments:(NSArray* _Nullable) defaultArgs;
 +(void) configureFileProtectionFor:(NSString*) file;
 +(NSDictionary*) splitJid:(NSString*) jid;

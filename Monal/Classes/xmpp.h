@@ -120,7 +120,7 @@ extern NSString* const kAccountHibernate;
 -(void) reconnect;
 -(void) reconnect:(double) wait;
 
--(void) setPubSubNotificationsForNodes:(NSSet* _Nonnull) nodes persistState:(BOOL) persistState;
+-(void) setPubSubNotificationsForNodes:(NSArray* _Nonnull) nodes persistState:(BOOL) persistState;
 
 /**
  send a message to a contact with xmpp id

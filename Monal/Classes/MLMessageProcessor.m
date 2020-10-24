@@ -17,9 +17,8 @@
 #import "MLPubSub.h"
 #import "MLOMEMO.h"
 
-
-@interface MLMessageProcessor ()
-
+@interface MLPubSub ()
+-(void) handleHeadlineMessage:(XMPPMessage*) messageNode;
 @end
 
 static NSMutableDictionary* _typingNotifications;

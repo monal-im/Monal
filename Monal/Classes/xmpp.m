@@ -68,8 +68,12 @@ NSString *const kXMPPError =@"error";
 NSString *const kXMPPSuccess =@"success";
 NSString *const kXMPPPresence = @"presence";
 
-
-
+@interface MLPubSub ()
+-(id) initWithAccount:(xmpp*) account;
+-(NSDictionary*) getInternalData;
+-(void) setInternalData:(NSDictionary*) data;
+-(void) handleHeadlineMessage:(XMPPMessage*) messageNode;
+@end
 
 @interface xmpp()
 {
@@ -175,11 +179,11 @@ NSString *const kXMPPPresence = @"presence";
     // Init omemo
     self.omemo = [[MLOMEMO alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid ressource:self.connectionProperties.identity.resource connectionProps:self.connectionProperties xmppConnection:self];
     
-    //pubsub avatar handling (XEP-0084)
-    [self handleAvatars];
+    //we want to get automatic avatar updates (XEP-0084)
+    [self.pubsub registerForNode:@"urn:xmpp:avatar:metadata" withHandler:[HelperTools createStaticHandlerWithDelegate:[self class] andMethod:@selector(avatarHandlerFor:andJid:withErrorIq:andData:) andAdditionalArguments:nil]];
     
-    //pubsub nickname handling (XEP-0172)
-    [self handleRosterNames];
+    //we want to get automatic roster name updates (XEP-0172)
+    [self.pubsub registerForNode:@"http://jabber.org/protocol/nick" withHandler:[HelperTools createStaticHandlerWithDelegate:[self class] andMethod:@selector(rosterNameHandlerFor:withNode:jid:type:andData:) andAdditionalArguments:nil]];
     
     return self;
 }
@@ -287,7 +291,7 @@ NSString *const kXMPPPresence = @"presence";
     }
 }
 
--(void) setPubSubNotificationsForNodes:(NSSet* _Nonnull) nodes persistState:(BOOL) persistState
+-(void) setPubSubNotificationsForNodes:(NSArray* _Nonnull) nodes persistState:(BOOL) persistState
 {
     NSString* client = [NSString stringWithFormat:@"%@/%@//%@", [_capsIdentity findFirst:@"/@category"], [_capsIdentity findFirst:@"/@type"], [_capsIdentity findFirst:@"/@name"]];
     NSMutableSet* featuresSet = [[NSMutableSet alloc] initWithSet:[HelperTools getOwnFeatureSet]];
@@ -336,9 +340,9 @@ NSString *const kXMPPPresence = @"presence";
 -(void) accountStatusChanged
 {
     // Send notification that our account state has changed
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil userInfo:@{
-            kAccountID:self.accountNo,
-            kAccountState:[[NSNumber alloc] initWithInt:(int)self.accountState],
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:self userInfo:@{
+            kAccountID: self.accountNo,
+            kAccountState: [[NSNumber alloc] initWithInt:(int)self.accountState],
     }];
 }
 
@@ -754,7 +758,7 @@ NSString *const kXMPPPresence = @"presence";
         }
         
         [self closeSocket];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:nil];
+        [self accountStatusChanged];
     }];
 }
 
@@ -1797,7 +1801,7 @@ NSString *const kXMPPPresence = @"presence";
 {
     NSDictionary *dic = @{@"AccountNo":self.accountNo, @"AccountName": self.connectionProperties.identity.jid};
     [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
-     [self accountStatusChanged];
+    [self accountStatusChanged];
 }
 
 -(void) sendIq:(XMPPIQ*) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler
@@ -2301,7 +2305,6 @@ NSString *const kXMPPPresence = @"presence";
     self.connectionProperties.supportsHTTPUpload = NO;
     self.connectionProperties.supportsPing = NO;
     self.connectionProperties.supportsRosterPreApproval = NO;
-    [self.pubsub invalidateCache];      //delete all non-persistent nodes from cache
 
     //now fetch roster, request disco and send initial presence
     [self fetchRoster];
@@ -3223,77 +3226,51 @@ NSString *const kXMPPPresence = @"presence";
     return array;
 }
 
--(void) handleAvatars
++(void) avatarHandlerFor:(xmpp*) account andJid:(NSString*) jid withErrorIq:(XMPPIQ*) error andData:(NSDictionary*) data
 {
-    //we want to get automatic avatar metadata updates
-    [self.pubsub registerInterestForNode:@"urn:xmpp:avatar:metadata"];
-    
-    //register handler for avatar metadata coming from *any* jid
-    [self.pubsub registerForNode:@"urn:xmpp:avatar:metadata" andBareJid:nil withHandler:^(NSDictionary* items, NSString* jid, NSSet* changedIdList) {
-        DDLogDebug(@"Got new avatar metadata from '%@'", jid);
-        for(NSString* entry in items)
+    DDLogDebug(@"Got new avatar metadata from '%@'", jid);
+    for(NSString* entry in data)
+    {
+        NSString* avatarHash = [data[entry] findFirst:@"{urn:xmpp:avatar:metadata}metadata/info@id"];
+        if(!avatarHash)     //the user disabled his avatar
         {
-            NSString* avatarHash = [items[entry] findFirst:@"{urn:xmpp:avatar:metadata}metadata/info@id"];
-            if(!avatarHash)     //the user disabled his avatar
-            {
-                DDLogInfo(@"User %@ disabled his avatar", jid);
-                [[MLImageManager sharedInstance] setIconForContact:jid andAccount:self.accountNo WithData:nil];
-                [[DataLayer sharedInstance] setAvatarHash:@"" forContact:jid andAccount:self.accountNo];
-            }
-            else
-            {
-                NSString* currentHash = [[DataLayer sharedInstance] getAvatarHashForContact:jid andAccount:self.accountNo];
-                if([avatarHash isEqualToString:currentHash])
-                {
-                    DDLogInfo(@"Avatar hash is the same, we don't need to update our avatar image data");
-                    break;
-                }
-                //if this returns NO, we don't have a copy of this image yet --> lets fetch it
-                if(![self updateAvatarWithHash:avatarHash andJid:jid])
-                {
-                    DDLogInfo(@"Fetching new avatar data for hash '%@' and jid '%@'", avatarHash, jid);
-                    [self.pubsub forceRefreshForNode:@"urn:xmpp:avatar:data" andBareJid:jid andItemsList:@[avatarHash] withDelegate:[self class] andMethod:@selector(handlePubSubForceRefreshResultForAccount:andJid:withError:andAvatarHash:) andAdditionalArguments:@[avatarHash]];
-                }
-                else
-                    DDLogInfo(@"Avatar of '%@' updated successfully from cache", jid);
-            }
-            break;      //we only want to process the first item
+            DDLogInfo(@"User %@ disabled his avatar", jid);
+            [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:nil];
+            [[DataLayer sharedInstance] setAvatarHash:@"" forContact:jid andAccount:account.accountNo];
         }
-        if([items count] > 1)
-            DDLogError(@"Got more than one avatar metadata item!");
-    }];
+        else
+        {
+            NSString* currentHash = [[DataLayer sharedInstance] getAvatarHashForContact:jid andAccount:account.accountNo];
+            if([avatarHash isEqualToString:currentHash])
+            {
+                DDLogInfo(@"Avatar hash is the same, we don't need to update our avatar image data");
+                break;
+            }
+            [account.pubsub fetchNode:@"urn:xmpp:avatar:data" from:jid withItemsList:@[avatarHash] andHandler:[HelperTools createStaticHandlerWithDelegate:self andMethod:@selector(handleAvatarFetchResultForAccount:andJid:withErrorIq:andData:) andAdditionalArguments:nil]];
+        }
+        break;      //we only want to process the first item (this should also be the only item)
+    }
+    if([data count] > 1)
+        DDLogWarn(@"Got more than one avatar metadata item!");
 }
 
-+(void) handlePubSubForceRefreshResultForAccount:(xmpp*) account andJid:(NSString*) jid withError:(MLXMLNode*) errorIq andAvatarHash:(NSString*) avatarHash
++(void) handleAvatarFetchResultForAccount:(xmpp*) account andJid:(NSString*) jid withErrorIq:(XMPPIQ*) errorIq andData:(NSDictionary*) data
 {
     //ignore errors here (e.g. simply don't update the avatar image)
     //(this should never happen if other clients and servers behave properly)
     if(errorIq)
     {
-        DDLogError(@"Got avatar image fetch error: %@", errorIq);
+        DDLogError(@"Got avatar image fetch error from jid %@: %@", jid, errorIq);
         return;
     }
     
-    //ignore if the avatar data can not be found (should never happen if other clients behave properly)
-    if(![account updateAvatarWithHash:avatarHash andJid:jid])
-        DDLogError(@"Avatar image data error for avatar hash %@ of contact %@", avatarHash, jid);
-    else
-        DDLogInfo(@"Avatar of '%@' fetched and updated successfully", jid);
-}
-
--(BOOL) updateAvatarWithHash:(NSString*) avatarHash andJid:(NSString*) jid
-{
-    //check if we already have a cached copy of the avatar image data and use it if possible
-    NSDictionary* avatarData = [self.pubsub getCachedDataForNode:@"urn:xmpp:avatar:data" andBareJid:jid];
-    if(avatarData[avatarHash])
+    for(NSString* avatarHash in data)
     {
-        DDLogDebug(@"Found (cached) avatar data for hash '%@' and jid '%@'", avatarHash, jid);
-        [[MLImageManager sharedInstance] setIconForContact:jid andAccount:self.accountNo WithData:[avatarData[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]];
-        [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:jid andAccount:self.accountNo];
-        return YES;
+        [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:[data[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]];
+        [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:jid andAccount:account.accountNo];
+        [account accountStatusChanged];     //inform ui of this change (accountStatusChanged will force a ui reload which will also reload the avatars)
+        DDLogInfo(@"Avatar of '%@' fetched and updated successfully", jid);
     }
-    DDLogDebug(@"No cached avatar data for hash '%@' and jid '%@'", avatarHash, jid);
-    return NO;
 }
 
 -(void) sendDisplayMarkerForId:(NSString*) messageid to:(NSString*) to
@@ -3310,35 +3287,54 @@ NSString *const kXMPPPresence = @"presence";
     [self send:displayedNode];
 }
 
--(void) handleRosterNames
++(void) rosterNameHandlerFor:(xmpp*) account withNode:(NSString*) node jid:(NSString*) jid type:(NSString*) type andData:(NSDictionary*) data
 {
-    //we want to get automatic roster name updates
-    [self.pubsub registerInterestForNode:@"http://jabber.org/protocol/nick"];
-    
-    //register handler for roster names coming from *any* jid
-    [self.pubsub registerForNode:@"http://jabber.org/protocol/nick" andBareJid:nil withHandler:^(NSDictionary* items, NSString* jid, NSSet* changedIdList) {
-        for(NSString* itemId in changedIdList)
+    //new/updated nickname
+    if([type isEqualToString:@"publish"])
+    {
+        for(NSString* itemId in data)
         {
-            if([jid isEqualToString:self.connectionProperties.identity.jid])        //own roster name
+            if([jid isEqualToString:account.connectionProperties.identity.jid])        //own roster name
             {
-                DDLogInfo(@"Got own nickname: %@", [items[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"]);
-                NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:self.accountNo] copyItems:NO];
-                accountDic[kRosterName] = [items[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"];
+                DDLogInfo(@"Got own nickname: %@", [data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"]);
+                NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo] copyItems:NO];
+                accountDic[kRosterName] = [data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"];
                 [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
             }
             else                                                                    //roster name of contact
             {
-                DDLogInfo(@"Got nickname of %@: %@", jid, [items[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"]);
-                [[DataLayer sharedInstance] setFullName:[items[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"] forContact:jid andAccount:self.accountNo];
-                MLContact* contact = [[DataLayer sharedInstance] contactForUsername:jid forAccount:self.accountNo];
+                DDLogInfo(@"Got nickname of %@: %@", jid, [data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"]);
+                [[DataLayer sharedInstance] setFullName:[data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"] forContact:jid andAccount:account.accountNo];
+                MLContact* contact = [[DataLayer sharedInstance] contactForUsername:jid forAccount:account.accountNo];
                 if(contact)     //ignore updates for jids not in our roster
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                         @"contact": contact
                     }];
             }
             break;      //we only need the first item (there should be only one item in the first place)
         }
-    }];
+    }
+    //deleted/purged node or retracted item
+    else
+    {
+        if([jid isEqualToString:account.connectionProperties.identity.jid])        //own roster name
+        {
+            DDLogInfo(@"Own nickname got retracted");
+            NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo] copyItems:NO];
+            accountDic[kRosterName] = @"";
+            [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
+        }
+        else
+        {
+            DDLogInfo(@"Nickname of %@ got retracted", jid);
+            [[DataLayer sharedInstance] setFullName:@"" forContact:jid andAccount:account.accountNo];
+            MLContact* contact = [[DataLayer sharedInstance] contactForUsername:jid forAccount:account.accountNo];
+            if(contact)     //ignore updates for jids not in our roster
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                    @"contact": contact
+                }];
+        }
+    }
 }
 
 -(void) publishRosterName:(NSString* _Nullable) rosterName
@@ -3351,7 +3347,10 @@ NSString *const kXMPPPresence = @"presence";
             [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": @"current"} andChildren:@[
                 [[MLXMLNode alloc] initWithElement:@"nick" andNamespace:@"http://jabber.org/protocol/nick" withAttributes:@{} andChildren:@[] andData:rosterName]
             ] andData:nil]
-        onNode:@"http://jabber.org/protocol/nick" withAccessModel:@"presence"];
+        onNode:@"http://jabber.org/protocol/nick" withConfigOptions:@{
+            @"pubsub#persist_items": @"true",
+            @"pubsub#access_model": @"presence"
+        }];
 }
 
 @end

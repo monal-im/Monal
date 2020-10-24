@@ -24,13 +24,44 @@ void logException(NSException* exception)
     usleep(1000000);
 }
 
++(NSString*) staticHandlerToString:(NSDictionary*) handler
+{
+    return [NSString stringWithFormat:@"[%@ %@](%lu:%@)", handler[@"delegate"], handler[@"method"], (unsigned long)[handler[@"arguments"] count], handler[@"defaultParameterCount"]];
+}
+
++(NSDictionary*) createStaticHandlerWithDelegate:(id) delegate andMethod:(SEL) method andAdditionalArguments:(NSArray*) args
+{
+    if(!args)
+        args = @[];     //default is an empty argument list
+    NSMethodSignature* signature = [delegate instanceMethodSignatureForSelector:method];
+    NSNumber* overallParameterCount = @([signature numberOfArguments] - 2);        //don't count self and _cmd
+    if([args count] > [overallParameterCount integerValue])
+        @throw [NSException exceptionWithName:@"ParameterError" reason:[NSString stringWithFormat:@"More additional parameters for [%@ %@] given than its overall parameter count", NSStringFromClass(delegate), NSStringFromSelector(method)] userInfo:@{
+            @"overallParameterCount": overallParameterCount,
+            @"args": args
+        }];
+    NSNumber* defaultParameterCount = @([overallParameterCount integerValue] - [args count]);
+    return @{
+        @"delegate": NSStringFromClass(delegate),
+        @"method": NSStringFromSelector(method),
+        @"arguments": args,
+        @"overallParameterCount": overallParameterCount,
+        @"defaultParameterCount": defaultParameterCount
+    };
+}
+
 +(void) callStaticHandler:(NSDictionary*) handler withDefaultArguments:(NSArray*) defaultArgs
 {
-    if(handler[@"delegate"] && handler[@"method"])
+    if(handler[@"delegate"] && handler[@"method"] && handler[@"defaultParameterCount"] && handler[@"overallParameterCount"])
     {
+        if([defaultArgs count] != [handler[@"defaultParameterCount"] integerValue])
+            @throw [NSException exceptionWithName:@"ParameterError" reason:[NSString stringWithFormat:@"Number of defaultArgs given for %@ not equal to the expected default parameter count", [self staticHandlerToString:handler]] userInfo:@{
+                @"defaultParameterCount": handler[@"overallParameterCount"],
+                @"defaultArgs": defaultArgs
+            }];
         id cls = NSClassFromString(handler[@"delegate"]);
         SEL sel = NSSelectorFromString(handler[@"method"]);
-        DDLogVerbose(@"Calling callback [%@ %@]...", handler[@"delegate"], handler[@"method"]);
+        DDLogVerbose(@"Calling handler [%@ %@]...", handler[@"delegate"], handler[@"method"]);
         NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[cls methodSignatureForSelector:sel]];
         [inv setTarget:cls];
         [inv setSelector:sel];
@@ -47,7 +78,10 @@ void logException(NSException* exception)
         //additional arguments bound to the handler
         if(handler[@"arguments"])
             for(id _Nonnull arg in handler[@"arguments"])
-                [inv setArgument:(void* _Nonnull)&arg atIndex:idx++];
+                if(arg == [NSNull null])
+                    [inv setArgument:&nilArgument atIndex:idx++];
+                else
+                    [inv setArgument:(void* _Nonnull)&arg atIndex:idx++];
         [inv invoke];
     }
 }

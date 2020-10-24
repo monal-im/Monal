@@ -216,7 +216,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSString*) jidOfAccount:(NSString*) accountNo
 {
-    NSString* query = @"select username, domain from account where account_id=?";
+    NSString* query = @"SELECT username, domain FROM account WHERE account_id=?;";
     NSMutableArray* accountDetails = [self.db executeReader:query andArguments:@[accountNo]];
     
     if(accountDetails == nil)
@@ -415,7 +415,7 @@ static NSDateFormatter* dbFormatter;
         WHERE b.buddy_name=? AND b.account_id=?;" andArguments:@[username, accountNo]];
     if(results != nil && [results count] != 1)
         @throw [NSException exceptionWithName:@"DataLayerError" reason:@"unexpected contact count" userInfo:@{
-            @"usrname": username,
+            @"username": username,
             @"accountNo": accountNo,
             @"count": [NSNumber numberWithInteger:[results count]],
             @"results": results
@@ -1620,12 +1620,10 @@ static NSDateFormatter* dbFormatter;
     
     return [self.db boolWriteTransaction:^{
         // Check that we do not add a chat a second time to activechats
-        if([self isActiveBuddy:buddyname forAccount:accountNo]) {
-            // active chat entry does not exist yet -> insert
+        if([self isActiveBuddy:buddyname forAccount:accountNo])
             return YES;
-        }
         
-        NSString* query = @"select count(buddy_name) from activechats where account_id=? and buddy_name=?";
+        NSString* query = @"SELECT count(buddy_name) FROM activechats WHERE account_id=? AND buddy_name=?;";
         NSObject* count = [self.db executeScalar:query  andArguments:@[accountNo, buddyname]];
         if(count != nil)
         {
@@ -1640,11 +1638,11 @@ static NSDateFormatter* dbFormatter;
 
                 if([accountJid isEqualToString:buddyname]) {
                     // Something is broken
-                    DDLogWarn(@"We should never try to create a cheat with our own jid");
+                    DDLogWarn(@"We should never try to create a chat with our own jid");
                     return NO;
                 } else {
                     // insert
-                    NSString* query3 = @"insert into activechats (buddy_name, account_id, lastMessageTime) values (?, ?, current_timestamp)";
+                    NSString* query3 = @"INSERT INTO activechats (buddy_name, account_id, lastMessageTime) VALUES(?, ?, current_timestamp);";
                     BOOL result = [self.db executeNonQuery:query3 andArguments:@[buddyname, accountNo]];
                     return result;
                 }

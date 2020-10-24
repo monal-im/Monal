@@ -1429,8 +1429,14 @@ NSString *const kXMPPPresence = @"presence";
                 messageNode.to = self.connectionProperties.identity.fullJid;
             
             DDLogVerbose(@"Incoming outer message from='%@' to='%@' -- inner message from='%@' to='%@'", outerMessageNode.from, outerMessageNode.to, messageNode.from, messageNode.to);
+            DDLogVerbose(@"Incoming outer message fromUser='%@' toUser='%@' -- inner message fromUser='%@' toUser='%@'", outerMessageNode.fromUser, outerMessageNode.toUser, messageNode.fromUser, messageNode.toUser);
             DDLogVerbose(@"Raw outer from value: '%@', raw inner from value: '%@'", outerMessageNode.attributes[@"from"], messageNode.attributes[@"from"]);
             DDLogVerbose(@"Raw outer to value: '%@', raw inner to value: '%@'", outerMessageNode.attributes[@"to"], messageNode.attributes[@"to"]);
+            
+            NSAssert(![messageNode.fromUser containsString:@"/"], @"messageNode.fromUser contains resource!");
+            NSAssert(![messageNode.toUser containsString:@"/"], @"messageNode.toUser contains resource!");
+            NSAssert(![outerMessageNode.fromUser containsString:@"/"], @"outerMessageNode.fromUser contains resource!");
+            NSAssert(![outerMessageNode.toUser containsString:@"/"], @"outerMessageNode.toUser contains resource!");
             
             //only process mam results when they are *not* for priming the database with the initial stanzaid (the id will be taken from the iq result)
             //we do this because we don't want to randomly add one single message to our history db after the user installs the app / adds a new account

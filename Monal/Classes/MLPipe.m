@@ -215,7 +215,7 @@
     //DDLogVerbose(@"pipe processing done");
 }
 
--(void) stream:(NSStream*)stream handleEvent:(NSStreamEvent)eventCode
+-(void) stream:(NSStream*) stream handleEvent:(NSStreamEvent) eventCode
 {
     //DDLogVerbose(@"Pipe stream %@ has event", stream);
     
@@ -229,23 +229,25 @@
         case NSStreamEventOpenCompleted:
         {
             DDLogVerbose(@"Pipe stream %@ completed open", stream);
+            break;
         }
+        
         case NSStreamEventNone:
         {
-            DDLogVerbose(@"Pipe stream %@ event none", stream);
+            //DDLogVerbose(@"Pipe stream %@ event none", stream);
             break;
         }
         
         //handle read and write events
         case NSStreamEventHasSpaceAvailable:
         {
-            DDLogVerbose(@"Pipe stream %@ has space available to write", stream);
+            //DDLogVerbose(@"Pipe stream %@ has space available to write", stream);
             [self process];
             break;
         }
-        case  NSStreamEventHasBytesAvailable:
+        case NSStreamEventHasBytesAvailable:
         {
-            DDLogVerbose(@"Pipe stream %@ has bytes available to read", stream);
+            //DDLogVerbose(@"Pipe stream %@ has bytes available to read", stream);
             [self process];
             break;
         }
@@ -253,7 +255,7 @@
         //handle all other events in outer stream delegate
         default:
         {
-            DDLogVerbose(@"Pipe stream %@ delegates event to outer delegate", stream);
+            //DDLogVerbose(@"Pipe stream %@ delegates event to outer delegate", stream);
             [_delegate stream:stream handleEvent:eventCode];
             break;
         }

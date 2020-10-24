@@ -32,10 +32,6 @@ static NSMutableDictionary* _typingNotifications;
 
 +(void) processMessage:(XMPPMessage*) messageNode andOuterMessage:(XMPPMessage*) outerMessageNode forAccount:(xmpp*) account
 {
-    //ignore self messages
-    if([messageNode.fromUser isEqualToString:messageNode.toUser])
-        return;
-    
     if([messageNode check:@"/<type=error>"])
     {
         DDLogError(@"Error type message received");
@@ -73,6 +69,10 @@ static NSMutableDictionary* _typingNotifications;
         [account.pubsub handleHeadlineMessage:messageNode];
         return;
     }
+    
+    //ignore self messages after this (only pubsub data is from self)
+    if([messageNode.fromUser isEqualToString:messageNode.toUser])
+        return;
 
     NSString* stanzaid = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];
     //check stnaza-id @by according to the rules outlined in XEP-0359

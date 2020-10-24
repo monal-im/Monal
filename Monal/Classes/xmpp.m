@@ -3303,7 +3303,7 @@ NSString *const kXMPPPresence = @"presence";
             if([jid isEqualToString:account.connectionProperties.identity.jid])        //own roster name
             {
                 DDLogInfo(@"Got own nickname: %@", [data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"]);
-                NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo] copyItems:NO];
+                NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo] copyItems:YES];
                 accountDic[kRosterName] = [data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"];
                 [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
             }

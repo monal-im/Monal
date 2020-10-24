@@ -24,6 +24,11 @@ void logException(NSException* exception)
     usleep(1000000);
 }
 
++(NSString*) staticHandlerToId:(NSDictionary*) handler
+{
+    return [NSString stringWithFormat:@"%@|%@", handler[@"delegate"], handler[@"method"]];
+}
+
 +(NSString*) staticHandlerToString:(NSDictionary*) handler
 {
     return [NSString stringWithFormat:@"[%@ %@](%lu:%@)", handler[@"delegate"], handler[@"method"], (unsigned long)[handler[@"arguments"] count], handler[@"defaultParameterCount"]];

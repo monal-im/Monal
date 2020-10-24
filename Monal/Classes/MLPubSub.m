@@ -14,7 +14,7 @@
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
 
-#define CURRENT_PUBSUB_DATA_VERSION @3
+#define CURRENT_PUBSUB_DATA_VERSION @4
 
 @interface MLPubSub ()
 {
@@ -35,7 +35,7 @@
 
 -(void) registerForNode:(NSString*) node withHandler:(NSDictionary*) handler
 {
-    NSString* handlerId = [NSString stringWithFormat:@"[%@ %@]", handler[@"delegate"], handler[@"method"]];
+    NSString* handlerId = [HelperTools staticHandlerToId:handler];
     DDLogInfo(@"Adding PEP handler %@ for node %@", handlerId, node);
     @synchronized(_registeredHandlers) {
         if(!_registeredHandlers[node])
@@ -47,7 +47,7 @@
 
 -(void) unregisterHandler:(NSDictionary*) handler forNode:(NSString*) node
 {
-    NSString* handlerId = [NSString stringWithFormat:@"[%@ %@]", handler[@"delegate"], handler[@"method"]];
+    NSString* handlerId = [HelperTools staticHandlerToId:handler];
     DDLogInfo(@"Removing PEP handler %@ for node %@", handlerId, node);
     @synchronized(_registeredHandlers) {
         if(!_registeredHandlers[node])
@@ -200,15 +200,20 @@
         return;
     }
     
+    DDLogDebug(@"Handling pubsub data for node '%@'", node);
+    
     //handle node purge
     if([messageNode check:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event/purge"])
     {
+        DDLogDebug(@"Handling purge");
         [self callHandlersForNode:node andJid:messageNode.fromUser withType:@"purge" andData:nil];
         return;     //we are done here (no items element for purge events)
     }
+    
     //handle node delete
     if([messageNode check:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event/delete"])
     {
+        DDLogDebug(@"Handling delete");
         [self callHandlersForNode:node andJid:messageNode.fromUser withType:@"delete" andData:nil];
         return;     //we are done here (no items element for delete events)
     }
@@ -224,6 +229,7 @@
     //handle item delete
     if([items check:@"retract"])
     {
+        DDLogDebug(@"Handling retract");
         NSMutableDictionary* data = [self handleRetraction:items fromJid:messageNode.fromUser withData:[[NSMutableDictionary alloc] init]];
         if(data)        //ignore unexpected/wrong data
             [self callHandlersForNode:node andJid:messageNode.fromUser withType:@"retract" andData:data];
@@ -232,12 +238,14 @@
     //handle xep-0060 6.5.6 (check if payload is included or if it has to be fetched separately)
     if([items check:@"item/{*}*"])
     {
+        DDLogDebug(@"Handling publish");
         NSMutableDictionary* data = [self handleItems:items fromJid:messageNode.fromUser withData:[[NSMutableDictionary alloc] init]];
         if(data)        //ignore unexpected/wrong data
             [self callHandlersForNode:node andJid:messageNode.fromUser withType:@"publish" andData:data];
     }
     else
     {
+        DDLogDebug(@"Handling truncated publish");
         [self fetchNode:node from:messageNode.fromUser withItemsList:[items find:@"item@id"] andHandler:[HelperTools createStaticHandlerWithDelegate:[self class] andMethod:@selector(handleInternalFetchFor:andJid:withErrorIq:data:andNode:) andAdditionalArguments:@[node]]];
     }
 }
@@ -305,7 +313,7 @@
         handlers = [[NSDictionary alloc] initWithDictionary:_registeredHandlers[node] copyItems:YES];
     }
     for(NSString* handlerId in handlers)
-        [HelperTools callStaticHandler:_registeredHandlers[node][handlerId] withDefaultArguments:@[_account, node, jid, type, data]];
+        [HelperTools callStaticHandler:handlers[handlerId] withDefaultArguments:@[_account, node, jid, type, data ? data : [NSNull null]]];
     DDLogDebug(@"All pubsub handlers called");
 }
 
@@ -443,7 +451,7 @@
     if([iqNode check:@"/<type=error>"])
     {
         //check if this node is already present and configured --> reconfigure it according to our access-model
-        if([iqNode check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}conflict/{http://jabber.org/protocol/pubsub#errors}precondition-not-met"])
+        if([iqNode check:@"error<type=cancel>/{http://jabber.org/protocol/pubsub#errors}precondition-not-met"])
         {
             DDLogWarn(@"Node precondition not met, reconfiguring node %@", node);
             [me configureNode:node withConfigOptions:configOptions andHandler:[HelperTools createStaticHandlerWithDelegate:self andMethod:@selector(handlePublishAgainFor:withError:item:node:andConfigOptions:) andAdditionalArguments:@[item, node, configOptions]]];

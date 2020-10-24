@@ -110,7 +110,7 @@
         self.directTLS = [[settings objectForKey:@"directTLS"] boolValue];
         self.selfSignedSSL = [[settings objectForKey:@"selfsigned"] boolValue];
         
-        self.rosterName = [settings objectForKey:@"rosterName"];
+        self.rosterName = [settings objectForKey:kRosterName];
     }
     else
     {

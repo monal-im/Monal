@@ -34,13 +34,13 @@ void logException(NSException* exception)
     if(!args)
         args = @[];     //default is an empty argument list
     NSMethodSignature* signature = [delegate instanceMethodSignatureForSelector:method];
-    NSNumber* overallParameterCount = @([signature numberOfArguments] - 2);        //don't count self and _cmd
-    if([args count] > [overallParameterCount integerValue])
+    NSNumber* overallParameterCount = [NSNumber numberWithInt:((unsigned long)[signature numberOfArguments] - 2)];     //don't count self and _cmd
+    /*if([args count] > [overallParameterCount integerValue])
         @throw [NSException exceptionWithName:@"ParameterError" reason:[NSString stringWithFormat:@"More additional parameters for [%@ %@] given than its overall parameter count", NSStringFromClass(delegate), NSStringFromSelector(method)] userInfo:@{
             @"overallParameterCount": overallParameterCount,
             @"args": args
-        }];
-    NSNumber* defaultParameterCount = @([overallParameterCount integerValue] - [args count]);
+        }];*/
+    NSNumber* defaultParameterCount = [NSNumber numberWithInteger:([overallParameterCount integerValue] - [args count])];
     return @{
         @"delegate": NSStringFromClass(delegate),
         @"method": NSStringFromSelector(method),
@@ -54,14 +54,14 @@ void logException(NSException* exception)
 {
     if(handler[@"delegate"] && handler[@"method"])
     {
-        if(handler[@"defaultParameterCount"] && [defaultArgs count] != [handler[@"defaultParameterCount"] integerValue])
+        /*if(handler[@"defaultParameterCount"] && [defaultArgs count] != [handler[@"defaultParameterCount"] integerValue])
             @throw [NSException exceptionWithName:@"ParameterError" reason:[NSString stringWithFormat:@"Number of defaultArgs given for %@ not equal to the expected default parameter count", [self staticHandlerToString:handler]] userInfo:@{
-                @"defaultParameterCount": handler[@"overallParameterCount"],
-                @"defaultArgs": defaultArgs
-            }];
+                @"defaultArgs": defaultArgs,
+                @"handler": handler
+            }];*/
         id cls = NSClassFromString(handler[@"delegate"]);
         SEL sel = NSSelectorFromString(handler[@"method"]);
-        DDLogVerbose(@"Calling handler [%@ %@]...", handler[@"delegate"], handler[@"method"]);
+        DDLogVerbose(@"Calling handler %@...", [HelperTools staticHandlerToString:handler]);
         NSInvocation* inv = [NSInvocation invocationWithMethodSignature:[cls methodSignatureForSelector:sel]];
         [inv setTarget:cls];
         [inv setSelector:sel];

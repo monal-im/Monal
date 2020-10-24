@@ -180,7 +180,7 @@ NSString *const kXMPPPresence = @"presence";
     self.omemo = [[MLOMEMO alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid ressource:self.connectionProperties.identity.resource connectionProps:self.connectionProperties xmppConnection:self];
     
     //we want to get automatic avatar updates (XEP-0084)
-    [self.pubsub registerForNode:@"urn:xmpp:avatar:metadata" withHandler:[HelperTools createStaticHandlerWithDelegate:[self class] andMethod:@selector(avatarHandlerFor:andJid:withErrorIq:andData:) andAdditionalArguments:nil]];
+    [self.pubsub registerForNode:@"urn:xmpp:avatar:metadata" withHandler:[HelperTools createStaticHandlerWithDelegate:[self class] andMethod:@selector(avatarHandlerFor:withNode:jid:type:andData:) andAdditionalArguments:nil]];
     
     //we want to get automatic roster name updates (XEP-0172)
     [self.pubsub registerForNode:@"http://jabber.org/protocol/nick" withHandler:[HelperTools createStaticHandlerWithDelegate:[self class] andMethod:@selector(rosterNameHandlerFor:withNode:jid:type:andData:) andAdditionalArguments:nil]];
@@ -3232,7 +3232,7 @@ NSString *const kXMPPPresence = @"presence";
     return array;
 }
 
-+(void) avatarHandlerFor:(xmpp*) account andJid:(NSString*) jid withErrorIq:(XMPPIQ*) error andData:(NSDictionary*) data
++(void) avatarHandlerFor:(xmpp*) account withNode:(NSString*) node jid:(NSString*) jid type:(NSString*) type andData:(NSDictionary*) data
 {
     DDLogDebug(@"Got new avatar metadata from '%@'", jid);
     for(NSString* entry in data)

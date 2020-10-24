@@ -14,7 +14,7 @@
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
 
-#define CURRENT_PUBSUB_DATA_VERSION @2
+#define CURRENT_PUBSUB_DATA_VERSION @3
 
 @interface MLPubSub ()
 {

@@ -32,6 +32,10 @@ static NSMutableDictionary* _typingNotifications;
 
 +(void) processMessage:(XMPPMessage*) messageNode andOuterMessage:(XMPPMessage*) outerMessageNode forAccount:(xmpp*) account
 {
+    //ignore self messages
+    if([messageNode.fromUser isEqualToString:messageNode.toUser])
+        return;
+    
     if([messageNode check:@"/<type=error>"])
     {
         DDLogError(@"Error type message received");

@@ -209,7 +209,7 @@ extern NSString* const kMessageTypeUrl;
 -(NSDate*) lastMessageDateAccount:(NSString*) accountNo;
 
 
--(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo;
+-(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(BOOL) messageHistoryCleanAll;
 
 -(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo;

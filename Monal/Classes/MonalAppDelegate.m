@@ -469,7 +469,7 @@
         [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
     }
     
-    //trigger view updates (this has to be done because a NotificationServiceExtension could have updated the database some time ago)
+    //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:self userInfo:nil];
     
     [[MLXMPPManager sharedInstance] setClientsActive];

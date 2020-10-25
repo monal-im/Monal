@@ -375,15 +375,10 @@ static NSDateFormatter* dbFormatter;
 -(void) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     [self.db voidWriteTransaction:^{
-        //clean up logs
-        [self messageHistoryClean:buddy :accountNo];
-
-        NSString* query = @"delete from buddylist where account_id=? and buddy_name=?;";
-        NSArray* params = @[accountNo, buddy];
-
-        [self.db executeNonQuery:query andArguments:params];
-
-        [self setSubscription:kSubNone andAsk:@"" forContact:buddy andAccount:accountNo];
+        //clean up logs...
+        [self messageHistoryClean:buddy forAccount:accountNo];
+        //...and delete contact
+        [self.db executeNonQuery:@"DELETE FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
     }];
 }
 
@@ -420,15 +415,37 @@ static NSDateFormatter* dbFormatter;
         FROM buddylist AS b LEFT JOIN activechats AS a \
         ON a.buddy_name = b.buddy_name AND a.account_id = b.account_id \
         WHERE b.buddy_name=? AND b.account_id=?;" andArguments:@[username, accountNo]];
-    if(results != nil && [results count] != 1)
+    if(results == nil || [results count] > 1)
         @throw [NSException exceptionWithName:@"DataLayerError" reason:@"unexpected contact count" userInfo:@{
             @"username": username,
             @"accountNo": accountNo,
             @"count": [NSNumber numberWithInteger:[results count]],
-            @"results": results
+            @"results": results ? results : @"(null)"
         }];
     
-    return [MLContact contactFromDictionary:results[0]];
+    //check if we know this contact and return a dummy one if not
+    if([results count] == 0)
+    {
+        return [MLContact contactFromDictionary:@{
+            @"buddy_name": username,
+            @"nick_name": @"",
+            @"full_name": @"",
+            @"filename": @"",
+            @"subscription": kSubNone,
+            @"ask": @"",
+            @"account_id": accountNo,
+            //@"muc_subject": nil,
+            //@"muc_nick": nil,
+            @"Muc": @NO,
+            @"pinned": @NO,
+            @"status": @"",
+            @"state": kSubNone,
+            @"count": @0,
+            @"isActiveChat": @NO
+        }];
+    }
+    else
+        return [MLContact contactFromDictionary:results[0]];
 }
 
 
@@ -1256,7 +1273,7 @@ static NSDateFormatter* dbFormatter;
     }
 }
 
--(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo
+-(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     //returns a buddy's message history
 
@@ -1630,33 +1647,23 @@ static NSDateFormatter* dbFormatter;
         if([self isActiveBuddy:buddyname forAccount:accountNo])
             return YES;
         
-        NSString* query = @"SELECT count(buddy_name) FROM activechats WHERE account_id=? AND buddy_name=?;";
-        NSObject* count = [self.db executeScalar:query  andArguments:@[accountNo, buddyname]];
-        if(count != nil)
+        NSString* accountJid = [self jidOfAccount:accountNo];
+        if(!accountJid)
+            return NO;
+        
+        if([accountJid isEqualToString:buddyname])
         {
-            NSInteger val = [((NSNumber *)count) integerValue];
-            if(val > 0)
-                return NO;
-            else
-            {
-                NSString* accountJid = [self jidOfAccount:accountNo];
-                if(!accountJid)
-                    return NO;
-
-                if([accountJid isEqualToString:buddyname]) {
-                    // Something is broken
-                    DDLogWarn(@"We should never try to create a chat with our own jid");
-                    return NO;
-                } else {
-                    // insert
-                    NSString* query3 = @"INSERT INTO activechats (buddy_name, account_id, lastMessageTime) VALUES(?, ?, current_timestamp);";
-                    BOOL result = [self.db executeNonQuery:query3 andArguments:@[buddyname, accountNo]];
-                    return result;
-                }
-            }
+            // Something is broken
+            DDLogWarn(@"We should never try to create a chat with our own jid");
+            return NO;
         }
         else
-            return NO;
+        {
+            // insert
+            NSString* query3 = @"INSERT INTO activechats (buddy_name, account_id, lastMessageTime) VALUES(?, ?, current_timestamp);";
+            BOOL result = [self.db executeNonQuery:query3 andArguments:@[buddyname, accountNo]];
+            return result;
+        }
     }];
 }
 

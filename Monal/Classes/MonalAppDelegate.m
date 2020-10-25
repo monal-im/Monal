@@ -30,62 +30,40 @@
 
 @implementation MonalAppDelegate
 
--(void) setUISettings
-{
-    UIColor *monalGreen = [UIColor monalGreen];
-    UIColor *monaldarkGreen =[UIColor monaldarkGreen];
-    [[UINavigationBar appearance] setTintColor:monalGreen];
-    if (@available(iOS 13.0, *)) {
-        UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
-        [appearance configureWithTransparentBackground];
-        appearance.backgroundColor=[UIColor systemBackgroundColor];
-        
-        [[UINavigationBar appearance] setScrollEdgeAppearance:appearance];
-        [[UINavigationBar appearance] setStandardAppearance:appearance];
-#if TARGET_OS_MACCATALYST
-        self.window.windowScene.titlebar.titleVisibility=UITitlebarTitleVisibilityHidden;
-#endif
-    }
-    [[UINavigationBar appearance] setPrefersLargeTitles:YES];
-    [[UITabBar appearance] setTintColor:monaldarkGreen];
-}
-
 #pragma mark -  APNS notificaion
 
-- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken{
-    
-    NSString *token=[MLPush stringFromToken:deviceToken];
-     [MLXMPPManager sharedInstance].hasAPNSToken=YES;
+-(void) application:(UIApplication*) application didRegisterForRemoteNotificationsWithDeviceToken:(NSData*) deviceToken
+{
+    NSString* token = [MLPush stringFromToken:deviceToken];
     DDLogInfo(@"APNS token string: %@", token);
     [[[MLPush alloc] init] postToPushServer:token];
 }
 
-- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+-(void) application:(UIApplication*) application didFailToRegisterForRemoteNotificationsWithError:(NSError*) error
+{
     DDLogError(@"push reg error %@", error);
-    
 }
 
 #pragma mark - VOIP notification
+
 #if !TARGET_OS_MACCATALYST
+
 -(void) voipRegistration
 {
-    DDLogInfo(@"registering for voip APNS...");
-    dispatch_queue_t mainQueue = dispatch_get_main_queue();
-    PKPushRegistry * voipRegistry = [[PKPushRegistry alloc] initWithQueue: mainQueue];
+    PKPushRegistry* voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
     voipRegistry.delegate = self;
     voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
 }
 
 // Handle updated APNS tokens
--(void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType:(NSString *)type
+-(void) pushRegistry:(PKPushRegistry*) registry didUpdatePushCredentials:(PKPushCredentials*) credentials forType:(NSString*) type
 {
-    NSString *token=[MLPush stringFromToken:credentials.token];
-     [MLXMPPManager sharedInstance].hasAPNSToken=YES;
+    NSString* token = [MLPush stringFromToken:credentials.token];
     DDLogInfo(@"APNS voip token string: %@", token);
     [[[MLPush alloc] init] postToPushServer:token];
 }
 
--(void)pushRegistry:(PKPushRegistry *)registry didInvalidatePushTokenForType:(NSString *)type
+-(void) pushRegistry:(PKPushRegistry*) registry didInvalidatePushTokenForType:(NSString*) type
 {
     DDLogInfo(@"didInvalidatePushTokenForType called (and ignored, TODO: disable push on server?)");
 }
@@ -94,7 +72,8 @@
 -(void) pushRegistry:(PKPushRegistry*) registry didReceiveIncomingPushWithPayload:(PKPushPayload*) payload forType:(PKPushType) type withCompletionHandler:(void (^)(void)) completion
 {
     DDLogInfo(@"incoming voip push notfication: %@", [payload dictionaryPayload]);
-    if([UIApplication sharedApplication].applicationState==UIApplicationStateActive) return;
+    if([UIApplication sharedApplication].applicationState == UIApplicationStateActive)
+        return;
     if(@available(iOS 13.0, *))
         DDLogError(@"Voip push shouldnt arrive on ios13.");
     else
@@ -192,10 +171,35 @@
 
 - (BOOL)application:(UIApplication*) application didFinishLaunchingWithOptions:(NSDictionary*) launchOptions
 {
+    //this will use the cached values in defaultsDB, if possible
+    [[MLXMPPManager sharedInstance] setPushNode:nil andSecret:nil];
+    
+    //activate push
+    if(@available(iOS 13.0, *))
+    {
+        //no more voip mode after ios 13
+        if(![[HelperTools defaultsDB] boolForKey:@"HasUpgradedPushiOS13"]) {
+            MLPush *push = [[MLPush alloc] init];
+            [push unregisterVOIPPush];
+            [[HelperTools defaultsDB] setBool:YES forKey:@"HasUpgradedPushiOS13"];
+        }
+        
+        DDLogInfo(@"Registering for APNS...");
+        [[UIApplication sharedApplication] registerForRemoteNotifications];
+    }
+    else
+    {
+#if !TARGET_OS_MACCATALYST
+        DDLogInfo(@"Registering for VoIP APNS...");
+        [self voipRegistration];
+#endif
+    }
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     center.delegate = self;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
     
+    //create notification categories with actions
     UNNotificationAction* replyAction = [UNTextInputNotificationAction
         actionWithIdentifier:@"REPLY_ACTION"
         title:NSLocalizedString(@"Reply", @"")
@@ -224,35 +228,28 @@
             options:UNNotificationCategoryOptionNone
         ];
     
+    //request auth to show notifications and register our categories created above
+    [center requestAuthorizationWithOptions:(UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert | UNAuthorizationOptionAnnouncement) completionHandler:^(BOOL granted, NSError *error) {
+        DDLogInfo(@"Got local notification authorization response: %@, error=%@", granted ? @"YES" : @"NO", error);
+    }];
     [center setNotificationCategories:[NSSet setWithObjects:messageCategory, nil]];
     
-    //register for voip push using pushkit
-    if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) {
-        // if we are launched in the background, it was from a push. dont do this again.
-        if (@available(iOS 13.0, *)) {
-            //no more voip mode after ios 13
-            if(![[HelperTools defaultsDB] boolForKey:@"HasUpgradedPushiOS13"]) {
-                MLPush *push = [[MLPush alloc] init];
-                [push unregisterVOIPPush];
-                [[HelperTools defaultsDB] setBool:YES forKey:@"HasUpgradedPushiOS13"];
-            }
-            
-            [[UIApplication sharedApplication] registerForRemoteNotifications];
-        }
-        else {
-#if !TARGET_OS_MACCATALYST
-            [self voipRegistration];
+    UIColor *monalGreen = [UIColor monalGreen];
+    UIColor *monaldarkGreen =[UIColor monaldarkGreen];
+    [[UINavigationBar appearance] setTintColor:monalGreen];
+    if (@available(iOS 13.0, *)) {
+        UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
+        [appearance configureWithTransparentBackground];
+        appearance.backgroundColor=[UIColor systemBackgroundColor];
+        
+        [[UINavigationBar appearance] setScrollEdgeAppearance:appearance];
+        [[UINavigationBar appearance] setStandardAppearance:appearance];
+#if TARGET_OS_MACCATALYST
+        self.window.windowScene.titlebar.titleVisibility=UITitlebarTitleVisibilityHidden;
 #endif
-        }
     }
-    else  {
-        [MLXMPPManager sharedInstance].pushNode = [[HelperTools defaultsDB] objectForKey:@"pushNode"];
-        [MLXMPPManager sharedInstance].pushSecret=[[HelperTools defaultsDB] objectForKey:@"pushSecret"];
-        [MLXMPPManager sharedInstance].hasAPNSToken=YES;
-        DDLogInfo(@"push node %@", [MLXMPPManager sharedInstance].pushNode);
-    }
-    
-    [self setUISettings];
+    [[UINavigationBar appearance] setPrefersLargeTitles:YES];
+    [[UITabBar appearance] setTintColor:monaldarkGreen];
 
     //update logs if needed
     if(![[HelperTools defaultsDB] boolForKey:@"Logging"])

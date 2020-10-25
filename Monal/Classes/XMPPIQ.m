@@ -68,7 +68,7 @@ NSString* const kiqErrorType = @"error";
 -(void) setPushEnableWithNode:(NSString*) node andSecret:(NSString*) secret
 {
     [self addChild:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
-        @"jid": [MLPush pushServer],
+        @"jid": [MLPush pushServer][@"jid"],
         @"node": node
     } andChildren:@[
         [[XMPPDataForm alloc] initWithType:@"submit" formType:@"http://jabber.org/protocol/pubsub#publish-options" andDictionary:@{
@@ -82,7 +82,7 @@ NSString* const kiqErrorType = @"error";
     MLXMLNode* disableNode =[[MLXMLNode alloc] init];
     disableNode.element=@"disable";
     [disableNode.attributes setObject:@"urn:xmpp:push:0" forKey:kXMLNS];
-    [disableNode.attributes setObject:[MLPush pushServer] forKey:@"jid"];
+    [disableNode.attributes setObject:[MLPush pushServer][@"jid"] forKey:@"jid"];
     [disableNode.attributes setObject:node forKey:@"node"];
     [self addChild:disableNode];
 }

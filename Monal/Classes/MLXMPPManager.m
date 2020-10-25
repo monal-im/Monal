@@ -600,11 +600,11 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@",[account objectForKey:kUsername],[account objectForKey:kDomain] ] password:password andResource:[account objectForKey:kResource]];
 
     MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andDirectTLS:[[account objectForKey:kDirectTLS] boolValue]];
-    server.selfSignedCert=[[account objectForKey:kSelfSigned] boolValue];
+    server.selfSignedCert = [[account objectForKey:kSelfSigned] boolValue];
 
-    xmpp* xmppAccount=[[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
-    xmppAccount.pushNode=self.pushNode;
-    xmppAccount.pushSecret=self.pushSecret;
+    xmpp* xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
+    xmppAccount.pushNode = self.pushNode;
+    xmppAccount.pushSecret = self.pushSecret;
 
     if(xmppAccount)
     {
@@ -980,25 +980,49 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - APNS
 
--(void) setPushNode:(NSString *)node andSecret:(NSString *)secret
+-(void) setPushNode:(NSString*) node andSecret:(NSString*) secret
 {
-    self.pushNode = node;
-    [[HelperTools defaultsDB] setObject:self.pushNode forKey:@"pushNode"];
-    
-    if(secret)
+    if(node && ![node isEqualToString:self.pushNode])
     {
-        self.pushSecret=secret;
+        self.pushNode = node;
+        [[HelperTools defaultsDB] setObject:self.pushNode forKey:@"pushNode"];
+    }
+    else    //use saved one: push server not reachable via http(s) --> the old node might still be valid
+        self.pushNode = [[HelperTools defaultsDB] objectForKey:@"pushNode"];
+
+    if(secret && ![secret isEqualToString:self.pushSecret])
+    {
+        self.pushSecret = secret;
         [[HelperTools defaultsDB] setObject:self.pushSecret forKey:@"pushSecret"];
     }
-    else    //use saved one (push server not reachable via http(s)) --> the old secret might still be valid
+    else    //use saved one: push server not reachable via http(s) --> the old secret might still be valid
         self.pushSecret = [[HelperTools defaultsDB] objectForKey:@"pushSecret"];
 
-    for(xmpp* xmppAccount in [self connectedXMPP])
+    //check node and secret values
+    if(
+        self.pushNode &&
+        self.pushSecret &&
+        self.pushNode.length &&
+        self.pushSecret.length
+    )
     {
-        xmppAccount.pushNode = self.pushNode;
-        xmppAccount.pushSecret = self.pushSecret;
-        [xmppAccount enablePush];
+        DDLogInfo(@"push token valid, current push settings: node=%@, secret=%@", [MLXMPPManager sharedInstance].pushNode, [MLXMPPManager sharedInstance].pushSecret);
+        self.hasAPNSToken = YES;
     }
+    else
+    {
+        self.hasAPNSToken = NO;
+        DDLogWarn(@"push token invalid, current push settings: node=%@, secret=%@", [MLXMPPManager sharedInstance].pushNode, [MLXMPPManager sharedInstance].pushSecret);
+    }
+
+    //only try to enable push if we have a node and secret value
+    if(self.hasAPNSToken)
+        for(xmpp* xmppAccount in [self connectedXMPP])
+        {
+            xmppAccount.pushNode = self.pushNode;
+            xmppAccount.pushSecret = self.pushSecret;
+            [xmppAccount enablePush];
+        }
 }
 
 #pragma mark - share sheet added

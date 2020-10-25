@@ -2305,6 +2305,7 @@ NSString *const kXMPPPresence = @"presence";
     self.connectionProperties.conferenceServer = nil;
     self.connectionProperties.usingCarbons2 = NO;
     self.connectionProperties.supportsPush = NO;
+    self.connectionProperties.pushEnabled = NO;
     self.connectionProperties.supportsClientState = NO;
     self.connectionProperties.supportsMam2 = NO;
     self.connectionProperties.supportsPubSub = NO;
@@ -3162,16 +3163,17 @@ NSString *const kXMPPPresence = @"presence";
 -(void) enablePush
 {
     if(
-        self.accountState>=kStateBound && self.connectionProperties.supportsPush &&
-        self.pushNode!=nil && [self.pushNode length]>0 &&
-        self.pushSecret!=nil && [self.pushSecret length]>0
+        self.accountState >= kStateBound &&
+        self.connectionProperties.supportsPush &&
+        self.pushNode != nil && [self.pushNode length] > 0 &&
+        self.pushSecret != nil && [self.pushSecret length] > 0
     )
     {
         DDLogInfo(@"ENABLING PUSH: %@ < %@", self.pushNode, self.pushSecret);
         XMPPIQ* enable =[[XMPPIQ alloc] initWithType:kiqSetType];
         [enable setPushEnableWithNode:self.pushNode andSecret:self.pushSecret];
         [self send:enable];
-        self.connectionProperties.pushEnabled=YES;
+        self.connectionProperties.pushEnabled = YES;
     }
     else
     {

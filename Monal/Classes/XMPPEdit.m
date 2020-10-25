@@ -232,7 +232,7 @@
                 }
             } else  {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    UIAlertController* alert= [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Account Exists",@ "") message:NSLocalizedString(@"This account already exists in Monal.", @"") preferredStyle:UIAlertControllerStyleAlert];
+                    UIAlertController* alert= [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Account Exists", @"") message:NSLocalizedString(@"This account already exists in Monal.", @"") preferredStyle:UIAlertControllerStyleAlert];
                     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                         [alert dismissViewControllerAnimated:YES completion:nil];
                     }]];
@@ -275,7 +275,7 @@
 {
     DDLogVerbose(@"Deleting");
 
-    UIAlertController *questionAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Delete Account",@ "") message:NSLocalizedString(@"This will remove this account and the associated data from this device.",@ "") preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertController *questionAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Delete Account", @"") message:NSLocalizedString(@"This will remove this account and the associated data from this device.", @"") preferredStyle:UIAlertControllerStyleActionSheet];
     UIAlertAction *noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         //do nothing when "no" was pressed
     }];
@@ -439,7 +439,7 @@
                 break;
             }
             case 5: {
-                thecell.cellLabel.text = NSLocalizedString(@"Resource", @ "");
+                thecell.cellLabel.text = NSLocalizedString(@"Resource", @"");
                 thecell.labelRight.text = self.resource;
                 thecell.labelRight.hidden = NO;
                 thecell.toggleSwitch.hidden = YES;
@@ -457,7 +457,7 @@
                 {
 
                     MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
-                    buttonCell.buttonText.text = NSLocalizedString(@"Delete",@ "");
+                    buttonCell.buttonText.text = NSLocalizedString(@"Delete", @"");
                     buttonCell.buttonText.textColor = [UIColor redColor];
                     buttonCell.selectionStyle = UITableViewCellSelectionStyleNone;
                     return buttonCell;
@@ -742,7 +742,7 @@
 
     if (!account) return;
     
-    UIAlertController *actionControll = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Select Action",@ "")
+    UIAlertController *actionControll = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Select Action", @"")
                                                                             message:nil preferredStyle:UIAlertControllerStyleActionSheet];
 
 #if TARGET_OS_MACCATALYST
@@ -751,12 +751,12 @@
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
     imagePicker.delegate = self;
 
-    UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
         [self presentViewController:imagePicker animated:YES completion:nil];
     }];
 
-    UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
         [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
             if(granted)
@@ -818,9 +818,9 @@
         }
         else
         {
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@ "")
-                                                                           message:NSLocalizedString(@"Can't convert the image to png file.",@ "") preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"")
+                                                                           message:NSLocalizedString(@"Can't convert the image to png file.", @"") preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
             [self presentViewController:alert animated:YES completion:nil];
@@ -828,9 +828,9 @@
     }
     else
     {
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@ "")
-                                                                       message:NSLocalizedString(@"Can't convert the image to png file.",@ "") preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"")
+                                                                       message:NSLocalizedString(@"Can't convert the image to png file.", @"") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];

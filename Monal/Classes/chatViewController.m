@@ -753,7 +753,7 @@ enum msgSentState {
         NSMutableArray* messages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId];
         NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId];
         if([unreadMsgCnt integerValue] == 0) self->_firstmsg=YES;
-                                 
+
         if(!self.jid) return;
         MLMessage* unreadStatus = [[MLMessage alloc] init];
         unreadStatus.messageType = kMessageTypeStatus;
@@ -775,12 +775,10 @@ enum msgSentState {
         if(unreadPos <= messages.count - 1 && unreadPos > 0) {
             [messages insertObject:unreadStatus atIndex:unreadPos];
         }
-        if(messages.count != self.messageList.count)
-        {
-            self.messageList = messages;
-        }
-        
+
+        self.messageList = messages;
 		[self doSetNotLoadingHistory];
+        [self refreshCounter];
     }
     else  { // load log for this day
         self.messageList = [[[DataLayer sharedInstance] messageHistoryDateForContact:self.contact.contactJid forAccount:self.contact.accountId forDate:self.day] mutableCopy];

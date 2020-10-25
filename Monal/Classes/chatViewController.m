@@ -141,7 +141,6 @@ enum msgSentState {
     
     
     [nc addObserver:self selector:@selector(dismissKeyboard:) name:UIApplicationDidEnterBackgroundNotification object:nil];
-    [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleForeGround) name:kMonalRefresh object:nil];
     
     [nc addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];

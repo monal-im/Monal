@@ -3249,7 +3249,7 @@ NSString *const kXMPPPresence = @"presence";
         else
         {
             NSString* currentHash = [[DataLayer sharedInstance] getAvatarHashForContact:jid andAccount:account.accountNo];
-            if([avatarHash isEqualToString:currentHash])
+            if(currentHash && [avatarHash isEqualToString:currentHash])
             {
                 DDLogInfo(@"Avatar hash is the same, we don't need to update our avatar image data");
                 break;
@@ -3359,6 +3359,53 @@ NSString *const kXMPPPresence = @"presence";
             @"pubsub#persist_items": @"true",
             @"pubsub#access_model": @"presence"
         }];
+}
+
+-(void) publishAvatar:(UIImage*) image
+{
+    if(!image)
+    {
+        DDLogInfo(@"Retracting own avatar image");
+        [self.pubsub deleteNode:@"urn:xmpp:avatar:metadata"];
+        [self.pubsub deleteNode:@"urn:xmpp:avatar:data"];
+    }
+    else
+    {
+        NSString* width = [NSString stringWithFormat:@"%lu", (unsigned long)(image.size.width * image.scale)];
+        NSString* height = [NSString stringWithFormat:@"%lu", (unsigned long)(image.size.height * image.scale)];
+        NSData* imageData = UIImagePNGRepresentation(image);
+        NSString* imageHash = [HelperTools hexadecimalString:[HelperTools sha1:imageData]];
+        
+        DDLogInfo(@"Publishing own avatar image with hash %@", imageHash);
+        
+        //publish data node (must be done *before* publishing the new metadata node)
+        [self.pubsub publishItem:
+            [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": imageHash} andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"data" andNamespace:@"urn:xmpp:avatar:data" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithData:imageData]]
+            ] andData:nil]
+        onNode:@"urn:xmpp:avatar:data" withConfigOptions:@{
+            @"pubsub#persist_items": @"true",
+            @"pubsub#access_model": @"presence"
+        }];
+        
+        //publish metadata node (must be done *after* publishing the new data node)
+        [self.pubsub publishItem:
+            [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": imageHash} andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"metadata" andNamespace:@"urn:xmpp:avatar:metadata" withAttributes:@{} andChildren:@[
+                    [[MLXMLNode alloc] initWithElement:@"info" withAttributes:@{
+                        @"id": imageHash,
+                        @"type": @"image/png",
+                        @"width": width,
+                        @"height": height,
+                        @"bytes": [NSString stringWithFormat:@"%lu", (unsigned long)imageData.length]
+                    } andChildren:@[] andData:nil]
+                ] andData:nil]
+            ] andData:nil]
+        onNode:@"urn:xmpp:avatar:metadata" withConfigOptions:@{
+            @"pubsub#persist_items": @"true",
+            @"pubsub#access_model": @"presence"
+        }];
+    }
 }
 
 @end

@@ -268,6 +268,7 @@ Decline a call request
 -(void) initSession;
 -(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType andActualFrom:(NSString* _Nullable) actualFrom;
 -(void) sendDisplayMarkerForId:(NSString*) messageid to:(NSString*) to;
+-(void) publishAvatar:(UIImage*) image;
 
 @end
 

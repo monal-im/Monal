@@ -34,11 +34,10 @@
 
 @property (nonatomic, weak) UITextField *currentTextField;
 
-@property (nonatomic, strong) NSDictionary *initialSettings;
 @property (nonatomic, strong) UIDocumentPickerViewController *imagePicker;
 
 @property (nonatomic, strong) UIImageView *userAvatarImageView;
-@property (nonatomic, strong) NSString *base64ImgString;
+@property (nonatomic, strong) UIImage *avatarPngImg;
 @end
 
 
@@ -89,8 +88,6 @@
             //present another UI here.
             return;
         }
-
-        self.initialSettings = settings;
 
         self.jid = [NSString stringWithFormat:@"%@@%@", [settings objectForKey:@"username"], [settings objectForKey:@"domain"]];
 
@@ -217,7 +214,6 @@
             if(!accountExists) {
                 NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
                 if(accountID) {
-                    [self showSuccessHUD];
                     self.accountno = [NSString stringWithFormat:@"%@", accountID];
                     self.editMode = YES;
                     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
@@ -228,6 +224,7 @@
                         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
                     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
                     [account publishRosterName:self.rosterName];
+                    [account publishAvatar:self.avatarPngImg];
                     [self showSuccessHUD];
                 }
             } else  {
@@ -252,6 +249,7 @@
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
             xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
             [account publishRosterName:self.rosterName];
+            [account publishAvatar:self.avatarPngImg];
             [self showSuccessHUD];
         }
     }
@@ -268,6 +266,9 @@
         UIImage *image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         hud.customView = [[UIImageView alloc] initWithImage:image];
         [hud hideAnimated:YES afterDelay:1.0f];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self.navigationController popViewControllerAnimated:YES];
+        });
     });
 }
 
@@ -807,14 +808,14 @@
 
 -(void)convertUIImageToPngData:(UIImage*) selectedImg
 {
-    NSData *pngData=  UIImagePNGRepresentation(selectedImg);
-    self.base64ImgString = [HelperTools encodeBase64WithData:pngData];
+    self.avatarPngImg = nil;
+    NSData* pngData = UIImagePNGRepresentation(selectedImg);
     if(pngData)
     {
-        UIImage *avatarPngImg = [UIImage imageWithData:pngData];
-        if (avatarPngImg)
+        self.avatarPngImg = [UIImage imageWithData:pngData];
+        if (self.avatarPngImg)
         {
-            [self.userAvatarImageView setImage:avatarPngImg];
+            [self.userAvatarImageView setImage:self.avatarPngImg];
         }
         else
         {

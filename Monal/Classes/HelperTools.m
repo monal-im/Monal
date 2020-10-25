@@ -155,16 +155,6 @@ void logException(NSException* exception)
     }];
 }
 
-+(NSString*) sha256HmacForKey: (NSString*) key andData: (NSString*) data
-{
-	const char* cKey  = [key cStringUsingEncoding: NSUTF8StringEncoding];
-	const char* cData = [data cStringUsingEncoding: NSUTF8StringEncoding];
-	uint8_t cHMAC[CC_SHA256_DIGEST_LENGTH] = {0};
-	CCHmac(kCCHmacAlgSHA256, cKey, [key lengthOfBytesUsingEncoding: NSUTF8StringEncoding], cData, [data lengthOfBytesUsingEncoding: NSUTF8StringEncoding], cHMAC);
-	NSString* retval = [self hexadecimalString: [[NSData alloc] initWithBytes: cHMAC length: sizeof(cHMAC)]];
-	return retval;
-}
-
 +(BOOL) isInBackground
 {
     __block BOOL inBackground = NO;
@@ -194,7 +184,11 @@ void logException(NSException* exception)
     //directly call block:
     //IF: the destination queue is equal to our current queue
     //OR IF: the destination queue is the main queue and we are already in the main thread (but not the main queue)
-    if(dispatch_get_current_queue() == queue || (queue == dispatch_get_main_queue() && [NSThread isMainThread]))
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    dispatch_queue_t current_queue = dispatch_get_current_queue();
+#pragma clang diagnostic pop
+    if(current_queue == queue || (queue == dispatch_get_main_queue() && [NSThread isMainThread]))
         block();
     else
         dispatch_sync(queue, block);
@@ -281,21 +275,16 @@ void logException(NSException* exception)
 {
     // see https://xmpp.org/extensions/xep-0115.html#ver
     NSMutableString* unhashed = [[NSMutableString alloc] init];
-    NSData* hashed;
-    unsigned char digest[CC_SHA1_DIGEST_LENGTH];
     
     //generate identities string
     for(NSString* identity in identities)
         [unhashed appendString:[NSString stringWithFormat:@"%@<", identity]];
+    
     //append features string
     [unhashed appendString:[self generateStringOfFeatureSet:features]];
     
-    NSData *stringBytes = [unhashed dataUsingEncoding: NSUTF8StringEncoding];
-    if(CC_SHA1([stringBytes bytes], (UInt32)[stringBytes length], digest))
-        hashed = [NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
-    NSString* hashedBase64 = [self encodeBase64WithData:hashed];
-    
-    DDLogVerbose(@"ver string: unhashed %@, hashed %@, hashed-64 %@", unhashed, hashed, hashedBase64);
+    NSString* hashedBase64 = [self encodeBase64WithData:[self sha1:[unhashed dataUsingEncoding:NSUTF8StringEncoding]]];
+    DDLogVerbose(@"ver string: unhashed %@, hashed-64 %@", unhashed, hashedBase64);
     return hashedBase64;
 }
 
@@ -509,17 +498,52 @@ void logException(NSException* exception)
     return resource;
 }
 
-#pragma mark  Base64
+#pragma mark Hashes
+
++(NSData*) sha1:(NSData*) data
+{
+    if(!data)
+        return nil;
+    NSData* hashed;
+    unsigned char digest[CC_SHA1_DIGEST_LENGTH];
+    if(CC_SHA1([data bytes], (UInt32)[data length], digest))
+        hashed = [NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
+    return hashed;
+}
+
++(NSData*) sha256:(NSData*) data
+{
+    if(!data)
+        return nil;
+    NSData* hashed;
+    unsigned char digest[CC_SHA256_DIGEST_LENGTH];
+    if(CC_SHA256([data bytes], (UInt32)[data length], digest))
+        hashed = [NSData dataWithBytes:digest length:CC_SHA256_DIGEST_LENGTH];
+    return hashed;
+}
+
++(NSData*) sha256HmacForKey:(NSString*) key andData:(NSString*) data
+{
+    if(!key || !data)
+        return nil;
+	const char* cKey  = [key cStringUsingEncoding: NSUTF8StringEncoding];
+	const char* cData = [data cStringUsingEncoding: NSUTF8StringEncoding];
+	uint8_t cHMAC[CC_SHA256_DIGEST_LENGTH] = {0};
+	CCHmac(kCCHmacAlgSHA256, cKey, [key lengthOfBytesUsingEncoding: NSUTF8StringEncoding], cData, [data lengthOfBytesUsingEncoding: NSUTF8StringEncoding], cHMAC);
+	return [[NSData alloc] initWithBytes:cHMAC length:sizeof(cHMAC)];
+}
+
+#pragma mark Base64
 
 +(NSString*) encodeBase64WithString:(NSString*) strData
 {
-    NSData *data =[strData dataUsingEncoding:NSUTF8StringEncoding];
+    NSData* data = [strData dataUsingEncoding:NSUTF8StringEncoding];
     return [self encodeBase64WithData:data];
 }
 
 +(NSString*) encodeBase64WithData:(NSData*) objData
 {
-   return [objData base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
+   return [objData base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength | NSDataBase64EncodingEndLineWithLineFeed];
 }
 
 +(NSData*) dataWithBase64EncodedString:(NSString*) string

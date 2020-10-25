@@ -839,13 +839,20 @@ static NSDateFormatter* dbFormatter;
 
 -(void) setAvatarHash:(NSString*) hash forContact:(NSString*) contact andAccount:(NSString*) accountNo
 {
-    [self.db executeNonQuery:@"update buddylist set iconhash=?, dirty=1 where account_id=? and buddy_name=?;" andArguments:@[hash, accountNo, contact]];
-
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"UPDATE account SET iconhash=? WHERE account_id=? AND printf('%s@%s', username, domain)=?;" andArguments:@[hash, accountNo, contact]];
+        [self.db executeNonQuery:@"UPDATE buddylist SET iconhash=?, dirty=1 WHERE account_id=? AND buddy_name=?;" andArguments:@[hash, accountNo, contact]];
+    }];
 }
 
 -(NSString*) getAvatarHashForContact:(NSString*) buddy andAccount:(NSString*) accountNo
 {
-    return [self.db executeScalar:@"select iconhash from buddylist where account_id=? and buddy_name=?" andArguments:@[accountNo, buddy]];
+    return [self.db idWriteTransaction:^{
+        NSString* hash = [self.db executeScalar:@"SELECT iconhash FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
+        if(!hash)       //try to get the hash of our own account
+            hash = [self.db executeScalar:@"SELECT iconhash FROM account WHERE account_id=? AND printf('%s@%s', username, domain)=?;" andArguments:@[accountNo, buddy]];
+        return hash;
+    }];
 }
 
 -(BOOL) isContactInList:(NSString*) buddy forAccount:(NSString*) accountNo
@@ -2087,6 +2094,10 @@ static NSDateFormatter* dbFormatter;
         
         [self updateDBTo:4.94 withBlock:^{
             [self.db executeNonQuery:@"ALTER TABLE account ADD COLUMN rosterName TEXT;"];
+        }];
+        
+        [self updateDBTo:4.95 withBlock:^{
+            [self.db executeNonQuery:@"ALTER TABLE account ADD COLUMN iconhash VARCHAR(200);"];
         }];
     }];
     

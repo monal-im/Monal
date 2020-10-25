@@ -282,16 +282,16 @@
         [features containsObject:@"http://jabber.org/protocol/pubsub#filtered-notifications"] &&                    //needed for xep-0163 support
         [features containsObject:@"http://jabber.org/protocol/pubsub#publish-options"] &&                           //needed for xep-0223 support
         //important xep-0060 support (aka basic support)
-        [features containsObject:@"http://jabber.org/protocol/pubsub#last-published"] &&
+        // [features containsObject:@"http://jabber.org/protocol/pubsub#last-published"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#publish"] &&
-        [features containsObject:@"http://jabber.org/protocol/pubsub#item-ids"] &&
-        [features containsObject:@"http://jabber.org/protocol/pubsub#create-and-configure"] &&
+        // [features containsObject:@"http://jabber.org/protocol/pubsub#item-ids"] &&
+        // [features containsObject:@"http://jabber.org/protocol/pubsub#create-and-configure"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#create-nodes"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#delete-items"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#delete-nodes"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#persistent-items"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#retrieve-items"] &&
-        [features containsObject:@"http://jabber.org/protocol/pubsub#config-node"] &&
+        // [features containsObject:@"http://jabber.org/protocol/pubsub#config-node"] &&
         [features containsObject:@"http://jabber.org/protocol/pubsub#auto-create"]
         //needed for xep-0402 later
         //[features containsObject:@"http://jabber.org/protocol/pubsub#multi-items"]

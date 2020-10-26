@@ -37,7 +37,7 @@
 @property (nonatomic, strong) UIDocumentPickerViewController *imagePicker;
 
 @property (nonatomic, strong) UIImageView *userAvatarImageView;
-@property (nonatomic, strong) UIImage *avatarPngImg;
+@property (nonatomic, strong) UIImage *selectedAvatarImage;
 @end
 
 
@@ -224,7 +224,7 @@
                         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
                     xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
                     [account publishRosterName:self.rosterName];
-                    [account publishAvatar:self.avatarPngImg];
+                    [account publishAvatar:self.selectedAvatarImage];
                     [self showSuccessHUD];
                 }
             } else  {
@@ -249,7 +249,7 @@
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
             xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
             [account publishRosterName:self.rosterName];
-            [account publishAvatar:self.avatarPngImg];
+            [account publishAvatar:self.selectedAvatarImage];
             [self showSuccessHUD];
         }
     }
@@ -733,7 +733,7 @@
     [coordinator coordinateReadingItemAtURL:urls.firstObject options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
         NSData *data =[NSData dataWithContentsOfURL:newURL];
         UIImage *pickImg = [UIImage imageWithData:data];
-        [self convertUIImageToPngData:pickImg];
+        [self useAvatarImage:pickImg];
     }];
 }
 
@@ -804,36 +804,35 @@
     }
 }
 
--(void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
+-(void) imagePickerControllerDidCancel:(UIImagePickerController *)picker
 {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
--(void)convertUIImageToPngData:(UIImage*) selectedImg
+-(void) useAvatarImage:(UIImage*) selectedImg
 {
-    self.avatarPngImg = nil;
-    NSData* pngData = UIImagePNGRepresentation(selectedImg);
-    if(pngData)
+    
+    /*
+    //small sample image
+    UIGraphicsImageRenderer* renderer = [[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(200, 200)];
+    selectedImg = [renderer imageWithActions:^(UIGraphicsImageRendererContext * _Nonnull context) {
+        [[UIColor darkGrayColor] setStroke];
+        [context strokeRect:renderer.format.bounds];
+        [[UIColor colorWithRed:158/255.0 green:215/255.0 blue:245/255.0 alpha:1] setFill];
+        [context fillRect:CGRectMake(1, 1, 140, 140)];
+    }];
+    */
+    
+    //check if conversion can be done and display error if not
+    if(selectedImg && UIImageJPEGRepresentation(selectedImg, 1.0))
     {
-        self.avatarPngImg = [UIImage imageWithData:pngData];
-        if (self.avatarPngImg)
-        {
-            [self.userAvatarImageView setImage:self.avatarPngImg];
-        }
-        else
-        {
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"")
-                                                                           message:NSLocalizedString(@"Can't convert the image to png file.", @"") preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                [alert dismissViewControllerAnimated:YES completion:nil];
-            }]];
-            [self presentViewController:alert animated:YES completion:nil];
-        }
+        self.selectedAvatarImage = selectedImg;
+        [self.userAvatarImageView setImage:self.selectedAvatarImage];
     }
     else
     {
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"")
-                                                                       message:NSLocalizedString(@"Can't convert the image to png file.", @"") preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"")
+                                                                       message:NSLocalizedString(@"Can't scale down the image.", @"") preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
@@ -848,7 +847,7 @@
     didCropToCircularImage:(nonnull UIImage *)image withRect:(CGRect)cropRect
                      angle:(NSInteger)angle
 {
-    [self convertUIImageToPngData:image];
+    [self useAvatarImage:image];
     [cropViewController dismissViewControllerAnimated:NO completion:nil];
 }
 

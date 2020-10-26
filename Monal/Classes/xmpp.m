@@ -3361,51 +3361,74 @@ NSString *const kXMPPPresence = @"presence";
         }];
 }
 
+-(NSData*) resizeAvatarImage:(UIImage*) image
+{
+    //resize image to a maximum of 600x600 pixel
+    CGRect dimensions = AVMakeRectWithAspectRatioInsideRect(image.size, CGRectMake(0, 0, 600, 600));
+    UIGraphicsImageRenderer* renderer = [[UIGraphicsImageRenderer alloc] initWithSize:dimensions.size];
+    UIImage* resizedImage = [renderer imageWithActions:^(UIGraphicsImageRendererContext * _Nonnull context) {
+        [image drawInRect:dimensions];
+    }];
+    
+    //now reduce quality until image data is smaller than ~150kb
+    NSData* data;
+    unsigned long limit = 150000;        //conversations made some experiments what size works on almost all servers and this is the outcome
+    CGFloat quality = 0.8;               //start here
+    do
+    {
+        DDLogDebug(@"Resizing new avatar to quality %f", (double)quality);
+        data = UIImageJPEGRepresentation(resizedImage, quality);
+        DDLogError(@"New avatar size after changing quality: %lu", (unsigned long)data.length);
+        quality /= 1.5;
+    } while((data.length*1.5) > limit && quality > 0.0001);     //base64 encoded data is 1.5 times bigger than the raw binary data (take that into account)
+    
+    DDLogInfo(@"Returning new avatar jpeg data with size %lu and quality %f", (unsigned long)data.length, (double)quality);
+    return data;
+}
+
 -(void) publishAvatar:(UIImage*) image
 {
-    if(!image)
-    {
-        DDLogInfo(@"Retracting own avatar image");
-        [self.pubsub deleteNode:@"urn:xmpp:avatar:metadata"];
-        [self.pubsub deleteNode:@"urn:xmpp:avatar:data"];
-    }
-    else
-    {
-        NSString* width = [NSString stringWithFormat:@"%lu", (unsigned long)(image.size.width * image.scale)];
-        NSString* height = [NSString stringWithFormat:@"%lu", (unsigned long)(image.size.height * image.scale)];
-        NSData* imageData = UIImagePNGRepresentation(image);
-        NSString* imageHash = [HelperTools hexadecimalString:[HelperTools sha1:imageData]];
-        
-        DDLogInfo(@"Publishing own avatar image with hash %@", imageHash);
-        
-        //publish data node (must be done *before* publishing the new metadata node)
-        [self.pubsub publishItem:
-            [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": imageHash} andChildren:@[
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        if(!image)
+        {
+            DDLogInfo(@"Retracting own avatar image");
+            [self.pubsub deleteNode:@"urn:xmpp:avatar:metadata"];
+            [self.pubsub deleteNode:@"urn:xmpp:avatar:data"];
+        }
+        else
+        {
+            NSData* imageData = [self resizeAvatarImage:image];
+            NSString* imageHash = [HelperTools hexadecimalString:[HelperTools sha1:imageData]];
+            
+            DDLogInfo(@"Publishing own avatar image with hash %@", imageHash);
+            
+            //publish data node (must be done *before* publishing the new metadata node)
+            MLXMLNode* item = [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": imageHash} andChildren:@[
                 [[MLXMLNode alloc] initWithElement:@"data" andNamespace:@"urn:xmpp:avatar:data" withAttributes:@{} andChildren:@[] andData:[HelperTools encodeBase64WithData:imageData]]
-            ] andData:nil]
-        onNode:@"urn:xmpp:avatar:data" withConfigOptions:@{
-            @"pubsub#persist_items": @"true",
-            @"pubsub#access_model": @"presence"
-        }];
-        
-        //publish metadata node (must be done *after* publishing the new data node)
-        [self.pubsub publishItem:
-            [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": imageHash} andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"metadata" andNamespace:@"urn:xmpp:avatar:metadata" withAttributes:@{} andChildren:@[
-                    [[MLXMLNode alloc] initWithElement:@"info" withAttributes:@{
-                        @"id": imageHash,
-                        @"type": @"image/png",
-                        @"width": width,
-                        @"height": height,
-                        @"bytes": [NSString stringWithFormat:@"%lu", (unsigned long)imageData.length]
-                    } andChildren:@[] andData:nil]
+            ] andData:nil];
+            
+            [self.pubsub publishItem:item onNode:@"urn:xmpp:avatar:data" withConfigOptions:@{
+                @"pubsub#persist_items": @"true",
+                @"pubsub#access_model": @"presence"
+            }];
+            
+            //publish metadata node (must be done *after* publishing the new data node)
+            [self.pubsub publishItem:
+                [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": imageHash} andChildren:@[
+                    [[MLXMLNode alloc] initWithElement:@"metadata" andNamespace:@"urn:xmpp:avatar:metadata" withAttributes:@{} andChildren:@[
+                        [[MLXMLNode alloc] initWithElement:@"info" withAttributes:@{
+                            @"id": imageHash,
+                            @"type": @"image/jpeg",
+                            @"bytes": [NSString stringWithFormat:@"%lu", (unsigned long)imageData.length]
+                        } andChildren:@[] andData:nil]
+                    ] andData:nil]
                 ] andData:nil]
-            ] andData:nil]
-        onNode:@"urn:xmpp:avatar:metadata" withConfigOptions:@{
-            @"pubsub#persist_items": @"true",
-            @"pubsub#access_model": @"presence"
-        }];
-    }
+            onNode:@"urn:xmpp:avatar:metadata" withConfigOptions:@{
+                @"pubsub#persist_items": @"true",
+                @"pubsub#access_model": @"presence"
+            }];
+        }
+    });
 }
 
 @end

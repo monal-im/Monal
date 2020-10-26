@@ -45,7 +45,7 @@ extern NSString* const kMessageTypeUrl;
 -(void) setRosterVersion:(NSString *) version forAccount: (NSString*) accountNo;
 
 // Buddy Commands
--(BOOL) addContact:(NSString*) contact  forAccount:(NSString*) accountNo nickname:(NSString*) nickName andMucNick:(NSString* _Nullable) mucNick;
+-(BOOL) addContact:(NSString*) contact  forAccount:(NSString*) accountNo nickname:(NSString* _Nullable) nickName andMucNick:(NSString* _Nullable) mucNick;
 -(void) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(BOOL) clearBuddies:(NSString*) accountNo;
 -(MLContact*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo;

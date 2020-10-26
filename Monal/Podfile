@@ -45,6 +45,7 @@ pod 'SDWebImage', '~> 5.8.3'
 
 pod 'DZNEmptyDataSet'
 pod 'EAIntroView'
+pod 'TOCropViewController'
   # Pods for Monal
 
   target 'Monal Tests' do

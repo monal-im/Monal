@@ -797,7 +797,10 @@
     if([mediaType isEqualToString:(NSString*) kUTTypeImage]) {
         UIImage *selectedImage = info[UIImagePickerControllerEditedImage];
         if(!selectedImage) selectedImage = info[UIImagePickerControllerOriginalImage];
-        [self convertUIImageToPngData:selectedImage];
+        
+        TOCropViewController *cropViewController = [[TOCropViewController alloc] initWithImage:selectedImage];
+        cropViewController.delegate = self;
+        [self presentViewController:cropViewController animated:NO completion:nil];
     }
 }
 
@@ -836,6 +839,17 @@
         }]];
         [self presentViewController:alert animated:YES completion:nil];
     }
+}
+
+
+#pragma mark -- TOCropViewController delagate
+
+- (void)cropViewController:(nonnull TOCropViewController *)cropViewController
+    didCropToCircularImage:(nonnull UIImage *)image withRect:(CGRect)cropRect
+                     angle:(NSInteger)angle
+{
+    [self convertUIImageToPngData:image];
+    [cropViewController dismissViewControllerAnimated:NO completion:nil];
 }
 
 @end

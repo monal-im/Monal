@@ -28,6 +28,7 @@ PODS:
   - SignalProtocolObjC (1.1.0):
     - SignalProtocolC (~> 2.3.2)
   - SnapKit (5.0.1)
+  - TOCropViewController (2.5.5)
   - TPCircularBuffer (1.6.1)
 
 DEPENDENCIES:
@@ -42,6 +43,7 @@ DEPENDENCIES:
   - SDWebImage (~> 5.8.3)
   - SignalProtocolC
   - SignalProtocolObjC
+  - TOCropViewController
   - TPCircularBuffer
 
 SPEC REPOS:
@@ -62,6 +64,7 @@ SPEC REPOS:
     - SignalProtocolC
     - SignalProtocolObjC
     - SnapKit
+    - TOCropViewController
     - TPCircularBuffer
 
 SPEC CHECKSUMS:
@@ -81,8 +84,9 @@ SPEC CHECKSUMS:
   SignalProtocolC: 051512e9f3abfeb4120c5e9673af9ae0ee370070
   SignalProtocolObjC: b992ed29c3b7b453510ff0102ed16ef143f7efd2
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
+  TOCropViewController: da59f531f8ac8a94ef6d6c0fc34009350f9e8bfe
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 
-PODFILE CHECKSUM: ec8c7d7faf4b1902a1f1088634f223da2dadea6e
+PODFILE CHECKSUM: 2bd9c81d0cb080794974dfbb334985bf61102788
 
 COCOAPODS: 1.9.3

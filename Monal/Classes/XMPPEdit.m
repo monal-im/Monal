@@ -811,7 +811,6 @@
 
 -(void) useAvatarImage:(UIImage*) selectedImg
 {
-    
     /*
     //small sample image
     UIGraphicsImageRenderer* renderer = [[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(200, 200)];
@@ -844,7 +843,7 @@
 #pragma mark -- TOCropViewController delagate
 
 - (void)cropViewController:(nonnull TOCropViewController *)cropViewController
-    didCropToCircularImage:(nonnull UIImage *)image withRect:(CGRect)cropRect
+    didCropToImage:(nonnull UIImage *)image withRect:(CGRect)cropRect
                      angle:(NSInteger)angle
 {
     [self useAvatarImage:image];

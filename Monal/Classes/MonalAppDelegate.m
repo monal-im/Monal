@@ -389,56 +389,61 @@
 
 -(void) userNotificationCenter:(UNUserNotificationCenter*) center didReceiveNotificationResponse:(UNNotificationResponse*) response withCompletionHandler:(void (^)(void)) completionHandler
 {
-    DDLogVerbose(@"notification action triggered for %@", response.notification.request.content.userInfo);
-    [[MLXMPPManager sharedInstance] connectIfNecessary];
-    
-    NSString* from = response.notification.request.content.userInfo[@"from"];
-    NSString* accountId = response.notification.request.content.userInfo[@"accountId"];
-    NSString* messageId = response.notification.request.content.userInfo[@"messageId"];
-    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountId];
-    NSAssert(from, @"from should not be nil");
-    NSAssert(accountId, @"accountId should not be nil");
-    NSAssert(messageId, @"messageId should not be nil");
-    NSAssert(account, @"account should not be nil");
-    if([response.actionIdentifier isEqualToString:@"REPLY_ACTION"])
+    if([response.notification.request.content.categoryIdentifier isEqualToString:@"message"])
     {
-        DDLogInfo(@"REPLY_ACTION triggered...");
-        UNTextInputNotificationResponse* textResponse = (UNTextInputNotificationResponse*) response;
-        if(!textResponse.userText.length)
+        DDLogVerbose(@"notification action triggered for %@", response.notification.request.content.userInfo);
+        [[MLXMPPManager sharedInstance] connectIfNecessary];
+        
+        NSString* from = response.notification.request.content.userInfo[@"from"];
+        NSString* accountId = response.notification.request.content.userInfo[@"accountId"];
+        NSString* messageId = response.notification.request.content.userInfo[@"messageId"];
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountId];
+        NSAssert(from, @"from should not be nil");
+        NSAssert(accountId, @"accountId should not be nil");
+        NSAssert(messageId, @"messageId should not be nil");
+        NSAssert(account, @"account should not be nil");
+        if([response.actionIdentifier isEqualToString:@"REPLY_ACTION"])
         {
-            DDLogWarn(@"User tried to send empty text response!");
-            return;
+            DDLogInfo(@"REPLY_ACTION triggered...");
+            UNTextInputNotificationResponse* textResponse = (UNTextInputNotificationResponse*) response;
+            if(!textResponse.userText.length)
+            {
+                DDLogWarn(@"User tried to send empty text response!");
+                if(completionHandler)
+                    completionHandler();
+                return;
+            }
+            
+            //mark messages as read because we are replying
+            [[DataLayer sharedInstance] markMessagesAsReadForBuddy:from andAccount:accountId tillStanzaId:messageId wasOutgoing:NO];
+            [self updateUnread];
+            
+            BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:from andAccountNo:accountId];
+            BOOL isMuc = [[DataLayer sharedInstance] isBuddyMuc:from forAccount:accountId];
+            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:textResponse.userText toContact:from fromAccount:accountId isEncrypted:encrypted isMUC:isMuc isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                DDLogInfo(@"REPLY_ACTION success=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", messageIdSentObject);
+            }];
         }
-        
-        //mark messages as read because we are replying
-        [[DataLayer sharedInstance] markMessagesAsReadForBuddy:from andAccount:accountId tillStanzaId:messageId wasOutgoing:NO];
-        [self updateUnread];
-        
-        BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:from andAccountNo:accountId];
-        BOOL isMuc = [[DataLayer sharedInstance] isBuddyMuc:from forAccount:accountId];
-        [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:textResponse.userText toContact:from fromAccount:accountId isEncrypted:encrypted isMUC:isMuc isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-            DDLogInfo(@"REPLY_ACTION success=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", messageIdSentObject);
-        }];
-    }
-    else if([response.actionIdentifier isEqualToString:@"MARK_AS_READ_ACTION"])
-    {
-        DDLogInfo(@"MARK_AS_READ_ACTION triggered...");
-        NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:from andAccount:accountId tillStanzaId:messageId wasOutgoing:NO];
-        DDLogDebug(@"Marked as read: %@", unread);
-        
-        //remove notifications of all remotely read messages (indicated by sending a response message)
-        for(MLMessage* msg in unread)
+        else if([response.actionIdentifier isEqualToString:@"MARK_AS_READ_ACTION"])
         {
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
-            [account sendDisplayMarkerForId:msg.messageId to:msg.from];
+            DDLogInfo(@"MARK_AS_READ_ACTION triggered...");
+            NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:from andAccount:accountId tillStanzaId:messageId wasOutgoing:NO];
+            DDLogDebug(@"Marked as read: %@", unread);
+            
+            //remove notifications of all remotely read messages (indicated by sending a response message)
+            for(MLMessage* msg in unread)
+            {
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
+                [account sendDisplayMarkerForId:msg.messageId to:msg.from];
+            }
+            
+            //update unread count in active chats list
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                @"contact": [[DataLayer sharedInstance] contactForUsername:from forAccount:accountId]
+            }];
+            
+            [self updateUnread];
         }
-        
-        //update unread count in active chats list
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-            @"contact": [[DataLayer sharedInstance] contactForUsername:from forAccount:accountId]
-        }];
-        
-        [self updateUnread];
     }
     if(completionHandler)
         completionHandler();

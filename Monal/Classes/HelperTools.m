@@ -147,6 +147,7 @@ void logException(NSException* exception)
     content.title = NSLocalizedString(@"Could not synchronize", @"");
     content.body = NSLocalizedString(@"Please open the app to retry", @"");
     content.sound = [UNNotificationSound defaultSound];
+    content.categoryIdentifier = @"simple";
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:@"syncError" content:content trigger:nil];
     [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {

@@ -38,6 +38,9 @@
 
 @property (nonatomic, strong) UIImageView *userAvatarImageView;
 @property (nonatomic, strong) UIImage *selectedAvatarImage;
+@property (nonatomic) BOOL avatarChanged;
+@property (nonatomic) BOOL rosterNameChanged;
+@property (nonatomic) BOOL usedCamera;
 @end
 
 
@@ -248,8 +251,10 @@
             else
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
             xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
-            [account publishRosterName:self.rosterName];
-            [account publishAvatar:self.selectedAvatarImage];
+            if(self.rosterNameChanged)
+                [account publishRosterName:self.rosterName];
+            if(self.avatarChanged)
+                [account publishAvatar:self.selectedAvatarImage];
             [self showSuccessHUD];
         }
     }
@@ -650,6 +655,7 @@
     switch (textField.tag) {
         case 1: {
             self.rosterName = textField.text;
+            self.rosterNameChanged = YES;
             break;
         }
         case 2: {
@@ -791,8 +797,6 @@
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *, id> *)info
 {
-    [self dismissViewControllerAnimated:YES completion:nil];
-    
     NSString *mediaType = info[UIImagePickerControllerMediaType];
     if([mediaType isEqualToString:(NSString*) kUTTypeImage]) {
         UIImage *selectedImage = info[UIImagePickerControllerEditedImage];
@@ -800,13 +804,28 @@
         
         TOCropViewController *cropViewController = [[TOCropViewController alloc] initWithImage:selectedImage];
         cropViewController.delegate = self;
-        [self presentViewController:cropViewController animated:NO completion:nil];
+        //set square aspect ratio and don't let the user change that (this is a avatar which should be square for maximum compatibility with other clients)
+        cropViewController.aspectRatioPreset = TOCropViewControllerAspectRatioPresetSquare;
+        cropViewController.aspectRatioLockEnabled = YES;
+        cropViewController.aspectRatioPickerButtonHidden = YES;
+        
+        if (picker.sourceType == UIImagePickerControllerSourceTypeCamera) {
+            [picker dismissViewControllerAnimated:YES completion:^{
+                self.usedCamera = YES;
+                [self presentViewController:cropViewController animated:YES completion:nil];
+            }];
+        } else {
+            self.usedCamera = NO;
+            [picker pushViewController:cropViewController animated:YES];
+        }
     }
+    else
+        [picker dismissViewControllerAnimated:YES completion:nil];
 }
 
 -(void) imagePickerControllerDidCancel:(UIImagePickerController *)picker
 {
-    [self dismissViewControllerAnimated:YES completion:nil];
+    [picker dismissViewControllerAnimated:YES completion:nil];
 }
 
 -(void) useAvatarImage:(UIImage*) selectedImg
@@ -827,11 +846,12 @@
     {
         self.selectedAvatarImage = selectedImg;
         [self.userAvatarImageView setImage:self.selectedAvatarImage];
+        self.avatarChanged = YES;
     }
     else
     {
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"")
-                                                                       message:NSLocalizedString(@"Can't scale down the image.", @"") preferredStyle:UIAlertControllerStyleAlert];
+                                                                       message:NSLocalizedString(@"Can't convert the image to jpeg format.", @"") preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
@@ -847,7 +867,10 @@
                      angle:(NSInteger)angle
 {
     [self useAvatarImage:image];
-    [cropViewController dismissViewControllerAnimated:NO completion:nil];
+    if(self.usedCamera)
+        [self dismissViewControllerAnimated:YES completion:nil];
+    else
+        [cropViewController dismissViewControllerAnimated:YES completion:nil];
 }
 
 @end

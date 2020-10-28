@@ -3365,6 +3365,7 @@ NSString *const kXMPPPresence = @"presence";
 {
     //resize image to a maximum of 600x600 pixel
     CGRect dimensions = AVMakeRectWithAspectRatioInsideRect(image.size, CGRectMake(0, 0, 600, 600));
+    DDLogInfo(@"Downsizing avatar image to %lux%lu pixel", (unsigned long)dimensions.size.width, (unsigned long)dimensions.size.height);
     UIGraphicsImageRenderer* renderer = [[UIGraphicsImageRenderer alloc] initWithSize:dimensions.size];
     UIImage* resizedImage = [renderer imageWithActions:^(UIGraphicsImageRendererContext * _Nonnull context) {
         [image drawInRect:dimensions];
@@ -3378,11 +3379,11 @@ NSString *const kXMPPPresence = @"presence";
     {
         DDLogDebug(@"Resizing new avatar to quality %f", (double)quality);
         data = UIImageJPEGRepresentation(resizedImage, quality);
-        DDLogError(@"New avatar size after changing quality: %lu", (unsigned long)data.length);
-        quality /= 1.5;
+        DDLogDebug(@"New avatar size after changing quality: %lu", (unsigned long)data.length);
+        quality /= 1.3;
     } while((data.length*1.5) > limit && quality > 0.0001);     //base64 encoded data is 1.5 times bigger than the raw binary data (take that into account)
     
-    DDLogInfo(@"Returning new avatar jpeg data with size %lu and quality %f", (unsigned long)data.length, (double)quality);
+    DDLogInfo(@"Returning new avatar jpeg data with size %lu and quality %f", (unsigned long)data.length, (double)quality*1.5);
     return data;
 }
 

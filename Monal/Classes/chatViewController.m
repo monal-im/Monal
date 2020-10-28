@@ -1571,7 +1571,7 @@ enum msgSentState {
     NSString* messageText = row.messageText;
     if([messageText length] > kMonalChatMaxAllowedTextLen)
         messageText = [NSString stringWithFormat:@"%@\n[...]", [messageText substringToIndex:kMonalChatMaxAllowedTextLen]];
-    DDLogWarn(@"msg: %@", messageText);
+    DDLogVerbose(@"msg: %@", messageText);
     BOOL inDirection = [row.from isEqualToString:self.contact.contactJid];
 
     if([row.messageType isEqualToString:kMessageTypeStatus])

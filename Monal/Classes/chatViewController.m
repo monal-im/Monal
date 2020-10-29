@@ -722,7 +722,7 @@ enum msgSentState {
         if([MLNotificationManager sharedInstance].currentContact!=self.contact)
             return;
         
-        if(!_day)
+        if(!_day && ![HelperTools isInBackground])
         {
             //get list of unread messages
             NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountId tillStanzaId:nil wasOutgoing:NO];

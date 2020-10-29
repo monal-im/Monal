@@ -7,7 +7,7 @@
   <Project>
 
     <name>Monal</name>
-    <short-name>monal</short-name>
+    <short-name>Monal</short-name>
 
     <shortdesc xml:lang="en">iOS and MacOS XMPP chat client</shortdesc>
     <description xml:lang="en">

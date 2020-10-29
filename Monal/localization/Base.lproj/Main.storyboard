@@ -1681,18 +1681,11 @@
                     </view>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="tgd-HR-Cbd">
                         <nil key="title"/>
-                        <rightBarButtonItems>
-                            <barButtonItem title="Info" image="info.circle" catalog="system" id="C9Q-7y-bRl">
-                                <connections>
-                                    <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" id="qAH-1S-435"/>
-                                </connections>
-                            </barButtonItem>
-                            <barButtonItem image="745-unlocked" style="plain" id="wma-QS-7Rc">
-                                <connections>
-                                    <action selector="toggleEncryption:" destination="5nR-Q5-dQD" id="NXe-fw-72r"/>
-                                </connections>
-                            </barButtonItem>
-                        </rightBarButtonItems>
+                        <barButtonItem key="rightBarButtonItem" image="745-unlocked" style="plain" id="wma-QS-7Rc">
+                            <connections>
+                                <action selector="toggleEncryption:" destination="5nR-Q5-dQD" id="NXe-fw-72r"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <connections>
                         <outlet property="backgroundImage" destination="SEk-WZ-Rcm" id="KCn-y5-DRl"/>
@@ -1706,6 +1699,7 @@
                         <outlet property="tableviewBottom" destination="Iwu-bN-lxd" id="6KW-KJ-mpd"/>
                         <outlet property="transparentLayer" destination="cUR-xM-Mq7" id="0Fl-vg-WUH"/>
                         <outlet property="view" destination="Riz-2Q-bcU" id="d0E-AR-8aA"/>
+                        <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" id="tEM-gR-7nN"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tvb-fM-fJc" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1846,7 +1840,7 @@
     <inferredMetricsTieBreakers>
         <segue reference="Ecb-7N-zer"/>
         <segue reference="ndm-rg-MfL"/>
-        <segue reference="qAH-1S-435"/>
+        <segue reference="tEM-gR-7nN"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="724-info" width="28" height="28"/>

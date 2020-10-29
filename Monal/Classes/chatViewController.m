@@ -214,7 +214,7 @@ enum msgSentState {
 
 -(void) initNavigationBarItems
 {
-    UIView *cusView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 200, self.navigationController.navigationBar.frame.size.height)];
+    UIView *cusView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 120, self.navigationController.navigationBar.frame.size.height)];
     //cusView.backgroundColor = [UIColor redColor];
 
     self.navBarIcon = [[UIImageView alloc] initWithFrame:CGRectMake(0, 7, 30, 30)];

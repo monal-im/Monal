@@ -3372,9 +3372,9 @@ NSString *const kXMPPPresence = @"presence";
         [image drawInRect:dimensions];
     }];
     
-    //now reduce quality until image data is smaller than ~150kb
+    //now reduce quality until image data is smaller than ~240kb
     NSData* data;
-    unsigned long limit = 150000;        //conversations made some experiments what size works on almost all servers and this is the outcome
+    unsigned long limit = 240000;        //should work for ejabberd >= 19.02 and prosody >= 0.11
     CGFloat quality = 0.8;               //start here
     do
     {

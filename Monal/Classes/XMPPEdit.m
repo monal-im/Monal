@@ -80,6 +80,8 @@
     gestureRecognizer.cancelsTouchesInView = false; //this prevents it from blocking the button
     [self.tableView addGestureRecognizer:gestureRecognizer];
     
+    self.avatarChanged = NO;
+    self.rosterNameChanged = NO;
     
     if(_originIndex.section == 0)
     {

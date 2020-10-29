@@ -39,7 +39,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0004.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>sufficient</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0004: Data Forms</xmpp:note>
       </xmpp:SupportedXep>
@@ -47,7 +47,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0027.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0027: Current Jabber OpenPGP Usage</xmpp:note>
       </xmpp:SupportedXep>
@@ -55,7 +55,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0030.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>complete</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0030: Service Discovery</xmpp:note>
       </xmpp:SupportedXep>
@@ -63,7 +63,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0033.html" />
-        <xmpp:status>?</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0033: Extended Stanza Addressing</xmpp:note>
       </xmpp:SupportedXep>
@@ -71,7 +71,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0045.html" />
-        <xmpp:status>complete</xmpp:status>
+        <xmpp:status>partly</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0045: Multi-User Chat</xmpp:note>
       </xmpp:SupportedXep>
@@ -79,7 +79,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0047.html" />
-        <xmpp:status>?</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0047: In-Band Bytestreams</xmpp:note>
       </xmpp:SupportedXep>
@@ -87,7 +87,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0048.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0048: Bookmarks</xmpp:note>
       </xmpp:SupportedXep>
@@ -95,7 +95,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0054.html" />
-        <xmpp:status>?</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0054: vcard-temp</xmpp:note>
       </xmpp:SupportedXep>
@@ -103,7 +103,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0055.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0055: Jabber Search</xmpp:note>  
       </xmpp:SupportedXep>
@@ -111,7 +111,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0059.html" />
-        <xmpp:status>?</xmpp:status>
+        <xmpp:status>complete</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0059: Result Set Management. Used by XEP-0313.</xmpp:note>
       </xmpp:SupportedXep>
@@ -119,7 +119,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0060.html" />
-        <xmpp:status>?</xmpp:status>
+        <xmpp:status>partly</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0060: Publish-Subscribe</xmpp:note>
       </xmpp:SupportedXep>
@@ -127,7 +127,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0065.html" />
-        <xmpp:status>?</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0065: SOCKS5 Bytestreams</xmpp:note>
       </xmpp:SupportedXep>
@@ -135,7 +135,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0066.html" />
-        <xmpp:status>?</xmpp:status>
+        <xmpp:status>partly</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0066: Out of Band Data</xmpp:note>
       </xmpp:SupportedXep>
@@ -143,7 +143,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0070.html" />
-        <xmpp:status>?</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0070: Verifying HTTP Requests via XMPP</xmpp:note>
       </xmpp:SupportedXep>
@@ -154,14 +154,6 @@
         <xmpp:status>partial</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0077: In-Band Registration</xmpp:note> 
-      </xmpp:SupportedXep>
-    </implements>
-    <implements>
-      <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0080.html" />
-        <xmpp:status>complete</xmpp:status>
-        <xmpp:version>?</xmpp:version>
-        <xmpp:note>XEP-0080: User Location</xmpp:note> 
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -190,80 +182,32 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0095.html" />
-        <xmpp:status>?</xmpp:status>
-        <xmpp:version>?</xmpp:version>
-        <xmpp:note>XEP-0095: Stream Initiation</xmpp:note>    
-      </xmpp:SupportedXep>
-    </implements>
-    <implements>
-      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0107.html" />
-        <xmpp:status>complete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0107: User Mood</xmpp:note> 
       </xmpp:SupportedXep>
     </implements>
     <implements>
       <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0108.html" />
-        <xmpp:status>complete</xmpp:status>
-        <xmpp:version>?</xmpp:version>
-        <xmpp:note>XEP-0108: User Activity</xmpp:note> 
-      </xmpp:SupportedXep>
-    </implements>
-    <implements>
-      <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0114.html" />
-        <xmpp:status>?</xmpp:status>
-        <xmpp:version>?</xmpp:version>
-        <xmpp:note>XEP-0114: Jabber Component Protocol</xmpp:note> 
-      </xmpp:SupportedXep>
-    </implements>
-    <implements>
-      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0115.html" />
-        <xmpp:status>?</xmpp:status>
+        <xmpp:status>complete</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0115: Entity Capabilities</xmpp:note>   
       </xmpp:SupportedXep>
     </implements>
     <implements>
       <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0144.html" />
-        <xmpp:status>?</xmpp:status>
-        <xmpp:version>?</xmpp:version>
-        <xmpp:note>XEP-0144: Roster Item Exchange</xmpp:note>
-      </xmpp:SupportedXep>
-    </implements>
-    <implements>
-      <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0147.html" />
-        <xmpp:status>?</xmpp:status>
-        <xmpp:version>?</xmpp:version>
-        <xmpp:note>XEP-0147: XMPP URI Scheme Query Components</xmpp:note>
-      </xmpp:SupportedXep>
-    </implements>
-    <implements>
-      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0153.html" />
-        <xmpp:status>?</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0153: vCard-Based Avatars</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
       <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0157.html" />
-        <xmpp:status>?</xmpp:status>
-        <xmpp:version>?</xmpp:version>
-        <xmpp:note>XEP-0157: Contact Addresses for XMPP Services</xmpp:note>
-      </xmpp:SupportedXep>
-    </implements>
-    <implements>
-      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0158.html" />
-        <xmpp:status>?</xmpp:status>
+        <xmpp:status>partial</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0158: CAPTCHA Forms</xmpp:note>
       </xmpp:SupportedXep>
@@ -272,14 +216,14 @@
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0162.html" />
         <xmpp:status>complete</xmpp:status>
-        <xmpp:version>0.2</xmpp:version>
+        <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0162: Best Practices for Roster and Subscription Management</xmpp:note>  
       </xmpp:SupportedXep>
     </implements>
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0163.html" />
-        <xmpp:status>?</xmpp:status>
+        <xmpp:status>complete</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0163: Personal Eventing Protocol</xmpp:note>  
       </xmpp:SupportedXep>
@@ -290,14 +234,6 @@
         <xmpp:status>complete</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0172: User Nickname</xmpp:note>  
-      </xmpp:SupportedXep>
-    </implements>
-    <implements>
-      <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0174.html" />
-        <xmpp:status>incomplete</xmpp:status>
-        <xmpp:version>?</xmpp:version>
-        <xmpp:note>XEP-0174: Serverless Messaging</xmpp:note>      
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -326,56 +262,24 @@
     </implements>
     <implements>
       <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0200.html" />
-        <xmpp:status>incomplete</xmpp:status>
-        <xmpp:version>?</xmpp:version>
-        <xmpp:note>XEP-0200: Stanza Encryption</xmpp:note>  
-      </xmpp:SupportedXep>
-    </implements>
-    <implements>
-      <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0201.html" />
-        <xmpp:status>incomplete</xmpp:status>
-        <xmpp:version>?</xmpp:version>
-        <xmpp:note>XEP-0201: Best Practices for Message Threads</xmpp:note>  
-      </xmpp:SupportedXep>
-    </implements>
-    <implements>
-      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0215.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0215: External Service Discovery</xmpp:note>  
       </xmpp:SupportedXep>
     </implements>
     <implements>
       <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0221.html" />
-        <xmpp:status>partial</xmpp:status>
-        <xmpp:version>1.0</xmpp:version>
-        <xmpp:note>XEP-0221: Data Forms Media Element</xmpp:note>
-      </xmpp:SupportedXep>
-    </implements>
-    <implements>
-      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0223.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>complete</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0223: Persistent Storage of Private Data via PubSub</xmpp:note>   
       </xmpp:SupportedXep>
     </implements>
     <implements>
       <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0225.html" />
-        <xmpp:status>incomplete</xmpp:status>
-        <xmpp:version>?</xmpp:version>
-        <xmpp:note>XEP-0225: Component Connections</xmpp:note>   
-      </xmpp:SupportedXep>
-    </implements>
-    <implements>
-      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0234.html" />
-        <xmpp:status>?</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0234: Jingle File Transfer</xmpp:note> 
       </xmpp:SupportedXep>
@@ -384,7 +288,8 @@
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0237.html" />
         <xmpp:status>complete</xmpp:status>
-        <xmpp:version>1.2</xmpp:version>
+        <xmpp:version>?</xmpp:version>
+        <xmpp:note>XEP-0237: Roster Versioning</xmpp:note> 
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -398,7 +303,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0249.html" />
-        <xmpp:status>?</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0249: Direct MUC Invitations</xmpp:note> 
       </xmpp:SupportedXep>
@@ -406,7 +311,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0261.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0261: Jingle In-Band Bytestreams Transport Method</xmpp:note> 
       </xmpp:SupportedXep>
@@ -414,7 +319,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0280.html" />
-        <xmpp:status>?</xmpp:status>
+        <xmpp:status>complete</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0280: Message Carbons</xmpp:note> 
       </xmpp:SupportedXep>
@@ -422,7 +327,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0308.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0308: Last Message Correction</xmpp:note> 
       </xmpp:SupportedXep>
@@ -430,9 +335,9 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0313.html" />
-        <xmpp:status>partial</xmpp:status>
+        <xmpp:status>complete</xmpp:status>
         <xmpp:version>?</xmpp:version>
-        <xmpp:note>XEP-0313: Message Archive Management, partial, MUC-MAM not implemented</xmpp:note> 
+        <xmpp:note>XEP-0313: Message Archive Management</xmpp:note> 
       </xmpp:SupportedXep>
     </implements>
     <implements>
@@ -446,7 +351,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0333.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>complete</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0333: Chat Markers</xmpp:note> 
       </xmpp:SupportedXep>
@@ -478,7 +383,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0368.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>complete</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0368: SRV records for XMPP over TLS</xmpp:note> 
       </xmpp:SupportedXep>
@@ -486,7 +391,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0369.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0369: Mediated Information eXchange (MIX)</xmpp:note> 
       </xmpp:SupportedXep>
@@ -494,7 +399,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0374.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version
         <xmpp:note>XEP-0374: OpenPGP for XMPP Instant Messaging</xmpp:note>
       </xmpp:SupportedXep>
@@ -502,7 +407,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0377.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0377: Spam Reporting (via XEP-0191)</xmpp:note>
       </xmpp:SupportedXep>
@@ -510,7 +415,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0379.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0379: Pre-Authenticated Roster Subscription</xmpp:note>
       </xmpp:SupportedXep>
@@ -518,7 +423,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0380.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0380: Explicit Message Encryption</xmpp:note>   
       </xmpp:SupportedXep>
@@ -534,7 +439,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0386.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0386: Bind 2.0</xmpp:note>
       </xmpp:SupportedXep>
@@ -542,7 +447,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0390.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0390: Entity Capabilities 2.0</xmpp:note>
       </xmpp:SupportedXep>
@@ -550,7 +455,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0392.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0392: Consistent Color Generation</xmpp:note>
       </xmpp:SupportedXep>
@@ -558,7 +463,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0396.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0396: Jingle Encrypted Transports - OMEMO</xmpp:note>
       </xmpp:SupportedXep>
@@ -566,23 +471,15 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0397.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0397: Instant Stream Resumption</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
       <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0398.html" />
-        <xmpp:status>incomplete</xmpp:status>
-        <xmpp:version>?</xmpp:version>
-        <xmpp:note>XEP-0398: User Avatar to vCard-Based Avatars Conversion</xmpp:note>
-      </xmpp:SupportedXep>
-    </implements>
-    <implements>
-      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0402.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0402: PEP Native Bookmarks</xmpp:note>
       </xmpp:SupportedXep>
@@ -590,7 +487,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0409.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0409: IM Routing-NG</xmpp:note>
       </xmpp:SupportedXep>
@@ -598,23 +495,15 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0410.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0410: MUC Self-Ping (Schrödinger's Chat)</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
       <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0411.html" />
-        <xmpp:status>incomplete</xmpp:status>
-        <xmpp:version>?</xmpp:version>
-        <xmpp:note>XEP-0411: Bookmarks Conversion</xmpp:note>
-      </xmpp:SupportedXep>
-    </implements>
-    <implements>
-      <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0420.html" />
-        <xmpp:status>incomplete</xmpp:status>
+        <xmpp:status>no</xmpp:status>
         <xmpp:version>?</xmpp:version>
         <xmpp:note>XEP-0420: Stanza Content Encryption</xmpp:note>
       </xmpp:SupportedXep>

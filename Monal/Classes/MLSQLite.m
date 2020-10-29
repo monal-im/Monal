@@ -17,10 +17,18 @@
 }
 @end
 
+#ifdef DEBUG
+static NSMutableDictionary* currentTransactions;
+#endif
+
 @implementation MLSQLite
 
 +(void) initialize
 {
+#ifdef DEBUG
+    currentTransactions = [[NSMutableDictionary alloc] init];
+#endif
+    
     if(sqlite3_config(SQLITE_CONFIG_MULTITHREAD) == SQLITE_OK)
         DDLogInfo(@"sqlite initialize: sqlite3 configured ok");
     else
@@ -201,9 +209,15 @@
 
 -(void) throwErrorForQuery:(NSString*) query andArguments:(NSArray*) args
 {
-    NSString* error = [NSString stringWithFormat:@"%@ --> %@", query, [NSString stringWithUTF8String:sqlite3_errmsg(self->_database)]];
+    NSString* error = [NSString stringWithUTF8String:sqlite3_errmsg(self->_database)];
     DDLogError(@"SQLite Exception: %@ for query '%@' having params %@", error, query ? query : @"", args ? args : @[]);
-    @throw [NSException exceptionWithName:@"SQLite3Exception" reason:error userInfo:@{@"query": query ? query : [NSNull null], @"args": args ? args : [NSNull null]}];
+    @throw [NSException exceptionWithName:@"SQLite3Exception" reason:error userInfo:@{
+#ifdef DEBUG
+        @"currentTransactions": currentTransactions,
+#endif
+        @"query": query ? query : [NSNull null],
+        @"args": args ? args : [NSNull null]
+    }];
 }
 
 -(void) testThreadInstanceForQuery:(NSString*) query andArguments:(NSArray*) args
@@ -212,7 +226,13 @@
     if(!threadData[@"_sqliteInstancesForThread"] || !threadData[@"_sqliteInstancesForThread"][_dbFile] || self != threadData[@"_sqliteInstancesForThread"][_dbFile])
     {
         DDLogError(@"Shared instance of MLSQLite used in wrong thread for query '%@' having params %@", query ? query : @"", args ? args : @[]);
-        @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Shared instance of MLSQLite used in wrong thread!" userInfo:@{@"query": query ? query : [NSNull null], @"args": args ? args : [NSNull null]}];
+        @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Shared instance of MLSQLite used in wrong thread!" userInfo:@{
+#ifdef DEBUG
+            @"currentTransactions": currentTransactions,
+#endif
+            @"query": query ? query : [NSNull null],
+            @"args": args ? args : [NSNull null]
+        }];
     }
 }
 
@@ -291,6 +311,12 @@
             DDLogWarn(@"Retrying transaction start...");
         }
     } while(!retval);
+#ifdef DEBUG
+    NSString* ownThread = [NSString stringWithFormat:@"%@", [NSThread currentThread]];
+    @synchronized(currentTransactions) {
+        currentTransactions[ownThread] = [NSThread callStackSymbols];
+    }
+#endif
 }
 
 -(void) endWriteTransaction
@@ -299,7 +325,15 @@
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
     threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:[threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] - 1];
     if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
+    {
         [self executeNonQuery:@"COMMIT;"];		//commit only outermost transaction
+#ifdef DEBUG
+        NSString* ownThread = [NSString stringWithFormat:@"%@", [NSThread currentThread]];
+        @synchronized(currentTransactions) {
+            [currentTransactions removeObjectForKey:ownThread];
+        }
+#endif
+    }
 }
 
 -(id) executeScalar:(NSString*) query

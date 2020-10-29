@@ -201,6 +201,7 @@
     [dic setObject:[NSNumber numberWithBool:self.selfSignedSSL] forKey:kSelfSigned];
     [dic setObject:[NSNumber numberWithBool:self.directTLS] forKey:kDirectTLS];
     [dic setObject:self.accountno forKey:kAccountID];
+    [dic setObject:self.rosterName forKey:kRosterName];
 
     if(!self.editMode)
     {

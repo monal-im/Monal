@@ -27,13 +27,13 @@
 
 +(void) processIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
-    if([[iqNode findFirst:@"/@type"] isEqualToString:kiqGetType])
+    if([iqNode check:@"/<type=get>"])
         [self processGetIq:iqNode forAccount:account];
-    else if([[iqNode findFirst:@"/@type"] isEqualToString:kiqSetType])
+    if([iqNode check:@"/<type=set>"])
         [self processSetIq:iqNode forAccount:account];
-    else if([[iqNode findFirst:@"/@type"] isEqualToString:kiqResultType])
+    if([iqNode check:@"/<type=result>"])
         [self processResultIq:iqNode forAccount:account];
-    else if([[iqNode findFirst:@"/@type"] isEqualToString:kiqErrorType])
+    if([iqNode check:@"/<type=error>"])
         [self processErrorIq:iqNode forAccount:account];
     else
         DDLogWarn(@"Ignoring invalid iq type: %@", [iqNode findFirst:@"/@type"]);
@@ -106,7 +106,7 @@
 
 +(void) handleCatchupFor:(xmpp*) account withIqNode:(XMPPIQ*) iqNode
 {
-    if([[iqNode findFirst:@"/@type"] isEqualToString:@"error"])
+    if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Mam catchup query returned error: %@", [iqNode findFirst:@"error"]);
         [account mamFinished];
@@ -144,7 +144,7 @@
 
 +(void) handleCarbonsEnabledFor:(xmpp*) account withIqNode:(XMPPIQ*) iqNode
 {
-    if([[iqNode findFirst:@"/@type"] isEqualToString:@"error"])
+    if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"carbon enable iq returned error: %@", [iqNode findFirst:@"error"]);
         return;
@@ -154,7 +154,7 @@
 
 +(void) handleBindFor:(xmpp*) account withIqNode:(XMPPIQ*) iqNode
 {
-    if([[iqNode findFirst:@"/@type"] isEqualToString:@"error"])
+    if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Binding our resource returned an error: %@", [iqNode findFirst:@"error"]);
         if([@"cancel" isEqualToString:[iqNode findFirst:@"/@type"]])
@@ -211,7 +211,7 @@
         return;
     }
     
-    if([[iqNode findFirst:@"/@type"] isEqualToString:@"error"])
+    if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Roster query returned an error: %@", [iqNode findFirst:@"error"]);
         [self postError:@"XMPP Roster Error" withIqNode:iqNode andAccount:account];
@@ -268,7 +268,7 @@
 //features advertised on our own jid/account
 +(void) handleAccountDiscoInfo:(xmpp*) account withIqNode:(XMPPIQ*) iqNode
 {
-    if([[iqNode findFirst:@"/@type"] isEqualToString:@"error"])
+    if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Disco info query to our account returned an error: %@", [iqNode findFirst:@"error"]);
         [self postError:@"XMPP Account Info Error" withIqNode:iqNode andAccount:account];
@@ -337,7 +337,7 @@
 //features advertised on our server
 +(void) handleServerDiscoInfo:(xmpp*) account withIqNode:(XMPPIQ*) iqNode
 {
-    if([[iqNode findFirst:@"/@type"] isEqualToString:@"error"])
+    if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Disco info query to our server returned an error: %@", [iqNode findFirst:@"error"]);
         [self postError:@"XMPP Disco Info Error" withIqNode:iqNode andAccount:account];

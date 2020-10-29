@@ -120,6 +120,7 @@
         self.resource = [HelperTools encodeRandomResource];
         self.directTLS = NO;
         self.selfSignedSSL = NO;
+        self.rosterName = @"";
     }
     self.sectionArray = @[@"", NSLocalizedString(@"Account", @""), NSLocalizedString(@"General", @""), NSLocalizedString(@"Advanced Settings", @""), @""];
     

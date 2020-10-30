@@ -537,6 +537,7 @@ enum msgSentState {
     [super viewWillAppear:animated];
 
     self.viewDidAppear = NO;
+    self.viewIsScrolling = YES;
 
     [MLNotificationManager sharedInstance].currentAccountNo=self.contact.accountId;
     [MLNotificationManager sharedInstance].currentContact=self.contact;
@@ -617,18 +618,6 @@ enum msgSentState {
     [self initLastMsgButton];
 
     self.viewDidAppear = YES;
-
-#ifndef DISABLE_OMEMO
-    // load omemo devices from contact if we have 0 in our store
-    // FIXME: OMEMO true
-    if(![self.xmppAccount.omemo knownDevicesForAddressNameExist:self.contact.contactJid] || YES)
-    {
-        // FIXME: Remove YES
-        [self.xmppAccount.omemo queryOMEMODevicesFrom:self.contact.contactJid];
-        [self.xmppAccount.omemo queryOMEMODevicesFrom:self.jid];
-        [self.xmppAccount.omemo sendOMEMOBundle];
-    }
-#endif
 
 	[self initSearchViewControler];
 }

@@ -411,11 +411,7 @@
 +(void) omemoResult:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
 #ifndef DISABLE_OMEMO
-    if([iqNode check:@"{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.devicelist>"]) {
-        NSArray<NSNumber*>* deviceIds =  [iqNode find:@"{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.devicelist>/item/{eu.siacs.conversations.axolotl}list/device@id|int"];
-        NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
-        [account.omemo processOMEMODevices:deviceSet from:iqNode.from];
-    } else if([iqNode check:@"{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>"]) {
+    if([iqNode check:@"{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>"]) {
         [account.omemo processOMEMOKeys:iqNode];
     }
 #endif

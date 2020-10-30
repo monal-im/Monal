@@ -177,7 +177,7 @@ NSString *const kXMPPPresence = @"presence";
     [self readState];
     
     // Init omemo
-    self.omemo = [[MLOMEMO alloc] initWithAccount:self.accountNo jid:self.connectionProperties.identity.jid ressource:self.connectionProperties.identity.resource connectionProps:self.connectionProperties xmppConnection:self];
+    self.omemo = [[MLOMEMO alloc] initWithAccount:self];
     
     //we want to get automatic avatar updates (XEP-0084)
     [self.pubsub registerForNode:@"urn:xmpp:avatar:metadata" withHandler:[HelperTools createStaticHandlerWithDelegate:[self class] andMethod:@selector(avatarHandlerFor:withNode:jid:type:andData:) andAdditionalArguments:nil]];
@@ -1587,8 +1587,6 @@ NSString *const kXMPPPresence = @"presence";
                     }
                 }];
             }
-
-            [self postConnectNotification];
         }
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}failed"] && self.connectionProperties.supportsSM3 && self.accountState<kStateBound && self.resuming)
         {
@@ -1803,13 +1801,6 @@ NSString *const kXMPPPresence = @"presence";
 }
 
 #pragma mark stanza handling
-
--(void) postConnectNotification
-{
-    NSDictionary *dic = @{@"AccountNo":self.accountNo, @"AccountName": self.connectionProperties.identity.jid};
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
-    [self accountStatusChanged];
-}
 
 -(void) sendIq:(XMPPIQ*) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler
 {
@@ -2272,8 +2263,10 @@ NSString *const kXMPPPresence = @"presence";
     //we are now bound
     _accountState = kStateBound;
     _connectedTime = [NSDate date];
-    [self postConnectNotification];
-    _usableServersList = [[NSMutableArray alloc] init];       //reset list to start again with the highest SRV priority on next connect
+    NSDictionary* dic = @{@"AccountNo":self.accountNo, @"AccountName": self.connectionProperties.identity.jid};
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
+    [self accountStatusChanged];
+    _usableServersList = [[NSMutableArray alloc] init]; //reset list to start again with the highest SRV priority on next connect
     _exponentialBackoff = 0;
     
     //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
@@ -2337,8 +2330,6 @@ NSString *const kXMPPPresence = @"presence";
     //mam query will be done in MLIQProcessor once the disco result returns
     
 #ifndef DISABLE_OMEMO
-    // omemo
-    [self.omemo queryOMEMODevicesFrom:self.connectionProperties.identity.jid];
     [self.omemo sendOMEMOBundle];
 #endif
 }
@@ -3188,6 +3179,7 @@ NSString *const kXMPPPresence = @"presence";
     {
         _catchupDone = YES;
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
+
     }
 }
 

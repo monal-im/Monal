@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) MLSignalStore* monalSignalStore;
 @property (nonatomic, strong) NSString* deviceQueryId;
 
--(MLOMEMO *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid ressource:(NSString*) ressource connectionProps:(MLXMPPConnection *) connectionProps xmppConnection:(xmpp*) xmppConnection;
+-(MLOMEMO*) initWithAccount:(xmpp*) account;
 
 /*
  * handle omemo iq's

@@ -23,37 +23,63 @@
 
 // TODO: rename senderJID to accountJid
 @property (nonatomic, strong) NSString* _senderJid;
-@property (nonatomic, strong) NSString* _accountRessource;
 @property (nonatomic, strong) NSString* _accountNo;
 @property (nonatomic, strong) MLXMPPConnection* _connection;
 
-@property (nonatomic, strong) xmpp* xmppConnection;
+@property (nonatomic, strong) xmpp* account;
+@property (nonatomic, assign) BOOL deviceListExists;
 
 // jid -> @[deviceID1, deviceID2]
 @property (nonatomic, strong) NSMutableDictionary* devicesWithBrokenSession;
 @end
 
 static const size_t MIN_OMEMO_KEYS = 25;
-static const size_t MAX_OMEMO_KEYS = 120;
+static const size_t MAX_OMEMO_KEYS = 100;
 
 @implementation MLOMEMO
 
 const int KEY_SIZE = 16;
 
--(MLOMEMO *) initWithAccount:(NSString *) accountNo jid:(NSString *) jid ressource:(NSString*) ressource connectionProps:(MLXMPPConnection *) connectionProps xmppConnection:(xmpp*) xmppConnection
+-(MLOMEMO*) initWithAccount:(xmpp*) account;
 {
     self = [super init];
-    self._senderJid = jid;
-    self._accountRessource = ressource;
-    self._accountNo = accountNo;
-    self._connection = connectionProps;
-    self.xmppConnection = xmppConnection;
+    self._senderJid = account.connectionProperties.identity.jid;
+    self._accountNo = account.accountNo;
+    self._connection = account.connectionProperties;
+    self.account = account;
+    self.deviceListExists = YES;
 
     self.devicesWithBrokenSession = [[NSMutableDictionary alloc] init];
 
     [self setupSignal];
 
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(connectionStarted:) name:kMLHasConnectedNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(connected:) name:kMonalFinishedCatchup object:nil];
+
     return self;
+}
+
+-(void) connectionStarted:(NSNotification *) notification {
+    NSDictionary* dic = notification.object;
+    if(!dic) return;
+    NSString* accountNo = [dic objectForKey:@"AccountNo"];
+    if(!accountNo) return;
+    if([self._accountNo isEqualToString:accountNo]) {
+        self.deviceListExists = NO;
+    }
+}
+
+-(void) connected:(NSNotification *) notification {
+    xmpp* notiAccount = notification.object;
+    if(!notiAccount) return;
+
+    if([self._accountNo isEqualToString:notiAccount.accountNo]) {
+        if(self.deviceListExists == NO) {
+            // we need to publish a new devicelist if we did not receive our own list after a new connection
+            [self sendOMEMODeviceWithForce:YES];
+            self.deviceListExists = YES;
+        }
+    }
 }
 
 -(void) setupSignal
@@ -68,9 +94,7 @@ const int KEY_SIZE = 16;
     SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self._signalContext];
 
     // init MLPubSub handler
-    [self.xmppConnection.pubsub registerForNode:@"eu.siacs.conversations.axolotl.devicelist" withHandler:[HelperTools createStaticHandlerWithDelegate:[self class] andMethod:@selector(devicelistHandlerFor:withNode:jid:type:andData:) andAdditionalArguments:nil]];
-
-    // TODO: register pubsub handler for devicelist
+    [self.account.pubsub registerForNode:@"eu.siacs.conversations.axolotl.devicelist" withHandler:[HelperTools createStaticHandlerWithDelegate:[self class] andMethod:@selector(devicelistHandlerFor:withNode:jid:type:andData:) andAdditionalArguments:nil]];
 
     if(self.monalSignalStore.deviceid == 0)
     {
@@ -86,10 +110,6 @@ const int KEY_SIZE = 16;
 
         SignalAddress* address = [[SignalAddress alloc] initWithName:self._senderJid deviceId:self.monalSignalStore.deviceid];
         [self.monalSignalStore saveIdentity:address identityKey:self.monalSignalStore.identityKeyPair.publicKey];
-
-        // request own omemo device list -> we will add our new device automatilcy as we are missing in the list
-        [self queryOMEMODevicesFrom:self._senderJid];
-        // FIXME: query queryOMEMODevicesFrom after connected -> state change
     }
 }
 
@@ -97,7 +117,15 @@ const int KEY_SIZE = 16;
 {
     //type will be "publish", "retract", "purge" or "delete", "publish" and "retract" will have the data dictionary filled with id --> data pairs
     //the data for "publish" is the item node with the given id, the data for "retract" is always @YES
-    DDLogWarn(@"UNIMPLEMENTED PEP OMEMO DEVICELIST PUSH");
+    assert([node isEqualToString:@"eu.siacs.conversations.axolotl.devicelist"]);
+    if(type && [type isEqualToString:@"publish"]) {
+        MLXMLNode* publishedDevices = [data objectForKey:@"current"];
+        if(publishedDevices && jid) {
+            NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"/{http://jabber.org/protocol/pubsub#event}item/{eu.siacs.conversations.axolotl}list/device@id|int"];
+            NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
+            [account.omemo processOMEMODevices:deviceSet from:jid];
+        }
+    }
 }
 
 -(void) sendOMEMOBundle
@@ -124,7 +152,7 @@ const int KEY_SIZE = 16;
         self.deviceQueryId = [query.attributes objectForKey:@"id"];
     }
 
-    if(self.xmppConnection) [self.xmppConnection send:query];
+    if(self.account) [self.account send:query];
 }
 
 /*
@@ -162,14 +190,14 @@ const int KEY_SIZE = 16;
     [bundleQuery setiqTo:jid];
     [bundleQuery requestBundles:deviceid];
 
-    if(self.xmppConnection) [self.xmppConnection send:bundleQuery];
+    if(self.account) [self.account send:bundleQuery];
 }
 
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString *) source
 {
     if(receivedDevices)
     {
-        NSAssert([self._senderJid isEqualToString:self._connection.identity.jid], @"connection jid should be equal to the senderJid");
+        NSAssert([self._senderJid caseInsensitiveCompare:self._connection.identity.jid] == NSOrderedSame, @"connection jid should be equal to the senderJid");
 
         NSArray<NSNumber*>* existingDevices = [self.monalSignalStore knownDevicesForAddressName:source];
 
@@ -194,8 +222,9 @@ const int KEY_SIZE = 16;
         }
         // TODO: delete deviceid from new session array
         // Send our own device id when it is missing on the server
-        if(!source || [source isEqualToString:self._senderJid])
+        if(!source || [source caseInsensitiveCompare:self._senderJid] == NSOrderedSame)
         {
+            self.deviceListExists = YES;
             [self sendOMEMODevice:receivedDevices force:NO];
         }
     }
@@ -243,7 +272,7 @@ const int KEY_SIZE = 16;
 
 -(void) sendOMEMODevice:(NSSet<NSNumber*>*) receivedDevices force:(BOOL) force
 {
-        NSMutableSet<NSNumber*>* devices = [[NSMutableSet alloc] init];
+    NSMutableSet<NSNumber*>* devices = [[NSMutableSet alloc] init];
     if(receivedDevices && [receivedDevices count] > 0)
     {
         [devices unionSet:receivedDevices];
@@ -317,29 +346,27 @@ const int KEY_SIZE = 16;
             NSString* keyid = (NSString *)[row objectForKey:@"preKeyId"];
             NSData* preKeyData = [row objectForKey:@"preKey"];
             if(preKeyData) {
-                //parallelize prekey bundle processing
-                //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                    DDLogDebug(@"Generating keyBundle for key id %@...", keyid);
-                    SignalPreKeyBundle* keyBundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
-                                                                                deviceId:device
-                                                                                preKeyId:[keyid intValue]
-                                                                                preKeyPublic:preKeyData
-                                                                                signedPreKeyId:signedPreKeyPublicId.intValue
-                                                                                signedPreKeyPublic:signedPreKeyPublic
-                                                                                signature:signedPreKeySignature
-                                                                                identityKey:identityKey
-                                                                                error:nil];
-                    // dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                        NSError* error;
-                        DDLogDebug(@"Processing keyBundle for key id %@...", keyid);
-                        [builder processPreKeyBundle:keyBundle error:&error];
-                        DDLogDebug(@"Done processing keyBundle for key id %@...", keyid);
-                        if(error)
-                        {
-                            DDLogWarn(@"Error creating preKeyBundle: %@", error);
-                        }
-                    // });
-                // });
+                DDLogDebug(@"Generating keyBundle for key id %@...", keyid);
+                NSError* error;
+                SignalPreKeyBundle* keyBundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
+                                                                            deviceId:device
+                                                                            preKeyId:[keyid intValue]
+                                                                            preKeyPublic:preKeyData
+                                                                            signedPreKeyId:signedPreKeyPublicId.intValue
+                                                                            signedPreKeyPublic:signedPreKeyPublic
+                                                                            signature:signedPreKeySignature
+                                                                            identityKey:identityKey
+                                                                            error:&error];
+                if(error || !keyBundle)
+                {
+                    DDLogWarn(@"Error creating preKeyBundle: %@", error);
+                    continue;
+                }
+                [builder processPreKeyBundle:keyBundle error:&error];
+                if(error)
+                {
+                    DDLogWarn(@"Error adding preKeyBundle: %@", error);
+                }
             }
             else
             {
@@ -366,7 +393,7 @@ const int KEY_SIZE = 16;
 
             // Send KeyTransportElement only to the one device (overrideDevices)
             [self encryptMessage:messageNode withMessage:nil toContact:source];
-            if(self.xmppConnection) [self.xmppConnection send:messageNode];
+            if(self.account) [self.account send:messageNode];
         }
     }
 }
@@ -669,7 +696,7 @@ const int KEY_SIZE = 16;
     [itemNode addChild:listNode];
 
     // publish devices via pubsub
-    [self.xmppConnection.pubsub publishItem:itemNode onNode:@"eu.siacs.conversations.axolotl.devicelist" withConfigOptions:@{
+    [self.account.pubsub publishItem:itemNode onNode:@"eu.siacs.conversations.axolotl.devicelist" withConfigOptions:@{
         @"pubsub#persist_items": @"true",
         @"pubsub#access_model": @"open"
     }];
@@ -720,7 +747,7 @@ const int KEY_SIZE = 16;
     [itemNode addChild:bundle];
 
     // send bundle via pubsub interface
-    [self.xmppConnection.pubsub publishItem:itemNode onNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%u", deviceid] withConfigOptions:@{
+    [self.account.pubsub publishItem:itemNode onNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%u", deviceid] withConfigOptions:@{
         @"pubsub#persist_items": @"true",
         @"pubsub#access_model": @"open"
     }];

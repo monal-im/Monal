@@ -34,7 +34,7 @@
     [super viewWillAppear:animated];
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-    [nc addObserver:self selector:@selector(connected) name:kMLHasConnectedNotice object:nil];
+    [nc addObserver:self selector:@selector(connected) name:kMonalFinishedCatchup object:nil];
     [nc addObserver:self selector:@selector(error) name:kXMPPError object:nil];
     [self registerForKeyboardNotifications];
 }
@@ -61,17 +61,17 @@
     self.loginHUD.mode=MBProgressHUDModeIndeterminate;
     self.loginHUD.removeFromSuperViewOnHide=YES;
 
-    NSString *jid= self.jid.text;
-    NSString *password = self.password.text;
+    NSString* jid = self.jid.text;
+    NSString* password = self.password.text;
     
-    NSArray* elements=[jid componentsSeparatedByString:@"@"];
+    NSArray* elements = [jid componentsSeparatedByString:@"@"];
 
-    NSString *domain;
-    NSString *user;
+    NSString* domain;
+    NSString* user;
     //if it is a JID
-    if([elements count]>1)
+    if([elements count] > 1)
     {
-        user= [elements objectAtIndex:0];
+        user = [elements objectAtIndex:0];
         domain = [elements objectAtIndex:1];
     }
    
@@ -98,8 +98,8 @@
     }
     
     NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
-    [dic setObject:domain forKey:kDomain];
-    [dic setObject:user forKey:kUsername];
+    [dic setObject:domain.lowercaseString forKey:kDomain];
+    [dic setObject:user.lowercaseString forKey:kUsername];
     [dic setObject:[HelperTools encodeRandomResource]  forKey:kResource];
     [dic setObject:@YES forKey:kEnabled];
     [dic setObject:@NO forKey:kSelfSigned];

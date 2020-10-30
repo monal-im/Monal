@@ -187,9 +187,9 @@
     }
 
     NSMutableDictionary* dic = [[NSMutableDictionary alloc] init];
-    [dic setObject:domain forKey:kDomain];
+    [dic setObject:domain.lowercaseString forKey:kDomain];
 
-    if(user) [dic setObject:user forKey:kUsername];
+    if(user) [dic setObject:user.lowercaseString forKey:kUsername];
 
     if(self.server) {
         [dic setObject:self.server  forKey:kServer];

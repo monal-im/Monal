@@ -34,6 +34,14 @@
 
 - (void)viewDidAppear:(BOOL)animated
 {
+    CGFloat xAxis = self.searchBar.frame.origin.x;
+    CGFloat yAxis = self.searchBar.frame.origin.y;
+    CGFloat height = self.searchBar.frame.size.height;
+    CGFloat width = self.searchBar.frame.size.width;
+    if (yAxis > 50) {
+        self.searchBar.frame = CGRectMake(xAxis, yAxis-50, width, height);
+    }
+    
     self.toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.searchBar.frame.size.width, self.searchBar.frame.size.height)];
     UniChar upCode = 0x2191;
     UniChar downCode = 0x2193;

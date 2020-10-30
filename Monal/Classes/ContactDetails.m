@@ -606,7 +606,7 @@
         [self.xmppAccount updateRosterItem:self.contact.contactJid withName:textField.text];
         
         self.saveHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-        self.saveHUD.label.text = NSLocalizedString(@"Saving changes to server",@"");
+        self.saveHUD.label.text = NSLocalizedString(@"Saving changes to server", @"");
         self.saveHUD.mode = MBProgressHUDModeIndeterminate;
         self.saveHUD.removeFromSuperViewOnHide = YES;
     }

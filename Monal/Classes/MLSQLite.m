@@ -211,6 +211,9 @@ static NSMutableDictionary* currentTransactions;
 {
     NSString* error = [NSString stringWithUTF8String:sqlite3_errmsg(self->_database)];
     DDLogError(@"SQLite Exception: %@ for query '%@' having params %@", error, query ? query : @"", args ? args : @[]);
+#ifdef DEBUG
+    DDLogError(@"currentTransactions: %@", currentTransactions);
+#endif
     @throw [NSException exceptionWithName:@"SQLite3Exception" reason:error userInfo:@{
 #ifdef DEBUG
         @"currentTransactions": currentTransactions,
@@ -226,6 +229,9 @@ static NSMutableDictionary* currentTransactions;
     if(!threadData[@"_sqliteInstancesForThread"] || !threadData[@"_sqliteInstancesForThread"][_dbFile] || self != threadData[@"_sqliteInstancesForThread"][_dbFile])
     {
         DDLogError(@"Shared instance of MLSQLite used in wrong thread for query '%@' having params %@", query ? query : @"", args ? args : @[]);
+#ifdef DEBUG
+        DDLogError(@"currentTransactions: %@", currentTransactions);
+#endif
         @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Shared instance of MLSQLite used in wrong thread!" userInfo:@{
 #ifdef DEBUG
             @"currentTransactions": currentTransactions,

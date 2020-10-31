@@ -326,3 +326,4 @@
 "No search result." = "No search result.";
 "Notification" = "Notification";
 "Can't convert the image to jpeg format." = "Can't convert the image to jpeg format.";
+"Message was encrypted with omemo and can't be decrypted anymore" = "Message was encrypted with omemo and can't be decrypted anymore";

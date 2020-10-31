@@ -15,6 +15,7 @@
 #import "XMPPIQ.h"
 #import "xmpp.h"
 #import "MLPubSub.h"
+#import "DataLayer.h"
 
 
 @interface MLOMEMO ()
@@ -124,6 +125,7 @@ const int KEY_SIZE = 16;
         if(publishedDevices && jid) {
             NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"/{http://jabber.org/protocol/pubsub#event}item/{eu.siacs.conversations.axolotl}list/device@id|int"];
             NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
+
             [account.omemo processOMEMODevices:deviceSet from:jid];
         }
     }
@@ -202,6 +204,9 @@ const int KEY_SIZE = 16;
     if(receivedDevices)
     {
         NSAssert([self._senderJid caseInsensitiveCompare:self._connection.identity.jid] == NSOrderedSame, @"connection jid should be equal to the senderJid");
+
+        if(![[DataLayer  sharedInstance] isContactInList:source forAccount:self._accountNo] && ![source isEqualToString:self._senderJid])
+            return;
 
         NSArray<NSNumber*>* existingDevices = [self.monalSignalStore knownDevicesForAddressName:source];
 

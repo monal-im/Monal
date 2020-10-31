@@ -68,7 +68,7 @@ static NSMutableDictionary* _typingNotifications;
         return;
 
     NSString* stanzaid = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];
-    //check stnaza-id @by according to the rules outlined in XEP-0359
+    //check stanza-id @by according to the rules outlined in XEP-0359
     if(!stanzaid && [account.connectionProperties.identity.jid isEqualToString:[messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@by"]])
         stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
 
@@ -78,7 +78,12 @@ static NSMutableDictionary* _typingNotifications;
     NSString* decrypted;
     if([messageNode check:@"/{jabber:client}message/{eu.siacs.conversations.axolotl}encrypted/header"])
     {
-        decrypted = [account.omemo decryptMessage:messageNode];
+        NSString* queryId = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"];
+        if(queryId && [queryId hasPrefix:@"MLhistory:"]) {
+            decrypted = NSLocalizedString(@"Message was encrypted with omemo and can't be decrypted anymore", @"");
+        } else {
+            decrypted = [account.omemo decryptMessage:messageNode];
+        }
     }
 
     if([messageNode check:@"body"] || [messageNode check:@"/<type=headline>/subject#"] || decrypted)

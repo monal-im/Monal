@@ -76,6 +76,7 @@ const int KEY_SIZE = 16;
     if([self._accountNo isEqualToString:notiAccount.accountNo]) {
         if(self.deviceListExists == NO) {
             // we need to publish a new devicelist if we did not receive our own list after a new connection
+            [self sendOMEMOBundle];
             [self sendOMEMODeviceWithForce:YES];
             self.deviceListExists = YES;
         }

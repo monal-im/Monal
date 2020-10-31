@@ -176,7 +176,6 @@ const int KEY_SIZE = 16;
     if(errorIq)
     {
         DDLogError(@"Could not fetch bundle from %@: rid: %@ - %@", jid, rid, errorIq);
-        // TODO: remove device from devicelist that need a new session && create new session if needed
         NSString* bundleName = [errorIq findFirst:@"/{jabber:client}iq/{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>@node"];
         if(!bundleName)
             return;
@@ -184,6 +183,8 @@ const int KEY_SIZE = 16;
         if(!ridFromIQ)
             return;
         [account.omemo deleteDeviceForSource:jid andRid:rid.intValue];
+        // We may have a broken session with a device that does not have a bundle anymore
+        [account.omemo sendKeyTransportElementIfNeeded:jid removeBrokenSessionForRid:rid];
     }
     else
     {
@@ -221,6 +222,15 @@ const int KEY_SIZE = 16;
                 // only delete other devices from signal store && keep our own entry
                 if(!([source isEqualToString:self._senderJid] && deviceId.intValue == self.monalSignalStore.deviceid))
                     [self deleteDeviceForSource:source andRid:deviceId.intValue];
+
+                // Remove device from broken sessions if needed
+                NSMutableSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:source];
+                NSNumber* ridNum = [NSNumber numberWithInt:[deviceId intValue]];
+                if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:ridNum])
+                {
+                    [devicesWithBrokenSession removeObject:ridNum];
+                    [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:source];
+                }
             }
         }
         // TODO: delete deviceid from new session array
@@ -369,27 +379,35 @@ const int KEY_SIZE = 16;
             }
         }
         // Build new session when a device session is marked as broken
-        NSMutableSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:jid];
-        NSNumber* ridNum = [NSNumber numberWithInt:[rid intValue]];
-        if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:ridNum])
-        {
-            // Remove device from list
-            [devicesWithBrokenSession removeObject:ridNum];
-            [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:jid];
-            if([devicesWithBrokenSession count] != 0) {
-                return;
-            }
-            // The needed device bundle for this contact/device was fetched
-            // Send new keys
-            XMPPMessage* messageNode = [[XMPPMessage alloc] init];
-            [messageNode.attributes setObject:jid forKey:@"to"];
-            [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
-            [messageNode setXmppId:[[NSUUID UUID] UUIDString]];
+        [self sendKeyTransportElementIfNeeded:jid removeBrokenSessionForRid:rid];
+    }
+}
 
-            // Send KeyTransportElement only to the one device (overrideDevices)
-            [self encryptMessage:messageNode withMessage:nil toContact:jid];
-            if(self.account) [self.account send:messageNode];
+-(void) sendKeyTransportElementIfNeeded:(NSString*) jid removeBrokenSessionForRid:(NSString*) rid
+{
+    // Build new session when a device session is marked as broken
+    NSMutableSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:jid];
+    NSNumber* ridNum = [NSNumber numberWithInt:[rid intValue]];
+    if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:ridNum])
+    {
+        // Remove device from list
+        [devicesWithBrokenSession removeObject:ridNum];
+        [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:jid];
+        DDLogDebug(@"Removed jid: %@, rid: %@ from devicesWithBrokenSession", jid, rid);
+        if([devicesWithBrokenSession count] != 0) {
+            return;
         }
+        // The needed device bundle for this contact/device was fetched
+        // Send new keys
+        XMPPMessage* messageNode = [[XMPPMessage alloc] init];
+        [messageNode.attributes setObject:jid forKey:@"to"];
+        [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
+        [messageNode setXmppId:[[NSUUID UUID] UUIDString]];
+
+        // Send KeyTransportElement only to the one device (overrideDevices)
+        [self encryptMessage:messageNode withMessage:nil toContact:jid];
+        DDLogDebug(@"Send KeyTransportElement to jid: %@", jid);
+        if(self.account) [self.account send:messageNode];
     }
 }
 

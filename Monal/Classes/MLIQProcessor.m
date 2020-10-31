@@ -80,8 +80,7 @@
 
 +(void) processResultIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
-    if([iqNode check:@"{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>"] ||
-       [iqNode check:@"{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.devicelist>"]) {
+    if([iqNode check:@"{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>"]) {
         [self omemoResult:iqNode forAccount:account];
     }
     

@@ -139,23 +139,6 @@ const int KEY_SIZE = 16;
     } andPreKeys:self.monalSignalStore.preKeys withDeviceId:self.monalSignalStore.deviceid];
 }
 
--(void) queryOMEMODevicesFrom:(NSString *) jid
-{
-    if(!self._connection.supportsPubSub)
-        return;
-    
-    XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
-    [query setiqTo:jid];
-    [query requestDevices];
-    if([jid isEqualToString:self._senderJid])
-    {
-        // save our own last omemo query id for matching against our own device list received from the server
-        self.deviceQueryId = [query.attributes objectForKey:@"id"];
-    }
-
-    if(self.account) [self.account send:query];
-}
-
 /*
  * generates new omemo keys if we have less than MIN_OMEMO_KEYS left
  * returns YES if keys were generated and the new omemo bundle was send
@@ -184,14 +167,33 @@ const int KEY_SIZE = 16;
 
 -(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
 {
-    if(!self._connection.supportsPubSub)
-        return;
-    
-    XMPPIQ* bundleQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
-    [bundleQuery setiqTo:jid];
-    [bundleQuery requestBundles:deviceid];
+    NSString* bundleNode = [NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%@", deviceid];
+    [self.account.pubsub fetchNode:bundleNode from:jid withItemsList:nil andHandler:[HelperTools createStaticHandlerWithDelegate:[self class] andMethod:@selector(handleBundleFetchResultForAccount:andJid:withErrorIq:andData:andRid:) andAdditionalArguments:@[deviceid]]];
+}
 
-    if(self.account) [self.account send:bundleQuery];
++(void) handleBundleFetchResultForAccount:(xmpp*) account andJid:(NSString*) jid withErrorIq:(XMPPIQ*) errorIq andData:(NSDictionary*) data andRid:(NSString*) rid
+{
+    if(errorIq)
+    {
+        DDLogError(@"Could not fetch bundle from %@: rid: %@ - %@", jid, rid, errorIq);
+        // TODO: remove device from devicelist that need a new session && create new session if needed
+        NSString* bundleName = [errorIq findFirst:@"/{jabber:client}iq/{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>@node"];
+        if(!bundleName)
+            return;
+        NSString* ridFromIQ = [bundleName componentsSeparatedByString:@":"][1];
+        if(!ridFromIQ)
+            return;
+        [account.omemo deleteDeviceForSource:jid andRid:rid.intValue];
+    }
+    else
+    {
+        if(!rid)
+            return;
+        MLXMLNode* receivedKeys = [data objectForKey:@"current"];
+        if(!receivedKeys)
+            return;
+        [account.omemo processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
+    }
 }
 
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString *) source
@@ -243,6 +245,10 @@ const int KEY_SIZE = 16;
 
 -(void) deleteDeviceForSource:(NSString*) source andRid:(int) rid
 {
+    // We should not delete our own device
+    if([source isEqualToString:self._senderJid] && rid == self.monalSignalStore.deviceid)
+        return;
+
     SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:rid];
     [self.monalSignalStore deleteDeviceforAddress:address];
 }
@@ -288,20 +294,14 @@ const int KEY_SIZE = 16;
     }
 }
 
--(void) processOMEMOKeys:(XMPPIQ*) iqNode
+-(void) processOMEMOKeys:(MLXMLNode*) iqNode forJid:(NSString*) jid andRid:(NSString*) rid
 {
     assert(self._signalContext);
-    for(MLXMLNode* publishElement in [iqNode find:@"{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>"])
     {
-        NSString* bundleName = [publishElement findFirst:@"/@node"];
-        if(!bundleName)
-            return;
-        // get rid
-        NSString* rid = [bundleName componentsSeparatedByString:@":"][1];
         if(!rid)
             return;
 
-        NSArray* bundles = [publishElement find:@"item/{eu.siacs.conversations.axolotl}bundle"];
+        NSArray* bundles = [iqNode find:@"/{http://jabber.org/protocol/pubsub}item<id=current>/{eu.siacs.conversations.axolotl}bundle"];
 
         // there should only be one bundle per device
         if([bundles count] != 1) {
@@ -318,15 +318,9 @@ const int KEY_SIZE = 16;
         
         if(!signedPreKeyPublic || !signedPreKeyPublicId || !signedPreKeySignature || !identityKey)
             return;
-        
-        NSString* source = iqNode.fromUser;
-        if(!source)
-        {
-            source = self._senderJid;
-        }
-        
+
         uint32_t device = (uint32_t)[rid intValue];
-        SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:device];
+        SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:device];
         SignalSessionBuilder* builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self._signalContext];
         NSMutableArray* preKeys = [[NSMutableArray alloc] init];
         NSArray<NSNumber*>* preKeyIds = [bundle find:@"prekeys/preKeyPublic@preKeyId|int"];
@@ -375,25 +369,25 @@ const int KEY_SIZE = 16;
             }
         }
         // Build new session when a device session is marked as broken
-        NSMutableSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:source];
+        NSMutableSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:jid];
         NSNumber* ridNum = [NSNumber numberWithInt:[rid intValue]];
         if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:ridNum])
         {
             // Remove device from list
             [devicesWithBrokenSession removeObject:ridNum];
-            [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:source];
+            [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:jid];
             if([devicesWithBrokenSession count] != 0) {
                 return;
             }
             // The needed device bundle for this contact/device was fetched
             // Send new keys
             XMPPMessage* messageNode = [[XMPPMessage alloc] init];
-            [messageNode.attributes setObject:source forKey:@"to"];
+            [messageNode.attributes setObject:jid forKey:@"to"];
             [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
             [messageNode setXmppId:[[NSUUID UUID] UUIDString]];
 
             // Send KeyTransportElement only to the one device (overrideDevices)
-            [self encryptMessage:messageNode withMessage:nil toContact:source];
+            [self encryptMessage:messageNode withMessage:nil toContact:jid];
             if(self.account) [self.account send:messageNode];
         }
     }

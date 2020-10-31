@@ -29,12 +29,11 @@ NS_ASSUME_NONNULL_BEGIN
  * handle omemo iq's
  */
 -(void) sendOMEMOBundle;
--(void) queryOMEMODevicesFrom:(NSString *) jid;
 -(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid;
 -(void) sendOMEMODeviceWithForce:(BOOL) force;
 -(void) sendOMEMODevice:(NSSet<NSNumber*> *) receivedDevices force:(BOOL) force;
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString *) source;
--(void) processOMEMOKeys:(XMPPIQ*) iqNode;
+-(void) processOMEMOKeys:(MLXMLNode*) iqNode forJid:(NSString*) jid;
 
 /*
  * encrypting / decrypting messages
@@ -45,7 +44,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(BOOL) knownDevicesForAddressNameExist:(NSString*) addressName;
 -(NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*) addressName;
-
 -(void) deleteDeviceForSource:(NSString*) source andRid:(int) rid;
 -(BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;

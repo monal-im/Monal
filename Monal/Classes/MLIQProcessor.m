@@ -11,9 +11,6 @@
 #import "DataLayer.h"
 #import "MLImageManager.h"
 #import "HelperTools.h"
-#import "MLOMEMO.h"
-
-@class MLOMEMO;
 
 @interface MLIQProcessor()
 
@@ -80,10 +77,6 @@
 
 +(void) processResultIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
-    if([iqNode check:@"{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>"]) {
-        [self omemoResult:iqNode forAccount:account];
-    }
-    
     if([iqNode check:@"{jabber:iq:version}query"])
         [self iqVersionResult:iqNode forAccount:account];
 }
@@ -405,15 +398,6 @@
     NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
     NSString* ver = [HelperTools getEntityCapsHashForIdentities:identities andFeatures:features];
     [[DataLayer sharedInstance] setCaps:features forVer:ver];
-}
-
-+(void) omemoResult:(XMPPIQ*) iqNode forAccount:(xmpp*) account
-{
-#ifndef DISABLE_OMEMO
-    if([iqNode check:@"{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>"]) {
-        [account.omemo processOMEMOKeys:iqNode];
-    }
-#endif
 }
 
 +(void) iqVersionResult:(XMPPIQ*) iqNode forAccount:(xmpp*) account

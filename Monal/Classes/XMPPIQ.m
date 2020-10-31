@@ -540,41 +540,11 @@ NSString* const kiqErrorType = @"error";
   
 }
 
-#pragma mark - signal
-
--(void) requestNode:(NSString*) node
-{
-    MLXMLNode* pubsubNode =[[MLXMLNode alloc] init];
-    pubsubNode.element=@"pubsub";
-    [pubsubNode.attributes setObject:@"http://jabber.org/protocol/pubsub" forKey:kXMLNS];
-
-    
-    MLXMLNode* subscribe =[[MLXMLNode alloc] init];
-    subscribe.element=@"items";
-    [subscribe.attributes setObject:node forKey:@"node"];
-//[subscribe.attributes setObject:@"1" forKey:@"max_items"];
-    
-    [pubsubNode addChild:subscribe];
-    [self addChild:pubsubNode];
-    
-}
-
--(void) requestDevices
-{
-    [self requestNode:@"eu.siacs.conversations.axolotl.devicelist"];
-    
-}
-
--(void) requestBundles:(NSString*) deviceid
-{
-    [self requestNode:[NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%@", deviceid]];
-}
-
 #pragma mark - Account Management
 -(void) getRegistrationFields
 {
-    MLXMLNode* query =[[MLXMLNode alloc] init];
-    query.element=@"query";
+    MLXMLNode* query = [[MLXMLNode alloc] init];
+    query.element = @"query";
     [query setXMLNS:kRegisterNameSpace];
     [self addChild:query];
 }

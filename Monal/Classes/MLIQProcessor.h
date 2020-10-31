@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "XMPPIQ.h"
-#import "MLOMEMO.h"
 #import "MLXMPPConnection.h"
 #import "XMPPIQ.h"
 #import "MLXMLNode.h"
@@ -19,8 +18,6 @@ NS_ASSUME_NONNULL_BEGIN
 typedef void (^iqCompletion)(MLXMLNode* iq, monal_iq_handler_t resultHandler, monal_iq_handler_t errorHandler);
 typedef void (^iqDelegateCompletion)(MLXMLNode* iq, id delegate, SEL method, NSArray* args);
 typedef void (^processAction)(void);
-
-@class MLOMEMO;
 
 @interface MLIQProcessor : NSObject
 

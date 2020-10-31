@@ -132,14 +132,6 @@ removes a contact from the roster
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid;
 
-#pragma mark - pubsub
-
--(void) requestBundles:(NSString* _Nonnull) deviceid;
--(void) requestDevices;
-
-
--(void) requestNode:(NSString*) node;
-
 #pragma mark - account
 -(void) changePasswordForUser:(NSString* _Nonnull) user newPassword:(NSString* _Nonnull) newPsss;
 -(void) getRegistrationFields;

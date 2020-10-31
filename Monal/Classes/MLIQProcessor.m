@@ -157,21 +157,21 @@
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Binding our resource returned an error: %@", [iqNode findFirst:@"error"]);
-        if([@"cancel" isEqualToString:[iqNode findFirst:@"/@type"]])
+        if([iqNode check:@"/<type=cancel>"])
         {
             [self postError:@"XMPP Bind Error" withIqNode:iqNode andAccount:account];
             [account disconnect];
         }
-        else if([@"modify" isEqualToString:[iqNode findFirst:@"/@type"]])
+        else if([iqNode check:@"/<type=modify>"])
             [account bindResource:[HelperTools encodeRandomResource]];      //try to bind a new resource
         else
             [account reconnect];        //just try to reconnect (wait error type and all other error types not expected for bind)
         return;
     }
     
-    DDLogInfo(@"Binding to jid: %@", [iqNode findFirst:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/jid#"]);
+    DDLogInfo(@"Now bound to full jid: %@", [iqNode findFirst:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/jid#"]);
     [account.connectionProperties.identity bindJid:[iqNode findFirst:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/jid#"]];
-    DDLogDebug(@"After bind: jid=%@, resource=%@, fullJid=%@", account.connectionProperties.identity.jid, account.connectionProperties.identity.resource, account.connectionProperties.identity.fullJid);
+    DDLogDebug(@"jid=%@, resource=%@, fullJid=%@", account.connectionProperties.identity.jid, account.connectionProperties.identity.resource, account.connectionProperties.identity.fullJid);
     
     //update resource in db (could be changed by server)
     NSMutableDictionary* accountDict = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo]];

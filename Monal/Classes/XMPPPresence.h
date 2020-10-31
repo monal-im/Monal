@@ -20,14 +20,6 @@
 #define kextvideo @"video-v1"
 #define kextcamera @"camera-v1"
 
-#define kpresenceUnavailable @"unavailable"
-#define kpresencesSubscribe @"subscribe"
-#define kpresenceSubscribed @"subscribed"
-#define kpresenceUnsubscribe @"unsubscribe"
-#define kpresenceUnsubscribed @"unsubscribed"
-#define kpresenceProbe @"probe"
-#define kpresenceError @"error"
-
 @interface XMPPPresence : XMPPStanza
 {
     

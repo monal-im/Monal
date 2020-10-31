@@ -59,7 +59,7 @@
     MLXMLNode* fieldNode = [self findFirst:[NSString stringWithFormat:@"field<var=%@>", [NSRegularExpression escapedPatternForString:name]]];
     if(!fieldNode)
         return nil;
-    if([fieldNode findFirst:@"/@type"])
+    if([fieldNode check:@"/@type"])
         return @{
             @"name": [fieldNode findFirst:@"/@var"],
             @"type": [fieldNode findFirst:@"/@type"],

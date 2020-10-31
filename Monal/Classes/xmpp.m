@@ -1248,7 +1248,7 @@ NSString *const kXMPPPresence = @"presence";
             }
             else
             {
-                if([[presenceNode findFirst:@"/@type"] isEqualToString:kpresencesSubscribe])
+                if([presenceNode check:@"/<type=subscribe>"])
                 {
                     MLContact* contact = [[MLContact alloc] init];
                     contact.accountId = self.accountNo;
@@ -1276,7 +1276,7 @@ NSString *const kXMPPPresence = @"presence";
                         }
                     }
 
-                    if([[presenceNode findFirst:@"/@type"] isEqualToString:kpresenceUnavailable])
+                    if([presenceNode check:@"/<type=unavailable>"])
                     {
                         [self incrementLastHandledStanza];
                         //handle this differently later
@@ -1323,7 +1323,7 @@ NSString *const kXMPPPresence = @"presence";
                         DDLogError(@"ERROR: presence notice but no user name.");
                     }
                 }
-                else if([[presenceNode findFirst:@"/@type"] isEqualToString:kpresenceUnavailable])
+                else if([presenceNode check:@"/<type=unavailable>"])
                 {
                     [[DataLayer sharedInstance] setOfflineBuddy:presenceNode forAccount:self.accountNo];
                 }
@@ -1481,9 +1481,9 @@ NSString *const kXMPPPresence = @"presence";
             //process registered iq handlers
             if(_iqHandlers[[iqNode findFirst:@"/@id"]])
             {
-                if([@"result" isEqualToString:[iqNode findFirst:@"/@type"]] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"resultHandler"])
+                if([iqNode check:@"/<type=result>"] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"resultHandler"])
                     ((monal_iq_handler_t) _iqHandlers[[iqNode findFirst:@"/@id"]][@"resultHandler"])(iqNode);
-                else if([@"error" isEqualToString:[iqNode findFirst:@"/@type"]] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"errorHandler"])
+                else if([iqNode check:@"/<type=error>"] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"errorHandler"])
                     ((monal_iq_handler_t) _iqHandlers[[iqNode findFirst:@"/@id"]][@"errorHandler"])(iqNode);
                 else if(_iqHandlers[[iqNode findFirst:@"/@id"]][@"delegate"] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"method"])
                     [HelperTools callStaticHandler:_iqHandlers[[iqNode findFirst:@"/@id"]] withDefaultArguments:@[self, iqNode]];
@@ -1498,7 +1498,7 @@ NSString *const kXMPPPresence = @"presence";
 #ifndef DISABLE_OMEMO
                 if([[iqNode findFirst:@"/@id"] isEqualToString:self.omemo.deviceQueryId])
                 {
-                    if([[iqNode findFirst:@"/@type"] isEqualToString:kiqErrorType]) {
+                    if([iqNode check:@"/<type=error>"]) {
                         //there are no devices published yet
                         [self.omemo sendOMEMODeviceWithForce:NO];
                     }

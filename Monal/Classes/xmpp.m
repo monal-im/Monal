@@ -1256,9 +1256,12 @@ NSString *const kXMPPPresence = @"presence";
 
                     // check if we need a contact request
                     NSDictionary* contactSub = [[DataLayer sharedInstance] getSubscriptionForContact:contact.contactJid andAccount:contact.accountId];
-                    if(!contactSub || ![[contactSub objectForKey:@"subscription"] isEqualToString:kSubBoth]) {
+                    DDLogVerbose(@"Got subscription request for contact %@ having subscription status: %@", presenceNode.fromUser, contactSub);
+                    if(!contactSub || !([[contactSub objectForKey:@"subscription"] isEqualToString:kSubTo] || [[contactSub objectForKey:@"subscription"] isEqualToString:kSubBoth])) {
                         [[DataLayer sharedInstance] addContactRequest:contact];
                     }
+                    else if(contactSub && [[contactSub objectForKey:@"subscription"] isEqualToString:kSubTo])
+                        [self approveToRoster:presenceNode.fromUser];
                 }
 
                 if([presenceNode check:@"{http://jabber.org/protocol/muc#user}x"])

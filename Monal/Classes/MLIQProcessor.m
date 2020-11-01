@@ -26,11 +26,11 @@
 {
     if([iqNode check:@"/<type=get>"])
         [self processGetIq:iqNode forAccount:account];
-    if([iqNode check:@"/<type=set>"])
+    else if([iqNode check:@"/<type=set>"])
         [self processSetIq:iqNode forAccount:account];
-    if([iqNode check:@"/<type=result>"])
+    else if([iqNode check:@"/<type=result>"])
         [self processResultIq:iqNode forAccount:account];
-    if([iqNode check:@"/<type=error>"])
+    else if([iqNode check:@"/<type=error>"])
         [self processErrorIq:iqNode forAccount:account];
     else
         DDLogWarn(@"Ignoring invalid iq type: %@", [iqNode findFirst:@"/@type"]);
@@ -222,11 +222,7 @@
             contactObj.contactJid = [contact objectForKey:@"jid"];
             contactObj.accountId = account.accountNo;
 
-            if([[contact objectForKey:@"subscription"] isEqualToString:kSubTo])
-            {
-                [[DataLayer sharedInstance] addContactRequest:contactObj];
-            }
-            else if([[contact objectForKey:@"subscription"] isEqualToString:kSubFrom]) //already subscribed
+            if([[contact objectForKey:@"subscription"] isEqualToString:kSubFrom]) //already subscribed
             {
                 [[DataLayer sharedInstance] deleteContactRequest:contactObj];
             }
@@ -241,7 +237,8 @@
                                         forAccount:account.accountNo
                                           nickname:[contact objectForKey:@"name"] ? [contact objectForKey:@"name"] : @""
                                         andMucNick:nil];
-                
+            
+            DDLogVerbose(@"Setting subscription status '%@' (ask=%@) for contact %@", contact[@"subscription"], contact[@"ask"], contact[@"jid"]);
             [[DataLayer sharedInstance] setSubscription:[contact objectForKey:@"subscription"]
                                                  andAsk:[contact objectForKey:@"ask"]
                                              forContact:[contact objectForKey:@"jid"]

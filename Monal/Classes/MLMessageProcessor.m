@@ -42,16 +42,26 @@ static NSMutableDictionary* _typingNotifications;
             return;
         }
         
+        NSString* errorType = [messageNode findFirst:@"error@type"];
+        NSString* errorReason = [messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"];
+        NSString* errorText = [messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"];
+        DDLogInfo(@"Got errorType='%@', errorReason='%@', errorText='%@' for message '%@'", errorType, errorReason, errorText, [messageNode findFirst:@"/@id"]);
+        
+        if(errorReason)
+            errorType = [NSString stringWithFormat:@"%@ - %@", errorType, errorReason];
+        if(!errorText)
+            errorText = NSLocalizedString(@"No further error description", @"");
+        
         //update db
         [[DataLayer sharedInstance]
             setMessageId:[messageNode findFirst:@"/@id"]
-            errorType:[messageNode check:@"error@type"] ? [messageNode findFirst:@"error@type"] : @""
-            errorReason:[messageNode check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"] ? [messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"] : @""
+            errorType:errorType
+            errorReason:errorText
         ];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageErrorNotice object:nil userInfo:@{
             @"MessageID": [messageNode findFirst:@"/@id"],
-            @"errorType": [messageNode check:@"error@type"] ? [messageNode findFirst:@"error@type"] : @"",
-            @"errorReason": [messageNode check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"] ? [messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"] : @""
+            @"errorType": errorType,
+            @"errorReason": errorText
         }];
 
         return;

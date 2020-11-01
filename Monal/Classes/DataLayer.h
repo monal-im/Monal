@@ -156,7 +156,7 @@ extern NSString* const kMessageTypeUrl;
 /**
  returns messages with the provided local id number
  */
--(NSArray *) messageForHistoryID:(NSInteger) historyID;
+-(MLMessage*) messageForHistoryID:(NSInteger) historyID;
 
 /*
  adds a specified message to the database

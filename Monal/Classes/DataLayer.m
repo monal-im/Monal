@@ -975,9 +975,14 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark message Commands
 
--(NSArray*) messageForHistoryID:(NSInteger) historyID
+-(MLMessage*) messageForHistoryID:(NSInteger) historyID
 {
-    return [self.db executeReader:@"select message, messageid from message_history where message_history_id=?;" andArguments:@[[NSNumber numberWithInteger:historyID]]];
+    NSString* query = @"SELECT IFNULL(actual_from, message_from) AS af, message_from, message_to, account_id, message, received, displayed, displayMarkerWanted, encrypted, timestamp  AS thetime, message_history_id, sent, messageid, messageType, previewImage, previewText, unread, errorType, errorReason, stanzaid FROM message_history WHERE message_history_id=?;";
+    NSArray* params = @[[NSNumber numberWithInteger:historyID]];
+
+    for(NSDictionary* dic in [self.db executeReader:query andArguments:params])
+        return [MLMessage messageFromDictionary:dic withDateFormatter:dbFormatter];
+    return nil;
 }
 
 -(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted backwards:(BOOL) backwards displayMarkerWanted:(BOOL) displayMarkerWanted withCompletion: (void (^)(BOOL, NSString*, NSNumber*))completion

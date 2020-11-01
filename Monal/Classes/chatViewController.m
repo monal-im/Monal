@@ -1333,8 +1333,8 @@ enum msgSentState {
                 msg.hasBeenDisplayed = YES;
             } else if(event == msgErrorAfterSent) {
                 DDLogVerbose(@"got msgErrorAfterSent event for messageid: %@", messageId);
-                //we don't want to show errors if the message has been received at least once or if the message wasn't even sent
-                if(msg.hasBeenSent && !msg.hasBeenReceived)
+                //we don't want to show errors if the message has been received at least once
+                if(!msg.hasBeenReceived)
                 {
                     msg.errorType = [dic objectForKey:@"errorType"];
                     msg.errorReason = [dic objectForKey:@"errorReason"];
@@ -1463,17 +1463,13 @@ enum msgSentState {
 
 -(void) retry:(id) sender
 {
-    NSInteger historyId = ((UIButton*) sender).tag;
-    
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Retry sending message?", @"") message:NSLocalizedString(@"This message failed to send.", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+    NSInteger msgHistorID = ((UIButton*) sender).tag;
+    MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:msgHistorID];
+
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Retry sending message?", @"") message:[NSString stringWithFormat:NSLocalizedString(@"This message failed to send (%@): %@", @""), msg.errorType, msg.errorReason] preferredStyle:UIAlertControllerStyleActionSheet];
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Retry", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-        NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
-        if([messageArray count] > 0)
-        {
-            NSDictionary *dic = [messageArray objectAtIndex:0];
-            [self sendMessage:[dic objectForKey:@"message"] andMessageID:[dic objectForKey:@"messageid"]];
-            //[self setMessageId:[dic objectForKey:@"messageid"] sent:YES]; // for the UI, db will be set in the notification
-        }
+        [self sendMessage:msg.messageText andMessageID:msg.messageId];
+        //[self setMessageId:msg.messageId sent:YES]; // for the UI, db will be set in the notification
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         [self dismissViewControllerAnimated:YES completion:nil];
@@ -1766,7 +1762,7 @@ enum msgSentState {
     
     if(cell.outBound && ([row.errorType length] > 0 || [row.errorReason length] > 0) && !row.hasBeenReceived && row.hasBeenSent)
     {
-        cell.messageStatus.text = [NSString stringWithFormat:@"Error: %@ - %@", row.errorType, row.errorReason];
+        cell.messageStatus.text = @"Error";
         cell.deliveryFailed = YES;
     }
     

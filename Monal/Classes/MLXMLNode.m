@@ -371,6 +371,11 @@ static NSRegularExpression* attributeFilterRegex;
                             break;
                         }
                     }
+                    else
+                    {
+                        ok = NO;
+                        break;
+                    }
                 if(!ok)
                     continue;               //this node does *not* fullfill the attribute filter regex
             }
@@ -495,7 +500,7 @@ static NSRegularExpression* attributeFilterRegex;
                 continue;       //ignore incomplete matches
             
             NSString* attributeFilterName = [atrributeFilters substringWithRange:attributeFilterNameRange];
-            NSString* attributeFilterValue = [atrributeFilters substringWithRange:attributeFilterValueRange];
+            NSString* attributeFilterValue = [NSString stringWithFormat:@"^%@$", [atrributeFilters substringWithRange:attributeFilterValueRange]];
             NSError* error;
             [retval[@"attributeFilters"] addObject:@{
                 @"name": attributeFilterName,

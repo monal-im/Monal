@@ -402,7 +402,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(MLContact*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo
+-(MLContact*) contactForUsername:(NSString*) username forAccount:(NSString*) accountNo
 {
     if(!username || !accountNo)
         return nil;
@@ -451,31 +451,13 @@ static NSDateFormatter* dbFormatter;
 
 -(NSArray*) searchContactsWithString:(NSString*) search
 {
-    NSString *likeString = [NSString stringWithFormat:@"%%%@%%", search];
-    NSString* query = @"";
-    query = @"select buddy_name, state, status, filename, 0 as 'count', full_name, nick_name, account_id, online from buddylist where buddy_name like ? or full_name like ? or nick_name like ? order by full_name, nick_name, buddy_name COLLATE NOCASE asc ";
-
-    NSArray *params = @[likeString, likeString];
-
-    //DDLogVerbose(query);
-    NSArray* results = [self.db executeReader:query andArguments:params];
-
-    NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
-          [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-              NSDictionary *dic = (NSDictionary *) obj;
-              [toReturn addObject:[MLContact contactFromDictionary:dic]];
-          }];
-
-    if(toReturn != nil)
-    {
-        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count]);
-        return toReturn;
-    }
-    else
-    {
-        DDLogError(@"buddylist is empty or failed to read");
-        return nil;
-    }
+    NSString* likeString = [NSString stringWithFormat:@"%%%@%%", search];
+    NSString* query = @"SELECT buddy_name FROM buddylist WHERE buddy_name like ? OR full_name like ? OR nick_name like ? ORDER BY full_name, nick_name, buddy_name COLLATE NOCASE ASC;";
+    NSArray* params = @[likeString, likeString, likeString];
+    NSMutableArray* toReturn = [[NSMutableArray alloc] init];
+    for(NSDictionary* dic in [self.db executeReader:query andArguments:params])
+        [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];
+    return toReturn;
 }
 
 -(NSMutableArray*) onlineContactsSortedBy:(NSString*) sort
@@ -484,34 +466,26 @@ static NSDateFormatter* dbFormatter;
 
     if([sort isEqualToString:@"Name"])
     {
-        query = @"select buddy_name, state, status,filename, 0 as 'count', full_name, nick_name, MUC, muc_subject, muc_nick, account_id from buddylist where online=1 and subscription='both' order by nick_name, full_name, buddy_name COLLATE NOCASE asc";
+        query = @"SELECT buddy_name, account_id FROM buddylist WHERE online=1 AND subscription='both' ORDER BY nick_name, full_name, buddy_name COLLATE NOCASE ASC;";
     }
 
     if([sort isEqualToString:@"Status"])
     {
-        query = @"select buddy_name, state, status, filename, 0 as 'count', full_name, nick_name, MUC, muc_subject, muc_nick, account_id from buddylist where online=1 and subscription='both' order by state, nick_name, full_name, buddy_name COLLATE NOCASE asc";
+        query = @"SELECT buddy_name, account_id FROM buddylist WHERE online=1 AND subscription='both' ORDER BY state, nick_name, full_name, buddy_name COLLATE NOCASE ASC;";
     }
 
-    NSMutableArray* results = [self.db executeReader:query];
-
-    NSMutableArray *toReturn = [[NSMutableArray alloc] initWithCapacity:results.count];
-    [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSDictionary *dic = (NSDictionary *) obj;
-        [toReturn addObject:[MLContact contactFromDictionary:dic]];
-    }];
+    NSMutableArray* toReturn = [[NSMutableArray alloc] init];
+    for(NSDictionary* dic in [self.db executeReader:query])
+        [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];
     return toReturn;
 }
 
 -(NSMutableArray*) offlineContacts
 {
-    NSString* query = @"select buddy_name, A.state, status, filename, 0, full_name, nick_name, a.account_id, MUC, muc_subject, muc_nick from buddylist as A inner join account as b  on a.account_id=b.account_id  where  online=0 and enabled=1 order by nick_name, full_name, buddy_name COLLATE NOCASE ";
-    NSMutableArray* results = [self.db executeReader:query];
-
-    NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
-    [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSDictionary *dic = (NSDictionary *) obj;
-        [toReturn addObject:[MLContact contactFromDictionary:dic]];
-    }];
+    NSString* query = @"SELECT buddy_name, a.account_id FROM buddylist AS A INNER JOIN account AS b ON a.account_id=b.account_id WHERE online=0 AND enabled=1 ORDER BY nick_name, full_name, buddy_name COLLATE NOCASE ASC;";
+    NSMutableArray* toReturn = [[NSMutableArray alloc] init];
+    for(NSDictionary* dic in [self.db executeReader:query])
+        [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];
     return toReturn;
 }
 
@@ -735,15 +709,10 @@ static NSDateFormatter* dbFormatter;
 
 -(NSMutableArray*) contactRequestsForAccount
 {
-    NSString* query = @"select account_id, buddy_name from subscriptionRequests";
-
-    NSMutableArray* results = [self.db executeReader:query];
-
-     NSMutableArray* toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
-     [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-         NSDictionary* dic = (NSDictionary *) obj;
-         [toReturn addObject:[MLContact contactFromDictionary:dic]];
-     }];
+    NSString* query = @"SELECT account_id, buddy_name FROM subscriptionRequests;";
+    NSMutableArray* toReturn = [[NSMutableArray alloc] init];
+    for(NSDictionary* dic in [self.db executeReader:query])
+        [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];
     return toReturn;
 }
 
@@ -1329,27 +1298,13 @@ static NSDateFormatter* dbFormatter;
         NSArray* params = @[accountNo, accountNo,
                             accountJid];
         //DDLogVerbose(query);
-        NSArray* results = [self.db executeReader:query andArguments:params];
-
-        NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
-        [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSDictionary *dic = (NSDictionary *) obj;
-            [toReturn addObject:[MLContact contactFromDictionary:dic]];
-        }];
-
-        if(toReturn!=nil)
-        {
-
-            DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count]);
-            return toReturn; //[toReturn autorelease];
-        }
-        else
-        {
-            DDLogError(@"message history buddy list is empty or failed to read");
-            return nil;
-        }
-
-    } else return nil;
+        NSMutableArray* toReturn = [[NSMutableArray alloc] init];
+        for(NSDictionary* dic in [self.db executeReader:query andArguments:params])
+            [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];
+        return toReturn;
+    }
+    else
+        return nil;
 }
 
 //message history
@@ -1595,21 +1550,10 @@ static NSDateFormatter* dbFormatter;
 
 -(NSMutableArray*) activeContactsWithPinned:(BOOL) pinned
 {
-    NSString* query = @"SELECT a.buddy_name,  state, status,  filename, b.full_name, b.nick_name, muc_subject, muc_nick, a.account_id, lastMessageTime, 0 AS 'count', subscription, ask, pinned from activechats as a JOIN buddylist AS b WHERE a.buddy_name = b.buddy_name AND a.account_id = b.account_id AND a.pinned=? ORDER BY lastMessageTime DESC";
-
-    NSDateFormatter* dateFromatter = [[NSDateFormatter alloc] init];
-    NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-
-    [dateFromatter setLocale:enUSPOSIXLocale];
-    [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
-    [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-
-    NSMutableArray* results = [self.db executeReader:query andArguments:@[[NSNumber numberWithBool:pinned]]];
-    NSMutableArray* toReturn = [[NSMutableArray alloc] initWithCapacity:results.count];
-    [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSDictionary* dic = (NSDictionary *) obj;
-        [toReturn addObject:[MLContact contactFromDictionary:dic withDateFormatter:dateFromatter]];
-    }];
+    NSString* query = @"SELECT a.buddy_name, a.account_id FROM activechats AS a JOIN buddylist AS b WHERE a.buddy_name = b.buddy_name AND a.account_id = b.account_id AND a.pinned=? ORDER BY lastMessageTime DESC;";
+    NSMutableArray* toReturn = [[NSMutableArray alloc] init];
+    for(NSDictionary* dic in [self.db executeReader:query andArguments:@[[NSNumber numberWithBool:pinned]]])
+        [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];
     return toReturn;
 }
 

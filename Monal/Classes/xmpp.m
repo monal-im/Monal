@@ -37,12 +37,10 @@
 //processors
 #import "MLMessageProcessor.h"
 #import "MLIQProcessor.h"
+#import "MLPubSubProcessor.h"
 
 #import "MLHTTPRequest.h"
 #import "AESGcm.h"
-#ifndef DISABLE_OMEMO
-#import "SignalProtocolObjC.h"
-#endif
 
 
 #define kConnectTimeout 20ull //seconds
@@ -180,10 +178,10 @@ NSString *const kXMPPPresence = @"presence";
     self.omemo = [[MLOMEMO alloc] initWithAccount:self];
     
     //we want to get automatic avatar updates (XEP-0084)
-    [self.pubsub registerForNode:@"urn:xmpp:avatar:metadata" withHandler:[HelperTools createStaticHandlerWithDelegate:[self class] andMethod:@selector(avatarHandlerFor:withNode:jid:type:andData:) andAdditionalArguments:nil]];
+    [self.pubsub registerForNode:@"urn:xmpp:avatar:metadata" withHandler:makeHandler(MLPubSubProcessor, avatarHandler)];
     
     //we want to get automatic roster name updates (XEP-0172)
-    [self.pubsub registerForNode:@"http://jabber.org/protocol/nick" withHandler:[HelperTools createStaticHandlerWithDelegate:[self class] andMethod:@selector(rosterNameHandlerFor:withNode:jid:type:andData:) andAdditionalArguments:nil]];
+    [self.pubsub registerForNode:@"http://jabber.org/protocol/nick" withHandler:makeHandler(MLPubSubProcessor, rosterNameHandler)];
     
     return self;
 }
@@ -452,7 +450,8 @@ NSString *const kXMPPPresence = @"presence";
 
 	//see this for extracting the sslcontext of the cfstream: https://stackoverflow.com/a/26726525/3528174
 	//see this for creating the proper protocols array: https://github.com/LLNL/FRS/blob/master/Pods/AWSIoT/AWSIoT/Internal/AWSIoTMQTTClient.m
-	//WARNING: this will only have an effect if the TLS handshake was not already started (e.g. the TCP socket is not connected) abd ignored otherwise
+	//WARNING: this will only have an effect if the TLS handshake was not already started (e.g. the TCP socket is not connected) and
+	//         will be ignored otherwise
 	SSLContextRef sslContext = (__bridge SSLContextRef) [_oStream propertyForKey: (__bridge NSString *) kCFStreamPropertySSLContext ];
 	CFStringRef strs[1];
 	strs[0] = CFSTR("xmpp-client");
@@ -698,16 +697,17 @@ NSString *const kXMPPPresence = @"presence";
             _cancelReconnectTimer();
         _cancelReconnectTimer = nil;
         
-        [_iqHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-            NSString* id = (NSString*)key;
-            NSDictionary* data = (NSDictionary*)obj;
-            if(data[@"errorHandler"])
+        for(NSString* iqid in _iqHandlers)
+            if(![_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
             {
-                DDLogWarn(@"invalidating iq handler for iq id '%@'", id);
+                NSDictionary* data = (NSDictionary*)_iqHandlers[iqid];
                 if(data[@"errorHandler"])
-                    ((monal_iq_handler_t)data[@"errorHandler"])(nil);
+                {
+                    DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
+                    if(data[@"errorHandler"])
+                        ((monal_iq_handler_t)data[@"errorHandler"])(nil);
+                }
             }
-        }];
         
         if(explicitLogout && _accountState>=kStateHasStream)
         {
@@ -1364,7 +1364,7 @@ NSString *const kXMPPPresence = @"presence";
                         XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
                         [discoInfo setiqTo:presenceNode.from];
                         [discoInfo setDiscoInfoNode];
-                        [self sendIq:discoInfo withDelegate:[MLIQProcessor class] andMethod:@selector(handleEntityCapsDisco:withIqNode:) andAdditionalArguments:nil];
+                        [self sendIq:discoInfo withHandler:makeHandler(MLIQProcessor, handleEntityCapsDisco)];
                     }
                 }
 
@@ -1484,12 +1484,12 @@ NSString *const kXMPPPresence = @"presence";
             //process registered iq handlers
             if(_iqHandlers[[iqNode findFirst:@"/@id"]])
             {
-                if([iqNode check:@"/<type=result>"] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"resultHandler"])
+                if([_iqHandlers[[iqNode findFirst:@"/@id"]] isKindOfClass:[MLHandler class]])
+                    [_iqHandlers[[iqNode findFirst:@"/@id"]] callWithArguments:@{@"account": self, @"iqNode": iqNode}];
+                else if([iqNode check:@"/<type=result>"] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"resultHandler"])
                     ((monal_iq_handler_t) _iqHandlers[[iqNode findFirst:@"/@id"]][@"resultHandler"])(iqNode);
                 else if([iqNode check:@"/<type=error>"] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"errorHandler"])
                     ((monal_iq_handler_t) _iqHandlers[[iqNode findFirst:@"/@id"]][@"errorHandler"])(iqNode);
-                else if(_iqHandlers[[iqNode findFirst:@"/@id"]][@"delegate"] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"method"])
-                    [HelperTools callStaticHandler:_iqHandlers[[iqNode findFirst:@"/@id"]] withDefaultArguments:@[self, iqNode]];
                 
                 //remove handler after calling it
                 [_iqHandlers removeObjectForKey:[iqNode findFirst:@"/@id"]];
@@ -1814,25 +1814,13 @@ NSString *const kXMPPPresence = @"presence";
     [self send:iq];
 }
 
--(void) sendIq:(XMPPIQ*) iq withDelegate:(id) delegate andMethod:(SEL) method andAdditionalArguments:(NSArray*) args
+-(void) sendIq:(XMPPIQ*) iq withHandler:(MLHandler*) handler
 {
-    if(delegate && method)
+    if(handler)
     {
-        DDLogVerbose(@"Adding delegate [%@ %@] to iqHandlers...", NSStringFromClass(delegate), NSStringFromSelector(method));
+        DDLogVerbose(@"Adding %@ to iqHandlers...", handler);
         @synchronized(_iqHandlers) {
-            _iqHandlers[[iq getId]] = @{@"id":[iq getId], @"delegate":NSStringFromClass(delegate), @"method":NSStringFromSelector(method), @"arguments":(args ? args : @[])};
-        }
-    }
-    [self send:iq];     //this will also call persistState --> we don't need to do this here explicitly (to make sure our iq delegate is stored to db)
-}
-
--(void) sendIq:(XMPPIQ*) iq withDelegate:(id) delegate andMethod:(SEL) method andInvalidationMethod:(SEL) invalidationMethod andAdditionalArguments:(NSArray*) args
-{
-    if(delegate && method && invalidationMethod)
-    {
-        DDLogVerbose(@"Adding delegate [%@ %@] to iqHandlers...", NSStringFromClass(delegate), NSStringFromSelector(method));
-        @synchronized(_iqHandlers) {
-            _iqHandlers[[iq getId]] = @{@"id":[iq getId], @"delegate":NSStringFromClass(delegate), @"method":NSStringFromSelector(method), @"invalidationMethod":NSStringFromSelector(invalidationMethod), @"arguments":(args ? args : @[])};
+            _iqHandlers[[iq getId]] = handler;
         }
     }
     [self send:iq];     //this will also call persistState --> we don't need to do this here explicitly (to make sure our iq delegate is stored to db)
@@ -1959,16 +1947,9 @@ NSString *const kXMPPPresence = @"presence";
 
         NSMutableDictionary* persistentIqHandlers = [[NSMutableDictionary alloc] init];
         @synchronized(_iqHandlers) {
-            [_iqHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-                NSString* id = (NSString*)key;
-                NSDictionary* data = (NSDictionary*)obj;
-                //only serialize persistent handlers with delegate and method
-                if(data[@"delegate"] && data[@"method"])
-                {
-                    DDLogVerbose(@"saving serialized iq handler for iq '%@'", id);
-                    [persistentIqHandlers setObject:data forKey:id];
-                }
-            }];
+            for(NSString* iqid in _iqHandlers)
+                if([_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
+                    persistentIqHandlers[iqid] = _iqHandlers[iqid];
         }
         [values setObject:persistentIqHandlers forKey:@"iqHandlers"];
 
@@ -2068,12 +2049,8 @@ NSString *const kXMPPPresence = @"presence";
             
             NSDictionary* persistentIqHandlers = [dic objectForKey:@"iqHandlers"];
             @synchronized(_iqHandlers) {
-                [persistentIqHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-                    NSString* id = (NSString*)key;
-                    NSDictionary* data = (NSDictionary*)obj;
-                    DDLogWarn(@"Reading serialized iq handler for iq id '%@': [%@ %@]", id, data[@"delegate"], data[@"method"]);
-                    [_iqHandlers setObject:data forKey:id];
-                }];
+                for(NSString* iqid in persistentIqHandlers)
+                    _iqHandlers[iqid] = persistentIqHandlers[iqid];
             }
             
             self.connectionProperties.serverFeatures = [dic objectForKey:@"serverFeatures"];
@@ -2207,7 +2184,7 @@ NSString *const kXMPPPresence = @"presence";
     _accountState = kStateBinding;
     XMPPIQ* iqNode =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iqNode setBindWithResource:resource];
-    [self sendIq:iqNode withDelegate:[MLIQProcessor class] andMethod:@selector(handleBindFor:withIqNode:) andAdditionalArguments:nil];
+    [self sendIq:iqNode withHandler:makeHandler(MLIQProcessor, handleBind)];
 }
 
 -(void) queryDisco
@@ -2215,17 +2192,17 @@ NSString *const kXMPPPresence = @"presence";
     XMPPIQ* accountInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [accountInfo setiqTo:self.connectionProperties.identity.jid];
     [accountInfo setDiscoInfoNode];
-    [self sendIq:accountInfo withDelegate:[MLIQProcessor class] andMethod:@selector(handleAccountDiscoInfo:withIqNode:) andAdditionalArguments:nil];
+    [self sendIq:accountInfo withHandler:makeHandler(MLIQProcessor, handleAccountDiscoInfo)];
     
     XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoInfo setiqTo:self.connectionProperties.identity.domain];
     [discoInfo setDiscoInfoNode];
-    [self sendIq:discoInfo withDelegate:[MLIQProcessor class] andMethod:@selector(handleServerDiscoInfo:withIqNode:) andAdditionalArguments:nil];
+    [self sendIq:discoInfo withHandler:makeHandler(MLIQProcessor, handleServerDiscoInfo)];
     
     XMPPIQ* discoItems = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoItems setiqTo:self.connectionProperties.identity.domain];
     [discoItems setDiscoItemNode];
-    [self sendIq:discoItems withDelegate:[MLIQProcessor class] andMethod:@selector(handleServerDiscoItems:withIqNode:) andAdditionalArguments:nil];
+    [self sendIq:discoItems withHandler:makeHandler(MLIQProcessor, handleServerDiscoItems)];
 }
 
 -(void) sendPresence
@@ -2255,7 +2232,7 @@ NSString *const kXMPPPresence = @"presence";
     if(self.connectionProperties.supportsRosterVersion)
         rosterVer = [[DataLayer sharedInstance] getRosterVersionForAccount:self.accountNo];
     [roster setRosterRequest:rosterVer];
-    [self sendIq:roster withDelegate:[MLIQProcessor class] andMethod:@selector(handleRosterFor:withIqNode:) andAdditionalArguments:nil];
+    [self sendIq:roster withHandler:makeHandler(MLIQProcessor, handleRoster)];
 }
 
 -(void) initSession
@@ -2273,22 +2250,14 @@ NSString *const kXMPPPresence = @"presence";
     _exponentialBackoff = 0;
     
     //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
-    [_iqHandlers enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-        NSString* iqid = (NSString*)key;
-        NSDictionary* data = (NSDictionary*)obj;
+    for(NSString* iqid in _iqHandlers)
+    {
         DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-        if(data[@"errorHandler"])
-            ((monal_iq_handler_t)data[@"errorHandler"])(nil);
-        else if(data[@"delegate"] && data[@"invalidationMethod"])
-        {
-            DDLogVerbose(@"Calling IQHandler invalidation method [%@ %@]...", data[@"delegate"], data[@"invalidationMethod"]);
-            [HelperTools callStaticHandler:@{
-                @"delegate": data[@"delegate"],
-                @"method": data[@"invalidationMethod"],
-                @"arguments": data[@"arguments"] ? data[@"arguments"] : @[]
-            } withDefaultArguments:@[self]];
-        }
-    }];
+        if([_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
+            [_iqHandlers[iqid] invalidateWithArguments:@{@"account": self}];
+        else if(_iqHandlers[iqid][@"errorHandler"])
+            ((monal_iq_handler_t)_iqHandlers[iqid][@"errorHandler"])(nil);
+    }
     _iqHandlers = [[NSMutableDictionary alloc] init];
 
     //force new disco queries because we landed here because of a failed smacks resume
@@ -2659,7 +2628,7 @@ NSString *const kXMPPPresence = @"presence";
     XMPPIQ* roster = [[XMPPIQ alloc] initWithType:kiqSetType];
     [roster setUpdateRosterItem:jid withName:name];
     //this delegate will handle errors (result responses don't include any data that could be processed and will be ignored)
-    [self sendIq:roster withDelegate:[MLIQProcessor class] andMethod:@selector(handleRosterFor:withIqNode:) andAdditionalArguments:nil];
+    [self sendIq:roster withHandler:makeHandler(MLIQProcessor, handleRoster)];
 }
 
 #pragma mark - Jingle calls
@@ -2994,7 +2963,7 @@ NSString *const kXMPPPresence = @"presence";
             {
                 // Do not show "Connection refused" message if there are more SRV records to try
                 if(!_SRVDiscoveryDone || (_SRVDiscoveryDone && [_usableServersList count] == 0) || st_error.code != 61)
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message, st_error]];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
             }
 
             DDLogInfo(@"stream error, calling reconnect");
@@ -3230,53 +3199,6 @@ NSString *const kXMPPPresence = @"presence";
     return array;
 }
 
-+(void) avatarHandlerFor:(xmpp*) account withNode:(NSString*) node jid:(NSString*) jid type:(NSString*) type andData:(NSDictionary*) data
-{
-    DDLogDebug(@"Got new avatar metadata from '%@'", jid);
-    for(NSString* entry in data)
-    {
-        NSString* avatarHash = [data[entry] findFirst:@"{urn:xmpp:avatar:metadata}metadata/info@id"];
-        if(!avatarHash)     //the user disabled his avatar
-        {
-            DDLogInfo(@"User %@ disabled his avatar", jid);
-            [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:nil];
-            [[DataLayer sharedInstance] setAvatarHash:@"" forContact:jid andAccount:account.accountNo];
-        }
-        else
-        {
-            NSString* currentHash = [[DataLayer sharedInstance] getAvatarHashForContact:jid andAccount:account.accountNo];
-            if(currentHash && [avatarHash isEqualToString:currentHash])
-            {
-                DDLogInfo(@"Avatar hash is the same, we don't need to update our avatar image data");
-                break;
-            }
-            [account.pubsub fetchNode:@"urn:xmpp:avatar:data" from:jid withItemsList:@[avatarHash] andHandler:[HelperTools createStaticHandlerWithDelegate:self andMethod:@selector(handleAvatarFetchResultForAccount:andJid:withErrorIq:andData:) andAdditionalArguments:nil]];
-        }
-        break;      //we only want to process the first item (this should also be the only item)
-    }
-    if([data count] > 1)
-        DDLogWarn(@"Got more than one avatar metadata item!");
-}
-
-+(void) handleAvatarFetchResultForAccount:(xmpp*) account andJid:(NSString*) jid withErrorIq:(XMPPIQ*) errorIq andData:(NSDictionary*) data
-{
-    //ignore errors here (e.g. simply don't update the avatar image)
-    //(this should never happen if other clients and servers behave properly)
-    if(errorIq)
-    {
-        DDLogError(@"Got avatar image fetch error from jid %@: %@", jid, errorIq);
-        return;
-    }
-    
-    for(NSString* avatarHash in data)
-    {
-        [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:[data[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]];
-        [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:jid andAccount:account.accountNo];
-        [account accountStatusChanged];     //inform ui of this change (accountStatusChanged will force a ui reload which will also reload the avatars)
-        DDLogInfo(@"Avatar of '%@' fetched and updated successfully", jid);
-    }
-}
-
 -(void) sendDisplayMarkerForId:(NSString*) messageid to:(NSString*) to
 {
     if(![[HelperTools defaultsDB] boolForKey:@"SendDisplayedMarkers"])
@@ -3289,56 +3211,6 @@ NSString *const kXMPPPresence = @"presence";
     [displayedNode setDisplayed:messageid];
     [displayedNode setStoreHint];
     [self send:displayedNode];
-}
-
-+(void) rosterNameHandlerFor:(xmpp*) account withNode:(NSString*) node jid:(NSString*) jid type:(NSString*) type andData:(NSDictionary*) data
-{
-    //new/updated nickname
-    if([type isEqualToString:@"publish"])
-    {
-        for(NSString* itemId in data)
-        {
-            if([jid isEqualToString:account.connectionProperties.identity.jid])        //own roster name
-            {
-                DDLogInfo(@"Got own nickname: %@", [data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"]);
-                NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo] copyItems:YES];
-                accountDic[kRosterName] = [data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"];
-                [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
-            }
-            else                                                                    //roster name of contact
-            {
-                DDLogInfo(@"Got nickname of %@: %@", jid, [data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"]);
-                [[DataLayer sharedInstance] setFullName:[data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"] forContact:jid andAccount:account.accountNo];
-                MLContact* contact = [[DataLayer sharedInstance] contactForUsername:jid forAccount:account.accountNo];
-                if(contact)     //ignore updates for jids not in our roster
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                        @"contact": contact
-                    }];
-            }
-            break;      //we only need the first item (there should be only one item in the first place)
-        }
-    }
-    //deleted/purged node or retracted item
-    else
-    {
-        if([jid isEqualToString:account.connectionProperties.identity.jid])        //own roster name
-        {
-            DDLogInfo(@"Own nickname got retracted");
-            NSMutableDictionary* accountDic = [[NSMutableDictionary alloc] initWithDictionary:[[DataLayer sharedInstance] detailsForAccount:account.accountNo] copyItems:NO];
-            accountDic[kRosterName] = @"";
-            [[DataLayer sharedInstance] updateAccounWithDictionary:accountDic];
-        }
-        else
-        {
-            DDLogInfo(@"Nickname of %@ got retracted", jid);
-            [[DataLayer sharedInstance] setFullName:@"" forContact:jid andAccount:account.accountNo];
-            MLContact* contact = [[DataLayer sharedInstance] contactForUsername:jid forAccount:account.accountNo];
-            if(contact)     //ignore updates for jids not in our roster
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                    @"contact": contact
-                }];
-        }
-    }
 }
 
 -(void) publishRosterName:(NSString* _Nullable) rosterName
@@ -3407,23 +3279,7 @@ NSString *const kXMPPPresence = @"presence";
             [self.pubsub publishItem:item onNode:@"urn:xmpp:avatar:data" withConfigOptions:@{
                 @"pubsub#persist_items": @"true",
                 @"pubsub#access_model": @"presence"
-            }];
-            
-            //publish metadata node (must be done *after* publishing the new data node)
-            [self.pubsub publishItem:
-                [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": imageHash} andChildren:@[
-                    [[MLXMLNode alloc] initWithElement:@"metadata" andNamespace:@"urn:xmpp:avatar:metadata" withAttributes:@{} andChildren:@[
-                        [[MLXMLNode alloc] initWithElement:@"info" withAttributes:@{
-                            @"id": imageHash,
-                            @"type": @"image/jpeg",
-                            @"bytes": [NSString stringWithFormat:@"%lu", (unsigned long)imageData.length]
-                        } andChildren:@[] andData:nil]
-                    ] andData:nil]
-                ] andData:nil]
-            onNode:@"urn:xmpp:avatar:metadata" withConfigOptions:@{
-                @"pubsub#persist_items": @"true",
-                @"pubsub#access_model": @"presence"
-            }];
+            } andHandler:makeHandlerWithArgs(MLPubSubProcessor, avatarDataPublished, (@{@"imageHash": imageHash, @"imageData": imageData}))];
         }
     });
 }

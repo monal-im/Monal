@@ -122,6 +122,8 @@ extern NSString* const kAccountHibernate;
 
 -(void) setPubSubNotificationsForNodes:(NSArray* _Nonnull) nodes persistState:(BOOL) persistState;
 
+-(void) accountStatusChanged;
+
 /**
  send a message to a contact with xmpp id
  */
@@ -144,11 +146,7 @@ extern NSString* const kAccountHibernate;
  */
 -(void) send:(MLXMLNode*) stanza;
 -(void) sendIq:(XMPPIQ*) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler;
--(void) sendIq:(XMPPIQ*) iq withDelegate:(id) delegate andMethod:(SEL) method andAdditionalArguments:(NSArray* _Nullable) args;
--(void) sendIq:(XMPPIQ*) iq withDelegate:(id) delegate andMethod:(SEL) method andInvalidationMethod:(SEL) invalidationMethod andAdditionalArguments:(NSArray* _Nullable) args;
-
--(void) addSmacksHandler:(monal_void_block_t) handler;
--(void) addSmacksHandler:(monal_void_block_t) handler forValue:(NSNumber*) value;
+-(void) sendIq:(XMPPIQ*) iq withHandler:(MLHandler* _Nullable) handler;
 
 /**
  removes a contact from the roster

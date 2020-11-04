@@ -313,6 +313,7 @@ static NSDateFormatter* dbFormatter;
             [NSNumber class],
             [NSString class],
             [NSDate class],
+            [MLHandler class],
             [MLXMLNode class],
             [XMPPIQ class],
             [XMPPPresence class],

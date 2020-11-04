@@ -7,6 +7,7 @@
 //
 
 #import "MLOMEMO.h"
+#import "MLHandler.h"
 #import "SignalAddress.h"
 #import "MLSignalStore.h"
 #import "SignalContext.h"
@@ -96,7 +97,7 @@ const int KEY_SIZE = 16;
     SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self._signalContext];
 
     // init MLPubSub handler
-    [self.account.pubsub registerForNode:@"eu.siacs.conversations.axolotl.devicelist" withHandler:[HelperTools createStaticHandlerWithDelegate:[self class] andMethod:@selector(devicelistHandlerFor:withNode:jid:type:andData:) andAdditionalArguments:nil]];
+    [self.account.pubsub registerForNode:@"eu.siacs.conversations.axolotl.devicelist" withHandler:makeHandler(self, devicelistHandler)];
 
     if(self.monalSignalStore.deviceid == 0)
     {
@@ -115,8 +116,7 @@ const int KEY_SIZE = 16;
     }
 }
 
-+(void) devicelistHandlerFor:(xmpp*) account withNode:(NSString*) node jid:(NSString*) jid type:(NSString*) type andData:(NSDictionary*) data
-{
+$$handler(devicelistHandler, $ID(xmpp*, account), $ID(NSString*, node), $ID(NSString*, jid), $ID(NSString*, type), $ID(NSDictionary*, data))
     //type will be "publish", "retract", "purge" or "delete", "publish" and "retract" will have the data dictionary filled with id --> data pairs
     //the data for "publish" is the item node with the given id, the data for "retract" is always @YES
     assert([node isEqualToString:@"eu.siacs.conversations.axolotl.devicelist"]);
@@ -129,7 +129,7 @@ const int KEY_SIZE = 16;
             [account.omemo processOMEMODevices:deviceSet from:jid];
         }
     }
-}
+$$
 
 -(void) sendOMEMOBundle
 {
@@ -170,11 +170,11 @@ const int KEY_SIZE = 16;
 -(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
 {
     NSString* bundleNode = [NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%@", deviceid];
-    [self.account.pubsub fetchNode:bundleNode from:jid withItemsList:nil andHandler:[HelperTools createStaticHandlerWithDelegate:[self class] andMethod:@selector(handleBundleFetchResultForAccount:andJid:withErrorIq:andData:andRid:) andAdditionalArguments:@[deviceid]]];
+    [self.account.pubsub fetchNode:bundleNode from:jid withItemsList:nil andHandler:makeHandlerWithArgs(self, handleBundleFetchResult, (@{@"deviceid": deviceid}))];
 }
 
-+(void) handleBundleFetchResultForAccount:(xmpp*) account andJid:(NSString*) jid withErrorIq:(XMPPIQ*) errorIq andData:(NSDictionary*) data andRid:(NSString*) rid
-{
+
+$$handler(handleBundleFetchResult, $ID(xmpp*, account), $ID(NSString*, jid), $ID(XMPPIQ*, errorIq), $ID(NSDictionary*, data), $ID(NSString*, rid))
     if(errorIq)
     {
         DDLogError(@"Could not fetch bundle from %@: rid: %@ - %@", jid, rid, errorIq);
@@ -197,7 +197,7 @@ const int KEY_SIZE = 16;
             return;
         [account.omemo processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
     }
-}
+$$
 
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString *) source
 {

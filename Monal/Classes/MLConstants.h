@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLContact.h"
+#import "MLHandler.h"
 
 @import CocoaLumberjack;
 static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
@@ -18,6 +18,7 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 //configure app group constants
 #define kAppGroup @"group.monal"
 
+@class MLContact;
 
 //some typedefs used throughout the project
 typedef void (^contactCompletion)(MLContact *selectedContact);
@@ -34,7 +35,7 @@ typedef enum NotificationPrivacySettingOption {
 //some useful macros
 #define weakify(var) __weak __typeof__(var) AHKWeak_##var = var
 #define strongify(var) _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wshadow\"") __strong __typeof__(var) var = AHKWeak_##var; _Pragma("clang diagnostic pop")
-
+#define nilWrapper(var)  (var ? var : [NSNull null])
 
 //some xmpp related constants
 #define kRegServer @"yax.im"

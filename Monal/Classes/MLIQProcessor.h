@@ -26,14 +26,6 @@ typedef void (^processAction)(void);
  */
 +(void) processIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account;
 
-+(void) handleBindFor:(xmpp*) account withIqNode:(XMPPIQ*) iqNode;
-+(void) handleRosterFor:(xmpp*) account withIqNode:(XMPPIQ*) iqNode;
-+(void) handleAccountDiscoInfo:(xmpp*) account withIqNode:(XMPPIQ*) iqNode;
-+(void) handleServerDiscoInfo:(xmpp*) account withIqNode:(XMPPIQ*) iqNode;
-+(void) handleServiceDiscoInfo:(xmpp*) account withIqNode:(XMPPIQ*) iqNode;
-+(void) handleServerDiscoItems:(xmpp*) account withIqNode:(XMPPIQ*) iqNode;
-+(void) handleEntityCapsDisco:(xmpp*) account withIqNode:(XMPPIQ*) iqNode;
-
 @end
 
 NS_ASSUME_NONNULL_END

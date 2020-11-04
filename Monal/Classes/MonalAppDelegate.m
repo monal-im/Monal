@@ -113,7 +113,7 @@
 
 #pragma mark - app life cycle
 
-- (BOOL)application:(UIApplication*) application willFinishLaunchingWithOptions:(NSDictionary*) launchOptions
+-(BOOL) application:(UIApplication*) application willFinishLaunchingWithOptions:(NSDictionary*) launchOptions
 {
     self.fileLogger = [HelperTools configureLogging];
     

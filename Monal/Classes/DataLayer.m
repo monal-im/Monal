@@ -2049,6 +2049,11 @@ static NSDateFormatter* dbFormatter;
         [self updateDBTo:4.95 withBlock:^{
             [self.db executeNonQuery:@"ALTER TABLE account ADD COLUMN iconhash VARCHAR(200);"];
         }];
+        
+        [self updateDBTo:4.96 withBlock:^{
+            //truncate internal account state to create a clean working set (old serialized handlers can not be called by our new code)
+            [self.db executeNonQuery:@"UPDATE account SET state=NULL;"];
+        }];
     }];
     
     DDLogInfo(@"Database version check complete");

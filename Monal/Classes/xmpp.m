@@ -43,8 +43,7 @@
 #import "AESGcm.h"
 
 
-#define kConnectTimeout 20ull //seconds
-#define kPingTimeout 120ull //seconds
+#define STATE_VERSION 1
 
 
 NSString *const kMessageId=@"MessageID";
@@ -741,6 +740,16 @@ NSString *const kXMPPPresence = @"presence";
                 //reset smacks state to sane values (this can be done even if smacks is not supported)
                 [self initSM3];
                 self.unAckedStanzas = stanzas;
+                
+                //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
+                for(NSString* iqid in _iqHandlers)
+                {
+                    DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
+                    if([_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
+                        [_iqHandlers[iqid] invalidateWithArguments:@{@"account": self}];
+                    else if(_iqHandlers[iqid][@"errorHandler"])
+                        ((monal_iq_handler_t)_iqHandlers[iqid][@"errorHandler"])(nil);
+                }
                 _iqHandlers = [[NSMutableDictionary alloc] init];
 
                 //persist these changes
@@ -1976,6 +1985,7 @@ NSString *const kXMPPPresence = @"presence";
 
         [values setObject:_lastInteractionDate forKey:@"lastInteractionDate"];
         [values setValue:[NSDate date] forKey:@"stateSavedAt"];
+        [values setValue:@(STATE_VERSION) forKey:@"VERSION"];
 
         //save state dictionary
         [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
@@ -2026,6 +2036,11 @@ NSString *const kXMPPPresence = @"presence";
                 for(NSDictionary* dic in self.unAckedStanzas)
                     DDLogDebug(@"readSmacksStateOnly unAckedStanza %@: %@", [dic objectForKey:kQueueID], [dic objectForKey:kStanza]);
             
+            if([dic[@"VERSION"] intValue] != STATE_VERSION)
+            {
+                DDLogWarn(@"Account state upgraded from %@ to %d, invalidating smacks streamID...", dic[@"VERSION"], STATE_VERSION);
+                self.streamID = nil;
+            }
         }
         //always reset handler and smacksRequestInFlight when loading smacks state
         _smacksAckHandler = [[NSMutableArray alloc] init];
@@ -2143,6 +2158,12 @@ NSString *const kXMPPPresence = @"presence";
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
                     DDLogDebug(@"readState unAckedStanza %@: %@", [dic objectForKey:kQueueID], [dic objectForKey:kStanza]);
+            
+            if([dic[@"VERSION"] intValue] != STATE_VERSION)
+            {
+                DDLogWarn(@"Account state upgraded from %@ to %d, invalidating smacks streamID...", dic[@"VERSION"], STATE_VERSION);
+                self.streamID = nil;
+            }
         }
         
         //always reset handler and smacksRequestInFlight when loading smacks state

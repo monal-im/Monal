@@ -1449,7 +1449,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId encrypted:(BOOL) encrypted withCompletion:(void (^)(BOOL, NSString *))completion
+-(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId encrypted:(BOOL) encrypted withCompletion:(void (^)(BOOL, NSString*, NSNumber*)) completion
 {
     //Message_history going out, from is always the local user. always read and not sent
 
@@ -1471,11 +1471,12 @@ static NSDateFormatter* dbFormatter;
     [self.db voidWriteTransaction:^{
         DDLogVerbose(@"%@", query);
         BOOL result = [self.db executeNonQuery:query andArguments:params];
+        NSNumber* historyId = [self.db lastInsertId];
         if(result)
             [self updateActiveBuddy:to setTime:dateTime forAccount:accountNo];
         //include this completion handler in our db transaction to include the smacks state update in the same transaction as the our history update
         if(completion)
-            completion(result, messageType);
+            completion(result, messageType, historyId);
     }];
 }
 

@@ -805,12 +805,13 @@ enum msgSentState {
     else
     {
         [[MLXMPPManager sharedInstance]
-            sendMessage:messageText
-            toContact:self.contact.contactJid
-            fromAccount:self.contact.accountId
-            isEncrypted:self.encryptChat
-            isMUC:self.contact.isGroup
-            isUpload:NO messageId:newMessageID
+                      sendMessage:messageText
+                        toContact:self.contact.contactJid
+                      fromAccount:self.contact.accountId
+                      isEncrypted:self.encryptChat
+                            isMUC:self.contact.isGroup
+                         isUpload:NO
+                        messageId:newMessageID
             withCompletionHandler:nil
         ];
     }
@@ -1179,7 +1180,7 @@ enum msgSentState {
         DDLogError(@" not ready to send messages");
         return;
     }
-    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:self.contact.accountId withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString *messageType) {
+    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:self.contact.accountId withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString* messageType, NSNumber* messageDBId) {
         DDLogVerbose(@"added message");
         
         if(result)
@@ -1199,6 +1200,7 @@ enum msgSentState {
                 messageObj.encrypted = self.encryptChat;
                 messageObj.messageType = messageType;
                 messageObj.messageText = message;
+                messageObj.messageDBId = messageDBId;
 
                 [self.messageTable performBatchUpdates:^{
                     if(!self.messageList) self.messageList = [[NSMutableArray alloc] init];
@@ -1463,8 +1465,9 @@ enum msgSentState {
 
 -(void) retry:(id) sender
 {
-    NSInteger msgHistorID = ((UIButton*) sender).tag;
-    MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:msgHistorID];
+    NSInteger msgHistoryID = ((UIButton*) sender).tag;
+    MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:msgHistoryID];
+    DDLogDebug(@"Called retry for message with history id %ld: %@", (long)msgHistoryID, msg);
 
     UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Retry sending message?", @"") message:[NSString stringWithFormat:NSLocalizedString(@"This message failed to send (%@): %@", @""), msg.errorType, msg.errorReason] preferredStyle:UIAlertControllerStyleActionSheet];
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Retry", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {

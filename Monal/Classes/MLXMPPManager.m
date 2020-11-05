@@ -710,10 +710,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                                          actuallyFrom:(isMUC ? contact.accountNickInGroup : account.connectionProperties.identity.jid)
                                                withId:msgid
                                             encrypted:encrypted
-                                       withCompletion:^(BOOL successHist, NSString *messageTypeHist) {
+                                       withCompletion:^(BOOL successHist, NSString* messageTypeHist, NSNumber* messageDBId) {
         // Send message
         if(successHist) {
-            DDLogInfo(@"Message added to history, now sending...");
+            DDLogInfo(@"Message added to history with id %ld, now sending...", (long)[messageDBId intValue]);
             [self sendMessage:message toContact:recipient fromAccount:accountID isEncrypted:encrypted isMUC:isMUC isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString *messageIdSend) {
                 if(successSend)
                     completion(successSend, messageIdSend);

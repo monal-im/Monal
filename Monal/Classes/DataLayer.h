@@ -215,7 +215,7 @@ extern NSString* const kMessageTypeUrl;
 -(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo;
 -(NSArray*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSString*) accountNo tillStanzaId:(NSString* _Nullable) stanzaId wasOutgoing:(BOOL) outgoing;
 
--(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId encrypted:(BOOL) encrypted withCompletion:(void (^)(BOOL, NSString *))completion;
+-(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId encrypted:(BOOL) encrypted withCompletion:(void (^)(BOOL, NSString*, NSNumber*)) completion;
 
 /**
 retrieves the actual_from of the the last message from hisroty id

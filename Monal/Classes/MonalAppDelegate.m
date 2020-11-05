@@ -213,24 +213,31 @@
         options:UNNotificationActionOptionNone
     ];
     UNNotificationCategory* messageCategory;
+    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert;
     if(@available(iOS 13.0, *))
+    {
         messageCategory = [UNNotificationCategory
             categoryWithIdentifier:@"message"
             actions:@[replyAction, markAsReadAction]
             intentIdentifiers:@[]
             options:UNNotificationCategoryOptionAllowAnnouncement
         ];
+        
+        //ios 13 has support for UNAuthorizationOptionAnnouncement
+        authOptions = authOptions | UNAuthorizationOptionAnnouncement;
+    }
     else
+    {
         messageCategory = [UNNotificationCategory
             categoryWithIdentifier:@"message"
             actions:@[replyAction, markAsReadAction]
             intentIdentifiers:@[]
             options:UNNotificationCategoryOptionNone
         ];
-    
-    //request auth to show notifications and register our categories created above
-    [center requestAuthorizationWithOptions:(UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert | UNAuthorizationOptionAnnouncement) completionHandler:^(BOOL granted, NSError *error) {
-        DDLogInfo(@"Got local notification authorization response: %@, error=%@", granted ? @"YES" : @"NO", error);
+    }
+    //request auth to show notifications and register our notification categories created above
+    [center requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError *error) {
+        DDLogInfo(@"Got local notification authorization response: granted=%@, error=%@", granted ? @"YES" : @"NO", error);
     }];
     [center setNotificationCategories:[NSSet setWithObjects:messageCategory, nil]];
     
@@ -253,9 +260,7 @@
 
     //update logs if needed
     if(![[HelperTools defaultsDB] boolForKey:@"Logging"])
-    {
         [[DataLayer sharedInstance] messageHistoryCleanAll];
-    }
     
     //handle message notifications by initializing the MLNotificationManager
     [MLNotificationManager sharedInstance];

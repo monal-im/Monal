@@ -80,10 +80,10 @@ MLHandler* h = makeHandlerWithInvalidationAndArgs(ClassName, myHandlerName, myIn
 #include "metamacros.h"
 
 //create handler object
-#define makeHandler(delegate, name)                                               [[MLHandler alloc] initWithDelegate:[delegate class] andMethod:@selector(name##WithArguments:andBoundArguments:)]
-#define makeHandlerWithArgs(delegate, name, args)                                 [[MLHandler alloc] initWithDelegate:[delegate class] method:@selector(name##WithArguments:andBoundArguments:) andBoundArguments:args]
-#define makeHandlerWithInvalidation(delegate, name, invalidation)                 [[MLHandler alloc] initWithDelegate:[delegate class] method:@selector(name##WithArguments:andBoundArguments:) invalidationMethod:@selector(invalidation##WithArguments:andBoundArguments:)]
-#define makeHandlerWithInvalidationAndArgs(delegate, name, invalidation, args)    [[MLHandler alloc] initWithDelegate:[delegate class] method:@selector(name##WithArguments:andBoundArguments:) invalidationMethod:@selector(invalidation##WithArguments:andBoundArguments:) andBoundArguments:args]
+#define makeHandler(delegate, name)                                               _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wundeclared-selector\"") [[MLHandler alloc] initWithDelegate:[delegate class] andMethod:@selector(name##WithArguments:andBoundArguments:)] _Pragma("clang diagnostic pop")
+#define makeHandlerWithArgs(delegate, name, args)                                 _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wundeclared-selector\"") [[MLHandler alloc] initWithDelegate:[delegate class] method:@selector(name##WithArguments:andBoundArguments:) andBoundArguments:args] _Pragma("clang diagnostic pop")
+#define makeHandlerWithInvalidation(delegate, name, invalidation)                 _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wundeclared-selector\"") [[MLHandler alloc] initWithDelegate:[delegate class] method:@selector(name##WithArguments:andBoundArguments:) invalidationMethod:@selector(invalidation##WithArguments:andBoundArguments:)] _Pragma("clang diagnostic pop")
+#define makeHandlerWithInvalidationAndArgs(delegate, name, invalidation, args)    _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wundeclared-selector\"") [[MLHandler alloc] initWithDelegate:[delegate class] method:@selector(name##WithArguments:andBoundArguments:) invalidationMethod:@selector(invalidation##WithArguments:andBoundArguments:) andBoundArguments:args] _Pragma("clang diagnostic pop")
 
 //declare handler, the order of provided arguments does not matter because we use named arguments
 #define $$handler(name, ...)                                                      +(void) name##WithArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
@@ -114,13 +114,13 @@ NS_ASSUME_NONNULL_BEGIN
 -(instancetype) initWithDelegate:(id) delegate method:(SEL) method invalidationMethod:(SEL) invalidationMethod andBoundArguments:(NSDictionary*) args;
 
 //bind new arguments dictionary
--(void) bindArguments:(NSDictionary*) args;
+-(void) bindArguments:(NSDictionary* _Nullable) args;
 
 //call and invalidate
 -(void) call;
--(void) callWithArguments:(NSDictionary*) defaultArgs;
+-(void) callWithArguments:(NSDictionary* _Nullable) defaultArgs;
 -(void) invalidate;
--(void) invalidateWithArguments:(NSDictionary*) args;
+-(void) invalidateWithArguments:(NSDictionary* _Nullable) args;
 
 @end
 

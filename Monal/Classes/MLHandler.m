@@ -51,20 +51,29 @@
 
 -(instancetype) INTERNALinitWithDelegate:(id) delegate method:(SEL) method invalidationMethod:(SEL _Nullable) invalidationMethod andBoundArguments:(NSDictionary* _Nullable) args
 {
-    args = [self sanitizeArguments:args];
+    if(![delegate respondsToSelector:method])
+        @throw [NSException exceptionWithName:@"RuntimeException" reason:[NSString stringWithFormat:@"Class '%@' does not provide handler implementation '%@'!", NSStringFromClass(delegate), [self selectorToHandlerName:method]] userInfo:@{
+            @"delegate": NSStringFromClass(delegate),
+            @"method": NSStringFromSelector(method),
+        }];
+    if(invalidationMethod && ![delegate respondsToSelector:invalidationMethod])
+        @throw [NSException exceptionWithName:@"RuntimeException" reason:[NSString stringWithFormat:@"Class '%@' does not provide invalidation implementation '%@'!", NSStringFromClass(delegate), [self selectorToHandlerName:method]] userInfo:@{
+            @"delegate": NSStringFromClass(delegate),
+            @"method": NSStringFromSelector(method),
+        }];
     _internalData = [[NSMutableDictionary alloc] init];
     _invalidated = NO;
     [_internalData addEntriesFromDictionary:@{
         @"delegate": NSStringFromClass(delegate),
         @"method": NSStringFromSelector(method),
-        @"boundArguments": args,
     }];
     if(invalidationMethod)
         _internalData[@"invalidationMethod"] = NSStringFromSelector(invalidationMethod);
+    [self bindArguments:args];
     return self;
 }
 
--(void) bindArguments:(NSDictionary*) args
+-(void) bindArguments:(NSDictionary* _Nullable) args
 {
     [self checkInvalidation];
     _internalData[@"boundArguments"] = [self sanitizeArguments:args];
@@ -75,7 +84,7 @@
     [self callWithArguments:nil];
 }
 
--(void) callWithArguments:(NSDictionary*) args
+-(void) callWithArguments:(NSDictionary* _Nullable) args
 {
     [self checkInvalidation];
     if(_internalData[@"delegate"] && _internalData[@"method"])
@@ -103,7 +112,7 @@
     [self invalidateWithArguments:nil];
 }
 
--(void) invalidateWithArguments:(NSDictionary*) args
+-(void) invalidateWithArguments:(NSDictionary* _Nullable) args
 {
     [self checkInvalidation];
     if(_internalData[@"delegate"] && _internalData[@"invalidationMethod"])
@@ -141,8 +150,8 @@
 {
     NSString* extras = @"";
     if(_internalData[@"invalidationMethod"])
-        extras = [NSString stringWithFormat:@"<%@>", _internalData[@"invalidationMethod"]];
-    return [NSString stringWithFormat:@"[%@ %@]%@", _internalData[@"delegate"], _internalData[@"method"], extras];
+        extras = [NSString stringWithFormat:@"<%@>", [self selectorStringToHandlerName:_internalData[@"invalidationMethod"]]];
+    return [NSString stringWithFormat:@"{%@, %@%@}", _internalData[@"delegate"], [self selectorStringToHandlerName:_internalData[@"method"]], extras];
 }
 
 +(BOOL) supportsSecureCoding
@@ -172,7 +181,7 @@
     return copy;
 }
 
--(NSMutableDictionary*) sanitizeArguments:(NSDictionary*) args
+-(NSMutableDictionary*) sanitizeArguments:(NSDictionary* _Nullable) args
 {
     NSMutableDictionary* retval = [[NSMutableDictionary alloc] init];
     if(args)
@@ -188,6 +197,16 @@
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Tried to call or bind vars to already invalidated handler!" userInfo:@{
             @"handler": _internalData,
         }];
+}
+
+-(NSString*) selectorToHandlerName:(SEL) selector
+{
+    return [self selectorStringToHandlerName:NSStringFromSelector(selector)];
+}
+
+-(NSString*) selectorStringToHandlerName:(NSString*) methodName
+{
+    return [methodName substringWithRange:NSMakeRange(0, methodName.length - @"WithArguments:andBoundArguments:".length)];
 }
 
 @end

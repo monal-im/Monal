@@ -387,7 +387,7 @@ $$handler(handleServerDiscoItems, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
 $$
 
 //entity caps of some contact
-$$handler(handleEntityCapsDisco, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
+$$handler(handleEntityCapsDisco, $ID(XMPPIQ*, iqNode))
     NSMutableArray* identities = [[NSMutableArray alloc] init];
     for(MLXMLNode* identity in [iqNode find:@"{http://jabber.org/protocol/disco#info}query/identity"])
         [identities addObject:[NSString stringWithFormat:@"%@/%@//%@", [identity findFirst:@"/@category"], [identity findFirst:@"/@type"], [identity findFirst:@"/@name"]]];

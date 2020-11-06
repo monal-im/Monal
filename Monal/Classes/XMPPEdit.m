@@ -150,6 +150,17 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+-(void) alertWithTitle:(NSString*) title andMsg:(NSString*) msg
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:title message:msg preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+    });
+}
+
 #pragma mark actions
 
 -(IBAction) save:(id) sender
@@ -160,6 +171,7 @@
 
     if([self.jid length] == 0)
     {
+        [self alertWithTitle:NSLocalizedString(@"XMPP ID missing", @"") andMsg:NSLocalizedString(@"You have not entered your XMPP ID yet", @"")];
         return;
     }
 
@@ -169,6 +181,7 @@
     if([self.jid characterAtIndex:0] == '@')
     {
         //first char =@ means no username in jid
+        [self alertWithTitle:NSLocalizedString(@"Username missing", @"") andMsg:NSLocalizedString(@"Your entered XMPP ID is missing the username", @"")];
         return;
     }
 
@@ -184,6 +197,11 @@
     {
         user = self.jid;
         domain = @"";
+    }
+    if([domain isEqualToString:@""] && !self.server)
+    {
+        [self alertWithTitle:NSLocalizedString(@"Domain missing", @"") andMsg:NSLocalizedString(@"Your entered XMPP ID is missing the domain", @"")];
+        return;
     }
 
     NSMutableDictionary* dic = [[NSMutableDictionary alloc] init];
@@ -235,13 +253,7 @@
                     [self showSuccessHUD];
                 }
             } else  {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    UIAlertController* alert= [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Account Exists", @"") message:NSLocalizedString(@"This account already exists in Monal.", @"") preferredStyle:UIAlertControllerStyleAlert];
-                    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                        [alert dismissViewControllerAnimated:YES completion:nil];
-                    }]];
-                    [self presentViewController:alert animated:YES completion:nil];
-                });
+                [self alertWithTitle:NSLocalizedString(@"Account Exists", @"") andMsg:NSLocalizedString(@"This account already exists in Monal.", @"")];
             }
         }
     }
@@ -358,7 +370,7 @@
                 break;
             }
             case 1: {
-                thecell.cellLabel.text = NSLocalizedString(@"Jabber ID", @"");
+                thecell.cellLabel.text = NSLocalizedString(@"XMPP ID", @"");
                 thecell.toggleSwitch.hidden = YES;
                 thecell.textInputField.tag = 2;
                 thecell.textInputField.keyboardType = UIKeyboardTypeEmailAddress;

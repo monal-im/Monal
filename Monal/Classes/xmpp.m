@@ -1507,15 +1507,6 @@ NSString *const kXMPPPresence = @"presence";
             {
                 [MLIQProcessor processIq:iqNode forAccount:self];
 
-#ifndef DISABLE_OMEMO
-                if([[iqNode findFirst:@"/@id"] isEqualToString:self.omemo.deviceQueryId])
-                {
-                    if([iqNode check:@"/<type=error>"]) {
-                        //there are no devices published yet
-                        [self.omemo sendOMEMODeviceWithForce:NO];
-                    }
-                }
-#endif
                 if([[iqNode findFirst:@"/@id"] isEqualToString:self.jingle.idval])
                     [self jingleResult:iqNode];
             }
@@ -2321,10 +2312,6 @@ NSString *const kXMPPPresence = @"presence";
     }
     
     //mam query will be done in MLIQProcessor once the disco result returns
-    
-#ifndef DISABLE_OMEMO
-    [self.omemo sendOMEMOBundle];
-#endif
 }
 
 -(void) setStatusMessageText:(NSString*) message

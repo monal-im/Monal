@@ -55,13 +55,13 @@ const int KEY_SIZE = 16;
 
     [self setupSignal];
 
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(connectionStarted:) name:kMLHasConnectedNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(connected:) name:kMonalFinishedCatchup object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loggedIn:) name:kMLHasConnectedNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(catchupDone:) name:kMonalFinishedCatchup object:nil];
 
     return self;
 }
 
--(void) connectionStarted:(NSNotification *) notification {
+-(void) loggedIn:(NSNotification *) notification {
     NSDictionary* dic = notification.object;
     if(!dic) return;
     NSString* accountNo = [dic objectForKey:@"AccountNo"];
@@ -71,7 +71,7 @@ const int KEY_SIZE = 16;
     }
 }
 
--(void) connected:(NSNotification *) notification {
+-(void) catchupDone:(NSNotification *) notification {
     xmpp* notiAccount = notification.object;
     if(!notiAccount) return;
 
@@ -304,7 +304,7 @@ $$
     if(![devices containsObject:[NSNumber numberWithInt:self.monalSignalStore.deviceid]] || force)
     {
         [devices addObject:[NSNumber numberWithInt:self.monalSignalStore.deviceid]];
-
+        [self sendOMEMOBundle];
         [self publishDevicesViaPubSub:devices];
     }
 }
@@ -616,7 +616,7 @@ $$
         {
             // check if we need to generate new preKeys
             if(![self generateNewKeysIfNeeded]) {
-                // send new bundle without the used peyKey if no new keys were generated
+                // send new bundle without the used preKey if no new keys were generated
                 [self sendOMEMOBundle];
             }
             else {
@@ -669,7 +669,7 @@ $$
 
                 NSData* decData = [AESGcm decrypt:decodedPayload withKey:key andIv:iv withAuth:auth];
                 if(!decData) {
-                    DDLogError(@"Could not decrypt message with key that was decrypted.");
+                    DDLogError(@"Could not decrypt message with key that was decrypted. (GCM error)");
                      return NSLocalizedString(@"Encrypted message was sent in an older format Monal can't decrypt. Please ask them to update their client. (GCM error)", @"");
                 }
                 else

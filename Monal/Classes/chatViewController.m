@@ -443,7 +443,7 @@ enum msgSentState {
     
     //send button is always enabled, except if the account is permanently disabled
     sendButtonEnabled = YES;
-    if(![[DataLayer sharedInstance] isAccountEnabled:self.contact.accountId])
+    if(![[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo])
         sendButtonEnabled = NO;
     
     jidLabelText = contactDisplayName;
@@ -595,7 +595,7 @@ enum msgSentState {
 #ifndef DISABLE_OMEMO
     BOOL omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressNameExist:self.contact.contactJid];
     if(!omemoDeviceForContactFound) {
-        if(self.encryptChat) {
+        if(self.encryptChat && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo]) {
             UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Encryption Not Supported", @"") message:NSLocalizedString(@"This contact does not appear to have any devices that support encryption.", @"") preferredStyle:UIAlertControllerStyleAlert];
             [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 // Disable encryption

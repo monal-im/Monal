@@ -50,6 +50,8 @@ const int KEY_SIZE = 16;
     self._connection = account.connectionProperties;
     self.account = account;
     self.deviceListExists = YES;
+    self.hasCatchUpDone = [NSNumber numberWithInt:0];
+    self.openBundleFetchCnt = [NSNumber numberWithInt:0];
 
     self.devicesWithBrokenSession = [[NSMutableDictionary alloc] init];
 
@@ -76,11 +78,16 @@ const int KEY_SIZE = 16;
     if(!notiAccount) return;
 
     if([self._accountNo isEqualToString:notiAccount.accountNo]) {
+        self.hasCatchUpDone = [NSNumber numberWithInt:1];
         if(self.deviceListExists == NO) {
             // we need to publish a new devicelist if we did not receive our own list after a new connection
             [self sendOMEMOBundle];
             [self sendOMEMODeviceWithForce:YES];
             self.deviceListExists = YES;
+        }
+        if(self.openBundleFetchCnt.intValue == 0)
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedOmemoBundleFetch object:self];
         }
     }
 }
@@ -170,7 +177,9 @@ $$
 -(void) queryOMEMOBundleFrom:(NSString *) jid andDevice:(NSString *) deviceid
 {
     NSString* bundleNode = [NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%@", deviceid];
-    [self.account.pubsub fetchNode:bundleNode from:jid withItemsList:nil andHandler:makeHandlerWithArgs(self, handleBundleFetchResult, (@{@"deviceid": deviceid}))];
+
+    self.openBundleFetchCnt = [NSNumber numberWithInt:(self.openBundleFetchCnt.intValue + 1)];
+    [self.account.pubsub fetchNode:bundleNode from:jid withItemsList:nil andHandler:makeHandlerWithArgs(self, handleBundleFetchResult, (@{@"rid": deviceid}))];
 }
 
 
@@ -179,23 +188,34 @@ $$handler(handleBundleFetchResult, $ID(xmpp*, account), $ID(NSString*, jid), $ID
     {
         DDLogError(@"Could not fetch bundle from %@: rid: %@ - %@", jid, rid, errorIq);
         NSString* bundleName = [errorIq findFirst:@"/{jabber:client}iq/{http://jabber.org/protocol/pubsub}pubsub/items<node=eu\\.siacs\\.conversations\\.axolotl\\.bundles:[0-9]+>@node"];
-        if(!bundleName)
-            return;
-        NSString* ridFromIQ = [bundleName componentsSeparatedByString:@":"][1];
-        if(!ridFromIQ)
-            return;
-        [account.omemo deleteDeviceForSource:jid andRid:rid.intValue];
-        // We may have a broken session with a device that does not have a bundle anymore
-        [account.omemo sendKeyTransportElementIfNeeded:jid removeBrokenSessionForRid:rid];
+        if(bundleName)
+        {
+            NSString* ridFromIQ = [bundleName componentsSeparatedByString:@":"][1];
+            if(ridFromIQ)
+            {
+                [account.omemo deleteDeviceForSource:jid andRid:rid.intValue];
+                // We may have a broken session with a device that does not have a bundle anymore
+                [account.omemo sendKeyTransportElementIfNeeded:jid removeBrokenSessionForRid:rid];
+            }
+        }
     }
     else
     {
         if(!rid)
             return;
         MLXMLNode* receivedKeys = [data objectForKey:@"current"];
-        if(!receivedKeys)
-            return;
-        [account.omemo processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
+        if(receivedKeys)
+            [account.omemo processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
+    }
+    if(account.omemo.openBundleFetchCnt.intValue > 1)
+    {
+        account.omemo.openBundleFetchCnt = [NSNumber numberWithInt:(account.omemo.openBundleFetchCnt.intValue - 1)];
+    }
+    else
+    {
+        account.omemo.openBundleFetchCnt = [NSNumber numberWithInt:0];
+        if(account.omemo.hasCatchUpDone.intValue == 1)
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedOmemoBundleFetch object:self];
     }
 $$
 

@@ -21,7 +21,8 @@ NS_ASSUME_NONNULL_BEGIN
     NSLock* signalLock;
 }
 @property (nonatomic, strong) MLSignalStore* monalSignalStore;
-@property (nonatomic, strong) NSString* deviceQueryId;
+@property (nonatomic, assign) NSNumber* hasCatchUpDone;
+@property (nonatomic, strong) NSNumber* openBundleFetchCnt;
 
 -(MLOMEMO*) initWithAccount:(xmpp*) account;
 
@@ -33,7 +34,6 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) sendOMEMODeviceWithForce:(BOOL) force;
 -(void) sendOMEMODevice:(NSSet<NSNumber*> *) receivedDevices force:(BOOL) force;
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString *) source;
--(void) processOMEMOKeys:(MLXMLNode*) iqNode forJid:(NSString*) jid;
 
 /*
  * encrypting / decrypting messages

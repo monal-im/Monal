@@ -35,7 +35,9 @@
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(connected) name:kMonalFinishedCatchup object:nil];
+    [nc addObserver:self selector:@selector(omemoBundleFetchFinished) name:kMonalFinishedOmemoBundleFetch object:nil];
     [nc addObserver:self selector:@selector(error) name:kXMPPError object:nil];
+
     [self registerForKeyboardNotifications];
 }
 
@@ -107,7 +109,7 @@
     
     NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
     if(accountID) {
-        self.accountno=[NSString stringWithFormat:@"%@", accountID];
+        self.accountno = [NSString stringWithFormat:@"%@", accountID];
         [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
         [SAMKeychain setPassword:password forService:@"Monal" account:self.accountno];
         [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
@@ -116,23 +118,33 @@
 
 -(void) connected
 {
-     dispatch_async(dispatch_get_main_queue(), ^{
-    self.loginHUD.hidden=YES;
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Success!",@"") message:NSLocalizedString(@"You are set up and connected.",@"") preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Start Using Monal",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [self dismissViewControllerAnimated:YES completion:nil];
-    }]];
-    [self presentViewController:alert animated:YES completion:nil];
-     });
+#ifndef DISABLE_OMEMO
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.loginHUD.label.text = NSLocalizedString(@"Loading omemo bundles", @"");
+    });
+#else
+    [self kMonalFinishedOmemoBundleFetch];
+#endif
 }
 
+-(void) omemoBundleFetchFinished
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.loginHUD.hidden = YES;
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Success!", @"") message:NSLocalizedString(@"You are set up and connected.", @"") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Start Using Monal", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+    });
+}
 
 -(void) error
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         self.loginHUD.hidden=YES;
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@"") message:NSLocalizedString(@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.",@"") preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@"") message:NSLocalizedString(@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.", @"") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
@@ -158,12 +170,12 @@
 
 - (void)textFieldDidBeginEditing:(UITextField *)textField
 {
-    self.activeField= textField;
+    self.activeField = textField;
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField
 {
-    self.activeField=nil;
+    self.activeField = nil;
 }
 
 

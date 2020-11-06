@@ -328,3 +328,6 @@
 "Notification" = "Notification";
 "Can't convert the image to jpeg format." = "Can't convert the image to jpeg format.";
 "Message was encrypted with omemo and can't be decrypted anymore" = "Message was encrypted with omemo and can't be decrypted anymore";
+"No further error description" = "No further error description";
+"This message failed to send (%@): %@" = "This message failed to send (%1$@): %2$@";
+"Loading omemo bundles" = "Loading omemo bundles";

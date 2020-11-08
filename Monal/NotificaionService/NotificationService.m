@@ -89,13 +89,16 @@
 {
     @synchronized(self) {
         DDLogInfo(@"Handling expired push");
+        
+        if([self.handlerList count]==1)
+            [HelperTools postSendingErrorNotification];
+        
         //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
         if([self.handlerList count])
         {
             void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
             [self.handlerList removeObject:handler];
-            UNNotificationContent* emptyContent = [[UNNotificationContent alloc] init]; // this is used with special extension filtering entitlement
-            handler(emptyContent);
+            [self callHandler:handler];
         }
     }
 }
@@ -114,6 +117,17 @@
         //(re)connect all accounts
         [[MLXMPPManager sharedInstance] connectIfNecessary];
     }
+}
+
+-(void) callHandler:(void (^)(UNNotificationContent*)) handler
+{
+    //this is used with special extension filtering entitlement which does not show notifications with empty body, title and subtitle
+    //but: app badge updates are still performed: use this to make sure the badge is up to date, even if a message got marked as read (by XEP-0333 etc.)
+    UNMutableNotificationContent* emptyContent = [[UNMutableNotificationContent alloc] init];
+    NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
+    DDLogInfo(@"Updating unread badge to: %@", unreadMsgCnt);
+    emptyContent.badge = unreadMsgCnt;
+    handler(emptyContent);
 }
 
 -(void) feedAllWaitingHandlers
@@ -142,8 +156,7 @@
                 DDLogVerbose(@"Feeding handler");
                 void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
                 [self.handlerList removeObject:handler];
-                UNNotificationContent* emptyContent = [[UNNotificationContent alloc] init]; // this is used with special extension filtering entitlement
-                handler(emptyContent);
+                [self callHandler:handler];
             }
         }
     });
@@ -198,7 +211,7 @@
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         //display an error notification and disconnect this account, leaving the extension running until all accounts are idle
         //(disconnected accounts count as idle)
-        DDLogInfo(@"notification handler: account error --> publish this as error notification and disconnect the account");
+        DDLogInfo(@"notification handler: account error --> publishing this as error notification and disconnecting this account");
         //extract error contents and disconnect the account
         NSArray* payload = [notification.object copy];
         NSString* message = payload[1];

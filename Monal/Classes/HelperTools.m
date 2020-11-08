@@ -9,16 +9,12 @@
 #include <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
 #import "HelperTools.h"
+#import "MLPubSub.h"
 #import "MLUDPLogger.h"
 
+@import UserNotifications;
+
 @implementation HelperTools
-
-static NSMutableDictionary* protectedFiles;
-
-+(void) initialize
-{
-    protectedFiles = [[NSMutableDictionary alloc] init];
-}
 
 void logException(NSException* exception)
 {
@@ -31,33 +27,62 @@ void logException(NSException* exception)
 +(void) configureFileProtectionFor:(NSString*) file
 {
 #if TARGET_OS_IPHONE
-    @synchronized(protectedFiles) {
-        if(protectedFiles[file])
-            return;
-        NSFileManager* fileManager = [NSFileManager defaultManager];
-        if([fileManager fileExistsAtPath:file])
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    if([fileManager fileExistsAtPath:file])
+    {
+        //DDLogVerbose(@"protecting file '%@'...", file);
+        NSError* error;
+        [fileManager setAttributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} ofItemAtPath:file error:&error];
+        if(error)
         {
-            NSError* error;
-            [fileManager setAttributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} ofItemAtPath:file error:&error];
-            if(error)
-            {
-                DDLogError(@"Error configuring database file protection level for: %@", file);
-                @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
-            }
-            protectedFiles[file] = @YES;
+            DDLogError(@"Error configuring database file protection level for: %@", file);
+            @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
         }
+        else
+            ;//DDLogVerbose(@"file '%@' now protected", file);
     }
+    else
+        ;//DDLogVerbose(@"file '%@' does not exist!", file);
 #endif
 }
 
-+(NSString*) sha256HmacForKey: (NSString*) key andData: (NSString*) data
++(NSDictionary*) splitJid:(NSString*) jid
 {
-	const char* cKey  = [key cStringUsingEncoding: NSUTF8StringEncoding];
-	const char* cData = [data cStringUsingEncoding: NSUTF8StringEncoding];
-	uint8_t cHMAC[CC_SHA256_DIGEST_LENGTH] = {0};
-	CCHmac(kCCHmacAlgSHA256, cKey, [key lengthOfBytesUsingEncoding: NSUTF8StringEncoding], cData, [data lengthOfBytesUsingEncoding: NSUTF8StringEncoding], cHMAC);
-	NSString* retval = [self hexadecimalString: [[NSData alloc] initWithBytes: cHMAC length: sizeof(cHMAC)]];
-	return retval;
+    NSMutableDictionary* retval = [[NSMutableDictionary alloc] init];
+    NSArray* parts = [jid componentsSeparatedByString:@"/"];
+    
+    retval[@"user"] = [[parts objectAtIndex:0] lowercaseString];        //intended to not break code that expects lowercase
+    if([parts count]>1 && ![[parts objectAtIndex:1] isEqualToString:@""])
+        retval[@"resource"] = [parts objectAtIndex:1];                  //resources are case sensitive
+    parts = [retval[@"user"] componentsSeparatedByString:@"@"];
+    if([parts count]>1)
+    {
+        retval[@"node"] = [[parts objectAtIndex:0] lowercaseString];    //intended to not break code that expects lowercase
+        retval[@"host"] = [[parts objectAtIndex:1] lowercaseString];    //intended to not break code that expects lowercase
+    }
+    else
+        retval[@"host"] = [[parts objectAtIndex:0] lowercaseString];    //intended to not break code that expects lowercase
+    
+    //log sanity check errors
+    if([retval[@"host"] isEqualToString:@""])
+        DDLogError(@"jid '%@' has no host part!", jid);
+    
+    return retval;
+}
+
++(void) postSendingErrorNotification
+{
+    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    content.title = NSLocalizedString(@"Could not synchronize", @"");
+    content.body = NSLocalizedString(@"Please open the app to retry", @"");
+    content.sound = [UNNotificationSound defaultSound];
+    content.categoryIdentifier = @"simple";
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:@"syncError" content:content trigger:nil];
+    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+        if(error)
+            DDLogError(@"Error posting syncError notification: %@", error);
+    }];
 }
 
 +(BOOL) isInBackground
@@ -89,7 +114,11 @@ void logException(NSException* exception)
     //directly call block:
     //IF: the destination queue is equal to our current queue
     //OR IF: the destination queue is the main queue and we are already in the main thread (but not the main queue)
-    if(dispatch_get_current_queue() == queue || (queue == dispatch_get_main_queue() && [NSThread isMainThread]))
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    dispatch_queue_t current_queue = dispatch_get_current_queue();
+#pragma clang diagnostic pop
+    if(current_queue == queue || (queue == dispatch_get_main_queue() && [NSThread isMainThread]))
         block();
     else
         dispatch_sync(queue, block);
@@ -120,16 +149,23 @@ void logException(NSException* exception)
 
 +(DDFileLogger*) configureLogging
 {
-    //console logger
-    [[DDOSLogger sharedInstance] setLogFormatter:[[MLLogFormatter alloc] initForConsole:YES]];
+    //create log formatter
+    MLLogFormatter* formatter = [[MLLogFormatter alloc] init];
+    
+    //console logger (this one will *not* log own additional (and duplicated) informations like DDOSLogger would)
+#ifdef TARGET_IPHONE_SIMULATOR
+    [[DDTTYLogger sharedInstance] setLogFormatter:formatter];
+    [DDLog addLogger:[DDTTYLogger sharedInstance]];
+#else
+    [[DDOSLogger sharedInstance] setLogFormatter:formatter];
     [DDLog addLogger:[DDOSLogger sharedInstance]];
+#endif
     
-    //create log formatter for file and network logging
-    MLLogFormatter* formatter = [[MLLogFormatter alloc] initForConsole:NO];
-    
-    //file logger
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
+    DDLogInfo(@"Logfile dir: %@", [containerUrl path]);
+    
+    //file logger
     id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:[containerUrl path]];
     DDFileLogger* fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
     [fileLogger setLogFormatter:formatter];
@@ -137,19 +173,24 @@ void logException(NSException* exception)
     fileLogger.logFileManager.maximumNumberOfLogFiles = 3;
     fileLogger.maximumFileSize = 1024 * 1024 * 64;
     [DDLog addLogger:fileLogger];
-    DDLogInfo(@"Logfile dir: %@", [containerUrl path]);
     
     //network logger
     MLUDPLogger* udpLogger = [[MLUDPLogger alloc] init];
     [udpLogger setLogFormatter:formatter];
     [DDLog addLogger:udpLogger];
     
+    //log version info as early as possible
+    NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+    NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
+    NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
+    NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
+    DDLogInfo(@"Starting: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
+    [DDLog flushLog];
+    
     //for debugging when upgrading the app
     NSArray* directoryContents = [fileManager contentsOfDirectoryAtPath:[containerUrl path] error:nil];
     for(NSString* file in directoryContents)
-    {
-        DDLogInfo(@"File %@/%@", [containerUrl path], file);
-    }
+        DDLogVerbose(@"File %@/%@", [containerUrl path], file);
     
     return fileLogger;
 }
@@ -164,28 +205,17 @@ void logException(NSException* exception)
 {
     // see https://xmpp.org/extensions/xep-0115.html#ver
     NSMutableString* unhashed = [[NSMutableString alloc] init];
-    NSData* hashed;
-    unsigned char digest[CC_SHA1_DIGEST_LENGTH];
     
     //generate identities string
     for(NSString* identity in identities)
         [unhashed appendString:[NSString stringWithFormat:@"%@<", identity]];
+    
     //append features string
     [unhashed appendString:[self generateStringOfFeatureSet:features]];
     
-    NSData *stringBytes = [unhashed dataUsingEncoding: NSUTF8StringEncoding];
-    if(CC_SHA1([stringBytes bytes], (UInt32)[stringBytes length], digest))
-        hashed = [NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
-    NSString* hashedBase64 = [self encodeBase64WithData:hashed];
-    
-    DDLogVerbose(@"ver string: unhashed %@, hashed %@, hashed-64 %@", unhashed, hashed, hashedBase64);
+    NSString* hashedBase64 = [self encodeBase64WithData:[self sha1:[unhashed dataUsingEncoding:NSUTF8StringEncoding]]];
+    DDLogVerbose(@"ver string: unhashed %@, hashed-64 %@", unhashed, hashedBase64);
     return hashedBase64;
-}
-
-+(NSString*) getOwnCapsHash
-{
-    NSString* client = [NSString stringWithFormat:@"client/phone//Monal %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
-    return [self getEntityCapsHashForIdentities:@[client] andFeatures:[self getOwnFeatureSet]];
 }
 
 +(NSSet*) getOwnFeatureSet
@@ -194,7 +224,6 @@ void logException(NSException* exception)
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSArray* featuresArray = @[
-            @"eu.siacs.conversations.axolotl.devicelist+notify",
             @"http://jabber.org/protocol/caps",
             @"http://jabber.org/protocol/disco#info",
             @"http://jabber.org/protocol/disco#items",
@@ -204,13 +233,13 @@ void logException(NSException* exception)
             @"urn:xmpp:jingle:apps:rtp:audio",
             @"urn:xmpp:jingle:transports:raw-udp:0",
             @"urn:xmpp:jingle:transports:raw-udp:1",
-            @"urn:xmpp:receipts",
             @"jabber:x:oob",
             @"urn:xmpp:ping",
             @"urn:xmpp:receipts",
             @"urn:xmpp:idle:1",
             @"http://jabber.org/protocol/chatstates",
-            @"jabber:iq:version"
+            @"jabber:iq:version",
+            @"urn:xmpp:chat-markers:0"
         ];
         featuresSet = [[NSSet alloc] initWithArray:featuresArray];
     });
@@ -341,7 +370,7 @@ void logException(NSException* exception)
     return [self startTimer:timeout withHandler:handler andCancelHandler:nil];
 }
 
-+(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t) cancelHandler
++(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler
 {
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     if(timeout<=0.001)
@@ -399,17 +428,52 @@ void logException(NSException* exception)
     return resource;
 }
 
-#pragma mark  Base64
+#pragma mark Hashes
+
++(NSData*) sha1:(NSData*) data
+{
+    if(!data)
+        return nil;
+    NSData* hashed;
+    unsigned char digest[CC_SHA1_DIGEST_LENGTH];
+    if(CC_SHA1([data bytes], (UInt32)[data length], digest))
+        hashed = [NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
+    return hashed;
+}
+
++(NSData*) sha256:(NSData*) data
+{
+    if(!data)
+        return nil;
+    NSData* hashed;
+    unsigned char digest[CC_SHA256_DIGEST_LENGTH];
+    if(CC_SHA256([data bytes], (UInt32)[data length], digest))
+        hashed = [NSData dataWithBytes:digest length:CC_SHA256_DIGEST_LENGTH];
+    return hashed;
+}
+
++(NSData*) sha256HmacForKey:(NSString*) key andData:(NSString*) data
+{
+    if(!key || !data)
+        return nil;
+	const char* cKey  = [key cStringUsingEncoding: NSUTF8StringEncoding];
+	const char* cData = [data cStringUsingEncoding: NSUTF8StringEncoding];
+	uint8_t cHMAC[CC_SHA256_DIGEST_LENGTH] = {0};
+	CCHmac(kCCHmacAlgSHA256, cKey, [key lengthOfBytesUsingEncoding: NSUTF8StringEncoding], cData, [data lengthOfBytesUsingEncoding: NSUTF8StringEncoding], cHMAC);
+	return [[NSData alloc] initWithBytes:cHMAC length:sizeof(cHMAC)];
+}
+
+#pragma mark Base64
 
 +(NSString*) encodeBase64WithString:(NSString*) strData
 {
-    NSData *data =[strData dataUsingEncoding:NSUTF8StringEncoding];
+    NSData* data = [strData dataUsingEncoding:NSUTF8StringEncoding];
     return [self encodeBase64WithData:data];
 }
 
 +(NSString*) encodeBase64WithData:(NSData*) objData
 {
-   return [objData base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
+   return [objData base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength | NSDataBase64EncodingEndLineWithLineFeed];
 }
 
 +(NSData*) dataWithBase64EncodedString:(NSString*) string

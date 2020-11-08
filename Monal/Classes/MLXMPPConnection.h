@@ -17,10 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MLXMPPConnection : NSObject
 
-@property (nonatomic, readonly) MLXMPPServer *server;
-@property (nonatomic, readonly) MLXMPPIdentity *identity;
-
-@property (nonatomic, readonly) NSString* boundJid;
+@property (nonatomic, readonly) MLXMPPServer* server;
+@property (nonatomic, readonly) MLXMPPIdentity* identity;
 
 //State
 
@@ -29,12 +27,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 
 //server details
-@property (nonatomic, strong) NSSet *serverFeatures;
+@property (nonatomic, strong) NSSet* _Nullable serverFeatures;
 
 @property (nonatomic, strong)  NSMutableArray* _Nullable discoveredServices;
-@property (nonatomic, strong)  NSString* uploadServer;
+@property (nonatomic, strong)  NSString* _Nullable uploadServer;
 
-@property (nonatomic, strong)  NSString* conferenceServer;
+@property (nonatomic, strong)  NSString* _Nullable conferenceServer;
 
 @property (nonatomic, assign) BOOL supportsHTTPUpload;
 // client state
@@ -46,15 +44,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL pushEnabled;
 @property (nonatomic, assign) BOOL usingCarbons2;
 @property (nonatomic, assign) BOOL supportsRosterVersion;
+@property (nonatomic, assign) BOOL supportsRosterPreApproval;
 
 @property (nonatomic, assign) BOOL supportsBlocking;
 @property (nonatomic, assign) BOOL supportsPing;
 @property (nonatomic, assign) BOOL supportsPubSub;
 
 
--(id) initWithServer:(MLXMPPServer *) server andIdentity:(MLXMPPIdentity *) identity;
-
--(void) bindJid:(NSString *)jid;
+-(id) initWithServer:(MLXMPPServer*) server andIdentity:(MLXMPPIdentity*) identity;
 
 @end
 

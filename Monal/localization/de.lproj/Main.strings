@@ -8,8 +8,6 @@
 "AtF-5m-xfT.title" = "Vorherige";
 /* Class = "UIBarButtonItem"; title = "Settings"; ObjectID = "BWH-2I-fSI"; */
 "BWH-2I-fSI.title" = "Einstellungen";
-/* Class = "UIBarButtonItem"; title = "Info"; ObjectID = "C9Q-7y-bRl"; */
-"C9Q-7y-bRl.title" = "Info";
 /* Class = "UINavigationItem"; title = "Contact Requests"; ObjectID = "GI8-WI-wYs"; */
 "GI8-WI-wYs.title" = "Kontaktanfragen";
 /* Class = "UITableViewController"; title = "Edit Group Chat"; ObjectID = "GpF-k7-Z6D"; */

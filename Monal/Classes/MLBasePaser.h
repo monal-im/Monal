@@ -7,33 +7,24 @@
 //
 
 #import <Foundation/Foundation.h>
-
 #import "MLConstants.h"
+#import "MLXMLNode.h"
 
-
-//parsers
-#import "ParseStream.h"
-#import "ParseIq.h"
-#import "ParsePresence.h"
-#import "ParseMessage.h"
-#import "ParseChallenge.h"
-#import "ParseFailure.h"
-#import "ParseEnabled.h"
-#import "ParseR.h"
-#import "ParseA.h"
-#import "ParseResumed.h"
-#import "ParseFailed.h"
+//stanzas
+#import "XMPPIQ.h"
+#import "XMPPPresence.h"
+#import "XMPPMessage.h"
+#import "XMPPDataForm.h"
 
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void (^stanzaCompletion)(XMPPParser * _Nullable parsedStanza);
+typedef void (^stanzaCompletion)(MLXMLNode* _Nullable parsedStanza);
 
 @interface MLBasePaser : NSObject <NSXMLParserDelegate>
 
--(id) initWithCompeltion:(stanzaCompletion) completion;
--(void) reset; 
-@property (nonatomic, strong, readonly) XMPPParser *currentStanzaParser;
+-(id) initWithCompletion:(stanzaCompletion) completion;
+-(void) reset;
 
 @end
 

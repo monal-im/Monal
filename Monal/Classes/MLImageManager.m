@@ -119,10 +119,9 @@
     return [NSString stringWithFormat:@"%@.png", [contact lowercaseString]];;
 }
 
--(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSString*) data
+-(void) setIconForContact:(NSString*) contact andAccount:(NSString*) accountNo WithData:(NSData* _Nullable) data
 {
-    if(!data) return; 
-//documents directory/buddyicons/account no/contact
+    //documents directory/buddyicons/account no/contact
     
     NSString* filename= [self fileNameforContact:contact];
     
@@ -141,13 +140,12 @@
         [fileManager removeItemAtPath:writablePath error:nil];
     }
 
-    if([[HelperTools dataWithBase64EncodedString:data] writeToFile:writablePath atomically:NO] )
+    if(data)
     {
-        DDLogVerbose(@"wrote image to file");
-    }
-    else
-    {
-        DDLogError(@"failed to write image");
+        if([data writeToFile:writablePath atomically:NO])
+            DDLogVerbose(@"wrote image to file");
+        else
+            DDLogError(@"failed to write image");
     }
     
     //remove from cache if its there
@@ -369,7 +367,7 @@ Provides temp url
     }];
 }
 
--(void) saveImageData:(NSData *) data forLink:(NSString *) link
+-(void) saveImageData:(NSData* _Nonnull) data forLink:(NSString* _Nonnull) link
 {
     [self.fileQueue addOperationWithBlock:^{
         NSString *path =  [self savefilePathforURL:link];

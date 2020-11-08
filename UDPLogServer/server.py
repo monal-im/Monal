@@ -59,10 +59,10 @@ while True:
         continue        # process next udp packet
     
     # decompress raw data
-    payload = zlib.decompress(payload, wbits = zlib.MAX_WBITS | 16)
+    payload = zlib.decompress(payload, zlib.MAX_WBITS | 16)
     
     # decode raw json encoded data
-    decoded = json.loads(payload)
+    decoded = json.loads(str(payload, "UTF-8"))
     
     # print original formatted log message
     print(decoded["formattedMessage"], end="", flush=True)

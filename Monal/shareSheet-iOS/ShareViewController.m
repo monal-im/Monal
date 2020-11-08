@@ -14,6 +14,8 @@
 #import "MLConstants.h"
 #import "HelperTools.h"
 
+#import <MapKit/MapKit.h>
+
 @interface ShareViewController ()
 
 @property (nonatomic, strong) NSDictionary* account;
@@ -22,8 +24,12 @@
 @property (nonatomic, strong) NSArray* accounts;
 @property (nonatomic, strong) NSMutableArray* recipients;
 
-
 @end
+
+// Magic const
+const u_int32_t MagicPublicUrl = 1 << 0;
+const u_int32_t MagicPlainTxt = 1 << 1;
+const u_int32_t MagicMapKitItem = 1 << 2;
 
 @implementation ShareViewController
 
@@ -49,7 +55,7 @@
     NSData* recipientsData = [[HelperTools defaultsDB] objectForKey:@"recipients"];
     
     NSError* error;
-    NSSet* objClasses = [NSSet setWithArray:@[[NSMutableArray class], [NSMutableDictionary class]]];
+    NSSet* objClasses = [NSSet setWithArray:@[[NSMutableArray class], [NSMutableDictionary class], [NSNumber class], [NSString class]]];
     self.recipients = [NSKeyedUnarchiver unarchivedObjectOfClasses:objClasses fromData:recipientsData error:&error];
     if(error) {
         DDLogError(@"Monal ShareViewController: %@", error);
@@ -61,49 +67,86 @@
 }
 
 - (BOOL)isContentValid {
-    if(self.recipient.length>0 && self.account!=nil)
+    if(self.recipient.length > 0 && self.account != nil)
     return YES;
     else return NO;
 }
 
 - (void)didSelectPost {
-    NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
-    
     NSExtensionItem* item = self.extensionContext.inputItems.firstObject;
     DDLogVerbose(@"Attachments = %@", item.attachments);
-    
+
+    u_int32_t magicIdentifyer = 0;
+    NSMutableDictionary<NSNumber*, NSItemProvider*>* magicIdentifyerDic = [[NSMutableDictionary alloc] init];
+
     for (NSItemProvider* provider in item.attachments)
     {
-       if([provider hasItemConformingToTypeIdentifier:@"public.url"])
-       {
-           [provider loadItemForTypeIdentifier:@"public.url" options:NULL completionHandler:^(NSURL<NSSecureCoding>*  _Nullable item, NSError * _Null_unspecified error) {
-               [payload setObject:item.absoluteString forKey:@"url"];
-               if(self.contentText) [payload setObject:self.contentText forKey:@"comment"];
-               [payload setObject:self.account forKey:@"account"];
-               [payload setObject:self.recipient forKey:@"recipient"];
-               
-               NSMutableArray *outbox=[[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
-               if(!outbox) outbox =[[NSMutableArray alloc] init];
-               
-               [outbox addObject:payload];
-               [[HelperTools defaultsDB] setObject:outbox forKey:@"outbox"];
-               
-               // Save last used account / recipient
-               [[HelperTools defaultsDB] setObject:self.account forKey:@"lastAccount"];
-               [[HelperTools defaultsDB] setObject:self.recipient forKey:@"lastRecipient"];
-               
-               [[HelperTools defaultsDB] synchronize];
-           }];
-       }
+        DDLogInfo(@"ShareProvider: %@", provider.registeredTypeIdentifiers);
+        if([provider hasItemConformingToTypeIdentifier:@"public.url"])
+        {
+           magicIdentifyer |= MagicPublicUrl;
+           [magicIdentifyerDic setObject:provider forKey:[NSNumber numberWithUnsignedInt:MagicPublicUrl]];
+        }
+        if([provider hasItemConformingToTypeIdentifier:@"public.plain-text"])
+        {
+           magicIdentifyer |= MagicPlainTxt;
+           [magicIdentifyerDic setObject:provider forKey:[NSNumber numberWithUnsignedInt:MagicPlainTxt]];
+        }
+        if([provider hasItemConformingToTypeIdentifier:@"com.apple.mapkit.map-item"])
+        {
+           magicIdentifyer |= MagicMapKitItem;
+           [magicIdentifyerDic setObject:provider forKey:[NSNumber numberWithUnsignedInt:MagicMapKitItem]];
+        }
     }
-    
-    
-//    [[[NSURLSession sharedSession] dataTaskWithURL:[NSURL URLWithString:@"https://monal.im/wakeios"] completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-//
-//
-//    }] resume];
+    NSMutableDictionary* payload = [[NSMutableDictionary alloc] init];
+    [payload setObject:self.account forKey:@"account"];
+    [payload setObject:self.recipient forKey:@"recipient"];
 
-     [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
+    // use best matching providers
+    if((magicIdentifyer & MagicMapKitItem) > 0) {
+        // convert map item to geo:
+        NSItemProvider* provider = [magicIdentifyerDic objectForKey:[NSNumber numberWithUnsignedInt:MagicMapKitItem]];
+        [provider loadItemForTypeIdentifier:@"com.apple.mapkit.map-item" options:NULL completionHandler:^(NSData*  _Nullable item, NSError * _Null_unspecified error) {
+            NSError* err;
+            MKMapItem* mapItem = [NSKeyedUnarchiver unarchivedObjectOfClass:[MKMapItem class] fromData:item error:&err];
+            DDLogWarn(@"%@", err);
+            [payload setObject:[NSString stringWithFormat:@"geo:%f,%f", mapItem.placemark.coordinate.latitude, mapItem.placemark.coordinate.longitude] forKey:@"url"];
+            if(self.contentText) [payload setObject:self.contentText forKey:@"comment"];
+            [self savePayloadMsgAndComplete:payload];
+        }];
+    }
+    else if((magicIdentifyer & MagicPublicUrl) > 0)
+    {
+        NSItemProvider* provider = [magicIdentifyerDic objectForKey:[NSNumber numberWithUnsignedInt:MagicPublicUrl]];
+        [provider loadItemForTypeIdentifier:@"public.url" options:NULL completionHandler:^(NSURL<NSSecureCoding>*  _Nullable item, NSError * _Null_unspecified error) {
+            [payload setObject:item.absoluteString forKey:@"url"];
+            if(self.contentText) [payload setObject:self.contentText forKey:@"comment"];
+            [self savePayloadMsgAndComplete:payload];
+        }];
+    }
+    else if((magicIdentifyer & MagicPlainTxt) > 0)
+    {
+        if(self.contentText) [payload setObject:self.contentText forKey:@"comment"];
+        [self savePayloadMsgAndComplete:payload];
+    }
+}
+
+-(void) savePayloadMsgAndComplete:(NSDictionary*) payload
+{
+    // append to old outbox
+    NSMutableArray* outbox = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
+    if(!outbox) outbox = [[NSMutableArray alloc] init];
+
+    [outbox addObject:payload];
+    [[HelperTools defaultsDB] setObject:outbox forKey:@"outbox"];
+
+    // Save last used account / recipient
+    [[HelperTools defaultsDB] setObject:self.account forKey:@"lastAccount"];
+    [[HelperTools defaultsDB] setObject:self.recipient forKey:@"lastRecipient"];
+
+    [[HelperTools defaultsDB] synchronize];
+
+    [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
 }
 
 - (NSArray *)configurationItems {

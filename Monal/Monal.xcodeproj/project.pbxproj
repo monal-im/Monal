@@ -144,8 +144,6 @@
 		264A7E751AA7263600E860E3 /* MLSwitchCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 264A7E741AA7263600E860E3 /* MLSwitchCell.xib */; };
 		264DCF9C23E11483004105CE /* MLNewViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 264DCF9B23E11483004105CE /* MLNewViewController.m */; };
 		26529F5217FA7B260057F199 /* addContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FE17BDD85F0031304D /* addContact.m */; };
-		26537970244208FE007D67D5 /* MLBasePaser.h in Headers */ = {isa = PBXBuildFile; fileRef = 2653796E244208FE007D67D5 /* MLBasePaser.h */; };
-		26537971244208FE007D67D5 /* MLBasePaser.m in Sources */ = {isa = PBXBuildFile; fileRef = 2653796F244208FE007D67D5 /* MLBasePaser.m */; };
 		265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */; };
 		2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2664D28423F2312400CD4085 /* MLAccountPickerViewController.m */; };
 		2666F018249D380D00372E28 /* MLContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661102A238F17CB0030A4EE /* MLContact.m */; };
@@ -183,17 +181,6 @@
 		26CC57A423A086AA00ABB92A /* MLXMPPServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661100C238F08820030A4EE /* MLXMPPServer.m */; };
 		26CC57A523A086AA00ABB92A /* MLXMPPIdentity.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611011238F08980030A4EE /* MLXMPPIdentity.m */; };
 		26CC57A623A086AA00ABB92A /* MLXMPPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 26611016238F08AC0030A4EE /* MLXMPPConnection.m */; };
-		26CC57A723A086C000ABB92A /* ParseFailed.m in Sources */ = {isa = PBXBuildFile; fileRef = 261B29321FECBBF0001C5CF4 /* ParseFailed.m */; };
-		26CC57A823A086C000ABB92A /* ParseStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 263F1279177F867B0025B235 /* ParseStream.m */; };
-		26CC57A923A086C000ABB92A /* ParseIq.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EAC1780DE5C002B7085 /* ParseIq.m */; };
-		26CC57AA23A086C000ABB92A /* XMPPParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EB11780DFD9002B7085 /* XMPPParser.m */; };
-		26CC57AB23A086C000ABB92A /* ParsePresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 261AC91C1788A49C00E05657 /* ParsePresence.m */; };
-		26CC57AC23A086C000ABB92A /* ParseMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 262D9EA617921169009292B4 /* ParseMessage.m */; };
-		26CC57AD23A086C000ABB92A /* ParseChallenge.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EE8B1B179B55D2006781F3 /* ParseChallenge.m */; };
-		26CC57AE23A086C000ABB92A /* ParseFailure.m in Sources */ = {isa = PBXBuildFile; fileRef = 261E672A179E27BE00CB493E /* ParseFailure.m */; };
-		26CC57AF23A086C000ABB92A /* ParseEnabled.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDF61A8072D5000E6331 /* ParseEnabled.m */; };
-		26CC57B023A086C000ABB92A /* ParseA.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFC1A807E76000E6331 /* ParseA.m */; };
-		26CC57B123A086C000ABB92A /* ParseResumed.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C3EDFF1A819A38000E6331 /* ParseResumed.m */; };
 		26CC57B223A086CC00ABB92A /* MLXMLNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D3177F44AD0039634B /* MLXMLNode.m */; };
 		26CC57B323A086CC00ABB92A /* XMPPIQ.m in Sources */ = {isa = PBXBuildFile; fileRef = 26CF3EA91780D6B7002B7085 /* XMPPIQ.m */; };
 		26CC57B423A086CC00ABB92A /* XMPPPresence.m in Sources */ = {isa = PBXBuildFile; fileRef = 264E345A1787BAB100BC7BD0 /* XMPPPresence.m */; };
@@ -244,6 +231,7 @@
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
 		322AD0CC78815E4551793930 /* Pods_Monal_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F59B43550E822D135D1127E /* Pods_Monal_Tests.framework */; };
 		3517ED822FCB1456A8D492B1 /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C40CE7301D792181A28A1F8 /* Pods_Monal.framework */; };
+		38720923251EDE07001837EB /* MLXEPSlashMeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */; };
 		540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FAC24D674BD0008965D /* MLSQLite.m */; };
 		540BD0D224D8D1F40087A743 /* IPC.h in Headers */ = {isa = PBXBuildFile; fileRef = 540BD0D124D8D1F20087A743 /* IPC.h */; };
 		540BD0D424D8D2000087A743 /* IPC.m in Sources */ = {isa = PBXBuildFile; fileRef = 540BD0D324D8D1FF0087A743 /* IPC.m */; };
@@ -253,22 +241,37 @@
 		540E13A724CF78900038FDA0 /* MLLogFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 540E13A624CF78900038FDA0 /* MLLogFormatter.m */; };
 		540E13A924CF78D00038FDA0 /* MLLogFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = 540E13A824CF78D00038FDA0 /* MLLogFormatter.h */; };
 		540F625F24BA951E0008A6D8 /* HelperTools.m in Sources */ = {isa = PBXBuildFile; fileRef = C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */; };
-		5435BE9B245F97B2006C61BF /* ParseR.h in Headers */ = {isa = PBXBuildFile; fileRef = 5435BE99245F97B1006C61BF /* ParseR.h */; };
-		5435BE9C245F97B3006C61BF /* ParseR.m in Sources */ = {isa = PBXBuildFile; fileRef = 5435BE9A245F97B1006C61BF /* ParseR.m */; };
+		54179CC0251CBAFA008F398E /* XMPPStanza.m in Sources */ = {isa = PBXBuildFile; fileRef = 54179CBF251CBAF9008F398E /* XMPPStanza.m */; };
+		54179CC3251CBB2B008F398E /* XMPPStanza.h in Headers */ = {isa = PBXBuildFile; fileRef = 54179CC2251CBB2B008F398E /* XMPPStanza.h */; };
+		541E4CBC254AA08700FD7B28 /* MLSQLite.h in Headers */ = {isa = PBXBuildFile; fileRef = 541E4CBB254AA08600FD7B28 /* MLSQLite.h */; };
+		541E4CBE254AA0B600FD7B28 /* MLHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 541E4CBD254AA0B600FD7B28 /* MLHandler.h */; };
+		541E4CC0254AA0E700FD7B28 /* MLHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 541E4CBF254AA0E700FD7B28 /* MLHandler.m */; };
+		541E4CC4254D369200FD7B28 /* MLPubSubProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 541E4CC3254D369100FD7B28 /* MLPubSubProcessor.h */; };
+		541E4CC7254D370200FD7B28 /* MLPubSubProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 541E4CC6254D370100FD7B28 /* MLPubSubProcessor.m */; };
+		544656BB2534910D006B2953 /* XMPPDataForm.m in Sources */ = {isa = PBXBuildFile; fileRef = 544656BA2534910D006B2953 /* XMPPDataForm.m */; };
+		544656BD25349133006B2953 /* XMPPDataForm.h in Headers */ = {isa = PBXBuildFile; fileRef = 544656BC25349133006B2953 /* XMPPDataForm.h */; };
 		5455BC3324EB776F0024D80F /* MLUDPLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 5455BC3024EB776B0024D80F /* MLUDPLogger.m */; };
 		5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = 5455BC3224EB776E0024D80F /* MLUDPLogger.h */; };
 		54D2307E24CB0F4600638D65 /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		54D2308224CB0F5400638D65 /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4C28AE0807330E8B6F972591 /* Pods_NotificaionService.framework */; };
 		54D2308424CB10EE00638D65 /* MLLogFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C15D504A24C727CC002F75BB /* MLLogFileManager.m */; };
+		54E594BD2523C34B00E4172B /* MLPubSub.h in Headers */ = {isa = PBXBuildFile; fileRef = 54E594BA2523C34900E4172B /* MLPubSub.h */; };
+		54E594BE2523C34B00E4172B /* MLPubSub.m in Sources */ = {isa = PBXBuildFile; fileRef = 54E594BC2523C34A00E4172B /* MLPubSub.m */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
 		C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */; };
 		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
+		C1613B5A2520723D0062C0C2 /* MLBasePaser.h in Headers */ = {isa = PBXBuildFile; fileRef = C1613B572520723C0062C0C2 /* MLBasePaser.h */; };
+		C1613B5B2520723D0062C0C2 /* MLBasePaser.m in Sources */ = {isa = PBXBuildFile; fileRef = C1613B592520723C0062C0C2 /* MLBasePaser.m */; };
 		C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */ = {isa = PBXBuildFile; fileRef = C18E7578245E8AE900AE8FB7 /* MLPipe.h */; };
 		C18E757C245E8AE900AE8FB7 /* MLPipe.m in Sources */ = {isa = PBXBuildFile; fileRef = C18E7579245E8AE900AE8FB7 /* MLPipe.m */; };
+		C1943A4C25309A9D0036172F /* MLReloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1943A4B25309A9D0036172F /* MLReloadCell.m */; };
 		C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */; };
 		C1B7DF6C2438883600C7F0C4 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */; };
+		C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */ = {isa = PBXBuildFile; fileRef = C1C839DA24F15DF800BBCF17 /* MLOMEMO.h */; };
+		C1C839DE24F15DF800BBCF17 /* MLOMEMO.m in Sources */ = {isa = PBXBuildFile; fileRef = C1C839DC24F15DF800BBCF17 /* MLOMEMO.m */; };
 		C1E4654824EE517000CA5AAF /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
 		D838DFA541E4102BCA92A60E /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC355146D687D83135E2BBF7 /* Pods_monalxmpp.framework */; };
+		E8DED06225388BE8003167FF /* MLSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E8DED06125388BE8003167FF /* MLSearchViewController.m */; };
 		FE9BEACD951D0F8D3EBE264D /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99727E17D81471E803966620 /* Pods_shareSheet.framework */; };
 /* End PBXBuildFile section */
 
@@ -438,13 +441,7 @@
 		261A628A176C159000059090 /* AccountsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccountsViewController.m; sourceTree = "<group>"; };
 		261A628C176C15AD00059090 /* ChatLogsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatLogsViewController.h; sourceTree = "<group>"; };
 		261A628D176C15AD00059090 /* ChatLogsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogsViewController.m; sourceTree = "<group>"; };
-		261AC91B1788A49C00E05657 /* ParsePresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParsePresence.h; sourceTree = "<group>"; };
-		261AC91C1788A49C00E05657 /* ParsePresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParsePresence.m; sourceTree = "<group>"; };
-		261B29321FECBBF0001C5CF4 /* ParseFailed.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseFailed.m; sourceTree = "<group>"; };
-		261B29331FECBBF0001C5CF4 /* ParseFailed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseFailed.h; sourceTree = "<group>"; };
 		261E543223A1CD1700394F59 /* MLMessageProcessorTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMessageProcessorTest.m; sourceTree = "<group>"; };
-		261E6729179E27BE00CB493E /* ParseFailure.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseFailure.h; sourceTree = "<group>"; };
-		261E672A179E27BE00CB493E /* ParseFailure.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseFailure.m; sourceTree = "<group>"; };
 		262265CF2144148A00B18F83 /* libapple_crypto.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libapple_crypto.tbd; path = usr/lib/libapple_crypto.tbd; sourceTree = SDKROOT; };
 		262265D12144156A00B18F83 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcrypto.a; path = "Pods/OpenSSL-Universal/lib-macos/libcrypto.a"; sourceTree = "<group>"; };
 		262265D521441FA300B18F83 /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libssl.a; path = "Pods/OpenSSL-Universal/lib-macos/libssl.a"; sourceTree = "<group>"; };
@@ -453,8 +450,6 @@
 		26292F4E1309CAE100097280 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		262AEFE620AE756800498F82 /* MLMAMPrefTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLMAMPrefTableViewController.h; sourceTree = "<group>"; };
 		262AEFE720AE756800498F82 /* MLMAMPrefTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMAMPrefTableViewController.m; sourceTree = "<group>"; };
-		262D9EA517921169009292B4 /* ParseMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseMessage.h; sourceTree = "<group>"; };
-		262D9EA617921169009292B4 /* ParseMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseMessage.m; sourceTree = "<group>"; };
 		262D9EA817921E82009292B4 /* XMPPMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPMessage.h; sourceTree = "<group>"; };
 		262D9EA917921E82009292B4 /* XMPPMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPMessage.m; sourceTree = "<group>"; };
 		262D9EAB17924532009292B4 /* MLConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLConstants.h; sourceTree = "<group>"; };
@@ -483,8 +478,6 @@
 		263DFABE2183A59B0038E716 /* MLSelectionController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSelectionController.m; sourceTree = "<group>"; };
 		263DFAC12187D0E00038E716 /* MLLinkCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLLinkCell.h; sourceTree = "<group>"; };
 		263DFAC22187D0E00038E716 /* MLLinkCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLLinkCell.m; sourceTree = "<group>"; };
-		263F1278177F867B0025B235 /* ParseStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseStream.h; sourceTree = "<group>"; };
-		263F1279177F867B0025B235 /* ParseStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseStream.m; sourceTree = "<group>"; };
 		263F568C121B5E970027D85D /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		264006BB140B43BB00CF1107 /* rtcpapppacket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rtcpapppacket.cpp; path = jrtplib/rtcpapppacket.cpp; sourceTree = "<group>"; };
 		264006BC140B43BB00CF1107 /* rtcpapppacket.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = rtcpapppacket.hh; path = jrtplib/rtcpapppacket.hh; sourceTree = "<group>"; };
@@ -591,8 +584,6 @@
 		264E34591787BAB100BC7BD0 /* XMPPPresence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPPresence.h; sourceTree = "<group>"; };
 		264E345A1787BAB100BC7BD0 /* XMPPPresence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPPresence.m; sourceTree = "<group>"; };
 		264FF3E4158A855D00D97B86 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
-		2653796E244208FE007D67D5 /* MLBasePaser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLBasePaser.h; sourceTree = "<group>"; };
-		2653796F244208FE007D67D5 /* MLBasePaser.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLBasePaser.m; sourceTree = "<group>"; };
 		265BD14E21A2D15600A59251 /* MLBackgroundSettings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLBackgroundSettings.h; sourceTree = "<group>"; };
 		265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLBackgroundSettings.m; sourceTree = "<group>"; };
 		2661100B238F08820030A4EE /* MLXMPPServer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLXMPPServer.h; sourceTree = "<group>"; };
@@ -678,12 +669,6 @@
 		26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLNotificationSettingsViewController.m; sourceTree = "<group>"; };
 		26C3456C1C68F9F0007F4BEC /* MLHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLHTTPRequest.h; sourceTree = "<group>"; };
 		26C3456D1C68F9F0007F4BEC /* MLHTTPRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLHTTPRequest.m; sourceTree = "<group>"; };
-		26C3EDF51A8072D5000E6331 /* ParseEnabled.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseEnabled.h; sourceTree = "<group>"; };
-		26C3EDF61A8072D5000E6331 /* ParseEnabled.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseEnabled.m; sourceTree = "<group>"; };
-		26C3EDFB1A807E76000E6331 /* ParseA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseA.h; sourceTree = "<group>"; };
-		26C3EDFC1A807E76000E6331 /* ParseA.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseA.m; sourceTree = "<group>"; };
-		26C3EDFE1A819A38000E6331 /* ParseResumed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseResumed.h; sourceTree = "<group>"; };
-		26C3EDFF1A819A38000E6331 /* ParseResumed.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseResumed.m; sourceTree = "<group>"; };
 		26C4B22221B6B91300610282 /* MLDNSLookup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDNSLookup.h; sourceTree = "<group>"; };
 		26C4B22321B6B91300610282 /* MLDNSLookup.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLDNSLookup.m; sourceTree = "<group>"; };
 		26C836612396CB9200C9F21D /* MLIQProcessorTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLIQProcessorTest.m; sourceTree = "<group>"; };
@@ -692,10 +677,6 @@
 		26CC579523A0867400ABB92A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		26CF3EA81780D6B7002B7085 /* XMPPIQ.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPIQ.h; sourceTree = "<group>"; };
 		26CF3EA91780D6B7002B7085 /* XMPPIQ.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPIQ.m; sourceTree = "<group>"; };
-		26CF3EAB1780DE5C002B7085 /* ParseIq.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseIq.h; sourceTree = "<group>"; };
-		26CF3EAC1780DE5C002B7085 /* ParseIq.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseIq.m; sourceTree = "<group>"; };
-		26CF3EB01780DFD9002B7085 /* XMPPParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMPPParser.h; sourceTree = "<group>"; };
-		26CF3EB11780DFD9002B7085 /* XMPPParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPParser.m; sourceTree = "<group>"; };
 		26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLRegisterViewController.m; sourceTree = "<group>"; };
 		26D0940B22A33E9B009C7AEF /* MLRegisterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLRegisterViewController.h; sourceTree = "<group>"; };
 		26D3476B23A54E67004D6D75 /* MLMessageParserTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLMessageParserTest.m; sourceTree = "<group>"; };
@@ -798,8 +779,6 @@
 		26EC411217BDE39E0031304D /* MLImageManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLImageManager.m; sourceTree = "<group>"; };
 		26EE1B0A21A8F3CE00264B95 /* MLWelcomeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLWelcomeViewController.h; sourceTree = "<group>"; };
 		26EE1B0B21A8F3CE00264B95 /* MLWelcomeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLWelcomeViewController.m; sourceTree = "<group>"; };
-		26EE8B1A179B55D2006781F3 /* ParseChallenge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseChallenge.h; sourceTree = "<group>"; };
-		26EE8B1B179B55D2006781F3 /* ParseChallenge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseChallenge.m; sourceTree = "<group>"; };
 		26EE8B1D179B67FA006781F3 /* MLNotificationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MLNotificationManager.h; path = Classes/MLNotificationManager.h; sourceTree = "<group>"; };
 		26EE8B1E179B67FA006781F3 /* MLNotificationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MLNotificationManager.m; path = Classes/MLNotificationManager.m; sourceTree = "<group>"; };
 		26F396CF2196836700EF5720 /* MLLogInViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLLogInViewController.h; sourceTree = "<group>"; };
@@ -832,24 +811,33 @@
 		2B13C0878F8FA2F0DABB9F0A /* Pods-monalxmpp.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-monalxmpp/Pods-monalxmpp.appstore.xcconfig"; sourceTree = "<group>"; };
 		31A80863B17A9EB9D4C08364 /* Pods-jrtplib-static.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static.adhoc.xcconfig"; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* SworIM_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SworIM_Prefix.pch; sourceTree = "<group>"; };
+		3872091F251EDE07001837EB /* MLXEPSlashMeHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXEPSlashMeHandler.h; sourceTree = "<group>"; };
+		38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLXEPSlashMeHandler.m; sourceTree = "<group>"; };
 		3C40CE7301D792181A28A1F8 /* Pods_Monal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3EDC0EB6935929A159956EB5 /* Pods-Monal-OSXTests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSXTests.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSXTests/Pods-Monal-OSXTests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		428F57D57919ACB0B97869A6 /* Pods-jrtplib-static-OSX.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.adhoc.xcconfig"; sourceTree = "<group>"; };
 		4425FD9C1F3AFFA64619FF67 /* Pods-jrtplib-static-OSX.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static-OSX.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-jrtplib-static-OSX/Pods-jrtplib-static-OSX.appstore.xcconfig"; sourceTree = "<group>"; };
 		4C28AE0807330E8B6F972591 /* Pods_NotificaionService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NotificaionService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		540A3FAC24D674BD0008965D /* MLSQLite.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSQLite.m; sourceTree = "<group>"; };
-		540A3FAF24D674C80008965D /* MLSQLite.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSQLite.m; sourceTree = "<group>"; };
-		540A3FB224D674EF0008965D /* MLSQLite.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLSQLite.h; sourceTree = "<group>"; };
 		540BD0D124D8D1F20087A743 /* IPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPC.h; sourceTree = "<group>"; };
 		540BD0D324D8D1FF0087A743 /* IPC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPC.m; sourceTree = "<group>"; };
 		540E139F24CDCDB30038FDA0 /* MLProcessLock.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLProcessLock.m; sourceTree = "<group>"; };
 		540E13A124CDCE3B0038FDA0 /* MLProcessLock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLProcessLock.h; sourceTree = "<group>"; };
 		540E13A624CF78900038FDA0 /* MLLogFormatter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLLogFormatter.m; sourceTree = "<group>"; };
 		540E13A824CF78D00038FDA0 /* MLLogFormatter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLLogFormatter.h; sourceTree = "<group>"; };
-		5435BE99245F97B1006C61BF /* ParseR.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParseR.h; sourceTree = "<group>"; };
-		5435BE9A245F97B1006C61BF /* ParseR.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ParseR.m; sourceTree = "<group>"; };
+		54179CBF251CBAF9008F398E /* XMPPStanza.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMPPStanza.m; sourceTree = "<group>"; };
+		54179CC2251CBB2B008F398E /* XMPPStanza.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPStanza.h; sourceTree = "<group>"; };
+		541E4CBB254AA08600FD7B28 /* MLSQLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSQLite.h; sourceTree = "<group>"; };
+		541E4CBD254AA0B600FD7B28 /* MLHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLHandler.h; sourceTree = "<group>"; };
+		541E4CBF254AA0E700FD7B28 /* MLHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLHandler.m; sourceTree = "<group>"; };
+		541E4CC3254D369100FD7B28 /* MLPubSubProcessor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPubSubProcessor.h; sourceTree = "<group>"; };
+		541E4CC6254D370100FD7B28 /* MLPubSubProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPubSubProcessor.m; sourceTree = "<group>"; };
+		544656BA2534910D006B2953 /* XMPPDataForm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMPPDataForm.m; sourceTree = "<group>"; };
+		544656BC25349133006B2953 /* XMPPDataForm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPDataForm.h; sourceTree = "<group>"; };
 		5455BC3024EB776B0024D80F /* MLUDPLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLUDPLogger.m; sourceTree = "<group>"; };
 		5455BC3224EB776E0024D80F /* MLUDPLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLUDPLogger.h; sourceTree = "<group>"; };
+		54E594BA2523C34900E4172B /* MLPubSub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPubSub.h; sourceTree = "<group>"; };
+		54E594BC2523C34A00E4172B /* MLPubSub.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPubSub.m; sourceTree = "<group>"; };
 		5ED93030541F175E7BEB1FC2 /* Pods-NotificaionService.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.debug.xcconfig"; path = "Pods/Target Support Files/Pods-NotificaionService/Pods-NotificaionService.debug.xcconfig"; sourceTree = "<group>"; };
 		5F59B43550E822D135D1127E /* Pods_Monal_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Monal_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6253B2B3FE987619C2714CF5 /* Pods-Monal Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -880,9 +868,13 @@
 		C1414E9C24312F0100948788 /* MLChatMapsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatMapsCell.m; sourceTree = "<group>"; };
 		C15D504824C727CC002F75BB /* MLLogFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLLogFileManager.h; sourceTree = "<group>"; };
 		C15D504A24C727CC002F75BB /* MLLogFileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLLogFileManager.m; sourceTree = "<group>"; };
+		C1613B572520723C0062C0C2 /* MLBasePaser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLBasePaser.h; sourceTree = "<group>"; };
+		C1613B592520723C0062C0C2 /* MLBasePaser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLBasePaser.m; sourceTree = "<group>"; };
 		C176FD0C24FAC94F0022890C /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "../localization/zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		C18E7578245E8AE900AE8FB7 /* MLPipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPipe.h; sourceTree = "<group>"; };
 		C18E7579245E8AE900AE8FB7 /* MLPipe.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPipe.m; sourceTree = "<group>"; };
+		C1943A4A25309A9D0036172F /* MLReloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLReloadCell.h; sourceTree = "<group>"; };
+		C1943A4B25309A9D0036172F /* MLReloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLReloadCell.m; sourceTree = "<group>"; };
 		C1A80DA224D9552400B99E01 /* MLChatViewHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatViewHelper.h; sourceTree = "<group>"; };
 		C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatViewHelper.m; sourceTree = "<group>"; };
 		C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelperTools.h; sourceTree = "<group>"; };
@@ -944,6 +936,8 @@
 		C1C839C424F1254200BBCF17 /* zh-Hant-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant-HK"; path = "localization/zh-Hant-HK.lproj/Settings.strings"; sourceTree = "<group>"; };
 		C1C839C624F1254600BBCF17 /* zh-Hant-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant-HK"; path = "localization/zh-Hant-HK.lproj/ContactDetails.strings"; sourceTree = "<group>"; };
 		C1C839C824F1255600BBCF17 /* zh-Hant-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant-HK"; path = "localization/zh-Hant-HK.lproj/iosShare.strings"; sourceTree = "<group>"; };
+		C1C839DA24F15DF800BBCF17 /* MLOMEMO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLOMEMO.h; sourceTree = "<group>"; };
+		C1C839DC24F15DF800BBCF17 /* MLOMEMO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLOMEMO.m; sourceTree = "<group>"; };
 		C1D27E0D3E8B8D0D625C5D2A /* Pods-monalxmppmac.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmppmac.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-monalxmppmac/Pods-monalxmppmac.adhoc.xcconfig"; sourceTree = "<group>"; };
 		C1E4654724EE517000CA5AAF /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = localization/de.lproj/Localizable.strings; sourceTree = SOURCE_ROOT; };
 		C1E4654924EE51EC00CA5AAF /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = localization/Base.lproj/Localizable.strings; sourceTree = SOURCE_ROOT; };
@@ -973,6 +967,8 @@
 		C8C2F3F80367A8A1D3C24092 /* Pods-Monal Tests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests.adhoc.xcconfig"; sourceTree = "<group>"; };
 		DFF6FBF8AB797FDAA75C0B92 /* Pods-monalxmppmac.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmppmac.debug.xcconfig"; path = "Pods/Target Support Files/Pods-monalxmppmac/Pods-monalxmppmac.debug.xcconfig"; sourceTree = "<group>"; };
 		E141DB69283EC3EA1A55B30F /* libPods-Monal-OSXTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Monal-OSXTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E8DED05F25388BE8003167FF /* MLSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSearchViewController.h; sourceTree = "<group>"; };
+		E8DED06125388BE8003167FF /* MLSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSearchViewController.m; sourceTree = "<group>"; };
 		EB7F14851D3C002B88ABBBF2 /* Pods-Monal Tests.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-Monal Tests/Pods-Monal Tests.appstore.xcconfig"; sourceTree = "<group>"; };
 		F5BECCAF4500573C1631F09F /* Pods-shareSheet.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-shareSheet.adhoc.xcconfig"; path = "Pods/Target Support Files/Pods-shareSheet/Pods-shareSheet.adhoc.xcconfig"; sourceTree = "<group>"; };
 		FEB13B684255D50BCF0CE6C6 /* Pods-Monal-OSX.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal-OSX.appstore.xcconfig"; path = "Pods/Target Support Files/Pods-Monal-OSX/Pods-Monal-OSX.appstore.xcconfig"; sourceTree = "<group>"; };
@@ -1063,8 +1059,6 @@
 				26352EA5177D21FC00E2C8FF /* Managers */,
 				26F7BB3A1115F8A300712672 /* tools */,
 				2601D9A70FBF255D004DB939 /* DataLayer.m */,
-				540A3FB224D674EF0008965D /* MLSQLite.h */,
-				540A3FAF24D674C80008965D /* MLSQLite.m */,
 				2601D9A80FBF255D004DB939 /* DataLayer.h */,
 				262D9EAB17924532009292B4 /* MLConstants.h */,
 				26EC411117BDE39E0031304D /* MLImageManager.h */,
@@ -1105,6 +1099,8 @@
 		260C51CE177F08CF0039634B /* XMPP */ = {
 			isa = PBXGroup;
 			children = (
+				54E594BA2523C34900E4172B /* MLPubSub.h */,
+				54E594BC2523C34A00E4172B /* MLPubSub.m */,
 				2661102E238F17D00030A4EE /* Models */,
 				2633CB40231CB7F5006D0277 /* Processors */,
 				2642EBC418693615006A6C12 /* Jingle */,
@@ -1120,6 +1116,8 @@
 				26611011238F08980030A4EE /* MLXMPPIdentity.m */,
 				26611015238F08AC0030A4EE /* MLXMPPConnection.h */,
 				26611016238F08AC0030A4EE /* MLXMPPConnection.m */,
+				3872091F251EDE07001837EB /* MLXEPSlashMeHandler.h */,
+				38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */,
 			);
 			name = XMPP;
 			sourceTree = "<group>";
@@ -1173,6 +1171,8 @@
 				2661101B238F10360030A4EE /* MLIQProcessor.m */,
 				2661101F238F104B0030A4EE /* MLPresenceProcessor.h */,
 				26611020238F104B0030A4EE /* MLPresenceProcessor.m */,
+				541E4CC3254D369100FD7B28 /* MLPubSubProcessor.h */,
+				541E4CC6254D370100FD7B28 /* MLPubSubProcessor.m */,
 			);
 			name = Processors;
 			sourceTree = "<group>";
@@ -1222,6 +1222,10 @@
 				C1414E9C24312F0100948788 /* MLChatMapsCell.m */,
 				C1A80DA224D9552400B99E01 /* MLChatViewHelper.h */,
 				C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */,
+				C1943A4A25309A9D0036172F /* MLReloadCell.h */,
+				C1943A4B25309A9D0036172F /* MLReloadCell.m */,
+				E8DED05F25388BE8003167FF /* MLSearchViewController.h */,
+				E8DED06125388BE8003167FF /* MLSearchViewController.m */,
 			);
 			name = ChatViews;
 			sourceTree = "<group>";
@@ -1313,6 +1317,8 @@
 		267B671E226A2208003DB850 /* Crypto */ = {
 			isa = PBXGroup;
 			children = (
+				C1C839DA24F15DF800BBCF17 /* MLOMEMO.h */,
+				C1C839DC24F15DF800BBCF17 /* MLOMEMO.m */,
 				267B671A226A200D003DB850 /* AESGcm.h */,
 				267B671B226A200D003DB850 /* AESGcm.m */,
 				267B671F226A222E003DB850 /* MLEncryptedPayload.h */,
@@ -1581,6 +1587,10 @@
 				264E345A1787BAB100BC7BD0 /* XMPPPresence.m */,
 				262D9EA817921E82009292B4 /* XMPPMessage.h */,
 				262D9EA917921E82009292B4 /* XMPPMessage.m */,
+				54179CBF251CBAF9008F398E /* XMPPStanza.m */,
+				54179CC2251CBB2B008F398E /* XMPPStanza.h */,
+				544656BA2534910D006B2953 /* XMPPDataForm.m */,
+				544656BC25349133006B2953 /* XMPPDataForm.h */,
 			);
 			name = Nodes;
 			sourceTree = "<group>";
@@ -1588,32 +1598,8 @@
 		26CF3EAF1780DF8B002B7085 /* Parsers */ = {
 			isa = PBXGroup;
 			children = (
-				263F1278177F867B0025B235 /* ParseStream.h */,
-				263F1279177F867B0025B235 /* ParseStream.m */,
-				261B29331FECBBF0001C5CF4 /* ParseFailed.h */,
-				261B29321FECBBF0001C5CF4 /* ParseFailed.m */,
-				26CF3EAB1780DE5C002B7085 /* ParseIq.h */,
-				26CF3EAC1780DE5C002B7085 /* ParseIq.m */,
-				26CF3EB01780DFD9002B7085 /* XMPPParser.h */,
-				26CF3EB11780DFD9002B7085 /* XMPPParser.m */,
-				261AC91B1788A49C00E05657 /* ParsePresence.h */,
-				261AC91C1788A49C00E05657 /* ParsePresence.m */,
-				262D9EA517921169009292B4 /* ParseMessage.h */,
-				262D9EA617921169009292B4 /* ParseMessage.m */,
-				26EE8B1A179B55D2006781F3 /* ParseChallenge.h */,
-				26EE8B1B179B55D2006781F3 /* ParseChallenge.m */,
-				261E6729179E27BE00CB493E /* ParseFailure.h */,
-				261E672A179E27BE00CB493E /* ParseFailure.m */,
-				26C3EDF51A8072D5000E6331 /* ParseEnabled.h */,
-				26C3EDF61A8072D5000E6331 /* ParseEnabled.m */,
-				26C3EDFB1A807E76000E6331 /* ParseA.h */,
-				26C3EDFC1A807E76000E6331 /* ParseA.m */,
-				26C3EDFE1A819A38000E6331 /* ParseResumed.h */,
-				26C3EDFF1A819A38000E6331 /* ParseResumed.m */,
-				2653796E244208FE007D67D5 /* MLBasePaser.h */,
-				2653796F244208FE007D67D5 /* MLBasePaser.m */,
-				5435BE99245F97B1006C61BF /* ParseR.h */,
-				5435BE9A245F97B1006C61BF /* ParseR.m */,
+				C1613B572520723C0062C0C2 /* MLBasePaser.h */,
+				C1613B592520723C0062C0C2 /* MLBasePaser.m */,
 			);
 			name = Parsers;
 			sourceTree = "<group>";
@@ -1681,6 +1667,7 @@
 				5455BC3024EB776B0024D80F /* MLUDPLogger.m */,
 				540BD0D324D8D1FF0087A743 /* IPC.m */,
 				540BD0D124D8D1F20087A743 /* IPC.h */,
+				541E4CBB254AA08600FD7B28 /* MLSQLite.h */,
 				540A3FAC24D674BD0008965D /* MLSQLite.m */,
 				C18E7579245E8AE900AE8FB7 /* MLPipe.m */,
 				C18E7578245E8AE900AE8FB7 /* MLPipe.h */,
@@ -1690,6 +1677,8 @@
 				540E13A124CDCE3B0038FDA0 /* MLProcessLock.h */,
 				540E13A624CF78900038FDA0 /* MLLogFormatter.m */,
 				540E13A824CF78D00038FDA0 /* MLLogFormatter.h */,
+				541E4CBD254AA0B600FD7B28 /* MLHandler.h */,
+				541E4CBF254AA0E700FD7B28 /* MLHandler.m */,
 			);
 			name = tools;
 			sourceTree = "<group>";
@@ -1877,12 +1866,18 @@
 			files = (
 				26CC579623A0867400ABB92A /* monalxmpp.h in Headers */,
 				C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */,
-				26537970244208FE007D67D5 /* MLBasePaser.h in Headers */,
-				5435BE9B245F97B2006C61BF /* ParseR.h in Headers */,
+				54179CC3251CBB2B008F398E /* XMPPStanza.h in Headers */,
+				544656BD25349133006B2953 /* XMPPDataForm.h in Headers */,
 				540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */,
+				541E4CBC254AA08700FD7B28 /* MLSQLite.h in Headers */,
+				C1613B5A2520723D0062C0C2 /* MLBasePaser.h in Headers */,
+				54E594BD2523C34B00E4172B /* MLPubSub.h in Headers */,
 				540BD0D224D8D1F40087A743 /* IPC.h in Headers */,
 				540E13A924CF78D00038FDA0 /* MLLogFormatter.h in Headers */,
+				C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */,
 				26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */,
+				541E4CC4254D369200FD7B28 /* MLPubSubProcessor.h in Headers */,
+				541E4CBE254AA0B600FD7B28 /* MLHandler.h in Headers */,
 				5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2074,10 +2069,9 @@
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Monal" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 1;
 			knownRegions = (
-				English,
 				Base,
 				de,
 				"es-419",
@@ -2418,6 +2412,7 @@
 				26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */,
 				26B51C4918654D98002134C3 /* LogViewController.m in Sources */,
 				26529F5217FA7B260057F199 /* addContact.m in Sources */,
+				C1943A4C25309A9D0036172F /* MLReloadCell.m in Sources */,
 				262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */,
 				263DFAC32187D0E00038E716 /* MLLinkCell.m in Sources */,
 				261A6281176C055400059090 /* ContactsViewController.m in Sources */,
@@ -2464,6 +2459,7 @@
 				26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */,
 				26D0940C22A33E9B009C7AEF /* MLRegisterViewController.m in Sources */,
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,
+				E8DED06225388BE8003167FF /* MLSearchViewController.m in Sources */,
 				26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */,
 				2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */,
 				C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */,
@@ -2556,51 +2552,46 @@
 				540E13A524CF6A8C0038FDA0 /* MLNotificationManager.m in Sources */,
 				54D2308424CB10EE00638D65 /* MLLogFileManager.m in Sources */,
 				26CC57B323A086CC00ABB92A /* XMPPIQ.m in Sources */,
-				26CC57AA23A086C000ABB92A /* XMPPParser.m in Sources */,
+				C1613B5B2520723D0062C0C2 /* MLBasePaser.m in Sources */,
+				54179CC0251CBAFA008F398E /* XMPPStanza.m in Sources */,
 				26CC57CB23A0892800ABB92A /* MLPresenceProcessor.m in Sources */,
 				26CC57A423A086AA00ABB92A /* MLXMPPServer.m in Sources */,
 				540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */,
 				26CC57CA23A0892800ABB92A /* MLIQProcessor.m in Sources */,
 				26CC57D323A08D7100ABB92A /* DataLayer.m in Sources */,
-				26CC57B023A086C000ABB92A /* ParseA.m in Sources */,
-				26CC57A923A086C000ABB92A /* ParseIq.m in Sources */,
 				26CC57A323A086AA00ABB92A /* MLDNSLookup.m in Sources */,
 				26CC57D423A08D7100ABB92A /* MLImageManager.m in Sources */,
-				26CC57A723A086C000ABB92A /* ParseFailed.m in Sources */,
-				26CC57AC23A086C000ABB92A /* ParseMessage.m in Sources */,
 				540E13A024CDCDB30038FDA0 /* MLProcessLock.m in Sources */,
-				26CC57A823A086C000ABB92A /* ParseStream.m in Sources */,
 				26CC57C823A0892100ABB92A /* MLMessage.m in Sources */,
 				26CC57A623A086AA00ABB92A /* MLXMPPConnection.m in Sources */,
-				26CC57B123A086C000ABB92A /* ParseResumed.m in Sources */,
 				540BD0D424D8D2000087A743 /* IPC.m in Sources */,
 				26CC57CF23A08D5B00ABB92A /* jingleCall.m in Sources */,
 				26CC57DA23A08DD800ABB92A /* MLXMPPManager.m in Sources */,
-				26CC57AE23A086C000ABB92A /* ParseFailure.m in Sources */,
 				26CC57D123A08D5B00ABB92A /* IPAddress.m in Sources */,
 				26CC57D023A08D5B00ABB92A /* RTP.mm in Sources */,
 				26CC57B823A0876300ABB92A /* MLHTTPRequest.m in Sources */,
 				26CC57A223A086AA00ABB92A /* xmpp.m in Sources */,
-				26CC57AD23A086C000ABB92A /* ParseChallenge.m in Sources */,
 				26CC57B423A086CC00ABB92A /* XMPPPresence.m in Sources */,
+				541E4CC0254AA0E700FD7B28 /* MLHandler.m in Sources */,
 				540E13A724CF78900038FDA0 /* MLLogFormatter.m in Sources */,
 				26CC57C923A0892800ABB92A /* MLMessageProcessor.m in Sources */,
 				26CC57D623A08D7100ABB92A /* MLMetaInfo.m in Sources */,
-				26CC57AB23A086C000ABB92A /* ParsePresence.m in Sources */,
 				C18E757C245E8AE900AE8FB7 /* MLPipe.m in Sources */,
-				5435BE9C245F97B3006C61BF /* ParseR.m in Sources */,
 				26CC57D523A08D7100ABB92A /* MLSignalStore.m in Sources */,
+				C1C839DE24F15DF800BBCF17 /* MLOMEMO.m in Sources */,
 				26CC57B223A086CC00ABB92A /* MLXMLNode.m in Sources */,
 				26CC57A523A086AA00ABB92A /* MLXMPPIdentity.m in Sources */,
+				54E594BE2523C34B00E4172B /* MLPubSub.m in Sources */,
 				26CC57B723A0876300ABB92A /* MLEncryptedPayload.m in Sources */,
 				26CC57B523A086CC00ABB92A /* XMPPMessage.m in Sources */,
 				26CC57B623A0876300ABB92A /* AESGcm.m in Sources */,
 				5455BC3324EB776F0024D80F /* MLUDPLogger.m in Sources */,
+				541E4CC7254D370200FD7B28 /* MLPubSubProcessor.m in Sources */,
 				26CC57C723A0892100ABB92A /* MLContact.m in Sources */,
 				540F625F24BA951E0008A6D8 /* HelperTools.m in Sources */,
-				26CC57AF23A086C000ABB92A /* ParseEnabled.m in Sources */,
+				38720923251EDE07001837EB /* MLXEPSlashMeHandler.m in Sources */,
 				26CC57D723A08D9B00ABB92A /* MLPush.m in Sources */,
-				26537971244208FE007D67D5 /* MLBasePaser.m in Sources */,
+				544656BB2534910D006B2953 /* XMPPDataForm.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2888,6 +2879,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_ENTITLEMENTS = Monal.entitlements;
@@ -2896,7 +2888,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				DEAD_CODE_STRIPPING = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 33XS7DE5NZ;
 				ENABLE_BITCODE = YES;
@@ -2906,6 +2898,7 @@
 					"$(SRCROOT)",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_INPUT_FILETYPE = automatic;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = SworIM_Prefix.pch;
@@ -2923,7 +2916,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 4.8;
+				MARKETING_VERSION = 4.9;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -2980,7 +2973,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 4.8;
+				MARKETING_VERSION = 4.9;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
@@ -3059,7 +3052,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 4.8;
+				MARKETING_VERSION = 4.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
@@ -3140,7 +3133,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 4.8;
+				MARKETING_VERSION = 4.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
@@ -3328,7 +3321,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_INPUT_FILETYPE = automatic;
@@ -3356,6 +3349,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_ENTITLEMENTS = Monal.entitlements;
@@ -3364,7 +3358,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = YES;
-				DEAD_CODE_STRIPPING = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 33XS7DE5NZ;
 				ENABLE_BITCODE = YES;
@@ -3374,6 +3368,7 @@
 					"$(SRCROOT)",
 				);
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INPUT_FILETYPE = automatic;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = SworIM_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -3386,7 +3381,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 4.8;
+				MARKETING_VERSION = 4.9;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -3505,7 +3500,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 4.8;
+				MARKETING_VERSION = 4.9;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3576,7 +3571,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 4.8;
+				MARKETING_VERSION = 4.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3649,7 +3644,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 4.8;
+				MARKETING_VERSION = 4.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3670,7 +3665,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -3692,6 +3687,7 @@
 				ENABLE_BITCODE = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_INPUT_FILETYPE = automatic;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -3708,7 +3704,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 4.7;
+				MARKETING_VERSION = 4.9;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
@@ -3730,7 +3726,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -3771,6 +3767,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_INPUT_FILETYPE = automatic;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -3791,7 +3788,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 4.7;
+				MARKETING_VERSION = 4.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
@@ -3815,7 +3812,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -3856,6 +3853,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_INPUT_FILETYPE = automatic;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -3876,7 +3874,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 4.7;
+				MARKETING_VERSION = 4.9;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = im.Monal.monalxmpp;
@@ -3918,7 +3916,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Anurodh Pokharel (33XS7DE5NZ)";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_INPUT_FILETYPE = automatic;
@@ -3946,6 +3944,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_ENTITLEMENTS = Monal.entitlements;
@@ -3954,7 +3953,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = YES;
-				DEAD_CODE_STRIPPING = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = 33XS7DE5NZ;
 				ENABLE_BITCODE = YES;
@@ -3964,6 +3963,7 @@
 					"$(SRCROOT)",
 				);
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INPUT_FILETYPE = automatic;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = SworIM_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -3976,7 +3976,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 4.8;
+				MARKETING_VERSION = 4.9;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -4048,7 +4048,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Anurodh Pokharel (NVHUCKM9V3)";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = c99;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_INPUT_FILETYPE = automatic;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;

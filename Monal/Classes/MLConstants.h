@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "MLContact.h"
+#import "MLHandler.h"
 
 @import CocoaLumberjack;
 static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
@@ -18,12 +18,24 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 //configure app group constants
 #define kAppGroup @"group.monal"
 
+@class MLContact;
 
-// some typedefs used throughout the project
+//some typedefs used throughout the project
 typedef void (^contactCompletion)(MLContact *selectedContact);
 typedef void (^accountCompletion)(NSInteger accountRow);
 typedef void (^monal_void_block_t)(void);
 
+typedef enum NotificationPrivacySettingOption {
+    DisplayNameAndMessage,
+    DisplayOnlyName,
+    DisplayOnlyPlaceholder
+} NotificationPrivacySettingOption;
+
+
+//some useful macros
+#define weakify(var) __weak __typeof__(var) AHKWeak_##var = var
+#define strongify(var) _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wshadow\"") __strong __typeof__(var) var = AHKWeak_##var; _Pragma("clang diagnostic pop")
+#define nilWrapper(var)  (var ? var : [NSNull null])
 
 //some xmpp related constants
 #define kRegServer @"yax.im"
@@ -40,18 +52,20 @@ typedef void (^monal_void_block_t)(void);
 
 //all other constants needed
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
+#define kMonalDisplayedMessageNotice @"kMonalDisplayedMessageNotice"
 #define kMonalHistoryMessagesNotice @"kMonalHistoryMessagesNotice"
 #define kMLMessageSentToContact @"kMLMessageSentToContact"
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"
 
 #define kMonalLastInteractionUpdatedNotice @"kMonalLastInteractionUpdatedNotice"
 #define kMonalMessageReceivedNotice @"kMonalMessageReceivedNotice"
+#define kMonalMessageDisplayedNotice @"kMonalMessageDisplayedNotice"
 #define kMonalMessageErrorNotice @"kMonalMessageErrorNotice"
 #define kMonalReceivedMucInviteNotice @"kMonalReceivedMucInviteNotice"
 
-#define kMLHasRoomsNotice @"kMLHasRoomsNotice"
 #define kMLHasConnectedNotice @"kMLHasConnectedNotice"
 #define kMonalFinishedCatchup @"kMonalFinishedCatchup"
+#define kMonalFinishedOmemoBundleFetch @"kMonalFinishedOmemoBundleFetch"
 #define kMonalIdle @"kMonalIdle"
 
 #define kMonalPresentChat @"kMonalPresentChat"
@@ -94,7 +108,13 @@ typedef void (^monal_void_block_t)(void);
 #define DEBUG 1
 #endif
 
-//temp for  a release
+//use this to completely disable omemo in build
 //#ifndef DISABLE_OMEMO
 //#define DISABLE_OMEMO 1
 //#endif
+
+//build MLXMLNode query statistics (will only optimize MLXMLNode queries if *not* defined)
+//#define QueryStatistics 1
+
+
+

@@ -83,6 +83,8 @@ The of the message in the DB , should be int
  */
 @property (nonatomic, assign) BOOL hasBeenReceived;
 
+@property (nonatomic, assign) BOOL hasBeenDisplayed;
+
 
 @property (nonatomic, assign) BOOL shouldShowAlert;
 
@@ -97,6 +99,8 @@ The of the message in the DB , should be int
  the message has not been marked as read in the db
  */
 @property (nonatomic, assign) BOOL unread;
+
+@property (nonatomic, assign) BOOL displayMarkerWanted;
 
 /**
  Converts a dictonary to a message object Provide a formatter for the format the dates will be in

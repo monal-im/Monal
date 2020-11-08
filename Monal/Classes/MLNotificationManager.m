@@ -6,15 +6,18 @@
 //
 //
 
+#import "MonalAppDelegate.h"
 #import "HelperTools.h"
 #import "MLNotificationManager.h"
 #import "MLImageManager.h"
 #import "MLMessage.h"
+#import "MLXEPSlashMeHandler.h"
+#import "MLConstants.h"
 @import UserNotifications;
 @import CoreServices;
 
 @interface MLNotificationManager ()
-
+@property (nonatomic, assign) NotificationPrivacySettingOption notificationPrivacySetting;
 @end
 
 @implementation MLNotificationManager
@@ -33,6 +36,9 @@
 {
     self = [super init];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDisplayedMessage:) name:kMonalDisplayedMessageNotice object:nil];
+
+    self.notificationPrivacySetting = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
     return self;
 }
 
@@ -66,9 +72,34 @@
     }
 }
 
--(NSString*) identifierWithNotification:(NSNotification*) notification
+-(void) handleDisplayedMessage:(NSNotification*) notification
 {
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
+    
+    if([message.messageType isEqualToString:kMessageTypeStatus])
+        return;
+    
+    DDLogVerbose(@"notification manager got displayed message notice: %@", message.messageId);
+    NSString* idval = [self identifierWithMessage:message];
+    
+    [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
+    [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
+    
+    //update app badge
+    dispatch_async(dispatch_get_main_queue(), ^{
+        MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
+        [appDelegate updateUnread];
+    });
+}
+
+-(NSString*) identifierWithMessage:(MLMessage*) message
+{
+    return [NSString stringWithFormat:@"%@_%@", [self threadIdentifierWithMessage:message], message.messageId];
+}
+
+-(NSString*) threadIdentifierWithMessage:(MLMessage*) message
+{
     return [NSString stringWithFormat:@"%@_%@", message.accountId, message.from];
 }
 
@@ -100,60 +131,84 @@
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     
-    NSString *displayName = [[DataLayer sharedInstance] fullNameForContact:message.from inAccount:message.accountId];
-    NSString *nickName = [[DataLayer sharedInstance] nickName:message.from  forAccount:message.accountId];
+    MLContact* contact = [[DataLayer sharedInstance] contactForUsername:message.from forAccount:message.accountId];
     
-    if(nickName.length>0) displayName= nickName;
-    
-    content.title = displayName.length>0 ? displayName : message.from;
+    // Only show contact name if allowed
+    if(self.notificationPrivacySetting <= DisplayOnlyName) {
+        content.title = [contact contactDisplayName];
 
-    if(![message.from isEqualToString:message.actualFrom])
-    {
-        content.subtitle = [NSString stringWithFormat:@"%@ says:", message.actualFrom];
+        if(![message.from isEqualToString:message.actualFrom])
+        {
+            content.subtitle = [NSString stringWithFormat:@"%@ says:", message.actualFrom];
+        }
+    } else {
+        content.title = NSLocalizedString(@"New Message", @"");
     }
+    NSString* idval = [self identifierWithMessage:message];
 
-    NSString* idval = [NSString stringWithFormat:@"%@_%@", [self identifierWithNotification:notification], message.messageId];
-
-    content.body = message.messageText;
-    content.threadIdentifier = [self identifierWithNotification:notification];
-    content.categoryIdentifier = @"Reply";
-
-    if([[HelperTools defaultsDB] boolForKey:@"Sound"])
+    // only show msgText if allowed
+    if(self.notificationPrivacySetting == DisplayNameAndMessage)
     {
-        NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
-        if(filename)
-            content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif",filename]];
-        else
-            content.sound = [UNNotificationSound defaultSound];
-    }
+        NSString* msgText = message.messageText;
 
-    if([message.messageType isEqualToString:kMessageTypeImage])
-    {
-        [[MLImageManager sharedInstance] imageURLForAttachmentLink:message.messageText withCompletion:^(NSURL * _Nullable url) {
-            if(url)
-            {
-                NSError *error;
-                UNNotificationAttachment* attachment = [UNNotificationAttachment attachmentWithIdentifier:[[NSUUID UUID] UUIDString] URL:url options:@{UNNotificationAttachmentOptionsTypeHintKey:(NSString*) kUTTypePNG} error:&error];
-                if(attachment)
-                    content.attachments = @[attachment];
-                if(error)
-                    DDLogError(@"Error %@", error);
-            }
+        //XEP-0245: The slash me Command
+        if([message.messageText hasPrefix:@"/me "])
+        {
+            BOOL isMuc = [[DataLayer sharedInstance] isBuddyMuc:message.from forAccount:message.accountId];
+            msgText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:message.accountId
+                                                                           displayName:[contact contactDisplayName]
+                                                                            actualFrom:message.actualFrom
+                                                                               message:message.messageText
+                                                                               isGroup:isMuc];
+        }
+        
+        content.body = msgText;
+        content.threadIdentifier = [self threadIdentifierWithMessage:message];
+        content.categoryIdentifier = @"message";
+        content.userInfo = @{
+            @"from": message.from,
+            @"accountId": message.accountId,
+            @"messageId": message.messageId
+        };
 
-            if(!content.attachments)
-                content.body = NSLocalizedString(@"Sent an Image 📷", @"");
+        if([[HelperTools defaultsDB] boolForKey:@"Sound"])
+        {
+            NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
+            if(filename)
+                content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif",filename]];
             else
-                content.body = @"";
+                content.sound = [UNNotificationSound defaultSound];
+        }
 
-            [self publishNotificationContent:content withID:idval];
-        }];
-        return;
+        if([message.messageType isEqualToString:kMessageTypeImage])
+        {
+            [[MLImageManager sharedInstance] imageURLForAttachmentLink:message.messageText withCompletion:^(NSURL * _Nullable url) {
+                if(url)
+                {
+                    NSError *error;
+                    UNNotificationAttachment* attachment = [UNNotificationAttachment attachmentWithIdentifier:[[NSUUID UUID] UUIDString] URL:url options:@{UNNotificationAttachmentOptionsTypeHintKey:(NSString*) kUTTypePNG} error:&error];
+                    if(attachment)
+                        content.attachments = @[attachment];
+                    if(error)
+                        DDLogError(@"Error %@", error);
+                }
+
+                if(!content.attachments)
+                    content.body = NSLocalizedString(@"Sent an Image 📷", @"");
+                else
+                    content.body = @"";
+
+                [self publishNotificationContent:content withID:idval];
+            }];
+            return;
+        }
+        else if([message.messageType isEqualToString:kMessageTypeUrl])
+            content.body = NSLocalizedString(@"Sent a Link 🔗", @"");
+        else if([message.messageType isEqualToString:kMessageTypeGeo])
+            content.body = NSLocalizedString(@"Sent a location 📍", @"");
+    } else {
+        content.body = NSLocalizedString(@"Open app to see more", @"");
     }
-    else if([message.messageType isEqualToString:kMessageTypeUrl])
-        content.body = NSLocalizedString(@"Sent a Link 🔗", @"");
-    else if([message.messageType isEqualToString:kMessageTypeGeo])
-        content.body = NSLocalizedString(@"Sent a location 📍", @"");
-
     [self publishNotificationContent:content withID:idval];
 }
 

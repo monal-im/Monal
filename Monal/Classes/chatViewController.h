@@ -32,12 +32,11 @@
 @property (nonatomic, weak) IBOutlet UIButton *plusButton;
 
 @property (nonatomic, weak) IBOutlet UIView *inputContainerView;
-@property (nonatomic, weak) IBOutlet UIView *navBarContainerView;
+@property (nonatomic, strong) IBOutlet UIView *navBarContainerView;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *tableviewBottom;
-@property (weak, nonatomic) IBOutlet UILabel *navBarContactJid;
-@property (weak, nonatomic) IBOutlet UILabel *navBarLastInteraction;
-@property (nonatomic, weak) IBOutlet UIImageView* navBarIcon;
-@property (weak, nonatomic) IBOutlet UIButton *navBarContactDetailsButton;
+@property (nonatomic, strong) IBOutlet UILabel *navBarContactJid;
+@property (nonatomic, strong) IBOutlet UILabel *navBarLastInteraction;
+@property (nonatomic, strong) IBOutlet UIImageView* navBarIcon;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *navBarEncryptToggleButton;
 
 @property (nonatomic, weak) IBOutlet UIImageView *backgroundImage;

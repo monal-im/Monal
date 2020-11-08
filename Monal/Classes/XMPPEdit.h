@@ -10,9 +10,9 @@
 #import "DataLayer.h"
 @import SAMKeychain;
 #import "MLXMPPManager.h"
+#import "TOCropViewController.h"
 
-
-@interface XMPPEdit: UITableViewController <UITextFieldDelegate> {
+@interface XMPPEdit: UITableViewController <UITextFieldDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate, TOCropViewControllerDelegate> {
 	IBOutlet UILabel *JIDLabel;
 }
 

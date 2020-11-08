@@ -19,13 +19,14 @@
 
 @property (atomic, strong) NSInputStream* input;
 @property (atomic, strong) NSOutputStream* output;
-@property (assign) id <NSStreamDelegate> delegate;
+@property (assign) id<NSStreamDelegate> delegate;
 
 @end
 
 @implementation MLPipe
 
--(id) initWithInputStream:(NSInputStream*)inputStream andOuterDelegate:(id <NSStreamDelegate>)outerDelegate {
+-(id) initWithInputStream:(NSInputStream*) inputStream andOuterDelegate:(id<NSStreamDelegate>) outerDelegate
+{
     _input = inputStream;
     _delegate = outerDelegate;
     _outputBufferByteCount = 0;
@@ -34,13 +35,13 @@
     return self;
 }
 
--(void)dealloc
+-(void) dealloc
 {
     DDLogInfo(@"Deallocating pipe");
     [self close];
 }
 
--(void)close
+-(void) close
 {
     //check if the streams are already closed
     if(!_input && !_output)
@@ -69,11 +70,12 @@
     }
     @catch(id theException)
     {
-        DDLogError(@"Exception while closing pipe");
+        DDLogError(@"Exception while closing pipe: %@", theException);
     }
 }
 
--(NSInputStream*) getNewEnd {
+-(NSInputStream*) getNewEnd
+{
     //make current output stream orphan
     if(_output)
     {
@@ -99,7 +101,8 @@
     return inputStream;
 }
 
--(NSNumber*) drainInputStream {
+-(NSNumber*) drainInputStream
+{
     NSInteger drainedBytes = 0;
     uint8_t* buf=malloc(kPipeBufferSize+1);
     NSInteger len = 0;
@@ -120,7 +123,8 @@
     return @(drainedBytes);
 }
 
--(void) cleanupOutputBuffer {
+-(void) cleanupOutputBuffer
+{
     if(_outputBuffer)
     {
         DDLogVerbose(@"Pipe throwing away data in output buffer: %ld bytes", (long)_outputBufferByteCount);
@@ -130,7 +134,8 @@
     _outputBufferByteCount = 0;
 }
 
--(void) process {
+-(void) process
+{
     //only start processing if piping is possible
     if(!_output || ![_output hasSpaceAvailable])
     {
@@ -210,7 +215,8 @@
     //DDLogVerbose(@"pipe processing done");
 }
 
--(void)stream:(NSStream*)stream handleEvent:(NSStreamEvent)eventCode {
+-(void) stream:(NSStream*) stream handleEvent:(NSStreamEvent) eventCode
+{
     //DDLogVerbose(@"Pipe stream %@ has event", stream);
     
     //ignore events from stale streams
@@ -223,23 +229,25 @@
         case NSStreamEventOpenCompleted:
         {
             DDLogVerbose(@"Pipe stream %@ completed open", stream);
+            break;
         }
+        
         case NSStreamEventNone:
         {
-            DDLogVerbose(@"Pipe stream %@ event none", stream);
+            //DDLogVerbose(@"Pipe stream %@ event none", stream);
             break;
         }
         
         //handle read and write events
         case NSStreamEventHasSpaceAvailable:
         {
-            DDLogVerbose(@"Pipe stream %@ has space available to write", stream);
+            //DDLogVerbose(@"Pipe stream %@ has space available to write", stream);
             [self process];
             break;
         }
-        case  NSStreamEventHasBytesAvailable:
+        case NSStreamEventHasBytesAvailable:
         {
-            DDLogVerbose(@"Pipe stream %@ has bytes available to read", stream);
+            //DDLogVerbose(@"Pipe stream %@ has bytes available to read", stream);
             [self process];
             break;
         }
@@ -247,7 +255,7 @@
         //handle all other events in outer stream delegate
         default:
         {
-            DDLogVerbose(@"Pipe stream %@ delegates event to outer delegate", stream);
+            //DDLogVerbose(@"Pipe stream %@ delegates event to outer delegate", stream);
             [_delegate stream:stream handleEvent:eventCode];
             break;
         }

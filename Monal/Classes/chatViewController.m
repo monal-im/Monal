@@ -11,11 +11,12 @@
 #import "MLLinkCell.h"
 #import "MLChatImageCell.h"
 #import "MLChatMapsCell.h"
+#import "MLReloadCell.h"
 
 #import "MLConstants.h"
 #import "MonalAppDelegate.h"
 #import "MBProgressHUD.h"
-
+#import "MLOMEMO.h"
 
 #import "IDMPhotoBrowser.h"
 #import "ContactDetails.h"
@@ -26,11 +27,14 @@
 #import "HelperTools.h"
 #import "MLChatViewHelper.h"
 #import "MLChatInputContainer.h"
+#import "MLXEPSlashMeHandler.h"
+#import "MLSearchViewController.h"
 
 @import QuartzCore;
 @import MobileCoreServices;
+@import AVFoundation;
 
-@interface chatViewController()<IDMPhotoBrowserDelegate, ChatInputActionDelegage>
+@interface chatViewController()<IDMPhotoBrowserDelegate, ChatInputActionDelegage, UISearchControllerDelegate, SearchResultDeleagte>
 {
     BOOL _isTyping;
     monal_void_block_t _cancelTypingNotification;
@@ -67,9 +71,15 @@
 @property (atomic) BOOL viewDidAppear;
 @property (atomic) BOOL viewIsScrolling;
 @property (atomic) BOOL isLoadingMam;
+@property (atomic) BOOL moreMessagesAvailable;
 
 @property (nonatomic, strong) UIButton *lastMsgButton;
 @property (nonatomic, assign) CGFloat lastOffset;
+
+//SearchViewController, SearchResultViewController
+@property (nonatomic, strong) MLSearchViewController* searchController;
+@property (nonatomic, strong) NSMutableArray* searchResultMessageList;
+
 
 #define lastMsgButtonSize 40.0
 
@@ -88,25 +98,24 @@ enum chatViewControllerSections {
 enum msgSentState {
     msgSent,
     msgErrorAfterSent,
-    msgRecevied
+    msgRecevied,
+    msgDisplayed
 };
 
 -(void) setup
 {
     self.hidesBottomBarWhenPushed = YES;
     
-    NSArray* accountDetails = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId];
-    if([accountDetails count] > 0)
-    {
-        self.jid = [NSString stringWithFormat:@"%@@%@",[[accountDetails objectAtIndex:0] objectForKey:@"username"], [[accountDetails objectAtIndex:0] objectForKey:@"domain"]];
-    }
+    NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId];
+    if(accountDict)
+        self.jid = [NSString stringWithFormat:@"%@@%@",[accountDict objectForKey:@"username"], [accountDict objectForKey:@"domain"]];
 
     // init privacy Settings
     self.showGeoLocationsInline = [[HelperTools defaultsDB] boolForKey: @"ShowGeoLocation"];
     self.sendLastChatState = [[HelperTools defaultsDB] boolForKey: @"SendLastChatState"];
 }
 
--(void) setupWithContact:(MLContact* ) contact
+-(void) setupWithContact:(MLContact*) contact
 {
     self.contact = contact;
     [self setup];
@@ -117,6 +126,9 @@ enum msgSentState {
 -(void) viewDidLoad
 {
     [super viewDidLoad];
+    
+    [self initNavigationBarItems];
+    
     [self setupDateObjects];
     containerView = self.view;
     self.messageTable.scrollsToTop = YES;
@@ -129,7 +141,6 @@ enum msgSentState {
     
     
     [nc addObserver:self selector:@selector(dismissKeyboard:) name:UIApplicationDidEnterBackgroundNotification object:nil];
-    [nc addObserver:self selector:@selector(handleForeGround) name:UIApplicationWillEnterForegroundNotification object:nil];
     [nc addObserver:self selector:@selector(handleForeGround) name:kMonalRefresh object:nil];
     
     [nc addObserver:self selector:@selector(keyboardDidShow:) name:UIKeyboardDidShowNotification object:nil];
@@ -138,8 +149,10 @@ enum msgSentState {
     [nc addObserver:self selector:@selector(keyboardWillDisappear:) name:UIKeyboardWillHideNotification object:nil];
     
     [nc addObserver:self selector:@selector(handleReceivedMessage:) name:kMonalMessageReceivedNotice object:nil];
+    [nc addObserver:self selector:@selector(handleDisplayedMessage:) name:kMonalMessageDisplayedNotice object:nil];
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
+    [nc addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
     [nc addObserver:self selector:@selector(updateUIElementsOnAccountChange:) name:kMonalAccountStatusChanged object:nil];
     [nc addObserver:self selector:@selector(updateNavBarLastInteractionLabel:) name:kMonalLastInteractionUpdatedNotice object:nil];
     
@@ -194,6 +207,30 @@ enum msgSentState {
     [refreshControl addTarget:self action:@selector(loadOldMsgHistory:) forControlEvents:UIControlEventValueChanged];
     refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:NSLocalizedString(@"Loading more Messages from Server", @"")];
     [self.messageTable setRefreshControl:refreshControl];
+    self.moreMessagesAvailable = YES;
+    //Init search button item.
+    [self initSearchButtonItem];
+}
+
+-(void) initNavigationBarItems
+{
+    UIView *cusView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 120, self.navigationController.navigationBar.frame.size.height)];
+    //cusView.backgroundColor = [UIColor redColor];
+
+    self.navBarIcon = [[UIImageView alloc] initWithFrame:CGRectMake(0, 7, 30, 30)];
+    self.navBarContactJid = [[UILabel alloc] initWithFrame:CGRectMake(38, 7, 200, 18)];
+    self.navBarLastInteraction = [[UILabel alloc] initWithFrame:CGRectMake(38, 26, 200, 12)];
+
+    [self.navBarContactJid setFont:[UIFont systemFontOfSize:15.0]];
+    [self.navBarLastInteraction setFont:[UIFont systemFontOfSize:10.0]];
+
+    [cusView addSubview:self.navBarIcon];
+    [cusView addSubview:self.navBarContactJid];
+    [cusView addSubview:self.navBarLastInteraction];
+    UITapGestureRecognizer *customViewTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(commandIPressed:)];
+    [cusView addGestureRecognizer:customViewTapRecognizer];
+    self.navigationItem.leftBarButtonItems = @[[[UIBarButtonItem alloc] initWithCustomView:cusView]];
+    self.navigationItem.leftItemsSupplementBackButton = YES;
 }
 
 -(void) initLastMsgButton
@@ -201,9 +238,7 @@ enum msgSentState {
     unichar arrowSymbol = 0x2193;
     
     self.lastMsgButton = [[UIButton alloc] init];
-    float buttonXPos = [UIScreen mainScreen].bounds.size.width - lastMsgButtonSize - 5;
-    float buttonYPos = self.inputContainerView.frame.origin.y - lastMsgButtonSize - 5;
-    self.lastMsgButton.frame = CGRectMake(buttonXPos, buttonYPos , lastMsgButtonSize, lastMsgButtonSize);
+    [self lastMsgButtonPositionConfigWithSize:self.inputContainerView.bounds.size];
     self.lastMsgButton.layer.cornerRadius = lastMsgButtonSize/2;
     self.lastMsgButton.layer.backgroundColor = [UIColor whiteColor].CGColor;
     [self.lastMsgButton setTitleColor:[UIColor grayColor] forState:UIControlStateNormal];
@@ -216,11 +251,141 @@ enum msgSentState {
     MLChatInputContainer* inputView = (MLChatInputContainer*) self.inputContainerView;
     inputView.chatInputActionDelegate = self;
 }
+
+-(void) lastMsgButtonPositionConfigWithSize:(CGSize)size
+{
+    float buttonXPos = size.width - lastMsgButtonSize - 5;
+    float buttonYPos = self.inputContainerView.frame.origin.y - lastMsgButtonSize - 5;
+    self.lastMsgButton.frame = CGRectMake(buttonXPos, buttonYPos , lastMsgButtonSize, lastMsgButtonSize);
+}
 #pragma mark - ChatInputActionDelegage
 -(void)doScrollDownAction
 {
     [self scrollToBottom];
 }
+
+#pragma mark - SearchViewController
+-(void) initSearchViewControler
+{
+    self.searchController = [[MLSearchViewController alloc] initWithSearchResultsController:nil];
+    [self.searchController setObscuresBackgroundDuringPresentation:NO];
+    self.searchController.searchResultDelegate = self;
+    self.searchController.jid = self.jid;
+    self.searchResultMessageList = [[NSMutableArray alloc] init];
+}
+
+-(void) initSearchButtonItem
+{
+    UIBarButtonItem* seachButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemSearch
+                                                                                 target:self
+                                                                                 action:@selector(showSeachButtonAction)];
+    
+    NSMutableArray* rightBarButtons = [self.navigationItem.rightBarButtonItems mutableCopy];
+    [rightBarButtons addObject:seachButton];
+    self.navigationItem.rightBarButtonItems = rightBarButtons;
+}
+
+-(void) showSeachButtonAction
+{
+    self.searchController.contact = self.contact;
+    [self presentViewController:self.searchController animated:NO completion:nil];
+}
+
+-(void) dismissSearchViewControllerAction
+{
+    [self.searchController dismissViewControllerAnimated:NO completion:nil];
+}
+
+#pragma mark - SearchResultVCActionDelegate
+
+-(void) doGoSearchResultAction:(NSNumber*)nextDBId
+{
+    NSNumber* messagePathIdx = [self.searchController getMessageIndexPathForDBId:nextDBId];
+    if (messagePathIdx != nil)
+    {
+        long nextPathIdx = [messagePathIdx longValue];
+        NSIndexPath* msgIdxPath = [NSIndexPath indexPathForRow:nextPathIdx inSection:messagesSection];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.messageTable scrollToRowAtIndexPath:msgIdxPath atScrollPosition:UITableViewScrollPositionMiddle animated:NO];
+            MLBaseCell* selectedCell = [self.messageTable cellForRowAtIndexPath:msgIdxPath];
+            UIColor *originColor = [selectedCell.backgroundColor copy];
+            selectedCell.backgroundColor = [UIColor lightGrayColor];
+                        
+            [UIView animateWithDuration:0.2 delay:0.2 options:UIViewAnimationOptionCurveLinear animations:^{
+                selectedCell.backgroundColor = originColor;
+            } completion:nil];
+        });
+    }
+}
+
+-(void)doReloadHistoryForSearch
+{
+    [self loadOldMsgHistory];
+}
+
+- (void)doReloadActionForAllTableView
+{
+    [self.messageTable reloadData];
+}
+
+- (void)doGetMsgData
+{
+    for (int idx = 0; idx<self.messageList.count; idx++)
+    {
+        MLMessage* msg = [self.messageList objectAtIndex:idx];
+        [self doSetMsgPathIdx:idx withDBId:msg.messageDBId];
+    }
+}
+
+-(void) doSetNotLoadingHistory
+{
+    if (self.searchController.isActive)
+    {
+        self.searchController.isLoadingHistory = NO;
+        [self.searchController setResultToolBar];
+        if (self.searchController.isGoingUp)
+        {
+            [self.searchController doPreviousAction];
+        }
+        else
+        {
+            [self.searchController doNextAction];
+        }
+    }
+    [self doGetMsgData];
+}
+
+
+-(void) doSetMsgPathIdx:(NSInteger) pathIdx withDBId:(NSNumber *) messageDBId
+{
+    if(messageDBId)
+    {
+        [self.searchController setMessageIndexPath:[NSNumber numberWithInteger:pathIdx] withDBId:messageDBId];
+    }
+}
+
+-(BOOL) isContainKeyword:(NSNumber *) messageDBId
+{
+    if ([self.searchController getMessageIndexPathForDBId:messageDBId])
+    {
+        return YES;
+    }
+    
+    return NO;
+}
+
+-(void) resetHistoryAttributeForCell:(MLBaseCell*) cell
+{
+    if (!cell.messageBody.text) return;
+    
+    NSMutableAttributedString *defaultAttrString = [[NSMutableAttributedString alloc] initWithString:cell.messageBody.text];
+    NSInteger textLength = (cell.messageBody.text == nil) ? 0: cell.messageBody.text.length;
+    NSRange defaultTextRange = NSMakeRange(0, textLength);
+    [defaultAttrString addAttribute:NSBackgroundColorAttributeName value:[UIColor clearColor] range:defaultTextRange];
+    cell.messageBody.attributedText = defaultAttrString;
+    cell.textLabel.backgroundColor = [UIColor clearColor];
+}
+
 
 -(void) setChatInputHeightConstraints:(BOOL) hwKeyboardPresent
 {
@@ -242,7 +407,7 @@ enum msgSentState {
 -(IBAction) toggleEncryption:(id)sender
 {
 #ifndef DISABLE_OMEMO
-    NSArray* devices = [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
+    NSArray* devices = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid];
     [MLChatViewHelper<chatViewController*> toggleEncryption:&(self->_encryptChat) forAccount:self.xmppAccount.accountNo forContactJid:self.contact.contactJid withKnownDevices:devices withSelf:self afterToggle:^() {
         [self displayEncryptionStateInUI];
     }];
@@ -258,8 +423,14 @@ enum msgSentState {
     }
 }
 
-// TODO use notification
--(void) updateUIElementsOnAccountChange:(xmppState) accountState isHibernated:(BOOL) isHibernated
+-(void) refreshContact:(NSNotification*) notification
+{
+    MLContact* contact = [notification.userInfo objectForKey:@"contact"];
+    if(self.contact && [self.contact.contactJid isEqualToString:contact.contactJid] && [self.contact.accountId isEqual:contact.accountId])
+        [self updateUIElements];
+}
+
+-(void) updateUIElements
 {
     if(!self.contact.accountId) return;
 
@@ -272,13 +443,10 @@ enum msgSentState {
     
     //send button is always enabled, except if the account is permanently disabled
     sendButtonEnabled = YES;
-    if(![[DataLayer sharedInstance] isAccountEnabled:self.contact.accountId])
+    if(![[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo])
         sendButtonEnabled = NO;
     
-    if(isHibernated == YES)
-        jidLabelText = [NSString stringWithFormat:@"%@ [%@]", contactDisplayName, @"Hibernated"];
-    else
-        jidLabelText = [NSString stringWithFormat:@"%@", contactDisplayName];
+    jidLabelText = contactDisplayName;
 
     if(self.contact.isGroup) {
         NSArray* members = [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
@@ -302,19 +470,17 @@ enum msgSentState {
         // Check if all objects of the notification are present
         NSString* accountNo = [userInfo objectForKey:kAccountID];
         NSNumber* accountState = [userInfo objectForKey:kAccountState];
-        NSNumber* accountHibernate = [userInfo objectForKey:kAccountHibernate];
-        
+
         // Only parse account changes for our current opened account
         if(![accountNo isEqualToString:self.xmppAccount.accountNo])
             return;
-        
-        if(accountNo && accountState && accountHibernate)
-            [self updateUIElementsOnAccountChange:(xmppState)[accountState intValue] isHibernated:[accountHibernate boolValue]];
+
+        if(accountNo && accountState)
+            [self updateUIElements];
     }
     else
     {
-        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-        [self updateUIElementsOnAccountChange:kStateLoggedIn isHibernated:[xmppAccount isHibernated]];
+        [self updateUIElements];
     }
 }
 
@@ -371,6 +537,7 @@ enum msgSentState {
     [super viewWillAppear:animated];
 
     self.viewDidAppear = NO;
+    self.viewIsScrolling = YES;
 
     [MLNotificationManager sharedInstance].currentAccountNo=self.contact.accountId;
     [MLNotificationManager sharedInstance].currentContact=self.contact;
@@ -379,7 +546,7 @@ enum msgSentState {
         [[NSNotificationCenter defaultCenter] removeObserver:self];
         self.inputContainerView.hidden = YES;
         [self refreshData];
-        [self updateUIElementsOnAccountChange:nil];
+        [self updateUIElements];
         [self updateNavBarLastInteractionLabel:nil];
         return;
     }
@@ -391,7 +558,7 @@ enum msgSentState {
         self.encryptChat = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
     }
     [self handleForeGround];
-    [self updateUIElementsOnAccountChange:nil];
+    [self updateUIElements];
     [self updateNavBarLastInteractionLabel:nil];
     [self displayEncryptionStateInUI];
     
@@ -411,6 +578,12 @@ enum msgSentState {
     // Set correct chatInput height constraints
     [self setChatInputHeightConstraints:self.hardwareKeyboardPresent];
     [self scrollToBottom];
+
+    // Allow  autoloading of more messages after a few seconds
+    monal_void_block_t __block allowAutoLoading = ^{
+        self.viewIsScrolling = NO;
+    };
+    [HelperTools startTimer:2 withHandler:allowAutoLoading];
 }
 
 
@@ -420,18 +593,14 @@ enum msgSentState {
     if(!self.contact.contactJid || !self.contact.accountId) return;
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
 #ifndef DISABLE_OMEMO
-    if(![self.contact.subscription isEqualToString:kSubBoth] && !self.contact.isGroup) {
-        [self.xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
-    }
-    
-    NSArray* devices = [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
-    if(devices.count == 0) {
-        if(self.encryptChat) {
+    BOOL omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressNameExist:self.contact.contactJid];
+    if(!omemoDeviceForContactFound) {
+        if(self.encryptChat && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo]) {
             UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Encryption Not Supported", @"") message:NSLocalizedString(@"This contact does not appear to have any devices that support encryption.", @"") preferredStyle:UIAlertControllerStyleAlert];
             [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 // Disable encryption
                 self.encryptChat = NO;
-                [self updateUIElementsOnAccountChange:nil];
+                [self updateUIElements];
                 [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
@@ -443,13 +612,14 @@ enum msgSentState {
         }
     }
 #endif
-
     [self refreshCounter];
     
     //init the floating last message button
     [self initLastMsgButton];
 
     self.viewDidAppear = YES;
+
+	[self initSearchViewControler];
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -458,7 +628,7 @@ enum msgSentState {
     BOOL success = [self saveMessageDraft];
     if(success) {
         // Update status message for contact to show current draft
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
     }
     [super viewWillDisappear:animated];
     [MLNotificationManager sharedInstance].currentAccountNo = nil;
@@ -515,6 +685,11 @@ enum msgSentState {
 -(void) viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     [self.chatInput resignFirstResponder];
+    
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+    } completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        [self lastMsgButtonPositionConfigWithSize:[UIApplication sharedApplication].keyWindow.bounds.size];
+    }];
 }
 
 
@@ -533,17 +708,28 @@ enum msgSentState {
 {
     if(self.navigationController.topViewController==self)
     {
-        if([MLNotificationManager sharedInstance].currentContact!=self.contact) {
+        if([MLNotificationManager sharedInstance].currentContact!=self.contact)
             return;
-        }
         
-        if(!_day) {
-            [[DataLayer sharedInstance] markAsReadBuddy:self.contact.contactJid forAccount:self.contact.accountId];
+        if(!_day && ![HelperTools isInBackground])
+        {
+            //get list of unread messages
+            NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountId tillStanzaId:nil wasOutgoing:NO];
             
+            //send displayed marker for last unread message (XEP-0333)
+            MLMessage* lastUnreadMessage = [unread lastObject];
+            if(lastUnreadMessage)
+            {
+                DDLogDebug(@"Marking as displayed: %@", lastUnreadMessage.messageId);
+                [[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId] sendDisplayMarkerForId:lastUnreadMessage.messageId to:lastUnreadMessage.from];
+            }
+            
+            //update app badge
             MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
             [appDelegate updateUnread];
             
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+            //refresh contact in active contacts view
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
         }
     }
 }
@@ -555,7 +741,7 @@ enum msgSentState {
         NSMutableArray* messages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId];
         NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId];
         if([unreadMsgCnt integerValue] == 0) self->_firstmsg=YES;
-                                 
+
         if(!self.jid) return;
         MLMessage* unreadStatus = [[MLMessage alloc] init];
         unreadStatus.messageType = kMessageTypeStatus;
@@ -577,10 +763,10 @@ enum msgSentState {
         if(unreadPos <= messages.count - 1 && unreadPos > 0) {
             [messages insertObject:unreadStatus atIndex:unreadPos];
         }
-        if(messages.count != self.messageList.count)
-        {
-            self.messageList = messages;
-        }
+
+        self.messageList = messages;
+		[self doSetNotLoadingHistory];
+        [self refreshCounter];
     }
     else  { // load log for this day
         self.messageList = [[[DataLayer sharedInstance] messageHistoryDateForContact:self.contact.contactJid forAccount:self.contact.accountId forDate:self.day] mutableCopy];
@@ -599,35 +785,33 @@ enum msgSentState {
     NSString *newMessageID =messageID?messageID:[[NSUUID UUID] UUIDString];
     //dont readd it, use the exisitng
 
-    NSArray* accountDetails = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId];
-    if(accountDetails.count == 0) {
-        DDLogError(@"Account should be >0");
+    NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId];
+    if(!accountDict)
+    {
+        DDLogError(@"Account not found!");
         return;
     }
 
     if(!messageID)
     {
-        NSString *contactNameCopy = self.contact.contactJid; //prevent retail cycle
-        NSString *accountNoCopy = self.contact.accountId;
-        BOOL isMucCopy = self.contact.isGroup;
-        BOOL encryptChatCopy = self.encryptChat;
-        MLContact *contactCopy = self.contact;
-
+        weakify(self);
         [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
-            [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:contactNameCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:NO messageId:newMessageID
+            strongify(self);
+            [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:NO messageId:newMessageID
                                 withCompletionHandler:nil];
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:nil userInfo:@{@"contact":contactCopy}];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
         }];
     }
     else
     {
         [[MLXMPPManager sharedInstance]
-            sendMessage:messageText
-            toContact:self.contact.contactJid
-            fromAccount:self.contact.accountId
-            isEncrypted:self.encryptChat
-            isMUC:self.contact.isGroup
-            isUpload:NO messageId:newMessageID
+                      sendMessage:messageText
+                        toContact:self.contact.contactJid
+                      fromAccount:self.contact.accountId
+                      isEncrypted:self.encryptChat
+                            isMUC:self.contact.isGroup
+                         isUpload:NO
+                        messageId:newMessageID
             withCompletionHandler:nil
         ];
     }
@@ -923,11 +1107,6 @@ enum msgSentState {
             if(url) {
                 NSString* newMessageID = [[NSUUID UUID] UUIDString];
                 
-                NSString* contactJidCopy = self.contact.contactJid; //prevent retail cycle
-                NSString* accountNoCopy = self.contact.accountId;
-                BOOL isMucCopy = self.contact.isGroup;
-                BOOL encryptChatCopy = self.encryptChat;
-                
                 NSString* urlToPass = url;
                 
                 if(encrypted) {
@@ -944,8 +1123,10 @@ enum msgSentState {
                 }
                 [[MLImageManager sharedInstance] saveImageData:decryptedData forLink:urlToPass];
                 
+                weakify(self);
                 [self addMessageto:self.contact.contactJid withMessage:urlToPass andId:newMessageID withCompletion:^(BOOL success) {
-                    [[MLXMPPManager sharedInstance] sendMessage:urlToPass toContact:contactJidCopy fromAccount:accountNoCopy isEncrypted:encryptChatCopy isMUC:isMucCopy isUpload:YES messageId:newMessageID
+                    strongify(self);
+                    [[MLXMPPManager sharedInstance] sendMessage:urlToPass toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:YES messageId:newMessageID
                                           withCompletionHandler:nil];
                 }];
             }
@@ -999,22 +1180,27 @@ enum msgSentState {
         DDLogError(@" not ready to send messages");
         return;
     }
-    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:self.contact.accountId withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString *messageType) {
+    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:self.contact.accountId withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString* messageType, NSNumber* messageDBId) {
         DDLogVerbose(@"added message");
         
         if(result)
         {
+            if(completion)
+                completion(result);
+            
             dispatch_async(dispatch_get_main_queue(), ^{
                 MLMessage* messageObj = [[MLMessage alloc] init];
                 messageObj.actualFrom = self.jid;
                 messageObj.from = self.jid;
                 messageObj.timestamp = [NSDate date];
+                messageObj.hasBeenDisplayed = NO;
                 messageObj.hasBeenReceived = NO;
                 messageObj.hasBeenSent = NO;
                 messageObj.messageId = messageId;
                 messageObj.encrypted = self.encryptChat;
                 messageObj.messageType = messageType;
                 messageObj.messageText = message;
+                messageObj.messageDBId = messageDBId;
 
                 [self.messageTable performBatchUpdates:^{
                     if(!self.messageList) self.messageList = [[NSMutableArray alloc] init];
@@ -1026,8 +1212,6 @@ enum msgSentState {
                                                    withRowAnimation:UITableViewRowAnimationNone];
                     }
                 } completion:^(BOOL finished) {
-                    if(completion) completion(result);
-
                     [self scrollToBottom];
                 }];
             });
@@ -1098,7 +1282,7 @@ enum msgSentState {
             if([message.messageType isEqualToString:kMessageTypeStatus])
                 finalMessageType = kMessageTypeStatus;
             message.messageType = finalMessageType;
-
+            
             if(!self.messageList)
                 self.messageList = [[NSMutableArray alloc] init];
             [self.messageList addObject:message];   //do not insert based on delay timestamp because that would make it possible to fake history entries
@@ -1114,7 +1298,14 @@ enum msgSentState {
             [self->_messageTable endUpdates];
 
             [self scrollToBottom];
-
+            
+            if (self.searchController.isActive)
+            {
+                [self doSetMsgPathIdx:bottom withDBId:message.messageDBId];
+                [self.searchController getSearchData:self.self.searchController.searchBar.text];
+                [self.searchController setResultToolBar];
+            }            
+            
             [self refreshCounter];
         });
     }
@@ -1131,18 +1322,27 @@ enum msgSentState {
         {
             // Set correct flags
             if(event == msgSent) {
+                DDLogVerbose(@"got msgSent event for messageid: %@", messageId);
                 msg.hasBeenSent = YES;
             } else if(event == msgRecevied) {
+                DDLogVerbose(@"got msgRecevied event for messageid: %@", messageId);
                 msg.hasBeenSent = YES;
                 msg.hasBeenReceived = YES;
+            } else if(event == msgDisplayed) {
+                DDLogVerbose(@"got msgDisplayed event for messageid: %@", messageId);
+                msg.hasBeenSent = YES;
+                msg.hasBeenReceived = YES;
+                msg.hasBeenDisplayed = YES;
             } else if(event == msgErrorAfterSent) {
-                //we don't want to show errors if the message has been received at least once or if the message wasn't even sent
-                if(msg.hasBeenSent && !msg.hasBeenReceived)
+                DDLogVerbose(@"got msgErrorAfterSent event for messageid: %@", messageId);
+                //we don't want to show errors if the message has been received at least once
+                if(!msg.hasBeenReceived)
                 {
                     msg.errorType = [dic objectForKey:@"errorType"];
                     msg.errorReason = [dic objectForKey:@"errorReason"];
                 }
             }
+            
             indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
 
             // Update table entry
@@ -1173,7 +1373,13 @@ enum msgSentState {
 -(void) handleReceivedMessage:(NSNotification*) notification
 {
     NSDictionary *dic = notification.userInfo;
-    [self updateMsgState:[dic  objectForKey:kMessageId] withEvent:msgRecevied withOptDic:nil];
+    [self updateMsgState:[dic objectForKey:kMessageId] withEvent:msgRecevied withOptDic:nil];
+}
+
+-(void) handleDisplayedMessage:(NSNotification*) notification
+{
+    NSDictionary *dic = notification.userInfo;
+    [self updateMsgState:[dic objectForKey:kMessageId] withEvent:msgDisplayed withOptDic:nil];
 }
 
 
@@ -1259,17 +1465,14 @@ enum msgSentState {
 
 -(void) retry:(id) sender
 {
-    NSInteger historyId = ((UIButton*) sender).tag;
-    
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Retry sending message?", @"") message:NSLocalizedString(@"This message failed to send.", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+    NSInteger msgHistoryID = ((UIButton*) sender).tag;
+    MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:msgHistoryID];
+    DDLogDebug(@"Called retry for message with history id %ld: %@", (long)msgHistoryID, msg);
+
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Retry sending message?", @"") message:[NSString stringWithFormat:NSLocalizedString(@"This message failed to send (%@): %@", @""), msg.errorType, msg.errorReason] preferredStyle:UIAlertControllerStyleActionSheet];
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Retry", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-        NSArray *messageArray =[[DataLayer sharedInstance] messageForHistoryID:historyId];
-        if([messageArray count] > 0)
-        {
-            NSDictionary *dic = [messageArray objectAtIndex:0];
-            [self sendMessage:[dic objectForKey:@"message"] andMessageID:[dic objectForKey:@"messageid"]];
-            //[self setMessageId:[dic objectForKey:@"messageid"] sent:YES]; // for the UI, db will be set in the notification
-        }
+        [self sendMessage:msg.messageText andMessageID:msg.messageId];
+        //[self setMessageId:msg.messageId sent:YES]; // for the UI, db will be set in the notification
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         [self dismissViewControllerAnimated:YES completion:nil];
@@ -1314,10 +1517,29 @@ enum msgSentState {
     return [tableView dequeueReusableCellWithIdentifier:fullIdentifier];
 }
 
+-(void) tableView:(UITableView*) tableView willDisplayCell:(nonnull UITableViewCell *)cell forRowAtIndexPath:(nonnull NSIndexPath *)indexPath
+{
+    if(indexPath.section == messagesSection && indexPath.row == 0) {
+        if(self.moreMessagesAvailable && !self.viewIsScrolling) {
+            [self loadOldMsgHistory];
+            // Allow loading of more messages after a few seconds
+            monal_void_block_t __block allowAutoLoading = ^{
+                self.viewIsScrolling = NO;
+            };
+            [HelperTools startTimer:10 withHandler:allowAutoLoading];
+        }
+    }
+}
+
 -(UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
 {
     if(indexPath.section == reloadBoxSection) {
-        UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"reloadBox" forIndexPath:indexPath];
+        MLReloadCell* cell = (MLReloadCell*)[tableView dequeueReusableCellWithIdentifier:@"reloadBox" forIndexPath:indexPath];
+        #if TARGET_OS_MACCATALYST
+            // "Pull" could be a bit misleading on a mac
+            cell.reloadLabel.text = NSLocalizedString(@"Scroll down to load more messages", @"mac only string");
+        #endif
+
         // Remove selection style (if cell is pressed)
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         return cell;
@@ -1337,7 +1559,6 @@ enum msgSentState {
     NSString* messageText = row.messageText;
     if([messageText length] > kMonalChatMaxAllowedTextLen)
         messageText = [NSString stringWithFormat:@"%@\n[...]", [messageText substringToIndex:kMonalChatMaxAllowedTextLen]];
-    DDLogWarn(@"msg: %@", messageText);
     BOOL inDirection = [row.from isEqualToString:self.contact.contactJid];
 
     if([row.messageType isEqualToString:kMessageTypeStatus])
@@ -1472,7 +1693,31 @@ enum msgSentState {
         else // Default case
         {
             // Reset attributes
-            [cell.messageBody setText:messageText];
+            //XEP-0245: The slash me Command
+            if([messageText hasPrefix:@"/me "])
+            {
+                NSString* displayName;
+                if([row.from isEqualToString:self.jid])
+                    displayName = [MLContact ownDisplayNameForAccountNo:self.contact.accountId andOwnJid:self.jid];
+                else
+                    displayName = [self.contact contactDisplayName];
+                UIFont* italicFont = [UIFont italicSystemFontOfSize:cell.messageBody.font.pointSize];
+                
+                NSMutableAttributedString* attributedMsgString = [[MLXEPSlashMeHandler sharedInstance] attributedStringSlashMeWithAccountId:self.contact.accountId
+                                                                                                                                displayName:displayName
+                                                                                                                                 actualFrom:row.actualFrom
+                                                                                                                                    message:messageText
+                                                                                                                                    isGroup:self.contact.isGroup
+                                                                                                                                   withFont:italicFont];
+                
+                [cell.messageBody setAttributedText:attributedMsgString];
+            } else {                
+                // Reset attributes
+                UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize];
+                [cell.messageBody setFont:originalFont];
+                
+                [cell.messageBody setText:messageText];
+            }
             cell.link = nil;
         }
     }
@@ -1486,7 +1731,9 @@ enum msgSentState {
         priorRow = [self.messageList objectAtIndex:indexPath.row-1];
     }
     
-    if(row.hasBeenReceived)
+    if(row.hasBeenDisplayed)
+        cell.messageStatus.text = kDisplayed;
+    else if(row.hasBeenReceived)
         cell.messageStatus.text = kReceived;
     else if(row.hasBeenSent)
         cell.messageStatus.text = kSent;
@@ -1517,11 +1764,23 @@ enum msgSentState {
     
     if(cell.outBound && ([row.errorType length] > 0 || [row.errorReason length] > 0) && !row.hasBeenReceived && row.hasBeenSent)
     {
-        cell.messageStatus.text = [NSString stringWithFormat:@"Error: %@ - %@", row.errorType, row.errorReason];
+        cell.messageStatus.text = @"Error";
         cell.deliveryFailed = YES;
     }
     
     [cell updateCellWithNewSender:newSender];
+        
+    [self resetHistoryAttributeForCell:cell];
+    if (self.searchController.isActive)
+    {
+        if ([self.searchController isDBIdExited:row.messageDBId])
+        {
+            NSMutableAttributedString *attributedMsgString = [self.searchController doSearchKeyword:self.searchController.searchBar.text
+                                                                                             onText:messageText
+                                                                                         andInbound:inDirection];
+            [cell.messageBody setAttributedText:attributedMsgString];
+        }
+    }
     
     return cell;
 }
@@ -1711,21 +1970,26 @@ enum msgSentState {
         
         //now load more (older) messages from mam if not
         DDLogVerbose(@"Loading more messages from mam before stanzaId %@", oldestStanzaId);
-        __weak chatViewController *weakSelf = self;
+        weakify(self);
         [self.xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid before:oldestStanzaId withCompletion:^(NSArray* _Nullable messages) {
+            strongify(self);
             if(!messages)
             {
                 DDLogError(@"Got backscrolling mam error");
+                self.moreMessagesAvailable = NO;
                 //TODO: error happened --> display this to user?
             }
             else
             {
+                if([messages count] == 0) {
+                    self.moreMessagesAvailable = NO;
+                }
                 DDLogVerbose(@"Got backscrolling mam response: %lu", (unsigned long)[messages count]);
-                [weakSelf insertOldMessages:messages];      //this array is already in reverse order
+                [self insertOldMessages:messages];      //this array is already in reverse order
             }
             //allow next mam fetch
             dispatch_async(dispatch_get_main_queue(), ^{
-                weakSelf.isLoadingMam = NO;
+                self.isLoadingMam = NO;
                 if(sender)
                     [(UIRefreshControl *)sender endRefreshing];
             });
@@ -1737,8 +2001,14 @@ enum msgSentState {
             [(UIRefreshControl *)sender endRefreshing];
     }
     
-    //use reverse order to insert messages from newest to oldest (bottom to top in chatview)
-    [self insertOldMessages:[[oldMessages reverseObjectEnumerator] allObjects]];
+    if(oldMessages && [oldMessages count] > 0) {
+        //use reverse order to insert messages from newest to oldest (bottom to top in chatview)
+        [self insertOldMessages:[[oldMessages reverseObjectEnumerator] allObjects]];
+    }
+    else
+    {
+        [self doSetNotLoadingHistory];
+    }
 }
 
 -(void) insertOldMessages:(NSArray*) oldMessages
@@ -1747,6 +2017,7 @@ enum msgSentState {
         if(!self.messageList)
             self.messageList = [[NSMutableArray alloc] init];
         
+        CGSize sizeBeforeAddingMessages = [self->_messageTable contentSize];
         // Insert old messages into messageTable
         NSMutableArray* indexArray = [NSMutableArray array];
         for(size_t msgIdx = 0; msgIdx < [oldMessages count]; msgIdx++)
@@ -1758,16 +2029,14 @@ enum msgSentState {
         }
         [self->_messageTable beginUpdates];
         [self->_messageTable insertRowsAtIndexPaths:indexArray withRowAnimation:UITableViewRowAnimationNone];
+        // keep old position - scrolling may stop
+        CGSize sizeAfterAddingMessages = [self->_messageTable contentSize];
+        CGPoint contentOffset = self->_messageTable.contentOffset;
+        CGPoint newOffset = CGPointMake(contentOffset.x, contentOffset.y + sizeAfterAddingMessages.height - sizeBeforeAddingMessages.height);
+        self->_messageTable.contentOffset = newOffset;
         [self->_messageTable endUpdates];
-
-        size_t scrollRow = NSNotFound;
-        if([self.messageList count] > 0 && [self.messageList count] == [oldMessages count]) {
-            scrollRow = [oldMessages count] - 1;
-        } else if([self.messageList count] > [oldMessages count]) {
-            // >
-            scrollRow = [oldMessages count];
-        }
-        [self->_messageTable scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:scrollRow inSection:messagesSection] atScrollPosition: (UITableViewScrollPosition) messagesSection animated:NO];
+		
+		[self doSetNotLoadingHistory];
     });
 }
 
@@ -1806,6 +2075,12 @@ enum msgSentState {
     [self performSegueWithIdentifier:@"showDetails" sender:self];
 }
 
+// Open search ViewController
+-(void) commandFPressed:(UIKeyCommand*)keyCommand
+{
+    [self showSeachButtonAction];
+}
+
 // List of custom hardware key commands
 - (NSArray<UIKeyCommand *> *)keyCommands {
     return @[
@@ -1814,7 +2089,9 @@ enum msgSentState {
             // enter
             [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(enterKeyPressed:)],
             // command + i
-            [UIKeyCommand keyCommandWithInput:@"i" modifierFlags:UIKeyModifierCommand action:@selector(commandIPressed:)]
+            [UIKeyCommand keyCommandWithInput:@"i" modifierFlags:UIKeyModifierCommand action:@selector(commandIPressed:)],
+            // command + f
+            [UIKeyCommand keyCommandWithInput:@"f" modifierFlags:UIKeyModifierCommand action:@selector(commandFPressed:)]
     ];
 }
 

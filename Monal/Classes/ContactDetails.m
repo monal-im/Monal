@@ -7,6 +7,7 @@
 //
 
 #import "ContactDetails.h"
+#import "MBProgressHUD.h"
 #import "MLImageManager.h"
 #import "MLConstants.h"
 #import "CallViewController.h"
@@ -18,6 +19,7 @@
 #import "MLTextInputCell.h"
 #import "HelperTools.h"
 #import "MLChatViewHelper.h"
+#import "MLOMEMO.h"
 
 
 @interface ContactDetails()
@@ -36,7 +38,7 @@
 @property (nonatomic, strong) UIImage *leftImage;
 @property (nonatomic, strong) UIImage *rightImage;
 @property (nonatomic, strong) NSMutableDictionary *versionInfoDic;
-
+@property (nonatomic, strong) MBProgressHUD* saveHUD;
 @end
 
 @class HelperTools;
@@ -51,7 +53,7 @@
                                                bundle:[NSBundle mainBundle]]
          forCellReuseIdentifier:@"TextCell"];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshSoftwareVersion:) name: kMonalXmppUserSoftWareVersionRefresh object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -59,7 +61,6 @@
     [super viewWillAppear:animated];
     if(!self.contact) return;
     
-    [[MLXMPPManager sharedInstance] getVCard:self.contact];
     self.tableView.rowHeight = UITableViewAutomaticDimension;
     
     self.navigationItem.title = self.contact.contactDisplayName;
@@ -71,13 +72,7 @@
     }
     
     self.accountNo = self.contact.accountId;
-    //making sure there is an entry at least
-    [[DataLayer sharedInstance] addContact:self.contact.contactJid forAccount:self.accountNo  fullname:@"" nickname:@"" andMucNick:nil];
     
-	if (!self.contact.isGroup) {
-        [self querySoftwareVersion];
-    }
-	
     self.isEncrypted = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.accountNo];
     self.isPinned = [[DataLayer sharedInstance] isPinnedChat:self.accountNo andBuddyJid:self.contact.contactJid];
     
@@ -111,20 +106,15 @@
         self.isSubscribed=YES;
     }
     
-#ifndef DISABLE_OMEMO
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
-    [self.xmppAccount queryOMEMODevicesFrom:self.contact.contactJid];
-#endif
     
     [self refreshLock];
     [self refreshMute];
-    [self refreshSoftwareVersion:nil];
 }
 
 -(void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [[NSNotificationCenter defaultCenter] removeObserver:kMonalXmppUserSoftWareVersionRefresh];
 }
 
 -(IBAction) callContact:(id)sender
@@ -189,7 +179,7 @@
             // Set jid field
             if(self.contact.isGroup) {
                detailCell.jid.text=[NSString stringWithFormat:@"%@ (%lu)", self.contact.contactJid, self.groupMemberCount];
-                //for how hide things that arent relevant
+                //hide things that aren't relevant
                 detailCell.phoneButton.hidden = YES;
                 detailCell.isContact.hidden = YES;
             } else {
@@ -242,14 +232,8 @@
                     cell.textInput.enabled=NO;
                     cell.textInput.text=self.contact.accountNickInGroup;
                 } else  {
-                    NSString* nickName=self.contact.nickName;
-                    if([[nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length]>0) {
-                        cell.textInput.text=nickName;
-                    } else {
-                        cell.textInput.text=self.contact.fullName;
-                    }
-                    if([cell.textInput.text isEqualToString:@"(null)"])  cell.textInput.text = @"";
-                    cell.textInput.placeholder = NSLocalizedString(@"Set a nickname", @"");
+                    cell.textInput.text=[self.contact contactDisplayName];
+                    cell.textInput.placeholder = NSLocalizedString(@"Set a nickname for this contact", @"");
                     cell.textInput.delegate = self;
                 }
                 thecell = cell;
@@ -260,7 +244,8 @@
                     cell.cellDetails.text = self.contact.groupSubject;
                 } else  {
                     cell.cellDetails.text = self.contact.statusMessage;
-                    if([cell.cellDetails.text isEqualToString:@"(null)"])  cell.cellDetails.text = @"";
+                    if([cell.cellDetails.text isEqualToString:@"(null)"])
+                        cell.cellDetails.text = @"";
                 }
                 thecell = cell;
             }
@@ -286,10 +271,10 @@
             else if(indexPath.row == 2) {
                 if(self.contact.isGroup) {
                     thecell.textLabel.text = NSLocalizedString(@"Leave Conversation", @"");
-                } else  {
+                } else {
                     if(self.isSubscribed) {
                         thecell.textLabel.text = NSLocalizedString(@"Remove Contact", @"");
-                    } else  {
+                    } else {
                         thecell.textLabel.text = NSLocalizedString(@"Add Contact", @"");
                     }
                 }
@@ -309,30 +294,6 @@
             }
             thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
             break;
-
-		case 3: {
-            thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Sub"];
-                        
-            switch (indexPath.row) {
-                case 0:
-                    thecell.textLabel.text = [NSString stringWithFormat:@"%@%@",
-                                              NSLocalizedString(@"Name: ",@""),
-                                              (_versionInfoDic[@"platform_App_Name"] == nil) ? @"":_versionInfoDic[@"platform_App_Name"]];
-                    break;
-                case 1:
-                    thecell.textLabel.text = [NSString stringWithFormat:@"%@%@",
-                                              NSLocalizedString(@"Os: ",@""),
-                                              (_versionInfoDic[@"platform_OS"] == nil) ? @"":_versionInfoDic[@"platform_OS"]];
-                    break;
-                case 2:
-                    thecell.textLabel.text = [NSString stringWithFormat:@"%@%@",
-                                              NSLocalizedString(@"Version: ",@""),
-                                              (_versionInfoDic[@"platform_App_Version"] == nil) ? @"":_versionInfoDic[@"platform_App_Version"]];
-                    break;
-                default:
-                    break;
-            }
-        }	
         }
     }
     return thecell;
@@ -363,9 +324,6 @@
     
     if(section == 2)
         toreturn= NSLocalizedString(@"Connection Details",@"");
-    
-    if(section==3)
-        toreturn= NSLocalizedString(@"Software Version",@"");
     
     return toreturn;
 }
@@ -423,7 +381,7 @@
                 // Update button text
                 [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
                 // Update color in activeViewController
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact, @"pinningChanged": @YES}];
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact":self.contact, @"pinningChanged": @YES}];
                 break;
             }
         }
@@ -431,7 +389,7 @@
 }
 
 -(void) addContact {
-    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Add %@ to your contacts?", @""),self.contact.fullName ];
+    NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"Add %@ to your contacts?", @""), self.contact.contactJid];
     NSString* detailString = NSLocalizedString(@"They will see when you are online. They will be able to send you encrypted messages.", @"");
 
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
@@ -453,7 +411,7 @@
 }
 
 -(void) removeContact {
-    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", @""), self.contact.fullName];
+    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", @""), self.contact.contactJid];
     NSString* detailString = NSLocalizedString(@"They will no longer see when you are online. They may not be able to send you encrypted messages.", @"");
        
     BOOL isMUC=self.contact.isGroup;
@@ -485,7 +443,7 @@
 }
 
 -(void) blockContact {
-    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Block %@ from contacting you?", @""), self.contact.fullName ];
+    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Block %@ from contacting you?", @""), self.contact.contactJid];
     NSString* detailString = NSLocalizedString(@"This sender will no longer be able to contact you",@"");
 
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
@@ -504,7 +462,7 @@
 }
 
 -(void) unBlockContact {
-    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Allow %@ to contact you?", @""),self.contact.fullName ];
+    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Allow %@ to contact you?", @""), self.contact.contactJid];
     NSString* detailString =NSLocalizedString(@"This sender will be able to send you messages",@"");
 
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
@@ -559,8 +517,8 @@
             
             [self presentViewController:nav animated:YES completion:nil];
         } else  {
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Nothing to see",@"") message:NSLocalizedString(@"You have not received any images in this conversation.",@"") preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Nothing to see", @"") message:NSLocalizedString(@"You have not received any images in this conversation.",@"") preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                 [alert dismissViewControllerAnimated:YES completion:nil];
             }]];
             [self presentViewController:alert animated:YES completion:nil];
@@ -603,7 +561,7 @@
 -(IBAction) toggleEncryption:(id)sender
 {
 #ifndef DISABLE_OMEMO
-    NSArray* devices = [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
+    NSArray* devices = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid];
     [MLChatViewHelper<ContactDetails*> toggleEncryption:&(self->_isEncrypted) forAccount:self.accountNo forContactJid:self.contact.contactJid withKnownDevices:devices withSelf:self afterToggle:^() {
         [self refreshLock];
     }];
@@ -618,33 +576,6 @@
     });
 }
 
-#pragma mark - refresh software version
--(void) refreshSoftwareVersion:(NSNotification*) verNotification
-{
-    if (verNotification) {        
-        _versionInfoDic = [verNotification.userInfo mutableCopy];
-    } else {
-        NSArray* versionDBInfoArr = [[DataLayer sharedInstance] softwareVersionInfoForAccount:self.accountNo andContact:self.contact.contactJid];
-        if(versionDBInfoArr && [versionDBInfoArr count] >= 1) {
-            _versionInfoDic = versionDBInfoArr[0];
-        } else {
-            _versionInfoDic = [[NSMutableDictionary alloc] init];
-        }
-    }
-    
-    dispatch_async(dispatch_get_main_queue(), ^{        
-        NSIndexSet *sectionSet = [NSIndexSet indexSetWithIndex:3];
-        [self.tableView reloadSections:sectionSet withRowAnimation:UITableViewRowAnimationNone];
-    });
-}
-
-#pragma mark - Query Software Version
-
--(void) querySoftwareVersion
-{
-    [[MLXMPPManager sharedInstance] getEntitySoftWareVersion:self.contact];
-}
-
 #pragma mark - textfield delegate
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
@@ -653,20 +584,31 @@
     return YES;
 }
 
+-(void) refreshContact:(NSNotification*) notification
+{
+    weakify(self);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        strongify(self);
+        self.navigationItem.title = [self.contact contactDisplayName];
+        if(self.saveHUD)
+            self.saveHUD.hidden = YES;
+    });
+}
 
 -(BOOL) textFieldShouldEndEditing:(UITextField *)textField {
-    if(!textField) return NO;
-    [[DataLayer sharedInstance] setNickName:textField.text forContact:self.contact.contactJid andAccount:self.accountNo];
+    if(!textField)
+        return NO;
     
-    if(textField.text.length>0)
-        self.navigationItem.title = textField.text;
-    else
-        self.navigationItem.title = self.contact.fullName;
-    
-    if(![self.contact.nickName isEqualToString:textField.text]) {
-        self.contact.nickName = textField.text;
-
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self userInfo:@{@"contact":self.contact}];
+    //update roster on our server if the nick changed
+    if(!self.contact.nickName || ![self.contact.nickName isEqualToString:textField.text])
+    {
+        //no need to update our db here, this will be done automatically on incoming roster push that gets initiated by our roster set with the new name
+        [self.xmppAccount updateRosterItem:self.contact.contactJid withName:textField.text];
+        
+        self.saveHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        self.saveHUD.label.text = NSLocalizedString(@"Saving changes to server", @"");
+        self.saveHUD.mode = MBProgressHUDModeIndeterminate;
+        self.saveHUD.removeFromSuperViewOnHide = YES;
     }
     
     return YES;

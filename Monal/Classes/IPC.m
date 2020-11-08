@@ -73,7 +73,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
     [self sendMessage:name withData:data to:destination withResponseHandler:nil];
 }
 
--(void) sendMessage:(NSString*) name withData:(NSData* _Nullable) data to:(NSString*) destination withResponseHandler:(IPC_response_handler_t) responseHandler
+-(void) sendMessage:(NSString*) name withData:(NSData* _Nullable) data to:(NSString*) destination withResponseHandler:(IPC_response_handler_t _Nullable) responseHandler
 {
     NSNumber* id = [self writeIpcMessage:name withData:data andResponseId:[NSNumber numberWithInt:0] to:destination];
     //save response handler for later execution (if one is specified)

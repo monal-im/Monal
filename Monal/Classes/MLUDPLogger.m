@@ -150,6 +150,21 @@
     addr.sin_port           = htons([[[HelperTools defaultsDB] stringForKey:@"udpLoggerPort"] integerValue]);
     addr.sin_addr.s_addr    = inet_addr([[[HelperTools defaultsDB] stringForKey:@"udpLoggerHostname"] UTF8String]);
     
+    if(!CFSocketIsValid(_cfsocketout))
+    {
+        CFSocketInvalidate(_cfsocketout);       //just to make sure
+        //release old socket object and create new one
+        CFRelease(_cfsocketout);
+        _cfsocketout = CFSocketCreate(
+            kCFAllocatorDefault,
+            PF_INET,
+            SOCK_DGRAM,
+            IPPROTO_UDP,
+            kCFSocketNoCallBack,
+            NULL,
+            NULL
+        );
+    }
     //send log via udp
     CFSocketError error = CFSocketSendData(_cfsocketout, (__bridge CFDataRef)[NSData dataWithBytes:(const UInt8*)&addr length:sizeof(addr)], (__bridge CFDataRef)data, 0);
     if(error)

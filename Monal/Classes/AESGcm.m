@@ -18,10 +18,11 @@
 
 +(MLEncryptedPayload*) encrypt:(NSData*) body keySize:(int) keySize
 {
-    uint8_t randomBytes[keySize];
-    if(SecRandomCopyBytes(kSecRandomDefault, keySize, randomBytes)!=0)
+    NSData* gcmKey = [self genKey:keySize];
+    if(!gcmKey)
+    {
         return nil;
-    NSData* gcmKey = [[NSData alloc] initWithBytes:randomBytes length:keySize];
+    }
     return [self encrypt:body withKey:gcmKey];
 }
 
@@ -29,7 +30,7 @@
 {
     if(@available(iOS 13.0, *))
     {
-        MLCrypto *crypto = [[MLCrypto alloc] init];
+        MLCrypto* crypto = [[MLCrypto alloc] init];
         EncryptedPayload* payload = [crypto encryptGCMWithKey:gcmKey decryptedContent:body];
         NSMutableData* combinedKey = [NSMutableData dataWithData:gcmKey];
         [combinedKey appendData:payload.tag];
@@ -43,10 +44,7 @@
         unsigned char outbuf[body.length];
         unsigned char tag[16];
         
-        //genreate iv
-        unsigned char iv[12];
-        RAND_bytes(iv, sizeof(iv));
-        NSData* gcmiv = [[NSData alloc] initWithBytes:iv length:12];
+        NSData* gcmiv = [self genIV];
         
         NSMutableData *encryptedMessage;
         
@@ -82,9 +80,37 @@
         EVP_CIPHER_CTX_free(ctx);
         return [[MLEncryptedPayload alloc] initWithBody:encryptedMessage key:combinedKey iv:gcmiv authTag:[NSData dataWithBytes:tag length:16]];
 #else
+        assert(false);
         return nil;
 #endif
     }
+}
+
++(NSData*) genIV
+{
+    if(@available(iOS 13.0, *)) {
+        MLCrypto* crypto = [[MLCrypto alloc] init];
+        return [crypto genIV];
+    } else {
+#if !TARGET_OS_MACCATALYST
+        //generate iv
+        unsigned char iv[12];
+        RAND_bytes(iv, sizeof(iv));
+        NSData* gcmiv = [[NSData alloc] initWithBytes:iv length:12];
+        return gcmiv;
+#else
+        assert(false);
+        return nil;
+#endif
+    }
+}
+
++(NSData*) genKey:(int) keySize
+{
+    uint8_t randomBytes[keySize];
+    if(SecRandomCopyBytes(kSecRandomDefault, keySize, randomBytes) != 0)
+        return nil;
+    return [[NSData alloc] initWithBytes:randomBytes length:keySize];
 }
 
 + (NSData *) decrypt:(NSData *)body withKey:(NSData *) key andIv:(NSData *)iv withAuth:( NSData * _Nullable )  auth {
@@ -146,6 +172,7 @@
         EVP_CIPHER_CTX_free(ctx);
         return  decdata;
 #else
+        assert(false);
         return nil;
 #endif
     }

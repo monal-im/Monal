@@ -7,43 +7,37 @@
 //
 
 #import "XMPPPresence.h"
-
 #import "HelperTools.h"
 
 @implementation XMPPPresence
 
 -(id) init
 {
-    self=[super init];
-    self.element=@"presence";
-    [self.attributes setObject:[[NSUUID UUID] UUIDString] forKey:@"id"];
+    self = [super init];
+    self.element = @"presence";
+    [self setXMLNS:@"jabber:client"];
+    self.attributes[@"id"] = [[NSUUID UUID] UUIDString];
     return self;
 }
 
 -(id) initWithHash:(NSString*) version
 {
-    self=[super init];
-    self.element=@"presence";
-    self.versionHash=version;
-    
-    MLXMLNode* c =[[MLXMLNode alloc] init];
-    c.element=@"c";
-    [c.attributes setObject:@"http://jabber.org/protocol/caps" forKey:kXMLNS];
-    [c.attributes setObject:@"http://monal.im/" forKey:@"node"];
-    [c.attributes setObject:@"sha-1" forKey:@"hash"];
-    [c.attributes setObject:self.versionHash forKey:@"ver"];
-    [self.children addObject:c];
-    
+    self = [self init];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"c" andNamespace:@"http://jabber.org/protocol/caps" withAttributes:@{
+        @"node": @"http://monal.im/",
+        @"hash": @"sha-1",
+        @"ver": version
+    } andChildren:@[] andData:nil]];
     return self;
 }
 
 #pragma mark own state
 -(void) setShow:(NSString*) showVal
 {
-    MLXMLNode* show =[[MLXMLNode alloc] init];
-    show.element=@"show";
+    MLXMLNode* show = [[MLXMLNode alloc] init];
+    show.element = @"show";
     show.data=showVal;
-    [self.children addObject:show];
+    [self addChild:show];
 }
 
 -(void) setAway
@@ -58,17 +52,17 @@
 
 -(void) setStatus:(NSString*) status
 {
-    MLXMLNode* statusNode =[[MLXMLNode alloc] init];
-    statusNode.element=@"status";
-    statusNode.data=status;
-    [self.children addObject:statusNode];
+    MLXMLNode* statusNode = [[MLXMLNode alloc] init];
+    statusNode.element = @"status";
+    statusNode.data = status;
+    [self addChild:statusNode];
 }
 
 -(void) setLastInteraction:(NSDate*) date
 {
     MLXMLNode* idle = [[MLXMLNode alloc] initWithElement:@"idle" andNamespace:@"urn:xmpp:idle:1"];
     [idle.attributes setValue:[HelperTools generateDateTimeString:date] forKey:@"since"];
-    [self.children addObject:idle];
+    [self addChild:idle];
 }
 
 #pragma mark MUC 
@@ -84,17 +78,17 @@
     MLXMLNode* historyNode =[[MLXMLNode alloc] init];
     historyNode.element=@"history";
     [historyNode.attributes setObject:@"0" forKey:@"maxstanzas"];
-    [xNode.children addObject:historyNode];
+    [xNode addChild:historyNode];
     
     if(password)
     {
     MLXMLNode* passwordNode =[[MLXMLNode alloc] init];
     passwordNode.element=@"password";
     passwordNode.data=password;
-    [xNode.children addObject:passwordNode];
+    [xNode addChild:passwordNode];
     }
 
-    [self.children addObject:xNode];
+    [self addChild:xNode];
     
 }
 

@@ -41,7 +41,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
-    self.navigationItem.title=NSLocalizedString(@"Contacts",@"");
+    self.navigationItem.title=NSLocalizedString(@"Contacts", @"");
     
     self.contactsTable=self.tableView;
     self.contactsTable.delegate=self;
@@ -63,11 +63,11 @@
     self.searchController =[[UISearchController alloc] initWithSearchResultsController:nil];
     
     self.searchController.searchResultsUpdater = self;
-    self.searchController.delegate=self;
+    self.searchController.delegate = self;
     self.searchController.obscuresBackgroundDuringPresentation = NO;
     self.definesPresentationContext = YES;
     
-    self.navigationItem.searchController= self.searchController;
+    self.navigationItem.searchController = self.searchController;
     
     self.tableView.emptyDataSetSource = self;
     self.tableView.emptyDataSetDelegate = self;
@@ -93,7 +93,7 @@
     self.lastSelectedContact=nil;
     [self refreshDisplay];
     
-    if(self.contacts.count+self.offlineContacts.count==0)
+    if(self.contacts.count+self.offlineContacts.count == 0)
     {
         [self reloadTable];
     }
@@ -115,31 +115,27 @@
 
 -(void) showCallRequest:(NSNotification *) notification
 {
-    NSDictionary *dic = notification.object;
+    NSDictionary* dic = notification.object;
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *contactName=[dic objectForKey:@"user"];
-        NSString *userName=[dic objectForKey:kUsername];
-        
-        
-        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Incoming Call",@"") message:[NSString stringWithFormat:NSLocalizedString(@"Incoming audio call to %@ from %@ ",@""),userName,  contactName] preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Accept",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        NSString* contactName = [dic objectForKey:@"user"];
+        NSString* userName = [dic objectForKey:kUsername];
+
+        UIAlertController* messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Incoming Call", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Incoming audio call to %@ from %@ ", @""),userName,  contactName] preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Accept", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
             
             [self performSegueWithIdentifier:@"showCall" sender:dic];
             
             [[MLXMPPManager sharedInstance] handleCall:dic withResponse:YES];
         }];
-        
-        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Decline",@"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Decline" , @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             [[MLXMPPManager sharedInstance] handleCall:dic withResponse:NO];
         }];
         [messageAlert addAction:closeAction];
         [messageAlert addAction:acceptAction];
-        
+
         [self.tabBarController presentViewController:messageAlert animated:YES completion:nil];
-        
     });
-    
 }
 
 #pragma mark - message signals
@@ -176,7 +172,7 @@
            [self reloadTable];
         });
     }
-    if(self.searchResults.count==0)
+    if(self.searchResults.count == 0)
     {
         dispatch_async(dispatch_get_main_queue(), ^{
           [self reloadTable];
@@ -190,58 +186,51 @@
 {
    if([segue.identifier isEqualToString:@"showDetails"])
     {
-        UINavigationController *nav = segue.destinationViewController;
+        UINavigationController* nav = segue.destinationViewController;
         ContactDetails* details = (ContactDetails *)nav.topViewController;
-        details.contact= sender;
+        details.contact = sender;
     }
     else if([segue.identifier isEqualToString:@"showGroups"])
        {
            MLGroupChatTableViewController* groups = (MLGroupChatTableViewController *)segue.destinationViewController;
            groups.selectGroup = ^(MLContact *selectedContact) {
-              
                if(self.selectContact) self.selectContact(selectedContact);
                [self close:nil];
            };
-           
        }
-
 }
-
-
 
 #pragma mark - Search Controller
 
 - (void)didDismissSearchController:(UISearchController *)searchController;
 {
-    self.searchResults=nil;
-  [self reloadTable];
+    self.searchResults = nil;
+    [self reloadTable];
 }
 
 
 - (void)updateSearchResultsForSearchController:(UISearchController *)searchController;
 {
-    if(searchController.searchBar.text.length>0) {
-        
-        NSString *term = [searchController.searchBar.text  copy];
+    if(searchController.searchBar.text.length > 0) {
+        NSString* term = [searchController.searchBar.text copy];
         self.searchResults = [[DataLayer sharedInstance] searchContactsWithString:term];
-        
     } else  {
-        self.searchResults=nil;
+        self.searchResults = nil;
     }
-  [self reloadTable];
+    [self reloadTable];
 }
 
 
 #pragma mark - tableview datasource
 -(NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    NSString* toReturn=nil;
+    NSString* toReturn = nil;
     switch (section) {
         case konlineSection:
-            toReturn= NSLocalizedString(@"Recently Seen", "");
+            toReturn = NSLocalizedString(@"Recently Seen", @"");
             break;
         case kofflineSection:
-            toReturn= NSLocalizedString(@"Away", "");
+            toReturn = NSLocalizedString(@"Away", @"");
             break;
         default:
             break;
@@ -252,14 +241,14 @@
 
 -(NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewRowAction *delete = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:NSLocalizedString(@"Delete",@"") handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+    UITableViewRowAction *delete = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:NSLocalizedString(@"Delete", @"") handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
         [self deleteRowAtIndexPath:indexPath];
     }];
-    UITableViewRowAction *mute;
-    MLContactCell *cell = (MLContactCell *)[tableView cellForRowAtIndexPath:indexPath];
+    UITableViewRowAction* mute;
+    MLContactCell* cell = (MLContactCell *)[tableView cellForRowAtIndexPath:indexPath];
     if(cell.muteBadge.hidden)
     {
-        mute = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:NSLocalizedString(@"Mute",@"") handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+        mute = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:NSLocalizedString(@"Mute", @"") handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
             [self muteContactAtIndexPath:indexPath];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
@@ -367,17 +356,17 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    MLContact* row =nil;
-    if(self.searchResults.count>0) {
+    MLContact* row = nil;
+    if(self.searchResults.count > 0) {
         row = [self.searchResults objectAtIndex:indexPath.row];
     }
     else
     {
-        if(indexPath.section==konlineSection)
+        if(indexPath.section == konlineSection)
         {
             row = [self.contacts objectAtIndex:indexPath.row];
         }
-        else if(indexPath.section==kofflineSection)
+        else if(indexPath.section == kofflineSection)
         {
             row = [self.offlineContacts objectAtIndex:indexPath.row];
         }
@@ -386,15 +375,15 @@
         }
     }
     
-    MLContactCell* cell =[tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
+    MLContactCell* cell = [tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
     if(!cell)
     {
-        cell =[[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
+        cell = [[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
     }
     
-    cell.count=0;
-    cell.userImage.image=nil;
-    cell.statusText.text=@"";
+    cell.count = 0;
+    cell.userImage.image = nil;
+    cell.statusText.text = @"";
     
     [cell showDisplayName:row.contactDisplayName];
     
@@ -409,34 +398,33 @@
         [cell showStatusText:row.groupSubject];
     }
     
-    if(tableView ==self.view) {
-        if(indexPath.section==konlineSection)
+    if(tableView == self.view) {
+        if(indexPath.section == konlineSection)
         {
-            NSString* stateString=[row.state stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] ;
+            NSString* stateString = [row.state stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] ;
             
             if(([stateString isEqualToString:@"away"]) ||
                ([stateString isEqualToString:@"dnd"])||
                ([stateString isEqualToString:@"xa"])
                )
             {
-                cell.status=kStatusAway;
+                cell.status = kStatusAway;
             }
             else if([row.state isEqualToString:@"(null)"] ||
                     [row.state isEqualToString:@""])
                 cell.status=kStatusOnline;
         }
-        else  if(indexPath.section==kofflineSection) {
+        else  if(indexPath.section == kofflineSection) {
             cell.status=kStatusOffline;
         }}
     else {
-        
-        if(row.isOnline==YES)
+        if(row.isOnline == YES)
         {
-            cell.status=kStatusOnline;
+            cell.status = kStatusOnline;
         }
         else
         {
-            cell.status=kStatusOffline;
+            cell.status = kStatusOffline;
         }
     }
     
@@ -498,10 +486,10 @@
 -(void) deleteRowAtIndexPath:(NSIndexPath *) indexPath
 {
     MLContact* contact;
-    if ((indexPath.section==1) && (indexPath.row<=[self.contacts count]) ) {
+    if ((indexPath.section == 1) && (indexPath.row<=[self.contacts count]) ) {
         contact=[self.contacts objectAtIndex:indexPath.row];
     }
-    else if((indexPath.section==2) && (indexPath.row<=[self.offlineContacts count]) ) {
+    else if((indexPath.section == 2) && (indexPath.row<=[self.offlineContacts count]) ) {
         contact=[self.offlineContacts objectAtIndex:indexPath.row];
     }
     else {
@@ -509,23 +497,23 @@
         return;
     }
     
-    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?",@""), contact.fullName];
-    NSString* detailString =NSLocalizedString(@"They will no longer see when you are online. They may not be able to access your encryption keys.",@"");
+    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", @""), contact.contactJid];
+    NSString* detailString = NSLocalizedString(@"They will no longer see when you are online. They may not be able to access your encryption keys.", @"");
     
     BOOL isMUC=contact.isGroup;
     if(isMUC)
     {
-        messageString =NSLocalizedString(@"Leave this converstion?",@"");
+        messageString =NSLocalizedString(@"Leave this converstion?", @"");
         detailString=nil;
     }
     
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:messageString
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:messageString
                                                                    message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [alert dismissViewControllerAnimated:YES completion:nil];
     }]];
     
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes",@"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         if(isMUC) {
             [[MLXMPPManager sharedInstance] leaveRoom:contact.contactJid withNick:contact.accountNickInGroup forAccountId:contact.accountId ];
         }
@@ -533,9 +521,9 @@
             [[MLXMPPManager sharedInstance] removeContact:contact];
         }
         
-        if(self.searchResults.count==0) {
+        if(self.searchResults.count == 0) {
             [self.contactsTable beginUpdates];
-            if ((indexPath.section==1) && (indexPath.row<=[self.contacts count]) ) {
+            if ((indexPath.section == 1) && (indexPath.row <= [self.contacts count]) ) {
                 [self.contacts removeObjectAtIndex:indexPath.row];
             }
             else if((indexPath.section==2) && (indexPath.row<=[self.offlineContacts count]) ) {
@@ -622,7 +610,7 @@
 
 - (NSAttributedString *)titleForEmptyDataSet:(UIScrollView *)scrollView
 {
-    NSString *text = NSLocalizedString(@"You need friends for this ride",@"");
+    NSString *text = NSLocalizedString(@"You need friends for this ride", @"");
     
     NSDictionary *attributes = @{NSFontAttributeName: [UIFont boldSystemFontOfSize:18.0f],
                                  NSForegroundColorAttributeName: [UIColor darkGrayColor]};
@@ -632,7 +620,7 @@
 
 - (NSAttributedString *)descriptionForEmptyDataSet:(UIScrollView *)scrollView
 {
-    NSString *text = NSLocalizedString(@"Add new contacts with the + button above. Your friends will pop up here when they can talk",@"");
+    NSString *text = NSLocalizedString(@"Add new contacts with the + button above. Your friends will pop up here when they can talk", @"");
     
     NSMutableParagraphStyle *paragraph = [NSMutableParagraphStyle new];
     paragraph.lineBreakMode = NSLineBreakByWordWrapping;

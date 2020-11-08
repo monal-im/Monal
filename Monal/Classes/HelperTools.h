@@ -16,7 +16,8 @@ void logException(NSException* exception);
 @interface HelperTools : NSObject
 
 +(void) configureFileProtectionFor:(NSString*) file;
-+(NSString*) sha256HmacForKey: (NSString*) key andData: (NSString*) data;
++(NSDictionary*) splitJid:(NSString*) jid;
++(void) postSendingErrorNotification;
 +(BOOL) isInBackground;
 +(void) dispatchSyncReentrant:(monal_void_block_t) block onQueue:(dispatch_queue_t) queue;
 +(void) activityLog;
@@ -25,14 +26,16 @@ void logException(NSException* exception);
 +(BOOL) isAppExtension;
 +(NSString*) generateStringOfFeatureSet:(NSSet*) features;
 +(NSSet*) getOwnFeatureSet;
-+(NSString*) getOwnCapsHash;
 +(NSString*) getEntityCapsHashForIdentities:(NSArray*) identities andFeatures:(NSSet*) features;
 +(NSString* _Nullable) formatLastInteraction:(NSDate*) lastInteraction;
 +(NSDate*) parseDateTimeString:(NSString*) datetime;
 +(NSString*) generateDateTimeString:(NSDate*) datetime;
 +(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler;
-+(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t) cancelHandler;
++(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler;
 +(NSString*) encodeRandomResource;
++(NSData* _Nullable) sha1:(NSData* _Nullable) data;
++(NSData* _Nullable) sha256:(NSData* _Nullable) data;
++(NSData* _Nullable) sha256HmacForKey:(NSString* _Nullable) key andData:(NSString* _Nullable) data;
 +(NSString*) encodeBase64WithString:(NSString*) strData;
 +(NSString*) encodeBase64WithData:(NSData*) objData;
 +(NSData*) dataWithBase64EncodedString:(NSString*) string;

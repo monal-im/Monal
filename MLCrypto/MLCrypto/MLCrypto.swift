@@ -46,6 +46,15 @@ public class MLCrypto: NSObject {
         }
     }
     
+    // generate 12 byte nonce
+    public func genIV() -> Data?
+    {
+        if #available(iOS 13.0, *) {
+            return Data(AES.GCM.Nonce())
+        } else {
+            return nil;
+        }
+    }
     
     public func decryptGCM (key: Data, encryptedContent:Data) -> Data?
     {

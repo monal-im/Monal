@@ -72,6 +72,7 @@ void logException(NSException* exception)
 
 +(void) postSendingErrorNotification
 {
+    DDLogWarn(@"Posting syncError notification...");
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     content.title = NSLocalizedString(@"Could not synchronize", @"");
     content.body = NSLocalizedString(@"Please open the app to retry", @"");

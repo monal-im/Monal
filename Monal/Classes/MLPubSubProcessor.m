@@ -22,7 +22,7 @@
 
 @implementation MLPubSubProcessor
 
-$$handler(avatarHandler, $ID(xmpp*, account), $ID(NSString*, jid), $ID(NSString*, type), $ID(NSDictionary*, data))
+$$handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
     DDLogDebug(@"Got new avatar metadata from '%@'", jid);
     if([type isEqualToString:@"publish"])
     {
@@ -43,7 +43,7 @@ $$handler(avatarHandler, $ID(xmpp*, account), $ID(NSString*, jid), $ID(NSString*
                     DDLogInfo(@"Avatar hash is the same, we don't need to update our avatar image data");
                     break;
                 }
-                [account.pubsub fetchNode:@"urn:xmpp:avatar:data" from:jid withItemsList:@[avatarHash] andHandler:makeHandler(self, handleAvatarFetchResult)];
+                [account.pubsub fetchNode:@"urn:xmpp:avatar:data" from:jid withItemsList:@[avatarHash] andHandler:$newHandler(self, handleAvatarFetchResult)];
             }
             break;      //we only want to process the first item (this should also be the only item)
         }
@@ -58,7 +58,7 @@ $$handler(avatarHandler, $ID(xmpp*, account), $ID(NSString*, jid), $ID(NSString*
     }
 $$
 
-$$handler(handleAvatarFetchResult, $ID(xmpp*, account), $ID(NSString*, jid), $ID(XMPPIQ*, errorIq), $ID(NSDictionary*, data))
+$$handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data))
     //ignore errors here (e.g. simply don't update the avatar image)
     //(this should never happen if other clients and servers behave properly)
     if(errorIq)
@@ -76,7 +76,7 @@ $$handler(handleAvatarFetchResult, $ID(xmpp*, account), $ID(NSString*, jid), $ID
     }
 $$
 
-$$handler(rosterNameHandler, $ID(xmpp*, account), $ID(NSString*, jid), $ID(NSString*, type), $ID(NSDictionary*, data))
+$$handler(rosterNameHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
     //new/updated nickname
     if([type isEqualToString:@"publish"])
     {
@@ -125,7 +125,7 @@ $$handler(rosterNameHandler, $ID(xmpp*, account), $ID(NSString*, jid), $ID(NSStr
     }
 $$
 
-$$handler(avatarDataPublished, $ID(xmpp*, account), $BOOL(success), $ID(NSString*, imageHash), $ID(NSData*, imageData))
+$$handler(avatarDataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, imageHash), $_ID(NSData*, imageData))
     if(!success)
     {
         DDLogWarn(@"Could not publish avatar image data for hash %@!", imageHash);

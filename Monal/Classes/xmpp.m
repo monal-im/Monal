@@ -177,10 +177,10 @@ NSString *const kXMPPPresence = @"presence";
     self.omemo = [[MLOMEMO alloc] initWithAccount:self];
     
     //we want to get automatic avatar updates (XEP-0084)
-    [self.pubsub registerForNode:@"urn:xmpp:avatar:metadata" withHandler:makeHandler(MLPubSubProcessor, avatarHandler)];
+    [self.pubsub registerForNode:@"urn:xmpp:avatar:metadata" withHandler:$newHandler(MLPubSubProcessor, avatarHandler)];
     
     //we want to get automatic roster name updates (XEP-0172)
-    [self.pubsub registerForNode:@"http://jabber.org/protocol/nick" withHandler:makeHandler(MLPubSubProcessor, rosterNameHandler)];
+    [self.pubsub registerForNode:@"http://jabber.org/protocol/nick" withHandler:$newHandler(MLPubSubProcessor, rosterNameHandler)];
     
     return self;
 }
@@ -746,7 +746,7 @@ NSString *const kXMPPPresence = @"presence";
                 {
                     DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
                     if([_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
-                        [_iqHandlers[iqid] invalidateWithArguments:@{@"account": self}];
+                        $invalidate(_iqHandlers[iqid], $ID(account, self));
                     else if(_iqHandlers[iqid][@"errorHandler"])
                         ((monal_iq_handler_t)_iqHandlers[iqid][@"errorHandler"])(nil);
                 }
@@ -1373,7 +1373,7 @@ NSString *const kXMPPPresence = @"presence";
                         XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
                         [discoInfo setiqTo:presenceNode.from];
                         [discoInfo setDiscoInfoNode];
-                        [self sendIq:discoInfo withHandler:makeHandler(MLIQProcessor, handleEntityCapsDisco)];
+                        [self sendIq:discoInfo withHandler:$newHandler(MLIQProcessor, handleEntityCapsDisco)];
                     }
                 }
 
@@ -1494,7 +1494,7 @@ NSString *const kXMPPPresence = @"presence";
             if(_iqHandlers[[iqNode findFirst:@"/@id"]])
             {
                 if([_iqHandlers[[iqNode findFirst:@"/@id"]] isKindOfClass:[MLHandler class]])
-                    [_iqHandlers[[iqNode findFirst:@"/@id"]] callWithArguments:@{@"account": self, @"iqNode": iqNode}];
+                    $call(_iqHandlers[[iqNode findFirst:@"/@id"]], $ID(account, self), $ID(iqNode));
                 else if([iqNode check:@"/<type=result>"] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"resultHandler"])
                     ((monal_iq_handler_t) _iqHandlers[[iqNode findFirst:@"/@id"]][@"resultHandler"])(iqNode);
                 else if([iqNode check:@"/<type=error>"] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"errorHandler"])
@@ -2163,6 +2163,22 @@ NSString *const kXMPPPresence = @"presence";
     }
 }
 
++(NSDictionary*) invalidateState:(NSDictionary*) dic
+{
+    NSArray* toKeep = @[@"lastHandledInboundStanza", @"lastHandledOutboundStanza", @"lastOutboundStanza", @"unAckedStanzas", @"loggedInOnce", @"lastInteractionDate"];
+    
+    NSMutableDictionary* newState = [[NSMutableDictionary alloc] init];
+    if(dic)
+    {
+        for(NSString* entry in toKeep)
+            newState[entry] = dic[entry];
+        
+        newState[@"stateSavedAt"] = [NSDate date];
+        newState[@"VERSION"] = @(STATE_VERSION);
+    }
+    return newState;
+}
+
 -(void) incrementLastHandledStanza
 {
     @synchronized(_stateLockObject) {
@@ -2196,7 +2212,7 @@ NSString *const kXMPPPresence = @"presence";
     _accountState = kStateBinding;
     XMPPIQ* iqNode =[[XMPPIQ alloc] initWithType:kiqSetType];
     [iqNode setBindWithResource:resource];
-    [self sendIq:iqNode withHandler:makeHandler(MLIQProcessor, handleBind)];
+    [self sendIq:iqNode withHandler:$newHandler(MLIQProcessor, handleBind)];
 }
 
 -(void) queryDisco
@@ -2204,17 +2220,17 @@ NSString *const kXMPPPresence = @"presence";
     XMPPIQ* accountInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [accountInfo setiqTo:self.connectionProperties.identity.jid];
     [accountInfo setDiscoInfoNode];
-    [self sendIq:accountInfo withHandler:makeHandler(MLIQProcessor, handleAccountDiscoInfo)];
+    [self sendIq:accountInfo withHandler:$newHandler(MLIQProcessor, handleAccountDiscoInfo)];
     
     XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoInfo setiqTo:self.connectionProperties.identity.domain];
     [discoInfo setDiscoInfoNode];
-    [self sendIq:discoInfo withHandler:makeHandler(MLIQProcessor, handleServerDiscoInfo)];
+    [self sendIq:discoInfo withHandler:$newHandler(MLIQProcessor, handleServerDiscoInfo)];
     
     XMPPIQ* discoItems = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoItems setiqTo:self.connectionProperties.identity.domain];
     [discoItems setDiscoItemNode];
-    [self sendIq:discoItems withHandler:makeHandler(MLIQProcessor, handleServerDiscoItems)];
+    [self sendIq:discoItems withHandler:$newHandler(MLIQProcessor, handleServerDiscoItems)];
 }
 
 -(void) sendPresence
@@ -2244,7 +2260,7 @@ NSString *const kXMPPPresence = @"presence";
     if(self.connectionProperties.supportsRosterVersion)
         rosterVer = [[DataLayer sharedInstance] getRosterVersionForAccount:self.accountNo];
     [roster setRosterRequest:rosterVer];
-    [self sendIq:roster withHandler:makeHandler(MLIQProcessor, handleRoster)];
+    [self sendIq:roster withHandler:$newHandler(MLIQProcessor, handleRoster)];
 }
 
 -(void) initSession
@@ -2266,7 +2282,7 @@ NSString *const kXMPPPresence = @"presence";
     {
         DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
         if([_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
-            [_iqHandlers[iqid] invalidateWithArguments:@{@"account": self}];
+            $invalidate(_iqHandlers[iqid], $ID(account, self));
         else if(_iqHandlers[iqid][@"errorHandler"])
             ((monal_iq_handler_t)_iqHandlers[iqid][@"errorHandler"])(nil);
     }
@@ -2636,7 +2652,7 @@ NSString *const kXMPPPresence = @"presence";
     XMPPIQ* roster = [[XMPPIQ alloc] initWithType:kiqSetType];
     [roster setUpdateRosterItem:jid withName:name];
     //this delegate will handle errors (result responses don't include any data that could be processed and will be ignored)
-    [self sendIq:roster withHandler:makeHandler(MLIQProcessor, handleRoster)];
+    [self sendIq:roster withHandler:$newHandler(MLIQProcessor, handleRoster)];
 }
 
 #pragma mark - Jingle calls
@@ -3287,7 +3303,7 @@ NSString *const kXMPPPresence = @"presence";
             [self.pubsub publishItem:item onNode:@"urn:xmpp:avatar:data" withConfigOptions:@{
                 @"pubsub#persist_items": @"true",
                 @"pubsub#access_model": @"presence"
-            } andHandler:makeHandlerWithArgs(MLPubSubProcessor, avatarDataPublished, (@{@"imageHash": imageHash, @"imageData": imageData}))];
+            } andHandler:$newHandler(MLPubSubProcessor, avatarDataPublished, $ID(imageHash), $ID(imageData))];
         }
     });
 }

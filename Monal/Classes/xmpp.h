@@ -268,6 +268,8 @@ Decline a call request
 -(void) sendDisplayMarkerForId:(NSString*) messageid to:(NSString*) to;
 -(void) publishAvatar:(UIImage*) image;
 
++(NSDictionary*) invalidateState:(NSDictionary*) dic;
+
 @end
 
 NS_ASSUME_NONNULL_END

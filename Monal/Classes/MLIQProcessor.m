@@ -99,7 +99,7 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[account, message]];
 }
 
-$$handler(handleCatchup, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
+$$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Mam catchup query returned error: %@", [iqNode findFirst:@"error"]);
@@ -112,7 +112,7 @@ $$handler(handleCatchup, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
         //do RSM forward paging
         XMPPIQ* pageQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
         [pageQuery setMAMQueryAfter:[iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]];
-        [account sendIq:pageQuery withHandler:makeHandler(self, handleCatchup)];
+        [account sendIq:pageQuery withHandler:$newHandler(self, handleCatchup)];
     }
     else if([iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"])
     {
@@ -121,7 +121,7 @@ $$handler(handleCatchup, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
     }
 $$
 
-$$handler(handleMamResponseWithLatestId, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
+$$handler(handleMamResponseWithLatestId, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     DDLogVerbose(@"Got latest stanza id to prime database with: %@", [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
     //only do this if we got a valid stanza id (not null)
     //if we did not get one we will get one when receiving the next message in this smacks session
@@ -135,7 +135,7 @@ $$handler(handleMamResponseWithLatestId, $ID(xmpp*, account), $ID(XMPPIQ*, iqNod
     [account mamFinished];
 $$
 
-$$handler(handleCarbonsEnabled, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
+$$handler(handleCarbonsEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"carbon enable iq returned error: %@", [iqNode findFirst:@"error"]);
@@ -144,7 +144,7 @@ $$handler(handleCarbonsEnabled, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
     account.connectionProperties.usingCarbons2 = YES;
 $$
 
-$$handler(handleBind, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
+$$handler(handleBind, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Binding our resource returned an error: %@", [iqNode findFirst:@"error"]);
@@ -188,7 +188,7 @@ $$handler(handleBind, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
 $$
 
 //proxy handler
-$$handler(handleRoster, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
+$$handler(handleRoster, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     [self processRosterWithAccount:account andIqNode:iqNode];
 $$
 
@@ -259,7 +259,7 @@ $$
 }
 
 //features advertised on our own jid/account
-$$handler(handleAccountDiscoInfo, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
+$$handler(handleAccountDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Disco info query to our account returned an error: %@", [iqNode findFirst:@"error"]);
@@ -315,19 +315,19 @@ $$handler(handleAccountDiscoInfo, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
         {
             DDLogInfo(@"Querying mam:2 archive after stanzaid '%@' for catchup", lastStanzaId);
             [mamQuery setMAMQueryAfter:lastStanzaId];
-            [account sendIq:mamQuery withHandler:makeHandler(self, handleCatchup)];
+            [account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup)];
         }
         else
         {
             DDLogInfo(@"Querying mam:2 archive for latest stanzaid to prime database");
             [mamQuery setMAMQueryForLatestId];
-            [account sendIq:mamQuery withHandler:makeHandler(self, handleMamResponseWithLatestId)];
+            [account sendIq:mamQuery withHandler:$newHandler(self, handleMamResponseWithLatestId)];
         }
     }
 $$
 
 //features advertised on our server
-$$handler(handleServerDiscoInfo, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
+$$handler(handleServerDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Disco info query to our server returned an error: %@", [iqNode findFirst:@"error"]);
@@ -346,7 +346,7 @@ $$handler(handleServerDiscoInfo, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
             DDLogInfo(@"enabling carbons");
             XMPPIQ* carbons = [[XMPPIQ alloc] initWithType:kiqSetType];
             [carbons addChild:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:carbons:2"]];
-            [account sendIq:carbons withHandler:makeHandler(self, handleCarbonsEnabled)];
+            [account sendIq:carbons withHandler:$newHandler(self, handleCarbonsEnabled)];
         }
     }
     
@@ -357,7 +357,7 @@ $$handler(handleServerDiscoInfo, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
         account.connectionProperties.supportsBlocking=YES;
 $$
 
-$$handler(handleServiceDiscoInfo, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
+$$handler(handleServiceDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     NSSet* features = [NSSet setWithArray:[iqNode find:@"{http://jabber.org/protocol/disco#info}query/feature@var"]];
     
     if(!account.connectionProperties.supportsHTTPUpload && [features containsObject:@"urn:xmpp:http:upload:0"])
@@ -371,7 +371,7 @@ $$handler(handleServiceDiscoInfo, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
         account.connectionProperties.conferenceServer = iqNode.from;
 $$
 
-$$handler(handleServerDiscoItems, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
+$$handler(handleServerDiscoItems, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     account.connectionProperties.discoveredServices = [[NSMutableArray alloc] init];
     for(NSDictionary* item in [iqNode find:@"{http://jabber.org/protocol/disco#items}query/item@@"])
     {
@@ -381,13 +381,13 @@ $$handler(handleServerDiscoItems, $ID(xmpp*, account), $ID(XMPPIQ*, iqNode))
             XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
             [discoInfo setiqTo:[item objectForKey:@"jid"]];
             [discoInfo setDiscoInfoNode];
-            [account sendIq:discoInfo withHandler:makeHandler(self, handleServiceDiscoInfo)];
+            [account sendIq:discoInfo withHandler:$newHandler(self, handleServiceDiscoInfo)];
         }
     }
 $$
 
 //entity caps of some contact
-$$handler(handleEntityCapsDisco, $ID(XMPPIQ*, iqNode))
+$$handler(handleEntityCapsDisco, $_ID(XMPPIQ*, iqNode))
     NSMutableArray* identities = [[NSMutableArray alloc] init];
     for(MLXMLNode* identity in [iqNode find:@"{http://jabber.org/protocol/disco#info}query/identity"])
         [identities addObject:[NSString stringWithFormat:@"%@/%@//%@", [identity findFirst:@"/@category"], [identity findFirst:@"/@type"], [identity findFirst:@"/@name"]]];

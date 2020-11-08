@@ -104,7 +104,7 @@ const int KEY_SIZE = 16;
     SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self._signalContext];
 
     // init MLPubSub handler
-    [self.account.pubsub registerForNode:@"eu.siacs.conversations.axolotl.devicelist" withHandler:makeHandler(self, devicelistHandler)];
+    [self.account.pubsub registerForNode:@"eu.siacs.conversations.axolotl.devicelist" withHandler:$newHandler(self, devicelistHandler)];
 
     if(self.monalSignalStore.deviceid == 0)
     {
@@ -123,7 +123,7 @@ const int KEY_SIZE = 16;
     }
 }
 
-$$handler(devicelistHandler, $ID(xmpp*, account), $ID(NSString*, node), $ID(NSString*, jid), $ID(NSString*, type), $ID(NSDictionary*, data))
+$$handler(devicelistHandler, $_ID(xmpp*, account), $_ID(NSString*, node), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
     //type will be "publish", "retract", "purge" or "delete", "publish" and "retract" will have the data dictionary filled with id --> data pairs
     //the data for "publish" is the item node with the given id, the data for "retract" is always @YES
     assert([node isEqualToString:@"eu.siacs.conversations.axolotl.devicelist"]);
@@ -179,11 +179,11 @@ $$
     NSString* bundleNode = [NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%@", deviceid];
 
     self.openBundleFetchCnt = [NSNumber numberWithInt:(self.openBundleFetchCnt.intValue + 1)];
-    [self.account.pubsub fetchNode:bundleNode from:jid withItemsList:nil andHandler:makeHandlerWithArgs(self, handleBundleFetchResult, (@{@"rid": deviceid}))];
+    [self.account.pubsub fetchNode:bundleNode from:jid withItemsList:nil andHandler:$newHandler(self, handleBundleFetchResult, $ID(rid, deviceid))];
 }
 
 
-$$handler(handleBundleFetchResult, $ID(xmpp*, account), $ID(NSString*, jid), $ID(XMPPIQ*, errorIq), $ID(NSDictionary*, data), $ID(NSString*, rid))
+$$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data), $_ID(NSString*, rid))
     if(errorIq)
     {
         DDLogError(@"Could not fetch bundle from %@: rid: %@ - %@", jid, rid, errorIq);

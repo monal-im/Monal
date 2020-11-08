@@ -7,12 +7,14 @@
 //
 
 #import "DataLayer.h"
+#import "xmpp.h"
 #import "MLSQLite.h"
 #import "HelperTools.h"
 #import "MLXMLNode.h"
 #import "XMPPPresence.h"
 #import "XMPPMessage.h"
 #import "XMPPIQ.h"
+#import "XMPPDataForm.h"
 
 @interface DataLayer()
 @property (readonly, strong) MLSQLite* db;
@@ -317,7 +319,8 @@ static NSDateFormatter* dbFormatter;
             [MLXMLNode class],
             [XMPPIQ class],
             [XMPPPresence class],
-            [XMPPMessage class]
+            [XMPPMessage class],
+            [XMPPDataForm class],
         ]] fromData:data error:&error];
         if(error)
             @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
@@ -2024,8 +2027,7 @@ static NSDateFormatter* dbFormatter;
         }];
         
         [self updateDBTo:4.91 withBlock:^{
-            //truncate internal account state to create a clean working set
-            [self.db executeNonQuery:@"UPDATE account SET state=NULL;"];
+            //not needed anymore (better handled by 4.97)
         }];
         
         [self updateDBTo:4.92 withBlock:^{
@@ -2052,13 +2054,23 @@ static NSDateFormatter* dbFormatter;
         }];
         
         [self updateDBTo:4.96 withBlock:^{
-            //truncate internal account state to create a clean working set (old serialized handlers can not be called by our new code)
-            [self.db executeNonQuery:@"UPDATE account SET state=NULL;"];
+            //not needed anymore (better handled by 4.97)
+        }];
+        
+        [self updateDBTo:4.97 withBlock:^{
+            [self invalidateAllAccountStates];
         }];
     }];
     
     DDLogInfo(@"Database version check complete");
     return;
+}
+
+-(void) invalidateAllAccountStates
+{
+    DDLogWarn(@"Invalidating state of all accounts...");
+    for(NSDictionary* entry in [self.db executeReader:@"SELECT account_id FROM account;"])
+        [self persistState:[xmpp invalidateState:[self readStateForAccount:entry[@"account_id"]]] forAccount:entry[@"account_id"]];
 }
 
 #pragma mark determine message type

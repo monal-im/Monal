@@ -592,7 +592,7 @@ $$
     NSString* deviceKeyPathPreKey = [NSString stringWithFormat:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>@prekey|bool", self.monalSignalStore.deviceid];
     
     NSData* messageKey = [messageNode findFirst:deviceKeyPath];
-    BOOL devicePreKey = [messageNode findFirst:deviceKeyPathPreKey];
+    BOOL devicePreKey = [[messageNode findFirst:deviceKeyPathPreKey] boolValue];
     
     if(!messageKey && isKeyTransportElement)
     {

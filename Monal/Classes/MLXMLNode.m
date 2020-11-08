@@ -217,7 +217,10 @@ static NSRegularExpression* attributeFilterRegex;
 //the argument "@" for extraction command "@" returns the full attribute dictionary of the XML element (full command: "@@")
 //we also added conversion commands that can be appended to a query string:
 //"|bool" --> convert xml string to bool (XMPP defines "1"/"true" to be true and "0"/"false" to be false)
-//"|num" --> convert xml string to NSNumber
+//"|int" --> convert xml string to NSNumber
+//"|float" --> convert xml string to NSNumber
+//"|datetime" --> convert xml datetime string to NSDate
+//"|base64" --> convert base64 encoded xml string to NSData
 -(NSArray*) find:(NSString* _Nonnull) queryString
 {
     //return our own node if the query string is empty (this makes queries like "/.." possible which will return the parent node

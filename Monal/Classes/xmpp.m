@@ -1525,7 +1525,7 @@ NSString *const kXMPPPresence = @"presence";
                 [self initSM3];
 
                 //save streamID if resume is supported
-                if([parsedStanza findFirst:@"/@resume|bool"])
+                if([[parsedStanza findFirst:@"/@resume|bool"] boolValue])
                     self.streamID = [parsedStanza findFirst:@"/@id"];
                 else
                     self.streamID = nil;
@@ -2557,7 +2557,7 @@ NSString *const kXMPPPresence = @"presence";
             //page through to get more messages (a page possibly contians fewer than 25 messages having a body)
             //but because we query for 50 stanzas we easily could get more than 25 messages having a body, too
             if(
-                ![response findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] &&
+                ![[response findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue] &&
                 [response check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/first#"]
             )
             {

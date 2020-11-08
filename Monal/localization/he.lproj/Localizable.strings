@@ -131,11 +131,11 @@
 "No" = "No";
 "No connected accounts" = "No connected accounts";
 "No Contact Selected" = "No Contact Selected";
-"No Empty Values" = "No Empty Values";
+"No Empty Values" = "אין ערכים ריקים";
 "No GPS location received" = "No GPS location received";
 "No groups yet" = "No groups yet";
-"No one is here" = "No one is here";
-"Nothing to see" = "Nothing to see";
+"No one is here" = "אין כאן אף אחד";
+"Nothing to see" = "אין מה לראות";
 "Notification Changes" = "Notification Changes";
 "Notification Settings" = "Notification Settings";
 "Notifications" = "Notifications";
@@ -300,3 +300,4 @@
 "Os: " = "Os: ";
 "Software Version" = "Software Version";
 "Version: " = "Version: ";
+"Jabber, Openfire, Prosody etc. " = "Jabber,‏ Prosody,‏ ejabberd וכו׳.   ";

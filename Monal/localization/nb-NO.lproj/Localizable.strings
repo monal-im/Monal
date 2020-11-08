@@ -300,3 +300,5 @@
 "Os: " = "Os: ";
 "Software Version" = "Software Version";
 "Version: " = "Version: ";
+"Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old experience back." = "Merknader har endret seg i iOS 13. Du vil få beskjed om nye meldinger, men ikke hvem avsenderen er. Funksjonaliteten er midlertidig, i påvente av at den gamle opplevelsen kan etableres igjen i Moanal.";
+"Jabber, Openfire, Prosody etc. " = "Jabber, Prosody, ejabberd osv.   ";

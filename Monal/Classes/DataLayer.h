@@ -30,13 +30,13 @@ extern NSString* const kRosterName;
 
 extern NSString* const kUsername;
 
-extern NSString* const kMessageType;
-extern NSString* const kMessageTypeGeo;
-extern NSString* const kMessageTypeImage;
-extern NSString* const kMessageTypeMessageDraft;
 extern NSString* const kMessageTypeStatus;
+extern NSString* const kMessageTypeMessageDraft;
 extern NSString* const kMessageTypeText;
+extern NSString* const kMessageTypeGeo;
 extern NSString* const kMessageTypeUrl;
+extern NSString* const kMessageTypeFiletransfer;
+extern NSString* const kMessageTypeImage;
 
 +(DataLayer*) sharedInstance;
 -(void) version;
@@ -121,8 +121,6 @@ extern NSString* const kMessageTypeUrl;
 -(BOOL) updateMucSubject:(NSString *) subject forAccount:(NSString *) accountNo andRoom:(NSString *) room;
 -(NSString*) mucSubjectforAccount:(NSString *) accountNo andRoom:(NSString *) room;
 
--(void) setMessageId:(NSString*) messageid stanzaId:(NSString *) stanzaId;
-
 /**
  Calls with YES if contact  has already been added to the database for this account
  */
@@ -157,12 +155,12 @@ extern NSString* const kMessageTypeUrl;
 /**
  returns messages with the provided local id number
  */
--(MLMessage*) messageForHistoryID:(NSInteger) historyID;
+-(NSArray*) messagesForHistoryIDs:(NSArray*) historyIDs;
 
 /*
  adds a specified message to the database
  */
--(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted backwards:(BOOL) backwards displayMarkerWanted:(BOOL) displayMarkerWanted withCompletion: (void (^)(BOOL, NSString*, NSNumber*))completion;
+-(NSNumber*) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted backwards:(BOOL) backwards displayMarkerWanted:(BOOL) displayMarkerWanted;
 
 /*
  Marks a message as sent. When the server acked it
@@ -184,6 +182,10 @@ extern NSString* const kMessageTypeUrl;
  */
 -(void) setMessageId:(NSString *) messageid previewText:(NSString *) text andPreviewImage:(NSString *) image;
 
+-(void) setMessageId:(NSString*) messageid stanzaId:(NSString *) stanzaId;
+-(void) setMessageHistoryId:(NSNumber*) historyId filetransferMimeType:(NSString*) mimeType filetransferSize:(NSNumber*) size;
+-(void) setMessageHistoryId:(NSNumber*) historyId messageType:(NSString*) messageType;
+
 -(void) clearMessages:(NSString *) accountNo;
 -(void) deleteMessageHistory:(NSNumber *) messageNo;
 
@@ -195,7 +197,7 @@ extern NSString* const kMessageTypeUrl;
 
 
 -(NSArray *) allMessagesForContact:(NSString* ) buddy forAccount:(NSString *) accountNo;
--(NSMutableArray*) lastMessageForContact:(NSString *) contact forAccount:(NSString *) accountNo;
+-(MLMessage*) lastMessageForContact:(NSString *) contact forAccount:(NSString *) accountNo;
 -(NSString*) lastStanzaIdForAccount:(NSString*) accountNo;
 -(void) setLastStanzaId:(NSString*) lastStanzaId forAccount:(NSString*) accountNo;
 
@@ -216,7 +218,7 @@ extern NSString* const kMessageTypeUrl;
 -(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo;
 -(NSArray*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSString*) accountNo tillStanzaId:(NSString* _Nullable) stanzaId wasOutgoing:(BOOL) outgoing;
 
--(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId encrypted:(BOOL) encrypted withCompletion:(void (^)(BOOL, NSString*, NSNumber*)) completion;
+-(NSNumber*) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType;
 
 /**
 retrieves the actual_from of the the last message from hisroty id
@@ -238,12 +240,6 @@ retrieves the actual_from of the the last message from hisroty id
 -(NSNumber*) countUnreadMessages;
 //set all unread messages to read
 -(void) setAllMessagesAsRead;
-
-/**
- checks HTTP  head on URL to determine the message type
- */
--(NSString*) messageTypeForMessage:(NSString *) messageString withKeepThread:(BOOL) keepThread;
-
 
 -(void) muteJid:(NSString *) jid;
 -(void) unMuteJid:(NSString *) jid;

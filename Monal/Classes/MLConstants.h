@@ -59,15 +59,16 @@ typedef enum NotificationPrivacySettingOption {
 #define kMonalHistoryMessagesNotice @"kMonalHistoryMessagesNotice"
 #define kMLMessageSentToContact @"kMLMessageSentToContact"
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"
-#define kXMPPError @"kXMPPError"
-#define kScheduleBackgroundFetchingTask @"kScheduleBackgroundFetchingTask"
-#define kMonalUpdateUnread @"kMonalUpdateUnread"
+#define kMonalMessageFiletransferUpdateNotice @"kMonalMessageFiletransferUpdateNotice"
 
 #define kMonalLastInteractionUpdatedNotice @"kMonalLastInteractionUpdatedNotice"
 #define kMonalMessageReceivedNotice @"kMonalMessageReceivedNotice"
 #define kMonalMessageDisplayedNotice @"kMonalMessageDisplayedNotice"
 #define kMonalMessageErrorNotice @"kMonalMessageErrorNotice"
 #define kMonalReceivedMucInviteNotice @"kMonalReceivedMucInviteNotice"
+#define kXMPPError @"kXMPPError"
+#define kScheduleBackgroundFetchingTask @"kScheduleBackgroundFetchingTask"
+#define kMonalUpdateUnread @"kMonalUpdateUnread"
 
 #define kMLHasConnectedNotice @"kMLHasConnectedNotice"
 #define kMonalFinishedCatchup @"kMonalFinishedCatchup"
@@ -92,6 +93,7 @@ typedef enum NotificationPrivacySettingOption {
 
 // max count of char's in a single message (both: sending and receiving)
 #define kMonalChatMaxAllowedTextLen 2048
+
 #if TARGET_OS_MACCATALYST
 #define kMonalChatFetchedMsgCnt 75
 #else

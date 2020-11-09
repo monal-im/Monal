@@ -2549,7 +2549,8 @@ NSString *const kContact=@"contact";
         //insert messages having a body into the db and check if they are alread in there
         for(MLMessage* msg in [self getOrderedMamPageFor:[response findFirst:@"{urn:xmpp:mam:2}fin@queryid"]])
             if(msg.messageText)
-                [[DataLayer sharedInstance] addMessageFrom:msg.from
+            {
+                NSNumber* historyId = [[DataLayer sharedInstance] addMessageFrom:msg.from
                                                         to:msg.to
                                                 forAccount:self.accountNo
                                                   withBody:msg.messageText
@@ -2563,11 +2564,12 @@ NSString *const kContact=@"contact";
                                                  encrypted:msg.encrypted
                                                  backwards:YES
                                        displayMarkerWanted:NO
-                                            withCompletion:^(BOOL success, NSString* newMessageType, NSNumber* historyId) {
-                    //add successfully added messages to our display list
-                    if(success)
-                        [messageList addObject:msg];
-                }];
+                ];
+                //add successfully added messages to our display list
+                if(historyId)
+                    [messageList addObject:msg];
+            }
+        
         DDLogVerbose(@"collected mam:2 before-pages now contain %lu messages in summary not already in history", (unsigned long)[messageList count]);
         //call completion to display all messages saved in db if we have enough messages or reached end of mam archive
         if([messageList count] >= 25)

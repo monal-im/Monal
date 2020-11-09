@@ -440,11 +440,10 @@ enum activeChatsControllerSections {
         }
     });
     
-    NSMutableArray* messages = [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:row.accountId];
+    MLMessage* messageRow = [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:row.accountId];
     dispatch_async(dispatch_get_main_queue(), ^{
-        if(messages.count > 0)
+        if(messageRow)
         {
-            MLMessage *messageRow = messages[0];
             if([messageRow.messageType isEqualToString:kMessageTypeUrl])
             {
                 [cell showStatusText:NSLocalizedString(@"🔗 A Link", @"")];
@@ -489,13 +488,15 @@ enum activeChatsControllerSections {
             } else  {
                 cell.time.hidden = YES;
             }
-        } else  {
+        }
+        else
+        {
             [cell showStatusText:nil];
             DDLogWarn(NSLocalizedString(@"Active chat but no messages found in history for %@.", @""), row.contactJid);
         }
     });
     [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
-            cell.userImage.image = image;
+        cell.userImage.image = image;
     }];
     [cell setOrb];
     return cell;

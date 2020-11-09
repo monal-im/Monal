@@ -44,6 +44,8 @@ The of the message in the DB , should be int
 @property (nonatomic, copy) NSString *to;
 
 @property (nonatomic, copy) NSString* messageType;
+@property (nonatomic, copy) NSString* filetransferMimeType;
+@property (nonatomic, copy) NSNumber* filetransferSize;
 
 @property (nonatomic, copy) NSString *messageText;
 
@@ -106,6 +108,8 @@ The of the message in the DB , should be int
  Converts a dictonary to a message object Provide a formatter for the format the dates will be in
  */
 +(MLMessage *) messageFromDictionary:(NSDictionary *) dic withDateFormatter:(NSDateFormatter *) formatter;
+
+-(void) updateWithMessage:(MLMessage*) msg;
 
 @end
 

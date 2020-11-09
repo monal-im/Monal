@@ -100,7 +100,8 @@ enum msgSentState {
     msgSent,
     msgErrorAfterSent,
     msgRecevied,
-    msgDisplayed
+    msgDisplayed,
+    msgFiletransferUpdate
 };
 
 -(void) setup
@@ -151,6 +152,7 @@ enum msgSentState {
     
     [nc addObserver:self selector:@selector(handleReceivedMessage:) name:kMonalMessageReceivedNotice object:nil];
     [nc addObserver:self selector:@selector(handleDisplayedMessage:) name:kMonalMessageDisplayedNotice object:nil];
+    [nc addObserver:self selector:@selector(handleFiletransferMessageUpdate:) name:kMonalMessageFiletransferUpdateNotice object:nil];
     [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
     [nc addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
@@ -778,17 +780,16 @@ enum msgSentState {
 }
 
 #pragma mark - textview
--(void) sendMessage:(NSString *) messageText
+-(void) sendMessage:(NSString*) messageText withType:(NSString*) messageType
 {
-    [self sendMessage:messageText andMessageID:nil];
+    [self sendMessage:messageText andMessageID:nil withType:messageType];
 }
 
--(void) sendMessage:(NSString *) messageText andMessageID:(NSString *)messageID
+-(void) sendMessage:(NSString*) messageText andMessageID:(NSString*) messageID withType:(NSString*) messageType
 {
     DDLogVerbose(@"Sending message");
-    NSString *newMessageID =messageID?messageID:[[NSUUID UUID] UUIDString];
+    NSString* newMessageID = messageID ? messageID:[[NSUUID UUID] UUIDString];
     //dont readd it, use the exisitng
-
     NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:self.contact.accountId];
     if(!accountDict)
     {
@@ -798,13 +799,10 @@ enum msgSentState {
 
     if(!messageID)
     {
-        weakify(self);
-        [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID withCompletion:^(BOOL success) {
-            strongify(self);
-            [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:NO messageId:newMessageID
-                                withCompletionHandler:nil];
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
-        }];
+        [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID messageType:messageType];
+        [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:NO messageId:newMessageID
+                            withCompletionHandler:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
     }
     else
     {
@@ -879,7 +877,7 @@ enum msgSentState {
         [self.chatInput setText:@""];
         [self saveMessageDraft];
         // Send trimmed message
-        [self sendMessage:cleanString];
+        [self sendMessage:cleanString withType:kMessageTypeText];
     }
     [self sendChatState:NO];
 }
@@ -950,7 +948,7 @@ enum msgSentState {
     }
     self.gpsHUD.hidden=YES;
     // Send location
-    [self sendMessage:[NSString stringWithFormat:@"geo:%f,%f", gpsLoc.coordinate.latitude, gpsLoc.coordinate.longitude]];
+    [self sendMessage:[NSString stringWithFormat:@"geo:%f,%f", gpsLoc.coordinate.latitude, gpsLoc.coordinate.longitude] withType:kMessageTypeGeo];
 }
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
@@ -1126,7 +1124,7 @@ enum msgSentState {
         }
     }
     
-    [[MLXMPPManager sharedInstance]  httpUploadJpegData:dataToPass toContact:self.contact.contactJid onAccount:self.contact.accountId withCompletionHandler:^(NSString *url, NSError *error) {
+    [[MLXMPPManager sharedInstance] httpUploadJpegData:dataToPass toContact:self.contact.contactJid onAccount:self.contact.accountId withCompletionHandler:^(NSString *url, NSError *error) {
         dispatch_async(dispatch_get_main_queue(), ^{
             self.uploadHUD.hidden = YES;
             
@@ -1145,16 +1143,13 @@ enum msgSentState {
                         urlToPass = urlComponents.string;
                     } else  {
                         DDLogError(@"Could not parse URL for conversion to aesgcm:");
+                        return;
                     }
                 }
                 [[MLImageManager sharedInstance] saveImageData:data forLink:urlToPass];
                 
-                weakify(self);
-                [self addMessageto:self.contact.contactJid withMessage:urlToPass andId:newMessageID withCompletion:^(BOOL success) {
-                    strongify(self);
-                    [[MLXMPPManager sharedInstance] sendMessage:urlToPass toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:YES messageId:newMessageID
-                                          withCompletionHandler:nil];
-                }];
+                [self addMessageto:self.contact.contactJid withMessage:urlToPass andId:newMessageID messageType:kMessageTypeFiletransfer];
+                [[MLXMPPManager sharedInstance] sendMessage:urlToPass toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:YES messageId:newMessageID withCompletionHandler:nil];
             }
             else  {
                 UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"There was an error uploading the file to the server", @"") message:[NSString stringWithFormat:@"%@", error.localizedDescription] preferredStyle:UIAlertControllerStyleAlert];
@@ -1194,64 +1189,59 @@ enum msgSentState {
 
 -(void) reloadTable
 {
-    if(self.messageTable.hasUncommittedUpdates) return;
-    
+    if(self.messageTable.hasUncommittedUpdates)
+        return;
     [self.messageTable reloadData];
 }
 
-//always messages going out
--(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId withCompletion:(void (^)(BOOL success))completion
+//only for messages going out
+-(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId messageType:(NSString*) messageType
 {
-    if(!self.jid || !message)  {
-        DDLogError(@" not ready to send messages");
+    if(!self.jid || !message)
+    {
+        DDLogError(@"not ready to send messages");
         return;
     }
-    [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:self.contact.accountId withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat withCompletion:^(BOOL result, NSString* messageType, NSNumber* messageDBId) {
-        DDLogVerbose(@"added message");
-        
-        if(result)
-        {
-            if(completion)
-                completion(result);
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                MLMessage* messageObj = [[MLMessage alloc] init];
-                messageObj.actualFrom = self.jid;
-                messageObj.from = self.jid;
-                messageObj.timestamp = [NSDate date];
-                messageObj.hasBeenDisplayed = NO;
-                messageObj.hasBeenReceived = NO;
-                messageObj.hasBeenSent = NO;
-                messageObj.messageId = messageId;
-                messageObj.encrypted = self.encryptChat;
-                messageObj.messageType = messageType;
-                messageObj.messageText = message;
-                messageObj.messageDBId = messageDBId;
-
-                [self.messageTable performBatchUpdates:^{
-                    if(!self.messageList) self.messageList = [[NSMutableArray alloc] init];
-                    [self.messageList addObject:messageObj];
-                    NSInteger bottom = [self.messageList count]-1;
-                    if(bottom>=0) {
-                        NSIndexPath* path1 = [NSIndexPath indexPathForRow:bottom inSection:messagesSection];
-                        [self->_messageTable insertRowsAtIndexPaths:@[path1]
-                                                   withRowAnimation:UITableViewRowAnimationNone];
-                    }
-                } completion:^(BOOL finished) {
-                    [self scrollToBottom];
-                }];
-            });
-        }
-        else
-            DDLogVerbose(@"failed to add message");
-    }];
     
-    // make sure its in active
-    if(_firstmsg == YES)
+    NSNumber* messageDBId = [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:self.contact.accountId withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat messageType:messageType];
+    if(messageDBId)
     {
-        [[DataLayer sharedInstance] addActiveBuddies:to forAccount:self.contact.accountId];
-        _firstmsg = NO;
+        DDLogVerbose(@"added message");
+        NSArray* msgList = [[DataLayer sharedInstance] messagesForHistoryIDs:@[messageDBId]];
+        if(![msgList count])
+        {
+            DDLogError(@"Could not find msg for history ID %@!", messageDBId);
+            return;
+        }
+        MLMessage* messageObj = msgList[0];
+        
+        //update message list in ui
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.messageTable performBatchUpdates:^{
+                if(!self.messageList)
+                    self.messageList = [[NSMutableArray alloc] init];
+                [self.messageList addObject:messageObj];
+                NSInteger bottom = [self.messageList count]-1;
+                if(bottom>=0)
+                {
+                    NSIndexPath* path1 = [NSIndexPath indexPathForRow:bottom inSection:messagesSection];
+                    [self->_messageTable insertRowsAtIndexPaths:@[path1]
+                                                withRowAnimation:UITableViewRowAnimationNone];
+                }
+            } completion:^(BOOL finished) {
+                [self scrollToBottom];
+            }];
+        });
+        
+        // make sure its in active chats list
+        if(_firstmsg == YES)
+        {
+            [[DataLayer sharedInstance] addActiveBuddies:to forAccount:self.contact.accountId];
+            _firstmsg = NO;
+        }
     }
+    else
+        DDLogVerbose(@"failed to add message");
 }
 
 -(void) presentMucInvite:(NSNotification *)notification
@@ -1279,10 +1269,9 @@ enum msgSentState {
 {
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
     
-    MLMessage *message = [notification.userInfo objectForKey:@"message"];
-    if(!message) {
+    MLMessage* message = [notification.userInfo objectForKey:@"message"];
+    if(!message)
         DDLogError(@"Notification without message");
-    }
     
     if([message.accountId isEqualToString:self.contact.accountId]
        && ([message.from isEqualToString:self.contact.contactJid]
@@ -1301,14 +1290,7 @@ enum msgSentState {
             //            }
         }
         
-        NSString* messageType = [[DataLayer sharedInstance] messageTypeForMessage: message.messageText withKeepThread:YES];
-            
         dispatch_async(dispatch_get_main_queue(), ^{
-            NSString* finalMessageType = messageType;
-            if([message.messageType isEqualToString:kMessageTypeStatus])
-                finalMessageType = kMessageTypeStatus;
-            message.messageType = finalMessageType;
-            
             if(!self.messageList)
                 self.messageList = [[NSMutableArray alloc] init];
             [self.messageList addObject:message];   //do not insert based on delay timestamp because that would make it possible to fake history entries
@@ -1408,6 +1390,34 @@ enum msgSentState {
     [self updateMsgState:[dic objectForKey:kMessageId] withEvent:msgDisplayed withOptDic:nil];
 }
 
+-(void) handleFiletransferMessageUpdate:(NSNotification*) notification
+{
+    NSDictionary* dic = notification.userInfo;
+    MLMessage* msg = dic[@"message"];
+    
+    NSIndexPath* indexPath;
+    for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
+    {
+        // find msg that should be updated
+        MLMessage* msgInList = [self.messageList objectAtIndex:(msgIdx - 1)];
+        if([msgInList.messageDBId intValue] == [msg.messageDBId intValue])
+        {
+            //update message in our list (this will copy filetransferMimeType and filetransferSize fields)
+            [msgInList updateWithMessage:msg];
+            
+            //TODO JIM: do something on update (maybe this is not needed because handling will be done in filetransferChatCell)
+            
+            // Update table entry
+            indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self->_messageTable beginUpdates];
+                [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                [self->_messageTable endUpdates];
+            });
+            break;
+        }
+    }
+}
 
 -(void) scrollToBottom
 {
@@ -1492,12 +1502,18 @@ enum msgSentState {
 -(void) retry:(id) sender
 {
     NSInteger msgHistoryID = ((UIButton*) sender).tag;
-    MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:msgHistoryID];
+    NSArray* msgArray = [[DataLayer sharedInstance] messagesForHistoryIDs:@[[NSNumber numberWithInteger:msgHistoryID]]];
+    if(![msgArray count])
+    {
+        DDLogError(@"Called retry for non existing message with history id %ld", (long)msgHistoryID);
+        return;
+    }
+    MLMessage* msg = msgArray[0];
     DDLogDebug(@"Called retry for message with history id %ld: %@", (long)msgHistoryID, msg);
 
     UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Retry sending message?", @"") message:[NSString stringWithFormat:NSLocalizedString(@"This message failed to send (%@): %@", @""), msg.errorType, msg.errorReason] preferredStyle:UIAlertControllerStyleActionSheet];
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Retry", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-        [self sendMessage:msg.messageText andMessageID:msg.messageId];
+        [self sendMessage:msg.messageText andMessageID:msg.messageId withType:nil];     //type not needed for messages already in history db
         //[self setMessageId:msg.messageId sent:YES]; // for the UI, db will be set in the notification
     }]];
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Cancel", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {

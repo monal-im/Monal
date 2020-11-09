@@ -38,13 +38,13 @@ NSString *const kRosterName = @"rosterName";
 
 NSString *const kUsername = @"username";
 
-NSString *const kMessageType = @"messageType";
-NSString *const kMessageTypeGeo = @"Geo";
-NSString *const kMessageTypeImage = @"Image";
-NSString *const kMessageTypeMessageDraft = @"MessageDraft";
 NSString *const kMessageTypeStatus = @"Status";
+NSString *const kMessageTypeMessageDraft = @"MessageDraft";
 NSString *const kMessageTypeText = @"Text";
+NSString *const kMessageTypeGeo = @"Geo";
 NSString *const kMessageTypeUrl = @"Url";
+NSString *const kMessageTypeFiletransfer = @"Filetransfer";
+NSString *const kMessageTypeImage = @"Image";
 
 static NSString* dbPath;
 static NSDateFormatter* dbFormatter;
@@ -956,106 +956,95 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark message Commands
 
--(MLMessage*) messageForHistoryID:(NSInteger) historyID
+-(NSArray*) messagesForHistoryIDs:(NSArray*) historyIDs
 {
-    NSString* query = @"SELECT IFNULL(actual_from, message_from) AS af, message_from, message_to, account_id, message, received, displayed, displayMarkerWanted, encrypted, timestamp  AS thetime, message_history_id, sent, messageid, messageType, previewImage, previewText, unread, errorType, errorReason, stanzaid FROM message_history WHERE message_history_id=?;";
-    NSArray* params = @[[NSNumber numberWithInteger:historyID]];
+    NSString* idList = [historyIDs componentsJoinedByString:@","];
+    NSString* query = @"SELECT IFNULL(actual_from, message_from) AS af, message_from, message_to, account_id, message, received, displayed, displayMarkerWanted, encrypted, timestamp  AS thetime, message_history_id, sent, messageid, messageType, previewImage, previewText, unread, errorType, errorReason, stanzaid FROM message_history WHERE message_history_id IN(?);";
+    NSArray* params = @[idList];
 
+    NSMutableArray* retval = [[NSMutableArray alloc] init];
     for(NSDictionary* dic in [self.db executeReader:query andArguments:params])
-        return [MLMessage messageFromDictionary:dic withDateFormatter:dbFormatter];
-    return nil;
+        [retval addObject:[MLMessage messageFromDictionary:dic withDateFormatter:dbFormatter]];
+    return retval;
 }
 
--(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted backwards:(BOOL) backwards displayMarkerWanted:(BOOL) displayMarkerWanted withCompletion: (void (^)(BOOL, NSString*, NSNumber*))completion
+-(NSNumber*) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted backwards:(BOOL) backwards displayMarkerWanted:(BOOL) displayMarkerWanted
 {
     if(!from || !to || !message)
-    {
-        if(completion)
-            completion(NO, nil, nil);
-        return;
-    }
-
-    NSString* typeToUse=messageType;
-    if(!typeToUse) typeToUse=kMessageTypeText; //default to insert
-
-    [self.db beginWriteTransaction];
-    if(![self hasMessageForStanzaId:stanzaid orMessageID:messageid toContact:actualfrom onAccount:accountNo])
-    {
-        //this is always from a contact
-        NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-        [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-        NSDate* sourceDate=[NSDate date];
-        NSDate* destinationDate;
-        if(messageDate)
+        return nil;
+    
+    return [self.db idWriteTransaction:^{
+        if(![self hasMessageForStanzaId:stanzaid orMessageID:messageid toContact:actualfrom onAccount:accountNo])
         {
-            //already GMT no need for conversion
-
-            destinationDate = messageDate;
-            [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-        }
-        else
-        {
-            NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
-            NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
-
-            NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
-            NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
-            NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
-
-            destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
-        }
-        // note: if it isnt the same day we want to show the full  day
-
-        NSString* dateString = [formatter stringFromDate:destinationDate];
-        
-        //do not do this in MUC
-        if(!messageType && [actualfrom isEqualToString:from])
-        {
-            NSString* foundMessageType = [self messageTypeForMessage:message withKeepThread:YES];
-            NSString* query;
-            NSArray* params;
-            if(backwards)
+            //this is always from a contact
+            NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
+            [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+            NSDate* sourceDate = [NSDate date];
+            NSDate* destinationDate;
+            if(messageDate)
             {
-                NSNumber* nextHisoryId = [NSNumber numberWithInt:[(NSNumber*)[self.db executeScalar:@"SELECT MIN(message_history_id) FROM message_history;"] intValue] - 1];
-                query = @"insert into message_history (message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-                params = @[nextHisoryId, accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", foundMessageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@""];
+                //already GMT no need for conversion
+                destinationDate = messageDate;
+                [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
             }
             else
             {
-                //we use autoincrement here instead of MAX(message_history_id) + 1 to be a little bit faster (but at the cost of "duplicated code")
-                query = @"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-                params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", foundMessageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@""];
+                NSTimeZone* sourceTimeZone = [NSTimeZone systemTimeZone];
+                NSTimeZone* destinationTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+
+                NSInteger sourceGMTOffset = [sourceTimeZone secondsFromGMTForDate:sourceDate];
+                NSInteger destinationGMTOffset = [destinationTimeZone secondsFromGMTForDate:sourceDate];
+                NSTimeInterval interval = destinationGMTOffset - sourceGMTOffset;
+
+                destinationDate = [[NSDate alloc] initWithTimeInterval:interval sinceDate:sourceDate];
             }
-            DDLogVerbose(@"%@", query);
-            BOOL success = [self.db executeNonQuery:query andArguments:params];
-            NSNumber* historyId = [self.db lastInsertId];
-            if(success)
+            // note: if it isnt the same day we want to show the full  day
+            NSString* dateString = [formatter stringFromDate:destinationDate];
+            
+            //do not do this in MUC
+            if(!messageType && [actualfrom isEqualToString:from])
+            {
+                NSString* query;
+                NSArray* params;
+                if(backwards)
+                {
+                    NSNumber* nextHisoryId = [NSNumber numberWithInt:[(NSNumber*)[self.db executeScalar:@"SELECT MIN(message_history_id) FROM message_history;"] intValue] - 1];
+                    query = @"insert into message_history (message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                    params = @[nextHisoryId, accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@""];
+                }
+                else
+                {
+                    //we use autoincrement here instead of MAX(message_history_id) + 1 to be a little bit faster (but at the cost of "duplicated code")
+                    query = @"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                    params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@""];
+                }
+                DDLogVerbose(@"%@", query);
+                BOOL success = [self.db executeNonQuery:query andArguments:params];
+                if(!success)
+                    return (NSNumber*)nil;
+                NSNumber* historyId = [self.db lastInsertId];
                 [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
-            [self.db endWriteTransaction];
-            if(completion)
-                completion(success, messageType, historyId);
+                return historyId;
+            }
+            else
+            {
+                NSString* query = @"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                NSArray* params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:sent], messageid ? messageid : @"", messageType, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
+                DDLogVerbose(@"%@", query);
+                BOOL success = [self.db executeNonQuery:query andArguments:params];
+                if(!success)
+                    return (NSNumber*)nil;
+                NSNumber* historyId = [self.db lastInsertId];
+                [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
+                return historyId;
+            }
         }
         else
         {
-            NSString* query = @"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-            NSArray* params = @[accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:sent], messageid?messageid:@"", typeToUse, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
-            DDLogVerbose(@"%@", query);
-            BOOL success = [self.db executeNonQuery:query andArguments:params];
-            NSNumber* historyId = [self.db lastInsertId];
-            if(success)
-                [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
-            [self.db endWriteTransaction];
-            if(completion)
-                completion(success, messageType, historyId);
+            DDLogError(@"Message(%@) %@ with stanzaid %@ already existing, ignoring history update", accountNo, messageid, stanzaid);
+            return (NSNumber*)nil;
         }
-    }
-    else
-    {
-        DDLogError(@"Message(%@) %@ with stanzaid %@ already existing, ignoring history update", accountNo, messageid, stanzaid);
-        [self.db endWriteTransaction];
-        if(completion)
-            completion(NO, nil, nil);
-    }
+    }];
 }
 
 -(BOOL) hasMessageForStanzaId:(NSString*) stanzaId orMessageID:(NSString*) messageId toContact:(NSString*) contact onAccount:(NSString*) accountNo
@@ -1109,7 +1098,7 @@ static NSDateFormatter* dbFormatter;
 
 -(void) setMessageId:(NSString*) messageid received:(BOOL) received
 {
-    NSString* query = @"update message_history set received=?, sent=? where messageid=?";
+    NSString* query = @"UPDATE message_history SET received=?, sent=? WHERE messageid=?;";
     DDLogVerbose(@"setting received confrmed %@", messageid);
     [self.db executeNonQuery:query andArguments:@[[NSNumber numberWithBool:received], [NSNumber numberWithBool:YES], messageid]];
 }
@@ -1117,34 +1106,45 @@ static NSDateFormatter* dbFormatter;
 -(void) setMessageId:(NSString*) messageid errorType:(NSString*) errorType errorReason:(NSString*) errorReason
 {
     //ignore error if the message was already received by *some* client
-    if([self.db executeScalar:@"SELECT messageid FROM message_history WHERE messageid=? AND received" andArguments:@[messageid]])
+    if([self.db executeScalar:@"SELECT messageid FROM message_history WHERE messageid=? AND received;" andArguments:@[messageid]])
     {
         DDLogVerbose(@"ignoring message error for %@ [%@, %@]", messageid, errorType, errorReason);
         return;
     }
-    NSString* query = @"update message_history set errorType=?, errorReason=? where messageid=?";
+    NSString* query = @"UPDATE message_history SET errorType=?, errorReason=? WHERE messageid=?;";
     DDLogVerbose(@"setting message error %@ [%@, %@]", messageid, errorType, errorReason);
     [self.db executeNonQuery:query andArguments:@[errorType, errorReason, messageid]];
 }
 
--(void) setMessageId:(NSString*) messageid messageType:(NSString *) messageType
+-(void) setMessageHistoryId:(NSNumber*) historyId filetransferMimeType:(NSString*) mimeType filetransferSize:(NSNumber*) size
 {
-    NSString* query = @"update message_history set messageType=? where messageid=?";
-    DDLogVerbose(@"setting message type %@", messageid);
-    [self.db executeNonQuery:query andArguments:@[messageType, messageid]];
+    if(!historyId)
+        return;
+    NSString* query = @"UPDATE message_history SET filetransferMimeType=?, filetransferSize=? WHERE message_history_id=?;";
+    DDLogVerbose(@"setting mime type '%@' and size %@ for history id %@", mimeType, size, historyId);
+    [self.db executeNonQuery:query andArguments:@[mimeType ? mimeType : @"application/binary", size, historyId]];
 }
 
--(void) setMessageId:(NSString*) messageid previewText:(NSString *) text andPreviewImage:(NSString *) image
+-(void) setMessageHistoryId:(NSNumber*) historyId messageType:(NSString*) messageType
+{
+    if(!historyId)
+        return;
+    NSString* query = @"UPDATE message_history SET messageType=? WHERE message_history_id=?;";
+    DDLogVerbose(@"setting message type '%@' for history id %@", messageType, historyId);
+    [self.db executeNonQuery:query andArguments:@[messageType, historyId]];
+}
+
+-(void) setMessageId:(NSString*) messageid previewText:(NSString*) text andPreviewImage:(NSString*) image
 {
     if(!messageid) return;
-    NSString* query = @"update message_history set previewText=?,  previewImage=? where messageid=?";
+    NSString* query = @"UPDATE message_history SET previewText=?, previewImage=? WHERE messageid=?;";
     DDLogVerbose(@"setting previews type %@", messageid);
     [self.db executeNonQuery:query  andArguments:@[text?text:@"", image?image:@"", messageid]];
 }
 
--(void) setMessageId:(NSString*) messageid stanzaId:(NSString *) stanzaId
+-(void) setMessageId:(NSString*) messageid stanzaId:(NSString*) stanzaId
 {
-    NSString* query = @"update message_history set stanzaid=? where messageid=?";
+    NSString* query = @"UPDATE message_history SET stanzaid=? WHERE messageid=?;";
     DDLogVerbose(@"setting message stanzaid %@", query);
     [self.db executeNonQuery:query andArguments:@[stanzaId, messageid]];
 }
@@ -1187,30 +1187,13 @@ static NSDateFormatter* dbFormatter;
 
 -(NSArray*) messageHistoryDateForContact:(NSString*) contact forAccount:(NSString*) accountNo forDate:(NSString*) date
 {
-    NSString* query = @"select af, message_from, message_to, message, thetime, sent, message_history_id from (select ifnull(actual_from, message_from) as af, message_from, message_to, message, sent, timestamp  as thetime, message_history_id, previewImage, previewText from message_history where account_id=? and (message_from=? or message_to=?) and date(timestamp)=? order by message_history_id desc) order by message_history_id asc";
-    NSArray* params = @[accountNo, contact, contact, date];
-
-    DDLogVerbose(@"%@", query);
-    NSArray* results = [self.db executeReader:query andArguments:params];
-
-    NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
-    [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSDictionary *dic = (NSDictionary *) obj;
-        [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:dbFormatter]];
+    return [self.db idWriteTransaction:^{
+        NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id=? AND (message_from=? OR message_to=?) AND DATE(timestamp)=? ORDER BY message_history_id ASC;";
+        NSArray* params = @[accountNo, contact, contact, date];
+        DDLogVerbose(@"%@", query);
+        NSArray* results = [self.db executeScalarReader:query andArguments:params];
+        return [self messagesForHistoryIDs:results];
     }];
-
-    if(toReturn!=nil)
-    {
-
-        DDLogVerbose(@"count: %lu",  (unsigned long)[toReturn count]);
-
-        return toReturn; //[toReturn autorelease];
-    }
-    else
-    {
-        DDLogError(@"message history is empty or failed to read");
-        return nil;
-    }
 }
 
 -(NSArray*) allMessagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo
@@ -1287,52 +1270,39 @@ static NSDateFormatter* dbFormatter;
 //message history
 -(NSMutableArray*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo beforeMsgHistoryID:(NSNumber*) msgHistoryID
 {
-    if(!accountNo || !buddy || !msgHistoryID) {
+    if(!accountNo || !buddy || !msgHistoryID)
         return nil;
-    };
-    NSString* query = @"select af, message_from, message_to, account_id, message, thetime, message_history_id, sent, messageid, messageType, received, displayed, displayMarkerWanted, encrypted, previewImage, previewText, unread, errorType, errorReason, stanzaid from (select ifnull(actual_from, message_from) as af, message_from, message_to, account_id, message, received, displayed, displayMarkerWanted, encrypted, timestamp  as thetime, message_history_id, sent,messageid, messageType, previewImage, previewText, unread, errorType, errorReason, stanzaid from message_history where account_id=? and (message_from=? or message_to=?) and message_history_id<? order by message_history_id desc limit ?) order by message_history_id asc";
-    NSNumber* msgLimit = [NSNumber numberWithInt:kMonalChatFetchedMsgCnt];
-    NSArray* params = @[accountNo, buddy, buddy, msgHistoryID, msgLimit];
-    NSArray* result = [self.db executeReader:query andArguments:params];
-    NSMutableArray* toReturn = [[NSMutableArray alloc] initWithCapacity:result.count];
-    [result enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSDictionary* dic = (NSDictionary *) obj;
-        [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:dbFormatter]];
+    return [self.db idWriteTransaction:^{
+        NSString* query = @"SELECT message_history_id FROM (SELECT message_history_id FROM message_history WHERE account_id=? AND (message_from=? OR message_to=?) AND message_history_id<? ORDER BY message_history_id DESC LIMIT ?) ORDER BY message_history_id ASC;";
+        NSNumber* msgLimit = [NSNumber numberWithInt:kMonalChatFetchedMsgCnt];
+        NSArray* params = @[accountNo, buddy, buddy, msgHistoryID, msgLimit];
+        NSArray* results = [self.db executeScalarReader:query andArguments:params];
+        return [self messagesForHistoryIDs:results];
     }];
-
-    if(toReturn!=nil)
-    {
-        DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count]);
-    }
-    else
-    {
-        DDLogError(@"message history is empty or failed to read");
-    }
-    return toReturn;
 }
 
--(NSMutableArray*) lastMessageForContact:(NSString*) contact forAccount:(NSString*) accountNo
+-(MLMessage*) lastMessageForContact:(NSString*) contact forAccount:(NSString*) accountNo
 {
-    if(!accountNo ||! contact) return nil;
-    NSString* query = @"SELECT message, thetime, messageType, message_to, message_from, actual_from AS 'af' FROM (SELECT 1 AS messagePrio, bl.messageDraft AS message, ac.lastMessageTime AS thetime, 'MessageDraft' AS messageType, ? AS message_to, '' AS message_from, '' AS actual_from FROM buddylist AS bl INNER JOIN activechats AS ac WHERE bl.account_id = ac.account_id AND bl.buddy_name = ac.buddy_name AND ac.account_id=? AND ac.buddy_name=? AND messageDraft IS NOT NULL AND messageDraft != '' UNION SELECT 2 AS messagePrio, message, timestamp, messageType, message_to, message_from, actual_from FROM (SELECT message, timestamp, messageType, message_to, message_from, actual_from FROM message_history WHERE account_id=? AND (message_from=? OR message_to=?) ORDER BY message_history_id DESC LIMIT 1) ORDER BY messagePrio ASC LIMIT 1);";
-    NSArray* params = @[contact, accountNo, contact, accountNo, contact, contact];
-
-    NSMutableArray* results = [self.db executeReader:query andArguments:params];
-    NSMutableArray *toReturn =[[NSMutableArray alloc] initWithCapacity:results.count];
-    [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSDictionary *dic = (NSDictionary *) obj;
-        [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:dbFormatter]];
+    if(!accountNo || !contact)
+        return nil;
+    
+    return [self.db idWriteTransaction:^{
+        //return message draft (if any)
+        NSString* query = @"SELECT bl.messageDraft AS message, ac.lastMessageTime AS thetime, 'MessageDraft' AS messageType, ? AS message_to, '' AS message_from, '' AS af, '' AS filetransferMimeType, 0 AS filetransferSize FROM buddylist AS bl INNER JOIN activechats AS ac WHERE bl.account_id = ac.account_id AND bl.buddy_name = ac.buddy_name AND ac.account_id=? AND ac.buddy_name=? AND messageDraft IS NOT NULL AND messageDraft != '';";
+        NSArray* params = @[contact, accountNo, contact];
+        NSArray* results = [self.db executeReader:query andArguments:params];
+        if([results count])
+            return [MLMessage messageFromDictionary:results[0] withDateFormatter:dbFormatter];
+        
+        //return "real" last message
+        NSNumber* historyID = [self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND (message_from=? OR message_to=?) ORDER BY message_history_id DESC LIMIT 1;" andArguments:@[accountNo, contact, contact]];
+        if(!historyID)
+            return (MLMessage*)nil;
+        NSArray* msgList = [self messagesForHistoryIDs:@[historyID]];
+        if([msgList count])
+            return (MLMessage*)msgList[0];
+        return (MLMessage*)nil;
     }];
-
-    if(toReturn != nil)
-    {
-        DDLogVerbose(@" message history count: %lu", (unsigned long)[toReturn count]);
-    }
-    else
-    {
-        DDLogError(@"message history is empty or failed to read");
-    }
-    return toReturn;
 }
 
 -(NSArray*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSString*) accountNo tillStanzaId:(NSString*) stanzaid wasOutgoing:(BOOL) outgoing
@@ -1379,56 +1349,42 @@ static NSDateFormatter* dbFormatter;
         //marking messages as displayed that have not been received (or marking messages that are not markable) would create false UI
         NSArray* messageArray;
         if(outgoing)
-            messageArray = [self.db executeReader:@"SELECT ifnull(actual_from, message_from) as af, * FROM message_history WHERE displayed=0 AND displayMarkerWanted=1 AND received=1 AND account_id=? AND message_to=? AND message_history_id<=? ORDER BY message_history_id ASC;" andArguments:@[accountNo, buddy, historyId]];
+            messageArray = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE displayed=0 AND displayMarkerWanted=1 AND received=1 AND account_id=? AND message_to=? AND message_history_id<=? ORDER BY message_history_id ASC;" andArguments:@[accountNo, buddy, historyId]];
         else
-            messageArray = [self.db executeReader:@"SELECT ifnull(actual_from, message_from) as af, * FROM message_history WHERE unread=1 AND account_id=? AND message_from=? AND message_history_id<=? ORDER BY message_history_id ASC;" andArguments:@[accountNo, buddy, historyId]];
+            messageArray = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE unread=1 AND account_id=? AND message_from=? AND message_history_id<=? ORDER BY message_history_id ASC;" andArguments:@[accountNo, buddy, historyId]];
         
         DDLogVerbose(@"[%@:%@] messageArray=%@", outgoing ? @"OUT" : @"IN", historyId, messageArray);
         
-        //return NSArray of MLMessage objects instead of NSArray of plain NSDictionary objects coming directly from db
-        //use this iteration to mark messages as read/displayed, too
-        NSMutableArray* retval = [[NSMutableArray alloc] init];
-        for(NSDictionary* entry in messageArray)
+        //mark messages as read/displayed
+        for(NSNumber* historyIDEntry in messageArray)
         {
-            [retval addObject:[MLMessage messageFromDictionary:entry withDateFormatter:dbFormatter]];
             if(outgoing)
-                [self.db executeNonQuery:@"UPDATE message_history SET displayed=1 WHERE message_history_id=? AND received=1;" andArguments:@[entry[@"message_history_id"]]];
+                [self.db executeNonQuery:@"UPDATE message_history SET displayed=1 WHERE message_history_id=? AND received=1;" andArguments:@[historyIDEntry]];
             else
-                [self.db executeNonQuery:@"UPDATE message_history SET unread=0 WHERE message_history_id=?;" andArguments:@[entry[@"message_history_id"]]];
+                [self.db executeNonQuery:@"UPDATE message_history SET unread=0 WHERE message_history_id=?;" andArguments:@[historyIDEntry]];
         }
         
-        return (NSArray*)retval;
+        //return NSArray of all updated MLMessages
+        return [self messagesForHistoryIDs:messageArray];
     }];
 }
 
--(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId encrypted:(BOOL) encrypted withCompletion:(void (^)(BOOL, NSString*, NSNumber*)) completion
+-(NSNumber*) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType
 {
     //Message_history going out, from is always the local user. always read and not sent
-
-    NSString *cleanedActualFrom = actualfrom;
-
-    if([actualfrom isEqualToString:@"(null)"])
-    {
-        //handle null dictionary string
-        cleanedActualFrom = from;
-    }
-
-    NSString* messageType = [self messageTypeForMessage:message withKeepThread:YES];
-
     NSArray* parts = [[[NSDate date] description] componentsSeparatedByString:@" "];
     NSString* dateTime = [NSString stringWithFormat:@"%@ %@", [parts objectAtIndex:0], [parts objectAtIndex:1]];
-    NSString* query = @"insert into message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, displayMarkerWanted) values (?,?,?,?,?,?,?,?,?,?,?,?);";
-    NSArray* params = @[accountNo, from, to, dateTime, message, cleanedActualFrom, [NSNumber numberWithBool:NO], [NSNumber numberWithBool:NO], messageId, messageType, [NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:YES]];
+    NSString* query = @"INSERT INTO message_history (account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, displayMarkerWanted) VALUES(?,?,?,?,?,?,?,?,?,?,?,?);";
+    NSArray* params = @[accountNo, from, to, dateTime, message, actualfrom, [NSNumber numberWithBool:NO], [NSNumber numberWithBool:NO], messageId, messageType, [NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:YES]];
     
-    [self.db voidWriteTransaction:^{
+    return [self.db idWriteTransaction:^{
         DDLogVerbose(@"%@", query);
         BOOL result = [self.db executeNonQuery:query andArguments:params];
+        if(!result)
+            return (NSNumber*)nil;
         NSNumber* historyId = [self.db lastInsertId];
-        if(result)
-            [self updateActiveBuddy:to setTime:dateTime forAccount:accountNo];
-        //include this completion handler in our db transaction to include the smacks state update in the same transaction as the our history update
-        if(completion)
-            completion(result, messageType, historyId);
+        [self updateActiveBuddy:to setTime:dateTime forAccount:accountNo];
+        return historyId;
     }];
 }
 
@@ -1633,6 +1589,13 @@ static NSDateFormatter* dbFormatter;
         [self.db executeNonQuery:@"UPDATE dbversion SET dbversion=?;" andArguments:@[[NSNumber numberWithDouble:version]]];
         DDLogDebug(@"Upgrade to %@ success", [NSNumber numberWithDouble:version]);
     }
+}
+
+-(void) invalidateAllAccountStates
+{
+    DDLogWarn(@"Invalidating state of all accounts...");
+    for(NSDictionary* entry in [self.db executeReader:@"SELECT account_id FROM account;"])
+        [self persistState:[xmpp invalidateState:[self readStateForAccount:entry[@"account_id"]]] forAccount:entry[@"account_id"]];
 }
 
 -(void) version
@@ -2006,7 +1969,7 @@ static NSDateFormatter* dbFormatter;
         [self updateDBTo:4.97 withBlock:^{
             [self invalidateAllAccountStates];
         }];
-
+        
         [self updateDBTo:4.98 withBlock:^{
             [self.db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN filetransferMimeType VARCHAR(32) DEFAULT 'application/octet-stream';"];
             [self.db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN filetransferSize INTEGER DEFAULT 0;"];
@@ -2032,63 +1995,6 @@ static NSDateFormatter* dbFormatter;
     DDLogInfo(@"Database version check complete");
     return;
 }
-
--(void) invalidateAllAccountStates
-{
-    DDLogWarn(@"Invalidating state of all accounts (but keeping outgoing unacked stanzas)...");
-    for(NSDictionary* entry in [self.db executeReader:@"SELECT account_id FROM account;"])
-        [self persistState:[xmpp invalidateState:[self readStateForAccount:entry[@"account_id"]]] forAccount:entry[@"account_id"]];
-}
-
-#pragma mark determine message type
-
--(NSString*) messageTypeForMessage:(NSString *) messageString withKeepThread:(BOOL) keepThread
-{
-    dispatch_semaphore_t semaphore;
-    __block NSString* messageType = kMessageTypeText;
-    if([messageString rangeOfString:@" "].location != NSNotFound) {
-        return messageType;
-    }
-
-    if ([messageString hasPrefix:@"xmpp:"]) {
-           messageType=kMessageTypeUrl;
-    }
-
-    if ([[HelperTools defaultsDB] boolForKey: @"ShowImages"] &&
-        ([messageString hasPrefix:@"HTTPS://"] || [messageString hasPrefix:@"https://"] || [messageString hasPrefix:@"aesgcm://"])) {
-            NSString *cleaned = [messageString stringByReplacingOccurrencesOfString:@"aesgcm://" withString:@"https://"];
-            NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:cleaned]];
-            request.HTTPMethod = @"HEAD";
-            request.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
-
-            if(keepThread)
-                semaphore = dispatch_semaphore_create(0);
-            NSURLSession *session = [NSURLSession sharedSession];
-            [[session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError* _Nullable error) {
-                NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
-                NSString* contentType = [headers objectForKey:@"Content-Type"];
-                if([contentType hasPrefix:@"image/"])
-                {
-                    messageType = kMessageTypeImage;
-                }
-                else  {
-                    messageType = kMessageTypeUrl;
-                }
-
-                if(keepThread)
-                    dispatch_semaphore_signal(semaphore);
-            }] resume];
-
-            if(keepThread)
-            {
-                dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-            }
-    } else if ([messageString hasPrefix:@"geo:"]) {
-        messageType = kMessageTypeGeo;
-    }
-    return messageType;
-}
-
 
 #pragma mark mute and block
 -(void) muteJid:(NSString*) jid
@@ -2287,56 +2193,29 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark History Message Search (search keyword in message, message_from, actual_from, messageType)
 
--(NSArray*)searchResultOfHistoryMessageWithKeyWords:(NSString*)keyword accountNo:(NSString*) accountNo
+-(NSArray*) searchResultOfHistoryMessageWithKeyWords:(NSString*) keyword accountNo:(NSString*) accountNo
 {
-    if(!keyword || !accountNo) return nil;
-    NSString *likeString = [NSString stringWithFormat:@"%%%@%%", keyword];
-    NSString* query = @"select actual_from as af, message_from, message_to, account_id, message, timestamp  as thetime, message_history_id, sent, messageid, messageType, received, encrypted, previewImage, previewText, unread, errorType, errorReason, stanzaid from message_history where account_id = ? and (message like ? or message_from like ? or actual_from like ? or messageType like ?) order by timestamp";
-    
-    NSArray* params = @[accountNo, likeString, likeString, likeString, likeString];
-    NSArray* result = [self.db executeReader:query andArguments:params];
-    NSMutableArray* toReturn = [[NSMutableArray alloc] initWithCapacity:result.count];
-    for (NSDictionary* dic in result)
-    {
-        [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:dbFormatter]];
-    }
-    
-    if(toReturn!=nil)
-    {
-        DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count]);
-    }
-    else
-    {
-        DDLogError(@"message history is empty or failed to read");
-    }
-    return toReturn;
+    if(!keyword || !accountNo)
+        return nil;
+    return [self.db idWriteTransaction:^{
+        NSString *likeString = [NSString stringWithFormat:@"%%%@%%", keyword];
+        NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id = ? AND (message like ? OR message_from LIKE ? OR actual_from LIKE ? OR messageType LIKE ?) ORDER BY timestamp ASC;";
+        NSArray* params = @[accountNo, likeString, likeString, likeString, likeString];
+        NSArray* results = [self.db executeScalarReader:query andArguments:params];
+        return [self messagesForHistoryIDs:results];
+    }];
 }
 
-#pragma mark History Message Search (search keyword in message, message_from, actual_from, messageType)
-
--(NSArray*)searchResultOfHistoryMessageWithKeyWords:(NSString*)keyword accountNo:(NSString*) accountNo betweenBuddy:(NSString * _Nonnull) accountJid1 andBuddy:(NSString * _Nonnull)accountJid2
+-(NSArray*) searchResultOfHistoryMessageWithKeyWords:(NSString*) keyword accountNo:(NSString*) accountNo betweenBuddy:(NSString* _Nonnull) accountJid1 andBuddy:(NSString* _Nonnull) accountJid2
 {
-    if(!keyword || !accountNo) return nil;
-    NSString *likeString = [NSString stringWithFormat:@"%%%@%%", keyword];
-    NSString* query = @"select actual_from as af, message_from, message_to, account_id, message, timestamp  as thetime0, message_history_id, sent, messageid, messageType, received, encrypted, previewImage, previewText, unread, errorType, errorReason, stanzaid from message_history where account_id = ? and (message like ?) and (((message_from = ?) and (message_to = ?)) or ((message_from = ?) and (message_to = ?)) ) order by timestamp";
-    
-    NSArray* params = @[accountNo, likeString, accountJid1, accountJid2, accountJid2, accountJid1];
-    
-    NSArray* result = [self.db executeReader:query andArguments:params];
-    NSMutableArray* toReturn = [[NSMutableArray alloc] initWithCapacity:result.count];
-    for (NSDictionary* dic in result)
-    {
-        [toReturn addObject:[MLMessage messageFromDictionary:dic withDateFormatter:dbFormatter]];
-    }
-    
-    if(toReturn!=nil)
-    {
-        DDLogVerbose(@" message history count: %lu",  (unsigned long)[toReturn count]);
-    }
-    else
-    {
-        DDLogError(@"message history is empty or failed to read");
-    }
-    return toReturn;
+    if(!keyword || !accountNo)
+        return nil;
+    return [self.db idWriteTransaction:^{
+        NSString *likeString = [NSString stringWithFormat:@"%%%@%%", keyword];
+        NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id=? AND message LIKE ? AND ((message_from=? AND message_to=?) OR (message_from=? AND message_to=?)) ORDER BY timestamp ASC;";
+        NSArray* params = @[accountNo, likeString, accountJid1, accountJid2, accountJid2, accountJid1];
+        NSArray* results = [self.db executeScalarReader:query andArguments:params];
+        return [self messagesForHistoryIDs:results];
+    }];
 }
 @end

@@ -248,6 +248,8 @@
 		541E4CC7254D370200FD7B28 /* MLPubSubProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = 541E4CC6254D370100FD7B28 /* MLPubSubProcessor.m */; };
 		544656BB2534910D006B2953 /* XMPPDataForm.m in Sources */ = {isa = PBXBuildFile; fileRef = 544656BA2534910D006B2953 /* XMPPDataForm.m */; };
 		544656BD25349133006B2953 /* XMPPDataForm.h in Headers */ = {isa = PBXBuildFile; fileRef = 544656BC25349133006B2953 /* XMPPDataForm.h */; };
+		54507CE5255D8C14007092F4 /* MLFiletransfer.m in Sources */ = {isa = PBXBuildFile; fileRef = 54507CE4255D8C14007092F4 /* MLFiletransfer.m */; };
+		54507CE8255D8C47007092F4 /* MLFiletransfer.h in Headers */ = {isa = PBXBuildFile; fileRef = 54507CE7255D8C47007092F4 /* MLFiletransfer.h */; };
 		5455BC3324EB776F0024D80F /* MLUDPLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 5455BC3024EB776B0024D80F /* MLUDPLogger.m */; };
 		5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = 5455BC3224EB776E0024D80F /* MLUDPLogger.h */; };
 		54D2307E24CB0F4600638D65 /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
@@ -834,6 +836,8 @@
 		541E4CC6254D370100FD7B28 /* MLPubSubProcessor.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPubSubProcessor.m; sourceTree = "<group>"; };
 		544656BA2534910D006B2953 /* XMPPDataForm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMPPDataForm.m; sourceTree = "<group>"; };
 		544656BC25349133006B2953 /* XMPPDataForm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPDataForm.h; sourceTree = "<group>"; };
+		54507CE4255D8C14007092F4 /* MLFiletransfer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLFiletransfer.m; sourceTree = "<group>"; };
+		54507CE7255D8C47007092F4 /* MLFiletransfer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLFiletransfer.h; sourceTree = "<group>"; };
 		5455BC3024EB776B0024D80F /* MLUDPLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLUDPLogger.m; sourceTree = "<group>"; };
 		5455BC3224EB776E0024D80F /* MLUDPLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLUDPLogger.h; sourceTree = "<group>"; };
 		54E594BA2523C34900E4172B /* MLPubSub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPubSub.h; sourceTree = "<group>"; };
@@ -1104,6 +1108,8 @@
 				26611016238F08AC0030A4EE /* MLXMPPConnection.m */,
 				3872091F251EDE07001837EB /* MLXEPSlashMeHandler.h */,
 				38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */,
+				54507CE4255D8C14007092F4 /* MLFiletransfer.m */,
+				54507CE7255D8C47007092F4 /* MLFiletransfer.h */,
 			);
 			name = XMPP;
 			sourceTree = "<group>";
@@ -1839,6 +1845,7 @@
 				C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */,
 				54179CC3251CBB2B008F398E /* XMPPStanza.h in Headers */,
 				544656BD25349133006B2953 /* XMPPDataForm.h in Headers */,
+				54507CE8255D8C47007092F4 /* MLFiletransfer.h in Headers */,
 				540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */,
 				541E4CBC254AA08700FD7B28 /* MLSQLite.h in Headers */,
 				C1613B5A2520723D0062C0C2 /* MLBasePaser.h in Headers */,
@@ -2617,6 +2624,7 @@
 				26CC57B423A086CC00ABB92A /* XMPPPresence.m in Sources */,
 				541E4CC0254AA0E700FD7B28 /* MLHandler.m in Sources */,
 				540E13A724CF78900038FDA0 /* MLLogFormatter.m in Sources */,
+				54507CE5255D8C14007092F4 /* MLFiletransfer.m in Sources */,
 				26CC57C923A0892800ABB92A /* MLMessageProcessor.m in Sources */,
 				26CC57D623A08D7100ABB92A /* MLMetaInfo.m in Sources */,
 				C18E757C245E8AE900AE8FB7 /* MLPipe.m in Sources */,

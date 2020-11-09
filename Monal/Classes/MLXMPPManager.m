@@ -481,28 +481,34 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     NSAssert(account, @"Account should not be nil");
     NSAssert(contact, @"Contact should not be nil");
     
+    NSString* messageType = kMessageTypeText;
+    if(isUpload)
+        messageType = kMessageTypeFiletransfer;
+    
     // Save message to history
-    [[DataLayer sharedInstance] addMessageHistoryFrom:account.connectionProperties.identity.jid
-                                                   to:recipient
-                                           forAccount:accountID
-                                          withMessage:message
-                                         actuallyFrom:(isMUC ? contact.accountNickInGroup : account.connectionProperties.identity.jid)
-                                               withId:msgid
-                                            encrypted:encrypted
-                                       withCompletion:^(BOOL successHist, NSString* messageTypeHist, NSNumber* messageDBId) {
-        // Send message
-        if(successHist) {
-            DDLogInfo(@"Message added to history with id %ld, now sending...", (long)[messageDBId intValue]);
-            [self sendMessage:message toContact:recipient fromAccount:accountID isEncrypted:encrypted isMUC:isMUC isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString *messageIdSend) {
-                if(successSend)
-                    completion(successSend, messageIdSend);
-            }];
-            DDLogVerbose(@"Notifying active chats of change for contact %@", contact);
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":contact}];
-        }
-        else
-            DDLogError(@"Could not add message to history!");
-    }];
+    NSNumber* messageDBId = [[DataLayer sharedInstance]
+        addMessageHistoryFrom:account.connectionProperties.identity.jid
+                           to:recipient
+                   forAccount:accountID
+                  withMessage:message
+                 actuallyFrom:(isMUC ? contact.accountNickInGroup : account.connectionProperties.identity.jid)
+                       withId:msgid
+                    encrypted:encrypted
+                  messageType:messageType
+    ];
+    // Send message
+    if(messageDBId)
+    {
+        DDLogInfo(@"Message added to history with id %ld, now sending...", (long)[messageDBId intValue]);
+        [self sendMessage:message toContact:recipient fromAccount:accountID isEncrypted:encrypted isMUC:isMUC isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString *messageIdSend) {
+            if(successSend)
+                completion(successSend, messageIdSend);
+        }];
+        DDLogVerbose(@"Notifying active chats of change for contact %@", contact);
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":contact}];
+    }
+    else
+        DDLogError(@"Could not add message to history!");
 }
 
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC  isUpload:(BOOL) isUpload messageId:(NSString *) messageId withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion

@@ -1318,17 +1318,34 @@ NSString *const kXMPPPresence = @"presence";
 
                         //handle last interaction time (dispatch database update in own background thread)
                         if([presenceNode check:@"{urn:xmpp:idle:1}idle@since"])
+                        {
+                            NSDate* lastInteraction = [[DataLayer sharedInstance] lastInteractionOfJid:presenceNode.fromUser forAccountNo:self.accountNo];
+                            
+                            if([[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] compare:lastInteraction] == NSOrderedDescending)
+                            {
+                                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                                    [[DataLayer sharedInstance] setLastInteraction:[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] forJid:presenceNode.fromUser andAccountNo:self.accountNo];
+
+                                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                                        @"jid": presenceNode.fromUser,
+                                        @"accountNo": self.accountNo,
+                                        @"lastInteraction": [presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"],
+                                        @"isTyping": @NO
+                                    }];
+                                });
+                            }
+                        }
+                        else
+                        {
                             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                                [[DataLayer sharedInstance] setLastInteraction:[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] forJid:presenceNode.fromUser andAccountNo:self.accountNo];
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                                    @"jid": presenceNode.fromUser,
+                                    @"accountNo": self.accountNo,
+                                    @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:0],    //nil cannot directly be saved in NSDictionary
+                                    @"isTyping": @NO
+                                }];
                             });
-                        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
-                                @"jid": presenceNode.fromUser,
-                                @"accountNo": self.accountNo,
-                                @"lastInteraction": [presenceNode check:@"{urn:xmpp:idle:1}idle@since"] ? [presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] : [[NSDate date] initWithTimeIntervalSince1970:0],    //nil cannot directly be saved in NSDictionary
-                                @"isTyping": @NO
-                            }];
-                        });
+                        }
                     }
                     else
                     {

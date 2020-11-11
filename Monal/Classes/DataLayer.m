@@ -2265,7 +2265,7 @@ static NSDateFormatter* dbFormatter;
     NSAssert(jid, @"jid should not be null");
     NSAssert(accountNo != NULL, @"accountNo should not be null");
 
-    NSString* query = @"SELECT lastInteraction from buddylist where account_id=? and buddy_name=?";
+    NSString* query = @"SELECT lastInteraction FROM buddylist WHERE account_id=? AND buddy_name=?;";
     NSArray* params = @[accountNo, jid];
     NSNumber* lastInteractionTime = (NSNumber*)[self.db executeScalar:query andArguments:params];
 
@@ -2284,7 +2284,7 @@ static NSDateFormatter* dbFormatter;
     if(lastInteractionTime)
         timestamp = [NSNumber numberWithInt:lastInteractionTime.timeIntervalSince1970];
 
-    NSString* query = @"UPDATE buddylist SET lastInteraction=? WHERE account_id=? and buddy_name=?";
+    NSString* query = @"UPDATE buddylist SET lastInteraction=? WHERE account_id=? AND buddy_name=?;";
     NSArray* params = @[timestamp, accountNo, jid];
     [self.db executeNonQuery:query andArguments:params];
 }

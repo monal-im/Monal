@@ -1488,7 +1488,7 @@ static NSDateFormatter* dbFormatter;
 -(NSNumber*) countUnreadMessages
 {
     // count # of meaages in message table
-    NSString* query = @"select count(message_history_id) from  message_history where unread=1";
+    NSString* query = @"SELECT COUNT(message_history_id) FROM message_history WHERE unread=1 AND NOT EXISTS(SELECT * FROM muteList WHERE jid=message_history.message_from);";
 
     NSNumber* count = (NSNumber*)[self.db executeScalar:query];
     return count;
@@ -1497,7 +1497,7 @@ static NSDateFormatter* dbFormatter;
 //set all unread messages to read
 -(void) setAllMessagesAsRead
 {
-    NSString* query = @"update message_history set unread=0 where unread=1";
+    NSString* query = @"UPDATE message_history SET unread=0 WHERE unread=1;";
 
     [self.db executeNonQuery:query];
 }
@@ -2128,7 +2128,7 @@ static NSDateFormatter* dbFormatter;
 -(void) muteJid:(NSString*) jid
 {
     if(!jid) return;
-    NSString* query = @"insert into muteList(jid) values(?)";
+    NSString* query = @"INSERT INTO muteList(jid) VALUES(?);";
     NSArray* params = @[jid];
     [self.db executeNonQuery:query andArguments:params];
 }
@@ -2136,7 +2136,7 @@ static NSDateFormatter* dbFormatter;
 -(void) unMuteJid:(NSString*) jid
 {
     if(!jid) return;
-    NSString* query = @"delete from muteList where jid=?";
+    NSString* query = @"DELETE FROM muteList WHERE jid=?;";
     NSArray* params = @[jid];
     [self.db executeNonQuery:query andArguments:params];
 }
@@ -2144,7 +2144,7 @@ static NSDateFormatter* dbFormatter;
 -(BOOL) isMutedJid:(NSString*) jid
 {
     if(!jid) return NO;
-    NSString* query = @"select count(jid) from muteList where jid=?";
+    NSString* query = @"SELECT COUNT(jid) FROM muteList WHERE jid=?;";
     NSArray* params = @[jid];
     NSObject* val = [self.db executeScalar:query andArguments:params];
         NSNumber* count = (NSNumber *) val;

@@ -27,6 +27,9 @@ typedef BOOL (^monal_sqlite_bool_operations_t)(void);
 -(id) executeScalar:(NSString*) query;
 -(id) executeScalar:(NSString*) query andArguments:(NSArray*) args;
 
+-(NSArray*) executeScalarReader:(NSString*) query;
+-(NSArray*) executeScalarReader:(NSString*) query andArguments:(NSArray*) args;
+
 -(NSMutableArray*) executeReader:(NSString*) query;
 -(NSMutableArray*) executeReader:(NSString*) query andArguments:(NSArray*) args;
 

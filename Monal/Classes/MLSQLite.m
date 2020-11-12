@@ -378,6 +378,45 @@ static NSMutableDictionary* currentTransactions;
     return toReturn;
 }
 
+-(NSArray*) executeScalarReader:(NSString*) query
+{
+    return [self executeScalarReader:query andArguments:@[]];
+}
+
+-(NSArray*) executeScalarReader:(NSString*) query andArguments:(NSArray*) args
+{
+    if(!query)
+        return nil;
+    
+    [self testThreadInstanceForQuery:query andArguments:args];
+    
+    NSMutableArray* __block toReturn = [[NSMutableArray alloc] init];
+    sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
+    if(statement != NULL)
+    {
+        int step;
+        while((step=sqlite3_step(statement)) == SQLITE_ROW)
+        {
+            NSMutableDictionary* row = [[NSMutableDictionary alloc] init];
+            NSObject* returnData = [self getColumn:0 ofStatement:statement];
+            //accessing an unset key in NSDictionary will return nil (nil can not be inserted directly into the dictionary)
+            if(returnData)
+                [toReturn addObject:returnData];
+        }
+        sqlite3_finalize(statement);
+        if(step != SQLITE_DONE)
+            [self throwErrorForQuery:query andArguments:args];
+    }
+    else
+    {
+        //if noting else
+        DDLogVerbose(@"returning nil with out OK %@", query);
+        toReturn = nil;
+        [self throwErrorForQuery:query andArguments:args];
+    }
+    return toReturn;
+}
+
 -(NSMutableArray*) executeReader:(NSString*) query
 {
     return [self executeReader:query andArguments:@[]];
@@ -404,7 +443,7 @@ static NSMutableDictionary* currentTransactions;
                 NSString* columnName = [NSString stringWithUTF8String:sqlite3_column_name(statement, counter)];
                 NSObject* returnData = [self getColumn:counter ofStatement:statement];
                 //accessing an unset key in NSDictionary will return nil (nil can not be inserted directly into the dictionary)
-                if(returnData != nil)
+                if(returnData)
                     [row setObject:returnData forKey:columnName];
                 counter++;
             }

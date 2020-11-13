@@ -2061,6 +2061,27 @@ static NSDateFormatter* dbFormatter;
         [self updateDBTo:4.97 withBlock:^{
             [self invalidateAllAccountStates];
         }];
+
+        [self updateDBTo:4.98 withBlock:^{
+            [self.db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN filetransferMimeType VARCHAR(32) DEFAULT 'application/octet-stream';"];
+            [self.db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN filetransferSize INTEGER DEFAULT 0;"];
+        }];
+
+        // remove dupl entries from activechats && budylist
+        [self updateDBTo:4.99 withBlock:^{
+            [self.db executeNonQuery:@"DELETE FROM activechats \
+                WHERE ROWID NOT IN \
+                    (SELECT tmpID FROM \
+                        (SELECT ROWID as tmpID, account_id, buddy_name FROM activechats WHERE \
+                        ROWID IN \
+                            (SELECT ROWID FROM activechats ORDER BY lastMessageTime DESC) \
+                        GROUP BY account_id, buddy_name) \
+             )"];
+            [self.db executeNonQuery:@"DELETE FROM buddylist WHERE ROWID NOT IN \
+                    (SELECT tmpID FROM \
+                        (SELECT ROWID as tmpID, account_id, buddy_name FROM buddylist GROUP BY account_id, buddy_name) \
+             )"];
+        }];
     }];
     
     DDLogInfo(@"Database version check complete");

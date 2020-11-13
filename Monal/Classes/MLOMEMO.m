@@ -18,6 +18,7 @@
 #import "MLPubSub.h"
 #import "DataLayer.h"
 
+// #define DEBUG_OMEMO true
 
 @interface MLOMEMO ()
 
@@ -665,7 +666,7 @@ $$
             {
                 // nothing to do
                 DDLogInfo(@"KeyTransportElement received from device: %@", sid);
-#ifdef DEBUG
+#ifdef DEBUG_OMEMO
                 return [NSString stringWithFormat:@"ALPHA_DEBUG_MESSAGE: KeyTransportElement received from device: %@", sid];
 #else
                 return nil;

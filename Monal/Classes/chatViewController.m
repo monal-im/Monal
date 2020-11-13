@@ -288,7 +288,8 @@ enum msgSentState {
 -(void) showSeachButtonAction
 {
     self.searchController.contact = self.contact;
-    [self presentViewController:self.searchController animated:NO completion:nil];
+    if(!(self.searchController.isViewLoaded && self.searchController.view.window))
+        [self presentViewController:self.searchController animated:NO completion:nil];
 }
 
 -(void) dismissSearchViewControllerAction

@@ -252,7 +252,7 @@
         [[UINavigationBar appearance] setScrollEdgeAppearance:appearance];
         [[UINavigationBar appearance] setStandardAppearance:appearance];
 #if TARGET_OS_MACCATALYST
-        self.window.windowScene.titlebar.titleVisibility=UITitlebarTitleVisibilityHidden;
+        self.window.windowScene.titlebar.titleVisibility = UITitlebarTitleVisibilityHidden;
 #endif
     }
     [[UINavigationBar appearance] setPrefersLargeTitles:YES];
@@ -284,8 +284,31 @@
     //handle IPC messages (this should be done *after* calling connectIfNecessary to make sure any disconnectAll messages are handled properly
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
     
+    //handle catalyst minimize/maximize window
+#if TARGET_OS_MACCATALYST
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowHandling:) name:@"NSWindowDidResignKeyNotification" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowHandling:) name:@"NSWindowDidBecomeKeyNotification" object:nil];
+#endif
+    
     return YES;
 }
+
+#if TARGET_OS_MACCATALYST
+-(void) windowHandling:(NSNotification*) notification
+{
+    if([notification.name isEqualToString:@"NSWindowDidResignKeyNotification"])
+    {
+        DDLogInfo(@"Window lost focus (key window)...");
+        [self updateUnread];
+        [[MLXMPPManager sharedInstance] nowBackgrounded];
+    }
+    else if([notification.name isEqualToString:@"NSWindowDidBecomeKeyNotification"])
+    {
+        DDLogInfo(@"Window got focus (key window)...");
+        [[MLXMPPManager sharedInstance] nowForegrounded];
+    }
+}
+#endif
 
 -(void) incomingIPC:(NSNotification*) notification
 {
@@ -466,7 +489,7 @@
 
 - (void) applicationWillEnterForeground:(UIApplication *)application
 {
-    DDLogVerbose(@"Entering FG");
+    DDLogInfo(@"Entering FG");
     [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
     
     //only proceed with foregrounding if the NotificationServiceExtension is not running
@@ -479,7 +502,7 @@
     //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:self userInfo:nil];
     
-    [[MLXMPPManager sharedInstance] setClientsActive];
+    [[MLXMPPManager sharedInstance] nowForegrounded];
 }
 
 -(void) applicationWillResignActive:(UIApplication *)application
@@ -502,25 +525,25 @@
 {
     UIApplicationState state = [application applicationState];
     if(state == UIApplicationStateInactive)
-        DDLogVerbose(@"Screen lock / incoming call");
+        DDLogInfo(@"Screen lock / incoming call");
     else if(state == UIApplicationStateBackground)
-        DDLogVerbose(@"Entering BG");
+        DDLogInfo(@"Entering BG");
     
     [self updateUnread];
-    [[MLXMPPManager sharedInstance] setClientsInactive];
+    [[MLXMPPManager sharedInstance] nowBackgrounded];
 }
 
 -(void) applicationWillTerminate:(UIApplication *)application
 {
     DDLogWarn(@"|~~| T E R M I N A T I N G |~~|");
     [self updateUnread];
-    DDLogVerbose(@"|~~| 25%% |~~|");
+    DDLogInfo(@"|~~| 25%% |~~|");
     [[HelperTools defaultsDB] synchronize];
-    DDLogVerbose(@"|~~| 50%% |~~|");
-    [[MLXMPPManager sharedInstance] setClientsInactive];
-    DDLogVerbose(@"|~~| 75%% |~~|");
+    DDLogInfo(@"|~~| 50%% |~~|");
+    [[MLXMPPManager sharedInstance] nowBackgrounded];
+    DDLogInfo(@"|~~| 75%% |~~|");
     [[MLXMPPManager sharedInstance] scheduleBackgroundFetchingTask];        //make sure delivery will be attempted, if needed
-    DDLogVerbose(@"|~~| T E R M I N A T E D |~~|");
+    DDLogInfo(@"|~~| T E R M I N A T E D |~~|");
     [DDLog flushLog];
     //give the server some more time to send smacks acks (it doesn't matter if we get killed because of this, we're terminating anyways)
     usleep(1000000);

@@ -9,11 +9,12 @@
 #import <BackgroundTasks/BackgroundTasks.h>
 #import <UserNotifications/UserNotifications.h>
 
+#import "MLConstants.h"
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
 #import "HelperTools.h"
 #import "MonalAppDelegate.h"
-#import "MLConstants.h"
+#import "xmpp.h"
 
 @import Network;
 @import MobileCoreServices;
@@ -164,6 +165,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     _connectedXMPP = [[NSMutableArray alloc] init];
     _bgTask = UIBackgroundTaskInvalid;
     _hasConnectivity = NO;
+    _isBackgrounded = NO;
     
     [self defaultSettings];
 
@@ -201,7 +203,12 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(autoJoinRoom:) name:kMLHasConnectedNotice object:nil];
 
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sendOutbox:) name:kMonalFinishedCatchup object:nil];
+    //this processes the sharesheet outbox only, the handler in the NotificationServiceExtension will do more interesting things
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(catchupFinished:) name:kMonalFinishedCatchup object:nil];
+
+    //process idle state changes
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
+
 
     _path_monitor = nw_path_monitor_create();
     nw_path_monitor_set_queue(_path_monitor, q_background);
@@ -243,12 +250,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     });
     nw_path_monitor_start(_path_monitor);
 
-    //this is only for debugging purposes, the real handler has to be added to the NotificationServiceExtension
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(catchupFinished:) name:kMonalFinishedCatchup object:nil];
-
-    //process idle state changes
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
-
     return self;
 }
 
@@ -269,12 +270,16 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) catchupFinished:(NSNotification*) notification
 {
-    DDLogVerbose(@"### MAM/SMACKS CATCHUP FINISHED ###");
+    xmpp* account = notification.object;
+    DDLogInfo(@"### MAM/SMACKS CATCHUP FINISHED FOR ACCOUNT NO %@ ###", account.accountNo);
+    
+    //send sharesheet outbox
+    [self sendOutboxForAccount:account];
 }
 
 -(void) nowIdle:(NSNotification*) notification
 {
-    DDLogVerbose(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
+    DDLogInfo(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
     [self checkIfBackgroundTaskIsStillNeeded];
 }
 
@@ -290,14 +295,17 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 {
     if([self allAccountsIdle])
     {
+        DDLogInfo(@"### ALL ACCOUNTS IDLE NOW ###");
+        
         //remove syncError notification because all accounts are idle and fully synced now
         [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[@"syncError"]];
         
         if(![HelperTools isAppExtension])
         {
+#if !TARGET_OS_MACCATALYST
             //use a synchronized block to disconnect only once
             @synchronized(self) {
-                DDLogVerbose(@"### NOT EXTENSION --> checking if background is still needed ###");
+                DDLogInfo(@"### NOT EXTENSION --> checking if background is still needed ###");
                 BOOL background = [HelperTools isInBackground];
                 if(background)
                 {
@@ -308,7 +316,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                         BOOL stopped = NO;
                         if(_bgTask != UIBackgroundTaskInvalid)
                         {
-                            DDLogVerbose(@"stopping UIKit _bgTask");
+                            DDLogDebug(@"stopping UIKit _bgTask");
                             [DDLog flushLog];
                             [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
                             _bgTask = UIBackgroundTaskInvalid;
@@ -316,14 +324,14 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                         }
                         if(_bgFetch)
                         {
-                            DDLogVerbose(@"stopping backgroundFetchingTask");
+                            DDLogDebug(@"stopping backgroundFetchingTask");
                             [DDLog flushLog];
                             [_bgFetch setTaskCompletedWithSuccess:YES];
                             _bgFetch = nil;
                             stopped = YES;
                         }
                         if(!stopped)
-                            DDLogVerbose(@"no background tasks running, nothing to stop");
+                            DDLogDebug(@"no background tasks running, nothing to stop");
                         [DDLog flushLog];
                     } onQueue:dispatch_get_main_queue()];
                 }
@@ -341,9 +349,12 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                     }
                 }
             }
+#else
+            DDLogInfo(@"### CATALYST BUILD --> ignoring in MLXMPPManager ###");
+#endif
         }
         else
-            DDLogVerbose(@"### IN EXTENSION --> ignoring in MLXMPPManager ###");
+            DDLogInfo(@"### IN APPEX --> ignoring in MLXMPPManager ###");
     }
 }
 
@@ -470,12 +481,20 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 -(void) incomingPushWithCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
 {
     DDLogInfo(@"got incomingPushWithCompletionHandler");
+    
+#if TARGET_OS_MACCATALYST
+    DDLogError(@"Ignoring incomingPushWithCompletionHandler: we are a catalyst app!");
+    completionHandler(UIBackgroundFetchResultNoData);
+    return;
+#endif
+    
     if(![HelperTools isInBackground])
     {
         DDLogError(@"Ignoring incomingPushWithCompletionHandler: because app is in FG!");
         completionHandler(UIBackgroundFetchResultNoData);
         return;
     }
+    
     // should any accounts reconnect?
     [self pingAllAccounts];
     
@@ -491,10 +510,12 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     };
 }
 
-#pragma mark - client state
+#pragma mark - app state
 
--(void) setClientsInactive
+-(void) nowBackgrounded
 {
+    _isBackgrounded = YES;
+    
     [self addBackgroundTask];
     
     for(xmpp* xmppAccount in [self connectedXMPP])
@@ -502,8 +523,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [self checkIfBackgroundTaskIsStillNeeded];
 }
 
--(void) setClientsActive
+-(void) nowForegrounded
 {
+    _isBackgrounded = NO;
+    
     [self addBackgroundTask];
     
     //*** we don't need to check for a running service extension here because the appdelegate does this already for us ***
@@ -516,6 +539,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [xmppAccount setClientActive];
     }
 }
+
+#pragma mark - Connection related
 
 -(void) pingAllAccounts
 {
@@ -561,8 +586,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     }
     return nil;
 }
-
-#pragma mark - Connection related
 
 -(void) connectAccount:(NSString*) accountNo
 {
@@ -1027,12 +1050,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - share sheet added
 
--(void) sendOutbox: (NSNotification *) notification {
-    xmpp* account = notification.object;
-    [self sendOutboxForAccount:account];
-}
-
-- (void) sendOutboxForAccount:(xmpp*) account
+-(void) sendOutboxForAccount:(xmpp*) account
 {
     NSMutableArray* outbox = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
     NSMutableArray* outboxClean = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];

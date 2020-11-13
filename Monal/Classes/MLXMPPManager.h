@@ -17,7 +17,7 @@
 	dispatch_source_t _pinger;
 }
 
-+ (MLXMPPManager* )sharedInstance;
++(MLXMPPManager*) sharedInstance;
 
 -(BOOL) allAccountsIdle;
 -(void) configureBackgroundFetchingTask;
@@ -162,6 +162,8 @@ Attempts to upload a file to the  HTTP upload service
 @property (nonatomic, strong) NSString *pushNode;
 @property (nonatomic, strong) NSString *pushSecret;
 
+@property (nonatomic, readonly) BOOL isBackgrounded;
+
 /**
  updates unread
  */
@@ -179,19 +181,19 @@ Attempts to upload a file to the  HTTP upload service
 /**
  updtes client state on server as inactive
  */
--(void) setClientsInactive;
+-(void) nowBackgrounded;
 
 /**
  sets client state on server as active
  */
--(void) setClientsActive;
+-(void) nowForegrounded;
 
 -(void) pingAllAccounts;
 
 /**
  fetch entity software version
  */
--(void) getEntitySoftWareVersionForContact:(MLContact *) contact andResource:(NSString*) resource;
+-(void) getEntitySoftWareVersionForContact:(MLContact*) contact andResource:(NSString*) resource;
 /**
  Iterates through set and compares with connected accounts. Removes them. useful for active chat. 
  */

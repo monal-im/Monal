@@ -9,6 +9,7 @@
 #include <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
 #import "HelperTools.h"
+#import "MLXMPPManager.h"
 #import "MLPubSub.h"
 #import "MLUDPLogger.h"
 
@@ -92,12 +93,15 @@ void logException(NSException* exception)
     if([HelperTools isAppExtension])
         inBackground = YES;
     else
+        inBackground = [[MLXMPPManager sharedInstance] isBackgrounded];
+    /*
     {
         [HelperTools dispatchSyncReentrant:^{
             if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                 inBackground = YES;
         } onQueue:dispatch_get_main_queue()];
     }
+    */
     return inBackground;
 }
 

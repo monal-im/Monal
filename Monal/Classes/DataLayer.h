@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface DataLayer : NSObject
 
 extern NSString* const kAccountID;
+extern NSString* const kAccountState;
 extern NSString* const kDomain;
 extern NSString* const kEnabled;
 

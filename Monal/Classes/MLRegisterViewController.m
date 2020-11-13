@@ -10,7 +10,7 @@
 #import "MBProgressHUD.h"
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
-
+#import "xmpp.h"
 #import "MLRegSuccessViewController.h"
 
 @import QuartzCore;

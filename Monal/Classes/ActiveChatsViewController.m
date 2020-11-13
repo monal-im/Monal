@@ -8,6 +8,7 @@
 
 #import "ActiveChatsViewController.h"
 #import "DataLayer.h"
+#import "xmpp.h"
 #import "MLContactCell.h"
 #import "chatViewController.h"
 #import "MonalAppDelegate.h"

@@ -39,7 +39,6 @@ FOUNDATION_EXPORT NSString* const kFileName;
 FOUNDATION_EXPORT NSString* const kContentType;
 FOUNDATION_EXPORT NSString* const kData;
 FOUNDATION_EXPORT NSString* const kContact;
-FOUNDATION_EXPORT NSString* const kCompletion;
 
 @class jingleCall;
 @class MLPubSub;
@@ -100,16 +99,6 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 @property (nonatomic, strong, readonly) MLXMLNode* capsIdentity;
 @property (nonatomic, strong, readonly) NSSet* capsFeatures;
 @property (nonatomic, strong, readonly) NSString* capsHash;
-
-extern NSString *const kMessageId;
-extern NSString *const kSendTimer;
-
-extern NSString *const kXMPPError;
-extern NSString *const kXMPPSuccess;
-extern NSString *const kXMPPPresence;
-
-extern NSString* const kAccountState;
-extern NSString* const kAccountHibernate;
 
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSString*) accountNo;
 

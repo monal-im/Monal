@@ -13,6 +13,7 @@
 #import "MLTextInputCell.h"
 #import "MLAccountPickerViewController.h"
 #import "DataLayer.h"
+#import "xmpp.h"
 
 @implementation addContact
 

@@ -8,7 +8,7 @@
 
 #import "MLSettingCell.h"
 #import "MLXMPPManager.h"
-
+#import "xmpp.h"
 
 @implementation MLSettingCell
 

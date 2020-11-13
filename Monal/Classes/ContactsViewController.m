@@ -17,7 +17,7 @@
 #import "MonalAppDelegate.h"
 #import "UIColor+Theme.h"
 #import "MLGroupChatTableViewController.h"
-
+#import "xmpp.h"
 
 #define konlineSection 1
 #define kofflineSection 2

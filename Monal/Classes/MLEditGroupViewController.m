@@ -14,6 +14,7 @@
 #import "UIColor+Theme.h"
 #import "MLButtonCell.h"
 #import "MLXMPPManager.h"
+#import "xmpp.h"
 #import "MLAccountPickerViewController.h"
 
 @interface MLEditGroupViewController ()

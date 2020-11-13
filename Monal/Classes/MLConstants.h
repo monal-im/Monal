@@ -43,12 +43,11 @@ typedef enum NotificationPrivacySettingOption {
 #define kXMLNS @"xmlns"
 #define kId @"id"
 #define kJid @"jid"
+#define kMessageId @"kMessageId"
 
 #define kRegisterNameSpace @"jabber:iq:register"
 #define kDataNameSpace @"jabber:x:data"
 #define kBobNameSpace @"urn:xmpp:bob"
-#define kStanzasNameSpace @"urn:ietf:params:xml:ns:xmpp-stanzas"
-
 
 //all other constants needed
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
@@ -56,6 +55,7 @@ typedef enum NotificationPrivacySettingOption {
 #define kMonalHistoryMessagesNotice @"kMonalHistoryMessagesNotice"
 #define kMLMessageSentToContact @"kMLMessageSentToContact"
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"
+#define kXMPPError @"kXMPPError"
 
 #define kMonalLastInteractionUpdatedNotice @"kMonalLastInteractionUpdatedNotice"
 #define kMonalMessageReceivedNotice @"kMonalMessageReceivedNotice"

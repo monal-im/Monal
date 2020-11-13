@@ -13,6 +13,7 @@
 #import "MLProcessLock.h"
 #import "MLXMPPManager.h"
 #import "MLNotificationManager.h"
+#import "xmpp.h"
 
 @interface Push : NSObject
 @property (atomic, strong) NSMutableArray* handlerList;

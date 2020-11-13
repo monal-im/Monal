@@ -18,6 +18,7 @@
 #import "ActiveChatsViewController.h"
 #import "IPC.h"
 #import "MLProcessLock.h"
+#import "xmpp.h"
 
 @import NotificationBannerSwift;
 

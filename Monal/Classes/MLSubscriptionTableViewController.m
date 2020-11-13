@@ -9,6 +9,7 @@
 #import "MLSubscriptionTableViewController.h"
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
+#import "xmpp.h"
 
 @interface MLSubscriptionTableViewController ()
 @property (nonatomic, strong) NSMutableArray *requests;

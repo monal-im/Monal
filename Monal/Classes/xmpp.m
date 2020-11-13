@@ -46,24 +46,14 @@
 #define STATE_VERSION 1
 
 
-NSString *const kMessageId=@"MessageID";
-NSString *const kSendTimer=@"SendTimer";
-
 NSString *const kQueueID=@"queueID";
 NSString *const kStanza=@"stanza";
-
 
 NSString *const kFileName=@"fileName";
 NSString *const kContentType=@"contentType";
 NSString *const kData=@"data";
 NSString *const kContact=@"contact";
 
-NSString *const kCompletion=@"completion";
-
-
-NSString *const kXMPPError =@"error";
-NSString *const kXMPPSuccess =@"success";
-NSString *const kXMPPPresence = @"presence";
 
 @interface MLPubSub ()
 -(id) initWithAccount:(xmpp*) account;
@@ -258,7 +248,7 @@ NSString *const kXMPPPresence = @"presence";
     self.statusMessage = [[HelperTools defaultsDB] stringForKey:@"StatusMessage"];
     self.awayState = [[HelperTools defaultsDB] boolForKey:@"Away"];
 
-    self.sendIdleNotifications = [[HelperTools defaultsDB] boolForKey: @"SendLastUserInteraction"];
+    self.sendIdleNotifications = [[HelperTools defaultsDB] boolForKey:@"SendLastUserInteraction"];
 }
 
 -(void) dealloc

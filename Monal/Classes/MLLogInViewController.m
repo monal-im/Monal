@@ -10,11 +10,14 @@
 #import "MBProgressHUD.h"
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
+#import "xmpp.h"
+
 @import SAMKeychain;
 @import QuartzCore;
 @import SafariServices;
 
 @interface MLLogInViewController ()
+
 @property (nonatomic, strong) MBProgressHUD *loginHUD;
 @property (nonatomic, weak) UITextField *activeField;
 @property (nonatomic, strong) NSString *accountno;

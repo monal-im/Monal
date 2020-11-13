@@ -7,7 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "xmpp.h"
+
+@class xmpp;
+@class MLContact;
 
 /**
  A singleton to control all of the active XMPP connections

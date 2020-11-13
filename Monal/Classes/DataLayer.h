@@ -55,7 +55,7 @@ extern NSString* const kMessageTypeUrl;
  */
 -(BOOL) resetContactsForAccount:(NSString*) accountNo;
 
--(NSArray*) searchContactsWithString:(NSString*) search;
+-(NSArray<MLContact*>*) searchContactsWithString:(NSString*) search;
 
 -(NSMutableArray*) onlineContactsSortedBy:(NSString*) sort;
 -(NSArray*) resourcesForContact:(NSString*)contact ;

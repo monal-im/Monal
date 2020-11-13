@@ -454,12 +454,12 @@ static NSDateFormatter* dbFormatter;
 }
 
 
--(NSArray*) searchContactsWithString:(NSString*) search
+-(NSArray<MLContact*>*) searchContactsWithString:(NSString*) search
 {
     NSString* likeString = [NSString stringWithFormat:@"%%%@%%", search];
-    NSString* query = @"SELECT buddy_name FROM buddylist WHERE buddy_name like ? OR full_name like ? OR nick_name like ? ORDER BY full_name, nick_name, buddy_name COLLATE NOCASE ASC;";
+    NSString* query = @"SELECT buddy_name, account_id FROM buddylist WHERE buddy_name LIKE ? OR full_name LIKE ? OR nick_name LIKE ? ORDER BY full_name, nick_name, buddy_name COLLATE NOCASE ASC;";
     NSArray* params = @[likeString, likeString, likeString];
-    NSMutableArray* toReturn = [[NSMutableArray alloc] init];
+    NSMutableArray<MLContact*>* toReturn = [[NSMutableArray alloc] init];
     for(NSDictionary* dic in [self.db executeReader:query andArguments:params])
         [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];
     return toReturn;

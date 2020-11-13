@@ -420,13 +420,12 @@ static NSDateFormatter* dbFormatter;
         ON a.buddy_name = b.buddy_name AND a.account_id = b.account_id \
         WHERE b.buddy_name=? AND b.account_id=?;" andArguments:@[username, accountNo]];
     if(results == nil || [results count] > 1)
-        DDLogWarn(@"DataLayerError unexpected contact count: username: %@, accountNo %@, count %luu, results: %@", username, accountNo, (unsigned long)(results ? [results count] : 0), results);
-        /*@throw [NSException exceptionWithName:@"DataLayerError" reason:@"unexpected contact count" userInfo:@{
+        @throw [NSException exceptionWithName:@"DataLayerError" reason:@"unexpected contact count" userInfo:@{
             @"username": username,
             @"accountNo": accountNo,
             @"count": [NSNumber numberWithInteger:[results count]],
             @"results": results ? results : @"(null)"
-        }];*/
+        }];
     
     //check if we know this contact and return a dummy one if not
     if([results count] == 0)
@@ -2068,7 +2067,7 @@ static NSDateFormatter* dbFormatter;
         }];
 
         // remove dupl entries from activechats && budylist
-        [self updateDBTo:4.99 withBlock:^{
+        [self updateDBTo:4.990 withBlock:^{
             [self.db executeNonQuery:@"DELETE FROM activechats \
                 WHERE ROWID NOT IN \
                     (SELECT tmpID FROM \
@@ -2076,11 +2075,11 @@ static NSDateFormatter* dbFormatter;
                         ROWID IN \
                             (SELECT ROWID FROM activechats ORDER BY lastMessageTime DESC) \
                         GROUP BY account_id, buddy_name) \
-             )"];
+                    )"];
             [self.db executeNonQuery:@"DELETE FROM buddylist WHERE ROWID NOT IN \
                     (SELECT tmpID FROM \
                         (SELECT ROWID as tmpID, account_id, buddy_name FROM buddylist GROUP BY account_id, buddy_name) \
-             )"];
+                    )"];
         }];
     }];
     

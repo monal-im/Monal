@@ -280,19 +280,22 @@
 -(MLContact  *)contactAtIndexPath:(NSIndexPath *) indexPath
 {
     MLContact* contact;
-    if ((indexPath.section==1) && (indexPath.row<=[self.contacts count]) ) {
-        contact=[self.contacts objectAtIndex:indexPath.row];
+    if (indexPath.section == 1 && indexPath.row <= [self.contacts count])
+    {
+        contact = [self.contacts objectAtIndex:indexPath.row];
     }
-    else if((indexPath.section==2) && (indexPath.row<=[self.offlineContacts count]) ) {
-        contact=[self.offlineContacts objectAtIndex:indexPath.row];
+    else if(indexPath.section == 2 && indexPath.row <= [self.offlineContacts count])
+    {
+        contact = [self.offlineContacts objectAtIndex:indexPath.row];
     }
     return contact;
 }
 
 -(void) muteContactAtIndexPath:(NSIndexPath *) indexPath
 {
-    MLContact *contact = [self contactAtIndexPath:indexPath];
-    if(contact){
+    MLContact* contact = [self contactAtIndexPath:indexPath];
+    if(contact)
+    {
         [[DataLayer sharedInstance] muteJid:contact.contactJid];
     }
 }
@@ -300,7 +303,8 @@
 -(void) unMuteContactAtIndexPath:(NSIndexPath *) indexPath
 {
     MLContact *contact = [self contactAtIndexPath:indexPath];
-    if(contact){
+    if(contact)
+    {
         [[DataLayer sharedInstance] unMuteJid:contact.contactJid];
     }
 }
@@ -309,7 +313,8 @@
 -(void) blockContactAtIndexPath:(NSIndexPath *) indexPath
 {
     MLContact *contact = [self contactAtIndexPath:indexPath];
-    if(contact){
+    if(contact)
+    {
         [[DataLayer sharedInstance] blockJid:contact.contactJid];
     }
 }
@@ -317,40 +322,40 @@
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
-    NSInteger toreturn=0;
-    if(self.searchResults.count>0) {
-        toreturn =1;
+    NSInteger toreturn = 0;
+    if(self.searchResults.count > 0) {
+        toreturn = 1;
     }
-    else{
+    else
+    {
         if([[HelperTools defaultsDB] boolForKey:@"OfflineContact"])
-            toreturn =3;
+            toreturn = 3;
         else
-            toreturn =2;
+            toreturn = 2;
     }
     return toreturn;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    NSInteger toReturn=0;
-    if(self.searchResults.count>0) {
+    NSInteger toReturn = 0;
+    if(self.searchResults.count > 0) {
         toReturn=[self.searchResults count];
     }
     //if(tableView ==self.view)
     else {
         switch (section) {
             case konlineSection:
-                toReturn= [self.contacts count];
+                toReturn = [self.contacts count];
                 break;
             case kofflineSection:
-                toReturn=[self.offlineContacts count];
+                toReturn = [self.offlineContacts count];
                 break;
             default:
                 break;
         }
     }
-    
-    
+
     return toReturn;
 }
 

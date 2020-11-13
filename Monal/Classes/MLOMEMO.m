@@ -82,7 +82,7 @@ const int KEY_SIZE = 16;
         self.hasCatchUpDone = [NSNumber numberWithInt:1];
         if(self.deviceListExists == NO) {
             // we need to publish a new devicelist if we did not receive our own list after a new connection
-            [self sendOMEMOBundle];
+            [self createLocalIdentiyKeyPairIfNeeded:[[NSSet<NSNumber*> alloc] init]]; // sends our omemo bundle automatically
             [self sendOMEMODeviceWithForce:YES];
             self.deviceListExists = YES;
         }
@@ -101,17 +101,23 @@ const int KEY_SIZE = 16;
     SignalStorage* signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
     // signal context
     self._signalContext = [[SignalContext alloc] initWithStorage:signalStorage];
-    // signal helper
-    SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self._signalContext];
 
     // init MLPubSub handler
     [self.account.pubsub registerForNode:@"eu.siacs.conversations.axolotl.devicelist" withHandler:$newHandler(self, devicelistHandler)];
+}
 
+-(void) createLocalIdentiyKeyPairIfNeeded:(NSSet<NSNumber*>*) ownDeviceIds
+{
     if(self.monalSignalStore.deviceid == 0)
     {
-        // Generate a new device id
-        // TODO: check if device id is unique
-        self.monalSignalStore.deviceid = [signalHelper generateRegistrationId];
+        // signal helper
+        SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self._signalContext];
+
+        do
+        {
+            // Generate a new device id
+            self.monalSignalStore.deviceid = [signalHelper generateRegistrationId];
+        } while([ownDeviceIds containsObject:[NSNumber numberWithUnsignedInt:self.monalSignalStore.deviceid]]);
         // Create identity key pair
         self.monalSignalStore.identityKeyPair = [signalHelper generateIdentityKeyPair];
         self.monalSignalStore.signedPreKey = [signalHelper generateSignedPreKeyWithIdentity:self.monalSignalStore.identityKeyPair signedPreKeyId:1];
@@ -264,6 +270,7 @@ $$
         if(!source || [source caseInsensitiveCompare:self._senderJid] == NSOrderedSame)
         {
             self.deviceListExists = YES;
+            [self createLocalIdentiyKeyPairIfNeeded:receivedDevices];
             [self sendOMEMODevice:receivedDevices force:NO];
         }
     }

@@ -39,7 +39,6 @@
 "Server" = "Servidor";
 "Server: %@" = "Servidor: %@";
 "Welcome to Monal" = "Bienvenidos a Monal";
-"Jabber, Openfire, Prosody etc.   " = "Jabber, Openfire, Prosody etc.   ";
 "Synchronize your messages on all loggedin devices." = "Sincronice sus mensajes en todos los dispositivos conectados.";
 "(autojoin)" = "(autojoin)";
 "Access message archives on the server." = "Access message archives on the server.";

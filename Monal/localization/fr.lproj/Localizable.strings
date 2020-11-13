@@ -299,7 +299,6 @@
 "Name: " = "Nom : ";
 "Os: " = "Système d'exploitation : ";
 "Software Version" = "Software Version";
-"Jabber, Openfire, Prosody etc. " = "Jabber, Prosody, ejabberd etc.   ";
 "Version: " = "Version: ";
 "Could not synchronize" = "Could not synchronize";
 "Please open the app to retry" = "Please open the app to retry";

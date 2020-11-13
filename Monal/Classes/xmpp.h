@@ -10,23 +10,13 @@
 #import "MLConstants.h"
 
 #import "HelperTools.h"
-#import "MLXMLNode.h"
-
-#import "ParseIq.h"
-#import "ParseMessage.h"
-#import "jingleCall.h"
-#import "MLDNSLookup.h"
-#import "MLSignalStore.h"
-
-#ifndef DISABLE_OMEMO
-#import "SignalProtocolObjC.h"
-#endif
 
 #import "MLMessage.h"
 #import "MLContact.h"
 
 #import "MLXMPPConnection.h"
 
+NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM (NSInteger, xmppState) {
     kStateLoggedOut = -1,
@@ -51,8 +41,20 @@ FOUNDATION_EXPORT NSString* const kData;
 FOUNDATION_EXPORT NSString* const kContact;
 FOUNDATION_EXPORT NSString* const kCompletion;
 
-typedef void (^xmppCompletion)(BOOL success, NSString *message);
+@class jingleCall;
+@class MLPubSub;
+@class MLXMLNode;
+@class XMPPDataForm;
+@class XMPPStanza;
+@class XMPPIQ;
+@class XMPPMessage;
+@class XMPPPresence;
+@class MLOMEMO;
+@class MLMessageProcessor;
+
+typedef void (^xmppCompletion)(BOOL success, NSString* _Nullable message);
 typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFields);
+typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 @interface xmpp : NSObject <NSStreamDelegate>
 
@@ -68,7 +70,6 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, strong) NSString *regPass;
 @property (nonatomic, strong) NSString *regCode;
 @property (nonatomic, strong) NSDictionary *regHidden;
-
 
 @property (nonatomic, strong) jingleCall* call;
 
@@ -88,17 +89,17 @@ typedef void (^xmppDataCompletion)(NSData *captchaImage, NSDictionary *hiddenFie
 @property (nonatomic, strong) NSArray* discoveredServersList;
 @property (nonatomic, strong) NSMutableArray* usableServersList;
 
+@property (nonatomic, strong) MLOMEMO* omemo;
+@property (nonatomic, strong) MLPubSub* pubsub;
+
 @property (nonatomic, strong) NSArray* roomList;
 @property (nonatomic, strong) NSArray* rosterList;
 
 //calculated
-@property (nonatomic, strong, readonly) NSString* versionHash;
 @property (nonatomic, strong) NSDate* connectedTime;
-
-#ifndef DISABLE_OMEMO
-@property (atomic, strong) SignalContext* signalContext;
-@property (atomic, strong) MLSignalStore* monalSignalStore;
-#endif
+@property (nonatomic, strong, readonly) MLXMLNode* capsIdentity;
+@property (nonatomic, strong, readonly) NSSet* capsFeatures;
+@property (nonatomic, strong, readonly) NSString* capsHash;
 
 extern NSString *const kMessageId;
 extern NSString *const kSendTimer;
@@ -110,19 +111,23 @@ extern NSString *const kXMPPPresence;
 extern NSString* const kAccountState;
 extern NSString* const kAccountHibernate;
 
-
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSString*) accountNo;
 
+-(void) unfreezed;
 -(void) connect;
 -(void) disconnect;
 -(void) disconnect:(BOOL) explicitLogout;
 -(void) reconnect;
 -(void) reconnect:(double) wait;
 
+-(void) setPubSubNotificationsForNodes:(NSArray* _Nonnull) nodes persistState:(BOOL) persistState;
+
+-(void) accountStatusChanged;
+
 /**
  send a message to a contact with xmpp id
  */
--(void) sendMessage:(NSString* _Nonnull) message toContact:(NSString* _Nonnull) contact isMUC:(BOOL) isMUC isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString *) messageId ;
+-(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString *) messageId ;
 -(void) sendChatState:(BOOL) isTyping toJid:(NSString*) jid;
 
 /**
@@ -139,26 +144,28 @@ extern NSString* const kAccountHibernate;
 /**
  Adds the stanza to the output Queue
  */
--(void) send:(MLXMLNode* _Nonnull) stanza;
--(void) sendIq:(XMPPIQ* _Nonnull) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler;
--(void) sendIq:(XMPPIQ* _Nonnull) iq withDelegate:(id) delegate andMethod:(SEL) method andAdditionalArguments:(NSArray*) args;
+-(void) send:(MLXMLNode*) stanza;
+-(void) sendIq:(XMPPIQ*) iq withResponseHandler:(monal_iq_handler_t) resultHandler andErrorHandler:(monal_iq_handler_t) errorHandler;
+-(void) sendIq:(XMPPIQ*) iq withHandler:(MLHandler* _Nullable) handler;
 
 /**
  removes a contact from the roster
  */
--(void) removeFromRoster:(NSString* _Nonnull) contact;
+-(void) removeFromRoster:(NSString*) contact;
 
 /**
  adds a new contact to the roster
  */
--(void) addToRoster:(NSString* _Nonnull) contact;
+-(void) addToRoster:(NSString*) contact;
 
 /**
  adds a new contact to the roster
  */
--(void) approveToRoster:(NSString* _Nonnull) contact;
+-(void) approveToRoster:(NSString*) contact;
 
--(void) rejectFromRoster:(NSString* _Nonnull) contact;
+-(void) rejectFromRoster:(NSString*) contact;
+
+-(void) updateRosterItem:(NSString*) jid withName:(NSString*) name;
 
 #pragma mark set connection attributes
 /**
@@ -172,48 +179,36 @@ sets away xmpp call.
 -(void) setAway:(BOOL) away;
 
 /**
- request futher service detail
- */
--(void) getServiceDetails;
-
--(BOOL) isHibernated;
-
-/**
- get list of rooms on conference server
- */
--(void) getConferenceRooms;
-
-/**
  join a room on the conference server
  */
--(void) joinRoom:(NSString* _Nonnull) room withNick:(NSString* _Nullable) nick andPassword:(NSString* _Nullable)password;
+-(void) joinRoom:(NSString*) room withNick:(NSString* _Nullable) nick andPassword:(NSString* _Nullable)password;
 
 /**
  leave specific room. the nick name is the name used in the room.
  it is arbitrary and it may not match any other hame.
  */
--(void) leaveRoom:(NSString* _Nonnull) room withNick:(NSString* _Nullable) nick;
+-(void) leaveRoom:(NSString*) room withNick:(NSString* _Nullable) nick;
 
 #pragma mark Jingle
 /**
  Calls a contact
  */
--(void)call:(MLContact* _Nonnull) contact;
+-(void)call:(MLContact*) contact;
 
 /**
 Hangs up current call with contact
  */
--(void)hangup:(MLContact* _Nonnull) contact;
+-(void)hangup:(MLContact*) contact;
 
 /**
 Decline a call request
  */
--(void)declineCall:(NSDictionary* _Nonnull) contact;
+-(void)declineCall:(NSDictionary*) contact;
 
 /**
  accept call request
  */
--(void)acceptCall:(NSDictionary* _Nonnull) contact;
+-(void)acceptCall:(NSDictionary*) contact;
 
 
 /*
@@ -225,7 +220,6 @@ Decline a call request
  notifies the server client is in foreground
  */
 -(void) setClientInactive;
-
 
 /*
  HTTP upload
@@ -245,44 +239,37 @@ Decline a call request
 -(void) mamFinished;
 
 /**
- query a user's vcard
- */
--(void) getVCard:(NSString* _Nonnull) user;
-
-/**
  query a user's software version
  */
--(void) getEntitySoftWareVersion:(NSString* _Nonnull) user;
+-(void) getEntitySoftWareVersion:(NSString*) user;
 
 /**
  XEP-0191 blocking
  */
--(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) jid;
-
-#ifndef DISABLE_OMEMO
-
--(void) subscribeOMEMODevicesFrom:(NSString* _Nonnull) jid;
-/** OMEMO */
--(void) queryOMEMODevicesFrom:(NSString* _Nonnull) jid;
-#endif
-
-/**
- An intentional disconnect to trigger APNS. does not close the stream.
- */
--(void) disconnectToResumeWithCompletion:(void (^)(void))completion;
-
--(void) setupSignal;
+-(void) setBlocked:(BOOL) blocked forJid:(NSString*) jid;
 
 
 #pragma mark - account management
 
--(void) changePassword:(NSString* _Nonnull) newPass withCompletion:(xmppCompletion _Nullable) completion;
+-(void) changePassword:(NSString*) newPass withCompletion:(xmppCompletion _Nullable) completion;
 
 -(void) requestRegFormWithCompletion:(xmppDataCompletion) completion andErrorCompletion:(xmppCompletion) errorCompletion;
--(void) registerUser:(NSString* _Nonnull) username withPassword:(NSString* _Nonnull) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
+-(void) registerUser:(NSString*) username withPassword:(NSString*) password captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields withCompletion:(xmppCompletion _Nullable) completion;
 
+-(void) publishRosterName:(NSString* _Nullable) rosterName;
 
--(void) addMessageToMamPageArray:(ParseMessage* _Nonnull) messageNode withBody:(NSString* _Nonnull) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString* _Nonnull) messageType;
--(NSArray* _Nullable) getOrderedMamPageFor:(NSString* _Nonnull) mamQueryId;
+#pragma mark - internal stuff for processors
+
+-(void) addMessageToMamPageArray:(XMPPMessage*) messageNode forOuterMessageNode:(XMPPMessage*) outerMessageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType;
+-(NSArray* _Nullable) getOrderedMamPageFor:(NSString*) mamQueryId;
+-(void) bindResource:(NSString*) resource;
+-(void) initSession;
+-(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType andActualFrom:(NSString* _Nullable) actualFrom;
+-(void) sendDisplayMarkerForId:(NSString*) messageid to:(NSString*) to;
+-(void) publishAvatar:(UIImage*) image;
+
++(NSDictionary*) invalidateState:(NSDictionary*) dic;
 
 @end
+
+NS_ASSUME_NONNULL_END

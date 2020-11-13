@@ -19,41 +19,45 @@ NSString* const kMessageHeadlineType=@"headline";
 
 -(id) init
 {
-    self= [super init];
-    self.element=@"message";
+    self = [super init];
+    self.element = @"message";
+    [self setXMLNS:@"jabber:client"];
+    [self setXmppId:[[NSUUID UUID] UUIDString]];        //default value, can be overwritten later on
+    return self;
+}
+
+-(id) initWithXMPPMessage:(XMPPMessage*) msg
+{
+    self = [self initWithElement:msg.element withAttributes:msg.attributes andChildren:msg.children andData:msg.data];
     return self;
 }
 
 -(void) setXmppId:(NSString*) idval
 {
     [self.attributes setObject:idval forKey:@"id"];
+    //add origin id to indicate we are using uuids for our stanza ids
+    if([self check:@"{urn:xmpp:sid:0}origin-id"])       //modify existing origin id
+        ((MLXMLNode*)[self findFirst:@"{urn:xmpp:sid:0}origin-id"]).attributes[@"id"] = idval;
+    else
+        [self addChild:[[MLXMLNode alloc] initWithElement:@"origin-id" andNamespace:@"urn:xmpp:sid:0" withAttributes:@{@"id":idval} andChildren:@[] andData:nil]];
 }
 
--(NSString *) xmppId
+-(NSString*) xmppId
 {
-    return  [self.attributes objectForKey:@"id"];
+    return [self.attributes objectForKey:@"id"];
 }
 
 -(void) setBody:(NSString*) messageBody
 {
-    MLXMLNode* body =[[MLXMLNode alloc] init];
-    body.element=@"body";
-    body.data=messageBody;
-    [self.children addObject:body];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"body" withAttributes:@{} andChildren:@[] andData:messageBody]];
 }
 
 -(void) setOobUrl:(NSString*) link
 {
-    MLXMLNode* oob =[[MLXMLNode alloc] init];
-    oob.element=@"x";
-    [oob.attributes setValue:@"jabber:x:oob" forKey:kXMLNS];
-    MLXMLNode* url =[[MLXMLNode alloc] init];
-    url.element=@"url";
-    url.data=link;
-    [oob.children addObject:url];
-    [self.children addObject:oob];
-    
-    [self setBody:link]; // fallback
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:oob" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"url" withAttributes:@{} andChildren:@[] andData:link]
+    ] andData:nil]];
+    [self setBody:link];    //http filetransfers must have a message body equal to the oob link to be recognized as filetransfer
 }
 
 /**
@@ -61,28 +65,28 @@ NSString* const kMessageHeadlineType=@"headline";
  */
 -(void) setReceipt:(NSString*) messageId
 {
-    MLXMLNode* received =[[MLXMLNode alloc] init];
-    received.element=@"received";
-    [received.attributes setValue:@"urn:xmpp:receipts" forKey:kXMLNS];
-    [received.attributes setValue:messageId forKey:@"id"];
-    [self.children addObject:received];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"received" andNamespace:@"urn:xmpp:receipts" withAttributes:@{@"id":messageId} andChildren:@[] andData:nil]];
 }
 
+-(void) setChatmarkerReceipt:(NSString*) messageId
+{
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"received" andNamespace:@"urn:xmpp:chat-markers:0" withAttributes:@{@"id":messageId} andChildren:@[] andData:nil]];
+}
+
+-(void) setDisplayed:(NSString*) messageId
+{
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"displayed" andNamespace:@"urn:xmpp:chat-markers:0" withAttributes:@{@"id":messageId} andChildren:@[] andData:nil]];
+}
 
 -(void) setStoreHint
 {
-    MLXMLNode* store =[[MLXMLNode alloc] init];
-    store.element=@"store";
-    [store.attributes setValue:@"urn:xmpp:hints" forKey:kXMLNS];
-    [self.children addObject:store];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"store" andNamespace:@"urn:xmpp:hints"]];
 }
 
 -(void) setNoStoreHint
 {
-    MLXMLNode* store = [[MLXMLNode alloc] initWithElement:@"no-store" andNamespace:@"urn:xmpp:hints"];
-    [self.children addObject:store];
-    MLXMLNode* storage = [[MLXMLNode alloc] initWithElement:@"no-storage" andNamespace:@"urn:xmpp:hints"];
-    [self.children addObject:storage];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"no-store" andNamespace:@"urn:xmpp:hints"]];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"no-storage" andNamespace:@"urn:xmpp:hints"]];
 }
 
 @end

@@ -30,86 +30,56 @@
 
 @implementation MonalAppDelegate
 
--(void) setUISettings
-{
-    UIColor *monalGreen = [UIColor monalGreen];
-    UIColor *monaldarkGreen =[UIColor monaldarkGreen];
-    [[UINavigationBar appearance] setTintColor:monalGreen];
-    if (@available(iOS 13.0, *)) {
-        UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
-        [appearance configureWithTransparentBackground];
-        appearance.backgroundColor=[UIColor systemBackgroundColor];
-        
-        [[UINavigationBar appearance] setScrollEdgeAppearance:appearance];
-        [[UINavigationBar appearance] setStandardAppearance:appearance];
-#if TARGET_OS_MACCATALYST
-        self.window.windowScene.titlebar.titleVisibility=UITitlebarTitleVisibilityHidden;
-#endif
-    }
-    [[UINavigationBar appearance] setPrefersLargeTitles:YES];
-    [[UITabBar appearance] setTintColor:monaldarkGreen];
-}
-
 #pragma mark -  APNS notificaion
 
-- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken{
-    
-    NSString *token=[MLPush stringFromToken:deviceToken];
-     [MLXMPPManager sharedInstance].hasAPNSToken=YES;
+-(void) application:(UIApplication*) application didRegisterForRemoteNotificationsWithDeviceToken:(NSData*) deviceToken
+{
+    NSString* token = [MLPush stringFromToken:deviceToken];
     DDLogInfo(@"APNS token string: %@", token);
     [[[MLPush alloc] init] postToPushServer:token];
 }
 
-- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+-(void) application:(UIApplication*) application didFailToRegisterForRemoteNotificationsWithError:(NSError*) error
+{
     DDLogError(@"push reg error %@", error);
-    
 }
 
 #pragma mark - VOIP notification
+
 #if !TARGET_OS_MACCATALYST
+
 -(void) voipRegistration
 {
-    DDLogInfo(@"registering for voip APNS...");
-    dispatch_queue_t mainQueue = dispatch_get_main_queue();
-    PKPushRegistry * voipRegistry = [[PKPushRegistry alloc] initWithQueue: mainQueue];
+    PKPushRegistry* voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
     voipRegistry.delegate = self;
     voipRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
 }
 
 // Handle updated APNS tokens
--(void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials: (PKPushCredentials *)credentials forType:(NSString *)type
+-(void) pushRegistry:(PKPushRegistry*) registry didUpdatePushCredentials:(PKPushCredentials*) credentials forType:(NSString*) type
 {
-    NSString *token=[MLPush stringFromToken:credentials.token];
-     [MLXMPPManager sharedInstance].hasAPNSToken=YES;
+    NSString* token = [MLPush stringFromToken:credentials.token];
     DDLogInfo(@"APNS voip token string: %@", token);
     [[[MLPush alloc] init] postToPushServer:token];
 }
 
--(void)pushRegistry:(PKPushRegistry *)registry didInvalidatePushTokenForType:(NSString *)type
+-(void) pushRegistry:(PKPushRegistry*) registry didInvalidatePushTokenForType:(NSString*) type
 {
     DDLogInfo(@"didInvalidatePushTokenForType called (and ignored, TODO: disable push on server?)");
 }
 
 // Handle incoming pushes
--(void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
+-(void) pushRegistry:(PKPushRegistry*) registry didReceiveIncomingPushWithPayload:(PKPushPayload*) payload forType:(PKPushType) type withCompletionHandler:(void (^)(void)) completion
 {
     DDLogInfo(@"incoming voip push notfication: %@", [payload dictionaryPayload]);
-    if([UIApplication sharedApplication].applicationState==UIApplicationStateActive) return;
-    if (@available(iOS 13.0, *)) {
+    if([UIApplication sharedApplication].applicationState == UIApplicationStateActive)
+        return;
+    if(@available(iOS 13.0, *))
         DDLogError(@"Voip push shouldnt arrive on ios13.");
-    }
-    else  {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            __block UIBackgroundTaskIdentifier tempTask= [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-                DDLogInfo(@"voip push wake expiring");
-                [[UIApplication sharedApplication] endBackgroundTask:tempTask];
-                tempTask=UIBackgroundTaskInvalid;
-            }];
-            
-            [[MLXMPPManager sharedInstance] connectIfNecessary];
-            DDLogInfo(@"voip push wake complete");
-        });
-    }
+    else
+        [[MLXMPPManager sharedInstance] incomingPushWithCompletionHandler:^(UIBackgroundFetchResult result) {
+            completion();
+        }];
 }
 
 #endif
@@ -136,13 +106,14 @@
         NSInteger unread = 0;
         if(unreadMsgCnt)
             unread = [unreadMsgCnt integerValue];
+        DDLogInfo(@"Updating unread badge to: %ld", (long)unread);
         [UIApplication sharedApplication].applicationIconBadgeNumber = unread;
     } onQueue:dispatch_get_main_queue()];
 }
 
 #pragma mark - app life cycle
 
-- (BOOL)application:(UIApplication*) application willFinishLaunchingWithOptions:(NSDictionary*) launchOptions
+-(BOOL) application:(UIApplication*) application willFinishLaunchingWithOptions:(NSDictionary*) launchOptions
 {
     self.fileLogger = [HelperTools configureLogging];
     
@@ -194,62 +165,102 @@
         DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
         [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
     }
+    
+    return YES;
 }
 
 - (BOOL)application:(UIApplication*) application didFinishLaunchingWithOptions:(NSDictionary*) launchOptions
 {
-    [UNUserNotificationCenter currentNotificationCenter].delegate=self;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
+    //this will use the cached values in defaultsDB, if possible
+    [[MLXMPPManager sharedInstance] setPushNode:nil andSecret:nil];
     
-    //register for local notifications and badges
-    UIMutableUserNotificationAction* replyAction = [[UIMutableUserNotificationAction alloc] init];
-    replyAction.activationMode = UIUserNotificationActivationModeBackground;
-    replyAction.title = NSLocalizedString(@"Reply", @"");
-    replyAction.identifier = NSLocalizedString(@"ReplyButton", @"");
-    replyAction.destructive = NO;
-    replyAction.authenticationRequired = NO;
-    replyAction.behavior = UIUserNotificationActionBehaviorTextInput;
-    
-    UIMutableUserNotificationCategory* actionCategory = [[UIMutableUserNotificationCategory alloc] init];
-    actionCategory.identifier = NSLocalizedString(@"Reply", @"");
-    [actionCategory setActions:@[replyAction] forContext:UIUserNotificationActionContextDefault];
-    
-    UIUserNotificationSettings* settings = [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge categories:[NSSet setWithObjects:actionCategory,nil]];
-    [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
-    
-    //register for voip push using pushkit
-    if([UIApplication sharedApplication].applicationState!=UIApplicationStateBackground) {
-        // if we are launched in the background, it was from a push. dont do this again.
-        if (@available(iOS 13.0, *)) {
-            //no more voip mode after ios 13
-            if(![[HelperTools defaultsDB] boolForKey:@"HasUpgradedPushiOS13"]) {
-                MLPush *push = [[MLPush alloc] init];
-                [push unregisterVOIPPush];
-                [[HelperTools defaultsDB] setBool:YES forKey:@"HasUpgradedPushiOS13"];
-            }
-            
-            [[UIApplication sharedApplication] registerForRemoteNotifications];
+    //activate push
+    if(@available(iOS 13.0, *))
+    {
+        //no more voip mode after ios 13
+        if(![[HelperTools defaultsDB] boolForKey:@"HasUpgradedPushiOS13"]) {
+            MLPush *push = [[MLPush alloc] init];
+            [push unregisterVOIPPush];
+            [[HelperTools defaultsDB] setBool:YES forKey:@"HasUpgradedPushiOS13"];
         }
-        else {
+        
+        DDLogInfo(@"Registering for APNS...");
+        [[UIApplication sharedApplication] registerForRemoteNotifications];
+    }
+    else
+    {
 #if !TARGET_OS_MACCATALYST
-            [self voipRegistration];
+        DDLogInfo(@"Registering for VoIP APNS...");
+        [self voipRegistration];
 #endif
-        }
-    }
-    else  {
-        [MLXMPPManager sharedInstance].pushNode = [[HelperTools defaultsDB] objectForKey:@"pushNode"];
-        [MLXMPPManager sharedInstance].pushSecret=[[HelperTools defaultsDB] objectForKey:@"pushSecret"];
-        [MLXMPPManager sharedInstance].hasAPNSToken=YES;
-        DDLogInfo(@"push node %@", [MLXMPPManager sharedInstance].pushNode);
     }
     
-    [self setUISettings];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+    center.delegate = self;
+    
+    //create notification categories with actions
+    UNNotificationAction* replyAction = [UNTextInputNotificationAction
+        actionWithIdentifier:@"REPLY_ACTION"
+        title:NSLocalizedString(@"Reply", @"")
+        options:UNNotificationActionOptionNone
+        textInputButtonTitle:NSLocalizedString(@"Send", @"")
+        textInputPlaceholder:NSLocalizedString(@"Your answer", @"")
+    ];
+    UNNotificationAction* markAsReadAction = [UNNotificationAction
+        actionWithIdentifier:@"MARK_AS_READ_ACTION"
+        title:NSLocalizedString(@"Mark as read", @"")
+        options:UNNotificationActionOptionNone
+    ];
+    UNNotificationCategory* messageCategory;
+    UNAuthorizationOptions authOptions = UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionCriticalAlert;
+    if(@available(iOS 13.0, *))
+    {
+        messageCategory = [UNNotificationCategory
+            categoryWithIdentifier:@"message"
+            actions:@[replyAction, markAsReadAction]
+            intentIdentifiers:@[]
+            options:UNNotificationCategoryOptionAllowAnnouncement
+        ];
+        
+        //ios 13 has support for UNAuthorizationOptionAnnouncement
+        authOptions = authOptions | UNAuthorizationOptionAnnouncement;
+    }
+    else
+    {
+        messageCategory = [UNNotificationCategory
+            categoryWithIdentifier:@"message"
+            actions:@[replyAction, markAsReadAction]
+            intentIdentifiers:@[]
+            options:UNNotificationCategoryOptionNone
+        ];
+    }
+    //request auth to show notifications and register our notification categories created above
+    [center requestAuthorizationWithOptions:authOptions completionHandler:^(BOOL granted, NSError *error) {
+        DDLogInfo(@"Got local notification authorization response: granted=%@, error=%@", granted ? @"YES" : @"NO", error);
+    }];
+    [center setNotificationCategories:[NSSet setWithObjects:messageCategory, nil]];
+    
+    UIColor *monalGreen = [UIColor monalGreen];
+    UIColor *monaldarkGreen =[UIColor monaldarkGreen];
+    [[UINavigationBar appearance] setTintColor:monalGreen];
+    if (@available(iOS 13.0, *)) {
+        UINavigationBarAppearance *appearance = [[UINavigationBarAppearance alloc] init];
+        [appearance configureWithTransparentBackground];
+        appearance.backgroundColor=[UIColor systemBackgroundColor];
+        
+        [[UINavigationBar appearance] setScrollEdgeAppearance:appearance];
+        [[UINavigationBar appearance] setStandardAppearance:appearance];
+#if TARGET_OS_MACCATALYST
+        self.window.windowScene.titlebar.titleVisibility=UITitlebarTitleVisibilityHidden;
+#endif
+    }
+    [[UINavigationBar appearance] setPrefersLargeTitles:YES];
+    [[UITabBar appearance] setTintColor:monaldarkGreen];
 
     //update logs if needed
     if(![[HelperTools defaultsDB] boolForKey:@"Logging"])
-    {
         [[DataLayer sharedInstance] messageHistoryCleanAll];
-    }
     
     //handle message notifications by initializing the MLNotificationManager
     [MLNotificationManager sharedInstance];
@@ -304,17 +315,10 @@
 
 -(void) setActiveChatsController: (UIViewController*) activeChats
 {
-    self.activeChats = activeChats;
+    self.activeChats = (ActiveChatsViewController*)activeChats;
 }
 
 #pragma mark - handling urls
-
--(BOOL) openFile:(NSURL*) file
-{
-    NSData *data = [NSData dataWithContentsOfURL:file];
-    [[MLXMPPManager sharedInstance] parseMessageForData:data];
-    return data?YES:NO;
-}
 
 /**
  xmpp:romeo@montague.net?message;subject=Test%20Message;body=Here%27s%20a%20test%20message
@@ -371,23 +375,6 @@
 
 #pragma mark  - user notifications
 
--(void) application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
-{
-    DDLogVerbose(@"did register for local notifications");
-}
-
-- (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
-{
-    DDLogVerbose(@"entering app with didReceiveLocalNotification: %@", notification);
-    
-    //iphone
-    //make sure tab 0 for chat
-    if([notification.userInfo objectForKey:@"from"]) {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalPresentChat object:nil  userInfo:notification.userInfo];
-        
-    }
-}
-
 -(void) application:(UIApplication*) application didReceiveRemoteNotification:(NSDictionary*) userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
 {
     DDLogVerbose(@"got didReceiveRemoteNotification: %@", userInfo);
@@ -405,39 +392,66 @@
     }
 }
 
--(void) application:(UIApplication *)application handleActionWithIdentifier:(nullable NSString *)identifier forLocalNotification:(nonnull UILocalNotification *)notification withResponseInfo:(nonnull NSDictionary *)responseInfo completionHandler:(nonnull void (^)(void))completionHandler
+-(void) userNotificationCenter:(UNUserNotificationCenter*) center didReceiveNotificationResponse:(UNNotificationResponse*) response withCompletionHandler:(void (^)(void)) completionHandler
 {
-    if ([notification.category isEqualToString:@"Reply"]) {
-        if ([identifier isEqualToString:@"ReplyButton"]) {
-            NSString *message = responseInfo[UIUserNotificationActionResponseTypedTextKey];
-            if (message.length > 0) {
-                
-                if([notification.userInfo objectForKey:@"from"]) {
-                    
-                    NSString *replyingAccount = [notification.userInfo objectForKey:@"to"];
-                    
-                    NSString *messageID =[[NSUUID UUID] UUIDString];
-                    
-                    BOOL encryptChat =[[DataLayer sharedInstance] shouldEncryptForJid:[notification.userInfo objectForKey:@"from"] andAccountNo:[notification.userInfo objectForKey:@"accountNo"]];
-                    
-                    [[DataLayer sharedInstance] addMessageHistoryFrom:replyingAccount to:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:@"accountNo"] withMessage:message actuallyFrom:replyingAccount withId:messageID encrypted:encryptChat withCompletion:^(BOOL success, NSString *messageType) {
-                        
-                    }];
-                    
-                    [[MLXMPPManager sharedInstance] sendMessage:message toContact:[notification.userInfo objectForKey:@"from"] fromAccount:[notification.userInfo objectForKey:@"accountNo"] isEncrypted:encryptChat isMUC:NO isUpload:NO messageId:messageID  withCompletionHandler:^(BOOL success, NSString *messageId) {
-                        
-                    }];
-                    
-                    [[DataLayer sharedInstance] markAsReadBuddy:[notification.userInfo objectForKey:@"from"] forAccount:[notification.userInfo objectForKey:@"accountNo"]];
-                    [self updateUnread];
-                    
-                }
-                
-                
+    if([response.notification.request.content.categoryIdentifier isEqualToString:@"message"])
+    {
+        DDLogVerbose(@"notification action triggered for %@", response.notification.request.content.userInfo);
+        [[MLXMPPManager sharedInstance] connectIfNecessary];
+        
+        NSString* from = response.notification.request.content.userInfo[@"from"];
+        NSString* accountId = response.notification.request.content.userInfo[@"accountId"];
+        NSString* messageId = response.notification.request.content.userInfo[@"messageId"];
+        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:accountId];
+        NSAssert(from, @"from should not be nil");
+        NSAssert(accountId, @"accountId should not be nil");
+        NSAssert(messageId, @"messageId should not be nil");
+        NSAssert(account, @"account should not be nil");
+        if([response.actionIdentifier isEqualToString:@"REPLY_ACTION"])
+        {
+            DDLogInfo(@"REPLY_ACTION triggered...");
+            UNTextInputNotificationResponse* textResponse = (UNTextInputNotificationResponse*) response;
+            if(!textResponse.userText.length)
+            {
+                DDLogWarn(@"User tried to send empty text response!");
+                if(completionHandler)
+                    completionHandler();
+                return;
             }
+            
+            //mark messages as read because we are replying
+            [[DataLayer sharedInstance] markMessagesAsReadForBuddy:from andAccount:accountId tillStanzaId:messageId wasOutgoing:NO];
+            [self updateUnread];
+            
+            BOOL encrypted = [[DataLayer sharedInstance] shouldEncryptForJid:from andAccountNo:accountId];
+            BOOL isMuc = [[DataLayer sharedInstance] isBuddyMuc:from forAccount:accountId];
+            [[MLXMPPManager sharedInstance] sendMessageAndAddToHistory:textResponse.userText toContact:from fromAccount:accountId isEncrypted:encrypted isMUC:isMuc isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                DDLogInfo(@"REPLY_ACTION success=%@, messageIdSentObject=%@", successSendObject ? @"YES" : @"NO", messageIdSentObject);
+            }];
+        }
+        else if([response.actionIdentifier isEqualToString:@"MARK_AS_READ_ACTION"])
+        {
+            DDLogInfo(@"MARK_AS_READ_ACTION triggered...");
+            NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:from andAccount:accountId tillStanzaId:messageId wasOutgoing:NO];
+            DDLogDebug(@"Marked as read: %@", unread);
+            
+            //remove notifications of all remotely read messages (indicated by sending a response message)
+            for(MLMessage* msg in unread)
+            {
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
+                [account sendDisplayMarkerForId:msg.messageId to:msg.from];
+            }
+            
+            //update unread count in active chats list
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                @"contact": [[DataLayer sharedInstance] contactForUsername:from forAccount:accountId]
+            }];
+            
+            [self updateUnread];
         }
     }
-    if(completionHandler) completionHandler();
+    if(completionHandler)
+        completionHandler();
 }
 
 
@@ -462,11 +476,10 @@
         [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
     }
     
-    //trigger view updates (this has to be done because a NotificationServiceExtension could have updated the database some time ago)
+    //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:self userInfo:nil];
     
     [[MLXMPPManager sharedInstance] setClientsActive];
-    [[MLXMPPManager sharedInstance] sendMessageForConnectedAccounts];
 }
 
 -(void) applicationWillResignActive:(UIApplication *)application

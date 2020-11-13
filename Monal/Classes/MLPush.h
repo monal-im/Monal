@@ -11,10 +11,10 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MLPush : NSObject
-+(NSString *) stringFromToken:(NSData *) tokenIn;
-+(NSString *) pushServer;
++(NSString*) stringFromToken:(NSData*) tokenIn;
++(NSDictionary*) pushServer;
 
--(void) postToPushServer:(NSString *) token;
+-(void) postToPushServer:(NSString*) token;
 -(void) unregisterPush;
 
 /**

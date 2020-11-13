@@ -16,6 +16,7 @@
 #import "MLWelcomeViewController.h"
 #import "ContactsViewController.h"
 #import "MLNewViewController.h"
+#import "MLXEPSlashMeHandler.h"
 
 @interface ActiveChatsViewController ()
 
@@ -71,7 +72,6 @@ enum activeChatsControllerSections {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageSent:) name:kMLMessageSentToContact object:nil];
-       
     
     [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell"
                                                bundle:[NSBundle mainBundle]]
@@ -97,8 +97,8 @@ enum activeChatsControllerSections {
 
 -(void) refreshDisplay
 {
-    NSMutableArray* activeContactsUnpinned = [[DataLayer sharedInstance] activeContacts:NO];
-    NSMutableArray* activeContactsPinned = [[DataLayer sharedInstance] activeContacts:YES];
+    NSMutableArray* activeContactsUnpinned = [[DataLayer sharedInstance] activeContactsWithPinned:NO];
+    NSMutableArray* activeContactsPinned = [[DataLayer sharedInstance] activeContactsWithPinned:YES];
     if(!activeContactsUnpinned || ! activeContactsPinned)
         return;
 
@@ -120,24 +120,25 @@ enum activeChatsControllerSections {
 
 -(void) refreshContact:(NSNotification*) notification
 {
-    MLContact* contact = [notification.userInfo objectForKey:@"contact"];;
+    MLContact* contact = [notification.userInfo objectForKey:@"contact"];
     
     if([notification.userInfo objectForKey:@"pinningChanged"]) {
         // if pinning changed we have to move the user to a other section
         [self insertOrMoveContact:contact completion:nil];
     } else {
         __block NSIndexPath* indexPath = nil;
-        for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt; section++) {
-            if(indexPath)
-                break;
-
+        for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt && !indexPath; section++) {
             NSMutableArray* curContactArray = [self getChatArrayForSection:section];
 
             // check if contact is already displayed -> get coresponding indexPath
             [curContactArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                MLContact* rowContact = (MLContact *) obj;
-                if([rowContact.contactJid isEqualToString:contact.contactJid] &&
-                   [rowContact.accountId isEqualToString:contact.accountId]) {
+                MLContact* rowContact = (MLContact*)obj;
+                if(
+                    [rowContact.contactJid isEqualToString:contact.contactJid] &&
+                    [rowContact.accountId isEqualToString:contact.accountId]
+                ) {
+                    //this MLContact instance is used in various ui parts, not just this file --> update all properties but keep the instance intact
+                    [rowContact updateWithContact:contact];
                     indexPath = [NSIndexPath indexPathForRow:idx inSection:section];
                     *stop = YES;
                 }
@@ -174,21 +175,18 @@ enum activeChatsControllerSections {
     if([msgAccount.connectionProperties.identity.jid isEqualToString:newMessage.from]) {
         buddyContactJid = newMessage.to;
     }
-    NSArray* contactArr = [[DataLayer sharedInstance] contactForUsername:buddyContactJid forAccount:newMessage.accountId];
-    if(!contactArr || [contactArr count] == 0)
-        return;
 
-    MLContact* contact = [contactArr objectAtIndex:0];
+    MLContact* contact = [[DataLayer sharedInstance] contactForUsername:buddyContactJid forAccount:newMessage.accountId];
+    if(!contact)
+        return;
+    
     // contact.statusMessage = newMessage;
     [self insertOrMoveContact:contact completion:nil];
 }
 
 -(void) insertOrMoveContact:(MLContact *) contact completion:(void (^ _Nullable)(BOOL finished))completion {
     __block NSIndexPath* indexPath = nil;
-    for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt; section++) {
-        if(indexPath)
-            break;
-
+    for(size_t section = pinnedChats; section < activeChatsViewControllerSectionCnt && !indexPath; section++) {
         NSMutableArray* curContactArray = [self getChatArrayForSection:section];
 
         // check if contact is already displayed -> get coresponding indexPath
@@ -283,6 +281,24 @@ enum activeChatsControllerSections {
     [self  performSegueWithIdentifier:@"showConversation" sender:row];
 }
 
+/*
+ * return YES if no enabled account was found && a alert will open
+ */
+-(BOOL) showAccountNumberWarningIfNeeded
+{
+    // Only open contacts list / roster if at least one account is enabled
+    if([[DataLayer sharedInstance] enabledAccountCnts].intValue == 0) {
+        // Show warning
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No enabled account found", @"") message:NSLocalizedString(@"Please add a new account under settings first. If you already added your account you may need to enable it under settings", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+        return YES;
+    }
+    return NO;
+}
+
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     if([segue.identifier isEqualToString:@"showIntro"])
@@ -301,16 +317,23 @@ enum activeChatsControllerSections {
     {
         UINavigationController *nav = segue.destinationViewController;
         chatViewController *chatVC = (chatViewController *)nav.topViewController;
+        UIBarButtonItem *barButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
+        self.navigationItem.backBarButtonItem = barButtonItem;
         [chatVC setupWithContact:sender];
     }
     else if([segue.identifier isEqualToString:@"showDetails"])
     {
-        UINavigationController *nav = segue.destinationViewController;
+        UINavigationController* nav = segue.destinationViewController;
         ContactDetails* details = (ContactDetails *)nav.topViewController;
         details.contact= sender;
     }
     else if([segue.identifier isEqualToString:@"showContacts"])
     {
+        // Only segue if at least one account is enabled
+        if([self showAccountNumberWarningIfNeeded]) {
+            return;
+        }
+
         UINavigationController* nav = segue.destinationViewController;
         ContactsViewController* contacts = (ContactsViewController *)nav.topViewController;
         contacts.selectContact = ^(MLContact* selectedContact) {
@@ -331,6 +354,10 @@ enum activeChatsControllerSections {
     }
     else if([segue.identifier isEqualToString:@"showNew"])
       {
+          // Only segue if at least one account is enabled
+          if([self showAccountNumberWarningIfNeeded]) {
+              return;
+          }
           UINavigationController* nav = segue.destinationViewController;
           MLNewViewController* newScreen = (MLNewViewController *)nav.topViewController;
           newScreen.selectContact = ^(MLContact *selectedContact) {
@@ -439,7 +466,30 @@ enum activeChatsControllerSections {
             {
                 [cell showStatusText:NSLocalizedString(@"📍 A Location", @"")];
             } else  {
-                [cell showStatusText:messageRow.messageText];
+                //XEP-0245: The slash me Command
+                NSString* displayName;
+                NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:row.accountId];
+                NSString* ownJid = [NSString stringWithFormat:@"%@@%@",[accountDict objectForKey:@"username"], [accountDict objectForKey:@"domain"]];
+                if([messageRow.actualFrom isEqualToString:ownJid])
+                    displayName = [MLContact ownDisplayNameForAccountNo:row.accountId andOwnJid:ownJid];
+                else
+                    displayName = [row contactDisplayName];
+                if([messageRow.messageText hasPrefix:@"/me "])
+                {
+                    NSString* replacedMessageText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:row.accountId
+                                                                                                         displayName:displayName
+                                                                                                          actualFrom:messageRow.actualFrom
+                                                                                                             message:messageRow.messageText
+                                                                                                             isGroup:row.isGroup];
+                    
+                    NSRange replacedMsgAttrRange = NSMakeRange(0, replacedMessageText.length);
+                    
+                    [cell showStatusTextItalic:replacedMessageText withItalicRange:replacedMsgAttrRange];
+                }
+                else
+                {
+                    [cell showStatusText:messageRow.messageText];
+                }
             }
             if(messageRow.timestamp) {
                 cell.time.text = [self formattedDateWithSource:messageRow.timestamp];
@@ -469,7 +519,7 @@ enum activeChatsControllerSections {
 
 
 -(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return NSLocalizedString(@"Hide Chat",@ "");
+    return NSLocalizedString(@"Hide Chat", @"");
 }
 
 
@@ -624,6 +674,10 @@ enum activeChatsControllerSections {
 
 #pragma mark -mac menu
 -(void) showNew {
+    // Only segue if at least one account is enabled
+    if([self showAccountNumberWarningIfNeeded]) {
+        return;
+    }
     [self performSegueWithIdentifier:@"showContacts" sender:self];
 }
 

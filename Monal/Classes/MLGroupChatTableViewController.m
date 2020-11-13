@@ -110,20 +110,20 @@
 {
     NSDictionary *dic = self.favorites[indexPath.row];
     
-    NSNumber *account=[dic objectForKey:@"account_id"];
+    NSString* account = [NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
     [[MLXMPPManager sharedInstance] joinRoom:[dic objectForKey:@"room"] withNick:[dic objectForKey:@"nick"]  andPassword:@"" forAccounId:account];
     
-    xmpp* xmppAccount =[[MLXMPPManager sharedInstance] getConnectedAccountForID:[NSString stringWithFormat:@"%@",account]];
+    xmpp* xmppAccount =[[MLXMPPManager sharedInstance] getConnectedAccountForID:account];
     
-    BOOL success = [[DataLayer sharedInstance] addContact:[dic objectForKey:@"room"] forAccount:[NSString stringWithFormat:@"%@", account] fullname:@"" nickname:@"" andMucNick:[dic objectForKey:@"nick"]];
+    BOOL success = [[DataLayer sharedInstance] addContact:[dic objectForKey:@"room"] forAccount:account nickname:@"" andMucNick:[dic objectForKey:@"nick"]];
     if(success)
-        [[DataLayer sharedInstance] updateOwnNickName:[dic objectForKey:@"nick"] forMuc:[dic objectForKey:@"room"] andServer:xmppAccount.connectionProperties.conferenceServer forAccount:[NSString stringWithFormat:@"%@", account]];
+        [[DataLayer sharedInstance] updateOwnNickName:[dic objectForKey:@"nick"] forMuc:[dic objectForKey:@"room"] andServer:xmppAccount.connectionProperties.conferenceServer forAccount:account];
 
-    MLContact *group = [[MLContact alloc] init];
-    group.isGroup=YES;
-    group.accountId=[NSString stringWithFormat:@"%@", account];
-    group.accountNickInGroup=[dic objectForKey:@"nick"] ;
-    group.contactJid=[dic objectForKey:@"room"];
+    MLContact* group = [[MLContact alloc] init];
+    group.isGroup = YES;
+    group.accountId = account;
+    group.accountNickInGroup = [dic objectForKey:@"nick"] ;
+    group.contactJid = [dic objectForKey:@"room"];
     
         if(self.selectGroup) {
             self.selectGroup(group);

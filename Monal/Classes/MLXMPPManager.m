@@ -7,14 +7,13 @@
 //
 
 #import <BackgroundTasks/BackgroundTasks.h>
+#import <UserNotifications/UserNotifications.h>
 
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
-
-#import "MLMessageProcessor.h"
-#import "ParseMessage.h"
-
+#import "HelperTools.h"
 #import "MonalAppDelegate.h"
+#import "MLConstants.h"
 
 @import Network;
 @import MobileCoreServices;
@@ -22,20 +21,19 @@
 
 typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 
-static const NSString* kBackgroundFetchingTask = @"im.monal.fetch";
+static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 //this is in seconds
 #define SHORT_PING 4.0
 #define LONG_PING 16.0
 
 static const int pingFreqencyMinutes = 5;       //about the same Conversations uses
-static const int sendMessageTimeoutSeconds = 10;
 
 @interface MLXMPPManager()
 {
     nw_path_monitor_t _path_monitor;
     UIBackgroundTaskIdentifier _bgTask;
-    BGTask* _bgFetch;
+    API_AVAILABLE(ios(13.0)) BGTask* _bgFetch;
     BOOL _hasConnectivity;
     NSMutableDictionary* _pushCompletions;
     NSMutableArray* _connectedXMPP;
@@ -66,6 +64,11 @@ static const int sendMessageTimeoutSeconds = 10;
         [[HelperTools defaultsDB] setBool:YES forKey:@"ShowGeoLocation"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastUserInteraction"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastChatState"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"SendReceivedMarkers"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"SendDisplayedMarkers"];
+
+        // Message Settings / Privacy
+        [[HelperTools defaultsDB] setInteger:DisplayNameAndMessage forKey:@"NotificationPrivacySetting"];
 
         // udp logger
         [[HelperTools defaultsDB] setBool:NO forKey:@"udpLoggerEnabled"];
@@ -94,6 +97,10 @@ static const int sendMessageTimeoutSeconds = 10;
     // upgrade SendLastChatState
     [self upgradeBoolUserSettingsIfUnset:@"SendLastChatState" toDefault:YES];
 
+    // upgrade received and displayed markers
+    [self upgradeBoolUserSettingsIfUnset:@"SendReceivedMarkers" toDefault:YES];
+    [self upgradeBoolUserSettingsIfUnset:@"SendDisplayedMarkers" toDefault:YES];
+
     // upgrade udp logger
     [self upgradeBoolUserSettingsIfUnset:@"udpLoggerEnabled" toDefault:NO];
     [self upgradeObjectUserSettingsIfUnset:@"udpLoggerHostname" toDefault:@""];
@@ -105,6 +112,9 @@ static const int sendMessageTimeoutSeconds = 10;
     }
 
     [self upgradeObjectUserSettingsIfUnset:@"udpLoggerKey" toDefault:@""];
+
+    // upgrade Message Settings / Privacy
+    [self upgradeIntegerUserSettingsIfUnset:@"NotificationPrivacySetting" toDefault:DisplayNameAndMessage];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal
@@ -113,6 +123,16 @@ static const int sendMessageTimeoutSeconds = 10;
     if(currentSettingVal == nil)
     {
         [[HelperTools defaultsDB] setBool:defaultVal forKey:settingsName];
+        [[HelperTools defaultsDB] synchronize];
+    }
+}
+
+-(void) upgradeIntegerUserSettingsIfUnset:(NSString*) settingsName toDefault:(NSInteger) defaultVal
+{
+    NSNumber* currentSettingVal = [[HelperTools defaultsDB] objectForKey:settingsName];
+    if(currentSettingVal == nil)
+    {
+        [[HelperTools defaultsDB] setInteger:defaultVal forKey:settingsName];
         [[HelperTools defaultsDB] synchronize];
     }
 }
@@ -181,7 +201,7 @@ static const int sendMessageTimeoutSeconds = 10;
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(autoJoinRoom:) name:kMLHasConnectedNotice object:nil];
 
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sendOutbox:) name:kMLHasConnectedNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sendOutbox:) name:kMonalFinishedCatchup object:nil];
 
     _path_monitor = nw_path_monitor_create();
     nw_path_monitor_set_queue(_path_monitor, q_background);
@@ -255,14 +275,7 @@ static const int sendMessageTimeoutSeconds = 10;
 -(void) nowIdle:(NSNotification*) notification
 {
     DDLogVerbose(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
-    [DDLog flushLog];
-    if(![HelperTools isAppExtension])
-    {
-        DDLogVerbose(@"### NOT EXTENSION --> checking if background is still needed ###");
-        [self checkIfBackgroundTaskIsStillNeeded];
-    }
-    else
-        DDLogVerbose(@"### IN EXTENSION --> ignoring in MLXMPPManager ###");
+    [self checkIfBackgroundTaskIsStillNeeded];
 }
 
 -(BOOL) allAccountsIdle
@@ -275,49 +288,62 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) checkIfBackgroundTaskIsStillNeeded
 {
-    if(![HelperTools isAppExtension] && [self allAccountsIdle])
+    if([self allAccountsIdle])
     {
-        BOOL background = [HelperTools isInBackground];
-        if(background)
+        //remove syncError notification because all accounts are idle and fully synced now
+        [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[@"syncError"]];
+        
+        if(![HelperTools isAppExtension])
         {
-            DDLogInfo(@"### All accounts idle, disconnecting and stopping all background tasks ###");
-            [DDLog flushLog];
-            [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
-            [HelperTools dispatchSyncReentrant:^{
-                BOOL stopped = NO;
-                if(_bgTask != UIBackgroundTaskInvalid)
+            //use a synchronized block to disconnect only once
+            @synchronized(self) {
+                DDLogVerbose(@"### NOT EXTENSION --> checking if background is still needed ###");
+                BOOL background = [HelperTools isInBackground];
+                if(background)
                 {
-                    DDLogVerbose(@"stopping UIKit _bgTask");
+                    DDLogInfo(@"### All accounts idle, disconnecting and stopping all background tasks ###");
                     [DDLog flushLog];
-                    [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
-                    _bgTask = UIBackgroundTaskInvalid;
-                    stopped = YES;
+                    [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
+                    [HelperTools dispatchSyncReentrant:^{
+                        BOOL stopped = NO;
+                        if(_bgTask != UIBackgroundTaskInvalid)
+                        {
+                            DDLogVerbose(@"stopping UIKit _bgTask");
+                            [DDLog flushLog];
+                            [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
+                            _bgTask = UIBackgroundTaskInvalid;
+                            stopped = YES;
+                        }
+                        if(_bgFetch)
+                        {
+                            DDLogVerbose(@"stopping backgroundFetchingTask");
+                            [DDLog flushLog];
+                            [_bgFetch setTaskCompletedWithSuccess:YES];
+                            _bgFetch = nil;
+                            stopped = YES;
+                        }
+                        if(!stopped)
+                            DDLogVerbose(@"no background tasks running, nothing to stop");
+                        [DDLog flushLog];
+                    } onQueue:dispatch_get_main_queue()];
                 }
-                if(_bgFetch)
+                if([_pushCompletions count])
                 {
-                    DDLogVerbose(@"stopping backgroundFetchingTask");
+                    //we don't need to call disconnectAll if we are in background here, because we already did this in the if above (don't reorder these 2 ifs!)
+                    DDLogInfo(@"### All accounts idle, calling push completion handlers ###");
                     [DDLog flushLog];
-                    [_bgFetch setTaskCompletedWithSuccess:YES];
-                    stopped = YES;
+                    for(NSString* completionId in _pushCompletions)
+                    {
+                        //cancel running timer and push completion handler
+                        ((monal_void_block_t)_pushCompletions[completionId][@"timer"])();
+                        ((pushCompletion)_pushCompletions[completionId][@"handler"])(UIBackgroundFetchResultNewData);
+                        [_pushCompletions removeObjectForKey:completionId];
+                    }
                 }
-                if(!stopped)
-                    DDLogVerbose(@"no background tasks running, nothing to stop");
-                [DDLog flushLog];
-            } onQueue:dispatch_get_main_queue()];
-        }
-        if([_pushCompletions count])
-        {
-            //we don't need to call disconnectAll if we are in background here, because we already did this in the if above (don't reorder these 2 ifs!)
-            DDLogInfo(@"### All accounts idle, calling push completion handlers ###");
-            [DDLog flushLog];
-            for(NSString* completionId in _pushCompletions)
-            {
-                //cancel running timer and push completion handler
-                ((monal_void_block_t)_pushCompletions[completionId][@"timer"])();
-                ((pushCompletion)_pushCompletions[completionId][@"handler"])(UIBackgroundFetchResultNewData);
-                [_pushCompletions removeObjectForKey:completionId];
             }
         }
+        else
+            DDLogVerbose(@"### IN EXTENSION --> ignoring in MLXMPPManager ###");
     }
 }
 
@@ -332,8 +358,10 @@ static const int sendMessageTimeoutSeconds = 10;
                 _bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
                     DDLogWarn(@"BG WAKE EXPIRING");
                     [DDLog flushLog];
-
+                    
                     [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
+                    
+                    [HelperTools postSendingErrorNotification];
 
                     //schedule a BGProcessingTaskRequest to process this further as soon as possible
                     if(@available(iOS 13.0, *))
@@ -355,11 +383,13 @@ static const int sendMessageTimeoutSeconds = 10;
 {
     DDLogVerbose(@"RUNNING BGTASK");
     _bgFetch = task;
+    __weak BGTask* weakTask = task;
     task.expirationHandler = ^{
-        DDLogError(@"*** BGTASK EXPIRED ***");
-        [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
+        DDLogWarn(@"*** BGTASK EXPIRED ***");
         _bgFetch = nil;
-        [task setTaskCompletedWithSuccess:NO];
+        [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
+        [HelperTools postSendingErrorNotification];
+        [weakTask setTaskCompletedWithSuccess:NO];
         [self scheduleBackgroundFetchingTask];      //schedule new one if neccessary
         [DDLog flushLog];
     };
@@ -374,7 +404,7 @@ static const int sendMessageTimeoutSeconds = 10;
         }
     }
     else
-        DDLogVerbose(@"BGTASK has *no* connectivity? That's strange!");
+        DDLogWarn(@"BGTASK has *no* connectivity? That's strange!");
     
     //log bgtask ticks
     unsigned long tick = 0;
@@ -480,6 +510,7 @@ static const int sendMessageTimeoutSeconds = 10;
     
     for(xmpp* xmppAccount in [self connectedXMPP])
     {
+        [xmppAccount unfreezed];
         if(_hasConnectivity)
             [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         [xmppAccount setClientActive];
@@ -489,8 +520,11 @@ static const int sendMessageTimeoutSeconds = 10;
 -(void) pingAllAccounts
 {
     for(xmpp* xmppAccount in [self connectedXMPP])
+    {
+        [xmppAccount unfreezed];
         if(_hasConnectivity)
             [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+    }
 }
 
 -(void) rejectContact:(MLContact*) contact
@@ -532,25 +566,25 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) connectAccount:(NSString*) accountNo
 {
-    NSArray* accountDetails = [[DataLayer sharedInstance] detailsForAccount:accountNo];
-    if(accountDetails.count == 1) {
-        NSDictionary* account = [accountDetails objectAtIndex:0];
+    NSDictionary* account = [[DataLayer sharedInstance] detailsForAccount:accountNo];
+    if(!account)
+        DDLogError(@"Expected account settings in db for accountNo: %@", accountNo);
+    else
         [self connectAccountWithDictionary:account];
-    } else {
-        DDLogVerbose(@"Expected account settings in db for accountNo: %@", accountNo);
-    }
 }
 
 -(void) connectAccountWithDictionary:(NSDictionary*)account
 {
-    xmpp* existing=[self getConnectedAccountForID:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
+    xmpp* existing = [self getConnectedAccountForID:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
     if(existing)
     {
-        DDLogVerbose(@"existing account just pinging.");
+        DDLogInfo(@"existing account, calling unfreezed");
+        [existing unfreezed];
+        DDLogInfo(@"existing account, just pinging.");
         if(_hasConnectivity)
             [existing sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
         else
-            DDLogVerbose(@"NOT pinging because no connectivity.");
+            DDLogWarn(@"NOT pinging because no connectivity.");
         return;
     }
     DDLogVerbose(@"connecting account %@@%@",[account objectForKey:kUsername], [account objectForKey:kDomain]);
@@ -566,28 +600,25 @@ static const int sendMessageTimeoutSeconds = 10;
     MLXMPPIdentity *identity = [[MLXMPPIdentity alloc] initWithJid:[NSString stringWithFormat:@"%@@%@",[account objectForKey:kUsername],[account objectForKey:kDomain] ] password:password andResource:[account objectForKey:kResource]];
 
     MLXMPPServer *server = [[MLXMPPServer alloc] initWithHost:[account objectForKey:kServer] andPort:[account objectForKey:kPort] andDirectTLS:[[account objectForKey:kDirectTLS] boolValue]];
-    server.selfSignedCert=[[account objectForKey:kSelfSigned] boolValue];
+    server.selfSignedCert = [[account objectForKey:kSelfSigned] boolValue];
 
-    xmpp* xmppAccount=[[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
-    xmppAccount.pushNode=self.pushNode;
-    xmppAccount.pushSecret=self.pushSecret;
-
-#ifndef DISABLE_OMEMO
-    [xmppAccount setupSignal];
-#endif
+    xmpp* xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
+    xmppAccount.pushNode = self.pushNode;
+    xmppAccount.pushSecret = self.pushSecret;
 
     if(xmppAccount)
     {
         @synchronized(_connectedXMPP) {
             [_connectedXMPP addObject:xmppAccount];
         }
+
         if(_hasConnectivity)
         {
-            DDLogVerbose(@"starting connect");
+            DDLogInfo(@"starting connect");
             [xmppAccount connect];
         }
         else
-            DDLogVerbose(@"NOT connecting because no connectivity.");
+            DDLogWarn(@"NOT connecting because no connectivity.");
     }
 }
 
@@ -645,6 +676,7 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) connectIfNecessary
 {
+    [self addBackgroundTask];
     NSArray* enabledAccountList = [[DataLayer sharedInstance] enabledAccountList];
     for(NSDictionary* account in enabledAccountList) {
         [self connectAccountWithDictionary:account];
@@ -660,17 +692,37 @@ static const int sendMessageTimeoutSeconds = 10;
 }
 
 #pragma mark -  XMPP commands
--(void) sendMessageAndAddToHistory:(NSString*) message toContact:(NSString*)recipient fromAccount:(NSString*) accountID fromJID:(NSString*) fromJID isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC  isUpload:(BOOL) isUpload withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion {
+-(void) sendMessageAndAddToHistory:(NSString*) message toContact:(NSString*) recipient fromAccount:(NSString*) accountID isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC isUpload:(BOOL) isUpload withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
+{
     NSString* msgid = [[NSUUID UUID] UUIDString];
+    xmpp* account = [self getConnectedAccountForID:accountID];
+    MLContact* contact = [[DataLayer sharedInstance] contactForUsername:recipient forAccount:accountID];
 
+    NSAssert(message, @"Message should not be nil");
+    NSAssert(account, @"Account should not be nil");
+    NSAssert(contact, @"Contact should not be nil");
+    
     // Save message to history
-    [[DataLayer sharedInstance] addMessageHistoryFrom:fromJID to:recipient forAccount:accountID withMessage:message actuallyFrom:fromJID withId:msgid encrypted:encrypted withCompletion:^(BOOL successHist, NSString *messageTypeHist) {
+    [[DataLayer sharedInstance] addMessageHistoryFrom:account.connectionProperties.identity.jid
+                                                   to:recipient
+                                           forAccount:accountID
+                                          withMessage:message
+                                         actuallyFrom:(isMUC ? contact.accountNickInGroup : account.connectionProperties.identity.jid)
+                                               withId:msgid
+                                            encrypted:encrypted
+                                       withCompletion:^(BOOL successHist, NSString* messageTypeHist, NSNumber* messageDBId) {
         // Send message
         if(successHist) {
-            [self sendMessage:message toContact:recipient fromAccount:accountID isEncrypted:encrypted isMUC:NO  isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString *messageIdSend) {
-                if(successSend) completion(successSend, messageIdSend);
+            DDLogInfo(@"Message added to history with id %ld, now sending...", (long)[messageDBId intValue]);
+            [self sendMessage:message toContact:recipient fromAccount:accountID isEncrypted:encrypted isMUC:isMUC isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString *messageIdSend) {
+                if(successSend)
+                    completion(successSend, messageIdSend);
             }];
+            DDLogVerbose(@"Notifying active chats of change for contact %@", contact);
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":contact}];
         }
+        else
+            DDLogError(@"Could not add message to history!");
     }];
 }
 
@@ -745,17 +797,6 @@ static const int sendMessageTimeoutSeconds = 10;
 
 #pragma mark - getting details
 
--(void) getServiceDetailsForAccount:(NSInteger) row
-{
-    xmpp* account;
-    @synchronized(_connectedXMPP) {
-        if(row < [_connectedXMPP count] && row>=0)
-            account = [_connectedXMPP objectAtIndex:row];
-    }
-    if(account)
-        [account getServiceDetails];
-}
-
 -(NSString*) getAccountNameForConnectedRow:(NSInteger) row
 {
     xmpp* account;
@@ -775,7 +816,6 @@ static const int sendMessageTimeoutSeconds = 10;
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
     if(account)
     {
-
         if(contact.isGroup)
         {
             //if MUC
@@ -790,30 +830,19 @@ static const int sendMessageTimeoutSeconds = 10;
 
 -(void) addContact:(MLContact *) contact
 {
-    xmpp* account =[self getConnectedAccountForID:contact.accountId];
-     [account addToRoster:contact.contactJid];
+    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    [account addToRoster:contact.contactJid];
 }
 
--(void) getVCard:(MLContact *) contact
+-(void) getEntitySoftWareVersionForContact:(MLContact *) contact andResource:(NSString*) resource
 {
     xmpp* account =[self getConnectedAccountForID:contact.accountId];
-    [account getVCard:contact.contactJid];
-}
-
--(void) getEntitySoftWareVersion:(MLContact *) contact
-{
-    xmpp* account =[self getConnectedAccountForID:contact.accountId];
-    NSArray *contactResourceArr = [[DataLayer sharedInstance] resourcesForContact:contact.contactJid];
     
     NSString *xmppId = @"";
-    if ((contactResourceArr == nil) && ([contactResourceArr count] == 0)) {
+    if ((resource == nil) || ([resource length] == 0)) {
         xmppId = [NSString stringWithFormat:@"%@",contact.contactJid];
     } else {
-        if ([contactResourceArr count] == 0) {
-            xmppId = [NSString stringWithFormat:@"%@",contact.contactJid];
-        } else {
-            xmppId = [NSString stringWithFormat:@"%@/%@",contact.contactJid, [[contactResourceArr objectAtIndex:0] objectForKey:@"resource"] ];
-        }        
+        xmppId = [NSString stringWithFormat:@"%@/%@",contact.contactJid, resource];
     }
     
     [account getEntitySoftWareVersion:xmppId];
@@ -845,7 +874,7 @@ static const int sendMessageTimeoutSeconds = 10;
         [account joinRoom:roomName withNick:nick andPassword:password];
 }
 
--(void)  leaveRoom:(NSString*) roomName withNick:(NSString *) nick forAccountId:(NSString*) accountId
+-(void) leaveRoom:(NSString*) roomName withNick:(NSString *) nick forAccountId:(NSString*) accountId
 {
     xmpp* account= [self getConnectedAccountForID:accountId];
     [account leaveRoom:roomName withNick:nick];
@@ -951,71 +980,88 @@ static const int sendMessageTimeoutSeconds = 10;
 
 #pragma mark - APNS
 
--(void) setPushNode:(NSString *)node andSecret:(NSString *)secret
+-(void) setPushNode:(NSString*) node andSecret:(NSString*) secret
 {
-    self.pushNode = node;
-    [[HelperTools defaultsDB] setObject:self.pushNode forKey:@"pushNode"];
-    
-    if(secret)
+    if(node && ![node isEqualToString:self.pushNode])
     {
-        self.pushSecret=secret;
+        self.pushNode = node;
+        [[HelperTools defaultsDB] setObject:self.pushNode forKey:@"pushNode"];
+    }
+    else    //use saved one: push server not reachable via http(s) --> the old node might still be valid
+        self.pushNode = [[HelperTools defaultsDB] objectForKey:@"pushNode"];
+
+    if(secret && ![secret isEqualToString:self.pushSecret])
+    {
+        self.pushSecret = secret;
         [[HelperTools defaultsDB] setObject:self.pushSecret forKey:@"pushSecret"];
     }
-    else    //use saved one (push server not reachable via http(s)) --> the old secret might still be valid
+    else    //use saved one: push server not reachable via http(s) --> the old secret might still be valid
         self.pushSecret = [[HelperTools defaultsDB] objectForKey:@"pushSecret"];
 
-    for(xmpp* xmppAccount in [self connectedXMPP])
+    //check node and secret values
+    if(
+        self.pushNode &&
+        self.pushSecret &&
+        self.pushNode.length &&
+        self.pushSecret.length
+    )
     {
-        xmppAccount.pushNode = self.pushNode;
-        xmppAccount.pushSecret = self.pushSecret;
-        [xmppAccount enablePush];
+        DDLogInfo(@"push token valid, current push settings: node=%@, secret=%@", [MLXMPPManager sharedInstance].pushNode, [MLXMPPManager sharedInstance].pushSecret);
+        self.hasAPNSToken = YES;
     }
+    else
+    {
+        self.hasAPNSToken = NO;
+        DDLogWarn(@"push token invalid, current push settings: node=%@, secret=%@", [MLXMPPManager sharedInstance].pushNode, [MLXMPPManager sharedInstance].pushSecret);
+    }
+
+    //only try to enable push if we have a node and secret value
+    if(self.hasAPNSToken)
+        for(xmpp* xmppAccount in [self connectedXMPP])
+        {
+            xmppAccount.pushNode = self.pushNode;
+            xmppAccount.pushSecret = self.pushSecret;
+            [xmppAccount enablePush];
+        }
 }
 
 #pragma mark - share sheet added
 
 -(void) sendOutbox: (NSNotification *) notification {
-    NSDictionary *dic = notification.object;
-    NSString *account= [dic objectForKey:@"AccountNo"];
-
+    xmpp* account = notification.object;
     [self sendOutboxForAccount:account];
 }
 
-- (void) sendOutboxForAccount:(NSString *) account{
+- (void) sendOutboxForAccount:(xmpp*) account
+{
     NSMutableArray* outbox = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
     NSMutableArray* outboxClean = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
 
-    for (NSDictionary* row in outbox)
+    DDLogInfo(@"Got message outbox: %@", outbox);
+    for(NSDictionary* row in outbox)
     {
         NSDictionary* accountDic = [row objectForKey:@"account"] ;
-        if([[accountDic objectForKey:kAccountID] integerValue] == [account integerValue])
+        if([[accountDic objectForKey:kAccountID] integerValue] == [account.accountNo integerValue])
         {
             NSString* accountID = [NSString stringWithFormat:@"%@", [accountDic objectForKey:kAccountID]];
             NSString* recipient = [row objectForKey:@"recipient"];
             NSAssert(recipient != nil, @"Recipient missing");
             NSAssert(recipient != nil, @"Recipient missing");
             BOOL encryptMessages = [[DataLayer sharedInstance] shouldEncryptForJid:recipient andAccountNo:accountID];
-            NSString* fromJID = [NSString stringWithFormat:@"%@@%@", [accountDic objectForKey:@"username"], [accountDic objectForKey:@"domain"]];
 
-            [self sendMessageAndAddToHistory:[row objectForKey:@"url"] toContact:recipient fromAccount:accountID fromJID:fromJID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
-                if(successSendObject) {
-                    NSString* comment = (NSString*)[row objectForKey:@"comment"];
-                    if(comment.length > 0) {
-                        [self sendMessageAndAddToHistory:comment toContact:recipient fromAccount:accountID fromJID:fromJID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendComment, NSString* messageIdSendComment) {
-                        }];
-                    }
-                    [outboxClean removeObject:row];
-                    [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
-                }
-            }];
+            if([row objectForKey:@"comment"]) {
+                [self sendMessageAndAddToHistory:[row objectForKey:@"comment"] toContact:recipient fromAccount:accountID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                }];
+            }
+            if([row objectForKey:@"url"]) {
+                [self sendMessageAndAddToHistory:[row objectForKey:@"url"] toContact:recipient fromAccount:accountID isEncrypted:encryptMessages isMUC:NO isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) {
+                }];
+            }
+            // remove msg even after error
+            [outboxClean removeObject:row];
+            [[HelperTools defaultsDB] setObject:outboxClean forKey:@"outbox"];
         }
     }
-}
-
--(void) sendMessageForConnectedAccounts
-{
-    for(xmpp* xmppAccount in [self connectedXMPP])
-        [self sendOutboxForAccount:xmppAccount.accountNo];
 }
 
 @end

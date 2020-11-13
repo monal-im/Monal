@@ -15,16 +15,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface MLXMPPIdentity : NSObject
 
-@property (nonatomic, readonly) NSString *jid;
-@property (nonatomic, readonly) NSString* password;
-@property (nonatomic, readonly) NSString* resource;
+@property (atomic) NSString* jid;
+@property (atomic) NSString* resource;
+@property (atomic, readonly) NSString* fullJid;
 
-@property (nonatomic, readonly) NSString *user;
-@property (nonatomic, readonly) NSString *domain;
-
--(NSString *) user;
--(NSString *) domain;
-
+@property (atomic, readonly) NSString* user;
+@property (atomic, readonly) NSString* password;
+@property (atomic, readonly) NSString* domain;
 
 /**
  Creates a new identity.
@@ -35,6 +32,8 @@ NS_ASSUME_NONNULL_BEGIN
  Update password is only used when the password is changed in app
  */
 -(void) updatPassword:(NSString *) newPassword;
+
+-(void) bindJid:(NSString*) jid;
 
 @end
 

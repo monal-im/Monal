@@ -8,36 +8,34 @@
 
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
-#import "ParsePresence.h"
+#import "XMPPPresence.h"
 #import "MLMessage.h"
 #import "MLContact.h"
 
+NS_ASSUME_NONNULL_BEGIN
 
 @interface DataLayer : NSObject
 
-extern NSString *const kAccountID;
-extern NSString *const kDomain;
-extern NSString *const kEnabled;
+extern NSString* const kAccountID;
+extern NSString* const kDomain;
+extern NSString* const kEnabled;
 
-extern NSString *const kServer;
-extern NSString *const kPort;
-extern NSString *const kResource;
-extern NSString *const kDirectTLS;
-extern NSString *const kSelfSigned;
+extern NSString* const kServer;
+extern NSString* const kPort;
+extern NSString* const kResource;
+extern NSString* const kDirectTLS;
+extern NSString* const kSelfSigned;
+extern NSString* const kRosterName;
 
-extern NSString *const kUsername;
-extern NSString *const kFullName;
+extern NSString* const kUsername;
 
-extern NSString *const kContactName;
-extern NSString *const kCount;
-
-extern NSString *const kMessageType;
-extern NSString *const kMessageTypeGeo;
-extern NSString *const kMessageTypeImage;
-extern NSString *const kMessageTypeMessageDraft;
-extern NSString *const kMessageTypeStatus;
-extern NSString *const kMessageTypeText;
-extern NSString *const kMessageTypeUrl;
+extern NSString* const kMessageType;
+extern NSString* const kMessageTypeGeo;
+extern NSString* const kMessageTypeImage;
+extern NSString* const kMessageTypeMessageDraft;
+extern NSString* const kMessageTypeStatus;
+extern NSString* const kMessageTypeText;
+extern NSString* const kMessageTypeUrl;
 
 +(DataLayer*) sharedInstance;
 -(void) version;
@@ -47,10 +45,10 @@ extern NSString *const kMessageTypeUrl;
 -(void) setRosterVersion:(NSString *) version forAccount: (NSString*) accountNo;
 
 // Buddy Commands
--(BOOL) addContact:(NSString*) contact  forAccount:(NSString*) accountNo fullname:(NSString*)fullName nickname:(NSString*) nickName andMucNick:(NSString *) mucNick;
+-(BOOL) addContact:(NSString*) contact  forAccount:(NSString*) accountNo nickname:(NSString* _Nullable) nickName andMucNick:(NSString* _Nullable) mucNick;
 -(void) removeBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(BOOL) clearBuddies:(NSString*) accountNo;
--(NSArray*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo;
+-(MLContact*) contactForUsername:(NSString*) username forAccount: (NSString*) accountNo;
 
 /**
  should be called when a new session needs to be established
@@ -61,8 +59,13 @@ extern NSString *const kMessageTypeUrl;
 
 -(NSMutableArray*) onlineContactsSortedBy:(NSString*) sort;
 -(NSArray*) resourcesForContact:(NSString*)contact ;
--(NSArray*) softwareVersionInfoForAccount:(NSString*)account andContact:(NSString*)contact;
--(void) setSoftwareVersionInfoForAppName:(NSString*)appName appVersion:(NSString*)appVersion platformOS:(NSString*)platformOS withAccount:(NSString*)account andContact:(NSString*)contact;
+-(NSArray*) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSString*)account;
+-(void) setSoftwareVersionInfoForContact:(NSString*)contact
+                                resource:(NSString*)resource
+                              andAccount:(NSString*)account
+                             withAppName:(NSString*)appName
+                              appVersion:(NSString*)appVersion
+                           andPlatformOS:(NSString*)platformOS;
 -(NSMutableArray*) offlineContacts;
 
 #pragma mark Ver string and Capabilities
@@ -74,16 +77,17 @@ extern NSString *const kMessageTypeUrl;
 -(void) setCaps:(NSSet*) caps forVer:(NSString*) ver;
 
 #pragma mark  presence functions
--(void) setResourceOnline:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
--(void) setOnlineBuddy:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
--(BOOL) setOfflineBuddy:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) setResourceOnline:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
+-(void) setOnlineBuddy:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
+-(BOOL) setOfflineBuddy:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
 
--(void) setBuddyStatus:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) setBuddyStatus:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
 -(NSString*) buddyStatus:(NSString*) buddy forAccount:(NSString*) accountNo;
 
--(void) setBuddyState:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
+-(void) setBuddyState:(XMPPPresence*) presenceObj forAccount:(NSString*) accountNo;
 -(NSString*) buddyState:(NSString*) buddy forAccount:(NSString*) accountNo;
 
+-(BOOL) hasContactRequestForAccount:(NSString*) accountNo andBuddyName:(NSString*) buddy;
 -(NSMutableArray*) contactRequestsForAccount;
 -(void) addContactRequest:(MLContact *) requestor;
 -(void) deleteContactRequest:(MLContact *) requestor; 
@@ -91,10 +95,9 @@ extern NSString *const kMessageTypeUrl;
 #pragma mark Contact info
 
 -(void) setFullName:(NSString*) fullName forContact:(NSString*) contact andAccount:(NSString*) accountNo;
--(NSString*) fullNameForContact:(NSString*) contact inAccount:(NSString*) accountNo;
 
--(void) setContactHash:(ParsePresence*)presenceObj forAccount: (NSString*) accountNo;
--(NSString*) contactHash:(NSString*) contact forAccount:(NSString*) accountNo;
+-(void) setAvatarHash:(NSString*) hash forContact:(NSString*) contact andAccount:(NSString*) accountNo;
+-(NSString*) getAvatarHashForContact:(NSString*) buddy andAccount:(NSString*) accountNo;
 
 -(BOOL) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo;
 
@@ -124,19 +127,15 @@ extern NSString *const kMessageTypeUrl;
  */
 -(BOOL) isContactInList:(NSString*) buddy forAccount:(NSString*) accountNo;
 
-
-#pragma mark - vcard commands
--(void) setNickName:(NSString*) nickName forContact:(NSString*) buddy andAccount:(NSString*) accountNo;
--(NSString*) nickName:(NSString*) buddy forAccount:(NSString*) accountNo;
-
 #pragma mark - account commands
 -(NSArray*) accountList;
+-(NSNumber*) enabledAccountCnts;
 -(NSArray*) enabledAccountList;
 -(BOOL) isAccountEnabled:(NSString*) accountNo;
 -(BOOL) doesAccountExistUser:(NSString*) user andDomain:(NSString *) domain;
 -(NSNumber*) accountIDForUser:(NSString*) user andDomain:(NSString *) domain;
 
--(NSArray*) detailsForAccount:(NSString*) accountNo;
+-(NSDictionary*) detailsForAccount:(NSString*) accountNo;
 -(NSString*) jidOfAccount:(NSString*) accountNo;
 
 -(BOOL) updateAccounWithDictionary:(NSDictionary *) dictionary;
@@ -157,12 +156,12 @@ extern NSString *const kMessageTypeUrl;
 /**
  returns messages with the provided local id number
  */
--(NSArray *) messageForHistoryID:(NSInteger) historyID;
+-(MLMessage*) messageForHistoryID:(NSInteger) historyID;
 
 /*
  adds a specified message to the database
  */
--(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted backwards:(BOOL) backwards withCompletion: (void (^)(BOOL, NSString*))completion;
+-(void) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString *) messageid serverMessageId:(NSString *) stanzaid messageType:(NSString *) messageType andOverrideDate:(NSDate *) messageDate encrypted:(BOOL) encrypted backwards:(BOOL) backwards displayMarkerWanted:(BOOL) displayMarkerWanted withCompletion: (void (^)(BOOL, NSString*, NSNumber*))completion;
 
 /*
  Marks a message as sent. When the server acked it
@@ -210,18 +209,23 @@ extern NSString *const kMessageTypeUrl;
 -(NSDate*) lastMessageDateAccount:(NSString*) accountNo;
 
 
--(BOOL) messageHistoryClean:(NSString*) buddy :(NSString*) accountNo;
+-(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(BOOL) messageHistoryCleanAll;
 
 -(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo;
--(void) markAsReadBuddy:(NSString*) buddy forAccount:(NSString*) accountNo;
--(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId encrypted:(BOOL) encrypted withCompletion:(void (^)(BOOL, NSString *))completion;
+-(NSArray*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSString*) accountNo tillStanzaId:(NSString* _Nullable) stanzaId wasOutgoing:(BOOL) outgoing;
+
+-(void) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString *)messageId encrypted:(BOOL) encrypted withCompletion:(void (^)(BOOL, NSString*, NSNumber*)) completion;
+
+/**
+retrieves the actual_from of the the last message from hisroty id
+*/
+-(NSString*)lastMessageActualFromByHistoryId:(NSNumber*) lastMsgHistoryId;
 
 #pragma mark active contacts
--(NSMutableArray*) activeContacts:(BOOL) pinned;
+-(NSMutableArray*) activeContactsWithPinned:(BOOL) pinned;
 -(NSMutableArray*) activeContactDict;
 -(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
--(void) removeAllActiveBuddies;
 -(BOOL) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo;
 -(BOOL) isActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
 -(BOOL) updateActiveBuddy:(NSString*) buddyname setTime:(NSString *)timestamp forAccount:(NSString*) accountNo;
@@ -267,5 +271,20 @@ extern NSString *const kMessageTypeUrl;
 -(NSDictionary *) getSubscriptionForContact:(NSString*) contact andAccount:(NSString*) accountNo;
 -(void) setSubscription:(NSString *)sub andAsk:(NSString*) ask forContact:(NSString*) contact andAccount:(NSString*) accountNo;
 
+#pragma mark History Message Search
+/*
+ search message by keyword in message, message_from, actual_from, messageType.
+ */
+-(NSArray* _Nullable) searchResultOfHistoryMessageWithKeyWords:(NSString* _Nonnull) keyword
+                                             accountNo:(NSString*  _Nonnull) accountNo;
 
+/*
+ search message by keyword in message, message_from, actual_from, messageType.
+ */
+-(NSArray* _Nullable) searchResultOfHistoryMessageWithKeyWords:(NSString* _Nonnull) keyword
+                                             accountNo:(NSString*  _Nonnull) accountNo
+                                          betweenBuddy:(NSString*  _Nonnull) accountJid1
+                                              andBuddy:(NSString*  _Nonnull) accountJid2;
 @end
+
+NS_ASSUME_NONNULL_END

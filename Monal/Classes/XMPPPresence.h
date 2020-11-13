@@ -6,7 +6,7 @@
 //
 //
 
-#import "MLXMLNode.h"
+#import "XMPPStanza.h"
 
 /*
  pmuc-v1 = private muc
@@ -20,22 +20,10 @@
 #define kextvideo @"video-v1"
 #define kextcamera @"camera-v1"
 
-
-#define kpresenceUnavailable @"unavailable"
-#define kpresencesSubscribe @"subscribe"
-#define kpresenceSubscribed @"subscribed"
-#define kpresenceUnsubscribe @"unsubscribe"
-#define kpresenceUnsubscribed @"unsubscribed"
-#define kpresenceProbe @"probe"
-#define kpresenceError @"error"
-
-@interface XMPPPresence : MLXMLNode
+@interface XMPPPresence : XMPPStanza
 {
     
 }
-
-@property (nonatomic,strong) NSString* versionHash;
-
 
 /**
  initialte with a version hash string

@@ -6,18 +6,19 @@
 //
 //
 
-#import "MLXMLNode.h"
+#import "XMPPStanza.h"
 
+FOUNDATION_EXPORT NSString* const kiqGetType;
+FOUNDATION_EXPORT NSString* const kiqSetType;
+FOUNDATION_EXPORT NSString* const kiqResultType;
+FOUNDATION_EXPORT NSString* const kiqErrorType;
 
-FOUNDATION_EXPORT NSString *const kiqGetType;
-FOUNDATION_EXPORT NSString *const kiqSetType;
-FOUNDATION_EXPORT NSString *const kiqResultType;
-FOUNDATION_EXPORT NSString *const kiqErrorType;
-
-@interface XMPPIQ : MLXMLNode
+@interface XMPPIQ : XMPPStanza
 
 -(id) initWithId:(NSString*) iqid andType:(NSString*) iqType;
 -(id) initWithType:(NSString*) iqType;
+-(id) initWithType:(NSString*) iqType to:(NSString*) to;
+-(id) initAsResponseTo:(XMPPIQ*) iq withType:(NSString*) iqType;
 
 -(NSString*) getId;
 -(void) setId:(NSString*) id;
@@ -60,7 +61,7 @@ FOUNDATION_EXPORT NSString *const kiqErrorType;
  makes a disco info response for the server.
  @param node param passed is the xmpp node attribute that came in with the iq get
  */
--(void) setDiscoInfoWithFeaturesAndNode:(NSString*) node;
+-(void) setDiscoInfoWithFeatures:(NSSet*) features identity:(MLXMLNode*) identity andNode:(NSString*) node;
 
 /**
  sets up a disco info query node
@@ -73,10 +74,7 @@ FOUNDATION_EXPORT NSString *const kiqErrorType;
 -(void) setDiscoItemNode;
 
 #pragma mark roster
-/**
-gets vcard info 
- */
--(void) getVcardTo:(NSString*) to;
+
 /**
 gets Entity SoftWare Version
  */
@@ -86,6 +84,8 @@ gets Entity SoftWare Version
 removes a contact from the roster
  */
 -(void) setRemoveFromRoster:(NSString*) jid;
+
+-(void) setUpdateRosterItem:(NSString* _Nonnull) jid withName:(NSString* _Nonnull) name;
 
 /**
  Requests a full roster from the server. A null version will not set the ver attribute
@@ -132,33 +132,9 @@ removes a contact from the roster
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid;
 
-
-#pragma mark Signal
-
--(void) subscribeDevices:(NSString*) jid;
-
-/**
- publishes a device.
- */
--(void) publishDevices:(NSArray*) devices;
-
-/**
- publishes signal keys and prekeys
- */
--(void) publishKeys:(NSDictionary *) keys andPreKeys:(NSArray *) prekeys withDeviceId:(NSString*) deviceid;
-
-
-#pragma mark - pubsub
-
--(void) requestBundles:(NSString*) deviceid;
--(void) requestDevices;
-
-
--(void) requestNode:(NSString*) node;
-
 #pragma mark - account
--(void) changePasswordForUser:(NSString *) user newPassword:(NSString *)newPsss;
+-(void) changePasswordForUser:(NSString* _Nonnull) user newPassword:(NSString* _Nonnull) newPsss;
 -(void) getRegistrationFields;
--(void) registerUser:(NSString *) user withPassword:(NSString *) newPass captcha:(NSString *) captcha andHiddenFields:(NSDictionary *)hiddenFields;
+-(void) registerUser:(NSString* _Nonnull) user withPassword:(NSString* _Nonnull) newPass captcha:(NSString* _Nonnull) captcha andHiddenFields:(NSDictionary* _Nonnull) hiddenFields;
 
 @end

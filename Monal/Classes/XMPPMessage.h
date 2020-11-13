@@ -7,7 +7,7 @@
 //
 
 
-#import "MLXMLNode.h"
+#import "XMPPStanza.h"
 
 FOUNDATION_EXPORT NSString* const kMessageChatType;
 FOUNDATION_EXPORT NSString* const kMessageGroupChatType;
@@ -15,7 +15,9 @@ FOUNDATION_EXPORT NSString* const kMessageErrorType;
 FOUNDATION_EXPORT NSString* const kMessageNormalType;
 FOUNDATION_EXPORT NSString* const kMessageHeadlineType;
 
-@interface XMPPMessage : MLXMLNode
+@interface XMPPMessage : XMPPStanza
+
+-(id) initWithXMPPMessage:(XMPPMessage*) msg;
 
 /**
  Sets the id attribute of the element
@@ -42,6 +44,8 @@ FOUNDATION_EXPORT NSString* const kMessageHeadlineType;
  sets the receipt child element
  */
 -(void) setReceipt:(NSString*) messageId;
+-(void) setChatmarkerReceipt:(NSString*) messageId;
+-(void) setDisplayed:(NSString*) messageId;
 
 /**
  Hint saying the message should be stored

@@ -8,9 +8,11 @@
 
 #import "MLResourcesTableViewController.h"
 #import "DataLayer.h"
+#import "MLXMPPManager.h"
 
 @interface MLResourcesTableViewController ()
 @property (nonatomic, strong) NSArray *resources;
+@property (nonatomic, strong) NSMutableDictionary *versionInfoDic;
 @end
 
 @implementation MLResourcesTableViewController
@@ -21,77 +23,140 @@
         self.navigationItem.title=NSLocalizedString(@"Participants",@ "");
     } else {
         self.navigationItem.title=NSLocalizedString(@"Resources",@ "");
-    }
-    
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshSoftwareVersion:) name: kMonalXmppUserSoftWareVersionRefresh object:nil];
+        if (!self.versionInfoDic)
+        {
+            self.versionInfoDic = [[NSMutableDictionary alloc] init];
+        }
+    }    
 }
 
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
     self.resources = [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
+    
+    if (!self.contact.isGroup) {
+        [self querySoftwareVersion];
+        [self refreshSoftwareVersion:nil];
+    }
+}
+
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    if(!self.contact.isGroup)
+    {
+        [[NSNotificationCenter defaultCenter] removeObserver:kMonalXmppUserSoftWareVersionRefresh];
+    }
 }
 
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
+    if(!self.contact.isGroup)
+    {
+        return self.resources.count;
+    }
+    else
+    {
+        return 1;
+    }    
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-   return self.resources.count;
+    if(!self.contact.isGroup)
+    {
+        return 3;
+    }
+    else
+    {
+        return self.resources.count;
+    }
 }
 
+- (nullable NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    NSString* resourceTitle = [[self.resources objectAtIndex:section] objectForKey:@"resource"];
+    return  resourceTitle;
+}
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"resource" forIndexPath:indexPath];
-    cell.textLabel.text = [[self.resources objectAtIndex:indexPath.row] objectForKey:@"resource"];
+    
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    if (self.contact.isGroup)
+    {
+        cell.textLabel.text = [[self.resources objectAtIndex:indexPath.row] objectForKey:@"resource"];
+    }
+    else
+    {
+        NSString* resourceTitle = [[self.resources objectAtIndex:indexPath.section] objectForKey:@"resource"];
+        if (resourceTitle)
+        {
+            NSDictionary* versionDataDictionary = [self.versionInfoDic objectForKey:resourceTitle];
+            
+            switch (indexPath.row) {
+                case 0:
+                    cell.textLabel.text = [NSString stringWithFormat:@"%@%@",
+                                              NSLocalizedString(@"Name: ",@""),
+                                              (versionDataDictionary[@"platform_App_Name"] == nil) ? @"":versionDataDictionary[@"platform_App_Name"]];
+                    break;
+                case 1:
+                    cell.textLabel.text = [NSString stringWithFormat:@"%@%@",
+                                              NSLocalizedString(@"Os: ",@""),
+                                              (versionDataDictionary[@"platform_OS"] == nil) ? @"":versionDataDictionary[@"platform_OS"]];
+                    break;
+                case 2:
+                    cell.textLabel.text = [NSString stringWithFormat:@"%@%@",
+                                              NSLocalizedString(@"Version: ",@""),
+                                              (versionDataDictionary[@"platform_App_Version"] == nil) ? @"":versionDataDictionary[@"platform_App_Version"]];
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
     
     return cell;
 }
 
+#pragma mark - Query Software Version
 
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
+-(void) querySoftwareVersion
+{
+    for (NSDictionary* resourceDic in self.resources)
+    {
+        NSString* resourceTitle = [resourceDic objectForKey:@"resource"];
+        [[MLXMPPManager sharedInstance] getEntitySoftWareVersionForContact:self.contact andResource:resourceTitle];
+    }
 }
-*/
 
-/*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    } else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
+#pragma mark - refresh software version
+-(void) refreshSoftwareVersion:(NSNotification*) verNotification
+{
+    if (verNotification) {
+        NSMutableDictionary* inVerDictionary = [verNotification.userInfo mutableCopy];
+        NSString* resourceKey = [inVerDictionary objectForKey:@"fromResource"];
+        if (resourceKey)
+        {
+            [inVerDictionary removeObjectForKey:@"fromResource"];
+            [self.versionInfoDic setObject:inVerDictionary forKey:resourceKey];
+        }
+    } else {
+        for (NSDictionary* resourceDic in self.resources)
+        {
+            NSString* resourceTitle = [resourceDic objectForKey:@"resource"];
+            NSArray* versionDBInfoArr = [[DataLayer sharedInstance] getSoftwareVersionInfoForContact:self.contact.contactJid resource:resourceTitle andAccount:self.contact.accountId];
+            
+            if(versionDBInfoArr && [versionDBInfoArr count] >= 1) {
+                [self.versionInfoDic setObject:versionDBInfoArr[0] forKey:resourceTitle];
+            }
+        }
+    }
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.tableView reloadData];
+    });
 }
-*/
-
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
-}
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
-
 @end

@@ -7,42 +7,45 @@
 //
 
 #import "MLXMPPIdentity.h"
+#import "HelperTools.h"
 
- 
 @interface MLXMPPIdentity ()
 
-@property (nonatomic) NSString *jid;
-@property (nonatomic) NSString *password;
-@property (nonatomic) NSString *resource;
-
-@property (nonatomic) NSString *user;
-@property (nonatomic) NSString *domain;
+@property (atomic) NSString* user;
+@property (atomic) NSString* password;
+@property (atomic) NSString* domain;
 
 @end
 
 @implementation MLXMPPIdentity
 
--(id) initWithJid:(NSString *)jid password:(NSString *) password andResource:(NSString *) resource
+-(id) initWithJid:(NSString*) jid password:(NSString*) password andResource:(NSString*) resource
 {
-    self=[super init];
-    self.jid=jid;
-    self.password=password;
-    self.resource=resource;
+    self = [super init];
+    self.jid = jid;
+    self.resource = resource;
+    _fullJid = resource ? [NSString stringWithFormat:@"%@/%@", jid, resource] : jid;
+    self.password = password;
     
-    NSArray* elements=[self.jid componentsSeparatedByString:@"@"];
-    
-    self.user=elements[0];
-    
-    if(elements.count>1) {
+    NSArray* elements = [self.jid componentsSeparatedByString:@"@"];
+    self.user = elements[0];
+    if(elements.count > 1)
         self.domain = elements[1];
-    }
     
     return self;
 }
 
--(void) updatPassword:(NSString *) newPassword
+-(void) updatPassword:(NSString*) newPassword
 {
-    self.password=newPassword;
+    self.password = newPassword;
+}
+
+-(void) bindJid:(NSString*) jid
+{
+    _fullJid = jid;
+    NSDictionary* parts = [HelperTools splitJid:jid];
+    self.jid = parts[@"user"];
+    self.resource = parts[@"resource"];
 }
 
 

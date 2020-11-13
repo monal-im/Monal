@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) NSData* authTag; //just tag
 
 -(MLEncryptedPayload *) initWithBody:(NSData *) body key:(NSData *) key iv:(NSData *) iv authTag:(NSData *) authTag;
+-(MLEncryptedPayload *) initWithKey:(NSData *) key iv:(NSData *) iv;
 
 @end
 

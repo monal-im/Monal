@@ -8,171 +8,115 @@
 
 #import "MLBasePaser.h"
 
+@interface MLXMLNode()
+@property (atomic, readwrite) MLXMLNode* parent;
+@end
+
 @interface MLBasePaser ()
-
-@property (nonatomic, strong) XMPPParser *currentStanzaParser;
-@property (nonatomic, assign) NSInteger depth;
-@property (nonatomic, strong) stanzaCompletion completion;
-
+{
+    MLXMLNode* _currentNode;
+    NSMutableString* _currentCharData;
+    NSInteger _depth;
+    stanzaCompletion _completion;
+}
 @end
 
 @implementation MLBasePaser
 
--(id) initWithCompeltion:(stanzaCompletion) completion
+-(id) initWithCompletion:(stanzaCompletion) completion
 {
     self = [super init];
-    self.completion = completion;
+    _completion = completion;
     return self;
 }
 
 -(void) reset
 {
-    self.currentStanzaParser=nil;
-    self.depth=0; 
+    _currentNode = nil;
+    _depth = 0; 
 }
 
-#pragma mark common parser delegate functions
-- (void)parserDidStartDocument:(NSXMLParser *)parser{
-    DDLogVerbose(@"Document start");
-    self.currentStanzaParser=nil;
-    self.depth=0;
-}
-
-- (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict
+-(void) parserDidStartDocument:(NSXMLParser*) parser
 {
-    self.depth++;
+    DDLogInfo(@"Document start");
+    [self reset];
+}
+
+-(void) parser:(NSXMLParser*) parser didStartElement:(NSString*) elementName namespaceURI:(NSString*) namespaceURI qualifiedName:(NSString*) qName attributes:(NSDictionary*) attributeDict
+{
+    _depth++;
+//     DDLogDebug(@"Started element: %@ :: %@ (%@) depth %ld", elementName, namespaceURI, qName, _depth);
     
-    if(self.depth <= 2) // stream:stream is 1
-    {
-        [self makeStanzaParser:elementName andNamespaceURI:namespaceURI];
-        self.currentStanzaParser.stanzaType=elementName;
-        self.currentStanzaParser.stanzaNameSpace=namespaceURI;
-    }
+    //use appropriate MLXMLNode child classes for iq, message and presence stanzas
+    MLXMLNode* newNode;
+    if(_depth == 2 && [elementName isEqualToString:@"iq"] && [namespaceURI isEqualToString:@"jabber:client"])
+        newNode = [XMPPIQ alloc];
+    else if(_depth == 2 && [elementName isEqualToString:@"message"] && [namespaceURI isEqualToString:@"jabber:client"])
+        newNode = [XMPPMessage alloc];
+    else if(_depth == 2 && [elementName isEqualToString:@"presence"] && [namespaceURI isEqualToString:@"jabber:client"])
+        newNode = [XMPPPresence alloc];
+    else if([elementName isEqualToString:@"x"] && [namespaceURI isEqualToString:@"jabber:x:data"])
+        newNode = [XMPPDataForm alloc];
+    else
+        newNode = [MLXMLNode alloc];
+    newNode = [newNode initWithElement:elementName andNamespace:namespaceURI withAttributes:attributeDict andChildren:@[] andData:nil];
     
-    if(!self.currentStanzaParser)
+    //add new node to tree
+    if(_currentNode)
+        newNode.parent = _currentNode;
+    _currentNode = newNode;
+}
+
+-(void) parser:(NSXMLParser*) parser foundCharacters:(NSString*) string
+{
+    if(!_currentNode)
     {
-        DDLogDebug(@"Started element: %@ with depth: %ld and namespaceURI: %@", elementName, self.depth, namespaceURI);
-        DDLogError(@"no parser!");
+        DDLogError(@"Got xml character data outside of any element!");
         return;
     }
-    
-    [self.currentStanzaParser parser:parser didStartElement:elementName namespaceURI:namespaceURI qualifiedName:qName attributes:attributeDict];
+    if(!_currentCharData)
+        _currentCharData = [[NSMutableString alloc] init];
+    [_currentCharData appendString:string];
 }
 
--(void) makeStanzaParser:(NSString *) elementName andNamespaceURI:(NSString *)namespaceURI
+-(void) parser:(NSXMLParser*) parser didEndElement:(NSString*) elementName namespaceURI:(NSString*) namespaceURI qualifiedName:(NSString*) qName
 {
-    //http://etherx.jabber.org/streams
-    if(([elementName isEqualToString:@"stream"] && [namespaceURI isEqualToString:@"http://etherx.jabber.org/streams"]) ||
-        ([elementName isEqualToString:@"proceed"] && [namespaceURI isEqualToString:@"urn:ietf:params:xml:ns:xmpp-tls"]) ||
-        ([elementName isEqualToString:@"success"] && [namespaceURI isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"]) ||
-        ([elementName isEqualToString:@"features"] && [namespaceURI isEqualToString:@"http://etherx.jabber.org/streams"]) ||
-        ([elementName isEqualToString:@"error"] && [namespaceURI isEqualToString:@"http://etherx.jabber.org/streams"])
-    )
-    {
-        DDLogDebug(@"Creating ParseStream for %@", elementName);
-        self.currentStanzaParser=[[ParseStream alloc] init];
-    }
+    if(_currentCharData)
+        _currentNode.data = [_currentCharData copy];
+    _currentCharData = nil;
     
-    if([elementName isEqualToString:@"iq"] && [namespaceURI isEqualToString:@"jabber:client"])
-    {
-        DDLogDebug(@"Creating ParseIq for %@", elementName);
-        self.currentStanzaParser=[[ParseIq alloc] init];
-    }
-    if([elementName isEqualToString:@"message"] && [namespaceURI isEqualToString:@"jabber:client"])
-    {
-        DDLogDebug(@"Creating ParseMessage for %@", elementName);
-        self.currentStanzaParser=[[ParseMessage alloc] init];
-    }
-    if([elementName isEqualToString:@"presence"] && [namespaceURI isEqualToString:@"jabber:client"])
-    {
-        DDLogDebug(@"Creating ParsePresence for %@", elementName);
-        self.currentStanzaParser=[[ParsePresence alloc] init];
-    }
+//     DDLogDebug(@"Ended element: %@ :: %@ (%@) depth %ld", elementName, namespaceURI, qName, _depth);
     
-    if([elementName isEqualToString:@"enabled"] && [namespaceURI isEqualToString:@"urn:xmpp:sm:3"])
+    //only call completion for stanzas and stream start, not for inner elements inside stanzas
+    if(_depth <= 2)
+        _completion(_currentNode);
+    if(_currentNode.parent)
     {
-        DDLogDebug(@"Creating ParseEnabled for %@", elementName);
-        self.currentStanzaParser=[[ParseEnabled alloc] init];
-    }
-    if([elementName isEqualToString:@"failed"] && [namespaceURI isEqualToString:@"urn:xmpp:sm:3"])
-    {
-        DDLogDebug(@"Creating ParseFailed for %@", elementName);
-        self.currentStanzaParser=[[ParseFailed alloc] init];
-    }
-    if([elementName isEqualToString:@"resumed"] && [namespaceURI isEqualToString:@"urn:xmpp:sm:3"])
-    {
-        DDLogDebug(@"Creating ParseResumed for %@", elementName);
-        self.currentStanzaParser=[[ParseResumed alloc] init];
-    }
-    if([elementName isEqualToString:@"a"] && [namespaceURI isEqualToString:@"urn:xmpp:sm:3"])
-    {
-        DDLogDebug(@"Creating ParseA for %@", elementName);
-        self.currentStanzaParser=[[ParseA alloc] init];
-    }
-    if([elementName isEqualToString:@"r"] && [namespaceURI isEqualToString:@"urn:xmpp:sm:3"])
-    {
-        DDLogDebug(@"Creating ParseR for %@", elementName);
-        self.currentStanzaParser=[[ParseR alloc] init];
-    }
-
-    if([elementName isEqualToString:@"failure"] && [namespaceURI isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
-    {
-        DDLogDebug(@"Creating ParseFailure for %@", elementName);
-        self.currentStanzaParser=[[ParseFailure alloc] init];
-    }
-    if([elementName isEqualToString:@"challenge"] && [namespaceURI isEqualToString:@"urn:ietf:params:xml:ns:xmpp-sasl"])
-    {
-        DDLogDebug(@"Creating ParseChallenge for %@", elementName);
-        self.currentStanzaParser=[[ParseChallenge alloc] init];
-    }
-    
-    if(!self.currentStanzaParser) {
-        DDLogDebug(@"Creating GENERIC XMPPParser for %@", elementName);
-        self.currentStanzaParser =[[XMPPParser alloc] init];
-    }
-}
-
-
-- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
-    [self.currentStanzaParser parser:parser foundCharacters:string];
-}
-
-
--(void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
-    [self.currentStanzaParser parser:parser didEndElement:elementName namespaceURI:namespaceURI qualifiedName:qName];
-    
-    if(self.depth <=2) {
-        if(self.completion) {
-            if(!self.currentStanzaParser) {
-                DDLogDebug(@"Ended element: %@ depth %ld", elementName, self.depth);
-                DDLogError(@"No stanza parser. not calling completion");
-            } else {
-                self.completion(self.currentStanzaParser);
-            }
-        } else  {
-            DDLogDebug(@"Ended element: %@ depth %ld", elementName, self.depth);
-            DDLogError(@"no completion handler for stanza!");
+//         DDLogDebug(@"Ascending from child %@ to parent %@", _currentNode.element, _currentNode.parent.element);
+        if(_depth > 2)      //don't add all received stanzas/nonzas as childs to our stream header (that would create a memory leak!)
+        {
+//             DDLogDebug(@"Adding %@ to parent %@", _currentNode.element, _currentNode.parent.element);
+            [_currentNode.parent addChild:_currentNode];
         }
-        self.currentStanzaParser=nil;
+        _currentNode = _currentNode.parent;
     }
-    self.depth--;
+    _depth--;
 }
 
-
--(void)parserDidEndDocument:(NSXMLParser *)parser {
-    DDLogVerbose(@"Document end");
-}
-
-- (void)parser:(NSXMLParser *)parser foundIgnorableWhitespace:(NSString *)whitespaceString
+-(void) parserDidEndDocument:(NSXMLParser*) parser
 {
-    DDLogVerbose(@"found ignorable whitespace: %@", whitespaceString);
+    DDLogInfo(@"Document end");
 }
 
-- (void)parser:(NSXMLParser *)parser parseErrorOccurred:(NSError *)parseError
+-(void) parser:(NSXMLParser*) parser foundIgnorableWhitespace:(NSString*) whitespaceString
 {
-    DDLogError(@"parseErrorOccurred: line: %ld , col: %ld desc: %@ ",(long)[parser lineNumber],
+    DDLogVerbose(@"Found ignorable whitespace: '%@'", whitespaceString);
+}
+
+-(void) parser:(NSXMLParser*) parser parseErrorOccurred:(NSError*) parseError
+{
+    DDLogError(@"XML parse error occurred: line: %ld , col: %ld desc: %@ ",(long)[parser lineNumber],
                (long)[parser columnNumber], [parseError localizedDescription]);
 }
-
 
 @end

@@ -30,9 +30,9 @@
 /**
  Takes the string from the xmpp icon vcard info and stores it in an appropropriate place. 
  */
--(void) setIconForContact:(NSString*_Nonnull) contact andAccount:(NSString*_Nonnull) accountNo WithData:(NSString*_Nonnull) data ;
+-(void) setIconForContact:(NSString* _Nonnull) contact andAccount:(NSString* _Nonnull) accountNo WithData:(NSData* _Nullable) data ;
 
--(BOOL) saveBackgroundImageData:(NSData *_Nonnull) data;
+-(BOOL) saveBackgroundImageData:(NSData* _Nonnull) data;
 
 /**
  retrieves a uiimage for the icon. returns noicon.png if nothing is found. never returns nil.
@@ -49,5 +49,5 @@
  */
 -(void) purgeCache;
 
--(void) saveImageData:(NSData *) data forLink:(NSString *) link;
+-(void) saveImageData:(NSData* _Nonnull) data forLink:(NSString* _Nonnull) link;
 @end

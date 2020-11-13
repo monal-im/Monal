@@ -62,11 +62,6 @@
 -(void) blocked:(BOOL) isBlockd Jid:(MLContact *) contact;
 
 /**
- Gets service details for account
- */
--(void) getServiceDetailsForAccount:(NSInteger) row;
-
-/**
  Returns the user set name of the conencted account
  */
 -(NSString*) getAccountNameForConnectedRow:(NSInteger) row;
@@ -132,7 +127,7 @@
 /**
 Sends a message to a specified contact in account. Calls completion handler on success or failure.
  */
--(void) sendMessageAndAddToHistory:(NSString*) message toContact:(NSString*)recipient fromAccount:(NSString*) accountID fromJID:(NSString*) fromJID isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC  isUpload:(BOOL) isUpload withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion;
+-(void) sendMessageAndAddToHistory:(NSString*) message toContact:(NSString*) recipient fromAccount:(NSString*) accountID isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC isUpload:(BOOL) isUpload withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion;
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC  isUpload:(BOOL) isUpload messageId:(NSString *) messageId
 withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion;
 -(void) sendChatState:(BOOL) isTyping fromAccount:(NSString*) accountNo toJid:(NSString*) jid;
@@ -172,8 +167,6 @@ Attempts to upload a file to the  HTTP upload service
  */
 -(void) handleNewMessage:(NSNotification*) notification;
 
--(void) resetForeground;
-
 /**
  updates delivery status after message has been sent
  */
@@ -196,26 +189,14 @@ Attempts to upload a file to the  HTTP upload service
 -(void) pingAllAccounts;
 
 /**
- fetch a contacts vCard
- */
--(void) getVCard:(MLContact*) contact;
-
-/**
  fetch entity software version
  */
--(void) getEntitySoftWareVersion:(MLContact *) contact;
+-(void) getEntitySoftWareVersionForContact:(MLContact *) contact andResource:(NSString*) resource;
 /**
  Iterates through set and compares with connected accounts. Removes them. useful for active chat. 
  */
 -(void) cleanArrayOfConnectedAccounts:(NSMutableArray*) dirtySet;
 
 -(void) setPushNode:(NSString*) node andSecret:(NSString*)secret;
-
-
-
--(void) sendMessageForConnectedAccounts;
-
--(void) parseMessageForData:(NSData*) data;
-
 
 @end

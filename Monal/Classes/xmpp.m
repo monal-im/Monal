@@ -441,12 +441,15 @@ NSString *const kContact=@"contact";
 	//see this for creating the proper protocols array: https://github.com/LLNL/FRS/blob/master/Pods/AWSIoT/AWSIoT/Internal/AWSIoTMQTTClient.m
 	//WARNING: this will only have an effect if the TLS handshake was not already started (e.g. the TCP socket is not connected) and
 	//         will be ignored otherwise
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 	SSLContextRef sslContext = (__bridge SSLContextRef) [_oStream propertyForKey: (__bridge NSString *) kCFStreamPropertySSLContext ];
 	CFStringRef strs[1];
 	strs[0] = CFSTR("xmpp-client");
 	CFArrayRef protocols = CFArrayCreate(NULL, (void *)strs, 1, &kCFTypeArrayCallBacks);
 	SSLSetALPNProtocols(sslContext, protocols);
 	CFRelease(protocols);
+#pragma clang diagnostic pop
 }
 
 -(void) createStreams

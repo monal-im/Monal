@@ -6,7 +6,6 @@
 //
 //
 
-#import "MonalAppDelegate.h"
 #import "HelperTools.h"
 #import "MLNotificationManager.h"
 #import "MLImageManager.h"
@@ -87,10 +86,7 @@
     [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
     
     //update app badge
-    dispatch_async(dispatch_get_main_queue(), ^{
-        MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-        [appDelegate updateUnread];
-    });
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalUpdateUnread object:nil];
 }
 
 -(NSString*) identifierWithMessage:(MLMessage*) message

@@ -22,7 +22,6 @@
 +(MLXMPPManager*) sharedInstance;
 
 -(BOOL) allAccountsIdle;
--(void) configureBackgroundFetchingTask;
 
 #pragma  mark connectivity
 /**
@@ -167,18 +166,9 @@ Attempts to upload a file to the  HTTP upload service
 @property (nonatomic, readonly) BOOL isBackgrounded;
 
 /**
- updates unread
- */
--(void) handleNewMessage:(NSNotification*) notification;
-
-/**
  updates delivery status after message has been sent
  */
 -(void) handleSentMessage:(NSNotification*) notification;
-
--(void) scheduleBackgroundFetchingTask;
-
--(void) incomingPushWithCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler;
 
 /**
  updtes client state on server as inactive

@@ -18,6 +18,10 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 //configure app group constants
 #define kAppGroup @"group.monal"
 
+//this is in seconds
+#define SHORT_PING 4.0
+#define LONG_PING 16.0
+
 @class MLContact;
 
 //some typedefs used throughout the project
@@ -56,6 +60,8 @@ typedef enum NotificationPrivacySettingOption {
 #define kMLMessageSentToContact @"kMLMessageSentToContact"
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"
 #define kXMPPError @"kXMPPError"
+#define kScheduleBackgroundFetchingTask @"kScheduleBackgroundFetchingTask"
+#define kMonalUpdateUnread @"kMonalUpdateUnread"
 
 #define kMonalLastInteractionUpdatedNotice @"kMonalLastInteractionUpdatedNotice"
 #define kMonalMessageReceivedNotice @"kMonalMessageReceivedNotice"

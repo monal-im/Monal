@@ -329,7 +329,7 @@ static NSDateFormatter* dbFormatter;
     return nil;
 }
 
--(void) persistState:(NSMutableDictionary*) state forAccount:(NSString*) accountNo
+-(void) persistState:(NSDictionary*) state forAccount:(NSString*) accountNo
 {
     if(!accountNo || !state) return;
     NSString* query = @"update account set state=? where account_id=?";

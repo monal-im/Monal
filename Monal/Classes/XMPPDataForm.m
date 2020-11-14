@@ -45,7 +45,7 @@
     [self setField:name withType:nil andValue:value];
 }
 
--(void) setField:(NSString* _Nonnull) name withType:(NSString*) type andValue:(NSString* _Nonnull) value
+-(void) setField:(NSString* _Nonnull) name withType:(NSString* _Nullable) type andValue:(NSString* _Nonnull) value
 {
     NSDictionary* attrs = type ? @{@"type": type, @"var": name} : @{@"var": name};
     [self removeChild:[self findFirst:[NSString stringWithFormat:@"field<var=%@>", name]]];
@@ -173,7 +173,7 @@
     [self setField:key withValue:value];
 }
 
--(void) setValue:(NSString*) value forKey:(NSString*) key
+-(void) setValue:(NSString* _Nullable) value forKey:(NSString*) key
 {
     if(!value)
         [self removeObjectForKey:key];

@@ -397,7 +397,6 @@ static NSMutableDictionary* currentTransactions;
         int step;
         while((step=sqlite3_step(statement)) == SQLITE_ROW)
         {
-            NSMutableDictionary* row = [[NSMutableDictionary alloc] init];
             NSObject* returnData = [self getColumn:0 ofStatement:statement];
             //accessing an unset key in NSDictionary will return nil (nil can not be inserted directly into the dictionary)
             if(returnData)

@@ -682,7 +682,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) hangupContact:(MLContact*) contact
 {
-    xmpp* account =[self getConnectedAccountForID:contact.accountId];
+    xmpp* account = [self getConnectedAccountForID:contact.accountId];
     [account hangup:contact];
 }
 

@@ -106,17 +106,6 @@
 }
 
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    if(interfaceOrientation==UIInterfaceOrientationPortrait)
-        return YES;
-    else
-        
-        return NO;
-}
-
-
-
 -(IBAction)cancelCall:(id)sender
 {
     [UIDevice currentDevice].proximityMonitoringEnabled=NO;

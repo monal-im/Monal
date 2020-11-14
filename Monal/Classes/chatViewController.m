@@ -34,7 +34,7 @@
 @import MobileCoreServices;
 @import AVFoundation;
 
-@interface chatViewController()<IDMPhotoBrowserDelegate, ChatInputActionDelegage, UISearchControllerDelegate, SearchResultDeleagte>
+@interface chatViewController()<IDMPhotoBrowserDelegate, ChatInputActionDelegage, UISearchControllerDelegate>
 {
     BOOL _isTyping;
     monal_void_block_t _cancelTypingNotification;

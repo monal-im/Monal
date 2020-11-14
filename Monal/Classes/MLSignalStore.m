@@ -23,7 +23,7 @@
 
 +(void) initialize
 {
-    //WE USE THE SAME DATABASE FILE AS THE DataLayer --> this should probably be migrated into the datalayer or use its own sqlite database
+    //TODO: WE USE THE SAME DATABASE FILE AS THE DataLayer --> this should probably be migrated into the datalayer or use its own sqlite database
     
     //make sure the datalayer has migrated the database file to the app group location first
     [DataLayer initialize];

@@ -12,25 +12,27 @@
 #import <Foundation/Foundation.h>
 #import "MLXMLNode.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface XMPPDataForm : MLXMLNode
 
--(id _Nonnull) initWithType:(NSString* _Nonnull) type andFormType:(NSString* _Nonnull) formType;
--(id _Nonnull) initWithType:(NSString* _Nonnull) type formType:(NSString* _Nonnull) formType andDictionary:(NSDictionary* _Nonnull) vars;
+-(id) initWithType:(NSString*) type andFormType:(NSString*) formType;
+-(id) initWithType:(NSString*) type formType:(NSString*) formType andDictionary:(NSDictionary*) vars;
 
-@property (atomic, strong) NSString* _Nonnull type;
-@property (atomic, strong) NSString* _Nonnull formType;
--(void) setFieldWithDictionary:(NSDictionary* _Nonnull) field;
--(void) setField:(NSString* _Nonnull) name withValue:(NSString* _Nonnull) value;
--(void) setField:(NSString* _Nonnull) name withType:(NSString* _Nonnull) type andValue:(NSString* _Nonnull) value;
--(NSDictionary* _Nullable) getField:(NSString* _Nonnull) name;
--(void) removeField:(NSString* _Nonnull) name;
+@property (atomic, strong) NSString* type;
+@property (atomic, strong) NSString* formType;
+-(void) setFieldWithDictionary:(NSDictionary*) field;
+-(void) setField:(NSString*) name withValue:(NSString*) value;
+-(void) setField:(NSString*) name withType:(NSString* _Nullable) type andValue:(NSString*) value;
+-(NSDictionary* _Nullable) getField:(NSString*) name;
+-(void) removeField:(NSString*) name;
 
 //NSMutableDictionary interface (not complete, but nearly complete)
 @property(readonly) NSUInteger count;
 @property(readonly, copy) NSArray* allKeys;
 @property(readonly, copy) NSArray* allValues;
--(id _Nullable) objectForKeyedSubscript:(NSString* _Nonnull) key;
--(void) setObject:(id _Nullable) obj forKeyedSubscript:(NSString* _Nonnull) key;
+-(id _Nullable) objectForKeyedSubscript:(NSString*) key;
+-(void) setObject:(id _Nullable) obj forKeyedSubscript:(NSString*) key;
 -(NSArray*) allKeys;
 -(NSArray*) allValues;
 -(NSArray*) allKeysForObject:(id) anObject;
@@ -40,10 +42,12 @@
 -(void) removeAllObjects;
 -(void) removeObjectsForKeys:(NSArray*) keyArray;
 -(void) setObject:(NSString*) value forKey:(NSString*) key;
--(void) setValue:(NSString*) value forKey:(NSString*) key;
+-(void) setValue:(NSString* _Nullable) value forKey:(NSString*) key;
 -(void) addEntriesFromDictionary:(NSDictionary*) vars;
 -(void) setDictionary:(NSDictionary*) vars;
 
 @end
+
+NS_ASSUME_NONNULL_END
 
 #endif /* XMPPDataForm_h */

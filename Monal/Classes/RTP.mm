@@ -109,7 +109,7 @@ void checkerror(int rtperr)
                     
                     //  debug_NSLog(@"Got packet");
                     
-                    TPCircularBufferProduceBytes(&packetInCircularBuffer,pack->GetPayloadData(), pack->GetPayloadLength());
+                    TPCircularBufferProduceBytes(&packetInCircularBuffer,pack->GetPayloadData(), (unsigned int)pack->GetPayloadLength());
     
                     sess.DeletePacket(pack);
                     
@@ -194,11 +194,13 @@ void AudioOutputCallback(
             void* pbuffer=outBuffer->mAudioData;
             memcpy(pbuffer, buffer, bytesToCopy);
             
+            /*
             OSStatus status = AudioQueueEnqueueBuffer(
                                                       playState->queue,
                                                       outBuffer,
                                                       0,
                                                       packetDescs);
+            */
             
             playState->currentPacket += numPackets;
             

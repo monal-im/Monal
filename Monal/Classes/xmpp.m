@@ -2690,7 +2690,7 @@ NSString *const kContact=@"contact";
 
 -(void)hangup:(MLContact*) contact
 {
-    XMPPIQ* jingleiq =[self.jingle terminateJinglewithId:[[NSUUID UUID] UUIDString]];
+    XMPPIQ* jingleiq = [self.jingle terminateJinglewithId:[[NSUUID UUID] UUIDString]];
     [self send:jingleiq];
     [self.jingle rtpDisconnect];
     self.jingle=nil;

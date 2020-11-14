@@ -15,9 +15,10 @@
 #import "MLXMPPManager.h"
 #import "MLNotificationManager.h"
 #import "MLResizingTextView.h"
+#import "MLSearchViewController.h"
 
 
-@interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate, CLLocationManagerDelegate>
+@interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate, CLLocationManagerDelegate, SearchResultDelegate>
 {
     UIView* containerView;
 	BOOL _firstmsg;
@@ -72,6 +73,6 @@
 
 -(void) retry:(id) sender;
 
--(void) reloadTable; 
+-(void) reloadTable;
 
 @end

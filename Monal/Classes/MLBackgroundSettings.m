@@ -129,13 +129,13 @@
 #if TARGET_OS_MACCATALYST
     //UTI @"public.data" for everything
     NSString *images = (NSString *)kUTTypeImage;
-   UIDocumentPickerViewController *imagePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images] inMode:UIDocumentPickerModeImport];
+    UIDocumentPickerViewController *imagePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images] inMode:UIDocumentPickerModeImport];
     imagePicker.allowsMultipleSelection=NO;
     imagePicker.delegate=self;
     [self presentViewController:imagePicker animated:YES completion:nil];
 #else
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
-    imagePicker.delegate =self;
+    imagePicker.delegate = self;
     imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
         if(granted)

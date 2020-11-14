@@ -10,10 +10,8 @@
 #import "MLContact.h"
 #import "DataLayer.h"
 
-@protocol SearchResultDeleagte
-
+@protocol SearchResultDelegate
 - (void) doGoSearchResultAction:(NSNumber*_Nullable) nextDBId;
-- (void) doReloadActionForPathIndex:(NSIndexPath*_Nonnull) pathIdx;
 - (void) doReloadActionForAllTableView;
 - (void) doReloadHistoryForSearch;
 - (void) doGetMsgData;
@@ -24,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MLSearchViewController : UISearchController <UISearchBarDelegate>
 @property (nonatomic, strong) MLContact *contact;
 @property (nonatomic, weak) NSString *jid;
-@property (nonatomic, weak) id <SearchResultDeleagte> searchResultDelegate;
+@property (nonatomic, weak) id <SearchResultDelegate> searchResultDelegate;
 @property (nonatomic) BOOL isLoadingHistory;
 @property (nonatomic) BOOL isGoingUp;
 

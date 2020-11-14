@@ -8,6 +8,8 @@
 
 #import "XMPPStanza.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 FOUNDATION_EXPORT NSString* const kiqGetType;
 FOUNDATION_EXPORT NSString* const kiqSetType;
 FOUNDATION_EXPORT NSString* const kiqResultType;
@@ -127,7 +129,7 @@ removes a contact from the roster
 /**
  Dictionary info has initiator, responder, sid, ownip
  */
--(void) setJingleTerminateTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info;
+-(void) setJingleTerminateTo:(NSString* _Nullable) jid andResource:(NSString* _Nullable) resource withValues:(NSDictionary* _Nullable) info;
 
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid;
@@ -138,3 +140,5 @@ removes a contact from the roster
 -(void) registerUser:(NSString* _Nonnull) user withPassword:(NSString* _Nonnull) newPass captcha:(NSString* _Nonnull) captcha andHiddenFields:(NSDictionary* _Nonnull) hiddenFields;
 
 @end
+
+NS_ASSUME_NONNULL_END

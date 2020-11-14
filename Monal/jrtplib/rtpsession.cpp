@@ -752,7 +752,7 @@ int RTPSession::SendRTCPAPPPacket(uint8_t subtype, const uint8_t name[4], const 
 	sentpackets = true;
 	PACKSENT_UNLOCK
 
-	return pb.GetCompoundPacketLength();
+	return (int)pb.GetCompoundPacketLength();
 }
 
 #endif // RTP_SUPPORT_SENDAPP

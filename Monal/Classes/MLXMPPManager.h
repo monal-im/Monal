@@ -113,7 +113,7 @@
 /**
  hangup on a contact from an account
  */
--(void) hangupContact:(NSDictionary*) contact;
+-(void) hangupContact:(MLContact*) contact;
 
 
 -(void) approveContact:(MLContact*) contact;

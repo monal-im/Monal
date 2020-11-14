@@ -23,7 +23,7 @@ static DDQualityOfServiceName _qos_name(NSUInteger qos) {
     }
 }
 
-static NSString* _loglevel_name(NSUInteger flag) {
+static inline NSString* _loglevel_name(NSUInteger flag) {
     if(flag & DDLogLevelOff)
         return @"  OFF";
     else if(flag & DDLogLevelError)

@@ -76,7 +76,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 @property (nonatomic, strong) NSString* statusMessage;
 @property (nonatomic, assign) BOOL awayState;
 
-@property (nonatomic, strong) jingleCall *jingle;
+@property (nonatomic, strong) jingleCall* _Nullable jingle;
 
 // DB info
 @property (nonatomic, strong) NSString* accountNo;

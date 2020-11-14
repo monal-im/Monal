@@ -10,7 +10,7 @@
 
 @import UIKit;
 
-@interface MLImageManager : NSObject  <NSURLSessionDownloadDelegate>
+@interface MLImageManager : NSObject
 
 /**
  chatview inbound background image

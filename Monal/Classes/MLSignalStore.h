@@ -26,7 +26,6 @@
 -(NSMutableArray *) readPreKeys;
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 -(void) deleteDeviceforAddress:(SignalAddress*)address;
--(void) deletePreKeyWithRid:(NSNumber*) rid;
 
 -(int) getHighestPreyKeyId;
 -(int) getPreKeyCount;

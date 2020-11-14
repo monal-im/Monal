@@ -166,7 +166,7 @@
         
         if(auth) {
             /* Set expected tag value. */
-            EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, (int)auth.length, auth.bytes);
+            EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, (int)auth.length, (void*)auth.bytes);
         }
         
         EVP_CIPHER_CTX_free(ctx);

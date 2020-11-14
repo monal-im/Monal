@@ -168,7 +168,7 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 		exthdrlen = 0;
 	}	
 	
-	payloadlength = packetlen-numpadbytes-payloadoffset;
+	payloadlength = (int)(packetlen-numpadbytes-payloadoffset);
 	if (payloadlength < 0)
 		return ERR_RTP_PACKET_INVALIDPACKET;
 

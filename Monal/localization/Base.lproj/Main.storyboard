@@ -343,7 +343,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="Pzk-IL-JHz">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="Pzk-IL-JHz" reuseIdentifier="Pzk-IL-JHz">
                                 <rect key="frame" x="0.0" y="28" width="414" height="43.666667938232422"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="Pzk-IL-JHz" id="f2h-kv-0Bm">
@@ -468,7 +468,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="aW3-bk-9lP">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="aW3-bk-9lP" reuseIdentifier="aW3-bk-9lP">
                                 <rect key="frame" x="0.0" y="55.333332061767578" width="414" height="43.666667938232422"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="aW3-bk-9lP" id="XkY-vh-b2N">
@@ -1681,7 +1681,7 @@
                     </view>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="tgd-HR-Cbd">
                         <nil key="title"/>
-                        <barButtonItem key="rightBarButtonItem" image="745-unlocked" style="plain" id="wma-QS-7Rc">
+                        <barButtonItem key="rightBarButtonItem" image="745-unlocked" id="wma-QS-7Rc">
                             <connections>
                                 <action selector="toggleEncryption:" destination="5nR-Q5-dQD" id="NXe-fw-72r"/>
                             </connections>
@@ -1713,7 +1713,6 @@
                             <color key="textColor" systemColor="labelColor"/>
                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                             <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
-                            <dataDetectorType key="dataDetectorTypes" link="YES"/>
                             <attributedString key="userComments">
                                 <fragment content="#bc-ignore!"/>
                             </attributedString>

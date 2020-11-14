@@ -64,7 +64,7 @@
                                                             <constraint firstAttribute="width" constant="100" id="rLE-sF-M1H"/>
                                                         </constraints>
                                                     </imageView>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="jid" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontForContentSizeCategory="YES" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6bI-Lh-Qhb">
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="jid" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6bI-Lh-Qhb">
                                                         <rect key="frame" x="8" y="128" width="398" height="24.5"/>
                                                         <fontDescription key="fontDescription" name="ClarendonBT-Roman" family="Clarendon" pointSize="21"/>
                                                         <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -417,9 +417,6 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="yUm-Sr-yQc" secondAttribute="trailing" id="TCs-PX-4q1"/>
-                            <constraint firstItem="yUm-Sr-yQc" firstAttribute="leading" secondItem="fkR-1M-FW4" secondAttribute="leading" id="ULQ-Er-hci"/>
-                            <constraint firstItem="GUi-R2-kR6" firstAttribute="top" secondItem="yUm-Sr-yQc" secondAttribute="bottom" id="mlA-JR-pTl"/>
-                            <constraint firstItem="yUm-Sr-yQc" firstAttribute="top" secondItem="dMg-Du-phN" secondAttribute="bottom" constant="8" id="qce-VT-P6r"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="K6N-JL-zSL"/>
                     </view>

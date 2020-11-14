@@ -4,7 +4,7 @@ PODS:
   - CocoaLumberjack/Core (3.7.0)
   - DACircularProgress (2.3.1)
   - DZNEmptyDataSet (1.8.1)
-  - EAIntroView (2.12.0):
+  - EAIntroView (2.13.0):
     - EARestrictedScrollView (~> 1.1.0)
   - EARestrictedScrollView (1.1.0)
   - IDMPhotoBrowser (1.10.2):
@@ -69,7 +69,7 @@ SPEC CHECKSUMS:
   CocoaLumberjack: e8955b9d337ac307103b0a34fd141c32f27e53c5
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
-  EAIntroView: 249559079ddfdbe80e5bcb755c04c3b964b2ac27
+  EAIntroView: 9adedfc6b5c3fd3ebe19766da01dae573e6ce053
   EARestrictedScrollView: b0c2a3f92fb2610bb44d71c5e4893777c89e45ef
   IDMPhotoBrowser: 4bb459b1faffc228e92bccdf7c54ad6d6b7e8c37
   MarqueeLabel: 00cc0bcd087111dca575878b3531af980559707d

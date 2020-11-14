@@ -20,6 +20,8 @@
 
 @interface MLBaseCell : UITableViewCell
 
+-(id) init;
+
 @property (nonatomic, assign) BOOL outBound;
 @property (nonatomic, assign) BOOL MUC;
 

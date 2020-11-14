@@ -79,16 +79,21 @@ enum activeChatsControllerSections {
          forCellReuseIdentifier:@"ContactCell"];
     
     self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeAllVisible;
-#if !TARGET_OS_MACCATALYST
     if(@available(iOS 13.0, *))
+    {
+#if !TARGET_OS_MACCATALYST
         self.splitViewController.primaryBackgroundStyle = UISplitViewControllerBackgroundStyleSidebar;
+#endif
+        self.settingsButton.image = [UIImage systemImageNamed:@"person.crop.circle"];
+        self.addButton.image = [UIImage systemImageNamed:@"plus"];
+        self.composeButton.image = [UIImage systemImageNamed:@"square.and.pencil"];
+    }
     else
     {
         self.settingsButton.image = [UIImage imageNamed:@"973-user"];
         self.addButton.image = [UIImage imageNamed:@"907-plus-rounded-square"];
         self.composeButton.image = [UIImage imageNamed:@"704-compose"];
     }
-#endif
     
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;

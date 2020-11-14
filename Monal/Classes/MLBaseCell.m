@@ -11,6 +11,16 @@
 
 @implementation MLBaseCell
 
+-(id) init
+{
+    self = [super init];
+    if(@available(iOS 13.0, *))
+        [self.retry setImage:[UIImage systemImageNamed:@"info.circle"] forState:UIControlStateNormal];
+    else
+        [self.retry setImage:[UIImage imageNamed:@"724-info"] forState:UIControlStateNormal];
+    return self;
+}
+
 - (void)awakeFromNib {
     [super awakeFromNib];
     

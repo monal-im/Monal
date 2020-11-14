@@ -225,7 +225,7 @@
                                 <action selector="close:" destination="6Ao-6z-tB7" id="JZL-x6-OVB"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" image="person.3.fill" catalog="system" id="2vX-Wb-Pa6">
+                        <barButtonItem key="rightBarButtonItem" id="2vX-Wb-Pa6">
                             <connections>
                                 <segue destination="nW7-fq-iEr" kind="show" identifier="showGroups" id="U4S-rm-QvZ"/>
                             </connections>
@@ -358,20 +358,20 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Chats" id="RRa-hC-xrf">
-                        <barButtonItem key="leftBarButtonItem" title="Settings" image="person.crop.circle" catalog="system" id="BWH-2I-fSI">
+                        <barButtonItem key="leftBarButtonItem" title="Settings" id="BWH-2I-fSI">
                             <connections>
                                 <segue destination="cmS-oG-cv1" kind="presentation" identifier="showSettings" id="zkg-JY-Otv"/>
                             </connections>
                         </barButtonItem>
                         <rightBarButtonItems>
-                            <barButtonItem title="Compose" image="square.and.pencil" catalog="system" id="pyP-qb-mfr">
+                            <barButtonItem title="Compose" id="pyP-qb-mfr">
                                 <connections>
                                     <segue destination="hMh-kj-2DY" kind="popoverPresentation" identifier="showContacts" popoverAnchorBarButtonItem="pyP-qb-mfr" id="lBM-pO-Hdw">
                                         <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
                                     </segue>
                                 </connections>
                             </barButtonItem>
-                            <barButtonItem title="Add" image="plus" catalog="system" id="wNA-vF-ohQ">
+                            <barButtonItem title="Add" id="wNA-vF-ohQ">
                                 <connections>
                                     <segue destination="elF-QS-Bpm" kind="presentation" identifier="showNew" id="tor-VM-YxS"/>
                                 </connections>
@@ -1163,7 +1163,7 @@
                                                         <constraint firstAttribute="width" constant="28" id="awC-8S-WeQ"/>
                                                     </constraints>
                                                     <color key="tintColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                    <state key="normal" image="info.circle" catalog="system"/>
+                                                    <state key="normal"/>
                                                 </button>
                                                 <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DZU-Tx-2ba">
                                                     <rect key="frame" x="325.33333333333331" y="26" width="73.666666666666686" height="93"/>
@@ -1728,7 +1728,7 @@
                                 <constraint firstAttribute="width" constant="36" id="NRJ-Qj-1DA"/>
                                 <constraint firstAttribute="height" constant="30" id="ZPw-Mb-D1d"/>
                             </constraints>
-                            <state key="normal" image="paperplane.fill" catalog="system"/>
+                            <state key="normal"/>
                             <attributedString key="userComments">
                                 <fragment content="#bc-ignore!"/>
                             </attributedString>
@@ -1743,7 +1743,7 @@
                                 <constraint firstAttribute="width" constant="28" id="r5D-N5-kFE"/>
                                 <constraint firstAttribute="height" constant="27" id="yNE-7P-Ml5"/>
                             </constraints>
-                            <state key="normal" image="paperclip" catalog="system"/>
+                            <state key="normal" catalog="system"/>
                             <attributedString key="userComments">
                                 <fragment content="#bc-ignore!"/>
                             </attributedString>

@@ -193,14 +193,13 @@ enum msgSentState {
     
     [self setChatInputHeightConstraints:YES];
     
-#if !TARGET_OS_MACCATALYST
     if (@available(iOS 13.0, *)) {
-        
+        [self.sendButton setImage:[UIImage systemImageNamed:@"paperplane.fill"] forState:UIControlStateNormal];
+        [self.plusButton setImage:[UIImage systemImageNamed:@"paperclip"] forState:UIControlStateNormal];
     } else {
         [self.sendButton setImage:[UIImage imageNamed:@"648-paper-airplane"] forState:UIControlStateNormal];
         [self.plusButton setImage:[UIImage imageNamed:@"907-plus-rounded-square"] forState:UIControlStateNormal];
     }
-#endif
 
     // setup refreshControl for infinite scrolling
     UIRefreshControl* refreshControl = [[UIRefreshControl alloc] init];

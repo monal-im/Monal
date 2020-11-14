@@ -60,7 +60,7 @@
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     
-    self.searchController =[[UISearchController alloc] initWithSearchResultsController:nil];
+    self.searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
     
     self.searchController.searchResultsUpdater = self;
     self.searchController.delegate = self;
@@ -71,8 +71,11 @@
     
     self.tableView.emptyDataSetSource = self;
     self.tableView.emptyDataSetDelegate = self;
-        
     
+    if(@available(iOS 13.0, *))
+        self.navigationItem.rightBarButtonItem.image = [UIImage systemImageNamed:@"person.3.fill"];
+    else
+        self.navigationItem.rightBarButtonItem.image = [UIImage imageNamed:@"974-users"];
 }
 
 -(void) dealloc

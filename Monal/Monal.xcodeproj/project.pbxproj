@@ -1712,7 +1712,6 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				541DC33B248D1746001FD06D /* MonalAdhoc.entitlements */,
 				26A711D723C4D67300FC6A86 /* MLCrypto.xcodeproj */,
 				26AA70222146E2B900598605 /* shareSheet.entitlements */,
 				26FDB4341DC16A9800A129E0 /* Monal.entitlements */,
@@ -2054,9 +2053,9 @@
 				ORGANIZATIONNAME = Monal.im;
 				TargetAttributes = {
 					1D6058900D05DD3D006BFB54 = {
-						DevelopmentTeam = 33XS7DE5NZ;
+						DevelopmentTeam = S8D843U34Y;
 						LastSwiftMigration = 1220;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -2082,6 +2081,8 @@
 					};
 					26AA70102146BBB800598605 = {
 						CreatedOnToolsVersion = 9.4.1;
+						DevelopmentTeam = S8D843U34Y;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 1;
@@ -3019,6 +3020,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"DEBUG=1",
+					"DEBUG_ALPHA=1",
 				);
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;

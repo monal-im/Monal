@@ -25,7 +25,6 @@
 @property (atomic, strong) SignalContext* _signalContext;
 
 @property (nonatomic, strong) NSString* accountJid;
-@property (nonatomic, strong) MLXMPPConnection* connection;
 
 @property (nonatomic, strong) xmpp* account;
 @property (nonatomic, assign) BOOL deviceListExists;
@@ -45,7 +44,6 @@ const int KEY_SIZE = 16;
 {
     self = [super init];
     self.accountJid = account.connectionProperties.identity.jid;
-    self.connection = account.connectionProperties;
     self.account = account;
     self.deviceListExists = YES;
     self.hasCatchUpDone = [NSNumber numberWithInt:0];
@@ -227,7 +225,7 @@ $$
 {
     if(receivedDevices)
     {
-        NSAssert([self.accountJid caseInsensitiveCompare:self.connection.identity.jid] == NSOrderedSame, @"connection jid should be equal to the senderJid");
+        NSAssert([self.accountJid caseInsensitiveCompare:self.account.connectionProperties.identity.jid] == NSOrderedSame, @"connection jid should be equal to the senderJid");
 
         if(![[DataLayer  sharedInstance] isContactInList:source forAccount:self.account.accountNo] && ![source isEqualToString:self.accountJid])
             return;

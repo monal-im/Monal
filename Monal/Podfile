@@ -41,7 +41,7 @@ pod 'MBProgressHUD', '~> 1.2.0'
 
 pod 'NotificationBannerSwift', '~> 3.0.2'
 pod 'IDMPhotoBrowser'
-pod 'SDWebImage', '~> 5.8.3'
+pod 'SDWebImage', '~> 5.9.5'
 
 pod 'DZNEmptyDataSet'
 pod 'EAIntroView'
@@ -65,6 +65,6 @@ target 'monalxmpp' do
   pod 'SignalProtocolObjC'
   pod 'SignalProtocolC'
 
- pod 'OpenSSL-Universal', '1.0.2.20'
+ pod 'OpenSSL-Universal', '1.1.17'
 
 end

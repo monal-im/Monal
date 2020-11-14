@@ -25,7 +25,6 @@
 @property (atomic, strong) SignalContext* _signalContext;
 
 @property (nonatomic, strong) NSString* accountJid;
-@property (nonatomic, strong) NSString* accountNo;
 @property (nonatomic, strong) MLXMPPConnection* connection;
 
 @property (nonatomic, strong) xmpp* account;
@@ -46,7 +45,6 @@ const int KEY_SIZE = 16;
 {
     self = [super init];
     self.accountJid = account.connectionProperties.identity.jid;
-    self.accountNo = account.accountNo;
     self.connection = account.connectionProperties;
     self.account = account;
     self.deviceListExists = YES;
@@ -68,7 +66,7 @@ const int KEY_SIZE = 16;
     if(!dic) return;
     NSString* accountNo = [dic objectForKey:@"AccountNo"];
     if(!accountNo) return;
-    if([self.accountNo isEqualToString:accountNo]) {
+    if([self.account.accountNo isEqualToString:accountNo]) {
         self.deviceListExists = NO;
     }
 }
@@ -77,7 +75,7 @@ const int KEY_SIZE = 16;
     xmpp* notiAccount = notification.object;
     if(!notiAccount) return;
 
-    if([self.accountNo isEqualToString:notiAccount.accountNo]) {
+    if([self.account.accountNo isEqualToString:notiAccount.accountNo]) {
         self.hasCatchUpDone = [NSNumber numberWithInt:1];
         if(self.deviceListExists == NO) {
             // we need to publish a new devicelist if we did not receive our own list after a new connection
@@ -94,7 +92,7 @@ const int KEY_SIZE = 16;
 
 -(void) setupSignal
 {
-    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:self.accountNo];
+    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:self.account.accountNo];
 
     // signal store
     SignalStorage* signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
@@ -231,7 +229,7 @@ $$
     {
         NSAssert([self.accountJid caseInsensitiveCompare:self.connection.identity.jid] == NSOrderedSame, @"connection jid should be equal to the senderJid");
 
-        if(![[DataLayer  sharedInstance] isContactInList:source forAccount:self.accountNo] && ![source isEqualToString:self.accountJid])
+        if(![[DataLayer  sharedInstance] isContactInList:source forAccount:self.account.accountNo] && ![source isEqualToString:self.accountJid])
             return;
 
         NSArray<NSNumber*>* existingDevices = [self.monalSignalStore knownDevicesForAddressName:source];

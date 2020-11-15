@@ -731,6 +731,8 @@ enum msgSentState {
             //refresh contact in active contacts view
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
         }
+        else
+            DDLogDebug(@"Not marking messages as read because we are still in background: %@", [HelperTools isInBackground] ? @"YES" : @"NO");
     }
 }
 

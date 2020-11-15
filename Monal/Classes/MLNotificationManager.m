@@ -114,8 +114,10 @@
     DDLogInfo(@"Adding badge value: %lu", (long)unread);
     content.badge = [NSNumber numberWithInteger:unread];
     
-    DDLogVerbose(@"notification manager: publishing notification: %@", content.body);
-    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
+    //scheduling the notification in 1.5 seconds will make it possible to be deleted by XEP-0333 chat-markers received directly after the message
+    //this is useful in catchup scenarios
+    DDLogVerbose(@"notification manager: publishing notification in 1.5 seconds: %@", content.body);
+    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:[UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1.5 repeats: NO]];
     [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
         if(error)
             DDLogError(@"Error posting local notification: %@", error);

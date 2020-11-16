@@ -1738,9 +1738,8 @@ NSString *const kContact=@"contact";
                     {
                         //no supported auth mechanism
                         //TODO: implement SCRAM SHA1 and SHA256 based auth
-                        NSString* message = @"no supported auth mechanism, disconnecting!";
-                        DDLogInfo(message);
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(message, @""), @"isSevere": @YES}];
+                        DDLogInfo(@"no supported auth mechanism, disconnecting!");
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"no supported auth mechanism, disconnecting!", @""), @"isSevere": @YES}];
                         [self disconnect];
                     }
                 }

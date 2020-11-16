@@ -57,16 +57,45 @@ target 'monalxmpp' do
   pod 'SignalProtocolObjC'
   pod 'SignalProtocolC'
 
-  pod 'OpenSSL-Universal', '1.1.17'
+  pod 'OpenSSL-Universal', '1.0.2.20'
 end
 
 # see https://stackoverflow.com/a/36547646/3528174
 post_install do |installer|
+	fix_deployment_target(installer)
 	installer.pods_project.targets.each do |target|
-		if target.name == "TPCircularBuffer"
-			target.build_configurations.each do |configuration|
+		target.build_configurations.each do |configuration|
+			if target.name == "TPCircularBuffer"
 				configuration.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'YES'
 			end
-		end
+        end
 	end
+end
+
+# see https://github.com/CocoaPods/CocoaPods/issues/7314
+def fix_deployment_target(pod_installer)
+    if !pod_installer
+        return
+    end
+    puts "Make the pods deployment target version the same as our target"
+    
+    project = pod_installer.pods_project
+    deploymentMap = {}
+    project.build_configurations.each do |config|
+        deploymentMap[config.name] = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+    end
+    # p deploymentMap
+    
+    project.targets.each do |t|
+        puts "  #{t.name}"
+        t.build_configurations.each do |config|
+            oldTarget = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+            newTarget = deploymentMap[config.name]
+            if oldTarget == newTarget
+                next
+            end
+            puts "    #{config.name} deployment target: #{oldTarget} => #{newTarget}"
+            config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = newTarget
+        end
+    end
 end

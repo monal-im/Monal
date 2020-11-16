@@ -380,7 +380,7 @@ void logException(NSException* exception)
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     if(timeout<=0.001)
     {
-        DDLogWarn(@"Timer timeout is smaller than 0.001, dispatching handler directly.");
+        DDLogDebug(@"Timer timeout is smaller than 0.001, dispatching handler directly.");
         if(handler)
             dispatch_async(q_background, ^{
                 handler();

@@ -95,6 +95,7 @@ NSString *const kContact=@"contact";
     BOOL _catchupDone;
     double _exponentialBackoff;
     BOOL _reconnectInProgress;
+    BOOL _disconnectInProgres;
     NSObject* _stateLockObject;     //only used for @synchronized() blocks
     BOOL _lastIdleState;
     NSMutableDictionary* _mamPageArrays;
@@ -199,6 +200,7 @@ NSString *const kContact=@"contact";
     _startTLSComplete = NO;
     _catchupDone = NO;
     _reconnectInProgress = NO;
+    _disconnectInProgres = NO;
     _lastIdleState = NO;
     _outputQueue = [[NSMutableArray alloc] init];
     _iqHandlers = [[NSMutableDictionary alloc] init];
@@ -348,7 +350,11 @@ NSString *const kContact=@"contact";
         //but we don't need to make this completely race free (network "races" can occur far more often than send queue races).
         //in a race the smacks unacked stanzas array will contain the not yet sent stanzas --> we won't loose stanzas when racing the send queue
         //with [self disconnect] through an idle check
-        if(![object operationCount])
+        //NOTE: we only want to do an idle check if we are not in the middle of a disconnect call because this can race when the _bgTask is expiring
+        //and cancel the new _bgFetch because we are now idle (the dispatchAsyncOnReceiveQueue: will add a new task to the receive queue when
+        //the send queue gets cleaned up and this task will run as soon as the disconnect is done and interfere with the configuration of the
+        //_bgFetch and the syncError push notification both created on the main thread
+        if(![object operationCount] && _disconnectInProgres)
             [self dispatchAsyncOnReceiveQueue:^{
                 BOOL lastState = _lastIdleState;
                 //only send out idle notifications if we changed from non-idle to idle state
@@ -675,6 +681,7 @@ NSString *const kContact=@"contact";
             return;
         }
         DDLogInfo(@"disconnecting");
+        _disconnectInProgres = YES;
         [_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas (we should be logged out then!)
         [_receiveQueue cancelAllOperations];        //stop everything coming after this (we should be logged out then!)
         
@@ -761,6 +768,7 @@ NSString *const kContact=@"contact";
         
         [self closeSocket];
         [self accountStatusChanged];
+        _disconnectInProgres = NO;
     }];
 }
 
@@ -771,10 +779,11 @@ NSString *const kContact=@"contact";
         [_receiveQueue cancelAllOperations];        //stop everything coming after this (we should have closed sockets then!)
 
         //prevent any new read or write
-        if(_xmlParser!=nil)
+        if(_xmlParser != nil)
         {
             [_xmlParser setDelegate:nil];
             [_xmlParser abortParsing];
+            _xmlParser = nil;
         }
         [self->_iPipe close];
         self->_iPipe = nil;

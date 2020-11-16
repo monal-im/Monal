@@ -181,7 +181,7 @@
 
 -(void) nowIdle:(NSNotification*) notification
 {
-    //this method will be called inside the receive queue or send queue and immediately disconnect the account
+    //this method will be called inside the receive queue and immediately disconnect the account
     //this is needed to not leak incoming stanzas while no instance of the NotificaionService class is active
     xmpp* xmppAccount = (xmpp*)notification.object;
     
@@ -201,6 +201,10 @@
     if([[MLXMPPManager sharedInstance] allAccountsIdle])
     {
         DDLogInfo(@"notification handler: all accounts idle --> terminating extension");
+        
+        //remove syncError notification because all accounts are idle and fully synced now
+        [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[@"syncError"]];
+        
         [self feedAllWaitingHandlers];
     }
 }

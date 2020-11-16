@@ -441,20 +441,24 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) disconnectAll
 {
+    DDLogVerbose(@"manager disconnecAll");
     for(xmpp* xmppAccount in [self connectedXMPP])
     {
         //disconnect to prevent endless loops trying to connect
         DDLogVerbose(@"manager disconnecting");
         [xmppAccount disconnect];
     }
+    DDLogVerbose(@"manager disconnecAll done");
 }
 
 -(void) connectIfNecessary
 {
+    DDLogVerbose(@"manager connectIfNecessary");
     NSArray* enabledAccountList = [[DataLayer sharedInstance] enabledAccountList];
     for(NSDictionary* account in enabledAccountList) {
         [self connectAccountWithDictionary:account];
     }
+    DDLogVerbose(@"manager connectIfNecessary done");
 }
 
 -(void) updatePassword:(NSString *) password forAccount:(NSString *) accountNo

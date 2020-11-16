@@ -666,7 +666,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 #if !TARGET_OS_MACCATALYST
         //use a synchronized block to disconnect only once
         @synchronized(self) {
-            DDLogInfo(@"### NOT EXTENSION --> checking if background is still needed ###");
+            DDLogInfo(@"### checking if background is still needed ###");
             BOOL background = [HelperTools isInBackground];
             if(background)
             {

@@ -582,15 +582,14 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) showConnectionStatus:(NSNotification*) notification
 {
-    if([HelperTools isInBackground])
-        DDLogDebug(@"not surfacing errors in the background because they are super common");
-    else
+    //this will show an error banner but only if our app is foregrounded
+    if(![HelperTools isInBackground])
     {
         dispatch_async(dispatch_get_main_queue(), ^{
-            NSArray* payload = [notification.object copy];
-            NSString* message = payload[1];     // this is just the way i set it up a dic might better
-            xmpp *xmppAccount = payload.firstObject;
-            NotificationBanner* banner = [[NotificationBanner alloc] initWithTitle:xmppAccount.connectionProperties.identity.jid subtitle:message leftView:nil rightView:nil style:BannerStyleInfo colors:nil];
+            xmpp* xmppAccount = notification.object;
+            if(!notification.userInfo[@"isSevere"])
+                DDLogError(@"Minor XMPP Error(%@): %@", xmppAccount.connectionProperties.identity.jid, notification.userInfo[@"message"]);
+            NotificationBanner* banner = [[NotificationBanner alloc] initWithTitle:xmppAccount.connectionProperties.identity.jid subtitle:notification.userInfo[@"message"] leftView:nil rightView:nil style:BannerStyleInfo colors:nil];
             NotificationBannerQueue* queue = [[NotificationBannerQueue alloc] initWithMaxBannersOnScreenSimultaneously:2];
             [banner showWithQueuePosition:QueuePositionFront bannerPosition:BannerPositionTop queue:queue on:nil];
         });

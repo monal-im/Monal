@@ -12,6 +12,8 @@
 #import "MLMessage.h"
 #import "MLXEPSlashMeHandler.h"
 #import "MLConstants.h"
+#import "xmpp.h"
+
 @import UserNotifications;
 @import CoreServices;
 
@@ -36,9 +38,31 @@
     self = [super init];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDisplayedMessage:) name:kMonalDisplayedMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleXMPPError:) name:kXMPPError object:nil];
 
     self.notificationPrivacySetting = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
     return self;
+}
+
+-(void) handleXMPPError:(NSNotification*) notification
+{
+    //severe errors will be shown as notification (in addition to the banner shown if the app is in foreground)
+    if(notification.userInfo[@"isSevere"])
+    {
+        xmpp* xmppAccount = notification.object;
+        DDLogError(@"SEVERE XMPP Error(%@): %@", xmppAccount.connectionProperties.identity.jid, notification.userInfo[@"message"]);
+        NSString* idval = xmppAccount.connectionProperties.identity.jid;        //use this to only show the newest error notification per account
+        UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+        content.title = xmppAccount.connectionProperties.identity.jid;
+        content.body = notification.userInfo[@"message"];
+        content.sound = [UNNotificationSound defaultSound];
+        UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+        UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
+        [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+            if(error)
+                DDLogError(@"Error posting xmppError notification: %@", error);
+        }]; 
+    }
 }
 
 #pragma mark message signals

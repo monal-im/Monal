@@ -212,32 +212,17 @@
 -(void) xmppError:(NSNotification*) notification
 {
     DDLogInfo(@"notification handler: got xmpp error");
-    //dispatch in another thread to avoid blocking the thread posting this notification (most probably the receiveQueue)
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        //display an error notification and disconnect this account, leaving the extension running until all accounts are idle
-        //(disconnected accounts count as idle)
-        DDLogInfo(@"notification handler: account error --> publishing this as error notification and disconnecting this account");
-        //extract error contents and disconnect the account
-        NSArray* payload = [notification.object copy];
-        NSString* message = payload[1];
-        xmpp* xmppAccount = payload.firstObject;
-        DDLogVerbose(@"error(%@): %@", xmppAccount.connectionProperties.identity.jid, message);
-        //this will result in an idle notification for this account ultimately leading to the termination of this app extension
-        [xmppAccount disconnect];
-        
-        //display error notification
-        NSString* idval = xmppAccount.connectionProperties.identity.jid;        //use this to only show the newest error notification per account
-        UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
-        content.title = xmppAccount.connectionProperties.identity.jid;
-        content.body = message;
-        content.sound = [UNNotificationSound defaultSound];
-        UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-        UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
-        [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-            if(error)
-                DDLogError(@"Error posting xmppError notification: %@", error);
-        }];
-    });
+    if(notification.userInfo[@"isSevere"])
+    {
+        //dispatch in another thread to avoid blocking the thread posting this notification (most probably the receiveQueue)
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            //disconnect this account and make sure the account is marked as idle afterwards
+            //(which will ultimately lead to the termination of this app extension)
+            DDLogWarn(@"notification handler: severe account error --> disconnecting this account");
+            [notification.object disconnect];
+            [self nowIdle:notification];
+        });
+    }
 }
 
 @end

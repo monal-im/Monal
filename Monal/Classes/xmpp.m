@@ -99,6 +99,7 @@ NSString *const kContact=@"contact";
     NSObject* _stateLockObject;     //only used for @synchronized() blocks
     BOOL _lastIdleState;
     NSMutableDictionary* _mamPageArrays;
+    BOOL _firstLoginForThisInstance;
     
     //registration related stuff
     BOOL _registration;
@@ -202,6 +203,7 @@ NSString *const kContact=@"contact";
     _reconnectInProgress = NO;
     _disconnectInProgres = NO;
     _lastIdleState = NO;
+    _firstLoginForThisInstance = YES;
     _outputQueue = [[NSMutableArray alloc] init];
     _iqHandlers = [[NSMutableDictionary alloc] init];
     _mamPageArrays = [[NSMutableDictionary alloc] init];
@@ -300,7 +302,7 @@ NSString *const kContact=@"contact";
 -(void) invalidXMLError
 {
     DDLogError(@"Server returned invalid xml!");
-    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, @"Server returned invalid xml!"]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"Server returned invalid xml!", @""), @"isSevere": @NO}];
     [self reconnect];
     return;
 }
@@ -344,9 +346,9 @@ NSString *const kContact=@"contact";
         //only do the (more heavy but complete) idle check if we reache zero operations in the observed queue
         //we dispatch the idle check and subsequent notification on the receive queue to account for races
         //between the idle check and calls to disconnect issued in response to this idle notification
-        //NOTE: yes, doing the check for [_sendQueue operationCount] (inside [self idle]) from the receive queue is not race free
+        //NOTE: yes, doing the check for [_sendQueue operationCount] (inside [self idle]) from the receive queue is not race free.
         //with such disconnects, but: we only want to track the send queue on a best effort basis (because network sends are best effort, too)
-        //to some extent we want to make sure every stanza was physically sent out to the network before our app gets frozen by ios
+        //to some extent we want to make sure every stanza was physically sent out to the network before our app gets frozen by ios,
         //but we don't need to make this completely race free (network "races" can occur far more often than send queue races).
         //in a race the smacks unacked stanzas array will contain the not yet sent stanzas --> we won't loose stanzas when racing the send queue
         //with [self disconnect] through an idle check
@@ -473,8 +475,8 @@ NSString *const kContact=@"contact";
     if((localIStream==nil) || (localOStream==nil))
     {
         DDLogError(@"Connection failed");
-        NSString *message=NSLocalizedString(@"Unable to connect to server",@ "");
-        [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"Unable to connect to server!", @""), @"isSevere": @NO}];
+        [self reconnect];
         return;
     }
     else
@@ -531,9 +533,11 @@ NSString *const kContact=@"contact";
         // Check if entry "." == srv target
         if(![[row objectForKey:@"isEnabled"] boolValue])
         {
-            NSString *message = NSLocalizedString(@"SRV entry prohibits XMPP connection",@ "");
-            DDLogInfo(@"%@ for domain %@", message, self.connectionProperties.identity.domain);
-            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+            DDLogInfo(@"SRV entry prohibits XMPP connection for server %@", self.connectionProperties.identity.domain);
+            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{
+                @"message": [NSString stringWithFormat:NSLocalizedString(@"SRV entry prohibits XMPP connection for server %@", @""), self.connectionProperties.identity.domain],
+                @"isSevere": @YES
+            }];
             return YES;
         }
     }
@@ -541,7 +545,8 @@ NSString *const kContact=@"contact";
     // if all servers have been tried start over with the first one again
     if([_discoveredServersList count]>0 && [_usableServersList count]==0)
     {
-        DDLogWarn(@"All %lu SRV dns records tried, starting over again", (unsigned long)[_discoveredServersList count]);
+        if(!_firstLoginForThisInstance)
+            DDLogWarn(@"All %lu SRV dns records tried, starting over again", (unsigned long)[_discoveredServersList count]);
         _usableServersList = [_discoveredServersList mutableCopy];
         for(NSDictionary *row in _usableServersList)
         {
@@ -1652,7 +1657,7 @@ NSString *const kContact=@"contact";
                     message = @"There was a SASL error on the server.";
             }
 
-            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @YES}];
             [self disconnect];
         }
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}challenge"])
@@ -1689,10 +1694,10 @@ NSString *const kContact=@"contact";
             NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}!text$"];
             NSString* errorText = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}text#"];
             DDLogWarn(@"Got secure XMPP stream error %@: %@", errorReason, errorText);
-            NSString* message = [NSString stringWithFormat:@"XMPP stream error: %@", errorReason];
+            NSString* message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error: %@", @""), errorReason];
             if(errorText && ![errorText isEqualToString:@""])
-                message = [NSString stringWithFormat:@"XMPP stream error %@: %@", errorReason, errorText];
-            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+                message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error %@: %@", @""), errorReason, errorText];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
             [self reconnect];
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}features"])
@@ -1733,7 +1738,9 @@ NSString *const kContact=@"contact";
                     {
                         //no supported auth mechanism
                         //TODO: implement SCRAM SHA1 and SHA256 based auth
-                        DDLogInfo(@"no supported auth mechanism, disconnecting!");
+                        NSString* message = @"no supported auth mechanism, disconnecting!";
+                        DDLogInfo(message);
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(message, @""), @"isSevere": @YES}];
                         [self disconnect];
                     }
                 }
@@ -1790,10 +1797,10 @@ NSString *const kContact=@"contact";
             NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}!text$"];
             NSString* errorText = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}text#"];
             DDLogWarn(@"Got *INSECURE* XMPP stream error %@: %@", errorReason, errorText);
-            NSString* message = [NSString stringWithFormat:@"XMPP stream error: %@", errorReason];
+            NSString* message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error: %@", @""), errorReason];
             if(errorText && ![errorText isEqualToString:@""])
-                message = [NSString stringWithFormat:@"XMPP stream error %@: %@", errorReason, errorText];
-            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+                message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error %@: %@", @""), errorReason, errorText];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
             [self reconnect];
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}features"])
@@ -2982,22 +2989,22 @@ NSString *const kContact=@"contact";
             switch(st_error.code)
             {
                 case errSSLXCertChainInvalid: {
-                    message = NSLocalizedString(@"SSL Error: Certificate chain is invalid",@ "");
+                    message = NSLocalizedString(@"SSL Error: Certificate chain is invalid", @"");
                     break;
                 }
 
                 case errSSLUnknownRootCert: {
-                    message = NSLocalizedString(@"SSL Error: Unknown root certificate",@ "");
+                    message = NSLocalizedString(@"SSL Error: Unknown root certificate", @"");
                     break;
                 }
 
                 case errSSLCertExpired: {
-                    message = NSLocalizedString(@"SSL Error: Certificate expired",@ "");
+                    message = NSLocalizedString(@"SSL Error: Certificate expired", @"");
                     break;
                 }
 
                 case errSSLHostNameMismatch: {
-                    message = NSLocalizedString(@"SSL Error: Host name mismatch",@ "");
+                    message = NSLocalizedString(@"SSL Error: Host name mismatch", @"");
                     break;
                 }
 
@@ -3006,7 +3013,7 @@ NSString *const kContact=@"contact";
             {
                 // Do not show "Connection refused" message if there are more SRV records to try
                 if(!_SRVDiscoveryDone || (_SRVDiscoveryDone && [_usableServersList count] == 0) || st_error.code != 61)
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
             }
 
             DDLogInfo(@"stream error, calling reconnect");

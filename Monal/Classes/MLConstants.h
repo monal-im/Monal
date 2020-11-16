@@ -72,6 +72,7 @@ typedef enum NotificationPrivacySettingOption {
 #define kMLHasConnectedNotice @"kMLHasConnectedNotice"
 #define kMonalFinishedCatchup @"kMonalFinishedCatchup"
 #define kMonalFinishedOmemoBundleFetch @"kMonalFinishedOmemoBundleFetch"
+#define kMonalUpdateBundleFetchStatus @"kMonalUpdateBundleFetchStatus"
 #define kMonalIdle @"kMonalIdle"
 
 #define kMonalPresentChat @"kMonalPresentChat"

@@ -16,6 +16,7 @@
 #import "MLConstants.h"
 #import "MonalAppDelegate.h"
 #import "MBProgressHUD.h"
+#import "xmpp.h"
 #import "MLOMEMO.h"
 
 #import "IDMPhotoBrowser.h"

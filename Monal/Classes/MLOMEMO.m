@@ -7,7 +7,10 @@
 //
 
 #import "MLOMEMO.h"
+#import "MLXMPPConnection.h"
 #import "MLHandler.h"
+#import "xmpp.h"
+#import "XMPPMessage.h"
 #import "SignalAddress.h"
 #import "MLSignalStore.h"
 #import "SignalContext.h"
@@ -20,7 +23,7 @@
 
 @interface MLOMEMO ()
 
-@property (atomic, strong) SignalContext* _signalContext;
+@property (atomic, strong) SignalContext* signalContext;
 
 @property (nonatomic, strong) NSString* accountJid;
 
@@ -44,8 +47,9 @@ const int KEY_SIZE = 16;
     self.accountJid = account.connectionProperties.identity.jid;
     self.account = account;
     self.deviceListExists = YES;
-    self.hasCatchUpDone = [NSNumber numberWithInt:0];
-    self.openBundleFetchCnt = [NSNumber numberWithInt:0];
+    self.hasCatchUpDone = NO;
+    self.openBundleFetchCnt = 0;
+    self.closedBundleFetchCnt = 0;
 
     self.devicesWithBrokenSession = [[NSMutableDictionary alloc] init];
 
@@ -72,14 +76,14 @@ const int KEY_SIZE = 16;
     if(!notiAccount) return;
 
     if([self.account.accountNo isEqualToString:notiAccount.accountNo]) {
-        self.hasCatchUpDone = [NSNumber numberWithInt:1];
+        self.hasCatchUpDone = YES;
         if(self.deviceListExists == NO) {
             // we need to publish a new devicelist if we did not receive our own list after a new connection
             [self createLocalIdentiyKeyPairIfNeeded:[[NSSet<NSNumber*> alloc] init]]; // sends our omemo bundle automatically
             [self sendOMEMODeviceWithForce:YES];
             self.deviceListExists = YES;
         }
-        if(self.openBundleFetchCnt.intValue == 0)
+        if(!self.openBundleFetchCnt)
         {
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedOmemoBundleFetch object:self];
         }
@@ -93,7 +97,7 @@ const int KEY_SIZE = 16;
     // signal store
     SignalStorage* signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
     // signal context
-    self._signalContext = [[SignalContext alloc] initWithStorage:signalStorage];
+    self.signalContext = [[SignalContext alloc] initWithStorage:signalStorage];
 
     // init MLPubSub handler
     [self.account.pubsub registerForNode:@"eu.siacs.conversations.axolotl.devicelist" withHandler:$newHandler(self, devicelistHandler)];
@@ -104,7 +108,7 @@ const int KEY_SIZE = 16;
     if(self.monalSignalStore.deviceid == 0)
     {
         // signal helper
-        SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self._signalContext];
+        SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
 
         do
         {
@@ -158,7 +162,7 @@ $$
     int preKeyCount = [self.monalSignalStore getPreKeyCount];
     if(preKeyCount < MIN_OMEMO_KEYS)
     {
-        SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self._signalContext];
+        SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
 
         // Generate new keys so that we have a total of MAX_OMEMO_KEYS keys again
         int lastPreyKedId = [self.monalSignalStore getHighestPreyKeyId];
@@ -178,10 +182,13 @@ $$
 {
     NSString* bundleNode = [NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%@", deviceid];
 
-    self.openBundleFetchCnt = [NSNumber numberWithInt:(self.openBundleFetchCnt.intValue + 1)];
+    self.openBundleFetchCnt++;
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalUpdateBundleFetchStatus object:self userInfo:@{
+        @"completed": @(self.closedBundleFetchCnt),
+        @"all": @(self.openBundleFetchCnt + self.closedBundleFetchCnt)
+    }];
     [self.account.pubsub fetchNode:bundleNode from:jid withItemsList:nil andHandler:$newHandler(self, handleBundleFetchResult, $ID(rid, deviceid))];
 }
-
 
 $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data), $_ID(NSString*, rid))
     if(errorIq)
@@ -207,14 +214,20 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
         if(receivedKeys)
             [account.omemo processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
     }
-    if(account.omemo.openBundleFetchCnt.intValue > 1)
+    if(account.omemo.openBundleFetchCnt > 1)
     {
-        account.omemo.openBundleFetchCnt = [NSNumber numberWithInt:(account.omemo.openBundleFetchCnt.intValue - 1)];
+        account.omemo.openBundleFetchCnt--;
+        account.omemo.closedBundleFetchCnt++;
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalUpdateBundleFetchStatus object:account.omemo userInfo:@{
+            @"completed": @(account.omemo.closedBundleFetchCnt),
+            @"all": @(account.omemo.openBundleFetchCnt + account.omemo.closedBundleFetchCnt)
+        }];
     }
     else
     {
-        account.omemo.openBundleFetchCnt = [NSNumber numberWithInt:0];
-        if(account.omemo.hasCatchUpDone.intValue == 1)
+        account.omemo.openBundleFetchCnt = 0;
+        account.omemo.closedBundleFetchCnt = 0;
+        if(account.omemo.hasCatchUpDone)
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedOmemoBundleFetch object:self];
     }
 $$
@@ -332,7 +345,7 @@ $$
 
 -(void) processOMEMOKeys:(MLXMLNode*) iqNode forJid:(NSString*) jid andRid:(NSString*) rid
 {
-    assert(self._signalContext);
+    assert(self.signalContext);
     {
         if(!rid)
             return;
@@ -357,13 +370,12 @@ $$
 
         uint32_t device = (uint32_t)[rid intValue];
         SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:device];
-        SignalSessionBuilder* builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self._signalContext];
+        SignalSessionBuilder* builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
         NSMutableArray* preKeys = [[NSMutableArray alloc] init];
         NSArray<NSNumber*>* preKeyIds = [bundle find:@"prekeys/preKeyPublic@preKeyId|int"];
         for(NSNumber* preKey in preKeyIds)
         {
-            NSString* query = [NSString stringWithFormat:@"prekeys/preKeyPublic<preKeyId=%@>#|base64", preKey];
-            NSData* key = [bundle findFirst:query];
+            NSData* key = [bundle findFirst:[NSString stringWithFormat:@"prekeys/preKeyPublic<preKeyId=%@>#|base64", preKey]];
             if(!key)
                 continue;
             NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
@@ -452,7 +464,7 @@ $$
         // Only add encryption key for devices that are trusted
         if([self.monalSignalStore isTrustedIdentity:address identityKey:identity])
         {
-            SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self._signalContext];
+            SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
             NSError* error;
             SignalCiphertext* deviceEncryptedKey = [cipher encryptData:encryptedPayload.key error:&error];
 
@@ -476,7 +488,7 @@ $$
 
 -(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString*) message toContact:(NSString*) toContact overrideDevices:(NSArray<NSNumber*>* _Nullable) overrideDevices
 {
-    NSAssert(self._signalContext, @"_signalContext should be inited.");
+    NSAssert(self.signalContext, @"signalContext should be inited.");
 
     if(message)
     {
@@ -577,7 +589,7 @@ $$
 
     NSNumber* sid = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|int"];
     SignalAddress* address = [[SignalAddress alloc] initWithName:messageNode.fromUser deviceId:(uint32_t)sid.intValue];
-    if(!self._signalContext)
+    if(!self.signalContext)
     {
         DDLogError(@"Missing signal context");
         return NSLocalizedString(@"Error decrypting message", @"");
@@ -609,7 +621,7 @@ $$
     }
     else
     {
-        SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self._signalContext];
+        SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
         SignalCiphertextType messagetype;
 
         // Check if message is encrypted with a prekey

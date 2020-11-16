@@ -38,6 +38,9 @@
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(connected) name:kMonalFinishedCatchup object:nil];
+#ifndef DISABLE_OMEMO
+    [nc addObserver:self selector:@selector(updateBundleFetchStatus:) name:kMonalUpdateBundleFetchStatus object:nil];
+#endif
     [nc addObserver:self selector:@selector(omemoBundleFetchFinished) name:kMonalFinishedOmemoBundleFetch object:nil];
     [nc addObserver:self selector:@selector(error) name:kXMPPError object:nil];
 
@@ -129,6 +132,15 @@
     [self kMonalFinishedOmemoBundleFetch];
 #endif
 }
+
+#ifndef DISABLE_OMEMO
+-(void) updateBundleFetchStatus:(NSNotification*) notification
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.loginHUD.label.text = [NSString stringWithFormat:NSLocalizedString(@"Loading omemo bundles: %@ / %@", @""), notification.userInfo[@"completed"], notification.userInfo[@"all"]];
+    });
+}
+#endif
 
 -(void) omemoBundleFetchFinished
 {

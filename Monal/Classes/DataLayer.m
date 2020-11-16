@@ -1680,10 +1680,14 @@ static NSDateFormatter* dbFormatter;
 
 -(void) updateDBTo:(double) version withBlock:(monal_void_block_t) block
 {
+    static BOOL accountStateInvalidated = NO;
     if([(NSNumber*)[self.db executeScalar:@"SELECT dbversion FROM dbversion;"] doubleValue] < version)
     {
         DDLogVerbose(@"Database version <%@ detected. Performing upgrade.", [NSNumber numberWithDouble:version]);
         block();
+        if(!accountStateInvalidated)
+            [self invalidateAllAccountStates];
+        accountStateInvalidated = YES;
         [self.db executeNonQuery:@"UPDATE dbversion SET dbversion=?;" andArguments:@[[NSNumber numberWithDouble:version]]];
         DDLogDebug(@"Upgrade to %@ success", [NSNumber numberWithDouble:version]);
     }
@@ -2089,7 +2093,7 @@ static NSDateFormatter* dbFormatter;
 
 -(void) invalidateAllAccountStates
 {
-    DDLogWarn(@"Invalidating state of all accounts...");
+    DDLogWarn(@"Invalidating state of all accounts (but keeping outgoing unacked stanzas)...");
     for(NSDictionary* entry in [self.db executeReader:@"SELECT account_id FROM account;"])
         [self persistState:[xmpp invalidateState:[self readStateForAccount:entry[@"account_id"]]] forAccount:entry[@"account_id"]];
 }

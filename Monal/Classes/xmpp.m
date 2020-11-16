@@ -2521,29 +2521,20 @@ NSString *const kContact=@"contact";
 #pragma mark - Message archive
 
 
--(void) setMAMPrefs:(NSString *) preference
+-(void) setMAMPrefs:(NSString*) preference
 {
     if(!self.connectionProperties.supportsMam2)
         return;
     XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
     [query updateMamArchivePrefDefault:preference];
-    [self send:query];
+    [self sendIq:query withHandler:$newHandler(MLIQProcessor, handleSetMamPrefs)];
 }
 
 -(void) getMAMPrefs
 {
     XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query mamArchivePref];
-    //this can be a non persistent iq handler because getMAMPrefs is only called from the ui
-    //THIS HAS TO BE CHANGED IF THIS METHOD IS CALLED FROM OTHER MORE PERSISTENT PLACES
-    [self sendIq:query withResponseHandler:^(XMPPIQ* response) {
-        if([response check:@"{urn:xmpp:mam:2}prefs@default"])
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMLMAMPref object:@{@"mamPref": [response findFirst:@"{urn:xmpp:mam:2}prefs@default"]}];
-        else
-            DDLogError(@"MAM prefs query returned unexpected result: %@", response);
-    } andErrorHandler:^(XMPPIQ* error) {
-        DDLogError(@"MAM prefs query returned an error: %@", error);
-    }];
+    [self sendIq:query withHandler:$newHandler(MLIQProcessor, handleMamPrefs)];
 }
 
 -(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid withCompletion:(void (^)(NSArray* _Nullable)) completion

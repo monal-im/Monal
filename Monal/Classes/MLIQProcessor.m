@@ -402,6 +402,31 @@ $$handler(handleEntityCapsDisco, $_ID(XMPPIQ*, iqNode))
     [[DataLayer sharedInstance] setCaps:features forVer:ver];
 $$
 
+$$handler(handleMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"MAM prefs query returned an error: %@", [iqNode findFirst:@"error"]);
+        [self postError:NSLocalizedString(@"XMPP mam preferences error", @"") withIqNode:iqNode andAccount:account andIsSevere:NO];
+        return;
+    }
+    if([iqNode check:@"{urn:xmpp:mam:2}prefs@default"])
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMLMAMPref object:self userInfo:@{@"mamPref": [iqNode findFirst:@"{urn:xmpp:mam:2}prefs@default"]}];
+    else
+    {
+        DDLogError(@"MAM prefs query returned unexpected result: %@", iqNode);
+        [self postError:NSLocalizedString(@"Unexpected mam preferences result", @"") withIqNode:nil andAccount:account andIsSevere:NO];
+    }
+$$
+
+$$handler(handleSetMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Seting MAM prefs returned an error: %@", [iqNode findFirst:@"error"]);
+        [self postError:NSLocalizedString(@"XMPP mam preferences error", @"") withIqNode:iqNode andAccount:account andIsSevere:NO];
+        return;
+    }
+$$
+
 +(void) iqVersionResult:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
     NSString* iqAppName = [iqNode findFirst:@"{jabber:iq:version}query/name#"];

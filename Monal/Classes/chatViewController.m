@@ -862,6 +862,13 @@ enum msgSentState {
 
 -(void)resignTextView
 {
+    self.viewIsScrolling = YES;
+    // Allow  autoloading of more messages after a few seconds again
+    monal_void_block_t __block allowAutoLoading = ^{
+        self.viewIsScrolling = NO;
+    };
+    [HelperTools startTimer:2 withHandler:allowAutoLoading];
+
     // Trim leading spaces
     NSString* cleanString = [self.chatInput.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     // Only send msg that have at least one character

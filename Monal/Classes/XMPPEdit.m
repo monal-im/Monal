@@ -21,9 +21,7 @@
 
 @interface XMPPEdit()
 
-@property (nonatomic, strong) NSString *jid;
 @property (nonatomic, strong) NSString *rosterName;
-@property (nonatomic, strong) NSString *password;
 @property (nonatomic, strong) NSString *resource;
 @property (nonatomic, strong) NSString *server;
 @property (nonatomic, strong) NSString *port;
@@ -43,9 +41,7 @@
 @property (nonatomic) BOOL usedCamera;
 @end
 
-
 @implementation XMPPEdit
-
 
 -(void) hideKeyboard
 {
@@ -83,7 +79,7 @@
     self.avatarChanged = NO;
     self.rosterNameChanged = NO;
     
-    if(_originIndex.section == 0)
+    if(self.originIndex && self.originIndex.section == 0)
     {
         //edit
         DDLogVerbose(@"reading account number %@", _accountno);
@@ -116,11 +112,13 @@
     }
     else
     {
+        self.title = NSLocalizedString(@"New Account", @"");
         self.port = @"5222";
         self.resource = [HelperTools encodeRandomResource];
         self.directTLS = NO;
         self.selfSignedSSL = NO;
         self.rosterName = @"";
+        self.enabled = YES;
     }
     self.sectionArray = @[@"", NSLocalizedString(@"Account", @""), NSLocalizedString(@"General", @""), NSLocalizedString(@"Advanced Settings", @""), @""];
     

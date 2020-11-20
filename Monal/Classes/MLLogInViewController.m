@@ -16,6 +16,8 @@
 @import QuartzCore;
 @import SafariServices;
 
+@class MLQRCodeScanner;
+
 @interface MLLogInViewController ()
 
 @property (nonatomic, strong) MBProgressHUD *loginHUD;
@@ -249,7 +251,24 @@
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-     [self removeObservers];
+    if([segue.identifier isEqualToString:@"scanQRCode"])
+    {
+        MLQRCodeScanner* qrCodeScanner = (MLQRCodeScanner*)segue.destinationViewController;
+        qrCodeScanner.loginDelegate = self;
+    }
+    else
+    {
+        [self removeObservers];
+    }
+}
+
+-(void) MLQRCodeAccountLoginScannedWithJid:(NSString*) jid password:(NSString*) password
+{
+    // Insert jid and password into text fields
+    self.jid.text = jid;
+    self.password.text = jid;
+    // Close QR-Code scanner
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 

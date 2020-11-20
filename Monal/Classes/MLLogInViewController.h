@@ -7,10 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <Monal-Swift.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MLLogInViewController : UIViewController <UITextFieldDelegate>
+@interface MLLogInViewController : UIViewController <UITextFieldDelegate, MLLQRCodeScannerAccountLoginDeleagte>
 @property (nonatomic, weak) IBOutlet UITextField *jid;
 @property (nonatomic, weak) IBOutlet UITextField *password;
 @property (nonatomic, weak) IBOutlet UIButton *loginButton;

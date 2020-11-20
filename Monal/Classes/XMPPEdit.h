@@ -20,9 +20,13 @@
 @property (nonatomic, strong ) 	NSArray *sectionArray;
 
 @property (nonatomic, assign) BOOL editMode;
-@property (nonatomic, strong) NSString *accountno;
-@property (nonatomic, strong) NSIndexPath *originIndex;
-@property (nonatomic, strong) NSString *accountType;
+@property (nonatomic, strong) NSString* accountno;
+// Used for QR-Code scanning
+@property (nonatomic, strong) NSString* jid;
+@property (nonatomic, strong) NSString* password;
+
+@property (nonatomic, strong) NSIndexPath* originIndex;
+@property (nonatomic, strong) NSString* accountType;
 
 -(IBAction) delClicked: (id) sender;
 -(IBAction) save:(id) sender;

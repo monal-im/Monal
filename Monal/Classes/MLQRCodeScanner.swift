@@ -102,11 +102,10 @@ struct XMPPLoginQRCode : Codable
     }
 
     override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-
         if (captureSession?.isRunning == true) {
             captureSession.stopRunning()
         }
+        super.viewWillDisappear(animated)
     }
 
     func errorMsgNoCameraFound()
@@ -171,10 +170,19 @@ struct XMPPLoginQRCode : Codable
         }
     }
 
-    func errorMsg(title: String, msg: String)
+    func errorMsg(title: String, msg: String, startCaptureOnClose: Bool = false)
     {
         let ac = UIAlertController(title: title, message: msg, preferredStyle: .alert)
-        ac.addAction(UIAlertAction(title: NSLocalizedString("Close", comment: ""), style: .default))
+        ac.addAction(UIAlertAction(title: NSLocalizedString("Close", comment: ""), style: .default)
+        {
+            action -> Void in
+            // start capture again after invalid qr code
+            if(startCaptureOnClose == true)
+            {
+                self.captureSession.startRunning()
+            }
+        }
+        )
         present(ac, animated: true)
     }
 
@@ -198,29 +206,33 @@ struct XMPPLoginQRCode : Codable
         {
             let shortendContactString = contactString.suffix(contactString.count - XMPP_PREFIX.count)
             let contactStringParts = shortendContactString.components(separatedBy: "?")
-            if(contactStringParts.count == 2)
+            if(contactStringParts.count >= 1 && contactStringParts.count <= 2)
             {
                 // check if contactStringParts[0] is a valid jid
                 let jidParts = contactStringParts[0].components(separatedBy: "@")
                 if(jidParts.count == 2 && jidParts[0].count > 0 && jidParts[1].count > 0)
                 {
                     parsedJid = contactStringParts[0]
-                    let omemoParts = contactStringParts[1].components(separatedBy: ";")
-                    for omemoPart in omemoParts
+                    // parse omemo fingerprints if present
+                    if(contactStringParts.count == 2)
                     {
-                        let keyParts = omemoPart.components(separatedBy: "=")
-                        if(keyParts.count == 2 && keyParts[0].hasPrefix(OMEMO_SID_PREFIX))
+                        let omemoParts = contactStringParts[1].components(separatedBy: ";")
+                        for omemoPart in omemoParts
                         {
-                            let sidStr = keyParts[0].suffix(keyParts[0].count - OMEMO_SID_PREFIX.count)
-                            // parse string sid to int
-                            let sid = Int(sidStr) ?? -1
-                            if(sid > 0)
+                            let keyParts = omemoPart.components(separatedBy: "=")
+                            if(keyParts.count == 2 && keyParts[0].hasPrefix(OMEMO_SID_PREFIX))
                             {
-                                // valid sid
-                                if(keyParts[1].count > 0)
+                                let sidStr = keyParts[0].suffix(keyParts[0].count - OMEMO_SID_PREFIX.count)
+                                // parse string sid to int
+                                let sid = Int(sidStr) ?? -1
+                                if(sid > 0)
                                 {
-                                    // todo append
-                                    omemoFingerprints[sid] = keyParts[1]
+                                    // valid sid
+                                    if(keyParts[1].count > 0)
+                                    {
+                                        // todo append
+                                        omemoFingerprints[sid] = keyParts[1]
+                                    }
                                 }
                             }
                         }
@@ -236,6 +248,6 @@ struct XMPPLoginQRCode : Codable
 
     func handleQRCodeError()
     {
-        errorMsg(title: NSLocalizedString("Invalid format", comment: "QR-Code-Scanner: invalid format"), msg: NSLocalizedString("We could not find a xmpp related QR-Code", comment: "QR-Code-Scanner: invalid format"))
+        errorMsg(title: NSLocalizedString("Invalid format", comment: "QR-Code-Scanner: invalid format"), msg: NSLocalizedString("We could not find a xmpp related QR-Code", comment: "QR-Code-Scanner: invalid format"), startCaptureOnClose: true)
     }
 }

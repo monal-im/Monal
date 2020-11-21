@@ -1653,12 +1653,12 @@ NSString *const kContact=@"contact";
             if([parsedStanza check:@"not-authorized"])
             {
                 if(!message)
-                    message = @"Not Authorized. Please check your credentials.";
+                    message = NSLocalizedString(@"Not Authorized. Please check your credentials.", @"");
             }
             else
             {
                 if(!message)
-                    message = @"There was a SASL error on the server.";
+                    message = NSLocalizedString(@"There was a SASL error on the server.", @"");
             }
 
             [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @YES}];

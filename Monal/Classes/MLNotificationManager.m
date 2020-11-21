@@ -47,7 +47,7 @@
 -(void) handleXMPPError:(NSNotification*) notification
 {
     //severe errors will be shown as notification (in addition to the banner shown if the app is in foreground)
-    if(notification.userInfo[@"isSevere"])
+    if([notification.userInfo[@"isSevere"] boolValue])
     {
         xmpp* xmppAccount = notification.object;
         DDLogError(@"SEVERE XMPP Error(%@): %@", xmppAccount.connectionProperties.identity.jid, notification.userInfo[@"message"]);

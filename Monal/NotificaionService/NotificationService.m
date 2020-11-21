@@ -140,6 +140,7 @@
         //repeated calls to this method will do nothing (every handler will already be used and every content will already be posted)
         @synchronized(self) {
             DDLogInfo(@"Disconnecting all accounts and feeding all pending handlers: %lu", [self.handlerList count]);
+            
             //this has to be synchronous because we only want to continue if all accounts are completely disconnected
             [[MLXMPPManager sharedInstance] disconnectAll];
             
@@ -212,7 +213,7 @@
 -(void) xmppError:(NSNotification*) notification
 {
     DDLogInfo(@"notification handler: got xmpp error");
-    if(notification.userInfo[@"isSevere"])
+    if([notification.userInfo[@"isSevere"] boolValue])
     {
         //dispatch in another thread to avoid blocking the thread posting this notification (most probably the receiveQueue)
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{

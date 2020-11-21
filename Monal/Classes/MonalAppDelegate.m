@@ -587,7 +587,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     {
         dispatch_async(dispatch_get_main_queue(), ^{
             xmpp* xmppAccount = notification.object;
-            if(!notification.userInfo[@"isSevere"])
+            if(![notification.userInfo[@"isSevere"] boolValue])
                 DDLogError(@"Minor XMPP Error(%@): %@", xmppAccount.connectionProperties.identity.jid, notification.userInfo[@"message"]);
             NotificationBanner* banner = [[NotificationBanner alloc] initWithTitle:xmppAccount.connectionProperties.identity.jid subtitle:notification.userInfo[@"message"] leftView:nil rightView:nil style:BannerStyleInfo colors:nil];
             NotificationBannerQueue* queue = [[NotificationBannerQueue alloc] initWithMaxBannersOnScreenSimultaneously:2];

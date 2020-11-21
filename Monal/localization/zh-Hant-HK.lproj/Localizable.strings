@@ -371,3 +371,5 @@
 /* QR-Code-Scanner: invalid format */
 "We could not find a xmpp related QR-Code" = "We could not find a xmpp related QR-Code";
 "XMPP: QR-Code" = "XMPP: QR-Code";
+"Not Authorized. Please check your credentials." = "Not Authorized. Please check your credentials.";
+"There was a SASL error on the server." = "There was a SASL error on the server.";

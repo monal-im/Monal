@@ -18,6 +18,8 @@
 "heq-Ls-ieg.title" = "Ein Konto auswählen";
 /* Class = "UIBarButtonItem"; title = "Next"; ObjectID = "HOk-DV-nls"; */
 "HOk-DV-nls.title" = "Weiter";
+/* Class = "UINavigationItem"; title = "Add Contact"; ObjectID = "HYb-u1-ZN3"; */
+"HYb-u1-ZN3.title" = "Add Contact";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "IGd-kM-9BO"; */
 "IGd-kM-9BO.title" = "Schließen";
 /* Class = "UITabBarItem"; title = "Item"; ObjectID = "iLC-4b-aDr"; */
@@ -58,8 +60,6 @@
 "TMS-52-ORP.title" = "Fertig";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "Vtv-sv-ErG"; */
 "Vtv-sv-ErG.title" = "Schließen";
-/* Class = "UINavigationItem"; title = "Add Contact"; ObjectID = "w0d-HZ-N0s"; */
-"w0d-HZ-N0s.title" = "Kontakt hinzufügen";
 /* Class = "UIBarButtonItem"; title = "Add"; ObjectID = "wNA-vF-ohQ"; */
 "wNA-vF-ohQ.title" = "Hinzufügen";
 /* Class = "UINavigationItem"; title = "Edit Group Chat"; ObjectID = "yIE-Ub-BAk"; */

@@ -266,7 +266,7 @@
 {
     // Insert jid and password into text fields
     self.jid.text = jid;
-    self.password.text = jid;
+    self.password.text = password;
     // Close QR-Code scanner
     [self.navigationController popViewControllerAnimated:YES];
 }

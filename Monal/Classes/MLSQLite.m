@@ -242,10 +242,15 @@ static NSMutableDictionary* currentTransactions;
     }
 }
 
+-(void) checkQuery:(NSString*) query
+{
+    if(!query || [query length] == 0)
+        @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Empty sql query!" userInfo:nil];
+}
+
 -(BOOL) executeNonQuery:(NSString*) query andArguments:(NSArray *) args withException:(BOOL) throwException
 {
-    if(!query)
-        return NO;
+    [self checkQuery:query];
     
     //NOTE: we are not checking the thread instance here in this private api, but in the public api proxy methods
     
@@ -349,8 +354,7 @@ static NSMutableDictionary* currentTransactions;
 
 -(id) executeScalar:(NSString*) query andArguments:(NSArray*) args
 {
-    if(!query)
-        return nil;
+    [self checkQuery:query];
     
     [self testThreadInstanceForQuery:query andArguments:args];
     
@@ -371,8 +375,6 @@ static NSMutableDictionary* currentTransactions;
     else
     {
         //if noting else
-        DDLogVerbose(@"returning nil with out OK %@", query);
-        toReturn = nil;
         [self throwErrorForQuery:query andArguments:args];
     }
     return toReturn;
@@ -385,8 +387,7 @@ static NSMutableDictionary* currentTransactions;
 
 -(NSArray*) executeScalarReader:(NSString*) query andArguments:(NSArray*) args
 {
-    if(!query)
-        return nil;
+    [self checkQuery:query];
     
     [self testThreadInstanceForQuery:query andArguments:args];
     
@@ -409,8 +410,6 @@ static NSMutableDictionary* currentTransactions;
     else
     {
         //if noting else
-        DDLogVerbose(@"returning nil with out OK %@", query);
-        toReturn = nil;
         [self throwErrorForQuery:query andArguments:args];
     }
     return toReturn;
@@ -423,8 +422,7 @@ static NSMutableDictionary* currentTransactions;
 
 -(NSMutableArray*) executeReader:(NSString*) query andArguments:(NSArray*) args
 {
-    if(!query)
-        return nil;
+    [self checkQuery:query];
     
     [self testThreadInstanceForQuery:query andArguments:args];
 
@@ -456,7 +454,6 @@ static NSMutableDictionary* currentTransactions;
     {
         //if noting else
         DDLogVerbose(@"reader nil with sql not ok: %@", query);
-        toReturn = nil;
         [self throwErrorForQuery:query andArguments:args];
     }
     return toReturn;

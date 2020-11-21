@@ -165,7 +165,6 @@ int RTPPacket::ParseRawPacket(RTPRawPacket &rawpack)
 	else
 	{
 		rtpextheader = 0;
-		exthdrlen = 0;
 	}	
 	
 	payloadlength = (int)(packetlen-numpadbytes-payloadoffset);

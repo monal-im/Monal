@@ -54,7 +54,7 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
  */
 -(void) updateMamArchivePrefDefault:(NSString *) pref;
 
--(void) setMAMQueryLatestMessagesForJid:(NSString*) jid before:(NSString*) uid;
+-(void) setMAMQueryLatestMessagesForJid:(NSString*) jid before:(NSString* _Nullable) uid;
 -(void) setMAMQueryAfter:(NSString*) uid;
 -(void) setMAMQueryForLatestId;
 
@@ -92,7 +92,7 @@ removes a contact from the roster
 /**
  Requests a full roster from the server. A null version will not set the ver attribute
  */
--(void) setRosterRequest:(NSString *) version;
+-(void) setRosterRequest:(NSString* _Nullable) version;
 
 /**
  makes iq  with version element

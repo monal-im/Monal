@@ -505,14 +505,14 @@ void logException(NSException* exception)
 }
 
 
-+ (NSData *)dataWithHexString:(NSString *)hex
++(NSData*) dataWithHexString:(NSString*) hex
 {
     char buf[3];
     buf[2] = '\0';
     
     if( [hex length] % 2 !=00) {
-        NSLog(@"Hex strings should have an even number of digits");
-        return nil;
+        DDLogError(@"Hex strings should have an even number of digits");
+        return [[NSData alloc] init];
     }
     unsigned char *bytes = malloc([hex length]/2);
     unsigned char *bp = bytes;
@@ -522,8 +522,9 @@ void logException(NSException* exception)
         char *b2 = NULL;
         *bp++ = strtol(buf, &b2, 16);
         if(b2 != buf + 2) {
-            NSLog(@"String should be all hex digits");;
-            return nil;
+            DDLogError(@"String should be all hex digits");
+            free(bytes);
+            return [[NSData alloc] init];
         }
     }
     

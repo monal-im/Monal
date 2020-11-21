@@ -39,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
  * encrypting / decrypting messages
  */
 -(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString* _Nullable) message toContact:(NSString*) toContact;
--(NSString*) decryptMessage:(XMPPMessage*) messageNode;
+-(NSString* _Nullable) decryptMessage:(XMPPMessage*) messageNode;
 -(void) sendKeyTransportElementIfNeeded:(NSString*) jid removeBrokenSessionForRid:(NSString*) rid;
 
 

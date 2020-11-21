@@ -131,10 +131,9 @@
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     if(section == 0)
-    {
-        return NSLocalizedString(@"Contacts are usually in the format: username@domain.something", @"");
-    }
-    else return nil;
+        return NSLocalizedString(@"Contacts are usually in the format: username@dom.ain", @"");
+    else
+        return nil;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -158,34 +157,25 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell* cell ;
-  
-    switch (indexPath.section) {
-        case 0: {
-            if(indexPath.row == 0){
-                UITableViewCell* accountCell = [tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
-                accountCell.textLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Using Account: %@", @""), [[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:_selectedRow]];
-                accountCell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+    if(indexPath.section == 0)
+    {
+        if(indexPath.row == 0){
+            UITableViewCell* accountCell = [tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+            accountCell.textLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Using Account: %@", @""), [[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:_selectedRow]];
+            accountCell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
 
-                cell = accountCell;
-            } else if(indexPath.row == 1){
-                MLTextInputCell* textCell = [tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-                self.contactName = textCell.textInput;
-                self.contactName.placeholder = NSLocalizedString(@"Contact Name", @"");
-                self.contactName.delegate=self;
+            return accountCell;
+        }
+        
+        MLTextInputCell* textCell = [tableView dequeueReusableCellWithIdentifier:@"TextCell"];
+        self.contactName = textCell.textInput;
+        self.contactName.placeholder = NSLocalizedString(@"Contact Jid", @"");
+        self.contactName.delegate=self;
 
-                cell = textCell;
-            }
-            break;
-        }
-        case 1: {
-            cell = [tableView dequeueReusableCellWithIdentifier:@"addButton"];
-            break;
-        }
-        default:
-            break;
+        return textCell;
     }
-    return cell;
+    else
+        return [tableView dequeueReusableCellWithIdentifier:@"addButton"];
 }
 
 #pragma mark tableview delegate

@@ -74,7 +74,7 @@ DDLogFileInfo* _logInfo;
 }
 
 -(void) reloadLog {
-    self.logView.text = @"Only shareable for now";    //[NSString stringWithContentsOfFile:_logInfo.filePath encoding:NSUTF8StringEncoding error:&error];
+    self.logView.text = NSLocalizedString(@"Only shareable for now", @"");    //[NSString stringWithContentsOfFile:_logInfo.filePath encoding:NSUTF8StringEncoding error:&error];
 }
 
 -(void) scrollToBottom {

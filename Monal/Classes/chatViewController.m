@@ -1543,7 +1543,8 @@ enum msgSentState {
 
 -(UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
 {
-    if(indexPath.section == reloadBoxSection) {
+    if(indexPath.section == reloadBoxSection)
+    {
         MLReloadCell* cell = (MLReloadCell*)[tableView dequeueReusableCellWithIdentifier:@"reloadBox" forIndexPath:indexPath];
         #if TARGET_OS_MACCATALYST
             // "Pull" could be a bit misleading on a mac
@@ -1553,8 +1554,7 @@ enum msgSentState {
         // Remove selection style (if cell is pressed)
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         return cell;
-    } else if(indexPath.section != messagesSection)
-        return nil;
+    }
 
     MLBaseCell* cell;
     
@@ -1774,7 +1774,7 @@ enum msgSentState {
     
     if(cell.outBound && ([row.errorType length] > 0 || [row.errorReason length] > 0) && !row.hasBeenReceived && row.hasBeenSent)
     {
-        cell.messageStatus.text = @"Error";
+        cell.messageStatus.text = NSLocalizedString(@"Error", @"");
         cell.deliveryFailed = YES;
     }
     

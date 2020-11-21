@@ -247,6 +247,7 @@ void AudioOutputCallback(
               
                 int timestampIncrement=800;
                 int rtpstatus = sess.SendPacket(targetBuffer,bytesToCopy,8,self.marker, timestampIncrement);
+                free(targetBuffer);
                 
                 if(self.marker) self.marker=NO;
                 
@@ -256,7 +257,6 @@ void AudioOutputCallback(
                 
                 //clean up
                 TPCircularBufferConsume(&packetOutCircularBuffer, bytesToCopy);
-                free(targetBuffer);
             }
     }
     

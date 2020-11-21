@@ -34,8 +34,7 @@ target 'Monal' do
   use_frameworks!
   inhibit_all_warnings!
   pod 'MBProgressHUD', '~> 1.2.0'
-  # import YYKit here because we don't want to use the official repo for this IDMPhotoBrowser dependency
-  pod 'YYKit', :git => 'https://github.com/tmolitor-stud-tu/YYKit'
+  pod 'YYKit', :git => 'https://github.com/tmolitor-stud-tu/YYKit.git'
   pod 'IDMPhotoBrowser', :git => 'https://github.com/tmolitor-stud-tu/IDMPhotoBrowser.git'
   pod 'SDWebImage', '~> 5.9.5'
   pod 'DZNEmptyDataSet'

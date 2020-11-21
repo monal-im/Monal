@@ -1772,7 +1772,6 @@ void RTPUDPv4Transmitter::GetLocalIPList_DNS()
 	if (he == 0)
 		return;
 	
-	ip = 0;
 	i = 0;
 	done = false;
 	while (!done)

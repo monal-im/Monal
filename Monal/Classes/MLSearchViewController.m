@@ -26,14 +26,16 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
     
+    // Do any additional setup after loading the view.
     self.searchBar.delegate = self;
     self.isLoadingHistory = NO;
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
+    [super viewDidAppear:animated];
+    
     CGFloat xAxis = self.searchBar.frame.origin.x;
     CGFloat yAxis = self.searchBar.frame.origin.y;
     CGFloat height = self.searchBar.frame.size.height;
@@ -66,6 +68,8 @@
 
 - (void)viewDidDisappear:(BOOL)animated
 {
+    [super viewDidDisappear:animated];
+    
     self.isLoadingHistory = NO;
     self.searchResultMessageList = nil;
     self.searchResultMessageDictionary = nil;
@@ -132,7 +136,7 @@
         if (self.curIdxHistory > self.searchResultMessageList.count - 1)
             self.curIdxHistory = (int) self.searchResultMessageList.count - 1;
         
-        if ([self getMessageIndexPathForDBId:((MLMessage*)self.searchResultMessageList[self.curIdxHistory]).messageDBId])
+        if([self getMessageIndexPathForDBId:((MLMessage*)self.searchResultMessageList[self.curIdxHistory]).messageDBId])
         {
             [self setResultIndicatorTitle:@"" onlyHint:NO];
             [self.searchResultDelegate doGoSearchResultAction:((MLMessage*)self.searchResultMessageList[self.curIdxHistory]).messageDBId];
@@ -153,13 +157,13 @@
 - (void)doPreviousAction
 {
     self.isGoingUp = YES;
-    if (!self.isLoadingHistory)
+    if(!self.isLoadingHistory)
     {
         self.curIdxHistory -= 1;
         if (self.curIdxHistory <= 0)
             self.curIdxHistory = 0;
         
-        if ([self getMessageIndexPathForDBId:((MLMessage*)self.searchResultMessageList[self.curIdxHistory]).messageDBId])
+        if([self getMessageIndexPathForDBId:((MLMessage*)self.searchResultMessageList[self.curIdxHistory]).messageDBId])
         {
             [self setResultIndicatorTitle:@"" onlyHint:NO];
             [self.searchResultDelegate doGoSearchResultAction:((MLMessage*)self.searchResultMessageList[self.curIdxHistory]).messageDBId];
@@ -277,15 +281,9 @@
     [self.messageDictionary setObject:idxPath forKey:dbId];
 }
 
--(NSNumber*)getMessageIndexPathForDBId:(NSNumber*)dbId
+-(NSNumber*) getMessageIndexPathForDBId:(NSNumber*) dbId
 {
-    NSNumber *idxPath = [self.messageDictionary objectForKey:dbId];
-    if(idxPath)
-    {
-        return idxPath;
-    }
-    
-    return nil;
+    return [self.messageDictionary objectForKey:dbId];
 }
 
 -(void)escapeSearchPressed:(UIKeyCommand*)keyCommand

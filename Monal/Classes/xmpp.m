@@ -1240,7 +1240,7 @@ NSString *const kContact=@"contact";
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}a"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
         {
             NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
-            if(!h)
+            if(h==nil)
                 return [self invalidXMLError];
             
             @synchronized(_stateLockObject) {
@@ -1574,7 +1574,7 @@ NSString *const kContact=@"contact";
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}resumed"] && self.connectionProperties.supportsSM3 && self.accountState<kStateBound)
         {
             NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
-            if(!h)
+            if(h==nil)
                 return [self invalidXMLError];
             
             self.resuming = NO;
@@ -1630,7 +1630,7 @@ NSString *const kContact=@"contact";
                 //get h value, if server supports smacks revision 1.5
                 NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
                 DDLogInfo(@"++++++++++++++++++++++++ failed resume: h=%@", h);
-                if(h)
+                if(h!=nil)
                     [self removeAckedStanzasFromQueue:h];
                 //persist these changes
                 [self persistState];
@@ -2590,7 +2590,7 @@ NSString *const kContact=@"contact";
             }
         }
     };
-    query = ^(NSString* before) {
+    query = ^(NSString* _Nullable before) {
         DDLogVerbose(@"Loading (next) mam:2 page before: %@", before);
         XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
         [query setMAMQueryLatestMessagesForJid:jid before:before];
@@ -2717,11 +2717,10 @@ NSString *const kContact=@"contact";
 -(void) jingleResult:(XMPPIQ*) iqNode
 {
     //confirmation of set call after we accepted
-    if([[iqNode findFirst:@"/@id"] isEqualToString:self.jingle.idval])
+    NSString* from = iqNode.fromUser;
+    if(from && [[iqNode findFirst:@"/@id"] isEqualToString:self.jingle.idval])
     {
-        NSString* from = iqNode.fromUser;
         NSString* fullName = from;
-        if(!fullName) fullName = from;
         NSDictionary* userDic=@{@"buddy_name":from,
                                 @"full_name":fullName,
                                 kAccountID:self.accountNo

@@ -282,11 +282,9 @@
                     cell.accessoryView = accessory;
                 }
             }
-            else {
-                    cell.imageView.image = [UIImage imageNamed:@"disabled"];
-            }
+            else
+                cell.imageView.image = [UIImage imageNamed:@"disabled"];
             return cell;
-            break;
         }
         case 1:
         {
@@ -307,16 +305,8 @@
                 cell.detailTextLabel.text = NSLocalizedString(@"Login with a QR-Code", @"");
             }
             return cell;
-            break;
         }
-        default:
-        {
-            return 0;
-        }
-            break;
     }
-    
-    return nil;
 }
 
 @end

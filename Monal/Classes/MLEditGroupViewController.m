@@ -137,8 +137,6 @@
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *toreturn ;
-    
     switch (indexPath.section)
     {
         case 0:
@@ -146,8 +144,7 @@
             UITableViewCell *accountCell =[tableView dequeueReusableCellWithIdentifier:@"AccountPickerCell"];
             accountCell.textLabel.text=[NSString stringWithFormat:NSLocalizedString(@"Using Account: %@",@""), [[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:_selectedRow]];
             accountCell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
-            toreturn=accountCell;
-            break;
+            return accountCell;
         }
             
         case 1:
@@ -164,8 +161,7 @@
                     thecell.textInput.delegate=self;
                     self.roomField= thecell.textInput;
                     self.roomField.text=[_groupData objectForKey:@"room"];
-                    toreturn=thecell;
-                    break;
+                    return thecell;
                 }
                 case 1:{
                      MLTextInputCell* thecell=(MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
@@ -174,19 +170,17 @@
                      self.nickField= thecell.textInput;
                     thecell.textInput.delegate=self;
                       self.nickField.text=[_groupData objectForKey:@"nick"];
-                    toreturn=thecell;
-                    break;
+                    return thecell;
                 }
                 case 2:{
                     MLTextInputCell* thecell=(MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-                   thecell.textInput.placeholder=NSLocalizedString(@"Password",@"");
+                    thecell.textInput.placeholder=NSLocalizedString(@"Password",@"");
                     thecell.textInput.inputAccessoryView =self.keyboardToolbar;
                     thecell.textInput.secureTextEntry=YES;
                     
-                     self.passField= thecell.textInput;
-                     // self.roomField.text=[_groupData objectForKey:@"room"];
-                    toreturn=thecell;
-                    break;
+                    self.passField= thecell.textInput;
+                    // self.roomField.text=[_groupData objectForKey:@"room"];
+                    return thecell;
                 }
                 case 3:{
                     MLSwitchCell* thecell=(MLSwitchCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
@@ -196,8 +190,7 @@
                      self.favSwitch= thecell.toggleSwitch;
                     [self.favSwitch addTarget:self action:@selector(toggleFav) forControlEvents:UIControlEventTouchUpInside];
                     if(self.groupData) self.favSwitch.on=YES;
-                    toreturn=thecell;
-                    break;
+                    return thecell;
                 }
                 case 4:{
                     MLSwitchCell* thecell=(MLSwitchCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
@@ -205,34 +198,24 @@
                     thecell.cellLabel.text=NSLocalizedString(@"Auto Join",@"");
                     thecell.textInputField.hidden=YES;
                     self.autoSwitch= thecell.toggleSwitch;
-                     [self.autoSwitch addTarget:self action:@selector(toggleJoin) forControlEvents:UIControlEventTouchUpInside];
+                    [self.autoSwitch addTarget:self action:@selector(toggleJoin) forControlEvents:UIControlEventTouchUpInside];
                     NSNumber *on=[_groupData objectForKey:@"autojoin"];
                     
                     if(on.intValue==1)
-                    {
                         self.autoSwitch.on=YES;
-                    }
                     
-                    toreturn=thecell;
-                    break;
+                    return thecell;
                 }
-                    
             }
-            
-            break;
         }
-            
+        
         case 2:
         {
             //save button
             UITableViewCell *buttonCell =[tableView dequeueReusableCellWithIdentifier:@"addButton"];
-            toreturn= buttonCell;
-            break;
+            return buttonCell;
         }
-            
     }
-    
-    return toreturn;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath

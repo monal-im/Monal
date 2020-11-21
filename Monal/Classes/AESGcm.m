@@ -39,7 +39,7 @@
     else
     {
 #if !TARGET_OS_MACCATALYST
-        EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+        EVP_CIPHER_CTX *ctx;
         int outlen;
         unsigned char outbuf[body.length];
         unsigned char tag[16];
@@ -113,7 +113,8 @@
     return [[NSData alloc] initWithBytes:randomBytes length:keySize];
 }
 
-+ (NSData *) decrypt:(NSData *)body withKey:(NSData *) key andIv:(NSData *)iv withAuth:( NSData * _Nullable )  auth {
++(NSData*) decrypt:(NSData*) body withKey:(NSData*) key andIv:(NSData*) iv withAuth:(NSData* _Nullable) auth
+{
     if (@available(iOS 13.0, *)) {
         
         MLCrypto *crypto = [[MLCrypto alloc] init];
@@ -125,10 +126,11 @@
         
         NSData *toReturn =[crypto decryptGCMWithKey:key encryptedContent:combined];
         return toReturn;
-    } else
+    }
+    else
     {
 #if !TARGET_OS_MACCATALYST
-        int outlen, rv;
+        int outlen;
         unsigned char outbuf[key.length];
         EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
         
@@ -159,7 +161,7 @@
             EVP_DecryptUpdate(ctx, outbuf, &outlen, bytes, (int)byteRange.length);
             /* Output decrypted block */
             /* Finalise: note get no output for GCM */
-            rv = EVP_DecryptFinal_ex(ctx, outbuf, &outlen);
+            EVP_DecryptFinal_ex(ctx, outbuf, &outlen);
             [decdata appendBytes:outbuf length:byteRange.length];
             byteCounter+=byteRange.length;
         }

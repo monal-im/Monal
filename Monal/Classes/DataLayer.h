@@ -74,7 +74,7 @@ extern NSString* const kMessageTypeUrl;
 -(BOOL) checkCap:(NSString*) cap forUser:(NSString*) user andAccountNo:(NSString*) acctNo;
 -(NSString*) getVerForUser:(NSString*) user andResource:(NSString*) resource;
 -(void) setVer:(NSString*) ver forUser:(NSString*) user andResource:(NSString*) resource;
--(NSSet*) getCapsforVer:(NSString*) ver;
+-(NSSet* _Nullable) getCapsforVer:(NSString*) ver;
 -(void) setCaps:(NSSet*) caps forVer:(NSString*) ver;
 
 #pragma mark  presence functions
@@ -134,13 +134,13 @@ extern NSString* const kMessageTypeUrl;
 -(NSArray*) enabledAccountList;
 -(BOOL) isAccountEnabled:(NSString*) accountNo;
 -(BOOL) doesAccountExistUser:(NSString*) user andDomain:(NSString *) domain;
--(NSNumber*) accountIDForUser:(NSString*) user andDomain:(NSString *) domain;
+-(NSNumber* _Nullable) accountIDForUser:(NSString*) user andDomain:(NSString *) domain;
 
--(NSDictionary*) detailsForAccount:(NSString*) accountNo;
--(NSString*) jidOfAccount:(NSString*) accountNo;
+-(NSDictionary* _Nullable) detailsForAccount:(NSString*) accountNo;
+-(NSString* _Nullable) jidOfAccount:(NSString*) accountNo;
 
 -(BOOL) updateAccounWithDictionary:(NSDictionary *) dictionary;
--(NSNumber*) addAccountWithDictionary:(NSDictionary *) dictionary;
+-(NSNumber* _Nullable) addAccountWithDictionary:(NSDictionary *) dictionary;
 
 
 -(BOOL) removeAccount:(NSString*) accountNo;
@@ -150,8 +150,8 @@ extern NSString* const kMessageTypeUrl;
  */
 -(BOOL) disableEnabledAccount:(NSString*) accountNo;
 
--(NSMutableDictionary *) readStateForAccount:(NSString*) accountNo;
--(void) persistState:(NSDictionary *) state forAccount:(NSString*) accountNo;
+-(NSMutableDictionary* _Nullable) readStateForAccount:(NSString*) accountNo;
+-(void) persistState:(NSDictionary*) state forAccount:(NSString*) accountNo;
 
 #pragma mark - message Commands
 /**
@@ -234,7 +234,7 @@ retrieves the actual_from of the the last message from hisroty id
 
 
 #pragma mark count unread
--(NSNumber*) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(NSNumber*) countUserUnreadMessages:(NSString* _Nullable) buddy forAccount:(NSString* _Nullable) accountNo;
 -(NSNumber*) countUnreadMessages;
 //set all unread messages to read
 -(void) setAllMessagesAsRead;

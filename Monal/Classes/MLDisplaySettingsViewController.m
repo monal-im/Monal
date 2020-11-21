@@ -130,8 +130,8 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
-    MLSettingCell* cell=[[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
-    cell.parent= self;
+    MLSettingCell* cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
+    cell.parent = self;
    
     switch (indexPath.section) {
         case 0:
@@ -145,7 +145,6 @@
                     cell.defaultKey=@"StatusMessage";
                     cell.textEnabled=YES;
                     return cell;
-                    break;
                 }
             }
         }
@@ -163,7 +162,6 @@
                 }  
             }
             return cell; 
-            break;
         }
         
         case 2:
@@ -200,17 +198,8 @@
                 }
             }
             return cell; 
-            break;
         }
-        default:
-        {
-            return nil;
-            break;
-        }
-        break;
     }
-
-    return nil;
 }
 
 -(IBAction)close:(id)sender

@@ -81,8 +81,6 @@ RTCPSDESPacket::RTCPSDESPacket(uint8_t *data,size_t datalength)
 		
 		while ((ssrccount > 0) && (len > 0))
 		{
-			chunkoffset = 0;
-			
 			if (len < (sizeof(uint32_t)*2)) // chunk must contain at least a SSRC identifier
 				return;                  // and a (possibly empty) item
 			

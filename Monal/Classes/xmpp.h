@@ -160,7 +160,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 /**
 sets the status message. makes xmpp call
  */
--(void) setStatusMessageText:(NSString*) message;
+-(void) setStatusMessageText:(NSString* _Nullable) message;
 
 /**
 sets away xmpp call.
@@ -216,7 +216,7 @@ Decline a call request
  -(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion;
 
 
--(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid withCompletion:(void (^)(NSArray* _Nullable)) completion;
+-(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString* _Nullable) uid withCompletion:(void (^)(NSArray* _Nullable)) completion;
 -(void) setMAMPrefs:(NSString*) preference;
 -(void) getMAMPrefs;
 

@@ -1712,7 +1712,6 @@ bool RTPUDPv6Transmitter::GetLocalIPList_Interfaces()
 
 void RTPUDPv6Transmitter::GetLocalIPList_DNS()
 {
-	int status;
 	char name[1024];
 
 	gethostname(name,1023);
@@ -1726,7 +1725,7 @@ void RTPUDPv6Transmitter::GetLocalIPList_DNS()
 	hints.ai_socktype = 0;
 	hints.ai_protocol = 0;
 
-	if ((status = getaddrinfo(name,0,&hints,&res)) != 0)
+	if (getaddrinfo(name,0,&hints,&res) != 0)
 		return;
 
 	tmp = res;

@@ -139,27 +139,12 @@ static NSDateFormatter* dbFormatter;
 
 -(NSNumber*) enabledAccountCnts
 {
-    NSString* query = @"SELECT COUNT(*) FROM account WHERE enabled=1";
-    return (NSNumber*)[self.db executeScalar:query];
+    return (NSNumber*)[self.db executeScalar:@"SELECT COUNT(*) FROM account WHERE enabled=1;"];
 }
 
 -(NSArray*) enabledAccountList
 {
-    NSString* query = @"select * from account where enabled=1 order by account_id asc";
-    NSArray* toReturn = [self.db executeReader:query andArguments:@[]] ;
-
-    if(toReturn!=nil)
-    {
-        DDLogVerbose(@" count: %lu",  (unsigned long)[toReturn count]);
-
-        return toReturn;
-    }
-    else
-    {
-        DDLogError(@"account list  is empty or failed to read");
-
-        return nil;
-    }
+    return [self.db executeReader:@"SELECT * FROM account WHERE enabled=1 ORDER BY account_id ASC;"] ;
 }
 
 -(BOOL) isAccountEnabled:(NSString*) accountNo
@@ -945,15 +930,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSMutableArray*) mucFavoritesForAccount:(NSString*) accountNo
 {
-    NSMutableArray* favorites = [self.db executeReader:@"SELECT * FROM muc_favorites WHERE account_id=?;" andArguments:@[accountNo]];
-    if(favorites != nil) {
-        DDLogVerbose(@"fetched muc favorites");
-    }
-    else{
-        DDLogVerbose(@"could not fetch  muc favorites");
-
-    }
-    return favorites;
+    return [self.db executeReader:@"SELECT * FROM muc_favorites WHERE account_id=?;" andArguments:@[accountNo]];
 }
 
 -(BOOL) updateMucSubject:(NSString *) subject forAccount:(NSString*) accountNo andRoom:(NSString *) room
@@ -1260,40 +1237,12 @@ static NSDateFormatter* dbFormatter;
 
 -(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-    //returns a buddy's message history
-
-    NSString* query = @"delete from message_history where account_id=? and (message_from=? or message_to=?) ";
-    NSArray* params = @[accountNo, buddy, buddy];
-    //DDLogVerbose(query);
-    if( [self.db executeNonQuery:query andArguments:params])
-
-    {
-        DDLogVerbose(@" cleaned messages for %@",  buddy );
-        return YES;
-    }
-    else
-    {
-        DDLogError(@"message history failed to clean");
-        return NO;
-    }
+    return [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=? AND (message_from=? OR message_to=?);" andArguments:@[accountNo, buddy, buddy]];
 }
-
 
 -(BOOL) messageHistoryCleanAll
 {
-    //cleans a buddy's message history
-    NSString* query = @"delete from message_history ";
-    if( [self.db executeNonQuery:query andArguments:@[]])
-    {
-        DDLogVerbose(@" cleaned messages " );
-        return YES;
-    }
-    else
-    {
-        DDLogError(@"message history failed to clean all");
-        return NO;
-    }
-
+    return [self.db executeNonQuery:@"DELETE FROM message_history;"];
 }
 
 -(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo
@@ -1487,10 +1436,7 @@ static NSDateFormatter* dbFormatter;
 -(NSNumber*) countUnreadMessages
 {
     // count # of meaages in message table
-    NSString* query = @"SELECT COUNT(message_history_id) FROM message_history WHERE unread=1 AND NOT EXISTS(SELECT * FROM muteList WHERE jid=message_history.message_from);";
-
-    NSNumber* count = (NSNumber*)[self.db executeScalar:query];
-    return count;
+    return [self.db executeScalar:@"SELECT COUNT(message_history_id) FROM message_history WHERE unread=1 AND NOT EXISTS(SELECT * FROM muteList WHERE jid=message_history.message_from);"];
 }
 
 //set all unread messages to read
@@ -1669,11 +1615,10 @@ static NSDateFormatter* dbFormatter;
 #pragma mark chat properties
 -(NSNumber*) countUserUnreadMessages:(NSString*) buddy forAccount:(NSString*) accountNo
 {
+    if(!buddy || !accountNo)
+        return @0;
     // count # messages from a specific user in messages table
-    NSString* query = @"select count(message_history_id) from message_history where unread=1 and account_id=? and message_from=?";
-
-    NSNumber* count = (NSNumber*)[self.db executeScalar:query andArguments:@[accountNo, buddy]];
-    return count;
+    return [self.db executeScalar:@"SELECT COUNT(message_history_id) FROM message_history WHERE unread=1 AND account_id=? AND message_from=?;" andArguments:@[accountNo, buddy]];
 }
 
 #pragma db Commands

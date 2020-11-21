@@ -264,14 +264,7 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
             }
             break;
         }
-        default:
-        {
-            return nil;
-            break;
-        }
     }
-    cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }

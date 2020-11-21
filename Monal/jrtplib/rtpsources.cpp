@@ -1082,10 +1082,9 @@ void RTPSources::NoteTimeout(const RTPTime &curtime,const RTPTime &timeoutdelay)
 	while (sourcelist.HasCurrentElement())
 	{
 		RTPInternalSourceData *srcdat = sourcelist.GetCurrentElement();
-		uint8_t *note;
 		size_t notelen;
 
-		note = srcdat->SDES_GetNote(&notelen);
+		srcdat->SDES_GetNote(&notelen);
 		if (notelen != 0) // Note has been set
 		{
 			RTPTime notetime = srcdat->INF_GetLastSDESNoteTime();
@@ -1149,7 +1148,6 @@ void RTPSources::MultipleTimeouts(const RTPTime &curtime,const RTPTime &senderti
 		RTPInternalSourceData *srcdat = sourcelist.GetCurrentElement();
 		bool deleted,issender,isactive;
 		bool byetimeout,normaltimeout,notetimeout;
-		uint8_t *note;
 		size_t notelen;
 		
 		issender = srcdat->IsSender();
@@ -1159,7 +1157,7 @@ void RTPSources::MultipleTimeouts(const RTPTime &curtime,const RTPTime &senderti
 		normaltimeout = false;
 		notetimeout = false;
 
-		note = srcdat->SDES_GetNote(&notelen);
+		srcdat->SDES_GetNote(&notelen);
 		if (notelen != 0) // Note has been set
 		{
 			RTPTime notetime = srcdat->INF_GetLastSDESNoteTime();

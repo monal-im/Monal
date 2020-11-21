@@ -65,7 +65,6 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    UITableViewCell* toreturn;
     switch (indexPath.row) {
         case 0: {
             MLSettingCell* cell=[[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
@@ -73,16 +72,14 @@
             cell.switchEnabled=YES;
             cell.defaultKey=@"ChatBackgrounds";
             cell.textLabel.text=NSLocalizedString(@"Chat Backgrounds",@"");
-            toreturn=cell;
-            break;
+            return cell;
         }
             
         case 1: {
            UITableViewCell* cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SelectCell"];
             cell.textLabel.text=NSLocalizedString(@"Select Background",@"");
             cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
-            toreturn=cell;
-            break;
+            return cell;
         }
             
         case 2: {
@@ -93,15 +90,9 @@
             cell.textLabel.text=NSLocalizedString(@"Select From Photos",@"");
 #endif
             cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
-            toreturn=cell;
-            break;
+            return cell;
         }
-            
-        default:
-            break;
     }
-   
-    return toreturn;
 }
 
 

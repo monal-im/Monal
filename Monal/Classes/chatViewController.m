@@ -254,7 +254,7 @@ enum msgSentState {
 
 -(void) lastMsgButtonPositionConfigWithSize:(CGSize)size
 {
-    float buttonXPos = size.width - lastMsgButtonSize - 5;
+    float buttonXPos = self.inputContainerView.frame.origin.x + self.inputContainerView.frame.size.width - lastMsgButtonSize - 5;
     float buttonYPos = self.inputContainerView.frame.origin.y - lastMsgButtonSize - 5;
     self.lastMsgButton.frame = CGRectMake(buttonXPos, buttonYPos , lastMsgButtonSize, lastMsgButtonSize);
 }

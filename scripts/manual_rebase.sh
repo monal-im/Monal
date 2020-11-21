@@ -31,7 +31,7 @@ if [ "$?" -ne "0" ]; then
 	echo "WILL BE RESET TO THE STATE BEFORE THE MANUAL REBASE"
 	echo "***********************************************************************************"
 	bash
-	git cherry-pick --abort		#abort any cherry-pick currently running
+	git cherry-pick --abort 2>/dev/null		#abort any cherry-pick currently running
 	if [ "$?" -ne "0" ]; then
 		echo "***********************************************************************************"
 		echo "CHERRY-PICK COMPLETED SUCCESSFULLY" 

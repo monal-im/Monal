@@ -133,73 +133,54 @@
     MLSettingCell* cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
     cell.parent = self;
    
-    switch (indexPath.section) {
-        case 0:
+    if(indexPath.section == 0)
+    {
+        cell.textInputField.placeholder = NSLocalizedString(@"Status Message", @"");
+        cell.textInputField.keyboardType = UIKeyboardTypeAlphabet;
+        cell.defaultKey = @"StatusMessage";
+        cell.textEnabled = YES;
+    }
+    else if(indexPath.section == 1)
+    {
+        cell.textLabel.text = NSLocalizedString(@"Away", @"");
+        cell.defaultKey = @"Away";
+        cell.switchEnabled = YES;
+    }
+    else
+    {
+        switch(indexPath.row)
         {
-            switch(indexPath.row)
+            case 0:
             {
-                case 0:
-                {
-                    cell.textInputField.placeholder=NSLocalizedString(@"Status Message", @"");
-                    cell.textInputField.keyboardType=UIKeyboardTypeAlphabet;
-                    cell.defaultKey=@"StatusMessage";
-                    cell.textEnabled=YES;
-                    return cell;
-                }
+                cell.textLabel.text = NSLocalizedString(@"Message Preview", @"");
+                cell.defaultKey = @"MessagePreview";
+                cell.switchEnabled = YES;
+                break; 
             }
-        }
-        
-        case 1:
-        {
-            switch(indexPath.row)
+            case 1:
             {
-                case 0:
-                {
-                    cell.textLabel.text=NSLocalizedString(@"Away", @"");
-                    cell.defaultKey=@"Away";
-                    cell.switchEnabled=YES;
-                    break;
-                }  
+                cell.textLabel.text = NSLocalizedString(@"Log Chats", @"");
+                cell.defaultKey = @"Logging";
+                cell.switchEnabled = YES;
+                break;
             }
-            return cell; 
-        }
-        
-        case 2:
-        {
-            switch(indexPath.row)
+            case 2:
             {
-                case 0:
-                {
-                    cell.textLabel.text=NSLocalizedString(@"Message Preview", @"");
-                    cell.defaultKey=@"MessagePreview";
-                    cell.switchEnabled=YES;
-                    break; 
-                }
-                case 1:
-                {
-                    cell.textLabel.text=NSLocalizedString(@"Log Chats", @"");
-                    cell.defaultKey=@"Logging";
-                    cell.switchEnabled=YES;
-                    break;
-                }
-                case 2:
-                {
-                    cell.textLabel.text = NSLocalizedString(@"Offline Contacts", @"");
-                       cell.defaultKey = @"OfflineContact";
-                    cell.switchEnabled = YES;
-                    break;
-                }
-                case 3:
-                {
-                    cell.textLabel.text = NSLocalizedString(@"Sort By Status", @"");
-                       cell.defaultKey = @"SortContacts";
-                    cell.switchEnabled = YES;
-                    break;
-                }
+                cell.textLabel.text = NSLocalizedString(@"Offline Contacts", @"");
+                cell.defaultKey = @"OfflineContact";
+                cell.switchEnabled = YES;
+                break;
             }
-            return cell; 
+            case 3:
+            {
+                cell.textLabel.text = NSLocalizedString(@"Sort By Status", @"");
+                cell.defaultKey = @"SortContacts";
+                cell.switchEnabled = YES;
+                break;
+            }
         }
     }
+    return cell;
 }
 
 -(IBAction)close:(id)sender

@@ -242,70 +242,68 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    switch (indexPath.section) {
-        case 0:
+    if(indexPath.section == 0)
+    {
+        UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+        if(cell == nil)
         {
-            UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
-            if(cell == nil)
-            {
-                cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];
-            }
-            else
-            {
-                cell.accessoryView = nil;
-            }
-            if([(NSString*)[[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"] length] > 0) {
-                cell.textLabel.text = [NSString stringWithFormat:@"%@@%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"],
-                                     [[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"]];
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];
+        }
+        else
+        {
+            cell.accessoryView = nil;
+        }
+        if([(NSString*)[[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"] length] > 0) {
+            cell.textLabel.text = [NSString stringWithFormat:@"%@@%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"],
+                                    [[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"]];
+        }
+        else {
+            cell.textLabel.text = [[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"];
+        }
+        
+        
+        UIImageView* accessory = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
+        cell.detailTextLabel.text=nil;
+        
+        if([[[_accountList objectAtIndex:indexPath.row] objectForKey:@"enabled"] boolValue] == YES) {
+                cell.imageView.image = [UIImage imageNamed:@"888-checkmark"];
+            if([[MLXMPPManager sharedInstance] isAccountForIdConnected: [NSString stringWithFormat:@"%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]]) {
+                accessory.image = [UIImage imageNamed:@"Connected"];
+                cell.accessoryView = accessory;
+                
+                NSDate* connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor: [NSString stringWithFormat:@"%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]];
+                if(connectedTime) {
+                    cell.detailTextLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Connected since: %@", @""), [self.uptimeFormatter stringFromDate:connectedTime]];
+                }
             }
             else {
-                cell.textLabel.text = [[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"];
+                accessory.image = [UIImage imageNamed:NSLocalizedString(@"Disconnected", @"")];
+                cell.accessoryView = accessory;
             }
-            
-            
-            UIImageView* accessory = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
-            cell.detailTextLabel.text=nil;
-            
-            if([[[_accountList objectAtIndex:indexPath.row] objectForKey:@"enabled"] boolValue] == YES) {
-                   cell.imageView.image = [UIImage imageNamed:@"888-checkmark"];
-                if([[MLXMPPManager sharedInstance] isAccountForIdConnected: [NSString stringWithFormat:@"%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]]) {
-                    accessory.image = [UIImage imageNamed:@"Connected"];
-                    cell.accessoryView = accessory;
-                    
-                    NSDate* connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor: [NSString stringWithFormat:@"%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]];
-                    if(connectedTime) {
-                        cell.detailTextLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Connected since: %@", @""), [self.uptimeFormatter stringFromDate:connectedTime]];
-                    }
-                }
-                else {
-                    accessory.image = [UIImage imageNamed:NSLocalizedString(@"Disconnected", @"")];
-                    cell.accessoryView = accessory;
-                }
-            }
-            else
-                cell.imageView.image = [UIImage imageNamed:@"disabled"];
-            return cell;
         }
-        case 1:
-        {
-            UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"ProtocolCell"];
-            if(cell == nil)
-                cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ProtocolCell"];
-            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-            cell.imageView.image = [UIImage imageNamed:@"XMPP"];
+        else
+            cell.imageView.image = [UIImage imageNamed:@"disabled"];
+        return cell;
+    }
+    else
+    {
+        UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"ProtocolCell"];
+        if(cell == nil)
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ProtocolCell"];
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        cell.imageView.image = [UIImage imageNamed:@"XMPP"];
 
-            if(indexPath.row == 0)
-            {
-                cell.textLabel.text = NSLocalizedString(@"XMPP", @"");
-                cell.detailTextLabel.text = NSLocalizedString(@"Jabber, Prosody, ejabberd etc.   ", @"");
-            }
-            else
-            {
-                cell.textLabel.text = NSLocalizedString(@"XMPP: QR-Code", @"");
-                cell.detailTextLabel.text = NSLocalizedString(@"Login with a QR-Code", @"");
-            }
-            return cell;
+        if(indexPath.row == 0)
+        {
+            cell.textLabel.text = NSLocalizedString(@"XMPP", @"");
+            cell.detailTextLabel.text = NSLocalizedString(@"Jabber, Prosody, ejabberd etc.   ", @"");
         }
+        else
+        {
+            cell.textLabel.text = NSLocalizedString(@"XMPP: QR-Code", @"");
+            cell.detailTextLabel.text = NSLocalizedString(@"Login with a QR-Code", @"");
+        }
+        return cell;
     }
 }
 

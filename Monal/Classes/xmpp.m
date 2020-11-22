@@ -2916,7 +2916,12 @@ NSString *const kContact=@"contact";
         //dispatch completion handler outside of the receiveQueue
         if(_regFormErrorCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                _regFormErrorCompletion(nil, nil);
+                NSString* errorReason = [error findFirst:@"{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"];
+                NSString* errorText = [error findFirst:@"{urn:ietf:params:xml:ns:xmpp-stanzas}text#"];
+                NSString* message = errorReason;
+                if(errorText && ![errorText isEqualToString:@""])
+                    message = [NSString stringWithFormat:@"%@: %@", errorReason, errorText];
+                _regFormErrorCompletion(NO, message);
             });
     }];
 }

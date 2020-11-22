@@ -834,20 +834,19 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) incomingPushWithCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
 {
-    DDLogInfo(@"got incomingPushWithCompletionHandler");
-    
 #if TARGET_OS_MACCATALYST
     DDLogError(@"Ignoring incomingPushWithCompletionHandler: we are a catalyst app!");
     completionHandler(UIBackgroundFetchResultNoData);
     return;
-#endif
-    
+#else
     if(![HelperTools isInBackground])
     {
         DDLogError(@"Ignoring incomingPushWithCompletionHandler: because app is in FG!");
         completionHandler(UIBackgroundFetchResultNoData);
         return;
     }
+    
+    DDLogInfo(@"got incomingPushWithCompletionHandler");
     
     // should any accounts reconnect?
     [[MLXMPPManager sharedInstance] pingAllAccounts];
@@ -862,6 +861,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             completionHandler(UIBackgroundFetchResultFailed);
         }]
     };
+#endif
 }
 
 @end

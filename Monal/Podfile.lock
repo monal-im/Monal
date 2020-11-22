@@ -7,10 +7,10 @@ PODS:
   - EAIntroView (2.13.0):
     - EARestrictedScrollView (~> 1.1.0)
   - EARestrictedScrollView (1.1.0)
-  - IDMPhotoBrowser (2.0.2):
+  - IDMPhotoBrowser (1.10.2):
     - DACircularProgress
     - pop
-    - YYKit
+    - SDWebImage
   - MarqueeLabel (4.0.5)
   - MBProgressHUD (1.2.0)
   - NotificationBannerSwift (3.0.2):
@@ -30,15 +30,12 @@ PODS:
   - SnapKit (5.0.1)
   - TOCropViewController (2.5.5)
   - TPCircularBuffer (1.6.1)
-  - YYKit (2.0.10):
-    - YYKit/no-arc (= 2.0.10)
-  - YYKit/no-arc (2.0.10)
 
 DEPENDENCIES:
   - CocoaLumberjack
   - DZNEmptyDataSet
   - EAIntroView
-  - IDMPhotoBrowser (from `https://github.com/tmolitor-stud-tu/IDMPhotoBrowser.git`)
+  - IDMPhotoBrowser
   - MBProgressHUD (~> 1.2.0)
   - NotificationBannerSwift (~> 3.0.2)
   - OpenSSL-Universal (= 1.0.2.20)
@@ -48,7 +45,6 @@ DEPENDENCIES:
   - SignalProtocolObjC
   - TOCropViewController
   - TPCircularBuffer
-  - YYKit (from `https://github.com/tmolitor-stud-tu/YYKit.git`)
 
 SPEC REPOS:
   trunk:
@@ -57,6 +53,7 @@ SPEC REPOS:
     - DZNEmptyDataSet
     - EAIntroView
     - EARestrictedScrollView
+    - IDMPhotoBrowser
     - MarqueeLabel
     - MBProgressHUD
     - NotificationBannerSwift
@@ -70,27 +67,13 @@ SPEC REPOS:
     - TOCropViewController
     - TPCircularBuffer
 
-EXTERNAL SOURCES:
-  IDMPhotoBrowser:
-    :git: https://github.com/tmolitor-stud-tu/IDMPhotoBrowser.git
-  YYKit:
-    :git: https://github.com/tmolitor-stud-tu/YYKit.git
-
-CHECKOUT OPTIONS:
-  IDMPhotoBrowser:
-    :commit: 90677e4fa643ba2db489a2f454780652563da6e4
-    :git: https://github.com/tmolitor-stud-tu/IDMPhotoBrowser.git
-  YYKit:
-    :commit: ddd4cfe80c14d34843c870571c4c8e537d449088
-    :git: https://github.com/tmolitor-stud-tu/YYKit.git
-
 SPEC CHECKSUMS:
   CocoaLumberjack: e8955b9d337ac307103b0a34fd141c32f27e53c5
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   EAIntroView: 9adedfc6b5c3fd3ebe19766da01dae573e6ce053
   EARestrictedScrollView: b0c2a3f92fb2610bb44d71c5e4893777c89e45ef
-  IDMPhotoBrowser: 3b340a39e5031952c78d9729e25bba6df6a71836
+  IDMPhotoBrowser: 4bb459b1faffc228e92bccdf7c54ad6d6b7e8c37
   MarqueeLabel: 00cc0bcd087111dca575878b3531af980559707d
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   NotificationBannerSwift: 713e20f21b6105f4a36a00e5d9fa414a930d3d8e
@@ -103,8 +86,7 @@ SPEC CHECKSUMS:
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   TOCropViewController: da59f531f8ac8a94ef6d6c0fc34009350f9e8bfe
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
-  YYKit: 9520ba7e841cf641b6e46f756598b971e03f1348
 
-PODFILE CHECKSUM: 54c337459227c1cba58ea6250d2a6337401ff0da
+PODFILE CHECKSUM: 51c22442ce264e72ebbf3184800f617ddb0f7540
 
 COCOAPODS: 1.10.0

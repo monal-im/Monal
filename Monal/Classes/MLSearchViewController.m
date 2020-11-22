@@ -208,7 +208,7 @@
     }
 }
 
-- (BOOL)isDBIdExited:(NSNumber*) dbId
+- (BOOL)isDBIdExistent:(NSNumber*) dbId
 {
     if ([self.searchResultMessageDictionary objectForKey:dbId])
     {

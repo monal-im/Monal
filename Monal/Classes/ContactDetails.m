@@ -174,131 +174,132 @@
 {
     UITableViewCell* thecell;
     
-    switch(indexPath.section) {
-        case 0: {
-            MLContactDetailHeader* detailCell = (MLContactDetailHeader *)[tableView dequeueReusableCellWithIdentifier:@"headerCell"];
+    if(indexPath.section == 0)
+    {
+        MLContactDetailHeader* detailCell = (MLContactDetailHeader *)[tableView dequeueReusableCellWithIdentifier:@"headerCell"];
 
-            // Set jid field
+        // Set jid field
+        if(self.contact.isGroup)
+        {
+            detailCell.jid.text=[NSString stringWithFormat:@"%@ (%lu)", self.contact.contactJid, self.groupMemberCount];
+            //hide things that aren't relevant
+            detailCell.phoneButton.hidden = YES;
+            detailCell.isContact.hidden = YES;
+        }
+        else
+        {
+            detailCell.jid.text = self.contact.contactJid;
+            detailCell.isContact.hidden = self.isSubscribed;
+            detailCell.isContact.text = self.subMessage;
+        }
+        
+        // Set human readable lastInteraction field
+        NSDate* lastInteractionDate = [[DataLayer sharedInstance] lastInteractionOfJid:self.contact.contactJid forAccountNo:self.contact.accountId];
+        NSString* lastInteractionStr;
+        if(lastInteractionDate.timeIntervalSince1970 > 0)
+            lastInteractionStr = [NSDateFormatter localizedStringFromDate:lastInteractionDate dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
+        else
+            lastInteractionStr = NSLocalizedString(@"now", @"");
+        detailCell.lastInteraction.text = [NSString stringWithFormat:NSLocalizedString(@"Last seen: %@", @""), lastInteractionStr];
+
+        if(self.contact.isGroup || !self.isSubscribed) {
+            detailCell.lockButton.hidden = YES;
+        }
+
+        [[MLImageManager sharedInstance] getIconForContact:self.contact.contactJid andAccount:self.contact.accountId withCompletion:^(UIImage *image) {
+            detailCell.buddyIconView.image = image;
+            //   detailCell.background.image=image;
+        }];
+        
+        detailCell.background.image = [UIImage imageNamed:@"Tie_My_Boat_by_Ray_Garcia"];
+        
+        if(self.isMuted)
+            [detailCell.muteButton setImage:[UIImage imageNamed:@"847-moon-selected"] forState:UIControlStateNormal];
+        else
+            [detailCell.muteButton setImage:[UIImage imageNamed:@"847-moon"] forState:UIControlStateNormal];
+        
+        if(self.isEncrypted)
+            [detailCell.lockButton setImage:[UIImage imageNamed:@"744-locked-selected"] forState:UIControlStateNormal];
+        else
+            [detailCell.lockButton setImage:[UIImage imageNamed:@"745-unlocked"] forState:UIControlStateNormal];
+        
+        return detailCell;
+    }
+    else if(indexPath.section == 1)
+    {
+        if(indexPath.row == 0)
+        {
+            MLTextInputCell *cell = (MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
             if(self.contact.isGroup)
             {
-               detailCell.jid.text=[NSString stringWithFormat:@"%@ (%lu)", self.contact.contactJid, self.groupMemberCount];
-                //hide things that aren't relevant
-                detailCell.phoneButton.hidden = YES;
-                detailCell.isContact.hidden = YES;
+                cell.textInput.enabled=NO;
+                cell.textInput.text=self.contact.accountNickInGroup;
             }
-            else
+            else 
             {
-                detailCell.jid.text = self.contact.contactJid;
-                detailCell.isContact.hidden = self.isSubscribed;
-                detailCell.isContact.text = self.subMessage;
+                cell.textInput.text=[self.contact contactDisplayName];
+                cell.textInput.placeholder = NSLocalizedString(@"Set a nickname for this contact", @"");
+                cell.textInput.delegate = self;
             }
-            
-            // Set human readable lastInteraction field
-            NSDate* lastInteractionDate = [[DataLayer sharedInstance] lastInteractionOfJid:self.contact.contactJid forAccountNo:self.contact.accountId];
-            NSString* lastInteractionStr;
-            if(lastInteractionDate.timeIntervalSince1970 > 0)
-                lastInteractionStr = [NSDateFormatter localizedStringFromDate:lastInteractionDate dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
-            else
-                lastInteractionStr = NSLocalizedString(@"now", @"");
-            detailCell.lastInteraction.text = [NSString stringWithFormat:NSLocalizedString(@"Last seen: %@", @""), lastInteractionStr];
-
-            if(self.contact.isGroup || !self.isSubscribed) {
-                detailCell.lockButton.hidden = YES;
-            }
-
-            [[MLImageManager sharedInstance] getIconForContact:self.contact.contactJid andAccount:self.contact.accountId withCompletion:^(UIImage *image) {
-                detailCell.buddyIconView.image = image;
-                //   detailCell.background.image=image;
-            }];
-            
-            detailCell.background.image = [UIImage imageNamed:@"Tie_My_Boat_by_Ray_Garcia"];
-            
-            if(self.isMuted)
-                [detailCell.muteButton setImage:[UIImage imageNamed:@"847-moon-selected"] forState:UIControlStateNormal];
-            else
-                [detailCell.muteButton setImage:[UIImage imageNamed:@"847-moon"] forState:UIControlStateNormal];
-            
-            if(self.isEncrypted)
-                [detailCell.lockButton setImage:[UIImage imageNamed:@"744-locked-selected"] forState:UIControlStateNormal];
-            else
-                [detailCell.lockButton setImage:[UIImage imageNamed:@"745-unlocked"] forState:UIControlStateNormal];
-            
-            return detailCell;
+            return cell;
         }
-        case 1: {
-            if(indexPath.row == 0)
-            {
-                MLTextInputCell *cell = (MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-                if(self.contact.isGroup)
-                {
-                    cell.textInput.enabled=NO;
-                    cell.textInput.text=self.contact.accountNickInGroup;
-                }
-                else 
-                {
-                    cell.textInput.text=[self.contact contactDisplayName];
-                    cell.textInput.placeholder = NSLocalizedString(@"Set a nickname for this contact", @"");
-                    cell.textInput.delegate = self;
-                }
-                return cell;
+        else if(indexPath.row == 1)
+        {
+            MLDetailsTableViewCell* cell = (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"MessageCell"];
+            if(self.contact.isGroup) {
+                cell.cellDetails.text = self.contact.groupSubject;
+            } else  {
+                cell.cellDetails.text = self.contact.statusMessage;
+                if([cell.cellDetails.text isEqualToString:@"(null)"])
+                    cell.cellDetails.text = @"";
             }
-            else if(indexPath.row == 1)
-            {
-                MLDetailsTableViewCell* cell = (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"MessageCell"];
-                if(self.contact.isGroup) {
-                    cell.cellDetails.text = self.contact.groupSubject;
-                } else  {
-                    cell.cellDetails.text = self.contact.statusMessage;
-                    if([cell.cellDetails.text isEqualToString:@"(null)"])
-                        cell.cellDetails.text = @"";
-                }
-                return cell;
-            }
-            else
-            {
-                UITableViewCell* cell=  (UITableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"TableCell"];
-                cell.textLabel.text = NSLocalizedString(@"View Images Received",@"");
-                return cell;
+            return cell;
+        }
+        else
+        {
+            UITableViewCell* cell=  (UITableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"TableCell"];
+            cell.textLabel.text = NSLocalizedString(@"View Images Received",@"");
+            return cell;
+        }
+    }
+    else
+    {
+        thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Sub"];
+        if(indexPath.row == 0)
+            thecell.textLabel.text = NSLocalizedString(@"Encryption Keys", @"");
+        else if(indexPath.row == 1)
+        {
+            if(self.contact.isGroup) {
+                thecell.textLabel.text = NSLocalizedString(@"Participants", @"");
+            } else {
+                thecell.textLabel.text = NSLocalizedString(@"Resources", @"");
             }
         }
-        case 2: {
-            thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Sub"];
-            if(indexPath.row == 0)
-               thecell.textLabel.text = NSLocalizedString(@"Encryption Keys", @"");
-            else if(indexPath.row == 1)
+        else if(indexPath.row == 2)
+        {
+            if(self.contact.isGroup)
+                thecell.textLabel.text = NSLocalizedString(@"Leave Conversation", @"");
+            else
             {
-                if(self.contact.isGroup) {
-                    thecell.textLabel.text = NSLocalizedString(@"Participants", @"");
-                } else {
-                    thecell.textLabel.text = NSLocalizedString(@"Resources", @"");
-                }
-            }
-            else if(indexPath.row == 2)
-            {
-                if(self.contact.isGroup)
-                    thecell.textLabel.text = NSLocalizedString(@"Leave Conversation", @"");
+                if(self.isSubscribed)
+                    thecell.textLabel.text = NSLocalizedString(@"Remove Contact", @"");
                 else
-                {
-                    if(self.isSubscribed)
-                        thecell.textLabel.text = NSLocalizedString(@"Remove Contact", @"");
-                    else
-                        thecell.textLabel.text = NSLocalizedString(@"Add Contact", @"");
-                }
+                    thecell.textLabel.text = NSLocalizedString(@"Add Contact", @"");
             }
-            else if(indexPath.row == 3)
-                thecell.textLabel.text = NSLocalizedString(@"Block Sender", @"");
-            else if(indexPath.row == 4)
-                thecell.textLabel.text = NSLocalizedString(@"Unblock Sender", @"");
-            else if(indexPath.row == 5)
-            {
-                if(self.isPinned)
-                    thecell.textLabel.text = NSLocalizedString(@"Unpin Chat", @"");
-                else
-                    thecell.textLabel.text = NSLocalizedString(@"Pin Chat", @"");
-            }
-            thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
-            return thecell;
         }
+        else if(indexPath.row == 3)
+            thecell.textLabel.text = NSLocalizedString(@"Block Sender", @"");
+        else if(indexPath.row == 4)
+            thecell.textLabel.text = NSLocalizedString(@"Unblock Sender", @"");
+        else if(indexPath.row == 5)
+        {
+            if(self.isPinned)
+                thecell.textLabel.text = NSLocalizedString(@"Unpin Chat", @"");
+            else
+                thecell.textLabel.text = NSLocalizedString(@"Pin Chat", @"");
+        }
+        thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+        return thecell;
     }
 }
 

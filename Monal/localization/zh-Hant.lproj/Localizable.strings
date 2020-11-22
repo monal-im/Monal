@@ -377,3 +377,6 @@
 "XMPP: QR-Code" = "XMPP: QR-Code";
 "Not Authorized. Please check your credentials." = "Not Authorized. Please check your credentials.";
 "There was a SASL error on the server." = "There was a SASL error on the server.";
+"Contact Jid" = "Contact Jid";
+"Contacts are usually in the format: username@dom.ain" = "Contacts are usually in the format: username@dom.ain";
+"Only shareable for now" = "Only shareable for now";

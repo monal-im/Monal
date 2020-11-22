@@ -689,7 +689,8 @@ enum msgSentState {
     
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
     } completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {
-        [self lastMsgButtonPositionConfigWithSize:[UIApplication sharedApplication].keyWindow.bounds.size];
+        //[self lastMsgButtonPositionConfigWithSize:self.inputContainerView.bounds.size];
+        [self lastMsgButtonPositionConfigWithSize:size];
     }];
 }
 
@@ -1783,7 +1784,7 @@ enum msgSentState {
     [self resetHistoryAttributeForCell:cell];
     if (self.searchController.isActive)
     {
-        if ([self.searchController isDBIdExited:row.messageDBId])
+        if([self.searchController isDBIdExistent:row.messageDBId])
         {
             NSMutableAttributedString *attributedMsgString = [self.searchController doSearchKeyword:self.searchController.searchBar.text
                                                                                              onText:messageText
@@ -1874,36 +1875,22 @@ enum msgSentState {
         
         DDLogVerbose(@"%@", message);
         
-        if(message.messageId)
-        {
-            [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
-        }
-        else
-        {
+        if(!message.messageDBId)
             return;
-        }
+
+        [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
         [self.messageList removeObjectAtIndex:indexPath.row];
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];
     }
 }
 
-- (BOOL)tableView:(UITableView *)tableView shouldShowMenuForRowAtIndexPath:(NSIndexPath *)indexPath
+-(UISwipeActionsConfiguration*) tableView:(UITableView*) tableView trailingSwipeActionsConfigurationForRowAtIndexPath:(NSIndexPath*) indexPath
 {
-    return YES;
-}
-
-- (BOOL)tableView:(UITableView *)tableView canPerformAction:(SEL)action forRowAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender
-{
-    return YES;
+    return nil;
 }
 
 //dummy function needed to remove warnign
 -(void) openlink: (id) sender {
-    
-}
-
-- (void)tableView:(UITableView *)tableView performAction:(SEL)action forRowAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender
-{
     
 }
 

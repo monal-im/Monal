@@ -64,34 +64,32 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    switch (indexPath.row) {
-        case 0: {
-            MLSettingCell* cell=[[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
-            cell.parent= self;
-            cell.switchEnabled=YES;
-            cell.defaultKey=@"ChatBackgrounds";
-            cell.textLabel.text=NSLocalizedString(@"Chat Backgrounds",@"");
-            return cell;
-        }
-            
-        case 1: {
-           UITableViewCell* cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SelectCell"];
-            cell.textLabel.text=NSLocalizedString(@"Select Background",@"");
-            cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
-            return cell;
-        }
-            
-        case 2: {
-            UITableViewCell* cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SelectCell"];
+    if(indexPath.row == 0)
+    {
+        MLSettingCell* cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
+        cell.parent = self;
+        cell.switchEnabled = YES;
+        cell.defaultKey = @"ChatBackgrounds";
+        cell.textLabel.text = NSLocalizedString(@"Chat Backgrounds",@"");
+        return cell;
+    }
+    else if(indexPath.row == 1)
+    {
+        UITableViewCell* cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SelectCell"];
+        cell.textLabel.text = NSLocalizedString(@"Select Background",@"");
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        return cell;
+    }
+    else
+    {
+        UITableViewCell* cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SelectCell"];
 #if TARGET_OS_MACCATALYST
-            cell.textLabel.text=NSLocalizedString(@"Select File",@"");
+        cell.textLabel.text = NSLocalizedString(@"Select File",@"");
 #else
-            cell.textLabel.text=NSLocalizedString(@"Select From Photos",@"");
+        cell.textLabel.text = NSLocalizedString(@"Select From Photos",@"");
 #endif
-            cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
-            return cell;
-        }
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        return cell;
     }
 }
 
@@ -109,10 +107,7 @@
             [self showPhotos];
             break;
         }
-        default: break;
-            
     }
-    
 }
 
 -(void) showPhotos

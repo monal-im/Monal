@@ -29,7 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void) getSearchData:(NSString*) queryText;
 - (NSMutableAttributedString*) doSearchKeyword:(NSString*) keyword onText:(NSString*) allText andInbound:(BOOL) inDirection;
-- (BOOL) isDBIdExited:(NSNumber*) dbId;
+- (BOOL) isDBIdExistent:(NSNumber*) dbId;
 - (void) setResultToolBar;
 - (void) setMessageIndexPath:(NSNumber*)idxPath withDBId:(NSNumber*)dbId;
 - (NSNumber*) getMessageIndexPathForDBId:(NSNumber*)dbId;

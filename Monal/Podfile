@@ -34,8 +34,7 @@ target 'Monal' do
   use_frameworks!
   inhibit_all_warnings!
   pod 'MBProgressHUD', '~> 1.2.0'
-  pod 'YYKit', :git => 'https://github.com/tmolitor-stud-tu/YYKit.git'
-  pod 'IDMPhotoBrowser', :git => 'https://github.com/tmolitor-stud-tu/IDMPhotoBrowser.git'
+  pod 'IDMPhotoBrowser'
   pod 'SDWebImage', '~> 5.9.5'
   pod 'DZNEmptyDataSet'
   pod 'EAIntroView'

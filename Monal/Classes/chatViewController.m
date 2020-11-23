@@ -1106,6 +1106,7 @@ enum msgSentState {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
+        return;
     }
     int keySize = 32;
     if(self.encryptChat) {

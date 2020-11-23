@@ -8,3 +8,6 @@ Monal/Monal.xcodeproj/xcuserdata/anurodhp.xcuserdatad/xcschemes/jrtplib-static.x
 Monal/Monal.xcodeproj/xcuserdata/anurodhp.xcuserdatad/xcschemes/xcschememanagement.plist
 contents.xcworkspacedata
 ._*
+
+# Pods
+Monal/Pods

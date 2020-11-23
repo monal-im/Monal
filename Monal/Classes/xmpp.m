@@ -356,7 +356,7 @@ NSString *const kContact=@"contact";
         //and cancel the new _bgFetch because we are now idle (the dispatchAsyncOnReceiveQueue: will add a new task to the receive queue when
         //the send queue gets cleaned up and this task will run as soon as the disconnect is done and interfere with the configuration of the
         //_bgFetch and the syncError push notification both created on the main thread
-        DDLogVerbose(@"_disconnectInProgres = %@", _disconnectInProgres ? @"YES" : @"NO");
+        //DDLogVerbose(@"_disconnectInProgres = %@", _disconnectInProgres ? @"YES" : @"NO");
         if(![object operationCount] && !_disconnectInProgres)
         {
             DDLogVerbose(@"Adding idle state check to receive queue...");

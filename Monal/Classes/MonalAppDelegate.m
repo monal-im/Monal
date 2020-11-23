@@ -119,13 +119,13 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 {
     //make sure unread badge matches application badge
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
-    [HelperTools dispatchSyncReentrant:^{
+    dispatch_async(dispatch_get_main_queue(), ^{
         NSInteger unread = 0;
         if(unreadMsgCnt)
             unread = [unreadMsgCnt integerValue];
         DDLogInfo(@"Updating unread badge to: %ld", (long)unread);
         [UIApplication sharedApplication].applicationIconBadgeNumber = unread;
-    } onQueue:dispatch_get_main_queue()];
+    });
 }
 
 #pragma mark - app life cycle

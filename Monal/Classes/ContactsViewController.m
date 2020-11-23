@@ -484,7 +484,7 @@
         // A little trick for removing the cell separators
         self.tableView.tableFooterView = [UIView new];
     }
-    return toreturn;
+    return self.contacts.count == 0;
 }
 
 -(IBAction) close:(id) sender

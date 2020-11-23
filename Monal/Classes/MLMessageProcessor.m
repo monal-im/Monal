@@ -206,7 +206,7 @@ static NSMutableDictionary* _typingNotifications;
                     displayMarkerWanted:[messageNode check:@"{urn:xmpp:chat-markers:0}markable"]
                 ];
                 
-                if(historyId)
+                if(historyId != nil)
                 {
                     if(
                         [[HelperTools defaultsDB] boolForKey:@"SendReceivedMarkers"] &&

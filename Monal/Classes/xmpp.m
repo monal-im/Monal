@@ -2566,7 +2566,7 @@ NSString *const kContact=@"contact";
                                        displayMarkerWanted:NO
                 ];
                 //add successfully added messages to our display list
-                if(historyId)
+                if(historyId != nil)
                     [messageList addObject:msg];
             }
         
@@ -3225,7 +3225,7 @@ NSString *const kContact=@"contact";
     return message;
 }
 
--(void) addMessageToMamPageArray:(XMPPMessage* _Nonnull) messageNode forOuterMessageNode:(XMPPMessage* _Nonnull) outerMessageNode withBody:(NSString* _Nonnull) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString* _Nonnull) messageType
+-(void) addMessageToMamPageArray:(XMPPMessage*) messageNode forOuterMessageNode:(XMPPMessage*) outerMessageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType
 {
     MLMessage* message = [self parseMessageToMLMessage:messageNode withBody:body andEncrypted:encrypted andShowAlert:showAlert andMessageType:messageType andActualFrom:nil];
     @synchronized(_mamPageArrays) {
@@ -3235,7 +3235,7 @@ NSString *const kContact=@"contact";
     }
 }
 
--(NSArray* _Nullable) getOrderedMamPageFor:(NSString* _Nonnull) mamQueryId
+-(NSArray* _Nullable) getOrderedMamPageFor:(NSString*) mamQueryId
 {
     NSArray* array;
     @synchronized(_mamPageArrays) {

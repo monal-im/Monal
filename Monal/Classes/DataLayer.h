@@ -201,14 +201,6 @@ extern NSString* const kMessageTypeImage;
 -(NSArray *) messageHistoryListDates:(NSString *) buddy forAccount: (NSString *) accountNo;
 -(NSArray *) messageHistoryDateForContact:(NSString *) buddy forAccount:(NSString *) accountNo forDate:(NSString*) date;
 
-/**
- retrieves the date of the the last message to or from this contact
- */
--(NSDate*) lastMessageDateForContact:(NSString*) contact andAccount:(NSString*) accountNo;
-
--(NSDate*) lastMessageDateAccount:(NSString*) accountNo;
-
-
 -(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSString*) accountNo;
 -(BOOL) messageHistoryCleanAll;
 
@@ -216,11 +208,6 @@ extern NSString* const kMessageTypeImage;
 -(NSArray*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSString*) accountNo tillStanzaId:(NSString* _Nullable) stanzaId wasOutgoing:(BOOL) outgoing;
 
 -(NSNumber*) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType;
-
-/**
-retrieves the actual_from of the the last message from hisroty id
-*/
--(NSString*)lastMessageActualFromByHistoryId:(NSNumber*) lastMsgHistoryId;
 
 #pragma mark active contacts
 -(NSMutableArray*) activeContactsWithPinned:(BOOL) pinned;

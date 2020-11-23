@@ -25,7 +25,6 @@
 
     NSURLSession* session = [NSURLSession sharedSession];
     [[session dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError* _Nullable error) {
-        NSString* messageType;
         NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
         NSString* contentType = [[headers objectForKey:@"Content-Type"] lowercaseString];
         NSNumber* contentLength = [headers objectForKey:@"Content-Length"] ? [NSNumber numberWithInt:([[headers objectForKey:@"Content-Length"] intValue])] : @(-1);

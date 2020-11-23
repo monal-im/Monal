@@ -1150,9 +1150,9 @@ static NSDateFormatter* dbFormatter;
         {
             DDLogError(@"message history buddy date list is empty or failed to read");
 
-            return nil;
+            return [[NSArray alloc] init];
         }
-    } else return nil;
+    } else return [[NSArray alloc] init];
 }
 
 -(NSArray*) messageHistoryDateForContact:(NSString*) contact forAccount:(NSString*) accountNo forDate:(NSString*) date
@@ -1184,7 +1184,7 @@ static NSDateFormatter* dbFormatter;
     else
     {
         DDLogError(@"message history is empty or failed to read");
-        return nil;
+        return [[NSArray alloc] init];
     }
 }
 
@@ -1200,6 +1200,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo
 {
+    NSMutableArray* toReturn = [[NSMutableArray alloc] init];
     //returns a list of  buddy's with message history
     NSString* accountJid = [self jidOfAccount:accountNo];
     if(accountJid)
@@ -1209,13 +1210,10 @@ static NSDateFormatter* dbFormatter;
         NSArray* params = @[accountNo, accountNo,
                             accountJid];
         //DDLogVerbose(query);
-        NSMutableArray* toReturn = [[NSMutableArray alloc] init];
         for(NSDictionary* dic in [self.db executeReader:query andArguments:params])
             [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];
-        return toReturn;
     }
-    else
-        return nil;
+    return toReturn;
 }
 
 //message history
@@ -1373,29 +1371,6 @@ static NSDateFormatter* dbFormatter;
     [self.db executeNonQuery:query];
 }
 
--(NSDate*) lastMessageDateForContact:(NSString*) contact andAccount:(NSString*) accountNo
-{
-    NSString* query = @"select timestamp from message_history where account_id=? and (message_from=? or (message_to=? and sent=1)) order by timestamp desc limit 1";
-
-    NSObject* result = [self.db executeScalar:query andArguments:@[accountNo, contact, contact]];
-    if(!result) return nil;
-    
-    NSDateFormatter *dateFromatter = [[NSDateFormatter alloc] init];
-    NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-
-    [dateFromatter setLocale:enUSPOSIXLocale];
-    [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
-    [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-
-    NSDate* datetoReturn = [dateFromatter dateFromString:(NSString *)result];
-
-    // We could not parse the string -> default to 0
-    if(datetoReturn == nil)
-        datetoReturn = [[NSDate date] initWithTimeIntervalSince1970:0];
-
-    return datetoReturn;
-}
-
 -(NSString*) lastStanzaIdForAccount:(NSString*) accountNo
 {
     return [self.db executeScalar:@"SELECT lastStanzaId FROM account WHERE account_id=?;" andArguments:@[accountNo]];
@@ -1404,28 +1379,6 @@ static NSDateFormatter* dbFormatter;
 -(void) setLastStanzaId:(NSString*) lastStanzaId forAccount:(NSString*) accountNo
 {
     [self.db executeNonQuery:@"UPDATE account SET lastStanzaId=? WHERE account_id=?;" andArguments:@[lastStanzaId, accountNo]];
-}
-
--(NSDate*) lastMessageDateAccount:(NSString*) accountNo
-{
-    NSString* query = @"select timestamp from message_history where account_id=? order by timestamp desc limit 1";
-
-    NSObject* result = [self.db executeScalar:query andArguments:@[accountNo]];
-
-    NSDateFormatter* dateFromatter = [[NSDateFormatter alloc] init];
-    NSLocale* enUSPOSIXLocale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"];
-
-    [dateFromatter setLocale:enUSPOSIXLocale];
-    [dateFromatter setDateFormat:@"yyyy'-'MM'-'dd HH':'mm':'ss"];
-    [dateFromatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-
-    NSDate* datetoReturn = [dateFromatter dateFromString:(NSString *)result];
-    return datetoReturn;
-}
-
--(NSString*)lastMessageActualFromByHistoryId:(NSNumber*) lastMsgHistoryId
-{
-    return [self.db executeScalar:@"select actual_from from message_history where message_history_id=? order by timestamp desc limit 1" andArguments:@[lastMsgHistoryId]];
 }
 
 #pragma mark active chats
@@ -2104,7 +2057,7 @@ static NSDateFormatter* dbFormatter;
     else
     {
         DDLogError(@"attachment list  is empty or failed to read");
-        return nil;
+        return [[NSMutableArray alloc] init];
     }
 
 }

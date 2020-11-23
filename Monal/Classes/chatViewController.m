@@ -1813,7 +1813,7 @@ enum msgSentState {
     [cell updateCellWithNewSender:newSender];
         
     [self resetHistoryAttributeForCell:cell];
-    if (self.searchController.isActive)
+    if(self.searchController.isActive && row.messageDBId)
     {
         if([self.searchController isDBIdExistent:row.messageDBId])
         {

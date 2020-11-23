@@ -74,7 +74,6 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 // state attributes
 @property (nonatomic, strong) NSString* statusMessage;
-@property (nonatomic, assign) BOOL awayState;
 
 @property (nonatomic, strong) jingleCall* _Nullable jingle;
 
@@ -157,15 +156,6 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 -(void) updateRosterItem:(NSString*) jid withName:(NSString*) name;
 
 #pragma mark set connection attributes
-/**
-sets the status message. makes xmpp call
- */
--(void) setStatusMessageText:(NSString* _Nullable) message;
-
-/**
-sets away xmpp call.
- */
--(void) setAway:(BOOL) away;
 
 /**
  join a room on the conference server
@@ -256,6 +246,7 @@ Decline a call request
 -(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType andActualFrom:(NSString* _Nullable) actualFrom;
 -(void) sendDisplayMarkerForId:(NSString*) messageid to:(NSString*) to;
 -(void) publishAvatar:(UIImage*) image;
+-(void) publishStatusMessage:(NSString*) message;
 
 +(NSDictionary*) invalidateState:(NSDictionary*) dic;
 

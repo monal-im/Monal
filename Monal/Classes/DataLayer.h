@@ -131,7 +131,7 @@ extern NSString* const kMessageTypeImage;
 -(BOOL) doesAccountExistUser:(NSString*) user andDomain:(NSString *) domain;
 -(NSNumber* _Nullable) accountIDForUser:(NSString*) user andDomain:(NSString *) domain;
 
--(NSDictionary* _Nullable) detailsForAccount:(NSString*) accountNo;
+-(NSMutableDictionary* _Nullable) detailsForAccount:(NSString*) accountNo;
 -(NSString* _Nullable) jidOfAccount:(NSString*) accountNo;
 
 -(BOOL) updateAccounWithDictionary:(NSDictionary *) dictionary;
@@ -202,7 +202,6 @@ extern NSString* const kMessageTypeImage;
 -(NSArray *) messageHistoryDateForContact:(NSString *) buddy forAccount:(NSString *) accountNo forDate:(NSString*) date;
 
 -(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSString*) accountNo;
--(BOOL) messageHistoryCleanAll;
 
 -(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo;
 -(NSArray*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSString*) accountNo tillStanzaId:(NSString* _Nullable) stanzaId wasOutgoing:(BOOL) outgoing;

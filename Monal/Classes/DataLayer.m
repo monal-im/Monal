@@ -149,15 +149,7 @@ static NSDateFormatter* dbFormatter;
 
 -(BOOL) isAccountEnabled:(NSString*) accountNo
 {
-    NSArray* enabledAccounts = [self enabledAccountList];
-    for (NSDictionary* account in enabledAccounts)
-    {
-        if([[account objectForKey:@"account_id"] integerValue] == [accountNo integerValue])
-        {
-            return YES;
-        }
-    }
-    return NO;
+    return [[self.db executeScalar:@"SELECT enabled FROM account WHERE account_id=?;" andArguments:@[accountNo]] boolValue];
 }
 
 -(NSNumber*) accountIDForUser:(NSString *) user andDomain:(NSString *) domain
@@ -186,11 +178,11 @@ static NSDateFormatter* dbFormatter;
     return result.count > 0;
 }
 
--(NSDictionary*) detailsForAccount:(NSString*) accountNo
+-(NSMutableDictionary*) detailsForAccount:(NSString*) accountNo
 {
     if(!accountNo)
         return nil;
-    NSArray* result = [self.db executeReader:@"SELECT account_id, directTLS, domain, enabled, lastStanzaId, other_port, resource, rosterVersion, selfsigned, server, username, rosterName FROM account WHERE account_id=?;" andArguments:@[accountNo]];
+    NSArray* result = [self.db executeReader:@"SELECT * FROM account WHERE account_id=?;" andArguments:@[accountNo]];
     if(result != nil && [result count])
     {
         DDLogVerbose(@"count: %lu", (unsigned long)[result count]);
@@ -219,7 +211,7 @@ static NSDateFormatter* dbFormatter;
 
 -(BOOL) updateAccounWithDictionary:(NSDictionary *) dictionary
 {
-    NSString* query = @"UPDATE account SET server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, selfsigned=?, directTLS=?, rosterName=? WHERE account_id=?;";
+    NSString* query = @"UPDATE account SET server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, selfsigned=?, directTLS=?, rosterName=?, statusMessage=? WHERE account_id=?;";
 
     NSString* server = (NSString *) [dictionary objectForKey:kServer];
     NSString* port = (NSString *)[dictionary objectForKey:kPort];
@@ -232,6 +224,7 @@ static NSDateFormatter* dbFormatter;
                        [dictionary objectForKey:kSelfSigned],
                        [dictionary objectForKey:kDirectTLS],
                        [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @"",
+                       [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @"",
                        [dictionary objectForKey:kAccountID]
     ];
 
@@ -240,7 +233,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSNumber*) addAccountWithDictionary:(NSDictionary*) dictionary
 {
-    NSString* query = @"INSERT INTO account (server, other_port, resource, domain, enabled, selfsigned, directTLS, username, rosterName) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    NSString* query = @"INSERT INTO account (server, other_port, resource, domain, enabled, selfsigned, directTLS, username, rosterName, statusMessage) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
     
     NSString* server = (NSString*) [dictionary objectForKey:kServer];
     NSString* port = (NSString*)[dictionary objectForKey:kPort];
@@ -253,7 +246,8 @@ static NSDateFormatter* dbFormatter;
         [dictionary objectForKey:kSelfSigned],
         [dictionary objectForKey:kDirectTLS],
         ((NSString *)[dictionary objectForKey:kUsername]),
-        [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @""
+        [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @"",
+        [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @""
     ];
     BOOL result = [self.db executeNonQuery:query andArguments:params];
     // return the accountID
@@ -1121,7 +1115,10 @@ static NSDateFormatter* dbFormatter;
 
 -(void) clearMessages:(NSString*) accountNo
 {
-    [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=?;" andArguments:@[accountNo]];
+    [self.db voidWriteTransaction:^{
+        [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=?;" andArguments:@[accountNo]];
+        [self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=?;" andArguments:@[accountNo]];
+    }];
 }
 
 -(void) deleteMessageHistory:(NSNumber*) messageNo
@@ -1191,11 +1188,6 @@ static NSDateFormatter* dbFormatter;
 -(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     return [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=? AND (message_from=? OR message_to=?);" andArguments:@[accountNo, buddy, buddy]];
-}
-
--(BOOL) messageHistoryCleanAll
-{
-    return [self.db executeNonQuery:@"DELETE FROM message_history;"];
 }
 
 -(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo
@@ -1922,6 +1914,11 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"DROP TABLE _buddylistTMP;"];
             [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact on buddylist(buddy_name, account_id);"];
         }];
+        
+        [self updateDBTo:4.992 withBlock:^{
+            [self.db executeNonQuery:@"ALTER TABLE account ADD COLUMN statusMessage TEXT;"];
+        }];
+        
     }];
     
     DDLogInfo(@"Database version check complete");

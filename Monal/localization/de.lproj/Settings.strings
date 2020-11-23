@@ -22,8 +22,6 @@
 "pa7-vQ-Yz3.title" = "Konto bearbeiten";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "QTE-cG-3LC"; */
 "QTE-cG-3LC.title" = "Schließen";
-/* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "R3T-hy-2aY"; */
-"R3T-hy-2aY.title" = "Schließen";
 /* Class = "UIBarButtonItem"; title = "Reconnect All"; ObjectID = "r7s-58-k2m"; */
 "r7s-58-k2m.title" = "Alle wiederverbinden";
 /* Class = "UILabel"; text = "Detail"; ObjectID = "rF7-34-0sc"; */

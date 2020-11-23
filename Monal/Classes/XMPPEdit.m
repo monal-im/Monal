@@ -22,6 +22,7 @@
 @interface XMPPEdit()
 
 @property (nonatomic, strong) NSString *rosterName;
+@property (nonatomic, strong) NSString *statusMessage;
 @property (nonatomic, strong) NSString *resource;
 @property (nonatomic, strong) NSString *server;
 @property (nonatomic, strong) NSString *port;
@@ -38,6 +39,7 @@
 @property (nonatomic, strong) UIImage *selectedAvatarImage;
 @property (nonatomic) BOOL avatarChanged;
 @property (nonatomic) BOOL rosterNameChanged;
+@property (nonatomic) BOOL statusMessageChanged;
 @property (nonatomic) BOOL usedCamera;
 @end
 
@@ -67,7 +69,7 @@
     
     if(![_accountno isEqualToString:@"-1"])
     {
-        self.editMode = true;
+        self.editMode = YES;
     }
     
     DDLogVerbose(@"got account number %@", _accountno);
@@ -78,6 +80,7 @@
     
     self.avatarChanged = NO;
     self.rosterNameChanged = NO;
+    self.statusMessageChanged = NO;
     
     if(self.originIndex && self.originIndex.section == 0)
     {
@@ -109,6 +112,14 @@
         self.selfSignedSSL = [[settings objectForKey:@"selfsigned"] boolValue];
         
         self.rosterName = [settings objectForKey:kRosterName];
+        self.statusMessage = [settings objectForKey:@"statusMessage"];
+        self.sectionArray = @[
+            @"",
+            [NSString stringWithFormat:NSLocalizedString(@"Account (%@)", @""), self.jid],
+            NSLocalizedString(@"General", @""),
+            NSLocalizedString(@"Advanced Settings", @""),
+            @""
+        ];
     }
     else
     {
@@ -118,9 +129,16 @@
         self.directTLS = NO;
         self.selfSignedSSL = NO;
         self.rosterName = @"";
+        self.statusMessage = @"";
         self.enabled = YES;
+        self.sectionArray = @[
+            @"",
+            NSLocalizedString(@"Account (new)", @""),
+            NSLocalizedString(@"General", @""),
+            NSLocalizedString(@"Advanced Settings", @""),
+            @""
+        ];
     }
-    self.sectionArray = @[@"", NSLocalizedString(@"Account", @""), NSLocalizedString(@"General", @""), NSLocalizedString(@"Advanced Settings", @""), @""];
     
 #if TARGET_OS_MACCATALYST
     //UTI @"public.data" for everything
@@ -221,6 +239,7 @@
     [dic setObject:[NSNumber numberWithBool:self.directTLS] forKey:kDirectTLS];
     [dic setObject:self.accountno forKey:kAccountID];
     [dic setObject:self.rosterName forKey:kRosterName];
+    [dic setObject:self.statusMessage forKey:@"statusMessage"];
 
     if(!self.editMode)
     {
@@ -242,15 +261,18 @@
                     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
                     [SAMKeychain setPassword:self.password forService:@"Monal" account:self.accountno];
                     if(self.enabled)
+                    {
                         [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
+                        xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+                        [account publishStatusMessage:self.statusMessage];
+                        [account publishRosterName:self.rosterName];
+                        [account publishAvatar:self.selectedAvatarImage];
+                    }
                     else
                         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
-                    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
-                    [account publishRosterName:self.rosterName];
-                    [account publishAvatar:self.selectedAvatarImage];
                     [self showSuccessHUD];
                 }
-            } else  {
+            } else {
                 [self alertWithTitle:NSLocalizedString(@"Account Exists", @"") andMsg:NSLocalizedString(@"This account already exists in Monal.", @"")];
             }
         }
@@ -261,14 +283,18 @@
         if(updatedAccount) {
             [[MLXMPPManager sharedInstance] updatePassword:self.password forAccount:self.accountno];
             if(self.enabled)
+            {
                 [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
+                xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+                if(self.statusMessageChanged)
+                    [account publishStatusMessage:self.statusMessage];
+                if(self.rosterNameChanged)
+                    [account publishRosterName:self.rosterName];
+                if(self.avatarChanged)
+                    [account publishAvatar:self.selectedAvatarImage];
+            }
             else
                 [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
-            xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
-            if(self.rosterNameChanged)
-                [account publishRosterName:self.rosterName];
-            if(self.avatarChanged)
-                [account publishAvatar:self.selectedAvatarImage];
             [self showSuccessHUD];
         }
     }
@@ -291,7 +317,7 @@
     });
 }
 
-- (IBAction) delClicked: (id) sender
+- (IBAction) deleteAccountClicked: (id) sender
 {
     DDLogVerbose(@"Deleting");
 
@@ -318,6 +344,36 @@
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             [self.navigationController popViewControllerAnimated:YES];
         });
+    }];
+
+    [questionAlert addAction:noAction];
+    [questionAlert addAction:yesAction];
+    questionAlert.popoverPresentationController.sourceView = sender;
+
+    [self presentViewController:questionAlert animated:YES completion:nil];
+
+}
+
+- (IBAction) clearHistoryClicked: (id) sender
+{
+    DDLogVerbose(@"Deleting History");
+
+    UIAlertController *questionAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Clear Chat History", @"") message:NSLocalizedString(@"This will clear the whole chat history of this account from this device.", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertAction *noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        //do nothing when "no" was pressed
+    }];
+    UIAlertAction *yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+
+        [self.db clearMessages:self.accountno];
+
+        MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        hud.mode = MBProgressHUDModeCustomView;
+        hud.removeFromSuperViewOnHide=YES;
+        hud.label.text =NSLocalizedString(@"Success", @"");
+        hud.detailsLabel.text =NSLocalizedString(@"The chat history has been cleared", @"");
+        UIImage *image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+        hud.customView = [[UIImageView alloc] initWithImage:image];
+        [hud hideAnimated:YES afterDelay:1.0f];
     }];
 
     [questionAlert addAction:noAction];
@@ -360,34 +416,26 @@
         switch (indexPath.row)
         {
             case 0: {
-                thecell.cellLabel.text = NSLocalizedString(@"Display Name", @"");
-                thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.tag = 1;
-                thecell.textInputField.keyboardType = UIKeyboardTypeDefault;
-                thecell.textInputField.text = self.rosterName;
-                break;
-            }
-            case 1: {
-                thecell.cellLabel.text = NSLocalizedString(@"XMPP ID", @"");
-                thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.tag = 2;
-                thecell.textInputField.keyboardType = UIKeyboardTypeEmailAddress;
-                thecell.textInputField.text = self.jid;
-                break;
-            }
-            case 2: {
-                thecell.cellLabel.text = NSLocalizedString(@"Password", @"");
-                thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.secureTextEntry = YES;
-                thecell.textInputField.tag = 3;
-                thecell.textInputField.text = self.password;
-                break;
-            }
-            case 3: {
                 thecell.cellLabel.text = NSLocalizedString(@"Enabled", @"");
                 thecell.textInputField.hidden = YES;
                 thecell.toggleSwitch.tag = 1;
                 thecell.toggleSwitch.on = self.enabled;
+                break;
+            }
+            case 1: {
+                thecell.cellLabel.text = NSLocalizedString(@"Display Name", @"");
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.tag = 1;
+                thecell.textInputField.keyboardType = UIKeyboardTypeAlphabet;
+                thecell.textInputField.text = self.rosterName;
+                break;
+            }
+            case 2: {
+                thecell.cellLabel.text = NSLocalizedString(@"Status Message", @"");
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.tag = 6;
+                thecell.textInputField.keyboardType = UIKeyboardTypeAlphabet;
+                thecell.textInputField.text = self.statusMessage;
                 break;
             }
         }
@@ -398,9 +446,8 @@
         {
             // general
             case 0: {
-                thecell.cellLabel.text = NSLocalizedString(@"Message Archive Pref", @"");
+                thecell.cellLabel.text = NSLocalizedString(@"Change Password", @"");
                 thecell.toggleSwitch.hidden = YES;
-
                 thecell.textInputField.hidden = YES;
                 thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                 break;
@@ -408,7 +455,13 @@
             case 1: {
                 thecell.cellLabel.text = NSLocalizedString(@"My Keys", @"");
                 thecell.toggleSwitch.hidden = YES;
-
+                thecell.textInputField.hidden = YES;
+                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                break;
+            }
+            case 2: {
+                thecell.cellLabel.text = NSLocalizedString(@"Message Archive Pref", @"");
+                thecell.toggleSwitch.hidden = YES;
                 thecell.textInputField.hidden = YES;
                 thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                 break;
@@ -420,7 +473,23 @@
         switch (indexPath.row)
         {
             //advanced
-            case 0:  {
+            case 0: {
+                thecell.cellLabel.text = NSLocalizedString(@"XMPP ID", @"");
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.tag = 2;
+                thecell.textInputField.keyboardType = UIKeyboardTypeEmailAddress;
+                thecell.textInputField.text = self.jid;
+                break;
+            }
+            case 1: {
+                thecell.cellLabel.text = NSLocalizedString(@"Password", @"");
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.secureTextEntry = YES;
+                thecell.textInputField.tag = 3;
+                thecell.textInputField.text = self.password;
+                break;
+            }
+            case 2:  {
                 thecell.cellLabel.text = NSLocalizedString(@"Server", @"");
                 thecell.toggleSwitch.hidden = YES;
                 thecell.textInputField.tag = 4;
@@ -429,36 +498,28 @@
                 thecell.accessoryType = UITableViewCellAccessoryDetailButton;
                 break;
             }
-            case 1:  {
+            case 3:  {
                 thecell.cellLabel.text = NSLocalizedString(@"Port", @"");
                 thecell.toggleSwitch.hidden = YES;
                 thecell.textInputField.tag = 5;
                 thecell.textInputField.text = self.port;
                 break;
             }
-            case 2: {
+            case 4: {
                 thecell.cellLabel.text = NSLocalizedString(@"Direct TLS", @"");
                 thecell.textInputField.hidden = YES;
                 thecell.toggleSwitch.tag = 2;
                 thecell.toggleSwitch.on = self.directTLS;
                 break;
             }
-            case 3: {
+            case 5: {
                 thecell.cellLabel.text = NSLocalizedString(@"Validate certificate", @"");
                 thecell.textInputField.hidden = YES;
                 thecell.toggleSwitch.tag = 3;
                 thecell.toggleSwitch.on = !self.selfSignedSSL;
                 break;
             }
-            case 4: {
-                thecell.cellLabel.text = NSLocalizedString(@"Change Password", @"");
-                thecell.toggleSwitch.hidden = YES;
-
-                thecell.textInputField.hidden = YES;
-                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-                break;
-            }
-            case 5: {
+            case 6: {
                 thecell.cellLabel.text = NSLocalizedString(@"Resource", @"");
                 thecell.labelRight.text = self.resource;
                 thecell.labelRight.hidden = NO;
@@ -468,21 +529,26 @@
             }
         }
     }
-    else if (indexPath.section == 4)
+    else if (indexPath.section == 4 && self.editMode == YES)
     {
         switch (indexPath.row) {
             case 0:
             {
-                if(self.editMode == true)
-                {
-
-                    MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
-                    buttonCell.buttonText.text = NSLocalizedString(@"Delete", @"");
-                    buttonCell.buttonText.textColor = [UIColor redColor];
-                    buttonCell.selectionStyle = UITableViewCellSelectionStyleNone;
-                    return buttonCell;
-                }
-                break;
+                MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
+                buttonCell.buttonText.text = NSLocalizedString(@"Clear Chat History", @"");
+                buttonCell.buttonText.textColor = [UIColor redColor];
+                buttonCell.selectionStyle = UITableViewCellSelectionStyleNone;
+                buttonCell.tag = 0;
+                return buttonCell;
+            }
+            case 1:
+            {
+                MLButtonCell* buttonCell = (MLButtonCell*)[tableView dequeueReusableCellWithIdentifier:@"ButtonCell"];
+                buttonCell.buttonText.text = NSLocalizedString(@"Delete Account", @"");
+                buttonCell.buttonText.textColor = [UIColor redColor];
+                buttonCell.selectionStyle = UITableViewCellSelectionStyleNone;
+                buttonCell.tag = 1;
+                return buttonCell;
             }
         }
     }
@@ -539,30 +605,20 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    
-    if(section == 0){
+    //avatar image
+    if(section == 0)
         return 0;
-    }
     // account
-    else if(section == 1){
-        return 4;
-    }
+    else if(section == 1)
+        return 3;
     // General settings
-    else if(section == 2) {
-        return 2;
-    }
+    else if(section == 2)
+        return 3;
     // Advanced settings
-    else if(section == 3) {
-        return 6;
-    }
-    else if(section == 4 && !self.editMode)
-    {
-        return 0;
-    }
+    else if(section == 3)
+        return 7;
     else
-    {
-        return 1;
-    }
+        return self.editMode ? 2 : 0;
 }
 
 #pragma mark -  table view delegate
@@ -575,25 +631,27 @@
         switch(newIndexPath.row)
         {
             case 0:
-                [self performSegueWithIdentifier:@"showMAMPref" sender:self];
+                [self performSegueWithIdentifier:@"showPassChange" sender:self];
                 break;
             case 1:
                 [self performSegueWithIdentifier:@"showKeyTrust" sender:self];
                 break;
-        }
-    }
-    else if(newIndexPath.section == 3)
-    {
-        switch(newIndexPath.row)
-        {
-            case 4:
-                [self performSegueWithIdentifier:@"showPassChange" sender:self];
+            case 2:
+                [self performSegueWithIdentifier:@"showMAMPref" sender:self];
                 break;
         }
     }
     else if(newIndexPath.section == 4)
     {
-        [self delClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
+        switch(newIndexPath.row)
+        {
+            case 0:
+                [self clearHistoryClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
+                break;
+            case 1:
+                [self deleteAccountClicked:[tableView cellForRowAtIndexPath:newIndexPath]];
+                break;
+        }
     }
 
 }
@@ -604,7 +662,7 @@
     {
         switch(indexPath.row)
         {
-            case 0:
+            case 2:
                 [self performSegueWithIdentifier:@"showServerDetails" sender:self];
                 break;
         }
@@ -616,20 +674,21 @@
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    if ([segue.identifier isEqualToString:@"showServerDetails"])
+    if([segue.identifier isEqualToString:@"showServerDetails"])
     {
         MLServerDetails* server= (MLServerDetails*)segue.destinationViewController;
         server.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
     }
 
-    else if ([segue.identifier isEqualToString:@"showMAMPref"])
+    else if([segue.identifier isEqualToString:@"showMAMPref"])
     {
         MLMAMPrefTableViewController* mam = (MLMAMPrefTableViewController*)segue.destinationViewController;
         mam.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
     }
-    else if ([segue.identifier isEqualToString:@"showKeyTrust"])
+    else if([segue.identifier isEqualToString:@"showKeyTrust"])
     {
-        if(self.jid && self.accountno) {
+        if(self.jid && self.accountno)
+        {
             MLKeysTableViewController* keys = (MLKeysTableViewController*)segue.destinationViewController;
             keys.ownKeys = YES;
             MLContact *contact = [[MLContact alloc] init];
@@ -638,11 +697,12 @@
             keys.contact=contact;
         }
     }
-    else if ([segue.identifier isEqualToString:@"showPassChange"])
+    else if([segue.identifier isEqualToString:@"showPassChange"])
     {
-        if(self.jid && self.accountno) {
+        if(self.jid && self.accountno)
+        {
             MLPasswordChangeTableViewController* pwchange = (MLPasswordChangeTableViewController*)segue.destinationViewController;
-           pwchange.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+            pwchange.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
         }
     }
 }
@@ -686,6 +746,11 @@
         }
         case 5: {
             self.port = textField.text;
+            break;
+        }
+        case 6: {
+            self.statusMessage = textField.text;
+            self.statusMessageChanged = YES;
             break;
         }
         default:

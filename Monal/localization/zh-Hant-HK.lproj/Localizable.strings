@@ -376,3 +376,11 @@
 "Contact Jid" = "Contact Jid";
 "Contacts are usually in the format: username@dom.ain" = "Contacts are usually in the format: username@dom.ain";
 "Only shareable for now" = "Only shareable for now";
+"Account (%@)" = "Account (%@)";
+"Account (new)" = "Account (new)";
+"Clear Chat History" = "Clear Chat History";
+"Error while decrypting" = "Error while decrypting";
+"Error while decrypting: iv.length != 12" = "Error while decrypting: iv.length != 12";
+"Image encryption error" = "Image encryption error";
+"The chat history has been cleared" = "The chat history has been cleared";
+"This will clear the whole chat history of this account from this device." = "This will clear the whole chat history of this account from this device.";

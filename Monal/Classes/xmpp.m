@@ -248,11 +248,9 @@ NSString *const kContact=@"contact";
         _isCSIActive = NO;
     }
     _lastInteractionDate = [NSDate date];     //better default than 1970
-
-    self.statusMessage = [[HelperTools defaultsDB] stringForKey:@"StatusMessage"];
-    self.awayState = [[HelperTools defaultsDB] boolForKey:@"Away"];
-
     self.sendIdleNotifications = [[HelperTools defaultsDB] boolForKey:@"SendLastUserInteraction"];
+    
+    self.statusMessage = @"";
 }
 
 -(void) dealloc
@@ -356,7 +354,6 @@ NSString *const kContact=@"contact";
         //and cancel the new _bgFetch because we are now idle (the dispatchAsyncOnReceiveQueue: will add a new task to the receive queue when
         //the send queue gets cleaned up and this task will run as soon as the disconnect is done and interfere with the configuration of the
         //_bgFetch and the syncError push notification both created on the main thread
-        //DDLogVerbose(@"_disconnectInProgres = %@", _disconnectInProgres ? @"YES" : @"NO");
         if(![object operationCount] && !_disconnectInProgres)
         {
             DDLogVerbose(@"Adding idle state check to receive queue...");
@@ -1263,8 +1260,10 @@ NSString *const kContact=@"contact";
 
             if([presenceNode.fromUser isEqualToString:self.connectionProperties.identity.jid])
             {
-                //ignore self presences for now
-                DDLogInfo(@"ignoring presence from self");
+                DDLogInfo(@"got self presence");
+                NSMutableDictionary* accountDetails = [[DataLayer sharedInstance] detailsForAccount:self.AccountNo];
+                accountDetails[@"statusMessage"] = [presenceNode check:@"status#"] ? [presenceNode findFirst:@"status#"] : @"";
+                [[DataLayer sharedInstance] updateAccounWithDictionary:accountDetails];
             }
             else
             {
@@ -2269,10 +2268,8 @@ NSString *const kContact=@"contact";
         return;
     
     XMPPPresence* presence = [[XMPPPresence alloc] initWithHash:_capsHash];
-    if(self.statusMessage)
+    if(![self.statusMessage isEqualToString:@""])
         [presence setStatus:self.statusMessage];
-    if(self.awayState)
-        [presence setAway];
     
     //send last interaction date if not currently active
     //and the user prefers to send out lastInteraction date
@@ -2359,18 +2356,9 @@ NSString *const kContact=@"contact";
     //mam query will be done in MLIQProcessor once the disco result returns
 }
 
--(void) setStatusMessageText:(NSString*) message
+-(void) publishStatusMessage:(NSString*) message
 {
-    if(message && [message length] > 0)
-        self.statusMessage = message;
-    else
-        message = nil;
-    [self sendPresence];
-}
-
--(void) setAway:(BOOL) away
-{
-    self.awayState = away;
+    self.statusMessage = message;
     [self sendPresence];
 }
 

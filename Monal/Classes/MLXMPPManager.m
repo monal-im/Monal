@@ -35,11 +35,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     BOOL setDefaults = [[HelperTools defaultsDB] boolForKey:@"SetDefaults"];
     if(!setDefaults)
     {
-        // [[HelperTools defaultsDB] setObject:@"" forKey:@"StatusMessage"];   // we dont want anything set
-        [[HelperTools defaultsDB] setBool:NO forKey:@"Away"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"MusicStatus"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"Sound"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"Logging"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"ChatBackgrounds"];
 
         // Privacy Settings
@@ -376,6 +372,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     xmpp* xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     xmppAccount.pushNode = self.pushNode;
     xmppAccount.pushSecret = self.pushSecret;
+    xmppAccount.statusMessage = [account objectForKey:@"statusMessage"];
 
     if(xmppAccount)
     {
@@ -700,21 +697,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
          [account declineCall:userDic];
     }
 
-}
-
-
-#pragma mark - XMPP settings
-
--(void) setStatusMessage:(NSString*) message
-{
-    for(xmpp* xmppAccount in [self connectedXMPP])
-        [xmppAccount setStatusMessageText:message];
-}
-
--(void) setAway:(BOOL) isAway
-{
-    for(xmpp* xmppAccount in [self connectedXMPP])
-        [xmppAccount setAway:isAway];
 }
 
 #pragma mark message signals

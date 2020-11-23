@@ -152,9 +152,6 @@ Attempts to upload a file to the  HTTP upload service
 
 #pragma mark XMPP settings
 
--(void) setStatusMessage:(NSString*) message;
--(void) setAway:(BOOL) isAway;
-
 @property (nonatomic, strong, readonly) NSMutableArray* connectedXMPP;
 @property (nonatomic, readonly) BOOL hasConnectivity;
 

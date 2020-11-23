@@ -24,7 +24,6 @@
 		26189C8B238A526500EAD70C /* MLSubscriptionTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26189C8A238A526500EAD70C /* MLSubscriptionTableViewController.m */; };
 		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
 		261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
-		261A6288176C157D00059090 /* MLDisplaySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6287176C157D00059090 /* MLDisplaySettingsViewController.m */; };
 		261A628B176C159000059090 /* AccountsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A628A176C159000059090 /* AccountsViewController.m */; };
 		261A628E176C15AD00059090 /* ChatLogsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A628D176C15AD00059090 /* ChatLogsViewController.m */; };
 		261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
@@ -443,8 +442,6 @@
 		261A627F176C055400059090 /* ContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContactsViewController.m; sourceTree = "<group>"; };
 		261A6283176C156500059090 /* ActiveChatsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveChatsViewController.h; sourceTree = "<group>"; };
 		261A6284176C156500059090 /* ActiveChatsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActiveChatsViewController.m; sourceTree = "<group>"; };
-		261A6286176C157D00059090 /* MLDisplaySettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLDisplaySettingsViewController.h; sourceTree = "<group>"; };
-		261A6287176C157D00059090 /* MLDisplaySettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLDisplaySettingsViewController.m; sourceTree = "<group>"; };
 		261A6289176C159000059090 /* AccountsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccountsViewController.h; sourceTree = "<group>"; };
 		261A628A176C159000059090 /* AccountsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccountsViewController.m; sourceTree = "<group>"; };
 		261A628C176C15AD00059090 /* ChatLogsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatLogsViewController.h; sourceTree = "<group>"; };
@@ -1232,8 +1229,6 @@
 				2644D4981FF29E5600F46AB5 /* MLSettingsTableViewController.m */,
 				26C1EA691FF937320085547A /* MLNotificationSettingsViewController.h */,
 				26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */,
-				261A6286176C157D00059090 /* MLDisplaySettingsViewController.h */,
-				261A6287176C157D00059090 /* MLDisplaySettingsViewController.m */,
 				265BD14E21A2D15600A59251 /* MLBackgroundSettings.h */,
 				265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */,
 				26B0CA8721AE2E3C0080B133 /* MLSoundsTableViewController.h */,
@@ -2471,7 +2466,6 @@
 				26F396DC2197507200EF5720 /* GLTintButton.m in Sources */,
 				C15489B925680BBE00BBA2F0 /* MLQRCodeScanner.swift in Sources */,
 				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,
-				261A6288176C157D00059090 /* MLDisplaySettingsViewController.m in Sources */,
 				2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */,
 				261A628B176C159000059090 /* AccountsViewController.m in Sources */,
 				261A628E176C15AD00059090 /* ChatLogsViewController.m in Sources */,

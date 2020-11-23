@@ -42,6 +42,7 @@ public class MLCrypto: NSObject {
                 return nil
             }
         } else {
+            assert(false);
             return nil;
         }
     }
@@ -52,6 +53,7 @@ public class MLCrypto: NSObject {
         if #available(iOS 13.0, *) {
             return Data(AES.GCM.Nonce())
         } else {
+            assert(false);
             return nil;
         }
     }
@@ -68,6 +70,7 @@ public class MLCrypto: NSObject {
                 return nil;
             }
         } else {
+            assert(false);
             return nil 
         }
     }

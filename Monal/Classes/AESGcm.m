@@ -32,8 +32,16 @@
     {
         MLCrypto* crypto = [[MLCrypto alloc] init];
         EncryptedPayload* payload = [crypto encryptGCMWithKey:gcmKey decryptedContent:body];
+        if(payload == nil)
+        {
+            return nil;
+        }
         NSMutableData* combinedKey = [NSMutableData dataWithData:gcmKey];
         [combinedKey appendData:payload.tag];
+        if(combinedKey == nil)
+        {
+            return nil;
+        }
         return [[MLEncryptedPayload alloc] initWithBody:payload.body key:combinedKey iv:payload.iv authTag:payload.tag];
     }
     else
@@ -45,36 +53,57 @@
         unsigned char tag[16];
         
         NSData* gcmiv = [self genIV];
+        if(gcmiv == nil)
+        {
+            return nil;
+        }
         
-        NSMutableData *encryptedMessage;
+        NSMutableData* encryptedMessage;
         
         ctx = EVP_CIPHER_CTX_new();
         /* Set cipher type and mode */
-        if([gcmKey length]==16) {
+        if([gcmKey length] == 16) {
             EVP_EncryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
+            OPENSSL_assert(EVP_CIPHER_CTX_key_length(ctx) == 16);
         }
-        
-        if([gcmKey length]==32) {
+        else if([gcmKey length] == 32)
+        {
             EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL);
+            OPENSSL_assert(EVP_CIPHER_CTX_key_length(ctx) == 32);
+        }
+        else
+        {
+            EVP_CIPHER_CTX_free(ctx);
+            return nil;
         }
         /* Set IV length if default 96 bits is not approp riate */
-        EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, (int) gcmiv.length, NULL);
+        EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, (int)gcmiv.length, NULL);
+        OPENSSL_assert(EVP_CIPHER_CTX_iv_length(ctx) == (int)gcmiv.length);
         /* Initialise key and IV */
         EVP_EncryptInit_ex(ctx, NULL, NULL, gcmKey.bytes, gcmiv.bytes);
-        EVP_CIPHER_CTX_set_padding(ctx,1);
+        // enable padding, always returns 1
+        assert(EVP_CIPHER_CTX_set_padding(ctx, 1) == 1);
         /* Encrypt plaintext */
-        EVP_EncryptUpdate(ctx, outbuf, &outlen,body.bytes,(int)body.length);
+        if(EVP_EncryptUpdate(ctx, outbuf, &outlen,body.bytes,(int)body.length) == 0)
+        {
+            EVP_CIPHER_CTX_free(ctx);
+            return nil;
+        }
         
         encryptedMessage = [NSMutableData dataWithBytes:outbuf length:outlen];
         
         /* Finalise: note get no output for GCM */
-        EVP_EncryptFinal_ex(ctx, outbuf, &outlen);
+        if(EVP_EncryptFinal_ex(ctx, outbuf, &outlen) == 0)
+        {
+            EVP_CIPHER_CTX_free(ctx);
+            return nil;
+        }
         
         /* Get tag */
         EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, 16, tag);
         //[encryptedMessage appendBytes:tag length:16];
         
-        NSMutableData *combinedKey  = [NSMutableData dataWithData:gcmKey];
+        NSMutableData* combinedKey  = [NSMutableData dataWithData:gcmKey];
         [combinedKey appendBytes:tag length:16];
         
         EVP_CIPHER_CTX_free(ctx);
@@ -95,7 +124,10 @@
 #if !TARGET_OS_MACCATALYST
         //generate iv
         unsigned char iv[12];
-        RAND_bytes(iv, sizeof(iv));
+        if(RAND_bytes(iv, sizeof(iv)) == 0)
+        {
+            return nil;
+        }
         NSData* gcmiv = [[NSData alloc] initWithBytes:iv length:12];
         return gcmiv;
 #else
@@ -116,52 +148,70 @@
 +(NSData*) decrypt:(NSData*) body withKey:(NSData*) key andIv:(NSData*) iv withAuth:(NSData* _Nullable) auth
 {
     if (@available(iOS 13.0, *)) {
+        MLCrypto* crypto = [[MLCrypto alloc] init];
         
-        MLCrypto *crypto = [[MLCrypto alloc] init];
-        
-        NSMutableData *combined = [[NSMutableData alloc] init];
+        NSMutableData* combined = [[NSMutableData alloc] init];
         [combined appendData:iv];
         [combined appendData:body];
         [combined appendData:auth]; //if auth is nil assume it already was apended to body
         
-        NSData *toReturn =[crypto decryptGCMWithKey:key encryptedContent:combined];
+        NSData* toReturn = [crypto decryptGCMWithKey:key encryptedContent:combined];
         return toReturn;
     }
     else
     {
 #if !TARGET_OS_MACCATALYST
+        assert(iv.length == 12);
+
         int outlen;
         unsigned char outbuf[key.length];
-        EVP_CIPHER_CTX *ctx =EVP_CIPHER_CTX_new();
+        EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
         
         /* Select cipher */
-        if(key.length==16) {
+        if(key.length == 16) {
             EVP_DecryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL);
+            OPENSSL_assert(EVP_CIPHER_CTX_key_length(ctx) == 16);
         }
-        
-        if(key.length==32) {
+        else if(key.length == 32)
+        {
             EVP_DecryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL);
+            OPENSSL_assert(EVP_CIPHER_CTX_key_length(ctx) == 32);
+        }
+        else
+        {
+            EVP_CIPHER_CTX_free(ctx);
+            return nil;
         }
         
         /* Set IV length, omit for 96 bits */
         EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_IVLEN, (int)iv.length, NULL);
+        OPENSSL_assert(EVP_CIPHER_CTX_iv_length(ctx) == (int)iv.length);
         /* Specify key and IV */
         EVP_DecryptInit_ex(ctx, NULL, NULL, key.bytes, iv.bytes);
-        EVP_CIPHER_CTX_set_padding(ctx,1);
+        // enable padding, always returns 1
+        assert(EVP_CIPHER_CTX_set_padding(ctx, 1) == 1);
         /* Decrypt plaintext */
         NSMutableData *decdata = [[NSMutableData alloc] initWithCapacity:body.length];
         
-        int byteCounter=0;
-        while(byteCounter<body.length)
+        int byteCounter = 0;
+        while(byteCounter < body.length)
         {
             NSRange byteRange= NSMakeRange(byteCounter, key.length);
-            if(byteCounter+key.length>body.length) byteRange=NSMakeRange(byteCounter, body.length-byteCounter);
+            if(byteCounter+key.length > body.length) byteRange=NSMakeRange(byteCounter, body.length-byteCounter);
             unsigned char bytes[byteRange.length];
             [body getBytes:bytes range:byteRange];
-            EVP_DecryptUpdate(ctx, outbuf, &outlen, bytes, (int)byteRange.length);
+            if(EVP_DecryptUpdate(ctx, outbuf, &outlen, bytes, (int)byteRange.length) == 0)
+            {
+                EVP_CIPHER_CTX_free(ctx);
+                return nil;
+            }
             /* Output decrypted block */
             /* Finalise: note get no output for GCM */
-            EVP_DecryptFinal_ex(ctx, outbuf, &outlen);
+            if(EVP_DecryptFinal_ex(ctx, outbuf, &outlen) == 0)
+            {
+                EVP_CIPHER_CTX_free(ctx);
+                return nil;
+            }
             [decdata appendBytes:outbuf length:byteRange.length];
             byteCounter+=byteRange.length;
         }

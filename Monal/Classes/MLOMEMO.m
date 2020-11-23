@@ -514,13 +514,30 @@ $$
 
             // Encrypt message
             encryptedPayload = [AESGcm encrypt:messageBytes keySize:KEY_SIZE];
+            if(encryptedPayload == nil)
+            {
+                DDLogWarn(@"Could not encrypt message: AESGcm error");
+                return;
+            }
 
             MLXMLNode* payload = [[MLXMLNode alloc] initWithElement:@"payload"];
             [payload setData:[HelperTools encodeBase64WithData:encryptedPayload.body]];
             [encrypted.children addObject:payload];
         } else {
             // There is no message that can be encrypted -> create new session keys
-            encryptedPayload = [[MLEncryptedPayload alloc] initWithKey:[AESGcm genKey:KEY_SIZE] iv:[AESGcm genIV]];
+            NSData* newKey = [AESGcm genKey:KEY_SIZE];
+            NSData* newIv = [AESGcm genIV];
+            if(newKey == nil || newIv == nil)
+            {
+                DDLogWarn(@"Could not create key or iv");
+                return;
+            }
+            encryptedPayload = [[MLEncryptedPayload alloc] initWithKey:newKey iv:newIv];
+            if(encryptedPayload == nil)
+            {
+                DDLogWarn(@"Could not encrypt message: AESGcm error");
+                return;
+            }
         }
 
         // Get own device id
@@ -698,12 +715,21 @@ $$
                 NSString* encryptedPayload = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/payload#"];
 
                 NSData* iv = [HelperTools dataWithBase64EncodedString:ivStr];
+                if(iv.length != 12)
+                {
+                    DDLogError(@"Could not decrypt message: iv length: %lu", (unsigned long)iv.length);
+                    return NSLocalizedString(@"Error while decrypting: iv.length != 12", @"");
+                }
                 NSData* decodedPayload = [HelperTools dataWithBase64EncodedString:encryptedPayload];
-
+                if(decodedPayload == nil || key == nil || iv == nil || auth == nil)
+                {
+                    DDLogError(@"Could not decrypt message: GCM params missing");
+                    return NSLocalizedString(@"Error while decrypting", @"");
+                }
                 NSData* decData = [AESGcm decrypt:decodedPayload withKey:key andIv:iv withAuth:auth];
                 if(!decData) {
                     DDLogError(@"Could not decrypt message with key that was decrypted. (GCM error)");
-                     return NSLocalizedString(@"Encrypted message was sent in an older format Monal can't decrypt. Please ask them to update their client. (GCM error)", @"");
+                    return NSLocalizedString(@"Encrypted message was sent in an older format Monal can't decrypt. Please ask them to update their client. (GCM error)", @"");
                 }
                 else
                 {

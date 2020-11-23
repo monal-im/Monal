@@ -1095,19 +1095,33 @@ enum msgSentState {
     } else {
         self.uploadHUD.hidden = NO;
     }
-    NSData* decryptedData = data;
     NSData* dataToPass = data;
     MLEncryptedPayload* encrypted;
-    
+
+    if(data == nil)
+    {
+        DDLogError(@"Could not encrypt attachment (no data)");
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Image encryption error", @"") message:[NSString stringWithFormat:@"Error while encrypting the file (no data)"] preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+    }
     int keySize = 32;
     if(self.encryptChat) {
-        encrypted = [AESGcm encrypt:decryptedData keySize:keySize];
+        encrypted = [AESGcm encrypt:data keySize:keySize];
         if(encrypted) {
             NSMutableData* mutableBody = [encrypted.body mutableCopy];
             [mutableBody appendData:encrypted.authTag];
             dataToPass = [mutableBody copy];
         } else  {
-            DDLogError(@"Could not encrypt attachment");
+            DDLogError(@"Could not encrypt attachment (encrypt returned nil)");
+            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Image encryption error", @"") message:[NSString stringWithFormat:@"Error while encrypting the file (encrypt returned nil)"] preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                [alert dismissViewControllerAnimated:YES completion:nil];
+            }]];
+            [self presentViewController:alert animated:YES completion:nil];
+            return;
         }
     }
     
@@ -1132,7 +1146,7 @@ enum msgSentState {
                         DDLogError(@"Could not parse URL for conversion to aesgcm:");
                     }
                 }
-                [[MLImageManager sharedInstance] saveImageData:decryptedData forLink:urlToPass];
+                [[MLImageManager sharedInstance] saveImageData:data forLink:urlToPass];
                 
                 weakify(self);
                 [self addMessageto:self.contact.contactJid withMessage:urlToPass andId:newMessageID withCompletion:^(BOOL success) {

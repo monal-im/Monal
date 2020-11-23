@@ -242,16 +242,16 @@
     return toReturn;
 }
 
--(NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath
+-(UISwipeActionsConfiguration*)tableView:(UITableView *)tableView leadingSwipeActionsConfigurationForRowAt:(NSIndexPath *)indexPath
 {
-    UITableViewRowAction *delete = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:NSLocalizedString(@"Delete", @"") handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+    UIContextualAction* delete = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete", @"") handler:^(UIContextualAction*  action, __kindof UIView* sourceView, void (^ _Nonnull completionHandler)(BOOL)) {
         [self deleteRowAtIndexPath:indexPath];
     }];
-    UITableViewRowAction* mute;
+    UIContextualAction* mute;
     MLContactCell* cell = (MLContactCell *)[tableView cellForRowAtIndexPath:indexPath];
     if(cell.muteBadge.hidden)
     {
-        mute = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:NSLocalizedString(@"Mute", @"") handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+        mute = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:NSLocalizedString(@"Mute", @"") handler:^(UIContextualAction*  action, __kindof UIView* sourceView, void (^ _Nonnull completionHandler)(BOOL)) {
             [self muteContactAtIndexPath:indexPath];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
@@ -260,7 +260,7 @@
         [mute setBackgroundColor:[UIColor monalGreen]];
         
     } else  {
-        mute = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:NSLocalizedString(@"Unmute",@"") handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+        mute = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:NSLocalizedString(@"Unmute", @"") handler:^(UIContextualAction*  action, __kindof UIView* sourceView, void (^ _Nonnull completionHandler)(BOOL)) {
             [self unMuteContactAtIndexPath:indexPath];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
@@ -275,9 +275,7 @@
     //        [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
     //    }];
     //    [block setBackgroundColor:[UIColor darkGrayColor]];
-    
-    return @[delete, mute];
-    
+    return [UISwipeActionsConfiguration configurationWithActions:@[delete, mute]];
 }
 
 -(MLContact  *)contactAtIndexPath:(NSIndexPath *) indexPath

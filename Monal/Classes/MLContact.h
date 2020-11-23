@@ -57,8 +57,6 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
  */
 @property (nonatomic, assign) NSInteger unreadCount;
 
-@property (nonatomic, assign) BOOL isOnline;
-
 @property (nonatomic, assign) BOOL isPinned;
 
 @property (nonatomic, assign) BOOL isActiveChat;

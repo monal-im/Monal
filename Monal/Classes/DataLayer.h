@@ -58,7 +58,7 @@ extern NSString* const kMessageTypeImage;
 
 -(NSArray<MLContact*>*) searchContactsWithString:(NSString*) search;
 
--(NSMutableArray*) onlineContactsSortedBy:(NSString*) sort;
+-(NSMutableArray*) contactList;
 -(NSArray*) resourcesForContact:(NSString*)contact ;
 -(NSArray*) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSString*)account;
 -(void) setSoftwareVersionInfoForContact:(NSString*)contact
@@ -67,7 +67,6 @@ extern NSString* const kMessageTypeImage;
                              withAppName:(NSString*)appName
                               appVersion:(NSString*)appVersion
                            andPlatformOS:(NSString*)platformOS;
--(NSMutableArray*) offlineContacts;
 
 #pragma mark Ver string and Capabilities
 
@@ -99,8 +98,6 @@ extern NSString* const kMessageTypeImage;
 
 -(void) setAvatarHash:(NSString*) hash forContact:(NSString*) contact andAccount:(NSString*) accountNo;
 -(NSString*) getAvatarHashForContact:(NSString*) buddy andAccount:(NSString*) accountNo;
-
--(BOOL) isBuddyOnline:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 -(BOOL) saveMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo withComment:(NSString*) comment;
 -(NSString*) loadMessageDraft:(NSString*) buddy forAccount:(NSString*) accountNo;

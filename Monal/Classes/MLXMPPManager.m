@@ -39,12 +39,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [[HelperTools defaultsDB] setBool:NO forKey:@"Away"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"MusicStatus"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"Sound"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"MessagePreview"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"Logging"];
-
-        [[HelperTools defaultsDB] setBool:YES forKey:@"OfflineContact"];
-        [[HelperTools defaultsDB] setBool:NO forKey:@"SortContacts"];
-
         [[HelperTools defaultsDB] setBool:YES forKey:@"ChatBackgrounds"];
 
         // Privacy Settings
@@ -497,7 +492,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                   messageType:messageType
     ];
     // Send message
-    if(messageDBId)
+    if(messageDBId != nil)
     {
         DDLogInfo(@"Message added to history with id %ld, now sending...", (long)[messageDBId intValue]);
         [self sendMessage:message toContact:recipient fromAccount:accountID isEncrypted:encrypted isMUC:isMUC isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString *messageIdSend) {

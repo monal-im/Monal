@@ -18,7 +18,7 @@
 
 @implementation MLDisplaySettingsViewController
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+-(id) initWithNibName:(NSString*) nibNameOrNil bundle:(NSBundle*) nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
@@ -27,7 +27,7 @@
     return self;
 }
 
-- (void)viewDidLoad
+-(void) viewDidLoad
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
@@ -44,7 +44,7 @@
     [super viewWillAppear:animated];
 }
 
--(void) viewWillDisappear:(BOOL)animated
+-(void) viewWillDisappear:(BOOL) animated
 {
     [super viewWillDisappear:animated];
     [[HelperTools defaultsDB] synchronize];
@@ -56,26 +56,26 @@
     }
 }
 
-- (void)didReceiveMemoryWarning
+-(void) didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 
 #pragma mark tableview datasource delegate
--(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+-(NSInteger) numberOfSectionsInTableView:(UITableView*) tableView
 {
     return 3;
 }
 
 
--(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+-(UIView*) tableView:(UITableView*) tableView viewForHeaderInSection:(NSInteger) section
 {
     NSString* sectionTitle = [self tableView:tableView titleForHeaderInSection:section];
     return [HelperTools MLCustomViewHeaderWithTitle:sectionTitle];
 }
 
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+-(NSString*) tableView:(UITableView*) tableView titleForHeaderInSection:(NSInteger) section
 {
     switch (section) {
         case 0:
@@ -101,7 +101,7 @@
     }
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+-(NSInteger) tableView:(UITableView*) tableView numberOfRowsInSection:(NSInteger) section
 {
     switch (section) {
         case 0:
@@ -116,7 +116,7 @@
         }
         case 2:
         {
-            return 4;
+            return 1;
             break;
         }
         default:
@@ -127,7 +127,7 @@
     }
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+-(UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
 {
     
     MLSettingCell* cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
@@ -148,42 +148,14 @@
     }
     else
     {
-        switch(indexPath.row)
-        {
-            case 0:
-            {
-                cell.textLabel.text = NSLocalizedString(@"Message Preview", @"");
-                cell.defaultKey = @"MessagePreview";
-                cell.switchEnabled = YES;
-                break; 
-            }
-            case 1:
-            {
-                cell.textLabel.text = NSLocalizedString(@"Log Chats", @"");
-                cell.defaultKey = @"Logging";
-                cell.switchEnabled = YES;
-                break;
-            }
-            case 2:
-            {
-                cell.textLabel.text = NSLocalizedString(@"Offline Contacts", @"");
-                cell.defaultKey = @"OfflineContact";
-                cell.switchEnabled = YES;
-                break;
-            }
-            case 3:
-            {
-                cell.textLabel.text = NSLocalizedString(@"Sort By Status", @"");
-                cell.defaultKey = @"SortContacts";
-                cell.switchEnabled = YES;
-                break;
-            }
-        }
+        cell.textLabel.text = NSLocalizedString(@"Log Chats", @"");
+        cell.defaultKey = @"Logging";
+        cell.switchEnabled = YES;
     }
     return cell;
 }
 
--(IBAction)close:(id)sender
+-(IBAction) close:(id) sender
 {
     [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 }

@@ -540,6 +540,7 @@ enum activeChatsControllerSections {
         [self.chatListTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
         // removeActiveBuddy in db
         [[DataLayer sharedInstance] removeActiveBuddy:contact.contactJid forAccount:contact.accountId];
+        [self refreshDisplay];
     }
 }
 

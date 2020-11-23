@@ -365,6 +365,7 @@
     UIAlertAction *yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
 
         [self.db clearMessages:self.accountno];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:nil userInfo:nil];
 
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeCustomView;

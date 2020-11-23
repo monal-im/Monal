@@ -539,13 +539,20 @@ enum msgSentState {
 {
     [super viewWillAppear:animated];
 
+    //throw on empty contacts
+    NSAssert(self.contact.contactJid, @"can not open chat for empty contact jid");
+    NSAssert(self.contact.accountId, @"can not open chat for empty account id");
+    
     self.viewDidAppear = NO;
     self.viewIsScrolling = YES;
-
+    self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+    self.encryptChat = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+    
     [MLNotificationManager sharedInstance].currentAccountNo=self.contact.accountId;
     [MLNotificationManager sharedInstance].currentContact=self.contact;
-
-    if(self.day) {
+    
+    if(self.day)
+    {
         [[NSNotificationCenter defaultCenter] removeObserver:self];
         self.inputContainerView.hidden = YES;
         [self refreshData];
@@ -553,13 +560,9 @@ enum msgSentState {
         [self updateNavBarLastInteractionLabel:nil];
         return;
     }
-    else {
+    else
         self.inputContainerView.hidden = NO;
-    }
     
-    if(self.contact.contactJid && self.contact.accountId) {
-        self.encryptChat = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
-    }
     [self handleForeGround];
     [self updateUIElements];
     [self updateNavBarLastInteractionLabel:nil];
@@ -593,8 +596,6 @@ enum msgSentState {
 -(void) viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    if(!self.contact.contactJid || !self.contact.accountId) return;
-    self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
 #ifndef DISABLE_OMEMO
     BOOL omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressNameExist:self.contact.contactJid];
     if(!omemoDeviceForContactFound) {

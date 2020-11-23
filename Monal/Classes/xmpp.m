@@ -1261,9 +1261,14 @@ NSString *const kContact=@"contact";
             if([presenceNode.fromUser isEqualToString:self.connectionProperties.identity.jid])
             {
                 DDLogInfo(@"got self presence");
-                NSMutableDictionary* accountDetails = [[DataLayer sharedInstance] detailsForAccount:self.AccountNo];
-                accountDetails[@"statusMessage"] = [presenceNode check:@"status#"] ? [presenceNode findFirst:@"status#"] : @"";
-                [[DataLayer sharedInstance] updateAccounWithDictionary:accountDetails];
+                
+                //ignore special presences for status updates (they don't have one)
+                if(![presenceNode check:@"/@type"])
+                {
+                    NSMutableDictionary* accountDetails = [[DataLayer sharedInstance] detailsForAccount:self.accountNo];
+                    accountDetails[@"statusMessage"] = [presenceNode check:@"status#"] ? [presenceNode findFirst:@"status#"] : @"";
+                    [[DataLayer sharedInstance] updateAccounWithDictionary:accountDetails];
+                }
             }
             else
             {

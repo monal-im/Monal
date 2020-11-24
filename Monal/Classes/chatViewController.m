@@ -553,6 +553,7 @@ enum msgSentState {
     
     if(self.day)
     {
+        DDLogInfo(@"Showing special day history view");
         [[NSNotificationCenter defaultCenter] removeObserver:self];
         self.inputContainerView.hidden = YES;
         [self refreshData];
@@ -586,10 +587,9 @@ enum msgSentState {
     [self scrollToBottom];
 
     // Allow  autoloading of more messages after a few seconds
-    monal_void_block_t __block allowAutoLoading = ^{
+    [HelperTools startTimer:1 withHandler:^{
         self.viewIsScrolling = NO;
-    };
-    [HelperTools startTimer:2 withHandler:allowAutoLoading];
+    }];
 }
 
 
@@ -1215,6 +1215,11 @@ enum msgSentState {
             return;
         }
         MLMessage* messageObj = msgList[0];
+        
+        // Allow  autoloading of more messages after a few seconds
+        [HelperTools startTimer:1 withHandler:^{
+            self.viewIsScrolling = NO;
+        }];
         
         //update message list in ui
         dispatch_async(dispatch_get_main_queue(), ^{

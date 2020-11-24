@@ -923,8 +923,8 @@ static NSDateFormatter* dbFormatter;
 -(NSArray*) messagesForHistoryIDs:(NSArray*) historyIDs
 {
     NSString* idList = [historyIDs componentsJoinedByString:@","];
-    NSString* query = @"SELECT IFNULL(actual_from, message_from) AS af, message_from, message_to, account_id, message, received, displayed, displayMarkerWanted, encrypted, timestamp  AS thetime, message_history_id, sent, messageid, messageType, previewImage, previewText, unread, errorType, errorReason, stanzaid FROM message_history WHERE message_history_id IN(?);";
-    NSArray* params = @[idList];
+    NSString* query = [NSString stringWithFormat:@"SELECT IFNULL(actual_from, message_from) AS af, message_from, message_to, account_id, message, received, displayed, displayMarkerWanted, encrypted, timestamp  AS thetime, message_history_id, sent, messageid, messageType, previewImage, previewText, unread, errorType, errorReason, stanzaid FROM message_history WHERE message_history_id IN(%@);", idList];
+    NSArray* params = @[];
 
     NSMutableArray* retval = [[NSMutableArray alloc] init];
     for(NSDictionary* dic in [self.db executeReader:query andArguments:params])
@@ -1234,7 +1234,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
     return [self.db idWriteTransaction:^{
         NSString* query = @"SELECT message_history_id FROM (SELECT message_history_id FROM message_history WHERE account_id=? AND (message_from=? OR message_to=?) AND message_history_id<? ORDER BY message_history_id DESC LIMIT ?) ORDER BY message_history_id ASC;";
-        NSNumber* msgLimit = [NSNumber numberWithInt:kMonalChatFetchedMsgCnt];
+        NSNumber* msgLimit = @(kMonalChatFetchedMsgCnt);
         NSArray* params = @[accountNo, buddy, buddy, msgHistoryID, msgLimit];
         NSArray* results = [self.db executeScalarReader:query andArguments:params];
         return [self messagesForHistoryIDs:results];

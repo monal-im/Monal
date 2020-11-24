@@ -293,6 +293,7 @@ enum activeChatsControllerSections {
 
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
+    DDLogInfo(@"Got segue identifier '%@'", segue.identifier);
     if([segue.identifier isEqualToString:@"showIntro"])
     {
         MLWelcomeViewController* welcome = (MLWelcomeViewController *) segue.destinationViewController;

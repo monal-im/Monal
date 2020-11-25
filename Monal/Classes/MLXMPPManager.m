@@ -154,6 +154,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     _isBackgrounded = NO;
     
     [self defaultSettings];
+    [self setPushNode:nil andSecret:nil];       //load push settings from defaultsDB (can be overwritten later on in mainapp, but *not* in appex)
 
     //set up regular ping
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -773,13 +774,13 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         self.pushSecret.length
     )
     {
-        DDLogInfo(@"push token valid, current push settings: node=%@, secret=%@", [MLXMPPManager sharedInstance].pushNode, [MLXMPPManager sharedInstance].pushSecret);
+        DDLogInfo(@"push token valid, current push settings: node=%@, secret=%@", self.pushNode, self.pushSecret);
         self.hasAPNSToken = YES;
     }
     else
     {
         self.hasAPNSToken = NO;
-        DDLogWarn(@"push token invalid, current push settings: node=%@, secret=%@", [MLXMPPManager sharedInstance].pushNode, [MLXMPPManager sharedInstance].pushSecret);
+        DDLogWarn(@"push token invalid, current push settings: node=%@, secret=%@", self.pushNode, self.pushSecret);
     }
 
     //only try to enable push if we have a node and secret value

@@ -313,6 +313,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowHandling:) name:@"NSWindowDidBecomeKeyNotification" object:nil];
 #endif
     
+    //init background/foreground status
+    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+        [[MLXMPPManager sharedInstance] nowBackgrounded];
+    else
+        [[MLXMPPManager sharedInstance] nowForegrounded];
+    
     return YES;
 }
 

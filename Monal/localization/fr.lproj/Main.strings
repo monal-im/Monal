@@ -22,6 +22,8 @@
 "HYb-u1-ZN3.title" = "Add Contact";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "IGd-kM-9BO"; */
 "IGd-kM-9BO.title" = "Fermer";
+/* Class = "UITabBarItem"; title = "Item"; ObjectID = "iLC-4b-aD9"; */
+"iLC-4b-aD9.title" = "Item";
 /* Class = "UITabBarItem"; title = "Item"; ObjectID = "iLC-4b-aDr"; */
 "iLC-4b-aDr.title" = "Item";
 /* Class = "UITabBarItem"; title = "Chats"; ObjectID = "jh7-be-VPo"; */

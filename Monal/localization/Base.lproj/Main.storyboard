@@ -9,6 +9,16 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
+        <!--Privacy Settings-->
+        <scene sceneID="B5W-Me-AC9">
+            <objects>
+                <viewControllerPlaceholder storyboardName="Settings" referencedIdentifier="PrivacySettings" id="cmS-oG-cv9" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Item" id="iLC-4b-aD9"/>
+                </viewControllerPlaceholder>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="xDM-mH-2u9" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2876" y="-1307"/>
+        </scene>
         <!--Settings-->
         <scene sceneID="B5W-Me-ACR">
             <objects>
@@ -392,6 +402,7 @@
                         <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" modalPresentationStyle="formSheet" id="RNX-bQ-8Zb"/>
                         <segue destination="2g1-pP-Xxv" kind="presentation" identifier="showIntro" id="nUl-6E-4GO"/>
                         <segue destination="DkD-PA-Cmm" kind="presentation" identifier="showLogin" id="sv2-wf-aN0"/>
+                        <segue destination="cmS-oG-cv9" kind="presentation" identifier="showPrivacySettings" id="zkg-JY-Ot9"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ENC-uh-UXW" userLabel="First Responder" sceneMemberID="firstResponder"/>

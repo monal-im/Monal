@@ -259,6 +259,12 @@ enum activeChatsControllerSections {
   
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenIntro"]) {
         [self performSegueWithIdentifier:@"showIntro" sender:self];
+        return;
+    }
+    
+    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {
+        [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
+        return;
     }
 }
 

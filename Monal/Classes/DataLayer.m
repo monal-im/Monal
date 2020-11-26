@@ -1544,40 +1544,36 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo
+-(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo
 {
     if(!buddyname)
-        return NO;
+        return;
     
-    return [self.db boolWriteTransaction:^{
-        // Check that we do not add a chat a second time to activechats
-        if([self isActiveBuddy:buddyname forAccount:accountNo])
-            return YES;
-        
+    [self.db voidWriteTransaction:^{
         NSString* accountJid = [self jidOfAccount:accountNo];
         if(!accountJid)
-            return NO;
-        
+            return;
         if([accountJid isEqualToString:buddyname])
         {
             // Something is broken
             DDLogWarn(@"We should never try to create a chat with our own jid");
-            return NO;
+            return;
         }
         else
         {
-            // insert
-            NSString* query3 = @"INSERT INTO activechats (buddy_name, account_id, lastMessageTime) VALUES(?, ?, current_timestamp);";
-            BOOL result = [self.db executeNonQuery:query3 andArguments:@[buddyname, accountNo]];
-            return result;
+            // insert or update
+            NSString* query = @"INSERT INTO activechats (buddy_name, account_id, lastMessageTime) VALUES(?, ?, current_timestamp) ON CONFLICT(buddy_name, account_id) DO UPDATE SET lastMessageTime=current_timestamp;";
+            [self.db executeNonQuery:query andArguments:@[buddyname, accountNo]];
+            return;
         }
     }];
+    return;
 }
 
 
 -(BOOL) isActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo
 {
-    NSString* query = @"select count(buddy_name) from activechats where account_id=? and buddy_name=? ";
+    NSString* query = @"SELECT COUNT(buddy_name) FROM activechats WHERE account_id=? AND buddy_name=?;";
     NSNumber* count = (NSNumber*)[self.db executeScalar:query andArguments:@[accountNo, buddyname]];
     if(count != nil)
     {
@@ -1588,18 +1584,19 @@ static NSDateFormatter* dbFormatter;
     }
 }
 
--(BOOL) updateActiveBuddy:(NSString*) buddyname setTime:(NSString *)timestamp forAccount:(NSString*) accountNo
+-(BOOL) updateActiveBuddy:(NSString*) buddyname setTime:(NSString*) timestamp forAccount:(NSString*) accountNo
 {
     return [self.db boolWriteTransaction:^{
-        NSString* query = @"select lastMessageTime from  activechats where account_id=? and buddy_name=?";
+        NSString* query = @"SELECT lastMessageTime FROM activechats WHERE account_id=? AND buddy_name=?;";
         NSObject* result = [self.db executeScalar:query andArguments:@[accountNo, buddyname]];
         NSString* lastTime = (NSString *) result;
 
         NSDate* lastDate = [dbFormatter dateFromString:lastTime];
         NSDate* newDate = [dbFormatter dateFromString:timestamp];
 
-        if(lastDate.timeIntervalSince1970<newDate.timeIntervalSince1970) {
-            NSString* query = @"update activechats set lastMessageTime=? where account_id=? and buddy_name=? ";
+        if(lastDate.timeIntervalSince1970<newDate.timeIntervalSince1970)
+        {
+            NSString* query = @"UPDATE activechats SET lastMessageTime=? WHERE account_id=? AND buddy_name=?;";
             BOOL success = [self.db executeNonQuery:query andArguments:@[timestamp, accountNo, buddyname]];
             return success;
         }

@@ -406,6 +406,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         }
         
         [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
+        
         //no success may mean its already there
         dispatch_async(dispatch_get_main_queue(), ^{
             [(ActiveChatsViewController *) self.activeChats presentChatWithRow:contact];

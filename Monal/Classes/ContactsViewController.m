@@ -308,15 +308,6 @@
     if(row.isGroup && row.groupSubject)
         [cell showStatusText:row.groupSubject];
     
-    NSString* stateString = [row.state stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] ;
-    
-    if([stateString isEqualToString:@"away"] || [stateString isEqualToString:@"dnd"] || [stateString isEqualToString:@"xa"])
-        cell.status = kStatusAway;
-    else if([row.state isEqualToString:@"offline"])
-        cell.status=kStatusOffline;
-    else if([row.state isEqualToString:@"(null)"] || [row.state isEqualToString:@""])
-        cell.status=kStatusOnline;
-    
     cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
     
     cell.accountNo=[row.accountId integerValue];
@@ -330,7 +321,6 @@
     [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
         cell.userImage.image=image;
     }];
-    [cell setOrb];
     
     BOOL muted = [[DataLayer sharedInstance] isMutedJid:row.contactJid];
     dispatch_async(dispatch_get_main_queue(), ^{

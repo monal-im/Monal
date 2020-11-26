@@ -7,15 +7,8 @@
 //
 #import "MLAttributedLabel.h"
 
-typedef enum {
-    kStatusOnline=1,
-    kStatusOffline,
-    kStatusAway
-} statusType;
-
 @interface MLContactCell : UITableViewCell
 
-@property (nonatomic, assign) NSInteger status;
 @property (nonatomic, assign) NSInteger count;
 @property (nonatomic, assign) NSInteger accountNo;
 @property (nonatomic, strong) NSString *username;
@@ -25,14 +18,11 @@ typedef enum {
 @property (nonatomic, weak) IBOutlet UILabel *time;
 
 @property (nonatomic, weak) IBOutlet MLAttributedLabel *statusText;
-@property (nonatomic, weak) IBOutlet UIImageView *statusOrb;
 @property (nonatomic, weak) IBOutlet UIImageView *userImage;
 @property (nonatomic, weak) IBOutlet UIButton *badge;
 @property (nonatomic, weak) IBOutlet UIImageView *muteBadge;
 
 @property (nonatomic, assign) BOOL isPinned;
-
--(void) setOrb;
 
 -(void) showStatusText:(NSString *) text;
 -(void) showStatusTextItalic:(NSString *) text withItalicRange:(NSRange)italicRange;

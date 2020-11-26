@@ -414,22 +414,6 @@ enum activeChatsControllerSections {
     }
     [cell showDisplayName:row.contactDisplayName];
     
-    NSString* state = [row.state stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    
-    if(([state isEqualToString:@"away"]) ||
-       ([state isEqualToString:@"dnd"])||
-       ([state isEqualToString:@"xa"])
-       )
-    {
-        cell.status = kStatusAway;
-    }
-    else if([state isEqualToString:@"offline"]) {
-        cell.status = kStatusOffline;
-    }
-    else if([state isEqualToString:@"(null)"] || [state isEqualToString:@""]) {
-        cell.status = kStatusOnline;
-    }
-    
     cell.accountNo = row.accountId.integerValue;
     cell.username = row.contactJid;
     cell.count = 0;
@@ -446,18 +430,18 @@ enum activeChatsControllerSections {
         if(messageRow)
         {
             if([messageRow.messageType isEqualToString:kMessageTypeUrl])
-            {
                 [cell showStatusText:NSLocalizedString(@"🔗 A Link", @"")];
-            } else if([messageRow.messageType isEqualToString:kMessageTypeImage])
-            {
+            else if([messageRow.messageType isEqualToString:kMessageTypeImage])
                 [cell showStatusText:NSLocalizedString(@"📷 An Image", @"")];
-            } else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft]) {
+            else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft])
+            {
                 NSString* draftPreview = [NSString stringWithFormat:NSLocalizedString(@"Draft: %@", @""), messageRow.messageText];
                 [cell showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, 6)];
-            } else if([messageRow.messageType isEqualToString:kMessageTypeGeo])
-            {
+            }
+            else if([messageRow.messageType isEqualToString:kMessageTypeGeo])
                 [cell showStatusText:NSLocalizedString(@"📍 A Location", @"")];
-            } else  {
+            else
+            {
                 //XEP-0245: The slash me Command
                 NSString* displayName;
                 NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:row.accountId];
@@ -483,23 +467,27 @@ enum activeChatsControllerSections {
                     [cell showStatusText:messageRow.messageText];
                 }
             }
-            if(messageRow.timestamp) {
+            if(messageRow.timestamp)
+            {
                 cell.time.text = [self formattedDateWithSource:messageRow.timestamp];
                 cell.time.hidden = NO;
-            } else  {
-                cell.time.hidden = YES;
             }
+            else
+                cell.time.hidden = YES;
         }
         else
         {
             [cell showStatusText:nil];
-            DDLogWarn(NSLocalizedString(@"Active chat but no messages found in history for %@.", @""), row.contactJid);
+            DDLogWarn(@"Active chat but no messages found in history for %@.", row.contactJid);
         }
     });
     [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
         cell.userImage.image = image;
     }];
-    [cell setOrb];
+    BOOL muted = [[DataLayer sharedInstance] isMutedJid:row.contactJid];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        cell.muteBadge.hidden = !muted;
+    });
     return cell;
 }
 

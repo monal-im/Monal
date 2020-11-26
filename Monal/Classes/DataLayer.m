@@ -44,7 +44,6 @@ NSString *const kMessageTypeText = @"Text";
 NSString *const kMessageTypeGeo = @"Geo";
 NSString *const kMessageTypeUrl = @"Url";
 NSString *const kMessageTypeFiletransfer = @"Filetransfer";
-NSString *const kMessageTypeImage = @"Image";
 
 static NSString* dbPath;
 static NSDateFormatter* dbFormatter;
@@ -923,13 +922,22 @@ static NSDateFormatter* dbFormatter;
 -(NSArray*) messagesForHistoryIDs:(NSArray*) historyIDs
 {
     NSString* idList = [historyIDs componentsJoinedByString:@","];
-    NSString* query = [NSString stringWithFormat:@"SELECT IFNULL(actual_from, message_from) AS af, message_from, message_to, account_id, message, received, displayed, displayMarkerWanted, encrypted, timestamp  AS thetime, message_history_id, sent, messageid, messageType, previewImage, previewText, unread, errorType, errorReason, stanzaid FROM message_history WHERE message_history_id IN(%@);", idList];
-    NSArray* params = @[];
+    NSString* query = [NSString stringWithFormat:@"SELECT IFNULL(actual_from, message_from) AS af, timestamp AS thetime, * FROM message_history WHERE message_history_id IN(%@);", idList];
 
     NSMutableArray* retval = [[NSMutableArray alloc] init];
-    for(NSDictionary* dic in [self.db executeReader:query andArguments:params])
+    for(NSDictionary* dic in [self.db executeReader:query])
         [retval addObject:[MLMessage messageFromDictionary:dic withDateFormatter:dbFormatter]];
     return retval;
+}
+
+-(MLMessage*) messageForHistoryID:(NSNumber*) historyID
+{
+    if(historyID == nil)
+        return nil;
+    NSArray* result = [self messagesForHistoryIDs:@[historyID]];
+    if(![result count])
+        return nil;
+    return result[0];
 }
 
 -(NSNumber*) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted backwards:(BOOL) backwards displayMarkerWanted:(BOOL) displayMarkerWanted
@@ -1258,10 +1266,7 @@ static NSDateFormatter* dbFormatter;
         NSNumber* historyID = [self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND (message_from=? OR message_to=?) ORDER BY message_history_id DESC LIMIT 1;" andArguments:@[accountNo, contact, contact]];
         if(historyID == nil)
             return (MLMessage*)nil;
-        NSArray* msgList = [self messagesForHistoryIDs:@[historyID]];
-        if([msgList count])
-            return (MLMessage*)msgList[0];
-        return (MLMessage*)nil;
+        return [self messageForHistoryID:historyID];
     }];
 }
 
@@ -1917,6 +1922,17 @@ static NSDateFormatter* dbFormatter;
         
         [self updateDBTo:4.992 withBlock:^{
             [self.db executeNonQuery:@"ALTER TABLE account ADD COLUMN statusMessage TEXT;"];
+        }];
+        
+        [self updateDBTo:4.993 withBlock:^{
+            //make filetransferMimeType and filetransferSize have NULL as default value
+            //(this makes it possible to distinguish unknown values from known ones)
+            [self.db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE message_history (message_history_id integer not null primary key AUTOINCREMENT, account_id integer, message_from text collate nocase, message_to text collate nocase, timestamp datetime, message blob, actual_from text collate nocase, messageid text collate nocase, messageType text, sent bool, received bool, unread bool, encrypted bool, previewText text, previewImage text, stanzaid text collate nocase, errorType text collate nocase, errorReason text, displayed BOOL DEFAULT FALSE, displayMarkerWanted BOOL DEFAULT FALSE, filetransferMimeType VARCHAR(32) DEFAULT NULL, filetransferSize INTEGER DEFAULT NULL);"];
+            [self.db executeNonQuery:@"INSERT INTO message_history SELECT * FROM _message_historyTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _message_historyTMP;"];
+            [self.db executeNonQuery:@"CREATE INDEX stanzaidIndex on message_history(stanzaid collate nocase);"];
+            [self.db executeNonQuery:@"CREATE INDEX messageidIndex on message_history(messageid collate nocase);"];
         }];
         
     }];

@@ -431,8 +431,13 @@ enum activeChatsControllerSections {
         {
             if([messageRow.messageType isEqualToString:kMessageTypeUrl])
                 [cell showStatusText:NSLocalizedString(@"🔗 A Link", @"")];
-            else if([messageRow.messageType isEqualToString:kMessageTypeImage])
-                [cell showStatusText:NSLocalizedString(@"📷 An Image", @"")];
+            else if([messageRow.messageType isEqualToString:kMessageTypeFiletransfer])
+            {
+                if([messageRow.filetransferMimeType hasPrefix:@"image/"])
+                    [cell showStatusText:NSLocalizedString(@"📷 An Image", @"")];
+                else        //TODO JIM: add support for more mime types
+                    [cell showStatusText:NSLocalizedString(@"📁 A File", @"")];
+            }
             else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft])
             {
                 NSString* draftPreview = [NSString stringWithFormat:NSLocalizedString(@"Draft: %@", @""), messageRow.messageText];

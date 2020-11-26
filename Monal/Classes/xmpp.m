@@ -2553,6 +2553,7 @@ NSString *const kContact=@"contact";
                                                  backwards:YES
                                        displayMarkerWanted:NO
                 ];
+                msg.messageDBId = historyId;        //retrofit messageDBId
                 //add successfully added messages to our display list
                 if(historyId != nil)
                     [messageList addObject:msg];

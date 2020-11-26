@@ -153,6 +153,7 @@ static NSMutableDictionary* _typingNotifications;
                     return;
                 
                 [[DataLayer sharedInstance] updateMucSubject:subject forAccount:account.accountNo andRoom:messageNode.fromUser];
+                //TODO: this stuff has to be changed (why send a kMonalNewMessageNotice instead of a special kMonalMucSubjectChanged one?)
                 MLMessage* message = [account parseMessageToMLMessage:messageNode withBody:subject andEncrypted:encrypted andShowAlert:showAlert andMessageType:kMessageTypeStatus andActualFrom:actualFrom];
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
                     @"message": message,
@@ -206,7 +207,8 @@ static NSMutableDictionary* _typingNotifications;
                     displayMarkerWanted:[messageNode check:@"{urn:xmpp:chat-markers:0}markable"]
                 ];
                 
-                if(historyId != nil)
+                MLMessage* message = [[DataLayer sharedInstance] messageForHistoryID:historyId];
+                if(message != nil)
                 {
                     if(
                         [[HelperTools defaultsDB] boolForKey:@"SendReceivedMarkers"] &&
@@ -231,8 +233,7 @@ static NSMutableDictionary* _typingNotifications;
                     else
                         [[DataLayer sharedInstance] addActiveBuddies:messageNode.toUser forAccount:account.accountNo];
                     
-                    DDLogInfo(@"sending out kMonalNewMessageNotice notification");
-                    MLMessage* message = [account parseMessageToMLMessage:messageNode withBody:body andEncrypted:encrypted andShowAlert:showAlert andMessageType:messageType andActualFrom:actualFrom];
+                    DDLogInfo(@"sending out kMonalNewMessageNotice notification for historyId %@", historyId);
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
                         @"message": message,
                         @"historyId": historyId
@@ -260,7 +261,7 @@ static NSMutableDictionary* _typingNotifications;
                     
                     //try to automatically determine content type of filetransfers
                     //TODO JIM: this should be the config key to enable/disable auto downloads
-                    if(messageType == kMessageTypeFiletransfer && [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"])
+                    if(messageType == kMessageTypeFiletransfer && YES/*[[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"]*/)
                         [MLFiletransfer checkMimeTypeAndSizeForHistoryID:historyId withURL:body];
                 }
             }

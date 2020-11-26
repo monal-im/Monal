@@ -100,8 +100,7 @@ enum msgSentState {
     msgSent,
     msgErrorAfterSent,
     msgRecevied,
-    msgDisplayed,
-    msgFiletransferUpdate
+    msgDisplayed
 };
 
 -(void) setup
@@ -1401,6 +1400,8 @@ enum msgSentState {
     NSDictionary* dic = notification.userInfo;
     MLMessage* msg = dic[@"message"];
     
+    DDLogDebug(@"Got filetransfer message update for history id %ld: %@ (%@)", (long)[msg.messageDBId intValue], msg.filetransferMimeType, msg.filetransferSize);
+    
     NSIndexPath* indexPath;
     for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
     {
@@ -1616,17 +1617,31 @@ enum msgSentState {
         cell.link = nil;
         return cell;
     }
-    else if([row.messageType isEqualToString:kMessageTypeImage])
+    else if([row.messageType isEqualToString:kMessageTypeFiletransfer])
     {
-        MLChatImageCell* imageCell = (MLChatImageCell *) [self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable: tableView];
+        DDLogVerbose(@"got filetransfer chat cell: %@ (%@)", row.filetransferMimeType, row.filetransferSize);
+        if([row.filetransferMimeType hasPrefix:@"image/"])
+        {
+            MLChatImageCell* imageCell = (MLChatImageCell *) [self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable: tableView];
 
-        if(![imageCell.link isEqualToString:messageText]){
-            imageCell.link = messageText;
-            imageCell.thumbnailImage.image = nil;
-            imageCell.loading = NO;
-            [imageCell loadImageWithCompletion:^{}];
+            if(![imageCell.link isEqualToString:messageText]){
+                imageCell.link = messageText;
+                imageCell.thumbnailImage.image = nil;
+                imageCell.loading = NO;
+                [imageCell loadImageWithCompletion:^{}];
+            }
+            cell = imageCell;
         }
-        cell = imageCell;
+        else
+        {
+            //TODO JIM: add handling for some special mime types and default handling for general files (e.g. download/open button cell)
+            
+            //this is just a dummy to display something (the filetransfer url)
+            cell = (MLChatCell*)[self messageTableCellWithIdentifier:@"text" andInbound:inDirection fromTable: tableView];
+            UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize];
+            [cell.messageBody setFont:originalFont];
+            [cell.messageBody setText:messageText];
+        }
     }
     else if([row.messageType isEqualToString:kMessageTypeUrl])
     {

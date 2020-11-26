@@ -202,32 +202,39 @@
                 content.sound = [UNNotificationSound defaultSound];
         }
 
-        if([message.messageType isEqualToString:kMessageTypeImage])
+        if([message.messageType isEqualToString:kMessageTypeFiletransfer])
         {
-            [[MLImageManager sharedInstance] imageURLForAttachmentLink:message.messageText withCompletion:^(NSURL * _Nullable url) {
-                if(url)
-                {
-                    NSError *error;
-                    UNNotificationAttachment* attachment = [UNNotificationAttachment attachmentWithIdentifier:[[NSUUID UUID] UUIDString] URL:url options:@{UNNotificationAttachmentOptionsTypeHintKey:(NSString*) kUTTypePNG} error:&error];
-                    if(attachment)
-                        content.attachments = @[attachment];
-                    if(error)
-                        DDLogError(@"Error %@", error);
-                }
+            if([message.filetransferMimeType hasPrefix:@"image/"])
+            {
+                [[MLImageManager sharedInstance] imageURLForAttachmentLink:message.messageText withCompletion:^(NSURL * _Nullable url) {
+                    if(url)
+                    {
+                        NSError *error;
+                        UNNotificationAttachment* attachment = [UNNotificationAttachment attachmentWithIdentifier:[[NSUUID UUID] UUIDString] URL:url options:@{UNNotificationAttachmentOptionsTypeHintKey:(NSString*) kUTTypePNG} error:&error];
+                        if(attachment)
+                            content.attachments = @[attachment];
+                        if(error)
+                            DDLogError(@"Error %@", error);
+                    }
 
-                if(!content.attachments)
-                    content.body = NSLocalizedString(@"Sent an Image 📷", @"");
-                else
-                    content.body = @"";
+                    if(!content.attachments)
+                        content.body = NSLocalizedString(@"Sent an Image 📷", @"");
+                    else
+                        content.body = @"";
 
-                [self publishNotificationContent:content withID:idval];
-            }];
+                    [self publishNotificationContent:content withID:idval];
+                }];
+            }
+            else        //TODO JIM: add support for more mime types
+            {
+                content.body = NSLocalizedString(@"Sent a File 📁", @"");
+            }
             return;
         }
         else if([message.messageType isEqualToString:kMessageTypeUrl])
             content.body = NSLocalizedString(@"Sent a Link 🔗", @"");
         else if([message.messageType isEqualToString:kMessageTypeGeo])
-            content.body = NSLocalizedString(@"Sent a location 📍", @"");
+            content.body = NSLocalizedString(@"Sent a Location 📍", @"");
     } else {
         content.body = NSLocalizedString(@"Open app to see more", @"");
     }

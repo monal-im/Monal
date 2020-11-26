@@ -36,7 +36,6 @@ extern NSString* const kMessageTypeText;
 extern NSString* const kMessageTypeGeo;
 extern NSString* const kMessageTypeUrl;
 extern NSString* const kMessageTypeFiletransfer;
-extern NSString* const kMessageTypeImage;
 
 +(DataLayer*) sharedInstance;
 -(void) version;
@@ -153,6 +152,7 @@ extern NSString* const kMessageTypeImage;
  returns messages with the provided local id number
  */
 -(NSArray*) messagesForHistoryIDs:(NSArray*) historyIDs;
+-(MLMessage* _Nullable) messageForHistoryID:(NSNumber* _Nullable) historyID;
 
 /*
  adds a specified message to the database

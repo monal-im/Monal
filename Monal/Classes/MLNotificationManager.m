@@ -37,6 +37,7 @@
 {
     self = [super init];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDeletedMessage:) name:kMonalDeletedMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDisplayedMessage:) name:kMonalDisplayedMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleXMPPError:) name:kXMPPError object:nil];
 
@@ -104,6 +105,24 @@
         return;
     
     DDLogVerbose(@"notification manager got displayed message notice: %@", message.messageId);
+    NSString* idval = [self identifierWithMessage:message];
+    
+    [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
+    [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
+    
+    //update app badge
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalUpdateUnread object:nil];
+}
+
+-(void) handleDeletedMessage:(NSNotification*) notification
+{
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+    MLMessage* message = [notification.userInfo objectForKey:@"message"];
+    
+    if([message.messageType isEqualToString:kMessageTypeStatus])
+        return;
+    
+    DDLogVerbose(@"notification manager got deleted message notice: %@", message.messageId);
     NSString* idval = [self identifierWithMessage:message];
     
     [center removePendingNotificationRequestsWithIdentifiers:@[idval]];

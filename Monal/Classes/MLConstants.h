@@ -39,7 +39,8 @@ typedef enum NotificationPrivacySettingOption {
 //some useful macros
 #define weakify(var) __weak __typeof__(var) AHKWeak_##var = var
 #define strongify(var) _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wshadow\"") __strong __typeof__(var) var = AHKWeak_##var; _Pragma("clang diagnostic pop")
-#define nilWrapper(var)  (var ? var : [NSNull null])
+#define nilWrapper(var) (var ? var : [NSNull null])
+#define nilExtractor(var) (var == [NSNull null] ? nil : var)
 
 //some xmpp related constants
 #define kRegServer @"yax.im"
@@ -55,6 +56,7 @@ typedef enum NotificationPrivacySettingOption {
 
 //all other constants needed
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
+#define kMonalDeletedMessageNotice @"kMonalDeletedMessageNotice"
 #define kMonalDisplayedMessageNotice @"kMonalDisplayedMessageNotice"
 #define kMonalHistoryMessagesNotice @"kMonalHistoryMessagesNotice"
 #define kMLMessageSentToContact @"kMLMessageSentToContact"

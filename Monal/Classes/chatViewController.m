@@ -81,6 +81,7 @@
 @property (nonatomic, strong) MLSearchViewController* searchController;
 @property (nonatomic, strong) NSMutableArray* searchResultMessageList;
 
+@property (nonatomic, strong) void (^editingCallback)(NSString* newBody);
 
 #define lastMsgButtonSize 40.0
 
@@ -134,9 +135,11 @@ enum msgSentState {
     containerView = self.view;
     self.messageTable.scrollsToTop = YES;
     self.chatInput.scrollsToTop = NO;
+    self.editingCallback = nil;
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [nc addObserver:self selector:@selector(handleDeletedMessage:) name:kMonalDeletedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleMessageError:) name:kMonalMessageErrorNotice object:nil];
     
@@ -544,6 +547,7 @@ enum msgSentState {
     
     self.viewDidAppear = NO;
     self.viewIsScrolling = YES;
+    self.editingCallback = nil;
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     self.encryptChat = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
     
@@ -585,10 +589,7 @@ enum msgSentState {
     [self setChatInputHeightConstraints:self.hardwareKeyboardPresent];
     [self scrollToBottom];
 
-    // Allow  autoloading of more messages after a few seconds
-    [HelperTools startTimer:1 withHandler:^{
-        self.viewIsScrolling = NO;
-    }];
+    [self tempfreezeAutoloading];
 }
 
 
@@ -627,6 +628,8 @@ enum msgSentState {
 
 -(void) viewWillDisappear:(BOOL)animated
 {
+    self.editingCallback = nil;
+    
     // Save message draft
     BOOL success = [self saveMessageDraft];
     if(success) {
@@ -687,6 +690,7 @@ enum msgSentState {
 #pragma mark rotation
 -(void) viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
+    [self stopEditing];
     [self.chatInput resignFirstResponder];
     
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
@@ -701,6 +705,7 @@ enum msgSentState {
 
 -(IBAction)dismissKeyboard:(id)sender
 {
+    [self stopEditing];
     [self saveMessageDraft];
     [self.chatInput resignFirstResponder];
     [self sendChatState:NO];
@@ -861,23 +866,24 @@ enum msgSentState {
 
 -(void)resignTextView
 {
-    self.viewIsScrolling = YES;
-    // Allow  autoloading of more messages after a few seconds again
-    monal_void_block_t __block allowAutoLoading = ^{
-        self.viewIsScrolling = NO;
-    };
-    [HelperTools startTimer:2 withHandler:allowAutoLoading];
+    [self tempfreezeAutoloading];
 
     // Trim leading spaces
     NSString* cleanString = [self.chatInput.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     // Only send msg that have at least one character
     if(cleanString.length > 0)
     {
-        // Reset chatInput -> remove draft from db so that macOS will show the new send message
+        // Reset chatInput -> remove draft from db so that macOS will show the newly sens message
         [self.chatInput setText:@""];
         [self saveMessageDraft];
-        // Send trimmed message
-        [self sendMessage:cleanString withType:kMessageTypeText];
+        
+        if(self.editingCallback)
+            self.editingCallback(cleanString);
+        else
+        {
+            // Send trimmed message
+            [self sendMessage:cleanString withType:kMessageTypeText];
+        }
     }
     [self sendChatState:NO];
 }
@@ -906,6 +912,7 @@ enum msgSentState {
 #pragma mark - doc picker
 -(IBAction)attachfile:(id)sender
 {
+    [self stopEditing];
     [self.chatInput resignFirstResponder];
 
     [self presentViewController:self.imagePicker animated:YES completion:nil];
@@ -996,6 +1003,7 @@ enum msgSentState {
 
 -(IBAction)attach:(id)sender
 {
+    [self stopEditing];
     [self.chatInput resignFirstResponder];
     xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
 
@@ -1215,10 +1223,7 @@ enum msgSentState {
         }
         MLMessage* messageObj = msgList[0];
         
-        // Allow  autoloading of more messages after a few seconds
-        [HelperTools startTimer:1 withHandler:^{
-            self.viewIsScrolling = NO;
-        }];
+        [self tempfreezeAutoloading];
         
         //update message list in ui
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -1269,7 +1274,6 @@ enum msgSentState {
     });
 }
 
-
 -(void) handleNewMessage:(NSNotification *)notification
 {
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
@@ -1298,6 +1302,28 @@ enum msgSentState {
         dispatch_async(dispatch_get_main_queue(), ^{
             if(!self.messageList)
                 self.messageList = [[NSMutableArray alloc] init];
+            
+            //update already existent message
+            for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
+            {
+                // find msg that should be updated
+                MLMessage* msgInList = [self.messageList objectAtIndex:(msgIdx - 1)];
+                if([msgInList.messageDBId intValue] == [message.messageDBId intValue])
+                {
+                    //update message in our list
+                    [msgInList updateWithMessage:message];
+                    
+                    // Update table entry
+                    NSIndexPath* indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self->_messageTable beginUpdates];
+                        [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                        [self->_messageTable endUpdates];
+                    });
+                    return;
+                }
+            }
+            
             [self.messageList addObject:message];   //do not insert based on delay timestamp because that would make it possible to fake history entries
 
             [self->_messageTable beginUpdates];
@@ -1321,6 +1347,33 @@ enum msgSentState {
             
             [self refreshCounter];
         });
+    }
+}
+
+-(void) handleDeletedMessage:(NSNotification*) notification
+{
+    NSDictionary* dic = notification.userInfo;
+    MLMessage* msg = dic[@"message"];
+    
+    DDLogDebug(@"Got deleted message notice for history id %ld and message id %@", (long)[msg.messageDBId intValue], msg.messageId);
+    
+    NSIndexPath* indexPath;
+    for(size_t msgIdx = [self.messageList count]; msgIdx > 0; msgIdx--)
+    {
+        // find msg that should be deleted
+        MLMessage* msgInList = [self.messageList objectAtIndex:(msgIdx - 1)];
+        if([msgInList.messageDBId intValue] == [msg.messageDBId intValue])
+        {
+            // Remove table entry
+            indexPath = [NSIndexPath indexPathForRow:(msgIdx - 1) inSection:messagesSection];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self->_messageTable beginUpdates];
+                [self.messageList removeObjectAtIndex:indexPath.row];
+                [self->_messageTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];
+                [self->_messageTable endUpdates];
+            });
+            break;
+        }
     }
 }
 
@@ -1851,6 +1904,7 @@ enum msgSentState {
 #pragma mark - tableview delegate
 -(void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    [self stopEditing];
     [self.chatInput resignFirstResponder];
     if(indexPath.section == reloadBoxSection) {
         [self loadOldMsgHistory];
@@ -1917,28 +1971,114 @@ enum msgSentState {
     }
 }
 
-
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-    if(indexPath.section == reloadBoxSection) {
-        return;
-    }
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        MLMessage* message = [self.messageList objectAtIndex:indexPath.row];
-        
-        DDLogVerbose(@"%@", message);
-        
-        if(!message.messageDBId)
-            return;
-
-        [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
-        [self.messageList removeObjectAtIndex:indexPath.row];
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];
-    }
-}
-
 -(UISwipeActionsConfiguration*) tableView:(UITableView*) tableView trailingSwipeActionsConfigurationForRowAtIndexPath:(NSIndexPath*) indexPath
 {
-    return nil;
+    //don't allow swipe actions for our reload box
+    if(indexPath.section == reloadBoxSection)
+        return [UISwipeActionsConfiguration configurationWithActions:@[]];
+    
+    //do some sanity checks
+    MLMessage* message;
+    if(indexPath.row < self.messageList.count)
+        message = [self.messageList objectAtIndex:indexPath.row];
+    else
+    {
+        DDLogError(@"Attempt to access beyond bounds");
+        return [UISwipeActionsConfiguration configurationWithActions:@[]];
+    }
+    if(!message.messageDBId)
+        return [UISwipeActionsConfiguration configurationWithActions:@[]];
+    
+    //configure swipe actions
+    
+    UIContextualAction* LMCEditAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:NSLocalizedString(@"Edit", @"") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+        if(self.editingCallback)
+            return completionHandler(NO);
+        [self.chatInput setText:message.messageText];       //we want to begin editing using the old message
+        weakify(self);
+        self.editingCallback = ^(NSString* newBody) {
+            strongify(self);
+            self.editingCallback = nil;
+            if(newBody != nil)
+            {
+                message.messageText = newBody;
+                
+                [self.xmppAccount sendLMCForId:message.messageId withNewBody:newBody to:message.to];
+                [[DataLayer sharedInstance] updateMessageHistory:message.messageDBId withText:newBody];
+                
+                [self->_messageTable beginUpdates];
+                [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                [self->_messageTable endUpdates];
+                
+                //update active chats if necessary
+                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
+                return completionHandler(YES);
+            }
+            return completionHandler(NO);
+        };
+    }];
+    LMCEditAction.backgroundColor = UIColor.systemGreenColor;
+    if(@available(iOS 13.0, *))
+    {
+        LMCEditAction.backgroundColor = UIColor.systemGrayColor;
+        LMCEditAction.image = [[UIImage systemImageNamed:@"pencil.circle.fill"] imageWithTintColor:UIColor.systemGreenColor renderingMode:UIImageRenderingModeAlwaysOriginal];
+    }
+    
+    UIContextualAction* LMCDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete", @"") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+        self.editingCallback = nil;
+        
+        [self.xmppAccount sendLMCForId:message.messageId withNewBody:@"eu.siacs.conversations.message_deleted" to:message.to];
+        [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
+        
+        [self->_messageTable beginUpdates];
+        [self.messageList removeObjectAtIndex:indexPath.row];
+        [self->_messageTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];
+        [self->_messageTable endUpdates];
+        
+        //update active chats if necessary
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
+        
+        return completionHandler(YES);
+    }];
+    LMCDeleteAction.backgroundColor = UIColor.systemRedColor;
+    if(@available(iOS 13.0, *))
+    {
+        LMCDeleteAction.backgroundColor = UIColor.systemGrayColor;
+        LMCDeleteAction.image = [[UIImage systemImageNamed:@"trash.circle.fill"] imageWithTintColor:UIColor.systemRedColor renderingMode:UIImageRenderingModeAlwaysOriginal];
+    }
+    
+    UIContextualAction* localDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete Locally", @"") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+        self.editingCallback = nil;
+        
+        [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
+        
+        [self->_messageTable beginUpdates];
+        [self.messageList removeObjectAtIndex:indexPath.row];
+        [self->_messageTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];
+        [self->_messageTable endUpdates];
+        
+        //update active chats if necessary
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
+        
+        return completionHandler(YES);
+    }];
+    localDeleteAction.backgroundColor = UIColor.systemRedColor;
+    if(@available(iOS 13.0, *))
+    {
+        localDeleteAction.backgroundColor = UIColor.systemGrayColor;
+        localDeleteAction.image = [[UIImage systemImageNamed:@"trash.circle.fill"] imageWithTintColor:UIColor.systemRedColor renderingMode:UIImageRenderingModeAlwaysOriginal];
+    }
+    
+    //only allow editing for the 2 newest outgoing message that were sent in the last 2 minutes
+    if([[DataLayer sharedInstance] checkLMCEligible:message.messageDBId from:self.xmppAccount.connectionProperties.identity.jid])
+        return [UISwipeActionsConfiguration configurationWithActions:@[
+            LMCEditAction,
+            LMCDeleteAction,
+        ]];
+    else
+        return [UISwipeActionsConfiguration configurationWithActions:@[
+            localDeleteAction,
+        ]];
 }
 
 //dummy function needed to remove warnign
@@ -2231,6 +2371,21 @@ enum msgSentState {
 //    UIEdgeInsets contentInsets = UIEdgeInsetsZero;
 //    self.messageTable.contentInset = contentInsets;
 //    self.messageTable.scrollIndicatorInsets = contentInsets;
+}
+
+-(void) tempfreezeAutoloading
+{
+    // Allow  autoloading of more messages after a few seconds
+    self.viewIsScrolling = YES;
+    [HelperTools startTimer:1.5 withHandler:^{
+        self.viewIsScrolling = NO;
+    }];
+}
+
+-(void) stopEditing
+{
+    if(self.editingCallback != nil)
+        self.editingCallback(nil);      //dismiss swipe action
 }
 
 @end

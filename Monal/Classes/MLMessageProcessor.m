@@ -188,24 +188,47 @@ static NSMutableDictionary* _typingNotifications;
             //we don't want to call postPersistAction, too, beause we don't want to display push notifications for old messages
             if([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLhistory:"])
                 [account addMessageToMamPageArray:messageNode forOuterMessageNode:outerMessageNode withBody:body andEncrypted:encrypted andShowAlert:showAlert andMessageType:messageType];
-            else
+            else if(body)
             {
-                NSNumber* historyId = [[DataLayer sharedInstance] 
-                         addMessageFrom:messageNode.fromUser
-                                     to:messageNode.toUser
-                             forAccount:account.accountNo
-                               withBody:[body copy]
-                           actuallyfrom:actualFrom
-                                   sent:YES
-                                 unread:unread
-                              messageId:messageId
-                        serverMessageId:stanzaid
-                            messageType:messageType
-                        andOverrideDate:[messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"]
-                              encrypted:encrypted
-                              backwards:NO
-                    displayMarkerWanted:[messageNode check:@"{urn:xmpp:chat-markers:0}markable"]
-                ];
+                NSNumber* historyId = nil;
+                
+                //handle LMC
+                BOOL deleteMessage = NO;
+                if([messageNode check:@"{urn:xmpp:message-correct:0}replace"])
+                {
+                    NSString* messageIdToReplace = [messageNode findFirst:@"{urn:xmpp:message-correct:0}replace@id"];
+                    historyId = [[DataLayer sharedInstance] getHistoryIDForMessageId:messageIdToReplace from:messageNode.fromUser andAccount:account.accountNo];
+                    if([[DataLayer sharedInstance] checkLMCEligible:historyId from:messageNode.fromUser])
+                    {
+                        if(![body isEqualToString:@"eu.siacs.conversations.message_deleted"])
+                            [[DataLayer sharedInstance] updateMessageHistory:historyId withText:body];
+                        else
+                            deleteMessage = YES;
+                    }
+                    else
+                        historyId = nil;
+                }
+                
+                //handle normal messages or LMC messages that can not be found (but ignore deletion LMCs)
+                if(historyId == nil && ![body isEqualToString:@"eu.siacs.conversations.message_deleted"])
+                {
+                    historyId = [[DataLayer sharedInstance]
+                             addMessageFrom:messageNode.fromUser
+                                         to:messageNode.toUser
+                                 forAccount:account.accountNo
+                                   withBody:[body copy]
+                               actuallyfrom:actualFrom
+                                       sent:YES
+                                     unread:unread
+                                  messageId:messageId
+                            serverMessageId:stanzaid
+                                messageType:messageType
+                            andOverrideDate:[messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"]
+                                  encrypted:encrypted
+                                  backwards:NO
+                        displayMarkerWanted:[messageNode check:@"{urn:xmpp:chat-markers:0}markable"]
+                    ];
+                }
                 
                 MLMessage* message = [[DataLayer sharedInstance] messageForHistoryID:historyId];
                 if(message != nil)
@@ -228,17 +251,6 @@ static NSMutableDictionary* _typingNotifications;
                         [account send:receiptNode];
                     }
 
-                    if(![messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
-                        [[DataLayer sharedInstance] addActiveBuddies:messageNode.fromUser forAccount:account.accountNo];
-                    else
-                        [[DataLayer sharedInstance] addActiveBuddies:messageNode.toUser forAccount:account.accountNo];
-                    
-                    DDLogInfo(@"sending out kMonalNewMessageNotice notification for historyId %@", historyId);
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
-                        @"message": message,
-                        @"historyId": historyId
-                    }];
-                    
                     //check if we have an outgoing message sent from another client on our account
                     //if true we can mark all messages from this buddy as already read by us (using the other client)
                     //WARNING: kMonalMessageDisplayedNotice goes to chatViewController, kMonalDisplayedMessageNotice goes to MLNotificationManager and activeChatsViewController/chatViewController
@@ -259,10 +271,33 @@ static NSMutableDictionary* _typingNotifications;
                         }];
                     }
                     
-                    //try to automatically determine content type of filetransfers
-                    //TODO JIM: this should be the config key to enable/disable auto downloads
-                    if(messageType == kMessageTypeFiletransfer && YES/*[[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"]*/)
-                        [MLFiletransfer checkMimeTypeAndSizeForHistoryID:historyId withURL:body];
+                    if(deleteMessage)
+                    {
+                        [[DataLayer sharedInstance] deleteMessageHistory:historyId];
+                        
+                        DDLogInfo(@"sending out kMonalDeletedMessageNotice notification for historyId %@", historyId);
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
+                            @"message": message,
+                        }];
+                    }
+                    else
+                    {
+                        if(![messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
+                            [[DataLayer sharedInstance] addActiveBuddies:messageNode.fromUser forAccount:account.accountNo];
+                        else
+                            [[DataLayer sharedInstance] addActiveBuddies:messageNode.toUser forAccount:account.accountNo];
+                        
+                        DDLogInfo(@"sending out kMonalNewMessageNotice notification for historyId %@", historyId);
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
+                            @"message": message,
+                            @"historyId": historyId
+                        }];
+                        
+                        //try to automatically determine content type of filetransfers
+                        //TODO JIM: this should be the config key to enable/disable auto downloads
+                        if(messageType == kMessageTypeFiletransfer && YES/*[[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"]*/)
+                            [MLFiletransfer checkMimeTypeAndSizeForHistoryID:historyId withURL:body];
+                    }
                 }
             }
         }

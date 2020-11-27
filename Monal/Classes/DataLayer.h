@@ -185,6 +185,10 @@ extern NSString* const kMessageTypeFiletransfer;
 
 -(void) clearMessages:(NSString *) accountNo;
 -(void) deleteMessageHistory:(NSNumber *) messageNo;
+-(void) updateMessageHistory:(NSNumber*) messageNo withText:(NSString*) newText;
+-(NSNumber* _Nullable) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from andAccount:(NSString*) accountNo;
+
+-(BOOL) checkLMCEligible:(NSNumber* _Nullable) historyID from:(NSString* _Nullable) from;
 
 #pragma mark - message history
 

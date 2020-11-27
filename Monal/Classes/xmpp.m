@@ -2356,12 +2356,6 @@ NSString *const kContact=@"contact";
     //mam query will be done in MLIQProcessor once the disco result returns
 }
 
--(void) publishStatusMessage:(NSString*) message
-{
-    self.statusMessage = message;
-    [self sendPresence];
-}
-
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
 {
     XMPPIQ* iqBlocked= [[XMPPIQ alloc] initWithType:kiqSetType];
@@ -3321,6 +3315,21 @@ NSString *const kContact=@"contact";
             } andHandler:$newHandler(MLPubSubProcessor, avatarDataPublished, $ID(imageHash), $ID(imageData))];
         }
     });
+}
+
+-(void) publishStatusMessage:(NSString*) message
+{
+    self.statusMessage = message;
+    [self sendPresence];
+}
+
+-(void) sendLMCForId:(NSString*) messageid withNewBody:(NSString*) newBody to:(NSString*) to
+{
+    XMPPMessage* LMCNode = [[XMPPMessage alloc] init];
+    LMCNode.attributes[@"type"] = kMessageChatType;
+    LMCNode.attributes[@"to"] = to;
+    [LMCNode setLMCFor:messageid withNewBody:newBody];
+    [self send:LMCNode];
 }
 
 @end

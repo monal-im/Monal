@@ -72,6 +72,7 @@ enum activeChatsControllerSections {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalRefresh object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalDeletedMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageSent:) name:kMLMessageSentToContact object:nil];
     
     [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell"
@@ -84,9 +85,9 @@ enum activeChatsControllerSections {
 #if !TARGET_OS_MACCATALYST
         self.splitViewController.primaryBackgroundStyle = UISplitViewControllerBackgroundStyleSidebar;
 #endif
-        self.settingsButton.image = [UIImage systemImageNamed:@"person.crop.circle"];
+        self.settingsButton.image = [UIImage systemImageNamed:@"gearshape"];
         self.addButton.image = [UIImage systemImageNamed:@"plus"];
-        self.composeButton.image = [UIImage systemImageNamed:@"square.and.pencil"];
+        self.composeButton.image = [UIImage systemImageNamed:@"person.crop.circle"];
     }
     else
     {

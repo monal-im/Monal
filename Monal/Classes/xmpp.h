@@ -247,6 +247,7 @@ Decline a call request
 -(void) sendDisplayMarkerForId:(NSString*) messageid to:(NSString*) to;
 -(void) publishAvatar:(UIImage*) image;
 -(void) publishStatusMessage:(NSString*) message;
+-(void) sendLMCForId:(NSString*) messageid withNewBody:(NSString*) newBody to:(NSString*) to;
 
 +(NSDictionary*) invalidateState:(NSDictionary*) dic;
 

@@ -1134,6 +1134,33 @@ static NSDateFormatter* dbFormatter;
     [self.db executeNonQuery:@"DELETE FROM message_history WHERE message_history_id=?;" andArguments:@[messageNo]];
 }
 
+-(void) updateMessageHistory:(NSNumber*) messageNo withText:(NSString*) newText
+{
+    [self.db executeNonQuery:@"UPDATE message_history SET message=? WHERE message_history_id=?;" andArguments:@[newText, messageNo]];
+}
+
+-(NSNumber*) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from andAccount:(NSString*) accountNo
+{
+    return [self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE messageid=? AND message_from=? AND account_id=?;" andArguments:@[messageid, from, accountNo]];
+}
+
+-(BOOL) checkLMCEligible:(NSNumber*) historyID from:(NSString*) from
+{
+    MLMessage* msg = [self messageForHistoryID:historyID];
+    if(from == nil || msg == nil)
+        return NO;
+    NSNumber* numberOfMessagesComingAfterThis = [self.db executeScalar:@"SELECT COUNT(message_history_id) FROM message_history WHERE message_history_id>? AND message_from=? AND account_id=?;" andArguments:@[historyID, msg.from, msg.accountId]];
+    //only allow LMC for the 2 newest messages of this contact (or of us) that were received/sent in the last 2 minutes
+    if(
+        numberOfMessagesComingAfterThis.intValue < 2 &&
+        [msg.messageType isEqualToString:kMessageTypeText] &&
+        [msg.from isEqualToString:from] &&
+        ([NSDate date].timeIntervalSince1970 - msg.timestamp.timeIntervalSince1970) < 120
+    )
+        return YES;
+    return NO;
+}
+
 -(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo
 {
     NSString* accountJid = [self jidOfAccount:accountNo];

@@ -39,7 +39,7 @@ NSString* const kMessageHeadlineType=@"headline";
     if([self check:@"{urn:xmpp:sid:0}origin-id"])       //modify existing origin id
         ((MLXMLNode*)[self findFirst:@"{urn:xmpp:sid:0}origin-id"]).attributes[@"id"] = idval;
     else
-        [self addChild:[[MLXMLNode alloc] initWithElement:@"origin-id" andNamespace:@"urn:xmpp:sid:0" withAttributes:@{@"id":idval} andChildren:@[] andData:nil]];
+        [self addChild:[[MLXMLNode alloc] initWithElement:@"origin-id" andNamespace:@"urn:xmpp:sid:0" withAttributes:@{@"id":idval} andChildren:@[] andData:@"extra added"]];
 }
 
 -(NSString*) xmppId
@@ -58,6 +58,12 @@ NSString* const kMessageHeadlineType=@"headline";
         [[MLXMLNode alloc] initWithElement:@"url" withAttributes:@{} andChildren:@[] andData:link]
     ] andData:nil]];
     [self setBody:link];    //http filetransfers must have a message body equal to the oob link to be recognized as filetransfer
+}
+
+-(void) setLMCFor:(NSString*) id withNewBody:(NSString*) newBody
+{
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"replace" andNamespace:@"urn:xmpp:message-correct:0" withAttributes:@{@"id": id} andChildren:@[] andData:nil]];
+    [self setBody:newBody];
 }
 
 /**

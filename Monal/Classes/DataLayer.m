@@ -1149,13 +1149,14 @@ static NSDateFormatter* dbFormatter;
     MLMessage* msg = [self messageForHistoryID:historyID];
     if(from == nil || msg == nil)
         return NO;
-    NSNumber* numberOfMessagesComingAfterThis = [self.db executeScalar:@"SELECT COUNT(message_history_id) FROM message_history WHERE message_history_id>? AND message_from=? AND account_id=?;" andArguments:@[historyID, msg.from, msg.accountId]];
-    //only allow LMC for the 2 newest messages of this contact (or of us) that were received/sent in the last 2 minutes
+    NSNumber* numberOfMessagesComingAfterThis = [self.db executeScalar:@"SELECT COUNT(message_history_id) FROM message_history WHERE message_history_id>? AND message_from=? AND message_to=? AND account_id=?;" andArguments:@[historyID, msg.from, msg.to, msg.accountId]];
+    //only allow LMC for the 3 newest messages of this contact (or of us)
     if(
-        numberOfMessagesComingAfterThis.intValue < 2 &&
-        [msg.messageType isEqualToString:kMessageTypeText] &&
-        [msg.from isEqualToString:from] &&
-        ([NSDate date].timeIntervalSince1970 - msg.timestamp.timeIntervalSince1970) < 120
+        numberOfMessagesComingAfterThis.intValue < 3
+        && [msg.messageType isEqualToString:kMessageTypeText]
+        && [msg.from isEqualToString:from]
+        //not needed according to holger
+        //&& ([NSDate date].timeIntervalSince1970 - msg.timestamp.timeIntervalSince1970) < 120
     )
         return YES;
     return NO;

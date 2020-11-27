@@ -10,6 +10,16 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
+		<!--Privacy Settings-->
+        <scene sceneID="B5W-Me-AC8">
+            <objects>
+                <viewControllerPlaceholder storyboardName="Settings" referencedIdentifier="PrivacySettings" id="cmS-oG-cv8" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Item" id="iLC-4b-aD8"/>
+                </viewControllerPlaceholder>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="xDM-mH-2u8" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2876" y="-1307"/>
+        </scene>
         <!--Login View Controller-->
         <scene sceneID="ufC-wZ-h7g">
             <objects>
@@ -411,6 +421,7 @@
                         <outlet property="scrollView" destination="tT2-oH-OMx" id="BXf-Ce-GoE"/>
                         <outlet property="view" destination="EY5-se-S4y" id="AoK-S7-YuA"/>
                         <segue destination="iOy-Fr-h6X" kind="show" identifier="showSuccess" id="2Ua-AK-nzQ"/>
+						<segue destination="cmS-oG-cv8" kind="presentation" identifier="showPrivacySettings" id="zkg-JY-Ot8"/>
                     </connections>
                 </viewController>
                 <tapGestureRecognizer id="Hxy-TB-Vmi">

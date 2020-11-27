@@ -151,6 +151,11 @@
         UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Success!", @"") message:NSLocalizedString(@"You are set up and connected.", @"") preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Start Using Monal", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [self dismissViewControllerAnimated:YES completion:nil];
+            
+            if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {
+                [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
+                return;
+            }
         }]];
         [self presentViewController:alert animated:YES completion:nil];
     });

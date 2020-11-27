@@ -231,7 +231,7 @@ static NSMutableDictionary* _typingNotifications;
                 }
                 
                 MLMessage* message = [[DataLayer sharedInstance] messageForHistoryID:historyId];
-                if(message != nil)
+                if(message != nil && historyId != nil)      //check historyId to make static analyzer happy
                 {
                     if(
                         [[HelperTools defaultsDB] boolForKey:@"SendReceivedMarkers"] &&

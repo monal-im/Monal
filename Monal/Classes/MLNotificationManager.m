@@ -13,6 +13,7 @@
 #import "MLXEPSlashMeHandler.h"
 #import "MLConstants.h"
 #import "xmpp.h"
+#import "MLFiletransfer.h"
 
 @import UserNotifications;
 @import CoreServices;
@@ -223,26 +224,29 @@
 
         if([message.messageType isEqualToString:kMessageTypeFiletransfer])
         {
-            if([message.filetransferMimeType hasPrefix:@"image/"])
+            NSDictionary* info = [MLFiletransfer getFileInfoForMessage:message];
+            if(info && [info[@"mimeType"] hasPrefix:@"image/"])
             {
-                [[MLImageManager sharedInstance] imageURLForAttachmentLink:message.messageText withCompletion:^(NSURL * _Nullable url) {
-                    if(url)
-                    {
-                        NSError *error;
-                        UNNotificationAttachment* attachment = [UNNotificationAttachment attachmentWithIdentifier:[[NSUUID UUID] UUIDString] URL:url options:@{UNNotificationAttachmentOptionsTypeHintKey:(NSString*) kUTTypePNG} error:&error];
-                        if(attachment)
-                            content.attachments = @[attachment];
-                        if(error)
-                            DDLogError(@"Error %@", error);
-                    }
+                NSString* typeHint = (NSString*)kUTTypePNG;
+                if([info[@"mimeType"] isEqualToString:@"image/jpeg"])
+                    typeHint = (NSString*)kUTTypeJPEG;
+                if([info[@"mimeType"] isEqualToString:@"image/png"])
+                    typeHint = (NSString*)kUTTypePNG;
+                if([info[@"mimeType"] isEqualToString:@"image/png"])
+                    typeHint = (NSString*)kUTTypeGIF;
+                NSError *error;
+                UNNotificationAttachment* attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
+                if(attachment)
+                    content.attachments = @[attachment];
+                if(error)
+                    DDLogError(@"Error %@", error);
 
-                    if(!content.attachments)
-                        content.body = NSLocalizedString(@"Sent an Image 📷", @"");
-                    else
-                        content.body = @"";
+                if(!content.attachments)
+                    content.body = NSLocalizedString(@"Sent an Image 📷", @"");
+                else
+                    content.body = @"";
 
-                    [self publishNotificationContent:content withID:idval];
-                }];
+                [self publishNotificationContent:content withID:idval];
             }
             else        //TODO JIM: add support for more mime types
             {

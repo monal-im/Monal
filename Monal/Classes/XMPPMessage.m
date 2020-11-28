@@ -43,7 +43,7 @@ NSString* const kMessageHeadlineType = @"headline";
 
 -(NSString*) xmppId
 {
-    return [self.attributes objectForKey:@"id"];
+    return self.attributes[@"id"];
 }
 
 -(void) setBody:(NSString*) messageBody

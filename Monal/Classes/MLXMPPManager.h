@@ -133,23 +133,6 @@ Sends a message to a specified contact in account. Calls completion handler on s
 withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion;
 -(void) sendChatState:(BOOL) isTyping fromAccount:(NSString*) accountNo toJid:(NSString*) jid;
 
-
-/**
- uploads the selected png image Data as [uuid].jpg
- */
--(void)httpUploadJpegData:(NSData*) fileData   toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;
-
-/**
- opens file and attempts to upload it
- */
--(void)httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;
-
-/**
-Attempts to upload a file to the  HTTP upload service
- */
--(void)httpUploadData:(NSData*) data withFilename:(NSString*) filename andType:(NSString*) contentType  toContact:(NSString*) contact onAccount:(NSString*) accountNo withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;
-
-
 #pragma mark XMPP settings
 
 @property (nonatomic, strong, readonly) NSMutableArray* connectedXMPP;

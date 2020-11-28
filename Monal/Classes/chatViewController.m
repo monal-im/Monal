@@ -30,6 +30,7 @@
 #import "MLChatInputContainer.h"
 #import "MLXEPSlashMeHandler.h"
 #import "MLSearchViewController.h"
+#import "MLFiletransfer.h"
 
 @import QuartzCore;
 @import MobileCoreServices;
@@ -186,8 +187,8 @@ enum msgSentState {
     //UTI @"public.data" for everything
     NSString *images = (NSString *)kUTTypeImage;
     self.imagePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images] inMode:UIDocumentPickerModeImport];
-    self.imagePicker.allowsMultipleSelection=NO;
-    self.imagePicker.delegate=self;
+    self.mediaPicker.allowsMultipleSelection=NO;
+    self.mediaPicker.delegate=self;
 #endif
 
     // Set max height of the chatInput (The chat should be still readable while the HW-Keyboard is active
@@ -807,7 +808,7 @@ enum msgSentState {
 
     if(!messageID)
     {
-        [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID messageType:messageType];
+        [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID messageType:messageType mimeType:nil size:nil];
         [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:NO messageId:newMessageID
                             withCompletionHandler:nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
@@ -923,13 +924,36 @@ enum msgSentState {
     return;
 }
 
-- (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls
+- (void) documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls
 {
-    NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] init];
-    [coordinator coordinateReadingItemAtURL:urls.firstObject options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
-        NSData *data =[NSData dataWithContentsOfURL:newURL];
-        [self uploadData:data];
-    }];
+    if(urls.count == 0)
+        return;
+    
+    [self showUploadHUD];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        __block int filesToUpload = (int)urls.count;
+        NSFileCoordinator* coordinator = [[NSFileCoordinator alloc] init];
+        for(NSURL* url in urls)
+        {
+            [coordinator coordinateReadingItemAtURL:url options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
+                [MLFiletransfer uploadFile:newURL onAccount:self.xmppAccount withEncryption:self.encryptChat andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self showPotentialError:error];
+                        if(!error)
+                        {
+                            filesToUpload--;
+                            if(filesToUpload == 0)
+                                [self hideUploadHUD];
+                            
+                            NSString* newMessageID = [[NSUUID UUID] UUIDString];
+                            [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
+                            [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:YES messageId:newMessageID withCompletionHandler:nil];
+                        }
+                    });
+                }];
+            }];
+        }
+    });
 }
 
 #pragma mark  - location delegate
@@ -1029,21 +1053,22 @@ enum msgSentState {
 #if TARGET_OS_MACCATALYST
         [self attachfile:sender];
 #else
-        UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
-        imagePicker.delegate =self;
+        UIImagePickerController* mediaPicker = [[UIImagePickerController alloc] init];
+        mediaPicker.delegate = self;
 
         UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
-            [self presentViewController:imagePicker animated:YES completion:nil];
+            mediaPicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+            [self presentViewController:mediaPicker animated:YES completion:nil];
         }];
 
         UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+            mediaPicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+            mediaPicker.allowsEditing = YES;
             [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
                 if(granted)
                 {
                     dispatch_async(dispatch_get_main_queue(), ^{
-                        [self presentViewController:imagePicker animated:YES completion:nil];
+                        [self presentViewController:mediaPicker animated:YES completion:nil];
                     });
                 }
             }];
@@ -1094,110 +1119,28 @@ enum msgSentState {
     [self presentViewController:actionControll animated:YES completion:nil];
 }
 
--(void) uploadData:(NSData*) data
-{
-    if(!self.uploadHUD) {
-        self.uploadHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-        self.uploadHUD.removeFromSuperViewOnHide = YES;
-        self.uploadHUD.label.text = NSLocalizedString(@"Uploading", @"");
-        self.uploadHUD.detailsLabel.text = NSLocalizedString(@"Uploading file to server", @"");
-    } else {
-        self.uploadHUD.hidden = NO;
-    }
-
-    if(data == nil)
-    {
-        DDLogError(@"Could not encrypt attachment (no data)");
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Image encryption error", @"") message:[NSString stringWithFormat:@"Error while encrypting the file (no data)"] preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            [alert dismissViewControllerAnimated:YES completion:nil];
-        }]];
-        [self presentViewController:alert animated:YES completion:nil];
-        return;
-    }
-    
-    void (^uploadIt)(NSData*, MLEncryptedPayload*) = ^(NSData* dataToUpload, MLEncryptedPayload* encrypted) {
-        [[MLXMPPManager sharedInstance] httpUploadJpegData:dataToUpload toContact:self.contact.contactJid onAccount:self.contact.accountId withCompletionHandler:^(NSString *url, NSError *error) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if(url)
-                {
-                    NSString* newMessageID = [[NSUUID UUID] UUIDString];
-                    NSString* urlToPass = url;
-                    if(encrypted != nil)
-                    {
-                        NSURLComponents* urlComponents = [NSURLComponents componentsWithURL:[NSURL URLWithString:urlToPass] resolvingAgainstBaseURL:NO];
-                        if(urlComponents) {
-                            urlComponents.scheme = @"aesgcm";
-                            urlComponents.fragment = [NSString stringWithFormat:@"%@%@",
-                                                    [HelperTools hexadecimalString:encrypted.iv],
-                                                    [HelperTools hexadecimalString:[encrypted.key subdataWithRange:NSMakeRange(0, 32)]]];       //extract real aes key without authtag (32 bytes = 256bit)
-                            urlToPass = urlComponents.string;
-                        } else  {
-                            DDLogError(@"Could not parse URL for conversion to aesgcm:");
-                            return;
-                        }
-                    }
-                    [[MLImageManager sharedInstance] saveImageData:data forLink:urlToPass];
-                    
-                    [self addMessageto:self.contact.contactJid withMessage:urlToPass andId:newMessageID messageType:kMessageTypeFiletransfer];
-                    [[MLXMPPManager sharedInstance] sendMessage:urlToPass toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:YES messageId:newMessageID withCompletionHandler:nil];
-                    self.uploadHUD.hidden = YES;
-                }
-                else
-                {
-                    self.uploadHUD.hidden = YES;
-                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"There was an error uploading the file to the server", @"") message:[NSString stringWithFormat:@"%@", error.localizedDescription] preferredStyle:UIAlertControllerStyleAlert];
-                    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                        [alert dismissViewControllerAnimated:YES completion:nil];
-                    }]];
-                    [self presentViewController:alert animated:YES completion:nil];
-                }
-            });
-        }];
-    };
-    
-    if(self.encryptChat) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            MLEncryptedPayload* encrypted = [AESGcm encrypt:data keySize:32];
-            if(encrypted)
-            {
-                NSMutableData* mutableBody = [encrypted.body mutableCopy];
-                [mutableBody appendData:encrypted.authTag];
-                uploadIt(mutableBody, encrypted);
-            }
-            else
-            {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    DDLogError(@"Could not encrypt attachment (encrypt returned nil)");
-                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Image encryption error", @"") message:[NSString stringWithFormat:@"Error while encrypting the file (encrypt returned nil)"] preferredStyle:UIAlertControllerStyleAlert];
-                    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                        [alert dismissViewControllerAnimated:YES completion:nil];
-                    }]];
-                    [self presentViewController:alert animated:YES completion:nil];
-                });
-            }
-        });
-    }
-    else
-        uploadIt(data, nil);
-}
-
-- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *, id> *)info
+-(void) imagePickerController:(UIImagePickerController*) picker didFinishPickingMediaWithInfo:(NSDictionary<NSString*, id>*) info
 {
     [self dismissViewControllerAnimated:YES completion:nil];
-    
-    NSString *mediaType = info[UIImagePickerControllerMediaType];
-    if([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
-        UIImage *selectedImage = info[UIImagePickerControllerEditedImage];
-        if(!selectedImage) selectedImage = info[UIImagePickerControllerOriginalImage];
-        NSData *jpgData=  UIImageJPEGRepresentation(selectedImage, 0.5f);
-        if(jpgData)
-        {
-            [self uploadData:jpgData];
-        }
-        
-    }
-    
+
+    UIImage* selectedImage = info[UIImagePickerControllerEditedImage];
+    if(!selectedImage)
+        selectedImage = info[UIImagePickerControllerOriginalImage];
+
+    [self showUploadHUD];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [MLFiletransfer uploadUIImage:selectedImage onAccount:self.xmppAccount withEncryption:self.encryptChat andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self showPotentialError:error];
+                if(!error)
+                    [self hideUploadHUD];
+                
+                NSString* newMessageID = [[NSUUID UUID] UUIDString];
+                [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
+                [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:YES messageId:newMessageID withCompletionHandler:nil];
+            });
+        }];
+    });
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
@@ -1215,15 +1158,15 @@ enum msgSentState {
 }
 
 //only for messages going out
--(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId messageType:(NSString*) messageType
+-(NSNumber*) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId messageType:(NSString*) messageType mimeType:(NSString*) mimeType size:(NSNumber*) size
 {
     if(!self.jid || !message)
     {
         DDLogError(@"not ready to send messages");
-        return;
+        return nil;
     }
     
-    NSNumber* messageDBId = [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:self.contact.accountId withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat messageType:messageType];
+    NSNumber* messageDBId = [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:self.contact.accountId withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat messageType:messageType mimeType:mimeType size:size];
     if(messageDBId)
     {
         DDLogVerbose(@"added message");
@@ -1231,7 +1174,7 @@ enum msgSentState {
         if(![msgList count])
         {
             DDLogError(@"Could not find msg for history ID %@!", messageDBId);
-            return;
+            return nil;
         }
         MLMessage* messageObj = msgList[0];
         
@@ -1263,7 +1206,8 @@ enum msgSentState {
         }
     }
     else
-        DDLogVerbose(@"failed to add message");
+        DDLogError(@"failed to add message to history db");
+    return messageDBId;
 }
 
 -(void) presentMucInvite:(NSNotification *)notification
@@ -1685,21 +1629,26 @@ enum msgSentState {
     else if([row.messageType isEqualToString:kMessageTypeFiletransfer])
     {
         DDLogVerbose(@"got filetransfer chat cell: %@ (%@)", row.filetransferMimeType, row.filetransferSize);
-        if([row.filetransferMimeType hasPrefix:@"image/"])
+        NSDictionary* info = [MLFiletransfer getFileInfoForMessage:row];
+        if(info && [info[@"mimeType"] hasPrefix:@"image/"])
         {
-            MLChatImageCell* imageCell = (MLChatImageCell *) [self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable: tableView];
+            MLChatImageCell* imageCell = (MLChatImageCell *) [self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable:tableView];
 
-            if(![imageCell.link isEqualToString:messageText]){
-                imageCell.link = messageText;
+            if(imageCell.msg != row)
+            {
+                imageCell.msg = row;
                 imageCell.thumbnailImage.image = nil;
                 imageCell.loading = NO;
-                [imageCell loadImageWithCompletion:^{}];
+                [imageCell loadImage];
             }
             cell = imageCell;
         }
         else
         {
             //TODO JIM: add handling for some special mime types and default handling for general files (e.g. download/open button cell)
+            //TODO JIM: files not already downloaded have row.filetransferMimeType and row.filetransferSize to non-nil values,
+            //TODO JIM: files not checked with [MLFiletransfer checkMimeTypeAndSizeForHistoryID:] will have nil values for
+            //TODO JIM: row.filetransferMimeType and row.filetransferSize and need to display a checking button
             
             //this is just a dummy to display something (the filetransfer url)
             cell = (MLChatCell*)[self messageTableCellWithIdentifier:@"text" andInbound:inDirection fromTable: tableView];
@@ -1721,8 +1670,7 @@ enum msgSentState {
         {
             toreturn.imageUrl = row.previewImage;
             toreturn.messageTitle.text = row.previewText;
-            [toreturn loadImageWithCompletion:^{
-            }];
+            [toreturn loadImageWithCompletion:^{}];
         }
         else
         {
@@ -2400,6 +2348,37 @@ enum msgSentState {
 {
     if(self.editingCallback != nil)
         self.editingCallback(nil);      //dismiss swipe action
+}
+
+-(void) showUploadHUD
+{
+    if(!self.uploadHUD)
+    {
+        self.uploadHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        self.uploadHUD.removeFromSuperViewOnHide = YES;
+        self.uploadHUD.label.text = NSLocalizedString(@"Uploading", @"");
+        self.uploadHUD.detailsLabel.text = NSLocalizedString(@"Uploading file to server", @"");
+    }
+    else
+        self.uploadHUD.hidden = NO;
+}
+
+-(void) hideUploadHUD
+{
+    self.uploadHUD.hidden = YES;
+}
+
+-(void) showPotentialError:(NSError*) error
+{
+    if(error)
+    {
+        DDLogError(@"Could not send attachment: %@", error);
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not upload file", @"") message:[NSString stringWithFormat:@"%@", error.localizedDescription] preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+    }
 }
 
 @end

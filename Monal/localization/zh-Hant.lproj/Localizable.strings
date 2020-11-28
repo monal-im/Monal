@@ -395,3 +395,12 @@
 "Delete Locally" = "Delete Locally";
 /* MLLoginView: QR-Code Button iOS12 only */
 "QR" = "QR";
+"Could not upload file" = "Could not upload file";
+"Download error" = "Download error";
+"Failed to copy downloaded file into cache directory" = "Failed to copy downloaded file into cache directory";
+"Failed to decode download link" = "Failed to decode download link";
+"Failed to decode encrypted link" = "Failed to decode encrypted link";
+"Failed to encrypt file" = "Failed to encrypt file";
+"Failed to parse URL returned by HTTP upload server" = "Failed to parse URL returned by HTTP upload server";
+"Failed to uploaded file to file cache directory" = "Failed to uploaded file to file cache directory";
+"Failed to write decrypted download into cache directory" = "Failed to write decrypted download into cache directory";

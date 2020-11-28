@@ -487,6 +487,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                        withId:msgid
                     encrypted:encrypted
                   messageType:messageType
+                     mimeType:nil
+                         size:nil
     ];
     // Send message
     if(messageDBId != nil)
@@ -523,54 +525,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     if(account)
         [account sendChatState:isTyping toJid:jid];
 }
-
-
-#pragma  mark - HTTP upload
-
--(void) httpUploadJpegData:(NSData*) fileData   toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion{
-
-    NSString *fileName = [NSString stringWithFormat:@"%@.jpg",[NSUUID UUID].UUIDString];
-
-    //get file type
-    CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)@"jpg", NULL);
-    NSString *mimeType = (__bridge_transfer NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
-    CFRelease(UTI);
-    [self httpUploadData:fileData withFilename:fileName andType:mimeType toContact:contact onAccount:accountNo withCompletionHandler:completion];
-}
-
--(void) httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion{
-
-    //get file name
-    NSString *fileName =  fileURL.pathComponents.lastObject;
-
-    //get file type
-    CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)fileURL.pathExtension, NULL);
-    NSString *mimeType = (__bridge NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
-    CFRelease(UTI);
-    //get data
-    NSData *fileData = [[NSData alloc] initWithContentsOfURL:fileURL];
-
-    [self httpUploadData:fileData withFilename:fileName andType:mimeType toContact:contact onAccount:accountNo withCompletionHandler:completion];
-}
-
-
--(void)httpUploadData:(NSData *)data withFilename:(NSString*) filename andType:(NSString*)contentType  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion
-{
-    if(!data || !filename || !contentType || !contact || !accountNo)
-    {
-        NSError *error = [NSError errorWithDomain:@"Empty" code:0 userInfo:@{}];
-        if(completion) completion(nil, error);
-        return;
-    }
-
-    xmpp* account=[self getConnectedAccountForID:accountNo];
-    if(account)
-    {
-        NSDictionary *params =@{kData:data,kFileName:filename, kContentType:contentType};
-        [account requestHTTPSlotWithParams:params andCompletion:completion];
-    }
-}
-
 
 #pragma mark - getting details
 

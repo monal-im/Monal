@@ -49,7 +49,7 @@ void logException(NSException* exception)
         [fileManager setAttributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} ofItemAtPath:file error:&error];
         if(error)
         {
-            DDLogError(@"Error configuring database file protection level for: %@", file);
+            DDLogError(@"Error configuring file protection level for: %@", file);
             @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
         }
         else

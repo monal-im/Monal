@@ -8,10 +8,17 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class MLMessage;
+@class xmpp;
+
 @interface MLFiletransfer : NSObject
 
-+(void) checkMimeTypeAndSizeForHistoryID:(NSNumber*) historyId withURL:(NSString*) url;
-+(void) downloadFileForHistoryID:(NSNumber*) historyId withURL:(NSString*) url;
++(void) checkMimeTypeAndSizeForHistoryID:(NSNumber*) historyId;
++(void) downloadFileForHistoryID:(NSNumber*) historyId;
++(NSDictionary* _Nullable) getFileInfoForMessage:(MLMessage* _Nullable) msg;
++(void) deleteFileForMessage:(MLMessage* _Nullable) msg;
++(void) uploadFile:(NSURL*) fileUrl onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable)) completion;
++(void) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable)) completion;
 
 @end
 

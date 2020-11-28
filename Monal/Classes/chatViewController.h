@@ -69,7 +69,6 @@
  Receives the new message notice and will update if it is this user. 
  */
 -(void) handleNewMessage:(NSNotification *)notification;
--(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId messageType:(NSString*) messageType;
 
 -(void) retry:(id) sender;
 

@@ -8,70 +8,66 @@
 
 #import "MLChatImageCell.h"
 #import "MLImageManager.h"
-@import QuartzCore; 
+#import "MLFiletransfer.h"
+#import "MLMessage.h"
+@import QuartzCore;
+@import UIKit;
 
 @implementation MLChatImageCell
 
-- (void)awakeFromNib {
+-(void)awakeFromNib
+{
     [super awakeFromNib];
+    
     // Initialization code
-    self.thumbnailImage.layer.cornerRadius=15.0f;
-    self.thumbnailImage.layer.masksToBounds=YES;
+    self.thumbnailImage.layer.cornerRadius = 15.0f;
+    self.thumbnailImage.layer.masksToBounds = YES;
 }
 
--(void) loadImageWithCompletion:(void (^)(void))completion
+-(void) loadImage
 {
-    if(self.link && self.thumbnailImage.image==nil && !self.loading)
+    if(self.msg.messageText && self.thumbnailImage.image == nil && !self.loading)
     {
         [self.spinner startAnimating];
         self.loading=YES;
-        NSString *currentLink = self.link;
-       [[MLImageManager sharedInstance] imageForAttachmentLink:self.link withCompletion:^(NSData * _Nullable data) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                if([currentLink isEqualToString:self.link]){
-                    if(!data) {
-                        self.thumbnailImage.image=nil;
-                    }
-                    else if(!self.thumbnailImage.image) {
-                        UIImage *image= [UIImage imageWithData:data];
-                        [self.thumbnailImage setImage:image];
-                        if (image.size.height>image.size.width) {
-                            self.imageHeight.constant = 360;
-                        }
-                    }
-                    self.loading=NO;
-                     [self.spinner stopAnimating];
-                    if(completion) completion();
-                }
-                
-            });
-        }];
-        
-    }
-    else  {
-        
+        NSString* currentLink = self.msg.messageText;
+        NSDictionary* info = [MLFiletransfer getFileInfoForMessage:self.msg];
+        if(info && [info[@"mimeType"] hasPrefix:@"image/"])
+        {
+            if([currentLink isEqualToString:self.msg.messageText])
+            {
+                UIImage* image = [[UIImage alloc] initWithContentsOfFile:info[@"cacheFile"]];
+                [self.thumbnailImage setImage:image];
+                if(image && image.size.height > image.size.width)
+                    self.imageHeight.constant = 360;
+                self.loading = NO;
+                [self.spinner stopAnimating];
+            }
+        }
     }
 }
 
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+-(void) setSelected:(BOOL) selected animated:(BOOL) animated
+{
     [super setSelected:selected animated:animated];
-
     // Configure the view for the selected state
 }
 
--(BOOL) canPerformAction:(SEL)action withSender:(id)sender
+-(BOOL) canPerformAction:(SEL) action withSender:(id) sender
 {
-    return (action == @selector(copy:)) ;
+    return (action == @selector(copy:));
 }
 
--(void) copy:(id)sender {
-    UIPasteboard *pboard = [UIPasteboard generalPasteboard];
+-(void) copy:(id) sender
+{
+    UIPasteboard* pboard = [UIPasteboard generalPasteboard];
     pboard.image = self.thumbnailImage.image; 
 }
 
--(void)prepareForReuse{
+-(void) prepareForReuse
+{
     [super prepareForReuse];
-    self.imageHeight.constant=200;
+    self.imageHeight.constant = 200;
     [self.spinner stopAnimating];
 }
 

@@ -10,15 +10,16 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-		<!--Privacy Settings-->
+        <!--PrivacySettings-->
         <scene sceneID="B5W-Me-AC8">
             <objects>
                 <viewControllerPlaceholder storyboardName="Settings" referencedIdentifier="PrivacySettings" id="cmS-oG-cv8" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Item" id="iLC-4b-aD8"/>
+                    <navigationItem key="navigationItem" id="RMG-mT-X06"/>
                 </viewControllerPlaceholder>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xDM-mH-2u8" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-2876" y="-1307"/>
+            <point key="canvasLocation" x="-857" y="-2059"/>
         </scene>
         <!--Login View Controller-->
         <scene sceneID="ufC-wZ-h7g">
@@ -236,6 +237,7 @@
                         <outlet property="scrollView" destination="uEV-8J-3dB" id="yei-N7-QKD"/>
                         <outlet property="topImage" destination="dBi-E0-U5p" id="3rc-PX-yIK"/>
                         <outlet property="view" destination="mRc-C7-WOT" id="fsO-Sp-UXQ"/>
+                        <segue destination="cmS-oG-cv8" kind="show" identifier="showPrivacySettings" id="6jY-Zs-guy"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
@@ -421,7 +423,7 @@
                         <outlet property="scrollView" destination="tT2-oH-OMx" id="BXf-Ce-GoE"/>
                         <outlet property="view" destination="EY5-se-S4y" id="AoK-S7-YuA"/>
                         <segue destination="iOy-Fr-h6X" kind="show" identifier="showSuccess" id="2Ua-AK-nzQ"/>
-						<segue destination="cmS-oG-cv8" kind="presentation" identifier="showPrivacySettings" id="zkg-JY-Ot8"/>
+                        <segue destination="cmS-oG-cv8" kind="presentation" identifier="showPrivacySettings" id="zkg-JY-Ot8"/>
                     </connections>
                 </viewController>
                 <tapGestureRecognizer id="Hxy-TB-Vmi">
@@ -558,7 +560,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="r0k-Oh-I2R" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-857" y="-1856"/>
+            <point key="canvasLocation" x="-2179" y="-1781"/>
         </scene>
     </scenes>
     <designables>
@@ -578,6 +580,9 @@
             <size key="intrinsicContentSize" width="89" height="42"/>
         </designable>
     </designables>
+    <inferredMetricsTieBreakers>
+        <segue reference="6jY-Zs-guy"/>
+    </inferredMetricsTieBreakers>
     <resources>
         <image name="AppLogo" width="341.33334350585938" height="341.33334350585938"/>
         <image name="qrcode" catalog="system" width="128" height="114"/>

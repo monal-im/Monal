@@ -248,16 +248,16 @@ enum activeChatsControllerSections {
 -(void) viewWillAppear:(BOOL) animated
 {
     [super viewWillAppear:animated];
+    // load contacts
     self.lastSelectedUser = nil;
+    if(self.unpinnedContacts.count == 0) {
+        [self refreshDisplay];
+    }
 }
 
 -(void) viewDidAppear:(BOOL) animated
 {
     [super viewDidAppear:animated];
-    if(self.unpinnedContacts.count == 0) {
-        [self refreshDisplay];
-    }
-  
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenIntro"]) {
         [self performSegueWithIdentifier:@"showIntro" sender:self];
         return;

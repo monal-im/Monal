@@ -390,3 +390,5 @@
 "📁 A File" = "📁 A File";
 "Edit" = "Edit";
 "Delete Locally" = "Delete Locally";
+/* MLLoginView: QR-Code Button iOS12 only */
+"QR" = "QR";

@@ -234,6 +234,7 @@
                         <outlet property="jid" destination="ktr-DL-MYt" id="tdB-on-dSf"/>
                         <outlet property="loginButton" destination="Gth-vl-n15" id="5vq-1I-hkg"/>
                         <outlet property="password" destination="Qrh-pK-XJH" id="44m-vv-5Xb"/>
+                        <outlet property="qrScanButton" destination="TZB-oT-VmG" id="T61-Rl-X0r"/>
                         <outlet property="scrollView" destination="uEV-8J-3dB" id="yei-N7-QKD"/>
                         <outlet property="topImage" destination="dBi-E0-U5p" id="3rc-PX-yIK"/>
                         <outlet property="view" destination="mRc-C7-WOT" id="fsO-Sp-UXQ"/>

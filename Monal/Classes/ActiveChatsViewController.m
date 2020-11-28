@@ -303,7 +303,20 @@ enum activeChatsControllerSections {
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     DDLogInfo(@"Got segue identifier '%@'", segue.identifier);
-    if([segue.identifier isEqualToString:@"showConversation"])
+    if([segue.identifier isEqualToString:@"showIntro"])
+    {
+        // needed for >= ios13
+        MLWelcomeViewController* welcome = (MLWelcomeViewController *) segue.destinationViewController;
+        welcome.completion = ^(){
+            if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
+            {
+                if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"]) {
+                    [self performSegueWithIdentifier:@"showLogin" sender:self];
+                }
+            }
+        };
+    }
+    else if([segue.identifier isEqualToString:@"showConversation"])
     {
         UINavigationController *nav = segue.destinationViewController;
         chatViewController *chatVC = (chatViewController *)nav.topViewController;

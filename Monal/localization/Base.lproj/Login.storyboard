@@ -158,10 +158,10 @@
                                                     <constraint firstItem="UsC-wr-MFj" firstAttribute="leading" secondItem="LhW-wJ-Trm" secondAttribute="leading" constant="32" id="nOK-63-thD"/>
                                                 </constraints>
                                             </view>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QY7-bW-ufD">
-                                                <rect key="frame" x="62" y="528.5" width="196" height="30"/>
+                                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QY7-bW-ufD">
+                                                <rect key="frame" x="8" y="529" width="304" height="30"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="44" id="MVI-DD-ixP"/>
+                                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="200" id="MVI-DD-ixP"/>
                                                     <constraint firstAttribute="height" constant="30" id="duv-oS-3U1"/>
                                                 </constraints>
                                                 <fontDescription key="fontDescription" type="system" pointSize="19"/>

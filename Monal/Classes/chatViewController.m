@@ -2026,6 +2026,8 @@ enum msgSentState {
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
                 return completionHandler(YES);
             }
+            else
+                [self.chatInput setText:@""];
             return completionHandler(NO);
         };
     }];

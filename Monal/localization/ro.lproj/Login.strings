@@ -36,8 +36,6 @@
 "Tjb-kj-Z5d.placeholder" = "Nume de utilizator";
 /* Class = "UILabel"; text = "You are all ready to chat. People can message you  at:"; ObjectID = "Trj-ps-nO8"; */
 "Trj-ps-nO8.text" = "Sunteți cu toții gata să discutați. Oamenii vă pot trimite mesaje  la:";
-/* Class = "UIButton"; normalTitle = "Scan QR-Code"; ObjectID = "TZB-oT-VmG"; */
-"TZB-oT-VmG.normalTitle" = "Scan QR-Code";
 /* Class = "UINavigationItem"; title = "Register"; ObjectID = "xCl-CO-aFW"; */
 "xCl-CO-aFW.title" = "Înregistrare";
 /* Class = "UINavigationItem"; title = "Welcome"; ObjectID = "yxA-wa-jGH"; */

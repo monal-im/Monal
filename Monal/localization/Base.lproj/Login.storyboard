@@ -86,8 +86,8 @@
                                                             <constraint firstAttribute="bottom" secondItem="Qrh-pK-XJH" secondAttribute="bottom" constant="8" id="wB1-LA-K7H"/>
                                                         </constraints>
                                                     </view>
-                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gth-vl-n15" customClass="GLTintButton">
-                                                        <rect key="frame" x="32" y="124" width="224" height="46"/>
+                                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gth-vl-n15" customClass="GLTintButton">
+                                                        <rect key="frame" x="32" y="124" width="163" height="46"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="Dsd-ki-rLV"/>
                                                             <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="46" id="amu-If-hre"/>
@@ -102,25 +102,8 @@
                                                             <action selector="login:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="Y2M-nv-w6s"/>
                                                         </connections>
                                                     </button>
-                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TZB-oT-VmG" userLabel="scanQRCode" customClass="GLTintButton">
-                                                        <rect key="frame" x="32" y="178" width="224" height="46"/>
-                                                        <constraints>
-                                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="46" id="EjL-Tk-OMD"/>
-                                                            <constraint firstAttribute="height" constant="46" id="f5v-RT-KbI"/>
-                                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="mxz-AN-Esh"/>
-                                                        </constraints>
-                                                        <fontDescription key="fontDescription" type="system" pointSize="25"/>
-                                                        <state key="normal" title="Scan QR-Code">
-                                                            <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                            <color key="titleShadowColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
-                                                            <imageReference key="image" image="qrcode" catalog="system" symbolScale="large" renderingMode="original"/>
-                                                        </state>
-                                                        <connections>
-                                                            <segue destination="lNd-QE-Zgt" kind="show" identifier="scanQRCode" id="VE2-V7-mXq"/>
-                                                        </connections>
-                                                    </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="c9v-kP-ocC" customClass="GLTintButton">
-                                                        <rect key="frame" x="32" y="232" width="224" height="46"/>
+                                                        <rect key="frame" x="32" y="178" width="224" height="46"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="46" id="PAZ-xk-tbR"/>
                                                             <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="46" id="e2Z-KS-ben"/>
@@ -135,6 +118,24 @@
                                                             <segue destination="0z4-cM-T8Y" kind="show" id="WIW-8L-yzU"/>
                                                         </connections>
                                                     </button>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TZB-oT-VmG" userLabel="scanQRCode" customClass="GLTintButton">
+                                                        <rect key="frame" x="211" y="124" width="45" height="46"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="46" id="EjL-Tk-OMD"/>
+                                                            <constraint firstAttribute="width" constant="45" id="IXG-ib-C1X"/>
+                                                            <constraint firstAttribute="height" relation="lessThanOrEqual" constant="46" id="Tn0-0f-NYp"/>
+                                                            <constraint firstAttribute="height" constant="46" id="f5v-RT-KbI"/>
+                                                        </constraints>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="25"/>
+                                                        <state key="normal">
+                                                            <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                            <color key="titleShadowColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                                                            <imageReference key="image" image="qrcode" catalog="system" symbolScale="large" renderingMode="original"/>
+                                                        </state>
+                                                        <connections>
+                                                            <segue destination="lNd-QE-Zgt" kind="show" identifier="scanQRCode" id="VE2-V7-mXq"/>
+                                                        </connections>
+                                                    </button>
                                                 </subviews>
                                                 <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
                                                 <constraints>
@@ -145,13 +146,12 @@
                                                     <constraint firstItem="j1s-TP-Gbh" firstAttribute="leading" secondItem="LhW-wJ-Trm" secondAttribute="leading" constant="32" id="85F-Rd-Pbc"/>
                                                     <constraint firstItem="UsC-wr-MFj" firstAttribute="top" secondItem="j1s-TP-Gbh" secondAttribute="bottom" constant="8" id="9b4-7Y-5bn"/>
                                                     <constraint firstAttribute="trailing" secondItem="c9v-kP-ocC" secondAttribute="trailing" constant="32" id="B5P-ei-21a"/>
-                                                    <constraint firstItem="TZB-oT-VmG" firstAttribute="top" secondItem="Gth-vl-n15" secondAttribute="bottom" constant="8" id="F7F-jx-IOb"/>
-                                                    <constraint firstAttribute="trailing" secondItem="Gth-vl-n15" secondAttribute="trailing" constant="32" id="Q6w-Bc-pwp"/>
-                                                    <constraint firstItem="TZB-oT-VmG" firstAttribute="leading" secondItem="LhW-wJ-Trm" secondAttribute="leading" constant="32" id="Qfj-zS-0bl"/>
+                                                    <constraint firstItem="TZB-oT-VmG" firstAttribute="top" secondItem="Gth-vl-n15" secondAttribute="top" id="F7F-jx-IOb"/>
+                                                    <constraint firstItem="TZB-oT-VmG" firstAttribute="leading" relation="lessThanOrEqual" secondItem="Gth-vl-n15" secondAttribute="trailing" constant="16" id="OMh-Rg-csA"/>
                                                     <constraint firstAttribute="trailing" secondItem="j1s-TP-Gbh" secondAttribute="trailing" constant="32" id="Yg7-Ue-DzX"/>
                                                     <constraint firstItem="j1s-TP-Gbh" firstAttribute="centerX" secondItem="LhW-wJ-Trm" secondAttribute="centerX" id="YqL-ai-clZ"/>
                                                     <constraint firstItem="Gth-vl-n15" firstAttribute="leading" secondItem="LhW-wJ-Trm" secondAttribute="leading" constant="32" id="bia-tk-4sq"/>
-                                                    <constraint firstItem="c9v-kP-ocC" firstAttribute="leading" secondItem="LhW-wJ-Trm" secondAttribute="leading" constant="32" id="cHe-ke-10M"/>
+                                                    <constraint firstItem="c9v-kP-ocC" firstAttribute="leading" secondItem="Gth-vl-n15" secondAttribute="leading" id="cHe-ke-10M"/>
                                                     <constraint firstItem="j1s-TP-Gbh" firstAttribute="top" secondItem="LhW-wJ-Trm" secondAttribute="top" constant="8" id="cx3-nb-etw"/>
                                                     <constraint firstItem="Gth-vl-n15" firstAttribute="top" secondItem="UsC-wr-MFj" secondAttribute="bottom" constant="16" id="j3R-bG-Dje"/>
                                                     <constraint firstAttribute="trailing" secondItem="UsC-wr-MFj" secondAttribute="trailing" constant="32" id="lY9-9E-afU"/>
@@ -159,9 +159,9 @@
                                                 </constraints>
                                             </view>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QY7-bW-ufD">
-                                                <rect key="frame" x="59.5" y="528.5" width="201" height="30"/>
+                                                <rect key="frame" x="62" y="528.5" width="196" height="30"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="width" constant="201" id="MVI-DD-ixP"/>
+                                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="44" id="MVI-DD-ixP"/>
                                                     <constraint firstAttribute="height" constant="30" id="duv-oS-3U1"/>
                                                 </constraints>
                                                 <fontDescription key="fontDescription" type="system" pointSize="19"/>
@@ -247,7 +247,7 @@
                     </connections>
                 </tapGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="-1650" y="-2628"/>
+            <point key="canvasLocation" x="-1650" y="-2628.1690140845071"/>
         </scene>
         <!--Register-->
         <scene sceneID="nCU-xS-nTR">
@@ -568,7 +568,7 @@
             <size key="intrinsicContentSize" width="60" height="42"/>
         </designable>
         <designable name="TZB-oT-VmG">
-            <size key="intrinsicContentSize" width="188" height="30"/>
+            <size key="intrinsicContentSize" width="24" height="30"/>
         </designable>
         <designable name="c04-pS-Uoi">
             <size key="intrinsicContentSize" width="150" height="42"/>

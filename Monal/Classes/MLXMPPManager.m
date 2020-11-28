@@ -566,7 +566,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     xmpp* account=[self getConnectedAccountForID:accountNo];
     if(account)
     {
-        NSDictionary *params =@{kData:data,kFileName:filename, kContentType:contentType, kContact:contact};
+        NSDictionary *params =@{kData:data,kFileName:filename, kContentType:contentType};
         [account requestHTTPSlotWithParams:params andCompletion:completion];
     }
 }

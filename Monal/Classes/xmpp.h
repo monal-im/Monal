@@ -38,7 +38,6 @@ typedef NS_ENUM (NSInteger, xmppRegistrationState) {
 FOUNDATION_EXPORT NSString* const kFileName;
 FOUNDATION_EXPORT NSString* const kContentType;
 FOUNDATION_EXPORT NSString* const kData;
-FOUNDATION_EXPORT NSString* const kContact;
 
 @class jingleCall;
 @class MLPubSub;

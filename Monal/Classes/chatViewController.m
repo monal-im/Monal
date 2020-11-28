@@ -630,6 +630,9 @@ enum msgSentState {
 {
     self.editingCallback = nil;
     
+    NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
+    [nc removeObserver:self];
+
     // Save message draft
     BOOL success = [self saveMessageDraft];
     if(success) {

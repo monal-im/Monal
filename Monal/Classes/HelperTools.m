@@ -12,6 +12,7 @@
 #import "MLXMPPManager.h"
 #import "MLPubSub.h"
 #import "MLUDPLogger.h"
+#import "XMPPStanza.h"
 
 @import UserNotifications;
 
@@ -23,6 +24,18 @@ void logException(NSException* exception)
     DDLogError(@"*****************\nCRASH(%@): %@\nUserInfo: %@\nStack Trace: %@", [exception name], [exception reason], [exception userInfo], [exception callStackSymbols]);
     [DDLog flushLog];
     usleep(1000000);
+}
+
++(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString*) description
+{
+    if(description == nil || [description isEqualToString:@""])
+        description = @"XMPP Error";
+    NSString* errorReason = [stanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"];
+    NSString* errorText = [stanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-stanzas}text#"];
+    NSString* message = [NSString stringWithFormat:@"%@: %@", description, errorReason];
+    if(errorText && ![errorText isEqualToString:@""])
+        message = [NSString stringWithFormat:@"%@: %@ (%@)", description, errorReason, errorText];
+    return message;
 }
 
 +(void) configureFileProtectionFor:(NSString*) file

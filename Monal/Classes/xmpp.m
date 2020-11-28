@@ -2422,7 +2422,7 @@ NSString *const kContact=@"contact";
         });
     } andErrorHandler:^(XMPPIQ* error) {
         if(completion)
-            completion(nil, [error findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"]);
+            completion(nil, [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: [HelperTools extractXMPPError:error withDescription:@"Upload Error"]}]);
     }];
 }
 
@@ -2855,7 +2855,7 @@ NSString *const kContact=@"contact";
         //dispatch completion handler outside of the receiveQueue
         if(completion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                completion(NO, error && [error check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"] ? [error findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"]: @"");
+                completion(NO, error ? [HelperTools extractXMPPError:error withDescription:@"Could not change password"] : @"");
             });
     }];
 }
@@ -2901,12 +2901,7 @@ NSString *const kContact=@"contact";
         //dispatch completion handler outside of the receiveQueue
         if(_regFormErrorCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                NSString* errorReason = [error findFirst:@"{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"];
-                NSString* errorText = [error findFirst:@"{urn:ietf:params:xml:ns:xmpp-stanzas}text#"];
-                NSString* message = errorReason;
-                if(errorText && ![errorText isEqualToString:@""])
-                    message = [NSString stringWithFormat:@"%@: %@", errorReason, errorText];
-                _regFormErrorCompletion(NO, message);
+                _regFormErrorCompletion(NO, [HelperTools extractXMPPError:error withDescription:@"Could not request registration form"]);
             });
     }];
 }
@@ -2926,7 +2921,7 @@ NSString *const kContact=@"contact";
         //dispatch completion handler outside of the receiveQueue
         if(_regFormSubmitCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                _regFormSubmitCompletion(NO, [error findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"]);
+                _regFormSubmitCompletion(NO, [HelperTools extractXMPPError:error withDescription:@"Could not submit registration"]);
             });
     }];
 }

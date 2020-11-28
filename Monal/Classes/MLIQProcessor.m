@@ -93,13 +93,7 @@
 {
     NSString* message;
     if(iqNode)
-    {
-        NSString* errorReason = [iqNode findFirst:@"{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"];
-        NSString* errorText = [iqNode findFirst:@"{urn:ietf:params:xml:ns:xmpp-stanzas}text#"];
-        message = [NSString stringWithFormat:@"%@: %@", description, errorReason];
-        if(errorText && ![errorText isEqualToString:@""])
-            message = [NSString stringWithFormat:@"%@ %@: %@", description, errorReason, errorText];
-    }
+        message = [HelperTools extractXMPPError:iqNode withDescription:description];
     else
         message = description;
     [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:account userInfo:@{@"message": message, @"isSevere":@(isSevere)}];

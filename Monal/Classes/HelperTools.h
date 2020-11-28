@@ -11,10 +11,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class XMPPStanza;
+
 void logException(NSException* exception);
 
 @interface HelperTools : NSObject
 
++(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
 +(void) configureFileProtectionFor:(NSString*) file;
 +(NSDictionary*) splitJid:(NSString*) jid;
 +(void) postSendingErrorNotification;

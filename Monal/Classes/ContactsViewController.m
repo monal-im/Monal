@@ -81,18 +81,18 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+
+    self.lastSelectedContact = nil;
+    [self refreshDisplay];
+
+    if(self.contacts.count == 0)
+        [self reloadTable];
 }
 
 
 -(void) viewDidAppear:(BOOL) animated
 {
     [super viewDidAppear:animated];
-    
-    self.lastSelectedContact = nil;
-    [self refreshDisplay];
-    
-    if(self.contacts.count == 0)
-        [self reloadTable];
 }
 
 

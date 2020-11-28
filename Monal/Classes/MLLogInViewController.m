@@ -140,6 +140,7 @@
 
 -(void) connected
 {
+    [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
 #ifndef DISABLE_OMEMO
     dispatch_async(dispatch_get_main_queue(), ^{
         self.loginHUD.label.text = NSLocalizedString(@"Loading omemo bundles", @"");
@@ -186,8 +187,8 @@
 
 -(IBAction) useWithoutAccount:(id)sender
 {
-    [self dismissViewControllerAnimated:YES completion:nil];
     [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 -(IBAction) tapAction:(id)sender

@@ -306,15 +306,18 @@ enum activeChatsControllerSections {
     if([segue.identifier isEqualToString:@"showIntro"])
     {
         // needed for >= ios13
-        MLWelcomeViewController* welcome = (MLWelcomeViewController *) segue.destinationViewController;
-        welcome.completion = ^(){
-            if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
-            {
-                if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"]) {
-                    [self performSegueWithIdentifier:@"showLogin" sender:self];
+        if(@available(iOS 13.0, *))
+        {
+            MLWelcomeViewController* welcome = (MLWelcomeViewController *) segue.destinationViewController;
+            welcome.completion = ^(){
+                if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
+                {
+                    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"]) {
+                        [self performSegueWithIdentifier:@"showLogin" sender:self];
+                    }
                 }
-            }
-        };
+            };
+        }
     }
     else if([segue.identifier isEqualToString:@"showConversation"])
     {

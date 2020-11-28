@@ -9,7 +9,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Privacy Settings-->
+        <!--PrivacySettings-->
         <scene sceneID="B5W-Me-AC9">
             <objects>
                 <viewControllerPlaceholder storyboardName="Settings" referencedIdentifier="PrivacySettings" id="cmS-oG-cv9" sceneMemberID="viewController">
@@ -230,6 +230,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="sectionIndexBackgroundColor" systemColor="systemBackgroundColor"/>
                         <connections>
                             <outlet property="dataSource" destination="6Ao-6z-tB7" id="U7P-Iw-tsb"/>
                             <outlet property="delegate" destination="6Ao-6z-tB7" id="m7e-a4-sdI"/>
@@ -1869,7 +1870,7 @@
     <inferredMetricsTieBreakers>
         <segue reference="5zY-lR-WCu"/>
         <segue reference="5bM-w5-CYw"/>
-        <segue reference="tEM-gR-7nN"/>
+        <segue reference="hqW-lo-9tZ"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="724-info" width="28" height="28"/>

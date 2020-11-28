@@ -78,19 +78,25 @@ static NSRegularExpression* attributeFilterRegex;
 #endif
 }
 
--(id) init
+-(void) internalInit
 {
-    self = [super init];
     _attributes = [[NSMutableDictionary alloc] init];
     _children = [[NSMutableArray alloc] init];
     _data = nil;
     self.cache = [[NSMutableDictionary alloc] init];
+}
+
+-(id) init
+{
+    self = [super init];
+    [self internalInit];
     return self;
 }
 
 -(id) initWithElement:(NSString*) element
 {
-    self = [self init];
+    self = [super init];
+    [self internalInit];
     _element = [element copy];
     return self;
 }

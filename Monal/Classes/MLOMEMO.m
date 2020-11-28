@@ -440,7 +440,6 @@ $$
         XMPPMessage* messageNode = [[XMPPMessage alloc] init];
         [messageNode.attributes setObject:jid forKey:@"to"];
         [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
-        [messageNode setXmppId:[[NSUUID UUID] UUIDString]];
 
         // Send KeyTransportElement only to the one device (overrideDevices)
         [self encryptMessage:messageNode withMessage:nil toContact:jid];

@@ -8,14 +8,13 @@
 
 #import "XMPPMessage.h"
 
-
 @implementation XMPPMessage
 
-NSString* const kMessageChatType=@"chat";
-NSString* const kMessageGroupChatType=@"groupchat";
-NSString* const kMessageErrorType=@"error";
-NSString* const kMessageNormalType =@"normal";
-NSString* const kMessageHeadlineType=@"headline";
+NSString* const kMessageChatType = @"chat";
+NSString* const kMessageGroupChatType = @"groupchat";
+NSString* const kMessageErrorType = @"error";
+NSString* const kMessageNormalType = @"normal";
+NSString* const kMessageHeadlineType = @"headline";
 
 -(id) init
 {
@@ -34,12 +33,12 @@ NSString* const kMessageHeadlineType=@"headline";
 
 -(void) setXmppId:(NSString*) idval
 {
-    [self.attributes setObject:idval forKey:@"id"];
+    self.attributes[@"id"] = idval;
     //add origin id to indicate we are using uuids for our stanza ids
     if([self check:@"{urn:xmpp:sid:0}origin-id"])       //modify existing origin id
         ((MLXMLNode*)[self findFirst:@"{urn:xmpp:sid:0}origin-id"]).attributes[@"id"] = idval;
     else
-        [self addChild:[[MLXMLNode alloc] initWithElement:@"origin-id" andNamespace:@"urn:xmpp:sid:0" withAttributes:@{@"id":idval} andChildren:@[] andData:@"extra added"]];
+        [self addChild:[[MLXMLNode alloc] initWithElement:@"origin-id" andNamespace:@"urn:xmpp:sid:0" withAttributes:@{@"id":idval} andChildren:@[] andData:nil]];
 }
 
 -(NSString*) xmppId

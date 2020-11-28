@@ -52,7 +52,6 @@ NSString *const kStanza=@"stanza";
 NSString *const kFileName=@"fileName";
 NSString *const kContentType=@"contentType";
 NSString *const kData=@"data";
-NSString *const kContact=@"contact";
 
 
 @interface MLPubSub ()
@@ -2403,7 +2402,7 @@ NSString *const kContact=@"contact";
                 headers:headers
                 withArguments:nil
                 data:[params objectForKey:kData]
-                andCompletionHandler:^(NSError *error, id result) {
+                andCompletionHandler:^(NSError* error, id result) {
                     if(!error)
                     {
                         DDLogInfo(@"Upload succeded, get url: %@", [response findFirst:@"{urn:xmpp:http:upload:0}slot/get@url"]);

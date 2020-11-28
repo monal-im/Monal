@@ -20,6 +20,8 @@
 "Gth-vl-n15.normalTitle" = "Login";
 /* Class = "UIButton"; normalTitle = "Terms of service"; ObjectID = "hyG-BH-GJV"; */
 "hyG-BH-GJV.normalTitle" = "Termeni și condiții de utilizare";
+/* Class = "UITabBarItem"; title = "Item"; ObjectID = "iLC-4b-aD8"; */
+"iLC-4b-aD8.title" = "Item";
 /* Class = "UITextField"; placeholder = "Account@something.com"; ObjectID = "ktr-DL-MYt"; */
 "ktr-DL-MYt.placeholder" = "Account@something.com";
 /* Class = "UITextField"; placeholder = "Password"; ObjectID = "Qrh-pK-XJH"; */

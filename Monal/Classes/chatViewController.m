@@ -1091,7 +1091,7 @@ enum msgSentState {
     [self presentViewController:actionControll animated:YES completion:nil];
 }
 
--(void) uploadData:(NSData *) data
+-(void) uploadData:(NSData*) data
 {
     if(!self.uploadHUD) {
         self.uploadHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
@@ -1101,8 +1101,6 @@ enum msgSentState {
     } else {
         self.uploadHUD.hidden = NO;
     }
-    NSData* dataToPass = data;
-    MLEncryptedPayload* encrypted;
 
     if(data == nil)
     {
@@ -1114,60 +1112,71 @@ enum msgSentState {
         [self presentViewController:alert animated:YES completion:nil];
         return;
     }
-    int keySize = 32;
-    if(self.encryptChat) {
-        encrypted = [AESGcm encrypt:data keySize:keySize];
-        if(encrypted) {
-            NSMutableData* mutableBody = [encrypted.body mutableCopy];
-            [mutableBody appendData:encrypted.authTag];
-            dataToPass = [mutableBody copy];
-        } else  {
-            DDLogError(@"Could not encrypt attachment (encrypt returned nil)");
-            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Image encryption error", @"") message:[NSString stringWithFormat:@"Error while encrypting the file (encrypt returned nil)"] preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                [alert dismissViewControllerAnimated:YES completion:nil];
-            }]];
-            [self presentViewController:alert animated:YES completion:nil];
-            return;
-        }
-    }
     
-    [[MLXMPPManager sharedInstance] httpUploadJpegData:dataToPass toContact:self.contact.contactJid onAccount:self.contact.accountId withCompletionHandler:^(NSString *url, NSError *error) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.uploadHUD.hidden = YES;
-            
-            if(url) {
-                NSString* newMessageID = [[NSUUID UUID] UUIDString];
-                
-                NSString* urlToPass = url;
-                
-                if(encrypted) {
-                    NSURLComponents* urlComponents = [NSURLComponents componentsWithURL:[NSURL URLWithString:urlToPass] resolvingAgainstBaseURL:NO];
-                    if(urlComponents) {
-                        urlComponents.scheme = @"aesgcm";
-                        urlComponents.fragment = [NSString stringWithFormat:@"%@%@",
-                                                  [HelperTools hexadecimalString:encrypted.iv],
-                                                  [HelperTools hexadecimalString:[encrypted.key subdataWithRange:NSMakeRange(0, keySize)]]];
-                        urlToPass = urlComponents.string;
-                    } else  {
-                        DDLogError(@"Could not parse URL for conversion to aesgcm:");
-                        return;
+    void (^uploadIt)(NSData*, MLEncryptedPayload*) = ^(NSData* dataToUpload, MLEncryptedPayload* encrypted) {
+        [[MLXMPPManager sharedInstance] httpUploadJpegData:dataToUpload toContact:self.contact.contactJid onAccount:self.contact.accountId withCompletionHandler:^(NSString *url, NSError *error) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                if(url)
+                {
+                    NSString* newMessageID = [[NSUUID UUID] UUIDString];
+                    NSString* urlToPass = url;
+                    if(encrypted != nil)
+                    {
+                        NSURLComponents* urlComponents = [NSURLComponents componentsWithURL:[NSURL URLWithString:urlToPass] resolvingAgainstBaseURL:NO];
+                        if(urlComponents) {
+                            urlComponents.scheme = @"aesgcm";
+                            urlComponents.fragment = [NSString stringWithFormat:@"%@%@",
+                                                    [HelperTools hexadecimalString:encrypted.iv],
+                                                    [HelperTools hexadecimalString:[encrypted.key subdataWithRange:NSMakeRange(0, 32)]]];       //extract real aes key without authtag (32 bytes = 256bit)
+                            urlToPass = urlComponents.string;
+                        } else  {
+                            DDLogError(@"Could not parse URL for conversion to aesgcm:");
+                            return;
+                        }
                     }
+                    [[MLImageManager sharedInstance] saveImageData:data forLink:urlToPass];
+                    
+                    [self addMessageto:self.contact.contactJid withMessage:urlToPass andId:newMessageID messageType:kMessageTypeFiletransfer];
+                    [[MLXMPPManager sharedInstance] sendMessage:urlToPass toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:YES messageId:newMessageID withCompletionHandler:nil];
+                    self.uploadHUD.hidden = YES;
                 }
-                [[MLImageManager sharedInstance] saveImageData:data forLink:urlToPass];
-                
-                [self addMessageto:self.contact.contactJid withMessage:urlToPass andId:newMessageID messageType:kMessageTypeFiletransfer];
-                [[MLXMPPManager sharedInstance] sendMessage:urlToPass toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:YES messageId:newMessageID withCompletionHandler:nil];
+                else
+                {
+                    self.uploadHUD.hidden = YES;
+                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"There was an error uploading the file to the server", @"") message:[NSString stringWithFormat:@"%@", error.localizedDescription] preferredStyle:UIAlertControllerStyleAlert];
+                    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                        [alert dismissViewControllerAnimated:YES completion:nil];
+                    }]];
+                    [self presentViewController:alert animated:YES completion:nil];
+                }
+            });
+        }];
+    };
+    
+    if(self.encryptChat) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            MLEncryptedPayload* encrypted = [AESGcm encrypt:data keySize:32];
+            if(encrypted)
+            {
+                NSMutableData* mutableBody = [encrypted.body mutableCopy];
+                [mutableBody appendData:encrypted.authTag];
+                uploadIt(mutableBody, encrypted);
             }
-            else  {
-                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"There was an error uploading the file to the server", @"") message:[NSString stringWithFormat:@"%@", error.localizedDescription] preferredStyle:UIAlertControllerStyleAlert];
-                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                    [alert dismissViewControllerAnimated:YES completion:nil];
-                }]];
-                [self presentViewController:alert animated:YES completion:nil];
+            else
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    DDLogError(@"Could not encrypt attachment (encrypt returned nil)");
+                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Image encryption error", @"") message:[NSString stringWithFormat:@"Error while encrypting the file (encrypt returned nil)"] preferredStyle:UIAlertControllerStyleAlert];
+                    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                        [alert dismissViewControllerAnimated:YES completion:nil];
+                    }]];
+                    [self presentViewController:alert animated:YES completion:nil];
+                });
             }
         });
-    }];
+    }
+    else
+        uploadIt(data, nil);
 }
 
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *, id> *)info

@@ -175,11 +175,12 @@ static NSMutableDictionary* _typingNotifications;
                 else if(encrypted && [lowercaseBody hasPrefix:@"aesgcm://"])
                     messageType = kMessageTypeFiletransfer;
             }
+            DDLogInfo(@"Got message of type: %@", messageType);
             
             NSString* messageId = [messageNode findFirst:@"/@id"];
             if(!messageId.length)
             {
-                DDLogError(@"Empty ID using random UUID");
+                DDLogWarn(@"Empty ID using random UUID");
                 messageId = [[NSUUID UUID] UUIDString];
             }
             

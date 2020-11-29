@@ -187,8 +187,8 @@ enum msgSentState {
     //UTI @"public.data" for everything
     NSString *images = (NSString *)kUTTypeImage;
     self.imagePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images] inMode:UIDocumentPickerModeImport];
-    self.mediaPicker.allowsMultipleSelection=NO;
-    self.mediaPicker.delegate=self;
+    self.imagePicker.allowsMultipleSelection = NO;
+    self.imagePicker.delegate = self;
 #endif
 
     // Set max height of the chatInput (The chat should be still readable while the HW-Keyboard is active

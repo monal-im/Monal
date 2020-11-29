@@ -49,6 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 -(NSData *) getIdentityForAddress:(SignalAddress*)address;
+-(void) sendLocalDevicesIfNeeded;
 
 
 @end

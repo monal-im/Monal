@@ -28,7 +28,7 @@
 @property (nonatomic, strong) NSString* accountJid;
 
 @property (nonatomic, strong) xmpp* account;
-@property (nonatomic, assign) BOOL deviceListExists;
+@property (nonatomic, strong) NSMutableSet<NSNumber*>* ownReceivedDeviceList;
 
 // jid -> @[deviceID1, deviceID2]
 @property (nonatomic, strong) NSMutableDictionary* devicesWithBrokenSession;
@@ -46,7 +46,7 @@ const int KEY_SIZE = 16;
     self = [super init];
     self.accountJid = account.connectionProperties.identity.jid;
     self.account = account;
-    self.deviceListExists = YES;
+    self.ownReceivedDeviceList = [[NSMutableSet alloc] init];
     self.hasCatchUpDone = NO;
     self.openBundleFetchCnt = 0;
     self.closedBundleFetchCnt = 0;
@@ -67,7 +67,7 @@ const int KEY_SIZE = 16;
     NSString* accountNo = [dic objectForKey:@"AccountNo"];
     if(!accountNo) return;
     if([self.account.accountNo isEqualToString:accountNo]) {
-        self.deviceListExists = NO;
+        [self.ownReceivedDeviceList removeAllObjects];
     }
 }
 
@@ -77,14 +77,9 @@ const int KEY_SIZE = 16;
 
     if([self.account.accountNo isEqualToString:notiAccount.accountNo]) {
         self.hasCatchUpDone = YES;
-        if(self.deviceListExists == NO) {
-            // we need to publish a new devicelist if we did not receive our own list after a new connection
-            [self createLocalIdentiyKeyPairIfNeeded:[[NSSet<NSNumber*> alloc] init]]; // sends our omemo bundle automatically
-            [self sendOMEMODeviceWithForce:YES];
-            self.deviceListExists = YES;
-        }
         if(!self.openBundleFetchCnt)
         {
+            [self sendLocalDevicesIfNeeded];
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedOmemoBundleFetch object:self];
         }
     }
@@ -101,9 +96,11 @@ const int KEY_SIZE = 16;
 
     // init MLPubSub handler
     [self.account.pubsub registerForNode:@"eu.siacs.conversations.axolotl.devicelist" withHandler:$newHandler(self, devicelistHandler)];
+
+    [self createLocalIdentiyKeyPairIfNeeded:[[NSSet alloc] init]];
 }
 
--(void) createLocalIdentiyKeyPairIfNeeded:(NSSet<NSNumber*>*) ownDeviceIds
+-(BOOL) createLocalIdentiyKeyPairIfNeeded:(NSSet<NSNumber*>*) ownDeviceIds
 {
     if(self.monalSignalStore.deviceid == 0)
     {
@@ -118,12 +115,29 @@ const int KEY_SIZE = 16;
         // Create identity key pair
         self.monalSignalStore.identityKeyPair = [signalHelper generateIdentityKeyPair];
         self.monalSignalStore.signedPreKey = [signalHelper generateSignedPreKeyWithIdentity:self.monalSignalStore.identityKeyPair signedPreKeyId:1];
+        SignalAddress* address = [[SignalAddress alloc] initWithName:self.accountJid deviceId:self.monalSignalStore.deviceid];
+        [self.monalSignalStore saveIdentity:address identityKey:self.monalSignalStore.identityKeyPair.publicKey];
+        return YES;
+    }
+    return NO;
+}
+
+-(void) sendLocalDevicesIfNeeded
+{
+    if([self.ownReceivedDeviceList count] == 0) {
+        // we need to publish a new devicelist if we did not receive our own list after a new connection
         // Generate single use keys
         [self generateNewKeysIfNeeded];
         [self sendOMEMOBundle];
 
-        SignalAddress* address = [[SignalAddress alloc] initWithName:self.accountJid deviceId:self.monalSignalStore.deviceid];
-        [self.monalSignalStore saveIdentity:address identityKey:self.monalSignalStore.identityKeyPair.publicKey];
+        [self sendOMEMODeviceWithForce:YES];
+        [self.ownReceivedDeviceList addObject:[NSNumber numberWithInt:(self.monalSignalStore.deviceid)]];
+    }
+    else
+    {
+        // Generate single use keys
+        [self generateNewKeysIfNeeded];
+        [self sendOMEMODevice:self.ownReceivedDeviceList force:NO];
     }
 }
 
@@ -144,6 +158,8 @@ $$
 
 -(void) sendOMEMOBundle
 {
+    if(self.monalSignalStore.deviceid == 0)
+        return;
     [self publishKeysViaPubSub:@{
         @"signedPreKeyPublic":self.monalSignalStore.signedPreKey.keyPair.publicKey,
         @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature,
@@ -228,7 +244,10 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
         account.omemo.openBundleFetchCnt = 0;
         account.omemo.closedBundleFetchCnt = 0;
         if(account.omemo.hasCatchUpDone)
+        {
+            [account.omemo sendLocalDevicesIfNeeded];
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedOmemoBundleFetch object:self];
+        }
     }
 $$
 
@@ -275,9 +294,16 @@ $$
         // Send our own device id when it is missing on the server
         if(!source || [source caseInsensitiveCompare:self.accountJid] == NSOrderedSame)
         {
-            self.deviceListExists = YES;
-            [self createLocalIdentiyKeyPairIfNeeded:receivedDevices];
-            [self sendOMEMODevice:receivedDevices force:NO];
+            if(receivedDevices.count > 0)
+            {
+                // save own receivedDevices for catchupDone handling
+                [self.ownReceivedDeviceList unionSet:receivedDevices];
+            }
+            if(self.hasCatchUpDone == true && !self.openBundleFetchCnt)
+            {
+                // the catchup done handler or the bundleFetch handler will send our own devices while logging in
+                [self sendOMEMODevice:receivedDevices force:NO];
+            }
         }
     }
 }
@@ -340,6 +366,10 @@ $$
         [devices addObject:[NSNumber numberWithInt:self.monalSignalStore.deviceid]];
         [self sendOMEMOBundle];
         [self publishDevicesViaPubSub:devices];
+    }
+    if(devices.count > 0)
+    {
+        [self.ownReceivedDeviceList unionSet:devices];
     }
 }
 

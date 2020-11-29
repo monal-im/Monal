@@ -767,9 +767,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     else
         DDLogWarn(@"BGTASK has *no* connectivity? That's strange!");
     
-    //log bgtask ticks
+    //log bgtask ticks (and stop when the task expires)
     unsigned long tick = 0;
-    while(1)
+    while(_bgFetch)
     {
         DDLogVerbose(@"BGTASK TICK: %lu", tick++);
         [DDLog flushLog];

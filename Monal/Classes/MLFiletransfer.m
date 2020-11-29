@@ -35,127 +35,130 @@ static NSString* documentCache;
 
 +(void) checkMimeTypeAndSizeForHistoryID:(NSNumber*) historyId
 {
-    DDLogDebug(@"Checking mime-type for historyID %@", historyId);
-    MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
-    if(!msg)
-        return;
-    NSString* url = [self genCanonicalUrl:msg.messageText];
-    NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
-    request.HTTPMethod = @"HEAD";
-    request.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
-
-    NSURLSession* session = [NSURLSession sharedSession];
-    [[session dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data, NSURLResponse* _Nullable response, NSError* _Nullable error) {
-        NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
-        NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
-        NSNumber* contentLength = [headers objectForKey:@"Content-Length"] ? [NSNumber numberWithInt:([[headers objectForKey:@"Content-Length"] intValue])] : @(-1);
-        if(!mimeType)
-            mimeType = @"application/octet-stream";
-        
-        //try to deduce the content type from a given file extension if needed and possible
-        if([mimeType isEqualToString:@"application/octet-stream"])
-        {
-            NSURLComponents* urlComponents = [NSURLComponents componentsWithString:url];
-            if(urlComponents)
-                mimeType = [self getMimeTypeOfOriginalFile:urlComponents.path];
-        }
-        
-        //update db with content type and size
-        [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:contentLength];
-        
-        //send out update notification
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        DDLogDebug(@"Checking mime-type for historyID %@", historyId);
         MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
-        if(msg == nil)
-        {
-            DDLogError(@"Could not find msg for history ID %@!", historyId);
+        if(!msg)
             return;
-        }
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageFiletransferUpdateNotice object:nil userInfo:@{@"message": msg}];
-        
-        //try to autodownload if sizes match
-        //TODO JIM: these are the settings used for size checks and autodownload allowed checks
-        if([[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"] && [contentLength integerValue] <= [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"])
-            [self downloadFileForHistoryID:historyId];
-    }] resume];
+        NSString* url = [self genCanonicalUrl:msg.messageText];
+        NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
+        request.HTTPMethod = @"HEAD";
+        request.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
+
+        NSURLSession* session = [NSURLSession sharedSession];
+        [[session dataTaskWithRequest:request completionHandler:^(NSData* _Nullable data, NSURLResponse* _Nullable response, NSError* _Nullable error) {
+            NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
+            NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
+            NSNumber* contentLength = [headers objectForKey:@"Content-Length"] ? [NSNumber numberWithInt:([[headers objectForKey:@"Content-Length"] intValue])] : @(-1);
+            if(!mimeType)
+                mimeType = @"application/octet-stream";
+            
+            //try to deduce the content type from a given file extension if needed and possible
+            if([mimeType isEqualToString:@"application/octet-stream"])
+            {
+                NSURLComponents* urlComponents = [NSURLComponents componentsWithString:url];
+                if(urlComponents)
+                    mimeType = [self getMimeTypeOfOriginalFile:urlComponents.path];
+            }
+            
+            //update db with content type and size
+            [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:contentLength];
+            
+            //send out update notification
+            MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
+            if(msg == nil)
+            {
+                DDLogError(@"Could not find msg for history ID %@!", historyId);
+                return;
+            }
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageFiletransferUpdateNotice object:nil userInfo:@{@"message": msg}];
+            
+            //try to autodownload if sizes match
+            //TODO JIM: these are the settings used for size checks and autodownload allowed checks
+            //if([[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"] && [contentLength integerValue] <= [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"])
+                [self downloadFileForHistoryID:historyId];
+        }] resume];
+    });
 }
 
 +(void) downloadFileForHistoryID:(NSNumber*) historyId
 {
-    MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
-    if(!msg)
-        return;
-    NSString* url = [self genCanonicalUrl:msg.messageText];
-    NSURLComponents* urlComponents = [NSURLComponents componentsWithString:msg.messageText];
-    if(!urlComponents)
-    {
-        DDLogError(@"url components decoding failed");
-        [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decode download link", @"") forMessageId:msg.messageId];
-        return;
-    }
-    
-    NSURLSession* session = [NSURLSession sharedSession];
-    NSURLSessionDownloadTask* task = [session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL* _Nullable location, NSURLResponse* _Nullable response, NSError* _Nullable error) {
-        NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
-        NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
-        if(!mimeType)
-            mimeType = @"application/octet-stream";
-        
-        //try to deduce the content type from a given file extension if needed and possible
-        if([mimeType isEqualToString:@"application/octet-stream"])
-            mimeType = [self getMimeTypeOfOriginalFile:urlComponents.path];
-        
-        NSString* cacheFile = [self getCacheFileNameForUrl:msg.messageText andMimeType:mimeType];
-        
-        //encrypted filetransfer
-        if([urlComponents.scheme isEqualToString:@"aesgcm"])
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
+        if(!msg)
+            return;
+        NSString* url = [self genCanonicalUrl:msg.messageText];
+        NSURLComponents* urlComponents = [NSURLComponents componentsWithString:msg.messageText];
+        if(!urlComponents)
         {
-            if(urlComponents.fragment.length < 88)
-            {
-                DDLogError(@"File download failed: %@", error);
-                [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decode encrypted link", @"") forMessageId:msg.messageId];
-                return;
-            }
-            int ivLength = 24;
-            //format is iv+32byte key
-            NSData* key = [HelperTools dataWithHexString:[urlComponents.fragment substringWithRange:NSMakeRange(ivLength, 64)]];
-            NSData* iv = [HelperTools dataWithHexString:[urlComponents.fragment substringToIndex:ivLength]];
+            DDLogError(@"url components decoding failed");
+            [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decode download link", @"") forMessageId:msg.messageId];
+            return;
+        }
+        
+        NSURLSession* session = [NSURLSession sharedSession];
+        NSURLSessionDownloadTask* task = [session downloadTaskWithURL:[NSURL URLWithString:url] completionHandler:^(NSURL* _Nullable location, NSURLResponse* _Nullable response, NSError* _Nullable error) {
+            NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
+            NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
+            if(!mimeType)
+                mimeType = @"application/octet-stream";
             
-            //decrypt data with given key and iv
-            NSData* encryptedData = [NSData dataWithContentsOfURL:location];
-            if(encryptedData && encryptedData.length > 0 && key && iv)
+            //try to deduce the content type from a given file extension if needed and possible
+            if([mimeType isEqualToString:@"application/octet-stream"])
+                mimeType = [self getMimeTypeOfOriginalFile:urlComponents.path];
+            
+            NSString* cacheFile = [self getCacheFileNameForUrl:msg.messageText andMimeType:mimeType];
+            
+            //encrypted filetransfer
+            if([urlComponents.scheme isEqualToString:@"aesgcm"])
             {
-                NSData* decryptedData = [AESGcm decrypt:encryptedData withKey:key andIv:iv withAuth:nil];
-                [decryptedData writeToFile:cacheFile options:NSDataWritingAtomic error:&error];
+                if(urlComponents.fragment.length < 88)
+                {
+                    DDLogError(@"File download failed: %@", error);
+                    [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decode encrypted link", @"") forMessageId:msg.messageId];
+                    return;
+                }
+                int ivLength = 24;
+                //format is iv+32byte key
+                NSData* key = [HelperTools dataWithHexString:[urlComponents.fragment substringWithRange:NSMakeRange(ivLength, 64)]];
+                NSData* iv = [HelperTools dataWithHexString:[urlComponents.fragment substringToIndex:ivLength]];
+                
+                //decrypt data with given key and iv
+                NSData* encryptedData = [NSData dataWithContentsOfURL:location];
+                if(encryptedData && encryptedData.length > 0 && key && iv)
+                {
+                    NSData* decryptedData = [AESGcm decrypt:encryptedData withKey:key andIv:iv withAuth:nil];
+                    [decryptedData writeToFile:cacheFile options:NSDataWritingAtomic error:&error];
+                    if(error)
+                    {
+                        DDLogError(@"File download failed: %@", error);
+                        [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to write decrypted download into cache directory", @"") forMessageId:msg.messageId];
+                        return;
+                    }
+                    [HelperTools configureFileProtectionFor:cacheFile];
+                }
+            }
+            else        //cleartext filetransfer
+            {
+                //copy file to our document cache
+                [fileManager moveItemAtPath:[location path] toPath:cacheFile error:&error];
                 if(error)
                 {
                     DDLogError(@"File download failed: %@", error);
-                    [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to write decrypted download into cache directory", @"") forMessageId:msg.messageId];
+                    [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to copy downloaded file into cache directory", @"") forMessageId:msg.messageId];
                     return;
                 }
                 [HelperTools configureFileProtectionFor:cacheFile];
             }
-        }
-        else        //cleartext filetransfer
-        {
-            //copy file to our document cache
-            [fileManager moveItemAtPath:[location path] toPath:cacheFile error:&error];
-            if(error)
-            {
-                DDLogError(@"File download failed: %@", error);
-                [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to copy downloaded file into cache directory", @"") forMessageId:msg.messageId];
-                return;
-            }
-            [HelperTools configureFileProtectionFor:cacheFile];
-        }
-        
-        //update db with content type and size
-        [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:@([[fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize])];
-        
-        //send out update notification
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageFiletransferUpdateNotice object:nil userInfo:@{@"message": msg}];
-    }];
-    [task resume];
-    
+            
+            //update db with content type and size
+            [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:@([[fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize])];
+            
+            //send out update notification
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageFiletransferUpdateNotice object:nil userInfo:@{@"message": msg}];
+        }];
+        [task resume];
+    });
 }
 
 +(NSDictionary*) getFileInfoForMessage:(MLMessage*) msg

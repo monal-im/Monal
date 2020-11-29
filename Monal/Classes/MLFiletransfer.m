@@ -75,7 +75,7 @@ static NSString* documentCache;
             
             //try to autodownload if sizes match
             //TODO JIM: these are the settings used for size checks and autodownload allowed checks
-            //if([[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"] && [contentLength integerValue] <= [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"])
+            if([[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"] && [contentLength integerValue] <= [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"])
                 [self downloadFileForHistoryID:historyId];
         }] resume];
     });

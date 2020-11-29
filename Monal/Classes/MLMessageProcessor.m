@@ -296,7 +296,7 @@ static NSMutableDictionary* _typingNotifications;
                         
                         //try to automatically determine content type of filetransfers
                         //TODO JIM: this should be the config key to enable/disable auto downloads
-                        if(messageType == kMessageTypeFiletransfer && YES/*[[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"]*/)
+                        if(messageType == kMessageTypeFiletransfer && [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"])
                             [MLFiletransfer checkMimeTypeAndSizeForHistoryID:historyId];
                     }
                 }

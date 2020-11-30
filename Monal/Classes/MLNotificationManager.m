@@ -72,13 +72,14 @@
 -(void) handleNewMessage:(NSNotification*) notification
 {
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
+    BOOL showAlert = notification.userInfo[@"showAlert"] ? [notification.userInfo[@"showAlert"] boolValue] : NO;
     
     if([message.messageType isEqualToString:kMessageTypeStatus])
         return;
     
     DDLogVerbose(@"notification manager got new message notice: %@", message.messageText);
     BOOL muted = [[DataLayer sharedInstance] isMutedJid:message.actualFrom];
-    if(!muted && message.shouldShowAlert)
+    if(!muted && showAlert)
     {
         if([HelperTools isInBackground])
         {
@@ -93,8 +94,12 @@
                 ![message.to isEqualToString:self.currentContact.contactJid]
             )
                 [self showModernNotificaion:notification];
+            else
+                DDLogDebug(@"not showing notification: chat is open");
         }
     }
+    else
+        DDLogDebug(@"not showing notification: showAlert is NO");
 }
 
 -(void) handleDisplayedMessage:(NSNotification*) notification
@@ -155,7 +160,7 @@
     DDLogVerbose(@"Raw badge value: %lu", (long)unread);
     if(!unread)
         unread = 1;     //use this as fallback to always show a badge if a notification is shown
-    DDLogInfo(@"Adding badge value: %lu", (long)unread);
+    DDLogDebug(@"Adding badge value: %lu", (long)unread);
     content.badge = [NSNumber numberWithInteger:unread];
     
     //scheduling the notification in 1.5 seconds will make it possible to be deleted by XEP-0333 chat-markers received directly after the message
@@ -176,16 +181,14 @@
     MLContact* contact = [[DataLayer sharedInstance] contactForUsername:message.from forAccount:message.accountId];
     
     // Only show contact name if allowed
-    if(self.notificationPrivacySetting <= DisplayOnlyName) {
+    if(self.notificationPrivacySetting <= DisplayOnlyName)
+    {
         content.title = [contact contactDisplayName];
-
         if(![message.from isEqualToString:message.actualFrom])
-        {
             content.subtitle = [NSString stringWithFormat:@"%@ says:", message.actualFrom];
-        }
-    } else {
-        content.title = NSLocalizedString(@"New Message", @"");
     }
+    else
+        content.title = NSLocalizedString(@"New Message", @"");
     NSString* idval = [self identifierWithMessage:message];
 
     // only show msgText if allowed
@@ -250,21 +253,22 @@
                 else
                     content.body = NSLocalizedString(@"Sent an Image 📷", @"");
 
+                DDLogDebug(@"Publishing notification with id %@", idval);
                 [self publishNotificationContent:content withID:idval];
+                return;
             }
             else        //TODO JIM: add support for more mime types
-            {
                 content.body = NSLocalizedString(@"Sent a File 📁", @"");
-            }
-            return;
         }
         else if([message.messageType isEqualToString:kMessageTypeUrl])
             content.body = NSLocalizedString(@"Sent a Link 🔗", @"");
         else if([message.messageType isEqualToString:kMessageTypeGeo])
             content.body = NSLocalizedString(@"Sent a Location 📍", @"");
-    } else {
-        content.body = NSLocalizedString(@"Open app to see more", @"");
     }
+    else
+        content.body = NSLocalizedString(@"Open app to see more", @"");
+
+    DDLogDebug(@"Publishing notification with id %@", idval);
     [self publishNotificationContent:content withID:idval];
 }
 

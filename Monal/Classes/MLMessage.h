@@ -87,9 +87,6 @@ The of the message in the DB , should be int
 
 @property (nonatomic, assign) BOOL hasBeenDisplayed;
 
-
-@property (nonatomic, assign) BOOL shouldShowAlert;
-
 /**
  values only set if in a response the message was marked as error.
  if hasBeenReceived is true, these should be ignored

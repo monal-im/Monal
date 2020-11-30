@@ -154,7 +154,7 @@ static NSMutableDictionary* _typingNotifications;
                 
                 [[DataLayer sharedInstance] updateMucSubject:subject forAccount:account.accountNo andRoom:messageNode.fromUser];
                 //TODO: this stuff has to be changed (why send a kMonalNewMessageNotice instead of a special kMonalMucSubjectChanged one?)
-                MLMessage* message = [account parseMessageToMLMessage:messageNode withBody:subject andEncrypted:encrypted andShowAlert:showAlert andMessageType:kMessageTypeStatus andActualFrom:actualFrom];
+                MLMessage* message = [account parseMessageToMLMessage:messageNode withBody:subject andEncrypted:encrypted andMessageType:kMessageTypeStatus andActualFrom:actualFrom];
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
                     @"message": message,
                     @"subject": subject,
@@ -188,7 +188,7 @@ static NSMutableDictionary* _typingNotifications;
             //because mam always sorts the messages in a page by timestamp in ascending order
             //we don't want to call postPersistAction, too, beause we don't want to display push notifications for old messages
             if([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLhistory:"])
-                [account addMessageToMamPageArray:messageNode forOuterMessageNode:outerMessageNode withBody:body andEncrypted:encrypted andShowAlert:showAlert andMessageType:messageType];
+                [account addMessageToMamPageArray:messageNode forOuterMessageNode:outerMessageNode withBody:body andEncrypted:encrypted andMessageType:messageType];
             else if(body)
             {
                 NSNumber* historyId = nil;
@@ -291,7 +291,8 @@ static NSMutableDictionary* _typingNotifications;
                         DDLogInfo(@"sending out kMonalNewMessageNotice notification for historyId %@", historyId);
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
                             @"message": message,
-                            @"historyId": historyId
+                            @"historyId": historyId,
+                            @"showAlert": @(showAlert),
                         }];
                         
                         //try to automatically determine content type of filetransfers

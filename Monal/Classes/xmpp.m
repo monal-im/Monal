@@ -3182,7 +3182,7 @@ NSString *const kData=@"data";
     }
 }
 
--(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType andActualFrom:(NSString*) actualFrom
+-(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andMessageType:(NSString*) messageType andActualFrom:(NSString*) actualFrom
 {
     MLMessage* message = [[MLMessage alloc] init];
     message.from = messageNode.fromUser;
@@ -3194,7 +3194,6 @@ NSString *const kData=@"data";
     message.encrypted = encrypted;
     message.delayTimeStamp = [messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"];
     message.timestamp = [NSDate date];
-    message.shouldShowAlert = showAlert;
     message.messageType = messageType;
     message.hasBeenSent = YES;      //if it came in it has been sent to the server
     message.stanzaId = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
@@ -3202,9 +3201,9 @@ NSString *const kData=@"data";
     return message;
 }
 
--(void) addMessageToMamPageArray:(XMPPMessage*) messageNode forOuterMessageNode:(XMPPMessage*) outerMessageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType
+-(void) addMessageToMamPageArray:(XMPPMessage*) messageNode forOuterMessageNode:(XMPPMessage*) outerMessageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andMessageType:(NSString*) messageType
 {
-    MLMessage* message = [self parseMessageToMLMessage:messageNode withBody:body andEncrypted:encrypted andShowAlert:showAlert andMessageType:messageType andActualFrom:nil];
+    MLMessage* message = [self parseMessageToMLMessage:messageNode withBody:body andEncrypted:encrypted andMessageType:messageType andActualFrom:nil];
     @synchronized(_mamPageArrays) {
         if(!_mamPageArrays[[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]])
             _mamPageArrays[[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]] = [[NSMutableArray alloc] init];

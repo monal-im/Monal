@@ -238,11 +238,11 @@ Decline a call request
 
 #pragma mark - internal stuff for processors
 
--(void) addMessageToMamPageArray:(XMPPMessage*) messageNode forOuterMessageNode:(XMPPMessage*) outerMessageNode withBody:(NSString* _Nullable) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType;
+-(void) addMessageToMamPageArray:(XMPPMessage*) messageNode forOuterMessageNode:(XMPPMessage*) outerMessageNode withBody:(NSString* _Nullable) body andEncrypted:(BOOL) encrypted andMessageType:(NSString*) messageType;
 -(NSArray* _Nullable) getOrderedMamPageFor:(NSString*) mamQueryId;
 -(void) bindResource:(NSString*) resource;
 -(void) initSession;
--(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType andActualFrom:(NSString* _Nullable) actualFrom;
+-(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andMessageType:(NSString*) messageType andActualFrom:(NSString* _Nullable) actualFrom;
 -(void) sendDisplayMarkerForId:(NSString*) messageid to:(NSString*) to;
 -(void) publishAvatar:(UIImage*) image;
 -(void) publishStatusMessage:(NSString*) message;

@@ -36,7 +36,7 @@ static NSString* documentCache;
 +(void) checkMimeTypeAndSizeForHistoryID:(NSNumber*) historyId
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        DDLogDebug(@"Checking mime-type for historyID %@", historyId);
+        DDLogInfo(@"Requesting mime-type and size for historyID %@ from http server", historyId);
         MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
         if(!msg)
             return;
@@ -50,7 +50,7 @@ static NSString* documentCache;
             NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
             NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
             NSNumber* contentLength = [headers objectForKey:@"Content-Length"] ? [NSNumber numberWithInt:([[headers objectForKey:@"Content-Length"] intValue])] : @(-1);
-            if(!mimeType)
+            if(!mimeType)       //default mime type if none was returned by http server
                 mimeType = @"application/octet-stream";
             
             //try to deduce the content type from a given file extension if needed and possible
@@ -60,6 +60,13 @@ static NSString* documentCache;
                 if(urlComponents)
                     mimeType = [self getMimeTypeOfOriginalFile:urlComponents.path];
             }
+            
+            //make sure we *always* have a mime type
+            if(!mimeType)
+                mimeType = @"application/octet-stream";
+            
+            DDLogInfo(@"Got http mime-type and size for historyID %@: %@ (%@)", historyId, mimeType, contentLength);
+            DDLogDebug(@"Updating db and sending out kMonalMessageFiletransferUpdateNotice");
             
             //update db with content type and size
             [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:contentLength];
@@ -76,7 +83,10 @@ static NSString* documentCache;
             //try to autodownload if sizes match
             //TODO JIM: these are the settings used for size checks and autodownload allowed checks
             if([[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"] && [contentLength integerValue] <= [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"])
+            {
+                DDLogInfo(@"Autodownloading file");
                 [self downloadFileForHistoryID:historyId];
+            }
         }] resume];
     });
 }
@@ -84,6 +94,7 @@ static NSString* documentCache;
 +(void) downloadFileForHistoryID:(NSNumber*) historyId
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        DDLogInfo(@"Downloading file for historyID %@", historyId);
         MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
         if(!msg)
             return;
@@ -107,11 +118,16 @@ static NSString* documentCache;
             if([mimeType isEqualToString:@"application/octet-stream"])
                 mimeType = [self getMimeTypeOfOriginalFile:urlComponents.path];
             
-            NSString* cacheFile = [self getCacheFileNameForUrl:msg.messageText andMimeType:mimeType];
+            //make sure we *always* have a mime type
+            if(!mimeType)
+                mimeType = @"application/octet-stream";
+            
+            NSString* cacheFile = [self calculateCacheFileForNewUrl:msg.messageText andMimeType:mimeType];
             
             //encrypted filetransfer
             if([urlComponents.scheme isEqualToString:@"aesgcm"])
             {
+                DDLogInfo(@"Decrypting encrypted filetransfer");
                 if(urlComponents.fragment.length < 88)
                 {
                     DDLogError(@"File download failed: %@", error);
@@ -141,6 +157,7 @@ static NSString* documentCache;
             else        //cleartext filetransfer
             {
                 //copy file to our document cache
+                DDLogInfo(@"Copying downloaded file to document cache at %@", cacheFile);
                 [fileManager moveItemAtPath:[location path] toPath:cacheFile error:&error];
                 if(error)
                 {
@@ -150,6 +167,8 @@ static NSString* documentCache;
                 }
                 [HelperTools configureFileProtectionFor:cacheFile];
             }
+            
+            DDLogDebug(@"Updating db and sending out kMonalMessageFiletransferUpdateNotice");
             
             //update db with content type and size
             [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:@([[fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize])];
@@ -165,13 +184,23 @@ static NSString* documentCache;
 {
     if(![msg.messageType isEqualToString:kMessageTypeFiletransfer])
         return nil;
-    NSString* cacheFile = [self loadCacheFileForUrl:msg.messageText andMimeType:msg.filetransferMimeType];
+    NSURLComponents* urlComponents = [NSURLComponents componentsWithString:msg.messageText];
+    NSString* filename = [[NSUUID UUID] UUIDString];       //default is a dummy filename (used when the filename can not be extracted from url)
+    if(urlComponents != nil && urlComponents.path)
+        filename = [urlComponents.path lastPathComponent];
+    NSString* cacheFile = [self retrieveCacheFileForUrl:msg.messageText andMimeType:(msg.filetransferMimeType && ![msg.filetransferMimeType isEqualToString:@""] ? msg.filetransferMimeType : nil)];
     if(!cacheFile)
-        return nil;
+        return @{
+            @"url": msg.messageText,
+            @"filename": filename,
+            @"needsDownloading": @YES,
+        };
     return @{
         @"url": msg.messageText,
+        @"filename": filename,
         @"cacheId": [cacheFile lastPathComponent],
         @"cacheFile": cacheFile,
+        @"needsDownloading": @NO,
         @"mimeType": [self getMimeTypeOfCacheFile:cacheFile],
         @"size": @([[fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize]),
     };
@@ -179,17 +208,26 @@ static NSString* documentCache;
 
 +(void) deleteFileForMessage:(MLMessage*) msg
 {
+    if(![msg.messageType isEqualToString:kMessageTypeFiletransfer])
+        return;
+    DDLogInfo(@"Deleting file for url %@", msg.messageText);
     NSDictionary* info = [self getFileInfoForMessage:msg];
     if(info)
+    {
+        DDLogDebug(@"Deleting file in cache: %@", info[@"cacheFile"]);
         [fileManager removeItemAtPath:info[@"cacheFile"] error:nil];
+    }
 }
 
-+(void) uploadFile:(NSURL*) fileUrl onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable)) completion
++(void) uploadFile:(NSURL*) fileUrl onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error)) completion
 {
+    DDLogInfo(@"Uploading file stored at %@", [fileUrl path]);
+    
     //copy file to our document cache (temporary filename because the upload url is unknown yet)
     NSString* tempname = [NSString stringWithFormat:@"%@.tmp", [[NSUUID UUID] UUIDString]];
     NSError* error;
     NSString* file = [documentCache stringByAppendingPathComponent:tempname];
+    DDLogDebug(@"Tempstoring file at %@", file);
     [fileManager copyItemAtPath:[fileUrl path] toPath:file error:&error];
     if(error)
     {
@@ -202,13 +240,18 @@ static NSString* documentCache;
     [self internalUploadHandlerForTmpFile:file userFacingFilename:[fileUrl lastPathComponent] mimeType:[self getMimeTypeOfOriginalFile:[fileUrl path]] onAccount:account withEncryption:encrypt andCompletion:completion];
 }
 
-+(void) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable)) completion
++(void) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error)) completion
 {
+    double jpegQuality = 0.75;          //TODO JIM: make this configurable in upload/download settings
+    
+    DDLogInfo(@"Uploading image from UIImage object");
+    
     //copy file to our document cache (temporary filename because the upload url is unknown yet)
     NSString* tempname = [NSString stringWithFormat:@"%@.tmp", [[NSUUID UUID] UUIDString]];
     NSError* error;
     NSString* file = [documentCache stringByAppendingPathComponent:tempname];
-    NSData* imageData = UIImageJPEGRepresentation(image, 0.75);     //TODO JIM: make this configurable in upload/download settings
+    DDLogDebug(@"Tempstoring jpeg encoded file having quality %f at %@", jpegQuality, file);
+    NSData* imageData = UIImageJPEGRepresentation(image, jpegQuality);
     [imageData writeToFile:file options:NSDataWritingAtomic error:&error];
     if(error)
     {
@@ -218,12 +261,84 @@ static NSString* documentCache;
     }
     [HelperTools configureFileProtectionFor:file];
     
-    [self internalUploadHandlerForTmpFile:file userFacingFilename:[[NSUUID UUID] UUIDString] mimeType:@"image/jpeg" onAccount:account withEncryption:encrypt andCompletion:completion];
+    [self internalUploadHandlerForTmpFile:file userFacingFilename:[NSString stringWithFormat:@"%@.jpg", [[NSUUID UUID] UUIDString]] mimeType:@"image/jpeg" onAccount:account withEncryption:encrypt andCompletion:completion];
+}
+
++(void) doStartupCleanup
+{
+    //delete leftover tmp files
+    NSArray* directoryContents = [fileManager contentsOfDirectoryAtPath:documentCache error:nil];
+    NSPredicate* filter = [NSPredicate predicateWithFormat:@"self ENDSWITH '.tmp'"];
+    for(NSString* file in [directoryContents filteredArrayUsingPredicate:filter])
+    {
+        DDLogInfo(@"Deleting leftover tmp file at %@", [documentCache stringByAppendingPathComponent:file]);
+        [fileManager removeItemAtPath:[documentCache stringByAppendingPathComponent:file] error:nil];
+    }
+    
+    //*** migrate old image store to new fileupload store if needed***
+    if(![[HelperTools defaultsDB] boolForKey:@"ImageCacheMigratedToFiletransferCache"])
+    {
+        DDLogInfo(@"Migrating old image store to new filetransfer cache");
+        
+        //first of all upgrade all message types (needed to make getFileInfoForMessage: work later on)
+        [[DataLayer sharedInstance] upgradeImageMessagesToFiletransferMessages];
+        
+        //copy all images listed in old imageCache db tables to our new filetransfer store
+        NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        NSString* documentsDirectory = [paths objectAtIndex:0];
+        NSString* cachePath = [documentsDirectory stringByAppendingPathComponent:@"imagecache"];
+        for(NSDictionary* img in [[DataLayer sharedInstance] getAllCachedImages])
+        {
+            //extract old url, file and mime type
+            NSURLComponents* urlComponents = [NSURLComponents componentsWithString:img[@"url"]];
+            if(!urlComponents)
+                continue;
+            NSString* mimeType = [self getMimeTypeOfOriginalFile:urlComponents.path];
+            NSString* oldFile = [cachePath stringByAppendingPathComponent:img[@"path"]];
+            NSString* newFile = [self calculateCacheFileForNewUrl:img[@"url"] andMimeType:mimeType];
+            
+            DDLogInfo(@"Migrating old image cache file %@ (having mimeType %@) for URL %@ to new cache at %@", oldFile, mimeType, img[@"url"], newFile);
+            if([fileManager fileExistsAtPath:oldFile])
+            {
+                [fileManager copyItemAtPath:oldFile toPath:newFile error:nil];
+                [HelperTools configureFileProtectionFor:newFile];
+                [fileManager removeItemAtPath:oldFile error:nil];
+            }
+            else
+                DDLogWarn(@"Old file not existing --> not moving file, but still updating db entries");
+            
+            //update every history_db entry with new filetransfer metadata
+            //(this will flip the message type to kMessageTypeFiletransfer and set correct mimeType and size values)
+            NSArray* messageList = [[DataLayer sharedInstance] getAllMessagesForFiletransferUrl:img[@"url"]];
+            if(![messageList count])
+            {
+                DDLogWarn(@"No messages in history db having this url, deleting file completely");
+                [fileManager removeItemAtPath:newFile error:nil];
+            }
+            else
+            {
+                DDLogInfo(@"Updating every history db entry with new filetransfer metadata: %lu messages", [messageList count]);
+                for(MLMessage* msg in messageList)
+                {
+                    NSDictionary* info = [self getFileInfoForMessage:msg];
+                    DDLogDebug(@"FILETRANSFER INFO: %@", info);
+                    //don't update mime type and size if we still need to download the file (both is unknown in this case)
+                    if(info && ![info[@"needsDownloading"] boolValue])
+                        [[DataLayer sharedInstance] setMessageHistoryId:msg.messageDBId filetransferMimeType:info[@"mimeType"] filetransferSize:info[@"size"]];
+                }
+            }
+        }
+        
+        //remove old db tables completely
+        [[DataLayer sharedInstance] removeImageCacheTables];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"ImageCacheMigratedToFiletransferCache"];
+        DDLogInfo(@"Migration done");
+    }
 }
 
 #pragma mark - internal methods
 
-+(NSString*) loadCacheFileForUrl:(NSString*) url andMimeType:(NSString*) mimeType
++(NSString*) retrieveCacheFileForUrl:(NSString*) url andMimeType:(NSString*) mimeType
 {
     NSString* urlPart = [HelperTools hexadecimalString:[HelperTools sha256:[url dataUsingEncoding:NSUTF8StringEncoding]]];
     if(mimeType)
@@ -248,7 +363,7 @@ static NSString* documentCache;
     return nil;
 }
 
-+(NSString*) getCacheFileNameForUrl:(NSString*) url andMimeType:(NSString*) mimeType
++(NSString*) calculateCacheFileForNewUrl:(NSString*) url andMimeType:(NSString*) mimeType
 {
     //the cache filename consists of a hash of the upload url (in hex) followed of the file mimetype (also in hex) as file extension
     NSString* urlPart = [HelperTools hexadecimalString:[HelperTools sha256:[url dataUsingEncoding:NSUTF8StringEncoding]]];
@@ -258,10 +373,16 @@ static NSString* documentCache;
 
 +(NSString*) genCanonicalUrl:(NSString*) url
 {
-    NSString* lowercaseURL = [url lowercaseString];
-    if([lowercaseURL hasPrefix:@"aesgcm://"])
-        url = [NSString stringWithFormat:@"https://%@", [url substringFromIndex:@"aesgcm://".length]];
-    return url;
+    NSURLComponents* urlComponents = [NSURLComponents componentsWithString:url];
+    if(!urlComponents)
+    {
+        DDLogWarn(@"Failed to get url components, returning url possibly still including an urlfragment!");
+        return url;
+    }
+    if([urlComponents.scheme isEqualToString:@"aesgcm"])
+        urlComponents.scheme = @"https";
+    urlComponents.fragment = @"";       //make sure we don't leak urlfragments to upload server
+    return urlComponents.string;
 }
 
 +(NSString*) getMimeTypeOfOriginalFile:(NSString*) file
@@ -269,6 +390,8 @@ static NSString* documentCache;
     CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)[file pathExtension], NULL);
     NSString* mimeType = (__bridge_transfer NSString*)UTTypeCopyPreferredTagWithClass(UTI, kUTTagClassMIMEType);
     CFRelease(UTI);
+    if(!mimeType)
+        mimeType = @"application/octet-stream";
     return mimeType;
 }
 
@@ -297,6 +420,7 @@ static NSString* documentCache;
 +(void) internalUploadHandlerForTmpFile:(NSString*) file userFacingFilename:(NSString*) userFacingFilename mimeType:(NSString*) mimeType onAccount:(xmpp*) account withEncryption:(BOOL) encrypted andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable)) completion
 {
     //TODO: allow real file based transfers instead of NSData based transfers
+    DDLogDebug(@"Reading file data into NSData object");
     NSError* error;
     NSData* fileData = [[NSData alloc] initWithContentsOfFile:file options:0 error:&error];
     if(error)
@@ -310,6 +434,7 @@ static NSString* documentCache;
     MLEncryptedPayload* encryptedPayload;
     if(encrypted)
     {
+        DDLogInfo(@"Encrypting file data before upload");
         encryptedPayload = [AESGcm encrypt:fileData keySize:32];
         if(encryptedPayload)
         {
@@ -326,12 +451,16 @@ static NSString* documentCache;
         }
     }
     
+    //make sure we don't leak information about encrypted files
+    if(encrypted)
+        mimeType = @"application/octet-stream";
+    DDLogDebug(@"Requesting file upload slot for mimeType %@", mimeType);
     [account requestHTTPSlotWithParams:@{
         kData:fileData,
         kFileName:userFacingFilename,
         kContentType:mimeType
     } andCompletion:^(NSString *url, NSError *error) {
-        NSURLComponents* urlComponents = [NSURLComponents componentsWithURL:[NSURL URLWithString:url] resolvingAgainstBaseURL:NO];
+        NSURLComponents* urlComponents = [NSURLComponents componentsWithString:url];
         if(url && urlComponents)
         {
             //build aesgcm url containing "aesgcm" url-scheme and IV and AES-key in urlfragment
@@ -348,7 +477,8 @@ static NSString* documentCache;
             }
 
             //move the tempfile to our cache location
-            NSString* cacheFile = [self getCacheFileNameForUrl:url andMimeType:mimeType];
+            NSString* cacheFile = [self calculateCacheFileForNewUrl:url andMimeType:mimeType];
+            DDLogInfo(@"Moving (possibly encrypted) file to our document cache at %@", cacheFile);
             [fileManager moveItemAtPath:file toPath:cacheFile error:&error];
             if(error)
             {

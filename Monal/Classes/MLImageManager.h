@@ -41,13 +41,9 @@
 
 -(UIImage *_Nullable) getBackground;
 
--(void) imageForAttachmentLink:(NSString *_Nonnull) url withCompletion:(void (^_Nullable)(NSData * _Nullable data)) completionHandler;
--(void) imageURLForAttachmentLink:(NSString *_Nonnull) url withCompletion:(void (^_Nullable)(NSURL * _Nullable url)) completionHandler;
-
 /**
  Purge cache in the event of  a memory warning
  */
 -(void) purgeCache;
 
--(void) saveImageData:(NSData* _Nonnull) data forLink:(NSString* _Nonnull) link;
 @end

@@ -484,19 +484,18 @@
 }
 
 -(void) showChatImges{
-    NSMutableArray *images = [[DataLayer sharedInstance] allAttachmentsFromContact:self.contact.contactJid forAccount:self.accountNo];
+    NSMutableArray* images = [[DataLayer sharedInstance] allAttachmentsFromContact:self.contact.contactJid forAccount:self.accountNo];
     
     if(!self.photos)
-    {   self.photos =[[NSMutableArray alloc] init];
-        for (NSDictionary *imagePath  in images) {
-            NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-            NSString *documentsDirectory = [paths objectAtIndex:0];
-            NSString *readPath = [documentsDirectory stringByAppendingPathComponent:@"imagecache"];
-            readPath = [readPath stringByAppendingPathComponent:[imagePath objectForKey:@"path"]];
-            UIImage *image=[UIImage imageWithContentsOfFile:readPath];
-            IDMPhoto* photo=[IDMPhoto photoWithImage:image];
-            [self.photos addObject:photo];
-        }
+    {
+        self.photos = [[NSMutableArray alloc] init];
+        for(NSDictionary* imageInfo  in images)
+            if(![imageInfo[@"needsDownloading"] boolValue] && [imageInfo[@"mimeType"] hasPrefix:@"image/"])
+            {
+                UIImage* image = [UIImage imageWithContentsOfFile:imageInfo[@"cacheFile"]];
+                IDMPhoto* photo = [IDMPhoto photoWithImage:image];
+                [self.photos addObject:photo];
+            }
     }
     
     dispatch_async(dispatch_get_main_queue(), ^{

@@ -227,24 +227,28 @@
             NSDictionary* info = [MLFiletransfer getFileInfoForMessage:message];
             if(info && [info[@"mimeType"] hasPrefix:@"image/"])
             {
-                NSString* typeHint = (NSString*)kUTTypePNG;
-                if([info[@"mimeType"] isEqualToString:@"image/jpeg"])
-                    typeHint = (NSString*)kUTTypeJPEG;
-                if([info[@"mimeType"] isEqualToString:@"image/png"])
-                    typeHint = (NSString*)kUTTypePNG;
-                if([info[@"mimeType"] isEqualToString:@"image/png"])
-                    typeHint = (NSString*)kUTTypeGIF;
-                NSError *error;
-                UNNotificationAttachment* attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
+                UNNotificationAttachment* attachment;
+                if(![info[@"needsDownloading"] boolValue])
+                {
+                    NSString* typeHint = (NSString*)kUTTypePNG;
+                    if([info[@"mimeType"] isEqualToString:@"image/jpeg"])
+                        typeHint = (NSString*)kUTTypeJPEG;
+                    if([info[@"mimeType"] isEqualToString:@"image/png"])
+                        typeHint = (NSString*)kUTTypePNG;
+                    if([info[@"mimeType"] isEqualToString:@"image/png"])
+                        typeHint = (NSString*)kUTTypeGIF;
+                    NSError *error;
+                    attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
+                    if(error)
+                        DDLogError(@"Error %@", error);
+                }
                 if(attachment)
+                {
                     content.attachments = @[attachment];
-                if(error)
-                    DDLogError(@"Error %@", error);
-
-                if(!content.attachments)
-                    content.body = NSLocalizedString(@"Sent an Image 📷", @"");
-                else
                     content.body = @"";
+                }
+                else
+                    content.body = NSLocalizedString(@"Sent an Image 📷", @"");
 
                 [self publishNotificationContent:content withID:idval];
             }

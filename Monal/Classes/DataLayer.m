@@ -15,6 +15,7 @@
 #import "XMPPMessage.h"
 #import "XMPPIQ.h"
 #import "XMPPDataForm.h"
+#import "MLFiletransfer.h"
 
 @interface DataLayer()
 @property (readonly, strong) MLSQLite* db;
@@ -263,7 +264,12 @@ static NSDateFormatter* dbFormatter;
     // remove all other traces of the account_id in one transaction
     return [self.db boolWriteTransaction:^{
         [self.db executeNonQuery:@"DELETE FROM buddylist WHERE account_id=?;" andArguments:@[accountNo]];
+        
+        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=?;" andArguments:@[kMessageTypeFiletransfer, accountNo]];
+        for(NSNumber* historyId in messageHistoryIDs)
+            [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
         [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=?;" andArguments:@[accountNo]];
+        
         [self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=?;" andArguments:@[accountNo]];
         return [self.db executeNonQuery:@"DELETE FROM account WHERE account_id=?;" andArguments:@[accountNo]];
     }];
@@ -1092,9 +1098,9 @@ static NSDateFormatter* dbFormatter;
 {
     if(historyId == nil)
         return;
-    NSString* query = @"UPDATE message_history SET filetransferMimeType=?, filetransferSize=? WHERE message_history_id=?;";
-    DDLogVerbose(@"setting mime type '%@' and size %@ for history id %@", mimeType, size, historyId);
-    [self.db executeNonQuery:query andArguments:@[mimeType ? mimeType : @"application/binary", size, historyId]];
+    NSString* query = @"UPDATE message_history SET messageType=?, filetransferMimeType=?, filetransferSize=? WHERE message_history_id=?;";
+    DDLogVerbose(@"setting message type 'kMessageTypeFiletransfer', mime type '%@' and size %@ for history id %@", mimeType, size, historyId);
+    [self.db executeNonQuery:query andArguments:@[kMessageTypeFiletransfer, mimeType, size, historyId]];
 }
 
 -(void) setMessageHistoryId:(NSNumber*) historyId messageType:(NSString*) messageType
@@ -1124,14 +1130,23 @@ static NSDateFormatter* dbFormatter;
 -(void) clearMessages:(NSString*) accountNo
 {
     [self.db voidWriteTransaction:^{
+        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=?;" andArguments:@[kMessageTypeFiletransfer, accountNo]];
+        for(NSNumber* historyId in messageHistoryIDs)
+            [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
         [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=?;" andArguments:@[accountNo]];
+        
         [self.db executeNonQuery:@"DELETE FROM activechats WHERE account_id=?;" andArguments:@[accountNo]];
     }];
 }
 
 -(void) deleteMessageHistory:(NSNumber*) messageNo
 {
-    [self.db executeNonQuery:@"DELETE FROM message_history WHERE message_history_id=?;" andArguments:@[messageNo]];
+    [self.db voidWriteTransaction:^{
+        MLMessage* msg = [self messageForHistoryID:messageNo];
+        if([msg.messageType isEqualToString:kMessageTypeFiletransfer])
+            [MLFiletransfer deleteFileForMessage:msg];
+        [self.db executeNonQuery:@"DELETE FROM message_history WHERE message_history_id=?;" andArguments:@[messageNo]];
+    }];
 }
 
 -(void) updateMessageHistory:(NSNumber*) messageNo withText:(NSString*) newText
@@ -1223,7 +1238,12 @@ static NSDateFormatter* dbFormatter;
 
 -(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-    return [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=? AND (message_from=? OR message_to=?);" andArguments:@[accountNo, buddy, buddy]];
+    return [self.db boolWriteTransaction:^{
+        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=? AND (message_from=? OR message_to=?);" andArguments:@[kMessageTypeFiletransfer, accountNo, buddy, buddy]];
+        for(NSNumber* historyId in messageHistoryIDs)
+            [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
+        return [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=? AND (message_from=? OR message_to=?);" andArguments:@[accountNo, buddy, buddy]];
+    }];
 }
 
 -(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo
@@ -2069,51 +2089,43 @@ static NSDateFormatter* dbFormatter;
     [self.db executeNonQuery:query andArguments:@[accountNo, buddyJid]];
 }
 
-#pragma mark - Images
+#pragma mark - Filetransfers
 
--(void) createImageCache:(NSString *) path forUrl:(NSString*) url
+-(NSArray*) getAllCachedImages
 {
-    NSString* query = @"insert into imageCache(url, path) values(?, ?)";
-    NSArray* params = @[url, path];
-    [self.db executeNonQuery:query andArguments:params];
+    return [self.db executeReader:@"SELECT DISTINCT * FROM imageCache;"];
 }
 
--(void) deleteImageCacheForUrl:(NSString*) url
+-(NSArray*) getAllMessagesForFiletransferUrl:(NSString*) url
 {
-    NSString* query = @"delete from imageCache where url=?";
-    NSArray* params = @[url];
-    [self.db executeNonQuery:query andArguments:params];
+    return [self messagesForHistoryIDs:[self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE message=?;" andArguments:@[url]]];
 }
 
--(NSString*) imageCacheForUrl:(NSString*) url
+-(void) upgradeImageMessagesToFiletransferMessages
 {
-    if(!url) return nil;
-    NSString* query = @"select path from imageCache where url=?";
-    NSArray* params = @[url];
-    NSObject* val = [self.db executeScalar:query andArguments:params];
-    NSString* path = (NSString *) val;
-    return path;
+    [self.db executeNonQuery:@"UPDATE message_history SET messageType=? WHERE messageType=?;" andArguments:@[kMessageTypeFiletransfer, @"Image"]];
+}
+
+-(void) removeImageCacheTables
+{
+    [self.db executeNonQuery:@"DROP TABLE imageCache;"];
 }
 
 -(NSMutableArray*) allAttachmentsFromContact:(NSString*) contact forAccount:(NSString*) accountNo
 {
-    if(!accountNo ||! contact) return nil;
-    NSString* query = @"select distinct A.* from imageCache as A inner join  message_history as B on message = a.url where account_id=? and actual_from=? order by message_history_id desc";
-    NSArray* params = @[accountNo, contact];
-    NSMutableArray* toReturn = [[self.db executeReader:query andArguments:params] mutableCopy];
-
-    if(toReturn!=nil)
-    {
-        DDLogVerbose(@"attachment  count: %lu",  (unsigned long)[toReturn count]);
-        return toReturn;
-    }
-    else
-    {
-        DDLogError(@"attachment list  is empty or failed to read");
-        return [[NSMutableArray alloc] init];
-    }
-
+    if(!accountNo ||! contact)
+        return nil;
+    
+    NSString* query = @"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=? AND (message_from=? OR message_to=?) GROUP BY message ORDER BY message_history_id ASC;";
+    NSArray* params = @[kMessageTypeFiletransfer, accountNo, contact, contact];
+    
+    NSMutableArray* retval = [[NSMutableArray alloc] init];
+    for(MLMessage* msg in [self messagesForHistoryIDs:[self.db executeScalarReader:query andArguments:params]])
+        [retval addObject:[MLFiletransfer getFileInfoForMessage:msg]];
+    return retval;
 }
+
+#pragma mark - last interaction
 
 -(NSDate*) lastInteractionOfJid:(NSString* _Nonnull) jid forAccountNo:(NSString* _Nonnull) accountNo
 {

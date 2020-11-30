@@ -19,6 +19,7 @@
 #import "ActiveChatsViewController.h"
 #import "IPC.h"
 #import "MLProcessLock.h"
+#import "MLFiletransfer.h"
 #import "xmpp.h"
 
 @import NotificationBannerSwift;
@@ -169,6 +170,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [MLProcessLock lock];
     [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
     
+    //do MLFiletransfer cleanup tasks (do this in a new thread to parallelize it with our ping to the appex and don't slow down app startup)
+    //this will also migrate our old image cache to new MLFiletransfer cache
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [MLFiletransfer doStartupCleanup];
+    });
+    
     //only proceed with launching if the NotificationServiceExtension is *not* running
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
     {
@@ -296,8 +303,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     //handle IPC messages (this should be done *after* calling connectIfNecessary to make sure any disconnectAll messages are handled properly
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
     
-    //handle catalyst minimize/maximize window
 #if TARGET_OS_MACCATALYST
+    //handle catalyst foregrounding/backgrounding of window
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowHandling:) name:@"NSWindowDidResignKeyNotification" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowHandling:) name:@"NSWindowDidBecomeKeyNotification" object:nil];
 #endif
@@ -769,7 +776,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     
     //log bgtask ticks (and stop when the task expires)
     unsigned long tick = 0;
-    while(_bgFetch)
+    while(_bgFetch != nil)
     {
         DDLogVerbose(@"BGTASK TICK: %lu", tick++);
         [DDLog flushLog];

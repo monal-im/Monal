@@ -245,9 +245,6 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) encryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo;
 -(void) disableEncryptForJid:(NSString*) jid andAccountNo:(NSString*) accountNo;
 
--(void) createImageCache:(NSString *) path forUrl:(NSString*) url;
--(void) deleteImageCacheForUrl:(NSString*) url;
--(NSString* _Nullable) imageCacheForUrl:(NSString* _Nonnull) url;
 -(NSMutableArray*) allAttachmentsFromContact:(NSString*) contact forAccount:(NSString*) accountNo;
 -(NSDate*) lastInteractionOfJid:(NSString* _Nonnull) jid forAccountNo:(NSString* _Nonnull) accountNo;
 -(void) setLastInteraction:(NSDate*) lastInteractionTime forJid:(NSString* _Nonnull) jid andAccountNo:(NSString* _Nonnull) accountNo;
@@ -269,6 +266,12 @@ extern NSString* const kMessageTypeFiletransfer;
                                              accountNo:(NSString*  _Nonnull) accountNo
                                           betweenBuddy:(NSString*  _Nonnull) accountJid1
                                               andBuddy:(NSString*  _Nonnull) accountJid2;
+
+-(NSArray*) getAllCachedImages;
+-(void) removeImageCacheTables;
+-(NSArray*) getAllMessagesForFiletransferUrl:(NSString*) url;
+-(void) upgradeImageMessagesToFiletransferMessages;
+
 @end
 
 NS_ASSUME_NONNULL_END

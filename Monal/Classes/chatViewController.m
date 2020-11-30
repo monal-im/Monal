@@ -1630,7 +1630,7 @@ enum msgSentState {
     {
         DDLogVerbose(@"got filetransfer chat cell: %@ (%@)", row.filetransferMimeType, row.filetransferSize);
         NSDictionary* info = [MLFiletransfer getFileInfoForMessage:row];
-        if(info && [info[@"mimeType"] hasPrefix:@"image/"])
+        if(info && ![info[@"needsDownloading"] boolValue] && [info[@"mimeType"] hasPrefix:@"image/"])
         {
             MLChatImageCell* imageCell = (MLChatImageCell *) [self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable:tableView];
 

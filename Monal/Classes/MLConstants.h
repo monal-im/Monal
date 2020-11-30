@@ -44,6 +44,7 @@ typedef enum NotificationPrivacySettingOption {
 
 //some xmpp related constants
 #define kRegServer @"yax.im"
+#define kMessageDeletedBody @"eu.siacs.conversations.message_deleted"
 
 #define kXMLNS @"xmlns"
 #define kId @"id"

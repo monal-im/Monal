@@ -1989,7 +1989,7 @@ enum msgSentState {
     UIContextualAction* LMCDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete", @"") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         self.editingCallback = nil;
         
-        [self.xmppAccount sendLMCForId:message.messageId withNewBody:@"eu.siacs.conversations.message_deleted" to:message.to];
+        [self.xmppAccount sendLMCForId:message.messageId withNewBody:kMessageDeletedBody to:message.to];
         [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
         
         [self->_messageTable beginUpdates];

@@ -201,7 +201,7 @@ static NSMutableDictionary* _typingNotifications;
                     historyId = [[DataLayer sharedInstance] getHistoryIDForMessageId:messageIdToReplace from:messageNode.fromUser andAccount:account.accountNo];
                     if([[DataLayer sharedInstance] checkLMCEligible:historyId from:messageNode.fromUser])
                     {
-                        if(![body isEqualToString:@"eu.siacs.conversations.message_deleted"])
+                        if(![body isEqualToString:kMessageDeletedBody])
                             [[DataLayer sharedInstance] updateMessageHistory:historyId withText:body];
                         else
                             deleteMessage = YES;
@@ -211,7 +211,7 @@ static NSMutableDictionary* _typingNotifications;
                 }
                 
                 //handle normal messages or LMC messages that can not be found (but ignore deletion LMCs)
-                if(historyId == nil && ![body isEqualToString:@"eu.siacs.conversations.message_deleted"])
+                if(historyId == nil && ![body isEqualToString:kMessageDeletedBody])
                 {
                     historyId = [[DataLayer sharedInstance]
                              addMessageFrom:messageNode.fromUser

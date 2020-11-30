@@ -86,9 +86,9 @@ enum activeChatsControllerSections {
 #if !TARGET_OS_MACCATALYST
         self.splitViewController.primaryBackgroundStyle = UISplitViewControllerBackgroundStyleSidebar;
 #endif
-        self.settingsButton.image = [UIImage systemImageNamed:@"gearshape"];
+        self.settingsButton.image = [UIImage systemImageNamed:@"gearshape.fill"];
         self.addButton.image = [UIImage systemImageNamed:@"plus"];
-        self.composeButton.image = [UIImage systemImageNamed:@"person.crop.circle"];
+        self.composeButton.image = [UIImage systemImageNamed:@"person.2.fill"];
     }
     else
     {

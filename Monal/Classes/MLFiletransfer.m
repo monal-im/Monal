@@ -452,13 +452,15 @@ static NSString* documentCache;
     }
     
     //make sure we don't leak information about encrypted files
+    NSString* sendMimeType = mimeType;
     if(encrypted)
-        mimeType = @"application/octet-stream";
-    DDLogDebug(@"Requesting file upload slot for mimeType %@", mimeType);
+        sendMimeType = @"application/octet-stream";
+    
+    DDLogDebug(@"Requesting file upload slot for mimeType %@", sendMimeType);
     [account requestHTTPSlotWithParams:@{
         kData:fileData,
         kFileName:userFacingFilename,
-        kContentType:mimeType
+        kContentType:sendMimeType
     } andCompletion:^(NSString *url, NSError *error) {
         NSURLComponents* urlComponents = [NSURLComponents componentsWithString:url];
         if(url && urlComponents)

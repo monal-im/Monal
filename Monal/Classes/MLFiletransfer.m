@@ -125,7 +125,7 @@ static NSString* documentCache;
             NSString* cacheFile = [self calculateCacheFileForNewUrl:msg.messageText andMimeType:mimeType];
             
             //encrypted filetransfer
-            if([urlComponents.scheme isEqualToString:@"aesgcm"])
+            if([[urlComponents.scheme lowercaseString] isEqualToString:@"aesgcm"])
             {
                 DDLogInfo(@"Decrypting encrypted filetransfer");
                 if(urlComponents.fragment.length < 88)
@@ -379,7 +379,7 @@ static NSString* documentCache;
         DDLogWarn(@"Failed to get url components, returning url possibly still including an urlfragment!");
         return url;
     }
-    if([urlComponents.scheme isEqualToString:@"aesgcm"])
+    if([[urlComponents.scheme lowercaseString] isEqualToString:@"aesgcm"])
         urlComponents.scheme = @"https";
     urlComponents.fragment = @"";       //make sure we don't leak urlfragments to upload server
     return urlComponents.string;

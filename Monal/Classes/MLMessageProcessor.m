@@ -276,7 +276,7 @@ static NSMutableDictionary* _typingNotifications;
                     {
                         [[DataLayer sharedInstance] deleteMessageHistory:historyId];
                         
-                        DDLogInfo(@"sending out kMonalDeletedMessageNotice notification for historyId %@", historyId);
+                        DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyId);
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
                             @"message": message,
                         }];
@@ -288,7 +288,7 @@ static NSMutableDictionary* _typingNotifications;
                         else
                             [[DataLayer sharedInstance] addActiveBuddies:messageNode.toUser forAccount:account.accountNo];
                         
-                        DDLogInfo(@"sending out kMonalNewMessageNotice notification for historyId %@", historyId);
+                        DDLogInfo(@"Sending out kMonalNewMessageNotice notification for historyId %@", historyId);
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
                             @"message": message,
                             @"historyId": historyId,

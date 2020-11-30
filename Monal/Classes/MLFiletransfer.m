@@ -82,7 +82,11 @@ static NSString* documentCache;
             
             //try to autodownload if sizes match
             //TODO JIM: these are the settings used for size checks and autodownload allowed checks
-            if([[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"] && [contentLength integerValue] <= [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"])
+            if(
+                [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"] &&
+                [contentLength intValue] >= 0 &&        //-1 means we don't know the size --> don't autodownload files of unknown sizes
+                [contentLength integerValue] <= [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"]
+            )
             {
                 DDLogInfo(@"Autodownloading file");
                 [self downloadFileForHistoryID:historyId];
@@ -171,9 +175,12 @@ static NSString* documentCache;
             DDLogDebug(@"Updating db and sending out kMonalMessageFiletransferUpdateNotice");
             
             //update db with content type and size
-            [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:@([[fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize])];
+            NSNumber* filetransferSize = @([[fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize]);
+            [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:filetransferSize];
             
-            //send out update notification
+            //send out update notification (and update used MLMessage object directly instead of reloading it from db after updating the db)
+            msg.filetransferMimeType = mimeType;
+            msg.filetransferSize = filetransferSize;
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageFiletransferUpdateNotice object:nil userInfo:@{@"message": msg}];
         }];
         [task resume];

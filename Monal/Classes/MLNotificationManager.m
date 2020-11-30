@@ -38,6 +38,7 @@
 {
     self = [super init];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleFiletransferUpdate:) name:kMonalMessageFiletransferUpdateNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDeletedMessage:) name:kMonalDeletedMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDisplayedMessage:) name:kMonalDisplayedMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleXMPPError:) name:kXMPPError object:nil];
@@ -69,22 +70,48 @@
 
 #pragma mark message signals
 
+-(void) handleFiletransferUpdate:(NSNotification*) notification
+{
+    MLMessage* message = [notification.userInfo objectForKey:@"message"];
+    NSString* idval = [self identifierWithMessage:message];
+    
+    //check if we already show any notifications and update them if necessary (e.g. publish a second notification having the same id)
+    [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
+        for(UNNotificationRequest* request in requests)
+            if([request.identifier isEqualToString:idval])
+            {
+                [self internalMessageHandlerWithMessage:message showAlert:YES andSound:YES];
+            }
+    }];
+    [[UNUserNotificationCenter currentNotificationCenter] getDeliveredNotificationsWithCompletionHandler:^(NSArray* notifications) {
+        for(UNNotification* notification in notifications)
+             if([notification.request.identifier isEqualToString:idval])
+            {
+                [self internalMessageHandlerWithMessage:message showAlert:YES andSound:NO];
+            }
+    }];
+}
+
 -(void) handleNewMessage:(NSNotification*) notification
 {
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
     BOOL showAlert = notification.userInfo[@"showAlert"] ? [notification.userInfo[@"showAlert"] boolValue] : NO;
-    
+    [self internalMessageHandlerWithMessage:message showAlert:showAlert andSound:YES];
+}
+
+-(void) internalMessageHandlerWithMessage:(MLMessage*) message showAlert:(BOOL) showAlert andSound:(BOOL) sound
+{
     if([message.messageType isEqualToString:kMessageTypeStatus])
         return;
     
-    DDLogVerbose(@"notification manager got new message notice: %@", message.messageText);
+    DDLogVerbose(@"notification manager should show notification for: %@", message.messageText);
     BOOL muted = [[DataLayer sharedInstance] isMutedJid:message.actualFrom];
     if(!muted && showAlert)
     {
         if([HelperTools isInBackground])
         {
-            DDLogVerbose(@"notification manager got new message notice in background: %@", message.messageText);
-            [self showModernNotificaion:notification];
+            DDLogVerbose(@"notification manager should show notification in background: %@", message.messageText);
+            [self showModernNotificaionForMessage:message withSound:sound];
         }
         else
         {
@@ -93,13 +120,13 @@
                 ![message.from isEqualToString:self.currentContact.contactJid] &&
                 ![message.to isEqualToString:self.currentContact.contactJid]
             )
-                [self showModernNotificaion:notification];
+                [self showModernNotificaionForMessage:message withSound:sound];
             else
                 DDLogDebug(@"not showing notification: chat is open");
         }
     }
     else
-        DDLogDebug(@"not showing notification: showAlert is NO");
+        DDLogDebug(@"not showing notification: showAlert is NO (or this contact got muted)");
 }
 
 -(void) handleDisplayedMessage:(NSNotification*) notification
@@ -173,9 +200,8 @@
     }];
 }
 
--(void) showModernNotificaion:(NSNotification*) notification
+-(void) showModernNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound
 {
-    MLMessage* message = [notification.userInfo objectForKey:@"message"];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     
     MLContact* contact = [[DataLayer sharedInstance] contactForUsername:message.from forAccount:message.accountId];
@@ -216,7 +242,7 @@
             @"messageId": message.messageId
         };
 
-        if([[HelperTools defaultsDB] boolForKey:@"Sound"])
+        if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
         {
             NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
             if(filename)

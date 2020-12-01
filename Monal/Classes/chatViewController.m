@@ -1594,10 +1594,10 @@ enum msgSentState {
     if(indexPath.section == reloadBoxSection)
     {
         MLReloadCell* cell = (MLReloadCell*)[tableView dequeueReusableCellWithIdentifier:@"reloadBox" forIndexPath:indexPath];
-        #if TARGET_OS_MACCATALYST
+#if TARGET_OS_MACCATALYST
             // "Pull" could be a bit misleading on a mac
             cell.reloadLabel.text = NSLocalizedString(@"Scroll down to load more messages", @"mac only string");
-        #endif
+#endif
 
         // Remove selection style (if cell is pressed)
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -1609,8 +1609,13 @@ enum msgSentState {
     MLMessage* row;
     if(indexPath.row < self.messageList.count) {
         row = [self.messageList objectAtIndex:indexPath.row];
-    } else  {
+    } else {
         DDLogError(@"Attempt to access beyond bounds");
+        cell = [tableView dequeueReusableCellWithIdentifier:@"StatusCell"];
+        cell.messageBody.text = @"Dummy cell that should not be visible at all";
+        cell.link = nil;
+        cell.parent = self;
+        return cell;
     }
 
     //cut text after kMonalChatMaxAllowedTextLen chars to make the message cell work properly (too big texts don't render the text in the cell at all)
@@ -1624,12 +1629,17 @@ enum msgSentState {
         cell = [tableView dequeueReusableCellWithIdentifier:@"StatusCell"];
         cell.messageBody.text = messageText;
         cell.link = nil;
+        cell.parent = self;
         return cell;
     }
     else if([row.messageType isEqualToString:kMessageTypeFiletransfer])
     {
         DDLogVerbose(@"got filetransfer chat cell: %@ (%@)", row.filetransferMimeType, row.filetransferSize);
         NSDictionary* info = [MLFiletransfer getFileInfoForMessage:row];
+        
+        //TODO JIM: here we need the download and check-file buttons
+        
+        //TODO JIM: explanation: this was already downloaded and it is an image --> show this image inline
         if(info && ![info[@"needsDownloading"] boolValue] && [info[@"mimeType"] hasPrefix:@"image/"])
         {
             MLChatImageCell* imageCell = (MLChatImageCell *) [self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable:tableView];
@@ -1643,18 +1653,46 @@ enum msgSentState {
             }
             cell = imageCell;
         }
+        //TODO JIM: explanation: this was already checked (mime ype and size are known) but not yet downloaded --> download it
+        //TODO JIM: explanation: this should not be automatically but only triggered by a button press
+        //TODO JIM: explanation: I'm doing this automatically here because we still lack those buttons
+        //TODO JIM: explanation: this only handles images, because we don't want to autodownload everything
+        else if(info && [info[@"needsDownloading"] boolValue] && [info[@"mimeType"] hasPrefix:@"image/"] && [[HelperTools defaultsDB] boolForKey:@"ShowImages"])
+            [MLFiletransfer downloadFileForHistoryID:row.messageDBId];
+        //TODO JIM: explanation: this was not yet checked, do an http head request to get mime type and size
+        //TODO JIM: explanation: this should not be automatically but only triggered by a button press
+        //TODO JIM: explanation: I'm doing this automatically here because we still lack those buttons
+        else if(info && [info[@"needsDownloading"] boolValue] && info[@"mimeType"] == nil)
+            [MLFiletransfer checkMimeTypeAndSizeForHistoryID:row.messageDBId];
         else
         {
-            //TODO JIM: add handling for some special mime types and default handling for general files (e.g. download/open button cell)
-            //TODO JIM: files not already downloaded have row.filetransferMimeType and row.filetransferSize to non-nil values,
-            //TODO JIM: files not checked with [MLFiletransfer checkMimeTypeAndSizeForHistoryID:] will have nil values for
-            //TODO JIM: row.filetransferMimeType and row.filetransferSize and need to display a checking button
+            //TODO JIM: add handling for some other mime types and default handling for general files (e.g. "open this file" button) here
+            //TODO JIM: for now we just show the link as normal chat cell
+        }
+        
+        if(cell == nil)
+        {
+            //this is just a dummy to display something usable (the filetransfer url as link cell)
+            MLLinkCell* toreturn = (MLLinkCell *)[self messageTableCellWithIdentifier:@"link" andInbound:inDirection fromTable: tableView];;
+            toreturn.link = row.messageText;
+            toreturn.messageBody.text = toreturn.link;
             
-            //this is just a dummy to display something (the filetransfer url)
-            cell = (MLChatCell*)[self messageTableCellWithIdentifier:@"text" andInbound:inDirection fromTable: tableView];
-            UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize];
-            [cell.messageBody setFont:originalFont];
-            [cell.messageBody setText:messageText];
+            if(row.previewText || row.previewImage)
+            {
+                toreturn.imageUrl = row.previewImage;
+                toreturn.messageTitle.text = row.previewText;
+                [toreturn loadImageWithCompletion:^{}];
+            }
+            else
+            {
+                [toreturn loadPreviewWithCompletion:^{
+                    // prevent repeated calls
+                    if(toreturn.messageTitle.text.length == 0)
+                        toreturn.messageTitle.text = @" ";
+                    [[DataLayer sharedInstance] setMessageId:row.messageId previewText:toreturn.messageTitle.text andPreviewImage:toreturn.imageUrl.absoluteString];
+                }];
+            }
+            cell = toreturn;
         }
     }
     else if([row.messageType isEqualToString:kMessageTypeUrl])

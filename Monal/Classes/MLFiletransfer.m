@@ -19,6 +19,7 @@
 
 static NSFileManager* fileManager;
 static NSString* documentCache;
+static NSMutableSet* checklist;
 
 @implementation MLFiletransfer
 
@@ -31,15 +32,29 @@ static NSString* documentCache;
     if(error)
         @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
     [HelperTools configureFileProtectionFor:documentCache];
+    checklist = [[NSMutableSet alloc] init];
 }
 
 +(void) checkMimeTypeAndSizeForHistoryID:(NSNumber*) historyId
 {
+    MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
+    if(!msg)
+    {
+        DDLogError(@"historyId %@ does not yield an MLMessage object, aborting", historyId);
+        return;
+    }
+    //make sure we don't check or download this twice
+    @synchronized(checklist)
+    {
+        if([checklist containsObject:historyId])
+        {
+            DDLogDebug(@"Already checking/downloading this content, ignoring");
+            return;
+        }
+        [checklist addObject:historyId];
+    }
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         DDLogInfo(@"Requesting mime-type and size for historyID %@ from http server", historyId);
-        MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
-        if(!msg)
-            return;
         NSString* url = [self genCanonicalUrl:msg.messageText];
         NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
         request.HTTPMethod = @"HEAD";
@@ -71,21 +86,22 @@ static NSString* documentCache;
             //update db with content type and size
             [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:contentLength];
             
-            //send out update notification
-            MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
-            if(msg == nil)
-            {
-                DDLogError(@"Could not find msg for history ID %@!", historyId);
-                return;
-            }
+            //send out update notification (and update used MLMessage object directly instead of reloading it from db after updating the db)
+            msg.filetransferMimeType = mimeType;
+            msg.filetransferSize = contentLength;
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageFiletransferUpdateNotice object:nil userInfo:@{@"message": msg}];
+            
+            //check done, remove from "currently checking/downloading list"
+            [checklist removeObject:historyId];
             
             //try to autodownload if sizes match
             //TODO JIM: these are the settings used for size checks and autodownload allowed checks
             if(
                 [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"] &&
                 [contentLength intValue] >= 0 &&        //-1 means we don't know the size --> don't autodownload files of unknown sizes
-                [contentLength integerValue] <= [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"]
+                [contentLength integerValue] <= [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"] &&
+                //TODO JIM: this should be checked for image filetransfers only or mabe removed entirely in favor of AutodownloadFiletransfers
+                [[HelperTools defaultsDB] boolForKey:@"ShowImages"]
             )
             {
                 DDLogInfo(@"Autodownloading file");
@@ -97,17 +113,31 @@ static NSString* documentCache;
 
 +(void) downloadFileForHistoryID:(NSNumber*) historyId
 {
+    MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
+    if(!msg)
+    {
+        DDLogError(@"historyId %@ does not yield an MLMessage object, aborting", historyId);
+        return;
+    }
+    //make sure we don't check or download this twice
+    @synchronized(checklist)
+    {
+        if([checklist containsObject:historyId])
+        {
+            DDLogDebug(@"Already checking/downloading this content, ignoring");
+            return;
+        }
+        [checklist addObject:historyId];
+    }
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         DDLogInfo(@"Downloading file for historyID %@", historyId);
-        MLMessage* msg = [[DataLayer sharedInstance] messageForHistoryID:historyId];
-        if(!msg)
-            return;
         NSString* url = [self genCanonicalUrl:msg.messageText];
         NSURLComponents* urlComponents = [NSURLComponents componentsWithString:msg.messageText];
         if(!urlComponents)
         {
             DDLogError(@"url components decoding failed");
             [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decode download link", @"") forMessageId:msg.messageId];
+            [checklist removeObject:historyId];
             return;
         }
         
@@ -136,6 +166,7 @@ static NSString* documentCache;
                 {
                     DDLogError(@"File download failed: %@", error);
                     [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decode encrypted link", @"") forMessageId:msg.messageId];
+                    [checklist removeObject:historyId];
                     return;
                 }
                 int ivLength = 24;
@@ -153,6 +184,7 @@ static NSString* documentCache;
                     {
                         DDLogError(@"File download failed: %@", error);
                         [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to write decrypted download into cache directory", @"") forMessageId:msg.messageId];
+                        [checklist removeObject:historyId];
                         return;
                     }
                     [HelperTools configureFileProtectionFor:cacheFile];
@@ -167,6 +199,7 @@ static NSString* documentCache;
                 {
                     DDLogError(@"File download failed: %@", error);
                     [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to copy downloaded file into cache directory", @"") forMessageId:msg.messageId];
+                    [checklist removeObject:historyId];
                     return;
                 }
                 [HelperTools configureFileProtectionFor:cacheFile];
@@ -182,6 +215,9 @@ static NSString* documentCache;
             msg.filetransferMimeType = mimeType;
             msg.filetransferSize = filetransferSize;
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageFiletransferUpdateNotice object:nil userInfo:@{@"message": msg}];
+            
+            //download done, remove from "currently checking/downloading list"
+            [checklist removeObject:historyId];
         }];
         [task resume];
     });
@@ -196,12 +232,26 @@ static NSString* documentCache;
     if(urlComponents != nil && urlComponents.path)
         filename = [urlComponents.path lastPathComponent];
     NSString* cacheFile = [self retrieveCacheFileForUrl:msg.messageText andMimeType:(msg.filetransferMimeType && ![msg.filetransferMimeType isEqualToString:@""] ? msg.filetransferMimeType : nil)];
+    
+    //return every information we have
     if(!cacheFile)
-        return @{
-            @"url": msg.messageText,
-            @"filename": filename,
-            @"needsDownloading": @YES,
-        };
+    {
+        //if we have mimeype and size the http head request was already done, else we did not even do a head request
+        if(msg.filetransferMimeType != nil && msg.filetransferSize != nil)
+            return @{
+                @"url": msg.messageText,
+                @"filename": filename,
+                @"needsDownloading": @YES,
+                @"mimeType": msg.filetransferMimeType,
+                @"size": msg.filetransferSize,
+            };
+        else
+            return @{
+                @"url": msg.messageText,
+                @"filename": filename,
+                @"needsDownloading": @YES,
+            };
+    }
     return @{
         @"url": msg.messageText,
         @"filename": filename,

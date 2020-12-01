@@ -29,6 +29,7 @@
 
 @property (nonatomic, strong) xmpp* account;
 @property (nonatomic, strong) NSMutableSet<NSNumber*>* ownReceivedDeviceList;
+@property (nonatomic, assign) BOOL loggedIn;
 
 // jid -> @[deviceID1, deviceID2]
 @property (nonatomic, strong) NSMutableDictionary* devicesWithBrokenSession;
@@ -47,6 +48,7 @@ const int KEY_SIZE = 16;
     self.accountJid = account.connectionProperties.identity.jid;
     self.account = account;
     self.ownReceivedDeviceList = [[NSMutableSet alloc] init];
+    self.loggedIn = NO;
     self.hasCatchUpDone = NO;
     self.openBundleFetchCnt = 0;
     self.closedBundleFetchCnt = 0;
@@ -67,7 +69,8 @@ const int KEY_SIZE = 16;
     NSString* accountNo = [dic objectForKey:@"AccountNo"];
     if(!accountNo) return;
     if([self.account.accountNo isEqualToString:accountNo]) {
-        [self.ownReceivedDeviceList removeAllObjects];
+        self.loggedIn = YES;
+        // We don't have to clear ownReceivedDeviceList as it would have been cleared by a reconnect
     }
 }
 
@@ -77,7 +80,7 @@ const int KEY_SIZE = 16;
 
     if([self.account.accountNo isEqualToString:notiAccount.accountNo]) {
         self.hasCatchUpDone = YES;
-        if(!self.openBundleFetchCnt)
+        if(!self.openBundleFetchCnt && self.loggedIn) // check if we have a session were we loggedIn
         {
             [self sendLocalDevicesIfNeeded];
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedOmemoBundleFetch object:self];
@@ -230,7 +233,7 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
         if(receivedKeys)
             [account.omemo processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
     }
-    if(account.omemo.openBundleFetchCnt > 1)
+    if(account.omemo.openBundleFetchCnt > 1 && account.omemo.loggedIn)
     {
         account.omemo.openBundleFetchCnt--;
         account.omemo.closedBundleFetchCnt++;
@@ -243,7 +246,7 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
     {
         account.omemo.openBundleFetchCnt = 0;
         account.omemo.closedBundleFetchCnt = 0;
-        if(account.omemo.hasCatchUpDone)
+        if(account.omemo.hasCatchUpDone && account.omemo.loggedIn)
         {
             [account.omemo sendLocalDevicesIfNeeded];
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedOmemoBundleFetch object:self];

@@ -38,6 +38,7 @@
             {
                 UIImage* image = [[UIImage alloc] initWithContentsOfFile:info[@"cacheFile"]];
                 [self.thumbnailImage setImage:image];
+                self.link = currentLink;
                 if(image && image.size.height > image.size.width)
                     self.imageHeight.constant = 360;
                 self.loading = NO;

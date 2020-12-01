@@ -15,6 +15,7 @@
 - (void) doReloadActionForAllTableView;
 - (void) doReloadHistoryForSearch;
 - (void) doGetMsgData;
+- (void) doShowLoadingHistory:(NSString* _Nonnull) title;
 @end
 
 NS_ASSUME_NONNULL_BEGIN

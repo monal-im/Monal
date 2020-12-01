@@ -349,16 +349,21 @@ enum msgSentState {
     {
         self.searchController.isLoadingHistory = NO;
         [self.searchController setResultToolBar];
-        if (self.searchController.isGoingUp)
-        {
-            [self.searchController doPreviousAction];
-        }
-        else
-        {
-            [self.searchController doNextAction];
-        }
     }
     [self doGetMsgData];
+}
+
+-(void)doShowLoadingHistory:(NSString *)title
+{
+    UIAlertController *loadingWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Hint", @"")
+                                                                        message:title preferredStyle:UIAlertControllerStyleAlert];
+    
+    [self presentViewController:loadingWarning animated:YES completion:^{
+        dispatch_queue_t queue = dispatch_get_main_queue();
+        dispatch_after(2.0, queue, ^{
+            [loadingWarning dismissViewControllerAnimated:YES completion:nil];
+        });
+    }];
 }
 
 

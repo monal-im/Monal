@@ -112,10 +112,17 @@
         if ([self.searchResultMessageList count] >0)
         {
             self.toolbar.items = @[self.epmtyItem, self.prevItem, self.nextItem, self.searchResultIndicatorItem];
-            self.searchBar.inputAccessoryView = self.toolbar;
+            #if TARGET_OS_MACCATALYST
+                CGFloat yAxis = self.view.frame.size.height - self.searchBar.frame.size.height;
+                [self.toolbar setFrame:CGRectMake(0, yAxis, self.searchBar.frame.size.width, self.searchBar.frame.size.height)];
+                [self.view addSubview:self.toolbar];
+            #else
+                self.searchBar.inputAccessoryView = self.toolbar;
+            #endif
             self.curIdxHistory = (int)[self.searchResultMessageList count] - 1;
             
             [self setResultIndicatorTitle:@"" onlyHint:NO];
+            [self.searchBar reloadInputViews];
         }
         else
         {
@@ -146,6 +153,7 @@
             self.isLoadingHistory = YES;
             self.curIdxHistory -= 1;            
             [self.searchResultDelegate doReloadHistoryForSearch];
+            [self setResultIndicatorTitle:NSLocalizedString(@"Loading more Messages from Server", @"") onlyHint:YES];
         }
     }
     else
@@ -173,6 +181,7 @@
             self.curIdxHistory += 1;
             self.isLoadingHistory = YES;
             [self.searchResultDelegate doReloadHistoryForSearch];
+            [self setResultIndicatorTitle:NSLocalizedString(@"Loading more Messages from Server", @"") onlyHint:YES];
         }
     }
     else
@@ -192,10 +201,10 @@
     else
     {
         finalTitle = title;
+        [self.searchResultDelegate doShowLoadingHistory:finalTitle];
     }
     
     [self.searchResultIndicatorItem setTitle:finalTitle];
-    [self.searchBar reloadInputViews];
     [self.searchResultDelegate doReloadActionForAllTableView];
 }
 

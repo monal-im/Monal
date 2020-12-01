@@ -614,6 +614,10 @@ $$
         devicesWithInvalSession = [[NSMutableSet<NSNumber*> alloc] init];
     }
     // add device to broken session contact set
+    if([devicesWithInvalSession containsObject:deviceId])
+    {
+        return;
+    }
     [devicesWithInvalSession addObject:deviceId];
     [self.devicesWithBrokenSession setObject:devicesWithInvalSession forKey:contact];
 

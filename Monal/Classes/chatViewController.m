@@ -1612,7 +1612,7 @@ enum msgSentState {
     } else {
         DDLogError(@"Attempt to access beyond bounds");
         cell = [tableView dequeueReusableCellWithIdentifier:@"StatusCell"];
-        cell.messageBody.text = @"Dummy cell that should not be visible at all";
+        cell.messageBody.text = @" ";
         cell.link = nil;
         cell.parent = self;
         return cell;

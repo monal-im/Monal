@@ -1966,6 +1966,8 @@ enum msgSentState {
 
 -(UISwipeActionsConfiguration*) tableView:(UITableView*) tableView trailingSwipeActionsConfigurationForRowAtIndexPath:(NSIndexPath*) indexPath
 {
+    self.editingCallback = nil;     //stop editing (if there is some) on new swipe
+    
     //don't allow swipe actions for our reload box
     if(indexPath.section == reloadBoxSection)
         return [UISwipeActionsConfiguration configurationWithActions:@[]];
@@ -1985,13 +1987,10 @@ enum msgSentState {
     //configure swipe actions
     
     UIContextualAction* LMCEditAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:NSLocalizedString(@"Edit", @"") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
-        if(self.editingCallback)
-            return completionHandler(NO);
         [self.chatInput setText:message.messageText];       //we want to begin editing using the old message
         weakify(self);
         self.editingCallback = ^(NSString* newBody) {
             strongify(self);
-            self.editingCallback = nil;
             if(newBody != nil)
             {
                 message.messageText = newBody;
@@ -2012,15 +2011,13 @@ enum msgSentState {
             return completionHandler(NO);
         };
     }];
-    LMCEditAction.backgroundColor = UIColor.systemGreenColor;
+    LMCEditAction.backgroundColor = UIColor.systemYellowColor;
     if(@available(iOS 13.0, *))
     {
         LMCEditAction.image = [[UIImage systemImageNamed:@"pencil.circle.fill"] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
     
     UIContextualAction* LMCDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete", @"") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
-        self.editingCallback = nil;
-        
         [self.xmppAccount sendLMCForId:message.messageId withNewBody:kMessageDeletedBody to:message.to];
         [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
         
@@ -2041,8 +2038,6 @@ enum msgSentState {
     }
     
     UIContextualAction* localDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete Locally", @"") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
-        self.editingCallback = nil;
-        
         [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
         
         [self->_messageTable beginUpdates];
@@ -2062,8 +2057,6 @@ enum msgSentState {
     }
     
     UIContextualAction* copyAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Copy", @"") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
-        self.editingCallback = nil;
-        
         UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
         MLBaseCell* selectedCell = [self.messageTable cellForRowAtIndexPath:indexPath];
         if([selectedCell isKindOfClass:[MLChatImageCell class]])
@@ -2072,13 +2065,12 @@ enum msgSentState {
             pasteboard.URL = [NSURL URLWithString:((MLLinkCell*)selectedCell).link];
         else
             pasteboard.string = message.messageText;
-        
         return completionHandler(YES);
     }];
     copyAction.backgroundColor = UIColor.systemGreenColor;
     if(@available(iOS 13.0, *))
     {
-        copyAction.image = [[UIImage systemImageNamed:@"trash.circle.fill"] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
+        copyAction.image = [[UIImage systemImageNamed:@"doc.on.doc.fill"] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
     
     //only allow editing for the 2 newest outgoing message that were sent in the last 2 minutes

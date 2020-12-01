@@ -2020,8 +2020,7 @@ enum msgSentState {
     LMCEditAction.backgroundColor = UIColor.systemGreenColor;
     if(@available(iOS 13.0, *))
     {
-        LMCEditAction.backgroundColor = UIColor.systemGrayColor;
-        LMCEditAction.image = [[UIImage systemImageNamed:@"pencil.circle.fill"] imageWithTintColor:UIColor.systemGreenColor renderingMode:UIImageRenderingModeAlwaysOriginal];
+        LMCEditAction.image = [[UIImage systemImageNamed:@"pencil.circle.fill"] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
     
     UIContextualAction* LMCDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete", @"") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
@@ -2043,8 +2042,7 @@ enum msgSentState {
     LMCDeleteAction.backgroundColor = UIColor.systemRedColor;
     if(@available(iOS 13.0, *))
     {
-        LMCDeleteAction.backgroundColor = UIColor.systemGrayColor;
-        LMCDeleteAction.image = [[UIImage systemImageNamed:@"trash.circle.fill"] imageWithTintColor:UIColor.systemRedColor renderingMode:UIImageRenderingModeAlwaysOriginal];
+        LMCDeleteAction.image = [[UIImage systemImageNamed:@"trash.circle.fill"] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
     
     UIContextualAction* localDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete Locally", @"") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
@@ -2065,8 +2063,27 @@ enum msgSentState {
     localDeleteAction.backgroundColor = UIColor.systemRedColor;
     if(@available(iOS 13.0, *))
     {
-        localDeleteAction.backgroundColor = UIColor.systemGrayColor;
-        localDeleteAction.image = [[UIImage systemImageNamed:@"trash.circle.fill"] imageWithTintColor:UIColor.systemRedColor renderingMode:UIImageRenderingModeAlwaysOriginal];
+        localDeleteAction.image = [[UIImage systemImageNamed:@"trash.circle.fill"] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
+    }
+    
+    UIContextualAction* copyAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Copy", @"") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+        self.editingCallback = nil;
+        
+        UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
+        MLBaseCell* selectedCell = [self.messageTable cellForRowAtIndexPath:indexPath];
+        if([selectedCell isKindOfClass:[MLChatImageCell class]])
+            pasteboard.image = ((MLChatImageCell*)selectedCell).thumbnailImage.image;
+        else if([selectedCell isKindOfClass:[MLLinkCell class]])
+            pasteboard.URL = [NSURL URLWithString:((MLLinkCell*)selectedCell).link];
+        else
+            pasteboard.string = message.messageText;
+        
+        return completionHandler(YES);
+    }];
+    copyAction.backgroundColor = UIColor.systemGreenColor;
+    if(@available(iOS 13.0, *))
+    {
+        copyAction.image = [[UIImage systemImageNamed:@"trash.circle.fill"] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
     
     //only allow editing for the 2 newest outgoing message that were sent in the last 2 minutes
@@ -2074,10 +2091,12 @@ enum msgSentState {
         return [UISwipeActionsConfiguration configurationWithActions:@[
             LMCEditAction,
             LMCDeleteAction,
+            copyAction,
         ]];
     else
         return [UISwipeActionsConfiguration configurationWithActions:@[
             localDeleteAction,
+            copyAction,
         ]];
 }
 

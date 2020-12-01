@@ -1611,11 +1611,6 @@ enum msgSentState {
         row = [self.messageList objectAtIndex:indexPath.row];
     } else {
         DDLogError(@"Attempt to access beyond bounds");
-        cell = [tableView dequeueReusableCellWithIdentifier:@"StatusCell"];
-        cell.messageBody.text = @" ";
-        cell.link = nil;
-        cell.parent = self;
-        return cell;
     }
 
     //cut text after kMonalChatMaxAllowedTextLen chars to make the message cell work properly (too big texts don't render the text in the cell at all)

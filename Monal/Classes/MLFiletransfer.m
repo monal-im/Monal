@@ -519,6 +519,13 @@ static NSMutableSet* checklist;
         kFileName:userFacingFilename,
         kContentType:sendMimeType
     } andCompletion:^(NSString *url, NSError *error) {
+        if(error)
+        {
+            [fileManager removeItemAtPath:file error:nil];      //remove temporary file
+            DDLogError(@"File upload failed: %@", error);
+            return completion(nil, nil, nil, error);
+        }
+        
         NSURLComponents* urlComponents = [NSURLComponents componentsWithString:url];
         if(url && urlComponents)
         {

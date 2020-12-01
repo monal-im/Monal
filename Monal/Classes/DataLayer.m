@@ -952,7 +952,7 @@ static NSDateFormatter* dbFormatter;
         return nil;
     
     return [self.db idWriteTransaction:^{
-        if(![self hasMessageForStanzaId:stanzaid orMessageID:messageid toContact:actualfrom onAccount:accountNo])
+        if(![self hasMessageForStanzaId:stanzaid orMessageID:messageid toContact:from onAccount:accountNo])
         {
             //this is always from a contact
             NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
@@ -1033,27 +1033,36 @@ static NSDateFormatter* dbFormatter;
     return [self.db boolWriteTransaction:^{
         if(stanzaId)
         {
-            NSObject* found = [self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND stanzaid!='' AND stanzaid=?;" andArguments:@[accountNo, stanzaId]];
-            if(found)
+            DDLogVerbose(@"stanzaid provided");
+            NSArray* found = [self.db executeReader:@"SELECT * FROM message_history WHERE account_id=? AND stanzaid!='' AND stanzaid=?;" andArguments:@[accountNo, stanzaId]];
+            if([found count])
+            {
+                DDLogVerbose(@"stanzaid provided and could be found: %@", found);
                 return YES;
+            }
         }
         
         //we check message ids per contact to increase uniqueness and abort here if no contact was provided
         if(!contact)
+        {
+            DDLogVerbose(@"no contact given --> message not found");
             return NO;
+        }
         
         NSNumber* historyId = (NSNumber*)[self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND message_from=? AND messageid=?;" andArguments:@[accountNo, contact, messageId]];
         if(historyId != nil)
         {
+            DDLogVerbose(@"found by messageid");
             if(stanzaId)
             {
-                DDLogVerbose(@"Updating stanzaid of message_history_id %@ to %@ for (account=%@, messageid=%@, contact=%@)...", historyId, stanzaId, accountNo, messageId, contact);
+                DDLogDebug(@"Updating stanzaid of message_history_id %@ to %@ for (account=%@, messageid=%@, contact=%@)...", historyId, stanzaId, accountNo, messageId, contact);
                 //this entry needs an update of its stanzaid
                 [self.db executeNonQuery:@"UPDATE message_history SET stanzaid=? WHERE message_history_id=?" andArguments:@[stanzaId, historyId]];
             }
             return YES;
         }
         
+        DDLogVerbose(@"nothing worked --> message not found");
         return NO;
     }];
 }

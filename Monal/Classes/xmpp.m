@@ -2552,14 +2552,14 @@ NSString *const kData=@"data";
                     [messageList addObject:msg];
             }
         
-        DDLogVerbose(@"collected mam:2 before-pages now contain %lu messages in summary not already in history", (unsigned long)[messageList count]);
+        DDLogDebug(@"collected mam:2 before-pages now contain %lu messages in summary not already in history", (unsigned long)[messageList count]);
         //call completion to display all messages saved in db if we have enough messages or reached end of mam archive
         if([messageList count] >= 25)
             completion(messageList);
         else
         {
-            //page through to get more messages (a page possibly contians fewer than 25 messages having a body)
-            //but because we query for 50 stanzas we easily could get more than 25 messages having a body, too
+            //page through to get more messages (a page possibly contains fewer than 25 messages having a body)
+            //but because we query for 50 stanzas we could easily get more than 25 messages having a body, too
             if(
                 ![[response findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue] &&
                 [response check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/first#"]
@@ -2569,13 +2569,13 @@ NSString *const kData=@"data";
             }
             else
             {
-                DDLogVerbose(@"Reached upper end of mam:2 archive, returning %lu messages to ui", (unsigned long)[messageList count]);
+                DDLogDebug(@"Reached upper end of mam:2 archive, returning %lu messages to ui", (unsigned long)[messageList count]);
                 completion(messageList);    //can be fewer than 25 messages because we reached the upper end of the mam archive
             }
         }
     };
     query = ^(NSString* _Nullable before) {
-        DDLogVerbose(@"Loading (next) mam:2 page before: %@", before);
+        DDLogDebug(@"Loading (next) mam:2 page before: %@", before);
         XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
         [query setMAMQueryLatestMessagesForJid:jid before:before];
         //we always want to use blocks here because we want to make sure we get not interrupted by an app crash/restart
@@ -3204,6 +3204,7 @@ NSString *const kData=@"data";
 -(void) addMessageToMamPageArray:(XMPPMessage*) messageNode forOuterMessageNode:(XMPPMessage*) outerMessageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andMessageType:(NSString*) messageType
 {
     MLMessage* message = [self parseMessageToMLMessage:messageNode withBody:body andEncrypted:encrypted andMessageType:messageType andActualFrom:nil];
+    message.stanzaId = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];       //use the stanza id provided directly by mam
     @synchronized(_mamPageArrays) {
         if(!_mamPageArrays[[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]])
             _mamPageArrays[[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]] = [[NSMutableArray alloc] init];

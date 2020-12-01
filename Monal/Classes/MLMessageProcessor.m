@@ -188,8 +188,13 @@ static NSMutableDictionary* _typingNotifications;
             //because mam always sorts the messages in a page by timestamp in ascending order
             //we don't want to call postPersistAction, too, beause we don't want to display push notifications for old messages
             if([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLhistory:"])
+            {
+                DDLogInfo(@"Adding message to mam page array to be inserted into history later on");
                 [account addMessageToMamPageArray:messageNode forOuterMessageNode:outerMessageNode withBody:body andEncrypted:encrypted andMessageType:messageType];
-            else if(body)
+                return;
+            }
+            
+            if(body)
             {
                 NSNumber* historyId = nil;
                 

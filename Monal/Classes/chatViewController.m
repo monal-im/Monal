@@ -1056,14 +1056,14 @@ enum msgSentState {
         UIImagePickerController* mediaPicker = [[UIImagePickerController alloc] init];
         mediaPicker.delegate = self;
 
-        UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             mediaPicker.sourceType = UIImagePickerControllerSourceTypeCamera;
             [self presentViewController:mediaPicker animated:YES completion:nil];
         }];
 
-        UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             mediaPicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-            mediaPicker.allowsEditing = YES;
+            mediaPicker.allowsEditing = NO;
             [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
                 if(granted)
                 {
@@ -1242,19 +1242,6 @@ enum msgSentState {
        && ([message.from isEqualToString:self.contact.contactJid]
            || [message.to isEqualToString:self.contact.contactJid] ))
     {
-        if([self.contact.subscription isEqualToString:kSubBoth]) {
-            //getting encrypted chat turns it on. not the other way around
-            //            if(message.encrypted && !self.encryptChat) {
-            //                NSArray *devices= [self.xmppAccount.monalSignalStore knownDevicesForAddressName:self.contact.contactJid];
-            //                if(devices.count>0) {
-            //                    dispatch_async(dispatch_get_main_queue(), ^{
-            //                        [[DataLayer sharedInstance] encryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
-            //                        self.encryptChat=YES;
-            //                    });
-            //                }
-            //            }
-        }
-        
         dispatch_async(dispatch_get_main_queue(), ^{
             if(!self.messageList)
                 self.messageList = [[NSMutableArray alloc] init];

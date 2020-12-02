@@ -980,13 +980,14 @@ static NSDateFormatter* dbFormatter;
             NSString* dateString = [formatter stringFromDate:destinationDate];
             
             //do not do this in MUC
-            if(!messageType && [actualfrom isEqualToString:from])
+            if([actualfrom isEqualToString:from])
             {
                 NSString* query;
                 NSArray* params;
                 if(backwards)
                 {
                     NSNumber* nextHisoryId = [NSNumber numberWithInt:[(NSNumber*)[self.db executeScalar:@"SELECT MIN(message_history_id) FROM message_history;"] intValue] - 1];
+                    DDLogVerbose(@"Inserting backwards with history id %@", nextHisoryId);
                     query = @"insert into message_history (message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
                     params = @[nextHisoryId, accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@""];
                 }

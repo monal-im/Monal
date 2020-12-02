@@ -2004,7 +2004,10 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"CREATE INDEX stanzaidIndex on message_history(stanzaid collate nocase);"];
             [self.db executeNonQuery:@"CREATE INDEX messageidIndex on message_history(messageid collate nocase);"];
         }];
-        
+
+        [self updateDBTo:4.994 withBlock:^{
+            [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact ON activechats(buddy_name, account_id);"];
+        }];
     }];
     
     DDLogInfo(@"Database version check complete");

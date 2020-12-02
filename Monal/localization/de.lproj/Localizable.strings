@@ -300,8 +300,8 @@
 "Os: " = "Os: ";
 "Software Version" = "Software Version";
 "Version: " = "Version: ";
-"Could not synchronize" = "Nicht synchronisieren";
-"Please open the app to retry" = "Bitte die App öffnen um erneut zu versuchen";
+"Could not synchronize" = "Konnte nicht synchronisieren";
+"Please open the app to retry" = "Bitte App öffnen, um es erneut zu versuchen";
 /* mac only string */
 "Scroll down to load more messages" = "Scrollen Sie nach unten, um weitere Nachrichten zu laden";
 "No enabled account found" = "Kein aktiviertes Konto gefunden";

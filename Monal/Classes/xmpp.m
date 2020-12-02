@@ -2290,6 +2290,8 @@ NSString *const kData=@"data";
 
 -(void) initSession
 {
+    DDLogInfo(@"Now bound, initializing new xmpp session");
+    
     //delete old resources because we get new presences once we're done initializing the session
     [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
     

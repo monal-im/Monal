@@ -7,7 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "xmpp.h"
+
+@class xmpp;
+@class MLContact;
 
 /**
  A singleton to control all of the active XMPP connections
@@ -17,10 +19,9 @@
 	dispatch_source_t _pinger;
 }
 
-+ (MLXMPPManager* )sharedInstance;
++(MLXMPPManager*) sharedInstance;
 
 -(BOOL) allAccountsIdle;
--(void) configureBackgroundFetchingTask;
 
 #pragma  mark connectivity
 /**
@@ -112,7 +113,7 @@
 /**
  hangup on a contact from an account
  */
--(void) hangupContact:(NSDictionary*) contact;
+-(void) hangupContact:(MLContact*) contact;
 
 
 -(void) approveContact:(MLContact*) contact;
@@ -132,27 +133,7 @@ Sends a message to a specified contact in account. Calls completion handler on s
 withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion;
 -(void) sendChatState:(BOOL) isTyping fromAccount:(NSString*) accountNo toJid:(NSString*) jid;
 
-
-/**
- uploads the selected png image Data as [uuid].jpg
- */
--(void)httpUploadJpegData:(NSData*) fileData   toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;
-
-/**
- opens file and attempts to upload it
- */
--(void)httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;
-
-/**
-Attempts to upload a file to the  HTTP upload service
- */
--(void)httpUploadData:(NSData*) data withFilename:(NSString*) filename andType:(NSString*) contentType  toContact:(NSString*) contact onAccount:(NSString*) accountNo withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion;
-
-
 #pragma mark XMPP settings
-
--(void) setStatusMessage:(NSString*) message;
--(void) setAway:(BOOL) isAway;
 
 @property (nonatomic, strong, readonly) NSMutableArray* connectedXMPP;
 @property (nonatomic, readonly) BOOL hasConnectivity;
@@ -162,36 +143,29 @@ Attempts to upload a file to the  HTTP upload service
 @property (nonatomic, strong) NSString *pushNode;
 @property (nonatomic, strong) NSString *pushSecret;
 
-/**
- updates unread
- */
--(void) handleNewMessage:(NSNotification*) notification;
+@property (nonatomic, readonly) BOOL isBackgrounded;
 
 /**
  updates delivery status after message has been sent
  */
 -(void) handleSentMessage:(NSNotification*) notification;
 
--(void) scheduleBackgroundFetchingTask;
-
--(void) incomingPushWithCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler;
-
 /**
  updtes client state on server as inactive
  */
--(void) setClientsInactive;
+-(void) nowBackgrounded;
 
 /**
  sets client state on server as active
  */
--(void) setClientsActive;
+-(void) nowForegrounded;
 
 -(void) pingAllAccounts;
 
 /**
  fetch entity software version
  */
--(void) getEntitySoftWareVersionForContact:(MLContact *) contact andResource:(NSString*) resource;
+-(void) getEntitySoftWareVersionForContact:(MLContact*) contact andResource:(NSString*) resource;
 /**
  Iterates through set and compares with connected accounts. Removes them. useful for active chat. 
  */

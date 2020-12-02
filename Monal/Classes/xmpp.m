@@ -46,24 +46,13 @@
 #define STATE_VERSION 1
 
 
-NSString *const kMessageId=@"MessageID";
-NSString *const kSendTimer=@"SendTimer";
-
 NSString *const kQueueID=@"queueID";
 NSString *const kStanza=@"stanza";
-
 
 NSString *const kFileName=@"fileName";
 NSString *const kContentType=@"contentType";
 NSString *const kData=@"data";
-NSString *const kContact=@"contact";
 
-NSString *const kCompletion=@"completion";
-
-
-NSString *const kXMPPError =@"error";
-NSString *const kXMPPSuccess =@"success";
-NSString *const kXMPPPresence = @"presence";
 
 @interface MLPubSub ()
 -(id) initWithAccount:(xmpp*) account;
@@ -105,9 +94,11 @@ NSString *const kXMPPPresence = @"presence";
     BOOL _catchupDone;
     double _exponentialBackoff;
     BOOL _reconnectInProgress;
+    BOOL _disconnectInProgres;
     NSObject* _stateLockObject;     //only used for @synchronized() blocks
     BOOL _lastIdleState;
     NSMutableDictionary* _mamPageArrays;
+    BOOL _firstLoginForThisInstance;
     
     //registration related stuff
     BOOL _registration;
@@ -209,7 +200,9 @@ NSString *const kXMPPPresence = @"presence";
     _startTLSComplete = NO;
     _catchupDone = NO;
     _reconnectInProgress = NO;
+    _disconnectInProgres = NO;
     _lastIdleState = NO;
+    _firstLoginForThisInstance = YES;
     _outputQueue = [[NSMutableArray alloc] init];
     _iqHandlers = [[NSMutableDictionary alloc] init];
     _mamPageArrays = [[NSMutableDictionary alloc] init];
@@ -254,11 +247,9 @@ NSString *const kXMPPPresence = @"presence";
         _isCSIActive = NO;
     }
     _lastInteractionDate = [NSDate date];     //better default than 1970
-
-    self.statusMessage = [[HelperTools defaultsDB] stringForKey:@"StatusMessage"];
-    self.awayState = [[HelperTools defaultsDB] boolForKey:@"Away"];
-
-    self.sendIdleNotifications = [[HelperTools defaultsDB] boolForKey: @"SendLastUserInteraction"];
+    self.sendIdleNotifications = [[HelperTools defaultsDB] boolForKey:@"SendLastUserInteraction"];
+    
+    self.statusMessage = @"";
 }
 
 -(void) dealloc
@@ -308,7 +299,7 @@ NSString *const kXMPPPresence = @"presence";
 -(void) invalidXMLError
 {
     DDLogError(@"Server returned invalid xml!");
-    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, @"Server returned invalid xml!"]];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"Server returned invalid xml!", @""), @"isSevere": @NO}];
     [self reconnect];
     return;
 }
@@ -352,19 +343,26 @@ NSString *const kXMPPPresence = @"presence";
         //only do the (more heavy but complete) idle check if we reache zero operations in the observed queue
         //we dispatch the idle check and subsequent notification on the receive queue to account for races
         //between the idle check and calls to disconnect issued in response to this idle notification
-        //NOTE: yes, doing the check for [_sendQueue operationCount] (inside [self idle]) from the receive queue is not race free
+        //NOTE: yes, doing the check for [_sendQueue operationCount] (inside [self idle]) from the receive queue is not race free.
         //with such disconnects, but: we only want to track the send queue on a best effort basis (because network sends are best effort, too)
-        //to some extent we want to make sure every stanza was physically sent out to the network before our app gets frozen by ios
+        //to some extent we want to make sure every stanza was physically sent out to the network before our app gets frozen by ios,
         //but we don't need to make this completely race free (network "races" can occur far more often than send queue races).
         //in a race the smacks unacked stanzas array will contain the not yet sent stanzas --> we won't loose stanzas when racing the send queue
         //with [self disconnect] through an idle check
-        if(![object operationCount])
+        //NOTE: we only want to do an idle check if we are not in the middle of a disconnect call because this can race when the _bgTask is expiring
+        //and cancel the new _bgFetch because we are now idle (the dispatchAsyncOnReceiveQueue: will add a new task to the receive queue when
+        //the send queue gets cleaned up and this task will run as soon as the disconnect is done and interfere with the configuration of the
+        //_bgFetch and the syncError push notification both created on the main thread
+        if(![object operationCount] && !_disconnectInProgres)
+        {
+            DDLogVerbose(@"Adding idle state check to receive queue...");
             [self dispatchAsyncOnReceiveQueue:^{
                 BOOL lastState = _lastIdleState;
                 //only send out idle notifications if we changed from non-idle to idle state
                 if(self.idle && !lastState)
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
             }];
+        }
     }
 }
 
@@ -451,12 +449,15 @@ NSString *const kXMPPPresence = @"presence";
 	//see this for creating the proper protocols array: https://github.com/LLNL/FRS/blob/master/Pods/AWSIoT/AWSIoT/Internal/AWSIoTMQTTClient.m
 	//WARNING: this will only have an effect if the TLS handshake was not already started (e.g. the TCP socket is not connected) and
 	//         will be ignored otherwise
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 	SSLContextRef sslContext = (__bridge SSLContextRef) [_oStream propertyForKey: (__bridge NSString *) kCFStreamPropertySSLContext ];
 	CFStringRef strs[1];
 	strs[0] = CFSTR("xmpp-client");
 	CFArrayRef protocols = CFArrayCreate(NULL, (void *)strs, 1, &kCFTypeArrayCallBacks);
 	SSLSetALPNProtocols(sslContext, protocols);
 	CFRelease(protocols);
+#pragma clang diagnostic pop
 }
 
 -(void) createStreams
@@ -474,8 +475,8 @@ NSString *const kXMPPPresence = @"presence";
     if((localIStream==nil) || (localOStream==nil))
     {
         DDLogError(@"Connection failed");
-        NSString *message=NSLocalizedString(@"Unable to connect to server",@ "");
-        [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"Unable to connect to server!", @""), @"isSevere": @NO}];
+        [self reconnect];
         return;
     }
     else
@@ -532,9 +533,11 @@ NSString *const kXMPPPresence = @"presence";
         // Check if entry "." == srv target
         if(![[row objectForKey:@"isEnabled"] boolValue])
         {
-            NSString *message = NSLocalizedString(@"SRV entry prohibits XMPP connection",@ "");
-            DDLogInfo(@"%@ for domain %@", message, self.connectionProperties.identity.domain);
-            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+            DDLogInfo(@"SRV entry prohibits XMPP connection for server %@", self.connectionProperties.identity.domain);
+            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{
+                @"message": [NSString stringWithFormat:NSLocalizedString(@"SRV entry prohibits XMPP connection for server %@", @""), self.connectionProperties.identity.domain],
+                @"isSevere": @YES
+            }];
             return YES;
         }
     }
@@ -542,7 +545,8 @@ NSString *const kXMPPPresence = @"presence";
     // if all servers have been tried start over with the first one again
     if([_discoveredServersList count]>0 && [_usableServersList count]==0)
     {
-        DDLogWarn(@"All %lu SRV dns records tried, starting over again", (unsigned long)[_discoveredServersList count]);
+        if(!_firstLoginForThisInstance)
+            DDLogWarn(@"All %lu SRV dns records tried, starting over again", (unsigned long)[_discoveredServersList count]);
         _usableServersList = [_discoveredServersList mutableCopy];
         for(NSDictionary *row in _usableServersList)
         {
@@ -682,6 +686,7 @@ NSString *const kXMPPPresence = @"presence";
             return;
         }
         DDLogInfo(@"disconnecting");
+        _disconnectInProgres = YES;
         [_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas (we should be logged out then!)
         [_receiveQueue cancelAllOperations];        //stop everything coming after this (we should be logged out then!)
         
@@ -768,6 +773,7 @@ NSString *const kXMPPPresence = @"presence";
         
         [self closeSocket];
         [self accountStatusChanged];
+        _disconnectInProgres = NO;
     }];
 }
 
@@ -778,10 +784,11 @@ NSString *const kXMPPPresence = @"presence";
         [_receiveQueue cancelAllOperations];        //stop everything coming after this (we should have closed sockets then!)
 
         //prevent any new read or write
-        if(_xmlParser!=nil)
+        if(_xmlParser != nil)
         {
             [_xmlParser setDelegate:nil];
             [_xmlParser abortParsing];
+            _xmlParser = nil;
         }
         [self->_iPipe close];
         self->_iPipe = nil;
@@ -1229,7 +1236,7 @@ NSString *const kXMPPPresence = @"presence";
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}a"] && self.connectionProperties.supportsSM3 && self.accountState>=kStateBound)
         {
             NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
-            if(!h)
+            if(h==nil)
                 return [self invalidXMLError];
             
             @synchronized(_stateLockObject) {
@@ -1252,8 +1259,15 @@ NSString *const kXMPPPresence = @"presence";
 
             if([presenceNode.fromUser isEqualToString:self.connectionProperties.identity.jid])
             {
-                //ignore self presences for now
-                DDLogInfo(@"ignoring presence from self");
+                DDLogInfo(@"got self presence");
+                
+                //ignore special presences for status updates (they don't have one)
+                if(![presenceNode check:@"/@type"])
+                {
+                    NSMutableDictionary* accountDetails = [[DataLayer sharedInstance] detailsForAccount:self.accountNo];
+                    accountDetails[@"statusMessage"] = [presenceNode check:@"status#"] ? [presenceNode findFirst:@"status#"] : @"";
+                    [[DataLayer sharedInstance] updateAccounWithDictionary:accountDetails];
+                }
             }
             else
             {
@@ -1318,17 +1332,34 @@ NSString *const kXMPPPresence = @"presence";
 
                         //handle last interaction time (dispatch database update in own background thread)
                         if([presenceNode check:@"{urn:xmpp:idle:1}idle@since"])
+                        {
+                            NSDate* lastInteraction = [[DataLayer sharedInstance] lastInteractionOfJid:presenceNode.fromUser forAccountNo:self.accountNo];
+                            
+                            if([[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] compare:lastInteraction] == NSOrderedDescending)
+                            {
+                                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                                    [[DataLayer sharedInstance] setLastInteraction:[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] forJid:presenceNode.fromUser andAccountNo:self.accountNo];
+
+                                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                                        @"jid": presenceNode.fromUser,
+                                        @"accountNo": self.accountNo,
+                                        @"lastInteraction": [presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"],
+                                        @"isTyping": @NO
+                                    }];
+                                });
+                            }
+                        }
+                        else
+                        {
                             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                                [[DataLayer sharedInstance] setLastInteraction:[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] forJid:presenceNode.fromUser andAccountNo:self.accountNo];
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                                    @"jid": presenceNode.fromUser,
+                                    @"accountNo": self.accountNo,
+                                    @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:0],    //nil cannot directly be saved in NSDictionary
+                                    @"isTyping": @NO
+                                }];
                             });
-                        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
-                                @"jid": presenceNode.fromUser,
-                                @"accountNo": self.accountNo,
-                                @"lastInteraction": [presenceNode check:@"{urn:xmpp:idle:1}idle@since"] ? [presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] : [[NSDate date] initWithTimeIntervalSince1970:0],    //nil cannot directly be saved in NSDictionary
-                                @"isTyping": @NO
-                            }];
-                        });
+                        }
                     }
                     else
                     {
@@ -1441,11 +1472,6 @@ NSString *const kXMPPPresence = @"presence";
             if(!messageNode.to)
                 messageNode.to = self.connectionProperties.identity.fullJid;
             
-            DDLogVerbose(@"Incoming outer message from='%@' to='%@' -- inner message from='%@' to='%@'", outerMessageNode.from, outerMessageNode.to, messageNode.from, messageNode.to);
-            DDLogVerbose(@"Incoming outer message fromUser='%@' toUser='%@' -- inner message fromUser='%@' toUser='%@'", outerMessageNode.fromUser, outerMessageNode.toUser, messageNode.fromUser, messageNode.toUser);
-            DDLogVerbose(@"Raw outer from value: '%@', raw inner from value: '%@'", outerMessageNode.attributes[@"from"], messageNode.attributes[@"from"]);
-            DDLogVerbose(@"Raw outer to value: '%@', raw inner to value: '%@'", outerMessageNode.attributes[@"to"], messageNode.attributes[@"to"]);
-            
             NSAssert(![messageNode.fromUser containsString:@"/"], @"messageNode.fromUser contains resource!");
             NSAssert(![messageNode.toUser containsString:@"/"], @"messageNode.toUser contains resource!");
             NSAssert(![outerMessageNode.fromUser containsString:@"/"], @"outerMessageNode.fromUser contains resource!");
@@ -1546,7 +1572,7 @@ NSString *const kXMPPPresence = @"presence";
         else if([parsedStanza check:@"/{urn:xmpp:sm:3}resumed"] && self.connectionProperties.supportsSM3 && self.accountState<kStateBound)
         {
             NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
-            if(!h)
+            if(h==nil)
                 return [self invalidXMLError];
             
             self.resuming = NO;
@@ -1602,7 +1628,7 @@ NSString *const kXMPPPresence = @"presence";
                 //get h value, if server supports smacks revision 1.5
                 NSNumber* h = [parsedStanza findFirst:@"/@h|int"];
                 DDLogInfo(@"++++++++++++++++++++++++ failed resume: h=%@", h);
-                if(h)
+                if(h!=nil)
                     [self removeAckedStanzasFromQueue:h];
                 //persist these changes
                 [self persistState];
@@ -1625,15 +1651,15 @@ NSString *const kXMPPPresence = @"presence";
             if([parsedStanza check:@"not-authorized"])
             {
                 if(!message)
-                    message = @"Not Authorized. Please check your credentials.";
+                    message = NSLocalizedString(@"Not Authorized. Please check your credentials.", @"");
             }
             else
             {
                 if(!message)
-                    message = @"There was a SASL error on the server.";
+                    message = NSLocalizedString(@"There was a SASL error on the server.", @"");
             }
 
-            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @YES}];
             [self disconnect];
         }
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}challenge"])
@@ -1670,10 +1696,10 @@ NSString *const kXMPPPresence = @"presence";
             NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}!text$"];
             NSString* errorText = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}text#"];
             DDLogWarn(@"Got secure XMPP stream error %@: %@", errorReason, errorText);
-            NSString* message = [NSString stringWithFormat:@"XMPP stream error: %@", errorReason];
+            NSString* message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error: %@", @""), errorReason];
             if(errorText && ![errorText isEqualToString:@""])
-                message = [NSString stringWithFormat:@"XMPP stream error %@: %@", errorReason, errorText];
-            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+                message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error %@: %@", @""), errorReason, errorText];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
             [self reconnect];
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}features"])
@@ -1715,6 +1741,7 @@ NSString *const kXMPPPresence = @"presence";
                         //no supported auth mechanism
                         //TODO: implement SCRAM SHA1 and SHA256 based auth
                         DDLogInfo(@"no supported auth mechanism, disconnecting!");
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"no supported auth mechanism, disconnecting!", @""), @"isSevere": @YES}];
                         [self disconnect];
                     }
                 }
@@ -1771,10 +1798,10 @@ NSString *const kXMPPPresence = @"presence";
             NSString* errorReason = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}!text$"];
             NSString* errorText = [parsedStanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-streams}text#"];
             DDLogWarn(@"Got *INSECURE* XMPP stream error %@: %@", errorReason, errorText);
-            NSString* message = [NSString stringWithFormat:@"XMPP stream error: %@", errorReason];
+            NSString* message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error: %@", @""), errorReason];
             if(errorText && ![errorText isEqualToString:@""])
-                message = [NSString stringWithFormat:@"XMPP stream error %@: %@", errorReason, errorText];
-            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+                message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error %@: %@", @""), errorReason, errorText];
+            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
             [self reconnect];
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}features"])
@@ -2240,10 +2267,8 @@ NSString *const kXMPPPresence = @"presence";
         return;
     
     XMPPPresence* presence = [[XMPPPresence alloc] initWithHash:_capsHash];
-    if(self.statusMessage)
+    if(![self.statusMessage isEqualToString:@""])
         [presence setStatus:self.statusMessage];
-    if(self.awayState)
-        [presence setAway];
     
     //send last interaction date if not currently active
     //and the user prefers to send out lastInteraction date
@@ -2330,21 +2355,6 @@ NSString *const kXMPPPresence = @"presence";
     //mam query will be done in MLIQProcessor once the disco result returns
 }
 
--(void) setStatusMessageText:(NSString*) message
-{
-    if(message && [message length] > 0)
-        self.statusMessage = message;
-    else
-        message = nil;
-    [self sendPresence];
-}
-
--(void) setAway:(BOOL) away
-{
-    self.awayState = away;
-    [self sendPresence];
-}
-
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
 {
     XMPPIQ* iqBlocked= [[XMPPIQ alloc] initWithType:kiqSetType];
@@ -2392,7 +2402,7 @@ NSString *const kXMPPPresence = @"presence";
                 headers:headers
                 withArguments:nil
                 data:[params objectForKey:kData]
-                andCompletionHandler:^(NSError *error, id result) {
+                andCompletionHandler:^(NSError* error, id result) {
                     if(!error)
                     {
                         DDLogInfo(@"Upload succeded, get url: %@", [response findFirst:@"{urn:xmpp:http:upload:0}slot/get@url"]);
@@ -2411,7 +2421,7 @@ NSString *const kXMPPPresence = @"presence";
         });
     } andErrorHandler:^(XMPPIQ* error) {
         if(completion)
-            completion(nil, [error findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"]);
+            completion(nil, [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: [HelperTools extractXMPPError:error withDescription:@"Upload Error"]}]);
     }];
 }
 
@@ -2495,29 +2505,20 @@ NSString *const kXMPPPresence = @"presence";
 #pragma mark - Message archive
 
 
--(void) setMAMPrefs:(NSString *) preference
+-(void) setMAMPrefs:(NSString*) preference
 {
     if(!self.connectionProperties.supportsMam2)
         return;
     XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
     [query updateMamArchivePrefDefault:preference];
-    [self send:query];
+    [self sendIq:query withHandler:$newHandler(MLIQProcessor, handleSetMamPrefs)];
 }
 
 -(void) getMAMPrefs
 {
     XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqGetType];
     [query mamArchivePref];
-    //this can be a non persistent iq handler because getMAMPrefs is only called from the ui
-    //THIS HAS TO BE CHANGED IF THIS METHOD IS CALLED FROM OTHER MORE PERSISTENT PLACES
-    [self sendIq:query withResponseHandler:^(XMPPIQ* response) {
-        if([response check:@"{urn:xmpp:mam:2}prefs@default"])
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMLMAMPref object:@{@"mamPref": [response findFirst:@"{urn:xmpp:mam:2}prefs@default"]}];
-        else
-            DDLogError(@"MAM prefs query returned unexpected result: %@", response);
-    } andErrorHandler:^(XMPPIQ* error) {
-        DDLogError(@"MAM prefs query returned an error: %@", error);
-    }];
+    [self sendIq:query withHandler:$newHandler(MLIQProcessor, handleMamPrefs)];
 }
 
 -(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid withCompletion:(void (^)(NSArray* _Nullable)) completion
@@ -2529,7 +2530,8 @@ NSString *const kXMPPPresence = @"presence";
         //insert messages having a body into the db and check if they are alread in there
         for(MLMessage* msg in [self getOrderedMamPageFor:[response findFirst:@"{urn:xmpp:mam:2}fin@queryid"]])
             if(msg.messageText)
-                [[DataLayer sharedInstance] addMessageFrom:msg.from
+            {
+                NSNumber* historyId = [[DataLayer sharedInstance] addMessageFrom:msg.from
                                                         to:msg.to
                                                 forAccount:self.accountNo
                                                   withBody:msg.messageText
@@ -2543,19 +2545,21 @@ NSString *const kXMPPPresence = @"presence";
                                                  encrypted:msg.encrypted
                                                  backwards:YES
                                        displayMarkerWanted:NO
-                                            withCompletion:^(BOOL success, NSString* newMessageType, NSNumber* historyId) {
-                    //add successfully added messages to our display list
-                    if(success)
-                        [messageList addObject:msg];
-                }];
-        DDLogVerbose(@"collected mam:2 before-pages now contain %lu messages in summary not already in history", (unsigned long)[messageList count]);
+                ];
+                msg.messageDBId = historyId;        //retrofit messageDBId
+                //add successfully added messages to our display list
+                if(historyId != nil)
+                    [messageList addObject:msg];
+            }
+        
+        DDLogDebug(@"collected mam:2 before-pages now contain %lu messages in summary not already in history", (unsigned long)[messageList count]);
         //call completion to display all messages saved in db if we have enough messages or reached end of mam archive
         if([messageList count] >= 25)
             completion(messageList);
         else
         {
-            //page through to get more messages (a page possibly contians fewer than 25 messages having a body)
-            //but because we query for 50 stanzas we easily could get more than 25 messages having a body, too
+            //page through to get more messages (a page possibly contains fewer than 25 messages having a body)
+            //but because we query for 50 stanzas we could easily get more than 25 messages having a body, too
             if(
                 ![[response findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue] &&
                 [response check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/first#"]
@@ -2565,13 +2569,13 @@ NSString *const kXMPPPresence = @"presence";
             }
             else
             {
-                DDLogVerbose(@"Reached upper end of mam:2 archive, returning %lu messages to ui", (unsigned long)[messageList count]);
+                DDLogDebug(@"Reached upper end of mam:2 archive, returning %lu messages to ui", (unsigned long)[messageList count]);
                 completion(messageList);    //can be fewer than 25 messages because we reached the upper end of the mam archive
             }
         }
     };
-    query = ^(NSString* before) {
-        DDLogVerbose(@"Loading (next) mam:2 page before: %@", before);
+    query = ^(NSString* _Nullable before) {
+        DDLogDebug(@"Loading (next) mam:2 page before: %@", before);
         XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
         [query setMAMQueryLatestMessagesForJid:jid before:before];
         //we always want to use blocks here because we want to make sure we get not interrupted by an app crash/restart
@@ -2673,7 +2677,7 @@ NSString *const kXMPPPresence = @"presence";
 
 -(void)hangup:(MLContact*) contact
 {
-    XMPPIQ* jingleiq =[self.jingle terminateJinglewithId:[[NSUUID UUID] UUIDString]];
+    XMPPIQ* jingleiq = [self.jingle terminateJinglewithId:[[NSUUID UUID] UUIDString]];
     [self send:jingleiq];
     [self.jingle rtpDisconnect];
     self.jingle=nil;
@@ -2697,11 +2701,10 @@ NSString *const kXMPPPresence = @"presence";
 -(void) jingleResult:(XMPPIQ*) iqNode
 {
     //confirmation of set call after we accepted
-    if([[iqNode findFirst:@"/@id"] isEqualToString:self.jingle.idval])
+    NSString* from = iqNode.fromUser;
+    if(from && [[iqNode findFirst:@"/@id"] isEqualToString:self.jingle.idval])
     {
-        NSString* from = iqNode.fromUser;
         NSString* fullName = from;
-        if(!fullName) fullName = from;
         NSDictionary* userDic=@{@"buddy_name":from,
                                 @"full_name":fullName,
                                 kAccountID:self.accountNo
@@ -2851,7 +2854,7 @@ NSString *const kXMPPPresence = @"presence";
         //dispatch completion handler outside of the receiveQueue
         if(completion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                completion(NO, error && [error check:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"] ? [error findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"]: @"");
+                completion(NO, error ? [HelperTools extractXMPPError:error withDescription:@"Could not change password"] : @"");
             });
     }];
 }
@@ -2897,7 +2900,7 @@ NSString *const kXMPPPresence = @"presence";
         //dispatch completion handler outside of the receiveQueue
         if(_regFormErrorCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                _regFormErrorCompletion(nil, nil);
+                _regFormErrorCompletion(NO, [HelperTools extractXMPPError:error withDescription:@"Could not request registration form"]);
             });
     }];
 }
@@ -2917,7 +2920,7 @@ NSString *const kXMPPPresence = @"presence";
         //dispatch completion handler outside of the receiveQueue
         if(_regFormSubmitCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                _regFormSubmitCompletion(NO, [error findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"]);
+                _regFormSubmitCompletion(NO, [HelperTools extractXMPPError:error withDescription:@"Could not submit registration"]);
             });
     }];
 }
@@ -2963,22 +2966,22 @@ NSString *const kXMPPPresence = @"presence";
             switch(st_error.code)
             {
                 case errSSLXCertChainInvalid: {
-                    message = NSLocalizedString(@"SSL Error: Certificate chain is invalid",@ "");
+                    message = NSLocalizedString(@"SSL Error: Certificate chain is invalid", @"");
                     break;
                 }
 
                 case errSSLUnknownRootCert: {
-                    message = NSLocalizedString(@"SSL Error: Unknown root certificate",@ "");
+                    message = NSLocalizedString(@"SSL Error: Unknown root certificate", @"");
                     break;
                 }
 
                 case errSSLCertExpired: {
-                    message = NSLocalizedString(@"SSL Error: Certificate expired",@ "");
+                    message = NSLocalizedString(@"SSL Error: Certificate expired", @"");
                     break;
                 }
 
                 case errSSLHostNameMismatch: {
-                    message = NSLocalizedString(@"SSL Error: Host name mismatch",@ "");
+                    message = NSLocalizedString(@"SSL Error: Host name mismatch", @"");
                     break;
                 }
 
@@ -2987,7 +2990,7 @@ NSString *const kXMPPPresence = @"presence";
             {
                 // Do not show "Connection refused" message if there are more SRV records to try
                 if(!_SRVDiscoveryDone || (_SRVDiscoveryDone && [_usableServersList count] == 0) || st_error.code != 61)
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:@[self, message]];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
             }
 
             DDLogInfo(@"stream error, calling reconnect");
@@ -3179,7 +3182,7 @@ NSString *const kXMPPPresence = @"presence";
     }
 }
 
--(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType andActualFrom:(NSString*) actualFrom
+-(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andMessageType:(NSString*) messageType andActualFrom:(NSString*) actualFrom
 {
     MLMessage* message = [[MLMessage alloc] init];
     message.from = messageNode.fromUser;
@@ -3191,7 +3194,6 @@ NSString *const kXMPPPresence = @"presence";
     message.encrypted = encrypted;
     message.delayTimeStamp = [messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"];
     message.timestamp = [NSDate date];
-    message.shouldShowAlert = showAlert;
     message.messageType = messageType;
     message.hasBeenSent = YES;      //if it came in it has been sent to the server
     message.stanzaId = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
@@ -3199,9 +3201,10 @@ NSString *const kXMPPPresence = @"presence";
     return message;
 }
 
--(void) addMessageToMamPageArray:(XMPPMessage* _Nonnull) messageNode forOuterMessageNode:(XMPPMessage* _Nonnull) outerMessageNode withBody:(NSString* _Nonnull) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString* _Nonnull) messageType
+-(void) addMessageToMamPageArray:(XMPPMessage*) messageNode forOuterMessageNode:(XMPPMessage*) outerMessageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andMessageType:(NSString*) messageType
 {
-    MLMessage* message = [self parseMessageToMLMessage:messageNode withBody:body andEncrypted:encrypted andShowAlert:showAlert andMessageType:messageType andActualFrom:nil];
+    MLMessage* message = [self parseMessageToMLMessage:messageNode withBody:body andEncrypted:encrypted andMessageType:messageType andActualFrom:nil];
+    message.stanzaId = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];       //use the stanza id provided directly by mam
     @synchronized(_mamPageArrays) {
         if(!_mamPageArrays[[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]])
             _mamPageArrays[[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]] = [[NSMutableArray alloc] init];
@@ -3209,7 +3212,7 @@ NSString *const kXMPPPresence = @"presence";
     }
 }
 
--(NSArray* _Nullable) getOrderedMamPageFor:(NSString* _Nonnull) mamQueryId
+-(NSArray* _Nullable) getOrderedMamPageFor:(NSString*) mamQueryId
 {
     NSArray* array;
     @synchronized(_mamPageArrays) {
@@ -3306,6 +3309,21 @@ NSString *const kXMPPPresence = @"presence";
             } andHandler:$newHandler(MLPubSubProcessor, avatarDataPublished, $ID(imageHash), $ID(imageData))];
         }
     });
+}
+
+-(void) publishStatusMessage:(NSString*) message
+{
+    self.statusMessage = message;
+    [self sendPresence];
+}
+
+-(void) sendLMCForId:(NSString*) messageid withNewBody:(NSString*) newBody to:(NSString*) to
+{
+    XMPPMessage* LMCNode = [[XMPPMessage alloc] init];
+    LMCNode.attributes[@"type"] = kMessageChatType;
+    LMCNode.attributes[@"to"] = to;
+    [LMCNode setLMCFor:messageid withNewBody:newBody];
+    [self send:LMCNode];
 }
 
 @end

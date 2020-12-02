@@ -1,14 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="6sv-dL-UsN">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="6sv-dL-UsN">
     <device id="retina4_0" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17505"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
+        <!--PrivacySettings-->
+        <scene sceneID="B5W-Me-AC8">
+            <objects>
+                <viewControllerPlaceholder storyboardName="Settings" referencedIdentifier="PrivacySettings" id="cmS-oG-cv8" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Item" id="iLC-4b-aD8"/>
+                    <navigationItem key="navigationItem" id="RMG-mT-X06"/>
+                </viewControllerPlaceholder>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="xDM-mH-2u8" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-857" y="-2059"/>
+        </scene>
         <!--Login View Controller-->
         <scene sceneID="ufC-wZ-h7g">
             <objects>
@@ -31,7 +43,7 @@
                                                 </constraints>
                                             </imageView>
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="LhW-wJ-Trm" customClass="GLRoundedView">
-                                                <rect key="frame" x="16" y="277" width="288" height="275"/>
+                                                <rect key="frame" x="16" y="233.5" width="288" height="275"/>
                                                 <subviews>
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="j1s-TP-Gbh" customClass="GLCapsuleView">
                                                         <rect key="frame" x="32" y="8" width="224" height="46"/>
@@ -74,8 +86,8 @@
                                                             <constraint firstAttribute="bottom" secondItem="Qrh-pK-XJH" secondAttribute="bottom" constant="8" id="wB1-LA-K7H"/>
                                                         </constraints>
                                                     </view>
-                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gth-vl-n15" customClass="GLTintButton">
-                                                        <rect key="frame" x="32" y="124" width="224" height="46"/>
+                                                    <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gth-vl-n15" customClass="GLTintButton">
+                                                        <rect key="frame" x="32" y="124" width="163" height="46"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="Dsd-ki-rLV"/>
                                                             <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="46" id="amu-If-hre"/>
@@ -106,30 +118,50 @@
                                                             <segue destination="0z4-cM-T8Y" kind="show" id="WIW-8L-yzU"/>
                                                         </connections>
                                                     </button>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TZB-oT-VmG" userLabel="scanQRCode" customClass="GLTintButton">
+                                                        <rect key="frame" x="211" y="124" width="45" height="46"/>
+                                                        <constraints>
+                                                            <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="46" id="EjL-Tk-OMD"/>
+                                                            <constraint firstAttribute="width" constant="45" id="IXG-ib-C1X"/>
+                                                            <constraint firstAttribute="height" relation="lessThanOrEqual" constant="46" id="Tn0-0f-NYp"/>
+                                                            <constraint firstAttribute="height" constant="46" id="f5v-RT-KbI"/>
+                                                        </constraints>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="25"/>
+                                                        <state key="normal">
+                                                            <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                            <color key="titleShadowColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                                                            <imageReference key="image" image="qrcode" catalog="system" symbolScale="large" renderingMode="original"/>
+                                                        </state>
+                                                        <connections>
+                                                            <segue destination="lNd-QE-Zgt" kind="show" identifier="scanQRCode" id="VE2-V7-mXq"/>
+                                                        </connections>
+                                                    </button>
                                                 </subviews>
                                                 <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="275" id="0FA-kn-ANs"/>
                                                     <constraint firstItem="UsC-wr-MFj" firstAttribute="centerX" secondItem="LhW-wJ-Trm" secondAttribute="centerX" id="3yN-gD-Fpk"/>
-                                                    <constraint firstItem="c9v-kP-ocC" firstAttribute="top" secondItem="Gth-vl-n15" secondAttribute="bottom" constant="8" id="7Xn-jE-wTf"/>
+                                                    <constraint firstAttribute="trailing" secondItem="TZB-oT-VmG" secondAttribute="trailing" constant="32" id="56E-51-dqe"/>
+                                                    <constraint firstItem="c9v-kP-ocC" firstAttribute="top" secondItem="TZB-oT-VmG" secondAttribute="bottom" constant="8" id="7Xn-jE-wTf"/>
                                                     <constraint firstItem="j1s-TP-Gbh" firstAttribute="leading" secondItem="LhW-wJ-Trm" secondAttribute="leading" constant="32" id="85F-Rd-Pbc"/>
                                                     <constraint firstItem="UsC-wr-MFj" firstAttribute="top" secondItem="j1s-TP-Gbh" secondAttribute="bottom" constant="8" id="9b4-7Y-5bn"/>
                                                     <constraint firstAttribute="trailing" secondItem="c9v-kP-ocC" secondAttribute="trailing" constant="32" id="B5P-ei-21a"/>
-                                                    <constraint firstAttribute="trailing" secondItem="Gth-vl-n15" secondAttribute="trailing" constant="32" id="Q6w-Bc-pwp"/>
+                                                    <constraint firstItem="TZB-oT-VmG" firstAttribute="top" secondItem="Gth-vl-n15" secondAttribute="top" id="F7F-jx-IOb"/>
+                                                    <constraint firstItem="TZB-oT-VmG" firstAttribute="leading" relation="lessThanOrEqual" secondItem="Gth-vl-n15" secondAttribute="trailing" constant="16" id="OMh-Rg-csA"/>
                                                     <constraint firstAttribute="trailing" secondItem="j1s-TP-Gbh" secondAttribute="trailing" constant="32" id="Yg7-Ue-DzX"/>
                                                     <constraint firstItem="j1s-TP-Gbh" firstAttribute="centerX" secondItem="LhW-wJ-Trm" secondAttribute="centerX" id="YqL-ai-clZ"/>
                                                     <constraint firstItem="Gth-vl-n15" firstAttribute="leading" secondItem="LhW-wJ-Trm" secondAttribute="leading" constant="32" id="bia-tk-4sq"/>
-                                                    <constraint firstItem="c9v-kP-ocC" firstAttribute="leading" secondItem="LhW-wJ-Trm" secondAttribute="leading" constant="32" id="cHe-ke-10M"/>
+                                                    <constraint firstItem="c9v-kP-ocC" firstAttribute="leading" secondItem="Gth-vl-n15" secondAttribute="leading" id="cHe-ke-10M"/>
                                                     <constraint firstItem="j1s-TP-Gbh" firstAttribute="top" secondItem="LhW-wJ-Trm" secondAttribute="top" constant="8" id="cx3-nb-etw"/>
                                                     <constraint firstItem="Gth-vl-n15" firstAttribute="top" secondItem="UsC-wr-MFj" secondAttribute="bottom" constant="16" id="j3R-bG-Dje"/>
                                                     <constraint firstAttribute="trailing" secondItem="UsC-wr-MFj" secondAttribute="trailing" constant="32" id="lY9-9E-afU"/>
                                                     <constraint firstItem="UsC-wr-MFj" firstAttribute="leading" secondItem="LhW-wJ-Trm" secondAttribute="leading" constant="32" id="nOK-63-thD"/>
                                                 </constraints>
                                             </view>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QY7-bW-ufD">
-                                                <rect key="frame" x="59.5" y="572" width="201" height="30"/>
+                                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QY7-bW-ufD">
+                                                <rect key="frame" x="8" y="529" width="304" height="30"/>
                                                 <constraints>
-                                                    <constraint firstAttribute="width" constant="201" id="MVI-DD-ixP"/>
+                                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="200" id="MVI-DD-ixP"/>
                                                     <constraint firstAttribute="height" constant="30" id="duv-oS-3U1"/>
                                                 </constraints>
                                                 <fontDescription key="fontDescription" type="system" pointSize="19"/>
@@ -159,7 +191,7 @@
                                             <constraint firstItem="Spm-F2-kku" firstAttribute="top" secondItem="dBi-E0-U5p" secondAttribute="bottom" constant="16" id="M8v-It-dh4"/>
                                             <constraint firstItem="dBi-E0-U5p" firstAttribute="centerX" secondItem="9KO-5L-PvL" secondAttribute="centerX" id="bDd-PM-Gme"/>
                                             <constraint firstItem="dBi-E0-U5p" firstAttribute="centerX" secondItem="9KO-5L-PvL" secondAttribute="centerX" id="pHb-dm-Cue"/>
-                                            <constraint firstItem="LhW-wJ-Trm" firstAttribute="top" secondItem="Spm-F2-kku" secondAttribute="bottom" constant="53.5" id="qeD-bQ-gEf"/>
+                                            <constraint firstItem="LhW-wJ-Trm" firstAttribute="top" secondItem="Spm-F2-kku" secondAttribute="bottom" constant="10" id="qeD-bQ-gEf"/>
                                             <constraint firstItem="LhW-wJ-Trm" firstAttribute="leading" secondItem="9KO-5L-PvL" secondAttribute="leading" constant="16" id="t9f-po-MYB"/>
                                             <constraint firstAttribute="trailing" secondItem="Spm-F2-kku" secondAttribute="trailing" constant="16" id="uvI-vj-r2w"/>
                                             <constraint firstItem="QY7-bW-ufD" firstAttribute="top" secondItem="LhW-wJ-Trm" secondAttribute="bottom" constant="20" id="v0g-QC-njL"/>
@@ -202,9 +234,11 @@
                         <outlet property="jid" destination="ktr-DL-MYt" id="tdB-on-dSf"/>
                         <outlet property="loginButton" destination="Gth-vl-n15" id="5vq-1I-hkg"/>
                         <outlet property="password" destination="Qrh-pK-XJH" id="44m-vv-5Xb"/>
+                        <outlet property="qrScanButton" destination="TZB-oT-VmG" id="T61-Rl-X0r"/>
                         <outlet property="scrollView" destination="uEV-8J-3dB" id="yei-N7-QKD"/>
                         <outlet property="topImage" destination="dBi-E0-U5p" id="3rc-PX-yIK"/>
                         <outlet property="view" destination="mRc-C7-WOT" id="fsO-Sp-UXQ"/>
+                        <segue destination="cmS-oG-cv8" kind="show" identifier="showPrivacySettings" id="6jY-Zs-guy"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
@@ -214,7 +248,7 @@
                     </connections>
                 </tapGestureRecognizer>
             </objects>
-            <point key="canvasLocation" x="-1650" y="-2628"/>
+            <point key="canvasLocation" x="-1650" y="-2628.1690140845071"/>
         </scene>
         <!--Register-->
         <scene sceneID="nCU-xS-nTR">
@@ -390,6 +424,7 @@
                         <outlet property="scrollView" destination="tT2-oH-OMx" id="BXf-Ce-GoE"/>
                         <outlet property="view" destination="EY5-se-S4y" id="AoK-S7-YuA"/>
                         <segue destination="iOy-Fr-h6X" kind="show" identifier="showSuccess" id="2Ua-AK-nzQ"/>
+                        <segue destination="cmS-oG-cv8" kind="presentation" identifier="showPrivacySettings" id="zkg-JY-Ot8"/>
                     </connections>
                 </viewController>
                 <tapGestureRecognizer id="Hxy-TB-Vmi">
@@ -512,10 +547,29 @@
             </objects>
             <point key="canvasLocation" x="-2470" y="-2628"/>
         </scene>
+        <!--Code Scanner-->
+        <scene sceneID="sS3-kI-q5w">
+            <objects>
+                <viewController id="lNd-QE-Zgt" customClass="MLQRCodeScanner" customModule="Monal" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="0SF-uz-h1g" customClass="MLAttributedLabel">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="4wX-Ry-QAn"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="TQ2-L8-X0J"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="r0k-Oh-I2R" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2179" y="-1781"/>
+        </scene>
     </scenes>
     <designables>
         <designable name="Gth-vl-n15">
             <size key="intrinsicContentSize" width="60" height="42"/>
+        </designable>
+        <designable name="TZB-oT-VmG">
+            <size key="intrinsicContentSize" width="24" height="30"/>
         </designable>
         <designable name="c04-pS-Uoi">
             <size key="intrinsicContentSize" width="150" height="42"/>
@@ -527,8 +581,12 @@
             <size key="intrinsicContentSize" width="89" height="42"/>
         </designable>
     </designables>
+    <inferredMetricsTieBreakers>
+        <segue reference="6jY-Zs-guy"/>
+    </inferredMetricsTieBreakers>
     <resources>
         <image name="AppLogo" width="341.33334350585938" height="341.33334350585938"/>
+        <image name="qrcode" catalog="system" width="128" height="114"/>
         <systemColor name="groupTableViewBackgroundColor">
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
@@ -558,6 +616,9 @@
         </systemColor>
         <systemColor name="secondarySystemBackgroundColor">
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
     </resources>
 </document>

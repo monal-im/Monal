@@ -19,16 +19,24 @@
 
 -(MLEncryptedPayload *) initWithBody:(NSData *) body key:(NSData *) key iv:(NSData *) iv authTag:(NSData *) authTag
 {
-    self=[super init];
-    self.body=body;
-    self.key= key;
-    self.iv= iv;
-    self.authTag=authTag;
+    assert(body != nil);
+    assert(key != nil);
+    assert(iv != nil);
+    assert(authTag != nil);
+
+    self = [super init];
+    self.body = body;
+    self.key = key;
+    self.iv = iv;
+    self.authTag = authTag;
     return self;
 }
 
 -(MLEncryptedPayload *) initWithKey:(NSData *) key iv:(NSData *) iv
 {
+    assert(key != nil);
+    assert(iv != nil);
+
     self = [super init];
     self.body = nil;
     self.key = key;

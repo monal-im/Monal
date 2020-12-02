@@ -508,7 +508,7 @@ int RTPUDPv4Transmitter::GetLocalHostName(uint8_t *buffer,size_t *bufferlength)
 			ip = (*it);
 			
 			RTP_SNPRINTF(str,16,"%d.%d.%d.%d",(int)((ip>>24)&0xFF),(int)((ip>>16)&0xFF),(int)((ip>>8)&0xFF),(int)(ip&0xFF));
-			len = strlen(str);
+			len = (int)strlen(str);
 	
 			localhostnamelength = len;
 			localhostname = RTPNew(GetMemoryManager(),RTPMEM_TYPE_OTHER) uint8_t [localhostnamelength + 1];
@@ -1278,7 +1278,7 @@ int RTPUDPv4Transmitter::PollSocket(bool rtp)
 	{
 		RTPTime curtime = RTPTime::CurrentTime();
 		fromlen = sizeof(struct sockaddr_in);
-		recvlen = recvfrom(sock,packetbuffer,RTPUDPV4TRANS_MAXPACKSIZE,0,(struct sockaddr *)&srcaddr,&fromlen);
+		recvlen = (int)recvfrom(sock,packetbuffer,RTPUDPV4TRANS_MAXPACKSIZE,0,(struct sockaddr *)&srcaddr,&fromlen);
 		if (recvlen > 0)
 		{
 			bool acceptdata;
@@ -1772,7 +1772,6 @@ void RTPUDPv4Transmitter::GetLocalIPList_DNS()
 	if (he == 0)
 		return;
 	
-	ip = 0;
 	i = 0;
 	done = false;
 	while (!done)

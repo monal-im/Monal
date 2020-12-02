@@ -38,8 +38,6 @@ typedef NS_ENUM (NSInteger, xmppRegistrationState) {
 FOUNDATION_EXPORT NSString* const kFileName;
 FOUNDATION_EXPORT NSString* const kContentType;
 FOUNDATION_EXPORT NSString* const kData;
-FOUNDATION_EXPORT NSString* const kContact;
-FOUNDATION_EXPORT NSString* const kCompletion;
 
 @class jingleCall;
 @class MLPubSub;
@@ -75,9 +73,8 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 // state attributes
 @property (nonatomic, strong) NSString* statusMessage;
-@property (nonatomic, assign) BOOL awayState;
 
-@property (nonatomic, strong) jingleCall *jingle;
+@property (nonatomic, strong) jingleCall* _Nullable jingle;
 
 // DB info
 @property (nonatomic, strong) NSString* accountNo;
@@ -100,16 +97,6 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 @property (nonatomic, strong, readonly) MLXMLNode* capsIdentity;
 @property (nonatomic, strong, readonly) NSSet* capsFeatures;
 @property (nonatomic, strong, readonly) NSString* capsHash;
-
-extern NSString *const kMessageId;
-extern NSString *const kSendTimer;
-
-extern NSString *const kXMPPError;
-extern NSString *const kXMPPSuccess;
-extern NSString *const kXMPPPresence;
-
-extern NSString* const kAccountState;
-extern NSString* const kAccountHibernate;
 
 -(id) initWithServer:(nonnull MLXMPPServer*) server andIdentity:(nonnull MLXMPPIdentity*) identity andAccountNo:(NSString*) accountNo;
 
@@ -168,15 +155,6 @@ extern NSString* const kAccountHibernate;
 -(void) updateRosterItem:(NSString*) jid withName:(NSString*) name;
 
 #pragma mark set connection attributes
-/**
-sets the status message. makes xmpp call
- */
--(void) setStatusMessageText:(NSString*) message;
-
-/**
-sets away xmpp call.
- */
--(void) setAway:(BOOL) away;
 
 /**
  join a room on the conference server
@@ -227,7 +205,7 @@ Decline a call request
  -(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion;
 
 
--(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid withCompletion:(void (^)(NSArray* _Nullable)) completion;
+-(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString* _Nullable) uid withCompletion:(void (^)(NSArray* _Nullable)) completion;
 -(void) setMAMPrefs:(NSString*) preference;
 -(void) getMAMPrefs;
 
@@ -260,13 +238,15 @@ Decline a call request
 
 #pragma mark - internal stuff for processors
 
--(void) addMessageToMamPageArray:(XMPPMessage*) messageNode forOuterMessageNode:(XMPPMessage*) outerMessageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType;
+-(void) addMessageToMamPageArray:(XMPPMessage*) messageNode forOuterMessageNode:(XMPPMessage*) outerMessageNode withBody:(NSString* _Nullable) body andEncrypted:(BOOL) encrypted andMessageType:(NSString*) messageType;
 -(NSArray* _Nullable) getOrderedMamPageFor:(NSString*) mamQueryId;
 -(void) bindResource:(NSString*) resource;
 -(void) initSession;
--(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andShowAlert:(BOOL) showAlert andMessageType:(NSString*) messageType andActualFrom:(NSString* _Nullable) actualFrom;
+-(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andMessageType:(NSString*) messageType andActualFrom:(NSString* _Nullable) actualFrom;
 -(void) sendDisplayMarkerForId:(NSString*) messageid to:(NSString*) to;
 -(void) publishAvatar:(UIImage*) image;
+-(void) publishStatusMessage:(NSString*) message;
+-(void) sendLMCForId:(NSString*) messageid withNewBody:(NSString*) newBody to:(NSString*) to;
 
 +(NSDictionary*) invalidateState:(NSDictionary*) dic;
 

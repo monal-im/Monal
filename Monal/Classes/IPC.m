@@ -11,6 +11,9 @@
 #include <CommonCrypto/CommonDigest.h>
 #import "IPC.h"
 #import "MLSQLite.h"
+#import "HelperTools.h"
+
+#define MSG_TIMEOUT 2.0
 
 @interface IPC()
 {
@@ -32,7 +35,7 @@ static CFNotificationCenterRef _darwinNotificationCenterRef;
 //forward notifications to the IPC instance that is waiting (the instance running the server thread)
 void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* observer, CFNotificationName name, const void* object, CFDictionaryRef userInfo)
 {
-    [(__bridge IPC*)observer incomingDarwinNotification: (__bridge NSString*)name];
+    [(__bridge IPC*)observer incomingDarwinNotification:(__bridge NSString*)name];
 }
 
 @implementation IPC
@@ -81,6 +84,16 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
         _responseHandlers[id] = responseHandler;
 }
 
+-(void) sendBroadcastMessage:(NSString*) name withData:(NSData* _Nullable) data
+{
+    [self sendMessage:name withData:data to:@"*" withResponseHandler:nil];
+}
+
+-(void) sendBroadcastMessage:(NSString*) name withData:(NSData* _Nullable) data withResponseHandler:(IPC_response_handler_t _Nullable) responseHandler
+{
+    [self sendMessage:name withData:data to:@"*" withResponseHandler:responseHandler];
+}
+
 -(void) respondToMessage:(NSDictionary*) message withData:(NSData* _Nullable) data
 {
     [self writeIpcMessage:message[@"name"] withData:data andResponseId:message[@"id"] to:message[@"source"]];
@@ -88,6 +101,8 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
 
 -(id) initWithProcessName:(NSString*) processName
 {
+    self = [super init];
+    
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
     _dbFile = [[containerUrl path] stringByAppendingPathComponent:@"ipc.sqlite"];
@@ -143,12 +158,13 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
     DDLogInfo(@"Now running IPC server for '%@'", _processName);
     //register darwin notification handler for "im.monal.ipc.wakeup:<process name>" which is used to wake up readNextMessage using the NSCondition
     CFNotificationCenterAddObserver(_darwinNotificationCenterRef, (__bridge void*) self, &darwinNotificationCenterCallback, (__bridge CFNotificationName)[NSString stringWithFormat:@"im.monal.ipc.wakeup:%@", _processName], NULL, 0);
+    CFNotificationCenterAddObserver(_darwinNotificationCenterRef, (__bridge void*) self, &darwinNotificationCenterCallback, (__bridge CFNotificationName)@"im.monal.ipc.wakeup:*", NULL, 0);
     while(![[NSThread currentThread] isCancelled])
     {
         NSDictionary* message = [self readNextMessage];     //this will be blocking
         if(!message)
             continue;
-        DDLogVerbose(@"Got IPC message: %@", message);
+        DDLogDebug(@"Got IPC message: %@", message);
         
         //use a dedicated serial queue for every IPC receiver to maintain IPC message ordering while not blocking other receivers or this serverThread)
         NSArray* parts = [message[@"name"] componentsSeparatedByString:@"."];
@@ -166,10 +182,16 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
             if(_responseHandlers[message[@"response_to"]])
             {
                 IPC_response_handler_t responseHandler = (IPC_response_handler_t)_responseHandlers[message[@"response_to"]];
-                [_responseHandlers removeObjectForKey:message[@"response_to"]];      //responses can only be sent (and handled) once
-                dispatch_async(_ipcQueues[queueName], ^{
-                    responseHandler(message);
-                });
+                if(responseHandler)
+                {
+                    //responses handlers are only valid for the maximum RTT of messages (+ some safety margin)
+                    [HelperTools startTimer:(MSG_TIMEOUT*2 + 1) withHandler:^{
+                        [_responseHandlers removeObjectForKey:message[@"response_to"]];
+                    }];
+                    dispatch_async(_ipcQueues[queueName], ^{
+                        responseHandler(message);
+                    });
+                }
             }
         }
         else        //publish all non-responses (using the message name as object allows for filtering by ipc message name)
@@ -179,13 +201,14 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
     }
     //unregister darwin notification handler
     CFNotificationCenterRemoveObserver(_darwinNotificationCenterRef, (__bridge void*) self, (__bridge CFNotificationName)[NSString stringWithFormat:@"im.monal.ipc.wakeup:%@", _processName], NULL);
+    CFNotificationCenterRemoveObserver(_darwinNotificationCenterRef, (__bridge void*) self, (__bridge CFNotificationName)@"im.monal.ipc.wakeup:*", NULL);
     DDLogInfo(@"IPC server for '%@' now terminated", _processName);
 }
 
 -(void) incomingDarwinNotification:(NSString*) name
 {
-    DDLogVerbose(@"Got incoming darwin notification: %@", name);
-    [_serverThreadCondition signal];
+    DDLogDebug(@"Got incoming darwin notification: %@", name);
+    [_serverThreadCondition signal];        //wake up server thread to process new messages
 }
 
 -(NSDictionary*) readNextMessage
@@ -220,11 +243,12 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
     [self.db executeNonQuery:@"DELETE FROM ipc WHERE timeout<?;" andArguments:@[timestamp]];
     
     //load a *single* message from table and delete it afterwards
-    NSArray* rows = [self.db executeReader:@"SELECT * FROM ipc WHERE destination=? ORDER BY id ASC LIMIT 1;" andArguments:@[destination]];
+    NSArray* rows = [self.db executeReader:@"SELECT * FROM ipc WHERE destination=? OR destination='*' ORDER BY id ASC LIMIT 1;" andArguments:@[destination]];
     if([rows count])
     {
         retval = rows[0];
-        [self.db executeNonQuery:@"DELETE FROM ipc WHERE id=?;" andArguments:@[retval[@"id"]]];
+        if(![retval[@"destination"] isEqualToString:@"*"])      //broadcast will be deleted by their timeout value only
+            [self.db executeNonQuery:@"DELETE FROM ipc WHERE id=?;" andArguments:@[retval[@"id"]]];
     }
     
     [self.db endWriteTransaction];
@@ -238,7 +262,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
     if(!data)
         data = [[NSData alloc] init];
     
-    DDLogVerbose(@"writeIpcMessage:%@ withData:%@ andResponseId:%@ to:%@", name, data, responseId, destination);
+    DDLogDebug(@"writeIpcMessage:%@ withData:%@ andResponseId:%@ to:%@", name, data, responseId, destination);
     
     [self.db beginWriteTransaction];
     
@@ -247,16 +271,19 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
     [self.db executeNonQuery:@"DELETE FROM ipc WHERE timeout<?;" andArguments:@[timestamp]];
     
     //save message to table
-    NSNumber* timeout = @([timestamp intValue] + 2);        //2 seconds timeout for every message
+    NSNumber* timeout = @([timestamp intValue] + MSG_TIMEOUT);        //timeout for every message
     [self.db executeNonQuery:@"INSERT INTO ipc (name, source, destination, data, timeout, response_to) VALUES(?, ?, ?, ?, ?, ?);" andArguments:@[name, _processName, destination, data, timeout, responseId]];
     NSNumber* id = [self.db lastInsertId];
     
     [self.db endWriteTransaction];
     
     //send out darwin notification to wake up other processes waiting for IPC
-    CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (__bridge CFNotificationName)[NSString stringWithFormat:@"im.monal.ipc.wakeup:%@", destination], NULL, NULL, NO);
+    if(![destination isEqualToString:@"*"])
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (__bridge CFNotificationName)[NSString stringWithFormat:@"im.monal.ipc.wakeup:%@", destination], NULL, NULL, NO);
+    else
+        CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), (__bridge CFNotificationName)@"im.monal.ipc.wakeup:*", NULL, NULL, NO);
     
-    DDLogVerbose(@"Wrote IPC message %@ to database", id);
+    DDLogDebug(@"Wrote IPC message %@ to database", id);
     return id;
 }
 

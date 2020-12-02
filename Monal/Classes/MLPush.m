@@ -7,13 +7,10 @@
 //
 
 #import "MLPush.h"
+#import "MLConstants.h"
 #import "MLXMPPManager.h"
 
-
-
-
 @implementation MLPush
-
 
 +(NSString*) stringFromToken:(NSData*) tokenIn
 {

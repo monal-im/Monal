@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "MLConstants.h"
 
-@interface MLEditGroupViewController : UITableViewController <UITextFieldDelegate, UIPickerViewDelegate, UIPickerViewDataSource>
+@interface MLEditGroupViewController : UITableViewController <UITextFieldDelegate>
 {
       NSInteger _selectedRow;
 }

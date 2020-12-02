@@ -71,7 +71,16 @@
     if([type isEqualToString:@"connect"])
        {
            //self.imageView.image=[UIImage imageNamed:@"connect"];
-           _spinner=[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+           if (@available(iOS 13.0, *)) {
+               _spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleLarge];
+
+           }
+           else
+           {
+#if !TARGET_OS_MACCATALYST
+               _spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+#endif
+           }
            CGRect frame = _spinner.frame;
            frame.origin.x+=5;
            frame.origin.y+=2.5;

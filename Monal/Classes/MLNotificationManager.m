@@ -6,13 +6,15 @@
 //
 //
 
-#import "MonalAppDelegate.h"
 #import "HelperTools.h"
 #import "MLNotificationManager.h"
 #import "MLImageManager.h"
 #import "MLMessage.h"
 #import "MLXEPSlashMeHandler.h"
 #import "MLConstants.h"
+#import "xmpp.h"
+#import "MLFiletransfer.h"
+
 @import UserNotifications;
 @import CoreServices;
 
@@ -36,29 +38,80 @@
 {
     self = [super init];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleFiletransferUpdate:) name:kMonalMessageFiletransferUpdateNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDeletedMessage:) name:kMonalDeletedMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleDisplayedMessage:) name:kMonalDisplayedMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleXMPPError:) name:kXMPPError object:nil];
 
     self.notificationPrivacySetting = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
     return self;
 }
 
+-(void) handleXMPPError:(NSNotification*) notification
+{
+    //severe errors will be shown as notification (in addition to the banner shown if the app is in foreground)
+    if([notification.userInfo[@"isSevere"] boolValue])
+    {
+        xmpp* xmppAccount = notification.object;
+        DDLogError(@"SEVERE XMPP Error(%@): %@", xmppAccount.connectionProperties.identity.jid, notification.userInfo[@"message"]);
+        NSString* idval = xmppAccount.connectionProperties.identity.jid;        //use this to only show the newest error notification per account
+        UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+        content.title = xmppAccount.connectionProperties.identity.jid;
+        content.body = notification.userInfo[@"message"];
+        content.sound = [UNNotificationSound defaultSound];
+        UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+        UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
+        [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+            if(error)
+                DDLogError(@"Error posting xmppError notification: %@", error);
+        }]; 
+    }
+}
+
 #pragma mark message signals
+
+-(void) handleFiletransferUpdate:(NSNotification*) notification
+{
+    MLMessage* message = [notification.userInfo objectForKey:@"message"];
+    NSString* idval = [self identifierWithMessage:message];
+    
+    //check if we already show any notifications and update them if necessary (e.g. publish a second notification having the same id)
+    [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:^(NSArray* requests) {
+        for(UNNotificationRequest* request in requests)
+            if([request.identifier isEqualToString:idval])
+            {
+                [self internalMessageHandlerWithMessage:message showAlert:YES andSound:YES];
+            }
+    }];
+    [[UNUserNotificationCenter currentNotificationCenter] getDeliveredNotificationsWithCompletionHandler:^(NSArray* notifications) {
+        for(UNNotification* notification in notifications)
+             if([notification.request.identifier isEqualToString:idval])
+            {
+                [self internalMessageHandlerWithMessage:message showAlert:YES andSound:NO];
+            }
+    }];
+}
 
 -(void) handleNewMessage:(NSNotification*) notification
 {
     MLMessage* message = [notification.userInfo objectForKey:@"message"];
-    
+    BOOL showAlert = notification.userInfo[@"showAlert"] ? [notification.userInfo[@"showAlert"] boolValue] : NO;
+    [self internalMessageHandlerWithMessage:message showAlert:showAlert andSound:YES];
+}
+
+-(void) internalMessageHandlerWithMessage:(MLMessage*) message showAlert:(BOOL) showAlert andSound:(BOOL) sound
+{
     if([message.messageType isEqualToString:kMessageTypeStatus])
         return;
     
-    DDLogVerbose(@"notification manager got new message notice: %@", message.messageText);
+    DDLogVerbose(@"notification manager should show notification for: %@", message.messageText);
     BOOL muted = [[DataLayer sharedInstance] isMutedJid:message.actualFrom];
-    if(!muted && message.shouldShowAlert)
+    if(!muted && showAlert)
     {
         if([HelperTools isInBackground])
         {
-            DDLogVerbose(@"notification manager got new message notice in background: %@", message.messageText);
-            [self showModernNotificaion:notification];
+            DDLogVerbose(@"notification manager should show notification in background: %@", message.messageText);
+            [self showModernNotificaionForMessage:message withSound:sound];
         }
         else
         {
@@ -67,9 +120,13 @@
                 ![message.from isEqualToString:self.currentContact.contactJid] &&
                 ![message.to isEqualToString:self.currentContact.contactJid]
             )
-                [self showModernNotificaion:notification];
+                [self showModernNotificaionForMessage:message withSound:sound];
+            else
+                DDLogDebug(@"not showing notification: chat is open");
         }
     }
+    else
+        DDLogDebug(@"not showing notification: showAlert is NO (or this contact got muted)");
 }
 
 -(void) handleDisplayedMessage:(NSNotification*) notification
@@ -87,10 +144,25 @@
     [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
     
     //update app badge
-    dispatch_async(dispatch_get_main_queue(), ^{
-        MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-        [appDelegate updateUnread];
-    });
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalUpdateUnread object:nil];
+}
+
+-(void) handleDeletedMessage:(NSNotification*) notification
+{
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+    MLMessage* message = [notification.userInfo objectForKey:@"message"];
+    
+    if([message.messageType isEqualToString:kMessageTypeStatus])
+        return;
+    
+    DDLogVerbose(@"notification manager got deleted message notice: %@", message.messageId);
+    NSString* idval = [self identifierWithMessage:message];
+    
+    [center removePendingNotificationRequestsWithIdentifiers:@[idval]];
+    [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
+    
+    //update app badge
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalUpdateUnread object:nil];
 }
 
 -(NSString*) identifierWithMessage:(MLMessage*) message
@@ -110,40 +182,39 @@
     //this will add a badge having a minimum of 1 to make sure people see that something happened (even after swiping away all notifications)
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
     NSInteger unread = 0;
-    if(unreadMsgCnt)
+    if(unreadMsgCnt != nil)
         unread = [unreadMsgCnt integerValue];
     DDLogVerbose(@"Raw badge value: %lu", (long)unread);
     if(!unread)
         unread = 1;     //use this as fallback to always show a badge if a notification is shown
-    DDLogInfo(@"Adding badge value: %lu", (long)unread);
+    DDLogDebug(@"Adding badge value: %lu", (long)unread);
     content.badge = [NSNumber numberWithInteger:unread];
     
-    DDLogVerbose(@"notification manager: publishing notification: %@", content.body);
-    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:nil];
+    //scheduling the notification in 1.5 seconds will make it possible to be deleted by XEP-0333 chat-markers received directly after the message
+    //this is useful in catchup scenarios
+    DDLogVerbose(@"notification manager: publishing notification in 1.5 seconds: %@", content.body);
+    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:[UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1.5 repeats: NO]];
     [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
         if(error)
             DDLogError(@"Error posting local notification: %@", error);
     }];
 }
 
--(void) showModernNotificaion:(NSNotification*) notification
+-(void) showModernNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound
 {
-    MLMessage* message = [notification.userInfo objectForKey:@"message"];
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     
     MLContact* contact = [[DataLayer sharedInstance] contactForUsername:message.from forAccount:message.accountId];
     
     // Only show contact name if allowed
-    if(self.notificationPrivacySetting <= DisplayOnlyName) {
+    if(self.notificationPrivacySetting <= DisplayOnlyName)
+    {
         content.title = [contact contactDisplayName];
-
         if(![message.from isEqualToString:message.actualFrom])
-        {
             content.subtitle = [NSString stringWithFormat:@"%@ says:", message.actualFrom];
-        }
-    } else {
-        content.title = NSLocalizedString(@"New Message", @"");
     }
+    else
+        content.title = NSLocalizedString(@"New Message", @"");
     NSString* idval = [self identifierWithMessage:message];
 
     // only show msgText if allowed
@@ -171,7 +242,7 @@
             @"messageId": message.messageId
         };
 
-        if([[HelperTools defaultsDB] boolForKey:@"Sound"])
+        if(sound && [[HelperTools defaultsDB] boolForKey:@"Sound"])
         {
             NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
             if(filename)
@@ -180,35 +251,50 @@
                 content.sound = [UNNotificationSound defaultSound];
         }
 
-        if([message.messageType isEqualToString:kMessageTypeImage])
+        if([message.messageType isEqualToString:kMessageTypeFiletransfer])
         {
-            [[MLImageManager sharedInstance] imageURLForAttachmentLink:message.messageText withCompletion:^(NSURL * _Nullable url) {
-                if(url)
+            NSDictionary* info = [MLFiletransfer getFileInfoForMessage:message];
+            if(info && [info[@"mimeType"] hasPrefix:@"image/"])
+            {
+                UNNotificationAttachment* attachment;
+                if(![info[@"needsDownloading"] boolValue])
                 {
+                    NSString* typeHint = (NSString*)kUTTypePNG;
+                    if([info[@"mimeType"] isEqualToString:@"image/jpeg"])
+                        typeHint = (NSString*)kUTTypeJPEG;
+                    if([info[@"mimeType"] isEqualToString:@"image/png"])
+                        typeHint = (NSString*)kUTTypePNG;
+                    if([info[@"mimeType"] isEqualToString:@"image/png"])
+                        typeHint = (NSString*)kUTTypeGIF;
                     NSError *error;
-                    UNNotificationAttachment* attachment = [UNNotificationAttachment attachmentWithIdentifier:[[NSUUID UUID] UUIDString] URL:url options:@{UNNotificationAttachmentOptionsTypeHintKey:(NSString*) kUTTypePNG} error:&error];
-                    if(attachment)
-                        content.attachments = @[attachment];
+                    attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
                     if(error)
                         DDLogError(@"Error %@", error);
                 }
-
-                if(!content.attachments)
-                    content.body = NSLocalizedString(@"Sent an Image 📷", @"");
-                else
+                if(attachment)
+                {
+                    content.attachments = @[attachment];
                     content.body = @"";
+                }
+                else
+                    content.body = NSLocalizedString(@"Sent an Image 📷", @"");
 
+                DDLogDebug(@"Publishing notification with id %@", idval);
                 [self publishNotificationContent:content withID:idval];
-            }];
-            return;
+                return;
+            }
+            else        //TODO JIM: add support for more mime types
+                content.body = NSLocalizedString(@"Sent a File 📁", @"");
         }
         else if([message.messageType isEqualToString:kMessageTypeUrl])
             content.body = NSLocalizedString(@"Sent a Link 🔗", @"");
         else if([message.messageType isEqualToString:kMessageTypeGeo])
-            content.body = NSLocalizedString(@"Sent a location 📍", @"");
-    } else {
-        content.body = NSLocalizedString(@"Open app to see more", @"");
+            content.body = NSLocalizedString(@"Sent a Location 📍", @"");
     }
+    else
+        content.body = NSLocalizedString(@"Open app to see more", @"");
+
+    DDLogDebug(@"Publishing notification with id %@", idval);
     [self publishNotificationContent:content withID:idval];
 }
 

@@ -300,7 +300,6 @@
 "Os: " = "Os: ";
 "Software Version" = "Software Version";
 "Version: " = "Version: ";
-"Jabber, Openfire, Prosody etc. " = "Jabber, Prosody, ejabberd etc.   ";
 "Could not synchronize" = "Could not synchronize";
 "Please open the app to retry" = "Please open the app to retry";
 /* mac only string */
@@ -338,3 +337,68 @@
 "You have not entered your XMPP ID yet" = "You have not entered your XMPP ID yet";
 "Your entered XMPP ID is missing the domain" = "Your entered XMPP ID is missing the domain";
 "Your entered XMPP ID is missing the username" = "Your entered XMPP ID is missing the username";
+"Always archive" = "Always archive";
+"Archive only if the contact is in contact list" = "Archive only if the contact is in contact list";
+"Never archive" = "Never archive";
+"Only contacts" = "Only contacts";
+"Server returned invalid xml!" = "Server returned invalid xml!";
+"SRV entry prohibits XMPP connection for server %@" = "SRV entry prohibits XMPP connection for server %@";
+"Unable to connect to server!" = "Unable to connect to server!";
+"Unexpected mam preferences result" = "Unexpected mam preferences result";
+"XMPP Account Info Error" = "XMPP Account Info Error";
+"XMPP Bind Error" = "XMPP Bind Error";
+"XMPP Disco Info Error" = "XMPP Disco Info Error";
+"XMPP mam preferences error" = "XMPP mam preferences error";
+"XMPP Roster Error" = "XMPP Roster Error";
+"XMPP stream error %@: %@" = "XMPP stream error %1$@: %2$@";
+"XMPP stream error: %@" = "XMPP stream error: %@";
+"no supported auth mechanism, disconnecting!" = "no supported auth mechanism, disconnecting!";
+"Loading omemo bundles: %@ / %@" = "Loading omemo bundles: %1$@ / %2$@";
+/* QR-Code-Scanner: camera not found */
+"Could not access camera" = "Could not access camera";
+/* QR-Code-Scanner */
+"Could not get default capture device" = "Could not get default capture device";
+/* QR-Code-Scanner */
+"Could not init video session" = "Could not init video session";
+/* QR-Code-Scanner: invalid format */
+"Invalid format" = "Invalid format";
+/* QR-Code-Scanner: Camera not found */
+"It does not seem as your device has a camera. Please use a device with a camera for scanning" = "It does not seem as your device has a camera. Please use a device with a camera for scanning";
+"Login with a QR-Code" = "Login with a QR-Code";
+"New Account" = "New Account";
+"QR-Code Scanner" = "QR-Code Scanner";
+/* QR-Code-Scanner */
+"QR-Code video error" = "QR-Code video error";
+/* QR-Code-Scanner: invalid format */
+"We could not find a xmpp related QR-Code" = "We could not find a xmpp related QR-Code";
+"XMPP: QR-Code" = "XMPP: QR-Code";
+"Not Authorized. Please check your credentials." = "Not Authorized. Please check your credentials.";
+"There was a SASL error on the server." = "There was a SASL error on the server.";
+"Contact Jid" = "Contact Jid";
+"Contacts are usually in the format: username@dom.ain" = "Contacts are usually in the format: username@dom.ain";
+"Only shareable for now" = "Only shareable for now";
+"Account (%@)" = "Account (%@)";
+"Account (new)" = "Account (new)";
+"Clear Chat History" = "Clear Chat History";
+"Error while decrypting" = "Error while decrypting";
+"Error while decrypting: iv.length != 12" = "Error while decrypting: iv.length != 12";
+"Image encryption error" = "Image encryption error";
+"The chat history has been cleared" = "The chat history has been cleared";
+"This will clear the whole chat history of this account from this device." = "This will clear the whole chat history of this account from this device.";
+"Sent a File 📁" = "Sent a File 📁";
+"Sent a Location 📍" = "Sent a Location 📍";
+"📁 A File" = "📁 A File";
+"Edit" = "Edit";
+"Delete Locally" = "Delete Locally";
+/* MLLoginView: QR-Code Button iOS12 only */
+"QR" = "QR";
+"Could not upload file" = "Could not upload file";
+"Download error" = "Download error";
+"Failed to copy downloaded file into cache directory" = "Failed to copy downloaded file into cache directory";
+"Failed to decode download link" = "Failed to decode download link";
+"Failed to decode encrypted link" = "Failed to decode encrypted link";
+"Failed to encrypt file" = "Failed to encrypt file";
+"Failed to parse URL returned by HTTP upload server" = "Failed to parse URL returned by HTTP upload server";
+"Failed to uploaded file to file cache directory" = "Failed to uploaded file to file cache directory";
+"Failed to write decrypted download into cache directory" = "Failed to write decrypted download into cache directory";
+"Copy" = "Copy";

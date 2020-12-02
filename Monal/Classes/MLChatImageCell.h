@@ -8,15 +8,17 @@
 
 #import "MLBaseCell.h"
 
+@class MLMessage;
 
 @interface MLChatImageCell : MLBaseCell
 
 @property (nonatomic, weak) IBOutlet UIImageView *thumbnailImage;
 @property (nonatomic, weak) IBOutlet UIActivityIndicatorView *spinner;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *imageHeight;
-@property (nonatomic, assign)  BOOL loading;
+@property (nonatomic, assign) BOOL loading;
+@property (nonatomic) MLMessage* msg;
 
--(void) loadImageWithCompletion:(void (^)(void))completion;
+-(void) loadImage;
 
 @end
 

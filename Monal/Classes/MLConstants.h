@@ -18,6 +18,10 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 //configure app group constants
 #define kAppGroup @"group.monal"
 
+//this is in seconds
+#define SHORT_PING 4.0
+#define LONG_PING 16.0
+
 @class MLContact;
 
 //some typedefs used throughout the project
@@ -35,37 +39,44 @@ typedef enum NotificationPrivacySettingOption {
 //some useful macros
 #define weakify(var) __weak __typeof__(var) AHKWeak_##var = var
 #define strongify(var) _Pragma("clang diagnostic push") _Pragma("clang diagnostic ignored \"-Wshadow\"") __strong __typeof__(var) var = AHKWeak_##var; _Pragma("clang diagnostic pop")
-#define nilWrapper(var)  (var ? var : [NSNull null])
+#define nilWrapper(var) (var ? var : [NSNull null])
+#define nilExtractor(var) (var == [NSNull null] ? nil : var)
 
 //some xmpp related constants
 #define kRegServer @"yax.im"
+#define kMessageDeletedBody @"eu.siacs.conversations.message_deleted"
 
 #define kXMLNS @"xmlns"
 #define kId @"id"
 #define kJid @"jid"
+#define kMessageId @"kMessageId"
 
 #define kRegisterNameSpace @"jabber:iq:register"
 #define kDataNameSpace @"jabber:x:data"
 #define kBobNameSpace @"urn:xmpp:bob"
-#define kStanzasNameSpace @"urn:ietf:params:xml:ns:xmpp-stanzas"
-
 
 //all other constants needed
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
+#define kMonalDeletedMessageNotice @"kMonalDeletedMessageNotice"
 #define kMonalDisplayedMessageNotice @"kMonalDisplayedMessageNotice"
 #define kMonalHistoryMessagesNotice @"kMonalHistoryMessagesNotice"
 #define kMLMessageSentToContact @"kMLMessageSentToContact"
 #define kMonalSentMessageNotice @"kMLSentMessageNotice"
+#define kMonalMessageFiletransferUpdateNotice @"kMonalMessageFiletransferUpdateNotice"
 
 #define kMonalLastInteractionUpdatedNotice @"kMonalLastInteractionUpdatedNotice"
 #define kMonalMessageReceivedNotice @"kMonalMessageReceivedNotice"
 #define kMonalMessageDisplayedNotice @"kMonalMessageDisplayedNotice"
 #define kMonalMessageErrorNotice @"kMonalMessageErrorNotice"
 #define kMonalReceivedMucInviteNotice @"kMonalReceivedMucInviteNotice"
+#define kXMPPError @"kXMPPError"
+#define kScheduleBackgroundFetchingTask @"kScheduleBackgroundFetchingTask"
+#define kMonalUpdateUnread @"kMonalUpdateUnread"
 
 #define kMLHasConnectedNotice @"kMLHasConnectedNotice"
 #define kMonalFinishedCatchup @"kMonalFinishedCatchup"
 #define kMonalFinishedOmemoBundleFetch @"kMonalFinishedOmemoBundleFetch"
+#define kMonalUpdateBundleFetchStatus @"kMonalUpdateBundleFetchStatus"
 #define kMonalIdle @"kMonalIdle"
 
 #define kMonalPresentChat @"kMonalPresentChat"
@@ -85,6 +96,7 @@ typedef enum NotificationPrivacySettingOption {
 
 // max count of char's in a single message (both: sending and receiving)
 #define kMonalChatMaxAllowedTextLen 2048
+
 #if TARGET_OS_MACCATALYST
 #define kMonalChatFetchedMsgCnt 75
 #else

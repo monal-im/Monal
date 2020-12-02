@@ -15,9 +15,10 @@
 #import "MLXMPPManager.h"
 #import "MLNotificationManager.h"
 #import "MLResizingTextView.h"
+#import "MLSearchViewController.h"
 
 
-@interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate, CLLocationManagerDelegate>
+@interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate, CLLocationManagerDelegate, SearchResultDelegate>
 {
     UIView* containerView;
 	BOOL _firstmsg;
@@ -68,10 +69,9 @@
  Receives the new message notice and will update if it is this user. 
  */
 -(void) handleNewMessage:(NSNotification *)notification;
--(void) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId withCompletion:(void (^)(BOOL success))completion;
 
 -(void) retry:(id) sender;
 
--(void) reloadTable; 
+-(void) reloadTable;
 
 @end

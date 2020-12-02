@@ -7,7 +7,10 @@
 //
 
 #import "MLOMEMO.h"
+#import "MLXMPPConnection.h"
 #import "MLHandler.h"
+#import "xmpp.h"
+#import "XMPPMessage.h"
 #import "SignalAddress.h"
 #import "MLSignalStore.h"
 #import "SignalContext.h"
@@ -18,18 +21,15 @@
 #import "MLPubSub.h"
 #import "DataLayer.h"
 
-
 @interface MLOMEMO ()
 
-@property (atomic, strong) SignalContext* _signalContext;
+@property (atomic, strong) SignalContext* signalContext;
 
-// TODO: rename senderJID to accountJid
-@property (nonatomic, strong) NSString* _senderJid;
-@property (nonatomic, strong) NSString* _accountNo;
-@property (nonatomic, strong) MLXMPPConnection* _connection;
+@property (nonatomic, strong) NSString* accountJid;
 
 @property (nonatomic, strong) xmpp* account;
-@property (nonatomic, assign) BOOL deviceListExists;
+@property (nonatomic, strong) NSMutableSet<NSNumber*>* ownReceivedDeviceList;
+@property (nonatomic, assign) BOOL loggedIn;
 
 // jid -> @[deviceID1, deviceID2]
 @property (nonatomic, strong) NSMutableDictionary* devicesWithBrokenSession;
@@ -45,13 +45,13 @@ const int KEY_SIZE = 16;
 -(MLOMEMO*) initWithAccount:(xmpp*) account;
 {
     self = [super init];
-    self._senderJid = account.connectionProperties.identity.jid;
-    self._accountNo = account.accountNo;
-    self._connection = account.connectionProperties;
+    self.accountJid = account.connectionProperties.identity.jid;
     self.account = account;
-    self.deviceListExists = YES;
-    self.hasCatchUpDone = [NSNumber numberWithInt:0];
-    self.openBundleFetchCnt = [NSNumber numberWithInt:0];
+    self.ownReceivedDeviceList = [[NSMutableSet alloc] init];
+    self.loggedIn = NO;
+    self.hasCatchUpDone = NO;
+    self.openBundleFetchCnt = 0;
+    self.closedBundleFetchCnt = 0;
 
     self.devicesWithBrokenSession = [[NSMutableDictionary alloc] init];
 
@@ -68,8 +68,9 @@ const int KEY_SIZE = 16;
     if(!dic) return;
     NSString* accountNo = [dic objectForKey:@"AccountNo"];
     if(!accountNo) return;
-    if([self._accountNo isEqualToString:accountNo]) {
-        self.deviceListExists = NO;
+    if([self.account.accountNo isEqualToString:accountNo]) {
+        self.loggedIn = YES;
+        // We don't have to clear ownReceivedDeviceList as it would have been cleared by a reconnect
     }
 }
 
@@ -77,16 +78,11 @@ const int KEY_SIZE = 16;
     xmpp* notiAccount = notification.object;
     if(!notiAccount) return;
 
-    if([self._accountNo isEqualToString:notiAccount.accountNo]) {
-        self.hasCatchUpDone = [NSNumber numberWithInt:1];
-        if(self.deviceListExists == NO) {
-            // we need to publish a new devicelist if we did not receive our own list after a new connection
-            [self sendOMEMOBundle];
-            [self sendOMEMODeviceWithForce:YES];
-            self.deviceListExists = YES;
-        }
-        if(self.openBundleFetchCnt.intValue == 0)
+    if([self.account.accountNo isEqualToString:notiAccount.accountNo]) {
+        self.hasCatchUpDone = YES;
+        if(!self.openBundleFetchCnt && self.loggedIn) // check if we have a session were we loggedIn
         {
+            [self sendLocalDevicesIfNeeded];
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedOmemoBundleFetch object:self];
         }
     }
@@ -94,32 +90,57 @@ const int KEY_SIZE = 16;
 
 -(void) setupSignal
 {
-    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:self._accountNo];
+    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:self.account.accountNo];
 
     // signal store
     SignalStorage* signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
     // signal context
-    self._signalContext = [[SignalContext alloc] initWithStorage:signalStorage];
-    // signal helper
-    SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self._signalContext];
+    self.signalContext = [[SignalContext alloc] initWithStorage:signalStorage];
 
     // init MLPubSub handler
     [self.account.pubsub registerForNode:@"eu.siacs.conversations.axolotl.devicelist" withHandler:$newHandler(self, devicelistHandler)];
 
+    [self createLocalIdentiyKeyPairIfNeeded:[[NSSet alloc] init]];
+}
+
+-(BOOL) createLocalIdentiyKeyPairIfNeeded:(NSSet<NSNumber*>*) ownDeviceIds
+{
     if(self.monalSignalStore.deviceid == 0)
     {
-        // Generate a new device id
-        // TODO: check if device id is unique
-        self.monalSignalStore.deviceid = [signalHelper generateRegistrationId];
+        // signal helper
+        SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
+
+        do
+        {
+            // Generate a new device id
+            self.monalSignalStore.deviceid = [signalHelper generateRegistrationId];
+        } while([ownDeviceIds containsObject:[NSNumber numberWithUnsignedInt:self.monalSignalStore.deviceid]]);
         // Create identity key pair
         self.monalSignalStore.identityKeyPair = [signalHelper generateIdentityKeyPair];
         self.monalSignalStore.signedPreKey = [signalHelper generateSignedPreKeyWithIdentity:self.monalSignalStore.identityKeyPair signedPreKeyId:1];
+        SignalAddress* address = [[SignalAddress alloc] initWithName:self.accountJid deviceId:self.monalSignalStore.deviceid];
+        [self.monalSignalStore saveIdentity:address identityKey:self.monalSignalStore.identityKeyPair.publicKey];
+        return YES;
+    }
+    return NO;
+}
+
+-(void) sendLocalDevicesIfNeeded
+{
+    if([self.ownReceivedDeviceList count] == 0) {
+        // we need to publish a new devicelist if we did not receive our own list after a new connection
         // Generate single use keys
         [self generateNewKeysIfNeeded];
         [self sendOMEMOBundle];
 
-        SignalAddress* address = [[SignalAddress alloc] initWithName:self._senderJid deviceId:self.monalSignalStore.deviceid];
-        [self.monalSignalStore saveIdentity:address identityKey:self.monalSignalStore.identityKeyPair.publicKey];
+        [self sendOMEMODeviceWithForce:YES];
+        [self.ownReceivedDeviceList addObject:[NSNumber numberWithInt:(self.monalSignalStore.deviceid)]];
+    }
+    else
+    {
+        // Generate single use keys
+        [self generateNewKeysIfNeeded];
+        [self sendOMEMODevice:self.ownReceivedDeviceList force:NO];
     }
 }
 
@@ -140,6 +161,8 @@ $$
 
 -(void) sendOMEMOBundle
 {
+    if(self.monalSignalStore.deviceid == 0)
+        return;
     [self publishKeysViaPubSub:@{
         @"signedPreKeyPublic":self.monalSignalStore.signedPreKey.keyPair.publicKey,
         @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature,
@@ -158,7 +181,7 @@ $$
     int preKeyCount = [self.monalSignalStore getPreKeyCount];
     if(preKeyCount < MIN_OMEMO_KEYS)
     {
-        SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self._signalContext];
+        SignalKeyHelper* signalHelper = [[SignalKeyHelper alloc] initWithContext:self.signalContext];
 
         // Generate new keys so that we have a total of MAX_OMEMO_KEYS keys again
         int lastPreyKedId = [self.monalSignalStore getHighestPreyKeyId];
@@ -178,10 +201,13 @@ $$
 {
     NSString* bundleNode = [NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%@", deviceid];
 
-    self.openBundleFetchCnt = [NSNumber numberWithInt:(self.openBundleFetchCnt.intValue + 1)];
+    self.openBundleFetchCnt++;
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalUpdateBundleFetchStatus object:self userInfo:@{
+        @"completed": @(self.closedBundleFetchCnt),
+        @"all": @(self.openBundleFetchCnt + self.closedBundleFetchCnt)
+    }];
     [self.account.pubsub fetchNode:bundleNode from:jid withItemsList:nil andHandler:$newHandler(self, handleBundleFetchResult, $ID(rid, deviceid))];
 }
-
 
 $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data), $_ID(NSString*, rid))
     if(errorIq)
@@ -207,15 +233,24 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
         if(receivedKeys)
             [account.omemo processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
     }
-    if(account.omemo.openBundleFetchCnt.intValue > 1)
+    if(account.omemo.openBundleFetchCnt > 1 && account.omemo.loggedIn)
     {
-        account.omemo.openBundleFetchCnt = [NSNumber numberWithInt:(account.omemo.openBundleFetchCnt.intValue - 1)];
+        account.omemo.openBundleFetchCnt--;
+        account.omemo.closedBundleFetchCnt++;
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalUpdateBundleFetchStatus object:account.omemo userInfo:@{
+            @"completed": @(account.omemo.closedBundleFetchCnt),
+            @"all": @(account.omemo.openBundleFetchCnt + account.omemo.closedBundleFetchCnt)
+        }];
     }
     else
     {
-        account.omemo.openBundleFetchCnt = [NSNumber numberWithInt:0];
-        if(account.omemo.hasCatchUpDone.intValue == 1)
+        account.omemo.openBundleFetchCnt = 0;
+        account.omemo.closedBundleFetchCnt = 0;
+        if(account.omemo.hasCatchUpDone && account.omemo.loggedIn)
+        {
+            [account.omemo sendLocalDevicesIfNeeded];
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedOmemoBundleFetch object:self];
+        }
     }
 $$
 
@@ -223,9 +258,9 @@ $$
 {
     if(receivedDevices)
     {
-        NSAssert([self._senderJid caseInsensitiveCompare:self._connection.identity.jid] == NSOrderedSame, @"connection jid should be equal to the senderJid");
+        NSAssert([self.accountJid caseInsensitiveCompare:self.account.connectionProperties.identity.jid] == NSOrderedSame, @"connection jid should be equal to the senderJid");
 
-        if(![[DataLayer  sharedInstance] isContactInList:source forAccount:self._accountNo] && ![source isEqualToString:self._senderJid])
+        if(![[DataLayer  sharedInstance] isContactInList:source forAccount:self.account.accountNo] && ![source isEqualToString:self.accountJid])
             return;
 
         NSArray<NSNumber*>* existingDevices = [self.monalSignalStore knownDevicesForAddressName:source];
@@ -245,7 +280,7 @@ $$
             if(![receivedDevices containsObject:deviceId])
             {
                 // only delete other devices from signal store && keep our own entry
-                if(!([source isEqualToString:self._senderJid] && deviceId.intValue == self.monalSignalStore.deviceid))
+                if(!([source isEqualToString:self.accountJid] && deviceId.intValue == self.monalSignalStore.deviceid))
                     [self deleteDeviceForSource:source andRid:deviceId.intValue];
 
                 // Remove device from broken sessions if needed
@@ -260,10 +295,18 @@ $$
         }
         // TODO: delete deviceid from new session array
         // Send our own device id when it is missing on the server
-        if(!source || [source caseInsensitiveCompare:self._senderJid] == NSOrderedSame)
+        if(!source || [source caseInsensitiveCompare:self.accountJid] == NSOrderedSame)
         {
-            self.deviceListExists = YES;
-            [self sendOMEMODevice:receivedDevices force:NO];
+            if(receivedDevices.count > 0)
+            {
+                // save own receivedDevices for catchupDone handling
+                [self.ownReceivedDeviceList unionSet:receivedDevices];
+            }
+            if(self.hasCatchUpDone == true && !self.openBundleFetchCnt)
+            {
+                // the catchup done handler or the bundleFetch handler will send our own devices while logging in
+                [self sendOMEMODevice:receivedDevices force:NO];
+            }
         }
     }
 }
@@ -281,7 +324,7 @@ $$
 -(void) deleteDeviceForSource:(NSString*) source andRid:(int) rid
 {
     // We should not delete our own device
-    if([source isEqualToString:self._senderJid] && rid == self.monalSignalStore.deviceid)
+    if([source isEqualToString:self.accountJid] && rid == self.monalSignalStore.deviceid)
         return;
 
     SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:rid];
@@ -307,7 +350,7 @@ $$
 
 -(void) sendOMEMODeviceWithForce:(BOOL) force
 {
-    NSArray* ownCachedDevices = [self knownDevicesForAddressName:self._senderJid];
+    NSArray* ownCachedDevices = [self knownDevicesForAddressName:self.accountJid];
     NSSet<NSNumber*>* ownCachedDevicesSet = [[NSSet alloc] initWithArray:ownCachedDevices];
     [self sendOMEMODevice:ownCachedDevicesSet force:force];
 }
@@ -327,11 +370,15 @@ $$
         [self sendOMEMOBundle];
         [self publishDevicesViaPubSub:devices];
     }
+    if(devices.count > 0)
+    {
+        [self.ownReceivedDeviceList unionSet:devices];
+    }
 }
 
 -(void) processOMEMOKeys:(MLXMLNode*) iqNode forJid:(NSString*) jid andRid:(NSString*) rid
 {
-    assert(self._signalContext);
+    assert(self.signalContext);
     {
         if(!rid)
             return;
@@ -356,13 +403,12 @@ $$
 
         uint32_t device = (uint32_t)[rid intValue];
         SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:device];
-        SignalSessionBuilder* builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self._signalContext];
+        SignalSessionBuilder* builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
         NSMutableArray* preKeys = [[NSMutableArray alloc] init];
         NSArray<NSNumber*>* preKeyIds = [bundle find:@"prekeys/preKeyPublic@preKeyId|int"];
         for(NSNumber* preKey in preKeyIds)
         {
-            NSString* query = [NSString stringWithFormat:@"prekeys/preKeyPublic<preKeyId=%@>#|base64", preKey];
-            NSData* key = [bundle findFirst:query];
+            NSData* key = [bundle findFirst:[NSString stringWithFormat:@"prekeys/preKeyPublic<preKeyId=%@>#|base64", preKey]];
             if(!key)
                 continue;
             NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
@@ -427,7 +473,6 @@ $$
         XMPPMessage* messageNode = [[XMPPMessage alloc] init];
         [messageNode.attributes setObject:jid forKey:@"to"];
         [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
-        [messageNode setXmppId:[[NSUUID UUID] UUIDString]];
 
         // Send KeyTransportElement only to the one device (overrideDevices)
         [self encryptMessage:messageNode withMessage:nil toContact:jid];
@@ -441,7 +486,7 @@ $$
     for(NSNumber* device in devices)
     {
         // Do not encrypt for our own device
-        if(device.intValue == self.monalSignalStore.deviceid && [encryptForJid isEqualToString:self._senderJid]) {
+        if(device.intValue == self.monalSignalStore.deviceid && [encryptForJid isEqualToString:self.accountJid]) {
             continue;
         }
         SignalAddress* address = [[SignalAddress alloc] initWithName:encryptForJid deviceId:(uint32_t)device.intValue];
@@ -451,7 +496,7 @@ $$
         // Only add encryption key for devices that are trusted
         if([self.monalSignalStore isTrustedIdentity:address identityKey:identity])
         {
-            SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self._signalContext];
+            SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
             NSError* error;
             SignalCiphertext* deviceEncryptedKey = [cipher encryptData:encryptedPayload.key error:&error];
 
@@ -475,7 +520,7 @@ $$
 
 -(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString*) message toContact:(NSString*) toContact overrideDevices:(NSArray<NSNumber*>* _Nullable) overrideDevices
 {
-    NSAssert(self._signalContext, @"_signalContext should be inited.");
+    NSAssert(self.signalContext, @"signalContext should be inited.");
 
     if(message)
     {
@@ -485,7 +530,7 @@ $$
     }
 
     NSArray* devices = [self.monalSignalStore allDeviceIdsForAddressName:toContact];
-    NSArray* myDevices = [self.monalSignalStore allDeviceIdsForAddressName:self._senderJid];
+    NSArray* myDevices = [self.monalSignalStore allDeviceIdsForAddressName:self.accountJid];
 
     // Check if we found omemo keys from the recipient
     if(devices.count > 0 || overrideDevices.count > 0)
@@ -501,13 +546,30 @@ $$
 
             // Encrypt message
             encryptedPayload = [AESGcm encrypt:messageBytes keySize:KEY_SIZE];
+            if(encryptedPayload == nil)
+            {
+                DDLogWarn(@"Could not encrypt message: AESGcm error");
+                return;
+            }
 
             MLXMLNode* payload = [[MLXMLNode alloc] initWithElement:@"payload"];
             [payload setData:[HelperTools encodeBase64WithData:encryptedPayload.body]];
             [encrypted.children addObject:payload];
         } else {
             // There is no message that can be encrypted -> create new session keys
-            encryptedPayload = [[MLEncryptedPayload alloc] initWithKey:[AESGcm genKey:KEY_SIZE] iv:[AESGcm genIV]];
+            NSData* newKey = [AESGcm genKey:KEY_SIZE];
+            NSData* newIv = [AESGcm genIV];
+            if(newKey == nil || newIv == nil)
+            {
+                DDLogWarn(@"Could not create key or iv");
+                return;
+            }
+            encryptedPayload = [[MLEncryptedPayload alloc] initWithKey:newKey iv:newIv];
+            if(encryptedPayload == nil)
+            {
+                DDLogWarn(@"Could not encrypt message: AESGcm error");
+                return;
+            }
         }
 
         // Get own device id
@@ -525,7 +587,7 @@ $$
             // normal encryption -> add encryption for all of our own devices as well as to all of our contact's devices
             [self addEncryptionKeyForAllDevices:devices encryptForJid:toContact withEncryptedPayload:encryptedPayload withXMLHeader:header];
 
-            [self addEncryptionKeyForAllDevices:myDevices encryptForJid:self._senderJid withEncryptedPayload:encryptedPayload withXMLHeader:header];
+            [self addEncryptionKeyForAllDevices:myDevices encryptForJid:self.accountJid withEncryptedPayload:encryptedPayload withXMLHeader:header];
         }
         else
         {
@@ -552,6 +614,10 @@ $$
         devicesWithInvalSession = [[NSMutableSet<NSNumber*> alloc] init];
     }
     // add device to broken session contact set
+    if([devicesWithInvalSession containsObject:deviceId])
+    {
+        return;
+    }
     [devicesWithInvalSession addObject:deviceId];
     [self.devicesWithBrokenSession setObject:devicesWithInvalSession forKey:contact];
 
@@ -576,13 +642,13 @@ $$
 
     NSNumber* sid = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/header@sid|int"];
     SignalAddress* address = [[SignalAddress alloc] initWithName:messageNode.fromUser deviceId:(uint32_t)sid.intValue];
-    if(!self._signalContext)
+    if(!self.signalContext)
     {
         DDLogError(@"Missing signal context");
         return NSLocalizedString(@"Error decrypting message", @"");
     }
     // check if we received our own bundle
-    if([messageNode.fromUser isEqualToString:self._senderJid] && sid.intValue == self.monalSignalStore.deviceid)
+    if([messageNode.fromUser isEqualToString:self.accountJid] && sid.intValue == self.monalSignalStore.deviceid)
     {
         // Nothing to do
         return nil;
@@ -608,7 +674,7 @@ $$
     }
     else
     {
-        SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self._signalContext];
+        SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
         SignalCiphertextType messagetype;
 
         // Check if message is encrypted with a prekey
@@ -665,7 +731,7 @@ $$
             {
                 // nothing to do
                 DDLogInfo(@"KeyTransportElement received from device: %@", sid);
-#ifdef DEBUG
+#ifdef DEBUG_ALPHA
                 return [NSString stringWithFormat:@"ALPHA_DEBUG_MESSAGE: KeyTransportElement received from device: %@", sid];
 #else
                 return nil;
@@ -685,12 +751,21 @@ $$
                 NSString* encryptedPayload = [messageNode findFirst:@"{eu.siacs.conversations.axolotl}encrypted/payload#"];
 
                 NSData* iv = [HelperTools dataWithBase64EncodedString:ivStr];
+                if(iv.length != 12)
+                {
+                    DDLogError(@"Could not decrypt message: iv length: %lu", (unsigned long)iv.length);
+                    return NSLocalizedString(@"Error while decrypting: iv.length != 12", @"");
+                }
                 NSData* decodedPayload = [HelperTools dataWithBase64EncodedString:encryptedPayload];
-
+                if(decodedPayload == nil || key == nil || iv == nil || auth == nil)
+                {
+                    DDLogError(@"Could not decrypt message: GCM params missing");
+                    return NSLocalizedString(@"Error while decrypting", @"");
+                }
                 NSData* decData = [AESGcm decrypt:decodedPayload withKey:key andIv:iv withAuth:auth];
                 if(!decData) {
                     DDLogError(@"Could not decrypt message with key that was decrypted. (GCM error)");
-                     return NSLocalizedString(@"Encrypted message was sent in an older format Monal can't decrypt. Please ask them to update their client. (GCM error)", @"");
+                    return NSLocalizedString(@"Encrypted message was sent in an older format Monal can't decrypt. Please ask them to update their client. (GCM error)", @"");
                 }
                 else
                 {

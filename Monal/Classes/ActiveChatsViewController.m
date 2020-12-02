@@ -8,6 +8,7 @@
 
 #import "ActiveChatsViewController.h"
 #import "DataLayer.h"
+#import "xmpp.h"
 #import "MLContactCell.h"
 #import "chatViewController.h"
 #import "MonalAppDelegate.h"
@@ -69,8 +70,10 @@ enum activeChatsControllerSections {
     self.view = self.chatListTable;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalRefresh object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalMessageFiletransferUpdateNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalDeletedMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageSent:) name:kMLMessageSentToContact object:nil];
     
     [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell"
@@ -78,16 +81,21 @@ enum activeChatsControllerSections {
          forCellReuseIdentifier:@"ContactCell"];
     
     self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeAllVisible;
-#if !TARGET_OS_MACCATALYST
     if(@available(iOS 13.0, *))
+    {
+#if !TARGET_OS_MACCATALYST
         self.splitViewController.primaryBackgroundStyle = UISplitViewControllerBackgroundStyleSidebar;
+#endif
+        self.settingsButton.image = [UIImage systemImageNamed:@"gearshape.fill"];
+        self.addButton.image = [UIImage systemImageNamed:@"plus"];
+        self.composeButton.image = [UIImage systemImageNamed:@"person.2.fill"];
+    }
     else
     {
         self.settingsButton.image = [UIImage imageNamed:@"973-user"];
         self.addButton.image = [UIImage imageNamed:@"907-plus-rounded-square"];
         self.composeButton.image = [UIImage imageNamed:@"704-compose"];
     }
-#endif
     
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;
@@ -241,32 +249,26 @@ enum activeChatsControllerSections {
 -(void) viewWillAppear:(BOOL) animated
 {
     [super viewWillAppear:animated];
+    // load contacts
     self.lastSelectedUser = nil;
+    if(self.unpinnedContacts.count == 0) {
+        [self refreshDisplay];
+    }
 }
 
 -(void) viewDidAppear:(BOOL) animated
 {
     [super viewDidAppear:animated];
-    if(self.unpinnedContacts.count == 0) {
-        [self refreshDisplay];
-    }
-  
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenIntro"]) {
         [self performSegueWithIdentifier:@"showIntro" sender:self];
+        return;
     }
-    else  {
-        //for 3->4 release remove later
-        if(![[HelperTools defaultsDB] boolForKey:@"HasSeeniOS13Message"]) {
-            
-            UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Notification Changes",@ "") message:[NSString stringWithFormat:NSLocalizedString(@"Notifications have changed in iOS 13 because of some iOS changes. For now you will just see something saying there is a new message and not the text or who sent it. I have decided to do this so you have reliable messaging while I work to update Monal to get the old expereince back.",@ "")] preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction *acceptAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Got it!",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-                [self dismissViewControllerAnimated:YES completion:nil];
-                
-            }];
-            [messageAlert addAction:acceptAction];
-            [self.tabBarController presentViewController:messageAlert animated:YES completion:nil];
-            [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeeniOS13Message"];
-        }
+    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"]) {
+        [self performSegueWithIdentifier:@"showLogin" sender:self];
+    }
+    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {
+        [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
+        return;
     }
 }
 
@@ -301,17 +303,22 @@ enum activeChatsControllerSections {
 
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
+    DDLogInfo(@"Got segue identifier '%@'", segue.identifier);
     if([segue.identifier isEqualToString:@"showIntro"])
     {
-        MLWelcomeViewController* welcome = (MLWelcomeViewController *) segue.destinationViewController;
-        welcome.completion = ^(){
-            if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
-            {
-                if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"]) {
-                    [self performSegueWithIdentifier:@"showLogin" sender:self];
+        // needed for >= ios13
+        if(@available(iOS 13.0, *))
+        {
+            MLWelcomeViewController* welcome = (MLWelcomeViewController *) segue.destinationViewController;
+            welcome.completion = ^(){
+                if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
+                {
+                    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"]) {
+                        [self performSegueWithIdentifier:@"showLogin" sender:self];
+                    }
                 }
-            }
-        };
+            };
+        }
     }
     else if([segue.identifier isEqualToString:@"showConversation"])
     {
@@ -421,22 +428,6 @@ enum activeChatsControllerSections {
     }
     [cell showDisplayName:row.contactDisplayName];
     
-    NSString* state = [row.state stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    
-    if(([state isEqualToString:@"away"]) ||
-       ([state isEqualToString:@"dnd"])||
-       ([state isEqualToString:@"xa"])
-       )
-    {
-        cell.status = kStatusAway;
-    }
-    else if([state isEqualToString:@"offline"]) {
-        cell.status = kStatusOffline;
-    }
-    else if([state isEqualToString:@"(null)"] || [state isEqualToString:@""]) {
-        cell.status = kStatusOnline;
-    }
-    
     cell.accountNo = row.accountId.integerValue;
     cell.username = row.contactJid;
     cell.count = 0;
@@ -448,24 +439,28 @@ enum activeChatsControllerSections {
         }
     });
     
-    NSMutableArray* messages = [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:row.accountId];
+    MLMessage* messageRow = [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:row.accountId];
     dispatch_async(dispatch_get_main_queue(), ^{
-        if(messages.count > 0)
+        if(messageRow)
         {
-            MLMessage *messageRow = messages[0];
             if([messageRow.messageType isEqualToString:kMessageTypeUrl])
-            {
                 [cell showStatusText:NSLocalizedString(@"🔗 A Link", @"")];
-            } else if([messageRow.messageType isEqualToString:kMessageTypeImage])
+            else if([messageRow.messageType isEqualToString:kMessageTypeFiletransfer])
             {
-                [cell showStatusText:NSLocalizedString(@"📷 An Image", @"")];
-            } else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft]) {
+                if([messageRow.filetransferMimeType hasPrefix:@"image/"])
+                    [cell showStatusText:NSLocalizedString(@"📷 An Image", @"")];
+                else        //TODO JIM: add support for more mime types
+                    [cell showStatusText:NSLocalizedString(@"📁 A File", @"")];
+            }
+            else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft])
+            {
                 NSString* draftPreview = [NSString stringWithFormat:NSLocalizedString(@"Draft: %@", @""), messageRow.messageText];
                 [cell showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, 6)];
-            } else if([messageRow.messageType isEqualToString:kMessageTypeGeo])
-            {
+            }
+            else if([messageRow.messageType isEqualToString:kMessageTypeGeo])
                 [cell showStatusText:NSLocalizedString(@"📍 A Location", @"")];
-            } else  {
+            else
+            {
                 //XEP-0245: The slash me Command
                 NSString* displayName;
                 NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:row.accountId];
@@ -491,21 +486,27 @@ enum activeChatsControllerSections {
                     [cell showStatusText:messageRow.messageText];
                 }
             }
-            if(messageRow.timestamp) {
+            if(messageRow.timestamp)
+            {
                 cell.time.text = [self formattedDateWithSource:messageRow.timestamp];
                 cell.time.hidden = NO;
-            } else  {
-                cell.time.hidden = YES;
             }
-        } else  {
+            else
+                cell.time.hidden = YES;
+        }
+        else
+        {
             [cell showStatusText:nil];
-            DDLogWarn(NSLocalizedString(@"Active chat but no messages found in history for %@.", @""), row.contactJid);
+            DDLogWarn(@"Active chat but no messages found in history for %@.", row.contactJid);
         }
     });
     [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
-            cell.userImage.image = image;
+        cell.userImage.image = image;
     }];
-    [cell setOrb];
+    BOOL muted = [[DataLayer sharedInstance] isMutedJid:row.contactJid];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        cell.muteBadge.hidden = !muted;
+    });
     return cell;
 }
 
@@ -547,6 +548,7 @@ enum activeChatsControllerSections {
         [self.chatListTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
         // removeActiveBuddy in db
         [[DataLayer sharedInstance] removeActiveBuddy:contact.contactJid forAccount:contact.accountId];
+        [self refreshDisplay];
     }
 }
 

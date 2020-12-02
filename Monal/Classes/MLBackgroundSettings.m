@@ -64,44 +64,33 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    UITableViewCell* toreturn;
-    switch (indexPath.row) {
-        case 0: {
-            MLSettingCell* cell=[[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
-            cell.parent= self;
-            cell.switchEnabled=YES;
-            cell.defaultKey=@"ChatBackgrounds";
-            cell.textLabel.text=NSLocalizedString(@"Chat Backgrounds",@"");
-            toreturn=cell;
-            break;
-        }
-            
-        case 1: {
-           UITableViewCell* cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SelectCell"];
-            cell.textLabel.text=NSLocalizedString(@"Select Background",@"");
-            cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
-            toreturn=cell;
-            break;
-        }
-            
-        case 2: {
-            UITableViewCell* cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SelectCell"];
-#if TARGET_OS_MACCATALYST
-            cell.textLabel.text=NSLocalizedString(@"Select File",@"");
-#else
-            cell.textLabel.text=NSLocalizedString(@"Select From Photos",@"");
-#endif
-            cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
-            toreturn=cell;
-            break;
-        }
-            
-        default:
-            break;
+    if(indexPath.row == 0)
+    {
+        MLSettingCell* cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
+        cell.parent = self;
+        cell.switchEnabled = YES;
+        cell.defaultKey = @"ChatBackgrounds";
+        cell.textLabel.text = NSLocalizedString(@"Chat Backgrounds",@"");
+        return cell;
     }
-   
-    return toreturn;
+    else if(indexPath.row == 1)
+    {
+        UITableViewCell* cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SelectCell"];
+        cell.textLabel.text = NSLocalizedString(@"Select Background",@"");
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        return cell;
+    }
+    else
+    {
+        UITableViewCell* cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SelectCell"];
+#if TARGET_OS_MACCATALYST
+        cell.textLabel.text = NSLocalizedString(@"Select File",@"");
+#else
+        cell.textLabel.text = NSLocalizedString(@"Select From Photos",@"");
+#endif
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        return cell;
+    }
 }
 
 
@@ -118,10 +107,7 @@
             [self showPhotos];
             break;
         }
-        default: break;
-            
     }
-    
 }
 
 -(void) showPhotos
@@ -129,13 +115,13 @@
 #if TARGET_OS_MACCATALYST
     //UTI @"public.data" for everything
     NSString *images = (NSString *)kUTTypeImage;
-   UIDocumentPickerViewController *imagePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images] inMode:UIDocumentPickerModeImport];
+    UIDocumentPickerViewController *imagePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images] inMode:UIDocumentPickerModeImport];
     imagePicker.allowsMultipleSelection=NO;
     imagePicker.delegate=self;
     [self presentViewController:imagePicker animated:YES completion:nil];
 #else
     UIImagePickerController *imagePicker = [[UIImagePickerController alloc] init];
-    imagePicker.delegate =self;
+    imagePicker.delegate = self;
     imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
         if(granted)

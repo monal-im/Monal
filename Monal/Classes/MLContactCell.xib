@@ -100,7 +100,6 @@
                 <outlet property="centeredDisplayName" destination="IrL-yc-gYp" id="Yxr-Z1-F71"/>
                 <outlet property="displayName" destination="OhQ-Fk-Czf" id="a5j-X5-Tvp"/>
                 <outlet property="muteBadge" destination="IAx-7T-RJd" id="JkV-KW-AJX"/>
-                <outlet property="statusOrb" destination="Awx-9U-LWt" id="ae5-pP-a8p"/>
                 <outlet property="statusText" destination="WBM-UR-4hu" id="cWb-pt-41n"/>
                 <outlet property="time" destination="7IF-Xp-ziQ" id="EID-qK-VgW"/>
                 <outlet property="userImage" destination="pGK-Ar-iBm" id="ysI-Fi-czO"/>

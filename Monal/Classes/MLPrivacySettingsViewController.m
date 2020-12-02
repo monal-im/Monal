@@ -44,6 +44,7 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    [[HelperTools defaultsDB] setObject:@YES forKey:@"HasSeenPrivacySettings"];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -264,14 +265,7 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
             }
             break;
         }
-        default:
-        {
-            return nil;
-            break;
-        }
     }
-    cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }

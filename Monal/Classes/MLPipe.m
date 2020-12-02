@@ -197,7 +197,7 @@
             {
                 NSError* error=[_output streamError];
                 DDLogError(@"pipe sending failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
-                return;
+                break;
             }
             else if(writtenLen < readLen)
             {

@@ -43,11 +43,10 @@ NS_ENUM(NSInteger, kSettingSection)
     self.appRows = @[
         NSLocalizedString(@"Quick Setup", @""),
         NSLocalizedString(@"Accounts",@""),
+        NSLocalizedString(@"Privacy Settings",@""),
         NSLocalizedString(@"Notifications",@""),
         NSLocalizedString(@"Backgrounds",@""),
         NSLocalizedString(@"Sounds",@""),
-        NSLocalizedString(@"Display",@""),
-        NSLocalizedString(@"Privacy Settings",@""),
         NSLocalizedString(@"Chat Logs",@"")
     ];
     self.supportRows = @[
@@ -158,31 +157,23 @@ NS_ENUM(NSInteger, kSettingSection)
                     break;
 
                 case 2:
-                    [self performSegueWithIdentifier:@"showNotification" sender:self];
-                    break;
-
-                case 3:
-                    [self performSegueWithIdentifier:@"showBackgrounds" sender:self];
-                    break;
-
-                case 4:
-                    [self performSegueWithIdentifier:@"showSounds" sender:self];
-                    break;
-
-                case 5:
-                    [self performSegueWithIdentifier:@"showDisplay" sender:self];
-                    break;
-
-                case 6:
                     [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
                     break;
 
-                case 7:
-                    [self performSegueWithIdentifier:@"showChatLog" sender:self];
+                case 3:
+                    [self performSegueWithIdentifier:@"showNotification" sender:self];
                     break;
 
-                case 8:
-                    [self performSegueWithIdentifier:@"showCloud" sender:self];
+                case 4:
+                    [self performSegueWithIdentifier:@"showBackgrounds" sender:self];
+                    break;
+
+                case 5:
+                    [self performSegueWithIdentifier:@"showSounds" sender:self];
+                    break;
+
+                case 6:
+                    [self performSegueWithIdentifier:@"showChatLog" sender:self];
                     break;
 
                 default:

@@ -334,10 +334,9 @@ int RTCPCompoundPacketBuilder::AddSDESNormalItem(RTCPSDESPacket::ItemType t,cons
 		return ERR_RTP_OUTOFMEM;
 	len = sizeof(RTCPSDESHeader)+(size_t)itemlength;
 
-	RTCPSDESHeader *sdeshdr = (RTCPSDESHeader *)(buf);
+	((RTCPSDESHeader*)buf)->sdesid = itemid;
+	((RTCPSDESHeader*)buf)->length = itemlength;
 
-	sdeshdr->sdesid = itemid;
-	sdeshdr->length = itemlength;
 	if (itemlength != 0)
 		memcpy((buf + sizeof(RTCPSDESHeader)),itemdata,(size_t)itemlength);
 
@@ -376,10 +375,8 @@ int RTCPCompoundPacketBuilder::AddSDESPrivateItem(const void *prefixdata,uint8_t
 		return ERR_RTP_OUTOFMEM;
 	len = sizeof(RTCPSDESHeader)+(size_t)itemlength;
 
-	RTCPSDESHeader *sdeshdr = (RTCPSDESHeader *)(buf);
-
-	sdeshdr->sdesid = RTCP_SDES_ID_PRIVATE;
-	sdeshdr->length = itemlength;
+	((RTCPSDESHeader*)buf)->sdesid = RTCP_SDES_ID_PRIVATE;
+	((RTCPSDESHeader*)buf)->length = itemlength;
 	
 	buf[sizeof(RTCPSDESHeader)] = prefixlength;
 	if (prefixlength != 0)

@@ -53,7 +53,7 @@
         };
     }
     else if([segue.identifier isEqualToString:@"acceptContact"]) {
-        MLSubscriptionTableViewController* newScreen = (MLSubscriptionTableViewController *)segue.destinationViewController;
+        //MLSubscriptionTableViewController* newScreen = (MLSubscriptionTableViewController *)segue.destinationViewController;
     }
 }
 

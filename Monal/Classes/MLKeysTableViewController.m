@@ -10,6 +10,8 @@
 #import "MLXMPPManager.h"
 #import "MLKeyCell.h"
 #import "MLOMEMO.h"
+#import "SignalAddress.h"
+#import "MLSignalStore.h"
 
 @interface MLKeysTableViewController ()
 

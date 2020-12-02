@@ -93,7 +93,19 @@
     intro.skipButtonAlignment = EAViewAlignmentCenter;
     intro.skipButtonY = 100.f;
     intro.pageControlY = 120.0f;
-    intro.backgroundColor = [UIColor groupTableViewBackgroundColor];
+    if (@available(iOS 13.0, *)) {
+#if !TARGET_OS_MACCATALYST
+        intro.backgroundColor = [UIColor groupTableViewBackgroundColor];
+#else
+        intro.backgroundColor = [UIColor systemGroupedBackgroundColor];
+#endif
+    } else {
+#if !TARGET_OS_MACCATALYST
+        intro.backgroundColor = [UIColor groupTableViewBackgroundColor];
+#else
+        intro.backgroundColor = [UIColor systemGroupedBackgroundColor];
+#endif
+    }
     [intro.skipButton setTitleColor:[UIColor monaldarkGreen] forState:UIControlStateNormal];
     [intro setDelegate:self];
     intro.pageControl.currentPageIndicatorTintColor = [UIColor monaldarkGreen];

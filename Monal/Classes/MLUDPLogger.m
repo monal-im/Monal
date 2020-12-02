@@ -57,7 +57,7 @@
     strm.opaque = Z_NULL;
     strm.total_out = 0;
     strm.next_in=(Bytef *)[data bytes];
-    strm.avail_in = [data length];
+    strm.avail_in = (unsigned int)[data length];
 
     // Compresssion Levels:
     //   Z_NO_COMPRESSION
@@ -75,7 +75,7 @@
             [compressed increaseLengthBy: 16384];
 
         strm.next_out = [compressed mutableBytes] + strm.total_out;
-        strm.avail_out = [compressed length] - strm.total_out;
+        strm.avail_out = (unsigned int)([compressed length] - strm.total_out);
 
         deflate(&strm, Z_FINISH);  
 

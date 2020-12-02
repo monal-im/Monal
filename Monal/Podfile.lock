@@ -4,7 +4,7 @@ PODS:
   - CocoaLumberjack/Core (3.7.0)
   - DACircularProgress (2.3.1)
   - DZNEmptyDataSet (1.8.1)
-  - EAIntroView (2.12.0):
+  - EAIntroView (2.13.0):
     - EARestrictedScrollView (~> 1.1.0)
   - EARestrictedScrollView (1.1.0)
   - IDMPhotoBrowser (1.10.2):
@@ -21,9 +21,9 @@ PODS:
   - OpenSSL-Universal/Static (1.0.2.20)
   - pop (1.0.12)
   - SAMKeychain (1.5.3)
-  - SDWebImage (5.8.4):
-    - SDWebImage/Core (= 5.8.4)
-  - SDWebImage/Core (5.8.4)
+  - SDWebImage (5.9.5):
+    - SDWebImage/Core (= 5.9.5)
+  - SDWebImage/Core (5.9.5)
   - SignalProtocolC (2.3.2)
   - SignalProtocolObjC (1.1.0):
     - SignalProtocolC (~> 2.3.2)
@@ -40,7 +40,7 @@ DEPENDENCIES:
   - NotificationBannerSwift (~> 3.0.2)
   - OpenSSL-Universal (= 1.0.2.20)
   - SAMKeychain
-  - SDWebImage (~> 5.8.3)
+  - SDWebImage (~> 5.9.5)
   - SignalProtocolC
   - SignalProtocolObjC
   - TOCropViewController
@@ -71,7 +71,7 @@ SPEC CHECKSUMS:
   CocoaLumberjack: e8955b9d337ac307103b0a34fd141c32f27e53c5
   DACircularProgress: 4dd437c0fc3da5161cb289e07ac449493d41db71
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
-  EAIntroView: 249559079ddfdbe80e5bcb755c04c3b964b2ac27
+  EAIntroView: 9adedfc6b5c3fd3ebe19766da01dae573e6ce053
   EARestrictedScrollView: b0c2a3f92fb2610bb44d71c5e4893777c89e45ef
   IDMPhotoBrowser: 4bb459b1faffc228e92bccdf7c54ad6d6b7e8c37
   MarqueeLabel: 00cc0bcd087111dca575878b3531af980559707d
@@ -80,13 +80,13 @@ SPEC CHECKSUMS:
   OpenSSL-Universal: ff34003318d5e1163e9529b08470708e389ffcdd
   pop: d582054913807fd11fd50bfe6a539d91c7e1a55a
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
-  SDWebImage: cf6922231e95550934da2ada0f20f2becf2ceba9
+  SDWebImage: 0b2ba0d56479bf6a45ecddbfd5558bea93150d25
   SignalProtocolC: 051512e9f3abfeb4120c5e9673af9ae0ee370070
   SignalProtocolObjC: b992ed29c3b7b453510ff0102ed16ef143f7efd2
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
   TOCropViewController: da59f531f8ac8a94ef6d6c0fc34009350f9e8bfe
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 
-PODFILE CHECKSUM: 2bd9c81d0cb080794974dfbb334985bf61102788
+PODFILE CHECKSUM: 51c22442ce264e72ebbf3184800f617ddb0f7540
 
-COCOAPODS: 1.9.3
+COCOAPODS: 1.10.0

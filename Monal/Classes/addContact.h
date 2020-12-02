@@ -8,8 +8,9 @@
 
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
+#import <Monal-Swift.h>
 
-@interface addContact : UITableViewController <UITextFieldDelegate>
+@interface addContact : UITableViewController <UITextFieldDelegate, MLLQRCodeScannerContactDeleagte>
 {
     UITextField* _currentTextField;
     NSInteger _selectedRow;

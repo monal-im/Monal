@@ -9,6 +9,7 @@
 #import "MLNotificationSettingsViewController.h"
 #import "MLSwitchCell.h"
 #import "MLXMPPManager.h"
+#import "xmpp.h"
 #import "MLPush.h"
 #import "DataLayer.h"
 

@@ -9,8 +9,10 @@
 #include <CommonCrypto/CommonDigest.h>
 #import <CommonCrypto/CommonHMAC.h>
 #import "HelperTools.h"
+#import "MLXMPPManager.h"
 #import "MLPubSub.h"
 #import "MLUDPLogger.h"
+#import "XMPPStanza.h"
 
 @import UserNotifications;
 
@@ -24,6 +26,18 @@ void logException(NSException* exception)
     usleep(1000000);
 }
 
++(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString*) description
+{
+    if(description == nil || [description isEqualToString:@""])
+        description = @"XMPP Error";
+    NSString* errorReason = [stanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"];
+    NSString* errorText = [stanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-stanzas}text#"];
+    NSString* message = [NSString stringWithFormat:@"%@: %@", description, errorReason];
+    if(errorText && ![errorText isEqualToString:@""])
+        message = [NSString stringWithFormat:@"%@: %@ (%@)", description, errorReason, errorText];
+    return message;
+}
+
 +(void) configureFileProtectionFor:(NSString*) file
 {
 #if TARGET_OS_IPHONE
@@ -35,7 +49,7 @@ void logException(NSException* exception)
         [fileManager setAttributes:@{NSFileProtectionKey: NSFileProtectionCompleteUntilFirstUserAuthentication} ofItemAtPath:file error:&error];
         if(error)
         {
-            DDLogError(@"Error configuring database file protection level for: %@", file);
+            DDLogError(@"Error configuring file protection level for: %@", file);
             @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
         }
         else
@@ -92,12 +106,15 @@ void logException(NSException* exception)
     if([HelperTools isAppExtension])
         inBackground = YES;
     else
+        inBackground = [[MLXMPPManager sharedInstance] isBackgrounded];
+    /*
     {
         [HelperTools dispatchSyncReentrant:^{
             if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
                 inBackground = YES;
         } onQueue:dispatch_get_main_queue()];
     }
+    */
     return inBackground;
 }
 
@@ -376,7 +393,7 @@ void logException(NSException* exception)
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     if(timeout<=0.001)
     {
-        DDLogWarn(@"Timer timeout is smaller than 0.001, dispatching handler directly.");
+        //DDLogVerbose(@"Timer timeout is smaller than 0.001, dispatching handler directly.");
         if(handler)
             dispatch_async(q_background, ^{
                 handler();
@@ -501,14 +518,14 @@ void logException(NSException* exception)
 }
 
 
-+ (NSData *)dataWithHexString:(NSString *)hex
++(NSData*) dataWithHexString:(NSString*) hex
 {
     char buf[3];
     buf[2] = '\0';
     
     if( [hex length] % 2 !=00) {
-        NSLog(@"Hex strings should have an even number of digits");
-        return nil;
+        DDLogError(@"Hex strings should have an even number of digits");
+        return [[NSData alloc] init];
     }
     unsigned char *bytes = malloc([hex length]/2);
     unsigned char *bp = bytes;
@@ -518,8 +535,9 @@ void logException(NSException* exception)
         char *b2 = NULL;
         *bp++ = strtol(buf, &b2, 16);
         if(b2 != buf + 2) {
-            NSLog(@"String should be all hex digits");;
-            return nil;
+            DDLogError(@"String should be all hex digits");
+            free(bytes);
+            return [[NSData alloc] init];
         }
     }
     

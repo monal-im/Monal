@@ -15,7 +15,11 @@
 @import UserNotifications;
 
 
+#if !TARGET_OS_MACCATALYST
 @interface MonalAppDelegate : UIResponder <UIApplicationDelegate, PKPushRegistryDelegate, UNUserNotificationCenterDelegate >
+#else
+@interface MonalAppDelegate : UIResponder <UIApplicationDelegate, UNUserNotificationCenterDelegate >
+#endif
 
 @property (nonatomic, strong) UIWindow* window;
 @property (nonatomic, strong) DDFileLogger* fileLogger;

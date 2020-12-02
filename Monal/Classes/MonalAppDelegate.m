@@ -6,8 +6,9 @@
 //  Copyright __MyCompanyName__ 2008. All rights reserved.
 //
 
-#import "MonalAppDelegate.h"
+#import <BackgroundTasks/BackgroundTasks.h>
 
+#import "MonalAppDelegate.h"
 #import "CallViewController.h"
 #import "MLConstants.h"
 #import "HelperTools.h"
@@ -18,17 +19,34 @@
 #import "ActiveChatsViewController.h"
 #import "IPC.h"
 #import "MLProcessLock.h"
+#import "MLFiletransfer.h"
+#import "xmpp.h"
 
 @import NotificationBannerSwift;
 
 #import "MLXMPPManager.h"
 #import "UIColor+Theme.h"
 
+typedef void (^pushCompletion)(UIBackgroundFetchResult result);
+static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
+
 @interface MonalAppDelegate()
+{
+    NSMutableDictionary* _pushCompletions;
+    UIBackgroundTaskIdentifier _bgTask;
+    API_AVAILABLE(ios(13.0)) BGTask* _bgFetch;
+}
 @property (nonatomic, weak) ActiveChatsViewController* activeChats;
 @end
 
 @implementation MonalAppDelegate
+
+-(id) init
+{
+    self = [super init];
+    _bgTask = UIBackgroundTaskInvalid;
+    return self;
+}
 
 #pragma mark -  APNS notificaion
 
@@ -77,7 +95,7 @@
     if(@available(iOS 13.0, *))
         DDLogError(@"Voip push shouldnt arrive on ios13.");
     else
-        [[MLXMPPManager sharedInstance] incomingPushWithCompletionHandler:^(UIBackgroundFetchResult result) {
+        [self incomingPushWithCompletionHandler:^(UIBackgroundFetchResult result) {
             completion();
         }];
 }
@@ -102,13 +120,13 @@
 {
     //make sure unread badge matches application badge
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
-    [HelperTools dispatchSyncReentrant:^{
+    dispatch_async(dispatch_get_main_queue(), ^{
         NSInteger unread = 0;
         if(unreadMsgCnt)
             unread = [unreadMsgCnt integerValue];
         DDLogInfo(@"Updating unread badge to: %ld", (long)unread);
         [UIApplication sharedApplication].applicationIconBadgeNumber = unread;
-    } onQueue:dispatch_get_main_queue()];
+    });
 }
 
 #pragma mark - app life cycle
@@ -126,21 +144,14 @@
     if(![[HelperTools defaultsDB] boolForKey:@"DefaulsMigratedToAppGroup"])
     {
         DDLogInfo(@"Migrating [NSUserDefaults standardUserDefaults] to app group container...");
-        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"MessagePreview"] forKey:@"MessagePreview"];
         [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"ChatBackgrounds"] forKey:@"ChatBackgrounds"];
         [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"ShowGeoLocation"] forKey:@"ShowGeoLocation"];
         [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"Sound"] forKey:@"Sound"];
         [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"SetDefaults"] forKey:@"SetDefaults"];
         [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenIntro"] forKey:@"HasSeenIntro"];
-        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeeniOS13Message"] forKey:@"HasSeeniOS13Message"];
         [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"HasSeenLogin"] forKey:@"HasSeenLogin"];
-        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"SortContacts"] forKey:@"SortContacts"];
-        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"OfflineContact"] forKey:@"OfflineContact"];
-        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"Logging"] forKey:@"Logging"];
         [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"ShowImages"] forKey:@"ShowImages"];
-        [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"Away"] forKey:@"Away"];
         [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"HasUpgradedPushiOS13"] forKey:@"HasUpgradedPushiOS13"];
-        [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"StatusMessage"] forKey:@"StatusMessage"];
         [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"BackgroundImage"] forKey:@"BackgroundImage"];
         [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"] forKey:@"AlertSoundFile"];
         [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"pushSecret"] forKey:@"pushSecret"];
@@ -158,6 +169,12 @@
     //lock process and disconnect an already running NotificationServiceExtension
     [MLProcessLock lock];
     [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+    
+    //do MLFiletransfer cleanup tasks (do this in a new thread to parallelize it with our ping to the appex and don't slow down app startup)
+    //this will also migrate our old image cache to new MLFiletransfer cache
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [MLFiletransfer doStartupCleanup];
+    });
     
     //only proceed with launching if the NotificationServiceExtension is *not* running
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])
@@ -195,7 +212,13 @@
 #endif
     }
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(scheduleBackgroundFetchingTask) name:kScheduleBackgroundFetchingTask object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalNewMessageNotice object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalUpdateUnread object:nil];
+    
     UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
     center.delegate = self;
     
@@ -252,24 +275,20 @@
         [[UINavigationBar appearance] setScrollEdgeAppearance:appearance];
         [[UINavigationBar appearance] setStandardAppearance:appearance];
 #if TARGET_OS_MACCATALYST
-        self.window.windowScene.titlebar.titleVisibility=UITitlebarTitleVisibilityHidden;
+        self.window.windowScene.titlebar.titleVisibility = UITitlebarTitleVisibilityHidden;
 #endif
     }
     [[UINavigationBar appearance] setPrefersLargeTitles:YES];
     [[UITabBar appearance] setTintColor:monaldarkGreen];
 
-    //update logs if needed
-    if(![[HelperTools defaultsDB] boolForKey:@"Logging"])
-        [[DataLayer sharedInstance] messageHistoryCleanAll];
-    
     //handle message notifications by initializing the MLNotificationManager
     [MLNotificationManager sharedInstance];
     
     //register BGTask
     if(@available(iOS 13.0, *))
     {
-        DDLogInfo(@"calling MLXMPPManager configureBackgroundFetchingTask");
-        [[MLXMPPManager sharedInstance] configureBackgroundFetchingTask];
+        DDLogInfo(@"calling MonalAppDelegate configureBackgroundFetchingTask");
+        [self configureBackgroundFetchingTask];
     }
     
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
@@ -279,13 +298,45 @@
     DDLogInfo(@"App started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
     
     //should any accounts connect?
-    [[MLXMPPManager sharedInstance] connectIfNecessary];
+    [self connectIfNecessary];
     
     //handle IPC messages (this should be done *after* calling connectIfNecessary to make sure any disconnectAll messages are handled properly
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
     
+#if TARGET_OS_MACCATALYST
+    //handle catalyst foregrounding/backgrounding of window
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowHandling:) name:@"NSWindowDidResignKeyNotification" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowHandling:) name:@"NSWindowDidBecomeKeyNotification" object:nil];
+#endif
+    
+    //init background/foreground status
+    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+        [[MLXMPPManager sharedInstance] nowBackgrounded];
+    else
+        [[MLXMPPManager sharedInstance] nowForegrounded];
+    
     return YES;
 }
+
+#if TARGET_OS_MACCATALYST
+-(void) windowHandling:(NSNotification*) notification
+{
+    if([notification.name isEqualToString:@"NSWindowDidResignKeyNotification"])
+    {
+        DDLogInfo(@"Window lost focus (key window)...");
+        [self updateUnread];
+        [self addBackgroundTask];
+        [[MLXMPPManager sharedInstance] nowBackgrounded];
+        [self checkIfBackgroundTaskIsStillNeeded];
+    }
+    else if([notification.name isEqualToString:@"NSWindowDidBecomeKeyNotification"])
+    {
+        DDLogInfo(@"Window got focus (key window)...");
+        [self addBackgroundTask];
+        [[MLXMPPManager sharedInstance] nowForegrounded];
+    }
+}
+#endif
 
 -(void) incomingIPC:(NSNotification*) notification
 {
@@ -304,7 +355,7 @@
     {
         DDLogInfo(@"Got connectIfNecessary IPC message");
         //(re)connect all accounts
-        [[MLXMPPManager sharedInstance] connectIfNecessary];
+        [self connectIfNecessary];
     }
 }
 
@@ -352,6 +403,7 @@
         }
         
         [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
+        
         //no success may mean its already there
         dispatch_async(dispatch_get_main_queue(), ^{
             [(ActiveChatsViewController *) self.activeChats presentChatWithRow:contact];
@@ -378,7 +430,7 @@
 -(void) application:(UIApplication*) application didReceiveRemoteNotification:(NSDictionary*) userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
 {
     DDLogVerbose(@"got didReceiveRemoteNotification: %@", userInfo);
-    [[MLXMPPManager sharedInstance] incomingPushWithCompletionHandler:completionHandler];
+    [self incomingPushWithCompletionHandler:completionHandler];
 }
 
 - (void)userNotificationCenter:(UNUserNotificationCenter*) center willPresentNotification:(UNNotification*) notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions options)) completionHandler;
@@ -397,7 +449,7 @@
     if([response.notification.request.content.categoryIdentifier isEqualToString:@"message"])
     {
         DDLogVerbose(@"notification action triggered for %@", response.notification.request.content.userInfo);
-        [[MLXMPPManager sharedInstance] connectIfNecessary];
+        [self connectIfNecessary];
         
         NSString* from = response.notification.request.content.userInfo[@"from"];
         NSString* accountId = response.notification.request.content.userInfo[@"accountId"];
@@ -466,7 +518,7 @@
 
 - (void) applicationWillEnterForeground:(UIApplication *)application
 {
-    DDLogVerbose(@"Entering FG");
+    DDLogInfo(@"Entering FG");
     [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
     
     //only proceed with foregrounding if the NotificationServiceExtension is not running
@@ -479,7 +531,8 @@
     //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:self userInfo:nil];
     
-    [[MLXMPPManager sharedInstance] setClientsActive];
+    [self addBackgroundTask];
+    [[MLXMPPManager sharedInstance] nowForegrounded];
 }
 
 -(void) applicationWillResignActive:(UIApplication *)application
@@ -502,25 +555,27 @@
 {
     UIApplicationState state = [application applicationState];
     if(state == UIApplicationStateInactive)
-        DDLogVerbose(@"Screen lock / incoming call");
+        DDLogInfo(@"Screen lock / incoming call");
     else if(state == UIApplicationStateBackground)
-        DDLogVerbose(@"Entering BG");
+        DDLogInfo(@"Entering BG");
     
     [self updateUnread];
-    [[MLXMPPManager sharedInstance] setClientsInactive];
+    [self addBackgroundTask];
+    [[MLXMPPManager sharedInstance] nowBackgrounded];
+    [self checkIfBackgroundTaskIsStillNeeded];
 }
 
 -(void) applicationWillTerminate:(UIApplication *)application
 {
     DDLogWarn(@"|~~| T E R M I N A T I N G |~~|");
     [self updateUnread];
-    DDLogVerbose(@"|~~| 25%% |~~|");
+    DDLogInfo(@"|~~| 25%% |~~|");
     [[HelperTools defaultsDB] synchronize];
-    DDLogVerbose(@"|~~| 50%% |~~|");
-    [[MLXMPPManager sharedInstance] setClientsInactive];
-    DDLogVerbose(@"|~~| 75%% |~~|");
-    [[MLXMPPManager sharedInstance] scheduleBackgroundFetchingTask];        //make sure delivery will be attempted, if needed
-    DDLogVerbose(@"|~~| T E R M I N A T E D |~~|");
+    DDLogInfo(@"|~~| 50%% |~~|");
+    [[MLXMPPManager sharedInstance] nowBackgrounded];
+    DDLogInfo(@"|~~| 75%% |~~|");
+    [self scheduleBackgroundFetchingTask];        //make sure delivery will be attempted, if needed
+    DDLogInfo(@"|~~| T E R M I N A T E D |~~|");
     [DDLog flushLog];
     //give the server some more time to send smacks acks (it doesn't matter if we get killed because of this, we're terminating anyways)
     usleep(1000000);
@@ -530,15 +585,14 @@
 
 -(void) showConnectionStatus:(NSNotification*) notification
 {
-    if([HelperTools isInBackground])
-        DDLogDebug(@"not surfacing errors in the background because they are super common");
-    else
+    //this will show an error banner but only if our app is foregrounded
+    if(![HelperTools isInBackground])
     {
         dispatch_async(dispatch_get_main_queue(), ^{
-            NSArray* payload = [notification.object copy];
-            NSString* message = payload[1];     // this is just the way i set it up a dic might better
-            xmpp *xmppAccount = payload.firstObject;
-            NotificationBanner* banner = [[NotificationBanner alloc] initWithTitle:xmppAccount.connectionProperties.identity.jid subtitle:message leftView:nil rightView:nil style:BannerStyleInfo colors:nil];
+            xmpp* xmppAccount = notification.object;
+            if(![notification.userInfo[@"isSevere"] boolValue])
+                DDLogError(@"Minor XMPP Error(%@): %@", xmppAccount.connectionProperties.identity.jid, notification.userInfo[@"message"]);
+            NotificationBanner* banner = [[NotificationBanner alloc] initWithTitle:xmppAccount.connectionProperties.identity.jid subtitle:notification.userInfo[@"message"] leftView:nil rightView:nil style:BannerStyleInfo colors:nil];
             NotificationBannerQueue* queue = [[NotificationBannerQueue alloc] initWithMaxBannersOnScreenSimultaneously:2];
             [banner showWithQueuePosition:QueuePositionFront bannerPosition:BannerPositionTop queue:queue on:nil];
         });
@@ -578,7 +632,6 @@
     }
 }
 
-
 -(void) showNew {
     [self.activeChats showNew];
 }
@@ -593,6 +646,225 @@
 
 -(void) showDetails {
     [self.activeChats showDetails];
+}
+
+#pragma mark - background tasks
+
+-(void) nowIdle:(NSNotification*) notification
+{
+    DDLogInfo(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
+    [self checkIfBackgroundTaskIsStillNeeded];
+}
+
+-(void) checkIfBackgroundTaskIsStillNeeded
+{
+    if([[MLXMPPManager sharedInstance] allAccountsIdle])
+    {
+        DDLogInfo(@"### ALL ACCOUNTS IDLE NOW ###");
+        
+        //remove syncError notification because all accounts are idle and fully synced now
+        [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[@"syncError"]];
+        
+#if !TARGET_OS_MACCATALYST
+        //use a synchronized block to disconnect only once
+        @synchronized(self) {
+            DDLogInfo(@"### checking if background is still needed ###");
+            BOOL background = [HelperTools isInBackground];
+            if(background)
+            {
+                DDLogInfo(@"### All accounts idle, disconnecting and stopping all background tasks ###");
+                [DDLog flushLog];
+                [[MLXMPPManager sharedInstance] disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
+                [HelperTools dispatchSyncReentrant:^{
+                    BOOL stopped = NO;
+                    if(_bgTask != UIBackgroundTaskInvalid)
+                    {
+                        DDLogDebug(@"stopping UIKit _bgTask");
+                        [DDLog flushLog];
+                        [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
+                        _bgTask = UIBackgroundTaskInvalid;
+                        stopped = YES;
+                    }
+                    if(_bgFetch)
+                    {
+                        DDLogDebug(@"stopping backgroundFetchingTask");
+                        [DDLog flushLog];
+                        [_bgFetch setTaskCompletedWithSuccess:YES];
+                        _bgFetch = nil;
+                        stopped = YES;
+                    }
+                    if(!stopped)
+                        DDLogDebug(@"no background tasks running, nothing to stop");
+                    [DDLog flushLog];
+                } onQueue:dispatch_get_main_queue()];
+            }
+            if([_pushCompletions count])
+            {
+                //we don't need to call disconnectAll if we are in background here, because we already did this in the if above (don't reorder these 2 ifs!)
+                DDLogInfo(@"### All accounts idle, calling push completion handlers ###");
+                [DDLog flushLog];
+                for(NSString* completionId in _pushCompletions)
+                {
+                    //cancel running timer and push completion handler
+                    ((monal_void_block_t)_pushCompletions[completionId][@"timer"])();
+                    ((pushCompletion)_pushCompletions[completionId][@"handler"])(UIBackgroundFetchResultNewData);
+                    [_pushCompletions removeObjectForKey:completionId];
+                }
+            }
+        }
+#else
+        DDLogInfo(@"### CATALYST BUILD --> ignoring in MonalAppDelegate ###");
+#endif
+    }
+}
+
+-(void) addBackgroundTask
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(_bgTask == UIBackgroundTaskInvalid)
+        {
+            //indicate we want to do work even if the app is put into background
+            _bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
+                DDLogWarn(@"BG WAKE EXPIRING");
+                [DDLog flushLog];
+                
+                [[MLXMPPManager sharedInstance] disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
+                
+                [HelperTools postSendingErrorNotification];
+
+                //schedule a BGProcessingTaskRequest to process this further as soon as possible
+                if(@available(iOS 13.0, *))
+                {
+                    DDLogInfo(@"calling scheduleBackgroundFetchingTask");
+                    [self scheduleBackgroundFetchingTask];
+                }
+                
+                [DDLog flushLog];
+                [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
+                _bgTask = UIBackgroundTaskInvalid;
+            }];
+        }
+    });
+}
+
+-(void) handleBackgroundFetchingTask:(BGTask*) task API_AVAILABLE(ios(13.0))
+{
+    DDLogVerbose(@"RUNNING BGTASK");
+    _bgFetch = task;
+    __weak BGTask* weakTask = task;
+    task.expirationHandler = ^{
+        DDLogWarn(@"*** BGTASK EXPIRED ***");
+        _bgFetch = nil;
+        [[MLXMPPManager sharedInstance] disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
+        [HelperTools postSendingErrorNotification];
+        [weakTask setTaskCompletedWithSuccess:NO];
+        [self scheduleBackgroundFetchingTask];      //schedule new one if neccessary
+        [DDLog flushLog];
+    };
+    
+    if([[MLXMPPManager sharedInstance] hasConnectivity])
+    {
+        for(xmpp* xmppAccount in [[MLXMPPManager sharedInstance] connectedXMPP])
+        {
+            //try to send a ping. if it fails, it will reconnect
+            DDLogVerbose(@"app delegate pinging");
+            [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
+        }
+    }
+    else
+        DDLogWarn(@"BGTASK has *no* connectivity? That's strange!");
+    
+    //log bgtask ticks (and stop when the task expires)
+    unsigned long tick = 0;
+    while(_bgFetch != nil)
+    {
+        DDLogVerbose(@"BGTASK TICK: %lu", tick++);
+        [DDLog flushLog];
+        [NSThread sleepForTimeInterval:1.000];
+    }
+}
+
+-(void) configureBackgroundFetchingTask
+{
+    if(@available(iOS 13.0, *))
+    {
+        [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundFetchingTask usingQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0) launchHandler:^(BGTask *task) {
+            DDLogVerbose(@"RUNNING BGTASK LAUNCH HANDLER");
+            [self handleBackgroundFetchingTask:task];
+        }];
+    } else {
+        // No fallback unfortunately
+    }
+}
+
+-(void) scheduleBackgroundFetchingTask
+{
+    if(@available(iOS 13.0, *))
+    {
+        [HelperTools dispatchSyncReentrant:^{
+            NSError *error = NULL;
+            // cancel existing task (if any)
+            [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundFetchingTask];
+            // new task
+            //BGAppRefreshTaskRequest* request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
+            BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
+            //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
+            request.requiresNetworkConnectivity = YES;
+            request.requiresExternalPower = NO;
+            request.earliestBeginDate = nil;
+            //request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
+            BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
+            if(!success) {
+                // Errorcodes https://stackoverflow.com/a/58224050/872051
+                DDLogError(@"Failed to submit BGTask request: %@", error);
+            } else {
+                DDLogVerbose(@"Success submitting BGTask request %@", request);
+            }
+        } onQueue:dispatch_get_main_queue()];
+    }
+    else
+    {
+        // No fallback unfortunately
+        DDLogError(@"BGTask needed but NOT supported!");
+    }
+}
+
+-(void) connectIfNecessary
+{
+    [self addBackgroundTask];
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
+}
+
+-(void) incomingPushWithCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
+{
+#if TARGET_OS_MACCATALYST
+    DDLogError(@"Ignoring incomingPushWithCompletionHandler: we are a catalyst app!");
+    completionHandler(UIBackgroundFetchResultNoData);
+    return;
+#else
+    if(![HelperTools isInBackground])
+    {
+        DDLogError(@"Ignoring incomingPushWithCompletionHandler: because app is in FG!");
+        completionHandler(UIBackgroundFetchResultNoData);
+        return;
+    }
+    
+    DDLogInfo(@"got incomingPushWithCompletionHandler");
+    
+    // should any accounts reconnect?
+    [[MLXMPPManager sharedInstance] pingAllAccounts];
+    
+    //register push completion handler and associated timer
+    NSString* completionId = [[NSUUID UUID] UUIDString];
+    _pushCompletions[completionId] = @{
+        @"handler": completionHandler,
+        @"timer": [HelperTools startTimer:28.0 withHandler:^{
+            DDLogWarn(@"### Push timer triggered!! ###");
+            [_pushCompletions removeObjectForKey:completionId];
+            completionHandler(UIBackgroundFetchResultFailed);
+        }]
+    };
+#endif
 }
 
 @end

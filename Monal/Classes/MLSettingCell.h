@@ -12,7 +12,7 @@
 
 @property (nonatomic, assign) BOOL switchEnabled;
 @property (nonatomic, assign) BOOL textEnabled;
-@property (nonatomic, weak) UIViewController *parent; 
+@property (nonatomic, weak) UIViewController* parent; 
 
 /**
  NSuserdefault key to use

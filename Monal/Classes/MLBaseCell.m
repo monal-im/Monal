@@ -11,6 +11,16 @@
 
 @implementation MLBaseCell
 
+-(id) init
+{
+    self = [super init];
+    if(@available(iOS 13.0, *))
+        [self.retry setImage:[UIImage systemImageNamed:@"info.circle"] forState:UIControlStateNormal];
+    else
+        [self.retry setImage:[UIImage imageNamed:@"724-info"] forState:UIControlStateNormal];
+    return self;
+}
+
 - (void)awakeFromNib {
     [super awakeFromNib];
     
@@ -32,9 +42,12 @@
 
 -(void) updateCellWithNewSender:(BOOL) newSender
 {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
     if([self.parent respondsToSelector:@selector(retry:)]) {
         [self.retry addTarget:self.parent action:@selector(retry:) forControlEvents:UIControlEventTouchUpInside];
     }
+#pragma clang diagnostic pop
     
     self.retry.tag= [self.messageHistoryId integerValue];
     

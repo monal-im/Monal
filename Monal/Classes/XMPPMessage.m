@@ -8,14 +8,13 @@
 
 #import "XMPPMessage.h"
 
-
 @implementation XMPPMessage
 
-NSString* const kMessageChatType=@"chat";
-NSString* const kMessageGroupChatType=@"groupchat";
-NSString* const kMessageErrorType=@"error";
-NSString* const kMessageNormalType =@"normal";
-NSString* const kMessageHeadlineType=@"headline";
+NSString* const kMessageChatType = @"chat";
+NSString* const kMessageGroupChatType = @"groupchat";
+NSString* const kMessageErrorType = @"error";
+NSString* const kMessageNormalType = @"normal";
+NSString* const kMessageHeadlineType = @"headline";
 
 -(id) init
 {
@@ -34,7 +33,7 @@ NSString* const kMessageHeadlineType=@"headline";
 
 -(void) setXmppId:(NSString*) idval
 {
-    [self.attributes setObject:idval forKey:@"id"];
+    self.attributes[@"id"] = idval;
     //add origin id to indicate we are using uuids for our stanza ids
     if([self check:@"{urn:xmpp:sid:0}origin-id"])       //modify existing origin id
         ((MLXMLNode*)[self findFirst:@"{urn:xmpp:sid:0}origin-id"]).attributes[@"id"] = idval;
@@ -44,7 +43,7 @@ NSString* const kMessageHeadlineType=@"headline";
 
 -(NSString*) xmppId
 {
-    return [self.attributes objectForKey:@"id"];
+    return self.attributes[@"id"];
 }
 
 -(void) setBody:(NSString*) messageBody
@@ -58,6 +57,12 @@ NSString* const kMessageHeadlineType=@"headline";
         [[MLXMLNode alloc] initWithElement:@"url" withAttributes:@{} andChildren:@[] andData:link]
     ] andData:nil]];
     [self setBody:link];    //http filetransfers must have a message body equal to the oob link to be recognized as filetransfer
+}
+
+-(void) setLMCFor:(NSString*) id withNewBody:(NSString*) newBody
+{
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"replace" andNamespace:@"urn:xmpp:message-correct:0" withAttributes:@{@"id": id} andChildren:@[] andData:nil]];
+    [self setBody:newBody];
 }
 
 /**

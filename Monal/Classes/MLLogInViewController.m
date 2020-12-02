@@ -10,11 +10,16 @@
 #import "MBProgressHUD.h"
 #import "DataLayer.h"
 #import "MLXMPPManager.h"
+#import "xmpp.h"
+
 @import SAMKeychain;
 @import QuartzCore;
 @import SafariServices;
 
+@class MLQRCodeScanner;
+
 @interface MLLogInViewController ()
+
 @property (nonatomic, strong) MBProgressHUD *loginHUD;
 @property (nonatomic, weak) UITextField *activeField;
 @property (nonatomic, strong) NSString *accountno;
@@ -35,9 +40,20 @@
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(connected) name:kMonalFinishedCatchup object:nil];
+#ifndef DISABLE_OMEMO
+    [nc addObserver:self selector:@selector(updateBundleFetchStatus:) name:kMonalUpdateBundleFetchStatus object:nil];
+#endif
     [nc addObserver:self selector:@selector(omemoBundleFetchFinished) name:kMonalFinishedOmemoBundleFetch object:nil];
     [nc addObserver:self selector:@selector(error) name:kXMPPError object:nil];
 
+    if(@available(iOS 13.0, *))
+    {
+        // nothing to do here
+    }
+    else
+    {
+        [self.qrScanButton setTitle:NSLocalizedString(@"QR", "MLLoginView: QR-Code Button iOS12 only") forState:UIControlStateNormal];
+    }
     [self registerForKeyboardNotifications];
 }
 
@@ -58,8 +74,8 @@
 
 -(IBAction) login:(id)sender
 {
-    self.loginHUD= [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    self.loginHUD.label.text=NSLocalizedString(@"Logging in",@"");
+    self.loginHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    self.loginHUD.label.text = NSLocalizedString(@"Logging in",@"");
     self.loginHUD.mode=MBProgressHUDModeIndeterminate;
     self.loginHUD.removeFromSuperViewOnHide=YES;
 
@@ -79,8 +95,8 @@
    
     if(!user || !domain)
     {
-        self.loginHUD.hidden=YES;
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid Credentials",@"") message:NSLocalizedString(@"Your XMPP account should be in in the format user@domain. For special configurations, use manual setup.",@"") preferredStyle:UIAlertControllerStyleAlert];
+        self.loginHUD.hidden = YES;
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid Credentials", @"") message:NSLocalizedString(@"Your XMPP account should be in in the format user@domain. For special configurations, use manual setup.", @"") preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
@@ -88,10 +104,10 @@
         return;
     }
     
-    if(password.length==0)
+    if(password.length == 0)
     {
-        self.loginHUD.hidden=YES;
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid Credentials",@"") message:NSLocalizedString(@"Please enter a password.",@"") preferredStyle:UIAlertControllerStyleAlert];
+        self.loginHUD.hidden = YES;
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid Credentials",@"") message:NSLocalizedString(@"Please enter a password.",@"") preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
@@ -99,7 +115,7 @@
         return;
     }
     
-    NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary* dic  = [[NSMutableDictionary alloc] init];
     [dic setObject:domain.lowercaseString forKey:kDomain];
     [dic setObject:user.lowercaseString forKey:kUsername];
     [dic setObject:[HelperTools encodeRandomResource]  forKey:kResource];
@@ -114,10 +130,17 @@
         [SAMKeychain setPassword:password forService:@"Monal" account:self.accountno];
         [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
     }
+
+    // open privacy settings
+    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {
+        [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
+        return;
+    }
 }
 
 -(void) connected
 {
+    [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
 #ifndef DISABLE_OMEMO
     dispatch_async(dispatch_get_main_queue(), ^{
         self.loginHUD.label.text = NSLocalizedString(@"Loading omemo bundles", @"");
@@ -126,6 +149,15 @@
     [self kMonalFinishedOmemoBundleFetch];
 #endif
 }
+
+#ifndef DISABLE_OMEMO
+-(void) updateBundleFetchStatus:(NSNotification*) notification
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.loginHUD.label.text = [NSString stringWithFormat:NSLocalizedString(@"Loading omemo bundles: %@ / %@", @""), notification.userInfo[@"completed"], notification.userInfo[@"all"]];
+    });
+}
+#endif
 
 -(void) omemoBundleFetchFinished
 {
@@ -143,7 +175,7 @@
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         self.loginHUD.hidden=YES;
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@"") message:NSLocalizedString(@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.", @"") preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:NSLocalizedString(@"We were not able to connect your account. Please check your credentials and make sure you are connected to the internet.", @"") preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
@@ -155,8 +187,8 @@
 
 -(IBAction) useWithoutAccount:(id)sender
 {
-    [self dismissViewControllerAnimated:YES completion:nil];
     [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
+    [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 -(IBAction) tapAction:(id)sender
@@ -191,7 +223,6 @@
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(keyboardWillBeHidden:)
                                                  name:UIKeyboardWillHideNotification object:nil];
-    
 }
 
 // Called when the UIKeyboardDidShowNotification is sent.
@@ -228,13 +259,34 @@
 
 
 -(void) removeObservers {
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc removeObserver:self];
 }
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-     [self removeObservers];
+    if([segue.identifier isEqualToString:@"scanQRCode"])
+    {
+        MLQRCodeScanner* qrCodeScanner = (MLQRCodeScanner*)segue.destinationViewController;
+        qrCodeScanner.loginDelegate = self;
+    }
+    else if([segue.identifier isEqualToString:@"showPrivacySettings"])
+    {
+        // nothing todo
+    }
+    else
+    {
+        [self removeObservers];
+    }
+}
+
+-(void) MLQRCodeAccountLoginScannedWithJid:(NSString*) jid password:(NSString*) password
+{
+    // Insert jid and password into text fields
+    self.jid.text = jid;
+    self.password.text = password;
+    // Close QR-Code scanner
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 

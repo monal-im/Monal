@@ -7,16 +7,19 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <Monal-Swift.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MLLogInViewController : UIViewController <UITextFieldDelegate>
-@property (nonatomic, weak) IBOutlet UITextField *jid;
-@property (nonatomic, weak) IBOutlet UITextField *password;
-@property (nonatomic, weak) IBOutlet UIButton *loginButton;
-@property (nonatomic, weak) IBOutlet UIScrollView *scrollView;
-@property (nonatomic, weak) IBOutlet UIView *contentView;
-@property (nonatomic, weak) IBOutlet UIImageView *topImage;
+@interface MLLogInViewController : UIViewController <UITextFieldDelegate, MLLQRCodeScannerAccountLoginDeleagte>
+@property (nonatomic, weak) IBOutlet UITextField* jid;
+@property (nonatomic, weak) IBOutlet UITextField* password;
+@property (nonatomic, weak) IBOutlet UIButton* loginButton;
+@property (nonatomic, weak) IBOutlet UIScrollView* scrollView;
+@property (nonatomic, weak) IBOutlet UIView* contentView;
+@property (nonatomic, weak) IBOutlet UIImageView* topImage;
+@property (weak, nonatomic) IBOutlet UIButton* qrScanButton;
+
 
 -(IBAction) login:(id)sender;
 -(IBAction) registerAccount:(id)sender;

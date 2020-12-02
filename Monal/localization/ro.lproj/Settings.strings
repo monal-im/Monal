@@ -1,9 +1,5 @@
-/* Class = "UINavigationItem"; title = "Root View Controller"; ObjectID = "1Hw-bc-mNT"; */
-"1Hw-bc-mNT.title" = "Root View Controller";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "2FM-6l-v8h"; */
 "2FM-6l-v8h.title" = "Close";
-/* Class = "UINavigationItem"; title = "Display Settings"; ObjectID = "bRa-lQ-kQr"; */
-"bRa-lQ-kQr.title" = "Setări de afișare";
 /* Class = "UIButton"; normalTitle = "Change Password"; ObjectID = "d7c-hm-a1K"; */
 "d7c-hm-a1K.normalTitle" = "Schimbare parolă";
 /* Class = "UISplitViewController"; title = "Settings"; ObjectID = "dgM-uB-Aap"; */
@@ -22,8 +18,6 @@
 "pa7-vQ-Yz3.title" = "Editare cont";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "QTE-cG-3LC"; */
 "QTE-cG-3LC.title" = "Închide";
-/* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "R3T-hy-2aY"; */
-"R3T-hy-2aY.title" = "Închide";
 /* Class = "UIBarButtonItem"; title = "Reconnect All"; ObjectID = "r7s-58-k2m"; */
 "r7s-58-k2m.title" = "Reconectare toate";
 /* Class = "UILabel"; text = "Detail"; ObjectID = "rF7-34-0sc"; */

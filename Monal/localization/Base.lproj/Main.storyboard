@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="dqD-Rt-bEF">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="dqD-Rt-bEF">
     <device id="retina6_5" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17505"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
+        <!--PrivacySettings-->
+        <scene sceneID="B5W-Me-AC9">
+            <objects>
+                <viewControllerPlaceholder storyboardName="Settings" referencedIdentifier="PrivacySettings" id="cmS-oG-cv9" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Item" id="iLC-4b-aD9"/>
+                </viewControllerPlaceholder>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="xDM-mH-2u9" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2876" y="-1307"/>
+        </scene>
         <!--Settings-->
         <scene sceneID="B5W-Me-ACR">
             <objects>
@@ -170,7 +180,13 @@
                             <outlet property="delegate" destination="aFU-Vb-8Jd" id="yBG-Yo-9U4"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Add Contact" id="w0d-HZ-N0s"/>
+                    <navigationItem key="navigationItem" title="Add Contact" id="HYb-u1-ZN3">
+                        <barButtonItem key="rightBarButtonItem" systemItem="camera" id="DDj-bI-xft" customClass="MLQR">
+                            <connections>
+                                <segue destination="aVg-Rg-rcj" kind="show" identifier="qrContactScan" id="rqQ-Ib-mG5"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <segue destination="YbY-nY-vV9" kind="show" identifier="showAccountPicker" id="5zY-lR-WCu"/>
                     </connections>
@@ -214,6 +230,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="sectionIndexBackgroundColor" systemColor="systemBackgroundColor"/>
                         <connections>
                             <outlet property="dataSource" destination="6Ao-6z-tB7" id="U7P-Iw-tsb"/>
                             <outlet property="delegate" destination="6Ao-6z-tB7" id="m7e-a4-sdI"/>
@@ -225,7 +242,7 @@
                                 <action selector="close:" destination="6Ao-6z-tB7" id="JZL-x6-OVB"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" image="person.3.fill" catalog="system" id="2vX-Wb-Pa6">
+                        <barButtonItem key="rightBarButtonItem" id="2vX-Wb-Pa6">
                             <connections>
                                 <segue destination="nW7-fq-iEr" kind="show" identifier="showGroups" id="U4S-rm-QvZ"/>
                             </connections>
@@ -343,7 +360,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="Pzk-IL-JHz">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="Pzk-IL-JHz" id="Pzk-IL-JHz">
                                 <rect key="frame" x="0.0" y="28" width="414" height="43.666667938232422"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="Pzk-IL-JHz" id="f2h-kv-0Bm">
@@ -358,20 +375,20 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Chats" id="RRa-hC-xrf">
-                        <barButtonItem key="leftBarButtonItem" title="Settings" image="person.crop.circle" catalog="system" id="BWH-2I-fSI">
+                        <barButtonItem key="leftBarButtonItem" title="Settings" id="BWH-2I-fSI">
                             <connections>
                                 <segue destination="cmS-oG-cv1" kind="presentation" identifier="showSettings" id="zkg-JY-Otv"/>
                             </connections>
                         </barButtonItem>
                         <rightBarButtonItems>
-                            <barButtonItem title="Compose" image="square.and.pencil" catalog="system" id="pyP-qb-mfr">
+                            <barButtonItem title="Compose" id="pyP-qb-mfr">
                                 <connections>
                                     <segue destination="hMh-kj-2DY" kind="popoverPresentation" identifier="showContacts" popoverAnchorBarButtonItem="pyP-qb-mfr" id="lBM-pO-Hdw">
                                         <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
                                     </segue>
                                 </connections>
                             </barButtonItem>
-                            <barButtonItem title="Add" image="plus" catalog="system" id="wNA-vF-ohQ">
+                            <barButtonItem title="Add" id="wNA-vF-ohQ">
                                 <connections>
                                     <segue destination="elF-QS-Bpm" kind="presentation" identifier="showNew" id="tor-VM-YxS"/>
                                 </connections>
@@ -386,6 +403,7 @@
                         <segue destination="cC0-5a-Jvb" kind="presentation" identifier="showDetails" modalPresentationStyle="formSheet" id="RNX-bQ-8Zb"/>
                         <segue destination="2g1-pP-Xxv" kind="presentation" identifier="showIntro" id="nUl-6E-4GO"/>
                         <segue destination="DkD-PA-Cmm" kind="presentation" identifier="showLogin" id="sv2-wf-aN0"/>
+                        <segue destination="cmS-oG-cv9" kind="presentation" identifier="showPrivacySettings" id="zkg-JY-Ot9"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ENC-uh-UXW" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -468,7 +486,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="aW3-bk-9lP">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="aW3-bk-9lP" id="aW3-bk-9lP">
                                 <rect key="frame" x="0.0" y="55.333332061767578" width="414" height="43.666667938232422"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="aW3-bk-9lP" id="XkY-vh-b2N">
@@ -609,6 +627,22 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dX7-sf-ltO" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="3800" y="-1185"/>
+        </scene>
+        <!--Code Scanner-->
+        <scene sceneID="yPg-4o-1sG">
+            <objects>
+                <viewController id="aVg-Rg-rcj" customClass="MLQRCodeScanner" customModule="Monal" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="lqs-Za-yDf">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="Fno-SW-Pii"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="GiR-5G-j6g"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="d2y-pI-nP7" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="4843" y="-1652"/>
         </scene>
         <!--Select An Account-->
         <scene sceneID="XCz-Vd-Uah">
@@ -955,7 +989,7 @@
                                             <outlet property="thumbnailImage" destination="GlC-dn-bvj" id="iHP-Iz-z5V"/>
                                         </connections>
                                     </tableViewCell>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
                                         <rect key="frame" x="0.0" y="550" width="414" height="242"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xhf-eh-Dkx" id="BdL-U7-BOc">
@@ -1163,7 +1197,6 @@
                                                         <constraint firstAttribute="width" constant="28" id="awC-8S-WeQ"/>
                                                     </constraints>
                                                     <color key="tintColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                                    <state key="normal" image="info.circle" catalog="system"/>
                                                 </button>
                                                 <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DZU-Tx-2ba">
                                                     <rect key="frame" x="325.33333333333331" y="26" width="73.666666666666686" height="93"/>
@@ -1681,7 +1714,7 @@
                     </view>
                     <navigationItem key="navigationItem" largeTitleDisplayMode="never" id="tgd-HR-Cbd">
                         <nil key="title"/>
-                        <barButtonItem key="rightBarButtonItem" image="745-unlocked" style="plain" id="wma-QS-7Rc">
+                        <barButtonItem key="rightBarButtonItem" image="745-unlocked" id="wma-QS-7Rc">
                             <connections>
                                 <action selector="toggleEncryption:" destination="5nR-Q5-dQD" id="NXe-fw-72r"/>
                             </connections>
@@ -1713,7 +1746,6 @@
                             <color key="textColor" systemColor="labelColor"/>
                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                             <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
-                            <dataDetectorType key="dataDetectorTypes" link="YES"/>
                             <attributedString key="userComments">
                                 <fragment content="#bc-ignore!"/>
                             </attributedString>
@@ -1728,7 +1760,6 @@
                                 <constraint firstAttribute="width" constant="36" id="NRJ-Qj-1DA"/>
                                 <constraint firstAttribute="height" constant="30" id="ZPw-Mb-D1d"/>
                             </constraints>
-                            <state key="normal" image="paperplane.fill" catalog="system"/>
                             <attributedString key="userComments">
                                 <fragment content="#bc-ignore!"/>
                             </attributedString>
@@ -1743,7 +1774,6 @@
                                 <constraint firstAttribute="width" constant="28" id="r5D-N5-kFE"/>
                                 <constraint firstAttribute="height" constant="27" id="yNE-7P-Ml5"/>
                             </constraints>
-                            <state key="normal" image="plus" catalog="system"/>
                             <attributedString key="userComments">
                                 <fragment content="#bc-ignore!"/>
                             </attributedString>
@@ -1838,9 +1868,9 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="Ecb-7N-zer"/>
-        <segue reference="ndm-rg-MfL"/>
-        <segue reference="tEM-gR-7nN"/>
+        <segue reference="5zY-lR-WCu"/>
+        <segue reference="5bM-w5-CYw"/>
+        <segue reference="hqW-lo-9tZ"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="724-info" width="28" height="28"/>
@@ -1849,12 +1879,6 @@
         <image name="745-unlocked" width="21" height="28"/>
         <image name="906-chat-3" width="28" height="26"/>
         <image name="Tie_My_Boat_by_Ray_Garcia" width="563" height="1218"/>
-        <image name="info.circle" catalog="system" width="128" height="121"/>
-        <image name="paperplane.fill" catalog="system" width="128" height="118"/>
-        <image name="person.3.fill" catalog="system" width="32" height="32"/>
-        <image name="person.crop.circle" catalog="system" width="128" height="121"/>
-        <image name="plus" catalog="system" width="128" height="113"/>
-        <image name="square.and.pencil" catalog="system" width="128" height="115"/>
         <systemColor name="darkTextColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

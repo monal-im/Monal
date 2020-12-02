@@ -18,8 +18,12 @@
 "heq-Ls-ieg.title" = "Sélectionner un compte";
 /* Class = "UIBarButtonItem"; title = "Next"; ObjectID = "HOk-DV-nls"; */
 "HOk-DV-nls.title" = "Next";
+/* Class = "UINavigationItem"; title = "Add Contact"; ObjectID = "HYb-u1-ZN3"; */
+"HYb-u1-ZN3.title" = "Add Contact";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "IGd-kM-9BO"; */
 "IGd-kM-9BO.title" = "Fermer";
+/* Class = "UITabBarItem"; title = "Item"; ObjectID = "iLC-4b-aD9"; */
+"iLC-4b-aD9.title" = "Item";
 /* Class = "UITabBarItem"; title = "Item"; ObjectID = "iLC-4b-aDr"; */
 "iLC-4b-aDr.title" = "Item";
 /* Class = "UITabBarItem"; title = "Chats"; ObjectID = "jh7-be-VPo"; */
@@ -58,8 +62,6 @@
 "TMS-52-ORP.title" = "Terminé";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "Vtv-sv-ErG"; */
 "Vtv-sv-ErG.title" = "Fermer";
-/* Class = "UINavigationItem"; title = "Add Contact"; ObjectID = "w0d-HZ-N0s"; */
-"w0d-HZ-N0s.title" = "Add Contact";
 /* Class = "UIBarButtonItem"; title = "Add"; ObjectID = "wNA-vF-ohQ"; */
 "wNA-vF-ohQ.title" = "Add";
 /* Class = "UINavigationItem"; title = "Edit Group Chat"; ObjectID = "yIE-Ub-BAk"; */

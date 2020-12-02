@@ -8,6 +8,7 @@
 
 #import <AVFoundation/AVFoundation.h>
 #import "CallViewController.h"
+#import "MLConstants.h"
 #import "MLImageManager.h"
 #import "MLXMPPManager.h"
 
@@ -103,17 +104,6 @@
 {
     return nil;
 }
-
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    if(interfaceOrientation==UIInterfaceOrientationPortrait)
-        return YES;
-    else
-        
-        return NO;
-}
-
 
 
 -(IBAction)cancelCall:(id)sender

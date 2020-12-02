@@ -7,9 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <Monal-Swift.h>
 
-
-@interface AccountsViewController : UITableViewController
+@interface AccountsViewController : UITableViewController<MLLQRCodeScannerAccountLoginDeleagte>
 
 @property (nonatomic, strong) UITableView* accountsTable;
 

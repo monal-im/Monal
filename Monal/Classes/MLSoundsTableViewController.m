@@ -74,33 +74,28 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    UITableViewCell* toreturn;
-    switch (indexPath.section) {
-        case 0: {
-            MLSettingCell* cell=[[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
-            cell.parent= self;
-            cell.switchEnabled=YES;
-            cell.defaultKey=@"Sound";
-            cell.textLabel.text=NSLocalizedString(@"Play Sounds",@ "");
-            toreturn=cell;
-            break;
-        }
-        case 1: {
-            UITableViewCell* cell=[tableView dequeueReusableCellWithIdentifier:@"soundCell"];
-            cell.textLabel.text= self.soundList[indexPath.row];
-             NSString *filename =[NSString stringWithFormat:@"alert%ld", (long)indexPath.row+1];
-            if([filename isEqualToString:[[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"]]) {
-                cell.accessoryType=UITableViewCellAccessoryCheckmark;
-                self.selectedIndex= indexPath.row;
-            } else  {
-                cell.accessoryType=UITableViewCellAccessoryNone;
-            }
-            toreturn=cell;
-            
-        }
+    if(indexPath.section == 0)
+    {
+        MLSettingCell* cell=[[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
+        cell.parent= self;
+        cell.switchEnabled=YES;
+        cell.defaultKey=@"Sound";
+        cell.textLabel.text=NSLocalizedString(@"Play Sounds",@ "");
+        return cell;
     }
-    return toreturn;
+    else
+    {
+        UITableViewCell* cell=[tableView dequeueReusableCellWithIdentifier:@"soundCell"];
+        cell.textLabel.text= self.soundList[indexPath.row];
+            NSString *filename =[NSString stringWithFormat:@"alert%ld", (long)indexPath.row+1];
+        if([filename isEqualToString:[[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"]]) {
+            cell.accessoryType=UITableViewCellAccessoryCheckmark;
+            self.selectedIndex= indexPath.row;
+        } else  {
+            cell.accessoryType=UITableViewCellAccessoryNone;
+        }
+        return cell;
+    }
 }
 
 

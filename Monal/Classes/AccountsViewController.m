@@ -13,6 +13,8 @@
 #import "xmpp.h"
 #import "HelperTools.h"
 
+@class MLQRCodeScanner;
+
 @interface AccountsViewController ()
 
 @property (nonatomic , strong) MBProgressHUD *hud;
@@ -21,6 +23,11 @@
 @property (nonatomic, strong) NSIndexPath  *selected;
 
 @property (nonatomic, strong) NSArray* accountList;
+
+// QR-Code login scan properties
+@property (nonatomic, strong) NSString* qrCodeScanLoginJid;
+@property (nonatomic, strong) NSString* qrCodeScanLoginPassword;
+
 
 @end
 
@@ -111,8 +118,16 @@
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     self.selected = indexPath;
     
-    [self performSegueWithIdentifier:@"editXMPP" sender:self];
-    
+    if(indexPath.section == 1 && indexPath.row == 1)
+    {
+        // open QR-Code scanner
+        [self performSegueWithIdentifier:@"scanQRCode" sender:self];
+    }
+    else
+    {
+        // normal account creation & editing of a existing acount
+        [self performSegueWithIdentifier:@"editXMPP" sender:self];
+    }
 }
 
 
@@ -123,16 +138,42 @@
         XMPPEdit* editor = (XMPPEdit *)segue.destinationViewController;
     
         editor.originIndex=self.selected;
-        if(self.selected.section == 0)
+        if(self.selected && self.selected.section == 0)
         {
             //existing
             editor.accountno = [NSString stringWithFormat:@"%@",[[_accountList objectAtIndex:self.selected.row] objectForKey:@"account_id"]];
         }
-        else if(self.selected.section == 1)
+        else if(self.selected && self.selected.section == 1)
         {
+            // Adding new account
             editor.accountno = @"-1";
         }
+        else if(!self.selected && self.qrCodeScanLoginJid && self.qrCodeScanLoginPassword)
+        {
+            // QR-Code scanned login details
+            editor.accountno = @"-1";
+            editor.jid = self.qrCodeScanLoginJid;
+            editor.password = self.qrCodeScanLoginPassword;
+        }
     }
+    else if([segue.identifier isEqualToString:@"scanQRCode"])
+    {
+        MLQRCodeScanner* qrCodeScanner = (MLQRCodeScanner*)segue.destinationViewController;
+        qrCodeScanner.loginDelegate = self;
+    }
+}
+
+-(void) MLQRCodeAccountLoginScannedWithJid:(NSString*) jid password:(NSString*) password
+{
+    // We do not want to edit a existing account or to create a empty view
+    self.selected = nil;
+    // Save the new login credentials till we segue
+    self.qrCodeScanLoginJid = jid;
+    self.qrCodeScanLoginPassword = password;
+
+    [self.navigationController popViewControllerAnimated:YES];
+    // open account settings with the read credentials
+    [self performSegueWithIdentifier:@"editXMPP" sender:self];
 }
 
 
@@ -187,7 +228,7 @@
         }
         case 1:
         {
-            return 1;
+            return 2;
             break;
         }
             
@@ -201,73 +242,69 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    switch (indexPath.section) {
-        case 0:
+    if(indexPath.section == 0)
+    {
+        UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+        if(cell == nil)
         {
-            UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
-            if(cell == nil)
-            {
-                cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];
-            }
-            else
-            {
-                cell.accessoryView = nil;
-            }
-            if([(NSString*)[[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"] length] > 0) {
-                cell.textLabel.text = [NSString stringWithFormat:@"%@@%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"],
-                                     [[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"]];
-            }
-            else {
-                cell.textLabel.text = [[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"];
-            }
-            
-            
-            UIImageView* accessory = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
-            cell.detailTextLabel.text=nil;
-            
-            if([[[_accountList objectAtIndex:indexPath.row] objectForKey:@"enabled"] boolValue] == YES) {
-                   cell.imageView.image = [UIImage imageNamed:@"888-checkmark"];
-                if([[MLXMPPManager sharedInstance] isAccountForIdConnected: [NSString stringWithFormat:@"%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]]) {
-                    accessory.image = [UIImage imageNamed:@"Connected"];
-                    cell.accessoryView = accessory;
-                    
-                    NSDate* connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor: [NSString stringWithFormat:@"%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]];
-                    if(connectedTime) {
-                        cell.detailTextLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Connected since: %@", @""), [self.uptimeFormatter stringFromDate:connectedTime]];
-                    }
-                }
-                else {
-                    accessory.image = [UIImage imageNamed:NSLocalizedString(@"Disconnected", @"")];
-                    cell.accessoryView = accessory;
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];
+        }
+        else
+        {
+            cell.accessoryView = nil;
+        }
+        if([(NSString*)[[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"] length] > 0) {
+            cell.textLabel.text = [NSString stringWithFormat:@"%@@%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"],
+                                    [[_accountList objectAtIndex:indexPath.row] objectForKey:@"domain"]];
+        }
+        else {
+            cell.textLabel.text = [[_accountList objectAtIndex:indexPath.row] objectForKey:@"username"];
+        }
+        
+        
+        UIImageView* accessory = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
+        cell.detailTextLabel.text=nil;
+        
+        if([[[_accountList objectAtIndex:indexPath.row] objectForKey:@"enabled"] boolValue] == YES) {
+                cell.imageView.image = [UIImage imageNamed:@"888-checkmark"];
+            if([[MLXMPPManager sharedInstance] isAccountForIdConnected: [NSString stringWithFormat:@"%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]]) {
+                accessory.image = [UIImage imageNamed:@"Connected"];
+                cell.accessoryView = accessory;
+                
+                NSDate* connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor: [NSString stringWithFormat:@"%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]];
+                if(connectedTime) {
+                    cell.detailTextLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Connected since: %@", @""), [self.uptimeFormatter stringFromDate:connectedTime]];
                 }
             }
             else {
-                    cell.imageView.image = [UIImage imageNamed:@"disabled"];
+                accessory.image = [UIImage imageNamed:NSLocalizedString(@"Disconnected", @"")];
+                cell.accessoryView = accessory;
             }
-            return cell;
-            break;
         }
-        case 1:
-        {
-            UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"ProtocolCell"];
-            if(cell == nil)
-                cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ProtocolCell"];
-            cell.textLabel.text = NSLocalizedString(@"XMPP", @"");
-            cell.imageView.image = [UIImage imageNamed:@"XMPP"];
-            cell.detailTextLabel.text = NSLocalizedString(@"Jabber, Prosody, ejabberd etc.   ", @"");
-            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-
-            return cell;
-            break;
-        }
-        default:
-        {
-            return 0;
-        }
-            break;
+        else
+            cell.imageView.image = [UIImage imageNamed:@"disabled"];
+        return cell;
     }
-    
-    return nil;
+    else
+    {
+        UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"ProtocolCell"];
+        if(cell == nil)
+            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ProtocolCell"];
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+        cell.imageView.image = [UIImage imageNamed:@"XMPP"];
+
+        if(indexPath.row == 0)
+        {
+            cell.textLabel.text = NSLocalizedString(@"XMPP", @"");
+            cell.detailTextLabel.text = NSLocalizedString(@"Jabber, Prosody, ejabberd etc.   ", @"");
+        }
+        else
+        {
+            cell.textLabel.text = NSLocalizedString(@"XMPP: QR-Code", @"");
+            cell.detailTextLabel.text = NSLocalizedString(@"Login with a QR-Code", @"");
+        }
+        return cell;
+    }
 }
 
 @end

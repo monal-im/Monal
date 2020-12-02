@@ -6,36 +6,24 @@
 //
 //
 
-#import <BackgroundTasks/BackgroundTasks.h>
 #import <UserNotifications/UserNotifications.h>
 
+#import "MLConstants.h"
 #import "MLXMPPManager.h"
 #import "DataLayer.h"
 #import "HelperTools.h"
-#import "MonalAppDelegate.h"
-#import "MLConstants.h"
+#import "xmpp.h"
 
 @import Network;
 @import MobileCoreServices;
 @import SAMKeychain;
-
-typedef void (^pushCompletion)(UIBackgroundFetchResult result);
-
-static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
-
-//this is in seconds
-#define SHORT_PING 4.0
-#define LONG_PING 16.0
 
 static const int pingFreqencyMinutes = 5;       //about the same Conversations uses
 
 @interface MLXMPPManager()
 {
     nw_path_monitor_t _path_monitor;
-    UIBackgroundTaskIdentifier _bgTask;
-    API_AVAILABLE(ios(13.0)) BGTask* _bgFetch;
     BOOL _hasConnectivity;
-    NSMutableDictionary* _pushCompletions;
     NSMutableArray* _connectedXMPP;
 }
 @end
@@ -47,16 +35,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     BOOL setDefaults = [[HelperTools defaultsDB] boolForKey:@"SetDefaults"];
     if(!setDefaults)
     {
-        // [[HelperTools defaultsDB] setObject:@"" forKey:@"StatusMessage"];   // we dont want anything set
-        [[HelperTools defaultsDB] setBool:NO forKey:@"Away"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"MusicStatus"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"Sound"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"MessagePreview"];
-        [[HelperTools defaultsDB] setBool:YES forKey:@"Logging"];
-
-        [[HelperTools defaultsDB] setBool:YES forKey:@"OfflineContact"];
-        [[HelperTools defaultsDB] setBool:NO forKey:@"SortContacts"];
-
         [[HelperTools defaultsDB] setBool:YES forKey:@"ChatBackgrounds"];
 
         // Privacy Settings
@@ -115,6 +94,14 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
     // upgrade Message Settings / Privacy
     [self upgradeIntegerUserSettingsIfUnset:@"NotificationPrivacySetting" toDefault:DisplayNameAndMessage];
+    
+    // upgrade filetransfer settings
+    [self upgradeBoolUserSettingsIfUnset:@"AutodownloadFiletransfers" toDefault:YES];
+#ifdef IS_ALPHA
+    [self upgradeIntegerUserSettingsIfUnset:@"AutodownloadFiletransfersMaxSize" toDefault:16*1024*1024];    // 16 MiB
+#else
+    [self upgradeIntegerUserSettingsIfUnset:@"AutodownloadFiletransfersMaxSize" toDefault:5*1024*1024];     // 5 MiB
+#endif
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal
@@ -159,13 +146,14 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(id) init
 {
-    self=[super init];
+    self = [super init];
 
     _connectedXMPP = [[NSMutableArray alloc] init];
-    _bgTask = UIBackgroundTaskInvalid;
     _hasConnectivity = NO;
+    _isBackgrounded = NO;
     
     [self defaultSettings];
+    [self setPushNode:nil andSecret:nil];       //load push settings from defaultsDB (can be overwritten later on in mainapp, but *not* in appex)
 
     //set up regular ping
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -196,12 +184,12 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
     dispatch_resume(_pinger);
 
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(autoJoinRoom:) name:kMLHasConnectedNotice object:nil];
 
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sendOutbox:) name:kMonalFinishedCatchup object:nil];
+    //this processes the sharesheet outbox only, the handler in the NotificationServiceExtension will do more interesting things
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(catchupFinished:) name:kMonalFinishedCatchup object:nil];
 
     _path_monitor = nw_path_monitor_create();
     nw_path_monitor_set_queue(_path_monitor, q_background);
@@ -236,18 +224,13 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                 if(!wasIdle)
                 {
                     DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored");
-                    [self scheduleBackgroundFetchingTask];      //this will automatically start the app if connectivity gets restored
+                    //this will automatically start the app if connectivity gets restored
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundFetchingTask object:nil];
                 }
             }
         }
     });
     nw_path_monitor_start(_path_monitor);
-
-    //this is only for debugging purposes, the real handler has to be added to the NotificationServiceExtension
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(catchupFinished:) name:kMonalFinishedCatchup object:nil];
-
-    //process idle state changes
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
 
     return self;
 }
@@ -269,13 +252,11 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) catchupFinished:(NSNotification*) notification
 {
-    DDLogVerbose(@"### MAM/SMACKS CATCHUP FINISHED ###");
-}
-
--(void) nowIdle:(NSNotification*) notification
-{
-    DDLogVerbose(@"### SOME ACCOUNT CHANGED TO IDLE STATE ###");
-    [self checkIfBackgroundTaskIsStillNeeded];
+    xmpp* account = notification.object;
+    DDLogInfo(@"### MAM/SMACKS CATCHUP FINISHED FOR ACCOUNT NO %@ ###", account.accountNo);
+    
+    //send sharesheet outbox
+    [self sendOutboxForAccount:account];
 }
 
 -(BOOL) allAccountsIdle
@@ -286,225 +267,19 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     return YES;
 }
 
--(void) checkIfBackgroundTaskIsStillNeeded
+#pragma mark - app state
+
+-(void) nowBackgrounded
 {
-    if([self allAccountsIdle])
-    {
-        //remove syncError notification because all accounts are idle and fully synced now
-        [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[@"syncError"]];
-        
-        if(![HelperTools isAppExtension])
-        {
-            //use a synchronized block to disconnect only once
-            @synchronized(self) {
-                DDLogVerbose(@"### NOT EXTENSION --> checking if background is still needed ###");
-                BOOL background = [HelperTools isInBackground];
-                if(background)
-                {
-                    DDLogInfo(@"### All accounts idle, disconnecting and stopping all background tasks ###");
-                    [DDLog flushLog];
-                    [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
-                    [HelperTools dispatchSyncReentrant:^{
-                        BOOL stopped = NO;
-                        if(_bgTask != UIBackgroundTaskInvalid)
-                        {
-                            DDLogVerbose(@"stopping UIKit _bgTask");
-                            [DDLog flushLog];
-                            [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
-                            _bgTask = UIBackgroundTaskInvalid;
-                            stopped = YES;
-                        }
-                        if(_bgFetch)
-                        {
-                            DDLogVerbose(@"stopping backgroundFetchingTask");
-                            [DDLog flushLog];
-                            [_bgFetch setTaskCompletedWithSuccess:YES];
-                            _bgFetch = nil;
-                            stopped = YES;
-                        }
-                        if(!stopped)
-                            DDLogVerbose(@"no background tasks running, nothing to stop");
-                        [DDLog flushLog];
-                    } onQueue:dispatch_get_main_queue()];
-                }
-                if([_pushCompletions count])
-                {
-                    //we don't need to call disconnectAll if we are in background here, because we already did this in the if above (don't reorder these 2 ifs!)
-                    DDLogInfo(@"### All accounts idle, calling push completion handlers ###");
-                    [DDLog flushLog];
-                    for(NSString* completionId in _pushCompletions)
-                    {
-                        //cancel running timer and push completion handler
-                        ((monal_void_block_t)_pushCompletions[completionId][@"timer"])();
-                        ((pushCompletion)_pushCompletions[completionId][@"handler"])(UIBackgroundFetchResultNewData);
-                        [_pushCompletions removeObjectForKey:completionId];
-                    }
-                }
-            }
-        }
-        else
-            DDLogVerbose(@"### IN EXTENSION --> ignoring in MLXMPPManager ###");
-    }
-}
-
--(void) addBackgroundTask
-{
-    if(![HelperTools isAppExtension])
-    {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            //start indicating we want to do work even when the app is put into background
-            if(_bgTask == UIBackgroundTaskInvalid)
-            {
-                _bgTask = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^(void) {
-                    DDLogWarn(@"BG WAKE EXPIRING");
-                    [DDLog flushLog];
-                    
-                    [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
-                    
-                    [HelperTools postSendingErrorNotification];
-
-                    //schedule a BGProcessingTaskRequest to process this further as soon as possible
-                    if(@available(iOS 13.0, *))
-                    {
-                        DDLogInfo(@"calling scheduleBackgroundFetchingTask");
-                        [self scheduleBackgroundFetchingTask];
-                    }
-                    
-                    [DDLog flushLog];
-                    [[UIApplication sharedApplication] endBackgroundTask:_bgTask];
-                    _bgTask = UIBackgroundTaskInvalid;
-                }];
-            }
-        });
-    }
-}
-
--(void) handleBackgroundFetchingTask:(BGTask*) task API_AVAILABLE(ios(13.0))
-{
-    DDLogVerbose(@"RUNNING BGTASK");
-    _bgFetch = task;
-    __weak BGTask* weakTask = task;
-    task.expirationHandler = ^{
-        DDLogWarn(@"*** BGTASK EXPIRED ***");
-        _bgFetch = nil;
-        [self disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
-        [HelperTools postSendingErrorNotification];
-        [weakTask setTaskCompletedWithSuccess:NO];
-        [self scheduleBackgroundFetchingTask];      //schedule new one if neccessary
-        [DDLog flushLog];
-    };
-    
-    if(_hasConnectivity)
-    {
-        for(xmpp* xmppAccount in [self connectedXMPP])
-        {
-            //try to send a ping. if it fails, it will reconnect
-            DDLogVerbose(@"manager pinging");
-            [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
-        }
-    }
-    else
-        DDLogWarn(@"BGTASK has *no* connectivity? That's strange!");
-    
-    //log bgtask ticks
-    unsigned long tick = 0;
-    while(1)
-    {
-        DDLogVerbose(@"BGTASK TICK: %lu", tick++);
-        [DDLog flushLog];
-        [NSThread sleepForTimeInterval:1.000];
-    }
-}
-
--(void) configureBackgroundFetchingTask
-{
-    if(![HelperTools isAppExtension])
-    {
-        if(@available(iOS 13.0, *))
-        {
-            [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundFetchingTask usingQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0) launchHandler:^(BGTask *task) {
-                DDLogVerbose(@"RUNNING BGTASK LAUNCH HANDLER");
-                [self handleBackgroundFetchingTask:task];
-            }];
-        } else {
-            // No fallback unfortunately
-        }
-    }
-}
-
--(void) scheduleBackgroundFetchingTask
-{
-    if(![HelperTools isAppExtension])
-    {
-        if(@available(iOS 13.0, *))
-        {
-            [HelperTools dispatchSyncReentrant:^{
-                NSError *error = NULL;
-                // cancel existing task (if any)
-                [BGTaskScheduler.sharedScheduler cancelTaskRequestWithIdentifier:kBackgroundFetchingTask];
-                // new task
-                //BGAppRefreshTaskRequest* request = [[BGAppRefreshTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-                BGProcessingTaskRequest* request = [[BGProcessingTaskRequest alloc] initWithIdentifier:kBackgroundFetchingTask];
-                //do the same like the corona warn app from germany which leads to this hint: https://developer.apple.com/forums/thread/134031
-                request.requiresNetworkConnectivity = YES;
-                request.requiresExternalPower = NO;
-                request.earliestBeginDate = nil;
-                //request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:40];        //begin nearly immediately (if we have network connectivity)
-                BOOL success = [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
-                if(!success) {
-                    // Errorcodes https://stackoverflow.com/a/58224050/872051
-                    DDLogError(@"Failed to submit BGTask request: %@", error);
-                } else {
-                    DDLogVerbose(@"Success submitting BGTask request %@", request);
-                }
-            } onQueue:dispatch_get_main_queue()];
-        }
-        else
-        {
-            // No fallback unfortunately
-            DDLogError(@"BGTask needed but NOT supported!");
-        }
-    }
-}
-
--(void) incomingPushWithCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
-{
-    DDLogInfo(@"got incomingPushWithCompletionHandler");
-    if(![HelperTools isInBackground])
-    {
-        DDLogError(@"Ignoring incomingPushWithCompletionHandler: because app is in FG!");
-        completionHandler(UIBackgroundFetchResultNoData);
-        return;
-    }
-    // should any accounts reconnect?
-    [self pingAllAccounts];
-    
-    //register push completion handler and associated timer
-    NSString* completionId = [[NSUUID UUID] UUIDString];
-    _pushCompletions[completionId] = @{
-        @"handler": completionHandler,
-        @"timer": [HelperTools startTimer:28.0 withHandler:^{
-            DDLogWarn(@"### Push timer triggered!! ###");
-            [_pushCompletions removeObjectForKey:completionId];
-            completionHandler(UIBackgroundFetchResultFailed);
-        }]
-    };
-}
-
-#pragma mark - client state
-
--(void) setClientsInactive
-{
-    [self addBackgroundTask];
+    _isBackgrounded = YES;
     
     for(xmpp* xmppAccount in [self connectedXMPP])
         [xmppAccount setClientInactive];
-    [self checkIfBackgroundTaskIsStillNeeded];
 }
 
--(void) setClientsActive
+-(void) nowForegrounded
 {
-    [self addBackgroundTask];
+    _isBackgrounded = NO;
     
     //*** we don't need to check for a running service extension here because the appdelegate does this already for us ***
     
@@ -516,6 +291,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [xmppAccount setClientActive];
     }
 }
+
+#pragma mark - Connection related
 
 -(void) pingAllAccounts
 {
@@ -562,8 +339,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     return nil;
 }
 
-#pragma mark - Connection related
-
 -(void) connectAccount:(NSString*) accountNo
 {
     NSDictionary* account = [[DataLayer sharedInstance] detailsForAccount:accountNo];
@@ -605,6 +380,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     xmpp* xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
     xmppAccount.pushNode = self.pushNode;
     xmppAccount.pushSecret = self.pushSecret;
+    xmppAccount.statusMessage = [account objectForKey:@"statusMessage"];
 
     if(xmppAccount)
     {
@@ -666,21 +442,24 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) disconnectAll
 {
+    DDLogVerbose(@"manager disconnecAll");
     for(xmpp* xmppAccount in [self connectedXMPP])
     {
         //disconnect to prevent endless loops trying to connect
         DDLogVerbose(@"manager disconnecting");
         [xmppAccount disconnect];
     }
+    DDLogVerbose(@"manager disconnecAll done");
 }
 
 -(void) connectIfNecessary
 {
-    [self addBackgroundTask];
+    DDLogVerbose(@"manager connectIfNecessary");
     NSArray* enabledAccountList = [[DataLayer sharedInstance] enabledAccountList];
     for(NSDictionary* account in enabledAccountList) {
         [self connectAccountWithDictionary:account];
     }
+    DDLogVerbose(@"manager connectIfNecessary done");
 }
 
 -(void) updatePassword:(NSString *) password forAccount:(NSString *) accountNo
@@ -702,28 +481,36 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     NSAssert(account, @"Account should not be nil");
     NSAssert(contact, @"Contact should not be nil");
     
+    NSString* messageType = kMessageTypeText;
+    if(isUpload)
+        messageType = kMessageTypeFiletransfer;
+    
     // Save message to history
-    [[DataLayer sharedInstance] addMessageHistoryFrom:account.connectionProperties.identity.jid
-                                                   to:recipient
-                                           forAccount:accountID
-                                          withMessage:message
-                                         actuallyFrom:(isMUC ? contact.accountNickInGroup : account.connectionProperties.identity.jid)
-                                               withId:msgid
-                                            encrypted:encrypted
-                                       withCompletion:^(BOOL successHist, NSString* messageTypeHist, NSNumber* messageDBId) {
-        // Send message
-        if(successHist) {
-            DDLogInfo(@"Message added to history with id %ld, now sending...", (long)[messageDBId intValue]);
-            [self sendMessage:message toContact:recipient fromAccount:accountID isEncrypted:encrypted isMUC:isMUC isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString *messageIdSend) {
-                if(successSend)
-                    completion(successSend, messageIdSend);
-            }];
-            DDLogVerbose(@"Notifying active chats of change for contact %@", contact);
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":contact}];
-        }
-        else
-            DDLogError(@"Could not add message to history!");
-    }];
+    NSNumber* messageDBId = [[DataLayer sharedInstance]
+        addMessageHistoryFrom:account.connectionProperties.identity.jid
+                           to:recipient
+                   forAccount:accountID
+                  withMessage:message
+                 actuallyFrom:(isMUC ? contact.accountNickInGroup : account.connectionProperties.identity.jid)
+                       withId:msgid
+                    encrypted:encrypted
+                  messageType:messageType
+                     mimeType:nil
+                         size:nil
+    ];
+    // Send message
+    if(messageDBId != nil)
+    {
+        DDLogInfo(@"Message added to history with id %ld, now sending...", (long)[messageDBId intValue]);
+        [self sendMessage:message toContact:recipient fromAccount:accountID isEncrypted:encrypted isMUC:isMUC isUpload:NO messageId:msgid withCompletionHandler:^(BOOL successSend, NSString *messageIdSend) {
+            if(successSend)
+                completion(successSend, messageIdSend);
+        }];
+        DDLogVerbose(@"Notifying active chats of change for contact %@", contact);
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":contact}];
+    }
+    else
+        DDLogError(@"Could not add message to history!");
 }
 
 -(void)sendMessage:(NSString*) message toContact:(NSString*)contact fromAccount:(NSString*) accountNo isEncrypted:(BOOL) encrypted isMUC:(BOOL) isMUC  isUpload:(BOOL) isUpload messageId:(NSString *) messageId withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion
@@ -746,54 +533,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     if(account)
         [account sendChatState:isTyping toJid:jid];
 }
-
-
-#pragma  mark - HTTP upload
-
--(void) httpUploadJpegData:(NSData*) fileData   toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion{
-
-    NSString *fileName = [NSString stringWithFormat:@"%@.jpg",[NSUUID UUID].UUIDString];
-
-    //get file type
-    CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)@"jpg", NULL);
-    NSString *mimeType = (__bridge_transfer NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
-    CFRelease(UTI);
-    [self httpUploadData:fileData withFilename:fileName andType:mimeType toContact:contact onAccount:accountNo withCompletionHandler:completion];
-}
-
--(void) httpUploadFileURL:(NSURL*) fileURL  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion{
-
-    //get file name
-    NSString *fileName =  fileURL.pathComponents.lastObject;
-
-    //get file type
-    CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)fileURL.pathExtension, NULL);
-    NSString *mimeType = (__bridge NSString *)(UTTypeCopyPreferredTagWithClass (UTI, kUTTagClassMIMEType));
-    CFRelease(UTI);
-    //get data
-    NSData *fileData = [[NSData alloc] initWithContentsOfURL:fileURL];
-
-    [self httpUploadData:fileData withFilename:fileName andType:mimeType toContact:contact onAccount:accountNo withCompletionHandler:completion];
-}
-
-
--(void)httpUploadData:(NSData *)data withFilename:(NSString*) filename andType:(NSString*)contentType  toContact:(NSString*)contact onAccount:(NSString*) accountNo  withCompletionHandler:(void (^)(NSString *url,  NSError *error)) completion
-{
-    if(!data || !filename || !contentType || !contact || !accountNo)
-    {
-        NSError *error = [NSError errorWithDomain:@"Empty" code:0 userInfo:@{}];
-        if(completion) completion(nil, error);
-        return;
-    }
-
-    xmpp* account=[self getConnectedAccountForID:accountNo];
-    if(account)
-    {
-        NSDictionary *params =@{kData:data,kFileName:filename, kContentType:contentType, kContact:contact};
-        [account requestHTTPSlotWithParams:params andCompletion:completion];
-    }
-}
-
 
 #pragma mark - getting details
 
@@ -904,7 +643,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) hangupContact:(MLContact*) contact
 {
-    xmpp* account =[self getConnectedAccountForID:contact.accountId];
+    xmpp* account = [self getConnectedAccountForID:contact.accountId];
     [account hangup:contact];
 }
 
@@ -922,33 +661,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 }
 
-
-#pragma mark - XMPP settings
-
--(void) setStatusMessage:(NSString*) message
-{
-    for(xmpp* xmppAccount in [self connectedXMPP])
-        [xmppAccount setStatusMessageText:message];
-}
-
--(void) setAway:(BOOL) isAway
-{
-    for(xmpp* xmppAccount in [self connectedXMPP])
-        [xmppAccount setAway:isAway];
-}
-
 #pragma mark message signals
--(void) handleNewMessage:(NSNotification *)notification
-{
-    if(![HelperTools isAppExtension])
-    {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-            [appDelegate updateUnread];
-        });
-    }
-}
-
 
 -(void) handleSentMessage:(NSNotification*) notification
 {
@@ -1006,13 +719,13 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         self.pushSecret.length
     )
     {
-        DDLogInfo(@"push token valid, current push settings: node=%@, secret=%@", [MLXMPPManager sharedInstance].pushNode, [MLXMPPManager sharedInstance].pushSecret);
+        DDLogInfo(@"push token valid, current push settings: node=%@, secret=%@", self.pushNode, self.pushSecret);
         self.hasAPNSToken = YES;
     }
     else
     {
         self.hasAPNSToken = NO;
-        DDLogWarn(@"push token invalid, current push settings: node=%@, secret=%@", [MLXMPPManager sharedInstance].pushNode, [MLXMPPManager sharedInstance].pushSecret);
+        DDLogWarn(@"push token invalid, current push settings: node=%@, secret=%@", self.pushNode, self.pushSecret);
     }
 
     //only try to enable push if we have a node and secret value
@@ -1027,12 +740,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - share sheet added
 
--(void) sendOutbox: (NSNotification *) notification {
-    xmpp* account = notification.object;
-    [self sendOutboxForAccount:account];
-}
-
-- (void) sendOutboxForAccount:(xmpp*) account
+-(void) sendOutboxForAccount:(xmpp*) account
 {
     NSMutableArray* outbox = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];
     NSMutableArray* outboxClean = [[[HelperTools defaultsDB] objectForKey:@"outbox"] mutableCopy];

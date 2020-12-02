@@ -8,6 +8,8 @@
 
 #import "XMPPStanza.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 FOUNDATION_EXPORT NSString* const kiqGetType;
 FOUNDATION_EXPORT NSString* const kiqSetType;
 FOUNDATION_EXPORT NSString* const kiqResultType;
@@ -52,7 +54,7 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
  */
 -(void) updateMamArchivePrefDefault:(NSString *) pref;
 
--(void) setMAMQueryLatestMessagesForJid:(NSString*) jid before:(NSString*) uid;
+-(void) setMAMQueryLatestMessagesForJid:(NSString*) jid before:(NSString* _Nullable) uid;
 -(void) setMAMQueryAfter:(NSString*) uid;
 -(void) setMAMQueryForLatestId;
 
@@ -90,7 +92,7 @@ removes a contact from the roster
 /**
  Requests a full roster from the server. A null version will not set the ver attribute
  */
--(void) setRosterRequest:(NSString *) version;
+-(void) setRosterRequest:(NSString* _Nullable) version;
 
 /**
  makes iq  with version element
@@ -127,7 +129,7 @@ removes a contact from the roster
 /**
  Dictionary info has initiator, responder, sid, ownip
  */
--(void) setJingleTerminateTo:(NSString*) jid andResource:(NSString*) resource withValues:(NSDictionary*) info;
+-(void) setJingleTerminateTo:(NSString* _Nullable) jid andResource:(NSString* _Nullable) resource withValues:(NSDictionary* _Nullable) info;
 
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid;
@@ -138,3 +140,5 @@ removes a contact from the roster
 -(void) registerUser:(NSString* _Nonnull) user withPassword:(NSString* _Nonnull) newPass captcha:(NSString* _Nonnull) captcha andHiddenFields:(NSDictionary* _Nonnull) hiddenFields;
 
 @end
+
+NS_ASSUME_NONNULL_END

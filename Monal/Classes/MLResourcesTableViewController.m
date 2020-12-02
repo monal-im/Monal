@@ -19,6 +19,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
     if(self.contact.isGroup) {
         self.navigationItem.title=NSLocalizedString(@"Participants",@ "");
     } else {
@@ -34,6 +35,7 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    
     self.resources = [[DataLayer sharedInstance] resourcesForContact:self.contact.contactJid];
     
     if (!self.contact.isGroup) {
@@ -44,7 +46,8 @@
 
 -(void)viewWillDisappear:(BOOL)animated
 {
-    [super viewWillAppear:animated];
+    [super viewWillDisappear:animated];
+    
     if(!self.contact.isGroup)
     {
         [[NSNotificationCenter defaultCenter] removeObserver:kMonalXmppUserSoftWareVersionRefresh];

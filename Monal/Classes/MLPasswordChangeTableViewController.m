@@ -33,8 +33,8 @@
         
         [self presentViewController:messageAlert animated:YES completion:nil];
     }
-    else  {
-        
+    else
+    {
         if(self.password.text.length>0)
         {
             [self.xmppAccount changePassword:self.password.text withCompletion:^(BOOL success, NSString *message) {
@@ -96,11 +96,10 @@
 -(void) viewDidLoad
 {
     [super viewDidLoad];
-    self.navigationItem.title=NSLocalizedString(@"Change Password",@ "");
+    self.navigationItem.title=NSLocalizedString(@"Change Password", @"");
     [self.tableView registerNib:[UINib nibWithNibName:@"MLTextInputCell"
                                                bundle:[NSBundle mainBundle]]
-         forCellReuseIdentifier:@"TextCell"];
-    
+                               forCellReuseIdentifier:@"TextCell"];
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -118,11 +117,10 @@
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    if(section==0)
-    {
+    if(section == 0)
         return NSLocalizedString(@"Enter your new password. Passwords may not be empty. They may also be governed by server or company policies.",@ "");
-    }
-    else return nil;
+    else
+        return nil;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -145,31 +143,20 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell *cell ;
-    
-    switch (indexPath.section) {
-        case 0: {
-            MLTextInputCell *textCell =[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-            if(indexPath.row ==0){
-                self.password =textCell.textInput;
-                self.password.placeholder = NSLocalizedString(@"New Password",@ "");
-                self.password.delegate=self;
-                self.password.secureTextEntry=YES;
-            }
-           
-            cell= textCell;
-            break;
+    if(indexPath.section == 0)
+    {
+        MLTextInputCell *textCell =[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
+        if(indexPath.row == 0)
+        {
+            self.password =textCell.textInput;
+            self.password.placeholder = NSLocalizedString(@"New Password", @"");
+            self.password.delegate=self;
+            self.password.secureTextEntry=YES;
         }
-        case 1: {
-            cell =[tableView dequeueReusableCellWithIdentifier:@"addButton"];
-            break;
-        }
-        default:
-            break;
+        return textCell;
     }
-    
-    return cell;
-    
+    else
+        return [tableView dequeueReusableCellWithIdentifier:@"addButton"];
 }
 
 #pragma mark tableview delegate

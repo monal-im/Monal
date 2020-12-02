@@ -799,7 +799,7 @@ enum msgSentState {
     [self sendMessage:messageText andMessageID:nil withType:messageType];
 }
 
--(void) sendMessage:(NSString*) messageText andMessageID:(NSString*) messageID withType:(NSString*) messageType
+-(void) sendMessage:(nonnull NSString*) messageText andMessageID:(NSString*) messageID withType:(NSString*) messageType
 {
     DDLogVerbose(@"Sending message");
     NSString* newMessageID = messageID ? messageID:[[NSUUID UUID] UUIDString];
@@ -811,6 +811,11 @@ enum msgSentState {
         return;
     }
 
+    if(!messageID && !messageType) {
+        DDLogError(@"message id and type both cant be empty");
+        return;
+    }
+    
     if(!messageID)
     {
         [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID messageType:messageType mimeType:nil size:nil];
@@ -1163,7 +1168,7 @@ enum msgSentState {
 }
 
 //only for messages going out
--(NSNumber*) addMessageto:(NSString*)to withMessage:(NSString*) message andId:(NSString *) messageId messageType:(NSString*) messageType mimeType:(NSString*) mimeType size:(NSNumber*) size
+-(NSNumber*) addMessageto:(NSString *)to withMessage:(nonnull NSString *) message andId:(nonnull NSString *) messageId messageType:(nonnull NSString *) messageType mimeType:(NSString *) mimeType size:(NSNumber *) size
 {
     if(!self.jid || !message)
     {

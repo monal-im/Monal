@@ -84,14 +84,14 @@ static NSMutableDictionary* currentTransactions;
     [[NSNotificationCenter defaultCenter] addObserverForName:NSThreadWillExitNotification object:[NSThread currentThread] queue:nil usingBlock:^(NSNotification* notification) {
         @synchronized(self) {
             NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-            if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 1)
+            if([threadData[@"_sqliteTransactionsRunning"][self->_dbFile] intValue] > 1)
             {
                 DDLogError(@"Transaction leak in NSThreadWillExitNotification: trying to close sqlite3 connection while transaction still open");
                 @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Transaction leak in NSThreadWillExitNotification: trying to close sqlite3 connection while transaction still open" userInfo:threadData];
             }
             if(self->_database)
             {
-                DDLogInfo(@"Closing database in NSThreadWillExitNotification: %@", _dbFile);
+                DDLogInfo(@"Closing database in NSThreadWillExitNotification: %@", self->_dbFile);
                 sqlite3_close(self->_database);
                 self->_database = NULL;
             }

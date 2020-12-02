@@ -357,7 +357,7 @@ NSString *const kData=@"data";
         {
             DDLogVerbose(@"Adding idle state check to receive queue...");
             [self dispatchAsyncOnReceiveQueue:^{
-                BOOL lastState = _lastIdleState;
+                BOOL lastState = self->_lastIdleState;
                 //only send out idle notifications if we changed from non-idle to idle state
                 if(self.idle && !lastState)
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
@@ -412,7 +412,7 @@ NSString *const kData=@"data";
     [_sendQueue cancelAllOperations];
     [_sendQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
         DDLogVerbose(@"Cleaning up sendQueue [internal]");
-        [_sendQueue cancelAllOperations];
+        [self->_sendQueue cancelAllOperations];
         self->_outputQueue = [[NSMutableArray alloc] init];
         if(self->_outputBuffer)
             free(self->_outputBuffer);
@@ -606,8 +606,8 @@ NSString *const kData=@"data";
     }
     
     [self dispatchAsyncOnReceiveQueue: ^{
-        [_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas from old connections
-        [_receiveQueue cancelAllOperations];        //stop everything coming after this (we will start a clean connect here!)
+        [self->_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas from old connections
+        [self->_receiveQueue cancelAllOperations];        //stop everything coming after this (we will start a clean connect here!)
         
         //sanity check
         if(self.accountState >= kStateReconnecting)
@@ -625,7 +625,7 @@ NSString *const kData=@"data";
         }
         
         //mark this account as currently connecting
-        _accountState = kStateReconnecting;
+        self->_accountState = kStateReconnecting;
         
         //only proceed with connection if not concurrent with other processes
         DDLogVerbose(@"Checking remote process lock...");
@@ -637,13 +637,13 @@ NSString *const kData=@"data";
         if([HelperTools isAppExtension] && [MLProcessLock checkRemoteRunning:@"MainApp"])
         {
             DDLogInfo(@"MainApp is running, not connecting (this should transition us into idle state again which will terminate this extension)");
-            _accountState = kStateDisconnected;
+            self->_accountState = kStateDisconnected;
             return;
         }
         
         DDLogInfo(@"XMPP connnect start");
-        _startTLSComplete = NO;
-        _catchupDone = NO;
+        self->_startTLSComplete = NO;
+        self->_catchupDone = NO;
         
         [self cleanupSendQueue];
         
@@ -652,18 +652,18 @@ NSString *const kData=@"data";
         if([self connectionTask])
         {
             DDLogError(@"Server disallows xmpp connections for account '%@', ignoring login", self.accountNo);
-            _accountState = kStateDisconnected;
+            self->_accountState = kStateDisconnected;
             return;
         }
         
         //return here if we are just registering a new account
-        if(_registration || _registrationSubmission)
+        if(self->_registration || self->_registrationSubmission)
             return;
         
         double connectTimeout = 8.0;
-        _cancelLoginTimer = [HelperTools startTimer:connectTimeout withHandler:^{
+        self->_cancelLoginTimer = [HelperTools startTimer:connectTimeout withHandler:^{
             [self dispatchAsyncOnReceiveQueue: ^{
-                _cancelLoginTimer = nil;
+                self->_cancelLoginTimer = nil;
                 DDLogInfo(@"login took too long, cancelling and trying to reconnect (potentially using another SRV record)");
                 [self reconnect];
             }];
@@ -680,31 +680,31 @@ NSString *const kData=@"data";
 {
     //this has to be synchronous because we want to wait for the disconnect to complete before continuingand unlocking the process in the NSE
     [self dispatchOnReceiveQueue: ^{
-        if(_accountState<kStateReconnecting)
+        if(self->_accountState<kStateReconnecting)
         {
             DDLogVerbose(@"not doing logout because already logged out");
             return;
         }
         DDLogInfo(@"disconnecting");
-        _disconnectInProgres = YES;
-        [_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas (we should be logged out then!)
-        [_receiveQueue cancelAllOperations];        //stop everything coming after this (we should be logged out then!)
+        self->_disconnectInProgres = YES;
+        [self->_parseQueue cancelAllOperations];          //throw away all parsed but not processed stanzas (we should be logged out then!)
+        [self->_receiveQueue cancelAllOperations];        //stop everything coming after this (we should be logged out then!)
         
         DDLogInfo(@"stopping running timers");
-        if(_cancelLoginTimer)
-            _cancelLoginTimer();        //cancel running login timer
-        _cancelLoginTimer = nil;
-        if(_cancelPingTimer)
-            _cancelPingTimer();         //cancel running ping timer
-        _cancelPingTimer = nil;
-        if(!_reconnectInProgress && _cancelReconnectTimer)
-            _cancelReconnectTimer();
-        _cancelReconnectTimer = nil;
+        if(self->_cancelLoginTimer)
+            self->_cancelLoginTimer();        //cancel running login timer
+        self->_cancelLoginTimer = nil;
+        if(self->_cancelPingTimer)
+            self->_cancelPingTimer();         //cancel running ping timer
+        self->_cancelPingTimer = nil;
+        if(!self->_reconnectInProgress && self->_cancelReconnectTimer)
+            self->_cancelReconnectTimer();
+        self->_cancelReconnectTimer = nil;
         
-        for(NSString* iqid in _iqHandlers)
-            if(![_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
+        for(NSString* iqid in self->_iqHandlers)
+            if(![self->_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
             {
-                NSDictionary* data = (NSDictionary*)_iqHandlers[iqid];
+                NSDictionary* data = (NSDictionary*)self->_iqHandlers[iqid];
                 if(data[@"errorHandler"])
                 {
                     DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
@@ -713,12 +713,12 @@ NSString *const kData=@"data";
                 }
             }
         
-        if(explicitLogout && _accountState>=kStateHasStream)
+        if(explicitLogout && self->_accountState>=kStateHasStream)
         {
             DDLogInfo(@"doing explicit logout (xmpp stream close)");
-            _exponentialBackoff = 0;
+            self->_exponentialBackoff = 0;
             if(self.accountState>=kStateBound)
-                [_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
+                [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
                     //disable push for this node
                     if(self.pushNode && [self.pushNode length]>0 && self.connectionProperties.supportsPush)
                     {
@@ -729,14 +729,14 @@ NSString *const kData=@"data";
 
                     [self sendLastAck];
                 }]] waitUntilFinished:YES];         //block until finished because we are closing the xmpp stream directly afterwards
-            [_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
+            [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
                 //close stream
                 MLXMLNode* stream = [[MLXMLNode alloc] init];
                 stream.element = @"/stream:stream"; //hack to close stream
                 [self writeToStream:[stream XMLString]]; // dont even bother queueing
             }]] waitUntilFinished:YES];         //block until finished because we are closing the socket directly afterwards
 
-            @synchronized(_stateLockObject) {
+            @synchronized(self->_stateLockObject) {
                 //preserve unAckedStanzas even on explicitLogout and resend them on next connect
                 //if we don't do this, messages could get lost when logging out directly after sending them
                 //and: sending messages twice is less intrusive than silently loosing them
@@ -747,15 +747,15 @@ NSString *const kData=@"data";
                 self.unAckedStanzas = stanzas;
                 
                 //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
-                for(NSString* iqid in _iqHandlers)
+                for(NSString* iqid in self->_iqHandlers)
                 {
                     DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-                    if([_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
-                        $invalidate(_iqHandlers[iqid], $ID(account, self));
-                    else if(_iqHandlers[iqid][@"errorHandler"])
-                        ((monal_iq_handler_t)_iqHandlers[iqid][@"errorHandler"])(nil);
+                    if([self->_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
+                        $invalidate(self->_iqHandlers[iqid], $ID(account, self));
+                    else if(self->_iqHandlers[iqid][@"errorHandler"])
+                        ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
                 }
-                _iqHandlers = [[NSMutableDictionary alloc] init];
+                self->_iqHandlers = [[NSMutableDictionary alloc] init];
 
                 //persist these changes
                 [self persistState];
@@ -773,7 +773,7 @@ NSString *const kData=@"data";
         
         [self closeSocket];
         [self accountStatusChanged];
-        _disconnectInProgres = NO;
+        self->_disconnectInProgres = NO;
     }];
 }
 
@@ -781,14 +781,14 @@ NSString *const kData=@"data";
 {
     [self dispatchOnReceiveQueue: ^{
         DDLogInfo(@"removing streams from runLoop and aborting parser");
-        [_receiveQueue cancelAllOperations];        //stop everything coming after this (we should have closed sockets then!)
+        [self->_receiveQueue cancelAllOperations];        //stop everything coming after this (we should have closed sockets then!)
 
         //prevent any new read or write
-        if(_xmlParser != nil)
+        if(self->_xmlParser != nil)
         {
-            [_xmlParser setDelegate:nil];
-            [_xmlParser abortParsing];
-            _xmlParser = nil;
+            [self->_xmlParser setDelegate:nil];
+            [self->_xmlParser abortParsing];
+            self->_xmlParser = nil;
         }
         [self->_iPipe close];
         self->_iPipe = nil;
@@ -810,11 +810,11 @@ NSString *const kData=@"data";
         self->_oStream=nil;
         
         DDLogInfo(@"resetting internal stream state to disconnected");
-        _startTLSComplete = NO;
-        _catchupDone = NO;
-        _accountState = kStateDisconnected;
+        self->_startTLSComplete = NO;
+        self->_catchupDone = NO;
+        self->_accountState = kStateDisconnected;
         
-        [_parseQueue cancelAllOperations];      //throw away all parsed but not processed stanzas (we should have closed sockets then!)
+        [self->_parseQueue cancelAllOperations];      //throw away all parsed but not processed stanzas (we should have closed sockets then!)
     }];
 }
 
@@ -844,23 +844,23 @@ NSString *const kData=@"data";
     }
     
     [self dispatchAsyncOnReceiveQueue: ^{
-        if(_reconnectInProgress)
+        if(self->_reconnectInProgress)
         {
             DDLogInfo(@"Ignoring reconnect while one already in progress");
             return;
         }
         
-        _reconnectInProgress = YES;
+        self->_reconnectInProgress = YES;
         [self disconnect:NO];
 
         DDLogInfo(@"Trying to connect again in %G seconds...", wait);
-        _cancelReconnectTimer = [HelperTools startTimer:wait withHandler:^{
-            _cancelReconnectTimer = nil;
+        self->_cancelReconnectTimer = [HelperTools startTimer:wait withHandler:^{
+            self->_cancelReconnectTimer = nil;
             [self dispatchAsyncOnReceiveQueue: ^{
                 //there may be another connect/login operation in progress triggered from reachability or another timer
                 if(self.accountState<kStateReconnecting)
                     [self connect];
-                _reconnectInProgress = NO;
+                self->_reconnectInProgress = NO;
             }];
         }];
         DDLogInfo(@"reconnect exits");
@@ -886,7 +886,7 @@ NSString *const kData=@"data";
             //prime query cache by doing the most used queries in this thread ahead of the receiveQueue processing
             //only preprocess MLXMLNode queries to prime the cache if enough xml nodes are already queued
             //(we don't want to slow down processing by this)
-            if([_parseQueue operationCount] > 1)
+            if([self->_parseQueue operationCount] > 1)
             {
                 //this list contains the upper part of the 0.75 percentile of the statistically most used queries
                 [parsedStanza find:@"/@id"];
@@ -916,11 +916,11 @@ NSString *const kData=@"data";
 #endif
             //queue up new stanzas onto the parseQueue which will dispatch them synchronously to the receiveQueue
             //this makes it possible to discard all not already processed but parsed stanzas on disconnect or stream restart etc.
-            [_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+            [self->_parseQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                 //always process stanzas in the receiveQueue
                 //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
-                DDLogVerbose(@"Synchronously handling next stanza on receive queue (%lu stanzas queued in parse queue, %lu current operations in receive queue)", [_parseQueue operationCount], [_receiveQueue operationCount]);
-                [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                DDLogVerbose(@"Synchronously handling next stanza on receive queue (%lu stanzas queued in parse queue, %lu current operations in receive queue)", [self->_parseQueue operationCount], [self->_receiveQueue operationCount]);
+                [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                     [self processInput:parsedStanza];
                 }]] waitUntilFinished:YES];
             }]] waitUntilFinished:NO];
@@ -952,7 +952,7 @@ NSString *const kData=@"data";
     // do the stanza parsing in the default global queue
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         DDLogInfo(@"calling parse");
-        [_xmlParser parse];     //blocking operation
+        [self->_xmlParser parse];     //blocking operation
         DDLogInfo(@"parse ended");
     });
 
@@ -991,7 +991,7 @@ NSString *const kData=@"data";
             DDLogInfo(@"ping attempted before logged in and bound, ignoring ping.");
             return;
         }
-        else if(_cancelPingTimer)
+        else if(self->_cancelPingTimer)
         {
             DDLogInfo(@"ping already sent, ignoring second ping request.");
             return;
@@ -999,9 +999,9 @@ NSString *const kData=@"data";
         else
         {
             //start ping timer
-            _cancelPingTimer = [HelperTools startTimer:timeout withHandler:^{
+            self->_cancelPingTimer = [HelperTools startTimer:timeout withHandler:^{
                 [self dispatchAsyncOnReceiveQueue: ^{
-                    _cancelPingTimer = nil;
+                    self->_cancelPingTimer = nil;
                     //check if someone already called reconnect or disconnect while we were waiting for the ping
                     //(which was called while we still were >= kStateBound)
                     if(self.accountState<kStateBound)
@@ -1015,10 +1015,10 @@ NSString *const kData=@"data";
             }];
             monal_void_block_t handler = ^{
                 DDLogInfo(@"ping response received, all seems to be well");
-                if(_cancelPingTimer)
+                if(self->_cancelPingTimer)
                 {
-                    _cancelPingTimer();      //cancel timer (ping was successful)
-                    _cancelPingTimer = nil;
+                    self->_cancelPingTimer();      //cancel timer (ping was successful)
+                    self->_cancelPingTimer = nil;
                 }
             };
             
@@ -1891,7 +1891,7 @@ NSString *const kData=@"data";
     {
         [_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
             DDLogDebug(@"SEND: %@", stanza);
-            [_outputQueue addObject:stanza];
+            [self->_outputQueue addObject:stanza];
             [self writeFromQueue];      // try to send if there is space
         }]];
     }
@@ -2430,20 +2430,20 @@ NSString *const kData=@"data";
 {
     [self dispatchAsyncOnReceiveQueue: ^{
         //ignore active --> active transition
-        if(_isCSIActive)
+        if(self->_isCSIActive)
         {
             DDLogVerbose(@"Ignoring CSI transition from active to active");
             return;
         }
         
         //record new csi state and send csi nonza
-        _isCSIActive = YES;
+        self->_isCSIActive = YES;
         [self sendCurrentCSIState];
         
         //to make sure this date is newer than the old saved one (even if we now falsely "tag" the beginning of our interaction, not the end)
         //if everything works out as it should and the app does not get killed, we will "tag" the end of our interaction as soon as the app is backgrounded
         [self readState];       //make sure we operate on the newest state (appex could have changed it!)
-        _lastInteractionDate = [NSDate date];
+        self->_lastInteractionDate = [NSDate date];
         [self persistState];
         
         //this will broadcast our presence without idle element, because of _isCSIActive=YES
@@ -2457,7 +2457,7 @@ NSString *const kData=@"data";
 {
     [self dispatchAsyncOnReceiveQueue: ^{
         //ignore inactive --> inactive transition
-        if(!_isCSIActive)
+        if(!self->_isCSIActive)
         {
             DDLogVerbose(@"Ignoring CSI transition from INactive to INactive");
             return;
@@ -2465,11 +2465,11 @@ NSString *const kData=@"data";
         
         //save date as last interaction date (XEP-0319) (e.g. "tag" the end of our interaction)
         [self readState];       //make sure we operate on the newest state (appex could have changed it!)
-        _lastInteractionDate = [NSDate date];
+        self->_lastInteractionDate = [NSDate date];
         [self persistState];
         
         //record new state
-        _isCSIActive = NO;
+        self->_isCSIActive = NO;
         
         //this will broadcast our presence with idle element set, because of _isCSIActive=NO (see XEP-0319)
         if(self.sendIdleNotifications)
@@ -2494,7 +2494,7 @@ NSString *const kData=@"data";
         
         //really send csi nonza
         MLXMLNode* csiNode;
-        if(_isCSIActive)
+        if(self->_isCSIActive)
             csiNode = [[MLXMLNode alloc] initWithElement:@"active" andNamespace:@"urn:xmpp:csi:0"];
         else
             csiNode = [[MLXMLNode alloc] initWithElement:@"inactive" andNamespace:@"urn:xmpp:csi:0"];
@@ -2889,18 +2889,18 @@ NSString *const kData=@"data";
 
     [self sendIq:iq withResponseHandler:^(XMPPIQ* result) {
         //dispatch completion handler outside of the receiveQueue
-        if(_regFormCompletion)
+        if(self->_regFormCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 NSMutableDictionary* hiddenFormFields = [[NSMutableDictionary alloc] init];
                 for(MLXMLNode* field in [result find:@"{jabber:iq:register}query/{jabber:x:data}x<type=form>/field<type=hidden>"])
                     hiddenFormFields[[field findFirst:@"/@var"]] = [field findFirst:@"value#"];
-                _regFormCompletion([result findFirst:@"{jabber:iq:register}query/{jabber:x:data}x<type=form>/{*}data"], hiddenFormFields);
+                self->_regFormCompletion([result findFirst:@"{jabber:iq:register}query/{jabber:x:data}x<type=form>/{*}data"], hiddenFormFields);
             });
     } andErrorHandler:^(XMPPIQ* error) {
         //dispatch completion handler outside of the receiveQueue
-        if(_regFormErrorCompletion)
+        if(self->_regFormErrorCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                _regFormErrorCompletion(NO, [HelperTools extractXMPPError:error withDescription:@"Could not request registration form"]);
+                self->_regFormErrorCompletion(NO, [HelperTools extractXMPPError:error withDescription:@"Could not request registration form"]);
             });
     }];
 }
@@ -2912,15 +2912,15 @@ NSString *const kData=@"data";
 
     [self sendIq:iq withResponseHandler:^(XMPPIQ* result) {
         //dispatch completion handler outside of the receiveQueue
-        if(_regFormSubmitCompletion)
+        if(self->_regFormSubmitCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                _regFormSubmitCompletion(YES, nil);
+                self->_regFormSubmitCompletion(YES, nil);
             });
     } andErrorHandler:^(XMPPIQ* error) {
         //dispatch completion handler outside of the receiveQueue
-        if(_regFormSubmitCompletion)
+        if(self->_regFormSubmitCompletion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                _regFormSubmitCompletion(NO, [HelperTools extractXMPPError:error withDescription:@"Could not submit registration"]);
+                self->_regFormSubmitCompletion(NO, [HelperTools extractXMPPError:error withDescription:@"Could not submit registration"]);
             });
     }];
 }

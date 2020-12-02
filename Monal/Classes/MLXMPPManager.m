@@ -166,7 +166,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
     dispatch_source_set_event_handler(_pinger, ^{
         //only ping when having connectivity
-        if(_hasConnectivity)
+        if(self->_hasConnectivity)
         {
             for(xmpp* xmppAccount in [self connectedXMPP])
             {
@@ -195,10 +195,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     nw_path_monitor_set_queue(_path_monitor, q_background);
     nw_path_monitor_set_update_handler(_path_monitor, ^(nw_path_t path) {
         DDLogVerbose(@"*** nw_path_monitor update_handler called");
-        if(nw_path_get_status(path) == nw_path_status_satisfied && !_hasConnectivity)
+        if(nw_path_get_status(path) == nw_path_status_satisfied && !self->_hasConnectivity)
         {
             DDLogVerbose(@"reachable");
-            _hasConnectivity = YES;
+            self->_hasConnectivity = YES;
             for(xmpp* xmppAccount in [self connectedXMPP])
             {
                 if(![HelperTools isAppExtension])
@@ -211,10 +211,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                     [xmppAccount reconnect:0];      //try to immediately reconnect, don't bother pinging
             }
         }
-        else if(nw_path_get_status(path) != nw_path_status_satisfied && _hasConnectivity)
+        else if(nw_path_get_status(path) != nw_path_status_satisfied && self->_hasConnectivity)
         {
             DDLogVerbose(@"NOT reachable");
-            _hasConnectivity = NO;
+            self->_hasConnectivity = NO;
             //we only want to react on connectivity changes if not in NSE because disconnecting would terminate the NSE
             //we want do do "polling" reconnects in NSE instead to make sure we try as long as possible until the NSE times out
             if(![HelperTools isAppExtension])

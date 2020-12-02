@@ -1665,26 +1665,15 @@ enum msgSentState {
         if(cell == nil)
         {
             //this is just a dummy to display something usable (the filetransfer url as link cell)
-            MLLinkCell* toreturn = (MLLinkCell *)[self messageTableCellWithIdentifier:@"link" andInbound:inDirection fromTable: tableView];;
-            toreturn.link = row.messageText;
-            toreturn.messageBody.text = toreturn.link;
             
-            if(row.previewText || row.previewImage)
-            {
-                toreturn.imageUrl = row.previewImage;
-                toreturn.messageTitle.text = row.previewText;
-                [toreturn loadImageWithCompletion:^{}];
-            }
-            else
-            {
-                [toreturn loadPreviewWithCompletion:^{
-                    // prevent repeated calls
-                    if(toreturn.messageTitle.text.length == 0)
-                        toreturn.messageTitle.text = @" ";
-                    [[DataLayer sharedInstance] setMessageId:row.messageId previewText:toreturn.messageTitle.text andPreviewImage:toreturn.imageUrl.absoluteString];
-                }];
-            }
-            cell = toreturn;
+            // Use default text cell
+            cell = (MLChatCell*)[self messageTableCellWithIdentifier:@"text" andInbound:inDirection fromTable: tableView];
+            cell.link = row.messageText;
+            
+            NSDictionary* underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
+            NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
+            [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:cell.link attributes:underlineAttribute]];
+            cell.messageBody.attributedText = stitchedString;
         }
     }
     else if([row.messageType isEqualToString:kMessageTypeUrl])

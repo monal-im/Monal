@@ -402,3 +402,5 @@
 "Failed to uploaded file to file cache directory" = "Failed to uploaded file to file cache directory";
 "Failed to write decrypted download into cache directory" = "Failed to write decrypted download into cache directory";
 "Copy" = "Copy";
+"Hint" = "Hint";
+"Already uploading this content, ignoring" = "Already uploading this content, ignoring";

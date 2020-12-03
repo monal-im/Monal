@@ -17,22 +17,30 @@
 
 @import MobileCoreServices;
 
-static NSFileManager* fileManager;
-static NSString* documentCache;
-static NSMutableSet* checklist;
+static NSFileManager* _fileManager;
+static NSString* _documentCacheDir;
+static NSMutableSet* _currentlyTransfering;
 
 @implementation MLFiletransfer
 
 +(void) initialize
 {
-    fileManager = [NSFileManager defaultManager];
-    documentCache = [[[fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup] path] stringByAppendingPathComponent:@"documentCache"];
+    _fileManager = [NSFileManager defaultManager];
+    _documentCacheDir = [[[_fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup] path] stringByAppendingPathComponent:@"_documentCacheDir"];
     NSError* error;
-    [fileManager createDirectoryAtURL:[NSURL fileURLWithPath:documentCache] withIntermediateDirectories:YES attributes:nil error:&error];
+    [_fileManager createDirectoryAtURL:[NSURL fileURLWithPath:_documentCacheDir] withIntermediateDirectories:YES attributes:nil error:&error];
     if(error)
         @throw [NSException exceptionWithName:@"NSError" reason:[NSString stringWithFormat:@"%@", error] userInfo:@{@"error": error}];
-    [HelperTools configureFileProtectionFor:documentCache];
-    checklist = [[NSMutableSet alloc] init];
+    [HelperTools configureFileProtectionFor:_documentCacheDir];
+    _currentlyTransfering = [[NSMutableSet alloc] init];
+}
+
++(BOOL) isIdle
+{
+    @synchronized(_currentlyTransfering)
+    {
+        return [_currentlyTransfering count] == 0;
+    }
 }
 
 +(void) checkMimeTypeAndSizeForHistoryID:(NSNumber*) historyId
@@ -44,14 +52,14 @@ static NSMutableSet* checklist;
         return;
     }
     //make sure we don't check or download this twice
-    @synchronized(checklist)
+    @synchronized(_currentlyTransfering)
     {
-        if([checklist containsObject:historyId])
+        if([_currentlyTransfering containsObject:historyId])
         {
             DDLogDebug(@"Already checking/downloading this content, ignoring");
             return;
         }
-        [checklist addObject:historyId];
+        [_currentlyTransfering addObject:historyId];
     }
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         DDLogInfo(@"Requesting mime-type and size for historyID %@ from http server", historyId);
@@ -92,7 +100,7 @@ static NSMutableSet* checklist;
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageFiletransferUpdateNotice object:nil userInfo:@{@"message": msg}];
             
             //check done, remove from "currently checking/downloading list"
-            [checklist removeObject:historyId];
+            [self markAsComplete:historyId];
             
             //try to autodownload if sizes match
             //TODO JIM: these are the settings used for size checks and autodownload allowed checks
@@ -120,14 +128,14 @@ static NSMutableSet* checklist;
         return;
     }
     //make sure we don't check or download this twice
-    @synchronized(checklist)
+    @synchronized(_currentlyTransfering)
     {
-        if([checklist containsObject:historyId])
+        if([_currentlyTransfering containsObject:historyId])
         {
             DDLogDebug(@"Already checking/downloading this content, ignoring");
             return;
         }
-        [checklist addObject:historyId];
+        [_currentlyTransfering addObject:historyId];
     }
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         DDLogInfo(@"Downloading file for historyID %@", historyId);
@@ -137,7 +145,7 @@ static NSMutableSet* checklist;
         {
             DDLogError(@"url components decoding failed");
             [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decode download link", @"") forMessageId:msg.messageId];
-            [checklist removeObject:historyId];
+            [self markAsComplete:historyId];
             return;
         }
         
@@ -166,7 +174,7 @@ static NSMutableSet* checklist;
                 {
                     DDLogError(@"File download failed: %@", error);
                     [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decode encrypted link", @"") forMessageId:msg.messageId];
-                    [checklist removeObject:historyId];
+                    [self markAsComplete:historyId];
                     return;
                 }
                 int ivLength = 24;
@@ -184,7 +192,7 @@ static NSMutableSet* checklist;
                     {
                         DDLogError(@"File download failed: %@", error);
                         [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to write decrypted download into cache directory", @"") forMessageId:msg.messageId];
-                        [checklist removeObject:historyId];
+                        [self markAsComplete:historyId];
                         return;
                     }
                     [HelperTools configureFileProtectionFor:cacheFile];
@@ -194,12 +202,12 @@ static NSMutableSet* checklist;
             {
                 //copy file to our document cache
                 DDLogInfo(@"Copying downloaded file to document cache at %@", cacheFile);
-                [fileManager moveItemAtPath:[location path] toPath:cacheFile error:&error];
+                [_fileManager moveItemAtPath:[location path] toPath:cacheFile error:&error];
                 if(error)
                 {
                     DDLogError(@"File download failed: %@", error);
                     [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to copy downloaded file into cache directory", @"") forMessageId:msg.messageId];
-                    [checklist removeObject:historyId];
+                    [self markAsComplete:historyId];
                     return;
                 }
                 [HelperTools configureFileProtectionFor:cacheFile];
@@ -208,7 +216,7 @@ static NSMutableSet* checklist;
             DDLogDebug(@"Updating db and sending out kMonalMessageFiletransferUpdateNotice");
             
             //update db with content type and size
-            NSNumber* filetransferSize = @([[fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize]);
+            NSNumber* filetransferSize = @([[_fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize]);
             [[DataLayer sharedInstance] setMessageHistoryId:historyId filetransferMimeType:mimeType filetransferSize:filetransferSize];
             
             //send out update notification (and update used MLMessage object directly instead of reloading it from db after updating the db)
@@ -217,7 +225,7 @@ static NSMutableSet* checklist;
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageFiletransferUpdateNotice object:nil userInfo:@{@"message": msg}];
             
             //download done, remove from "currently checking/downloading list"
-            [checklist removeObject:historyId];
+            [self markAsComplete:historyId];
         }];
         [task resume];
     });
@@ -259,7 +267,7 @@ static NSMutableSet* checklist;
         @"cacheFile": cacheFile,
         @"needsDownloading": @NO,
         @"mimeType": [self getMimeTypeOfCacheFile:cacheFile],
-        @"size": @([[fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize]),
+        @"size": @([[_fileManager attributesOfItemAtPath:cacheFile error:nil] fileSize]),
     };
 }
 
@@ -272,7 +280,7 @@ static NSMutableSet* checklist;
     if(info)
     {
         DDLogDebug(@"Deleting file in cache: %@", info[@"cacheFile"]);
-        [fileManager removeItemAtPath:info[@"cacheFile"] error:nil];
+        [_fileManager removeItemAtPath:info[@"cacheFile"] error:nil];
     }
 }
 
@@ -283,12 +291,12 @@ static NSMutableSet* checklist;
     //copy file to our document cache (temporary filename because the upload url is unknown yet)
     NSString* tempname = [NSString stringWithFormat:@"%@.tmp", [[NSUUID UUID] UUIDString]];
     NSError* error;
-    NSString* file = [documentCache stringByAppendingPathComponent:tempname];
+    NSString* file = [_documentCacheDir stringByAppendingPathComponent:tempname];
     DDLogDebug(@"Tempstoring file at %@", file);
-    [fileManager copyItemAtPath:[fileUrl path] toPath:file error:&error];
+    [_fileManager copyItemAtPath:[fileUrl path] toPath:file error:&error];
     if(error)
     {
-        [fileManager removeItemAtPath:file error:nil];      //remove temporary file
+        [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
         DDLogError(@"File upload failed: %@", error);
         return completion(nil, nil, nil, error);
     }
@@ -306,13 +314,13 @@ static NSMutableSet* checklist;
     //copy file to our document cache (temporary filename because the upload url is unknown yet)
     NSString* tempname = [NSString stringWithFormat:@"%@.tmp", [[NSUUID UUID] UUIDString]];
     NSError* error;
-    NSString* file = [documentCache stringByAppendingPathComponent:tempname];
+    NSString* file = [_documentCacheDir stringByAppendingPathComponent:tempname];
     DDLogDebug(@"Tempstoring jpeg encoded file having quality %f at %@", jpegQuality, file);
     NSData* imageData = UIImageJPEGRepresentation(image, jpegQuality);
     [imageData writeToFile:file options:NSDataWritingAtomic error:&error];
     if(error)
     {
-        [fileManager removeItemAtPath:file error:nil];      //remove temporary file
+        [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
         DDLogError(@"File upload failed: %@", error);
         return completion(nil, nil, nil, error);
     }
@@ -324,12 +332,12 @@ static NSMutableSet* checklist;
 +(void) doStartupCleanup
 {
     //delete leftover tmp files
-    NSArray* directoryContents = [fileManager contentsOfDirectoryAtPath:documentCache error:nil];
+    NSArray* directoryContents = [_fileManager contentsOfDirectoryAtPath:_documentCacheDir error:nil];
     NSPredicate* filter = [NSPredicate predicateWithFormat:@"self ENDSWITH '.tmp'"];
     for(NSString* file in [directoryContents filteredArrayUsingPredicate:filter])
     {
-        DDLogInfo(@"Deleting leftover tmp file at %@", [documentCache stringByAppendingPathComponent:file]);
-        [fileManager removeItemAtPath:[documentCache stringByAppendingPathComponent:file] error:nil];
+        DDLogInfo(@"Deleting leftover tmp file at %@", [_documentCacheDir stringByAppendingPathComponent:file]);
+        [_fileManager removeItemAtPath:[_documentCacheDir stringByAppendingPathComponent:file] error:nil];
     }
     
     //*** migrate old image store to new fileupload store if needed***
@@ -355,11 +363,11 @@ static NSMutableSet* checklist;
             NSString* newFile = [self calculateCacheFileForNewUrl:img[@"url"] andMimeType:mimeType];
             
             DDLogInfo(@"Migrating old image cache file %@ (having mimeType %@) for URL %@ to new cache at %@", oldFile, mimeType, img[@"url"], newFile);
-            if([fileManager fileExistsAtPath:oldFile])
+            if([_fileManager fileExistsAtPath:oldFile])
             {
-                [fileManager copyItemAtPath:oldFile toPath:newFile error:nil];
+                [_fileManager copyItemAtPath:oldFile toPath:newFile error:nil];
                 [HelperTools configureFileProtectionFor:newFile];
-                [fileManager removeItemAtPath:oldFile error:nil];
+                [_fileManager removeItemAtPath:oldFile error:nil];
             }
             else
                 DDLogWarn(@"Old file not existing --> not moving file, but still updating db entries");
@@ -370,7 +378,7 @@ static NSMutableSet* checklist;
             if(![messageList count])
             {
                 DDLogWarn(@"No messages in history db having this url, deleting file completely");
-                [fileManager removeItemAtPath:newFile error:nil];
+                [_fileManager removeItemAtPath:newFile error:nil];
             }
             else
             {
@@ -403,18 +411,18 @@ static NSMutableSet* checklist;
         NSString* mimePart = [HelperTools hexadecimalString:[mimeType dataUsingEncoding:NSUTF8StringEncoding]];
         
         //the cache filename consists of a hash of the upload url (in hex) followed of the file mimetype (also in hex) as file extension
-        NSString* cacheFile = [documentCache stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@", urlPart, mimePart]];
+        NSString* cacheFile = [_documentCacheDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@", urlPart, mimePart]];
         
         //file having the supplied mimeType exists
-        if([fileManager fileExistsAtPath:cacheFile])
+        if([_fileManager fileExistsAtPath:cacheFile])
             return cacheFile;
     }
     
     //check for files having a different mime type but the same base url
-    NSArray* directoryContents = [fileManager contentsOfDirectoryAtPath:documentCache error:nil];
+    NSArray* directoryContents = [_fileManager contentsOfDirectoryAtPath:_documentCacheDir error:nil];
     NSPredicate* filter = [NSPredicate predicateWithFormat:[NSString stringWithFormat:@"self BEGINSWITH '%@.'", urlPart]];
     for(NSString* file in [directoryContents filteredArrayUsingPredicate:filter])
-        return [documentCache stringByAppendingPathComponent:file];
+        return [_documentCacheDir stringByAppendingPathComponent:file];
     
     //nothing found
     return nil;
@@ -425,7 +433,7 @@ static NSMutableSet* checklist;
     //the cache filename consists of a hash of the upload url (in hex) followed of the file mimetype (also in hex) as file extension
     NSString* urlPart = [HelperTools hexadecimalString:[HelperTools sha256:[url dataUsingEncoding:NSUTF8StringEncoding]]];
     NSString* mimePart = [HelperTools hexadecimalString:[mimeType dataUsingEncoding:NSUTF8StringEncoding]];
-    return [documentCache stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@", urlPart, mimePart]];
+    return [_documentCacheDir stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%@", urlPart, mimePart]];
 }
 
 +(NSString*) genCanonicalUrl:(NSString*) url
@@ -476,13 +484,28 @@ static NSMutableSet* checklist;
 
 +(void) internalUploadHandlerForTmpFile:(NSString*) file userFacingFilename:(NSString*) userFacingFilename mimeType:(NSString*) mimeType onAccount:(xmpp*) account withEncryption:(BOOL) encrypted andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable)) completion
 {
+    NSError* error;
+    
+    //make sure we don't upload the same tmpfile twice (should never happen anyways)
+    @synchronized(_currentlyTransfering)
+    {
+        if([_currentlyTransfering containsObject:file])
+        {
+            error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Already uploading this content, ignoring", @"")}];
+            DDLogError(@"Already uploading this content, ignoring %@", file);
+            [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
+            return completion(nil, nil, nil, error);
+        }
+        [_currentlyTransfering addObject:file];
+    }
+    
     //TODO: allow real file based transfers instead of NSData based transfers
     DDLogDebug(@"Reading file data into NSData object");
-    NSError* error;
     NSData* fileData = [[NSData alloc] initWithContentsOfFile:file options:0 error:&error];
     if(error)
     {
-        [fileManager removeItemAtPath:file error:nil];      //remove temporary file
+        [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
+        [self markAsComplete:file];
         DDLogError(@"File upload failed: %@", error);
         return completion(nil, nil, nil, error);
     }
@@ -502,7 +525,8 @@ static NSMutableSet* checklist;
         else
         {
             NSError* error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to encrypt file", @"")}];
-            [fileManager removeItemAtPath:file error:nil];      //remove temporary file
+            [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
+            [self markAsComplete:file];
             DDLogError(@"File upload failed: %@", error);
             return completion(nil, nil, nil, error);
         }
@@ -521,7 +545,8 @@ static NSMutableSet* checklist;
     } andCompletion:^(NSString *url, NSError *error) {
         if(error)
         {
-            [fileManager removeItemAtPath:file error:nil];      //remove temporary file
+            [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
+            [self markAsComplete:file];
             DDLogError(@"File upload failed: %@", error);
             return completion(nil, nil, nil, error);
         }
@@ -545,26 +570,39 @@ static NSMutableSet* checklist;
             //move the tempfile to our cache location
             NSString* cacheFile = [self calculateCacheFileForNewUrl:url andMimeType:mimeType];
             DDLogInfo(@"Moving (possibly encrypted) file to our document cache at %@", cacheFile);
-            [fileManager moveItemAtPath:file toPath:cacheFile error:&error];
+            [_fileManager moveItemAtPath:file toPath:cacheFile error:&error];
             if(error)
             {
                 NSError* error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to uploaded file to file cache directory", @"")}];
-                [fileManager removeItemAtPath:file error:nil];      //remove temporary file
+                [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
+                [self markAsComplete:file];
                 DDLogError(@"File upload failed: %@", error);
                 return completion(nil, nil, nil, error);
             }
             [HelperTools configureFileProtectionFor:cacheFile];
             
+            [self markAsComplete:file];
             return completion(url, mimeType, [NSNumber numberWithInteger:fileData.length], nil);
         }
         else
         {
             NSError* error = [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Failed to parse URL returned by HTTP upload server", @"")}];
-            [fileManager removeItemAtPath:file error:nil];      //remove temporary file
+            [_fileManager removeItemAtPath:file error:nil];      //remove temporary file
+            [self markAsComplete:file];
             DDLogError(@"File upload failed: %@", error);
             return completion(nil, nil, nil, error);
         }
     }];
+}
+
++(void) markAsComplete:(id) obj
+{
+    @synchronized(_currentlyTransfering)
+    {
+        [_currentlyTransfering removeObject:obj];
+    }
+    if(self.isIdle)
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFiletransfersIdle object:self];
 }
 
 @end

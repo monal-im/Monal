@@ -190,10 +190,10 @@
     DDLogDebug(@"Adding badge value: %lu", (long)unread);
     content.badge = [NSNumber numberWithInteger:unread];
     
-    //scheduling the notification in 1.5 seconds will make it possible to be deleted by XEP-0333 chat-markers received directly after the message
+    //scheduling the notification in 2 seconds will make it possible to be deleted by XEP-0333 chat-markers received directly after the message
     //this is useful in catchup scenarios
-    DDLogVerbose(@"notification manager: publishing notification in 1.5 seconds: %@", content.body);
-    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:[UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1.5 repeats: NO]];
+    DDLogVerbose(@"notification manager: publishing notification in 2 seconds: %@", content.body);
+    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:idval content:content trigger:[UNTimeIntervalNotificationTrigger triggerWithTimeInterval:2 repeats: NO]];
     [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
         if(error)
             DDLogError(@"Error posting local notification: %@", error);
@@ -256,6 +256,8 @@
             NSDictionary* info = [MLFiletransfer getFileInfoForMessage:message];
             if(info && [info[@"mimeType"] hasPrefix:@"image/"])
             {
+                content.body = NSLocalizedString(@"Sent an Image 📷", @"");
+                
                 UNNotificationAttachment* attachment;
                 if(![info[@"needsDownloading"] boolValue])
                 {
@@ -270,15 +272,13 @@
                     attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
                     if(error)
                         DDLogError(@"Error %@", error);
+                    if(attachment)
+                    {
+                        content.attachments = @[attachment];
+                        content.body = @"";
+                    }
                 }
-                if(attachment)
-                {
-                    content.attachments = @[attachment];
-                    content.body = @"";
-                }
-                else
-                    content.body = NSLocalizedString(@"Sent an Image 📷", @"");
-
+                
                 DDLogDebug(@"Publishing notification with id %@", idval);
                 [self publishNotificationContent:content withID:idval];
                 return;

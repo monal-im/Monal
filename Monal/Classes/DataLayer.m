@@ -980,13 +980,14 @@ static NSDateFormatter* dbFormatter;
             NSString* dateString = [formatter stringFromDate:destinationDate];
             
             //do not do this in MUC
-            if(!messageType && [actualfrom isEqualToString:from])
+            if([actualfrom isEqualToString:from])
             {
                 NSString* query;
                 NSArray* params;
                 if(backwards)
                 {
                     NSNumber* nextHisoryId = [NSNumber numberWithInt:[(NSNumber*)[self.db executeScalar:@"SELECT MIN(message_history_id) FROM message_history;"] intValue] - 1];
+                    DDLogVerbose(@"Inserting backwards with history id %@", nextHisoryId);
                     query = @"insert into message_history (message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
                     params = @[nextHisoryId, accountNo, from, to, dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@""];
                 }
@@ -2003,7 +2004,10 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"CREATE INDEX stanzaidIndex on message_history(stanzaid collate nocase);"];
             [self.db executeNonQuery:@"CREATE INDEX messageidIndex on message_history(messageid collate nocase);"];
         }];
-        
+
+        [self updateDBTo:4.994 withBlock:^{
+            [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact ON activechats(buddy_name, account_id);"];
+        }];
     }];
     
     DDLogInfo(@"Database version check complete");

@@ -13,6 +13,7 @@
 #import "MLProcessLock.h"
 #import "MLXMPPManager.h"
 #import "MLNotificationManager.h"
+#import "MLFiletransfer.h"
 #import "xmpp.h"
 
 @interface Push : NSObject
@@ -38,6 +39,7 @@
     DDLogInfo(@"Initializing push singleton");
     self.handlerList = [[NSMutableArray alloc] init];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filetransfersNowIdle:) name:kMonalFiletransfersIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(xmppError:) name:kXMPPError object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
     return self;
@@ -62,7 +64,7 @@
         }
         
         //add contentHandler to our list
-        DDLogVerbose(@"Adding content handler to list: %lu", [self.handlerList count]);
+        DDLogDebug(@"Adding content handler to list: %lu", [self.handlerList count]);
         [self.handlerList addObject:contentHandler];
         
         //terminate appex if the main app is already running
@@ -74,15 +76,19 @@
             return;
         }
         
-        if(first)      //first incoming push --> connect to servers
+        if(first)       //first incoming push --> connect to servers
         {
-            DDLogVerbose(@"locking process and connecting accounts");
+            DDLogDebug(@"locking process and connecting accounts");
             [DDLog flushLog];
             [MLProcessLock lock];
             [[MLXMPPManager sharedInstance] connectIfNecessary];
         }
-        else
-            ;       //do nothing if not the first call (MLXMPPManager is already connecting)
+        else            //second, third etc. incoming push --> reconnect already idle accounts and check connectivity for already connected ones
+        {
+            for(xmpp* account in self.idleAccounts)
+                [[MLXMPPManager sharedInstance] connectAccount:account.accountNo];
+            self.idleAccounts = [[NSMutableSet alloc] init];        //we now don't have idle accounts anymore
+        }
     }
 }
 
@@ -91,7 +97,9 @@
     @synchronized(self) {
         DDLogInfo(@"Handling expired push");
         
-        if([self.handlerList count]==1)
+        //we don't want to post any sync error notifications if the xmpp channel is idle and we're only downloading filetransfers
+        //(e.g. [MLFiletransfer isIdle] is not YES)
+        if([self.handlerList count] == 1 && ![[MLXMPPManager sharedInstance] allAccountsIdle])
             [HelperTools postSendingErrorNotification];
         
         //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
@@ -155,7 +163,7 @@
             //this will terminate/freeze the app extension afterwards
             while([self.handlerList count])
             {
-                DDLogVerbose(@"Feeding handler");
+                DDLogDebug(@"Feeding handler");
                 void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
                 [self.handlerList removeObject:handler];
                 [self callHandler:handler];
@@ -190,7 +198,7 @@
     @synchronized(self.idleAccounts) {
         if([self.idleAccounts containsObject:xmppAccount])
         {
-            DDLogVerbose(@"Ignoring already idle account: %@", xmppAccount.connectionProperties.identity.jid);
+            DDLogDebug(@"Ignoring already idle account: %@", xmppAccount.connectionProperties.identity.jid);
             return;
         }
         [self.idleAccounts addObject:xmppAccount];
@@ -199,9 +207,20 @@
     DDLogInfo(@"notification handler: some account idle: %@", xmppAccount.connectionProperties.identity.jid);
     [xmppAccount disconnect];
     
-    if([[MLXMPPManager sharedInstance] allAccountsIdle])
+    [self checkIfEverythingIsIdle];
+}
+
+-(void) filetransfersNowIdle:(NSNotification*) notification
+{
+    DDLogDebug(@"notification handler: all filetransfers complete now");
+    [self checkIfEverythingIsIdle];
+}
+
+-(void) checkIfEverythingIsIdle
+{
+    if([[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle])
     {
-        DDLogInfo(@"notification handler: all accounts idle --> terminating extension");
+        DDLogInfo(@"notification handler: all accounts idle and filetransfers complete --> terminating extension");
         
         //remove syncError notification because all accounts are idle and fully synced now
         [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[@"syncError"]];
@@ -283,18 +302,18 @@
     //just "ignore" this push if we have not migrated our defaults db already (this needs a normal app start to happen)
     if(![[HelperTools defaultsDB] boolForKey:@"DefaulsMigratedToAppGroup"])
     {
-        DDLogInfo(@"defaults not migrated to app group, ignoring push and posting notification as coming from the appserver (a dummy one)");
+        DDLogWarn(@"defaults not migrated to app group, ignoring push and posting notification as coming from the appserver (a dummy one)");
         contentHandler([request.content mutableCopy]);
         return;
     }
     
     //proxy to push singleton
-    DDLogVerbose(@"proxying to incomingPush");
+    DDLogDebug(@"proxying to incomingPush");
     [DDLog flushLog];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [[Push instance] incomingPush:contentHandler];
     });
-    DDLogVerbose(@"incomingPush proxy completed");
+    DDLogDebug(@"incomingPush proxy completed");
     [DDLog flushLog];
 }
 
@@ -304,10 +323,10 @@
     [DDLog flushLog];
     
     //proxy to push singleton
-    DDLogVerbose(@"proxying to pushExpired");
+    DDLogDebug(@"proxying to pushExpired");
     [DDLog flushLog];
     [[Push instance] pushExpired];
-    DDLogVerbose(@"pushExpired proxy completed");
+    DDLogDebug(@"pushExpired proxy completed");
     [DDLog flushLog];
 }
 

@@ -37,7 +37,7 @@
 //handler --> $$handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, node), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
 -(void) registerForNode:(NSString*) node withHandler:(MLHandler*) handler
 {
-    DDLogInfo(@"Adding PEP handler %@ for node %@", handler.id, node);
+    DDLogInfo(@"Adding PEP handler %@ for node %@", handler, node);
     @synchronized(_registeredHandlers) {
         if(!_registeredHandlers[node])
             _registeredHandlers[node] = [[NSMutableDictionary alloc] init];
@@ -49,7 +49,7 @@
 //handler --> $$handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, node), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
 -(void) unregisterHandler:(MLHandler*) handler forNode:(NSString*) node
 {
-    DDLogInfo(@"Removing PEP handler %@ for node %@", handler.id, node);
+    DDLogInfo(@"Removing PEP handler %@ for node %@", handler, node);
     @synchronized(_registeredHandlers) {
         if(!_registeredHandlers[node])
             return;

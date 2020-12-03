@@ -12,55 +12,55 @@
 @interface MLDNSLookup()
 @end
 
-BOOL isSecure=NO;
-
 @implementation MLDNSLookup
 
--(void) doDiscoveryWithSecure: (BOOL)secure andDomain: (NSString *) domain
+-(void) doDiscoveryWithSecure:(BOOL) secure andDomain:(NSString*) domain
 {
 	DNSServiceRef sdRef;
     DNSServiceErrorType res;
     
-    isSecure = secure;
-    NSString* serviceDiscoveryString=[NSString stringWithFormat:@"_xmpp%@-client._tcp.%@", isSecure ? @"s" : @"", domain];
-    res=DNSServiceQueryRecord(
-                              &sdRef, 0, 0,
-                              [serviceDiscoveryString UTF8String],
-                              kDNSServiceType_SRV,
-                              kDNSServiceClass_IN,
-                              query_cb,
-                              ( __bridge void *)(self)
-                              );
-    if(res==kDNSServiceErr_NoError)
+    NSDictionary* context = @{
+        @"isSecure": secure ? @YES : @NO,
+        @"caller": self,
+    };
+    NSString* serviceDiscoveryString = [NSString stringWithFormat:@"_xmpp%@-client._tcp.%@", secure ? @"s" : @"", domain];
+    res = DNSServiceQueryRecord(
+        &sdRef,
+        0,
+        0,
+        [serviceDiscoveryString UTF8String],
+        kDNSServiceType_SRV,
+        kDNSServiceClass_IN,
+        query_cb,
+        (__bridge void*)(context)
+    );
+    if(res == kDNSServiceErr_NoError)
     {
-        int sock=DNSServiceRefSockFD(sdRef);
+        int sock = DNSServiceRefSockFD(sdRef);
         
         fd_set set;
         struct timeval timeout;
         
         /* Initialize the file descriptor set. */
-        FD_ZERO (&set);
-        FD_SET (sock, &set);
+        FD_ZERO(&set);
+        FD_SET(sock, &set);
         
         /* Initialize the timeout data structure. */
         timeout.tv_sec = 2ul;
         timeout.tv_usec = 0;
         
         /* select returns 0 if timeout, 1 if input available, -1 if error. */
-        int ready= select (FD_SETSIZE,&set, NULL, NULL,
-                           &timeout) ;
+        int ready = select(FD_SETSIZE, &set, NULL, NULL, &timeout);
         
-        if(ready>0)
+        if(ready > 0)
         {
-            
             DNSServiceProcessResult(sdRef);
             DNSServiceRefDeallocate(sdRef);
         }
         else
         {
-         //   DDLogVerbose(@"dns call timed out");
+            //DDLogVerbose(@"dns call timed out");
         }
-        
     }
 }
 
@@ -133,21 +133,21 @@ char *ConvertDomainNameToCString_withescape(const domainName* name, int len, cha
 }
 
 // print arbitrary rdata in a readable manned
-void print_rdata(int type, int len, const u_char *rdata, void* context)
+void print_rdata(int type, int len, const u_char *rdata, void* _context)
 {
     int srvDomainLen = len - 6; // len - sizeof(priority) - sizeof(weight) - sizeof(port)
     if(srvDomainLen > MAX_DOMAIN_NAME) {
         return;
     }
 
-    srv_rdata *srv;
-    char targetStr[MAX_CSTRING];
-
-    MLDNSLookup *caller = (__bridge MLDNSLookup *) context;
+    NSDictionary* context = (__bridge NSDictionary*)_context;
+    BOOL isSecure = [context[@"isSecure"] boolValue];
+    MLDNSLookup* caller = (MLDNSLookup*)context[@"caller"];
 
     if(type == T_SRV)
     {
-        srv = (srv_rdata *)rdata;
+        srv_rdata* srv = (srv_rdata*)rdata;
+        char targetStr[MAX_CSTRING];
         ConvertDomainNameToCString_withescape(&srv->target, srvDomainLen, targetStr, 0);
         //  DDLogVerbose(@"pri=%d, w=%d, port=%d, target=%s\n", ntohs(srv->priority), ntohs(srv->weight), ntohs(srv->port), targetstr);
         

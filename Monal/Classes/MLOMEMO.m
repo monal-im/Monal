@@ -461,13 +461,6 @@ $$
     NSNumber* ridNum = [NSNumber numberWithInt:[rid intValue]];
     if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:ridNum])
     {
-        // Remove device from list
-        [devicesWithBrokenSession removeObject:ridNum];
-        [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:jid];
-        DDLogDebug(@"Removed jid: %@, rid: %@ from devicesWithBrokenSession", jid, rid);
-        if([devicesWithBrokenSession count] != 0) {
-            return;
-        }
         // The needed device bundle for this contact/device was fetched
         // Send new keys
         XMPPMessage* messageNode = [[XMPPMessage alloc] init];
@@ -478,6 +471,14 @@ $$
         [self encryptMessage:messageNode withMessage:nil toContact:jid];
         DDLogDebug(@"Send KeyTransportElement to jid: %@", jid);
         if(self.account) [self.account send:messageNode];
+
+        // Remove device from list
+        [devicesWithBrokenSession removeObject:ridNum];
+        [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:jid];
+        DDLogDebug(@"Removed jid: %@, rid: %@ from devicesWithBrokenSession", jid, rid);
+        if([devicesWithBrokenSession count] != 0) {
+            return;
+        }
     }
 }
 

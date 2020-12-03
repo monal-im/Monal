@@ -33,6 +33,7 @@
 
 // jid -> @[deviceID1, deviceID2]
 @property (nonatomic, strong) NSMutableDictionary* devicesWithBrokenSession;
+@property (nonatomic, strong) NSMutableDictionary* devicesThatAreNotInDeviceList;
 @end
 
 static const size_t MIN_OMEMO_KEYS = 25;
@@ -54,6 +55,7 @@ const int KEY_SIZE = 16;
     self.closedBundleFetchCnt = 0;
 
     self.devicesWithBrokenSession = [[NSMutableDictionary alloc] init];
+    self.devicesThatAreNotInDeviceList = [[NSMutableDictionary alloc] init];
 
     [self setupSignal];
 
@@ -273,7 +275,16 @@ $$
             {
                 [self queryOMEMOBundleFrom:source andDevice:[deviceId stringValue]];
             }
+            // unblock
+            // TODO:
+            NSMutableSet<NSNumber*>* devicesThatAreNotInList = [self.devicesThatAreNotInDeviceList objectForKey:source];
+            if(devicesThatAreNotInList && [devicesThatAreNotInList containsObject:deviceId])
+            {
+                [devicesThatAreNotInList removeObject:deviceId];
+                [self.devicesThatAreNotInDeviceList setObject:devicesThatAreNotInList forKey:source];
+            }
         }
+        
         // remove devices from our signalStorage when they are no longer published
         for(NSNumber* deviceId in existingDevices)
         {
@@ -293,6 +304,7 @@ $$
                 }
             }
         }
+        
         // TODO: delete deviceid from new session array
         // Send our own device id when it is missing on the server
         if(!source || [source caseInsensitiveCompare:self.accountJid] == NSOrderedSame)
@@ -622,6 +634,21 @@ $$
     }
     [devicesWithInvalSession addObject:deviceId];
     [self.devicesWithBrokenSession setObject:devicesWithInvalSession forKey:contact];
+    
+    // TODO:
+    NSMutableSet<NSNumber*>* devicesThatAreNotInList = [self.devicesThatAreNotInDeviceList objectForKey:contact];
+    if(!devicesThatAreNotInList)
+    {
+        // first broken session for contact -> create new set
+        devicesThatAreNotInList = [[NSMutableSet<NSNumber*> alloc] init];
+    }
+    // add device to broken session contact set
+    if([devicesThatAreNotInList containsObject:deviceId])
+    {
+        return;
+    }
+    [devicesThatAreNotInList addObject:deviceId];
+    [self.devicesThatAreNotInDeviceList setObject:devicesThatAreNotInList forKey:contact];
 
     // delete broken session from our storage
     SignalAddress* address = [[SignalAddress alloc] initWithName:contact deviceId:(uint32_t)deviceId.intValue];
@@ -654,6 +681,15 @@ $$
     {
         // Nothing to do
         return nil;
+    }
+    
+    NSMutableSet<NSNumber*>* devicesThatAreNotInList = [self.devicesThatAreNotInDeviceList objectForKey:messageNode.fromUser];
+    if(devicesThatAreNotInList && [devicesThatAreNotInList containsObject:sid]) {
+#ifdef IS_ALPHA
+        return @"ERROR: NEW ERROR";
+#else
+        return nil;
+#endif
     }
 
     NSString* deviceKeyPath = [NSString stringWithFormat:@"{eu.siacs.conversations.axolotl}encrypted/header/key<rid=%u>#|base64", self.monalSignalStore.deviceid];

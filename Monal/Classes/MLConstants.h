@@ -53,7 +53,6 @@ typedef enum NotificationPrivacySettingOption {
 
 #define kRegisterNameSpace @"jabber:iq:register"
 #define kDataNameSpace @"jabber:x:data"
-#define kBobNameSpace @"urn:xmpp:bob"
 
 //all other constants needed
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
@@ -78,6 +77,7 @@ typedef enum NotificationPrivacySettingOption {
 #define kMonalFinishedOmemoBundleFetch @"kMonalFinishedOmemoBundleFetch"
 #define kMonalUpdateBundleFetchStatus @"kMonalUpdateBundleFetchStatus"
 #define kMonalIdle @"kMonalIdle"
+#define kMonalFiletransfersIdle @"kMonalFiletransfersIdle"
 
 #define kMonalPresentChat @"kMonalPresentChat"
 

@@ -214,6 +214,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(scheduleBackgroundFetchingTask) name:kScheduleBackgroundFetchingTask object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filetransfersNowIdle:) name:kMonalFiletransfersIdle object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(showConnectionStatus:) name:kXMPPError object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalNewMessageNotice object:nil];
@@ -656,11 +657,17 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [self checkIfBackgroundTaskIsStillNeeded];
 }
 
+-(void) filetransfersNowIdle:(NSNotification*) notification
+{
+    DDLogInfo(@"### FILETRANSFERS CHANGED TO IDLE STATE ###");
+    [self checkIfBackgroundTaskIsStillNeeded];
+}
+
 -(void) checkIfBackgroundTaskIsStillNeeded
 {
-    if([[MLXMPPManager sharedInstance] allAccountsIdle])
+    if([[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle])
     {
-        DDLogInfo(@"### ALL ACCOUNTS IDLE NOW ###");
+        DDLogInfo(@"### ALL ACCOUNTS IDLE AND FILETRANSFERS COMPLETE NOW ###");
         
         //remove syncError notification because all accounts are idle and fully synced now
         [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[@"syncError"]];

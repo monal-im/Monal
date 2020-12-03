@@ -12,7 +12,9 @@ NS_ASSUME_NONNULL_BEGIN
 @class xmpp;
 
 @interface MLFiletransfer : NSObject
+@property (class, readonly) BOOL isIdle;
 
++(BOOL) isIdle;
 +(void) doStartupCleanup;
 +(void) checkMimeTypeAndSizeForHistoryID:(NSNumber*) historyId;
 +(void) downloadFileForHistoryID:(NSNumber*) historyId;

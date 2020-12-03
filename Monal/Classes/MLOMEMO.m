@@ -524,10 +524,11 @@ $$
     NSAssert(self.signalContext, @"signalContext should be inited.");
 
     if(message)
-    {
         [messageNode setBody:@"[This message is OMEMO encrypted]"];
-    } else {
+    else
+    {
         // KeyTransportElements should not contain a body
+        [messageNode setStoreHint];
     }
 
     NSArray* devices = [self.monalSignalStore allDeviceIdsForAddressName:toContact];

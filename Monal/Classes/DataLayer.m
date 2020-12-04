@@ -2008,6 +2008,10 @@ static NSDateFormatter* dbFormatter;
         [self updateDBTo:4.994 withBlock:^{
             [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact ON activechats(buddy_name, account_id);"];
         }];
+
+        [self updateDBTo:4.995 withBlock:^{
+            [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueActiveChat ON activechats(buddy_name, account_id);"];
+        }];
     }];
     
     DDLogInfo(@"Database version check complete");

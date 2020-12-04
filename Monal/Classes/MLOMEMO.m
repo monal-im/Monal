@@ -256,6 +256,30 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
     }
 $$
 
+-(void) queryOMEMODevices:(NSString *) jid
+{
+    [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
+}
+
+$$handler(handleManualDevices, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data))
+    if(errorIq)
+    {
+        DDLogWarn(@"Error while fetching omemo devices: jid: %@ - %@", jid, errorIq);
+    }
+    else
+    {
+        if(!jid)
+            return;
+        MLXMLNode* publishedDevices = [data objectForKey:@"current"];
+        if(publishedDevices) {
+            NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"/{http://jabber.org/protocol/pubsub}item<id=current>/{eu.siacs.conversations.axolotl}list/device@id|int"];
+            NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
+
+            [account.omemo processOMEMODevices:deviceSet from:jid];
+        }
+    }
+$$
+
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString *) source
 {
     if(receivedDevices)
@@ -543,8 +567,8 @@ $$
         [messageNode setStoreHint];
     }
 
-    NSArray* devices = [self.monalSignalStore allDeviceIdsForAddressName:toContact];
-    NSArray* myDevices = [self.monalSignalStore allDeviceIdsForAddressName:self.accountJid];
+    NSArray* devices = [self.monalSignalStore knownDevicesForAddressName:toContact];
+    NSArray* myDevices = [self.monalSignalStore knownDevicesForAddressName:self.accountJid];
 
     // Check if we found omemo keys from the recipient
     if(devices.count > 0 || overrideDevices.count > 0)
@@ -654,9 +678,17 @@ $$
     SignalAddress* address = [[SignalAddress alloc] initWithName:contact deviceId:(uint32_t)deviceId.intValue];
     [self.monalSignalStore deleteSessionRecordForAddress:address];
 
+    // DEBUG START
+    if(![self.accountJid isEqualToString:contact])
+    {
+        [self queryOMEMODevices:self.accountJid];
+    }
+    [self queryOMEMODevices:contact];
+    // DEBUG END
+    
     // request device bundle again -> check for new preKeys
     // use received preKeys to build new session
-    [self queryOMEMOBundleFrom:contact andDevice:deviceId.stringValue];
+    // [self queryOMEMOBundleFrom:contact andDevice:deviceId.stringValue];
     // rebuild session when preKeys of the requested bundle arrived
 }
 

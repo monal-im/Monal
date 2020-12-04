@@ -24,8 +24,8 @@
 @property (nonatomic, strong) NSMutableArray<MLContact*>* searchResults ;
 @property (nonatomic, strong) UISearchController* searchController;
 
-@property (nonatomic ,strong) NSMutableArray<MLContact*>* contacts;
-@property (nonatomic ,strong) MLContact* lastSelectedContact;
+@property (nonatomic, strong) NSMutableArray<MLContact*>* contacts;
+@property (nonatomic, strong) MLContact* lastSelectedContact;
 
 @end
 

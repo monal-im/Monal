@@ -21,10 +21,10 @@
 
 @interface ContactsViewController ()
 
-@property (nonatomic, strong) NSArray* searchResults ;
+@property (nonatomic, strong) NSMutableArray<MLContact*>* searchResults ;
 @property (nonatomic, strong) UISearchController* searchController;
 
-@property (nonatomic ,strong) NSMutableArray* contacts;
+@property (nonatomic ,strong) NSMutableArray<MLContact*>* contacts;
 @property (nonatomic ,strong) MLContact* lastSelectedContact;
 
 @end
@@ -39,19 +39,18 @@
     // Do any additional setup after loading the view from its nib.
     self.navigationItem.title=NSLocalizedString(@"Contacts", @"");
     
-    self.contactsTable=self.tableView;
-    self.contactsTable.delegate=self;
-    self.contactsTable.dataSource=self;
-    
-    
-    self.contacts=[[NSMutableArray alloc] init] ;
+    self.contactsTable = self.tableView;
+    self.contactsTable.delegate = self;
+    self.contactsTable.dataSource = self;
+
+    self.contacts = [[NSMutableArray alloc] init];
+    self.searchResults = [[NSMutableArray alloc] init];
     
     [self.contactsTable reloadData];
     
-    
     [self.contactsTable registerNib:[UINib nibWithNibName:@"MLContactCell"
-                                                   bundle:[NSBundle mainBundle]]
-             forCellReuseIdentifier:@"ContactCell"];
+                                    bundle:[NSBundle mainBundle]]
+                                    forCellReuseIdentifier:@"ContactCell"];
     
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     
@@ -75,7 +74,6 @@
 
 -(void) dealloc
 {
-   
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -182,19 +180,18 @@
 
 -(void) didDismissSearchController:(UISearchController*) searchController;
 {
-    self.searchResults = nil;
+    [self.searchResults removeAllObjects];
     [self reloadTable];
 }
 
 -(void) updateSearchResultsForSearchController:(UISearchController*) searchController;
 {
+    [self.searchResults removeAllObjects];
     if(searchController.searchBar.text.length > 0)
     {
         NSString* term = [searchController.searchBar.text copy];
-        self.searchResults = [[DataLayer sharedInstance] searchContactsWithString:term];
+        [self.searchResults addObjectsFromArray:[[DataLayer sharedInstance] searchContactsWithString:term]];
     }
-    else
-        self.searchResults = nil;
     [self reloadTable];
 }
 
@@ -310,8 +307,8 @@
     
     cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
     
-    cell.accountNo=[row.accountId integerValue];
-    cell.username=row.contactJid;
+    cell.accountNo = [row.accountId integerValue];
+    cell.username = row.contactJid;
 
     NSNumber* unreadMessagesCnt = [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:row.accountId];
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -319,7 +316,7 @@
     });
 
     [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
-        cell.userImage.image=image;
+        cell.userImage.image = image;
     }];
     
     BOOL muted = [[DataLayer sharedInstance] isMutedJid:row.contactJid];
@@ -404,7 +401,7 @@
 -(void) tableView:(UITableView*) tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath*) indexPath
 {
     MLContact* contactDic;
-    if(self.searchResults.count>0)
+    if(self.searchResults.count > 0)
         contactDic = [self.searchResults objectAtIndex:indexPath.row];
     else
         contactDic = [self.contacts objectAtIndex:indexPath.row];
@@ -415,11 +412,11 @@
 {
     MLContact* row;
     
-    if(self.searchResults.count>0)
+    if(self.searchResults.count > 0)
         row = [self.searchResults objectAtIndex:indexPath.row];
     else
     {
-        if(indexPath.row<self.contacts.count)
+        if(indexPath.row < self.contacts.count)
             row = [self.contacts objectAtIndex:indexPath.row];
     }
     
@@ -455,7 +452,7 @@
     paragraph.lineBreakMode = NSLineBreakByWordWrapping;
     paragraph.alignment = NSTextAlignmentCenter;
     
-    NSDictionary *attributes = @{NSFontAttributeName: [UIFont systemFontOfSize:14.0f],
+    NSDictionary* attributes = @{NSFontAttributeName: [UIFont systemFontOfSize:14.0f],
                                  NSForegroundColorAttributeName: [UIColor lightGrayColor],
                                  NSParagraphStyleAttributeName: paragraph};
     

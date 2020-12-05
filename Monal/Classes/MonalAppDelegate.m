@@ -756,7 +756,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) handleBackgroundFetchingTask:(BGTask*) task API_AVAILABLE(ios(13.0))
 {
-    DDLogVerbose(@"RUNNING BGTASK");
+    DDLogInfo(@"RUNNING BGTASK");
+    
     _bgFetch = task;
     __weak BGTask* weakTask = task;
     task.expirationHandler = ^{
@@ -796,8 +797,14 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     if(@available(iOS 13.0, *))
     {
         [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:kBackgroundFetchingTask usingQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0) launchHandler:^(BGTask *task) {
-            DDLogVerbose(@"RUNNING BGTASK LAUNCH HANDLER");
-            [self handleBackgroundFetchingTask:task];
+            DDLogDebug(@"RUNNING BGTASK LAUNCH HANDLER");
+            if(![HelperTools isInBackground])
+            {
+                DDLogDebug(@"Already in foreground, stopping bgtask");
+                [_bgFetch setTaskCompletedWithSuccess:YES];
+            }
+            else
+                [self handleBackgroundFetchingTask:task];
         }];
     } else {
         // No fallback unfortunately

@@ -303,6 +303,10 @@
             else
                 thecell.textLabel.text = NSLocalizedString(@"Pin Chat", @"");
         }
+        else if(indexPath.row == 6)
+        {
+            thecell.textLabel.text = NSLocalizedString(@"Clear omemo session", @"DEBUG - ContactDetails");
+        }
         thecell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
         return thecell;
     }
@@ -312,7 +316,7 @@
 {
     if(section == 0)  return 1;
     if(section == 1)  return 3;
-    if(section == 2)  return 6;
+    if(section == 2)  return 7;
     if(section==3){
         return [_versionInfoDic count];
     }
@@ -328,10 +332,10 @@
 {
     NSString* toreturn = nil;
     if(section == 1)
-        toreturn= NSLocalizedString(@"About",@"");
+        toreturn= NSLocalizedString(@"About", @"");
     
     if(section == 2)
-        toreturn= NSLocalizedString(@"Connection Details",@"");
+        toreturn= NSLocalizedString(@"Connection Details", @"");
     
     return toreturn;
 }
@@ -390,6 +394,10 @@
                 [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
                 // Update color in activeViewController
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact":self.contact, @"pinningChanged": @YES}];
+                break;
+            }
+            case 6:  {
+                [self.xmppAccount.omemo clearAllSessionsForJid:self.contact.contactJid];
                 break;
             }
         }

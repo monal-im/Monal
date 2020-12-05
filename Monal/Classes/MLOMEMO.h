@@ -52,6 +52,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) sendLocalDevicesIfNeeded;
 -(void) markSessionAsStableForJid:(NSString*) jid andDevice:(NSNumber*) ridNum;
 
+-(void) clearAllSessionsForJid:(NSString*) jid;
 @end
 
 NS_ASSUME_NONNULL_END

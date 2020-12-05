@@ -970,4 +970,16 @@ $$
     }];
 }
 
+-(void) clearAllSessionsForJid:(NSString*) jid
+{
+    NSArray<NSNumber*>* devices = [self knownDevicesForAddressName:jid];
+    for(NSNumber* device in devices)
+    {
+        [self deleteDeviceForSource:jid andRid:device.intValue];
+    }
+    [self sendOMEMOBundle];
+    [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:self.accountJid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
+    [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
+}
+
 @end

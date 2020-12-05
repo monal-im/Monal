@@ -327,7 +327,9 @@ $$
             {
                 // only delete other devices from signal store && keep our own entry
                 if(!([source isEqualToString:self.accountJid] && deviceId.intValue == self.monalSignalStore.deviceid))
+                {
                     [self deleteDeviceForSource:source andRid:deviceId.intValue];
+                }
             }
         }
         
@@ -367,6 +369,7 @@ $$
 
     SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:rid];
     [self.monalSignalStore deleteDeviceforAddress:address];
+    [self.monalSignalStore deleteSessionRecordForAddress:address];
 }
 
 -(BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey

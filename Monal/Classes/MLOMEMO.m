@@ -648,6 +648,8 @@ $$
 
 -(void) needNewSessionForContact:(NSString*) contact andDevice:(NSNumber*) deviceId
 {
+    [self sendOMEMOBundle];
+    
     if(deviceId.intValue == self.monalSignalStore.deviceid)
     {
         // We should not generate a new session to our own device

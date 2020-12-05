@@ -48,14 +48,25 @@ NSString* const kMessageHeadlineType = @"headline";
 
 -(void) setBody:(NSString*) messageBody
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"body" withAttributes:@{} andChildren:@[] andData:messageBody]];
+    MLXMLNode* body = [self findFirst:@"body"];
+    if(body)
+        body.data = messageBody;
+    else
+        [self addChild:[[MLXMLNode alloc] initWithElement:@"body" withAttributes:@{} andChildren:@[] andData:messageBody]];
 }
 
 -(void) setOobUrl:(NSString*) link
 {
-    [self addChild:[[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:oob" withAttributes:@{} andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"url" withAttributes:@{} andChildren:@[] andData:link]
-    ] andData:nil]];
+    MLXMLNode* oobElement = [self findFirst:@"{jabber:x:oob}x"];
+    MLXMLNode* oobElementUrl = [self findFirst:@"{jabber:x:oob}x/url"];
+    if(oobElement && oobElementUrl == nil)
+        [oobElement addChild:[[MLXMLNode alloc] initWithElement:@"url" withAttributes:@{} andChildren:@[] andData:link]];
+    else if(oobElement && oobElementUrl)
+        oobElementUrl.data = link;
+    else
+        [self addChild:[[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:oob" withAttributes:@{} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"url" withAttributes:@{} andChildren:@[] andData:link]
+        ] andData:nil]];
     [self setBody:link];    //http filetransfers must have a message body equal to the oob link to be recognized as filetransfer
 }
 

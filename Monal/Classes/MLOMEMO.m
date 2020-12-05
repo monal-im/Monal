@@ -233,7 +233,10 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
             return;
         MLXMLNode* receivedKeys = [data objectForKey:@"current"];
         if(receivedKeys)
+        {
             [account.omemo processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
+            [account.omemo markSessionAsStableForJid:jid andDevice:[NSNumber numberWithInt:[rid intValue]]];
+        }
     }
     if(account.omemo.openBundleFetchCnt > 1 && account.omemo.loggedIn)
     {
@@ -255,6 +258,17 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
         }
     }
 $$
+
+-(void) markSessionAsStableForJid:(NSString*) jid andDevice:(NSNumber*) ridNum
+{
+    // Remove device from broken sessions if needed
+    NSMutableSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:jid];
+    if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:ridNum])
+    {
+        [devicesWithBrokenSession removeObject:ridNum];
+        [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:jid];
+    }
+}
 
 -(void) queryOMEMODevices:(NSString *) jid
 {
@@ -314,15 +328,6 @@ $$
                 // only delete other devices from signal store && keep our own entry
                 if(!([source isEqualToString:self.accountJid] && deviceId.intValue == self.monalSignalStore.deviceid))
                     [self deleteDeviceForSource:source andRid:deviceId.intValue];
-
-                // Remove device from broken sessions if needed
-                NSMutableSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:source];
-                NSNumber* ridNum = [NSNumber numberWithInt:[deviceId intValue]];
-                if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:ridNum])
-                {
-                    [devicesWithBrokenSession removeObject:ridNum];
-                    [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:source];
-                }
             }
         }
         

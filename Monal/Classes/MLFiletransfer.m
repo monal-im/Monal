@@ -26,7 +26,7 @@ static NSMutableSet* _currentlyTransfering;
 +(void) initialize
 {
     _fileManager = [NSFileManager defaultManager];
-    _documentCacheDir = [[[_fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup] path] stringByAppendingPathComponent:@"_documentCacheDir"];
+    _documentCacheDir = [[[_fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup] path] stringByAppendingPathComponent:@"documentCache"];
     NSError* error;
     [_fileManager createDirectoryAtURL:[NSURL fileURLWithPath:_documentCacheDir] withIntermediateDirectories:YES attributes:nil error:&error];
     if(error)

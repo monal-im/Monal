@@ -80,6 +80,9 @@
 
 - (nullable NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
+    if(section>=self.resources.count) {
+        return @"";
+    }
     NSString* resourceTitle = [[self.resources objectAtIndex:section] objectForKey:@"resource"];
     return  resourceTitle;
 }

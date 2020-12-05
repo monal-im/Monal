@@ -286,9 +286,6 @@ $$
     {
         NSAssert([self.accountJid caseInsensitiveCompare:self.account.connectionProperties.identity.jid] == NSOrderedSame, @"connection jid should be equal to the senderJid");
 
-        if(![[DataLayer  sharedInstance] isContactInList:source forAccount:self.account.accountNo] && ![source isEqualToString:self.accountJid])
-            return;
-
         NSArray<NSNumber*>* existingDevices = [self.monalSignalStore knownDevicesForAddressName:source];
 
         // query omemo bundles from devices that are not in our signalStorage
@@ -536,7 +533,12 @@ $$
             SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
             NSError* error;
             SignalCiphertext* deviceEncryptedKey = [cipher encryptData:encryptedPayload.key error:&error];
-
+            if(error)
+            {
+                DDLogWarn(@"Error while adding encryption key for jid: %@ device: %@ error: %@", encryptForJid, device, error);
+                [self needNewSessionForContact:encryptForJid andDevice:device];
+                continue;
+            }
             MLXMLNode* keyNode = [[MLXMLNode alloc] initWithElement:@"key"];
             [keyNode.attributes setObject:[NSString stringWithFormat:@"%@", device] forKey:@"rid"];
             if(deviceEncryptedKey.type == SignalCiphertextTypePreKeyMessage)
@@ -677,6 +679,7 @@ $$
     // delete broken session from our storage
     SignalAddress* address = [[SignalAddress alloc] initWithName:contact deviceId:(uint32_t)deviceId.intValue];
     [self.monalSignalStore deleteSessionRecordForAddress:address];
+    [self.monalSignalStore deleteDeviceforAddress:address];
 
     // DEBUG START
     if(![self.accountJid isEqualToString:contact])

@@ -38,7 +38,7 @@ extern NSString* const kMessageTypeUrl;
 extern NSString* const kMessageTypeFiletransfer;
 
 +(DataLayer*) sharedInstance;
--(void) version;
+-(NSString*) exportDB;
 
 //Roster
 -(NSString *) getRosterVersionForAccount:(NSString*) accountNo;

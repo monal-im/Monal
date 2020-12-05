@@ -128,6 +128,24 @@ static NSDateFormatter* dbFormatter;
     return [MLSQLite sharedInstanceForFile:dbPath];
 }
 
+-(NSString*) exportDB
+{
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    NSString* temporaryFilename = [NSString stringWithFormat:@"%@.db", [[NSProcessInfo processInfo] globallyUniqueString]];
+    NSString* temporaryFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:temporaryFilename];
+    
+    //checkpoint db before copying db file
+    [self.db checkpointWal];
+    
+    //copy db file to temp file
+    NSError* error;
+    [fileManager copyItemAtPath:dbPath toPath:temporaryFilePath error:&error];
+    if(error)
+        return nil;
+    
+    return temporaryFilePath;
+}
+
 #pragma mark account commands
 
 -(NSArray*) accountList

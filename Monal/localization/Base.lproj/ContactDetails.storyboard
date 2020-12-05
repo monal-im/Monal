@@ -178,11 +178,11 @@
                                     <rect key="frame" x="0.0" y="0.0" width="414" height="126"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <textView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" delaysContentTouches="NO" canCancelContentTouches="NO" bouncesZoom="NO" editable="NO" text="log_placeholder" translatesAutoresizingMaskIntoConstraints="NO" id="esK-jI-cAB">
+                                        <textView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" delaysContentTouches="NO" canCancelContentTouches="NO" bouncesZoom="NO" editable="NO" text="status message text comes here: #bc-ignore!" translatesAutoresizingMaskIntoConstraints="NO" id="esK-jI-cAB">
                                             <rect key="frame" x="16" y="8" width="382" height="110"/>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <constraints>
-                                                <constraint firstAttribute="height" constant="110" id="Qn2-Pl-xsk"/>
+                                                <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="4" id="Qn2-Pl-xsk"/>
                                             </constraints>
                                             <color key="textColor" systemColor="labelColor" cocoaTouchSystemColor="darkTextColor"/>
                                             <fontDescription key="fontDescription" type="system" size="system"/>

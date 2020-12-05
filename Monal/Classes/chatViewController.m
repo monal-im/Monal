@@ -896,7 +896,11 @@ enum msgSentState {
         else
         {
             // Send trimmed message
-            [self sendMessage:cleanString withType:kMessageTypeText];
+            NSString* lowercaseCleanString = [cleanString lowercaseString];
+            if([lowercaseCleanString rangeOfString:@" "].location == NSNotFound && [lowercaseCleanString hasPrefix:@"https://"])
+                [self sendMessage:cleanString withType:kMessageTypeUrl];
+            else
+                [self sendMessage:cleanString withType:kMessageTypeText];
         }
     }
     [self sendChatState:NO];
@@ -1678,7 +1682,7 @@ enum msgSentState {
             cell.messageBody.attributedText = stitchedString;
         }
     }
-    else if([row.messageType isEqualToString:kMessageTypeUrl])
+    else if([row.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
     {
         MLLinkCell* toreturn = (MLLinkCell *)[self messageTableCellWithIdentifier:@"link" andInbound:inDirection fromTable: tableView];;
         

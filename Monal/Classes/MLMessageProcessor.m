@@ -174,6 +174,8 @@ static NSMutableDictionary* _typingNotifications;
                 //encrypted messages having one single string prefixed with "aesgcm:" are filetransfers, too (tribal knowledge)
                 else if(encrypted && [lowercaseBody hasPrefix:@"aesgcm://"])
                     messageType = kMessageTypeFiletransfer;
+                else if([lowercaseBody hasPrefix:@"https://"])
+                    messageType = kMessageTypeUrl;
             }
             DDLogInfo(@"Got message of type: %@", messageType);
             

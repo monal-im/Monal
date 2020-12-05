@@ -78,11 +78,11 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
         {
             if (self.self.isNotificationPrivacyOpened)
             {
-                return 10;
+                return 11;
             }
             else
             {
-                return 7;
+                return 8;
             }
             break;
         }
@@ -238,6 +238,13 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
                         cell.defaultKey = @"SendLastChatState";
                         cell.switchEnabled = YES;
                     }
+                    else
+                    {
+                        cell.textLabel.text = NSLocalizedString(@"Show URL previews", @"");
+                        cell.detailTextLabel.text = NSLocalizedString(@"Automatically fetch previews of received links", @"");
+                        cell.defaultKey = @"ShowURLPreview";
+                        cell.switchEnabled = YES;
+                    }
                     break;
                 }
                 case 8:
@@ -258,6 +265,17 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
                         cell.textLabel.text = NSLocalizedString(@"Sync Read-Markers", @"");
                         cell.detailTextLabel.text = NSLocalizedString(@"Tell my contacts if I've read a message", @"");
                         cell.defaultKey = @"SendDisplayedMarkers";
+                        cell.switchEnabled = YES;
+                    }
+                    break;
+                }
+                case 10:
+                {
+                    if (self.isNotificationPrivacyOpened)
+                    {
+                        cell.textLabel.text = NSLocalizedString(@"Show URL previews", @"");
+                        cell.detailTextLabel.text = NSLocalizedString(@"Automatically fetch previews of received links", @"");
+                        cell.defaultKey = @"ShowURLPreview";
                         cell.switchEnabled = YES;
                     }
                     break;

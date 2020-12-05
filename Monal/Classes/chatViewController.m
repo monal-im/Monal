@@ -430,7 +430,7 @@ enum msgSentState {
     
     //send button is always enabled, except if the account is permanently disabled
     sendButtonEnabled = YES;
-    if(![[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo])
+    if(![[DataLayer sharedInstance] isAccountEnabled:self.contact.accountId])
         sendButtonEnabled = NO;
     
     jidLabelText = contactDisplayName;

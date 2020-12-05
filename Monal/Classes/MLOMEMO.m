@@ -740,9 +740,11 @@ $$
     
     NSData* messageKey = [messageNode findFirst:deviceKeyPath];
     BOOL devicePreKey = [[messageNode findFirst:deviceKeyPathPreKey] boolValue];
+    DDLogVerbose(@"Decrypting using:\n%@ --> %@\n%@ --> %@", deviceKeyPath, messageKey, deviceKeyPathPreKey, devicePreKey ? @"YES" : @"NO");
     
     if(!messageKey && isKeyTransportElement)
     {
+        DDLogVerbose(@"Received KeyTransportElement without our own rid included --> Ignore it");
         // Received KeyTransportElement without our own rid included
         // Ignore it
         return nil;
@@ -760,11 +762,9 @@ $$
 
         // Check if message is encrypted with a prekey
         if(devicePreKey)
-        {
             messagetype = SignalCiphertextTypePreKeyMessage;
-        } else  {
+        else
             messagetype = SignalCiphertextTypeMessage;
-        }
 
         NSData* decoded = messageKey;
 

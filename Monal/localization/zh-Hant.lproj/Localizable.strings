@@ -407,3 +407,8 @@
 "Copy" = "Copy";
 "Hint" = "Hint";
 "Already uploading this content, ignoring" = "Already uploading this content, ignoring";
+"Archive chat" = "Archive chat";
+"Automatically fetch previews of received links" = "Automatically fetch previews of received links";
+/* DEBUG - ContactDetails */
+"Clear omemo session" = "Clear omemo session";
+"Show URL previews" = "Show URL previews";

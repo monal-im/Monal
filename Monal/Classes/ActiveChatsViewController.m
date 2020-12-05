@@ -520,7 +520,7 @@ enum activeChatsControllerSections {
 
 
 -(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return NSLocalizedString(@"Hide Chat", @"");
+    return NSLocalizedString(@"Archive chat", @"");
 }
 
 

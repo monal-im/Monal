@@ -8,8 +8,6 @@
 "BIp-1h-2Q5.text" = "Geräte ID";
 /* Class = "UILabel"; text = "name"; ObjectID = "DFP-48-Sgb"; */
 "DFP-48-Sgb.text" = "Name";
-/* Class = "UITextView"; text = "log_placeholder"; ObjectID = "esK-jI-cAB"; */
-"esK-jI-cAB.text" = "log_placeholder";
 /* Class = "UILabel"; text = "05C8299D ABF17279 01A72DC6 4231E407 B90BEF9D 3746C910 01C5444C 47DC66E6"; ObjectID = "fop-Br-WiN"; */
 "fop-Br-WiN.text" = "05C8299D ABF17279 01A72DC6 4231E407 B90BEF9D 3746C910 01C5444C 47DC66E6";
 /* Class = "UILabel"; text = "Calling"; ObjectID = "ggA-Jy-Lki"; */

@@ -72,6 +72,11 @@ $$handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
         [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:[data[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]];
         [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:jid andAccount:account.accountNo];
         [account accountStatusChanged];     //inform ui of this change (accountStatusChanged will force a ui reload which will also reload the avatars)
+        MLContact* contact = [[DataLayer sharedInstance] contactForUsername:jid forAccount:account.accountNo];
+        if(contact)     //ignore updates for jids not in our roster
+            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                @"contact": contact
+            }];
         DDLogInfo(@"Avatar of '%@' fetched and updated successfully", jid);
     }
 $$

@@ -100,7 +100,7 @@ static NSMutableDictionary* currentTransactions;
 
     //some settings (e.g. truncate is faster than delete)
     //this uses the private api because we have no thread local instance added to the threadData dictionary yet (and public apis check that)
-    sqlite3_busy_timeout(self->_database, 4000);
+    sqlite3_busy_timeout(self->_database, 8000);
     [self executeNonQuery:@"pragma synchronous=NORMAL;" andArguments:@[] withException:YES];
     [self executeNonQuery:@"pragma truncate;" andArguments:@[] withException:YES];
 

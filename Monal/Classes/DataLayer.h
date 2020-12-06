@@ -39,6 +39,7 @@ extern NSString* const kMessageTypeFiletransfer;
 
 +(DataLayer*) sharedInstance;
 -(NSString*) exportDB;
+-(void) createTransaction:(monal_void_block_t) block;
 
 //Roster
 -(NSString *) getRosterVersionForAccount:(NSString*) accountNo;

@@ -146,6 +146,11 @@ static NSDateFormatter* dbFormatter;
     return temporaryFilePath;
 }
 
+-(void) createTransaction:(monal_void_block_t) block
+{
+    [self.db voidWriteTransaction:block];
+}
+
 #pragma mark account commands
 
 -(NSArray*) accountList

@@ -923,7 +923,11 @@ NSString *const kData=@"data";
                 //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
                 DDLogVerbose(@"Synchronously handling next stanza on receive queue (%lu stanzas queued in parse queue, %lu current operations in receive queue)", [self->_parseQueue operationCount], [self->_receiveQueue operationCount]);
                 [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-                    [self processInput:parsedStanza];
+                    //add whole processing of incoming stanzas to one big transaction
+                    //this will make it impossible to leave inconsistent database entries on app crashes or iphone crashes/reboots
+                    [[DataLayer sharedInstance] createTransaction:^{
+                        [self processInput:parsedStanza];
+                    }];
                 }]] waitUntilFinished:YES];
             }]] waitUntilFinished:NO];
         }];

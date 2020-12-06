@@ -560,10 +560,8 @@ static NSMutableSet* _currentlyTransfering;
                 urlComponents.scheme = @"aesgcm";
                 urlComponents.fragment = [NSString stringWithFormat:@"%@%@",
                                         [HelperTools hexadecimalString:encryptedPayload.iv],
-                                        //extract real aes key without authtag (32 bytes = 256bit)
-                                        //TODO: DOES THIS MAKE SENSE (WHY NO AUTH TAG??)
+                                        //extract real aes key without authtag (32 bytes = 256bit) (conversations compatibility)
                                         [HelperTools hexadecimalString:[encryptedPayload.key subdataWithRange:NSMakeRange(0, 32)]]];
-                                        //[HelperTools hexadecimalString:encryptedPayload.key]];
                 url = urlComponents.string;
             }
 

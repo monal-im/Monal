@@ -100,14 +100,21 @@
         //we don't want to post any sync error notifications if the xmpp channel is idle and we're only downloading filetransfers
         //(e.g. [MLFiletransfer isIdle] is not YES)
         if([self.handlerList count] == 1 && ![[MLXMPPManager sharedInstance] allAccountsIdle])
-            [HelperTools postSendingErrorNotification];
-        
-        //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
-        if([self.handlerList count])
         {
-            void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
-            [self.handlerList removeObject:handler];
-            [self callHandler:handler];
+            [HelperTools postSendingErrorNotification];
+            //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
+            //handled in mainapp and again in NSE on next NSE wakeup (because still queued in the freezed NSE)
+            [self feedAllWaitingHandlers];
+        }
+        else
+        {
+            //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
+            if([self.handlerList count])
+            {
+                void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
+                [self.handlerList removeObject:handler];
+                [self callHandler:handler];
+            }
         }
     }
 }

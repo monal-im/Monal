@@ -13,34 +13,21 @@
 
 
 @interface MLImageManager()
-
-@property  (nonatomic, strong) NSCache* iconCache;
-@property  (nonatomic, strong) UIImage* noIcon;
-
+@property (nonatomic, strong) NSCache* iconCache;
+@property (nonatomic, strong) UIImage* noIcon;
+@property (nonatomic, strong) NSString* documentsDirectory;
 @end
 
 @implementation MLImageManager
 
 #pragma mark initilization
+
 +(MLImageManager*) sharedInstance
 {
     static dispatch_once_t once;
     static MLImageManager* sharedInstance;
     dispatch_once(&once, ^{
         sharedInstance = [[MLImageManager alloc] init] ;
-        NSFileManager* fileManager = [NSFileManager defaultManager];
-        
-        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-        NSString *documentsDirectory = [paths objectAtIndex:0];
-        NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"imagecache"];
-        NSError *error;
-        [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:&error];
-        
-        //for notifications
-        NSString *writablePath2 = [documentsDirectory stringByAppendingPathComponent:@"tempImage"];
-        NSError *error2;
-        [fileManager createDirectoryAtPath:writablePath2 withIntermediateDirectories:YES attributes:nil error:&error2];
-        
     });
     return sharedInstance;
 }
@@ -48,8 +35,24 @@
 
 -(id) init
 {
-    self=[super init];
-   return self;
+    self = [super init];
+    
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    
+    self.documentsDirectory = [[fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup] path];
+    
+    NSString *writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"imagecache"];
+    NSError *error;
+    [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:&error];
+    [HelperTools configureFileProtectionFor:writablePath];
+    
+    //for notifications
+    NSString *writablePath2 = [self.documentsDirectory stringByAppendingPathComponent:@"tempImage"];
+    NSError *error2;
+    [fileManager createDirectoryAtPath:writablePath2 withIntermediateDirectories:YES attributes:nil error:&error2];
+    [HelperTools configureFileProtectionFor:writablePath2];
+    
+    return self;
 }
 
 #pragma mark cache
@@ -116,12 +119,11 @@
     
     NSFileManager* fileManager = [NSFileManager defaultManager];
     
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths objectAtIndex:0];
-    NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
+    NSString *writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
     writablePath = [writablePath stringByAppendingPathComponent:accountNo];
     NSError* error;
     [fileManager createDirectoryAtPath:writablePath withIntermediateDirectories:YES attributes:nil error:&error];
+    [HelperTools configureFileProtectionFor:writablePath];
     writablePath = [writablePath stringByAppendingPathComponent:filename];
     
     if([fileManager fileExistsAtPath:writablePath])
@@ -132,7 +134,10 @@
     if(data)
     {
         if([data writeToFile:writablePath atomically:NO])
+        {
+            [HelperTools configureFileProtectionFor:writablePath];
             DDLogVerbose(@"wrote image to file");
+        }
         else
             DDLogError(@"failed to write image");
     }
@@ -170,9 +175,7 @@
     toreturn= [self.iconCache objectForKey:cacheKey];
     if(!toreturn) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-            NSString *documentsDirectory = [paths objectAtIndex:0];
-            NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
+            NSString *writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
             writablePath = [writablePath stringByAppendingPathComponent:accountNo];
             writablePath = [writablePath stringByAppendingPathComponent:filename];
             
@@ -211,16 +214,16 @@
 
 -(BOOL) saveBackgroundImageData:(NSData *) data {
     NSFileManager* fileManager = [NSFileManager defaultManager];
-    
+
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths objectAtIndex:0];
     NSString *writablePath = [documentsDirectory stringByAppendingPathComponent:@"background.jpg"];
-    
+
     if([fileManager fileExistsAtPath:writablePath])
     {
         [fileManager removeItemAtPath:writablePath error:nil];
     }
-    
+
     return [data writeToFile:writablePath atomically:YES];
 }
 

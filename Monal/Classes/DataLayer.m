@@ -2010,6 +2010,13 @@ static NSDateFormatter* dbFormatter;
         [self updateDBTo:4.995 withBlock:^{
             [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueActiveChat ON activechats(buddy_name, account_id);"];
         }];
+        
+        [self updateDBTo:4.996 withBlock:^{
+            //remove all icon hashes to reload all icons on next app/nse start
+            //(the db upgrade mechanism will make sure that no smacks resume will take place and pep pushes come in for all avatars)
+            [self.db executeNonQuery:@"UPDATE account SET iconhash='';"];
+            [self.db executeNonQuery:@"UPDATE buddylist SET iconhash='';"];
+        }];
     }];
     
     DDLogInfo(@"Database version check complete");

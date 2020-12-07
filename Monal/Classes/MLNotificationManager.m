@@ -286,7 +286,7 @@
             else        //TODO JIM: add support for more mime types
                 content.body = NSLocalizedString(@"Sent a File 📁", @"");
         }
-        else if([message.messageType isEqualToString:kMessageTypeUrl])
+        else if([message.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
             content.body = NSLocalizedString(@"Sent a Link 🔗", @"");
         else if([message.messageType isEqualToString:kMessageTypeGeo])
             content.body = NSLocalizedString(@"Sent a Location 📍", @"");

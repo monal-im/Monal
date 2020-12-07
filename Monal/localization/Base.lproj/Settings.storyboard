@@ -339,7 +339,7 @@
                                 <rect key="frame" x="0.0" y="55.333332061767578" width="414" height="43.666667938232422"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="8yr-I6-8Xj" id="QTf-Un-omb">
-                                    <rect key="frame" x="0.0" y="0.0" width="394.66666666666669" height="43.666667938232422"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="382.66666666666669" height="43.666667938232422"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableViewCellContentView>
                             </tableViewCell>
@@ -463,6 +463,12 @@
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="hQM-Na-1B0"/>
+                                    <barButtonItem systemItem="organize" id="W13-je-5Lt">
+                                        <connections>
+                                            <action selector="sqliteExportAction:" destination="v41-1Z-cuJ" id="wvo-wm-gE3"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="l48-at-NAu"/>
                                     <barButtonItem systemItem="rewind" id="Itl-QC-MOb">
                                         <connections>
                                             <action selector="rewindButton:" destination="v41-1Z-cuJ" id="TAy-7J-xNv"/>

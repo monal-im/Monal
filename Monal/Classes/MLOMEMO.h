@@ -50,7 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 -(NSData *) getIdentityForAddress:(SignalAddress*)address;
 -(void) sendLocalDevicesIfNeeded;
-
+-(void) markSessionAsStableForJid:(NSString*) jid andDevice:(NSNumber*) ridNum;
 
 @end
 

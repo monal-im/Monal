@@ -67,6 +67,9 @@ DDLogFileInfo* _logInfo;
     [[HelperTools defaultsDB] synchronize];
 }
 
+- (IBAction)sqliteExportAction:(id)sender {
+}
+
 -(IBAction)shareAction:(id)sender
 {
     UIActivityViewController* shareController = [[UIActivityViewController alloc] initWithActivityItems:@[[NSURL fileURLWithPath:_logInfo.filePath]] applicationActivities:nil];

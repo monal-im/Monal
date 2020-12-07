@@ -443,7 +443,7 @@ enum activeChatsControllerSections {
     dispatch_async(dispatch_get_main_queue(), ^{
         if(messageRow)
         {
-            if([messageRow.messageType isEqualToString:kMessageTypeUrl])
+            if([messageRow.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
                 [cell showStatusText:NSLocalizedString(@"🔗 A Link", @"")];
             else if([messageRow.messageType isEqualToString:kMessageTypeFiletransfer])
             {
@@ -520,7 +520,7 @@ enum activeChatsControllerSections {
 
 
 -(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return NSLocalizedString(@"Hide Chat", @"");
+    return NSLocalizedString(@"Archive chat", @"");
 }
 
 

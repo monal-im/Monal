@@ -37,6 +37,7 @@ typedef BOOL (^monal_sqlite_bool_operations_t)(void);
 -(BOOL) executeNonQuery:(NSString*) query andArguments:(NSArray *) args;
 
 -(NSNumber*) lastInsertId;
+-(void) checkpointWal;
 
 @end
 

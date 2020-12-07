@@ -248,7 +248,7 @@
             MLDetailsTableViewCell* cell = (MLDetailsTableViewCell *)[tableView dequeueReusableCellWithIdentifier:@"MessageCell"];
             if(self.contact.isGroup) {
                 cell.cellDetails.text = self.contact.groupSubject;
-            } else  {
+            } else {
                 cell.cellDetails.text = self.contact.statusMessage;
                 if([cell.cellDetails.text isEqualToString:@"(null)"])
                     cell.cellDetails.text = @"";

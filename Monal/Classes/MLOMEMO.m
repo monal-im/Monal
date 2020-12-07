@@ -233,7 +233,10 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
             return;
         MLXMLNode* receivedKeys = [data objectForKey:@"current"];
         if(receivedKeys)
+        {
             [account.omemo processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
+            [account.omemo markSessionAsStableForJid:jid andDevice:[NSNumber numberWithInt:[rid intValue]]];
+        }
     }
     if(account.omemo.openBundleFetchCnt > 1 && account.omemo.loggedIn)
     {
@@ -256,14 +259,46 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
     }
 $$
 
+-(void) markSessionAsStableForJid:(NSString*) jid andDevice:(NSNumber*) ridNum
+{
+    // Remove device from broken sessions if needed
+    NSMutableSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:jid];
+    if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:ridNum])
+    {
+        [devicesWithBrokenSession removeObject:ridNum];
+        [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:jid];
+    }
+}
+
+-(void) queryOMEMODevices:(NSString *) jid
+{
+    [self.account.pubsub fetchNode:@"eu.siacs.conversations.axolotl.devicelist" from:jid withItemsList:nil andHandler:$newHandler(self, handleManualDevices)];
+}
+
+$$handler(handleManualDevices, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data))
+    if(errorIq)
+    {
+        DDLogWarn(@"Error while fetching omemo devices: jid: %@ - %@", jid, errorIq);
+    }
+    else
+    {
+        if(!jid)
+            return;
+        MLXMLNode* publishedDevices = [data objectForKey:@"current"];
+        if(publishedDevices) {
+            NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"/{http://jabber.org/protocol/pubsub}item<id=current>/{eu.siacs.conversations.axolotl}list/device@id|int"];
+            NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
+
+            [account.omemo processOMEMODevices:deviceSet from:jid];
+        }
+    }
+$$
+
 -(void) processOMEMODevices:(NSSet<NSNumber*>*) receivedDevices from:(NSString *) source
 {
     if(receivedDevices)
     {
         NSAssert([self.accountJid caseInsensitiveCompare:self.account.connectionProperties.identity.jid] == NSOrderedSame, @"connection jid should be equal to the senderJid");
-
-        if(![[DataLayer  sharedInstance] isContactInList:source forAccount:self.account.accountNo] && ![source isEqualToString:self.accountJid])
-            return;
 
         NSArray<NSNumber*>* existingDevices = [self.monalSignalStore knownDevicesForAddressName:source];
 
@@ -292,15 +327,8 @@ $$
             {
                 // only delete other devices from signal store && keep our own entry
                 if(!([source isEqualToString:self.accountJid] && deviceId.intValue == self.monalSignalStore.deviceid))
-                    [self deleteDeviceForSource:source andRid:deviceId.intValue];
-
-                // Remove device from broken sessions if needed
-                NSMutableSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:source];
-                NSNumber* ridNum = [NSNumber numberWithInt:[deviceId intValue]];
-                if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:ridNum])
                 {
-                    [devicesWithBrokenSession removeObject:ridNum];
-                    [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:source];
+                    [self deleteDeviceForSource:source andRid:deviceId.intValue];
                 }
             }
         }
@@ -341,6 +369,7 @@ $$
 
     SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:rid];
     [self.monalSignalStore deleteDeviceforAddress:address];
+    [self.monalSignalStore deleteSessionRecordForAddress:address];
 }
 
 -(BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey
@@ -512,7 +541,12 @@ $$
             SignalSessionCipher* cipher = [[SignalSessionCipher alloc] initWithAddress:address context:self.signalContext];
             NSError* error;
             SignalCiphertext* deviceEncryptedKey = [cipher encryptData:encryptedPayload.key error:&error];
-
+            if(error)
+            {
+                DDLogWarn(@"Error while adding encryption key for jid: %@ device: %@ error: %@", encryptForJid, device, error);
+                [self needNewSessionForContact:encryptForJid andDevice:device];
+                continue;
+            }
             MLXMLNode* keyNode = [[MLXMLNode alloc] initWithElement:@"key"];
             [keyNode.attributes setObject:[NSString stringWithFormat:@"%@", device] forKey:@"rid"];
             if(deviceEncryptedKey.type == SignalCiphertextTypePreKeyMessage)
@@ -543,8 +577,8 @@ $$
         [messageNode setStoreHint];
     }
 
-    NSArray* devices = [self.monalSignalStore allDeviceIdsForAddressName:toContact];
-    NSArray* myDevices = [self.monalSignalStore allDeviceIdsForAddressName:self.accountJid];
+    NSArray* devices = [self.monalSignalStore knownDevicesForAddressName:toContact];
+    NSArray* myDevices = [self.monalSignalStore knownDevicesForAddressName:self.accountJid];
 
     // Check if we found omemo keys from the recipient
     if(devices.count > 0 || overrideDevices.count > 0)
@@ -614,6 +648,8 @@ $$
 
 -(void) needNewSessionForContact:(NSString*) contact andDevice:(NSNumber*) deviceId
 {
+    [self sendOMEMOBundle];
+    
     if(deviceId.intValue == self.monalSignalStore.deviceid)
     {
         // We should not generate a new session to our own device
@@ -653,10 +689,19 @@ $$
     // delete broken session from our storage
     SignalAddress* address = [[SignalAddress alloc] initWithName:contact deviceId:(uint32_t)deviceId.intValue];
     [self.monalSignalStore deleteSessionRecordForAddress:address];
+    [self.monalSignalStore deleteDeviceforAddress:address];
 
+    // DEBUG START
+    if(![self.accountJid isEqualToString:contact])
+    {
+        [self queryOMEMODevices:self.accountJid];
+    }
+    [self queryOMEMODevices:contact];
+    // DEBUG END
+    
     // request device bundle again -> check for new preKeys
     // use received preKeys to build new session
-    [self queryOMEMOBundleFrom:contact andDevice:deviceId.stringValue];
+    // [self queryOMEMOBundleFrom:contact andDevice:deviceId.stringValue];
     // rebuild session when preKeys of the requested bundle arrived
 }
 
@@ -697,9 +742,11 @@ $$
     
     NSData* messageKey = [messageNode findFirst:deviceKeyPath];
     BOOL devicePreKey = [[messageNode findFirst:deviceKeyPathPreKey] boolValue];
+    DDLogVerbose(@"Decrypting using:\n%@ --> %@\n%@ --> %@", deviceKeyPath, messageKey, deviceKeyPathPreKey, devicePreKey ? @"YES" : @"NO");
     
     if(!messageKey && isKeyTransportElement)
     {
+        DDLogVerbose(@"Received KeyTransportElement without our own rid included --> Ignore it");
         // Received KeyTransportElement without our own rid included
         // Ignore it
         return nil;
@@ -717,11 +764,9 @@ $$
 
         // Check if message is encrypted with a prekey
         if(devicePreKey)
-        {
             messagetype = SignalCiphertextTypePreKeyMessage;
-        } else  {
+        else
             messagetype = SignalCiphertextTypeMessage;
-        }
 
         NSData* decoded = messageKey;
 

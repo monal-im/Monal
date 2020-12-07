@@ -45,6 +45,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendLastChatState"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendReceivedMarkers"];
         [[HelperTools defaultsDB] setBool:YES forKey:@"SendDisplayedMarkers"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"ShowURLPreview"];
 
         // Message Settings / Privacy
         [[HelperTools defaultsDB] setInteger:DisplayNameAndMessage forKey:@"NotificationPrivacySetting"];
@@ -79,6 +80,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     // upgrade received and displayed markers
     [self upgradeBoolUserSettingsIfUnset:@"SendReceivedMarkers" toDefault:YES];
     [self upgradeBoolUserSettingsIfUnset:@"SendDisplayedMarkers" toDefault:YES];
+    
+    //upgrade url preview
+    [self upgradeBoolUserSettingsIfUnset:@"ShowURLPreview" toDefault:YES];
 
     // upgrade udp logger
     [self upgradeBoolUserSettingsIfUnset:@"udpLoggerEnabled" toDefault:NO];

@@ -477,4 +477,10 @@ static NSMutableDictionary* currentTransactions;
     return [NSNumber numberWithInt:(int)sqlite3_last_insert_rowid(self->_database)];
 }
 
+-(void) checkpointWal
+{
+    NSArray* result = [self executeReader:@"PRAGMA wal_checkpoint(TRUNCATE);"];
+    DDLogInfo(@"Chekpointing returned: %@", result);
+}
+
 @end

@@ -451,7 +451,7 @@ static NSDateFormatter* dbFormatter;
 -(NSMutableArray*) contactList
 {
     //only list contacts having a roster entry (e.g. kSubBoth, kSubTo or kSubFrom)
-    NSString* query = @"SELECT buddy_name, a.account_id FROM buddylist AS A INNER JOIN account AS b ON a.account_id=b.account_id WHERE (a.subscription=? OR a.subscription=? OR a.subscription=?) AND b.enabled=1 ORDER BY nick_name, full_name, buddy_name COLLATE NOCASE ASC;";
+    NSString* query = @"SELECT buddy_name, a.account_id, IFNULL(IFNULL(NULLIF(A.nick_name, ''), NULLIF(A.full_name, '')), buddy_name) AS 'sortkey' FROM buddylist AS A INNER JOIN account AS b ON a.account_id=b.account_id WHERE (a.subscription=? OR a.subscription=? OR a.subscription=?) AND b.enabled=1 ORDER BY sortkey COLLATE NOCASE ASC;";
     NSMutableArray* toReturn = [[NSMutableArray alloc] init];
     for(NSDictionary* dic in [self.db executeReader:query andArguments:@[kSubBoth, kSubTo, kSubFrom]])
         [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];
@@ -2005,8 +2005,10 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"CREATE INDEX messageidIndex on message_history(messageid collate nocase);"];
         }];
 
-        [self updateDBTo:4.994 withBlock:^{
-            [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact ON activechats(buddy_name, account_id);"];
+        // skipping 4.994 due to invalid command
+
+        [self updateDBTo:4.995 withBlock:^{
+            [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueActiveChat ON activechats(buddy_name, account_id);"];
         }];
     }];
     

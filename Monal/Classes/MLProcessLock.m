@@ -29,7 +29,7 @@
         //wake up other thread
         [condition signal];
     }];
-    //wait for response blocking this thread for 500ms
+    //wait for response blocking this thread for 1 second
     BOOL timedOut = ![condition waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
     DDLogVerbose(@"checkRemoteRunning:%@ returning %@", processName, !timedOut ? @"YES" : @"NO");
     return !timedOut;

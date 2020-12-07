@@ -70,10 +70,18 @@
         //terminate appex if the main app is already running
         if([MLProcessLock checkRemoteRunning:@"MainApp"])
         {
-            DDLogInfo(@"NOT connecting accounts, main app already running in foreground, terminating immediately instead");
-            [DDLog flushLog];
-            [self feedAllWaitingHandlers];
-            return;
+            //this will make sure we still run if we get triggered immediately after the mainapp disconnected but before its process got freezed
+            DDLogInfo(@"Main app already in foreground, sleeping for 5 seconds and trying again");
+            usleep(5000000);
+            if([MLProcessLock checkRemoteRunning:@"MainApp"])
+            {
+                DDLogInfo(@"NOT connecting accounts, main app already running in foreground, terminating immediately instead");
+                [DDLog flushLog];
+                [self feedAllWaitingHandlers];
+                return;
+            }
+            else
+                DDLogInfo(@"Main app not in foreground anymore, connecting now");
         }
         
         if(first)       //first incoming push --> connect to servers

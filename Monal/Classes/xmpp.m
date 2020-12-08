@@ -1606,10 +1606,11 @@ NSString *const kData=@"data";
                 //request an ack to accomplish this if stanza replay did not already trigger one (smacksRequestInFlight is false if replay did not trigger one)
                 if(!self.smacksRequestInFlight)
                     [self requestSMAck:YES];    //force sending of the request even if the smacks queue is empty (needed to always trigger the smacks handler below after 1 RTT)
+                DDLogVerbose(@"Adding resume smacks handler to check for completed catchup (%@)", self.lastOutboundStanza);
                 weakify(self);
                 [self addSmacksHandler:^{
-                    DDLogVerbose(@"Inside resume smacks handler: catchup done");
                     strongify(self);
+                    DDLogVerbose(@"Inside resume smacks handler: catchup done (%@)", self.lastOutboundStanza);
                     if(!self->_catchupDone)
                     {
                         self->_catchupDone = YES;

@@ -1112,7 +1112,7 @@ NSString *const kData=@"data";
 
 -(void) removeAckedStanzasFromQueue:(NSNumber*) hvalue
 {
-    NSMutableArray* ackHandlerToCall;
+    NSMutableArray* ackHandlerToCall = [[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
     @synchronized(_stateLockObject) {
         self.lastHandledOutboundStanza = hvalue;
         if([self.unAckedStanzas count]>0)
@@ -1148,17 +1148,23 @@ NSString *const kData=@"data";
                 [self persistState];
         }
         
+        DDLogVerbose(@"_smacksAckHandler: %@", _smacksAckHandler);
         //remove registered smacksAckHandler that will be called now
-        ackHandlerToCall = [[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
         for(NSDictionary* dic in _smacksAckHandler)
             if([[dic objectForKey:@"value"] integerValue] <= [hvalue integerValue])
+            {
+                DDLogVerbose(@"Adding smacks ack handler to call list: %@", dic);
                 [ackHandlerToCall addObject:dic];
+            }
         [_smacksAckHandler removeObjectsInArray:ackHandlerToCall];
     }
     
     //call registered smacksAckHandler that got sorted out
     for(NSDictionary* dic in ackHandlerToCall)
+    {
+        DDLogVerbose(@"Now calling smacks ack handler: %@", dic);
         ((monal_void_block_t)dic[@"handler"])();
+    }
 }
 
 -(void) requestSMAck:(BOOL) force
@@ -1606,7 +1612,7 @@ NSString *const kData=@"data";
                 //request an ack to accomplish this if stanza replay did not already trigger one (smacksRequestInFlight is false if replay did not trigger one)
                 if(!self.smacksRequestInFlight)
                     [self requestSMAck:YES];    //force sending of the request even if the smacks queue is empty (needed to always trigger the smacks handler below after 1 RTT)
-                DDLogVerbose(@"Adding resume smacks handler to check for completed catchup (%@)", self.lastOutboundStanza);
+                DDLogVerbose(@"Adding resume smacks handler to check for completed catchup on account %@: %@", self.accountNo, self.lastOutboundStanza);
                 weakify(self);
                 [self addSmacksHandler:^{
                     strongify(self);
@@ -2018,7 +2024,8 @@ NSString *const kData=@"data";
         [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
         //debug output
-        DDLogVerbose(@"persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d",
+        DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d",
+            self.accountNo,
             values[@"stateSavedAt"],
             self.lastHandledInboundStanza,
             self.lastHandledOutboundStanza,
@@ -2050,7 +2057,8 @@ NSString *const kData=@"data";
             self.streamID = [dic objectForKey:@"streamID"];
             
             //debug output
-            DDLogVerbose(@"readSmacksStateOnly(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
+            DDLogVerbose(@"%@ --> readSmacksStateOnly(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
+                self.accountNo,
                 dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
@@ -2168,7 +2176,8 @@ NSString *const kData=@"data";
                 [self.pubsub setInternalData:[dic objectForKey:@"pubsubData"]];
             
             //debug output
-            DDLogVerbose(@"readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d",
+                self.accountNo,
                 dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,

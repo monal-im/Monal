@@ -1931,7 +1931,7 @@ NSString *const kData=@"data";
 #ifdef IS_ALPHA
     // encrypt messages that should not be encrypted (but still use plaintext body for devices not speaking omemo)
     // WARNING NOT FOR PRODUCTION
-    if(!encrypt)
+    if(!encrypt && !isUpload)
         [self.omemo encryptMessage:messageNode withMessage:message toContact:contact];
     // WARNING NOT FOR PRODUCTION END
 #endif

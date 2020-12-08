@@ -103,7 +103,7 @@
 -(void) pushExpired
 {
     @synchronized(self) {
-        DDLogInfo(@"Handling expired push");
+        DDLogInfo(@"Handling expired push: %lu", (unsigned long)[self.handlerList count]);
         
         //we don't want to post any sync error notifications if the xmpp channel is idle and we're only downloading filetransfers
         //(e.g. [MLFiletransfer isIdle] is not YES)

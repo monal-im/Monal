@@ -129,9 +129,10 @@ static NSRegularExpression* attributeFilterRegex;
 
 -(id) initWithCoder:(NSCoder*) decoder
 {
-    self = [self init];
+    self = [super init];
     if(!self)
         return nil;
+    [self internalInit];
 
     _element = [decoder decodeObjectOfClass:[NSString class] forKey:@"element"];
     _attributes = [decoder decodeObjectOfClasses:[[NSSet alloc] initWithArray:@[[NSMutableDictionary class], [NSDictionary class], [NSMutableString class], [NSString class]]] forKey:@"attributes"];

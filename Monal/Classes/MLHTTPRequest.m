@@ -78,7 +78,6 @@
     {
         
         NSError *errorReply;
-        id dataReply;
         
         if(connectionError)
         {
@@ -90,31 +89,8 @@
             {
                 errorReply=[NSError errorWithDomain:@"HTTP" code:httpResponse.statusCode userInfo:@{@"result":[NSHTTPURLResponse localizedStringForStatusCode:httpResponse.statusCode]}];
             }
-            else {
-                if([data length]>0) {
-                    
-                    NSError *error;
-                    id result = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&error];
-                    if(!result ){
-                        DDLogError(@"Error: %@", error);
-                      //  errorReply=[NSError errorWithDomain:@"JSON" code:0 userInfo:@{@"result":@"JSON parse error"}];
-                    }
-                    else {
-                        if([result isKindOfClass:[NSDictionary class]])
-                        {
-                            dataReply=result;
-                        }
-                        else  {
-                            dataReply=@{@"Response":result};
-                        }
-                        DDLogVerbose(@"Response: %@", dataReply);
-                        
-                    }
-                }
-                
-            }
         }
-        completion(errorReply,dataReply);
+        completion(errorReply,data);
         
     };
     

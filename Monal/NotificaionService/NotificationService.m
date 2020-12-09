@@ -53,8 +53,32 @@
 
 -(void) incomingPush:(void (^)(UNNotificationContent* _Nonnull)) contentHandler
 {
+    DDLogInfo(@"Got incoming push...pinging main app");
+    
+    //terminate appex if the main app is already running
+    if([MLProcessLock checkRemoteRunning:@"MainApp"])
+    {
+        //this will make sure we still run if we get triggered immediately after the mainapp disconnected but before its process got freezed
+        DDLogDebug(@"Main app already in foreground, sleeping for 5 seconds and trying again");
+        usleep(5000000);
+        
+        DDLogDebug(@"Pinging main app again");
+        if([MLProcessLock checkRemoteRunning:@"MainApp"])
+        {
+            DDLogInfo(@"NOT connecting accounts, main app already running in foreground, terminating immediately instead");
+            [DDLog flushLog];
+            [self feedAllWaitingHandlersWithCompletion:^{
+                //now call this new handler we did not add to our handlerList
+                [self callHandler:contentHandler];
+            }];
+            return;
+        }
+        else
+            DDLogDebug(@"Main app not in foreground anymore, connecting now");
+    }
+    
     @synchronized(self) {
-        DDLogInfo(@"Handling incoming push");
+        DDLogInfo(@"Now handling incoming push");
         BOOL first = NO;
         if(![self.handlerList count])
         {
@@ -66,15 +90,6 @@
         //add contentHandler to our list
         DDLogDebug(@"Adding content handler to list: %lu", [self.handlerList count]);
         [self.handlerList addObject:contentHandler];
-        
-        //terminate appex if the main app is already running
-        if([MLProcessLock checkRemoteRunning:@"MainApp"])
-        {
-            DDLogInfo(@"NOT connecting accounts, main app already running in foreground, terminating immediately instead");
-            [DDLog flushLog];
-            [self feedAllWaitingHandlers];
-            return;
-        }
         
         if(first)       //first incoming push --> connect to servers
         {
@@ -95,19 +110,26 @@
 -(void) pushExpired
 {
     @synchronized(self) {
-        DDLogInfo(@"Handling expired push");
+        DDLogInfo(@"Handling expired push: %lu", (unsigned long)[self.handlerList count]);
         
         //we don't want to post any sync error notifications if the xmpp channel is idle and we're only downloading filetransfers
         //(e.g. [MLFiletransfer isIdle] is not YES)
-        if([self.handlerList count] == 1 && ![[MLXMPPManager sharedInstance] allAccountsIdle])
-            [HelperTools postSendingErrorNotification];
-        
-        //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
-        if([self.handlerList count])
+        if([self.handlerList count] <= 1 && ![[MLXMPPManager sharedInstance] allAccountsIdle])
         {
-            void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
-            [self.handlerList removeObject:handler];
-            [self callHandler:handler];
+            [HelperTools postSendingErrorNotification];
+            //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
+            //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
+            [self feedAllWaitingHandlersWithCompletion:nil];
+        }
+        else
+        {
+            //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
+            if([self.handlerList count])
+            {
+                void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
+                [self.handlerList removeObject:handler];
+                [self callHandler:handler];
+            }
         }
     }
 }
@@ -139,36 +161,44 @@
     handler(emptyContent);
 }
 
+-(void) feedAllWaitingHandlersWithCompletion:(monal_void_block_t) completion
+{
+    //repeated calls to this method will do nothing (every handler will already be used and every content will already be posted)
+    @synchronized(self) {
+        DDLogInfo(@"Disconnecting all accounts and feeding all pending handlers: %lu", [self.handlerList count]);
+        
+        //this has to be synchronous because we only want to continue if all accounts are completely disconnected
+        [[MLXMPPManager sharedInstance] disconnectAll];
+        
+        //for debugging
+        [self listNotifications];
+        
+        //we posted all notifications and disconnected, technically we're not running anymore
+        //(even though our containing process will still be running for a few more seconds)
+        [MLProcessLock unlock];
+        
+        //feed all waiting handlers with empty notifications to silence them
+        //this will terminate/freeze the app extension afterwards
+        while([self.handlerList count])
+        {
+            DDLogDebug(@"Feeding handler");
+            void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
+            [self.handlerList removeObject:handler];
+            [self callHandler:handler];
+        }
+    }
+    
+    if(completion)
+        completion();
+}
+
 -(void) feedAllWaitingHandlers
 {
     //dispatch in another thread to avoid blocking the thread calling this method (most probably the receiveQueue), which could result in a deadlock
     //without this dispatch a deadlock could also occur when this method tries to enter the receiveQueue (disconnectAll) while the receive queue
     //is waiting for the @synchronized(self) block in this method
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        //repeated calls to this method will do nothing (every handler will already be used and every content will already be posted)
-        @synchronized(self) {
-            DDLogInfo(@"Disconnecting all accounts and feeding all pending handlers: %lu", [self.handlerList count]);
-            
-            //this has to be synchronous because we only want to continue if all accounts are completely disconnected
-            [[MLXMPPManager sharedInstance] disconnectAll];
-            
-            //for debugging
-            [self listNotifications];
-            
-            //we posted all notifications and disconnected, technically we're not running anymore
-            //(even though our containing process will still be running for a few more seconds)
-            [MLProcessLock unlock];
-            
-            //feed all waiting handlers with empty notifications to silence them
-            //this will terminate/freeze the app extension afterwards
-            while([self.handlerList count])
-            {
-                DDLogDebug(@"Feeding handler");
-                void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
-                [self.handlerList removeObject:handler];
-                [self callHandler:handler];
-            }
-        }
+        [self feedAllWaitingHandlersWithCompletion:nil];
     });
 }
 

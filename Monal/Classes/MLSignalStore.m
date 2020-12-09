@@ -232,6 +232,7 @@
  */
 - (nullable NSData*) loadPreKeyWithId:(uint32_t)preKeyId;
 {
+    DDLogDebug(@"Loading prekey %lu", (unsigned long)preKeyId);
     NSData* preKeyData = (NSData *)[self.sqliteDatabase executeScalar:@"SELECT prekey FROM signalPreKey WHERE account_id=? AND prekeyid=? AND keyUsed=0" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
     return preKeyData;
 }
@@ -242,13 +243,14 @@
  */
 - (BOOL) storePreKey:(NSData*)preKey preKeyId:(uint32_t)preKeyId
 {
+    DDLogDebug(@"Storing prekey %lu", (unsigned long)preKeyId);
     // Only store new preKeys
     NSNumber* preKeyCnt = (NSNumber*)[self.sqliteDatabase executeScalar:@"SELECT count(*) FROM signalPreKey WHERE account_id=? AND prekeyid=? AND preKey=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId], preKey]];
     if(preKeyCnt.intValue > 0)
         return YES;
 
     BOOL success = [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalPreKey (account_id, prekeyid, preKey) VALUES (?,?,?)" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId], preKey]];
-     return success;
+    return success;
 }
 
 /**
@@ -257,8 +259,8 @@
  */
 - (BOOL) containsPreKeyWithId:(uint32_t)preKeyId;
 {
-    NSData *prekey= [self loadPreKeyWithId:preKeyId];
-    return prekey?YES:NO;
+    NSData* prekey = [self loadPreKeyWithId:preKeyId];
+    return prekey ? YES : NO;
 }
 
 /**
@@ -266,6 +268,7 @@
  */
 - (BOOL) deletePreKeyWithId:(uint32_t)preKeyId
 {
+    DDLogDebug(@"Marking prekey %lu as deleted", (unsigned long)preKeyId);
     // only mark the key for deletion -> key should be removed from pubSub
     return [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP, keyUsed=1 WHERE account_id=? AND prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
 }
@@ -275,6 +278,7 @@
  */
 - (nullable NSData*) loadSignedPreKeyWithId:(uint32_t)signedPreKeyId
 {
+    DDLogDebug(@"Loading signed prekey %lu", (unsigned long)signedPreKeyId);
     NSData *key= (NSData *)[self.sqliteDatabase executeScalar:@"select signedPreKey from signalSignedPreKey where account_id=? and signedPreKeyId=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:signedPreKeyId]]];
     return key;
 }
@@ -284,6 +288,7 @@
  */
 - (BOOL) storeSignedPreKey:(NSData*)signedPreKey signedPreKeyId:(uint32_t)signedPreKeyId
 {
+    DDLogDebug(@"Storing signed prekey %lu", (unsigned long)signedPreKeyId);
     BOOL success= [self.sqliteDatabase executeNonQuery:@"insert into  signalSignedPreKey (account_id,signedPreKeyId, signedPreKey) values (?,?,?)" andArguments:@[self.accountId,  [NSNumber numberWithInteger:signedPreKeyId], signedPreKey]];
     
     return success;
@@ -304,6 +309,7 @@
  */
 - (BOOL) removeSignedPreKeyWithId:(uint32_t)signedPreKeyId
 {
+    DDLogDebug(@"Removing signed prekey %lu", (unsigned long)signedPreKeyId);
     return [self.sqliteDatabase executeNonQuery:@"delete from signalSignedPreKey where account_id=? and signedPreKeyId=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:signedPreKeyId]]];
 }
 

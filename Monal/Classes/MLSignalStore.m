@@ -69,11 +69,15 @@
         }
         // remove old keys that should no longer be available
         [self cleanupKeys];
-        NSMutableArray* array = [self readPreKeys];
-        self.preKeys = array;
+        [self reloadCachedPrekeys];
     }
 
     return self; 
+}
+
+-(void) reloadCachedPrekeys
+{
+    self.preKeys = [self readPreKeys];
 }
 
 -(void) cleanupKeys
@@ -124,6 +128,7 @@
     {
         [self storePreKey:key.serializedData preKeyId:key.preKeyId];
     }
+    [self reloadCachedPrekeys];
 }
 
 /**
@@ -270,7 +275,9 @@
 {
     DDLogDebug(@"Marking prekey %lu as deleted", (unsigned long)preKeyId);
     // only mark the key for deletion -> key should be removed from pubSub
-    return [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP, keyUsed=1 WHERE account_id=? AND prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
+    BOOL ret = [self.sqliteDatabase executeNonQuery:@"UPDATE signalPreKey SET pubSubRemovalTimestamp=CURRENT_TIMESTAMP, keyUsed=1 WHERE account_id=? AND prekeyid=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:preKeyId]]];
+    [self reloadCachedPrekeys];
+    return ret;
 }
 
 /**
@@ -431,7 +438,7 @@
  * Store a serialized sender key record for a given
  * (groupId + senderId + deviceId) tuple.
  */
-- (BOOL) storeSenderKey:(NSData*)senderKey address:(SignalAddress*)address groupId:(NSString*)groupId;
+-(BOOL) storeSenderKey:(nonnull NSData*)senderKey address:(nonnull SignalAddress*)address groupId:(nonnull NSString*)groupId;
 {
     BOOL success = [self.sqliteDatabase executeNonQuery:@"insert into signalContactKey (account_id,contactName,contactDeviceId,groupId,senderKey) values (?,?,?,?,?)" andArguments:@[self.accountId,address.name, [NSNumber numberWithInteger:address.deviceId], groupId,senderKey]];
      return success;
@@ -446,6 +453,5 @@
     NSData* keyData = (NSData *)[self.sqliteDatabase executeScalar:@"select senderKey from signalContactKey where account_id=? and groupId=? and contactDeviceId=? and contactName=?" andArguments:@[self.accountId,groupId, [NSNumber numberWithInteger:address.deviceId], address.name]];
     return keyData;
 }
-
 
 @end

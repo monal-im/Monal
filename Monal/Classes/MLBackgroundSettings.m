@@ -125,9 +125,9 @@
     imagePicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
         if(granted)
-        {
-            [self presentViewController:imagePicker animated:YES completion:nil];
-        }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self presentViewController:imagePicker animated:YES completion:nil];
+            });
     }];
 #endif
 }

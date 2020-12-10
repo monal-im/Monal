@@ -19,8 +19,13 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 #define kAppGroup @"group.monal"
 
 //this is in seconds
-#define SHORT_PING 4.0
-#define LONG_PING 16.0
+#if TARGET_OS_MACCATALYST
+	#define SHORT_PING 16.0
+	#define LONG_PING 32.0
+#else
+	#define SHORT_PING 4.0
+	#define LONG_PING 16.0
+#endif
 
 @class MLContact;
 

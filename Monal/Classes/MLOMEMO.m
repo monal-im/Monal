@@ -170,7 +170,7 @@ $$
         @"signedPreKeySignature":self.monalSignalStore.signedPreKey.signature,
         @"identityKey":self.monalSignalStore.identityKeyPair.publicKey,
         @"signedPreKeyId": [NSString stringWithFormat:@"%d",self.monalSignalStore.signedPreKey.preKeyId]
-    } andPreKeys:self.monalSignalStore.preKeys withDeviceId:self.monalSignalStore.deviceid];
+    } andPreKeys:[self.monalSignalStore readPreKeys] withDeviceId:self.monalSignalStore.deviceid];
 }
 
 /*

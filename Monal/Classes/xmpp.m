@@ -593,6 +593,7 @@ NSString *const kData=@"data";
 {
     if(self.accountState < kStateReconnecting)
     {
+        DDLogInfo(@"UNFREEZING account %@", self.accountNo);
         //(re)read persisted state (could be changed by appex)
         [self readState];
     }

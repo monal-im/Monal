@@ -237,6 +237,7 @@
 
 -(void) setInternalData:(NSDictionary*) data
 {
+    DDLogDebug(@"Loading internal pubsub data");
     @synchronized(_registeredHandlers) {
         if(!data[@"version"] || ![data[@"version"] isEqualToNumber:CURRENT_PUBSUB_DATA_VERSION])
             return;     //ignore old data

@@ -393,7 +393,8 @@ NSString *const kData=@"data";
     )
         retval = YES;
     _lastIdleState = retval;
-    DDLogVerbose(@"Idle check:\n\t_accountState < kStateReconnecting = %@\n\t_reconnectInProgress = %@\n\t_catchupDone = %@\n\t[self.unAckedStanzas count] = %lu\n\t[_parseQueue operationCount] = %lu\n\t[_receiveQueue operationCount] = %lu\n\t[_sendQueue operationCount] = %lu\n\t--> %@",
+    DDLogVerbose(@"%@ --> Idle check:\n\t_accountState < kStateReconnecting = %@\n\t_reconnectInProgress = %@\n\t_catchupDone = %@\n\t[self.unAckedStanzas count] = %lu\n\t[_parseQueue operationCount] = %lu\n\t[_receiveQueue operationCount] = %lu\n\t[_sendQueue operationCount] = %lu\n\t--> %@",
+        self.accountNo,
         _accountState < kStateReconnecting ? @"YES" : @"NO",
         _reconnectInProgress ? @"YES" : @"NO",
         _catchupDone ? @"YES" : @"NO",

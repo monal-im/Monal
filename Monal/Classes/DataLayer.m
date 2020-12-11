@@ -2017,6 +2017,24 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"UPDATE account SET iconhash='';"];
             [self.db executeNonQuery:@"UPDATE buddylist SET iconhash='';"];
         }];
+        
+        [self updateDBTo:4.997 withBlock:^{
+            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+            //create unique constraint for (account_id, buddy_name) on activechats table
+            [self.db executeNonQuery:@"ALTER TABLE activechats RENAME TO _activechatsTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE activechats (account_id integer not null, buddy_name varchar(50) collate nocase, lastMessageTime datetime, lastMesssage blob, pinned bool DEFAULT FALSE, UNIQUE(account_id, buddy_name));"];
+            [self.db executeNonQuery:@"INSERT INTO activechats SELECT * FROM _activechatsTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _activechatsTMP;"];
+            [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueActiveChat ON activechats(buddy_name, account_id);"];
+            
+            //create unique constraint for () on buddylist table
+            [self.db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(50) collate nocase, full_name varchar(50), nick_name varchar(50), group_name varchar(50), iconhash varchar(200), filename varchar(100), state varchar(20), status varchar(200), Muc bool, muc_subject varchar(255), muc_nick varchar(255), backgroundImage text, encrypt bool, subscription varchar(50), ask varchar(50), messageDraft text, lastInteraction INTEGER NOT NULL DEFAULT 0, UNIQUE(account_id, buddy_name));"];
+            [self.db executeNonQuery:@"INSERT INTO buddylist SELECT * FROM _buddylistTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _buddylistTMP;"];
+            [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact on buddylist(buddy_name, account_id);"];
+            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
+        }];
     }];
     
     DDLogInfo(@"Database version check complete");

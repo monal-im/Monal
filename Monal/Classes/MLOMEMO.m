@@ -21,6 +21,8 @@
 #import "MLPubSub.h"
 #import "DataLayer.h"
 
+#include <stdlib.h>
+
 @interface MLOMEMO ()
 
 @property (atomic, strong) SignalContext* signalContext;
@@ -430,7 +432,6 @@ $$
         if([bundles count] != 1) {
             return;
         }
-
         MLXMLNode* bundle = [bundles firstObject];
 
         // parse
@@ -445,53 +446,55 @@ $$
         uint32_t device = (uint32_t)[rid intValue];
         SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:device];
         SignalSessionBuilder* builder = [[SignalSessionBuilder alloc] initWithAddress:address context:self.signalContext];
-        NSMutableArray* preKeys = [[NSMutableArray alloc] init];
         NSArray<NSNumber*>* preKeyIds = [bundle find:@"prekeys/preKeyPublic@preKeyId|int"];
-        for(NSNumber* preKey in preKeyIds)
+
+        if(preKeyIds == nil || preKeyIds.count == 0)
         {
-            NSData* key = [bundle findFirst:[NSString stringWithFormat:@"prekeys/preKeyPublic<preKeyId=%@>#|base64", preKey]];
+            DDLogWarn(@"Could not create array of preKeyIds");
+            return;
+        }
+        // parse preKeys
+        const uint32_t preKeyIdsCnt = (uint32_t)preKeyIds.count;
+        unsigned long processedKeysIdx = 0;
+        do
+        {
+            // select random preKey and try to import it
+            const uint32_t preKeyIdxToTest = arc4random_uniform(preKeyIdsCnt);
+            // load preKey
+            NSNumber* preKeyId = preKeyIds[preKeyIdxToTest];
+            if(preKeyId == nil)
+                continue;;
+            NSData* key = [bundle findFirst:[NSString stringWithFormat:@"prekeys/preKeyPublic<preKeyId=%@>#|base64", preKeyId]];
             if(!key)
                 continue;
-            NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
-            [dict setObject:preKey forKey:@"preKeyId"];
-            [dict setObject:key forKey:@"preKey"];
-            [preKeys addObject:dict];
-        }
-        // save preKeys to local storage
-        for(NSDictionary* row in preKeys)
-        {
-            NSString* keyid = (NSString *)[row objectForKey:@"preKeyId"];
-            NSData* preKeyData = [row objectForKey:@"preKey"];
-            if(preKeyData) {
-                DDLogDebug(@"Generating keyBundle for key id %@...", keyid);
-                NSError* error;
-                SignalPreKeyBundle* keyBundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
-                                                                            deviceId:device
-                                                                            preKeyId:[keyid intValue]
-                                                                            preKeyPublic:preKeyData
-                                                                            signedPreKeyId:signedPreKeyPublicId.intValue
-                                                                            signedPreKeyPublic:signedPreKeyPublic
-                                                                            signature:signedPreKeySignature
-                                                                            identityKey:identityKey
-                                                                            error:&error];
-                if(error || !keyBundle)
-                {
-                    DDLogWarn(@"Error creating preKeyBundle: %@", error);
-                    continue;
-                }
-                [builder processPreKeyBundle:keyBundle error:&error];
-                if(error)
-                {
-                    DDLogWarn(@"Error adding preKeyBundle: %@", error);
-                }
-            }
-            else
+
+            DDLogDebug(@"Generating keyBundle for key id %@...", preKeyId);
+            NSError* error;
+            SignalPreKeyBundle* keyBundle = [[SignalPreKeyBundle alloc] initWithRegistrationId:0
+                                                                        deviceId:device
+                                                                        preKeyId:[preKeyId intValue]
+                                                                        preKeyPublic:key
+                                                                        signedPreKeyId:signedPreKeyPublicId.intValue
+                                                                        signedPreKeyPublic:signedPreKeyPublic
+                                                                        signature:signedPreKeySignature
+                                                                        identityKey:identityKey
+                                                                        error:&error];
+            if(error || !keyBundle)
             {
-                DDLogError(@"Could not decode base64 prekey %@", row);
+                DDLogWarn(@"Error creating preKeyBundle: %@", error);
+                continue;
             }
-        }
-        // Build new session when a device session is marked as broken
-        [self sendKeyTransportElementIfNeeded:jid removeBrokenSessionForRid:rid];
+            [builder processPreKeyBundle:keyBundle error:&error];
+            if(error)
+            {
+                DDLogWarn(@"Error adding preKeyBundle: %@", error);
+                continue;
+            }
+            // found a key
+            // Build new session when a device session is marked as broken
+            [self sendKeyTransportElementIfNeeded:jid removeBrokenSessionForRid:rid];
+            break;
+        } while (++processedKeysIdx <= preKeyIds.count);
     }
 }
 

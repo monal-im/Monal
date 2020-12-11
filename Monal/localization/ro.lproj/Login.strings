@@ -1,5 +1,5 @@
 /* Class = "UILabel"; text = "someone@yax.im"; ObjectID = "0IG-5n-3XF"; */
-"0IG-5n-3XF.text" = "someone@yax.im";
+"0IG-5n-3XF.text" = "cineva@yax.im";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "0Tx-nj-jHi"; */
 "0Tx-nj-jHi.title" = "Închide";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "29t-GS-Yof"; */
@@ -17,19 +17,19 @@
 /* Class = "UILabel"; text = "Congratulations!"; ObjectID = "eEG-v1-Mb2"; */
 "eEG-v1-Mb2.text" = "Felicitări!";
 /* Class = "UIButton"; normalTitle = "Login"; ObjectID = "Gth-vl-n15"; */
-"Gth-vl-n15.normalTitle" = "Login";
+"Gth-vl-n15.normalTitle" = "Autentificare";
 /* Class = "UIButton"; normalTitle = "Terms of service"; ObjectID = "hyG-BH-GJV"; */
 "hyG-BH-GJV.normalTitle" = "Termeni și condiții de utilizare";
 /* Class = "UITabBarItem"; title = "Item"; ObjectID = "iLC-4b-aD8"; */
-"iLC-4b-aD8.title" = "Item";
+"iLC-4b-aD8.title" = "Articol";
 /* Class = "UITextField"; placeholder = "Account@something.com"; ObjectID = "ktr-DL-MYt"; */
-"ktr-DL-MYt.placeholder" = "Account@something.com";
+"ktr-DL-MYt.placeholder" = "cont@domeniu.ceva";
 /* Class = "UITextField"; placeholder = "Password"; ObjectID = "Qrh-pK-XJH"; */
-"Qrh-pK-XJH.placeholder" = "Password";
+"Qrh-pK-XJH.placeholder" = "Parolă";
 /* Class = "UIButton"; normalTitle = "Set up an account later"; ObjectID = "QY7-bW-ufD"; */
 "QY7-bW-ufD.normalTitle" = "Configurați un cont mai târziu";
 /* Class = "UITextField"; placeholder = "Password"; ObjectID = "rHr-ew-oBM"; */
-"rHr-ew-oBM.placeholder" = "Password";
+"rHr-ew-oBM.placeholder" = "Parolă";
 /* Class = "UILabel"; text = "Sign in or register an account.  If needed, more advanced options are in Accounts under Settings. "; ObjectID = "Spm-F2-kku"; */
 "Spm-F2-kku.text" = "Conectați-vă sau înregistrați un cont.  Dacă este necesar, opțiuni mai complexe sunt în secțiunea Conturi în Setări. ";
 /* Class = "UITextField"; placeholder = "Username"; ObjectID = "Tjb-kj-Z5d"; */

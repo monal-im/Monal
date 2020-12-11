@@ -553,7 +553,8 @@ enum msgSentState {
     
     self.viewDidAppear = NO;
     self.viewIsScrolling = YES;
-    self.editingCallback = nil;
+    //stop editing (if there is some)
+    [self stopEditing];
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     self.encryptChat = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
     
@@ -634,7 +635,8 @@ enum msgSentState {
 
 -(void) viewWillDisappear:(BOOL)animated
 {
-    self.editingCallback = nil;
+    //stop editing (if there is some)
+    [self stopEditing];
     
     NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc removeObserver:self];
@@ -887,7 +889,7 @@ enum msgSentState {
     // Only send msg that have at least one character
     if(cleanString.length > 0)
     {
-        // Reset chatInput -> remove draft from db so that macOS will show the newly sens message
+        // Reset chatInput -> remove draft from db so that macOS will show the newly sent message
         [self.chatInput setText:@""];
         [self saveMessageDraft];
         
@@ -1958,7 +1960,8 @@ enum msgSentState {
 
 -(UISwipeActionsConfiguration*) tableView:(UITableView*) tableView trailingSwipeActionsConfigurationForRowAtIndexPath:(NSIndexPath*) indexPath
 {
-    self.editingCallback = nil;     //stop editing (if there is some) on new swipe
+    //stop editing (if there is some) on new swipe
+    [self stopEditing];
     
     //don't allow swipe actions for our reload box
     if(indexPath.section == reloadBoxSection)
@@ -1983,6 +1986,7 @@ enum msgSentState {
         weakify(self);
         self.editingCallback = ^(NSString* newBody) {
             strongify(self);
+            self.editingCallback = nil;
             if(newBody != nil)
             {
                 message.messageText = newBody;
@@ -2382,7 +2386,7 @@ enum msgSentState {
 
 -(void) stopEditing
 {
-    if(self.editingCallback != nil)
+    if(self.editingCallback)
         self.editingCallback(nil);      //dismiss swipe action
 }
 

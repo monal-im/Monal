@@ -1983,11 +1983,13 @@ static NSDateFormatter* dbFormatter;
         
         [self updateDBTo:4.991 withBlock:^{
             //remove dirty, online, new from db
+            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(50) collate nocase, full_name varchar(50), nick_name varchar(50), group_name varchar(50), iconhash varchar(200), filename varchar(100), state varchar(20), status varchar(200), Muc bool, muc_subject varchar(255), muc_nick varchar(255), backgroundImage text, encrypt bool, subscription varchar(50), ask varchar(50), messageDraft text, lastInteraction INTEGER NOT NULL DEFAULT 0);"];
             [self.db executeNonQuery:@"INSERT INTO buddylist (buddy_id, account_id, buddy_name, full_name, nick_name, group_name, iconhash, filename, state, status, Muc, muc_subject, muc_nick, backgroundImage, encrypt, subscription, ask, messageDraft, lastInteraction) SELECT buddy_id, account_id, buddy_name, full_name, nick_name, group_name, iconhash, filename, state, status, Muc, muc_subject, muc_nick, backgroundImage, encrypt, subscription, ask, messageDraft, lastInteraction FROM _buddylistTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _buddylistTMP;"];
             [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact on buddylist(buddy_name, account_id);"];
+            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
         [self updateDBTo:4.992 withBlock:^{
@@ -1997,12 +1999,14 @@ static NSDateFormatter* dbFormatter;
         [self updateDBTo:4.993 withBlock:^{
             //make filetransferMimeType and filetransferSize have NULL as default value
             //(this makes it possible to distinguish unknown values from known ones)
+            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE message_history (message_history_id integer not null primary key AUTOINCREMENT, account_id integer, message_from text collate nocase, message_to text collate nocase, timestamp datetime, message blob, actual_from text collate nocase, messageid text collate nocase, messageType text, sent bool, received bool, unread bool, encrypted bool, previewText text, previewImage text, stanzaid text collate nocase, errorType text collate nocase, errorReason text, displayed BOOL DEFAULT FALSE, displayMarkerWanted BOOL DEFAULT FALSE, filetransferMimeType VARCHAR(32) DEFAULT NULL, filetransferSize INTEGER DEFAULT NULL);"];
             [self.db executeNonQuery:@"INSERT INTO message_history SELECT * FROM _message_historyTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _message_historyTMP;"];
             [self.db executeNonQuery:@"CREATE INDEX stanzaidIndex on message_history(stanzaid collate nocase);"];
             [self.db executeNonQuery:@"CREATE INDEX messageidIndex on message_history(messageid collate nocase);"];
+            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
 
         // skipping 4.994 due to invalid command
@@ -2016,6 +2020,24 @@ static NSDateFormatter* dbFormatter;
             //(the db upgrade mechanism will make sure that no smacks resume will take place and pep pushes come in for all avatars)
             [self.db executeNonQuery:@"UPDATE account SET iconhash='';"];
             [self.db executeNonQuery:@"UPDATE buddylist SET iconhash='';"];
+        }];
+        
+        [self updateDBTo:4.997 withBlock:^{
+            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+            //create unique constraint for (account_id, buddy_name) on activechats table
+            [self.db executeNonQuery:@"ALTER TABLE activechats RENAME TO _activechatsTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE activechats (account_id integer not null, buddy_name varchar(50) collate nocase, lastMessageTime datetime, lastMesssage blob, pinned bool DEFAULT FALSE, UNIQUE(account_id, buddy_name));"];
+            [self.db executeNonQuery:@"INSERT INTO activechats SELECT * FROM _activechatsTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _activechatsTMP;"];
+            [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueActiveChat ON activechats(buddy_name, account_id);"];
+            
+            //create unique constraint for () on buddylist table
+            [self.db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(50) collate nocase, full_name varchar(50), nick_name varchar(50), group_name varchar(50), iconhash varchar(200), filename varchar(100), state varchar(20), status varchar(200), Muc bool, muc_subject varchar(255), muc_nick varchar(255), backgroundImage text, encrypt bool, subscription varchar(50), ask varchar(50), messageDraft text, lastInteraction INTEGER NOT NULL DEFAULT 0, UNIQUE(account_id, buddy_name));"];
+            [self.db executeNonQuery:@"INSERT INTO buddylist SELECT * FROM _buddylistTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _buddylistTMP;"];
+            [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact on buddylist(buddy_name, account_id);"];
+            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
     }];
     

@@ -296,7 +296,7 @@
 "now" = "acum";
 "Jabber, Prosody, ejabberd etc.   " = "Jabber, Prosody, ejabberd etc.   ";
 "Loading more Messages from Server" = "Încarcă mai multe mesaje de pe server";
-"Name: " = "Name: ";
+"Name: " = "Nume: ";
 "Os: " = "Sistem operare: ";
 "Software Version" = "Versiune software";
 "Version: " = "Version: ";
@@ -310,7 +310,7 @@
 "Open app to see more" = "Deschideți aplicația pentru a vedea mai mult";
 "Mark as read" = "Marchează ca citit";
 "Saving changes to server" = "Salvare modificări pe server";
-"Send" = "Send";
+"Send" = "Trimite";
 "Send message received state" = "Trimitere stare primire mesaj";
 "Set a nickname for this contact" = "Setați un nume pentru acest contact";
 "Sync Read-Markers" = "Sincronizare marcatori de citire";
@@ -324,7 +324,7 @@
 "Display Only Name" = "Afișare doar nume";
 "Display Only Placeholder" = "Afișare numai înlocuitor";
 "No search result." = "Niciun rezultat al căutării.";
-"Notification" = "Notification";
+"Notification" = "Notificare";
 "Can't convert the image to jpeg format." = "Nu s-a putut converti imaginea în format JPG.";
 "Message was encrypted with omemo and can't be decrypted anymore" = "Mesajul a fost criptat cu OMEMO și nu mai poate fi decriptat";
 "No further error description" = "Nicio altă descriere a erorii";
@@ -332,7 +332,7 @@
 "Loading omemo bundles" = "Se încarcă pachetele OMEMO";
 "Domain missing" = "Nume domeniu lipsă";
 "Username missing" = "Nume utilizator lipsă";
-"XMPP ID" = "XMPP ID";
+"XMPP ID" = "Adresa XMPP";
 "XMPP ID missing" = "Adresă XMPP lipsă";
 "You have not entered your XMPP ID yet" = "Nu ați introdus încă adresa XMPP";
 "Your entered XMPP ID is missing the domain" = "Adresei XMPP introdusă îi lipsește numele de domeniu";
@@ -368,7 +368,7 @@
 "New Account" = "Cont nou";
 "QR-Code Scanner" = "Scaner cod QR";
 /* QR-Code-Scanner */
-"QR-Code video error" = "QR-Code video error";
+"QR-Code video error" = "Eroare video cod QR";
 /* QR-Code-Scanner: invalid format */
 "We could not find a xmpp related QR-Code" = "Nu am putut găsi un cod QR legat de XMPP";
 "XMPP: QR-Code" = "XMPP: cod QR";
@@ -393,7 +393,7 @@
 /* MLLoginView: QR-Code Button iOS12 only */
 "QR" = "QR";
 "Could not upload file" = "Nu s-a putut încărca fișierul";
-"Download error" = "Download error";
+"Download error" = "Eroare la descărcare";
 "Failed to copy downloaded file into cache directory" = "Copierea fișierului descărcat în directorul cache nu a reușit";
 "Failed to decode download link" = "Decodarea linkului de descărcare nu a reușit";
 "Failed to decode encrypted link" = "Decodarea legăturii criptate nu a reușit";

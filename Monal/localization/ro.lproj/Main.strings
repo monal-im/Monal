@@ -1,5 +1,5 @@
 /* Class = "UIButton"; normalTitle = "Add Contact"; ObjectID = "21P-WC-8yr"; */
-"21P-WC-8yr.normalTitle" = "Add Contact";
+"21P-WC-8yr.normalTitle" = "Adaugă contact";
 /* Class = "UILabel"; text = "Add a New Contact"; ObjectID = "7Cs-k6-7n4"; */
 "7Cs-k6-7n4.text" = "Adăugă un nou contact";
 /* Class = "UILabel"; text = "Join a Group Chat"; ObjectID = "7dx-xo-wIB"; */
@@ -17,27 +17,27 @@
 /* Class = "UINavigationItem"; title = "Select An Account"; ObjectID = "heq-Ls-ieg"; */
 "heq-Ls-ieg.title" = "Selectare cont";
 /* Class = "UIBarButtonItem"; title = "Next"; ObjectID = "HOk-DV-nls"; */
-"HOk-DV-nls.title" = "Next";
+"HOk-DV-nls.title" = "Următorul";
 /* Class = "UINavigationItem"; title = "Add Contact"; ObjectID = "HYb-u1-ZN3"; */
-"HYb-u1-ZN3.title" = "Add Contact";
+"HYb-u1-ZN3.title" = "Adaugă contact";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "IGd-kM-9BO"; */
 "IGd-kM-9BO.title" = "Închide";
 /* Class = "UITabBarItem"; title = "Item"; ObjectID = "iLC-4b-aD9"; */
-"iLC-4b-aD9.title" = "Item";
+"iLC-4b-aD9.title" = "Articol";
 /* Class = "UITabBarItem"; title = "Item"; ObjectID = "iLC-4b-aDr"; */
-"iLC-4b-aDr.title" = "Item";
+"iLC-4b-aDr.title" = "Articol";
 /* Class = "UITabBarItem"; title = "Chats"; ObjectID = "jh7-be-VPo"; */
 "jh7-be-VPo.title" = "Discuții";
 /* Class = "UIButton"; normalTitle = "Send"; ObjectID = "jIW-zk-rUu"; */
-"jIW-zk-rUu.normalTitle" = "Send";
+"jIW-zk-rUu.normalTitle" = "Trimite";
 /* Class = "UINavigationItem"; title = "Group Chat"; ObjectID = "k0T-5X-FQu"; */
 "k0T-5X-FQu.title" = "Discuție de grup";
 /* Class = "UILabel"; text = "Pull to load more messages"; ObjectID = "K3M-5z-C5O"; */
-"K3M-5z-C5O.text" = "Pull to load more messages";
+"K3M-5z-C5O.text" = "Trageți pentru a încărca mai multe mesaje";
 /* Class = "UILabel"; text = "Send Message"; ObjectID = "KUa-bA-cQb"; */
-"KUa-bA-cQb.text" = "Send Message";
+"KUa-bA-cQb.text" = "Trimite mesaj";
 /* Class = "UINavigationItem"; title = "Send A Message "; ObjectID = "MiR-iW-O6e"; */
-"MiR-iW-O6e.title" = "Send A Message ";
+"MiR-iW-O6e.title" = "Trimite un mesaj ";
 /* Class = "UINavigationItem"; title = "New"; ObjectID = "Msw-bP-HIu"; */
 "Msw-bP-HIu.title" = "Nou";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "NyY-WQ-3hC"; */
@@ -45,17 +45,17 @@
 /* Class = "UIBarButtonItem"; title = "Previous"; ObjectID = "OxW-Yc-5ky"; */
 "OxW-Yc-5ky.title" = "Anterior";
 /* Class = "UIBarButtonItem"; title = "Next"; ObjectID = "PI2-N1-aLJ"; */
-"PI2-N1-aLJ.title" = "Next";
+"PI2-N1-aLJ.title" = "Urmatorul";
 /* Class = "UIBarButtonItem"; title = "Compose"; ObjectID = "pyP-qb-mfr"; */
 "pyP-qb-mfr.title" = "Compune";
 /* Class = "UIButton"; normalTitle = "Join Group"; ObjectID = "Q7I-qj-4zk"; */
 "Q7I-qj-4zk.normalTitle" = "Alăturați-vă grupului";
 /* Class = "UINavigationItem"; title = "Contacts"; ObjectID = "qsR-dX-TO1"; */
-"qsR-dX-TO1.title" = "Contacts";
+"qsR-dX-TO1.title" = "Contacte";
 /* Class = "UINavigationItem"; title = "Chats"; ObjectID = "RRa-hC-xrf"; */
 "RRa-hC-xrf.title" = "Discuții";
 /* Class = "UILabel"; text = "Detail"; ObjectID = "sff-9g-z31"; */
-"sff-9g-z31.text" = "Detail";
+"sff-9g-z31.text" = "Detaliu";
 /* Class = "UILabel"; text = "View Contact Requests"; ObjectID = "SmS-bT-id6"; */
 "SmS-bT-id6.text" = "Vizualizare solicitări persoane de contact";
 /* Class = "UIBarButtonItem"; title = "Done"; ObjectID = "TMS-52-ORP"; */
@@ -63,6 +63,6 @@
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "Vtv-sv-ErG"; */
 "Vtv-sv-ErG.title" = "Închide";
 /* Class = "UIBarButtonItem"; title = "Add"; ObjectID = "wNA-vF-ohQ"; */
-"wNA-vF-ohQ.title" = "Add";
+"wNA-vF-ohQ.title" = "Adaugă";
 /* Class = "UINavigationItem"; title = "Edit Group Chat"; ObjectID = "yIE-Ub-BAk"; */
 "yIE-Ub-BAk.title" = "Editare discuție de grup";

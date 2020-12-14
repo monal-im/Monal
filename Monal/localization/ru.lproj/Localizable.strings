@@ -2,8 +2,8 @@
 "%ld (This device)" = "%ld (This device)";
 "(autojoin)" = "(autojoin)";
 "[This message is OMEMO encrypted]" = "[This message is OMEMO encrypted]";
-"About" = "About";
-"Accept" = "Accept";
+"About" = "О программе";
+"Accept" = "Принять";
 "Access message archives on the server." = "Access message archives on the server.";
 "Account" = "Account";
 "Account Exists" = "Account Exists";

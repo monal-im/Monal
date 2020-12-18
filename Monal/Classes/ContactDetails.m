@@ -55,6 +55,11 @@
          forCellReuseIdentifier:@"TextCell"];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
+
+    self.tableView.rowHeight = UITableViewAutomaticDimension;
+    self.tableView.estimatedRowHeight = UITableViewAutomaticDimension;
+    
+    
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -250,8 +255,9 @@
                 cell.cellDetails.text = self.contact.groupSubject;
             } else {
                 cell.cellDetails.text = self.contact.statusMessage;
-                if([cell.cellDetails.text isEqualToString:@"(null)"])
+                if([cell.cellDetails.text isEqualToString:@"(null)"]) {
                     cell.cellDetails.text = @"";
+                }
             }
             return cell;
         }

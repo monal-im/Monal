@@ -10,6 +10,6 @@
 
 @interface MLDetailsTableViewCell : UITableViewCell
 
-@property (nonatomic, weak) IBOutlet UITextView *cellDetails;
+@property (nonatomic, weak) IBOutlet UILabel *cellDetails;
 
 @end

@@ -1190,7 +1190,8 @@ NSString *const kData=@"data";
 -(void) sendLastAck
 {
     //send last smacks ack as required by smacks revision 1.5.2
-    if(self.connectionProperties.supportsSM3) {
+    if(self.connectionProperties.supportsSM3)
+    {
         DDLogInfo(@"sending last ack");
         [self sendSMAck:NO];
     }
@@ -1198,26 +1199,27 @@ NSString *const kData=@"data";
 
 -(void) sendSMAck:(BOOL) queuedSend
 {
-    if(self.connectionProperties.supportsSM3)
-    {
-        unsigned long unackedCount = 0;
-        NSDictionary* dic;
-        @synchronized(_stateLockObject) {
-            unackedCount = (unsigned long)[self.unAckedStanzas count];
-            dic = @{
-                @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
-                @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
-                @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
-                @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
-                @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", unackedCount],
-            };
-        }
-        MLXMLNode* aNode = [[MLXMLNode alloc] initWithElement:@"a" andNamespace:@"urn:xmpp:sm:3" withAttributes:dic andChildren:@[] andData:nil];
-        if(queuedSend)
-            [self send:aNode];
-        else      //this should only be done from sendQueue (e.g. by sendLastAck())
-            [self writeToStream:[aNode XMLString]];		// dont even bother queueing
+    //don't send anything before a resource is bound
+    if(self.accountState<kStateBound || !self.connectionProperties.supportsSM3)
+        return;
+    
+    unsigned long unackedCount = 0;
+    NSDictionary* dic;
+    @synchronized(_stateLockObject) {
+        unackedCount = (unsigned long)[self.unAckedStanzas count];
+        dic = @{
+            @"h":[NSString stringWithFormat:@"%@",self.lastHandledInboundStanza],
+            @"lastHandledInboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledInboundStanza],
+            @"lastHandledOutboundStanza":[NSString stringWithFormat:@"%@", self.lastHandledOutboundStanza],
+            @"lastOutboundStanza":[NSString stringWithFormat:@"%@", self.lastOutboundStanza],
+            @"unAckedStanzasCount":[NSString stringWithFormat:@"%lu", unackedCount],
+        };
     }
+    MLXMLNode* aNode = [[MLXMLNode alloc] initWithElement:@"a" andNamespace:@"urn:xmpp:sm:3" withAttributes:dic andChildren:@[] andData:nil];
+    if(queuedSend)
+        [self send:aNode];
+    else      //this should only be done from sendQueue (e.g. by sendLastAck())
+        [self writeToStream:[aNode XMLString]];		// dont even bother queueing
 }
 
 #pragma mark - stanza handling

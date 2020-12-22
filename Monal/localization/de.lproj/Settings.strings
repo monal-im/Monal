@@ -29,7 +29,7 @@
 /* Class = "UITableViewController"; title = "Account Edit"; ObjectID = "Tus-3k-aPR"; */
 "Tus-3k-aPR.title" = "Konto bearbeiten";
 /* Class = "UITabBarItem"; title = "Item"; ObjectID = "VJW-A6-Zpp"; */
-"VJW-A6-Zpp.title" = "Item";
+"VJW-A6-Zpp.title" = "Eintrag";
 /* Class = "UINavigationItem"; title = "Root View Controller"; ObjectID = "vKm-u5-p5y"; */
 "vKm-u5-p5y.title" = "Root View Controller";
 /* Class = "UINavigationItem"; title = "Accounts With Logs"; ObjectID = "wlb-8I-yzZ"; */

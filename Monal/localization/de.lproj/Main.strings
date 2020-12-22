@@ -19,13 +19,13 @@
 /* Class = "UIBarButtonItem"; title = "Next"; ObjectID = "HOk-DV-nls"; */
 "HOk-DV-nls.title" = "Weiter";
 /* Class = "UINavigationItem"; title = "Add Contact"; ObjectID = "HYb-u1-ZN3"; */
-"HYb-u1-ZN3.title" = "Add Contact";
+"HYb-u1-ZN3.title" = "Kontakt hinzufügen";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "IGd-kM-9BO"; */
 "IGd-kM-9BO.title" = "Schließen";
 /* Class = "UITabBarItem"; title = "Item"; ObjectID = "iLC-4b-aD9"; */
-"iLC-4b-aD9.title" = "Item";
+"iLC-4b-aD9.title" = "Eintrag";
 /* Class = "UITabBarItem"; title = "Item"; ObjectID = "iLC-4b-aDr"; */
-"iLC-4b-aDr.title" = "Item";
+"iLC-4b-aDr.title" = "Eintrag";
 /* Class = "UITabBarItem"; title = "Chats"; ObjectID = "jh7-be-VPo"; */
 "jh7-be-VPo.title" = "Chats";
 /* Class = "UIButton"; normalTitle = "Send"; ObjectID = "jIW-zk-rUu"; */
@@ -37,7 +37,7 @@
 /* Class = "UILabel"; text = "Send Message"; ObjectID = "KUa-bA-cQb"; */
 "KUa-bA-cQb.text" = "Nachricht senden";
 /* Class = "UINavigationItem"; title = "Send A Message "; ObjectID = "MiR-iW-O6e"; */
-"MiR-iW-O6e.title" = "Nachricht senden ";
+"MiR-iW-O6e.title" = "Eine Nachricht senden ";
 /* Class = "UINavigationItem"; title = "New"; ObjectID = "Msw-bP-HIu"; */
 "Msw-bP-HIu.title" = "Neu";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "NyY-WQ-3hC"; */

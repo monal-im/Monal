@@ -11,7 +11,7 @@
 /* Class = "UITableViewController"; title = "Settings"; ObjectID = "kjF-U7-P8y"; */
 "kjF-U7-P8y.title" = "Einstellungen";
 /* Class = "UINavigationItem"; title = "Root View Controller"; ObjectID = "mLa-XU-o1Q"; */
-"mLa-XU-o1Q.title" = "Root View Controller";
+"mLa-XU-o1Q.title" = "Root-View-Controller";
 /* Class = "UITableViewController"; title = "Notifications"; ObjectID = "nPR-ET-sg3"; */
 "nPR-ET-sg3.title" = "Benachrichtigungen";
 /* Class = "UINavigationItem"; title = "Account Edit"; ObjectID = "pa7-vQ-Yz3"; */
@@ -31,7 +31,7 @@
 /* Class = "UITabBarItem"; title = "Item"; ObjectID = "VJW-A6-Zpp"; */
 "VJW-A6-Zpp.title" = "Eintrag";
 /* Class = "UINavigationItem"; title = "Root View Controller"; ObjectID = "vKm-u5-p5y"; */
-"vKm-u5-p5y.title" = "Root View Controller";
+"vKm-u5-p5y.title" = "Root-View-Controller";
 /* Class = "UINavigationItem"; title = "Accounts With Logs"; ObjectID = "wlb-8I-yzZ"; */
 "wlb-8I-yzZ.title" = "Konten mit Chatverläufen";
 /* Class = "UITabBarItem"; title = "Settings"; ObjectID = "YtW-zK-Qze"; */

@@ -69,6 +69,7 @@
 "Add New Account" = "增加新帳號";
 "[This message is OMEMO encrypted]" = "[此訊息是OMEMO加密]";
 "Add Contact" = "增加聯絡人";
+/* ShareViewController: Account */
 "Account" = "帳號";
 "Account: %@" = "帳號: %@";
 "Apple Push Service" = "Apple推播通知服務";
@@ -408,3 +409,5 @@
 /* DEBUG - ContactDetails */
 "Clear omemo session" = "Clear omemo session";
 "Show URL previews" = "Show URL previews";
+/* shareViewController: recipient */
+"Recipient" = "Recipient";

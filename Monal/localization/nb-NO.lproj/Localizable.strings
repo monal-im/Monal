@@ -140,6 +140,7 @@
 "App" = "Program";
 "Account To Use" = "Konto å bruke";
 "Account Exists" = "Kontoen finnes";
+/* ShareViewController: Account */
 "Account" = "Konto";
 "Accept" = "Godta";
 "About" = "Om";
@@ -409,3 +410,5 @@
 /* DEBUG - ContactDetails */
 "Clear omemo session" = "Clear omemo session";
 "Show URL previews" = "Show URL previews";
+/* shareViewController: recipient */
+"Recipient" = "Recipient";

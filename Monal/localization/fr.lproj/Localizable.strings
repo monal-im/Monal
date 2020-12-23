@@ -275,6 +275,7 @@
 "Add %@ to your contacts?" = "Ajouter %@ à vos contacts ?";
 "Accounts" = "Comptes";
 "Account: %@" = "Compte : %@";
+/* ShareViewController: Account */
 "Account" = "Compte";
 "Accept" = "Accepter";
 "About" = "À propos";
@@ -409,3 +410,5 @@
 /* DEBUG - ContactDetails */
 "Clear omemo session" = "Effacer la session omemo";
 "Show URL previews" = "Afficher l'aperçu des URL";
+/* shareViewController: recipient */
+"Recipient" = "Recipient";

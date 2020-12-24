@@ -45,11 +45,11 @@ void logException(NSException* exception)
 {
     if (@available(iOS 13.0, *))        // for ios 13 onwards
         return @{
-            @"jid": @"ios13push.monal.im",
+            @"jid": @"push.molitor-dietzel.de",
         };
     else                                // for ios 12
         return @{
-            @"jid": @"push.monal.im",
+            @"jid": @"voip-push.eightysoft.de",
         };
 }
 

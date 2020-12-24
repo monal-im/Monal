@@ -25,8 +25,9 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
 -(NSString*) getId;
 -(void) setId:(NSString*) id;
 
--(void) setPushEnableWithNode:(NSString *) node andSecret:(NSString *) secret;
--(void) setPushDisableWithNode:(NSString *) node;
+-(void) setRegisterOnAppserverWithToken:(NSString*) token;
+-(void) setPushEnableWithNode:(NSString*) node andSecret:(NSString*) secret onAppserver:(NSString*) jid;
+-(void) setPushDisable;
 
 /**
  Makes an iq to bind with a resouce. Passing nil will set no resource.

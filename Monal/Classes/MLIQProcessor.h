@@ -10,6 +10,7 @@
 #import "XMPPIQ.h"
 #import "MLXMPPConnection.h"
 #import "XMPPIQ.h"
+#import "XMPPDataForm.h"
 #import "MLXMLNode.h"
 #import "xmpp.h"
 

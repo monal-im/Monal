@@ -58,9 +58,6 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 @property (nonatomic, readonly) BOOL idle;
 
-@property (nonatomic, strong) NSString* pushNode;
-@property (nonatomic, strong) NSString* pushSecret;
-
 @property (nonatomic, strong) MLXMPPConnection* connectionProperties;
 
 //reg

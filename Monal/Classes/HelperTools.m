@@ -26,6 +26,31 @@ void logException(NSException* exception)
     usleep(1000000);
 }
 
++(NSDictionary*) pushServer
+{
+    if (@available(iOS 13.0, *))        // for ios 13 onwards
+        return @{
+            @"jid": @"ios13push.monal.im",
+        };
+    else                                // for ios 12
+        return @{
+            @"jid": @"push.monal.im",
+        };
+}
+
++(NSString*) stringFromToken:(NSData*) tokenIn
+{
+    unsigned char* tokenBytes = (unsigned char*)[tokenIn bytes];
+    NSMutableString* token = [[NSMutableString alloc] init];
+    NSInteger counter = 0;
+    while(counter < tokenIn.length)
+    {
+        [token appendString:[NSString stringWithFormat:@"%02x", (unsigned char)tokenBytes[counter]]];
+        counter++;
+    }
+    return token;
+}
+
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString*) description
 {
     if(description == nil || [description isEqualToString:@""])

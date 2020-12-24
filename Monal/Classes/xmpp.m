@@ -722,10 +722,10 @@ NSString *const kData=@"data";
             if(self.accountState>=kStateBound)
                 [self->_sendQueue addOperations: @[[NSBlockOperation blockOperationWithBlock:^{
                     //disable push for this node
-                    if(self.pushNode && [self.pushNode length]>0 && self.connectionProperties.supportsPush)
+                    if(self.connectionProperties.supportsPush)
                     {
-                        XMPPIQ* disable=[[XMPPIQ alloc] initWithType:kiqSetType];
-                        [disable setPushDisableWithNode:self.pushNode];
+                        XMPPIQ* disable = [[XMPPIQ alloc] initWithType:kiqSetType];
+                        [disable setPushDisable];
                         [self writeToStream:disable.XMLString];		// dont even bother queueing
                     }
 
@@ -3192,22 +3192,21 @@ NSString *const kData=@"data";
 
 -(void) enablePush
 {
+    NSString* pushToken = [MLXMPPManager sharedInstance].pushToken;
     if(
+        [MLXMPPManager sharedInstance].hasAPNSToken &&
         self.accountState >= kStateBound &&
-        self.connectionProperties.supportsPush &&
-        self.pushNode != nil && [self.pushNode length] > 0 &&
-        self.pushSecret != nil && [self.pushSecret length] > 0
+        pushToken != nil && [pushToken length] > 0
     )
     {
-        DDLogInfo(@"ENABLING PUSH: %@ < %@", self.pushNode, self.pushSecret);
-        XMPPIQ* enable =[[XMPPIQ alloc] initWithType:kiqSetType];
-        [enable setPushEnableWithNode:self.pushNode andSecret:self.pushSecret];
-        [self send:enable];
-        self.connectionProperties.pushEnabled = YES;
+        XMPPIQ* registerNode = [[XMPPIQ alloc] initWithType:kiqSetType];
+        [registerNode setRegisterOnAppserverWithToken:pushToken];
+        [registerNode setiqTo:[HelperTools pushServer][@"jid"]];
+        [self sendIq:registerNode withHandler:$newHandler(MLIQProcessor, handleAppserverNodeRegistered)];
     }
     else
     {
-        DDLogInfo(@"NOT enabling push: %@ < %@ (accountState: %ld, supportsPush: %@)", self.pushNode, self.pushSecret, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
+        DDLogInfo(@"NOT registering and enabling push: %@ < %@ (accountState: %ld, supportsPush: %@)", [[[UIDevice currentDevice] identifierForVendor] UUIDString], pushToken, (long)self.accountState, self.connectionProperties.supportsPush ? @"YES" : @"NO");
     }
 }
 

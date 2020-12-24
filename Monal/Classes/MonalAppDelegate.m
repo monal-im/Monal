@@ -14,7 +14,6 @@
 #import "HelperTools.h"
 #import "MLNotificationManager.h"
 #import "DataLayer.h"
-#import "MLPush.h"
 #import "MLImageManager.h"
 #import "ActiveChatsViewController.h"
 #import "IPC.h"
@@ -52,9 +51,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) application:(UIApplication*) application didRegisterForRemoteNotificationsWithDeviceToken:(NSData*) deviceToken
 {
-    NSString* token = [MLPush stringFromToken:deviceToken];
+    NSString* token = [HelperTools stringFromToken:deviceToken];
     DDLogInfo(@"APNS token string: %@", token);
-    [[[MLPush alloc] init] postToPushServer:token];
+    [[MLXMPPManager sharedInstance] setPushToken:token];
 }
 
 -(void) application:(UIApplication*) application didFailToRegisterForRemoteNotificationsWithError:(NSError*) error
@@ -76,9 +75,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 // Handle updated APNS tokens
 -(void) pushRegistry:(PKPushRegistry*) registry didUpdatePushCredentials:(PKPushCredentials*) credentials forType:(NSString*) type
 {
-    NSString* token = [MLPush stringFromToken:credentials.token];
+    NSString* token = [HelperTools stringFromToken:credentials.token];
     DDLogInfo(@"APNS voip token string: %@", token);
-    [[[MLPush alloc] init] postToPushServer:token];
+    [[MLXMPPManager sharedInstance] setPushToken:token];
 }
 
 -(void) pushRegistry:(PKPushRegistry*) registry didInvalidatePushTokenForType:(NSString*) type
@@ -154,8 +153,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         [[HelperTools defaultsDB] setBool:[[NSUserDefaults standardUserDefaults] boolForKey:@"HasUpgradedPushiOS13"] forKey:@"HasUpgradedPushiOS13"];
         [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"BackgroundImage"] forKey:@"BackgroundImage"];
         [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"AlertSoundFile"] forKey:@"AlertSoundFile"];
-        [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"pushSecret"] forKey:@"pushSecret"];
-        [[HelperTools defaultsDB] setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"pushNode"] forKey:@"pushNode"];
         
         [[HelperTools defaultsDB] setBool:YES forKey:@"DefaulsMigratedToAppGroup"];
         [[HelperTools defaultsDB] synchronize];
@@ -189,18 +186,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 - (BOOL)application:(UIApplication*) application didFinishLaunchingWithOptions:(NSDictionary*) launchOptions
 {
     //this will use the cached values in defaultsDB, if possible
-    [[MLXMPPManager sharedInstance] setPushNode:nil andSecret:nil];
+    [[MLXMPPManager sharedInstance] setPushToken:nil];
     
     //activate push
     if(@available(iOS 13.0, *))
     {
-        //no more voip mode after ios 13
-        if(![[HelperTools defaultsDB] boolForKey:@"HasUpgradedPushiOS13"]) {
-            MLPush *push = [[MLPush alloc] init];
-            [push unregisterVOIPPush];
-            [[HelperTools defaultsDB] setBool:YES forKey:@"HasUpgradedPushiOS13"];
-        }
-        
         DDLogInfo(@"Registering for APNS...");
         [[UIApplication sharedApplication] registerForRemoteNotifications];
     }

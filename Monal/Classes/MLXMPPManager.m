@@ -57,6 +57,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [[HelperTools defaultsDB] setObject:@"" forKey:@"udpLoggerKey"];
 
         [[HelperTools defaultsDB] setBool:YES forKey:@"SetDefaults"];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"DefaulsMigratedToAppGroup"];
         [[HelperTools defaultsDB] synchronize];
     }
 
@@ -157,7 +158,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     _isBackgrounded = NO;
     
     [self defaultSettings];
-    [self setPushNode:nil andSecret:nil];       //load push settings from defaultsDB (can be overwritten later on in mainapp, but *not* in appex)
+    [self setPushToken:nil];       //load push settings from defaultsDB (can be overwritten later on in mainapp, but *not* in appex)
 
     //set up regular ping
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -382,8 +383,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     server.selfSignedCert = [[account objectForKey:kSelfSigned] boolValue];
 
     xmpp* xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]]];
-    xmppAccount.pushNode = self.pushNode;
-    xmppAccount.pushSecret = self.pushSecret;
     xmppAccount.statusMessage = [account objectForKey:@"statusMessage"];
 
     if(xmppAccount)
@@ -697,49 +696,35 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - APNS
 
--(void) setPushNode:(NSString*) node andSecret:(NSString*) secret
+-(void) setPushToken:(NSString*) token
 {
-    if(node && ![node isEqualToString:self.pushNode])
+    if(token && ![token isEqualToString:_pushToken])
     {
-        self.pushNode = node;
-        [[HelperTools defaultsDB] setObject:self.pushNode forKey:@"pushNode"];
+        _pushToken = token;
+        [[HelperTools defaultsDB] setObject:_pushToken forKey:@"pushToken"];
     }
-    else    //use saved one: push server not reachable via http(s) --> the old node might still be valid
-        self.pushNode = [[HelperTools defaultsDB] objectForKey:@"pushNode"];
-
-    if(secret && ![secret isEqualToString:self.pushSecret])
-    {
-        self.pushSecret = secret;
-        [[HelperTools defaultsDB] setObject:self.pushSecret forKey:@"pushSecret"];
-    }
-    else    //use saved one: push server not reachable via http(s) --> the old secret might still be valid
-        self.pushSecret = [[HelperTools defaultsDB] objectForKey:@"pushSecret"];
+    else    //use saved one if we are in NSE appex --> we can't get a new token and the old token might still be valid
+        _pushToken = [[HelperTools defaultsDB] objectForKey:@"pushToken"];
 
     //check node and secret values
     if(
-        self.pushNode &&
-        self.pushSecret &&
-        self.pushNode.length &&
-        self.pushSecret.length
+        _pushToken &&
+        _pushToken.length
     )
     {
-        DDLogInfo(@"push token valid, current push settings: node=%@, secret=%@", self.pushNode, self.pushSecret);
+        DDLogInfo(@"push token valid, current push settings: token=%@", _pushToken);
         self.hasAPNSToken = YES;
     }
     else
     {
         self.hasAPNSToken = NO;
-        DDLogWarn(@"push token invalid, current push settings: node=%@, secret=%@", self.pushNode, self.pushSecret);
+        DDLogWarn(@"push token invalid, current push settings: token=%@", _pushToken);
     }
 
     //only try to enable push if we have a node and secret value
     if(self.hasAPNSToken)
         for(xmpp* xmppAccount in [self connectedXMPP])
-        {
-            xmppAccount.pushNode = self.pushNode;
-            xmppAccount.pushSecret = self.pushSecret;
             [xmppAccount enablePush];
-        }
 }
 
 #pragma mark - share sheet added

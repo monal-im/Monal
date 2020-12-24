@@ -17,6 +17,8 @@ void logException(NSException* exception);
 
 @interface HelperTools : NSObject
 
++(NSDictionary*) pushServer;
++(NSString*) stringFromToken:(NSData*) tokenIn;
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
 +(void) configureFileProtectionFor:(NSString*) file;
 +(NSDictionary*) splitJid:(NSString*) jid;

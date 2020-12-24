@@ -65,10 +65,24 @@ NSString* const kiqErrorType = @"error";
 
 #pragma mark iq set
 
--(void) setPushEnableWithNode:(NSString*) node andSecret:(NSString*) secret
+-(void) setRegisterOnAppserverWithToken:(NSString*) token
+{
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"command" andNamespace:@"http://jabber.org/protocol/commands" withAttributes:@{
+        @"node": @"v1-register-push",
+        @"action": @"execute"
+    } andChildren:@[
+        [[XMPPDataForm alloc] initWithType:@"submit" formType:@"https://github.com/tmolitor-stud-tu/mod_push_appserver/#v1-register-push" andDictionary:@{
+            @"type": @"apns",
+            @"node": [[[UIDevice currentDevice] identifierForVendor] UUIDString],
+            @"token": token
+        }]
+    ] andData:nil]];
+}
+
+-(void) setPushEnableWithNode:(NSString*) node andSecret:(NSString*) secret onAppserver:(NSString*) jid
 {
     [self addChild:[[MLXMLNode alloc] initWithElement:@"enable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
-        @"jid": [MLPush pushServer][@"jid"],
+        @"jid": jid,
         @"node": node
     } andChildren:@[
         [[XMPPDataForm alloc] initWithType:@"submit" formType:@"http://jabber.org/protocol/pubsub#publish-options" andDictionary:@{
@@ -77,14 +91,12 @@ NSString* const kiqErrorType = @"error";
     ] andData:nil]];
 }
 
--(void) setPushDisableWithNode:(NSString *)node
+-(void) setPushDisable
 {
-    MLXMLNode* disableNode =[[MLXMLNode alloc] init];
-    disableNode.element=@"disable";
-    [disableNode.attributes setObject:@"urn:xmpp:push:0" forKey:kXMLNS];
-    [disableNode.attributes setObject:[MLPush pushServer][@"jid"] forKey:@"jid"];
-    [disableNode.attributes setObject:node forKey:@"node"];
-    [self addChild:disableNode];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"disable" andNamespace:@"urn:xmpp:push:0" withAttributes:@{
+        @"jid": [HelperTools pushServer][@"jid"],
+        @"node": [[[UIDevice currentDevice] identifierForVendor] UUIDString]
+    } andChildren:@[] andData:nil]];
 }
 
 -(void) setBindWithResource:(NSString*) resource

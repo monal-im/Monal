@@ -139,9 +139,7 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion;
 @property (nonatomic, readonly) BOOL hasConnectivity;
 
 @property (nonatomic, assign) BOOL hasAPNSToken;
-
-@property (nonatomic, strong) NSString *pushNode;
-@property (nonatomic, strong) NSString *pushSecret;
+@property (nonatomic, strong) NSString* pushToken;
 
 @property (nonatomic, readonly) BOOL isBackgrounded;
 
@@ -171,6 +169,6 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion;
  */
 -(void) cleanArrayOfConnectedAccounts:(NSMutableArray*) dirtySet;
 
--(void) setPushNode:(NSString*) node andSecret:(NSString*)secret;
+-(void) setPushToken:(NSString*) token;
 
 @end

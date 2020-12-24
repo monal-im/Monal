@@ -421,6 +421,39 @@ $$handler(handleSetMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     }
 $$
 
+$$handler(handleAppserverNodeRegistered, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Registering on appserver returned an error: %@", [iqNode findFirst:@"error"]);
+        [self postError:NSLocalizedString(@"Appserver error", @"") withIqNode:iqNode andAccount:account andIsSevere:NO];
+        return;
+    }
+    
+    XMPPDataForm* dataForm = [iqNode findFirst:@"{http://jabber.org/protocol/commands}command<status=complete><node=v1-register-push>/{jabber:x:data}x"];
+    if(!dataForm)
+    {
+        DDLogError(@"Appserver returned invalid data: %@", iqNode);
+        [self postError:NSLocalizedString(@"Appserver returned invalid data", @"") withIqNode:nil andAccount:account andIsSevere:NO];
+        return;
+    }
+    
+    DDLogInfo(@"ENABLING PUSH: %@ < %@", dataForm[@"node"], dataForm[@"secret"]);
+    XMPPIQ* enable = [[XMPPIQ alloc] initWithType:kiqSetType];
+    [enable setPushEnableWithNode:dataForm[@"node"] andSecret:dataForm[@"secret"] onAppserver:dataForm[@"jid"]];
+    [account sendIq:enable withHandler:$newHandler(MLIQProcessor, handlePushEnabled)];
+$$
+
+$$handler(handlePushEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogError(@"Enabling push returned an error: %@", [iqNode findFirst:@"error"]);
+        [self postError:NSLocalizedString(@"Error registering push", @"") withIqNode:iqNode andAccount:account andIsSevere:NO];
+        return;
+    }
+    
+    account.connectionProperties.pushEnabled = YES;
+$$
+
 +(void) iqVersionResult:(XMPPIQ*) iqNode forAccount:(xmpp*) account
 {
     NSString* iqAppName = [iqNode findFirst:@"{jabber:iq:version}query/name#"];

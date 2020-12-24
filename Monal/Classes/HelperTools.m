@@ -30,8 +30,8 @@ void logException(NSException* exception)
 {
     if(description == nil || [description isEqualToString:@""])
         description = @"XMPP Error";
-    NSString* errorReason = [stanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"];
-    NSString* errorText = [stanza findFirst:@"{urn:ietf:params:xml:ns:xmpp-stanzas}text#"];
+    NSString* errorReason = [stanza findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"];
+    NSString* errorText = [stanza findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"];
     NSString* message = [NSString stringWithFormat:@"%@: %@", description, errorReason];
     if(errorText && ![errorText isEqualToString:@""])
         message = [NSString stringWithFormat:@"%@: %@ (%@)", description, errorReason, errorText];

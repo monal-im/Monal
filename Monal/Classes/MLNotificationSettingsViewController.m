@@ -10,7 +10,6 @@
 #import "MLSwitchCell.h"
 #import "MLXMPPManager.h"
 #import "xmpp.h"
-#import "MLPush.h"
 #import "DataLayer.h"
 
 @import UserNotifications;
@@ -62,8 +61,7 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
     self.user = @[NSLocalizedString(@"Can Show Notifications", @"")];
     self.monal = @[NSLocalizedString(@"Monal Push Server", @"")];
 
-    self.advanced = @[NSLocalizedString(@"Rebuild Tokens", @ ""),
-                    NSLocalizedString(@"Mark all messages as read", @ "")];
+    self.advanced = @[NSLocalizedString(@"Mark all messages as read", @"")];
 
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 }
@@ -175,7 +173,7 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
         }
         case kNotificationSettingSectionMonalPush: {
             UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"descriptionCell"];
-            if([MLXMPPManager sharedInstance].pushNode) {
+            if([MLXMPPManager sharedInstance].pushToken) {
                 cell.imageView.image=[UIImage imageNamed:@"888-checkmark"];
             }
             else  {
@@ -224,14 +222,8 @@ NS_ENUM(NSInteger, kNotificationSettingSection)
     {
         case kNotificationSettingSectionAdvanced: {
             switch(indexPath.row) {
-                // Rebuild Tokens
-                case 0: {
-                    MLPush* push = [[MLPush alloc] init];
-                    [push unregisterPush];
-                    break;
-                }
                 // Mark all messages as read
-                case 1: {
+                case 0: {
                     [[DataLayer sharedInstance] setAllMessagesAsRead];
                     break;
                 }

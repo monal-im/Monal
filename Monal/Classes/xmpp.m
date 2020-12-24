@@ -516,20 +516,20 @@ NSString *const kData=@"data";
     if(!_SRVDiscoveryDone)
     {
         DDLogInfo(@"Querying for SRV records");
-        _discoveredServersList=[[[MLDNSLookup alloc] init] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
+        _discoveredServersList = [[[MLDNSLookup alloc] init] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
         _SRVDiscoveryDone = YES;
         // no SRV records found, update server to directly connect to specified domain
         if([_discoveredServersList count]==0)
         {
-            [self.connectionProperties.server updateConnectServer: self.connectionProperties.identity.domain];
-            [self.connectionProperties.server updateConnectPort: @5222];
-            [self.connectionProperties.server updateConnectTLS: NO];
+            [self.connectionProperties.server updateConnectServer:self.connectionProperties.identity.domain];
+            [self.connectionProperties.server updateConnectPort:@5222];
+            [self.connectionProperties.server updateConnectTLS:NO];
             DDLogInfo(@"NO SRV records found, using standard xmpp config: %@:%@ (using starttls)", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort);
         }
     }
 
     // Show warning when xmpp-client srv entry prohibits connections
-    for(NSDictionary *row in _discoveredServersList)
+    for(NSDictionary* row in _discoveredServersList)
     {
         // Check if entry "." == srv target
         if(![[row objectForKey:@"isEnabled"] boolValue])

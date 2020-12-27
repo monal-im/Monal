@@ -1067,11 +1067,17 @@ enum msgSentState {
         return;
     } else {
 
-#if TARGET_OS_MACCATALYST
-        [self attachfile:sender];
-#else
         UIImagePickerController* mediaPicker = [[UIImagePickerController alloc] init];
         mediaPicker.delegate = self;
+#if TARGET_OS_MACCATALYST
+       
+        UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Images", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [self attachfile:sender];
+        }];
+        
+        [photosAction setValue:[[UIImage systemImageNamed:@"photo"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+#else
+
 
         UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             mediaPicker.sourceType = UIImagePickerControllerSourceTypeCamera;
@@ -1099,9 +1105,11 @@ enum msgSentState {
             [cameraAction setValue:[[UIImage imageNamed:@"714-camera"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
         }
         [actionControll addAction:cameraAction];
-        [actionControll addAction:photosAction];
 #endif
+        
+        [actionControll addAction:photosAction];
     }
+    
     UIAlertAction* gpsAlert = [UIAlertAction actionWithTitle:NSLocalizedString(@"Send Location",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         // GPS
         CLAuthorizationStatus gpsStatus = [CLLocationManager authorizationStatus];

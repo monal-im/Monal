@@ -102,6 +102,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 #endif
 
 #pragma mark - notification actions
+
 -(void) showCallScreen:(NSNotification*) userInfo
 {
 //    dispatch_async(dispatch_get_main_queue(),
@@ -663,7 +664,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         //remove syncError notification because all accounts are idle and fully synced now
         [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[@"syncError"]];
         
-#if !TARGET_OS_MACCATALYST
         //use a synchronized block to disconnect only once
         @synchronized(self) {
             DDLogInfo(@"### checking if background is still needed ###");
@@ -710,9 +710,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 }
             }
         }
-#else
-        DDLogInfo(@"### CATALYST BUILD --> ignoring in MonalAppDelegate ###");
-#endif
     }
 }
 
@@ -842,11 +839,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) incomingPushWithCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
 {
-#if TARGET_OS_MACCATALYST
-    DDLogError(@"Ignoring incomingPushWithCompletionHandler: we are a catalyst app!");
-    completionHandler(UIBackgroundFetchResultNoData);
-    return;
-#else
     if(![HelperTools isInBackground])
     {
         DDLogError(@"Ignoring incomingPushWithCompletionHandler: because app is in FG!");
@@ -869,7 +861,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             completionHandler(UIBackgroundFetchResultFailed);
         }]
     };
-#endif
 }
 
 @end

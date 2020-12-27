@@ -228,7 +228,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                 [self disconnectAll];
                 if(!wasIdle)
                 {
-                    DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored");
+                    DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored (will be ignored in appex)");
                     //this will automatically start the app if connectivity gets restored
                     [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundFetchingTask object:nil];
                 }

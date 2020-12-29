@@ -1601,9 +1601,17 @@ static NSDateFormatter* dbFormatter;
 
 -(void) invalidateAllAccountStates
 {
-    DDLogWarn(@"Invalidating state of all accounts...");
-    for(NSDictionary* entry in [self.db executeReader:@"SELECT account_id FROM account;"])
-        [self persistState:[xmpp invalidateState:[self readStateForAccount:entry[@"account_id"]]] forAccount:entry[@"account_id"]];
+#ifndef IS_ALPHA
+    @try {
+#endif
+        DDLogWarn(@"Invalidating state of all accounts...");
+        for(NSDictionary* entry in [self.db executeReader:@"SELECT account_id FROM account;"])
+            [self persistState:[xmpp invalidateState:[self readStateForAccount:entry[@"account_id"]]] forAccount:entry[@"account_id"]];
+#ifndef IS_ALPHA
+    } @catch (NSException* exception) {
+        DDLogError(@"caught invalidate state exception: %@", exception);
+    }
+#endif
 }
 
 -(void) version

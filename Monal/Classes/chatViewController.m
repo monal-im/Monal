@@ -2008,7 +2008,7 @@ enum msgSentState {
     
     //configure swipe actions
     
-    UIContextualAction* LMCEditAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:NSLocalizedString(@"Edit", @"") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+    UIContextualAction* LMCEditAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         [self.chatInput setText:message.messageText];       //we want to begin editing using the old message
         weakify(self);
         self.editingCallback = ^(NSString* newBody) {
@@ -2037,10 +2037,10 @@ enum msgSentState {
     LMCEditAction.backgroundColor = UIColor.systemYellowColor;
     if(@available(iOS 13.0, *))
     {
-        LMCEditAction.image = [[UIImage systemImageNamed:@"pencil.circle.fill"] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
+        LMCEditAction.image = [[[UIImage systemImageNamed:@"pencil.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
     
-    UIContextualAction* LMCDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete", @"") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+    UIContextualAction* LMCDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         [self.xmppAccount sendLMCForId:message.messageId withNewBody:kMessageDeletedBody to:message.to];
         [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
         
@@ -2057,10 +2057,10 @@ enum msgSentState {
     LMCDeleteAction.backgroundColor = UIColor.systemRedColor;
     if(@available(iOS 13.0, *))
     {
-        LMCDeleteAction.image = [[UIImage systemImageNamed:@"trash.circle.fill"] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
+        LMCDeleteAction.image = [[[UIImage systemImageNamed:@"trash.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
     
-    UIContextualAction* localDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Delete Locally", @"") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+    UIContextualAction* localDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
         
         [self->_messageTable beginUpdates];
@@ -2076,10 +2076,10 @@ enum msgSentState {
     localDeleteAction.backgroundColor = UIColor.systemRedColor;
     if(@available(iOS 13.0, *))
     {
-        localDeleteAction.image = [[UIImage systemImageNamed:@"trash.circle.fill"] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
+        localDeleteAction.image = [[[UIImage systemImageNamed:@"trash.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
     
-    UIContextualAction* copyAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:NSLocalizedString(@"Copy", @"") handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+    UIContextualAction* copyAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
         MLBaseCell* selectedCell = [self.messageTable cellForRowAtIndexPath:indexPath];
         if([selectedCell isKindOfClass:[MLChatImageCell class]])
@@ -2093,7 +2093,7 @@ enum msgSentState {
     copyAction.backgroundColor = UIColor.systemGreenColor;
     if(@available(iOS 13.0, *))
     {
-        copyAction.image = [[UIImage systemImageNamed:@"doc.on.doc.fill"] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
+        copyAction.image = [[[UIImage systemImageNamed:@"doc.on.doc.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
     
     //only allow editing for the 2 newest outgoing message that were sent in the last 2 minutes

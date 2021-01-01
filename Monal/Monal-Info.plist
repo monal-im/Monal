@@ -80,7 +80,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>Monal allows users to take photos and upload to a conversation</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Monal allows you to share your location in chat if you want to</string>
+	<string>Monal  uses your location when you send a location message in a conversation.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Monal uses the microphone to transmit your voice in audio calls.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

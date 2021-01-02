@@ -385,7 +385,7 @@
     DDLogDebug(@"All pubsub handlers called");
 }
 
-$$handler(handleFetch, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_ID(NSMutableArray*, queryItems), $_ID(NSMutableDictionary*, data), $_ID(MLHandler*, handler))
+$$handler(handleFetch, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_ID(NSMutableArray*, queryItems), $_ID(NSMutableDictionary*, data), $_HANDLER(handler))
     MLPubSub* me = account.pubsub;
     
     if([iqNode check:@"/<type=error>"])
@@ -441,7 +441,7 @@ $$handler(handleInternalFetch, $_ID(xmpp*, account), $_ID(NSString*, node), $_ID
 $$
 
 
-$$handler(handleConfigureResult1, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_ID(NSDictionary*, configOptions), $_ID(MLHandler*, handler))
+$$handler(handleConfigureResult1, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_ID(NSDictionary*, configOptions), $_HANDLER(handler))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Got error iq for pubsub configure request 1: %@", iqNode);
@@ -498,7 +498,7 @@ $$handler(handleConfigureResult1, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $
     )];
 $$
 
-$$handler(handleConfigureResult2, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(MLHandler*, handler))
+$$handler(handleConfigureResult2, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_HANDLER(handler))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Got error iq for pubsub configure request 2: %@", iqNode);
@@ -523,7 +523,7 @@ $$handler(handlePublishAgain, $_ID(xmpp*, account), $_BOOL(success), $_ID(MLXMLN
     [me publishItem:item onNode:node withConfigOptions:configOptions];
 $$
 
-$$handler(handlePublishResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(MLXMLNode*, item), $_ID(NSString*, node), $_ID(NSDictionary*, configOptions), $_ID(MLHandler*, handler))
+$$handler(handlePublishResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(MLXMLNode*, item), $_ID(NSString*, node), $_ID(NSDictionary*, configOptions), $_HANDLER(handler))
     MLPubSub* me = account.pubsub;
     
     if([iqNode check:@"/<type=error>"])
@@ -545,7 +545,7 @@ $$handler(handlePublishResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
     $call(handler, $ID(account), $BOOL(success, YES));
 $$
 
-$$handler(handleRetractResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_ID(NSString*, itemId), $_ID(MLHandler*, handler))
+$$handler(handleRetractResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_ID(NSString*, itemId), $_HANDLER(handler))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Retract for item '%@' of node '%@' failed: %@", itemId, node, iqNode);
@@ -555,7 +555,7 @@ $$handler(handleRetractResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
     $call(handler, $ID(account), $BOOL(success, YES));
 $$
 
-$$handler(handlePurgeOrDeleteResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_ID(MLHandler*, handler))
+$$handler(handlePurgeOrDeleteResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, node), $_HANDLER(handler))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Purge/Delete of node '%@' failed: %@", node, iqNode);

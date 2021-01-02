@@ -34,7 +34,7 @@ NSCoding protocol to make the handler serializable.
 Variable binding example:
 ```
 NSString* var1 = @"value";
-MLHandler* h = newHandler(ClassName, myHandlerName,
+MLHandler* h = $newHandler(ClassName, myHandlerName,
         $ID(var1),
         $BOOL(success, YES)
 }));
@@ -43,8 +43,8 @@ $call(h, $ID(account), $ID(otherAccountVarWithSameValue, account))
 ```
 
 - Usable shortcuts to create MLHandler objects:
-  - newHandler(delegate, name, boundArgs...)
-  - newHandlerWithInvalidation(delegate, name, invalidation, boundArgs...)
+  - $newHandler(delegateClassName, handlerName, boundArgs...)
+  - $newHandlerWithInvalidation(delegateClassName, handlerName, invalidationHandlerName, boundArgs...)
 
 - You can add an invalidation method to a handler when creating the
 MLHandler object (after invalidating a handler you can not call or
@@ -58,11 +58,11 @@ $$
 // definition of invalidation method
 $$handler(myInvalidationName, $_BOOL(done), $_ID(NSString*, var1))
         // your code comes here
-        // variables defined/imported: var1, done
-        // variables that could be defined/imported: var1, success, done
+        // variables imported: var1, done
+        // variables that could have been imported: var1, success, done
 $$
 
-MLHandler* h = newHandlerWithInvalidation(ClassName, myHandlerName, myInvalidationName,
+MLHandler* h = $newHandlerWithInvalidation(delegateClassName, myHandlerName, myInvalidationHandlerName,
         $ID(var1, @"value"),
         $BOOL(success, YES)
 }));
@@ -84,6 +84,7 @@ $invalidate(h, $BOOL(done, YES))
 #define $INT(name, ...)                                                   metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( @#name : [NSNumber numberWithInt: name ] )( _packINT(name, __VA_ARGS__) )
 #define $DOUBLE(name, ...)                                                metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( @#name : [NSNumber numberWithDouble: name ] )( _packINT(name, __VA_ARGS__) )
 #define $INTEGER(name, ...)                                               metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( @#name : [NSNumber numberWithInteger: name ] )( _packINT(name, __VA_ARGS__) )
+#define $HANDLER(name, ...)                                               metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( @#name : nilWrapper(name) )( _packID(name, __VA_ARGS__) )
 
 //declare handler, the order of provided arguments does not matter because we use named arguments
 #define $$handler(name, ...)                                              +(void) MLHandler_##name##_withArguments:(NSDictionary*) _callerArgs andBoundArguments:(NSDictionary*) _boundArgs { metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))( )( metamacro_foreach(_expand_import, ;, __VA_ARGS__) );
@@ -92,6 +93,7 @@ $invalidate(h, $BOOL(done, YES))
 #define $_INT(var)                                                        int var = _callerArgs[@#var] ? [_callerArgs[@#var] intValue] : [_boundArgs[@#var] boolValue]
 #define $_DOUBLE(var)                                                     double var = _callerArgs[@#var] ? [_callerArgs[@#var] doubleValue] : [_boundArgs[@#var] boolValue]
 #define $_INTEGER(var)                                                    NSInteger var = _callerArgs[@#var] ? [_callerArgs[@#var] integerValue] : [_boundArgs[@#var] boolValue]
+#define $_HANDLER(var)                                                    MLHandler* var = _callerArgs[@#var] ? _callerArgs[@#var] : _boundArgs[@#var]
 #define $$                                                                }
 
 //call handler/invalidation
@@ -105,6 +107,7 @@ $invalidate(h, $BOOL(done, YES))
 #define _packINT(name, value, ...)                                        @#name : [NSNumber numberWithInt: value ]
 #define _packDOUBLE(name, value, ...)                                     @#name : [NSNumber numberWithDouble: value ]
 #define _packINTEGER(name, value, ...)                                    @#name : [NSNumber numberWithInteger: value ]
+#define _packHANDLER(name, value, ...)                                    @#name : nilWrapper(value)
 
 NS_ASSUME_NONNULL_BEGIN
 

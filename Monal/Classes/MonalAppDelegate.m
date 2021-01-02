@@ -369,41 +369,34 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
  */
 -(void) handleURL:(NSURL *) url {
     //TODO just uses fist account. maybe change in the future
-    xmpp *account=[[MLXMPPManager sharedInstance].connectedXMPP firstObject];
+    xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP firstObject];
     if(account) {
-        NSURLComponents *components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
-        __block MLContact *contact = [[MLContact alloc] init];
-        contact.contactJid= components.path;
-        contact.accountId=account.accountNo;
-        __block NSString *mucPassword;
+        NSURLComponents* components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
+        NSString* mucJid = components.path;
+        BOOL isGroup = NO;
         
-        [components.queryItems enumerateObjectsUsingBlock:^(NSURLQueryItem * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if([obj.name isEqualToString:@"join"]) {
-                contact.isGroup=YES;
-            }
-            if([obj.name isEqualToString:@"password"]) {
-                mucPassword=obj.value;
-            }
-        }];
-        
-        if(contact.isGroup) {
-            //TODO maybe default nick once we have defined one
-            [[MLXMPPManager sharedInstance] joinRoom:contact.contactJid withNick:account.connectionProperties.identity.user andPassword:mucPassword forAccounId:contact.accountId];
+        for(NSURLQueryItem* item in components.queryItems)
+        {
+            if([item.name isEqualToString:@"join"])
+                isGroup = YES;
         }
         
-        [[DataLayer sharedInstance] addActiveBuddies:contact.contactJid forAccount:contact.accountId];
+        if(isGroup)
+            [account joinMuc:mucJid];
         
-        //no success may mean its already there
+        [[DataLayer sharedInstance] addActiveBuddies:mucJid forAccount:account.accountNo];
+        
         dispatch_async(dispatch_get_main_queue(), ^{
-            [(ActiveChatsViewController *) self.activeChats presentChatWithRow:contact];
-            [(ActiveChatsViewController *) self.activeChats refreshDisplay];
+            MLContact* contact = [[DataLayer sharedInstance] contactForUsername:mucJid forAccount:account.accountNo];
+            [(ActiveChatsViewController*)self.activeChats presentChatWithRow:contact];
+            [(ActiveChatsViewController*)self.activeChats refreshDisplay];
         });
     }
 }
 
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
 {
-    if([url.scheme isEqualToString:@"xmpp"]) //for links
+    if([url.scheme isEqualToString:@"xmpp"])        //for xmpp uris
     {
         [self handleURL:url];
         return YES;

@@ -347,6 +347,7 @@ NSString* const kiqErrorType = @"error";
 }
 
 #pragma mark MUC
+
 -(void) setInstantRoom
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] init];

@@ -78,11 +78,11 @@ allow subscription. Called in response to a remote request.
 /**
  join specified room on server
  */
--(void) joinRoom:(NSString*) room withPassword:(NSString*) password onServer:(NSString*) server withName:(NSString*)name;
+-(void) joinRoom:(NSString*) room withNick:(NSString*) nick;
 
 /**
  leave specified room
  */
--(void) leaveRoom:(NSString*) room onServer:(NSString*) server withName:(NSString*)name;
+-(void) leaveRoom:(NSString*) room withNick:(NSString*) nick;
 
 @end

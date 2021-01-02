@@ -16,12 +16,15 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class MLXMLNode;
+@class xmpp;
 @class XMPPStanza;
 
 void logException(NSException* exception);
 
 @interface HelperTools : NSObject
 
++(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere;
 +(NSDictionary*) pushServer;
 +(NSString*) stringFromToken:(NSData*) tokenIn;
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;

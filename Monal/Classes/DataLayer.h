@@ -103,19 +103,23 @@ extern NSString* const kMessageTypeFiletransfer;
 
 #pragma mark - MUC
 
--(NSString *) ownNickNameforMuc:(NSString*) room andServer:(NSString*) server forAccount:(NSString*) accountNo;
--(BOOL) updateOwnNickName:(NSString *) nick forMuc:(NSString*) room andServer:(NSString*) server forAccount:(NSString*) accountNo;
-
-
+-(BOOL) initMuc:(NSString*) room forAccountId:(NSString*) accountNo andMucNick:(NSString* _Nullable) mucNick;
+-(void) addMucFavorite:(NSString*) room forAccountId:(NSString*) accountNo andMucNick:(NSString* _Nullable) mucNick;
+-(NSString*) lastStanzaIdForMuc:(NSString* _Nonnull) room andAccount:(NSString* _Nonnull) accountNo;
+-(void) setLastStanzaId:(NSString*) lastStanzaId forMuc:(NSString* _Nonnull) room andAccount:(NSString* _Nonnull) accountNo;
 -(BOOL) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo;
 
+-(NSString* _Nullable) ownNickNameforMuc:(NSString*) room forAccount:(NSString*) accountNo;
+-(BOOL) updateOwnNickName:(NSString*) nick forMuc:(NSString*) room forAccount:(NSString*) accountNo;
 
--(NSMutableArray*) mucFavoritesForAccount:(NSString *) accountNo;
--(BOOL) addMucFavoriteForAccount:(NSString *) accountNo withRoom:(NSString *) room nick:(NSString *)nick autoJoin:(BOOL) autoJoin;
--(BOOL) deleteMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo;
--(BOOL) updateMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo autoJoin:(BOOL) autoJoin;
--(BOOL) updateMucSubject:(NSString *) subject forAccount:(NSString *) accountNo andRoom:(NSString *) room;
--(NSString*) mucSubjectforAccount:(NSString *) accountNo andRoom:(NSString *) room;
+-(BOOL) updateMucSubject:(NSString*) subject forAccount:(NSString*) accountNo andRoom:(NSString*) room;
+-(NSString*) mucSubjectforAccount:(NSString*) accountNo andRoom:(NSString*) room;
+
+-(NSMutableArray*) listMucsForAccount:(NSString*) accountNo;
+-(BOOL) deleteMuc:(NSString*) room forAccountId:(NSString*) accountNo;
+
+-(void) updateMucTypeTo:(NSString*) type forRoom:(NSString*) room andAccount:(NSString*) accountNo;
+-(NSString*) getMucTypeOfRoom:(NSString*) room andAccount:(NSString*) accountNo;
 
 /**
  Calls with YES if contact  has already been added to the database for this account

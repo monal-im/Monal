@@ -327,10 +327,10 @@
     }];
     UIAlertAction *yesAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
 
-        [SAMKeychain deletePasswordForService:kMonalKeychainName account:[NSString stringWithFormat:@"%@",self.accountno]];
-        [self.db removeAccount:self.accountno];
         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+        [self.db removeAccount:self.accountno];
+        [SAMKeychain deletePasswordForService:kMonalKeychainName account:[NSString stringWithFormat:@"%@",self.accountno]];
 
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeCustomView;

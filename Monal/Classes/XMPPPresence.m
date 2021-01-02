@@ -67,48 +67,23 @@
 
 #pragma mark MUC 
 
--(void) joinRoom:(NSString*) room withPassword:(NSString*) password onServer:(NSString*) server withName:(NSString*)name
+-(void) joinRoom:(NSString*) room withNick:(NSString*) nick
 {
-    [self.attributes setObject:[NSString stringWithFormat:@"%@@%@/%@", room,server,name] forKey:@"to"];
-    
-    MLXMLNode* xNode =[[MLXMLNode alloc] init];
-    xNode.element=@"x";
-    [xNode.attributes setObject:@"http://jabber.org/protocol/muc" forKey:kXMLNS];
-    
-    MLXMLNode* historyNode =[[MLXMLNode alloc] init];
-    historyNode.element=@"history";
-    [historyNode.attributes setObject:@"0" forKey:@"maxstanzas"];
-    [xNode addChild:historyNode];
-    
-    if(password)
-    {
-    MLXMLNode* passwordNode =[[MLXMLNode alloc] init];
-    passwordNode.element=@"password";
-    passwordNode.data=password;
-    [xNode addChild:passwordNode];
-    }
-
-    [self addChild:xNode];
-    
+    [self.attributes setObject:[NSString stringWithFormat:@"%@/%@", room, nick] forKey:@"to"];
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"http://jabber.org/protocol/muc" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"history" withAttributes:@{@"maxstanzas": @"0"} andChildren:@[] andData:nil]
+    ] andData:nil]];
 }
 
 
--(void) leaveRoom:(NSString*) room onServer:(NSString*) server withName:(NSString*)name
+-(void) leaveRoom:(NSString*) room withNick:(NSString*) nick
 {
-    //depeding on how this is called room might have the full server name
-    if(server && ![room hasSuffix:server]) {
-        [self.attributes setObject:[NSString stringWithFormat:@"%@@%@/%@", room,server,name] forKey:@"to"];
-    }
-    else {
-        [self.attributes setObject:[NSString stringWithFormat:@"%@/%@", room,name] forKey:@"to"];
-    }
-    [self.attributes setObject:@"unavailable" forKey:@"type"];
-    
+    self.attributes[@"to"] = [NSString stringWithFormat:@"%@/%@", room, nick];
+    self.attributes[@"type"] = @"unavailable";
 }
-
-
 
 #pragma mark subscription
+
 -(void) unsubscribeContact:(NSString*) jid
 {
     [self.attributes setObject:jid forKey:@"to"];

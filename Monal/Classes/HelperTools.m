@@ -31,6 +31,16 @@ void logException(NSException* exception)
     usleep(1000000);
 }
 
++(void) postError:(NSString*) description withNode:(XMPPStanza* _Nullable) node andAccount:(xmpp*) account andIsSevere:(BOOL) isSevere
+{
+    NSString* message;
+    if(node)
+        message = [HelperTools extractXMPPError:node withDescription:description];
+    else
+        message = description;
+    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:account userInfo:@{@"message": message, @"isSevere":@(isSevere)}];
+}
+
 +(NSDictionary*) pushServer
 {
     if (@available(iOS 13.0, *))        // for ios 13 onwards

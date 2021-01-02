@@ -495,13 +495,7 @@ enum ContactDetailsAboutRows {
     }]];
 
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
-        if(isMUC) {
-            [[MLXMPPManager sharedInstance] leaveRoom:self.contact.contactJid withNick:self.contact.accountNickInGroup forAccountId:self.contact.accountId ];
-        }
-        else  {
-            [[MLXMPPManager sharedInstance] removeContact:self.contact];
-        }
-
+        [[MLXMPPManager sharedInstance] removeContact:self.contact];
     }]];
 
     alert.popoverPresentationController.sourceView = self.tableView;

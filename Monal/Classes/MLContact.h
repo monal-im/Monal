@@ -18,9 +18,11 @@ FOUNDATION_EXPORT NSString* const kSubRemove;
 
 FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
+@class xmpp;
+
 @interface MLContact : NSObject <NSCoding>
 
-+(NSString*) ownDisplayNameForAccountNo:(NSString*) accountNo andOwnJid:(NSString*)jid;
++(NSString*) ownDisplayNameForAccount:(xmpp*) account;
 
 +(MLContact*) contactFromDictionary:(NSDictionary*) dic;
 +(MLContact*) contactFromDictionary:(NSDictionary*) dic withDateFormatter:(NSDateFormatter*) formatter;
@@ -38,8 +40,6 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
  usually user assigned nick name
  */
 @property (nonatomic, copy) NSString *nickName;
-
-@property (nonatomic, copy) NSString *imageFile;
 
 /**
  xmpp state text
@@ -64,6 +64,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 @property (nonatomic, assign) BOOL isGroup;
 @property (nonatomic, copy) NSString *groupSubject;
+@property (nonatomic, copy) NSString *mucType;
 @property (nonatomic, copy) NSString *accountNickInGroup;
 
 @property (nonatomic, copy) NSString *subscription; //roster subbscription state

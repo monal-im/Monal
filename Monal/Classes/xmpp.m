@@ -38,6 +38,7 @@
 #import "MLMessageProcessor.h"
 #import "MLIQProcessor.h"
 #import "MLPubSubProcessor.h"
+#import "MLMucProcessor.h"
 
 #import "MLHTTPRequest.h"
 #import "AESGcm.h"
@@ -59,6 +60,11 @@ NSString *const kData=@"data";
 -(NSDictionary*) getInternalData;
 -(void) setInternalData:(NSDictionary*) data;
 -(void) handleHeadlineMessage:(XMPPMessage*) messageNode;
+@end
+
+@interface MLMucProcessor ()
+-(NSDictionary*) state;
+-(void) setState:(NSDictionary*) state;
 @end
 
 @interface xmpp()
@@ -1262,7 +1268,7 @@ NSString *const kData=@"data";
         {
             XMPPPresence* presenceNode = (XMPPPresence*)parsedStanza;
             
-            //sanitize: no from or to always means own bare jid
+            //sanitize: no from or to always means own bare/full jid
             if(!presenceNode.from)
                 presenceNode.from = self.connectionProperties.identity.jid;
             if(!presenceNode.to)
@@ -1298,27 +1304,13 @@ NSString *const kData=@"data";
                         [self approveToRoster:presenceNode.fromUser];
                 }
 
-                if([presenceNode check:@"{http://jabber.org/protocol/muc#user}x"])
+                if([presenceNode check:@"{http://jabber.org/protocol/muc#user}x"] || [presenceNode check:@"{http://jabber.org/protocol/muc}x"])
                 {
-                    for(NSString* code in [presenceNode find:@"{http://jabber.org/protocol/muc#user}x/status@code"])
-                    {
-                        if([code isEqualToString:@"201"])
-                        {
-                            //201- created and needs configuration
-                            //make instant room
-                            XMPPIQ *configNode = [[XMPPIQ alloc] initWithType:kiqSetType];
-                            [configNode setiqTo:presenceNode.from];
-                            [configNode setInstantRoom];
-                            [self send:configNode];
-                        }
-                    }
-
-                    if([presenceNode check:@"/<type=unavailable>"])
-                    {
-                        [self incrementLastHandledStanza];
-                        //handle this differently later
-                        return;
-                    }
+                    [MLMucProcessor processPresence:presenceNode forAccount:self];
+                    
+                    //mark this stanza as handled
+                    [self incrementLastHandledStanza];
+                    return;
                 }
 
                 if(![presenceNode check:@"/@type"])
@@ -1430,7 +1422,7 @@ NSString *const kData=@"data";
             XMPPMessage* outerMessageNode = (XMPPMessage*)parsedStanza;
             XMPPMessage* messageNode = outerMessageNode;
             
-            //sanitize outer node: no from or to always means own bare jid
+            //sanitize outer node: no from or to always means own bare/full jid
             if(!outerMessageNode.from)
                 outerMessageNode.from = self.connectionProperties.identity.jid;
             if(!outerMessageNode.to)
@@ -1438,12 +1430,13 @@ NSString *const kData=@"data";
             
             //extract inner message if mam result or carbon copy
             //the original "outer" message will be kept in outerMessageNode while the forwarded stanza will be stored in messageNode
-            if([outerMessageNode check:@"{urn:xmpp:mam:2}result"])          //mam result
+            if(self.connectionProperties.supportsMam2 && [outerMessageNode check:@"{urn:xmpp:mam:2}result"])          //mam result
             {
-                if(![self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from])
+                NSSet* mucJids = [[NSSet alloc] initWithArray:[[DataLayer sharedInstance] listMucsForAccount:self.accountNo]];
+                if(!([self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from] || [mucJids containsObject:outerMessageNode.from]))
                 {
-                    DDLogError(@"mam results must be from our bare jid, ignoring this spoofed mam result!");
-                    //even these stanzas have do be counted by smacks
+                    DDLogError(@"mam results must be from our bare jid or muc jids, ignoring this spoofed mam result!");
+                    //even these stanzas have to be counted by smacks
                     [self incrementLastHandledStanza];
                     return;
                 }
@@ -1457,12 +1450,12 @@ NSString *const kData=@"data";
                 
                 DDLogDebug(@"mam extracted, messageNode is now: %@", messageNode);
             }
-            else if([outerMessageNode check:@"{urn:xmpp:carbons:2}*"])     //carbon copy
+            else if(self.connectionProperties.usingCarbons2 && [outerMessageNode check:@"{urn:xmpp:carbons:2}*"])     //carbon copy
             {
                 if(![self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from])
                 {
                     DDLogError(@"carbon copies must be from our bare jid, ignoring this spoofed carbon copy!");
-                    //even these stanzas have do be counted by smacks
+                    //even these stanzas have to be counted by smacks
                     [self incrementLastHandledStanza];
                     return;
                 }
@@ -1483,6 +1476,7 @@ NSString *const kData=@"data";
             if(!messageNode.to)
                 messageNode.to = self.connectionProperties.identity.fullJid;
             
+            //assert on wrong from and to values
             NSAssert(![messageNode.fromUser containsString:@"/"], @"messageNode.fromUser contains resource!");
             NSAssert(![messageNode.toUser containsString:@"/"], @"messageNode.toUser contains resource!");
             NSAssert(![outerMessageNode.fromUser containsString:@"/"], @"outerMessageNode.fromUser contains resource!");
@@ -2009,6 +2003,7 @@ NSString *const kData=@"data";
             [values setObject:self.connectionProperties.conferenceServer forKey:@"conferenceServer"];
         
         [values setObject:[self.pubsub getInternalData] forKey:@"pubsubData"];
+        [values setObject:[MLMucProcessor state] forKey:@"mucState"];
         [values setObject:[NSNumber numberWithBool:_loggedInOnce] forKey:@"loggedInOnce"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
@@ -2190,6 +2185,9 @@ NSString *const kData=@"data";
             if([dic objectForKey:@"pubsubData"])
                 [self.pubsub setInternalData:[dic objectForKey:@"pubsubData"]];
             
+            if([dic objectForKey:@"mucState"])
+                [MLMucProcessor setState:[dic objectForKey:@"mucState"]];
+            
             //debug output
             DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d",
                 self.accountNo,
@@ -2348,7 +2346,7 @@ NSString *const kData=@"data";
             ((monal_iq_handler_t)_iqHandlers[iqid][@"errorHandler"])(nil);
     }
     _iqHandlers = [[NSMutableDictionary alloc] init];
-
+    
     //force new disco queries because we landed here because of a failed smacks resume
     //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)
     //--> all of this reasons imply that we had to start a new xmpp stream and our old cached disco data
@@ -2367,7 +2365,7 @@ NSString *const kData=@"data";
     self.connectionProperties.supportsHTTPUpload = NO;
     self.connectionProperties.supportsPing = NO;
     self.connectionProperties.supportsRosterPreApproval = NO;
-
+    
     //now fetch roster, request disco and send initial presence
     [self fetchRoster];
     //query disco *before* sending out our first presence because this presence will trigger pubsub "headline" updates and we want to know
@@ -2387,15 +2385,20 @@ NSString *const kData=@"data";
         //initSession() above does not add message stanzas to the self.unAckedStanzas queue --> this is safe to do
         [self resendUnackedMessageStanzasOnly:self.unAckedStanzas];
     }
-    //mam query will be done in MLIQProcessor once the disco result returns
+    
+    //NOTE: mam query will be done in MLIQProcessor once the disco result for our own jid/account returns
+    
+    //join MUCs from muc_favorites db
+    for(NSString* roomJid in [[DataLayer sharedInstance] listMucsForAccount:self.accountNo])
+        [MLMucProcessor sendDiscoQueryFor:roomJid onAccount:self withJoin:YES];
 }
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
 {
     if(!self.connectionProperties.supportsBlocking) return;
-
+    
     XMPPIQ* iqBlocked = [[XMPPIQ alloc] initWithType:kiqSetType];
-  
+    
     [iqBlocked setBlocked:blocked forJid:blockedJid];
     [self send:iqBlocked];
 }
@@ -2403,9 +2406,9 @@ NSString *const kData=@"data";
 -(void) fetchBlocklist
 {
     if(!self.connectionProperties.supportsBlocking) return;
-
+    
     XMPPIQ* iqBlockList = [[XMPPIQ alloc] initWithType:kiqGetType];
-
+    
     [iqBlockList requestBlockList];
     [self sendIq:iqBlockList withHandler:$newHandler(MLIQProcessor, handleBlocklist)];;
 }
@@ -2642,29 +2645,33 @@ NSString *const kData=@"data";
 
 #pragma mark - MUC
 
--(void) joinRoom:(NSString*)room withNick:(NSString*)nick andPassword:(NSString *)password
+-(void) joinMuc:(NSString* _Nonnull) room
 {
-    XMPPPresence* presence =[[XMPPPresence alloc] init];
-    NSArray* parts =[room componentsSeparatedByString:@"@"];
-    if([parts count]>1)
-    {
-        [presence joinRoom:[parts objectAtIndex:0] withPassword:password onServer:[parts objectAtIndex:1] withName:nick];
-    }
-    else{
-        [presence joinRoom:room withPassword:password onServer:self.connectionProperties.conferenceServer withName:nick];
-    }
-    [self send:presence];
+    [MLMucProcessor sendDiscoQueryFor:room onAccount:self withJoin:YES];
+    //TODO MUC: join muc interactively and add to favorites once we joined successful
 }
 
--(void) leaveRoom:(NSString*) room withNick:(NSString *) nick
+-(void) leaveMuc:(NSString* _Nonnull) room
 {
-    XMPPPresence* presence =[[XMPPPresence alloc] init];
-    [presence leaveRoom:room onServer:nil withName:nick];
-    [self send:presence];
+    //TODO MUC: leave room and remove from favorites
 }
 
+-(void) queryMucType:(NSString*) room withCompletion:(xmppCompletion) completion
+{
+    //TODO MUC: used only by ui (shouldn't this whole method be a proxy to MLMucProcessor?)
+    XMPPIQ* mucInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
+    [mucInfo setiqTo:room];
+    [mucInfo setDiscoInfoNode];
+    [self sendIq:mucInfo withResponseHandler:^(XMPPIQ* response) {
+        //TODO MUC: implement this
+    } andErrorHandler:^(XMPPIQ* error) {
+        completion(NO, [HelperTools extractXMPPError:error withDescription:@"Failed to query MUC description"]);
+    }];
+    [self sendIq:mucInfo withHandler:$newHandler(MLIQProcessor, handleAccountDiscoInfo)];
+}
 
 #pragma mark- XMPP add and remove contact
+
 -(void) removeFromRoster:(NSString*) contact
 {
     XMPPIQ* iq = [[XMPPIQ alloc] initWithType:kiqSetType];
@@ -2674,7 +2681,6 @@ NSString *const kData=@"data";
     XMPPPresence* presence =[[XMPPPresence alloc] init];
     [presence unsubscribeContact:contact];
     [self send:presence];
-
 }
 
 -(void) rejectFromRoster:(NSString*) contact
@@ -2689,8 +2695,7 @@ NSString *const kData=@"data";
 {
     XMPPPresence* presence =[[XMPPPresence alloc] init];
     [presence subscribeContact:contact];
-    [self send:presence]; //add them
-
+    [self send:presence];   //add them
 }
 
 -(void) approveToRoster:(NSString*) contact

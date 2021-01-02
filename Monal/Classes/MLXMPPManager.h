@@ -88,22 +88,6 @@
  */
 -(void) updatePassword:(NSString*) password forAccount:(NSString*) accountNo;
 
-
-#pragma mark MUC commands
-
-/**
- Joins the selected Room on the conference server
- */
--(void) joinRoom:(NSString*) roomName withNick:(NSString*) nick andPassword:(NSString*) password forAccountRow:(NSInteger) row;
-
--(void) joinRoom:(NSString*) roomName withNick:(NSString*) nick andPassword:(NSString*) password forAccounId:(NSString*) accountId;
-/**
- leaves a specified MUC room. 
- @param roomName room
- @param accountId the accountid number from the database
- */
--(void) leaveRoom:(NSString*) roomName withNick:(NSString*) nick forAccountId:(NSString*) accountId;
-
 #pragma mark Jingle VOIP
 
 /**

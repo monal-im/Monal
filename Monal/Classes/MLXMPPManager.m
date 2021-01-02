@@ -194,8 +194,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
 
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(autoJoinRoom:) name:kMLHasConnectedNotice object:nil];
-
     //this processes the sharesheet outbox only, the handler in the NotificationServiceExtension will do more interesting things
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(catchupFinished:) name:kMonalFinishedCatchup object:nil];
 
@@ -356,11 +354,16 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         [self connectAccountWithDictionary:account];
 }
 
--(void) connectAccountWithDictionary:(NSDictionary*)account
+-(void) connectAccountWithDictionary:(NSDictionary*) account
 {
     xmpp* existing = [self getConnectedAccountForID:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
     if(existing)
     {
+        if(![account[@"enabled"] boolValue])
+        {
+            DDLogInfo(@"existing but disabled account, ignoring");
+            return;
+        }
         DDLogInfo(@"existing account, calling unfreezed");
         [existing unfreezed];
         DDLogInfo(@"existing account, just pinging.");
@@ -394,6 +397,11 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
         if(_hasConnectivity)
         {
+            if(![account[@"enabled"] boolValue])
+            {
+                DDLogInfo(@"existing but disabled account, not connecting");
+                return;
+            }
             DDLogInfo(@"starting connect");
             [xmppAccount connect];
         }
@@ -437,8 +445,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) logoutAll
 {
-    NSArray* enabledAccountList = [[DataLayer sharedInstance] enabledAccountList];
-    for(NSDictionary* account in enabledAccountList) {
+    NSArray* enabledAccountList = [[DataLayer sharedInstance] accountList];
+    for(NSDictionary* account in enabledAccountList)
+    {
         DDLogVerbose(@"Disconnecting account %@@%@", [account objectForKey:@"username"], [account objectForKey:@"domain"]);
         [self disconnectAccount:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
     }
@@ -459,10 +468,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 -(void) connectIfNecessary
 {
     DDLogVerbose(@"manager connectIfNecessary");
-    NSArray* enabledAccountList = [[DataLayer sharedInstance] enabledAccountList];
-    for(NSDictionary* account in enabledAccountList) {
+    NSArray* enabledAccountList = [[DataLayer sharedInstance] accountList];
+    for(NSDictionary* account in enabledAccountList)
         [self connectAccountWithDictionary:account];
-    }
     DDLogVerbose(@"manager connectIfNecessary done");
 }
 
@@ -554,7 +562,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - contact
 
--(void) removeContact:(MLContact *) contact
+-(void) removeContact:(MLContact*) contact
 {
     xmpp* account = [self getConnectedAccountForID:contact.accountId];
     if(account)
@@ -562,7 +570,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         if(contact.isGroup)
         {
             //if MUC
-            [account leaveRoom:contact.contactJid withNick:contact.accountNickInGroup];
+            [account leaveMuc:contact.contactJid];
         } else  {
             [account removeFromRoster:contact.contactJid];
         }
@@ -603,53 +611,13 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [account setBlocked:isBlocked forJid:contact];
 }
 
-#pragma mark - MUC commands
-
--(void)  joinRoom:(NSString*) roomName  withNick:(NSString *)nick andPassword:(NSString*) password forAccounId:(NSString *) accountId
-{
-    xmpp* account= [self getConnectedAccountForID:accountId];
-    [account joinRoom:roomName withNick:nick andPassword:password];
-}
-
-
--(void)  joinRoom:(NSString*) roomName  withNick:(NSString *)nick andPassword:(NSString*) password forAccountRow:(NSInteger) row
-{
-    xmpp* account;
-    @synchronized(_connectedXMPP) {
-        if(row<[_connectedXMPP count] && row>=0)
-            account = [_connectedXMPP objectAtIndex:row];
-    }
-    if(account)
-        [account joinRoom:roomName withNick:nick andPassword:password];
-}
-
--(void) leaveRoom:(NSString*) roomName withNick:(NSString *) nick forAccountId:(NSString*) accountId
-{
-    xmpp* account= [self getConnectedAccountForID:accountId];
-    [account leaveRoom:roomName withNick:nick];
-    [[DataLayer sharedInstance] removeBuddy:roomName forAccount:accountId];
-}
-
--(void) autoJoinRoom:(NSNotification *) notification
-{
-    NSDictionary *dic = notification.object;
-
-    NSMutableArray* results = [[DataLayer sharedInstance] mucFavoritesForAccount:[dic objectForKey:@"AccountNo"]];
-    for(NSDictionary *row in results)
-    {
-        NSNumber *autoJoin =[row objectForKey:@"autojoin"] ;
-        if(autoJoin.boolValue)
-            [self joinRoom:[row objectForKey:@"room"] withNick:[row objectForKey:@"nick"] andPassword:[row objectForKey:@""] forAccounId:[NSString stringWithFormat:@"%@", [row objectForKey:kAccountID]]];
-    }
-}
-
 #pragma mark - Jingle VOIP
+
 -(void) callContact:(MLContact*) contact
 {
     xmpp* account =[self getConnectedAccountForID:contact.accountId];
     [account call:contact];
 }
-
 
 -(void) hangupContact:(MLContact*) contact
 {

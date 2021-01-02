@@ -151,9 +151,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSArray*) accountList
 {
-    NSString* query = @"select * from account order by account_id asc";
-    NSArray* result = [self.db executeReader:query];
-    return result;
+    return [self.db executeReader:@"SELECT * FROM account ORDER BY account_id ASC;"];
 }
 
 -(NSNumber*) enabledAccountCnts
@@ -171,7 +169,7 @@ static NSDateFormatter* dbFormatter;
     return [[self.db executeScalar:@"SELECT enabled FROM account WHERE account_id=?;" andArguments:@[accountNo]] boolValue];
 }
 
--(NSNumber*) accountIDForUser:(NSString *) user andDomain:(NSString *) domain
+-(NSNumber*) accountIDForUser:(NSString*) user andDomain:(NSString*) domain
 {
     if(!user && !domain)
         return nil;
@@ -182,7 +180,7 @@ static NSDateFormatter* dbFormatter;
     if(!cleanDomain) cleanDomain= @"";
     if(!cleanUser) cleanUser= @"";
 
-    NSString* query = @"select account_id from account where domain=? and username=?";
+    NSString* query = @"SELECT account_id FROM account WHERE domain=? and username=?;";
     NSArray* result = [self.db executeReader:query andArguments:@[cleanDomain, cleanUser]];
     if(result.count > 0) {
         return [result[0] objectForKey:@"account_id"];
@@ -192,7 +190,7 @@ static NSDateFormatter* dbFormatter;
 
 -(BOOL) doesAccountExistUser:(NSString*) user andDomain:(NSString *) domain
 {
-    NSString* query = @"select * from account where domain=? and username=?";
+    NSString* query = @"SELECT * FROM account WHERE domain=? AND username=?;";
     NSArray* result = [self.db executeReader:query andArguments:@[domain, user]];
     return result.count > 0;
 }
@@ -304,7 +302,7 @@ static NSDateFormatter* dbFormatter;
     return [self.db executeNonQuery:@"UPDATE account SET enabled=0 WHERE account_id=?;" andArguments:@[accountNo]] != NO;
 }
 
--(NSMutableDictionary *) readStateForAccount:(NSString*) accountNo
+-(NSMutableDictionary*) readStateForAccount:(NSString*) accountNo
 {
     if(!accountNo) return nil;
     NSString* query = @"SELECT state from account where account_id=?";
@@ -419,7 +417,7 @@ static NSDateFormatter* dbFormatter;
     if(!username || !accountNo)
         return nil;
     
-    NSArray* results = [self.db executeReader:@"SELECT b.buddy_name, state, status, filename, b.full_name, b.nick_name, muc_subject, muc_nick, b.account_id, lastMessageTime, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', blocked, \
+    NSArray* results = [self.db executeReader:@"SELECT b.buddy_name, state, status, b.full_name, b.nick_name, Muc, muc_subject, muc_type, muc_nick, b.account_id, lastMessageTime, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', blocked, \
         CASE \
             WHEN a.buddy_name IS NOT NULL THEN 1 \
             ELSE 0 \
@@ -438,11 +436,11 @@ static NSDateFormatter* dbFormatter;
     //check if we know this contact and return a dummy one if not
     if([results count] == 0)
     {
+        DDLogWarn(@"Returning dummy MLContact for %@ on accountNo %@", username, accountNo);
         return [MLContact contactFromDictionary:@{
             @"buddy_name": username,
             @"nick_name": @"",
             @"full_name": @"",
-            @"filename": @"",
             @"subscription": kSubNone,
             @"ask": @"",
             @"account_id": accountNo,
@@ -852,83 +850,88 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark MUC
 
+-(BOOL) initMuc:(NSString*) room forAccountId:(NSString*) accountNo andMucNick:(NSString* _Nullable) mucNick
+{
+    return [self.db boolWriteTransaction:^{
+        NSString* nick = mucNick;
+        if(!nick)
+            nick = [self ownNickNameforMuc:room forAccount:accountNo];
+        NSAssert(nick, @"Could not determine muc nick when adding muc");
+        
+        // return old buddy and add new one (this changes "normal" buddys to muc buddys if the aren't already tagged as mucs
+        [self.db executeNonQuery:@"DELETE FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, room]];
+        return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'muc', 'muc_nick') VALUES(?, ?, ?, ?);" andArguments:@[accountNo, room, @1, mucNick ? mucNick : @""]];
+    }];
+}
+
+-(void) addMucFavorite:(NSString*) room forAccountId:(NSString*) accountNo andMucNick:(NSString* _Nullable) mucNick
+{
+    [self.db voidWriteTransaction:^{
+        NSString* nick = mucNick;
+        if(!nick)
+            nick = [self ownNickNameforMuc:room forAccount:accountNo];
+        NSAssert(nick, @"Could not determine muc nick when adding muc");
+        
+        [self.db executeNonQuery:@"INSERT INTO muc_favorites (room, nick, account_id) VALUES(?, ?, ?) ON CONFLICT(room, account_id) DO UPDATE SET nick=?;" andArguments:@[room, nick, accountNo, nick]];
+    }];
+}
+
+-(NSString*) lastStanzaIdForMuc:(NSString* _Nonnull) room andAccount:(NSString* _Nonnull) accountNo
+{
+    return [self.db executeScalar:@"SELECT lastMucStanzaId FROM buddylist WHERE muc=1 AND account_id=? AND buddy_name=?;" andArguments:@[accountNo, room]];
+}
+
+-(void) setLastStanzaId:(NSString*) lastStanzaId forMuc:(NSString* _Nonnull) room andAccount:(NSString* _Nonnull) accountNo
+{
+    if(lastStanzaId && [lastStanzaId length])
+        [self.db executeNonQuery:@"UPDATE buddylist SET lastMucStanzaId=? WHERE muc=1 AND account_id=? AND buddy_name=?;" andArguments:@[lastStanzaId, accountNo, room]];
+}
+
+
 -(BOOL) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo
 {
-    NSString* query = @"SELECT Muc from buddylist where account_id=?  and buddy_name=? ";
-    NSArray* params = @[ accountNo, buddy];
-    NSNumber* status=(NSNumber*)[self.db executeScalar:query andArguments:params];
+    NSNumber* status = (NSNumber*)[self.db executeScalar:@"SELECT Muc FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
     return [status boolValue];
 }
 
--(NSString *) ownNickNameforMuc:(NSString*) room andServer:(NSString*) server forAccount:(NSString*) accountNo
+-(NSString* _Nullable) ownNickNameforMuc:(NSString*) room forAccount:(NSString*) accountNo
 {
-    NSString *combinedRoom = room;
-    if([combinedRoom componentsSeparatedByString:@"@"].count == 1) {
-        combinedRoom = [NSString stringWithFormat:@"%@@%@", room, server];
-    }
-
-    NSString* query = @"SELECT muc_nick from buddylist where account_id=?  and buddy_name=? ";
-    NSArray* params = @[ accountNo, combinedRoom];
-    NSString * nick=(NSString*)[self.db executeScalar:query andArguments:params];
-    if(nick.length==0) {
-        NSString* query2= @"SELECT nick from muc_favorites where account_id=?  and room=? ";
-        NSArray *params2=@[ accountNo, combinedRoom];
-        nick=(NSString*)[self.db executeScalar:query2 andArguments:params2];
-    }
+    NSString* nick = (NSString*)[self.db executeScalar:@"SELECT muc_nick FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, room]];
+    // fallback to nick in muc_favorites
+    if(!nick || nick.length == 0)
+        nick = (NSString*)[self.db executeScalar:@"SELECT nick FROM muc_favorites WHERE account_id=? AND room=?;" andArguments:@[accountNo, room]];
+    if(!nick || nick.length == 0)
+        return nil;
     return nick;
 }
 
--(BOOL) updateOwnNickName:(NSString *) nick forMuc:(NSString*) room andServer:(NSString*) server forAccount:(NSString*) accountNo
+-(BOOL) updateOwnNickName:(NSString*) nick forMuc:(NSString*) room forAccount:(NSString*) accountNo
 {
-    NSString* combinedRoom = room;
-    if([combinedRoom componentsSeparatedByString:@"@"].count == 1) {
-        combinedRoom = [NSString stringWithFormat:@"%@@%@", room, server];
-    }
-
-    NSString* query = @"update buddylist set muc_nick=?, muc=1 where account_id=? and buddy_name=?";
-    NSArray* params = @[nick, accountNo, combinedRoom];
+    NSString* query = @"UPDATE buddylist SET muc_nick=? WHERE account_id=? AND buddy_name=? AND muc=1;";
+    NSArray* params = @[nick, accountNo, room];
     DDLogVerbose(@"%@", query);
 
     return [self.db executeNonQuery:query andArguments:params];
 }
 
-
--(BOOL) addMucFavoriteForAccount:(NSString*) accountNo withRoom:(NSString *) room nick:(NSString *)nick autoJoin:(BOOL) autoJoin
+-(BOOL) deleteMuc:(NSString*) room forAccountId:(NSString*) accountNo
 {
-    NSString* query = @"insert into muc_favorites (room, nick, autojoin, account_id) values(?, ?, ?, ?)";
-    NSArray* params = @[room, nick, [NSNumber numberWithBool:autoJoin], accountNo];
-    DDLogVerbose(@"%@", query);
-
-    return [self.db executeNonQuery:query andArguments:params];
-}
-
--(BOOL) updateMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo autoJoin:(BOOL) autoJoin
-{
-    NSString* query = @"update muc_favorites set autojoin=? where mucid=? and account_id=?";
-    NSArray* params = @[[NSNumber numberWithBool:autoJoin], mucid, [NSNumber numberWithInteger:accountNo]];
-    DDLogVerbose(@"%@", query);
-
-    return [self.db executeNonQuery:query andArguments:params];
-}
-
--(BOOL) deleteMucFavorite:(NSNumber *) mucid forAccountId:(NSInteger) accountNo
-{
-    NSString* query = @"delete from muc_favorites where mucid=? and account_id=?";
-    NSArray* params = @[mucid, [NSNumber numberWithInteger:accountNo]];
+    NSString* query = @"DELETE FROM muc_favorites WHERE room=? AND account_id=?;";
+    NSArray* params = @[room, accountNo];
     DDLogVerbose(@"%@", query);
 
     BOOL success = [self.db executeNonQuery:query andArguments:params];
     return success;
 }
 
--(NSMutableArray*) mucFavoritesForAccount:(NSString*) accountNo
+-(NSMutableArray*) listMucsForAccount:(NSString*) accountNo
 {
     return [self.db executeReader:@"SELECT * FROM muc_favorites WHERE account_id=?;" andArguments:@[accountNo]];
 }
 
 -(BOOL) updateMucSubject:(NSString *) subject forAccount:(NSString*) accountNo andRoom:(NSString *) room
 {
-    NSString* query = @"update buddylist set muc_subject=? where account_id=? and buddy_name=?";
+    NSString* query = @"UPDATE buddylist SET muc_subject=? WHERE account_id=? AND buddy_name=?;";
     NSArray* params = @[subject, accountNo, room];
     DDLogVerbose(@"%@", query);
 
@@ -936,15 +939,25 @@ static NSDateFormatter* dbFormatter;
     return success;
 }
 
--(NSString*) mucSubjectforAccount:(NSString*) accountNo andRoom:(NSString *) room
+-(NSString*) mucSubjectforAccount:(NSString*) accountNo andRoom:(NSString*) room
 {
-    NSString* query = @"select muc_subject from buddylist where account_id=? and buddy_name=?";
+    NSString* query = @"SELECT muc_subject FROM buddylist WHERE account_id=? AND buddy_name=?;";
 
     NSArray* params = @[accountNo, room];
     DDLogVerbose(@"%@", query);
 
     NSObject* result = [self.db executeScalar:query andArguments:params];
-    return (NSString *)result;
+    return (NSString*)result;
+}
+
+-(void) updateMucTypeTo:(NSString*) type forRoom:(NSString*) room andAccount:(NSString*) accountNo
+{
+    [self.db executeNonQuery:@"UPDATE buddylist SET muc_type=? WHERE account_id=? AND buddy_name=?;" andArguments:@[type, accountNo, room]];
+}
+
+-(NSString*) getMucTypeOfRoom:(NSString*) room andAccount:(NSString*) accountNo
+{
+    return [self.db executeScalar:@"SELECT muc_type FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, room]];
 }
 
 #pragma mark message Commands
@@ -1288,7 +1301,7 @@ static NSDateFormatter* dbFormatter;
     if(accountJid)
     {
 
-        NSString* query = @"SELECT x.* FROM (select distinct buddy_name AS thename ,'', nick_name, message_from AS buddy_name, filename, a.account_id from message_history AS a LEFT OUTER JOIN buddylist AS b ON a.message_from=b.buddy_name AND a.account_id=b.account_id WHERE a.account_id=? UNION select distinct message_to as thename ,'',  nick_name, message_to as buddy_name,  filename, a.account_id from message_history as a left outer JOIN buddylist AS b ON a.message_to=b.buddy_name AND a.account_id=b.account_id WHERE a.account_id=? AND message_to!=\"(null)\" ) AS x WHERE buddy_name!=? ORDER BY thename COLLATE NOCASE;";
+        NSString* query = @"SELECT x.* FROM (select distinct buddy_name AS thename ,'', nick_name, message_from AS buddy_name, a.account_id from message_history AS a LEFT OUTER JOIN buddylist AS b ON a.message_from=b.buddy_name AND a.account_id=b.account_id WHERE a.account_id=? UNION select distinct message_to as thename ,'',  nick_name, message_to as buddy_name, a.account_id from message_history as a left outer JOIN buddylist AS b ON a.message_to=b.buddy_name AND a.account_id=b.account_id WHERE a.account_id=? AND message_to!=\"(null)\" ) AS x WHERE buddy_name!=? ORDER BY thename COLLATE NOCASE;";
         NSArray* params = @[accountNo, accountNo,
                             accountJid];
         //DDLogVerbose(query);
@@ -2063,7 +2076,7 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"DROP TABLE _activechatsTMP;"];
             [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueActiveChat ON activechats(buddy_name, account_id);"];
             
-            //create unique constraint for () on buddylist table
+            //create unique constraint for (buddy_name, account_id) on buddylist table
             [self.db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(50) collate nocase, full_name varchar(50), nick_name varchar(50), group_name varchar(50), iconhash varchar(200), filename varchar(100), state varchar(20), status varchar(200), Muc bool, muc_subject varchar(255), muc_nick varchar(255), backgroundImage text, encrypt bool, subscription varchar(50), ask varchar(50), messageDraft text, lastInteraction INTEGER NOT NULL DEFAULT 0, UNIQUE(account_id, buddy_name));"];
             [self.db executeNonQuery:@"INSERT INTO buddylist SELECT * FROM _buddylistTMP;"];
@@ -2092,7 +2105,7 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"DROP TABLE _activechatsTMP;"];
             [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueActiveChat ON activechats(buddy_name, account_id);"];
             
-            //create unique constraint for () on buddylist table
+            //create unique constraint for (buddy_name, account_id) on buddylist table
             [self.db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(50) collate nocase, full_name varchar(50), nick_name varchar(50), group_name varchar(50), iconhash varchar(200), filename varchar(100), state varchar(20), status varchar(200), Muc bool, muc_subject varchar(255), muc_nick varchar(255), backgroundImage text, encrypt bool, subscription varchar(50), ask varchar(50), messageDraft text, lastInteraction INTEGER NOT NULL DEFAULT 0, UNIQUE(account_id, buddy_name));"];
             [self.db executeNonQuery:@"INSERT INTO buddylist SELECT * FROM _buddylistTMP;"];
@@ -2108,12 +2121,12 @@ static NSDateFormatter* dbFormatter;
 
         [self updateDBTo:5.003 withBlock:^{
             [self.db executeNonQuery:@"CREATE TABLE 'blocklistCache' (\
-             'account_id' TEXT NOT NULL, \
-             'node' TEXT, \
-             'host' TEXT, \
-             'resource' TEXT, \
-             UNIQUE('account_id','node','host','resource'), \
-             CHECK( \
+                'account_id' TEXT NOT NULL, \
+                'node' TEXT, \
+                'host' TEXT, \
+                'resource' TEXT, \
+                UNIQUE('account_id','node','host','resource'), \
+                CHECK( \
                 (LENGTH('node') > 0 AND LENGTH('host') > 0 AND LENGTH('resource') > 0) \
                 OR \
                 (LENGTH('node') > 0 AND LENGTH('host') > 0) \
@@ -2121,11 +2134,11 @@ static NSDateFormatter* dbFormatter;
                 (LENGTH('host') > 0 AND LENGTH('resource') > 0) \
                 OR \
                 (LENGTH('host') > 0) \
-             ), \
-             FOREIGN KEY('account_id') REFERENCES 'account'('account_id') \
-         );"];
+                ), \
+                FOREIGN KEY('account_id') REFERENCES 'account'('account_id') \
+            );"];
         }];
-
+        
         /*
          * OMEMO trust levels:
          * 0: no trust
@@ -2159,6 +2172,23 @@ static NSDateFormatter* dbFormatter;
                 FROM _signalContactIdentityTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _signalContactIdentityTMP;"];
         }];
+        
+        [self updateDBTo:5.005 withBlock:^{
+            //remove group_name and filename columns from buddylist, resize buddy_name, full_name, nick_name and muc_subject columns and add lastStanzaId column (only used for mucs)
+            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+            [self.db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(255) collate nocase, full_name varchar(255), nick_name varchar(255), iconhash varchar(200), state varchar(20), status varchar(200), Muc bool, muc_subject varchar(1024), muc_nick varchar(255), backgroundImage text, encrypt bool, subscription varchar(50), ask varchar(50), messageDraft text, lastInteraction INTEGER NOT NULL DEFAULT 0, blocked BOOL DEFAULT FALSE, muc_type VARCHAR(10) DEFAULT 'channel', lastMucStanzaId text DEFAULT NULL, UNIQUE(account_id, buddy_name));"];
+            [self.db executeNonQuery:@"INSERT INTO buddylist SELECT buddy_id, account_id, buddy_name, full_name, nick_name, iconhash, state, status, Muc, muc_subject, muc_nick, backgroundImage, encrypt, subscription, ask, messageDraft, lastInteraction, blocked, 'channel', NULL FROM _buddylistTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _buddylistTMP;"];
+            [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact ON buddylist(buddy_name, account_id);"];
+            [self.db executeNonQuery:@"UPDATE buddylist SET muc_type='channel' WHERE Muc = true;"];     //muc default type
+            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
+            
+            //create new muc favorites table
+            [self.db executeNonQuery:@"DROP TABLE muc_favorites;"];
+            [self.db executeNonQuery:@"CREATE TABLE muc_favorites (room VARCHAR(255) PRIMARY KEY, nick varchar(255), account_id INTEGER, UNIQUE(room, account_id));"];
+        }];
+        
     }];
     
     DDLogInfo(@"Database version check complete");

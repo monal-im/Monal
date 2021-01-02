@@ -547,7 +547,6 @@ enum msgSentState {
     [nc addObserver:self selector:@selector(handleReceivedMessage:) name:kMonalMessageReceivedNotice object:nil];
     [nc addObserver:self selector:@selector(handleDisplayedMessage:) name:kMonalMessageDisplayedNotice object:nil];
     [nc addObserver:self selector:@selector(handleFiletransferMessageUpdate:) name:kMonalMessageFiletransferUpdateNotice object:nil];
-    [nc addObserver:self selector:@selector(presentMucInvite:) name:kMonalReceivedMucInviteNotice object:nil];
     
     [nc addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
     [nc addObserver:self selector:@selector(updateUIElementsOnAccountChange:) name:kMonalAccountStatusChanged object:nil];
@@ -1271,26 +1270,6 @@ enum msgSentState {
     return messageDBId;
 }
 
--(void) presentMucInvite:(NSNotification *)notification
-{
-    xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
-    NSDictionary* userDic = notification.userInfo;
-    NSString* from = [userDic objectForKey:@"from"];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSString* messageString = [NSString  stringWithFormat:NSLocalizedString(@"You have been invited to a conversation %@?", @""), from ];
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Group Chat Invite", @"") message:messageString preferredStyle:UIAlertControllerStyleAlert];
-        
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Join", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            [xmppAccount joinRoom:from withNick:xmppAccount.connectionProperties.identity.user andPassword:nil];
-            [alert dismissViewControllerAnimated:YES completion:nil];
-        }]];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-            [alert dismissViewControllerAnimated:YES completion:nil];
-        }]];
-        [self presentViewController:alert animated:YES completion:nil];
-    });
-}
-
 -(void) handleNewMessage:(NSNotification *)notification
 {
     DDLogVerbose(@"chat view got new message notice %@", notification.userInfo);
@@ -1891,7 +1870,7 @@ enum msgSentState {
             {
                 NSString* displayName;
                 if([row.from isEqualToString:self.jid])
-                    displayName = [MLContact ownDisplayNameForAccountNo:self.contact.accountId andOwnJid:self.jid];
+                    displayName = [MLContact ownDisplayNameForAccount:self.xmppAccount];
                 else
                     displayName = [self.contact contactDisplayName];
                 UIFont* italicFont = [UIFont italicSystemFontOfSize:cell.messageBody.font.pointSize];

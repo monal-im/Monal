@@ -119,16 +119,6 @@
     DDLogWarn(@"Got unhandled IQ error: %@", iqNode);
 }
 
-+(void) postError:(NSString*) description withIqNode:(XMPPIQ*) iqNode andAccount:(xmpp*) account  andIsSevere:(BOOL) isSevere
-{
-    NSString* message;
-    if(iqNode)
-        message = [HelperTools extractXMPPError:iqNode withDescription:description];
-    else
-        message = description;
-    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:account userInfo:@{@"message": message, @"isSevere":@(isSevere)}];
-}
-
 $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
@@ -180,7 +170,7 @@ $$handler(handleBind, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
         DDLogWarn(@"Binding our resource returned an error: %@", [iqNode findFirst:@"error"]);
         if([iqNode check:@"/<type=cancel>"])
         {
-            [self postError:NSLocalizedString(@"XMPP Bind Error", @"") withIqNode:iqNode andAccount:account andIsSevere:YES];
+            [HelperTools postError:NSLocalizedString(@"XMPP Bind Error", @"") withNode:iqNode andAccount:account andIsSevere:YES];
             [account disconnect];
         }
         else if([iqNode check:@"/<type=modify>"])
@@ -240,7 +230,7 @@ $$
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Roster query returned an error: %@", [iqNode findFirst:@"error"]);
-        [self postError:NSLocalizedString(@"XMPP Roster Error", @"") withIqNode:iqNode andAccount:account andIsSevere:NO];
+        [HelperTools postError:NSLocalizedString(@"XMPP Roster Error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
         return;
     }
     
@@ -293,7 +283,7 @@ $$handler(handleAccountDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Disco info query to our account returned an error: %@", [iqNode findFirst:@"error"]);
-        [self postError:NSLocalizedString(@"XMPP Account Info Error", @"") withIqNode:iqNode andAccount:account andIsSevere:NO];
+        [HelperTools postError:NSLocalizedString(@"XMPP Account Info Error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
         return;
     }
     
@@ -361,7 +351,7 @@ $$handler(handleServerDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Disco info query to our server returned an error: %@", [iqNode findFirst:@"error"]);
-        [self postError:NSLocalizedString(@"XMPP Disco Info Error", @"") withIqNode:iqNode andAccount:account andIsSevere:NO];
+        [HelperTools postError:NSLocalizedString(@"XMPP Disco Info Error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
         return;
     }
     
@@ -440,7 +430,7 @@ $$handler(handleMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"MAM prefs query returned an error: %@", [iqNode findFirst:@"error"]);
-        [self postError:NSLocalizedString(@"XMPP mam preferences error", @"") withIqNode:iqNode andAccount:account andIsSevere:NO];
+        [HelperTools postError:NSLocalizedString(@"XMPP mam preferences error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
         return;
     }
     if([iqNode check:@"{urn:xmpp:mam:2}prefs@default"])
@@ -448,7 +438,7 @@ $$handler(handleMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     else
     {
         DDLogError(@"MAM prefs query returned unexpected result: %@", iqNode);
-        [self postError:NSLocalizedString(@"Unexpected mam preferences result", @"") withIqNode:nil andAccount:account andIsSevere:NO];
+        [HelperTools postError:NSLocalizedString(@"Unexpected mam preferences result", @"") withNode:nil andAccount:account andIsSevere:NO];
     }
 $$
 
@@ -456,7 +446,7 @@ $$handler(handleSetMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Seting MAM prefs returned an error: %@", [iqNode findFirst:@"error"]);
-        [self postError:NSLocalizedString(@"XMPP mam preferences error", @"") withIqNode:iqNode andAccount:account andIsSevere:NO];
+        [HelperTools postError:NSLocalizedString(@"XMPP mam preferences error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
         return;
     }
 $$
@@ -465,7 +455,7 @@ $$handler(handleAppserverNodeRegistered, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqN
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Registering on appserver returned an error: %@", [iqNode findFirst:@"error"]);
-        [self postError:NSLocalizedString(@"Appserver error", @"") withIqNode:iqNode andAccount:account andIsSevere:NO];
+        [HelperTools postError:NSLocalizedString(@"Appserver error", @"") withNode:iqNode andAccount:account andIsSevere:NO];
         return;
     }
     
@@ -473,7 +463,7 @@ $$handler(handleAppserverNodeRegistered, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqN
     if(!dataForm)
     {
         DDLogError(@"Appserver returned invalid data: %@", iqNode);
-        [self postError:NSLocalizedString(@"Appserver returned invalid data", @"") withIqNode:nil andAccount:account andIsSevere:NO];
+        [HelperTools postError:NSLocalizedString(@"Appserver returned invalid data", @"") withNode:nil andAccount:account andIsSevere:NO];
         return;
     }
     
@@ -487,11 +477,10 @@ $$handler(handlePushEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Enabling push returned an error: %@", [iqNode findFirst:@"error"]);
-        [self postError:NSLocalizedString(@"Error registering push", @"") withIqNode:iqNode andAccount:account andIsSevere:NO];
+        [HelperTools postError:NSLocalizedString(@"Error registering push", @"") withNode:iqNode andAccount:account andIsSevere:NO];
         account.connectionProperties.pushEnabled = NO;
         return;
     }
-    
     account.connectionProperties.pushEnabled = YES;
 $$
 

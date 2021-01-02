@@ -491,12 +491,10 @@ enum activeChatsControllerSections {
             [cell showStatusText:NSLocalizedString(@"📍 A Location", @"")];
         else
         {
-            //XEP-0245: The slash me Command
             NSString* displayName;
-            NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:chatContact.accountId];
-            NSString* ownJid = [NSString stringWithFormat:@"%@@%@",[accountDict objectForKey:@"username"], [accountDict objectForKey:@"domain"]];
-            if([messageRow.actualFrom isEqualToString:ownJid])
-                displayName = [MLContact ownDisplayNameForAccountNo:chatContact.accountId andOwnJid:ownJid];
+            xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:chatContact.accountId];
+            if([messageRow.actualFrom isEqualToString:account.connectionProperties.identity.jid])
+                displayName = [MLContact ownDisplayNameForAccount:account];
             else
                 displayName = [chatContact contactDisplayName];
             if([messageRow.messageText hasPrefix:@"/me "])

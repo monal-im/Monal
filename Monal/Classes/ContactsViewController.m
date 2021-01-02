@@ -367,10 +367,7 @@
     }]];
     
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
-        if(contact.isGroup)
-            [[MLXMPPManager sharedInstance] leaveRoom:contact.contactJid withNick:contact.accountNickInGroup forAccountId:contact.accountId ];
-        else
-            [[MLXMPPManager sharedInstance] removeContact:contact];
+        [[MLXMPPManager sharedInstance] removeContact:contact];
         
         if(self.searchResults.count == 0) {
             [self.contactsTable beginUpdates];

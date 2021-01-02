@@ -156,13 +156,13 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 /**
  join a room on the conference server
  */
--(void) joinRoom:(NSString*) room withNick:(NSString* _Nullable) nick andPassword:(NSString* _Nullable)password;
+-(void) joinMuc:(NSString* _Nonnull) room;
 
 /**
  leave specific room. the nick name is the name used in the room.
  it is arbitrary and it may not match any other hame.
  */
--(void) leaveRoom:(NSString*) room withNick:(NSString* _Nullable) nick;
+-(void) leaveMuc:(NSString* _Nonnull) room;
 
 #pragma mark Jingle
 /**

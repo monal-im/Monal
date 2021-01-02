@@ -17,6 +17,7 @@
 #import "MLPubSub.h"
 #import "MLOMEMO.h"
 #import "MLFiletransfer.h"
+#import "MLMucProcessor.h"
 
 @interface MLPubSub ()
 -(void) handleHeadlineMessage:(XMPPMessage*) messageNode;
@@ -44,6 +45,8 @@ static NSMutableDictionary* _typingNotifications;
         }
         
         NSString* errorType = [messageNode findFirst:@"error@type"];
+        if(!errorType)
+            errorType= @"unknown error";
         NSString* errorReason = [messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}!text$"];
         NSString* errorText = [messageNode findFirst:@"error/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"];
         DDLogInfo(@"Got errorType='%@', errorReason='%@', errorText='%@' for message '%@'", errorType, errorReason, errorText, [messageNode findFirst:@"/@id"]);
@@ -52,10 +55,6 @@ static NSMutableDictionary* _typingNotifications;
             errorType = [NSString stringWithFormat:@"%@ - %@", errorType, errorReason];
         if(!errorText)
             errorText = NSLocalizedString(@"No further error description", @"");
-        
-        if(!errorType) {
-            errorType= @"Unknown error";
-        }
         
         //update db
         [[DataLayer sharedInstance]
@@ -82,8 +81,24 @@ static NSMutableDictionary* _typingNotifications;
     if([messageNode.fromUser isEqualToString:messageNode.toUser])
         return;
     
-    //add contact if possible (ignore already existing contacts)
-    [[DataLayer sharedInstance] addContact:messageNode.fromUser forAccount:account.accountNo nickname:nil andMucNick:nil];
+    //ignore muc PMs (after discussion with holger we don't want to support that)
+    if(![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] && [messageNode check:@"{http://jabber.org/protocol/muc#user}x"])
+    {
+        XMPPMessage* errorReply = [[XMPPMessage alloc] init];
+        [errorReply.attributes setObject:kMessageChatType forKey:@"type"];
+        [errorReply.attributes setObject:messageNode.from forKey:@"to"];        //this has to be the full jid here
+        [errorReply addChild:[[MLXMLNode alloc] initWithElement:@"error" withAttributes:@{@"type": @"cancel"} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"feature-not-implemented" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas"],
+            [[MLXMLNode alloc] initWithElement:@"text" andNamespace:@"urn:ietf:params:xml:ns:xmpp-stanzas" withAttributes:@{} andChildren:@[] andData:@"MUC-PMs are not supported here!"]
+        ] andData:nil]];
+        [errorReply setStoreHint];
+        [account send:errorReply];
+        return;
+    }
+    
+    //add contact if possible (ignore groupchats or already existing contacts)
+    if(![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"])
+        [[DataLayer sharedInstance] addContact:messageNode.fromUser forAccount:account.accountNo nickname:nil andMucNick:nil];
     
     NSString* stanzaid = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];
     //check stanza-id @by according to the rules outlined in XEP-0359
@@ -95,7 +110,10 @@ static NSMutableDictionary* _typingNotifications;
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalReceivedMucInviteNotice object:nil userInfo:@{@"from": messageNode.from}];
         return;
     }
-
+    
+    //handle muc status changes (this checks for the muc namespace itself)
+    [MLMucProcessor processMessage:messageNode forAccount:account];
+    
     NSString* decrypted;
     if([messageNode check:@"/{jabber:client}message/{eu.siacs.conversations.axolotl}encrypted/header"])
     {
@@ -106,7 +124,7 @@ static NSMutableDictionary* _typingNotifications;
             decrypted = [account.omemo decryptMessage:messageNode];
         }
     }
-
+    
     if([messageNode check:@"body"] || [messageNode check:@"/<type=headline>/subject#"] || decrypted)
     {
         NSString* ownNick;
@@ -115,7 +133,7 @@ static NSMutableDictionary* _typingNotifications;
         //processed messages already have server name
         if([messageNode check:@"/<type=groupchat>"] && messageNode.fromResource)
         {
-            ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser andServer:@"" forAccount:account.accountNo];
+            ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser forAccount:account.accountNo];
             actualFrom = messageNode.fromResource;
         }
         if(ownNick && actualFrom && [actualFrom isEqualToString:ownNick])
@@ -141,7 +159,7 @@ static NSMutableDictionary* _typingNotifications;
                 showAlert = NO;
                 unread = NO;
             }
-          
+            
             NSString* messageType = kMessageTypeText;
             BOOL encrypted = NO;
             NSString* body = [messageNode findFirst:@"body#"];
@@ -161,7 +179,7 @@ static NSMutableDictionary* _typingNotifications;
                 
                 [[DataLayer sharedInstance] updateMucSubject:subject forAccount:account.accountNo andRoom:messageNode.fromUser];
                 //TODO: this stuff has to be changed (why send a kMonalNewMessageNotice instead of a special kMonalMucSubjectChanged one?)
-                MLMessage* message = [account parseMessageToMLMessage:messageNode withBody:subject andEncrypted:encrypted andMessageType:kMessageTypeStatus andActualFrom:actualFrom];
+                MLMessage* message = [account parseMessageToMLMessage:messageNode withBody:subject andEncrypted:NO andMessageType:kMessageTypeStatus andActualFrom:actualFrom];
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
                     @"message": message,
                     @"subject": subject,

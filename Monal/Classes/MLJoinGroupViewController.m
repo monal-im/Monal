@@ -7,7 +7,6 @@
 //
 #import "MLJoinGroupViewController.h"
 
-#import "DataLayer.h"
 #import "MBProgressHUD.h"
 #import "MLAccountPickerViewController.h"
 #import "MLButtonCell.h"
@@ -17,6 +16,7 @@
 #import "SAMKeychain.h"
 #import "UIColor+Theme.h"
 #import "xmpp.h"
+#import "MLMucProcessor.h"
 
 @interface MLJoinGroupViewController ()
 @property (nonatomic, weak)  UITextField* accountName;
@@ -207,8 +207,19 @@
             - [self showGroupPasswordForm];
         */
         [self displayJoinHUD];
-        [self hideJoinHUD];
-        [self showGroupPasswordForm];
+        [MLMucProcessor addUIHandler:^(id _data) {
+            NSDictionary* data = (NSDictionary*)_data;
+            if([data[@"success"] boolValue])
+                [self hideJoinHUD];
+            else
+            {
+                [self hideJoinHUD];
+                
+                UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error entering groupchat", @"") message:data[@"message"] preferredStyle:UIAlertControllerStyleAlert];
+                [self presentViewController:messageAlert animated:YES completion:nil];
+            }
+        } forMuc:combinedRoom];
+        [account joinMuc:combinedRoom];
     }
 }
 

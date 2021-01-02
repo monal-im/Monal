@@ -51,12 +51,11 @@
     self.favorites = [[NSMutableArray alloc] init];
     for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
     {
-        NSMutableArray* results = [[DataLayer sharedInstance] mucFavoritesForAccount:account.accountNo];
+        NSMutableArray* results = [[DataLayer sharedInstance] listMucsForAccount:account.accountNo];
         [self.favorites addObjectsFromArray:results];
         dispatch_async(dispatch_get_main_queue(),^(){
             [self.tableView reloadData];
         });
-            
     }
 }
 
@@ -108,26 +107,11 @@
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSDictionary *dic = self.favorites[indexPath.row];
+    NSDictionary* dic = self.favorites[indexPath.row];
+    MLContact* group = [[DataLayer sharedInstance] contactForUsername:dic[@"room"] forAccount:dic[@"account_id"]];
     
-    NSString* account = [NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
-    [[MLXMPPManager sharedInstance] joinRoom:[dic objectForKey:@"room"] withNick:[dic objectForKey:@"nick"]  andPassword:@"" forAccounId:account];
-    
-    xmpp* xmppAccount =[[MLXMPPManager sharedInstance] getConnectedAccountForID:account];
-    
-    BOOL success = [[DataLayer sharedInstance] addContact:[dic objectForKey:@"room"] forAccount:account nickname:@"" andMucNick:[dic objectForKey:@"nick"]];
-    if(success)
-        [[DataLayer sharedInstance] updateOwnNickName:[dic objectForKey:@"nick"] forMuc:[dic objectForKey:@"room"] andServer:xmppAccount.connectionProperties.conferenceServer forAccount:account];
-
-    MLContact* group = [[MLContact alloc] init];
-    group.isGroup = YES;
-    group.accountId = account;
-    group.accountNickInGroup = [dic objectForKey:@"nick"] ;
-    group.contactJid = [dic objectForKey:@"room"];
-    
-        if(self.selectGroup) {
-            self.selectGroup(group);
-        }
+    if(self.selectGroup)
+        self.selectGroup(group);
     
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
@@ -143,11 +127,11 @@
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         
-        NSDictionary *dic = self.favorites[indexPath.row];
+        NSDictionary* dic = self.favorites[indexPath.row];
         
-        NSNumber *account=[dic objectForKey:@"account_id"];
+        NSString* account=[dic objectForKey:@"account_id"];
   
-        [[DataLayer sharedInstance] deleteMucFavorite:[dic objectForKey:@"mucid"] forAccountId:account.integerValue];
+        [[DataLayer sharedInstance] deleteMuc:[dic objectForKey:@"room"] forAccountId:account];
  
         [self.favorites removeObjectAtIndex:indexPath.row];
         

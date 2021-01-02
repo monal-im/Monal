@@ -332,7 +332,7 @@ static NSRegularExpression* attributeFilterRegex;
         }];
     
     //"*" is just syntactic sugar for an empty element name
-    //(but empty element names are not allowed if no namespace was givven, which makes this sugar mandatory in this case)
+    //(but empty element names are not allowed if no namespace was given, which makes this sugar mandatory in this case)
     if(parsedEntry[@"elementName"] && [parsedEntry[@"elementName"] isEqualToString:@"*"])
         [parsedEntry removeObjectForKey:@"elementName"];
     

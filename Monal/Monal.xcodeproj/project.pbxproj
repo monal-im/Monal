@@ -266,6 +266,8 @@
 		C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */; };
 		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
 		C15489B925680BBE00BBA2F0 /* MLQRCodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15489B825680BBE00BBA2F0 /* MLQRCodeScanner.swift */; };
+		C158D40025A0AB810005AA40 /* MLMucProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = C158D3FE25A0AB810005AA40 /* MLMucProcessor.h */; };
+		C158D41425A0AC630005AA40 /* MLMucProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = C158D41225A0AC630005AA40 /* MLMucProcessor.m */; };
 		C1613B5A2520723D0062C0C2 /* MLBasePaser.h in Headers */ = {isa = PBXBuildFile; fileRef = C1613B572520723C0062C0C2 /* MLBasePaser.h */; };
 		C1613B5B2520723D0062C0C2 /* MLBasePaser.m in Sources */ = {isa = PBXBuildFile; fileRef = C1613B592520723C0062C0C2 /* MLBasePaser.m */; };
 		C18E757A245E8AE900AE8FB7 /* MLPipe.h in Headers */ = {isa = PBXBuildFile; fileRef = C18E7578245E8AE900AE8FB7 /* MLPipe.h */; };
@@ -870,6 +872,8 @@
 		C1414E9B24312F0100948788 /* MLChatMapsCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatMapsCell.h; sourceTree = "<group>"; };
 		C1414E9C24312F0100948788 /* MLChatMapsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatMapsCell.m; sourceTree = "<group>"; };
 		C15489B825680BBE00BBA2F0 /* MLQRCodeScanner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MLQRCodeScanner.swift; sourceTree = "<group>"; };
+		C158D3FE25A0AB810005AA40 /* MLMucProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLMucProcessor.h; sourceTree = "<group>"; };
+		C158D41225A0AC630005AA40 /* MLMucProcessor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLMucProcessor.m; sourceTree = "<group>"; };
 		C15D504824C727CC002F75BB /* MLLogFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLLogFileManager.h; sourceTree = "<group>"; };
 		C15D504A24C727CC002F75BB /* MLLogFileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLLogFileManager.m; sourceTree = "<group>"; };
 		C1613B572520723C0062C0C2 /* MLBasePaser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLBasePaser.h; sourceTree = "<group>"; };
@@ -1175,6 +1179,8 @@
 		2633CB40231CB7F5006D0277 /* Processors */ = {
 			isa = PBXGroup;
 			children = (
+				C158D41225A0AC630005AA40 /* MLMucProcessor.m */,
+				C158D3FE25A0AB810005AA40 /* MLMucProcessor.h */,
 				2633CB41231CB816006D0277 /* MLMessageProcessor.h */,
 				2633CB42231CB816006D0277 /* MLMessageProcessor.m */,
 				2661101A238F10360030A4EE /* MLIQProcessor.h */,
@@ -1882,6 +1888,7 @@
 				540E13A924CF78D00038FDA0 /* MLLogFormatter.h in Headers */,
 				C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */,
 				26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */,
+				C158D40025A0AB810005AA40 /* MLMucProcessor.h in Headers */,
 				541E4CC4254D369200FD7B28 /* MLPubSubProcessor.h in Headers */,
 				541E4CBE254AA0B600FD7B28 /* MLHandler.h in Headers */,
 				5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */,
@@ -2649,6 +2656,7 @@
 				26CC57B423A086CC00ABB92A /* XMPPPresence.m in Sources */,
 				541E4CC0254AA0E700FD7B28 /* MLHandler.m in Sources */,
 				540E13A724CF78900038FDA0 /* MLLogFormatter.m in Sources */,
+				C158D41425A0AC630005AA40 /* MLMucProcessor.m in Sources */,
 				54507CE5255D8C14007092F4 /* MLFiletransfer.m in Sources */,
 				26CC57C923A0892800ABB92A /* MLMessageProcessor.m in Sources */,
 				26CC57D623A08D7100ABB92A /* MLMetaInfo.m in Sources */,

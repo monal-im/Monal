@@ -7,7 +7,7 @@
 //
 
 #import "MLNewViewController.h"
-#import "MLEditGroupViewController.h"
+#import "MLJoinGroupViewController.h"
 #import "MLSubscriptionTableViewController.h"
 #import "addContact.h"
 
@@ -47,7 +47,7 @@
     }
     else if([segue.identifier isEqualToString:@"newGroup"])
     {
-        MLEditGroupViewController* newScreen = (MLEditGroupViewController *)segue.destinationViewController;
+        MLJoinGroupViewController* newScreen = (MLJoinGroupViewController *)segue.destinationViewController;
         newScreen.completion = ^(MLContact *selectedContact) {
             if(self.selectContact) self.selectContact(selectedContact);
         };

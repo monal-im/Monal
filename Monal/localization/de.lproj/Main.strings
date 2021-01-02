@@ -4,20 +4,14 @@
 "7Cs-k6-7n4.text" = "Neuen Kontakt hinzufügen";
 /* Class = "UILabel"; text = "Join a Group Chat"; ObjectID = "7dx-xo-wIB"; */
 "7dx-xo-wIB.text" = "Einem Gruppenchat beitreten";
-/* Class = "UIBarButtonItem"; title = "Previous"; ObjectID = "AtF-5m-xfT"; */
-"AtF-5m-xfT.title" = "Vorherige";
 /* Class = "UIBarButtonItem"; title = "Settings"; ObjectID = "BWH-2I-fSI"; */
 "BWH-2I-fSI.title" = "Einstellungen";
 /* Class = "UINavigationItem"; title = "Contact Requests"; ObjectID = "GI8-WI-wYs"; */
 "GI8-WI-wYs.title" = "Kontaktanfragen";
-/* Class = "UITableViewController"; title = "Edit Group Chat"; ObjectID = "GpF-k7-Z6D"; */
+/* Class = "UITableViewController"; title = "Join Group Chat"; ObjectID = "GpF-k7-Z6D"; */
 "GpF-k7-Z6D.title" = "Gruppenchat bearbeiten";
-/* Class = "UIBarButtonItem"; title = "Done"; ObjectID = "gy3-P9-g7W"; */
-"gy3-P9-g7W.title" = "Fertig";
 /* Class = "UINavigationItem"; title = "Select An Account"; ObjectID = "heq-Ls-ieg"; */
 "heq-Ls-ieg.title" = "Ein Konto auswählen";
-/* Class = "UIBarButtonItem"; title = "Next"; ObjectID = "HOk-DV-nls"; */
-"HOk-DV-nls.title" = "Weiter";
 /* Class = "UINavigationItem"; title = "Add Contact"; ObjectID = "HYb-u1-ZN3"; */
 "HYb-u1-ZN3.title" = "Kontakt hinzufügen";
 /* Class = "UIBarButtonItem"; title = "Close"; ObjectID = "IGd-kM-9BO"; */
@@ -64,5 +58,5 @@
 "Vtv-sv-ErG.title" = "Schließen";
 /* Class = "UIBarButtonItem"; title = "Add"; ObjectID = "wNA-vF-ohQ"; */
 "wNA-vF-ohQ.title" = "Hinzufügen";
-/* Class = "UINavigationItem"; title = "Edit Group Chat"; ObjectID = "yIE-Ub-BAk"; */
+/* Class = "UINavigationItem"; title = "Join Group Chat"; ObjectID = "yIE-Ub-BAk"; */
 "yIE-Ub-BAk.title" = "Gruppenchat bearbeiten";

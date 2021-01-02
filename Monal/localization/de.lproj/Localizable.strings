@@ -412,3 +412,7 @@
 "Show URL previews" = "URL-Vorschau anzeigen";
 /* shareViewController: recipient */
 "Recipient" = "Recipient";
+"Appserver error" = "Appserver error";
+"Appserver returned invalid data" = "Appserver returned invalid data";
+"Error registering push" = "Error registering push";
+"Images" = "Images";

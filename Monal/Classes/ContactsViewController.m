@@ -229,12 +229,6 @@
         [mute setBackgroundColor:[UIColor monalGreen]];
         
     }
-    
-    //    UITableViewRowAction *block = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"Block" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
-    //        [self blockContactAtIndexPath:indexPath];
-    //        [self.tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
-    //    }];
-    //    [block setBackgroundColor:[UIColor darkGrayColor]];
     return [UISwipeActionsConfiguration configurationWithActions:@[delete, mute]];
 }
 
@@ -262,7 +256,7 @@
 {
     MLContact* contact = [self contactAtIndexPath:indexPath];
     if(contact)
-        [[DataLayer sharedInstance] blockJid:contact.contactJid];
+        [[DataLayer sharedInstance] blockJid:contact.contactJid withAccountNo:contact.accountId];
 }
 
 

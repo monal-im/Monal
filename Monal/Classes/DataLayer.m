@@ -1693,7 +1693,7 @@ static NSDateFormatter* dbFormatter;
         }];
 
         [self updateDBTo:3.4 withBlock:^{
-            [self.db executeNonQuery:@" alter table activechats add COLUMN lastMessageTime datetime "];
+            [self.db executeNonQuery:@"alter table activechats add COLUMN lastMessageTime datetime "];
 
             //iterate current active and set their times
             NSArray* active = [self.db executeReader:@"select distinct buddy_name, account_id from activeChats"];
@@ -2106,6 +2106,11 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact on buddylist(buddy_name, account_id);"];
             [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
+
+        [self updateDBTo:5.002 withBlock:^{
+            [self.db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN blocked BOOL DEFAULT FALSE;"];
+            [self.db executeNonQuery:@"DROP TABLE blockList;"];
+        }];
     }];
     
     DDLogInfo(@"Database version check complete");
@@ -2145,35 +2150,30 @@ static NSDateFormatter* dbFormatter;
 }
 
 
--(void) blockJid:(NSString*) jid
+-(void) updateBlockTo:(BOOL) blocked forJid:(NSString*) jid withAccountNo:(NSString*) accountNo
 {
-    if(!jid ) return;
-    NSString* query = @"insert into blockList(jid) values(?)";
-    NSArray* params = @[jid];
-    [self.db executeNonQuery:query andArguments:params];
+    if(!jid || !accountNo) return;
+    [self.db executeNonQuery:@"UPDATE buddylist SET blocked=? WHERE buddy_name=? AND account_id=?" andArguments:@[[NSNumber numberWithBool:blocked], jid, accountNo]];
 }
 
--(void) unBlockJid:(NSString*) jid
+-(void) blockJid:(NSString*) jid withAccountNo:(NSString*) accountNo
 {
-    if(!jid ) return;
-    NSString* query = @"delete from blockList where jid=?";
-    NSArray* params = @[jid];
-    [self.db executeNonQuery:query andArguments:params];
+    [self updateBlockTo:YES forJid:jid withAccountNo:accountNo];
 }
 
--(BOOL) isBlockedJid:(NSString*) jid
+-(void) unBlockJid:(NSString*) jid withAccountNo:(NSString*) accountNo
 {
-    if(!jid) return NO;
-    NSString* query = @"select count(jid) from blockList where jid=?";
-    NSArray* params = @[jid];
-    NSObject* val = [self.db executeScalar:query andArguments:params];
-    NSNumber* count = (NSNumber *) val;
-    BOOL toreturn = NO;
-    if(count.integerValue > 0)
-    {
-        toreturn = YES;
-    }
-    return toreturn;
+    [self updateBlockTo:NO forJid:jid withAccountNo:accountNo];
+}
+
+-(BOOL) isBlockedJid:(NSString*) jid withAccountNo:(NSString*) accountNo
+{
+    if(!jid || !accountNo) return NO;
+    NSNumber* blocked = [self.db executeScalar:@"SELECT blocked FROM buddylist WHERE buddy_name=? AND account_id=?;" andArguments:@[jid, accountNo]];
+    if(blocked != nil)
+        return [blocked boolValue];
+    else
+        return NO;
 }
 
 -(BOOL) isPinnedChat:(NSString*) accountNo andBuddyJid:(NSString*) buddyJid

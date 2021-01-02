@@ -234,9 +234,9 @@ extern NSString* const kMessageTypeFiletransfer;
 -(BOOL) isMutedJid:(NSString *) jid;
 
 
--(void) blockJid:(NSString *) jid;
--(void) unBlockJid:(NSString *) jid;
--(BOOL) isBlockedJid:(NSString *) jid;
+-(void) blockJid:(NSString *) jid withAccountNo:(NSString*) accountNo;
+-(void) unBlockJid:(NSString *) jid withAccountNo:(NSString*) accountNo;
+-(BOOL) isBlockedJid:(NSString *) jid withAccountNo:(NSString*) accountNo;
 
 -(BOOL) isPinnedChat:(NSString*) accountNo andBuddyJid:(NSString*) buddyJid;
 -(void) pinChat:(NSString*) accountNo andBuddyJid:(NSString*) buddyJid;

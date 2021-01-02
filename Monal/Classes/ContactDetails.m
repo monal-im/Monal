@@ -82,6 +82,7 @@
 
     self.isEncrypted = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.accountNo];
     self.isPinned = [[DataLayer sharedInstance] isPinnedChat:self.accountNo andBuddyJid:self.contact.contactJid];
+    self.isBlocked = [[DataLayer sharedInstance] isBlockedJid:self.contact.contactJid withAccountNo:self.accountNo];
 
     NSDictionary* newSub = [[DataLayer sharedInstance] getSubscriptionForContact:self.contact.contactJid andAccount:self.contact.accountId];
     self.contact.ask = [newSub objectForKey:@"ask"];
@@ -308,17 +309,20 @@
             }
         }
         else if(indexPath.row == 3)
-            thecell.textLabel.text = NSLocalizedString(@"Block Sender", @"");
+        {
+            if(!self.isBlocked)
+                thecell.textLabel.text = NSLocalizedString(@"Block Sender", @"");
+            else
+                thecell.textLabel.text = NSLocalizedString(@"Unblock Sender", @"");
+        }
         else if(indexPath.row == 4)
-            thecell.textLabel.text = NSLocalizedString(@"Unblock Sender", @"");
-        else if(indexPath.row == 5)
         {
             if(self.isPinned)
                 thecell.textLabel.text = NSLocalizedString(@"Unpin Chat", @"");
             else
                 thecell.textLabel.text = NSLocalizedString(@"Pin Chat", @"");
         }
-        else if(indexPath.row == 6)
+        else if(indexPath.row == 5)
         {
             thecell.textLabel.text = NSLocalizedString(@"Clear omemo session", @"DEBUG - ContactDetails");
         }
@@ -331,7 +335,7 @@
 {
     if(section == 0) return 1;
     if(section == 1) return 3;
-    if(section == 2) return 7;
+    if(section == 2) return 6;
     if(section == 3) return [_versionInfoDic count];
 
     return 0; //some default shouldnt reach this
@@ -362,7 +366,7 @@
 
     if(indexPath.section == 1){
         if(indexPath.row < 2) return;
-        [self showChatImges];
+        [self showChatImages];
     }
     else  {
         switch(indexPath.row)
@@ -379,7 +383,8 @@
                 if(self.contact.isGroup) {
                     [self removeContact]; // works for muc too
                 } else  {
-                    if(self.isSubscribed) {
+                    if(self.isSubscribed)
+                    {
                         [self removeContact];
                     }  else  {
                         [self addContact];
@@ -388,17 +393,26 @@
                 break;
             }
             case 3:  {
-                [self blockContact];
+                if(self.isBlocked)
+                {
+                    [self unBlockContact];
+                }
+                else
+                {
+                    [self blockContact];
+                }
+                self.isBlocked = !self.isBlocked;
+                // Update button text
+                [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
                 break;
             }
             case 4:  {
-                [self unBlockContact];
-                break;
-            }
-            case 5:  {
-                if(self.isPinned) {
+                if(self.isPinned)
+                {
                     [[DataLayer sharedInstance] unPinChat:self.accountNo andBuddyJid:self.contact.contactJid];
-                } else {
+                }
+                else
+                {
                     [[DataLayer sharedInstance] pinChat:self.accountNo andBuddyJid:self.contact.contactJid];
                 }
                 self.isPinned = !self.isPinned;
@@ -409,7 +423,7 @@
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact":self.contact, @"pinningChanged": @YES}];
                 break;
             }
-            case 6:  {
+            case 5:  {
                 [self.xmppAccount.omemo clearAllSessionsForJid:self.contact.contactJid];
                 break;
             }
@@ -472,44 +486,18 @@
 }
 
 -(void) blockContact {
-    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Block %@ from contacting you?", @""), self.contact.contactJid];
-    NSString* detailString = NSLocalizedString(@"This sender will no longer be able to contact you", @"");
-
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:messageString
-                                                                   message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [alert dismissViewControllerAnimated:YES completion:nil];
-    }]];
-
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
-        [[MLXMPPManager sharedInstance] blocked:YES Jid:self.contact];
-    }]];
-
-    alert.popoverPresentationController.sourceView = self.tableView;
-
-    [self presentViewController:alert animated:YES completion:nil];
+    [[MLXMPPManager sharedInstance] blocked:YES Jid:self.contact];
+    [[DataLayer sharedInstance] blockJid:self.contact.contactJid withAccountNo:self.contact.accountId];
 }
 
--(void) unBlockContact {
-    NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Allow %@ to contact you?", @""), self.contact.contactJid];
-    NSString* detailString = NSLocalizedString(@"This sender will be able to send you messages", @"");
-
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:messageString
-                                                                   message:detailString preferredStyle:UIAlertControllerStyleActionSheet];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [alert dismissViewControllerAnimated:YES completion:nil];
-    }]];
-
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
-        [[MLXMPPManager sharedInstance] blocked:NO Jid:self.contact];
-    }]];
-
-    alert.popoverPresentationController.sourceView = self.tableView;
-
-    [self presentViewController:alert animated:YES completion:nil];
+-(void) unBlockContact
+{
+    [[MLXMPPManager sharedInstance] blocked:NO Jid:self.contact];
+    [[DataLayer sharedInstance] unBlockJid:self.contact.contactJid withAccountNo:self.contact.accountId];
 }
 
--(void) showChatImges{
+-(void) showChatImages
+{
     NSMutableArray* images = [[DataLayer sharedInstance] allAttachmentsFromContact:self.contact.contactJid forAccount:self.accountNo];
 
     if(!self.photos)

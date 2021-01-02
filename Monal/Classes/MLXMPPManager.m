@@ -578,9 +578,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) getEntitySoftWareVersionForContact:(MLContact *) contact andResource:(NSString*) resource
 {
-    xmpp* account =[self getConnectedAccountForID:contact.accountId];
+    xmpp* account = [self getConnectedAccountForID:contact.accountId];
     
-    NSString *xmppId = @"";
+    NSString* xmppId = @"";
     if ((resource == nil) || ([resource length] == 0)) {
         xmppId = [NSString stringWithFormat:@"%@",contact.contactJid];
     } else {
@@ -590,10 +590,10 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [account getEntitySoftWareVersion:xmppId];
 }
 
--(void) blocked:(BOOL) isBlockd Jid:(MLContact *) contact
+-(void) blocked:(BOOL) isBlocked Jid:(MLContact *) contact
 {
-    xmpp* account =[self getConnectedAccountForID:contact.accountId];
-    [account setBlocked:isBlockd forJid:contact.contactJid];
+    xmpp* account = [self getConnectedAccountForID:contact.accountId];
+    [account setBlocked:isBlocked forJid:contact.contactJid];
 }
 
 #pragma mark - MUC commands

@@ -60,7 +60,7 @@
 /**
  Block  a jid
  */
--(void) blocked:(BOOL) isBlockd Jid:(MLContact *) contact;
+-(void) blocked:(BOOL) isBlocked Jid:(MLContact *) contact;
 
 /**
  Returns the user set name of the conencted account

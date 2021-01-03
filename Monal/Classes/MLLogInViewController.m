@@ -181,7 +181,8 @@
         }]];
         [self presentViewController:alert animated:YES completion:nil];
         
-        [[DataLayer sharedInstance] removeAccount:self.accountno];
+        if(self.accountno)
+            [[DataLayer sharedInstance] removeAccount:self.accountno];
     });
 }
 

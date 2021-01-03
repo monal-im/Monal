@@ -2464,7 +2464,6 @@ NSString *const kData=@"data";
         
         //to make sure this date is newer than the old saved one (even if we now falsely "tag" the beginning of our interaction, not the end)
         //if everything works out as it should and the app does not get killed, we will "tag" the end of our interaction as soon as the app is backgrounded
-        [self readState];       //make sure we operate on the newest state (appex could have changed it!)
         self->_lastInteractionDate = [NSDate date];
         [self persistState];
         
@@ -2486,7 +2485,6 @@ NSString *const kData=@"data";
         }
         
         //save date as last interaction date (XEP-0319) (e.g. "tag" the end of our interaction)
-        [self readState];       //make sure we operate on the newest state (appex could have changed it!)
         self->_lastInteractionDate = [NSDate date];
         [self persistState];
         

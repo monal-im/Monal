@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet href="https://monal.im/files/doap-style.xsl" type="text/xsl"?>
-<rdf:RDF xmlns="http://usefulinc.com/ns/doap#"
-         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-         xmlns:xmpp="https://linkmauve.fr/ns/xmpp-doap#"
-         xmlns:foaf="http://xmlns.com/foaf/0.1/">
-  <Project>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:schema="https://schema.org/"
+  <Project xmlns="http://usefulinc.com/ns/doap#">
 
     <name>Monal</name>
     <short-name>Monal</short-name>
@@ -19,7 +17,9 @@
     <homepage rdf:resource="https://monal.im/" />
     <bug-database rdf:resource="https://github.com/anurodhp/Monal/issues" />
     <license rdf:resource="https://github.com/anurodhp/Monal/blob/develop/LICENSE" />
-
+    <schema:documentation rdf:resource="https://github.com/anurodhp/Monal/wiki"/>
+    <schema:logo rdf:resource="https://github.com/anurodhp/Monal/blob/develop/Art/monal.svg"/>
+    
     <programming-language>Objective C</programming-language>
     <os>iOS</os>
     <os>MacOS</os>

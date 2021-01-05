@@ -408,13 +408,20 @@ void logException(NSException* exception)
     return [rfc3339DateFormatter stringFromDate:datetime];
 }
 
-+(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler
++(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andFile:(char*) file andLine:(int) line andFunc:(char*) func
 {
-    return [self startTimer:timeout withHandler:handler andCancelHandler:nil];
+    return [self startTimer:timeout withHandler:handler andCancelHandler:nil andFile:file andLine:line andFunc:func];
 }
 
-+(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler
++(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func
 {
+    NSString* fileStr = [NSString stringWithFormat:@"%s", file];
+    NSString* funcStr = [NSString stringWithFormat:@"%s", func];
+    NSArray* filePathComponents = [fileStr pathComponents];
+    NSString* fileName = fileStr;
+    if([filePathComponents count]>1)
+        fileName = [NSString stringWithFormat:@"%@/%@", filePathComponents[[filePathComponents count]-2], filePathComponents[[filePathComponents count]-1]];
+    
     dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     if(timeout<=0.001)
     {
@@ -436,25 +443,25 @@ void logException(NSException* exception)
                               0ull * NSEC_PER_SEC);
     
     dispatch_source_set_event_handler(timer, ^{
-        DDLogDebug(@"timer %@ %@(%G) triggered", timer, uuid, timeout);
+        DDLogDebug(@"timer %@ %@(%G) triggered (created at %@:%d in %@)", timer, uuid, timeout, fileName, line, funcStr);
         dispatch_source_cancel(timer);
         if(handler)
             handler();
     });
     
     dispatch_source_set_cancel_handler(timer, ^{
-        //DDLogDebug(@"timer %@ %@(%G) cancelled", timer, uuid, timeout);
+        //DDLogDebug(@"timer %@ %@(%G) cancelled (created at %@:%d)", timer, uuid, timeout, fileName, line);
         if(cancelHandler)
             cancelHandler();
     });
     
     //start timer
-    DDLogDebug(@"starting timer %@ %@(%G)", timer, uuid, timeout);
+    DDLogDebug(@"starting timer %@ %@(%G) (created at %@:%d in %@)", timer, uuid, timeout, fileName, line, funcStr);
     dispatch_resume(timer);
     
     //return block that can be used to cancel the timer
     return ^{
-        DDLogDebug(@"cancel block for timer %@ %@(%G) called", timer, uuid, timeout);
+        DDLogDebug(@"cancel block for timer %@ %@(%G) called (created at %@:%d in %@)", timer, uuid, timeout, fileName, line, funcStr);
         if(!dispatch_source_testcancel(timer))
             dispatch_source_cancel(timer);
     };

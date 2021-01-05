@@ -9,6 +9,11 @@
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
 
+#include "metamacros.h"
+
+#define createTimer(timeout, handler, ...)						metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools startTimer:timeout withHandler:handler andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])(_createTimer(timeout, handler, __VA_ARGS__))
+#define _createTimer(timeout, handler, cancelHandler, ...)		[HelperTools startTimer:timeout withHandler:handler andCancelHandler:cancelHandler andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]
+
 NS_ASSUME_NONNULL_BEGIN
 
 @class XMPPStanza;
@@ -35,8 +40,8 @@ void logException(NSException* exception);
 +(NSString* _Nullable) formatLastInteraction:(NSDate*) lastInteraction;
 +(NSDate*) parseDateTimeString:(NSString*) datetime;
 +(NSString*) generateDateTimeString:(NSDate*) datetime;
-+(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler;
-+(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler;
++(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andFile:(char*) file andLine:(int) line andFunc:(char*) func;
++(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func;
 +(NSString*) encodeRandomResource;
 +(NSData* _Nullable) sha1:(NSData* _Nullable) data;
 +(NSData* _Nullable) sha256:(NSData* _Nullable) data;

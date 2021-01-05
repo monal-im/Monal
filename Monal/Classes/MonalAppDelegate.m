@@ -855,11 +855,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     NSString* completionId = [[NSUUID UUID] UUIDString];
     _pushCompletions[completionId] = @{
         @"handler": completionHandler,
-        @"timer": [HelperTools startTimer:28.0 withHandler:^{
+        @"timer": createTimer(28.0, (^{
             DDLogWarn(@"### Push timer triggered!! ###");
             [_pushCompletions removeObjectForKey:completionId];
             completionHandler(UIBackgroundFetchResultFailed);
-        }]
+        }))
     };
 }
 

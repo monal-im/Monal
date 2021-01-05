@@ -98,9 +98,9 @@
     self.hud.label.text = NSLocalizedString(@"Reconnecting", @"");
     self.hud.detailsLabel.text = NSLocalizedString(@"Will logout and reconnect any connected accounts.", @"");
     [[MLXMPPManager sharedInstance] logoutAll];
-    [HelperTools startTimer:1.0 withHandler:^{
+    createTimer(1.0, (^{
         [[MLXMPPManager sharedInstance] connectIfNecessary];
-    }];
+    }));
     [self.hud hideAnimated:YES afterDelay:3.0f];
     self.hud=nil;
 }

@@ -411,13 +411,13 @@ static NSMutableDictionary* _typingNotifications;
                     //start a new timer for every isTyping message
                     if(composing)
                     {
-                        _typingNotifications[messageNode.fromUser] = [HelperTools startTimer:60 withHandler:^{
+                        _typingNotifications[messageNode.fromUser] = createTimer(60, (^{
                             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:[[NSDate date] initWithTimeIntervalSince1970:0] userInfo:@{
                                 @"jid": jid,
                                 @"accountNo": account.accountNo,
                                 @"isTyping": @NO
                             }];
-                        }];
+                        }));
                     }
                 }
             }

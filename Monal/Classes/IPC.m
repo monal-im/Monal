@@ -7,8 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <CommonCrypto/CommonDigest.h>
 #import <notify.h>
-#include <CommonCrypto/CommonDigest.h>
 #import "IPC.h"
 #import "MLSQLite.h"
 #import "HelperTools.h"
@@ -185,9 +185,9 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
                 if(responseHandler)
                 {
                     //responses handlers are only valid for the maximum RTT of messages (+ some safety margin)
-                    [HelperTools startTimer:(MSG_TIMEOUT*2 + 1) withHandler:^{
+                    createTimer(MSG_TIMEOUT*2 + 1, (^{
                         [_responseHandlers removeObjectForKey:message[@"response_to"]];
-                    }];
+                    }));
                     dispatch_async(_ipcQueues[queueName], ^{
                         responseHandler(message);
                     });

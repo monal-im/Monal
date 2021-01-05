@@ -663,13 +663,13 @@ NSString *const kData=@"data";
             return;
         
         double connectTimeout = 8.0;
-        self->_cancelLoginTimer = [HelperTools startTimer:connectTimeout withHandler:^{
+        self->_cancelLoginTimer = createTimer(connectTimeout, (^{
             [self dispatchAsyncOnReceiveQueue: ^{
                 self->_cancelLoginTimer = nil;
                 DDLogInfo(@"login took too long, cancelling and trying to reconnect (potentially using another SRV record)");
                 [self reconnect];
             }];
-        }];
+        }));
     }];
 }
 
@@ -856,7 +856,7 @@ NSString *const kData=@"data";
         [self disconnect:NO];
 
         DDLogInfo(@"Trying to connect again in %G seconds...", wait);
-        self->_cancelReconnectTimer = [HelperTools startTimer:wait withHandler:^{
+        self->_cancelReconnectTimer = createTimer(wait, (^{
             self->_cancelReconnectTimer = nil;
             [self dispatchAsyncOnReceiveQueue: ^{
                 //there may be another connect/login operation in progress triggered from reachability or another timer
@@ -864,7 +864,7 @@ NSString *const kData=@"data";
                     [self connect];
                 self->_reconnectInProgress = NO;
             }];
-        }];
+        }));
         DDLogInfo(@"reconnect exits");
     }];
 }
@@ -1007,7 +1007,7 @@ NSString *const kData=@"data";
         else
         {
             //start ping timer
-            self->_cancelPingTimer = [HelperTools startTimer:timeout withHandler:^{
+            self->_cancelPingTimer = createTimer(timeout, (^{
                 [self dispatchAsyncOnReceiveQueue: ^{
                     self->_cancelPingTimer = nil;
                     //check if someone already called reconnect or disconnect while we were waiting for the ping
@@ -1020,7 +1020,7 @@ NSString *const kData=@"data";
                         [self reconnect];
                     }
                 }];
-            }];
+            }));
             monal_void_block_t handler = ^{
                 DDLogInfo(@"ping response received, all seems to be well");
                 if(self->_cancelPingTimer)

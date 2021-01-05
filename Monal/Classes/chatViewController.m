@@ -510,7 +510,7 @@ enum msgSentState {
         [self stopLastInteractionTimer];
         // this timer will be called only if needed
         if(lastInteractionDate && lastInteractionDate.timeIntervalSince1970 > 0)
-            _cancelLastInteractionTimer = [HelperTools startTimer:60 withHandler:updateTime];
+            _cancelLastInteractionTimer = createTimer(60, updateTime);
     };
     updateTime();
 }
@@ -871,7 +871,7 @@ enum msgSentState {
     
     //start new timer if we are currently typing
     if(isTyping)
-        _cancelTypingNotification = [HelperTools startTimer:5.0 withHandler:^{
+        _cancelTypingNotification = createTimer(5.0, (^{
             //no typing interaction in 5 seconds? --> send out active chatstate (e.g. typing ended)
             if(_isTyping)
             {
@@ -879,7 +879,7 @@ enum msgSentState {
                 DDLogVerbose(@"Sending chatstate isTyping=NO");
                 [[MLXMPPManager sharedInstance] sendChatState:NO fromAccount:self.contact.accountId toJid:self.contact.contactJid];
             }
-        }];
+        }));
 }
 
 -(void)resignTextView
@@ -1612,7 +1612,7 @@ enum msgSentState {
             monal_void_block_t __block allowAutoLoading = ^{
                 self.viewIsScrolling = NO;
             };
-            [HelperTools startTimer:10 withHandler:allowAutoLoading];
+            createTimer(10, allowAutoLoading);
         }
     }
 }
@@ -2394,9 +2394,9 @@ enum msgSentState {
 {
     // Allow  autoloading of more messages after a few seconds
     self.viewIsScrolling = YES;
-    [HelperTools startTimer:1.5 withHandler:^{
+    createTimer(1.5, (^{
         self.viewIsScrolling = NO;
-    }];
+    }));
 }
 
 -(void) stopEditing

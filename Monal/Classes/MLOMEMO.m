@@ -234,6 +234,15 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
         if(!rid)
             return;
         MLXMLNode* receivedKeys = [data objectForKey:@"current"];
+        if(!receivedKeys && data.count == 1)
+        {
+            // some clients do not use <item id="current">
+            receivedKeys = [[data allValues] firstObject];
+        }
+        else if(!receivedKeys && data.count > 1)
+        {
+            DDLogWarn(@"More than one bundle item found from %@ rid: %@", jid, rid);
+        }
         if(receivedKeys)
         {
             [account.omemo processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
@@ -287,8 +296,17 @@ $$handler(handleManualDevices, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(
         if(!jid)
             return;
         MLXMLNode* publishedDevices = [data objectForKey:@"current"];
+        if(!publishedDevices && data.count == 1)
+        {
+            // some clients do not use <item id="current">
+            publishedDevices = [[data allValues] firstObject];
+        }
+        else if(!publishedDevices && data.count > 1)
+        {
+            DDLogWarn(@"More than one devicelist item found from %@", jid);
+        }
         if(publishedDevices) {
-            NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"/{http://jabber.org/protocol/pubsub}item<id=current>/{eu.siacs.conversations.axolotl}list/device@id|int"];
+            NSArray<NSNumber*>* deviceIds = [publishedDevices find:@"/{http://jabber.org/protocol/pubsub}item/{eu.siacs.conversations.axolotl}list/device@id|int"];
             NSSet<NSNumber*>* deviceSet = [[NSSet<NSNumber*> alloc] initWithArray:deviceIds];
 
             [account.omemo processOMEMODevices:deviceSet from:jid];
@@ -426,7 +444,7 @@ $$
         if(!rid)
             return;
 
-        NSArray* bundles = [iqNode find:@"/{http://jabber.org/protocol/pubsub}item<id=current>/{eu.siacs.conversations.axolotl}bundle"];
+        NSArray* bundles = [iqNode find:@"/{http://jabber.org/protocol/pubsub}item/{eu.siacs.conversations.axolotl}bundle"];
 
         // there should only be one bundle per device
         if([bundles count] != 1) {

@@ -35,11 +35,11 @@ target 'Monal' do
   inhibit_all_warnings!
   pod 'MBProgressHUD', '~> 1.2.0'
   pod 'IDMPhotoBrowser'
-  pod 'SDWebImage', '~> 5.9.5'
+  pod 'SDWebImage', '~> 5.10.0'
   pod 'DZNEmptyDataSet'
   pod 'EAIntroView'
   pod 'TOCropViewController'
-  pod 'NotificationBannerSwift', '~> 3.0.2'
+  pod 'NotificationBannerSwift', '~> 3.0.6'
 
   target 'Monal Tests' do
     inherit! :search_paths
@@ -58,7 +58,7 @@ target 'monalxmpp' do
   pod 'SignalProtocolC'
 
   #this is only for ios12. Remove for mac builds.
-  pod 'OpenSSL-Universal', '1.0.2.20'
+  pod 'OpenSSL-Universal', '1.1.180'
 end
 
 # see https://stackoverflow.com/a/36547646/3528174

@@ -153,9 +153,9 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     NSMutableArray *toreturn = [[NSMutableArray alloc] init];
     if(self.accounts.count > 1) {
         SLComposeSheetConfigurationItem* accountSelector = [[SLComposeSheetConfigurationItem alloc] init];
-        accountSelector.title=@"Account";
+        accountSelector.title = NSLocalizedString(@"Account", @"ShareViewController: Account");
 
-        accountSelector.value=[NSString stringWithFormat:@"%@@%@",[self.account objectForKey:@"username"],[self.account objectForKey:@"domain"]];
+        accountSelector.value = [NSString stringWithFormat:@"%@@%@",[self.account objectForKey:@"username"],[self.account objectForKey:@"domain"]];
         accountSelector.tapHandler = ^{
             UIStoryboard* iosShareStoryboard = [UIStoryboard storyboardWithName:@"iosShare" bundle:nil];
             MLSelectionController* controller = (MLSelectionController*)[iosShareStoryboard instantiateViewControllerWithIdentifier:@"accounts"];
@@ -163,12 +163,12 @@ const u_int32_t MagicMapKitItem = 1 << 2;
             controller.completion = ^(NSDictionary *selectedAccount)
             {
                 if(selectedAccount) {
-                    self.account=selectedAccount;
+                    self.account = selectedAccount;
                 }
                 else {
-                    self.account=nil;
+                    self.account = nil;
                 }
-                self.recipient=@"";
+                self.recipient = @"";
                 [self reloadConfigurationItems];
             };
             
@@ -183,11 +183,11 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     }
     
     SLComposeSheetConfigurationItem *recipient = [[SLComposeSheetConfigurationItem alloc] init];
-    recipient.title=@"Recipient";
-    recipient.value=self.recipient;
+    recipient.title = NSLocalizedString(@"Recipient", @"shareViewController: recipient");
+    recipient.value = self.recipient;
     recipient.tapHandler = ^{
         UIStoryboard* iosShareStoryboard = [UIStoryboard storyboardWithName:@"iosShare" bundle:nil];
-        MLSelectionController *controller = (MLSelectionController *)[iosShareStoryboard instantiateViewControllerWithIdentifier:@"contacts"];
+        MLSelectionController* controller = (MLSelectionController *)[iosShareStoryboard instantiateViewControllerWithIdentifier:@"contacts"];
 
         // Create list of recipients for the selected account
         NSMutableArray *recipientsToShow = [[NSMutableArray alloc] init];

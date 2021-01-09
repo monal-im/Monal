@@ -580,6 +580,7 @@ static NSMutableSet* _currentlyTransfering;
             [HelperTools configureFileProtectionFor:cacheFile];
             
             [self markAsComplete:file];
+            DDLogInfo(@"URL for download: %@", url);
             return completion(url, mimeType, [NSNumber numberWithInteger:fileData.length], nil);
         }
         else

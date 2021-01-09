@@ -51,12 +51,6 @@
 				<string>xmpp</string>
 			</array>
 		</dict>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.472865344000-invcngpma1psmiek5imc1gb8u7mef8l9</string>
-			</array>
-		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>0</string>

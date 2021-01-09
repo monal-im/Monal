@@ -9,6 +9,7 @@
 #import "LogViewController.h"
 #import "MonalAppDelegate.h"
 #import "HelperTools.h"
+#import "DataLayer.h"
 
 
 @interface LogViewController ()
@@ -68,6 +69,11 @@ DDLogFileInfo* _logInfo;
 }
 
 - (IBAction)sqliteExportAction:(id)sender {
+    NSString* dbFile = [[DataLayer sharedInstance] exportDB];
+    if(dbFile == nil)
+        return;
+    UIActivityViewController* shareController = [[UIActivityViewController alloc] initWithActivityItems:@[[NSURL fileURLWithPath:dbFile]] applicationActivities:nil];
+    [self presentViewController:shareController animated:YES completion:^{}];
 }
 
 -(IBAction)shareAction:(id)sender

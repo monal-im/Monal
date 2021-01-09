@@ -276,6 +276,7 @@
 "Account: %@" = "Cont: %@";
 "Account To Use" = "Cont de utilizat";
 "Account Exists" = "Contul există";
+/* ShareViewController: Account */
 "Account" = "Cont";
 "Access message archives on the server." = "Accesați arhivele de mesaje pe server.";
 "Accept" = "Acceptă";
@@ -409,3 +410,5 @@
 /* DEBUG - ContactDetails */
 "Clear omemo session" = "Ștergere sesiune OMEMO";
 "Show URL previews" = "Afișare previzualizări legături";
+/* shareViewController: recipient */
+"Recipient" = "Recipient";

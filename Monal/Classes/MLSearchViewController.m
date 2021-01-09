@@ -299,6 +299,7 @@
 {
     [self defaultStatus];
     [self.searchResultDelegate doReloadActionForAllTableView];
+    [self setActive:NO];
     [self dismissViewControllerAnimated:NO completion:nil];
 }
 

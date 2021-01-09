@@ -77,6 +77,7 @@
 "Account: %@" = "Account: %@";
 "Account Exists" = "Dit account bestaat al";
 "Account To Use" = "Het te gebruiken account";
+/* ShareViewController: Account */
 "Account" = "Account";
 "Access message archives on the server." = "Blader door berichtarchieven op deze server.";
 "Accept" = "Accepteer";
@@ -408,3 +409,5 @@
 /* DEBUG - ContactDetails */
 "Clear omemo session" = "Clear omemo session";
 "Show URL previews" = "Show URL previews";
+/* shareViewController: recipient */
+"Recipient" = "Recipient";

@@ -5,6 +5,7 @@
 "About" = "About";
 "Accept" = "Accept";
 "Access message archives on the server." = "Access message archives on the server.";
+/* ShareViewController: Account */
 "Account" = "Account";
 "Account Exists" = "Account Exists";
 "Account To Use" = "Account To Use";
@@ -408,3 +409,5 @@
 /* DEBUG - ContactDetails */
 "Clear omemo session" = "Clear omemo session";
 "Show URL previews" = "Show URL previews";
+/* shareViewController: recipient */
+"Recipient" = "Recipient";

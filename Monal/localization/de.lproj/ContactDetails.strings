@@ -1,7 +1,7 @@
 /* Class = "UILabel"; text = "Trust"; ObjectID = "4kz-Xh-2Ui"; */
 "4kz-Xh-2Ui.text" = "Vertrauen";
 /* Class = "UILabel"; text = "jid"; ObjectID = "6bI-Lh-Qhb"; */
-"6bI-Lh-Qhb.text" = "jid";
+"6bI-Lh-Qhb.text" = "JID";
 /* Class = "UILabel"; text = "Device:"; ObjectID = "aTq-lO-Xbf"; */
 "aTq-lO-Xbf.text" = "Gerät:";
 /* Class = "UILabel"; text = "deviceid"; ObjectID = "BIp-1h-2Q5"; */

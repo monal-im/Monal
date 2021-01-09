@@ -214,19 +214,19 @@ NSString *const kData=@"data";
     _exponentialBackoff = 0;
     
     _parseQueue = [[NSOperationQueue alloc] init];
-    _parseQueue.name = @"receiveQueue";
+    _parseQueue.name = [NSString stringWithFormat:@"parseQueue[%@]", self.accountNo];
     _parseQueue.qualityOfService = NSQualityOfServiceUtility;
     _parseQueue.maxConcurrentOperationCount = 1;
     [_parseQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
     
     _receiveQueue = [[NSOperationQueue alloc] init];
-    _receiveQueue.name = @"receiveQueue";
+    _receiveQueue.name = [NSString stringWithFormat:@"receiveQueue[%@]", self.accountNo];
     _receiveQueue.qualityOfService = NSQualityOfServiceUtility;
     _receiveQueue.maxConcurrentOperationCount = 1;
     [_receiveQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
 
     _sendQueue = [[NSOperationQueue alloc] init];
-    _sendQueue.name = @"sendQueue";
+    _sendQueue.name = [NSString stringWithFormat:@"sendQueue[%@]", self.accountNo];
     _sendQueue.qualityOfService = NSQualityOfServiceUtility;
     _sendQueue.maxConcurrentOperationCount = 1;
     [_sendQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
@@ -393,7 +393,8 @@ NSString *const kData=@"data";
     )
         retval = YES;
     _lastIdleState = retval;
-    DDLogVerbose(@"Idle check:\n\t_accountState < kStateReconnecting = %@\n\t_reconnectInProgress = %@\n\t_catchupDone = %@\n\t[self.unAckedStanzas count] = %lu\n\t[_parseQueue operationCount] = %lu\n\t[_receiveQueue operationCount] = %lu\n\t[_sendQueue operationCount] = %lu\n\t--> %@",
+    DDLogVerbose(@"%@ --> Idle check:\n\t_accountState < kStateReconnecting = %@\n\t_reconnectInProgress = %@\n\t_catchupDone = %@\n\t[self.unAckedStanzas count] = %lu\n\t[_parseQueue operationCount] = %lu\n\t[_receiveQueue operationCount] = %lu\n\t[_sendQueue operationCount] = %lu\n\t--> %@",
+        self.accountNo,
         _accountState < kStateReconnecting ? @"YES" : @"NO",
         _reconnectInProgress ? @"YES" : @"NO",
         _catchupDone ? @"YES" : @"NO",
@@ -515,20 +516,20 @@ NSString *const kData=@"data";
     if(!_SRVDiscoveryDone)
     {
         DDLogInfo(@"Querying for SRV records");
-        _discoveredServersList=[[[MLDNSLookup alloc] init] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
+        _discoveredServersList = [[[MLDNSLookup alloc] init] dnsDiscoverOnDomain:self.connectionProperties.identity.domain];
         _SRVDiscoveryDone = YES;
         // no SRV records found, update server to directly connect to specified domain
         if([_discoveredServersList count]==0)
         {
-            [self.connectionProperties.server updateConnectServer: self.connectionProperties.identity.domain];
-            [self.connectionProperties.server updateConnectPort: @5222];
-            [self.connectionProperties.server updateConnectTLS: NO];
+            [self.connectionProperties.server updateConnectServer:self.connectionProperties.identity.domain];
+            [self.connectionProperties.server updateConnectPort:@5222];
+            [self.connectionProperties.server updateConnectTLS:NO];
             DDLogInfo(@"NO SRV records found, using standard xmpp config: %@:%@ (using starttls)", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort);
         }
     }
 
     // Show warning when xmpp-client srv entry prohibits connections
-    for(NSDictionary *row in _discoveredServersList)
+    for(NSDictionary* row in _discoveredServersList)
     {
         // Check if entry "." == srv target
         if(![[row objectForKey:@"isEnabled"] boolValue])
@@ -592,6 +593,7 @@ NSString *const kData=@"data";
 {
     if(self.accountState < kStateReconnecting)
     {
+        DDLogInfo(@"UNFREEZING account %@", self.accountNo);
         //(re)read persisted state (could be changed by appex)
         [self readState];
     }
@@ -1112,7 +1114,7 @@ NSString *const kData=@"data";
 
 -(void) removeAckedStanzasFromQueue:(NSNumber*) hvalue
 {
-    NSMutableArray* ackHandlerToCall;
+    NSMutableArray* ackHandlerToCall = [[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
     @synchronized(_stateLockObject) {
         self.lastHandledOutboundStanza = hvalue;
         if([self.unAckedStanzas count]>0)
@@ -1148,17 +1150,23 @@ NSString *const kData=@"data";
                 [self persistState];
         }
         
+        DDLogVerbose(@"_smacksAckHandler: %@", _smacksAckHandler);
         //remove registered smacksAckHandler that will be called now
-        ackHandlerToCall = [[NSMutableArray alloc] initWithCapacity:[_smacksAckHandler count]];
         for(NSDictionary* dic in _smacksAckHandler)
             if([[dic objectForKey:@"value"] integerValue] <= [hvalue integerValue])
+            {
+                DDLogVerbose(@"Adding smacks ack handler to call list: %@", dic);
                 [ackHandlerToCall addObject:dic];
+            }
         [_smacksAckHandler removeObjectsInArray:ackHandlerToCall];
     }
     
     //call registered smacksAckHandler that got sorted out
     for(NSDictionary* dic in ackHandlerToCall)
+    {
+        DDLogVerbose(@"Now calling smacks ack handler: %@", dic);
         ((monal_void_block_t)dic[@"handler"])();
+    }
 }
 
 -(void) requestSMAck:(BOOL) force
@@ -1606,10 +1614,11 @@ NSString *const kData=@"data";
                 //request an ack to accomplish this if stanza replay did not already trigger one (smacksRequestInFlight is false if replay did not trigger one)
                 if(!self.smacksRequestInFlight)
                     [self requestSMAck:YES];    //force sending of the request even if the smacks queue is empty (needed to always trigger the smacks handler below after 1 RTT)
+                DDLogVerbose(@"Adding resume smacks handler to check for completed catchup on account %@: %@", self.accountNo, self.lastOutboundStanza);
                 weakify(self);
                 [self addSmacksHandler:^{
-                    DDLogVerbose(@"Inside resume smacks handler: catchup done");
                     strongify(self);
+                    DDLogVerbose(@"Inside resume smacks handler: catchup done (%@)", self.lastOutboundStanza);
                     if(!self->_catchupDone)
                     {
                         self->_catchupDone = YES;
@@ -2017,7 +2026,8 @@ NSString *const kData=@"data";
         [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
         //debug output
-        DDLogVerbose(@"persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d",
+        DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d",
+            self.accountNo,
             values[@"stateSavedAt"],
             self.lastHandledInboundStanza,
             self.lastHandledOutboundStanza,
@@ -2049,7 +2059,8 @@ NSString *const kData=@"data";
             self.streamID = [dic objectForKey:@"streamID"];
             
             //debug output
-            DDLogVerbose(@"readSmacksStateOnly(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
+            DDLogVerbose(@"%@ --> readSmacksStateOnly(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
+                self.accountNo,
                 dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
@@ -2167,7 +2178,8 @@ NSString *const kData=@"data";
                 [self.pubsub setInternalData:[dic objectForKey:@"pubsubData"]];
             
             //debug output
-            DDLogVerbose(@"readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d",
+                self.accountNo,
                 dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
                 self.lastHandledOutboundStanza,
@@ -2452,7 +2464,6 @@ NSString *const kData=@"data";
         
         //to make sure this date is newer than the old saved one (even if we now falsely "tag" the beginning of our interaction, not the end)
         //if everything works out as it should and the app does not get killed, we will "tag" the end of our interaction as soon as the app is backgrounded
-        [self readState];       //make sure we operate on the newest state (appex could have changed it!)
         self->_lastInteractionDate = [NSDate date];
         [self persistState];
         
@@ -2474,7 +2485,6 @@ NSString *const kData=@"data";
         }
         
         //save date as last interaction date (XEP-0319) (e.g. "tag" the end of our interaction)
-        [self readState];       //make sure we operate on the newest state (appex could have changed it!)
         self->_lastInteractionDate = [NSDate date];
         [self persistState];
         
@@ -3100,11 +3110,13 @@ NSString *const kData=@"data";
     //try to send remaining buffered data first
     if(_outputBufferByteCount>0)
     {
+        DDLogVerbose(@"sending remaining bytes in outputBuffer: %lu", (unsigned long)_outputBufferByteCount);
         NSInteger sentLen=[_oStream write:_outputBuffer maxLength:_outputBufferByteCount];
         if(sentLen!=-1)
         {
             if(sentLen!=_outputBufferByteCount)		//some bytes remaining to send --> trim buffer and return NO
             {
+                DDLogVerbose(@"could not send all bytes in outputBuffer: %lu of %lu sent, %lu remaining", (unsigned long)sentLen, (unsigned long)_outputBufferByteCount, (unsigned long)(_outputBufferByteCount-sentLen));
                 memmove(_outputBuffer, _outputBuffer+(size_t)sentLen, _outputBufferByteCount-(size_t)sentLen);
                 _outputBufferByteCount-=sentLen;
                 _streamHasSpace=NO;
@@ -3112,6 +3124,7 @@ NSString *const kData=@"data";
             }
             else
             {
+                DDLogVerbose(@"managed to send whole outputBuffer: %lu bytes", (unsigned long)sentLen);
                 //dealloc empty buffer
                 free(_outputBuffer);
                 _outputBuffer=nil;
@@ -3122,6 +3135,7 @@ NSString *const kData=@"data";
         {
             NSError* error=[_oStream streamError];
             DDLogError(@"sending: failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
+            //reconnect from third party queue to not block send queue
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 [self reconnect];
             });
@@ -3137,6 +3151,7 @@ NSString *const kData=@"data";
     {
         if(sentLen!=rawstringLen)
         {
+            DDLogVerbose(@"could not send all bytes of outgoing stanza: %lu of %lu sent, %lu remaining", (unsigned long)sentLen, (unsigned long)rawstringLen, (unsigned long)(rawstringLen-sentLen));
             //allocate new _outputBuffer
             _outputBuffer=malloc(sizeof(uint8_t) * (rawstringLen-sentLen));
             //copy the remaining data into the buffer and set the buffer pointer accordingly
@@ -3145,13 +3160,17 @@ NSString *const kData=@"data";
             _streamHasSpace=NO;
         }
         else
+        {
+            DDLogVerbose(@"managed to send whole outgoing stanza: %lu bytes", (unsigned long)sentLen);
             _outputBufferByteCount=0;
+        }
         return YES;
     }
     else
     {
         NSError* error=[_oStream streamError];
         DDLogError(@"sending: failed with error %ld domain %@ message %@", (long)error.code, error.domain, error.userInfo);
+        //reconnect from third party queue to not block send queue
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             [self reconnect];
         });
@@ -3199,7 +3218,7 @@ NSString *const kData=@"data";
     message.actualFrom = actualFrom ? actualFrom : messageNode.fromUser;
     message.messageText = [body copy];     //this need to be the processed value since it may be decrypted
     message.to = messageNode.toUser ? messageNode.toUser : self.connectionProperties.identity.jid;
-    message.messageId = [messageNode check:@"/@id"] ? [messageNode findFirst:@"/@id"] : @"";
+    message.messageId = [messageNode check:@"/@id"] ? [messageNode findFirst:@"/@id"] : [[NSUUID UUID] UUIDString];
     message.accountId = self.accountNo;
     message.encrypted = encrypted;
     message.delayTimeStamp = [messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"];

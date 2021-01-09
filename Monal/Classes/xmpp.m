@@ -1896,9 +1896,13 @@ NSString *const kData=@"data";
     }
     
     //only send nonzas if we are >kStateDisconnected and stanzas if we are >=kStateBound
-    //only exception: an outgoing bind request stanza that is allowed before we are bound
+    //only exceptions: an outgoing bind request or jabber:iq:register stanza (this is allowed before binding a resource)
     BOOL isBindRequest = [stanza isKindOfClass:[XMPPIQ class]] && [stanza check:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/resource"];
-    if(self.accountState>=kStateBound || (self.accountState>kStateDisconnected && (![stanza isKindOfClass:[XMPPStanza class]] || isBindRequest)))
+    BOOL isRegisterRequest = [stanza isKindOfClass:[XMPPIQ class]] && [stanza check:@"{jabber:iq:register}query"];
+    if(
+        self.accountState>=kStateBound ||
+        (self.accountState>kStateDisconnected && (![stanza isKindOfClass:[XMPPStanza class]] || isBindRequest || isRegisterRequest))
+    )
     {
         [_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
             DDLogDebug(@"SEND: %@", stanza);

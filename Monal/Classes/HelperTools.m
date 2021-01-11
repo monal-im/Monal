@@ -86,20 +86,18 @@ void logException(NSException* exception)
 
 +(void) postSendingErrorNotification
 {
-    return; // supressing this error because it is too frequent/complaints
-    
-//    DDLogWarn(@"Posting syncError notification...");
-//    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
-//    content.title = NSLocalizedString(@"Could not synchronize", @"");
-//    content.body = NSLocalizedString(@"Please open the app to retry", @"");
-//    content.sound = [UNNotificationSound defaultSound];
-//    content.categoryIdentifier = @"simple";
-//    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-//    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:@"syncError" content:content trigger:nil];
-//    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-//        if(error)
-//            DDLogError(@"Error posting syncError notification: %@", error);
-//    }];
+    DDLogWarn(@"Posting syncError notification...");
+    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+    content.title = NSLocalizedString(@"Could not synchronize", @"");
+    content.body = NSLocalizedString(@"Please open the app to retry", @"");
+    content.sound = [UNNotificationSound defaultSound];
+    content.categoryIdentifier = @"simple";
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:@"syncError" content:content trigger:nil];
+    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+        if(error)
+            DDLogError(@"Error posting syncError notification: %@", error);
+    }];
 }
 
 +(BOOL) isInBackground

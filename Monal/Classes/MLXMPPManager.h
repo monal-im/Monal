@@ -23,6 +23,8 @@
 
 -(BOOL) allAccountsIdle;
 
+-(NSArray*) accountsNotIdle;
+
 #pragma  mark connectivity
 /**
  Checks if there are any enabled acconts and connects them if necessary.  

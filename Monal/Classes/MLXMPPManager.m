@@ -271,6 +271,15 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     return YES;
 }
 
+-(NSArray*) accountsNotIdle
+{
+    NSMutableArray* list = [[NSMutableArray alloc] init];
+    for(xmpp* xmppAccount in [self connectedXMPP])
+        if(!xmppAccount.idle)
+            [list addObject:xmppAccount];
+    return list;
+}
+
 #pragma mark - app state
 
 -(void) nowBackgrounded

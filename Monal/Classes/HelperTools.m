@@ -13,6 +13,7 @@
 #import "MLPubSub.h"
 #import "MLUDPLogger.h"
 #import "XMPPStanza.h"
+#import "xmpp.h"
 
 @import UserNotifications;
 
@@ -89,6 +90,13 @@ void logException(NSException* exception)
     DDLogWarn(@"Posting syncError notification...");
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
     content.title = NSLocalizedString(@"Could not synchronize", @"");
+    NSMutableString* subtitle = [[NSMutableString alloc] init];
+    for(xmpp* account in [[MLXMPPManager sharedInstance] accountsNotIdle])
+    {
+        [subtitle appendString:account.connectionProperties.identity.jid];
+        [subtitle appendString:@" "];
+    }
+    content.subtitle = subtitle;
     content.body = NSLocalizedString(@"Please open the app to retry", @"");
     content.sound = [UNNotificationSound defaultSound];
     content.categoryIdentifier = @"simple";

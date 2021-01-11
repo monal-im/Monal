@@ -735,10 +735,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 DDLogWarn(@"BG WAKE EXPIRING");
                 [DDLog flushLog];
                 
-                [[MLXMPPManager sharedInstance] disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
-                
+                //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
                 [HelperTools postSendingErrorNotification];
-
+                
+                //disconnect all accounts to prevent TCP buffer leaking
+                [[MLXMPPManager sharedInstance] disconnectAll];
+                
                 //schedule a BGProcessingTaskRequest to process this further as soon as possible
                 if(@available(iOS 13.0, *))
                 {
@@ -759,13 +761,19 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     DDLogInfo(@"RUNNING BGTASK");
     
     _bgFetch = task;
-    __weak BGTask* weakTask = task;
+    weakify(task);
     task.expirationHandler = ^{
         DDLogWarn(@"*** BGTASK EXPIRED ***");
+        strongify(task);
         _bgFetch = nil;
-        [[MLXMPPManager sharedInstance] disconnectAll];       //disconnect all accounts to prevent TCP buffer leaking
+        
+        //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
         [HelperTools postSendingErrorNotification];
-        [weakTask setTaskCompletedWithSuccess:NO];
+        
+        //disconnect all accounts to prevent TCP buffer leaking
+        [[MLXMPPManager sharedInstance] disconnectAll];
+        
+        [task setTaskCompletedWithSuccess:NO];
         [self scheduleBackgroundFetchingTask];      //schedule new one if neccessary
         [DDLog flushLog];
     };

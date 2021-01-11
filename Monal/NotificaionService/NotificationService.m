@@ -117,6 +117,7 @@
         if([self.handlerList count] <= 1 && ![[MLXMPPManager sharedInstance] allAccountsIdle])
         {
             [HelperTools postSendingErrorNotification];
+            
             //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
             //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
             [self feedAllWaitingHandlersWithCompletion:nil];

@@ -1629,7 +1629,7 @@ NSString *const kData=@"data";
                     {
                         self->_catchupDone = YES;
                         DDLogVerbose(@"Now posting kMonalFinishedCatchup notification");
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:@{@"accountNo": self.accountNo}];
                     }
                 }];
             }
@@ -3239,7 +3239,7 @@ NSString *const kData=@"data";
     if(!_catchupDone)
     {
         _catchupDone = YES;
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self  userInfo:@{@"accountNo": self.accountNo}];
 
     }
 }

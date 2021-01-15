@@ -20,9 +20,9 @@
 
 @interface MLLogInViewController ()
 
-@property (nonatomic, strong) MBProgressHUD *loginHUD;
-@property (nonatomic, weak) UITextField *activeField;
-@property (nonatomic, strong) NSString *accountno;
+@property (nonatomic, strong) MBProgressHUD* loginHUD;
+@property (nonatomic, weak) UITextField* activeField;
+@property (nonatomic, strong) NSString* accountNo;
 
 @end
 
@@ -39,11 +39,11 @@
     [super viewWillAppear:animated];
     
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
-    [nc addObserver:self selector:@selector(connected) name:kMonalFinishedCatchup object:nil];
+    [nc addObserver:self selector:@selector(connected:) name:kMonalFinishedCatchup object:nil];
 #ifndef DISABLE_OMEMO
     [nc addObserver:self selector:@selector(updateBundleFetchStatus:) name:kMonalUpdateBundleFetchStatus object:nil];
 #endif
-    [nc addObserver:self selector:@selector(omemoBundleFetchFinished) name:kMonalFinishedOmemoBundleFetch object:nil];
+    [nc addObserver:self selector:@selector(omemoBundleFetchFinished:) name:kMonalFinishedOmemoBundleFetch object:nil];
     [nc addObserver:self selector:@selector(error) name:kXMPPError object:nil];
 
     if(@available(iOS 13.0, *))
@@ -149,10 +149,10 @@
     
     NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
     if(accountID) {
-        self.accountno = [NSString stringWithFormat:@"%@", accountID];
+        self.accountNo = [NSString stringWithFormat:@"%@", accountID];
         [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-        [SAMKeychain setPassword:password forService:@"Monal" account:self.accountno];
-        [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
+        [SAMKeychain setPassword:password forService:@"Monal" account:self.accountNo];
+        [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
     }
 
     // open privacy settings
@@ -162,37 +162,46 @@
     }
 }
 
--(void) connected
+-(void) connected:(NSNotification*) notification
 {
-    [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
-#ifndef DISABLE_OMEMO
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.loginHUD.label.text = NSLocalizedString(@"Loading omemo bundles", @"");
-    });
-#else
-    [self kMonalFinishedOmemoBundleFetch];
-#endif
+    if([notification.userInfo[@"accountNo"] isEqualToString:self.accountNo])
+    {
+        [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
+    #ifndef DISABLE_OMEMO
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.loginHUD.label.text = NSLocalizedString(@"Loading omemo bundles", @"");
+        });
+    #else
+        [self kMonalFinishedOmemoBundleFetch];
+    #endif
+    }
 }
 
 #ifndef DISABLE_OMEMO
 -(void) updateBundleFetchStatus:(NSNotification*) notification
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.loginHUD.label.text = [NSString stringWithFormat:NSLocalizedString(@"Loading omemo bundles: %@ / %@", @""), notification.userInfo[@"completed"], notification.userInfo[@"all"]];
-    });
+    if([notification.userInfo[@"accountNo"] isEqualToString:self.accountNo])
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.loginHUD.label.text = [NSString stringWithFormat:NSLocalizedString(@"Loading omemo bundles: %@ / %@", @""), notification.userInfo[@"completed"], notification.userInfo[@"all"]];
+        });
+    }
 }
 #endif
 
--(void) omemoBundleFetchFinished
+-(void) omemoBundleFetchFinished:(NSNotification*) notification
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.loginHUD.hidden = YES;
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Success!", @"") message:NSLocalizedString(@"You are set up and connected.", @"") preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Start Using Monal", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            [self dismissViewControllerAnimated:YES completion:nil];
-        }]];
-        [self presentViewController:alert animated:YES completion:nil];
-    });
+    if([notification.userInfo[@"accountNo"] isEqualToString:self.accountNo])
+    {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.loginHUD.hidden = YES;
+            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Success!", @"") message:NSLocalizedString(@"You are set up and connected.", @"") preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Start Using Monal", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                [self dismissViewControllerAnimated:YES completion:nil];
+            }]];
+            [self presentViewController:alert animated:YES completion:nil];
+        });
+    }
 }
 
 -(void) error
@@ -205,8 +214,8 @@
         }]];
         [self presentViewController:alert animated:YES completion:nil];
         
-        if(self.accountno)
-            [[DataLayer sharedInstance] removeAccount:self.accountno];
+        if(self.accountNo)
+            [[DataLayer sharedInstance] removeAccount:self.accountNo];
     });
 }
 

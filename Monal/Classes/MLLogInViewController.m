@@ -88,8 +88,13 @@
 
 -(IBAction) login:(id)sender
 {
+    [self login];
+}
+
+-(void) login
+{
     self.loginHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    self.loginHUD.label.text = NSLocalizedString(@"Logging in",@"");
+    self.loginHUD.label.text = NSLocalizedString(@"Logging in", @"");
     self.loginHUD.mode=MBProgressHUDModeIndeterminate;
     self.loginHUD.removeFromSuperViewOnHide=YES;
 
@@ -234,6 +239,19 @@
     self.activeField = nil;
 }
 
+// login on enter
+-(void) enterPressed:(UIKeyCommand*)keyCommand
+{
+    [self login];
+}
+
+// List of custom hardware key commands
+- (NSArray<UIKeyCommand *> *)keyCommands {
+    return @[
+        // enter
+        [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(enterPressed:)],
+    ];
+}
 
 
 #pragma mark - keyboard management

@@ -26,7 +26,7 @@ void logException(NSException* exception);
 +(NSString*) stringFromToken:(NSData*) tokenIn;
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
 +(void) configureFileProtectionFor:(NSString*) file;
-+(NSDictionary*) splitJid:(NSString*) jid;
++(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid;
 +(void) postSendingErrorNotification;
 +(BOOL) isInBackground;
 +(void) dispatchSyncReentrant:(monal_void_block_t) block onQueue:(dispatch_queue_t) queue;

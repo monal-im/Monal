@@ -319,6 +319,12 @@ NSString* const kiqErrorType = @"error";
     [self addChild:blockNode];
 }
 
+-(void) requestBlockList
+{
+    MLXMLNode* blockNode = [[MLXMLNode alloc] initWithElement:@"blocklist" andNamespace:@"urn:xmpp:blocking"];
+    [self addChild:blockNode];
+}
+
 -(void) httpUploadforFile:(NSString *) file ofSize:(NSNumber *) filesize andContentType:(NSString *) contentType
 {
     MLXMLNode* requestNode = [[MLXMLNode alloc] initWithElement:@"request" andNamespace:@"urn:xmpp:http:upload:0"];

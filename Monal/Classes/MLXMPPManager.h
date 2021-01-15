@@ -63,6 +63,7 @@
  Block  a jid
  */
 -(void) blocked:(BOOL) isBlocked Jid:(MLContact *) contact;
+-(void) blocked:(BOOL) isBlocked Jid:(NSString *) contact Account:(NSString*) accountNo;
 
 /**
  Returns the user set name of the conencted account

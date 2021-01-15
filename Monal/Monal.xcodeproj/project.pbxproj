@@ -271,6 +271,7 @@
 		C18E757C245E8AE900AE8FB7 /* MLPipe.m in Sources */ = {isa = PBXBuildFile; fileRef = C18E7579245E8AE900AE8FB7 /* MLPipe.m */; };
 		C1943A4C25309A9D0036172F /* MLReloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1943A4B25309A9D0036172F /* MLReloadCell.m */; };
 		C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */; };
+		C1B1982625AB31B800D5028E /* MLBlockedUsersTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1B1982525AB31B800D5028E /* MLBlockedUsersTableViewController.m */; };
 		C1B7DF6C2438883600C7F0C4 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */; };
 		C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */ = {isa = PBXBuildFile; fileRef = C1C839DA24F15DF800BBCF17 /* MLOMEMO.h */; };
 		C1C839DE24F15DF800BBCF17 /* MLOMEMO.m in Sources */ = {isa = PBXBuildFile; fileRef = C1C839DC24F15DF800BBCF17 /* MLOMEMO.m */; };
@@ -872,6 +873,8 @@
 		C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLChatViewHelper.m; sourceTree = "<group>"; };
 		C1AAC3E224B5EF4100BB15D6 /* HelperTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelperTools.h; sourceTree = "<group>"; };
 		C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HelperTools.m; sourceTree = "<group>"; };
+		C1B1982425AB31B800D5028E /* MLBlockedUsersTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLBlockedUsersTableViewController.h; sourceTree = "<group>"; };
+		C1B1982525AB31B800D5028E /* MLBlockedUsersTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLBlockedUsersTableViewController.m; sourceTree = "<group>"; };
 		C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/CoreLocation.framework; sourceTree = DEVELOPER_DIR; };
 		C1C8394E24F0EDFD00BBCF17 /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = localization/ar.lproj/Main.strings; sourceTree = "<group>"; };
 		C1C8395024F0EE0300BBCF17 /* zh-Hant-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant-HK"; path = "localization/zh-Hant-HK.lproj/Main.strings"; sourceTree = "<group>"; };
@@ -1265,6 +1268,8 @@
 				262AEFE720AE756800498F82 /* MLMAMPrefTableViewController.m */,
 				26AAAAD82295742400200433 /* MLPasswordChangeTableViewController.h */,
 				26AAAAD92295742400200433 /* MLPasswordChangeTableViewController.m */,
+				C1B1982425AB31B800D5028E /* MLBlockedUsersTableViewController.h */,
+				C1B1982525AB31B800D5028E /* MLBlockedUsersTableViewController.m */,
 			);
 			name = Accounts;
 			sourceTree = "<group>";
@@ -2274,6 +2279,7 @@
 				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC/SignalProtocolObjC.framework",
 				"${BUILT_PRODUCTS_DIR}/SAMKeychain/SAMKeychain.framework",
 				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer/TPCircularBuffer.framework",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL/OpenSSL.framework/OpenSSL",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
@@ -2282,6 +2288,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SignalProtocolObjC.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SAMKeychain.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TPCircularBuffer.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OpenSSL.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2356,6 +2363,7 @@
 				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC/SignalProtocolObjC.framework",
 				"${BUILT_PRODUCTS_DIR}/SAMKeychain/SAMKeychain.framework",
 				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer/TPCircularBuffer.framework",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL/OpenSSL.framework/OpenSSL",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
@@ -2376,6 +2384,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SignalProtocolObjC.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SAMKeychain.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TPCircularBuffer.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OpenSSL.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2509,6 +2518,7 @@
 				26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */,
 				2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */,
 				C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */,
+				C1B1982625AB31B800D5028E /* MLBlockedUsersTableViewController.m in Sources */,
 				2644D4951FF046E800F46AB5 /* MLBaseCell.m in Sources */,
 				268DD58617C4541000C673A9 /* MLChatCell.m in Sources */,
 				2644D4991FF29E5600F46AB5 /* MLSettingsTableViewController.m in Sources */,

@@ -86,9 +86,9 @@ void logException(NSException* exception)
 #endif
 }
 
-+(NSDictionary*) splitJid:(NSString*) jid
++(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid
 {
-    NSMutableDictionary* retval = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary<NSString*, NSString*>* retval = [[NSMutableDictionary alloc] init];
     NSArray* parts = [jid componentsSeparatedByString:@"/"];
     
     retval[@"user"] = [[parts objectAtIndex:0] lowercaseString];        //intended to not break code that expects lowercase

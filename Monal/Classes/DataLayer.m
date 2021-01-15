@@ -425,7 +425,7 @@ static NSDateFormatter* dbFormatter;
     if(!username || !accountNo)
         return nil;
     
-    NSArray* results = [self.db executeReader:@"SELECT b.buddy_name, state, status, filename, b.full_name, b.nick_name, muc_subject, muc_nick, b.account_id, lastMessageTime, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', \
+    NSArray* results = [self.db executeReader:@"SELECT b.buddy_name, state, status, filename, b.full_name, b.nick_name, muc_subject, muc_nick, b.account_id, lastMessageTime, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', blocked, \
         CASE \
             WHEN a.buddy_name IS NOT NULL THEN 1 \
             ELSE 0 \
@@ -2111,6 +2111,26 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN blocked BOOL DEFAULT FALSE;"];
             [self.db executeNonQuery:@"DROP TABLE blockList;"];
         }];
+
+        [self updateDBTo:5.003 withBlock:^{
+            [self.db executeNonQuery:@"CREATE TABLE 'blocklistCache' (\
+             'account_id' TEXT NOT NULL, \
+             'node' TEXT, \
+             'host' TEXT, \
+             'resource' TEXT, \
+             UNIQUE('account_id','node','host','resource'), \
+             CHECK( \
+                (LENGTH('node') > 0 AND LENGTH('host') > 0 AND LENGTH('resource') > 0) \
+                OR \
+                (LENGTH('node') > 0 AND LENGTH('host') > 0) \
+                OR \
+                (LENGTH('host') > 0 AND LENGTH('resource') > 0) \
+                OR \
+                (LENGTH('host') > 0) \
+             ), \
+             FOREIGN KEY('account_id') REFERENCES 'account'('account_id') \
+         );"];
+        }];
     }];
     
     DDLogInfo(@"Database version check complete");
@@ -2149,31 +2169,106 @@ static NSDateFormatter* dbFormatter;
     return toreturn;
 }
 
-
--(void) updateBlockTo:(BOOL) blocked forJid:(NSString*) jid withAccountNo:(NSString*) accountNo
-{
-    if(!jid || !accountNo) return;
-    [self.db executeNonQuery:@"UPDATE buddylist SET blocked=? WHERE buddy_name=? AND account_id=?" andArguments:@[[NSNumber numberWithBool:blocked], jid, accountNo]];
-}
-
 -(void) blockJid:(NSString*) jid withAccountNo:(NSString*) accountNo
 {
-    [self updateBlockTo:YES forJid:jid withAccountNo:accountNo];
+    if(!jid || !accountNo) return;
+    NSDictionary<NSString*, NSString*>* parsedJid = [HelperTools splitJid:jid];
+    [self.db executeNonQuery:@"INSERT OR IGNORE INTO blocklistCache(account_id, node, host, resource) VALUES(?, ?, ?, ?)" andArguments:@[accountNo,
+            parsedJid[@"node"] ? parsedJid[@"node"] : [NSNull null],
+            parsedJid[@"host"] ? parsedJid[@"host"] : [NSNull null],
+            parsedJid[@"resource"] ? parsedJid[@"resource"] : [NSNull null],
+    ]];
+}
+
+-(void) updateLocalBlocklistCache:(NSSet<NSString*>*) blockedJids forAccountNo:(NSString*) accountNo
+{
+    [self.db voidWriteTransaction:^{
+        // remove blocked state for all buddies of account
+        [self.db executeNonQuery:@"DELETE FROM blocklistCache WHERE account_id=?" andArguments:@[accountNo]];
+        // set blocking
+        for(NSString* blockedJid in blockedJids)
+        {
+            [self blockJid:blockedJid withAccountNo:accountNo];
+        }
+    }];
 }
 
 -(void) unBlockJid:(NSString*) jid withAccountNo:(NSString*) accountNo
 {
-    [self updateBlockTo:NO forJid:jid withAccountNo:accountNo];
+    NSDictionary<NSString*, NSString*>* parsedJid = [HelperTools splitJid:jid];
+
+    if(parsedJid[@"node"] && parsedJid[@"host"] && parsedJid[@"resource"])
+    {
+        [self.db executeNonQuery:@"DELETE FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource=?" andArguments:@[accountNo, parsedJid[@"node"], parsedJid[@"host"], parsedJid[@"resource"]]];    }
+    else if(parsedJid[@"node"] && parsedJid[@"host"])
+    {
+        [self.db executeNonQuery:@"DELETE FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource IS NULL" andArguments:@[accountNo, parsedJid[@"node"], parsedJid[@"host"]]];
+    }
+    else if(parsedJid[@"host"] && parsedJid[@"resource"])
+    {
+        [self.db executeNonQuery:@"DELETE FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource=?" andArguments:@[accountNo, parsedJid[@"host"], parsedJid[@"resource"]]];
+    }
+    else if(parsedJid[@"host"])
+    {
+        [self.db executeNonQuery:@"DELETE FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource IS NULL" andArguments:@[accountNo, parsedJid[@"host"]]];
+    }
 }
 
--(BOOL) isBlockedJid:(NSString*) jid withAccountNo:(NSString*) accountNo
+-(u_int8_t) isBlockedJid:(NSString*) jid withAccountNo:(NSString*) accountNo
 {
     if(!jid || !accountNo) return NO;
-    NSNumber* blocked = [self.db executeScalar:@"SELECT blocked FROM buddylist WHERE buddy_name=? AND account_id=?;" andArguments:@[jid, accountNo]];
-    if(blocked != nil)
-        return [blocked boolValue];
+
+    NSDictionary<NSString*, NSString*>* parsedJid = [HelperTools splitJid:jid];
+    NSNumber* blocked;
+    u_int8_t ruleId = kBlockingNoMatch;
+    if(parsedJid[@"node"] && parsedJid[@"host"] && parsedJid[@"resource"])
+    {
+        blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource=?;" andArguments:@[accountNo, parsedJid[@"node"], parsedJid[@"host"], parsedJid[@"resource"]]];
+        ruleId = kBlockingMatchedNodeHostResource;
+    }
+    else if(parsedJid[@"node"] && parsedJid[@"host"])
+    {
+        blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node=? AND host=? AND resource IS NULL;" andArguments:@[accountNo, parsedJid[@"node"], parsedJid[@"host"]]];
+        ruleId = kBlockingMatchedNodeHost;
+    }
+    else if(parsedJid[@"host"] && parsedJid[@"resource"])
+    {
+        blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource=?;" andArguments:@[accountNo, parsedJid[@"host"], parsedJid[@"resource"]]];
+        ruleId = kBlockingMatchedHostResource;
+    }
+    else if(parsedJid[@"host"])
+    {
+        blocked = [self.db executeScalar:@"SELECT COUNT(*) FROM blocklistCache WHERE account_id=? AND node IS NULL AND host=? AND resource IS NULL;" andArguments:@[accountNo, parsedJid[@"host"]]];
+        ruleId = kBlockingMatchedHost;
+    }
     else
-        return NO;
+    {
+        return kBlockingNoMatch;
+    }
+    if(blocked.intValue == 1)
+        return ruleId;
+    else
+        return kBlockingNoMatch;
+}
+
+-(NSArray<NSDictionary<NSString*, NSString*>*>*) blockedJidsForAccount:(NSString*) accountNo
+{
+    NSArray* blockedJidsFromDB = [self.db executeReader:@"SELECT * FROM blocklistCache WHERE account_id=?" andArguments:@[accountNo]];
+    NSMutableArray* blockedJids = [[NSMutableArray alloc] init];
+    for(NSDictionary* blockedJid in blockedJidsFromDB)
+    {
+        NSString* fullJid = @"";
+        if(blockedJid[@"node"])
+            fullJid = [NSString stringWithFormat:@"%@@", blockedJid[@"node"]];
+        if(blockedJid[@"host"])
+            fullJid = [NSString stringWithFormat:@"%@%@", fullJid, blockedJid[@"host"]];
+        if(blockedJid[@"resource"])
+            fullJid = [NSString stringWithFormat:@"%@/%@", fullJid, blockedJid[@"resource"]];
+        NSMutableDictionary* blockedMutableJid = [[NSMutableDictionary alloc] initWithDictionary:blockedJid];
+        [blockedMutableJid setValue:fullJid forKey:@"fullBlockedJid"];
+        [blockedJids addObject:blockedMutableJid];
+    }
+    return blockedJids;
 }
 
 -(BOOL) isPinnedChat:(NSString*) accountNo andBuddyJid:(NSString*) buddyJid

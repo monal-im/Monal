@@ -7,14 +7,15 @@
 //
 
 #import "XMPPEdit.h"
-#import "MLSwitchCell.h"
-#import "MLButtonCell.h"
 #import "MBProgressHUD.h"
-#import "MLServerDetails.h"
-#import "MLMAMPrefTableViewController.h"
-#import "MLKeysTableViewController.h"
-#import "MLPasswordChangeTableViewController.h"
+#import "MLBlockedUsersTableViewController.h"
+#import "MLButtonCell.h"
 #import "MLImageManager.h"
+#import "MLKeysTableViewController.h"
+#import "MLMAMPrefTableViewController.h"
+#import "MLPasswordChangeTableViewController.h"
+#import "MLServerDetails.h"
+#import "MLSwitchCell.h"
 
 @import MobileCoreServices;
 @import AVFoundation;
@@ -469,6 +470,13 @@
                 thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                 break;
             }
+            case 3: {
+                thecell.cellLabel.text = NSLocalizedString(@"Blocked Users", @"");
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.hidden = YES;
+                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                break;
+            }
         }
     }
     else if(indexPath.section == 3)
@@ -616,7 +624,7 @@
         return 3;
     // General settings
     else if(section == 2)
-        return 3;
+        return 4;
     // Advanced settings
     else if(section == 3)
         return 7;
@@ -641,6 +649,9 @@
                 break;
             case 2:
                 [self performSegueWithIdentifier:@"showMAMPref" sender:self];
+                break;
+            case 3:
+                [self performSegueWithIdentifier:@"showBlockedUsers" sender:self];
                 break;
         }
     }
@@ -682,11 +693,18 @@
         MLServerDetails* server= (MLServerDetails*)segue.destinationViewController;
         server.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
     }
-
     else if([segue.identifier isEqualToString:@"showMAMPref"])
     {
         MLMAMPrefTableViewController* mam = (MLMAMPrefTableViewController*)segue.destinationViewController;
         mam.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+    }
+    else if([segue.identifier isEqualToString:@"showBlockedUsers"])
+    {
+        xmpp* xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+        // force blocklist update
+        [xmppAccount fetchBlocklist];
+        MLBlockedUsersTableViewController* blockedUsers = (MLBlockedUsersTableViewController*)segue.destinationViewController;
+        blockedUsers.xmppAccount = xmppAccount;
     }
     else if([segue.identifier isEqualToString:@"showKeyTrust"])
     {

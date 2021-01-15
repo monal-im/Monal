@@ -74,6 +74,36 @@
         [reply setiqTo:iqNode.from];
         [account send:reply];
     }
+
+    if(account.connectionProperties.supportsBlocking)
+    {
+        // mark jid as unblocked
+        if([iqNode check:@"{urn:xmpp:blocking}unblock"])
+        {
+            NSArray* unBlockItems = [iqNode find:@"{urn:xmpp:blocking}unblock/item@@"];
+            for(NSDictionary* item in unBlockItems)
+            {
+                if(item && item[@"jid"])
+                    [[DataLayer sharedInstance] unBlockJid:item[@"jid"] withAccountNo:account.accountNo];
+            }
+            if(unBlockItems && unBlockItems.count == 0)
+            {
+                // remove all blocks
+                [account updateLocalBlocklistCache:[[NSSet<NSString*> alloc] init]];
+            }
+        }
+        // mark jid as blocked
+        if([iqNode check:@"{urn:xmpp:blocking}block"])
+        {
+            for(NSDictionary* item in [iqNode find:@"{urn:xmpp:blocking}block/item@@"])
+            {
+                if(item && item[@"jid"])
+                    [[DataLayer sharedInstance] blockJid:item[@"jid"] withAccountNo:account.accountNo];
+            }
+        }
+        // notify the views
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalBlockListRefresh object:account userInfo:@{@"accountNo": account.accountNo}];
+    }
 }
 
 +(void) processResultIq:(XMPPIQ*) iqNode forAccount:(xmpp*) account
@@ -354,7 +384,10 @@ $$handler(handleServerDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
         account.connectionProperties.supportsPing = YES;
     
     if([features containsObject:@"urn:xmpp:blocking"])
-        account.connectionProperties.supportsBlocking=YES;
+    {
+        account.connectionProperties.supportsBlocking = YES;
+        [account fetchBlocklist];
+    }
 $$
 
 $$handler(handleServiceDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
@@ -448,10 +481,30 @@ $$handler(handlePushEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     {
         DDLogError(@"Enabling push returned an error: %@", [iqNode findFirst:@"error"]);
         [self postError:NSLocalizedString(@"Error registering push", @"") withIqNode:iqNode andAccount:account andIsSevere:NO];
+        account.connectionProperties.pushEnabled = NO;
         return;
     }
     
     account.connectionProperties.pushEnabled = YES;
+$$
+
+$$handler(handleBlocklist, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+    if(!account.connectionProperties.supportsBlocking) return;
+
+    if([iqNode check:@"/<type=result>/{urn:xmpp:blocking}blocklist"])
+    {
+        NSMutableSet<NSString*>* blockedJids = [[NSMutableSet<NSString*> alloc] init];
+        for(NSDictionary* item in [iqNode find:@"/<type=result>/{urn:xmpp:blocking}blocklist/item@@"])
+        {
+            if(item && item[@"jid"])
+            {
+                [blockedJids addObject:item[@"jid"]];
+            }
+        }
+        [account updateLocalBlocklistCache:blockedJids];
+        // notify the views
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalBlockListRefresh object:account userInfo:@{@"accountNo": account.accountNo}];
+    }
 $$
 
 +(void) iqVersionResult:(XMPPIQ*) iqNode forAccount:(xmpp*) account

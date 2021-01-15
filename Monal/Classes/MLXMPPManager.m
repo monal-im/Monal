@@ -605,6 +605,12 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [account setBlocked:isBlocked forJid:contact.contactJid];
 }
 
+-(void) blocked:(BOOL) isBlocked Jid:(NSString *) contact Account:(NSString*) accountNo
+{
+    xmpp* account = [self getConnectedAccountForID:accountNo];
+    [account setBlocked:isBlocked forJid:contact];
+}
+
 #pragma mark - MUC commands
 
 -(void)  joinRoom:(NSString*) roomName  withNick:(NSString *)nick andPassword:(NSString*) password forAccounId:(NSString *) accountId

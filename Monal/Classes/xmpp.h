@@ -222,6 +222,8 @@ Decline a call request
  XEP-0191 blocking
  */
 -(void) setBlocked:(BOOL) blocked forJid:(NSString*) jid;
+-(void) fetchBlocklist;
+-(void) updateLocalBlocklistCache:(NSSet<NSString*>*) blockedJids;
 
 
 #pragma mark - account management

@@ -134,6 +134,7 @@ removes a contact from the roster
 
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid;
+-(void) requestBlockList;
 
 #pragma mark - account
 -(void) changePasswordForUser:(NSString* _Nonnull) user newPassword:(NSString* _Nonnull) newPsss;

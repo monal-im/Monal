@@ -23,9 +23,7 @@
 
 
 @interface ContactDetails()
-@property (nonatomic, assign) BOOL isPinned;
 @property (nonatomic, assign) BOOL isMuted;
-@property (nonatomic, assign) BOOL isBlocked;
 @property (nonatomic, assign) BOOL isEncrypted;
 @property (nonatomic, assign) BOOL isSubscribed;
 @property (nonatomic, strong) NSString* subMessage;
@@ -37,11 +35,27 @@
 @property (nonatomic, assign) NSInteger groupMemberCount;
 @property (nonatomic, strong) UIImage* leftImage;
 @property (nonatomic, strong) UIImage* rightImage;
-@property (nonatomic, strong) NSMutableDictionary* versionInfoDic;
 @property (nonatomic, strong) MBProgressHUD* saveHUD;
 @end
 
 @class HelperTools;
+
+enum ContactDetailsSections {
+    ContactDetailsHeaderSection,
+    ContactDetailsAboutSection,
+    ContactDetailsConnDetailsSection,
+    ContactDetailsSectionsCnt
+};
+
+enum ContactDetailsConnDetailsRows {
+    KeysRow,
+    ResourcesRow,
+    SubscribedStateRow,
+    BlockStateRow,
+    PinnStateRow,
+    OMEMOClearSessionRow,
+    ContactDetailsConnDetailsRowsCnt
+};
 
 @implementation ContactDetails
 
@@ -55,11 +69,10 @@
          forCellReuseIdentifier:@"TextCell"];
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshBlockState:) name:kMonalBlockListRefresh object:nil];
 
     self.tableView.rowHeight = UITableViewAutomaticDimension;
     self.tableView.estimatedRowHeight = UITableViewAutomaticDimension;
-
-
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -81,8 +94,7 @@
     self.accountNo = self.contact.accountId;
 
     self.isEncrypted = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.accountNo];
-    self.isPinned = [[DataLayer sharedInstance] isPinnedChat:self.accountNo andBuddyJid:self.contact.contactJid];
-    self.isBlocked = [[DataLayer sharedInstance] isBlockedJid:self.contact.contactJid withAccountNo:self.accountNo];
+    self.contact.isBlocked = ([[DataLayer sharedInstance] isBlockedJid:self.contact.contactJid withAccountNo:self.accountNo] == kBlockingMatchedNodeHost);
 
     NSDictionary* newSub = [[DataLayer sharedInstance] getSubscriptionForContact:self.contact.contactJid andAccount:self.contact.accountId];
     self.contact.ask = [newSub objectForKey:@"ask"];
@@ -95,7 +107,7 @@
             self.subMessage = NSLocalizedString(@"Neither can see keys.", @"");
         }
 
-        else  if([self.contact.subscription isEqualToString:kSubTo]){
+        else if([self.contact.subscription isEqualToString:kSubTo]){
              self.subMessage = NSLocalizedString(@"You can see their keys. They can't see yours", @"");
         }
 
@@ -109,7 +121,6 @@
         {
             self.subMessage =[NSString  stringWithFormat:NSLocalizedString(@"%@ (Pending Approval)", @""), self.subMessage];
         }
-
     } else  {
         self.isSubscribed = YES;
     }
@@ -118,6 +129,14 @@
 
     [self refreshLock];
     [self refreshMute];
+
+    [self.xmppAccount fetchBlocklist];
+
+    self.saveHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    self.saveHUD.label.text = NSLocalizedString(@"Saving changes to server", @"");
+    self.saveHUD.mode = MBProgressHUDModeIndeterminate;
+    self.saveHUD.removeFromSuperViewOnHide = YES;
+    self.saveHUD.hidden = YES;
 }
 
 -(void)viewWillDisappear:(BOOL)animated
@@ -194,7 +213,7 @@
 {
     UITableViewCell* thecell;
 
-    if(indexPath.section == 0)
+    if(indexPath.section == ContactDetailsHeaderSection)
     {
         MLContactDetailHeader* detailCell = (MLContactDetailHeader *)[tableView dequeueReusableCellWithIdentifier:@"headerCell"];
 
@@ -245,7 +264,7 @@
 
         return detailCell;
     }
-    else if(indexPath.section == 1)
+    else if(indexPath.section == ContactDetailsAboutSection)
     {
         if(indexPath.row == 0)
         {
@@ -286,9 +305,9 @@
     else
     {
         thecell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Sub"];
-        if(indexPath.row == 0)
+        if(indexPath.row == KeysRow)
             thecell.textLabel.text = NSLocalizedString(@"Encryption Keys", @"");
-        else if(indexPath.row == 1)
+        else if(indexPath.row == ResourcesRow)
         {
             if(self.contact.isGroup) {
                 thecell.textLabel.text = NSLocalizedString(@"Participants", @"");
@@ -296,7 +315,7 @@
                 thecell.textLabel.text = NSLocalizedString(@"Resources", @"");
             }
         }
-        else if(indexPath.row == 2)
+        else if(indexPath.row == SubscribedStateRow)
         {
             if(self.contact.isGroup)
                 thecell.textLabel.text = NSLocalizedString(@"Leave Conversation", @"");
@@ -308,21 +327,24 @@
                     thecell.textLabel.text = NSLocalizedString(@"Add Contact", @"");
             }
         }
-        else if(indexPath.row == 3)
+        else if(indexPath.row == BlockStateRow)
         {
-            if(!self.isBlocked)
+            // hide block button if the server does not support it
+            thecell.hidden = !self.xmppAccount.connectionProperties.supportsBlocking;
+
+            if(!self.contact.isBlocked)
                 thecell.textLabel.text = NSLocalizedString(@"Block Sender", @"");
             else
                 thecell.textLabel.text = NSLocalizedString(@"Unblock Sender", @"");
         }
-        else if(indexPath.row == 4)
+        else if(indexPath.row == PinnStateRow)
         {
-            if(self.isPinned)
+            if(self.contact.isPinned)
                 thecell.textLabel.text = NSLocalizedString(@"Unpin Chat", @"");
             else
                 thecell.textLabel.text = NSLocalizedString(@"Pin Chat", @"");
         }
-        else if(indexPath.row == 5)
+        else if(indexPath.row == OMEMOClearSessionRow)
         {
             thecell.textLabel.text = NSLocalizedString(@"Clear omemo session", @"DEBUG - ContactDetails");
         }
@@ -333,25 +355,24 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
 {
-    if(section == 0) return 1;
-    if(section == 1) return 3;
-    if(section == 2) return 6;
-    if(section == 3) return [_versionInfoDic count];
+    if(section == ContactDetailsHeaderSection) return 1;
+    if(section == ContactDetailsAboutSection) return 3;
+    if(section == ContactDetailsConnDetailsSection) return ContactDetailsConnDetailsRowsCnt;
 
     return 0; //some default shouldnt reach this
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 4;
+    return ContactDetailsSectionsCnt;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     NSString* toreturn = nil;
-    if(section == 1)
+    if(section == ContactDetailsAboutSection)
         toreturn = NSLocalizedString(@"About", @"");
 
-    if(section == 2)
+    if(section == ContactDetailsConnDetailsSection)
         toreturn = NSLocalizedString(@"Connection Details", @"");
 
     return toreturn;
@@ -362,24 +383,24 @@
 {
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
 
-    if(indexPath.section == 0 || indexPath.section == 3) return;
+    if(indexPath.section == ContactDetailsHeaderSection) return;
 
-    if(indexPath.section == 1){
+    if(indexPath.section == ContactDetailsAboutSection){
         if(indexPath.row < 2) return;
         [self showChatImages];
     }
     else  {
         switch(indexPath.row)
         {
-            case 0:  {
+            case KeysRow:  {
                 [self performSegueWithIdentifier:@"showKeys" sender:self];
                 break;
             }
-            case 1:  {
+            case ResourcesRow:  {
                 [self performSegueWithIdentifier:@"showResources" sender:self];
                 break;
             }
-            case 2:  {
+            case SubscribedStateRow:  {
                 if(self.contact.isGroup) {
                     [self removeContact]; // works for muc too
                 } else  {
@@ -392,8 +413,9 @@
                 }
                 break;
             }
-            case 3:  {
-                if(self.isBlocked)
+            case BlockStateRow:  {
+                if(![self checkBlockingSupport]) return;
+                if(self.contact.isBlocked)
                 {
                     [self unBlockContact];
                 }
@@ -401,13 +423,13 @@
                 {
                     [self blockContact];
                 }
-                self.isBlocked = !self.isBlocked;
-                // Update button text
-                [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
+                self.saveHUD.hidden = NO;
+                // hide after 20 seconds
+                [self.saveHUD hideAnimated:YES afterDelay:20];
                 break;
             }
-            case 4:  {
-                if(self.isPinned)
+            case PinnStateRow:  {
+                if(self.contact.isPinned)
                 {
                     [[DataLayer sharedInstance] unPinChat:self.accountNo andBuddyJid:self.contact.contactJid];
                 }
@@ -415,15 +437,14 @@
                 {
                     [[DataLayer sharedInstance] pinChat:self.accountNo andBuddyJid:self.contact.contactJid];
                 }
-                self.isPinned = !self.isPinned;
-                self.contact.isPinned = self.isPinned;
+                self.contact.isPinned = !self.contact.isPinned;
                 // Update button text
                 [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
                 // Update color in activeViewController
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact":self.contact, @"pinningChanged": @YES}];
                 break;
             }
-            case 5:  {
+            case OMEMOClearSessionRow:  {
                 [self.xmppAccount.omemo clearAllSessionsForJid:self.contact.contactJid];
                 break;
             }
@@ -485,15 +506,31 @@
     [self presentViewController:alert animated:YES completion:nil];
 }
 
+-(BOOL) checkBlockingSupport
+{
+    if(!self.xmppAccount.connectionProperties.supportsBlocking)
+    {
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Blocking not supported", @"") message:NSLocalizedString(@"The server does not support blocking", @"") preferredStyle:UIAlertControllerStyleAlert];
+
+        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        }];
+
+        [alert addAction:closeAction];
+        [self presentViewController:alert animated:YES completion:nil];
+        return NO;
+    }
+    return YES;
+}
+
 -(void) blockContact {
+    if(!self.xmppAccount.connectionProperties.supportsBlocking) return;
     [[MLXMPPManager sharedInstance] blocked:YES Jid:self.contact];
-    [[DataLayer sharedInstance] blockJid:self.contact.contactJid withAccountNo:self.contact.accountId];
 }
 
 -(void) unBlockContact
 {
+    if(!self.xmppAccount.connectionProperties.supportsBlocking) return;
     [[MLXMPPManager sharedInstance] blocked:NO Jid:self.contact];
-    [[DataLayer sharedInstance] unBlockJid:self.contact.contactJid withAccountNo:self.contact.accountId];
 }
 
 -(void) showChatImages
@@ -606,9 +643,21 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         strongify(self);
         self.navigationItem.title = [self.contact contactDisplayName];
-        if(self.saveHUD)
-            self.saveHUD.hidden = YES;
+        self.saveHUD.hidden = YES;
     });
+}
+
+-(void) refreshBlockState:(NSNotification*) notification
+{
+    if([notification.userInfo[@"accountNo"] isEqualToString:self.accountNo]) {
+        weakify(self);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            strongify(self);
+            self.contact.isBlocked = ([[DataLayer sharedInstance] isBlockedJid:self.contact.contactJid withAccountNo:self.accountNo] == kBlockingMatchedNodeHost);
+            [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:BlockStateRow inSection:ContactDetailsConnDetailsSection]] withRowAnimation:UITableViewRowAnimationNone];
+            self.saveHUD.hidden = YES;
+        });
+    }
 }
 
 -(BOOL) textFieldShouldEndEditing:(UITextField *)textField {
@@ -620,11 +669,7 @@
     {
         //no need to update our db here, this will be done automatically on incoming roster push that gets initiated by our roster set with the new name
         [self.xmppAccount updateRosterItem:self.contact.contactJid withName:textField.text];
-
-        self.saveHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-        self.saveHUD.label.text = NSLocalizedString(@"Saving changes to server", @"");
-        self.saveHUD.mode = MBProgressHUDModeIndeterminate;
-        self.saveHUD.removeFromSuperViewOnHide = YES;
+        self.saveHUD.hidden = NO;
     }
 
     return YES;

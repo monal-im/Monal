@@ -80,6 +80,7 @@ NSString *const kAskSubscribe=@"subscribe";
     contact.accountNickInGroup = [dic objectForKey:@"muc_nick"];
     contact.isGroup = [[dic objectForKey:@"Muc"] boolValue];
     contact.isPinned = [[dic objectForKey:@"pinned"] boolValue];
+    contact.isBlocked = [[dic objectForKey:@"blocked"] boolValue];
     contact.statusMessage = [dic objectForKey:@"status"];
     contact.state = [dic objectForKey:@"state"];
     contact.unreadCount = [[dic objectForKey:@"count"] integerValue];

@@ -167,6 +167,21 @@ static NSMutableDictionary* currentTransactions;
                 [self throwErrorForQuery:query andArguments:args];
             }
         }
+        else if([obj isKindOfClass:[NSNull class]])
+        {
+            if(sqlite3_bind_null(statement, (signed)idx+1) != SQLITE_OK)
+            {
+                DDLogError(@"null bind error");
+                [self throwErrorForQuery:query andArguments:args];
+            }
+        }
+        else
+        {
+            DDLogError(@"Binding unsupported parameter in: %@", statement);
+#ifdef IS_ALPHA
+            [self throwErrorForQuery:query andArguments:args];
+#endif
+        }
     }];
     
     return statement;

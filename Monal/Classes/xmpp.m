@@ -2024,6 +2024,7 @@ NSString *const kData=@"data";
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsHTTPUpload] forKey:@"supportsHTTPUpload"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsRosterPreApproval] forKey:@"supportsRosterPreApproval"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBlocking] forKey:@"supportsBlocking"];
         
         if(self.connectionProperties.discoveredServices)
             [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
@@ -2036,7 +2037,7 @@ NSString *const kData=@"data";
         [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
         //debug output
-        DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d",
+        DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d",
             self.accountNo,
             values[@"stateSavedAt"],
             self.lastHandledInboundStanza,
@@ -2049,7 +2050,8 @@ NSString *const kData=@"data";
             self.connectionProperties.supportsPush,
             self.connectionProperties.supportsHTTPUpload,
             self.connectionProperties.pushEnabled,
-            self.connectionProperties.supportsPubSub
+            self.connectionProperties.supportsPubSub,
+            self.connectionProperties.supportsBlocking
         );
     }
 }
@@ -2184,11 +2186,17 @@ NSString *const kData=@"data";
                 self.connectionProperties.supportsRosterPreApproval = supportsRosterPreApproval.boolValue;
             }
             
+            if([dic objectForKey:@"supportsBlocking"])
+            {
+                NSNumber* supportsBlocking = [dic objectForKey:@"supportsBlocking"];
+                self.connectionProperties.supportsBlocking = supportsBlocking.boolValue;
+            }
+
             if([dic objectForKey:@"pubsubData"])
                 [self.pubsub setInternalData:[dic objectForKey:@"pubsubData"]];
             
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d",
                 self.accountNo,
                 dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
@@ -2201,7 +2209,8 @@ NSString *const kData=@"data";
                 self.connectionProperties.supportsPush,
                 self.connectionProperties.supportsHTTPUpload,
                 self.connectionProperties.pushEnabled,
-                self.connectionProperties.supportsPubSub
+                self.connectionProperties.supportsPubSub,
+                self.connectionProperties.supportsBlocking
             );
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)
@@ -2383,17 +2392,32 @@ NSString *const kData=@"data";
         //initSession() above does not add message stanzas to the self.unAckedStanzas queue --> this is safe to do
         [self resendUnackedMessageStanzasOnly:self.unAckedStanzas];
     }
-    
     //mam query will be done in MLIQProcessor once the disco result returns
 }
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
 {
-    XMPPIQ* iqBlocked= [[XMPPIQ alloc] initWithType:kiqSetType];
+    if(!self.connectionProperties.supportsBlocking) return;
+
+    XMPPIQ* iqBlocked = [[XMPPIQ alloc] initWithType:kiqSetType];
   
     [iqBlocked setBlocked:blocked forJid:blockedJid];
-   
     [self send:iqBlocked];
+}
+
+-(void) fetchBlocklist
+{
+    if(!self.connectionProperties.supportsBlocking) return;
+
+    XMPPIQ* iqBlockList = [[XMPPIQ alloc] initWithType:kiqGetType];
+
+    [iqBlockList requestBlockList];
+    [self sendIq:iqBlockList withHandler:$newHandler(MLIQProcessor, handleBlocklist)];;
+}
+
+-(void) updateLocalBlocklistCache:(NSSet<NSString*>*) blockedJids
+{
+    [[DataLayer sharedInstance] updateLocalBlocklistCache:blockedJids forAccountNo:self.accountNo];
 }
 
 #pragma mark vcard

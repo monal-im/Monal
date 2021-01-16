@@ -75,9 +75,9 @@
 @property (atomic) BOOL viewIsScrolling;
 @property (atomic) BOOL isLoadingMam;
 @property (atomic) BOOL moreMessagesAvailable;
-@property (nonatomic) BOOL msgTableAtBottom;
 
 @property (nonatomic, strong) UIButton *lastMsgButton;
+@property (nonatomic, assign) CGFloat lastOffset;
 
 //SearchViewController, SearchResultViewController
 @property (nonatomic, strong) MLSearchViewController* searchController;
@@ -94,8 +94,8 @@
 @implementation chatViewController
 
 enum chatViewControllerSections {
-    messagesSection,
     reloadBoxSection,
+    messagesSection,
     chatViewControllerSectionCnt
 };
 
@@ -151,7 +151,6 @@ enum msgSentState {
     
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight = UITableViewAutomaticDimension;
-    self.messageTable.transform = CGAffineTransformMakeScale(1, -1);
     
 #if TARGET_OS_MACCATALYST
     //does not become first responder like in iOS
@@ -184,6 +183,12 @@ enum msgSentState {
         [self.sendButton setImage:[UIImage imageNamed:@"648-paper-airplane"] forState:UIControlStateNormal];
         [self.plusButton setImage:[UIImage imageNamed:@"907-plus-rounded-square"] forState:UIControlStateNormal];
     }
+
+    // setup refreshControl for infinite scrolling
+    UIRefreshControl* refreshControl = [[UIRefreshControl alloc] init];
+    [refreshControl addTarget:self action:@selector(loadOldMsgHistory:) forControlEvents:UIControlEventValueChanged];
+    refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:NSLocalizedString(@"Loading more Messages from Server", @"")];
+    [self.messageTable setRefreshControl:refreshControl];
     self.moreMessagesAvailable = YES;
     //Init search button item.
     [self initSearchButtonItem];
@@ -762,7 +767,6 @@ enum msgSentState {
     if(!self.contact.contactJid) return;
     if(!_day) {
         NSMutableArray* messages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId];
-        messages = [[[messages reverseObjectEnumerator] allObjects] mutableCopy];
         NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId];
         if([unreadMsgCnt integerValue] == 0) self->_firstmsg=YES;
 
@@ -772,19 +776,19 @@ enum msgSentState {
         unreadStatus.messageText = NSLocalizedString(@"Unread Messages Below", @"");
         unreadStatus.actualFrom = self.jid;
 
-        NSInteger unreadPos = 0;
-        while(unreadPos < messages.count)
+        NSInteger unreadPos = messages.count - 1;
+        while(unreadPos >= 0)
         {
             MLMessage* row = [messages objectAtIndex:unreadPos];
             if(!row.unread)
             {
-                unreadPos--; //move back down one
+                unreadPos++; //move back down one
                 break;
             }
-            unreadPos++; //move up the list
+            unreadPos--; //move up the list
         }
 
-        if(unreadPos < messages.count && unreadPos > 0) {
+        if(unreadPos <= messages.count - 1 && unreadPos > 0) {
             [messages insertObject:unreadStatus atIndex:unreadPos];
         }
 
@@ -1227,15 +1231,21 @@ enum msgSentState {
         }
         MLMessage* messageObj = msgList[0];
         
+        [self tempfreezeAutoloading];
+        
         //update message list in ui
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.messageTable performBatchUpdates:^{
                 if(!self.messageList)
                     self.messageList = [[NSMutableArray alloc] init];
-                [self.messageList insertObject:messageObj atIndex:0];
-                NSIndexPath* path1 = [NSIndexPath indexPathForRow:0 inSection:messagesSection];
-                [self->_messageTable insertRowsAtIndexPaths:@[path1]
+                [self.messageList addObject:messageObj];
+                NSInteger bottom = [self.messageList count]-1;
+                if(bottom>=0)
+                {
+                    NSIndexPath* path1 = [NSIndexPath indexPathForRow:bottom inSection:messagesSection];
+                    [self->_messageTable insertRowsAtIndexPaths:@[path1]
                                                 withRowAnimation:UITableViewRowAnimationNone];
+                }
             } completion:^(BOOL finished) {
                 [self scrollToBottom];
             }];
@@ -1310,25 +1320,27 @@ enum msgSentState {
                 }
             }
             
-            [self.messageList insertObject:message atIndex:0];   //do not insert based on delay timestamp because that would make it possible to fake history entries
+            [self.messageList addObject:message];   //do not insert based on delay timestamp because that would make it possible to fake history entries
 
-            CGPoint oldOffset = self.messageTable.contentOffset;
             [self->_messageTable beginUpdates];
-            NSIndexPath *path1 = [NSIndexPath indexPathForRow:0  inSection:messagesSection];
-            [self->_messageTable insertRowsAtIndexPaths:@[path1]
+            NSIndexPath *path1;
+            NSInteger bottom =  self.messageList.count-1;
+            if(bottom >= 0) {
+                path1 = [NSIndexPath indexPathForRow:bottom  inSection:messagesSection];
+                [self->_messageTable insertRowsAtIndexPaths:@[path1]
                                            withRowAnimation:UITableViewRowAnimationBottom];
-            CGPoint offsetAfterAddingMsgs = self.messageTable.contentOffset;
-
-            CGPoint newOffset = CGPointMake(oldOffset.x, offsetAfterAddingMsgs.y - (offsetAfterAddingMsgs.y - oldOffset.y));
-            self->_messageTable.contentOffset = newOffset;
+            }
             [self->_messageTable endUpdates];
+
+            [self scrollToBottom];
             
             if (self.searchController.isActive)
             {
-                [self doSetMsgPathIdx:0 withDBId:message.messageDBId];
+                [self doSetMsgPathIdx:bottom withDBId:message.messageDBId];
                 [self.searchController getSearchData:self.self.searchController.searchBar.text];
                 [self.searchController setResultToolBar];
-            }
+            }            
+            
             [self refreshCounter];
         });
     }
@@ -1470,7 +1482,7 @@ enum msgSentState {
         NSInteger bottom = [self.messageTable numberOfRowsInSection:messagesSection];
         if(bottom > 0)
         {
-            NSIndexPath* path1 = [NSIndexPath indexPathForRow:0 inSection:messagesSection];
+            NSIndexPath* path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:messagesSection];
           //  if(![self.messageTable.indexPathsForVisibleRows containsObject:path1])
             {
                 [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
@@ -1605,7 +1617,7 @@ enum msgSentState {
 
 -(void) tableView:(UITableView*) tableView willDisplayCell:(nonnull UITableViewCell *)cell forRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-    if(indexPath.section == messagesSection && indexPath.row == self.messageList.count) {
+    if(indexPath.section == messagesSection && indexPath.row == 0) {
         if(self.moreMessagesAvailable && !self.viewIsScrolling) {
             [self loadOldMsgHistory];
             // Allow loading of more messages after a few seconds
@@ -1629,7 +1641,6 @@ enum msgSentState {
 
         // Remove selection style (if cell is pressed)
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        cell.contentView.transform = CGAffineTransformMakeScale(1, -1);
         return cell;
     }
 
@@ -1654,7 +1665,6 @@ enum msgSentState {
         cell.messageBody.text = messageText;
         cell.link = nil;
         cell.parent = self;
-        cell.contentView.transform = CGAffineTransformMakeScale(1, -1);
         return cell;
     }
     else if([row.messageType isEqualToString:kMessageTypeFiletransfer])
@@ -1910,7 +1920,6 @@ enum msgSentState {
             [cell.messageBody setAttributedText:attributedMsgString];
         }
     }
-    cell.contentView.transform = CGAffineTransformMakeScale(1, -1);
     
     return cell;
 }
@@ -2126,20 +2135,26 @@ enum msgSentState {
 
     // get current scroll position (y-axis)
     CGFloat curOffset = scrollView.contentOffset.y;
-    if (curOffset < -40)
+    
+    if (self.lastOffset > curOffset)
+    {
+        [self.lastMsgButton setHidden:NO];
+    }
+    
+    CGFloat bottomLength = scrollView.frame.size.height + curOffset;
+        
+    if (scrollView.contentSize.height <= bottomLength)
     {
         [self.lastMsgButton setHidden:YES];
-        self.msgTableAtBottom = YES;
-    } else {
-        [self.lastMsgButton setHidden:NO];
-        self.msgTableAtBottom = NO;
     }
+        
+    self.lastOffset = curOffset;
 }
 
 -(void) loadOldMsgHistory
 {
-    // TODO: friedrich some animation
-    [self loadOldMsgHistory:nil];
+    [self.messageTable.refreshControl beginRefreshing];
+    [self loadOldMsgHistory:self.messageTable.refreshControl];
 }
 
 -(void) loadOldMsgHistory:(id) sender
@@ -2150,7 +2165,7 @@ enum msgSentState {
     // Load older messages from db
     NSMutableArray* oldMessages = nil;
     if(self.messageList.count > 0) {
-        oldMessages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId beforeMsgHistoryID:((MLMessage*)[self.messageList lastObject]).messageDBId];
+        oldMessages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId beforeMsgHistoryID:((MLMessage*)[self.messageList objectAtIndex:0]).messageDBId];
     }
 
     if(!self.isLoadingMam && [oldMessages count] < kMonalChatFetchedMsgCnt)
@@ -2160,7 +2175,7 @@ enum msgSentState {
         //not all messages in history db have a stanzaId (messages sent by this monal instance won't have one for example)
         //--> search for the oldest message having a stanzaId and use that one
         NSString* oldestStanzaId;
-        for(MLMessage* msg in oldMessages.reverseObjectEnumerator)
+        for(MLMessage* msg in oldMessages)
             if(msg.stanzaId)
             {
                 DDLogVerbose(@"Found oldest stanzaId in messages returned from db: %@", msg.stanzaId);
@@ -2169,7 +2184,7 @@ enum msgSentState {
             }
         if(!oldestStanzaId)
         {
-            for(MLMessage* msg in self.messageList.reverseObjectEnumerator)
+            for(MLMessage* msg in self.messageList)
             {
                 if(msg.stanzaId)
                 {
@@ -2229,17 +2244,23 @@ enum msgSentState {
         if(!self.messageList)
             self.messageList = [[NSMutableArray alloc] init];
         
+        CGSize sizeBeforeAddingMessages = [self->_messageTable contentSize];
         // Insert old messages into messageTable
         NSMutableArray* indexArray = [NSMutableArray array];
         for(size_t msgIdx = 0; msgIdx < [oldMessages count]; msgIdx++)
         {
             MLMessage* msg = [oldMessages objectAtIndex:msgIdx];
-            [self.messageList addObject:msg];
-            NSIndexPath* newIndexPath = [NSIndexPath indexPathForRow:(self.messageList.count - 1) inSection:messagesSection];
+            [self.messageList insertObject:msg atIndex:0];
+            NSIndexPath* newIndexPath = [NSIndexPath indexPathForRow:msgIdx inSection:messagesSection];
             [indexArray addObject:newIndexPath];
         }
         [self->_messageTable beginUpdates];
         [self->_messageTable insertRowsAtIndexPaths:indexArray withRowAnimation:UITableViewRowAnimationNone];
+        // keep old position - scrolling may stop
+        CGSize sizeAfterAddingMessages = [self->_messageTable contentSize];
+        CGPoint contentOffset = self->_messageTable.contentOffset;
+        CGPoint newOffset = CGPointMake(contentOffset.x, contentOffset.y + sizeAfterAddingMessages.height - sizeBeforeAddingMessages.height);
+        self->_messageTable.contentOffset = newOffset;
         [self->_messageTable endUpdates];
 		
 		[self doSetNotLoadingHistory];

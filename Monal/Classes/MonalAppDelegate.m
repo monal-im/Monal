@@ -668,9 +668,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     if([[MLXMPPManager sharedInstance] allAccountsIdle] && [MLFiletransfer isIdle])
     {
         DDLogInfo(@"### ALL ACCOUNTS IDLE AND FILETRANSFERS COMPLETE NOW ###");
-        
-        //remove syncError notification because all accounts are idle and fully synced now
-        [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[@"syncError"]];
+        [HelperTools updateSyncErrorsWithDeleteOnly:YES];
         
 #if !TARGET_OS_MACCATALYST
         //use a synchronized block to disconnect only once
@@ -736,7 +734,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 [DDLog flushLog];
                 
                 //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
-                [HelperTools postSendingErrorNotification];
+                [HelperTools updateSyncErrorsWithDeleteOnly:NO];
                 
                 //disconnect all accounts to prevent TCP buffer leaking
                 [[MLXMPPManager sharedInstance] disconnectAll];
@@ -768,7 +766,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         _bgFetch = nil;
         
         //this has to be before account disconnects, to detect which accounts are not idle (e.g. have a sync error)
-        [HelperTools postSendingErrorNotification];
+        [HelperTools updateSyncErrorsWithDeleteOnly:NO];
         
         //disconnect all accounts to prevent TCP buffer leaking
         [[MLXMPPManager sharedInstance] disconnectAll];

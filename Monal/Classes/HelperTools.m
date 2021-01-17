@@ -110,27 +110,49 @@ void logException(NSException* exception)
     return retval;
 }
 
-+(void) postSendingErrorNotification
++(void) updateSyncErrorsWithDeleteOnly:(BOOL) removeOnly
 {
-    DDLogWarn(@"Posting syncError notification...");
-    UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
-    content.title = NSLocalizedString(@"Could not synchronize", @"");
-    NSMutableString* subtitle = [[NSMutableString alloc] init];
-    for(xmpp* account in [[MLXMPPManager sharedInstance] accountsNotIdle])
-    {
-        [subtitle appendString:account.connectionProperties.identity.jid];
-        [subtitle appendString:@" "];
+    @synchronized(self) {
+        NSMutableDictionary* syncErrorsDisplayed = [NSMutableDictionary dictionaryWithDictionary:[[HelperTools defaultsDB] objectForKey:@"syncErrorsDisplayed"]];
+        DDLogInfo(@"Updating syncError notifications...");
+        for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
+        {
+            NSString* syncErrorIdentifier = [NSString stringWithFormat:@"syncError::%@", account.connectionProperties.identity.jid];
+            if(account.idle)
+            {
+                DDLogInfo(@"Removing syncError notification for %@ (now synced)...", account.connectionProperties.identity.jid);
+                [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers:@[syncErrorIdentifier]];
+                syncErrorsDisplayed[account.connectionProperties.identity.jid] = @NO;
+                [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
+            }
+            else if(!removeOnly)
+            {
+                if([syncErrorsDisplayed[account.connectionProperties.identity.jid] boolValue])
+                {
+                    DDLogWarn(@"NOT posting syncError notification for %@ (already did so since last app foreground)...", account.connectionProperties.identity.jid);
+                    continue;
+                }
+                DDLogWarn(@"Posting syncError notification for %@...", account.connectionProperties.identity.jid);
+                UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
+                content.title = NSLocalizedString(@"Could not synchronize", @"");
+                content.subtitle = account.connectionProperties.identity.jid;
+                content.body = NSLocalizedString(@"Please open the app to retry", @"");
+                content.sound = [UNNotificationSound defaultSound];
+                content.categoryIdentifier = @"simple";
+                UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+                UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:syncErrorIdentifier content:content trigger:nil];
+                [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+                    if(error)
+                        DDLogError(@"Error posting syncError notification: %@", error);
+                    else
+                    {
+                        syncErrorsDisplayed[account.connectionProperties.identity.jid] = @YES;
+                        [[HelperTools defaultsDB] setObject:syncErrorsDisplayed forKey:@"syncErrorsDisplayed"];
+                    }
+                }];
+            }
+        }
     }
-    content.subtitle = subtitle;
-    content.body = NSLocalizedString(@"Please open the app to retry", @"");
-    content.sound = [UNNotificationSound defaultSound];
-    content.categoryIdentifier = @"simple";
-    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
-    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:@"syncError" content:content trigger:nil];
-    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-        if(error)
-            DDLogError(@"Error posting syncError notification: %@", error);
-    }];
 }
 
 +(BOOL) isInBackground

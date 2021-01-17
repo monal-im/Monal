@@ -107,6 +107,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 #else
     [self upgradeIntegerUserSettingsIfUnset:@"AutodownloadFiletransfersMaxSize" toDefault:5*1024*1024];     // 5 MiB
 #endif
+    
+    //upgrade syncErrorsDisplayed list
+    [self upgradeObjectUserSettingsIfUnset:@"syncErrorsDisplayed" toDefault:@{}];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal
@@ -270,15 +273,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         if(!xmppAccount.idle)
             return NO;
     return YES;
-}
-
--(NSArray*) accountsNotIdle
-{
-    NSMutableArray* list = [[NSMutableArray alloc] init];
-    for(xmpp* xmppAccount in [self connectedXMPP])
-        if(!xmppAccount.idle)
-            [list addObject:xmppAccount];
-    return list;
 }
 
 #pragma mark - app state

@@ -38,6 +38,7 @@ static NSMutableDictionary* currentTransactions;
     }
     
     sqlite3_initialize();
+    DDLogInfo(@"sqlite initialize: using mysql lib version: %s", sqlite3_libversion());
 }
 
 //every thread gets its own instance having its own db connection

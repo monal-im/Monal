@@ -98,9 +98,6 @@ static NSDateFormatter* dbFormatter;
     dbFormatter = [[NSDateFormatter alloc] init];
     [dbFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
     [dbFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-    
-    //open db and update db version
-    [self version];
 }
 
 //we are a singleton (compatible with old code), but conceptually we could also be a static class instead

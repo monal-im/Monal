@@ -14,7 +14,6 @@
 		2601D9CB0FBF25EF004DB939 /* sworim.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 2601D9CA0FBF25EF004DB939 /* sworim.sqlite */; };
 		2601D9D40FBF262E004DB939 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2601D9D30FBF262E004DB939 /* libsqlite3.dylib */; };
 		2602A70922A5431B006D3E72 /* MLRegSuccessViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2602A70822A5431A006D3E72 /* MLRegSuccessViewController.m */; };
-		260773C4232FC4E800BFD50F /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = 260773C3232FC4E800BFD50F /* NotificationService.m */; };
 		2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2609B5281FD5B26800F09FA1 /* MLSplitViewDelegate.m */; };
 		2613BECF1EA41C8600C9F4C5 /* PushKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2613BECE1EA41C8600C9F4C5 /* PushKit.framework */; };
 		2614B64F1C54095D004FF2FA /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 2614B64E1C54095D004FF2FA /* libz.tbd */; };
@@ -43,9 +42,6 @@
 		2633CB4723215558006D0277 /* MLXMPPActivityItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 2633CB4623215558006D0277 /* MLXMPPActivityItem.m */; };
 		26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26347D851790FFDE006FF64F /* MLInfoCell.m */; };
 		2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */ = {isa = PBXBuildFile; fileRef = 2636C43E177BD58C001CA71F /* XMPPEdit.m */; };
-		2638008B2374816D00144929 /* NotificaionService.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 260773C0232FC4E800BFD50F /* NotificaionService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		263BC64F218BEE9F00FA0203 /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
-		263DFAC02183D7160038E716 /* MLSelectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = 263DFABE2183A59B0038E716 /* MLSelectionController.m */; };
 		263DFAC32187D0E00038E716 /* MLLinkCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 263DFAC22187D0E00038E716 /* MLLinkCell.m */; };
 		263F568D121B5E970027D85D /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 263F568C121B5E970027D85D /* MediaPlayer.framework */; };
 		26400712140B43BB00CF1107 /* rtcpapppacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 264006BB140B43BB00CF1107 /* rtcpapppacket.cpp */; };
@@ -144,7 +140,6 @@
 		26529F5217FA7B260057F199 /* addContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FE17BDD85F0031304D /* addContact.m */; };
 		265BD15021A2D15600A59251 /* MLBackgroundSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */; };
 		2664D28523F2312400CD4085 /* MLAccountPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2664D28423F2312400CD4085 /* MLAccountPickerViewController.m */; };
-		2666F018249D380D00372E28 /* MLContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 2661102A238F17CB0030A4EE /* MLContact.m */; };
 		2673CABD21D8617300256507 /* MLContactDetailHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABC21D8617300256507 /* MLContactDetailHeader.m */; };
 		2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABF21D9242E00256507 /* MLKeysTableViewController.m */; };
 		2673CAC321D9244B00256507 /* MLResourcesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CAC221D9244B00256507 /* MLResourcesTableViewController.m */; };
@@ -160,9 +155,6 @@
 		26A711EE23C5635900FC6A86 /* AESGCMTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A711ED23C5635900FC6A86 /* AESGCMTest.m */; };
 		26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A78ED723C2B59400C7CF40 /* MLPlaceholderViewController.m */; };
 		26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FB17BDD8560031304D /* ContactDetails.m */; };
-		26AA70152146BBB900598605 /* ShareViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AA70142146BBB900598605 /* ShareViewController.m */; };
-		26AA70182146BBB900598605 /* iosShare.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26AA70162146BBB900598605 /* iosShare.storyboard */; };
-		26AA701C2146BBB900598605 /* shareSheet.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 26AA70112146BBB800598605 /* shareSheet.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAAAD92295742400200433 /* MLPasswordChangeTableViewController.m */; };
 		26AAE285179F7B0200271345 /* MLSettingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26AAE284179F7B0200271345 /* MLSettingCell.m */; };
 		26B0CA8921AE2E3C0080B133 /* MLSoundsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */; };
@@ -201,7 +193,6 @@
 		26CC57D723A08D9B00ABB92A /* MLPush.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C01306233025DA001D411D /* MLPush.m */; };
 		26CC57DA23A08DD800ABB92A /* MLXMPPManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 26352EA7177D222600E2C8FF /* MLXMPPManager.m */; };
 		26CC57E623A08EAA00ABB92A /* libjrtplib-static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */; };
-		26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		26D0940C22A33E9B009C7AEF /* MLRegisterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */; };
 		26D3476C23A54E67004D6D75 /* MLMessageParserTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D3476B23A54E67004D6D75 /* MLMessageParserTest.m */; };
 		26D437FB23A5643A00242AAA /* MLIQParserTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D437FA23A5643A00242AAA /* MLIQParserTest.m */; };
@@ -251,15 +242,12 @@
 		54507CE8255D8C47007092F4 /* MLFiletransfer.h in Headers */ = {isa = PBXBuildFile; fileRef = 54507CE7255D8C47007092F4 /* MLFiletransfer.h */; };
 		5455BC3324EB776F0024D80F /* MLUDPLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 5455BC3024EB776B0024D80F /* MLUDPLogger.m */; };
 		5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = 5455BC3224EB776E0024D80F /* MLUDPLogger.h */; };
-		54D2307E24CB0F4600638D65 /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		54D2308424CB10EE00638D65 /* MLLogFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C15D504A24C727CC002F75BB /* MLLogFileManager.m */; };
 		54E594BD2523C34B00E4172B /* MLPubSub.h in Headers */ = {isa = PBXBuildFile; fileRef = 54E594BA2523C34900E4172B /* MLPubSub.h */; };
 		54E594BE2523C34B00E4172B /* MLPubSub.m in Sources */ = {isa = PBXBuildFile; fileRef = 54E594BC2523C34A00E4172B /* MLPubSub.m */; };
 		5E7A3AAABB0B465D0486DD14 /* Pods_Monal_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 190BE683A0C65E5A839F52BD /* Pods_Monal_Tests.framework */; };
 		6C0881EAB68D8D4760C8F4B8 /* Pods_jrtplib_static.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9FD41A731431B8DC2D41B808 /* Pods_jrtplib_static.framework */; };
-		B2F4C53CD9A8A4046C237072 /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E865A50FFD3C29AD8F3DFD0 /* Pods_NotificaionService.framework */; };
 		B6C2B2781C2EDD10E9341233 /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F17B168B23E046B18971F63 /* Pods_monalxmpp.framework */; };
-		BE24210F5A8DEA2D7DC913F1 /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 12CB538E8FC0AAFD96856CDD /* Pods_shareSheet.framework */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
 		C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */; };
 		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
@@ -292,13 +280,6 @@
 			remoteGlobalIDString = 1D6058900D05DD3D006BFB54;
 			remoteInfo = Monal;
 		};
-		263800892374814000144929 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 260773BF232FC4E800BFD50F;
-			remoteInfo = NotificaionService;
-		};
 		26A711DC23C4D67400FC6A86 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 26A711D723C4D67300FC6A86 /* MLCrypto.xcodeproj */;
@@ -313,13 +294,6 @@
 			remoteGlobalIDString = 26A711C623C4D67300FC6A86;
 			remoteInfo = MLCryptoTests;
 		};
-		26AA701A2146BBB900598605 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 26AA70102146BBB800598605;
-			remoteInfo = shareSheet;
-		};
 		26CC579723A0867400ABB92A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -333,20 +307,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 268BCD55140B25CC0025E4D1;
 			remoteInfo = "jrtplib-static";
-		};
-		26CC57E723A08F3A00ABB92A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 26CC579123A0867400ABB92A;
-			remoteInfo = monalxmpp;
-		};
-		26CC57E923A08F3F00ABB92A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 26CC579123A0867400ABB92A;
-			remoteInfo = monalxmpp;
 		};
 		26E88CD823F3C6B0001E9478 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -383,8 +343,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				2638008B2374816D00144929 /* NotificaionService.appex in Embed App Extensions */,
-				26AA701C2146BBB900598605 /* shareSheet.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -417,7 +375,6 @@
 		2602A70822A5431A006D3E72 /* MLRegSuccessViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLRegSuccessViewController.m; sourceTree = "<group>"; };
 		26049A5A1B73163300D11866 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
 		26049A5C1B73164500D11866 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/AVKit.framework; sourceTree = DEVELOPER_DIR; };
-		260773C0232FC4E800BFD50F /* NotificaionService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificaionService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		260773C2232FC4E800BFD50F /* NotificationService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationService.h; sourceTree = "<group>"; };
 		260773C3232FC4E800BFD50F /* NotificationService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationService.m; sourceTree = "<group>"; };
 		260773C5232FC4E800BFD50F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -647,7 +604,6 @@
 		26A711ED23C5635900FC6A86 /* AESGCMTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AESGCMTest.m; sourceTree = "<group>"; };
 		26A78ED623C2B59400C7CF40 /* MLPlaceholderViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPlaceholderViewController.h; sourceTree = "<group>"; };
 		26A78ED723C2B59400C7CF40 /* MLPlaceholderViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPlaceholderViewController.m; sourceTree = "<group>"; };
-		26AA70112146BBB800598605 /* shareSheet.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = shareSheet.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		26AA70132146BBB900598605 /* ShareViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShareViewController.h; sourceTree = "<group>"; };
 		26AA70142146BBB900598605 /* ShareViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ShareViewController.m; sourceTree = "<group>"; };
 		26AA70172146BBB900598605 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = localization/Base.lproj/iosShare.storyboard; sourceTree = "<group>"; };
@@ -988,15 +944,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		260773BD232FC4E800BFD50F /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				54D2307E24CB0F4600638D65 /* monalxmpp.framework in Frameworks */,
-				B2F4C53CD9A8A4046C237072 /* Pods_NotificaionService.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		2630FE2C1AD550C00079F5C0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1011,15 +958,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				6C0881EAB68D8D4760C8F4B8 /* Pods_jrtplib_static.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		26AA700E2146BBB800598605 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */,
-				BE24210F5A8DEA2D7DC913F1 /* Pods_shareSheet.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1065,8 +1003,6 @@
 				26080210110ABA4E005E194D /* Monal.app */,
 				268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */,
 				2630FE2F1AD550C00079F5C0 /* Monal Tests.xctest */,
-				26AA70112146BBB800598605 /* shareSheet.appex */,
-				260773C0232FC4E800BFD50F /* NotificaionService.appex */,
 				26CC579223A0867400ABB92A /* monalxmpp.framework */,
 			);
 			name = Products;
@@ -1671,7 +1607,7 @@
 			name = tools;
 			sourceTree = "<group>";
 		};
-		29B97314FDCFA39411CA2CEA = {
+		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
 				26A711D723C4D67300FC6A86 /* MLCrypto.xcodeproj */,
@@ -1879,32 +1815,11 @@
 			dependencies = (
 				26E88CE023F3C755001E9478 /* PBXTargetDependency */,
 				26CC579823A0867400ABB92A /* PBXTargetDependency */,
-				2638008A2374814000144929 /* PBXTargetDependency */,
-				26AA701B2146BBB900598605 /* PBXTargetDependency */,
 			);
 			name = Monal;
 			productName = SworIM;
 			productReference = 26080210110ABA4E005E194D /* Monal.app */;
 			productType = "com.apple.product-type.application";
-		};
-		260773BF232FC4E800BFD50F /* NotificaionService */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 260773CC232FC4E800BFD50F /* Build configuration list for PBXNativeTarget "NotificaionService" */;
-			buildPhases = (
-				E29F37602913131122522B1F /* [CP] Check Pods Manifest.lock */,
-				260773BC232FC4E800BFD50F /* Sources */,
-				260773BD232FC4E800BFD50F /* Frameworks */,
-				260773BE232FC4E800BFD50F /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				26CC57E823A08F3A00ABB92A /* PBXTargetDependency */,
-			);
-			name = NotificaionService;
-			productName = NotificaionService;
-			productReference = 260773C0232FC4E800BFD50F /* NotificaionService.appex */;
-			productType = "com.apple.product-type.app-extension";
 		};
 		2630FE2E1AD550C00079F5C0 /* Monal Tests */ = {
 			isa = PBXNativeTarget;
@@ -1944,25 +1859,6 @@
 			productName = "jrtplib-static";
 			productReference = 268BCD56140B25CC0025E4D1 /* libjrtplib-static.a */;
 			productType = "com.apple.product-type.library.static";
-		};
-		26AA70102146BBB800598605 /* shareSheet */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 26AA70202146BBB900598605 /* Build configuration list for PBXNativeTarget "shareSheet" */;
-			buildPhases = (
-				AEFD0BBC538F58642A554A94 /* [CP] Check Pods Manifest.lock */,
-				26AA700D2146BBB800598605 /* Sources */,
-				26AA700E2146BBB800598605 /* Frameworks */,
-				26AA700F2146BBB800598605 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				26CC57EA23A08F3F00ABB92A /* PBXTargetDependency */,
-			);
-			name = shareSheet;
-			productName = shareSheet;
-			productReference = 26AA70112146BBB800598605 /* shareSheet.appex */;
-			productType = "com.apple.product-type.app-extension";
 		};
 		26CC579123A0867400ABB92A /* monalxmpp */ = {
 			isa = PBXNativeTarget;
@@ -2019,25 +1915,10 @@
 							};
 						};
 					};
-					260773BF232FC4E800BFD50F = {
-						CreatedOnToolsVersion = 11.0;
-						DevelopmentTeam = 33XS7DE5NZ;
-						ProvisioningStyle = Manual;
-					};
 					2630FE2E1AD550C00079F5C0 = {
 						CreatedOnToolsVersion = 6.2;
 						DevelopmentTeam = 33XS7DE5NZ;
 						TestTargetID = 1D6058900D05DD3D006BFB54;
-					};
-					26AA70102146BBB800598605 = {
-						CreatedOnToolsVersion = 9.4.1;
-						DevelopmentTeam = 33XS7DE5NZ;
-						ProvisioningStyle = Automatic;
-						SystemCapabilities = {
-							com.apple.ApplicationGroups.iOS = {
-								enabled = 1;
-							};
-						};
 					};
 					26CC579123A0867400ABB92A = {
 						CreatedOnToolsVersion = 11.2.1;
@@ -2081,7 +1962,7 @@
 				fa,
 				"nb-NO",
 			);
-			mainGroup = 29B97314FDCFA39411CA2CEA;
+			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
 			projectReferences = (
@@ -2095,8 +1976,6 @@
 				268BCD55140B25CC0025E4D1 /* jrtplib-static */,
 				1D6058900D05DD3D006BFB54 /* Monal */,
 				2630FE2E1AD550C00079F5C0 /* Monal Tests */,
-				26AA70102146BBB800598605 /* shareSheet */,
-				260773BF232FC4E800BFD50F /* NotificaionService */,
 				26CC579123A0867400ABB92A /* monalxmpp */,
 			);
 		};
@@ -2142,25 +2021,10 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		260773BE232FC4E800BFD50F /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		2630FE2D1AD550C00079F5C0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		26AA700F2146BBB800598605 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				26AA70182146BBB900598605 /* iosShare.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2272,7 +2136,6 @@
 				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC/SignalProtocolObjC.framework",
 				"${BUILT_PRODUCTS_DIR}/SAMKeychain/SAMKeychain.framework",
 				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer/TPCircularBuffer.framework",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL/OpenSSL.framework/OpenSSL",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
@@ -2281,7 +2144,6 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SignalProtocolObjC.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SAMKeychain.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TPCircularBuffer.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OpenSSL.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2304,28 +2166,6 @@
 			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/Pods-jrtplib-static-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		AEFD0BBC538F58642A554A94 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-shareSheet-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2356,7 +2196,6 @@
 				"${BUILT_PRODUCTS_DIR}/SignalProtocolObjC/SignalProtocolObjC.framework",
 				"${BUILT_PRODUCTS_DIR}/SAMKeychain/SAMKeychain.framework",
 				"${BUILT_PRODUCTS_DIR}/TPCircularBuffer/TPCircularBuffer.framework",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL/OpenSSL.framework/OpenSSL",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
@@ -2377,7 +2216,6 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SignalProtocolObjC.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SAMKeychain.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TPCircularBuffer.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OpenSSL.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2417,28 +2255,6 @@
 			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/Pods-monalxmpp-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E29F37602913131122522B1F /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-NotificaionService-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2517,14 +2333,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		260773BC232FC4E800BFD50F /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				260773C4232FC4E800BFD50F /* NotificationService.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		2630FE2B1AD550C00079F5C0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2579,17 +2387,6 @@
 				26400760140B43BB00CF1107 /* rtptimeutilities.cpp in Sources */,
 				26400765140B43BB00CF1107 /* rtpudpv4transmitter.cpp in Sources */,
 				26400767140B43BB00CF1107 /* rtpudpv6transmitter.cpp in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		26AA700D2146BBB800598605 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				26AA70152146BBB900598605 /* ShareViewController.m in Sources */,
-				263DFAC02183D7160038E716 /* MLSelectionController.m in Sources */,
-				263BC64F218BEE9F00FA0203 /* UIColor+Theme.m in Sources */,
-				2666F018249D380D00372E28 /* MLContact.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2657,16 +2454,6 @@
 			target = 1D6058900D05DD3D006BFB54 /* Monal */;
 			targetProxy = 261E542B23A0A5F700394F59 /* PBXContainerItemProxy */;
 		};
-		2638008A2374814000144929 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 260773BF232FC4E800BFD50F /* NotificaionService */;
-			targetProxy = 263800892374814000144929 /* PBXContainerItemProxy */;
-		};
-		26AA701B2146BBB900598605 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 26AA70102146BBB800598605 /* shareSheet */;
-			targetProxy = 26AA701A2146BBB900598605 /* PBXContainerItemProxy */;
-		};
 		26CC579823A0867400ABB92A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 26CC579123A0867400ABB92A /* monalxmpp */;
@@ -2676,16 +2463,6 @@
 			isa = PBXTargetDependency;
 			target = 268BCD55140B25CC0025E4D1 /* jrtplib-static */;
 			targetProxy = 26CC57D823A08DA300ABB92A /* PBXContainerItemProxy */;
-		};
-		26CC57E823A08F3A00ABB92A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 26CC579123A0867400ABB92A /* monalxmpp */;
-			targetProxy = 26CC57E723A08F3A00ABB92A /* PBXContainerItemProxy */;
-		};
-		26CC57EA23A08F3F00ABB92A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 26CC579123A0867400ABB92A /* monalxmpp */;
-			targetProxy = 26CC57E923A08F3F00ABB92A /* PBXContainerItemProxy */;
 		};
 		26E88CD923F3C6B0001E9478 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -2968,7 +2745,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 4.9.1;
+				MARKETING_VERSION = 4.9;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -2985,236 +2762,6 @@
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
-		};
-		260773C9232FC4E800BFD50F /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0D0362F6B26B9407BE313F36 /* Pods-NotificaionService.debug.xcconfig */;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = NotificaionService/NotificaionService.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				CODE_SIGN_STYLE = Manual;
-				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 0;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
-				DEVELOPMENT_TEAM = 33XS7DE5NZ;
-				ENABLE_BITCODE = NO;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-					"TARGET_IS_EXTENSION=1",
-				);
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_PEDANTIC = NO;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				INFOPLIST_FILE = NotificaionService/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.3;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 4.9.1;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering dev";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
-				RUN_CLANG_STATIC_ANALYZER = YES;
-				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		260773CA232FC4E800BFD50F /* Adhoc */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 4A614910EEF29D66DD4B37E3 /* Pods-NotificaionService.adhoc.xcconfig */;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = NotificaionService/NotificaionService.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				CODE_SIGN_STYLE = Manual;
-				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 0;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
-				DEVELOPMENT_TEAM = 33XS7DE5NZ;
-				ENABLE_BITCODE = NO;
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(inherited)",
-					"COCOAPODS=1",
-					"TARGET_IS_EXTENSION=1",
-				);
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_PEDANTIC = NO;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = NotificaionService/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.3;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 4.9.1;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
-				RUN_CLANG_STATIC_ANALYZER = YES;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Adhoc;
-		};
-		260773CB232FC4E800BFD50F /* AppStore */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = D310A8387B2EB10761312F77 /* Pods-NotificaionService.appstore.xcconfig */;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = NotificaionService/NotificaionService.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				CODE_SIGN_STYLE = Manual;
-				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 0;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
-				DEVELOPMENT_TEAM = 33XS7DE5NZ;
-				ENABLE_BITCODE = NO;
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(inherited)",
-					"COCOAPODS=1",
-					"TARGET_IS_EXTENSION=1",
-				);
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_PEDANTIC = NO;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = NotificaionService/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.3;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 4.9.1;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.NotificaionService;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "Monal iOS Notification filtering dev";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
-				RUN_CLANG_STATIC_ANALYZER = YES;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = AppStore;
 		};
 		2630FE371AD550C00079F5C0 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -3453,7 +3000,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 4.9.1;
+				MARKETING_VERSION = 4.9;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -3534,216 +3081,6 @@
 				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Debug;
-		};
-		26AA701D2146BBB900598605 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 21E99538324C14220843F325 /* Pods-shareSheet.debug.xcconfig */;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = shareSheet.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 0;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
-				DEVELOPMENT_TEAM = 33XS7DE5NZ;
-				ENABLE_BITCODE = NO;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_PEDANTIC = NO;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				INFOPLIST_FILE = "$(SRCROOT)/shareSheet-iOS/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 4.9.1;
-				MTL_ENABLE_DEBUG_INFO = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				RUN_CLANG_STATIC_ANALYZER = YES;
-				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		26AA701E2146BBB900598605 /* Adhoc */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0EC0A5305E72C0F7F9E1CDEF /* Pods-shareSheet.adhoc.xcconfig */;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = shareSheet.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 0;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
-				DEVELOPMENT_TEAM = 33XS7DE5NZ;
-				ENABLE_BITCODE = NO;
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_PEDANTIC = NO;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/shareSheet-iOS/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 4.9.1;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				RUN_CLANG_STATIC_ANALYZER = YES;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Adhoc;
-		};
-		26AA701F2146BBB900598605 /* AppStore */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 061EF1BEDEE7A71FDF9AB402 /* Pods-shareSheet.appstore.xcconfig */;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = shareSheet.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 0;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
-				DEVELOPMENT_TEAM = 33XS7DE5NZ;
-				ENABLE_BITCODE = NO;
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_PEDANTIC = NO;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/shareSheet-iOS/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 4.9.1;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.shareSheet;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				RUN_CLANG_STATIC_ANALYZER = YES;
-				SDKROOT = iphoneos;
-				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = AppStore;
 		};
 		26CC579C23A0867400ABB92A /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -4077,7 +3414,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 4.9.1;
+				MARKETING_VERSION = 4.9;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -4186,16 +3523,6 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		260773CC232FC4E800BFD50F /* Build configuration list for PBXNativeTarget "NotificaionService" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				260773C9232FC4E800BFD50F /* Debug */,
-				260773CA232FC4E800BFD50F /* Adhoc */,
-				260773CB232FC4E800BFD50F /* AppStore */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
 		2630FE3A1AD550C00079F5C0 /* Build configuration list for PBXNativeTarget "Monal Tests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -4212,16 +3539,6 @@
 				268BCD58140B25CC0025E4D1 /* Debug */,
 				26E74FBF17B06D2200FD91AE /* Adhoc */,
 				2675EF5B18B98C2D0059C5C3 /* AppStore */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		26AA70202146BBB900598605 /* Build configuration list for PBXNativeTarget "shareSheet" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				26AA701D2146BBB900598605 /* Debug */,
-				26AA701E2146BBB900598605 /* Adhoc */,
-				26AA701F2146BBB900598605 /* AppStore */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

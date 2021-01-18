@@ -16,17 +16,16 @@ PODS:
   - NotificationBannerSwift (3.0.6):
     - MarqueeLabel (~> 4.0.5)
     - SnapKit (~> 5.0.1)
-  - OpenSSL-Universal (1.1.180)
   - pop (1.0.12)
   - SAMKeychain (1.5.3)
-  - SDWebImage (5.10.0):
-    - SDWebImage/Core (= 5.10.0)
-  - SDWebImage/Core (5.10.0)
+  - SDWebImage (5.10.2):
+    - SDWebImage/Core (= 5.10.2)
+  - SDWebImage/Core (5.10.2)
   - SignalProtocolC (2.3.2)
   - SignalProtocolObjC (1.1.0):
     - SignalProtocolC (~> 2.3.2)
   - SnapKit (5.0.1)
-  - TOCropViewController (2.5.5)
+  - TOCropViewController (2.6.0)
   - TPCircularBuffer (1.6.1)
 
 DEPENDENCIES:
@@ -36,7 +35,6 @@ DEPENDENCIES:
   - IDMPhotoBrowser
   - MBProgressHUD (~> 1.2.0)
   - NotificationBannerSwift (~> 3.0.6)
-  - OpenSSL-Universal (= 1.1.180)
   - SAMKeychain
   - SDWebImage (~> 5.10.0)
   - SignalProtocolC
@@ -55,7 +53,6 @@ SPEC REPOS:
     - MarqueeLabel
     - MBProgressHUD
     - NotificationBannerSwift
-    - OpenSSL-Universal
     - pop
     - SAMKeychain
     - SDWebImage
@@ -75,16 +72,15 @@ SPEC CHECKSUMS:
   MarqueeLabel: 00cc0bcd087111dca575878b3531af980559707d
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
   NotificationBannerSwift: 7021be2338f8f29cf424b0aca43da462bf9e2a1a
-  OpenSSL-Universal: 1aa4f6a6ee7256b83db99ec1ccdaa80d10f9af9b
   pop: d582054913807fd11fd50bfe6a539d91c7e1a55a
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
-  SDWebImage: 9169792e9eec3e45bba2a0c02f74bf8bd922d1ee
+  SDWebImage: b969dcfc02c40a5da71eac0b03b8f1a0c794a86f
   SignalProtocolC: 051512e9f3abfeb4120c5e9673af9ae0ee370070
   SignalProtocolObjC: b992ed29c3b7b453510ff0102ed16ef143f7efd2
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
-  TOCropViewController: da59f531f8ac8a94ef6d6c0fc34009350f9e8bfe
+  TOCropViewController: 3105367e808b7d3d886a74ff59bf4804e7d3ab38
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 
-PODFILE CHECKSUM: e621f54069f229ec1b076cfc2545c52a286138b4
+PODFILE CHECKSUM: c1845fe486b8d0d7f6393da57f08753788cafecb
 
 COCOAPODS: 1.10.0

@@ -58,7 +58,7 @@ target 'monalxmpp' do
   pod 'SignalProtocolC'
 
   #this is only for ios12. Remove for mac builds.
-  pod 'OpenSSL-Universal', '1.1.180'
+ # pod 'OpenSSL-Universal', '1.1.180'
 end
 
 # see https://stackoverflow.com/a/36547646/3528174

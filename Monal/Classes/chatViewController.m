@@ -1118,9 +1118,28 @@ enum msgSentState {
             [self makeLocationManager];
             [self.locationManager startUpdatingLocation];
         } else if(gpsStatus == kCLAuthorizationStatusNotDetermined) {
+#if TARGET_OS_MACCATALYST
+            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Location Access Needed", @"") message:NSLocalizedString(@"Monal  uses your location when you send a location message in a conversation.", @"") preferredStyle:UIAlertControllerStyleAlert];
+            
+            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                [alert dismissViewControllerAnimated:YES completion:nil];
+            }]];
+            
+            UIAlertAction* allow = [UIAlertAction actionWithTitle:NSLocalizedString(@"Allow", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                [self makeLocationManager];
+                self.sendLocation=YES;
+                [self.locationManager requestWhenInUseAuthorization];
+            }];
+            [alert addAction:allow];
+            
+            [self presentViewController:alert animated:YES completion:nil];
+
+#else
             [self makeLocationManager];
             self.sendLocation=YES;
             [self.locationManager requestWhenInUseAuthorization];
+#endif
+
         } else {
             UIAlertController *permissionAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Location Access Needed",@ "")
                                                                                      message:NSLocalizedString(@"Monal does not have access to your location. Please update the location access in your device's Privacy Settings.",@ "") preferredStyle:UIAlertControllerStyleAlert];

@@ -7,6 +7,7 @@
 //
 
 #import "MLRegSuccessViewController.h"
+#import "HelperTools.h"
 
 @interface MLRegSuccessViewController ()
 
@@ -28,6 +29,11 @@
 
 -(IBAction) close:(id)sender
 {
+    // open privacy settings
+    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {
+        [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
+        return;
+    }
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 

@@ -134,6 +134,16 @@
         return;
     }
     
+    if([[DataLayer sharedInstance] doesAccountExistUser:user.lowercaseString andDomain:domain.lowercaseString]) {
+        self.loginHUD.hidden = YES;
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Duplicate Account", @"") message:NSLocalizedString(@"This account already exists on this instance", @"") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+        return;
+    }
+
     NSMutableDictionary* dic  = [[NSMutableDictionary alloc] init];
     [dic setObject:domain.lowercaseString forKey:kDomain];
     [dic setObject:user.lowercaseString forKey:kUsername];

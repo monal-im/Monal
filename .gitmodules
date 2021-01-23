@@ -1,8 +1,8 @@
 [submodule "Monal/localization/external"]
 	path = Monal/localization/external
-	url = git@github.com:tmolitor-stud-tu/Monal-localzation-main.git
+	url = https://github.com/tmolitor-stud-tu/Monal-localzation-main.git
 	branch = main
 [submodule "Monal/shareSheet-iOS/localization/external"]
 	path = Monal/shareSheet-iOS/localization/external
-	url = git@github.com:tmolitor-stud-tu/Monal-localization-shareSheet.git
+	url = https://github.com/tmolitor-stud-tu/Monal-localization-shareSheet.git
 	branch = main

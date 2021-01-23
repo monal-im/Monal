@@ -13,22 +13,6 @@ target 'jrtplib-static' do
 end
 
 
-target 'shareSheet' do
-  # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
-  use_frameworks!
-  inhibit_all_warnings!
-  pod 'CocoaLumberjack'
-end
-
-target 'NotificaionService' do
-  # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
-  use_frameworks!
-  inhibit_all_warnings!
-  pod 'CocoaLumberjack'
-  pod 'SignalProtocolObjC'
-  pod 'SignalProtocolC'
-end
-
 target 'Monal' do
   # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
   use_frameworks!

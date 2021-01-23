@@ -12,7 +12,7 @@ else
     echo "warning: BartyCrouch not installed, download it from https://github.com/Flinesoft/BartyCrouch"
 fi
 
-for folder in "localization" "shareSheet-iOS/localization"; do
+for folder in "localization/external" "shareSheet-iOS/localization/external"; do
        for file in $folder/*.lproj/*.strings; do
                # Remove empty lines
                sed -i '' '/^$/d' $file

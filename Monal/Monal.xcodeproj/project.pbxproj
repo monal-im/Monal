@@ -934,7 +934,7 @@
 		C1C839DA24F15DF800BBCF17 /* MLOMEMO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLOMEMO.h; sourceTree = "<group>"; };
 		C1C839DC24F15DF800BBCF17 /* MLOMEMO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLOMEMO.m; sourceTree = "<group>"; };
 		C1E4654724EE517000CA5AAF /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = localization/external/de.lproj/Localizable.strings; sourceTree = SOURCE_ROOT; };
-		C1E4654924EE51EC00CA5AAF /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = localization/Base.lproj/Localizable.strings; sourceTree = SOURCE_ROOT; };
+		C1E4654924EE51EC00CA5AAF /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = localization/external/Base.lproj/Localizable.strings; sourceTree = SOURCE_ROOT; };
 		C1E4654A24EE520D00CA5AAF /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = localization/external/fr.lproj/Localizable.strings; sourceTree = SOURCE_ROOT; };
 		C1E4654B24EE520D00CA5AAF /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = localization/external/ru.lproj/Localizable.strings; sourceTree = SOURCE_ROOT; };
 		C1E4654C24EE520D00CA5AAF /* ne */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ne; path = localization/external/ne.lproj/Localizable.strings; sourceTree = SOURCE_ROOT; };

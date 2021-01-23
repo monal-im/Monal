@@ -26,6 +26,9 @@ PODS:
   - SignalProtocolObjC (1.1.0):
     - SignalProtocolC (~> 2.3.2)
   - SnapKit (5.0.1)
+  - sqlite3/common (3.34.1)
+  - sqlite3/perf-threadsafe (3.34.1):
+    - sqlite3/common
   - TOCropViewController (2.6.0)
   - TPCircularBuffer (1.6.1)
 
@@ -41,6 +44,7 @@ DEPENDENCIES:
   - SDWebImage (~> 5.10.0)
   - SignalProtocolC
   - SignalProtocolObjC
+  - sqlite3/perf-threadsafe
   - TOCropViewController
   - TPCircularBuffer
 
@@ -62,6 +66,7 @@ SPEC REPOS:
     - SignalProtocolC
     - SignalProtocolObjC
     - SnapKit
+    - sqlite3
     - TOCropViewController
     - TPCircularBuffer
 
@@ -82,9 +87,10 @@ SPEC CHECKSUMS:
   SignalProtocolC: 051512e9f3abfeb4120c5e9673af9ae0ee370070
   SignalProtocolObjC: b992ed29c3b7b453510ff0102ed16ef143f7efd2
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
+  sqlite3: 5326fbc03d1cc5b07e968504b0ab17ec784926b7
   TOCropViewController: 3105367e808b7d3d886a74ff59bf4804e7d3ab38
   TPCircularBuffer: c13243556527551c4d320709c7b14a6d20cdc30a
 
-PODFILE CHECKSUM: 2f6093f25a1e3c9672d14f83aba181694db324de
+PODFILE CHECKSUM: f260408cc00e0473f028541b27e4b32d1eef1c0d
 
 COCOAPODS: 1.10.1

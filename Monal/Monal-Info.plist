@@ -97,6 +97,8 @@
 	<string>Launch Screen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Monal  uses your location when you send a location message in a conversation.</string>
 	<key>UIPrerenderedIcon</key>
 	<true/>
 	<key>UIRequiresFullScreen</key>

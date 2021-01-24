@@ -556,6 +556,7 @@ enum msgSentState {
     //stop editing (if there is some)
     [self stopEditing];
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+    if(!self.xmppAccount) DDLogDebug(@"Disabled account detected");
     self.encryptChat = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
     
     [MLNotificationManager sharedInstance].currentAccountNo = self.contact.accountId;
@@ -604,22 +605,24 @@ enum msgSentState {
 {
     [super viewDidAppear:animated];
 #ifndef DISABLE_OMEMO
-    BOOL omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressNameExist:self.contact.contactJid];
-    if(!omemoDeviceForContactFound) {
-        if(self.encryptChat && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo]) {
-            UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Encryption Not Supported", @"") message:NSLocalizedString(@"This contact does not appear to have any devices that support encryption.", @"") preferredStyle:UIAlertControllerStyleAlert];
-            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                // Disable encryption
-                self.encryptChat = NO;
-                [self updateUIElements];
-                [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
-                [alert dismissViewControllerAnimated:YES completion:nil];
-            }]];
-            [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ignore", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-                [alert dismissViewControllerAnimated:YES completion:nil];
-            }]];
-
-            [self presentViewController:alert animated:YES completion:nil];
+    if(self.xmppAccount) {
+        BOOL omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressNameExist:self.contact.contactJid];
+        if(!omemoDeviceForContactFound) {
+            if(self.encryptChat && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo]) {
+                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Encryption Not Supported", @"") message:NSLocalizedString(@"This contact does not appear to have any devices that support encryption.", @"") preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                    // Disable encryption
+                    self.encryptChat = NO;
+                    [self updateUIElements];
+                    [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
+                    [alert dismissViewControllerAnimated:YES completion:nil];
+                }]];
+                [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ignore", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                    [alert dismissViewControllerAnimated:YES completion:nil];
+                }]];
+                
+                [self presentViewController:alert animated:YES completion:nil];
+            }
         }
     }
 #endif

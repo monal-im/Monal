@@ -855,6 +855,9 @@
 		B55DCA2ABBDB6E635D46D69A /* Pods-monalxmpp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.debug.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.debug.xcconfig"; sourceTree = "<group>"; };
 		C12436122434AB5D00B8F074 /* MLAttributedLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLAttributedLabel.h; sourceTree = "<group>"; };
 		C12436132434AB5D00B8F074 /* MLAttributedLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAttributedLabel.m; sourceTree = "<group>"; };
+		C13E640625BD405700763D6F /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "localization/external/zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		C13E640825BD406600763D6F /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "localization/external/pt-BR.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		C13E640925BD406700763D6F /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-PT"; path = "localization/external/pt-PT.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		C13EBB8C24DC685C008AADDA /* MLPrivacySettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPrivacySettingsViewController.h; sourceTree = "<group>"; };
 		C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPrivacySettingsViewController.m; sourceTree = "<group>"; };
 		C1414E9B24312F0100948788 /* MLChatMapsCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatMapsCell.h; sourceTree = "<group>"; };
@@ -1676,7 +1679,7 @@
 			name = tools;
 			sourceTree = "<group>";
 		};
-		29B97314FDCFA39411CA2CEA = {
+		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
 				26A711D723C4D67300FC6A86 /* MLCrypto.xcodeproj */,
@@ -2087,7 +2090,7 @@
 				fa,
 				"nb-NO",
 			);
-			mainGroup = 29B97314FDCFA39411CA2CEA;
+			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
 			projectReferences = (
@@ -2925,7 +2928,9 @@
 				C1E4655F24EE520F00CA5AAF /* el */,
 				C1E4656024EE520F00CA5AAF /* fa */,
 				C1C8395F24F0EE6700BBCF17 /* nb-NO */,
-				C176FD0C24FAC94F0022890C /* zh-Hant */,
+				C13E640625BD405700763D6F /* zh-Hant */,
+				C13E640825BD406600763D6F /* pt-BR */,
+				C13E640925BD406700763D6F /* pt-PT */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";

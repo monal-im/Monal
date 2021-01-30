@@ -393,27 +393,22 @@
 - (BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 {
     [self.sqliteDatabase beginWriteTransaction];
-    NSData* dbIdentity = [self getIdentityForAddress:address];
-    BOOL toreturn = NO;
-    
-    if(!dbIdentity) {
-       NSData *untrusted = [self getUntrustedForAddress:address];
-        if(!untrusted) toreturn = YES;
-    }
-    else {
-        if([dbIdentity isEqualToData:identityKey])
-        {
-            toreturn = YES;
-        }
-    }
+    NSNumber* trusted = (NSNumber*)[self.sqliteDatabase executeScalar:@"SELECT \
+                CASE \
+                    WHEN ((trustLevel=2 OR trustLevel=1) AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR lastReceivedMsg >= date('now', '-90 day'))) THEN 1 \
+                    ELSE 0 \
+                END \
+                FROM signalContactIdentity \
+                WHERE account_id=? AND contactDeviceId=? AND contactName=? AND identity=?; \
+                " andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name, identityKey]];
     [self.sqliteDatabase endWriteTransaction];
     
-     return toreturn;
+     return trusted.boolValue;
 }
 
 -(NSData *) getIdentityForAddress:(SignalAddress*)address
 {
-    return (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=? AND trustLevel=2;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    return (NSData *)[self.sqliteDatabase executeScalar:@"SELECT identity FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
 }
 
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address

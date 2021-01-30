@@ -375,7 +375,7 @@
         [self.sqliteDatabase endWriteTransaction];
         return YES;
     }
-    BOOL success = [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalContactIdentity (account_id, contactName, contactDeviceId, identity, trusted) values (?, ?, ?, ?, 1);" andArguments:@[self.accountId,address.name,[NSNumber numberWithInteger:address.deviceId], identityKey]];
+    BOOL success = [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalContactIdentity (account_id, contactName, contactDeviceId, identity, trustLevel) values (?, ?, ?, ?, 1);" andArguments:@[self.accountId,address.name,[NSNumber numberWithInteger:address.deviceId], identityKey]];
     [self.sqliteDatabase endWriteTransaction];
     return success;
 }
@@ -413,12 +413,12 @@
 
 -(NSData *) getIdentityForAddress:(SignalAddress*)address
 {
-    return (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=? AND trusted=1;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    return (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=? AND trustLevel=2;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
 }
 
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address
 {
-    [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trusted=? WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[[NSNumber numberWithBool:trust], self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[[NSNumber numberWithInt:(trust ? 2 : 0)], self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
 }
 
 -(void) deleteDeviceforAddress:(SignalAddress*)address
@@ -431,7 +431,7 @@
  */
 -(NSData *) getUntrustedForAddress:(SignalAddress*)address
 {
-    return (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=? AND trusted=0;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    return (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=? AND trustLevel=0;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
 }
 
 /**

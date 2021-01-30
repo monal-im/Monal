@@ -2128,6 +2128,40 @@ static NSDateFormatter* dbFormatter;
              FOREIGN KEY('account_id') REFERENCES 'account'('account_id') \
          );"];
         }];
+
+        /*
+         * OMEMO trust levels:
+         * 0: no trust
+         * 1: ToFU
+         * 2: trust
+         */
+        [self updateDBTo:5.004 withBlock:^{
+            [self.db executeNonQuery:@"ALTER TABLE signalContactIdentity RENAME TO _signalContactIdentityTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE 'signalContactIdentity' ( \
+                 'account_id' INTEGER NOT NULL, \
+                 'contactName' TEXT NOT NULL, \
+                 'contactDeviceId' INTEGER NOT NULL, \
+                 'identity' BLOB, \
+                 'lastReceivedMsg' INTEGER DEFAULT NULL, \
+                 'removedFromDeviceList' INTEGER DEFAULT NULL, \
+                 'trustLevel' INTEGER NOT NULL DEFAULT 1, \
+                 FOREIGN KEY('contactName') REFERENCES 'buddylist'('buddy_name'), \
+                 PRIMARY KEY('account_id', 'contactName', 'contactDeviceId'), \
+                 FOREIGN KEY('account_id') REFERENCES 'account'('account_id') \
+             );"];
+            [self.db executeNonQuery:@"INSERT INTO signalContactIdentity \
+                ( \
+                    account_id, contactName, contactDeviceId, identity, trustLevel \
+                ) \
+                SELECT \
+                    account_id, contactName, contactDeviceId, identity, \
+                    CASE \
+                        WHEN trusted=1 THEN 1 \
+                        ELSE 0 \
+                    END \
+                FROM _signalContactIdentityTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _signalContactIdentityTMP;"];
+        }];
     }];
     
     DDLogInfo(@"Database version check complete");

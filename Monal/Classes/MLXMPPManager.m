@@ -373,7 +373,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     DDLogVerbose(@"connecting account %@@%@",[account objectForKey:kUsername], [account objectForKey:kDomain]);
 
     NSError* error;
-    NSString *password = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]] error:&error];
+    NSString *password = [SAMKeychain passwordForService:kMonalKeychainName account:[NSString stringWithFormat:@"%@",[account objectForKey:kAccountID]] error:&error];
     error = nil;
     if(error)
     {
@@ -471,7 +471,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 -(void) updatePassword:(NSString *) password forAccount:(NSString *) accountNo
 {
     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-    [SAMKeychain setPassword:password forService:@"Monal" account:accountNo];
+    [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountNo];
     xmpp* xmpp =[self getConnectedAccountForID:accountNo];
     [xmpp.connectionProperties.identity updatPassword:password];
 }

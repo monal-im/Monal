@@ -156,7 +156,7 @@
     if(accountID) {
         self.accountNo = [NSString stringWithFormat:@"%@", accountID];
         [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-        [SAMKeychain setPassword:password forService:@"Monal" account:self.accountNo];
+        [SAMKeychain setPassword:password forService:kMonalKeychainName account:self.accountNo];
         [[MLXMPPManager sharedInstance] connectAccount:self.accountNo];
     }
 

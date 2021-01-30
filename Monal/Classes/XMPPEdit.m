@@ -96,7 +96,7 @@
 
         self.jid = [NSString stringWithFormat:@"%@@%@", [settings objectForKey:@"username"], [settings objectForKey:@"domain"]];
 
-        NSString* pass = [SAMKeychain passwordForService:@"Monal" account:[NSString stringWithFormat:@"%@", self.accountno]];
+        NSString* pass = [SAMKeychain passwordForService:kMonalKeychainName account:[NSString stringWithFormat:@"%@", self.accountno]];
 
         if(pass) {
             self.password = pass;
@@ -262,7 +262,7 @@
                     self.accountno = [NSString stringWithFormat:@"%@", accountID];
                     self.editMode = YES;
                     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
-                    [SAMKeychain setPassword:self.password forService:@"Monal" account:self.accountno];
+                    [SAMKeychain setPassword:self.password forService:kMonalKeychainName account:self.accountno];
                     if(self.enabled)
                     {
                         [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
@@ -330,7 +330,7 @@
     }];
     UIAlertAction *yesAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
 
-        [SAMKeychain deletePasswordForService:@"Monal"  account:[NSString stringWithFormat:@"%@",self.accountno]];
+        [SAMKeychain deletePasswordForService:kMonalKeychainName account:[NSString stringWithFormat:@"%@",self.accountno]];
         [self.db removeAccount:self.accountno];
         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
 

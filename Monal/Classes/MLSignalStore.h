@@ -9,6 +9,12 @@
 #import <Foundation/Foundation.h>
 @import SignalProtocolObjC;
 
+#define MLOmemoNotTrusted 0
+#define MLOmemoToFU 100
+#define MLOmemoTrusted 200
+#define MLOmemoTrustedButRemoved 201
+#define MLOmemoTrustedButNoMsgSeenInTime 202
+
 @interface MLSignalStore : NSObject <SignalStore>
 @property (nonatomic, assign) u_int32_t deviceid;
 @property (nonatomic, strong) SignalIdentityKeyPair *identityKeyPair;

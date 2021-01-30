@@ -392,18 +392,7 @@
  */
 - (BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 {
-    [self.sqliteDatabase beginWriteTransaction];
-    NSNumber* trusted = (NSNumber*)[self.sqliteDatabase executeScalar:@"SELECT \
-                CASE \
-                    WHEN ((trustLevel=2 OR trustLevel=1) AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR lastReceivedMsg >= date('now', '-90 day'))) THEN 1 \
-                    ELSE 0 \
-                END \
-                FROM signalContactIdentity \
-                WHERE account_id=? AND contactDeviceId=? AND contactName=? AND identity=?; \
-                " andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name, identityKey]];
-    [self.sqliteDatabase endWriteTransaction];
-    
-     return trusted.boolValue;
+    return [self getInternalTrustLevel:address identityKey:identityKey].intValue == MLOmemoTrusted;
 }
 
 -(NSData *) getIdentityForAddress:(SignalAddress*)address
@@ -421,12 +410,21 @@
     [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
 }
 
-/**
- is it explicity not trusted?
- */
--(NSData *) getUntrustedForAddress:(SignalAddress*)address
+
+-(NSNumber*) getInternalTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
 {
-    return (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=? AND trustLevel=0;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    return (NSNumber*)[self.sqliteDatabase executeScalar:@"SELECT \
+                CASE \
+                    WHEN (trusted=0) THEN 0 \
+                    WHEN (trusted=1) THEN 100 \
+                    WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR lastReceivedMsg >= date('now', '-90 day'))) THEN 200 \
+                    WHEN (trustLevel=2 AND removedFromDeviceList IS NOT NULL) THEN 201 \
+                    WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg < date('now', '-90 day'))) THEN 202 \
+                    ELSE 0 \
+                END \
+                FROM signalContactIdentity \
+                WHERE account_id=? AND contactDeviceId=? AND contactName=? AND identity=?; \
+                " andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name, identityKey]];
 }
 
 /**

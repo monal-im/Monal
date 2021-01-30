@@ -133,11 +133,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(BOOL) application:(UIApplication*) application willFinishLaunchingWithOptions:(NSDictionary*) launchOptions
 {
-    self.fileLogger = [HelperTools configureLogging];
-    
-    //log unhandled exceptions
-    NSSetUncaughtExceptionHandler(&logException);
-    
     [HelperTools activityLog];
     
     //migrate defaults db to shared app group

@@ -17,6 +17,8 @@
 
 @import UserNotifications;
 
+static DDFileLogger* _fileLogger;
+
 @implementation HelperTools
 
 void logException(NSException* exception)
@@ -220,7 +222,17 @@ void logException(NSException* exception)
     return db;
 }
 
-+(DDFileLogger*) configureLogging
++(DDFileLogger*) fileLogger
+{
+    return _fileLogger;
+}
+
++(void) setFileLogger:(DDFileLogger*) fileLogger
+{
+    _fileLogger = fileLogger;
+}
+
++(void) configureLogging
 {
     //create log formatter
     MLLogFormatter* formatter = [[MLLogFormatter alloc] init];
@@ -240,12 +252,12 @@ void logException(NSException* exception)
     
     //file logger
     id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:[containerUrl path]];
-    DDFileLogger* fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
-    [fileLogger setLogFormatter:formatter];
-    fileLogger.rollingFrequency = 60 * 60 * 24;    // 24 hour rolling
-    fileLogger.logFileManager.maximumNumberOfLogFiles = 3;
-    fileLogger.maximumFileSize = 1024 * 1024 * 64;
-    [DDLog addLogger:fileLogger];
+    self.fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
+    [self.fileLogger setLogFormatter:formatter];
+    self.fileLogger.rollingFrequency = 60 * 60 * 24;    // 24 hour rolling
+    self.fileLogger.logFileManager.maximumNumberOfLogFiles = 3;
+    self.fileLogger.maximumFileSize = 1024 * 1024 * 64;
+    [DDLog addLogger:self.fileLogger];
     
     //network logger
     MLUDPLogger* udpLogger = [[MLUDPLogger alloc] init];
@@ -264,8 +276,6 @@ void logException(NSException* exception)
     NSArray* directoryContents = [fileManager contentsOfDirectoryAtPath:[containerUrl path] error:nil];
     for(NSString* file in directoryContents)
         DDLogVerbose(@"File %@/%@", [containerUrl path], file);
-    
-    return fileLogger;
 }
 
 +(BOOL) isAppExtension

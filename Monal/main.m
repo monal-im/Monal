@@ -7,13 +7,18 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "HelperTools.h"
 #import "MonalAppDelegate.h"
 
 
 int main(int argc, char *argv[]) {
-    
     @autoreleasepool {
-    int retVal = UIApplicationMain(argc, argv, nil, NSStringFromClass([MonalAppDelegate class]));
-    return retVal;
+        //log unhandled exceptions
+        NSSetUncaughtExceptionHandler(&logException);
+        
+        [HelperTools configureLogging];
+        
+        int retVal = UIApplicationMain(argc, argv, nil, NSStringFromClass([MonalAppDelegate class]));
+        return retVal;
     }
 }

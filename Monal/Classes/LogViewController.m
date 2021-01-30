@@ -22,7 +22,6 @@
 
 @implementation LogViewController
 
-DDFileLogger* _logger;
 DDLogFileInfo* _logInfo;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -43,9 +42,7 @@ DDLogFileInfo* _logInfo;
 -(void) viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
-    _logger = appDelegate.fileLogger;
-    NSArray* sortedLogFileInfos = [_logger.logFileManager sortedLogFileInfos];
+    NSArray* sortedLogFileInfos = [HelperTools.fileLogger.logFileManager sortedLogFileInfos];
     _logInfo = [sortedLogFileInfos objectAtIndex: 0];
 
     self.logUDPSwitch.on = [[HelperTools defaultsDB] boolForKey: @"udpLoggerEnabled"];

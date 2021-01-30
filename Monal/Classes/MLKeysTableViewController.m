@@ -60,12 +60,12 @@ enum MLKeysTableViewControllerSections {
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    MLKeyCell *cell = (MLKeyCell *) [tableView dequeueReusableCellWithIdentifier:@"key" forIndexPath:indexPath];
-
-    NSNumber* device = [self.devices objectAtIndex:indexPath.row];
-    SignalAddress *address = [[SignalAddress alloc] initWithName:self.contact.contactJid deviceId:(int) device.integerValue];
+    MLKeyCell* cell = (MLKeyCell *) [tableView dequeueReusableCellWithIdentifier:@"key" forIndexPath:indexPath];
 
 #ifndef DISABLE_OMEMO
+    NSNumber* device = [self.devices objectAtIndex:indexPath.row];
+    SignalAddress* address = [[SignalAddress alloc] initWithName:self.contact.contactJid deviceId:(int) device.integerValue];
+
     NSData* identity = [self.account.omemo getIdentityForAddress:address];
 
     cell.key.text = [HelperTools signalHexKeyWithData:identity];
@@ -143,11 +143,12 @@ enum MLKeysTableViewControllerSections {
 
         if(indexPath.section == keysSection) {
             // get device rid
+#ifndef DISABLE_OMEMO
             NSNumber* device = [self.devices objectAtIndex:indexPath.row];
             [self.account.omemo deleteDeviceForSource:self.contact.contactJid andRid:device.intValue];
             // Send own updated omemo devices
             [self.account.omemo sendOMEMODeviceWithForce:YES];
-
+#endif // DISABLE_OMEMO
             // delete device from tableView
             [self.devices removeObjectAtIndex:indexPath.row];
             [self.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];

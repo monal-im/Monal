@@ -532,15 +532,13 @@ void logException(NSException* exception)
     return hashed;
 }
 
-+(NSData*) sha256HmacForKey:(NSString*) key andData:(NSString*) data
++(NSData*) sha256HmacForKey:(NSData*) key andData:(NSData*) data
 {
     if(!key || !data)
         return nil;
-	const char* cKey  = [key cStringUsingEncoding: NSUTF8StringEncoding];
-	const char* cData = [data cStringUsingEncoding: NSUTF8StringEncoding];
-	uint8_t cHMAC[CC_SHA256_DIGEST_LENGTH] = {0};
-	CCHmac(kCCHmacAlgSHA256, cKey, [key lengthOfBytesUsingEncoding: NSUTF8StringEncoding], cData, [data lengthOfBytesUsingEncoding: NSUTF8StringEncoding], cHMAC);
-	return [[NSData alloc] initWithBytes:cHMAC length:sizeof(cHMAC)];
+	unsigned char digest[CC_SHA256_DIGEST_LENGTH];
+	CCHmac(kCCHmacAlgSHA256, [key bytes], (UInt32)[key length], [data bytes], (UInt32)[data length], digest);
+    return [NSData dataWithBytes:digest length:CC_SHA256_DIGEST_LENGTH];
 }
 
 #pragma mark Base64

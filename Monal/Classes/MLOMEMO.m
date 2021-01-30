@@ -390,7 +390,6 @@ $$
         return;
 
     SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:rid];
-    [self.monalSignalStore deleteDeviceforAddress:address];
     [self.monalSignalStore deleteSessionRecordForAddress:address];
 }
 
@@ -712,7 +711,6 @@ $$
     // delete broken session from our storage
     SignalAddress* address = [[SignalAddress alloc] initWithName:contact deviceId:(uint32_t)deviceId.intValue];
     [self.monalSignalStore deleteSessionRecordForAddress:address];
-    [self.monalSignalStore deleteDeviceforAddress:address];
 
     // DEBUG START
     if(![self.accountJid isEqualToString:contact])

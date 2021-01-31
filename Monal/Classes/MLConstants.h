@@ -84,6 +84,8 @@ typedef enum NotificationPrivacySettingOption {
 #define kMonalIdle @"kMonalIdle"
 #define kMonalFiletransfersIdle @"kMonalFiletransfersIdle"
 
+#define kMonalBackgroundChanged @"kMonalBackgroundChanged"
+
 #define kMonalPresentChat @"kMonalPresentChat"
 
 #define kMLMAMPref @"kMLMAMPref"

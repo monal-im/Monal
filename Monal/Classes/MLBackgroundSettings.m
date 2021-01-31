@@ -179,6 +179,7 @@
 
 -(void) close {
     [[HelperTools defaultsDB] setObject:[self.imageList objectAtIndex:self.displayedPhotoIndex] forKey:@"BackgroundImage"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalBackgroundChanged object:nil userInfo:nil];
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 

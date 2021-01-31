@@ -551,6 +551,8 @@ enum msgSentState {
     [nc addObserver:self selector:@selector(updateUIElementsOnAccountChange:) name:kMonalAccountStatusChanged object:nil];
     [nc addObserver:self selector:@selector(updateNavBarLastInteractionLabel:) name:kMonalLastInteractionUpdatedNotice object:nil];
     
+    [nc addObserver:self selector:@selector(updateBackground) name:kMonalBackgroundChanged object:nil];
+    
     self.viewDidAppear = NO;
     self.viewIsScrolling = YES;
     //stop editing (if there is some)

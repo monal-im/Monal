@@ -7,11 +7,13 @@
 //
 
 #import "MLPasswordChangeTableViewController.h"
+#import "MBProgressHUD.h"
 #import "MLXMPPManager.h"
 
 
 @interface MLPasswordChangeTableViewController ()
 @property (nonatomic, weak)  UITextField* password;
+@property (nonatomic, strong) MBProgressHUD *progress;
 @end
 
 @implementation MLPasswordChangeTableViewController
@@ -37,8 +39,16 @@
     {
         if(self.password.text.length>0)
         {
+            
+            self.progress= [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+            self.progress.label.text=NSLocalizedString(@"Changing Password", @"");
+            self.progress.mode=MBProgressHUDModeIndeterminate;
+            self.progress.removeFromSuperViewOnHide=YES;
+            self.progress.hidden=NO;
+            
             [self.xmppAccount changePassword:self.password.text withCompletion:^(BOOL success, NSString *message) {
                 dispatch_async(dispatch_get_main_queue(), ^{
+                    self.progress.hidden=YES;
                     NSString *title =NSLocalizedString(@"Error",@ "");
                     NSString *displayMessage =message;
                     if(success) {

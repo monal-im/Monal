@@ -1084,20 +1084,22 @@ enum msgSentState {
 
         UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             mediaPicker.sourceType = UIImagePickerControllerSourceTypeCamera;
-            [self presentViewController:mediaPicker animated:YES completion:nil];
+
+            [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+                if(granted)
+                {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                       
+                    });
+                }
+            }];
         }];
 
         UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             mediaPicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
             mediaPicker.allowsEditing = NO;
-            [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
-                if(granted)
-                {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self presentViewController:mediaPicker animated:YES completion:nil];
-                    });
-                }
-            }];
+            [self presentViewController:mediaPicker animated:YES completion:nil];
+       
         }];
 
         // Set image

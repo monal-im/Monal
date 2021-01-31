@@ -26,6 +26,8 @@
 #import "MLXMPPManager.h"
 #import "UIColor+Theme.h"
 
+#import <AVKit/AVKit.h>
+
 typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
@@ -175,6 +177,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         DDLogInfo(@"NotificationServiceExtension is running, waiting for its termination");
         [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
     }
+    
+    AVAudioSession *audioSession = AVAudioSession.sharedInstance;
+    NSError *audioError = nil;
+    NSError *audioActiveError = nil;
+    [audioSession setCategory:AVAudioSessionCategoryPlayAndRecord error:&audioError];
+    [audioSession setActive:YES error:&audioActiveError];
     
     return YES;
 }

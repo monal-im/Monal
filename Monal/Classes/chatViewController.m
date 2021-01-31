@@ -54,7 +54,7 @@
 
 @property (nonatomic, strong) NSMutableArray* messageList;
 @property (nonatomic, strong) NSMutableArray* photos;
-@property (nonatomic, strong) UIDocumentPickerViewController *imagePicker;
+@property (nonatomic, strong) UIDocumentPickerViewController *filePicker;
 
 @property (nonatomic, assign) BOOL encryptChat;
 @property (nonatomic, assign) BOOL sendLocation; // used for first request
@@ -160,13 +160,39 @@ enum msgSentState {
     [self.inputContainerView.bottomAnchor constraintEqualToAnchor:self.inputContainerView.superview.bottomAnchor].active=YES;
     [self.inputContainerView.trailingAnchor constraintEqualToAnchor:self.inputContainerView.superview.trailingAnchor].active=YES;
     self.tableviewBottom.constant += 20;
-    
-    //UTI @"public.data" for everything
-    NSString *images = (NSString *)kUTTypeImage;
-    self.imagePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images] inMode:UIDocumentPickerModeImport];
-    self.imagePicker.allowsMultipleSelection = NO;
-    self.imagePicker.delegate = self;
 #endif
+    //UTI @"public.data" for everything
+    NSString *images = @"public.image";
+    NSString *gifFiles = @"com.compuserve.gif";
+    NSString *txtFiles = @"public.text";
+    NSString *xmlFiles = @"public.xml";
+    NSString *sourceCodeFiles = @"public.source-code";
+    NSString *pdfFiles = @"com.adobe.pdf";
+    NSString *rtfFiles = @"public.rtf";
+    NSString *xlsFiles = @"com.microsoft.excel.xls";
+    NSString *pptFiles = @"com.microsoft.powerpoint.​ppt";
+    NSString *docFiles = @"com.microsoft.word.doc";
+    NSString *keyNoteFiles = @"com.apple.keynote.key";
+    NSString *presentationFiles = @"public.presentation";
+    NSString *videoFiles = @"public.video";
+    NSString *mp4Files = @"public.mpeg-4";
+    NSString *aviFiles = @"public.avi";
+    NSString *rmFiles = @"com.real.realmedia";
+    NSString *movFiles = @"com.apple.quicktime-movie";
+    NSString *zipFiles = @"com.pkware.zip-archive";
+    NSString *gzipFiles = @"org.gnu.gnu-zip-archive";
+    NSString *tarFiles = @"public.tar-archive";
+    NSString *audioFiles = @"public.audio";
+    NSString *mp3Files = @"public.mp3";
+    NSString *mp4aFiles = @"public.mpeg-4-audio";
+    NSString *wavFiles = @"com.microsoft.waveform-​audio";
+    
+    self.filePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images, gifFiles, txtFiles, videoFiles, pdfFiles, xmlFiles, sourceCodeFiles,
+                                                                                      audioFiles, mp4Files, movFiles, zipFiles, gzipFiles,
+                                                                                      tarFiles, rtfFiles, xlsFiles, pptFiles, docFiles,
+                                                                                      keyNoteFiles, presentationFiles, rmFiles, mp3Files, aviFiles, mp4aFiles, wavFiles] inMode:UIDocumentPickerModeImport];
+    self.filePicker.allowsMultipleSelection = NO;
+    self.filePicker.delegate = self;
 
     // Set max height of the chatInput (The chat should be still readable while the HW-Keyboard is active
     self.chatInputConstraintHWKeyboard = [NSLayoutConstraint constraintWithItem:self.chatInput attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationLessThanOrEqual toItem:nil attribute:NSLayoutAttributeHeight multiplier:1 constant:self.view.frame.size.height * 0.6];
@@ -940,9 +966,9 @@ enum msgSentState {
 {
     [self stopEditing];
     [self.chatInput resignFirstResponder];
-
-    [self presentViewController:self.imagePicker animated:YES completion:nil];
-
+    
+    [self presentViewController:self.filePicker animated:YES completion:nil];
+    
     return;
 }
 
@@ -1104,7 +1130,11 @@ enum msgSentState {
             [self presentViewController:mediaPicker animated:YES completion:nil];
        
         }];
-
+        
+        UIAlertAction* fileAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"File", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [self presentViewController:self.filePicker animated:YES completion:nil];
+        }];
+        
         // Set image
         if (@available(iOS 13.0, *)) {
             [cameraAction setValue:[[UIImage systemImageNamed:@"camera"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
@@ -1112,7 +1142,10 @@ enum msgSentState {
         } else {
             [cameraAction setValue:[[UIImage imageNamed:@"714-camera"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
         }
+        [fileAction setValue:[[UIImage imageNamed:@"file-attatchment"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
         [actionControll addAction:cameraAction];
+        [actionControll addAction:photosAction];
+        [actionControll addAction:fileAction];
 #endif
         
         [actionControll addAction:photosAction];
@@ -1672,40 +1705,86 @@ enum msgSentState {
         DDLogVerbose(@"got filetransfer chat cell: %@ (%@)", row.filetransferMimeType, row.filetransferSize);
         NSDictionary* info = [MLFiletransfer getFileInfoForMessage:row];
         
-        //TODO JIM: here we need the download and check-file buttons
-        
-        //TODO JIM: explanation: this was already downloaded and it is an image --> show this image inline
-        if(info && ![info[@"needsDownloading"] boolValue] && [info[@"mimeType"] hasPrefix:@"image/"])
+        if (![[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"])
         {
-            MLChatImageCell* imageCell = (MLChatImageCell *) [self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable:tableView];
-
-            if(imageCell.msg != row)
+            //TODO JIM: here we need the download and check-file buttons
+            
+            if(info && ![info[@"needsDownloading"] boolValue])
             {
-                imageCell.msg = row;
-                imageCell.thumbnailImage.image = nil;
-                imageCell.loading = NO;
-                [imageCell loadImage];
+                cell = [self fileTransferCellCheckerWithInfo:info direction:inDirection tableView:tableView andMsg:row];
             }
-            cell = imageCell;
-        }
-        //TODO JIM: explanation: this was already checked (mime ype and size are known) but not yet downloaded --> download it
-        //TODO JIM: explanation: this should not be automatically but only triggered by a button press
-        //TODO JIM: explanation: I'm doing this automatically here because we still lack those buttons
-        //TODO JIM: explanation: this only handles images, because we don't want to autodownload everything
-        else if(info && [info[@"needsDownloading"] boolValue] && [info[@"mimeType"] hasPrefix:@"image/"] && [[HelperTools defaultsDB] boolForKey:@"ShowImages"])
-            [MLFiletransfer downloadFileForHistoryID:row.messageDBId];
-        //TODO JIM: explanation: this was not yet checked, do an http head request to get mime type and size
-        //TODO JIM: explanation: this should not be automatically but only triggered by a button press
-        //TODO JIM: explanation: I'm doing this automatically here because we still lack those buttons
-        else if(info && [info[@"needsDownloading"] boolValue] && info[@"mimeType"] == nil)
-            [MLFiletransfer checkMimeTypeAndSizeForHistoryID:row.messageDBId];
-        else
-        {
+            else if (info && [info[@"needsDownloading"] boolValue])
+            {
+                if (info[@"mimeType"] != nil)
+                {
+                    //TODO JIM: explanation: this was already checked (mime ype and size are known) but not yet downloaded --> download it
+                    //TODO JIM: explanation: this should not be automatically but only triggered by a button press
+                    //TODO JIM: explanation: I'm doing this automatically here because we still lack those buttons
+                    //TODO JIM: explanation: this only handles images, because we don't want to autodownload everything
+                    MLFileTransferDataCell* fileTransferCell = (MLFileTransferDataCell *) [self messageTableCellWithIdentifier:@"fileTransferCheckingData" andInbound:inDirection fromTable:tableView];
+                    
+                    NSString *fileType = info[@"mimeType"];
+                    
+                    if([fileType hasPrefix:@"image/"])
+                    {
+                        fileTransferCell.transferStatus = transferImageTypeNeedDowndload;
+                    }
+                    else if([fileType hasPrefix:@"video/"])
+                    {
+                        fileTransferCell.transferStatus = transferVideoTypeNeedDowndload;
+                    }
+                    else if([fileType hasPrefix:@"audio/"])
+                    {
+                        fileTransferCell.transferStatus = transferAudioTypeNeedDowndload;
+                    }
+                    else if([fileType hasPrefix:@"text/"])
+                    {
+                        fileTransferCell.transferStatus = transferFileTypeNeedDowndload;
+                    }
+                    else if([fileType hasPrefix:@"application/"])
+                    {
+                        fileTransferCell.transferStatus = transferFileTypeNeedDowndload;
+                    }
+                    
+                    NSString *hintStr = [NSString stringWithFormat:@"%@ %@ (%@).", NSLocalizedString(@"Download", @""), info[@"filename"], fileType];
+                    NSString *fileSizeStr = info[@"size"];
+                    long long fileSizeLongLongValue = fileSizeStr.longLongValue;
+                    NSString *readableFileSize = [NSByteCountFormatter stringFromByteCount:fileSizeLongLongValue
+                                                                                countStyle:NSByteCountFormatterCountStyleFile];
+                    
+                    [fileTransferCell.loadingView setHidden:YES];
+                    [fileTransferCell.downloadImageView setHidden:NO];
+                    [fileTransferCell.sizeLabel setText:readableFileSize];
+                    [fileTransferCell.fileTransferHint setText:hintStr];
+                    fileTransferCell.messageDBId = row.messageDBId;
+                    cell = fileTransferCell;
+                }
+                else
+                {
+                    //TODO JIM: explanation: this was not yet checked, do an http head request to get mime type and size
+                    //TODO JIM: explanation: this should not be automatically but only triggered by a button press
+                    //TODO JIM: explanation: I'm doing this automatically here because we still lack those buttons
+                    MLFileTransferDataCell* fileTransferCell = (MLFileTransferDataCell *) [self messageTableCellWithIdentifier:@"fileTransferCheckingData" andInbound:inDirection fromTable:tableView];
+                    NSString *hintStr = [NSString stringWithFormat:@"%@%@", NSLocalizedString(@"Check type and size on ", @""), info[@"filename"]];
+                    [fileTransferCell.fileTransferHint setText:hintStr];
+                    fileTransferCell.transferStatus = transferCheck;
+                    [fileTransferCell.sizeLabel setText:@""];
+                    fileTransferCell.messageDBId = row.messageDBId;
+                    cell = fileTransferCell;
+                }
+            }
+            //            else
+            //            {
+            //
+            //                NSString *mimeType = info[@"mimeType"];
+            //
+            //                NSLog(@"#[Jim] mimeType:%@", mimeType);
+            //
             //TODO JIM: add handling for some other mime types and default handling for general files (e.g. "open this file" button) here
             //TODO JIM: for now we just show the link as normal chat cell
+            //            }
         }
-        
-        if(cell == nil)
+        else
         {
             //this is just a dummy to display something usable (the filetransfer url as link cell)
             
@@ -1713,6 +1792,10 @@ enum msgSentState {
             cell = (MLChatCell*)[self messageTableCellWithIdentifier:@"progress" andInbound:inDirection fromTable: tableView];
             cell.link = row.messageText;
             
+            if(info && ![info[@"needsDownloading"] boolValue])
+            {
+                cell = [self fileTransferCellCheckerWithInfo:info direction:inDirection tableView:tableView andMsg:row];
+            }
         }
     }
     else if([row.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
@@ -1859,6 +1942,31 @@ enum msgSentState {
             }
             cell.link = nil;
         }
+    }
+    
+    if(cell == nil)
+    {
+        //this is just a dummy to display something usable (the filetransfer url as link cell)
+        MLLinkCell* toreturn = (MLLinkCell *)[self messageTableCellWithIdentifier:@"link" andInbound:inDirection fromTable: tableView];;
+        toreturn.link = row.messageText;
+        toreturn.messageBody.text = toreturn.link;
+        
+        if(row.previewText || row.previewImage)
+        {
+            toreturn.imageUrl = row.previewImage;
+            toreturn.messageTitle.text = row.previewText;
+            [toreturn loadImageWithCompletion:^{}];
+        }
+        else
+        {
+            [toreturn loadPreviewWithCompletion:^{
+                // prevent repeated calls
+                if(toreturn.messageTitle.text.length == 0)
+                    toreturn.messageTitle.text = @" ";
+                [[DataLayer sharedInstance] setMessageId:row.messageId previewText:toreturn.messageTitle.text andPreviewImage:toreturn.imageUrl.absoluteString];
+            }];
+        }
+        cell = toreturn;
     }
     // Only display names for groups
     cell.name.text = self.contact.isGroup ? row.actualFrom : @"";
@@ -2117,6 +2225,96 @@ enum msgSentState {
             localDeleteAction,
             copyAction,
         ]];
+}
+
+-(MLBaseCell*) fileTransferCellCheckerWithInfo:(NSDictionary*)info direction:(BOOL)inDirection tableView:(UITableView*)tableView andMsg:(MLMessage*)row{
+    MLBaseCell *cell = nil;
+    //TODO JIM: explanation: this was already downloaded and it is an image --> show this image inline
+    if ([info[@"mimeType"] hasPrefix:@"image/"])
+    {
+        MLChatImageCell* imageCell = (MLChatImageCell *) [self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable:tableView];
+        
+        if(imageCell.msg != row)
+        {
+            imageCell.msg = row;
+            imageCell.thumbnailImage.image = nil;
+            imageCell.loading = NO;
+            [imageCell loadImage];
+        }
+        cell = imageCell;
+    }
+    else if ([info[@"mimeType"] hasPrefix:@"video/"])
+    {                
+        MLFileTransferVideoCell* videoCell = (MLFileTransferVideoCell *) [self messageTableCellWithIdentifier:@"fileTransferVideo" andInbound:inDirection fromTable:tableView];
+        NSString *videoStr = info[@"cacheFile"];
+        NSString *videoFileName = info[@"filename"];
+        [videoCell avplayerConfigWithUrlStr:videoStr fileName:videoFileName andVC:self];
+                
+        cell = videoCell;
+    }
+    else if ([info[@"mimeType"] hasPrefix:@"text/"]
+             || [info[@"mimeType"] isEqual:@"application/pdf"]//.pdf
+             || [info[@"mimeType"] isEqual:@"application/json"]//.json
+             || [info[@"mimeType"] isEqual:@"application/csv"]//.csv
+             
+             || [info[@"mimeType"] isEqual:@"application/msword"]//.doc
+             || [info[@"mimeType"] isEqual:@"application/vnd.openxmlformats-officedocument.wordprocessingml.document"]//.docx
+             || [info[@"mimeType"] isEqual:@"application/vnd.ms-excel"]//.xls
+             || [info[@"mimeType"] isEqual:@"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]//.xlsx
+             || [info[@"mimeType"] isEqual:@"application/vnd.ms-powerpoint"]//.ppt
+             || [info[@"mimeType"] isEqual:@"application/vnd.openxmlformats-officedocument.presentationml.presentation"]//.pptx
+             
+             || [info[@"mimeType"] isEqual:@"application/vnd.oasis.opendocument.presentation"]//.odp
+             || [info[@"mimeType"] isEqual:@"application/vnd.oasis.opendocument.spreadsheet"]//.ods
+             || [info[@"mimeType"] isEqual:@"application/vnd.oasis.opendocument.text"]//.odt
+             
+             || ([info[@"mimeType"] isEqual:@"application/octet-stream"] && [info[@"filename"] hasSuffix:@".pages"])//.pages
+             || ([info[@"mimeType"] isEqual:@"application/octet-stream"] && [info[@"filename"] hasSuffix:@".numbers"])//.numbers
+             || ([info[@"mimeType"] isEqual:@"application/octet-stream"] && [info[@"filename"] hasSuffix:@".key"])//.key
+             )
+    {
+        MLFileTransferTextCell* textCell = (MLFileTransferTextCell *) [self messageTableCellWithIdentifier:@"fileTransferText" andInbound:inDirection fromTable:tableView];
+        
+        NSString *fileSizeStr = info[@"size"];
+        long long fileSizeLongLongValue = fileSizeStr.longLongValue;
+        NSString *readableFileSize = [NSByteCountFormatter stringFromByteCount:fileSizeLongLongValue
+                                                                    countStyle:NSByteCountFormatterCountStyleFile];
+        NSString *hintStr = [NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Open", @""), info[@"filename"]];
+        NSString *fileCacheUrlStr = info[@"cacheFile"];
+        textCell.fileCacheUrlStr = fileCacheUrlStr;
+        
+        NSUInteger countOfMimtTypeComponent = [info[@"mimeType"] componentsSeparatedByString:@";"].count;
+        NSString* fileMimeType = @"";
+        NSString* fileCharSet = @"";
+        NSString* fileEncodeName = @"utf-8";
+        if (countOfMimtTypeComponent > 1)
+        {
+            fileMimeType = [info[@"mimeType"] componentsSeparatedByString:@";"].firstObject;
+            fileCharSet = [info[@"mimeType"] componentsSeparatedByString:@";"].lastObject;
+        }
+        else
+        {
+            fileMimeType = info[@"mimeType"];
+        }
+        
+        if (fileCharSet != nil && fileCharSet.length > 0)
+        {
+            fileEncodeName = [fileCharSet componentsSeparatedByString:@"="].lastObject;
+        }
+        
+        textCell.fileMimeType = fileMimeType;
+        textCell.fileName = info[@"filename"];
+        textCell.fileEncodeName = fileEncodeName;
+        [textCell.fileTransferHint setText:hintStr];
+        [textCell.sizeLabel setText:readableFileSize];
+        textCell.openFileDelegate = self;
+        cell = textCell;
+    }
+    else{
+        
+    }
+    
+    return cell;
 }
 
 //dummy function needed to remove warnign
@@ -2457,4 +2655,15 @@ enum msgSentState {
     }
 }
 
+#pragma mark - MLFileTransferTextCell delegate
+-(void) showData:(NSString *)fileUrlStr withMimeType:(NSString *)mimeType andFileName:(NSString * _Nonnull)fileName andFileEncodeName:(NSString * _Nonnull)encodeName
+{
+    MLFileTransferFileViewController *fileViewController = [[MLFileTransferFileViewController alloc] init];
+    fileViewController.fileUrlStr = fileUrlStr;
+    fileViewController.mimeType = mimeType;
+    fileViewController.fileName = fileName;
+    fileViewController.fileEncodeName = encodeName;
+    [self presentViewController:fileViewController animated:NO completion:nil];
+//    [self.navigationController pushViewController:fileViewController animated:NO];
+}
 @end

@@ -16,9 +16,12 @@
 #import "MLNotificationManager.h"
 #import "MLResizingTextView.h"
 #import "MLSearchViewController.h"
+#import "MLFileTransferDataCell.h"
+#import "MLFileTransferVideoCell.h"
+#import "MLFileTransferTextCell.h"
+#import "MLFileTransferFileViewController.h"
 
-
-@interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate, CLLocationManagerDelegate, SearchResultDelegate>
+@interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate, CLLocationManagerDelegate, SearchResultDelegate, OpenFileDelegate>
 {
     UIView* containerView;
 	BOOL _firstmsg;

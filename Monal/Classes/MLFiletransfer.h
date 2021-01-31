@@ -22,7 +22,8 @@ NS_ASSUME_NONNULL_BEGIN
 +(void) deleteFileForMessage:(MLMessage* _Nullable) msg;
 +(void) uploadFile:(NSURL*) fileUrl onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error)) completion;
 +(void) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error)) completion;
-
++(BOOL) checkFileRequest:(NSNumber*) historyId;
++(NSString*) getMimeTypeOfOriginalFile:(NSString*) file;
 @end
 
 NS_ASSUME_NONNULL_END

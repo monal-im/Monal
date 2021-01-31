@@ -78,11 +78,11 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
         {
             if (self.self.isNotificationPrivacyOpened)
             {
-                return 11;
+                return 12;
             }
             else
             {
-                return 8;
+                return 9;
             }
             break;
         }
@@ -256,6 +256,13 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
                         cell.defaultKey = @"SendReceivedMarkers";
                         cell.switchEnabled = YES;
                     }
+                    else
+                    {
+                        cell.textLabel.text = NSLocalizedString(@"Auto-Download Media", @"");
+                        cell.detailTextLabel.text = NSLocalizedString(@"Automatic media download", @"");
+                        cell.defaultKey = @"AutodownloadFiletransfers";
+                        cell.switchEnabled = YES;
+                    }
                     break;
                 }
                 case 9:
@@ -276,6 +283,17 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
                         cell.textLabel.text = NSLocalizedString(@"Show URL previews", @"");
                         cell.detailTextLabel.text = NSLocalizedString(@"Automatically fetch previews of received links", @"");
                         cell.defaultKey = @"ShowURLPreview";
+                        cell.switchEnabled = YES;
+                    }
+                    break;
+                }
+                case 11:
+                {
+                    if (self.isNotificationPrivacyOpened)
+                    {
+                        cell.textLabel.text = NSLocalizedString(@"Auto-Download Media", @"");
+                        cell.detailTextLabel.text = NSLocalizedString(@"Automatic media download", @"");
+                        cell.defaultKey = @"AutodownloadFiletransfers";
                         cell.switchEnabled = YES;
                     }
                     break;

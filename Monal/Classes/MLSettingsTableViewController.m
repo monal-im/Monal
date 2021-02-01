@@ -12,7 +12,7 @@
 
 NS_ENUM(NSInteger, kSettingSection)
 {
-    kSettingSectionApp=0,
+    kSettingSectionApp = 0,
     kSettingSectionSupport,
     kSettingSectionAbout,
     kSettingSectionCount
@@ -20,10 +20,10 @@ NS_ENUM(NSInteger, kSettingSection)
 
 @interface MLSettingsTableViewController ()
 
-@property (nonatomic, strong) NSArray *sections;
-@property (nonatomic, strong) NSArray *appRows;
-@property (nonatomic, strong) NSArray *supportRows;
-@property (nonatomic, strong) NSArray *aboutRows;
+@property (nonatomic, strong) NSArray* sections;
+@property (nonatomic, strong) NSArray* appRows;
+@property (nonatomic, strong) NSArray* supportRows;
+@property (nonatomic, strong) NSArray* aboutRows;
 
 @end
 
@@ -38,7 +38,7 @@ NS_ENUM(NSInteger, kSettingSection)
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.sections =@[NSLocalizedString(@"App",@ ""), NSLocalizedString(@"Support",@ ""), NSLocalizedString(@"About",@ "")];
+    self.sections = @[NSLocalizedString(@"App", @""), NSLocalizedString(@"Support", @""), NSLocalizedString(@"About", @"")];
     
     self.appRows = @[
         NSLocalizedString(@"Quick Setup", @""),
@@ -50,19 +50,19 @@ NS_ENUM(NSInteger, kSettingSection)
         NSLocalizedString(@"Chat Logs",@"")
     ];
     self.supportRows = @[
-        NSLocalizedString(@"Email Support",@ ""),
-        NSLocalizedString(@"Submit A Bug",@ "")
+        NSLocalizedString(@"Email Support", @""),
+        NSLocalizedString(@"Submit A Bug", @"")
     ];
 
     self.aboutRows = @[
-        NSLocalizedString(@"Rate Monal",@""),
-        NSLocalizedString(@"Open Source",@""),
-        NSLocalizedString(@"Privacy",@""),
-        NSLocalizedString(@"About",@""),
+        NSLocalizedString(@"Rate Monal", @""),
+        NSLocalizedString(@"Open Source", @""),
+        NSLocalizedString(@"Privacy", @""),
+        NSLocalizedString(@"About", @""),
 #ifdef DEBUG
-        NSLocalizedString(@"Log",@""),
+        NSLocalizedString(@"Log", @""),
 #endif
-        NSLocalizedString(@"Version",@"")
+        NSLocalizedString(@"Version", @"")
     ];
 
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
@@ -113,7 +113,7 @@ NS_ENUM(NSInteger, kSettingSection)
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"settingsCell" forIndexPath:indexPath];
+    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"settingsCell" forIndexPath:indexPath];
     
     switch(indexPath.section)
     {
@@ -134,7 +134,7 @@ NS_ENUM(NSInteger, kSettingSection)
                 NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
                 NSString* build = [infoDict objectForKey:@"CFBundleVersion"];
                 
-                cell.textLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@)", @ ""), version, build];
+                cell.textLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@)", @""), version, build];
                 cell.accessoryType = UITableViewCellAccessoryNone;
             } else {
                 cell.textLabel.text = self.aboutRows[indexPath.row];
@@ -149,7 +149,7 @@ NS_ENUM(NSInteger, kSettingSection)
 
 -(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    return section!=kSettingSectionApp ? self.sections[section] : 0;
+    return (section != kSettingSectionApp) ? self.sections[section] : 0;
 }
 
 
@@ -192,7 +192,6 @@ NS_ENUM(NSInteger, kSettingSection)
                 default:
                     break;
             }
-            
             break;
         }
         case kSettingSectionSupport: {
@@ -234,17 +233,14 @@ NS_ENUM(NSInteger, kSettingSection)
                 default:
                     break;
             }
-            
-            
             break;
         }
-            
     }
 }
 
 -(void) openLink:(NSString *) link
 {
-    NSURL *url= [NSURL URLWithString:link];
+    NSURL* url = [NSURL URLWithString:link];
     
     if ([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"]) {
         SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:url];
@@ -260,9 +256,9 @@ NS_ENUM(NSInteger, kSettingSection)
     
     storeViewController.delegate = self;
     
-    NSNumber *identifier = [NSNumber numberWithInteger:iTunesItemIdentifier];
+    NSNumber* identifier = [NSNumber numberWithInteger:iTunesItemIdentifier];
     //, @"action":@"write-review"
-    NSDictionary *parameters = @{ SKStoreProductParameterITunesItemIdentifier:identifier};
+    NSDictionary* parameters = @{ SKStoreProductParameterITunesItemIdentifier:identifier};
     
     [storeViewController loadProductWithParameters:parameters
                                    completionBlock:^(BOOL result, NSError *error) {
@@ -285,9 +281,8 @@ NS_ENUM(NSInteger, kSettingSection)
         [self presentViewController:composeVC animated:YES completion:nil];
     }
     else  {
-        UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@ "") message:NSLocalizedString(@"There is no configured email account. Please email info@monal.im .",@ "") preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-            
+        UIAlertController* messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:NSLocalizedString(@"There is no configured email account. Please email info@monal.im .", @"") preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         }];
         [messageAlert addAction:closeAction];
         
@@ -307,7 +302,7 @@ NS_ENUM(NSInteger, kSettingSection)
 
 #pragma mark - SKStoreProductViewControllerDelegate
 
-- (void)productViewControllerDidFinish:(SKStoreProductViewController *)viewController {
+-(void)productViewControllerDidFinish:(SKStoreProductViewController *)viewController {
     [viewController dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -319,13 +314,11 @@ NS_ENUM(NSInteger, kSettingSection)
         UINavigationController *nav = (UINavigationController *)  segue.destinationViewController;
         MLWebViewController *web = (MLWebViewController *) nav.topViewController;
         
-        NSBundle *mainBundle = [NSBundle mainBundle];
-        NSString *myFile = [mainBundle pathForResource: @"opensource" ofType: @"html"];
+        NSBundle* mainBundle = [NSBundle mainBundle];
+        NSString* myFile = [mainBundle pathForResource: @"opensource" ofType: @"html"];
     
         web.urltoLoad=[NSURL fileURLWithPath:myFile];
     }
- 
 }
-
 
 @end

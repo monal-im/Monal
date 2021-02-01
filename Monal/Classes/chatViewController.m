@@ -1091,7 +1091,7 @@ enum msgSentState {
                 if(granted)
                 {
                     dispatch_async(dispatch_get_main_queue(), ^{
-                       
+                        [self presentViewController:mediaPicker animated:YES completion:nil];
                     });
                 }
             }];

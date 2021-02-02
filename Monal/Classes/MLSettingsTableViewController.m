@@ -80,6 +80,19 @@ NS_ENUM(NSInteger, kSettingSection)
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark - key commands
+
+-(BOOL)canBecomeFirstResponder {
+    return YES;
+}
+
+- (NSArray<UIKeyCommand *>*)keyCommands {
+    return @[
+        [UIKeyCommand keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(close:) discoverabilityTitle:@"Close"],
+    ];
+}
+
+
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {

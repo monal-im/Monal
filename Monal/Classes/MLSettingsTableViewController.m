@@ -88,7 +88,7 @@ NS_ENUM(NSInteger, kSettingSection)
 
 - (NSArray<UIKeyCommand *>*)keyCommands {
     return @[
-        [UIKeyCommand keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(close:) discoverabilityTitle:@"Close"],
+        [UIKeyCommand keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(close:) discoverabilityTitle:NSLocalizedString(@"Close", "")],
     ];
 }
 

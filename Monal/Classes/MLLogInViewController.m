@@ -57,6 +57,20 @@
     [self registerForKeyboardNotifications];
 }
 
+
+#pragma mark - key commands
+
+-(BOOL)canBecomeFirstResponder {
+    return YES;
+}
+
+- (NSArray<UIKeyCommand *>*)keyCommands {
+    return @[
+        [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(login:) discoverabilityTitle:NSLocalizedString(@"Login", "")],
+    ];
+}
+
+
 -(void) openLink:(NSString *) link
 {
     NSURL *url= [NSURL URLWithString:link];

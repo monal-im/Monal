@@ -1720,7 +1720,7 @@ enum msgSentState {
     }
     else if([row.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
     {
-        MLLinkCell* toreturn = (MLLinkCell *)[self messageTableCellWithIdentifier:@"link" andInbound:inDirection fromTable: tableView];;
+        MLLinkCell* toreturn = (MLLinkCell *)[self messageTableCellWithIdentifier:@"link" andInbound:inDirection fromTable: tableView];
         
         NSString* cleanLink = [messageText stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSArray* parts = [cleanLink componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -1813,18 +1813,10 @@ enum msgSentState {
             cell.link = parts[0];
             
             if(cell.link) {
-                NSDictionary* underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
-                NSAttributedString* underlined = [[NSAttributedString alloc] initWithString:cell.link attributes:underlineAttribute];
-                NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
-                [stitchedString appendAttributedString:
-                 [[NSAttributedString alloc] initWithString:[messageText substringToIndex:pos.location] attributes:nil]];
-                [stitchedString appendAttributedString:underlined];
-                if(pos2.location != NSNotFound)
-                {
-                    NSString* remainder = [messageText substringFromIndex:pos.location+[underlined length]];
-                    [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:remainder attributes:nil]];
-                }
-                cell.messageBody.attributedText = stitchedString;
+                NSMutableAttributedString *formattedString = [[NSMutableAttributedString alloc] initWithString:messageText];
+                [formattedString addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:NSMakeRange(pos.location, cell.link.length)];
+                cell.messageBody.text = nil;
+                cell.messageBody.attributedText= formattedString;
             }
         }
         else // Default case
@@ -1907,7 +1899,7 @@ enum msgSentState {
     
     [cell updateCellWithNewSender:newSender];
         
-    [self resetHistoryAttributeForCell:cell];
+    if(!cell.link) [self resetHistoryAttributeForCell:cell];
     if(self.searchController.isActive && row.messageDBId)
     {
         if([self.searchController isDBIdExistent:row.messageDBId])

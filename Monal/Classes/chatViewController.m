@@ -1821,6 +1821,15 @@ enum msgSentState {
         }
         else // Default case
         {
+            if(messageText.length ==2  ){
+        //check for emoji here
+                    UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize*3];
+                    [cell.messageBody setFont:originalFont];
+                    
+                [cell.messageBody setText:messageText];
+                cell.bubbleImage.hidden=YES;
+            }
+            else
             // Reset attributes
             //XEP-0245: The slash me Command
             if([messageText hasPrefix:@"/me "])

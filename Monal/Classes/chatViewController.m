@@ -31,6 +31,7 @@
 #import "MLXEPSlashMeHandler.h"
 #import "MLSearchViewController.h"
 #import "MLFiletransfer.h"
+#import "EmojiUtilities.h"
 
 @import QuartzCore;
 @import MobileCoreServices;
@@ -1821,11 +1822,15 @@ enum msgSentState {
         }
         else // Default case
         {
-            if(messageText.length ==2  ){
-        //check for emoji here
-                    UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize*3];
-                    [cell.messageBody setFont:originalFont];
-                    
+            //make sure everything is set to defaults 
+            cell.bubbleImage.hidden=NO;
+            UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize];
+            [cell.messageBody setFont:originalFont];
+            
+            if(messageText.length ==2  && [EmojiUtilities containsEmoji:messageText]){
+                UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize*3];
+                [cell.messageBody setFont:originalFont];
+                
                 [cell.messageBody setText:messageText];
                 cell.bubbleImage.hidden=YES;
             }

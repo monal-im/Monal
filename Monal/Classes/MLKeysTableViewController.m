@@ -113,15 +113,16 @@ enum MLKeysTableViewControllerSections {
     NSInteger row = button.tag - 100;
 
 #ifndef DISABLE_OMEMO
-    NSNumber *device =[self.devices objectAtIndex:row];
-    SignalAddress *address = [[SignalAddress alloc] initWithName:self.contact.contactJid deviceId:(int) device.integerValue];
+    NSNumber* device = [self.devices objectAtIndex:row];
+    SignalAddress* address = [[SignalAddress alloc] initWithName:self.contact.contactJid deviceId:(int) device.integerValue];
 
     NSData* identity = [self.account.omemo.monalSignalStore getIdentityForAddress:address];
 
     BOOL newTrust;
-    if([self.account.omemo isTrustedIdentity:address identityKey:identity]) {
+    int internalTrustLevel = [self.account.omemo.monalSignalStore getInternalTrustLevel:address identityKey:identity];
+    if(internalTrustLevel == MLOmemoInternalTrusted) {
         newTrust = NO;
-    } else  {
+    } else { // MLOmemoInternalToFU || MLOmemoInternalNotTrusted
         newTrust = YES;
     }
     [self.account.omemo updateTrust:newTrust forAddress:address];

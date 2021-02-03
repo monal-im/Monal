@@ -224,7 +224,8 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
             NSString* ridFromIQ = [bundleName componentsSeparatedByString:@":"][1];
             if(ridFromIQ)
             {
-                [account.omemo deleteDeviceForSource:jid andRid:rid.intValue];
+                SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:rid.intValue];
+                [account.omemo.monalSignalStore markDeviceAsDeleted:address];
                 // We may have a broken session with a device that does not have a bundle anymore
                 [account.omemo sendKeyTransportElementIfNeeded:jid removeBrokenSessionForRid:rid];
             }
@@ -328,6 +329,10 @@ $$
         // TODO: queryOMEMOBundleFrom when sending first msg without session
         for(NSNumber* deviceId in receivedDevices)
         {
+            SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:deviceId.intValue];
+            // remove mark that the device was not found in the devicelist
+            [self.monalSignalStore removeDeviceDeletedMark:address];
+
             if(![existingDevices containsObject:deviceId])
             {
                 [self queryOMEMOBundleFrom:source andDevice:[deviceId stringValue]];
@@ -350,7 +355,8 @@ $$
                 // only delete other devices from signal store && keep our own entry
                 if(!([source isEqualToString:self.accountJid] && deviceId.intValue == self.monalSignalStore.deviceid))
                 {
-                    [self deleteDeviceForSource:source andRid:deviceId.intValue];
+                    SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:deviceId.intValue];
+                    [self.monalSignalStore markDeviceAsDeleted:address];
                 }
             }
         }
@@ -383,16 +389,6 @@ $$
     return [self.monalSignalStore knownDevicesForAddressName:addressName];
 }
 
--(void) deleteDeviceForSource:(NSString*) source andRid:(int) rid
-{
-    // We should not delete our own device
-    if([source isEqualToString:self.accountJid] && rid == self.monalSignalStore.deviceid)
-        return;
-
-    SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:rid];
-    [self.monalSignalStore deleteSessionRecordForAddress:address];
-}
-
 -(BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey
 {
     return [self.monalSignalStore isTrustedIdentity:address identityKey:identityKey];
@@ -407,8 +403,6 @@ $$
 {
     return [self.monalSignalStore getIdentityForAddress:address];
 }
-
-
 
 -(void) sendOMEMODeviceWithForce:(BOOL) force
 {
@@ -830,6 +824,8 @@ $$
                 [devicesWithBrokenSession removeObject:sid];
                 [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:messageNode.fromUser];
             }
+            // save last successfull decryption time
+            [self.monalSignalStore updateLastSuccessfulDecryptTime:address];
             // if no payload is available -> KeyTransportElement
             if(isKeyTransportElement)
             {
@@ -968,6 +964,17 @@ $$
         @"pubsub#persist_items": @"true",
         @"pubsub#access_model": @"open"
     }];
+}
+
+-(void) deleteDeviceForSource:(NSString*) source andRid:(int) rid
+{
+    // We should not delete our own device
+    if([source isEqualToString:self.accountJid] && rid == self.monalSignalStore.deviceid)
+        return;
+
+    SignalAddress* address = [[SignalAddress alloc] initWithName:source deviceId:rid];
+    [self.monalSignalStore deleteDeviceforAddress:address];
+    [self.monalSignalStore deleteSessionRecordForAddress:address];
 }
 
 -(void) clearAllSessionsForJid:(NSString*) jid

@@ -201,7 +201,7 @@
 {
     if(!addressName) return nil;
     
-    NSArray *rows= [self.sqliteDatabase executeReader:@"SELECT DISTINCT contactDeviceId FROM signalContactIdentity WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, addressName]];
+    NSArray* rows = [self.sqliteDatabase executeReader:@"SELECT DISTINCT contactDeviceId FROM signalContactIdentity WHERE account_id=? AND contactName=? AND removedFromDeviceList IS NULL;" andArguments:@[self.accountId, addressName]];
     
     NSMutableArray *devices = [[NSMutableArray alloc] initWithCapacity:rows.count];
     
@@ -392,7 +392,7 @@
  */
 - (BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 {
-    return [self getInternalTrustLevel:address identityKey:identityKey].intValue == MLOmemoTrusted;
+    return [self getTrustLevel:address identityKey:identityKey].intValue == MLOmemoTrusted;
 }
 
 -(NSData *) getIdentityForAddress:(SignalAddress*)address
@@ -400,23 +400,43 @@
     return (NSData *)[self.sqliteDatabase executeScalar:@"SELECT identity FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
 }
 
+/*
+ * ToFU independent trust update
+ * true -> trust
+ * false -> don't trust
+ * -> after calling updateTrust once ToFU will be over
+ */
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address
 {
-    [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[[NSNumber numberWithInt:(trust ? 2 : 0)], self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[[NSNumber numberWithInt:(trust ? MLOmemoInternalTrusted : MLOmemoInternalNotTrusted)], self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
 }
 
--(void) deleteDeviceforAddress:(SignalAddress*)address
+-(void) markDeviceAsDeleted:(SignalAddress*)address
 {
-    [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET removedFromDeviceList=CURRENT_TIMESTAMP WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
 }
 
-
--(NSNumber*) getInternalTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
+-(void) removeDeviceDeletedMark:(SignalAddress*)address
 {
-    return (NSNumber*)[self.sqliteDatabase executeScalar:@"SELECT \
+    [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET removedFromDeviceList=NULL WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+}
+
+-(void) updateLastSuccessfulDecryptTime:(SignalAddress*)address
+{
+    [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET lastReceivedMsg=CURRENT_TIMESTAMP WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+}
+
+-(int) getInternalTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey
+{
+    return ((NSNumber*)[self.sqliteDatabase executeScalar:(@"SELECT trustLevel FROM signalContactIdentity  WHERE account_id=? AND contactDeviceId=? AND contactName=? AND identity=?;") andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name, identityKey]]).intValue;
+}
+
+-(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
+{
+    return (NSNumber*)[self.sqliteDatabase executeScalar:(@"SELECT \
                 CASE \
-                    WHEN (trusted=0) THEN 0 \
-                    WHEN (trusted=1) THEN 100 \
+                    WHEN (trustLevel=0) THEN 0 \
+                    WHEN (trustLevel=1) THEN 100 \
                     WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR lastReceivedMsg >= date('now', '-90 day'))) THEN 200 \
                     WHEN (trustLevel=2 AND removedFromDeviceList IS NOT NULL) THEN 201 \
                     WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg < date('now', '-90 day'))) THEN 202 \
@@ -424,7 +444,7 @@
                 END \
                 FROM signalContactIdentity \
                 WHERE account_id=? AND contactDeviceId=? AND contactName=? AND identity=?; \
-                " andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name, identityKey]];
+                ") andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name, identityKey]];
 }
 
 /**
@@ -446,5 +466,10 @@
     NSData* keyData = (NSData *)[self.sqliteDatabase executeScalar:@"SELECT senderKey FROM signalContactKey WHERE account_id=? AND groupId=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId,groupId, [NSNumber numberWithInteger:address.deviceId], address.name]];
     return keyData;
 }
+
+-(void) deleteDeviceforAddress:(SignalAddress*)address
+{
+     [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+ }
 
 @end

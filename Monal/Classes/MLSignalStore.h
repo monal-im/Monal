@@ -9,6 +9,10 @@
 #import <Foundation/Foundation.h>
 @import SignalProtocolObjC;
 
+#define MLOmemoInternalNotTrusted 0
+#define MLOmemoInternalToFU 1
+#define MLOmemoInternalTrusted 2
+
 #define MLOmemoNotTrusted 0
 #define MLOmemoToFU 100
 #define MLOmemoTrusted 200
@@ -30,8 +34,15 @@
  */
 - (NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*)addressName;
 -(NSMutableArray *) readPreKeys;
--(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
+
 -(void) deleteDeviceforAddress:(SignalAddress*)address;
+
+-(void) markDeviceAsDeleted:(SignalAddress*)address;
+-(void) removeDeviceDeletedMark:(SignalAddress*)address;
+-(void) updateLastSuccessfulDecryptTime:(SignalAddress*)address;
+
+-(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
+-(int) getInternalTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
 
 -(int) getHighestPreyKeyId;
 -(int) getPreKeyCount;

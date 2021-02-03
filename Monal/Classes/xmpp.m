@@ -430,11 +430,6 @@ NSString *const kData=@"data";
     DDLogInfo(@"configuring/starting tls handshake");
 	NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
 	[settings setObject:self.connectionProperties.identity.domain forKey:(NSString*)kCFStreamSSLPeerName];
-	if(self.connectionProperties.server.selfSignedCert)
-	{
-		DDLogInfo(@"configured self signed SSL");
-		[settings setObject:@NO forKey:(NSString*)kCFStreamSSLValidatesCertificateChain];
-	}
 
 	//this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
 	DDLogInfo(@"configuring SSL handshake");

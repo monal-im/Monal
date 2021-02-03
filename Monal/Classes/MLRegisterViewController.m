@@ -66,7 +66,6 @@
 {
     MLXMPPIdentity* identity = [[MLXMPPIdentity alloc] initWithJid:@"nothing@yax.im" password:@"nothing" andResource:@"MonalReg"];
     MLXMPPServer* server = [[MLXMPPServer alloc] initWithHost:@"" andPort:[NSNumber numberWithInt:5222] andDirectTLS:NO];
-    server.selfSignedCert = NO;
     self.xmppAccount = [[xmpp alloc] initWithServer:server andIdentity:identity andAccountNo:@"-1"];
 }
 
@@ -126,7 +125,6 @@
                 [dic setObject:self.jid.text forKey:kUsername];
                 [dic setObject:[HelperTools encodeRandomResource] forKey:kResource];
                 [dic setObject:@YES forKey:kEnabled];
-                [dic setObject:@NO forKey:kSelfSigned];
                 [dic setObject:@NO forKey:kDirectTLS];
                 
                 NSString *passwordText = [self.password.text copy];

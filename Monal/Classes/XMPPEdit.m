@@ -30,7 +30,6 @@
 
 @property (nonatomic, assign) BOOL enabled;
 @property (nonatomic, assign) BOOL directTLS;
-@property (nonatomic, assign) BOOL selfSignedSSL;
 
 @property (nonatomic, weak) UITextField *currentTextField;
 
@@ -110,7 +109,6 @@
         self.enabled = [[settings objectForKey:kEnabled] boolValue];
 
         self.directTLS = [[settings objectForKey:@"directTLS"] boolValue];
-        self.selfSignedSSL = [[settings objectForKey:@"selfsigned"] boolValue];
         
         self.rosterName = [settings objectForKey:kRosterName];
         self.statusMessage = [settings objectForKey:@"statusMessage"];
@@ -128,7 +126,6 @@
         self.port = @"5222";
         self.resource = [HelperTools encodeRandomResource];
         self.directTLS = NO;
-        self.selfSignedSSL = NO;
         self.rosterName = @"";
         self.statusMessage = @"";
         self.enabled = YES;
@@ -236,7 +233,6 @@
     [dic setObject:self.resource forKey:kResource];
 
     [dic setObject:[NSNumber numberWithBool:self.enabled] forKey:kEnabled];
-    [dic setObject:[NSNumber numberWithBool:self.selfSignedSSL] forKey:kSelfSigned];
     [dic setObject:[NSNumber numberWithBool:self.directTLS] forKey:kDirectTLS];
     [dic setObject:self.accountno forKey:kAccountID];
     if(self.rosterName)
@@ -524,13 +520,6 @@
                 break;
             }
             case 5: {
-                thecell.cellLabel.text = NSLocalizedString(@"Validate certificate", @"");
-                thecell.textInputField.hidden = YES;
-                thecell.toggleSwitch.tag = 3;
-                thecell.toggleSwitch.on = !self.selfSignedSSL;
-                break;
-            }
-            case 6: {
                 thecell.cellLabel.text = NSLocalizedString(@"Resource", @"");
                 thecell.labelRight.text = self.resource;
                 thecell.labelRight.hidden = NO;
@@ -627,7 +616,7 @@
         return 4;
     // Advanced settings
     else if(section == 3)
-        return 7;
+        return 6;
     else
         return self.editMode ? 2 : 0;
 }
@@ -809,16 +798,6 @@
             }
             else {
                 self.directTLS = NO;
-            }
-            break;
-        }
-        case 3: {
-            if(toggle.on)
-            {
-                self.selfSignedSSL = NO;
-            }
-            else {
-                self.selfSignedSSL = YES;
             }
             break;
         }

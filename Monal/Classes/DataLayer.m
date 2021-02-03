@@ -34,7 +34,6 @@ NSString *const kServer = @"server";
 NSString *const kPort = @"other_port";
 NSString *const kResource = @"resource";
 NSString *const kDirectTLS = @"directTLS";
-NSString *const kSelfSigned = @"selfsigned";
 NSString *const kRosterName = @"rosterName";
 
 NSString *const kUsername = @"username";
@@ -231,7 +230,7 @@ static NSDateFormatter* dbFormatter;
 
 -(BOOL) updateAccounWithDictionary:(NSDictionary *) dictionary
 {
-    NSString* query = @"UPDATE account SET server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, selfsigned=?, directTLS=?, rosterName=?, statusMessage=? WHERE account_id=?;";
+    NSString* query = @"UPDATE account SET server=?, other_port=?, username=?, resource=?, domain=?, enabled=?, directTLS=?, rosterName=?, statusMessage=? WHERE account_id=?;";
 
     NSString* server = (NSString *) [dictionary objectForKey:kServer];
     NSString* port = (NSString *)[dictionary objectForKey:kPort];
@@ -241,7 +240,6 @@ static NSDateFormatter* dbFormatter;
                        ((NSString*)[dictionary objectForKey:kResource]),
                        ((NSString*)[dictionary objectForKey:kDomain]),
                        [dictionary objectForKey:kEnabled],
-                       [dictionary objectForKey:kSelfSigned],
                        [dictionary objectForKey:kDirectTLS],
                        [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @"",
                        [dictionary objectForKey:@"statusMessage"] ? ((NSString*)[dictionary objectForKey:@"statusMessage"]) : @"",
@@ -253,7 +251,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSNumber*) addAccountWithDictionary:(NSDictionary*) dictionary
 {
-    NSString* query = @"INSERT INTO account (server, other_port, resource, domain, enabled, selfsigned, directTLS, username, rosterName, statusMessage) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    NSString* query = @"INSERT INTO account (server, other_port, resource, domain, enabled, directTLS, username, rosterName, statusMessage) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);";
     
     NSString* server = (NSString*) [dictionary objectForKey:kServer];
     NSString* port = (NSString*)[dictionary objectForKey:kPort];
@@ -263,7 +261,6 @@ static NSDateFormatter* dbFormatter;
         ((NSString *)[dictionary objectForKey:kResource]),
         ((NSString *)[dictionary objectForKey:kDomain]),
         [dictionary objectForKey:kEnabled] ,
-        [dictionary objectForKey:kSelfSigned],
         [dictionary objectForKey:kDirectTLS],
         ((NSString *)[dictionary objectForKey:kUsername]),
         [dictionary objectForKey:kRosterName] ? ((NSString*)[dictionary objectForKey:kRosterName]) : @"",

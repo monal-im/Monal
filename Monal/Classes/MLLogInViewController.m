@@ -37,7 +37,6 @@
 - (void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(connected:) name:kMonalFinishedCatchup object:nil];
 #ifndef DISABLE_OMEMO
@@ -149,7 +148,6 @@
     [dic setObject:user.lowercaseString forKey:kUsername];
     [dic setObject:[HelperTools encodeRandomResource]  forKey:kResource];
     [dic setObject:@YES forKey:kEnabled];
-    [dic setObject:@NO forKey:kSelfSigned];
     [dic setObject:@NO forKey:kDirectTLS];
     
     NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];

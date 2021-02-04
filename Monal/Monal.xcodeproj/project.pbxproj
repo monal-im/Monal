@@ -2976,7 +2976,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 4.9.1;
+				MARKETING_VERSION = 4.9.2;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -3461,7 +3461,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 4.9.1;
+				MARKETING_VERSION = 4.9.2;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -4085,7 +4085,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 4.9.1;
+				MARKETING_VERSION = 4.9.2;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;

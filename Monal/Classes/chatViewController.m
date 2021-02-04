@@ -1746,7 +1746,7 @@ enum msgSentState {
         cell = toreturn;
     } else if ([row.messageType isEqualToString:kMessageTypeGeo]) {
         // Parse latitude and longitude
-        NSString* geoPattern = @"^geo:(-?(?:90|[1-8][0-9]|[0-9])(?:\\.[0-9]{1,32})?),(-?(?:180|1[0-7][0-9]|[0-9]{1,2})(?:\\.[0-9]{1,32})?)$";
+
         NSError* error = NULL;
         NSRegularExpression* geoRegex = [NSRegularExpression regularExpressionWithPattern:geoPattern
         options:NSRegularExpressionCaseInsensitive

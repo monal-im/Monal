@@ -531,6 +531,11 @@ void logException(NSException* exception)
     return hashed;
 }
 
++(NSString*) stringSha1:(NSString*) data
+{
+    return [self hexadecimalString:[self sha1:[data dataUsingEncoding:NSUTF8StringEncoding]]];
+}
+
 +(NSData*) sha256:(NSData*) data
 {
     if(!data)
@@ -542,6 +547,11 @@ void logException(NSException* exception)
     return hashed;
 }
 
++(NSString*) stringSha256:(NSString*) data
+{
+    return [self hexadecimalString:[self sha256:[data dataUsingEncoding:NSUTF8StringEncoding]]];
+}
+
 +(NSData*) sha256HmacForKey:(NSData*) key andData:(NSData*) data
 {
     if(!key || !data)
@@ -550,6 +560,14 @@ void logException(NSException* exception)
 	CCHmac(kCCHmacAlgSHA256, [key bytes], (UInt32)[key length], [data bytes], (UInt32)[data length], digest);
     return [NSData dataWithBytes:digest length:CC_SHA256_DIGEST_LENGTH];
 }
+
++(NSString*) stringSha256HmacForKey:(NSString*) key andData:(NSString*) data
+{
+    if(!key || !data)
+        return nil;
+	return [self hexadecimalString:[self sha256HmacForKey:[key dataUsingEncoding:NSUTF8StringEncoding] andData:[data dataUsingEncoding:NSUTF8StringEncoding]]];
+}
+
 
 #pragma mark Base64
 

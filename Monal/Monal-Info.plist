@@ -73,6 +73,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Monal allows users to take photos and upload to a conversation</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Monal  uses your location when you send a location message in a conversation.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Monal  uses your location when you send a location message in a conversation.</string>
 	<key>NSMicrophoneUsageDescription</key>
@@ -97,8 +99,6 @@
 	<string>Launch Screen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
-	<key>NSLocationUsageDescription</key>
-	<string>Monal  uses your location when you send a location message in a conversation.</string>
 	<key>UIPrerenderedIcon</key>
 	<true/>
 	<key>UIRequiresFullScreen</key>

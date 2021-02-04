@@ -89,7 +89,7 @@ void logException(NSException* exception)
 {
     @synchronized(self) {
         NSMutableDictionary* syncErrorsDisplayed = [NSMutableDictionary dictionaryWithDictionary:[[HelperTools defaultsDB] objectForKey:@"syncErrorsDisplayed"]];
-        DDLogInfo(@"Updating syncError notifications...");
+        DDLogInfo(@"Updating syncError notifications: %@", syncErrorsDisplayed);
         for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
         {
             NSString* syncErrorIdentifier = [NSString stringWithFormat:@"syncError::%@", account.connectionProperties.identity.jid];

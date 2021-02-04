@@ -66,7 +66,7 @@
 
 - (NSArray<UIKeyCommand *>*)keyCommands {
     return @[
-        [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(login:) discoverabilityTitle:NSLocalizedString(@"Login", "")],
+        [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(login:)]
     ];
 }
 

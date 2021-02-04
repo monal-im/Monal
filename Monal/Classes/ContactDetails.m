@@ -124,6 +124,20 @@
     [super viewWillDisappear:animated];
 }
 
+#pragma mark - key commands
+
+-(BOOL)canBecomeFirstResponder {
+    return YES;
+}
+
+// List of custom hardware key commands
+- (NSArray<UIKeyCommand *> *)keyCommands {
+    return @[
+            // esc
+            [UIKeyCommand keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(close:)],
+    ];
+}
+
 -(IBAction) callContact:(id)sender
 {
     [self performSegueWithIdentifier:@"showCall" sender:self];
@@ -149,21 +163,6 @@
         keysVC.contact=self.contact;
     }
 }
-
-// Close the current view
--(void) escapePressed:(UIKeyCommand*)keyCommand
-{
-    [self dismissViewControllerAnimated:YES completion:nil];
-}
-
-// List of custom hardware key commands
-- (NSArray<UIKeyCommand *> *)keyCommands {
-    return @[
-            // esc
-            [UIKeyCommand keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(escapePressed:)],
-    ];
-}
-
 
 #pragma mark - tableview
 

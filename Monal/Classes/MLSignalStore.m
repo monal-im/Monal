@@ -367,7 +367,6 @@
  */
 - (BOOL) saveIdentity:(SignalAddress*)address identityKey:(nullable NSData*)identityKey;
 {
-
     [self.sqliteDatabase beginWriteTransaction];
     NSData* dbIdentity= (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
     if(dbIdentity)
@@ -392,7 +391,8 @@
  */
 - (BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 {
-    return [self getTrustLevel:address identityKey:identityKey].intValue == MLOmemoTrusted;
+    int trustLevel = [self getTrustLevel:address identityKey:identityKey].intValue;
+    return (trustLevel == MLOmemoTrusted || trustLevel == MLOmemoToFU);
 }
 
 -(NSData *) getIdentityForAddress:(SignalAddress*)address
@@ -428,7 +428,7 @@
 
 -(int) getInternalTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey
 {
-    return ((NSNumber*)[self.sqliteDatabase executeScalar:(@"SELECT trustLevel FROM signalContactIdentity  WHERE account_id=? AND contactDeviceId=? AND contactName=? AND identity=?;") andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name, identityKey]]).intValue;
+    return ((NSNumber*)[self.sqliteDatabase executeScalar:(@"SELECT trustLevel FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=? AND identity=?;") andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name, identityKey]]).intValue;
 }
 
 -(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
@@ -437,6 +437,7 @@
                 CASE \
                     WHEN (trustLevel=0) THEN 0 \
                     WHEN (trustLevel=1) THEN 100 \
+                    WHEN (COUNT(*)=0) THEN 100 \
                     WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg IS NULL OR lastReceivedMsg >= date('now', '-90 day'))) THEN 200 \
                     WHEN (trustLevel=2 AND removedFromDeviceList IS NOT NULL) THEN 201 \
                     WHEN (trustLevel=2 AND removedFromDeviceList IS NULL AND (lastReceivedMsg < date('now', '-90 day'))) THEN 202 \

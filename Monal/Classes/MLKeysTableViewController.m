@@ -12,12 +12,14 @@
 #import "MLOMEMO.h"
 #import "SignalAddress.h"
 #import "MLSignalStore.h"
+#import "MLOmemoQrCodeView.h"
 
 @interface MLKeysTableViewController ()
 
 @property (nonatomic, weak) xmpp *account;
 @property (nonatomic, strong) NSMutableArray<NSNumber*> * devices;
 @property (nonatomic, assign) NSInteger ownKeyRow;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *qrCodeScannButton;
 
 enum MLKeysTableViewControllerSections {
     keysSection,
@@ -37,6 +39,10 @@ enum MLKeysTableViewControllerSections {
         self.navigationItem.title=NSLocalizedString(@"Encryption Keys", @"");
     }
     self.ownKeyRow = -1;
+
+#if TARGET_OS_MACCATALYST
+    self.qrCodeScannButton.hidden = YES;
+#endif
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -155,6 +161,33 @@ enum MLKeysTableViewControllerSections {
             [self.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationRight];
         }
     }
+}
+
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+{
+    if([segue.identifier isEqualToString:@"showOwnQRCode"])
+    {
+        MLOmemoQrCodeView* oQrCodeView = segue.destinationViewController;
+        oQrCodeView.contact = self.contact;
+    }
+    else if([segue.identifier isEqualToString:@"showScanQRCode"])
+    {
+        MLQRCodeScanner* qrCodeScanner = (MLQRCodeScanner *) segue.destinationViewController;
+        qrCodeScanner.contactDelegate = self;
+    }
+}
+
+
+-(void) MLQRCodeContactScannedWithJid:(NSString *)jid fingerprints:(NSDictionary<NSNumber *,NSString *> *)fingerprints
+{
+    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"WIP" message:@"WIP" preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert dismissViewControllerAnimated:YES completion:nil];
+    }]];
+    [self presentViewController:alert animated:YES completion:nil];
+
+    // Close QR-Code scanner
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 @end

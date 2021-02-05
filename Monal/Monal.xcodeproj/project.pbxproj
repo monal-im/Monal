@@ -262,6 +262,7 @@
 		B6C2B2781C2EDD10E9341233 /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F17B168B23E046B18971F63 /* Pods_monalxmpp.framework */; };
 		BE24210F5A8DEA2D7DC913F1 /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 12CB538E8FC0AAFD96856CDD /* Pods_shareSheet.framework */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
+		C138464F25CD804D008EF0A0 /* MLOmemoQrCodeView.m in Sources */ = {isa = PBXBuildFile; fileRef = C138464E25CD804D008EF0A0 /* MLOmemoQrCodeView.m */; };
 		C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */; };
 		C1414E9D24312F0100948788 /* MLChatMapsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = C1414E9C24312F0100948788 /* MLChatMapsCell.m */; };
 		C15489B925680BBE00BBA2F0 /* MLQRCodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15489B825680BBE00BBA2F0 /* MLQRCodeScanner.swift */; };
@@ -804,7 +805,7 @@
 		26FC618D24EB2BEF0094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "localization/external/zh-Hant.lproj/Login.strings"; sourceTree = SOURCE_ROOT; };
 		26FC618E24EB2BF10094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "localization/external/zh-Hant.lproj/Settings.strings"; sourceTree = SOURCE_ROOT; };
 		26FC618F24EB2BF20094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "localization/external/zh-Hant.lproj/ContactDetails.strings"; sourceTree = SOURCE_ROOT; };
-		26FC619024EB2BF40094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = localization/external/zh-Hant.lproj/iosShare.strings; sourceTree = "<group>"; };
+		26FC619024EB2BF40094C302 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "localization/external/zh-Hant.lproj/iosShare.strings"; sourceTree = "<group>"; };
 		26FC619124EB6C220094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = localization/external/en.lproj/Main.strings; sourceTree = SOURCE_ROOT; };
 		26FC619224EB6C240094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = localization/external/en.lproj/Login.strings; sourceTree = SOURCE_ROOT; };
 		26FC619324EB6C250094C302 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = localization/external/en.lproj/Settings.strings; sourceTree = SOURCE_ROOT; };
@@ -855,6 +856,8 @@
 		B55DCA2ABBDB6E635D46D69A /* Pods-monalxmpp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.debug.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.debug.xcconfig"; sourceTree = "<group>"; };
 		C12436122434AB5D00B8F074 /* MLAttributedLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLAttributedLabel.h; sourceTree = "<group>"; };
 		C12436132434AB5D00B8F074 /* MLAttributedLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAttributedLabel.m; sourceTree = "<group>"; };
+		C138464D25CD804D008EF0A0 /* MLOmemoQrCodeView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLOmemoQrCodeView.h; sourceTree = "<group>"; };
+		C138464E25CD804D008EF0A0 /* MLOmemoQrCodeView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLOmemoQrCodeView.m; sourceTree = "<group>"; };
 		C13E640625BD405700763D6F /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "localization/external/zh-Hant.lproj/Localizable.strings"; sourceTree = SOURCE_ROOT; };
 		C13E640825BD406600763D6F /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "localization/external/pt-BR.lproj/Localizable.strings"; sourceTree = SOURCE_ROOT; };
 		C13E640925BD406700763D6F /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-PT"; path = "localization/external/pt-PT.lproj/Localizable.strings"; sourceTree = SOURCE_ROOT; };
@@ -1443,6 +1446,8 @@
 				2673CAC221D9244B00256507 /* MLResourcesTableViewController.m */,
 				2673CAC421D9D3F700256507 /* MLKeyCell.h */,
 				2673CAC521D9D3F700256507 /* MLKeyCell.m */,
+				C138464D25CD804D008EF0A0 /* MLOmemoQrCodeView.h */,
+				C138464E25CD804D008EF0A0 /* MLOmemoQrCodeView.m */,
 			);
 			name = "Contact Details";
 			sourceTree = "<group>";
@@ -2494,6 +2499,7 @@
 				26EE1B0C21A8F3CE00264B95 /* MLWelcomeViewController.m in Sources */,
 				26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */,
 				2673CAC621D9D3F700256507 /* MLKeyCell.m in Sources */,
+				C138464F25CD804D008EF0A0 /* MLOmemoQrCodeView.m in Sources */,
 				267C99082067D7BE00AB876C /* MLGroupChatTableViewController.m in Sources */,
 				26BDECDC1867B7790018670D /* CallViewController.m in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,

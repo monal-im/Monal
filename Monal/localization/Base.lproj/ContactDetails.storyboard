@@ -5,6 +5,7 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <customFonts key="customFonts">
@@ -230,7 +231,7 @@
             </objects>
             <point key="canvasLocation" x="66.666666666666671" y="185.49107142857142"/>
         </scene>
-        <!--Keys Table View Controller-->
+        <!--Title-->
         <scene sceneID="sfL-Fg-E9z">
             <objects>
                 <tableViewController storyboardIdentifier="keyTrust" id="2L9-Nd-Md9" customClass="MLKeysTableViewController" sceneMemberID="viewController">
@@ -317,10 +318,93 @@
                             <outlet property="delegate" destination="2L9-Nd-Md9" id="k4w-Bz-JHo"/>
                         </connections>
                     </tableView>
+                    <toolbarItems/>
+                    <navigationItem key="navigationItem" title="Title" id="URa-mN-bm6">
+                        <rightBarButtonItems>
+                            <barButtonItem style="plain" systemItem="camera" id="Dpz-6E-hJM" userLabel="scanQRCodeButton">
+                                <connections>
+                                    <segue destination="XE5-XN-1aO" kind="show" identifier="showScanQRCode" id="IZe-4b-eRN"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem title="Item" image="qrcode" catalog="system" id="pTg-0c-FUB">
+                                <connections>
+                                    <segue destination="B0G-ND-wHs" kind="show" identifier="showOwnQRCode" id="TY6-PZ-w3y"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
+                    </navigationItem>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <outlet property="qrCodeScannButton" destination="Dpz-6E-hJM" id="sHD-ZS-Wbu"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5M1-di-Ylm" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <navigationBar contentMode="scaleToFill" id="vtQ-A2-KKf">
+                    <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                    <items>
+                        <navigationItem title="Title" id="hxU-tZ-vvB"/>
+                    </items>
+                </navigationBar>
             </objects>
             <point key="canvasLocation" x="917.60000000000002" y="-243.32833583208398"/>
+        </scene>
+        <!--Code Scanner-->
+        <scene sceneID="Uoe-BR-LrI">
+            <objects>
+                <viewController id="XE5-XN-1aO" customClass="MLQRCodeScanner" customModule="Monal" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="b3e-3a-T6T">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="Vfq-HP-p8n"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="pSZ-BM-oe6"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="O1B-lv-QmN" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1938" y="-9"/>
+        </scene>
+        <!--Omemo Qr Code View-->
+        <scene sceneID="PKi-dy-uql">
+            <objects>
+                <viewController id="B0G-ND-wHs" customClass="MLOmemoQrCodeView" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="6Eh-lk-vGr">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yhH-d5-B0v">
+                                <rect key="frame" x="20" y="261" width="374" height="374"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="yhH-d5-B0v" secondAttribute="height" multiplier="1:1" id="UYY-pr-Hr9"/>
+                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="350" id="tVA-Jn-ifc"/>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="350" id="uFg-hm-nRP"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Own OMEMO Keys" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="E3b-yQ-mX2">
+                                <rect key="frame" x="116" y="96" width="182" height="26.5"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="Dyv-Fj-UPM"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="yhH-d5-B0v" firstAttribute="centerX" secondItem="6Eh-lk-vGr" secondAttribute="centerX" id="1nv-H6-q5g"/>
+                            <constraint firstItem="yhH-d5-B0v" firstAttribute="centerY" secondItem="6Eh-lk-vGr" secondAttribute="centerY" id="Dav-8f-fmQ"/>
+                            <constraint firstItem="E3b-yQ-mX2" firstAttribute="top" secondItem="Dyv-Fj-UPM" secondAttribute="top" constant="8" id="FXW-3u-gHE"/>
+                            <constraint firstItem="E3b-yQ-mX2" firstAttribute="centerX" secondItem="6Eh-lk-vGr" secondAttribute="centerX" id="P2H-70-xey"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="HD1-oR-t4s"/>
+                    <connections>
+                        <outlet property="qrCodeView" destination="yhH-d5-B0v" id="NVT-yn-aIB"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Eo8-eV-70w" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1937.68115942029" y="-672.32142857142856"/>
         </scene>
         <!--Resources Table View Controller-->
         <scene sceneID="j0F-2a-Zm2">
@@ -429,11 +513,15 @@
         <image name="847-moon-selected" width="24" height="28"/>
         <image name="Main_Img" width="16" height="16"/>
         <image name="noicon" width="44" height="44"/>
+        <image name="qrcode" catalog="system" width="128" height="114"/>
         <systemColor name="darkTextColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="groupTableViewBackgroundColor">
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
     </resources>
 </document>

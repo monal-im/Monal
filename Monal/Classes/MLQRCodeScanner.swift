@@ -46,6 +46,11 @@ struct XMPPLoginQRCode : Codable
         self.title = NSLocalizedString("QR-Code Scanner", comment: "")
         view.backgroundColor = UIColor.black
 
+#if TARGET_OS_MACCATALYST
+        errorMsg(title: NSLocalizedString("Not supported on macOS", comment: "QR-Code-Scanner"), msg: NSLocalizedString("We don't support QR-Code scanning on macOS at the moment", comment: "QR-Code-Scanner"))
+        return
+#else
+
         // init capture session
         captureSession = AVCaptureSession()
         guard let captureDevice = AVCaptureDevice.default(for: .video)
@@ -91,6 +96,7 @@ struct XMPPLoginQRCode : Codable
         view.layer.addSublayer(videoPreviewLayer)
 
         captureSession.startRunning()
+#endif
     }
 
     override func viewWillAppear(_ animated: Bool) {

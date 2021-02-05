@@ -16,6 +16,7 @@
 #import "MLPasswordChangeTableViewController.h"
 #import "MLServerDetails.h"
 #import "MLSwitchCell.h"
+#import "MLOMEMO.h"
 
 @import MobileCoreServices;
 @import AVFoundation;
@@ -527,6 +528,13 @@
                 thecell.textInputField.hidden = YES;
                 break;
             }
+            case 6: {
+                thecell.cellLabel.text = NSLocalizedString(@"Clear own omemo session", @"DEBUG - XMPPEdit");
+                thecell.labelRight.hidden = YES;
+                thecell.toggleSwitch.hidden = YES;
+                thecell.textInputField.hidden = YES;
+                break;
+            }
         }
     }
     else if (indexPath.section == 4 && self.editMode == YES)
@@ -616,7 +624,7 @@
         return 4;
     // Advanced settings
     else if(section == 3)
-        return 6;
+        return 7;
     else
         return self.editMode ? 2 : 0;
 }
@@ -641,6 +649,17 @@
                 break;
             case 3:
                 [self performSegueWithIdentifier:@"showBlockedUsers" sender:self];
+                break;
+        }
+    }
+    else if(newIndexPath.section == 3)
+    {
+        switch(newIndexPath.row)
+        {
+            case 6:
+                [[MLXMPPManager sharedInstance] connectAccount:self.accountno];
+                xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountno];
+                [account.omemo clearAllSessionsForJid:account.connectionProperties.identity.jid];
                 break;
         }
     }

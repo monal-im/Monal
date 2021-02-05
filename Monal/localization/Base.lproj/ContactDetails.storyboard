@@ -335,7 +335,7 @@
                     </navigationItem>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
-                        <outlet property="qrCodeScannButton" destination="Dpz-6E-hJM" id="sHD-ZS-Wbu"/>
+                        <outlet property="qrCodeScanButton" destination="Dpz-6E-hJM" id="i9c-U8-Z0W"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="5M1-di-Ylm" userLabel="First Responder" sceneMemberID="firstResponder"/>

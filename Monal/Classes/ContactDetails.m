@@ -187,10 +187,7 @@ enum ContactDetailsAboutRows {
     else if([segue.identifier isEqualToString:@"showKeys"])
     {
         MLKeysTableViewController* keysVC = segue.destinationViewController;
-        MLContact* ownContact = [[MLContact alloc] init];
-        ownContact.contactJid = self.xmppAccount.connectionProperties.identity.jid;
-        ownContact.accountId = self.accountNo;
-        keysVC.contact = ownContact;
+        keysVC.contact = self.contact;
     }
 }
 

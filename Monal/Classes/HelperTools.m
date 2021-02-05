@@ -582,6 +582,11 @@ void logException(NSException* exception)
    return [objData base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength | NSDataBase64EncodingEndLineWithLineFeed];
 }
 
++(NSString*) encodeBase64EndLineWithLineFeed:(NSData*) objData
+{
+   return [objData base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
+}
+
 +(NSData*) dataWithBase64EncodedString:(NSString*) string
 {
     return [[NSData alloc] initWithBase64EncodedString:string options:NSDataBase64DecodingIgnoreUnknownCharacters];

@@ -570,7 +570,7 @@ $$
                 [keyNode.attributes setObject:@"1" forKey:@"prekey"];
             }
 
-            [keyNode setData:[HelperTools encodeBase64WithData:deviceEncryptedKey.data]];
+            [keyNode setData:[HelperTools encodeBase64EndLineWithLineFeed:deviceEncryptedKey.data]];
             [xmlHeader.children addObject:keyNode];
         }
     }
@@ -617,7 +617,7 @@ $$
             }
 
             MLXMLNode* payload = [[MLXMLNode alloc] initWithElement:@"payload"];
-            [payload setData:[HelperTools encodeBase64WithData:encryptedPayload.body]];
+            [payload setData:[HelperTools encodeBase64EndLineWithLineFeed:encryptedPayload.body]];
             [encrypted.children addObject:payload];
         } else {
             // There is no message that can be encrypted -> create new session keys
@@ -643,7 +643,7 @@ $$
         [encrypted.children addObject:header];
 
         MLXMLNode* ivNode = [[MLXMLNode alloc] initWithElement:@"iv"];
-        [ivNode setData:[HelperTools encodeBase64WithData:encryptedPayload.iv]];
+        [ivNode setData:[HelperTools encodeBase64EndLineWithLineFeed:encryptedPayload.iv]];
         [header.children addObject:ivNode];
 
         if(!overrideDevices)
@@ -931,17 +931,17 @@ $$
     MLXMLNode* signedPreKeyPublic = [[MLXMLNode alloc] init];
     signedPreKeyPublic.element = @"signedPreKeyPublic";
     [signedPreKeyPublic.attributes setObject:[keys objectForKey:@"signedPreKeyId"] forKey:@"signedPreKeyId"];
-    signedPreKeyPublic.data = [HelperTools encodeBase64WithData: [keys objectForKey:@"signedPreKeyPublic"]];
+    signedPreKeyPublic.data = [HelperTools encodeBase64EndLineWithLineFeed: [keys objectForKey:@"signedPreKeyPublic"]];
     [bundle addChild:signedPreKeyPublic];
 
     MLXMLNode* signedPreKeySignature = [[MLXMLNode alloc] init];
     signedPreKeySignature.element = @"signedPreKeySignature";
-    signedPreKeySignature.data = [HelperTools encodeBase64WithData:[keys objectForKey:@"signedPreKeySignature"]];
+    signedPreKeySignature.data = [HelperTools encodeBase64EndLineWithLineFeed:[keys objectForKey:@"signedPreKeySignature"]];
     [bundle addChild:signedPreKeySignature];
 
     MLXMLNode* identityKey = [[MLXMLNode alloc] init];
     identityKey.element = @"identityKey";
-    identityKey.data = [HelperTools encodeBase64WithData:[keys objectForKey:@"identityKey"]];
+    identityKey.data = [HelperTools encodeBase64EndLineWithLineFeed:[keys objectForKey:@"identityKey"]];
     [bundle addChild:identityKey];
 
     MLXMLNode* prekeyNode = [[MLXMLNode alloc] init];
@@ -952,7 +952,7 @@ $$
         MLXMLNode* preKeyPublic = [[MLXMLNode alloc] init];
         preKeyPublic.element = @"preKeyPublic";
         [preKeyPublic.attributes setObject:[NSString stringWithFormat:@"%d", prekey.preKeyId] forKey:@"preKeyId"];
-        preKeyPublic.data = [HelperTools encodeBase64WithData:prekey.keyPair.publicKey];
+        preKeyPublic.data = [HelperTools encodeBase64EndLineWithLineFeed:prekey.keyPair.publicKey];
         [prekeyNode addChild:preKeyPublic];
     };
 

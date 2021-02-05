@@ -51,6 +51,7 @@ void logException(NSException* exception);
 +(NSData* _Nullable) sha256HmacForKey:(NSData* _Nullable) key andData:(NSData* _Nullable) data;
 +(NSString* _Nullable) stringSha256HmacForKey:(NSString* _Nullable) key andData:(NSString* _Nullable) data;
 +(NSString*) encodeBase64WithString:(NSString*) strData;
++(NSString*) encodeBase64EndLineWithLineFeed:(NSData*) objData;
 +(NSString*) encodeBase64WithData:(NSData*) objData;
 +(NSData*) dataWithBase64EncodedString:(NSString*) string;
 

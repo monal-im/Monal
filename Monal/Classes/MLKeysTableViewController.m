@@ -19,7 +19,7 @@
 @property (nonatomic, weak) xmpp *account;
 @property (nonatomic, strong) NSMutableArray<NSNumber*> * devices;
 @property (nonatomic, assign) NSInteger ownKeyRow;
-@property (weak, nonatomic) IBOutlet UIBarButtonItem *qrCodeScannButton;
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *qrCodeScanButton;
 
 enum MLKeysTableViewControllerSections {
     keysSection,
@@ -41,7 +41,7 @@ enum MLKeysTableViewControllerSections {
     self.ownKeyRow = -1;
 
 #if TARGET_OS_MACCATALYST
-    self.qrCodeScannButton.hidden = YES;
+    [self.qrCodeScanButton setEnabled:NO];
 #endif
 }
 

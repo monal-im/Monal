@@ -16,6 +16,8 @@
 #import "xmpp.h"
 
 @import UserNotifications;
+@import CoreImage;
+@import CoreImage.CIFilterBuiltins;
 
 static DDFileLogger* _fileLogger;
 
@@ -679,6 +681,17 @@ void logException(NSException* exception)
     tempLabel.font = [UIFont systemFontOfSize:[UIFont systemFontSize]];
 
     return tempView;
+}
+
++(CIImage*) createQRCodeFromString:(NSString*) input
+{
+    NSData* inputAsUTF8 = [input dataUsingEncoding:NSUTF8StringEncoding];
+
+    CIFilter<CIQRCodeGenerator>* qrCode = [CIFilter QRCodeGenerator];
+    [qrCode setValue:inputAsUTF8 forKey:@"message"];
+    [qrCode setValue:@"M" forKey:@"correctionLevel"];
+
+    return qrCode.outputImage;
 }
 
 

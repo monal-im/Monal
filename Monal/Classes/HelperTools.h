@@ -60,6 +60,7 @@ void logException(NSException* exception);
 + (NSString *)signalHexKeyWithData:(NSData*) data;
 
 +(UIView*) MLCustomViewHeaderWithTitle:(NSString*) title;
++(CIImage*) createQRCodeFromString:(NSString*) input;
 
 @end
 

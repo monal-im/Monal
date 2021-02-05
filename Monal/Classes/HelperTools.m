@@ -684,7 +684,7 @@ void logException(NSException* exception)
 
     CIFilter<CIQRCodeGenerator>* qrCode = [CIFilter QRCodeGenerator];
     [qrCode setValue:inputAsUTF8 forKey:@"message"];
-    [qrCode setValue:@"M" forKey:@"correctionLevel"];
+    [qrCode setValue:@"L" forKey:@"correctionLevel"];
 
     return qrCode.outputImage;
 }

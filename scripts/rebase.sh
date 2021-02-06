@@ -25,5 +25,5 @@ git cherry-pick $first^..tmpcopy
 #git cherry-pick develop..tmpcopy
 git branch -D tmpcopy
 date
-git remote set-url origin https://github.com/monal-im/Monal.git
+git remote set-url origin git@github.com:monal-im/Monal.git
 git push --force-with-lease

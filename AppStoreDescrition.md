@@ -10,7 +10,7 @@ included and does not read any personal information.
 - With the XMPP protocol a direct connection to your server ensures you can keep control of your data.
 - Encrypted chat with OMEMO
 - Monal will work with corporate XMPP servers that require a VPN
-- MUC multi-user chat integration
+- Group chat integration (MUC)
 
 The software is available on iOS and MacOS.
 

@@ -7,7 +7,6 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "ParseIq.h"
 #import "xmpp.h"
 #import "MLXMPPConnection.h"
 #import "MLConstants.h"
@@ -19,8 +18,8 @@
 @property (nonatomic, strong) NSString *resource;
 @property (nonatomic, strong) MLXMPPConnection *connectionProperties;
 
-@property (nonatomic, strong) SignalContext *signalContext;
-@property (nonatomic, strong) MLSignalStore *monalSignalStore;
+//@property (nonatomic, strong) SignalContext *signalContext;
+//@property (nonatomic, strong) MLSignalStore *monalSignalStore;
 @end
 
 @implementation MLIQParserTest
@@ -36,12 +35,12 @@
  
     self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];
     
-    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:_accountNo];
-    
-    //signal store
-    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
-    //signal context
-    self.signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
+//    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:_accountNo];
+//    
+//    //signal store
+//    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
+//    //signal context
+//    self.signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
 }
 
 

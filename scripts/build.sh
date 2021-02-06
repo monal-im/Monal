@@ -2,7 +2,6 @@
 
 # Abort on Error
 set -e
-cd Monal
 
 cd Monal
 

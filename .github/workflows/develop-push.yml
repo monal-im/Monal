@@ -1,0 +1,32 @@
+name: develop-push
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push
+  push:
+    branches: [ develop ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  rebaseAlpha:
+    # The type of runner that the job will run on
+    runs-on: self-hosted
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+        with:
+          ref: alpha.build
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: Checkout submodules
+        run: git submodule update --remote
+      - run: git branch
+      - run: git config --local user.email "pushBot@monal.im"
+      - run: git config --local user.name "Monal-IM-Push[BOT]"
+      - run: chmod +x ./scripts/rebase.sh
+      - name: Rebase
+        run: ./scripts/rebase.sh

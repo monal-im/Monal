@@ -1,0 +1,53 @@
+# build a new alpha release
+name: alpha.build-push
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push
+  push:
+    branches: [ alpha.build ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: self-hosted
+    env:
+      APP_NAME: "Monal"
+      IOS_DEVELOPER_NAME: "Apple Distribution: Thilo Molitor (S8D843U34Y)"
+      APP_DEVELOPER_NAME: "Developer ID Application: Thilo Molitor (S8D843U34Y)"
+      GCC_PREPROCESSOR_DEFINITIONS: "ALPHA_DEBUG=1"
+      BUILD_TYPE: "Debug"
+      ALPHA_UPLOAD_SECRET: ${{ secrets.ALPHA_UPLOAD_SECRET }}
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: Checkout submodules
+        run: git submodule update --remote
+      - name: Make our build scripts executable
+        run: chmod +x ./scripts/build.sh
+      - name: Run build
+        run: ./scripts/build.sh
+      - name: 'Upload Artifact macOS'
+        uses: actions/upload-artifact@v2
+        with:
+          name: alpha-macOS
+          path: |
+            Monal/build/ipa/$APP_NAME.tar
+          retention-days: 2
+      - name: Upload Artifact iOS
+        uses: actions/upload-artifact@v2
+        with:
+          name: alpha-iOS
+          path: |
+            Monal/build/ipa/$APP_NAME.ipa
+          retention-days: 2
+      - run: chmod +x ./scripts/upload.sh
+      - name: Uploading to alpha site
+        run: ./scripts/upload.sh

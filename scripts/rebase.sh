@@ -12,9 +12,9 @@ git pull --unshallow
 date
 git branch tmpcopy
 git log origin/alpha.build..origin/develop > ../changes.txt
-git reset --hard origin/develop
 first="$(git log --grep='\*\*\* INITIAL ALPHA COMMIT \*\*\*' --since='Mon Jun 8 16:33:25 2020 +0200' --author='tmolitor-stud-tu' --oneline --no-abbrev-commit tmpcopy | awk '{print $1}')"
-echo $first
+git reset --hard origin/develop
+echo "FIRST COMMIT: $first"
 touch ../changes.txt
 ls -l ../changes.txt
 mv ../changes.txt changes.txt

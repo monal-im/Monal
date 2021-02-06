@@ -13,11 +13,10 @@ cd $DIR
 #reset repo to sane state
 (
 	git cherry-pick --abort
-	git remote remove upstream
 	git branch -D tmpcopy
 ) 2>/dev/null
 git fetch origin
-git reset --hard origin/develop
+git reset --hard origin/alpha.build
 
 #call original rebase script
 ./rebase.sh
@@ -37,15 +36,13 @@ if [ "$?" -ne "0" ]; then
 		echo "CHERRY-PICK COMPLETED SUCCESSFULLY" 
 		echo "***********************************************************************************"
 		git branch -D tmpcopy
-		git remote remove upstream
 		git push --force-with-lease
 	else
 		echo "***********************************************************************************"
 		echo "CHERRY-PICK *NOT* COMPLETED SUCCESSFULLY, REVERTING"
 		echo "***********************************************************************************"
 		git branch -D tmpcopy
-		git remote remove upstream
-		git reset --hard origin/develop
+		git reset --hard origin/alpha.build
 	fi
 fi
 

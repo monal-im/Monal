@@ -1710,13 +1710,9 @@ enum msgSentState {
             //this is just a dummy to display something usable (the filetransfer url as link cell)
             
             // Use default text cell
-            cell = (MLChatCell*)[self messageTableCellWithIdentifier:@"text" andInbound:inDirection fromTable: tableView];
+            cell = (MLChatCell*)[self messageTableCellWithIdentifier:@"progress" andInbound:inDirection fromTable: tableView];
             cell.link = row.messageText;
             
-            NSDictionary* underlineAttribute = @{NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle)};
-            NSMutableAttributedString* stitchedString  = [[NSMutableAttributedString alloc] init];
-            [stitchedString appendAttributedString:[[NSAttributedString alloc] initWithString:cell.link attributes:underlineAttribute]];
-            cell.messageBody.attributedText = stitchedString;
         }
     }
     else if([row.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
@@ -1746,7 +1742,7 @@ enum msgSentState {
         cell = toreturn;
     } else if ([row.messageType isEqualToString:kMessageTypeGeo]) {
         // Parse latitude and longitude
-        NSString* geoPattern = @"^geo:(-?(?:90|[1-8][0-9]|[0-9])(?:\\.[0-9]{1,32})?),(-?(?:180|1[0-7][0-9]|[0-9]{1,2})(?:\\.[0-9]{1,32})?)$";
+
         NSError* error = NULL;
         NSRegularExpression* geoRegex = [NSRegularExpression regularExpressionWithPattern:geoPattern
         options:NSRegularExpressionCaseInsensitive

@@ -171,6 +171,8 @@
 		26B51C4918654D98002134C3 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B51C4718654D98002134C3 /* LogViewController.m */; };
 		26B69A75131C522F002FCBEB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B69A74131C522F002FCBEB /* Security.framework */; };
 		26BDECDC1867B7790018670D /* CallViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26BDECDA1867B7790018670D /* CallViewController.m */; };
+		26BEEF8E25CBA23200F6FA19 /* EmojiUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 26BEEF8B25CBA23200F6FA19 /* EmojiUtilities.h */; };
+		26BEEF8F25CBA23200F6FA19 /* EmojiUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 26BEEF8D25CBA23200F6FA19 /* EmojiUtilities.m */; };
 		26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */; };
 		26C836622396CB9200C9F21D /* MLIQProcessorTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C836612396CB9200C9F21D /* MLIQProcessorTest.m */; };
 		26CC579623A0867400ABB92A /* monalxmpp.h in Headers */ = {isa = PBXBuildFile; fileRef = 26CC579423A0867400ABB92A /* monalxmpp.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -668,6 +670,8 @@
 		26B69A74131C522F002FCBEB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		26BDECD91867B7790018670D /* CallViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallViewController.h; sourceTree = "<group>"; };
 		26BDECDA1867B7790018670D /* CallViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallViewController.m; sourceTree = "<group>"; };
+		26BEEF8B25CBA23200F6FA19 /* EmojiUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmojiUtilities.h; sourceTree = "<group>"; };
+		26BEEF8D25CBA23200F6FA19 /* EmojiUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EmojiUtilities.m; sourceTree = "<group>"; };
 		26C01305233025DA001D411D /* MLPush.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MLPush.h; path = Classes/MLPush.h; sourceTree = "<group>"; };
 		26C01306233025DA001D411D /* MLPush.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = MLPush.m; path = Classes/MLPush.m; sourceTree = "<group>"; };
 		26C1EA691FF937320085547A /* MLNotificationSettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLNotificationSettingsViewController.h; sourceTree = "<group>"; };
@@ -1651,6 +1655,8 @@
 		26F7BB3A1115F8A300712672 /* tools */ = {
 			isa = PBXGroup;
 			children = (
+				26BEEF8B25CBA23200F6FA19 /* EmojiUtilities.h */,
+				26BEEF8D25CBA23200F6FA19 /* EmojiUtilities.m */,
 				5455BC3224EB776E0024D80F /* MLUDPLogger.h */,
 				5455BC3024EB776B0024D80F /* MLUDPLogger.m */,
 				540BD0D324D8D1FF0087A743 /* IPC.m */,
@@ -1671,7 +1677,7 @@
 			name = tools;
 			sourceTree = "<group>";
 		};
-		29B97314FDCFA39411CA2CEA = {
+		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
 				26A711D723C4D67300FC6A86 /* MLCrypto.xcodeproj */,
@@ -1852,6 +1858,7 @@
 				541E4CC4254D369200FD7B28 /* MLPubSubProcessor.h in Headers */,
 				541E4CBE254AA0B600FD7B28 /* MLHandler.h in Headers */,
 				5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */,
+				26BEEF8E25CBA23200F6FA19 /* EmojiUtilities.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2081,7 +2088,7 @@
 				fa,
 				"nb-NO",
 			);
-			mainGroup = 29B97314FDCFA39411CA2CEA;
+			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
 			projectReferences = (
@@ -2601,6 +2608,7 @@
 				54D2308424CB10EE00638D65 /* MLLogFileManager.m in Sources */,
 				26CC57B323A086CC00ABB92A /* XMPPIQ.m in Sources */,
 				C1613B5B2520723D0062C0C2 /* MLBasePaser.m in Sources */,
+				26BEEF8F25CBA23200F6FA19 /* EmojiUtilities.m in Sources */,
 				54179CC0251CBAFA008F398E /* XMPPStanza.m in Sources */,
 				26CC57CB23A0892800ABB92A /* MLPresenceProcessor.m in Sources */,
 				26CC57A423A086AA00ABB92A /* MLXMPPServer.m in Sources */,
@@ -2968,7 +2976,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 4.9.1;
+				MARKETING_VERSION = 4.9.2;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -3453,7 +3461,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 4.9.1;
+				MARKETING_VERSION = 4.9.2;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;
@@ -4077,7 +4085,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 4.9.1;
+				MARKETING_VERSION = 4.9.2;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;
 				PRODUCT_NAME = Monal;

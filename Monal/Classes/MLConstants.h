@@ -135,5 +135,6 @@ typedef enum NotificationPrivacySettingOption {
 //build MLXMLNode query statistics (will only optimize MLXMLNode queries if *not* defined)
 //#define QueryStatistics 1
 
+#define geoPattern  @"^geo:(-?(?:90|[1-8][0-9]|[0-9])(?:\\.[0-9]{1,32})?),(-?(?:180|1[0-7][0-9]|[0-9]{1,2})(?:\\.[0-9]{1,32})?)$"
 
 

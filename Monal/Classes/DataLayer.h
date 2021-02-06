@@ -162,22 +162,21 @@ extern NSString* const kMessageTypeFiletransfer;
 /*
  Marks a message as sent. When the server acked it
  */
--(void) setMessageId:(NSString*) messageid sent:(BOOL) sent;
+-(void) setMessageId:(NSString*_Nonnull) messageid sent:(BOOL) sent;
 
 /**
  Marked when the client on the other end replies with a recived message
  */
--(void) setMessageId:(NSString*) messageid received:(BOOL) received;
-
+-(void) setMessageId:( NSString* _Nonnull ) messageid received:(BOOL) received;
 /**
  if the server replies with an error for a message, store it
  */
--(void) setMessageId:(NSString*) messageid errorType:(NSString *) errorType errorReason:(NSString *)errorReason;
+-(void) setMessageId:(NSString* _Nonnull) messageid errorType:(NSString *_Nonnull) errorType errorReason:(NSString *_Nonnull)errorReason;
 
 /**
  sets a preview info for a specified message
  */
--(void) setMessageId:(NSString *) messageid previewText:(NSString *) text andPreviewImage:(NSString *) image;
+-(void) setMessageId:(NSString*_Nonnull) messageid previewText:(NSString *) text andPreviewImage:(NSString *) image;
 
 -(void) setMessageId:(NSString*) messageid stanzaId:(NSString *) stanzaId;
 -(void) setMessageHistoryId:(NSNumber*) historyId filetransferMimeType:(NSString*) mimeType filetransferSize:(NSNumber*) size;

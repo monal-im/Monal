@@ -1092,7 +1092,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) setMessageId:(NSString*) messageid sent:(BOOL) sent
+-(void) setMessageId:(NSString* _Nonnull) messageid sent:(BOOL) sent
 {
     [self.db voidWriteTransaction:^{
         BOOL _sent = sent;
@@ -1108,14 +1108,14 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) setMessageId:(NSString*) messageid received:(BOOL) received
+-(void) setMessageId:( NSString* _Nonnull ) messageid received:(BOOL) received
 {
     NSString* query = @"UPDATE message_history SET received=?, sent=? WHERE messageid=?;";
     DDLogVerbose(@"setting received confrmed %@", messageid);
     [self.db executeNonQuery:query andArguments:@[[NSNumber numberWithBool:received], [NSNumber numberWithBool:YES], messageid]];
 }
 
--(void) setMessageId:(NSString*) messageid errorType:(NSString*) errorType errorReason:(NSString*) errorReason
+-(void) setMessageId:( NSString* _Nonnull ) messageid errorType:( NSString* _Nonnull ) errorType errorReason:( NSString* _Nonnull ) errorReason
 {
     //ignore error if the message was already received by *some* client
     if([self.db executeScalar:@"SELECT messageid FROM message_history WHERE messageid=? AND received;" andArguments:@[messageid]])

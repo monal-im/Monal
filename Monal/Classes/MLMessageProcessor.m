@@ -53,6 +53,10 @@ static NSMutableDictionary* _typingNotifications;
         if(!errorText)
             errorText = NSLocalizedString(@"No further error description", @"");
         
+        if(!errorType) {
+            errorType= @"Unknown error";
+        }
+        
         //update db
         [[DataLayer sharedInstance]
             setMessageId:[messageNode findFirst:@"/@id"]

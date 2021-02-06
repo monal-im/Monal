@@ -6,14 +6,11 @@ date
 git config push.default simple
 #git config user.email thilo@eightysoft.de
 git config user.name 'Rebase-Bot'
-git fetch origin/develop
-git fetch origin/alpha.build
+git fetch origin
 date
 git branch tmpcopy
 git log origin/alpha.build..origin/develop > ../changes.txt
 first="$(git log --grep='\*\*\* INITIAL ALPHA COMMIT \*\*\*' --since='Mon Jun 8 16:33:25 2020 +0200' --author='tmolitor-stud-tu' --oneline --no-abbrev-commit tmpcopy | awk '{print $1}')"
-echo "FIRST: $first"
-exit 0
 git reset --hard origin/develop
 touch ../changes.txt
 ls -l ../changes.txt

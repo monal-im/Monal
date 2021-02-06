@@ -57,19 +57,6 @@
 }
 
 
-#pragma mark - key commands
-
--(BOOL)canBecomeFirstResponder {
-    return YES;
-}
-
-- (NSArray<UIKeyCommand *>*)keyCommands {
-    return @[
-        [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(login:)]
-    ];
-}
-
-
 -(void) openLink:(NSString *) link
 {
     NSURL *url= [NSURL URLWithString:link];
@@ -246,6 +233,28 @@
 {
     self.activeField = nil;
 }
+
+#pragma mark - key commands
+
+-(BOOL)canBecomeFirstResponder {
+    return YES;
+}
+
+
+// login on enter
+-(void) enterPressed:(UIKeyCommand*)keyCommand
+{
+    [self login];
+}
+
+// List of custom hardware key commands
+- (NSArray<UIKeyCommand *> *)keyCommands {
+    return @[
+        // enter
+        [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(enterPressed:)],
+    ];
+}
+
 
 #pragma mark - keyboard management
 

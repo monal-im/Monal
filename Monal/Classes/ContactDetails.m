@@ -151,19 +151,6 @@ enum ContactDetailsAboutRows {
     [super viewWillDisappear:animated];
 }
 
-#pragma mark - key commands
-
--(BOOL)canBecomeFirstResponder {
-    return YES;
-}
-
-// List of custom hardware key commands
-- (NSArray<UIKeyCommand *> *)keyCommands {
-    return @[
-            // esc
-            [UIKeyCommand keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(close:)],
-    ];
-}
 
 -(IBAction) callContact:(id)sender
 {
@@ -190,6 +177,28 @@ enum ContactDetailsAboutRows {
         keysVC.contact = self.contact;
     }
 }
+
+#pragma mark - key commands
+
+-(BOOL)canBecomeFirstResponder {
+    return YES;
+}
+
+
+// Close the current view
+-(void) escapePressed:(UIKeyCommand*)keyCommand
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+// List of custom hardware key commands
+- (NSArray<UIKeyCommand *> *)keyCommands {
+    return @[
+        // esc
+        [UIKeyCommand keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(escapePressed:)],
+    ];
+}
+
 
 #pragma mark - tableview
 

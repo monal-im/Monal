@@ -39,14 +39,14 @@ jobs:
         with:
           name: alpha-macOS
           path: |
-            Monal/build/ipa/$APP_NAME.tar
-          retention-days: 2
+            Monal/build/app/${{ env.APP_NAME }}.tar
+          retention-days: 10
       - name: Upload Artifact iOS
         uses: actions/upload-artifact@v2
         with:
           name: alpha-iOS
           path: |
-            Monal/build/ipa/$APP_NAME.ipa
+            Monal/build/ipa/${{ env.APP_NAME }}.ipa
           retention-days: 2
       - run: chmod +x ./scripts/upload.sh
       - name: Uploading to alpha site

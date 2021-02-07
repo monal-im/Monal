@@ -30,3 +30,19 @@ jobs:
       - run: chmod +x ./scripts/rebase.sh
       - name: Rebase
         run: ./scripts/rebase.sh
+  tests:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: develop
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: Checkout submodules
+        run: git submodule update --remote
+      - name: Run tests
+        run: |
+          cd Monal
+          pod install
+          pod update
+          xcodebuild -workspace "Monal.xcworkspace" -scheme "Monal" -sdk iphonesimulator -destination 'platform=iOS Simulator,OS=14.4,name=iPhone 11 Pro' test

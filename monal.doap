@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet href="https://monal.im/files/doap-style.xsl" type="text/xsl"?>
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-         xmlns:xmpp="https://linkmauve.fr/ns/xmpp-doap#"
-         
-  <Project xmlns="http://usefulinc.com/ns/doap#"
-           xmlns:schema="https://schema.org/">
+        xmlns:xmpp="https://linkmauve.fr/ns/xmpp-doap#"
+        xmlns="http://usefulinc.com/ns/doap#"
+        xmlns:schema="https://schema.org/" 
+  <Project>
 
     <name>Monal</name>
     <short-name>Monal</short-name>
@@ -28,7 +28,7 @@
 
     <repository>
       <GitRepository>
-        <location rdf:resource="https://github.com/anurodhp/Monal" />
+        <location rdf:resource="https://github.com/monal-im/Monal" />
         <browse rdf:resource="https://github.com/monal-im/Monal" />
       </GitRepository>
     </repository>

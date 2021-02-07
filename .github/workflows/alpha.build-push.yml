@@ -20,7 +20,7 @@ jobs:
       APP_NAME: "Monal"
       IOS_DEVELOPER_NAME: "Apple Distribution: Thilo Molitor (S8D843U34Y)"
       APP_DEVELOPER_NAME: "Developer ID Application: Thilo Molitor (S8D843U34Y)"
-      GCC_PREPROCESSOR_DEFINITIONS: "ALPHA_DEBUG=1"
+      GCC_PREPROCESSOR_DEFINITIONS: "IS_ALPHA=1"
       BUILD_TYPE: "Debug"
       ALPHA_UPLOAD_SECRET: ${{ secrets.ALPHA_UPLOAD_SECRET }}
     # Steps represent a sequence of tasks that will be executed as part of the job

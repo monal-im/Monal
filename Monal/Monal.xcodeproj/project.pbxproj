@@ -1885,7 +1885,6 @@
 				2665C11D1C4ABFB500CC9A04 /* Tag Git */,
 				26AA70212146BBB900598605 /* Embed App Extensions */,
 				261E542723A0A1D300394F59 /* Embed Frameworks */,
-				C1C839B024F11BC100BBCF17 /* ShellScript */,
 				B76834F7D41432AA1A41545E /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
@@ -2401,23 +2400,6 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Monal/Pods-Monal-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
-		};
-		C1C839B024F11BC100BBCF17 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "bash ../scripts/updateLocalization.sh\n";
 		};
 		D180E765B155419143F176E9 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2990,7 +2972,6 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				LLVM_LTO = NO;
-				MARKETING_VERSION = 4.9.2;
 				MARKETING_VERSION = 5.0;
 				OTHER_LDFLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM;

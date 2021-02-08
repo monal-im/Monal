@@ -1786,6 +1786,11 @@ enum msgSentState {
     } else {
         // Use default text cell
         cell = (MLChatCell*)[self messageTableCellWithIdentifier:@"text" andInbound:inDirection fromTable: tableView];
+        
+        //make sure everything is set to defaults
+        cell.bubbleImage.hidden=NO;
+        UIFont* originalFont = [UIFont systemFontOfSize:17.0f];
+        [cell.messageBody setFont:originalFont];
 
         // Check if message contains a url
         NSString* lowerCase = [messageText lowercaseString];
@@ -1818,11 +1823,6 @@ enum msgSentState {
         }
         else // Default case
         {
-            //make sure everything is set to defaults 
-            cell.bubbleImage.hidden=NO;
-            UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize];
-            [cell.messageBody setFont:originalFont];
-            
             if(messageText.length ==2  && [EmojiUtilities containsEmoji:messageText]){
                 UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize*3];
                 [cell.messageBody setFont:originalFont];

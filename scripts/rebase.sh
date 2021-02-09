@@ -8,7 +8,9 @@ git config push.default simple
 git config user.name 'Rebase-Bot'
 git fetch origin alpha.build
 git fetch origin develop
-git pull --unshallow
+if $(git rev-parse --is-shallow-repository); then
+    git pull --unshallow
+fi
 date
 git branch tmpcopy
 git log origin/alpha.build..origin/develop > ../changes.txt

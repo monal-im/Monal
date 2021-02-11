@@ -13,7 +13,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  buildAndPublishAlpha:
     # The type of runner that the job will run on
     runs-on: self-hosted
     env:
@@ -37,3 +37,22 @@ jobs:
       - run: chmod +x ./scripts/upload.sh
       - name: Uploading to alpha site
         run: ./scripts/upload.sh
+  checkReleaseBuild:
+    # The type of runner that the job will run on
+    runs-on: self-hosted
+    env:
+      APP_NAME: "Monal"
+      IOS_DEVELOPER_NAME: "Apple Distribution: Thilo Molitor (S8D843U34Y)"
+      APP_DEVELOPER_NAME: "Developer ID Application: Thilo Molitor (S8D843U34Y)"
+      BUILD_TYPE: "Release"
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v2
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: Checkout submodules
+        run: git submodule update --remote
+      - name: Make our build scripts executable
+        run: chmod +x ./scripts/build.sh
+      - name: Run build
+        run: ./scripts/build.sh

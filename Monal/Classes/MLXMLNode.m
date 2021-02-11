@@ -563,7 +563,7 @@ static NSRegularExpression* attributeFilterRegex;
 -(NSString*) XMLString
 {
     if(!_element)
-        return nil; // sanity check
+        return @""; // sanity check
     
     //special handling of xml start tag
     if([_element isEqualToString:@"__xml"])

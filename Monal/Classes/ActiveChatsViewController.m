@@ -263,7 +263,8 @@ enum activeChatsControllerSections {
         [self performSegueWithIdentifier:@"showIntro" sender:self];
         return;
     }
-    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"]) {
+    // display quick start if the user never seen it or if there are 0 enabled accounts
+    if(![[HelperTools defaultsDB] boolForKey:@"HasSeenLogin"] || [[DataLayer sharedInstance] enabledAccountCnts].intValue == 0) {
         [self performSegueWithIdentifier:@"showLogin" sender:self];
     }
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {

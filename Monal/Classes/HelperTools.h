@@ -19,8 +19,8 @@ void logException(NSException* exception);
 
 +(NSString*) extractXMPPError:(XMPPStanza*) stanza withDescription:(NSString* _Nullable) description;
 +(void) configureFileProtectionFor:(NSString*) file;
-+(NSDictionary*) splitJid:(NSString*) jid;
-+(void) postSendingErrorNotification;
++(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid;
++(void) updateSyncErrorsWithDeleteOnly:(BOOL) removeOnly;
 +(BOOL) isInBackground;
 +(void) dispatchSyncReentrant:(monal_void_block_t) block onQueue:(dispatch_queue_t) queue;
 +(void) activityLog;

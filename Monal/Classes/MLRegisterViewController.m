@@ -148,8 +148,9 @@
 {
     if([segue.identifier isEqualToString:@"showSuccess"])
     {
-        MLRegSuccessViewController *dest = (MLRegSuccessViewController *) segue.destinationViewController;
-        dest.registeredAccount = [NSString stringWithFormat:@"%@@%@",self.jid.text,kRegServer];
+        [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
+        MLRegSuccessViewController* dest = (MLRegSuccessViewController *) segue.destinationViewController;
+        dest.registeredAccount = [NSString stringWithFormat:@"%@@%@",self.jid.text, kRegServer];
     }
 }
 

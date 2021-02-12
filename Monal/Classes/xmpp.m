@@ -894,10 +894,10 @@ NSString *const kData=@"data";
                 [parsedStanza find:@"/@id"];
                 [parsedStanza find:@"/{urn:xmpp:sm:3}r"];
                 [parsedStanza find:@"/{urn:xmpp:sm:3}a"];
-                [parsedStanza find:@"/@<type=get>"];
-                [parsedStanza find:@"/@<type=set>"];
-                [parsedStanza find:@"/@<type=result>"];
-                [parsedStanza find:@"/@<type=error>"];
+                [parsedStanza find:@"/<type=get>"];
+                [parsedStanza find:@"/<type=set>"];
+                [parsedStanza find:@"/<type=result>"];
+                [parsedStanza find:@"/<type=error>"];
                 [parsedStanza find:@"{urn:xmpp:sid:0}origin-id"];
                 [parsedStanza find:@"/{jabber:client}presence"];
                 [parsedStanza find:@"/{jabber:client}message"];
@@ -1623,7 +1623,7 @@ NSString *const kData=@"data";
                     {
                         self->_catchupDone = YES;
                         DDLogVerbose(@"Now posting kMonalFinishedCatchup notification");
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:@{@"accountNo": self.accountNo}];
                     }
                 }];
             }
@@ -3210,7 +3210,7 @@ NSString *const kData=@"data";
     if(!_catchupDone)
     {
         _catchupDone = YES;
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self];
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self  userInfo:@{@"accountNo": self.accountNo}];
 
     }
 }

@@ -106,6 +106,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 #else
     [self upgradeIntegerUserSettingsIfUnset:@"AutodownloadFiletransfersMaxSize" toDefault:5*1024*1024];     // 5 MiB
 #endif
+    
+    //upgrade syncErrorsDisplayed list
+    [self upgradeObjectUserSettingsIfUnset:@"syncErrorsDisplayed" toDefault:@{}];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal

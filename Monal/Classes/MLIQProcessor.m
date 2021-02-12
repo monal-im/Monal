@@ -355,6 +355,13 @@ $$handler(handleServerDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     
     if([features containsObject:@"urn:xmpp:blocking"])
         account.connectionProperties.supportsBlocking=YES;
+    
+    if(!account.connectionProperties.supportsHTTPUpload && [features containsObject:@"urn:xmpp:http:upload:0"])
+    {
+        DDLogInfo(@"supports http upload with server: %@", iqNode.from);
+        account.connectionProperties.supportsHTTPUpload = YES;
+        account.connectionProperties.uploadServer = iqNode.from;
+    }
 $$
 
 $$handler(handleServiceDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))

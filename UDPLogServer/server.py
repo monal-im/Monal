@@ -6,7 +6,11 @@ import ipaddress
 import json
 import zlib
 import hashlib
-from Cryptodome.Cipher import AES
+
+try:
+    from Cryptodome.Cipher import AES  # pycryptodomex
+except ImportError:
+    from Crypto.Cipher import AES  # pycryptodome
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)

@@ -114,7 +114,12 @@ enum activeChatsControllerSections {
         if(self.chatListTable.hasUncommittedUpdates)
             return;
 
-        [self.chatListTable reloadData];
+        [UIView performWithoutAnimation:^{
+            [self.chatListTable beginUpdates];
+            [self.chatListTable reloadData];
+            [self.chatListTable endUpdates];
+        }];
+
         MonalAppDelegate* appDelegate = (MonalAppDelegate*)[UIApplication sharedApplication].delegate;
         [appDelegate updateUnread];
     });

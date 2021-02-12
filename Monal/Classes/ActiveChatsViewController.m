@@ -413,28 +413,25 @@ enum activeChatsControllerSections {
 {
     MLContactCell* cell = (MLContactCell*)[tableView dequeueReusableCellWithIdentifier:@"ContactCell" forIndexPath:indexPath];
 
-    MLContact* row = nil;
+    MLContact* chatContact = nil;
     // Select correct contact array
     if(indexPath.section == pinnedChats) {
-        row = [self.pinnedContacts objectAtIndex:indexPath.row];
+        chatContact = [self.pinnedContacts objectAtIndex:indexPath.row];
         // mark pinned chats
         [cell setPinned:YES];
     } else {
-        row = [self.unpinnedContacts objectAtIndex:indexPath.row];
+        chatContact = [self.unpinnedContacts objectAtIndex:indexPath.row];
         [cell setPinned:NO];
     }
-    [cell showDisplayName:row.contactDisplayName];
+    [cell showDisplayName:chatContact.contactDisplayName];
     
-    cell.accountNo = row.accountId.integerValue;
-    cell.username = row.contactJid;
-    cell.count = 0;
+    cell.accountNo = chatContact.accountId.integerValue;
+    cell.username = chatContact.contactJid;
+    NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:chatContact.contactJid forAccount:chatContact.accountId];
+    cell.count = [unreadMsgCnt integerValue];
     
-    NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:row.contactJid forAccount:row.accountId];
-    if([cell.username isEqualToString:row.contactJid]){
-        cell.count = [unreadMsgCnt integerValue];
-    }
-    
-    MLMessage* messageRow = [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:row.accountId];
+    // Display msg draft or last msg
+    MLMessage* messageRow = [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:chatContact.accountId];
     if(messageRow)
     {
         if([messageRow.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
@@ -457,19 +454,19 @@ enum activeChatsControllerSections {
         {
             //XEP-0245: The slash me Command
             NSString* displayName;
-            NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:row.accountId];
+            NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:chatContact.accountId];
             NSString* ownJid = [NSString stringWithFormat:@"%@@%@",[accountDict objectForKey:@"username"], [accountDict objectForKey:@"domain"]];
             if([messageRow.actualFrom isEqualToString:ownJid])
-                displayName = [MLContact ownDisplayNameForAccountNo:row.accountId andOwnJid:ownJid];
+                displayName = [MLContact ownDisplayNameForAccountNo:chatContact.accountId andOwnJid:ownJid];
             else
-                displayName = [row contactDisplayName];
+                displayName = [chatContact contactDisplayName];
             if([messageRow.messageText hasPrefix:@"/me "])
             {
-                NSString* replacedMessageText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:row.accountId
+                NSString* replacedMessageText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:chatContact.accountId
                                                                                                      displayName:displayName
                                                                                                       actualFrom:messageRow.actualFrom
                                                                                                          message:messageRow.messageText
-                                                                                                         isGroup:row.isGroup];
+                                                                                                         isGroup:chatContact.isGroup];
 
                 NSRange replacedMsgAttrRange = NSMakeRange(0, replacedMessageText.length);
 
@@ -491,12 +488,12 @@ enum activeChatsControllerSections {
     else
     {
         [cell showStatusText:nil];
-        DDLogWarn(@"Active chat but no messages found in history for %@.", row.contactJid);
+        DDLogWarn(@"Active chat but no messages found in history for %@.", chatContact.contactJid);
     }
-    [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
+    [[MLImageManager sharedInstance] getIconForContact:chatContact.contactJid andAccount:chatContact.accountId withCompletion:^(UIImage *image) {
         cell.userImage.image = image;
     }];
-    BOOL muted = [[DataLayer sharedInstance] isMutedJid:row.contactJid];
+    BOOL muted = [[DataLayer sharedInstance] isMutedJid:chatContact.contactJid];
     cell.muteBadge.hidden = !muted;
     return cell;
 }

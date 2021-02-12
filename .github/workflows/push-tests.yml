@@ -27,5 +27,4 @@ jobs:
         run: |
           cd Monal
           pod install
-          pod update
           xcodebuild -workspace "Monal.xcworkspace" -scheme "Monal" -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 11 Pro' test

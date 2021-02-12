@@ -7,7 +7,6 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "ParseMessage.h"
 #import "MLMessageProcessor.h"
 #import "MLXMPPConnection.h"
 #import "MLConstants.h"
@@ -20,8 +19,8 @@
 @property (nonatomic, strong) NSString *resource;
 @property (nonatomic, strong) MLXMPPConnection *connectionProperties;
 
-@property (nonatomic, strong) SignalContext *signalContext;
-@property (nonatomic, strong) MLSignalStore *monalSignalStore;
+//@property (nonatomic, strong) SignalContext *signalContext;
+//@property (nonatomic, strong) MLSignalStore *monalSignalStore;
 @end
 
 @implementation MLMessageProcessorTest
@@ -38,12 +37,12 @@
  
     self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];
     
-    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:self.account.accountNo];
-    
-    //signal store
-    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
-    //signal context
-    self.signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
+//    self.monalSignalStore = [[MLSignalStore alloc] initWithAccountId:self.account.accountNo];
+//    
+//    //signal store
+//    SignalStorage *signalStorage = [[SignalStorage alloc] initWithSignalStore:self.monalSignalStore];
+//    //signal context
+//    self.signalContext= [[SignalContext alloc] initWithStorage:signalStorage];
 }
 
 
@@ -98,14 +97,14 @@
         return YES;
     };
     
-
-      MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
-          MLMessageProcessor *processor = [[MLMessageProcessor alloc] initWithAccount:self.account.accountNo jid:self.jid connection:nil signalContex:self.signalContext andSignalStore:self.monalSignalStore];
-          [processor processMessage:parsedStanza];
-      }];
-      
-      [self parseString:sample withDelegate:baseParserDelegate];
-    
+//
+//      MLBasePaser *baseParserDelegate = [[MLBasePaser alloc] initWithCompeltion:^(XMPPParser * _Nullable parsedStanza) {
+//          MLMessageProcessor *processor = [[MLMessageProcessor alloc] initWithAccount:self.account.accountNo jid:self.jid connection:nil signalContex:self.signalContext andSignalStore:self.monalSignalStore];
+//          [processor processMessage:parsedStanza];
+//      }];
+//      
+//      [self parseString:sample withDelegate:baseParserDelegate];
+//    
       // [self waitForExpectations:@[expectation] timeout:5];
 }
 

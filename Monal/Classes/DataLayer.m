@@ -1476,7 +1476,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSMutableArray*) activeContactsWithPinned:(BOOL) pinned
 {
-    NSString* query = @"SELECT a.buddy_name, a.account_id FROM activechats AS a JOIN buddylist AS b WHERE a.buddy_name = b.buddy_name AND a.account_id = b.account_id AND a.pinned=? ORDER BY lastMessageTime DESC;";
+    NSString* query = @"SELECT a.buddy_name, a.account_id FROM activechats AS a JOIN buddylist AS b ON (a.buddy_name = b.buddy_name AND a.account_id = b.account_id) JOIN account  ON a.account_id = account.account_id WHERE account.username != a.buddy_name AND a.pinned=? ORDER BY lastMessageTime DESC;";
     NSMutableArray* toReturn = [[NSMutableArray alloc] init];
     for(NSDictionary* dic in [self.db executeReader:query andArguments:@[[NSNumber numberWithBool:pinned]]])
         [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];

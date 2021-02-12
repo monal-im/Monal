@@ -105,20 +105,14 @@ enum activeChatsControllerSections {
 
 -(void) refreshDisplay
 {
-    NSMutableArray* activeContactsUnpinned = [[DataLayer sharedInstance] activeContactsWithPinned:NO];
-    NSMutableArray* activeContactsPinned = [[DataLayer sharedInstance] activeContactsWithPinned:YES];
-    if(!activeContactsUnpinned || ! activeContactsPinned)
+    self.unpinnedContacts = [[DataLayer sharedInstance] activeContactsWithPinned:NO];
+    self.pinnedContacts = [[DataLayer sharedInstance] activeContactsWithPinned:YES];
+    if(!self.unpinnedContacts || ! self.pinnedContacts)
         return;
 
     dispatch_async(dispatch_get_main_queue(), ^{
         if(self.chatListTable.hasUncommittedUpdates)
             return;
-        // Remove self chats (contact == self) FIXME
-        [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:activeContactsUnpinned];
-        [[MLXMPPManager sharedInstance] cleanArrayOfConnectedAccounts:activeContactsPinned];
-
-        self.unpinnedContacts = activeContactsUnpinned;
-        self.pinnedContacts = activeContactsPinned;
 
         [self.chatListTable reloadData];
         MonalAppDelegate* appDelegate = (MonalAppDelegate*)[UIApplication sharedApplication].delegate;
@@ -226,9 +220,10 @@ enum activeChatsControllerSections {
         NSMutableArray* removeContactFromArray = [self getChatArrayForSection:indexPath.section];
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.chatListTable performBatchUpdates:^{
+                [self.chatListTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                 [removeContactFromArray removeObjectAtIndex:indexPath.row];
                 [insertContactToArray insertObject:contact atIndex:0];
-                [self.chatListTable moveRowAtIndexPath:indexPath toIndexPath:insertAtPath];
+                [self.chatListTable insertRowsAtIndexPaths:@[insertAtPath] withRowAnimation:UITableViewRowAnimationNone];
             } completion:^(BOOL finished) {
                 if(completion) completion(finished);
             }];

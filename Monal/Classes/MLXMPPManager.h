@@ -165,10 +165,6 @@ withCompletionHandler:(void (^)(BOOL success, NSString *messageId)) completion;
  fetch entity software version
  */
 -(void) getEntitySoftWareVersionForContact:(MLContact*) contact andResource:(NSString*) resource;
-/**
- Iterates through set and compares with connected accounts. Removes them. useful for active chat. 
- */
--(void) cleanArrayOfConnectedAccounts:(NSMutableArray*) dirtySet;
 
 -(void) setPushToken:(NSString*) token;
 

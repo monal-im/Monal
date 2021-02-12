@@ -681,26 +681,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [[DataLayer sharedInstance] setMessageId:messageId sent:YES];
 }
 
-#pragma mark - properties
-
--(void) cleanArrayOfConnectedAccounts:(NSMutableArray*) dirtySet
-{
-    //yes, this is ineffecient but the size shouldnt ever be huge
-    NSMutableIndexSet* indexSet = [[NSMutableIndexSet alloc] init];
-    for(xmpp* xmppAccount in [self connectedXMPP])
-    {
-        NSInteger pos=0;
-        for(MLContact* row in dirtySet)
-        {
-            if([row.contactJid isEqualToString:xmppAccount.connectionProperties.identity.jid])
-                [indexSet addIndex:pos];
-            pos++;
-        }
-    }
-    [dirtySet removeObjectsAtIndexes:indexSet];
-}
-
-
 #pragma mark - APNS
 
 -(void) setPushToken:(NSString*) token

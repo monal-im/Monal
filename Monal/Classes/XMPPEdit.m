@@ -330,7 +330,7 @@
         [SAMKeychain deletePasswordForService:kMonalKeychainName account:[NSString stringWithFormat:@"%@",self.accountno]];
         [self.db removeAccount:self.accountno];
         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
-
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:nil userInfo:nil];
 
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeCustomView;

@@ -105,17 +105,46 @@ enum activeChatsControllerSections {
 
 -(void) refreshDisplay
 {
-    self.unpinnedContacts = [[DataLayer sharedInstance] activeContactsWithPinned:NO];
-    self.pinnedContacts = [[DataLayer sharedInstance] activeContactsWithPinned:YES];
-    if(!self.unpinnedContacts || ! self.pinnedContacts)
+    size_t unpinnedConCntBefore = self.unpinnedContacts.count;
+    size_t pinnedConCntBefore = self.pinnedContacts.count;
+    NSMutableArray<MLContact*>* newUnpinnedContacts = [[DataLayer sharedInstance] activeContactsWithPinned:NO];
+    NSMutableArray<MLContact*>* newPinnedContacts = [[DataLayer sharedInstance] activeContactsWithPinned:YES];
+    if(!newUnpinnedContacts || ! newPinnedContacts)
         return;
+
+    size_t unpinnedCntDiff = unpinnedConCntBefore - newUnpinnedContacts.count;
+    size_t pinnedCntDiff = pinnedConCntBefore - newPinnedContacts.count;
+
+    void (^resizeSections)(UITableView*, size_t, size_t) = ^void(UITableView* table, size_t section, size_t diff){
+        if(diff > 0)
+        {
+            // remove rows
+            for(size_t i = 0; i < diff; i++)
+            {
+                NSIndexPath* posInSection = [NSIndexPath indexPathForRow:i inSection:section];
+                [table deleteRowsAtIndexPaths:@[posInSection] withRowAnimation:UITableViewRowAnimationNone];
+            }
+        }
+        else if(diff < 0)
+        {
+            // add rows
+            for(size_t i = diff; i < 0; i++)
+            {
+                NSIndexPath* posInSectin = [NSIndexPath indexPathForRow:i inSection:section];
+                [table insertRowsAtIndexPaths:@[posInSectin] withRowAnimation:UITableViewRowAnimationNone];
+            }
+        }
+    };
 
     dispatch_async(dispatch_get_main_queue(), ^{
         if(self.chatListTable.hasUncommittedUpdates)
             return;
-
         [UIView performWithoutAnimation:^{
             [self.chatListTable beginUpdates];
+            resizeSections(self.chatListTable, unpinnedChats, unpinnedCntDiff);
+            resizeSections(self.chatListTable, pinnedChats, pinnedCntDiff);
+            self.unpinnedContacts = newUnpinnedContacts;
+            self.pinnedContacts = newPinnedContacts;
             [self.chatListTable reloadData];
             [self.chatListTable endUpdates];
         }];
@@ -254,11 +283,20 @@ enum activeChatsControllerSections {
     if(self.unpinnedContacts.count == 0) {
         [self refreshDisplay];
     }
+    // only check if the login screen has to be shown if there are no active chats
+    if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
+    {
+        [self segueToIntroScreensIfNeeded];
+    }
 }
 
 -(void) viewDidAppear:(BOOL) animated
 {
     [super viewDidAppear:animated];
+}
+
+-(void) segueToIntroScreensIfNeeded
+{
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenIntro"]) {
         [self performSegueWithIdentifier:@"showIntro" sender:self];
         return;

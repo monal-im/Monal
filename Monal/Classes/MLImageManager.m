@@ -165,50 +165,48 @@
 
 -(void) getIconForContact:(NSString*) contact andAccount:(NSString*) accountNo withCompletion:(void (^)(UIImage *))completion
 {
-    NSString* filename=[self fileNameforContact:contact];
+    NSString* filename = [self fileNameforContact:contact];
     
-    __block UIImage* toreturn=nil;
+    __block UIImage* toreturn = nil;
     //get filname from DB
-    NSString* cacheKey=[NSString stringWithFormat:@"%@_%@",accountNo,contact];
+    NSString* cacheKey = [NSString stringWithFormat:@"%@_%@",accountNo,contact];
     
     //check cache
-    toreturn= [self.iconCache objectForKey:cacheKey];
+    toreturn = [self.iconCache objectForKey:cacheKey];
     if(!toreturn) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
-            writablePath = [writablePath stringByAppendingPathComponent:accountNo];
-            writablePath = [writablePath stringByAppendingPathComponent:filename];
-            
-            
-            UIImage* savedImage =[UIImage imageWithContentsOfFile:writablePath];
-            if(savedImage)
-                toreturn=savedImage;
-            
-            if(toreturn==nil)
-            {
-                toreturn=self.noIcon;
-            }
-            
-            toreturn=[MLImageManager circularImage:toreturn];
-            
-            //uiimage image named is cached if avaialable
-            if(toreturn) {
-                [self.iconCache setObject:toreturn forKey:cacheKey];
-            }
-            
-            if(completion)
-            {
+        NSString* writablePath = [self.documentsDirectory stringByAppendingPathComponent:@"buddyicons"];
+        writablePath = [writablePath stringByAppendingPathComponent:accountNo];
+        writablePath = [writablePath stringByAppendingPathComponent:filename];
+
+        UIImage* savedImage = [UIImage imageWithContentsOfFile:writablePath];
+        if(savedImage)
+            toreturn = savedImage;
+
+        if(toreturn == nil)
+        {
+            toreturn = self.noIcon;
+        }
+
+        toreturn = [MLImageManager circularImage:toreturn];
+
+        //uiimage image named is cached if avaialable
+        if(toreturn)
+        {
+            [self.iconCache setObject:toreturn forKey:cacheKey];
+        }
+        if(completion)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
                 completion(toreturn);
-            }
-            
-        });
+            });
+        }
     }
-    
     else if(completion)
     {
-        completion(toreturn);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            completion(toreturn);
+        });
     }
-    
 }
 
 

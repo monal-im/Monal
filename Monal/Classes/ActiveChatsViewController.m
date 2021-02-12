@@ -411,11 +411,8 @@ enum activeChatsControllerSections {
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    MLContactCell* cell = [tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
-    if(!cell)
-    {
-        cell = [[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
-    }
+    MLContactCell* cell = (MLContactCell*)[tableView dequeueReusableCellWithIdentifier:@"ContactCell" forIndexPath:indexPath];
+
     MLContact* row = nil;
     // Select correct contact array
     if(indexPath.section == pinnedChats) {
@@ -433,80 +430,74 @@ enum activeChatsControllerSections {
     cell.count = 0;
     
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:row.contactJid forAccount:row.accountId];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if([cell.username isEqualToString:row.contactJid]){
-            cell.count = [unreadMsgCnt integerValue];
-        }
-    });
+    if([cell.username isEqualToString:row.contactJid]){
+        cell.count = [unreadMsgCnt integerValue];
+    }
     
     MLMessage* messageRow = [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:row.accountId];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if(messageRow)
+    if(messageRow)
+    {
+        if([messageRow.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
+            [cell showStatusText:NSLocalizedString(@"🔗 A Link", @"")];
+        else if([messageRow.messageType isEqualToString:kMessageTypeFiletransfer])
         {
-            if([messageRow.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
-                [cell showStatusText:NSLocalizedString(@"🔗 A Link", @"")];
-            else if([messageRow.messageType isEqualToString:kMessageTypeFiletransfer])
-            {
-                if([messageRow.filetransferMimeType hasPrefix:@"image/"])
-                    [cell showStatusText:NSLocalizedString(@"📷 An Image", @"")];
-                else        //TODO JIM: add support for more mime types
-                    [cell showStatusText:NSLocalizedString(@"📁 A File", @"")];
-            }
-            else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft])
-            {
-                NSString* draftPreview = [NSString stringWithFormat:NSLocalizedString(@"Draft: %@", @""), messageRow.messageText];
-                [cell showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, 6)];
-            }
-            else if([messageRow.messageType isEqualToString:kMessageTypeGeo])
-                [cell showStatusText:NSLocalizedString(@"📍 A Location", @"")];
-            else
-            {
-                //XEP-0245: The slash me Command
-                NSString* displayName;
-                NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:row.accountId];
-                NSString* ownJid = [NSString stringWithFormat:@"%@@%@",[accountDict objectForKey:@"username"], [accountDict objectForKey:@"domain"]];
-                if([messageRow.actualFrom isEqualToString:ownJid])
-                    displayName = [MLContact ownDisplayNameForAccountNo:row.accountId andOwnJid:ownJid];
-                else
-                    displayName = [row contactDisplayName];
-                if([messageRow.messageText hasPrefix:@"/me "])
-                {
-                    NSString* replacedMessageText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:row.accountId
-                                                                                                         displayName:displayName
-                                                                                                          actualFrom:messageRow.actualFrom
-                                                                                                             message:messageRow.messageText
-                                                                                                             isGroup:row.isGroup];
-                    
-                    NSRange replacedMsgAttrRange = NSMakeRange(0, replacedMessageText.length);
-                    
-                    [cell showStatusTextItalic:replacedMessageText withItalicRange:replacedMsgAttrRange];
-                }
-                else
-                {
-                    [cell showStatusText:messageRow.messageText];
-                }
-            }
-            if(messageRow.timestamp)
-            {
-                cell.time.text = [self formattedDateWithSource:messageRow.timestamp];
-                cell.time.hidden = NO;
-            }
-            else
-                cell.time.hidden = YES;
+            if([messageRow.filetransferMimeType hasPrefix:@"image/"])
+                [cell showStatusText:NSLocalizedString(@"📷 An Image", @"")];
+            else        //TODO JIM: add support for more mime types
+                [cell showStatusText:NSLocalizedString(@"📁 A File", @"")];
         }
+        else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft])
+        {
+            NSString* draftPreview = [NSString stringWithFormat:NSLocalizedString(@"Draft: %@", @""), messageRow.messageText];
+            [cell showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, 6)];
+        }
+        else if([messageRow.messageType isEqualToString:kMessageTypeGeo])
+            [cell showStatusText:NSLocalizedString(@"📍 A Location", @"")];
         else
         {
-            [cell showStatusText:nil];
-            DDLogWarn(@"Active chat but no messages found in history for %@.", row.contactJid);
+            //XEP-0245: The slash me Command
+            NSString* displayName;
+            NSDictionary* accountDict = [[DataLayer sharedInstance] detailsForAccount:row.accountId];
+            NSString* ownJid = [NSString stringWithFormat:@"%@@%@",[accountDict objectForKey:@"username"], [accountDict objectForKey:@"domain"]];
+            if([messageRow.actualFrom isEqualToString:ownJid])
+                displayName = [MLContact ownDisplayNameForAccountNo:row.accountId andOwnJid:ownJid];
+            else
+                displayName = [row contactDisplayName];
+            if([messageRow.messageText hasPrefix:@"/me "])
+            {
+                NSString* replacedMessageText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:row.accountId
+                                                                                                     displayName:displayName
+                                                                                                      actualFrom:messageRow.actualFrom
+                                                                                                         message:messageRow.messageText
+                                                                                                         isGroup:row.isGroup];
+
+                NSRange replacedMsgAttrRange = NSMakeRange(0, replacedMessageText.length);
+
+                [cell showStatusTextItalic:replacedMessageText withItalicRange:replacedMsgAttrRange];
+            }
+            else
+            {
+                [cell showStatusText:messageRow.messageText];
+            }
         }
-    });
+        if(messageRow.timestamp)
+        {
+            cell.time.text = [self formattedDateWithSource:messageRow.timestamp];
+            cell.time.hidden = NO;
+        }
+        else
+            cell.time.hidden = YES;
+    }
+    else
+    {
+        [cell showStatusText:nil];
+        DDLogWarn(@"Active chat but no messages found in history for %@.", row.contactJid);
+    }
     [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
         cell.userImage.image = image;
     }];
     BOOL muted = [[DataLayer sharedInstance] isMutedJid:row.contactJid];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        cell.muteBadge.hidden = !muted;
-    });
+    cell.muteBadge.hidden = !muted;
     return cell;
 }
 

@@ -642,7 +642,7 @@ enum activeChatsControllerSections {
 
 -(BOOL) emptyDataSetShouldDisplay:(UIScrollView*) scrollView
 {
-    BOOL toreturn = (self.unpinnedContacts.count==0)?YES:NO;
+    BOOL toreturn = (self.unpinnedContacts.count == 0 && self.pinnedContacts == 0) ? YES : NO;
     if(toreturn)
     {
         // A little trick for removing the cell separators

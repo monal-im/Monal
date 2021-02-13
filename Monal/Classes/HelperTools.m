@@ -634,24 +634,30 @@ void logException(NSException* exception)
 }
 
 
-+ (NSString *)signalHexKeyWithData:(NSData*) data
++(NSString *)signalHexKeyWithData:(NSData*) data
 {
     NSString* hex = [self hexadecimalString:data];
     
     //remove 05 cipher info
     hex = [hex substringWithRange:NSMakeRange(2, hex.length - 2)];
-    NSMutableString* output = [hex mutableCopy];
+
+    return hex;
+}
+
++(NSString *)signalHexKeyWithSpacesWithData:(NSData*) data
+{
+    NSMutableString* hex = [[self signalHexKeyWithData:data] mutableCopy];
    
     int counter = 0;
-    while(counter <= hex.length)
+    while(counter <= (hex.length - 2))
     {
         counter+=8;
-        [output insertString:@" " atIndex:counter];
+        [hex insertString:@" " atIndex:counter];
         counter++;
-       
     }
-    return output.uppercaseString;
+    return hex.uppercaseString;
 }
+
 
 +(UIView*) MLCustomViewHeaderWithTitle:(NSString*) title
 {

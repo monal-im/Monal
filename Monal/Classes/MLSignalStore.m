@@ -431,6 +431,11 @@
     return ((NSNumber*)[self.sqliteDatabase executeScalar:(@"SELECT trustLevel FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=? AND identity=?;") andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name, identityKey]]).intValue;
 }
 
+-(void) untrustAllDevicesFrom:(NSString*) jid
+{
+    [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactName=?;" andArguments:@[[NSNumber numberWithInt:MLOmemoInternalNotTrusted], self.accountId, jid]];
+}
+
 -(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
 {
     return (NSNumber*)[self.sqliteDatabase executeScalar:(@"SELECT \

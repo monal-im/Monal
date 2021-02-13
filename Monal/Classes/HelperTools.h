@@ -54,9 +54,10 @@ void logException(NSException* exception);
 +(NSString*) encodeBase64WithData:(NSData*) objData;
 +(NSData*) dataWithBase64EncodedString:(NSString*) string;
 
-+ (NSString *)hexadecimalString:(NSData*) data;
-+ (NSData *)dataWithHexString:(NSString *)hex;
-+ (NSString *)signalHexKeyWithData:(NSData*) data;
++(NSString *)hexadecimalString:(NSData*) data;
++(NSData *)dataWithHexString:(NSString *)hex;
++(NSString *)signalHexKeyWithData:(NSData*) data;
++(NSString *)signalHexKeyWithSpacesWithData:(NSData*) data;
 
 +(UIView*) MLCustomViewHeaderWithTitle:(NSString*) title;
 +(CIImage*) createQRCodeFromString:(NSString*) input;

@@ -46,8 +46,8 @@
         // Only add trusted keys to the list
         if([self.account.omemo isTrustedIdentity:address identityKey:identity])
         {
-            NSString* trimmedIdentity = [[HelperTools signalHexKeyWithData:identity] stringByReplacingOccurrencesOfString:@" " withString:@""];
-            NSString* keyString = [NSString stringWithFormat:@"%@omemo-sid-%@=%@", firstKey ? @"?" : @"&", device, trimmedIdentity];
+            NSString* hexIdentity = [HelperTools signalHexKeyWithData:identity];
+            NSString* keyString = [NSString stringWithFormat:@"%@omemo-sid-%@=%@", firstKey ? @"?" : @";", device, hexIdentity];
             [keyList appendString:keyString];
             firstKey = NO;
         }

@@ -74,7 +74,7 @@ enum MLKeysTableViewControllerSections {
 
     NSData* identity = [self.account.omemo getIdentityForAddress:address];
 
-    cell.key.text = [HelperTools signalHexKeyWithData:identity];
+    cell.key.text = [HelperTools signalHexKeyWithSpacesWithData:identity];
     cell.toggle.on = [self.account.omemo isTrustedIdentity:address identityKey:identity];
     cell.toggle.tag = 100 + indexPath.row;
     [cell.toggle addTarget:self action:@selector(toggleTrust:) forControlEvents:UIControlEventValueChanged];
@@ -184,12 +184,33 @@ enum MLKeysTableViewControllerSections {
 
 -(void) MLQRCodeContactScannedWithJid:(NSString *)jid fingerprints:(NSDictionary<NSNumber *,NSString *> *)fingerprints
 {
-    UIAlertController* alert = [UIAlertController alertControllerWithTitle:@"WIP" message:@"WIP" preferredStyle:UIAlertControllerStyleAlert];
-    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        [alert dismissViewControllerAnimated:YES completion:nil];
-    }]];
-    [self presentViewController:alert animated:YES completion:nil];
+    // untrust all devices from jid
+    [self.account.omemo untrustAllDevicesFrom:jid];
+    DDLogInfo(@"Removing trust for all devices from jid %@", jid);
 
+    // get new list with all known devices for jid
+    NSArray<NSNumber*>* knownDevices = [self.account.omemo knownDevicesForAddressName:jid];
+    for(NSNumber* qrDeviceId in fingerprints)
+    {
+        if([knownDevices containsObject:qrDeviceId])
+        {
+            SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:(int) qrDeviceId.integerValue];
+            NSData* identity = [self.account.omemo getIdentityForAddress:address];
+            NSString* knownIdentity = [HelperTools signalHexKeyWithData:identity];
+
+            // check that the fingerprint match
+            if([knownIdentity.uppercaseString isEqualToString:fingerprints[qrDeviceId].uppercaseString])
+            {
+                // trust this device
+                [self.account.omemo updateTrust:YES forAddress:address];
+                DDLogInfo(@"Trusting jid: %@ with device id %@", jid, qrDeviceId);
+            }
+        }
+        else
+        {
+            // TODO: save fingerprint and trust separately in another table
+        }
+    }
     // Close QR-Code scanner
     [self.navigationController popViewControllerAnimated:YES];
 }

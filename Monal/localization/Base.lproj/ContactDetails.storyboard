@@ -382,7 +382,7 @@
                                 </constraints>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Own OMEMO Keys" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="E3b-yQ-mX2">
-                                <rect key="frame" x="116" y="96" width="182" height="26.5"/>
+                                <rect key="frame" x="116" y="202.5" width="182" height="26.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="22"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
@@ -394,9 +394,9 @@
                             <constraint firstItem="yhH-d5-B0v" firstAttribute="centerX" secondItem="6Eh-lk-vGr" secondAttribute="centerX" id="1nv-H6-q5g"/>
                             <constraint firstItem="yhH-d5-B0v" firstAttribute="centerY" secondItem="6Eh-lk-vGr" secondAttribute="centerY" id="Dav-8f-fmQ"/>
                             <constraint firstItem="Dyv-Fj-UPM" firstAttribute="trailing" secondItem="yhH-d5-B0v" secondAttribute="trailing" constant="8" id="EJC-FS-2Lx"/>
-                            <constraint firstItem="E3b-yQ-mX2" firstAttribute="top" secondItem="Dyv-Fj-UPM" secondAttribute="top" constant="8" id="FXW-3u-gHE"/>
                             <constraint firstItem="E3b-yQ-mX2" firstAttribute="centerX" secondItem="6Eh-lk-vGr" secondAttribute="centerX" id="P2H-70-xey"/>
                             <constraint firstItem="yhH-d5-B0v" firstAttribute="leading" secondItem="Dyv-Fj-UPM" secondAttribute="leading" constant="8" id="Q8m-qc-Pcn"/>
+                            <constraint firstItem="E3b-yQ-mX2" firstAttribute="bottom" secondItem="yhH-d5-B0v" secondAttribute="top" constant="-20" id="mD2-s0-cch"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="HD1-oR-t4s"/>

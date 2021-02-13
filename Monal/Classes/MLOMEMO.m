@@ -399,6 +399,11 @@ $$
     [self.monalSignalStore updateTrust:trust forAddress:address];
 }
 
+-(void) untrustAllDevicesFrom:(NSString*)jid
+{
+    [self.monalSignalStore untrustAllDevicesFrom:jid];
+}
+
 -(NSData *) getIdentityForAddress:(SignalAddress*)address
 {
     return [self.monalSignalStore getIdentityForAddress:address];

@@ -47,10 +47,46 @@ struct XMPPLoginQRCode : Codable
         view.backgroundColor = UIColor.black
 
 #if TARGET_OS_MACCATALYST
-        errorMsg(title: NSLocalizedString("Not supported on macOS", comment: "QR-Code-Scanner"), msg: NSLocalizedString("We don't support QR-Code scanning on macOS at the moment", comment: "QR-Code-Scanner"))
-        return
-#else
+        switch AVCaptureDevice.authorizationStatus(for: .video)
+        {
+            case .authorized:
+                self.setupCaptureSession()
 
+            case .notDetermined:
+                AVCaptureDevice.requestAccess(for: .video) { granted in
+                    if granted {
+                        self.setupCaptureSession()
+                    }
+                }
+
+            case .denied:
+                return
+
+            case .restricted:
+                return
+        }
+#else
+        setupCaptureSession()
+#endif
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        if (captureSession?.isRunning == false) {
+            captureSession.startRunning()
+        }
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        if (captureSession?.isRunning == true) {
+            captureSession.stopRunning()
+        }
+        super.viewWillDisappear(animated)
+    }
+
+    func setupCaptureSession()
+    {
         // init capture session
         captureSession = AVCaptureSession()
         guard let captureDevice = AVCaptureDevice.default(for: .video)
@@ -96,22 +132,6 @@ struct XMPPLoginQRCode : Codable
         view.layer.addSublayer(videoPreviewLayer)
 
         captureSession.startRunning()
-#endif
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-
-        if (captureSession?.isRunning == false) {
-            captureSession.startRunning()
-        }
-    }
-
-    override func viewWillDisappear(_ animated: Bool) {
-        if (captureSession?.isRunning == true) {
-            captureSession.stopRunning()
-        }
-        super.viewWillDisappear(animated)
     }
 
     func errorMsgNoCameraFound()

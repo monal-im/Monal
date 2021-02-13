@@ -34,8 +34,7 @@
 
 -(void)layoutSubviews
 {
-    BOOL isFileRequestExist = [MLFiletransfer checkFileRequest:self.messageDBId];
-    if (isFileRequestExist)
+    if([MLFiletransfer isFileforHistoryIdInTransfer:self.messageDBId])
     {
         [self.loadingView setHidden:NO];
         [self.loadingView startAnimating];

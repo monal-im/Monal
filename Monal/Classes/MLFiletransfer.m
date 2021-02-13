@@ -604,7 +604,7 @@ static NSMutableSet* _currentlyTransfering;
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFiletransfersIdle object:self];
 }
 
-+(BOOL) checkFileRequest:(NSNumber*) historyId
++(BOOL) isFileforHistoryIdInTransfer:(NSNumber*) historyId
 {
     if([_currentlyTransfering containsObject:historyId])
     {

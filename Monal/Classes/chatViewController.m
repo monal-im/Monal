@@ -1737,11 +1737,7 @@ enum msgSentState {
                     {
                         fileTransferCell.transferStatus = transferAudioTypeNeedDowndload;
                     }
-                    else if([fileType hasPrefix:@"text/"])
-                    {
-                        fileTransferCell.transferStatus = transferFileTypeNeedDowndload;
-                    }
-                    else if([fileType hasPrefix:@"application/"])
+                    else
                     {
                         fileTransferCell.transferStatus = transferFileTypeNeedDowndload;
                     }

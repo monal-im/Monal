@@ -55,6 +55,7 @@
     NSString* contactString = [NSString stringWithFormat:@"xmpp:%@%@", self.contact.contactJid, keyList];
 
     CIImage* qrImage = [HelperTools createQRCodeFromString:contactString];
+    self.qrCodeView.layer.magnificationFilter = kCAFilterNearest; // reduce blur
     self.qrCodeView.image = [[UIImage alloc] initWithCIImage:qrImage];
 }
 

@@ -161,36 +161,11 @@ enum msgSentState {
     [self.inputContainerView.trailingAnchor constraintEqualToAnchor:self.inputContainerView.superview.trailingAnchor].active=YES;
     self.tableviewBottom.constant += 20;
 #endif
-    //UTI @"public.data" for everything
-    NSString *images = @"public.image";
-    NSString *gifFiles = @"com.compuserve.gif";
-    NSString *txtFiles = @"public.text";
-    NSString *xmlFiles = @"public.xml";
-    NSString *sourceCodeFiles = @"public.source-code";
-    NSString *pdfFiles = @"com.adobe.pdf";
-    NSString *rtfFiles = @"public.rtf";
-    NSString *xlsFiles = @"com.microsoft.excel.xls";
-    NSString *pptFiles = @"com.microsoft.powerpoint.​ppt";
-    NSString *docFiles = @"com.microsoft.word.doc";
-    NSString *keyNoteFiles = @"com.apple.keynote.key";
-    NSString *presentationFiles = @"public.presentation";
-    NSString *videoFiles = @"public.video";
-    NSString *mp4Files = @"public.mpeg-4";
-    NSString *aviFiles = @"public.avi";
-    NSString *rmFiles = @"com.real.realmedia";
-    NSString *movFiles = @"com.apple.quicktime-movie";
-    NSString *zipFiles = @"com.pkware.zip-archive";
-    NSString *gzipFiles = @"org.gnu.gnu-zip-archive";
-    NSString *tarFiles = @"public.tar-archive";
-    NSString *audioFiles = @"public.audio";
-    NSString *mp3Files = @"public.mp3";
-    NSString *mp4aFiles = @"public.mpeg-4-audio";
-    NSString *wavFiles = @"com.microsoft.waveform-​audio";
-    
-    self.filePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[images, gifFiles, txtFiles, videoFiles, pdfFiles, xmlFiles, sourceCodeFiles,
-                                                                                      audioFiles, mp4Files, movFiles, zipFiles, gzipFiles,
-                                                                                      tarFiles, rtfFiles, xlsFiles, pptFiles, docFiles,
-                                                                                      keyNoteFiles, presentationFiles, rmFiles, mp3Files, aviFiles, mp4aFiles, wavFiles] inMode:UIDocumentPickerModeImport];
+
+    self.filePicker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[mimeType_images, mimeType_gifFiles, mimeType_txtFiles, mimeType_videoFiles, mimeType_pdfFiles, mimeType_xmlFiles, mimeType_sourceCodeFiles,
+                        mimeType_audioFiles, mimeType_mp4Files, mimeType_movFiles, mimeType_zipFiles, mimeType_gzipFiles,
+                        mimeType_tarFiles, mimeType_rtfFiles, mimeType_xlsFiles, mimeType_pptFiles, mimeType_docFiles,
+                        mimeType_keyNoteFiles, mimeType_presentationFiles, mimeType_rmFiles, mimeType_mp3Files, mimeType_aviFiles, mimeType_mp4aFiles, mimeType_wavFiles] inMode:UIDocumentPickerModeImport];
     self.filePicker.allowsMultipleSelection = NO;
     self.filePicker.delegate = self;
 

@@ -593,13 +593,13 @@ void logException(NSException* exception)
 {
     /* Returns hexadecimal string of NSData. Empty string if data is empty.   */
     
-    const unsigned char *dataBuffer = (const unsigned char *)[data bytes];
+    const unsigned char* dataBuffer = (const unsigned char *)[data bytes];
     
     if (!dataBuffer)
         return [NSString string];
     
-    NSUInteger          dataLength  = [data length];
-    NSMutableString     *hexString  = [NSMutableString stringWithCapacity:(dataLength * 2)];
+    NSUInteger dataLength  = [data length];
+    NSMutableString* hexString = [NSMutableString stringWithCapacity:(dataLength * 2)];
     
     for (int i = 0; i < dataLength; ++i)
         [hexString appendString:[NSString stringWithFormat:@"%02x", (unsigned int)dataBuffer[i]]];
@@ -613,16 +613,16 @@ void logException(NSException* exception)
     char buf[3];
     buf[2] = '\0';
     
-    if( [hex length] % 2 !=00) {
+    if([hex length] % 2 != 00) {
         DDLogError(@"Hex strings should have an even number of digits");
         return [[NSData alloc] init];
     }
-    unsigned char *bytes = malloc([hex length]/2);
-    unsigned char *bp = bytes;
+    unsigned char* bytes = malloc([hex length] / 2);
+    unsigned char* bp = bytes;
     for (CFIndex i = 0; i < [hex length]; i += 2) {
         buf[0] = [hex characterAtIndex:i];
         buf[1] = [hex characterAtIndex:i+1];
-        char *b2 = NULL;
+        char* b2 = NULL;
         *bp++ = strtol(buf, &b2, 16);
         if(b2 != buf + 2) {
             DDLogError(@"String should be all hex digits");
@@ -630,28 +630,26 @@ void logException(NSException* exception)
             return [[NSData alloc] init];
         }
     }
-    
     return [NSData dataWithBytesNoCopy:bytes length:[hex length]/2 freeWhenDone:YES];
 }
 
 
 + (NSString *)signalHexKeyWithData:(NSData*) data
 {
-    NSString *hex = [self hexadecimalString:data];
+    NSString* hex = [self hexadecimalString:data];
     
     //remove 05 cipher info
-    hex = [hex substringWithRange:NSMakeRange(2, hex.length-2)];
-    NSMutableString *output = [hex mutableCopy];
+    hex = [hex substringWithRange:NSMakeRange(2, hex.length - 2)];
+    NSMutableString* output = [hex mutableCopy];
    
-    int counter =0;
-    while(counter<= hex.length)
+    int counter = 0;
+    while(counter <= hex.length)
     {
         counter+=8;
         [output insertString:@" " atIndex:counter];
         counter++;
        
     }
-    
     return output.uppercaseString;
 }
 

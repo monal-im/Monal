@@ -2248,26 +2248,7 @@ enum msgSentState {
                 
         cell = videoCell;
     }
-    else if ([info[@"mimeType"] hasPrefix:@"text/"]
-             || [info[@"mimeType"] isEqual:@"application/pdf"]//.pdf
-             || [info[@"mimeType"] isEqual:@"application/json"]//.json
-             || [info[@"mimeType"] isEqual:@"application/csv"]//.csv
-             
-             || [info[@"mimeType"] isEqual:@"application/msword"]//.doc
-             || [info[@"mimeType"] isEqual:@"application/vnd.openxmlformats-officedocument.wordprocessingml.document"]//.docx
-             || [info[@"mimeType"] isEqual:@"application/vnd.ms-excel"]//.xls
-             || [info[@"mimeType"] isEqual:@"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]//.xlsx
-             || [info[@"mimeType"] isEqual:@"application/vnd.ms-powerpoint"]//.ppt
-             || [info[@"mimeType"] isEqual:@"application/vnd.openxmlformats-officedocument.presentationml.presentation"]//.pptx
-             
-             || [info[@"mimeType"] isEqual:@"application/vnd.oasis.opendocument.presentation"]//.odp
-             || [info[@"mimeType"] isEqual:@"application/vnd.oasis.opendocument.spreadsheet"]//.ods
-             || [info[@"mimeType"] isEqual:@"application/vnd.oasis.opendocument.text"]//.odt
-             
-             || ([info[@"mimeType"] isEqual:@"application/octet-stream"] && [info[@"filename"] hasSuffix:@".pages"])//.pages
-             || ([info[@"mimeType"] isEqual:@"application/octet-stream"] && [info[@"filename"] hasSuffix:@".numbers"])//.numbers
-             || ([info[@"mimeType"] isEqual:@"application/octet-stream"] && [info[@"filename"] hasSuffix:@".key"])//.key
-             )
+    else
     {
         MLFileTransferTextCell* textCell = (MLFileTransferTextCell *) [self messageTableCellWithIdentifier:@"fileTransferText" andInbound:inDirection fromTable:tableView];
         
@@ -2305,9 +2286,6 @@ enum msgSentState {
         [textCell.sizeLabel setText:readableFileSize];
         textCell.openFileDelegate = self;
         cell = textCell;
-    }
-    else{
-        
     }
     
     return cell;

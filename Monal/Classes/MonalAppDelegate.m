@@ -178,12 +178,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         [MLProcessLock waitForRemoteTermination:@"NotificationServiceExtension"];
     }
     
-    AVAudioSession *audioSession = AVAudioSession.sharedInstance;
-    NSError *audioError = nil;
-    NSError *audioActiveError = nil;
-    [audioSession setCategory:AVAudioSessionCategoryPlayAndRecord error:&audioError];
-    [audioSession setActive:YES error:&audioActiveError];
-    
     return YES;
 }
 

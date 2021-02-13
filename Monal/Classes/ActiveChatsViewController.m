@@ -112,10 +112,10 @@ enum activeChatsControllerSections {
     if(!newUnpinnedContacts || ! newPinnedContacts)
         return;
 
-    size_t unpinnedCntDiff = unpinnedConCntBefore - newUnpinnedContacts.count;
-    size_t pinnedCntDiff = pinnedConCntBefore - newPinnedContacts.count;
+    int unpinnedCntDiff = (int)unpinnedConCntBefore - (int)newUnpinnedContacts.count;
+    int pinnedCntDiff = (int)pinnedConCntBefore - (int)newPinnedContacts.count;
 
-    void (^resizeSections)(UITableView*, size_t, size_t) = ^void(UITableView* table, size_t section, size_t diff){
+    void (^resizeSections)(UITableView*, size_t, int) = ^void(UITableView* table, size_t section, int diff){
         if(diff > 0)
         {
             // remove rows
@@ -128,9 +128,9 @@ enum activeChatsControllerSections {
         else if(diff < 0)
         {
             // add rows
-            for(size_t i = diff; i < 0; i++)
+            for(size_t i = (-1) * diff; i > 0; i--)
             {
-                NSIndexPath* posInSectin = [NSIndexPath indexPathForRow:i inSection:section];
+                NSIndexPath* posInSectin = [NSIndexPath indexPathForRow:(i - 1) inSection:section];
                 [table insertRowsAtIndexPaths:@[posInSectin] withRowAnimation:UITableViewRowAnimationNone];
             }
         }

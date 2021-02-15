@@ -16,7 +16,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSURL *imageUrl; 
 
 -(void) loadImageWithCompletion:(void (^)(void))completion;
--(void) loadPreviewWithCompletion:(void (^)(void))completion;
 
 -(void) openlink: (id) sender;
 

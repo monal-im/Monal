@@ -65,35 +65,6 @@
     pboard.string =self.link;
 }
 
--(void) loadPreviewWithCompletion:(void (^)(void))completion
-{
-    self.messageTitle.text=nil;
-    self.imageUrl=[NSURL URLWithString:@""];
-    
-    if(self.link) {
-        /**
-         <meta property="og:title" content="Nintendo recommits to “keep the business going” for 3DS">
-         <meta property="og:image" content="https://cdn.arstechnica.net/wp-content/uploads/2016/09/3DS_SuperMarioMakerforNintendo3DS_char_01-760x380.jpg">
-         facebookexternalhit/1.1
-         */
-        NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:self.link]];
-        [request setValue:@"facebookexternalhit/1.1" forHTTPHeaderField:@"User-Agent"]; //required on somesites for og tages e.g. youtube
-        [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-            
-            NSString *body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                self.messageTitle.text=[MLMetaInfo ogContentWithTag:@"og:title" inHTML:body] ;
-                self.imageUrl=[NSURL URLWithString:[[MLMetaInfo ogContentWithTag:@"og:image" inHTML:body] stringByRemovingPercentEncoding]];
-                if(self.imageUrl) {
-                    [self loadImageWithCompletion:^{
-                        if(completion) completion();
-                    }];
-                }
-            });
-        }] resume];
-    } else  if(completion) completion();
-}
 
 -(void) loadImageWithCompletion:(void (^)(void))completion
 {
@@ -105,7 +76,18 @@
             
             if(completion) completion();
         }];
-    } else  if(completion) completion();
+    } else  {
+        self.previewImage.image=nil;
+        if(completion) completion();
+    }
+}
+
+-(void)prepareForReuse
+{
+    [super prepareForReuse];
+    self.messageTitle.text=nil;
+    self.imageUrl=[NSURL URLWithString:@""];
+    self.previewImage.image=nil;
 }
 
 @end

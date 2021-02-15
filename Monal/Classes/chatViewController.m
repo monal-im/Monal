@@ -18,6 +18,7 @@
 #import "MBProgressHUD.h"
 #import "xmpp.h"
 #import "MLOMEMO.h"
+#import "MLMetaInfo.h"
 
 #import "IDMPhotoBrowser.h"
 #import "ContactDetails.h"
@@ -84,6 +85,7 @@
 @property (nonatomic, strong) NSMutableArray* searchResultMessageList;
 
 @property (nonatomic, strong) void (^editingCallback)(NSString* newBody);
+@property (nonatomic, strong) NSMutableSet* previewedIds;
 
 #define lastMsgButtonSize 40.0
 
@@ -117,6 +119,7 @@ enum msgSentState {
     // init privacy Settings
     self.showGeoLocationsInline = [[HelperTools defaultsDB] boolForKey: @"ShowGeoLocation"];
     self.sendLastChatState = [[HelperTools defaultsDB] boolForKey: @"SendLastChatState"];
+    self.previewedIds = [[NSMutableSet alloc] init];
 }
 
 -(void) setupWithContact:(MLContact*) contact
@@ -1751,11 +1754,13 @@ enum msgSentState {
     else if([row.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
     {
         MLLinkCell* toreturn = (MLLinkCell *)[self messageTableCellWithIdentifier:@"link" andInbound:inDirection fromTable: tableView];
-        
+
         NSString* cleanLink = [messageText stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSArray* parts = [cleanLink componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         toreturn.link = parts[0];
+        row.url= [NSURL URLWithString:toreturn.link];
         toreturn.messageBody.text = toreturn.link;
+        toreturn.messageHistoryId = row.messageDBId;
         
         if(row.previewText || row.previewImage)
         {
@@ -1765,11 +1770,8 @@ enum msgSentState {
         }
         else
         {
-            [toreturn loadPreviewWithCompletion:^{
-                // prevent repeated calls
-                if(toreturn.messageTitle.text.length == 0)
-                    toreturn.messageTitle.text = @" ";
-                [[DataLayer sharedInstance] setMessageId:row.messageId previewText:toreturn.messageTitle.text andPreviewImage:toreturn.imageUrl.absoluteString];
+            [self loadPreviewWithUrlForRow:indexPath withCompletion:^{
+                
             }];
         }
         cell = toreturn;
@@ -1901,21 +1903,6 @@ enum msgSentState {
         toreturn.link = row.messageText;
         toreturn.messageBody.text = toreturn.link;
         
-        if(row.previewText || row.previewImage)
-        {
-            toreturn.imageUrl = row.previewImage;
-            toreturn.messageTitle.text = row.previewText;
-            [toreturn loadImageWithCompletion:^{}];
-        }
-        else
-        {
-            [toreturn loadPreviewWithCompletion:^{
-                // prevent repeated calls
-                if(toreturn.messageTitle.text.length == 0)
-                    toreturn.messageTitle.text = @" ";
-                [[DataLayer sharedInstance] setMessageId:row.messageId previewText:toreturn.messageTitle.text andPreviewImage:toreturn.imageUrl.absoluteString];
-            }];
-        }
         cell = toreturn;
     }
     // Only display names for groups
@@ -2479,6 +2466,78 @@ enum msgSentState {
         self.placeHolderText.hidden = YES;
     else
         self.placeHolderText.hidden = NO;
+}
+
+#pragma mark - link preview
+
+-(void) loadPreviewWithUrlForRow:(NSIndexPath *) indexPath withCompletion:(void (^)(void))completion
+{
+    MLMessage* row;
+    if(indexPath.row < self.messageList.count) {
+        row = [self.messageList objectAtIndex:indexPath.row];
+    } else {
+        DDLogError(@"Attempt to access beyond bounds");
+    }
+  
+    //prevent duplicated calls from cell animations
+    if([self.previewedIds containsObject:row.messageDBId]) {
+        return;
+    }
+    
+    if(row.url) {
+        NSMutableURLRequest* headRequest = [[NSMutableURLRequest alloc] initWithURL: row.url];
+        headRequest.HTTPMethod = @"HEAD";
+        headRequest.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
+        
+        NSURLSession* session = [NSURLSession sharedSession];
+        [[session dataTaskWithRequest:headRequest completionHandler:^(NSData* _Nullable data, NSURLResponse* _Nullable response, NSError* _Nullable error) {
+            NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
+            NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
+            NSNumber* contentLength = [headers objectForKey:@"Content-Length"] ? [NSNumber numberWithInt:([[headers objectForKey:@"Content-Length"] intValue])] : @(-1);
+        
+            if(mimeType.length==0) {return;}
+            if(![mimeType hasPrefix:@"text"]) {return;}
+            if(contentLength.intValue>500*1024) {return;} //limit to half a meg of HTML
+            
+            [self downloadPreviewWithRow:indexPath];
+            
+        }] resume];
+          
+    } else  if(completion) completion();
+}
+
+-(void) downloadPreviewWithRow:(NSIndexPath *) indexPath
+{
+    MLMessage* row;
+    if(indexPath.row < self.messageList.count) {
+        row = [self.messageList objectAtIndex:indexPath.row];
+    } else {
+        DDLogError(@"Attempt to access beyond bounds");
+    }
+    
+    [self.previewedIds addObject:row.messageDBId];
+    /**
+     <meta property="og:title" content="Nintendo recommits to “keep the business going” for 3DS">
+     <meta property="og:image" content="https://cdn.arstechnica.net/wp-content/uploads/2016/09/3DS_SuperMarioMakerforNintendo3DS_char_01-760x380.jpg">
+     facebookexternalhit/1.1
+     */
+    NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:row.url];
+    [request setValue:@"facebookexternalhit/1.1" forHTTPHeaderField:@"User-Agent"]; //required on some sites for og tags e.g. youtube
+    request.timeoutInterval = 10;
+    [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        
+        NSString *body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        // prevent repeated calls to this logic  by setting to non null
+        row.previewText=[MLMetaInfo ogContentWithTag:@"og:title" inHTML:body];
+        row.previewImage=[NSURL URLWithString:[[MLMetaInfo ogContentWithTag:@"og:image" inHTML:body] stringByRemovingPercentEncoding]];
+        if(row.previewText.length == 0)
+            row.previewText = @" ";
+        [[DataLayer sharedInstance] setMessageId:row.messageId previewText:[row.previewText copy] andPreviewImage:[row.previewImage.absoluteString copy]];
+        //reload cells
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+        });
+    }] resume];
 }
 
 #pragma mark - photo browser delegate

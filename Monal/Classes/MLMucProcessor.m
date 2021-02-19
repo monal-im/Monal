@@ -195,6 +195,7 @@ static NSMutableDictionary* _uiHandler;
             }
             
             //we joined successfully --> add muc to our favorites (this will use the already up to date nick from buddylist db table)
+            //this is needed to whitelist this muc jid for incoming mam results
             [[DataLayer sharedInstance] addMucFavorite:node.fromUser forAccountId:account.accountNo andMucNick:nil];
             
             monal_id_block_t uiHandler = [self getUIHandlerForMuc:node.fromUser];
@@ -275,6 +276,8 @@ static NSMutableDictionary* _uiHandler;
 
 +(void) sendDiscoQueryFor:(NSString*) roomJid onAccount:(xmpp*) account withJoin:(BOOL) join
 {
+    if(roomJid == nil || account == nil)
+        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Room jid or account must not be nil!" userInfo:nil];
     DDLogInfo(@"Querying disco for muc %@...", roomJid);
     XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoInfo setiqTo:roomJid];

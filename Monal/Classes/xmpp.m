@@ -1436,6 +1436,7 @@ NSString *const kData=@"data";
                 if(!([self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from] || [mucJids containsObject:outerMessageNode.from]))
                 {
                     DDLogError(@"mam results must be from our bare jid or muc jids, ignoring this spoofed mam result!");
+                    DDLogError(@"known muc jids are: %@", mucJids);
                     //even these stanzas have to be counted by smacks
                     [self incrementLastHandledStanza];
                     return;
@@ -2389,8 +2390,8 @@ NSString *const kData=@"data";
     //NOTE: mam query will be done in MLIQProcessor once the disco result for our own jid/account returns
     
     //join MUCs from muc_favorites db
-    for(NSString* roomJid in [[DataLayer sharedInstance] listMucsForAccount:self.accountNo])
-        [MLMucProcessor sendDiscoQueryFor:roomJid onAccount:self withJoin:YES];
+    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:self.accountNo])
+        [MLMucProcessor sendDiscoQueryFor:entry[@"room"] onAccount:self withJoin:YES];
 }
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid

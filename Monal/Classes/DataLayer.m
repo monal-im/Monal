@@ -1609,7 +1609,12 @@ static NSDateFormatter* dbFormatter;
     if([(NSNumber*)[self.db executeScalar:@"SELECT dbversion FROM dbversion;"] doubleValue] < version)
     {
         DDLogVerbose(@"Database version <%@ detected. Performing upgrade.", [NSNumber numberWithDouble:version]);
+        //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+        [self.db executeNonQuery:@"PRAGMA legacy_alter_table=on;"];
         block();
+        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
+        [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
         if(!accountStateInvalidated)
             [self invalidateAllAccountStates];
         accountStateInvalidated = YES;

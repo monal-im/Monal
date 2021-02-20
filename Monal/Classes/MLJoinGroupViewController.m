@@ -215,7 +215,8 @@
             {
                 [self hideJoinHUD];
                 
-                UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error entering groupchat", @"") message:data[@"message"] preferredStyle:UIAlertControllerStyleAlert];
+                UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error entering groupchat", @"") message:data[@"errorMessage"] preferredStyle:UIAlertControllerStyleAlert];
+                [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {}]];
                 [self presentViewController:messageAlert animated:YES completion:nil];
             }
         } forMuc:combinedRoom];

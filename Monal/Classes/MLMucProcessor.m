@@ -202,9 +202,11 @@ static NSMutableDictionary* _uiHandler;
             if(uiHandler)
             {
                 DDLogInfo(@"Calling UI handler for muc %@...", node.fromUser);
-                uiHandler(@{
-                    @"success": @1,
-                    @"muc": node.fromUser
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    uiHandler(@{
+                        @"success": @YES,
+                        @"muc": node.fromUser
+                    });
                 });
             }
             
@@ -402,13 +404,15 @@ $$
         //prepare data
         NSString* message = [HelperTools extractXMPPError:node withDescription:description];
         NSDictionary* data = @{
-            @"success": @0,
+            @"success": @NO,
             @"muc": room,
             @"errorMessage": message
         };
         
         DDLogInfo(@"Calling UI error handler with %@", data);
-        uiHandler(data);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            uiHandler(data);
+        });
     }
     //otherwise call the general error handler
     else

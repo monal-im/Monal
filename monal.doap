@@ -224,7 +224,7 @@
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0191.html" />
         <xmpp:status>complete</xmpp:status>
-        <xmpp:note>XEP-0191: Blocking Command. Partly, missing sync with server which accounts are blocked.</xmpp:note>
+        <xmpp:note>XEP-0191: Blocking Command</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>

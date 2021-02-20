@@ -1609,12 +1609,7 @@ static NSDateFormatter* dbFormatter;
     if([(NSNumber*)[self.db executeScalar:@"SELECT dbversion FROM dbversion;"] doubleValue] < version)
     {
         DDLogVerbose(@"Database version <%@ detected. Performing upgrade.", [NSNumber numberWithDouble:version]);
-        //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
-        [self.db executeNonQuery:@"PRAGMA legacy_alter_table=on;"];
         block();
-        [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
-        [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
         if(!accountStateInvalidated)
             [self invalidateAllAccountStates];
         accountStateInvalidated = YES;
@@ -1653,6 +1648,9 @@ static NSDateFormatter* dbFormatter;
         DDLogWarn(@"transaction mode set to WAL");
     }
     
+    //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
+    [self.db executeNonQuery:@"PRAGMA legacy_alter_table=on;"];
+    [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
     [self.db voidWriteTransaction:^{
         NSNumber* dbversion = (NSNumber*)[self.db executeScalar:@"select dbversion from dbversion;"];
         DDLogInfo(@"Got db version %@", dbversion);
@@ -2088,7 +2086,7 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"DROP TABLE _buddylistTMP;"];
             [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact on buddylist(buddy_name, account_id);"];
             [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
-	}];
+        }];
 
         [self updateDBTo:5.000 withBlock:^{
             // cleanup omemo tables
@@ -2195,6 +2193,8 @@ static NSDateFormatter* dbFormatter;
         }];
         
     }];
+    [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
+    [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
     
     DDLogInfo(@"Database version check complete");
     return;

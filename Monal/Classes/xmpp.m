@@ -1435,7 +1435,7 @@ NSString *const kData=@"data";
             
             //extract inner message if mam result or carbon copy
             //the original "outer" message will be kept in outerMessageNode while the forwarded stanza will be stored in messageNode
-            if(self.connectionProperties.supportsMam2 && [outerMessageNode check:@"{urn:xmpp:mam:2}result"])          //mam result
+            if([outerMessageNode check:@"{urn:xmpp:mam:2}result"])          //mam result
             {
                 //wrap everything in lock instead of writing the boolean result into a temp var because incrementLastHandledStanza
                 //is wrapped in this lock, too (and we don't call anything else here)

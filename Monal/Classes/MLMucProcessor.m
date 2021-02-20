@@ -320,7 +320,10 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
         NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:iqNode.fromUser forAccount:account.accountNo];
         //use the account display name as nick, if nothing can be found in buddylist and muc_favorites db tables
         if(!nick)
+        {
             nick = [MLContact ownDisplayNameForAccount:account];
+            DDLogInfo(@"Using default nick '%@' for room %@", nick, iqNode.fromUser);
+        }
         //add new muc buddy (potentially deleting a non-muc buddy having the same jid)
         DDLogInfo(@"Adding new muc %@ using nick '%@' to buddylist...", iqNode.fromUser, nick);
         [[DataLayer sharedInstance] initMuc:iqNode.fromUser forAccountId:account.accountNo andMucNick:nick];

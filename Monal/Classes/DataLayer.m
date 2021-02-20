@@ -2246,6 +2246,19 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"DELETE FROM signalContactIdentity WHERE (account_id, contactName) NOT IN (SELECT account_id, contactName FROM signalContactSession);"];
             [self.db executeNonQuery:@"DELETE FROM signalContactSession WHERE (account_id, contactName) NOT IN (SELECT account_id, contactName FROM signalContactIdentity);"];
         }];
+
+        [self updateDBTo:5.008 withBlock:^{
+            [self.db executeNonQuery:@"DROP TABLE muc_favorites;"];
+            [self.db executeNonQuery:@"CREATE TABLE 'muc_favorites' ( \
+                 'account_id' INTEGER NOT NULL, \
+                 'room' VARCHAR(255) NOT NULL, \
+                 'nick' varchar(255), \
+                 'autojoin' BOOL NOT NULL DEFAULT 0, \
+                 FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, \
+                 UNIQUE('room', 'account_id'), \
+                 PRIMARY KEY('account_id', 'room') \
+             );"];
+        }];
     }];
     [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
     [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];

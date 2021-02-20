@@ -445,8 +445,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 -(void) logoutAll
 {
-    NSArray* enabledAccountList = [[DataLayer sharedInstance] accountList];
-    for(NSDictionary* account in enabledAccountList)
+    NSArray* allAccounts = [[DataLayer sharedInstance] accountList];        //this will also "disconnect" disabled account, just to make sure
+    for(NSDictionary* account in allAccounts)
     {
         DDLogVerbose(@"Disconnecting account %@@%@", [account objectForKey:@"username"], [account objectForKey:@"domain"]);
         [self disconnectAccount:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
@@ -468,7 +468,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 -(void) connectIfNecessary
 {
     DDLogVerbose(@"manager connectIfNecessary");
-    NSArray* enabledAccountList = [[DataLayer sharedInstance] accountList];
+    NSArray* enabledAccountList = [[DataLayer sharedInstance] enabledAccountList];
     for(NSDictionary* account in enabledAccountList)
         [self connectAccountWithDictionary:account];
     DDLogVerbose(@"manager connectIfNecessary done");

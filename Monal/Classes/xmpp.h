@@ -79,15 +79,11 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 @property (nonatomic, readonly) xmppState accountState;
 
 // discovered properties
-@property (nonatomic, assign) BOOL SRVDiscoveryDone;
 @property (nonatomic, strong) NSArray* discoveredServersList;
 @property (nonatomic, strong) NSMutableArray* usableServersList;
 
 @property (nonatomic, strong) MLOMEMO* omemo;
 @property (nonatomic, strong) MLPubSub* pubsub;
-
-@property (nonatomic, strong) NSArray* roomList;
-@property (nonatomic, strong) NSArray* rosterList;
 
 //calculated
 @property (nonatomic, strong) NSDate* connectedTime;

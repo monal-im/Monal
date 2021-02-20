@@ -44,7 +44,7 @@
 #import "AESGcm.h"
 
 
-#define STATE_VERSION 1
+#define STATE_VERSION 2
 
 
 NSString *const kQueueID=@"queueID";
@@ -96,6 +96,8 @@ NSString *const kData=@"data";
     monal_void_block_t _cancelReconnectTimer;
     NSMutableArray* _smacksAckHandler;
     NSMutableDictionary* _iqHandlers;
+    NSMutableSet* _runningMamQueries;
+    BOOL _SRVDiscoveryDone;
     BOOL _startTLSComplete;
     BOOL _catchupDone;
     double _exponentialBackoff;
@@ -212,6 +214,7 @@ NSString *const kData=@"data";
     _outputQueue = [[NSMutableArray alloc] init];
     _iqHandlers = [[NSMutableDictionary alloc] init];
     _mamPageArrays = [[NSMutableDictionary alloc] init];
+    _runningMamQueries = [[NSMutableSet alloc] init];
 
     _SRVDiscoveryDone = NO;
     _discoveredServersList = [[NSMutableArray alloc] init];
@@ -1109,7 +1112,9 @@ NSString *const kData=@"data";
             [sendCopy enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
                 NSDictionary* dic = (NSDictionary *) obj;
                 XMPPStanza* stanza = [dic objectForKey:kStanza];
-                if([stanza.element isEqualToString:@"message"])		//only resend message stanzas because of the smacks error condition
+                //only resend message stanzas because of the smacks error condition
+                //but don't add them to our outgoing smacks queue again, if smacks isn't supported (do we really need this special handling?)
+                if([stanza.element isEqualToString:@"message"])
                     [self send:stanza withSmacks:self.connectionProperties.supportsSM3];
             }];
             //persist these changes (the queue can now be empty because smacks enable failed
@@ -1432,14 +1437,17 @@ NSString *const kData=@"data";
             //the original "outer" message will be kept in outerMessageNode while the forwarded stanza will be stored in messageNode
             if(self.connectionProperties.supportsMam2 && [outerMessageNode check:@"{urn:xmpp:mam:2}result"])          //mam result
             {
-                NSSet* mucJids = [[NSSet alloc] initWithArray:[[DataLayer sharedInstance] listMucsForAccount:self.accountNo]];
-                if(!([self.connectionProperties.identity.jid isEqualToString:outerMessageNode.from] || [mucJids containsObject:outerMessageNode.from]))
-                {
-                    DDLogError(@"mam results must be from our bare jid or muc jids, ignoring this spoofed mam result!");
-                    DDLogError(@"known muc jids are: %@", mucJids);
-                    //even these stanzas have to be counted by smacks
-                    [self incrementLastHandledStanza];
-                    return;
+                //wrap everything in lock instead of writing the boolean result into a temp var because incrementLastHandledStanza
+                //is wrapped in this lock, too (and we don't call anything else here)
+                @synchronized(_stateLockObject) {
+                    if(![_runningMamQueries containsObject:[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]])
+                    {
+                        DDLogError(@"mam results must be asked for, ignoring this spoofed mam result having queryid: %@!", [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]);
+                        DDLogError(@"allowed mam queryids are: %@", _runningMamQueries);
+                        //even these stanzas have to be counted by smacks
+                        [self incrementLastHandledStanza];
+                        return;
+                    }
                 }
                 //create a new XMPPMessage node instead of only a MLXMLNode because messages have some convenience properties and methods
                 messageNode = [[XMPPMessage alloc] initWithXMPPMessage:[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result/{urn:xmpp:forward:0}forwarded/{jabber:client}message"]];
@@ -1870,6 +1878,14 @@ NSString *const kData=@"data";
 {
     NSAssert(stanza, @"stanza to send should not be nil");
     
+    //add outgoing mam queryids to our state (but don't persist state because this will be done by smacks code below)
+    NSString* mamQueryId = [stanza findFirst:@"/{jabber:client}iq/{urn:xmpp:mam:2}query@queryid"];
+    if(mamQueryId)
+        @synchronized(_stateLockObject) {
+            DDLogDebug(@"Adding mam queryid to list: %@", mamQueryId);
+            [_runningMamQueries addObject:mamQueryId];
+        }
+    
     //always add stanzas (not nonzas!) to smacks queue to be resent later (if withSmacks=YES)
     if(withSmacks && [stanza isKindOfClass:[XMPPStanza class]])
     {
@@ -2005,6 +2021,7 @@ NSString *const kData=@"data";
         
         [values setObject:[self.pubsub getInternalData] forKey:@"pubsubData"];
         [values setObject:[MLMucProcessor state] forKey:@"mucState"];
+        [values setObject:_runningMamQueries forKey:@"runningMamQueries"];
         [values setObject:[NSNumber numberWithBool:_loggedInOnce] forKey:@"loggedInOnce"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.usingCarbons2] forKey:@"usingCarbons2"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPush] forKey:@"supportsPush"];
@@ -2085,6 +2102,11 @@ NSString *const kData=@"data";
         //always reset handler and smacksRequestInFlight when loading smacks state
         _smacksAckHandler = [[NSMutableArray alloc] init];
         self.smacksRequestInFlight = NO;
+        
+        //the list of mam queryids is closely coupled with smacks state (it records mam queryids of outgoing stanzas)
+        //--> load them even when loading smacks state only
+        if([dic objectForKey:@"runningMamQueries"])
+            _runningMamQueries = [[dic objectForKey:@"runningMamQueries"] mutableCopy];
     }
 }
 
@@ -2188,6 +2210,9 @@ NSString *const kData=@"data";
             
             if([dic objectForKey:@"mucState"])
                 [MLMucProcessor setState:[dic objectForKey:@"mucState"]];
+            
+            if([dic objectForKey:@"runningMamQueries"])
+                _runningMamQueries = [[dic objectForKey:@"runningMamQueries"] mutableCopy];
             
             //debug output
             DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d",

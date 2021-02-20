@@ -2033,6 +2033,7 @@ NSString *const kData=@"data";
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsPing] forKey:@"supportsPing"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsRosterPreApproval] forKey:@"supportsRosterPreApproval"];
         [values setObject:[NSNumber numberWithBool:self.connectionProperties.supportsBlocking] forKey:@"supportsBlocking"];
+        [values setObject:[NSNumber numberWithBool:self.connectionProperties.accountDiscoDone] forKey:@"accountDiscoDone"];
         
         if(self.connectionProperties.discoveredServices)
             [values setObject:[self.connectionProperties.discoveredServices copy] forKey:@"discoveredServices"];
@@ -2204,7 +2205,13 @@ NSString *const kData=@"data";
                 NSNumber* supportsBlocking = [dic objectForKey:@"supportsBlocking"];
                 self.connectionProperties.supportsBlocking = supportsBlocking.boolValue;
             }
-
+            
+            if([dic objectForKey:@"accountDiscoDone"])
+            {
+                NSNumber* accountDiscoDone = [dic objectForKey:@"accountDiscoDone"];
+                self.connectionProperties.accountDiscoDone = accountDiscoDone.boolValue;
+            }
+            
             if([dic objectForKey:@"pubsubData"])
                 [self.pubsub setInternalData:[dic objectForKey:@"pubsubData"]];
             
@@ -2421,7 +2428,8 @@ NSString *const kData=@"data";
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid
 {
-    if(!self.connectionProperties.supportsBlocking) return;
+    if(!self.connectionProperties.supportsBlocking)
+        return;
     
     XMPPIQ* iqBlocked = [[XMPPIQ alloc] initWithType:kiqSetType];
     
@@ -2431,7 +2439,8 @@ NSString *const kData=@"data";
 
 -(void) fetchBlocklist
 {
-    if(!self.connectionProperties.supportsBlocking) return;
+    if(!self.connectionProperties.supportsBlocking) 
+        return;
     
     XMPPIQ* iqBlockList = [[XMPPIQ alloc] initWithType:kiqGetType];
     

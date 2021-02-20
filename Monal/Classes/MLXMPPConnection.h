@@ -50,6 +50,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL supportsPing;
 @property (nonatomic, assign) BOOL supportsPubSub;
 
+@property (nonatomic, assign) BOOL accountDiscoDone;
+
 
 -(id) initWithServer:(MLXMPPServer*) server andIdentity:(MLXMPPIdentity*) identity;
 

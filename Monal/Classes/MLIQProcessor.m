@@ -344,6 +344,8 @@ $$handler(handleAccountDiscoInfo, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
             [account sendIq:mamQuery withHandler:$newHandler(self, handleMamResponseWithLatestId)];
         }
     }
+    
+    account.connectionProperties.accountDiscoDone = YES;
 $$
 
 //features advertised on our server

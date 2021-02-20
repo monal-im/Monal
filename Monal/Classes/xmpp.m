@@ -1530,6 +1530,12 @@ NSString *const kData=@"data";
             if(!iqNode.to)
                 iqNode.to = self.connectionProperties.identity.fullJid;
             
+            //remove handled mam queries from _runningMamQueries
+            if([iqNode check:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"])
+                [_runningMamQueries removeObject:[iqNode findFirst:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"]];
+            else if([iqNode check:@"/<type=error>/{urn:xmpp:mam:2}fin@queryid"])
+                [_runningMamQueries removeObject:[iqNode findFirst:@"/<type=error>/{urn:xmpp:mam:2}fin@queryid"]];
+            
             //process registered iq handlers
             if(_iqHandlers[[iqNode findFirst:@"/@id"]])
             {

@@ -55,7 +55,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0030.html" />
-        <xmpp:status>wontfix</xmpp:status>
+        <xmpp:status>complete</xmpp:status>
         <xmpp:note>XEP-0030: Service Discovery</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
@@ -76,7 +76,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0047.html" />
-        <xmpp:status>planned</xmpp:status>
+        <xmpp:status>wontfix</xmpp:status>
         <xmpp:note>XEP-0047: In-Band Bytestreams</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
@@ -132,7 +132,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0070.html" />
-        <xmpp:status>planned</xmpp:status>
+        <xmpp:status>wontfix</xmpp:status>
         <xmpp:note>XEP-0070: Verifying HTTP Requests via XMPP</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
@@ -223,7 +223,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0191.html" />
-        <xmpp:status>partial</xmpp:status>
+        <xmpp:status>complete</xmpp:status>
         <xmpp:note>XEP-0191: Blocking Command. Partly, missing sync with server which accounts are blocked.</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
@@ -349,14 +349,14 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0369.html" />
-        <xmpp:status>wontfix</xmpp:status>
+        <xmpp:status>planned</xmpp:status>
         <xmpp:note>XEP-0369: Mediated Information eXchange (MIX)</xmpp:note> 
       </xmpp:SupportedXep>
     </implements>
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0374.html" />
-        <xmpp:status>wontfix</xmpp:status>
+        <xmpp:status>planned</xmpp:status>
         <xmpp:note>XEP-0374: OpenPGP for XMPP Instant Messaging</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
@@ -370,14 +370,14 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0379.html" />
-        <xmpp:status>wontfix</xmpp:status>
+        <xmpp:status>partial</xmpp:status>
         <xmpp:note>XEP-0379: Pre-Authenticated Roster Subscription</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0380.html" />
-        <xmpp:status>wontfix</xmpp:status>
+        <xmpp:status>planned</xmpp:status>
         <xmpp:note>XEP-0380: Explicit Message Encryption</xmpp:note>   
       </xmpp:SupportedXep>
     </implements>
@@ -405,7 +405,7 @@
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource="https://xmpp.org/extensions/xep-0392.html" />
-        <xmpp:status>wontfix</xmpp:status>
+        <xmpp:status>planned</xmpp:status>
         <xmpp:note>XEP-0392: Consistent Color Generation</xmpp:note>
       </xmpp:SupportedXep>
     </implements>

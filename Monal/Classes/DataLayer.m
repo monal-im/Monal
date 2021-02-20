@@ -268,6 +268,10 @@ static NSDateFormatter* dbFormatter;
     // return the accountID
     if(result) {
         NSNumber* accountID = [self.db lastInsertId];
+
+        // insert self chat for omemo foreign key
+        [self.db executeNonQuery:@"INSERT OR IGNORE INTO buddylist ('account_id', 'buddy_name', 'muc') SELECT account_id, (username || '@' || domain), 0 FROM account WHERE account_id=?;" andArguments:@[accountID]];
+
         return accountID;
     } else {
         return nil;
@@ -2192,6 +2196,51 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"CREATE TABLE muc_favorites (room VARCHAR(255) PRIMARY KEY, nick varchar(255), account_id INTEGER, UNIQUE(room, account_id));"];
         }];
         
+        [self updateDBTo:5.006 withBlock:^{
+            // recreate blocklistCache - fixes foreign key
+            [self.db executeNonQuery:@"ALTER TABLE blocklistCache RENAME TO _blocklistCacheTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE 'blocklistCache' (\
+                'account_id' TEXT NOT NULL, \
+                'node' TEXT, \
+                'host' TEXT, \
+                'resource' TEXT, \
+                UNIQUE('account_id','node','host','resource'), \
+                CHECK( \
+                (LENGTH('node') > 0 AND LENGTH('host') > 0 AND LENGTH('resource') > 0) \
+                OR \
+                (LENGTH('node') > 0 AND LENGTH('host') > 0) \
+                OR \
+                (LENGTH('host') > 0 AND LENGTH('resource') > 0) \
+                OR \
+                (LENGTH('host') > 0) \
+                ), \
+                FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE \
+            );"];
+            [self.db executeNonQuery:@"DELETE FROM _blocklistCacheTMP WHERE account_id NOT IN (SELECT account_id FROM account)"];
+            [self.db executeNonQuery:@"INSERT INTO blocklistCache SELECT * FROM _blocklistCacheTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _blocklistCacheTMP;"];
+
+            // recreate signalContactIdentity - fixes foreign key
+            [self.db executeNonQuery:@"ALTER TABLE signalContactIdentity RENAME TO _signalContactIdentityTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE 'signalContactIdentity' ( \
+                 'account_id' INTEGER NOT NULL, \
+                 'contactName' TEXT NOT NULL, \
+                 'contactDeviceId' INTEGER NOT NULL, \
+                 'identity' BLOB, \
+                 'lastReceivedMsg' INTEGER DEFAULT NULL, \
+                 'removedFromDeviceList' INTEGER DEFAULT NULL, \
+                 'trustLevel' INTEGER NOT NULL DEFAULT 1, \
+                 FOREIGN KEY('account_id','contactName') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE, \
+                 PRIMARY KEY('account_id', 'contactName', 'contactDeviceId'), \
+                 FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE \
+             );"];
+            [self.db executeNonQuery:@"DELETE FROM _signalContactIdentityTMP WHERE account_id NOT IN (SELECT account_id FROM account) OR (account_id, contactName) NOT IN (SELECT account_id, buddy_name FROM buddylist);"];
+            [self.db executeNonQuery:@"INSERT INTO signalContactIdentity SELECT * FROM _signalContactIdentityTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _signalContactIdentityTMP;"];
+            // add self chats for omemo
+            [self.db executeNonQuery:@"INSERT OR IGNORE INTO buddylist ('account_id', 'buddy_name', 'muc') SELECT account_id, (username || '@' || domain), 0 FROM account;"];
+        }];
+
     }];
     [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
     [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];

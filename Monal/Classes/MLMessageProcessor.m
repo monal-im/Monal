@@ -70,7 +70,11 @@ static NSMutableDictionary* _typingNotifications;
 
         return;
     }
-
+    
+    //ignore prosody mod_muc_notifications muc push stanzas (they are only needed to trigger an apns push)
+    if([messageNode check:@"{http://quobis.com/xmpp/muc#push}notification"])
+        return;
+    
     if([messageNode check:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event"])
     {
         [account.pubsub handleHeadlineMessage:messageNode];

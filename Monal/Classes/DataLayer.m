@@ -477,7 +477,7 @@ static NSDateFormatter* dbFormatter;
 -(NSMutableArray*) contactList
 {
     //only list contacts having a roster entry (e.g. kSubBoth, kSubTo or kSubFrom)
-    NSString* query = @"SELECT buddy_name, a.account_id, IFNULL(IFNULL(NULLIF(A.nick_name, ''), NULLIF(A.full_name, '')), buddy_name) AS 'sortkey' FROM buddylist AS A INNER JOIN account AS b ON a.account_id=b.account_id WHERE (a.subscription=? OR a.subscription=? OR a.subscription=?) AND b.enabled=1 ORDER BY sortkey COLLATE NOCASE ASC;";
+    NSString* query = @"SELECT buddy_name, a.account_id, IFNULL(IFNULL(NULLIF(A.nick_name, ''), NULLIF(A.full_name, '')), buddy_name) AS 'sortkey' FROM buddylist AS A INNER JOIN account AS b ON a.account_id=b.account_id WHERE (a.subscription=? OR a.subscription=? OR a.subscription=?) AND b.enabled=1 AND (b.username || '@' || b.domain) != buddy_name ORDER BY sortkey COLLATE NOCASE ASC;";
     NSMutableArray* toReturn = [[NSMutableArray alloc] init];
     for(NSDictionary* dic in [self.db executeReader:query andArguments:@[kSubBoth, kSubTo, kSubFrom]])
         [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];
@@ -1493,7 +1493,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSMutableArray*) activeContactsWithPinned:(BOOL) pinned
 {
-    NSString* query = @"SELECT a.buddy_name, a.account_id FROM activechats AS a JOIN buddylist AS b ON (a.buddy_name = b.buddy_name AND a.account_id = b.account_id) JOIN account  ON a.account_id = account.account_id WHERE account.username != a.buddy_name AND a.pinned=? ORDER BY lastMessageTime DESC;";
+    NSString* query = @"SELECT a.buddy_name, a.account_id FROM activechats AS a JOIN buddylist AS b ON (a.buddy_name = b.buddy_name AND a.account_id = b.account_id) JOIN account ON a.account_id = account.account_id WHERE (account.username || '@' || account.domain) != a.buddy_name AND a.pinned=? ORDER BY lastMessageTime DESC;";
     NSMutableArray* toReturn = [[NSMutableArray alloc] init];
     for(NSDictionary* dic in [self.db executeReader:query andArguments:@[[NSNumber numberWithBool:pinned]]])
         [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];

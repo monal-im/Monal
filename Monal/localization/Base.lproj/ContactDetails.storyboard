@@ -393,7 +393,8 @@
                         <constraints>
                             <constraint firstItem="yhH-d5-B0v" firstAttribute="centerX" secondItem="6Eh-lk-vGr" secondAttribute="centerX" id="1nv-H6-q5g"/>
                             <constraint firstItem="yhH-d5-B0v" firstAttribute="centerY" secondItem="6Eh-lk-vGr" secondAttribute="centerY" id="Dav-8f-fmQ"/>
-                            <constraint firstItem="Dyv-Fj-UPM" firstAttribute="trailing" secondItem="yhH-d5-B0v" secondAttribute="trailing" constant="8" id="EJC-FS-2Lx"/>
+                            <constraint firstItem="yhH-d5-B0v" firstAttribute="trailing" secondItem="Dyv-Fj-UPM" secondAttribute="trailing" constant="-8" id="EJC-FS-2Lx"/>
+                            <constraint firstItem="E3b-yQ-mX2" firstAttribute="top" relation="greaterThanOrEqual" secondItem="Dyv-Fj-UPM" secondAttribute="top" constant="8" id="IiH-yC-I3a"/>
                             <constraint firstItem="E3b-yQ-mX2" firstAttribute="centerX" secondItem="6Eh-lk-vGr" secondAttribute="centerX" id="P2H-70-xey"/>
                             <constraint firstItem="yhH-d5-B0v" firstAttribute="leading" secondItem="Dyv-Fj-UPM" secondAttribute="leading" constant="8" id="Q8m-qc-Pcn"/>
                             <constraint firstItem="E3b-yQ-mX2" firstAttribute="bottom" secondItem="yhH-d5-B0v" secondAttribute="top" constant="-20" id="mD2-s0-cch"/>

@@ -55,8 +55,21 @@
     NSString* contactString = [NSString stringWithFormat:@"xmpp:%@%@", self.contact.contactJid, keyList];
 
     CIImage* qrImage = [HelperTools createQRCodeFromString:contactString];
-    self.qrCodeView.layer.magnificationFilter = kCAFilterNearest; // reduce blur
-    self.qrCodeView.image = [[UIImage alloc] initWithCIImage:qrImage];
+
+    if(qrImage) {
+        self.qrCodeView.layer.magnificationFilter = kCAFilterNearest; // reduce blur
+        self.qrCodeView.image = [[UIImage alloc] initWithCIImage:qrImage];
+    } else {
+        // to many device keys -> show error msg
+        self.qrCodeView.image = nil;
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"To many device keys", @"OmemoQrCodeView") message:NSLocalizedString(@"You have to many enabled devices on this account. You need to remove some devices", @"OmemoQrCodeView") preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            // close alert and segue to previous view controller
+            [alert dismissViewControllerAnimated:YES completion:nil];
+            [self.navigationController popViewControllerAnimated:YES];
+        }]];
+        [self presentViewController:alert animated:YES completion:nil];
+    }
 }
 
 @end

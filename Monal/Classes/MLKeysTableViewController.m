@@ -39,10 +39,6 @@ enum MLKeysTableViewControllerSections {
         self.navigationItem.title=NSLocalizedString(@"Encryption Keys", @"");
     }
     self.ownKeyRow = -1;
-
-#if TARGET_OS_MACCATALYST
-    [self.qrCodeScanButton setEnabled:NO];
-#endif
 }
 
 -(void)viewWillAppear:(BOOL)animated

@@ -23,7 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
 +(void) removeUIHandlerForMuc:(NSString*) room;
 
 +(void) processPresence:(XMPPPresence*) presenceNode forAccount:(xmpp*) account;
-+(void) processMessage:(XMPPMessage*) messageNode forAccount:(xmpp*) account;
++(BOOL) processMessage:(XMPPMessage*) messageNode forAccount:(xmpp*) account;
 
 +(void) sendDiscoQueryFor:(NSString*) roomJid onAccount:(xmpp*) account withJoin:(BOOL) join;
 

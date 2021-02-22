@@ -20,7 +20,9 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 @class xmpp;
 
-@interface MLContact : NSObject <NSCoding>
+@interface MLContact : NSObject <NSSecureCoding>
+
++(BOOL) supportsSecureCoding;
 
 +(NSString*) ownDisplayNameForAccount:(xmpp*) account;
 

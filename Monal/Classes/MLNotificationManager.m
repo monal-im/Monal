@@ -203,19 +203,18 @@
 -(void) showModernNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound
 {
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
-    
     MLContact* contact = [[DataLayer sharedInstance] contactForUsername:message.from forAccount:message.accountId];
+    NSString* idval = [self identifierWithMessage:message];
     
     // Only show contact name if allowed
     if(self.notificationPrivacySetting <= DisplayOnlyName)
     {
         content.title = [contact contactDisplayName];
-        if(![message.from isEqualToString:message.actualFrom])
-            content.subtitle = [NSString stringWithFormat:@"%@ says:", message.actualFrom];
+        if(message.isMuc)
+            content.subtitle = [NSString stringWithFormat:NSLocalizedString(@"%@ says:", @""), message.actualFrom];
     }
     else
         content.title = NSLocalizedString(@"New Message", @"");
-    NSString* idval = [self identifierWithMessage:message];
 
     // only show msgText if allowed
     if(self.notificationPrivacySetting == DisplayNameAndMessage)
@@ -237,8 +236,8 @@
         content.threadIdentifier = [self threadIdentifierWithMessage:message];
         content.categoryIdentifier = @"message";
         content.userInfo = @{
-            @"from": message.from,
-            @"accountId": message.accountId,
+            @"fromContactJid": message.from,
+            @"fromContactAccountId": message.accountId,
             @"messageId": message.messageId
         };
 

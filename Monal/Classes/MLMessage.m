@@ -19,6 +19,7 @@
     message.actualFrom = [dic objectForKey:@"af"];
     message.messageText = [dic objectForKey:@"message"];
     message.to = [dic objectForKey:@"message_to"];
+    message.isMuc = [(NSNumber*)[dic objectForKey:@"Muc"] boolValue];
     
     message.messageId = [dic objectForKey:@"messageid"];
     message.stanzaId = [dic objectForKey:@"stanzaid"];
@@ -26,6 +27,7 @@
     if(formatter)
         message.timestamp = [formatter dateFromString:[dic objectForKey:@"thetime"]]; 
     message.messageType = [dic objectForKey:@"messageType"];
+    message.mucType = [dic objectForKey:@"muc_type"];
     
     message.hasBeenDisplayed = [(NSNumber*)[dic objectForKey:@"displayed"] boolValue];
     message.hasBeenReceived = [(NSNumber*)[dic objectForKey:@"received"] boolValue];

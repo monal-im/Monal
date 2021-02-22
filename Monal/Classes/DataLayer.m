@@ -969,8 +969,7 @@ static NSDateFormatter* dbFormatter;
 -(NSArray*) messagesForHistoryIDs:(NSArray*) historyIDs
 {
     NSString* idList = [historyIDs componentsJoinedByString:@","];
-    NSString* query = [NSString stringWithFormat:@"SELECT IFNULL(actual_from, message_from) AS af, timestamp AS thetime, * FROM message_history WHERE message_history_id IN(%@);", idList];
-
+    NSString* query = [NSString stringWithFormat:@"SELECT buddylist.Muc, buddylist.muc_type, IFNULL(actual_from, message_from) AS af, timestamp AS thetime, message_history.* FROM message_history, buddylist WHERE message_history.message_history_id IN(%@) AND buddylist.account_id = message_history.account_id AND buddylist.buddy_name = message_history.message_from;", idList];
     NSMutableArray* retval = [[NSMutableArray alloc] init];
     for(NSDictionary* dic in [self.db executeReader:query])
         [retval addObject:[MLMessage messageFromDictionary:dic withDateFormatter:dbFormatter]];
@@ -1355,7 +1354,7 @@ static NSDateFormatter* dbFormatter;
     
     return [self.db idWriteTransaction:^{
         //return message draft (if any)
-        NSString* query = @"SELECT bl.messageDraft AS message, ac.lastMessageTime AS thetime, 'MessageDraft' AS messageType, ? AS message_to, '' AS message_from, '' AS af, '' AS filetransferMimeType, 0 AS filetransferSize FROM buddylist AS bl INNER JOIN activechats AS ac WHERE bl.account_id = ac.account_id AND bl.buddy_name = ac.buddy_name AND ac.account_id=? AND ac.buddy_name=? AND messageDraft IS NOT NULL AND messageDraft != '';";
+        NSString* query = @"SELECT bl.messageDraft AS message, ac.lastMessageTime AS thetime, 'MessageDraft' AS messageType, ? AS message_to, '' AS message_from, '' AS af, '' AS filetransferMimeType, 0 AS filetransferSize, bl.Muc, bl.muc_type FROM buddylist AS bl INNER JOIN activechats AS ac WHERE bl.account_id = ac.account_id AND bl.buddy_name = ac.buddy_name AND ac.account_id=? AND ac.buddy_name=? AND messageDraft IS NOT NULL AND messageDraft != '';";
         NSArray* params = @[contact, accountNo, contact];
         NSArray* results = [self.db executeReader:query andArguments:params];
         if([results count])

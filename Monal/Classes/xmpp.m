@@ -1934,23 +1934,24 @@ NSString *const kData=@"data";
 
 #pragma mark messaging
 
--(void) sendMessage:(NSString*) message toContact:(NSString*) contact isMUC:(BOOL) isMUC isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString *) messageId
+-(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString *) messageId
 {
     XMPPMessage* messageNode = [[XMPPMessage alloc] init];
-    [messageNode.attributes setObject:contact forKey:@"to"];
+    [messageNode.attributes setObject:contact.contactJid forKey:@"to"];
     [messageNode setXmppId:messageId];
 
 #ifdef IS_ALPHA
     // encrypt messages that should not be encrypted (but still use plaintext body for devices not speaking omemo)
     // WARNING NOT FOR PRODUCTION
     if(!encrypt && !isUpload)
-        [self.omemo encryptMessage:messageNode withMessage:message toContact:contact];
+        [self.omemo encryptMessage:messageNode withMessage:message toContact:contact.contactJid];
     // WARNING NOT FOR PRODUCTION END
 #endif
 
 #ifndef DISABLE_OMEMO
-    if(encrypt && !isMUC)
-        [self.omemo encryptMessage:messageNode withMessage:message toContact:contact];
+    //TODO: implement omemo for MUCs and remove this MUC check
+    if(encrypt && !contact.isGroup)
+        [self.omemo encryptMessage:messageNode withMessage:message toContact:contact.contactJid];
     else
 #endif
     {
@@ -1960,11 +1961,15 @@ NSString *const kData=@"data";
             [messageNode setBody:message];
     }
     
-    if(isMUC)
-    {
+    //set message type
+    if(contact.isGroup)
         [messageNode.attributes setObject:kMessageGroupChatType forKey:@"type"];
-    } else  {
+    else
         [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
+    
+    //request receipts and chat-markers in 1:1 or groups (no channels!)
+    if(!contact.isGroup || [@"group" isEqualToString:contact.mucType])
+    {
         [messageNode addChild:[[MLXMLNode alloc] initWithElement:@"request" andNamespace:@"urn:xmpp:receipts"]];
         [messageNode addChild:[[MLXMLNode alloc] initWithElement:@"markable" andNamespace:@"urn:xmpp:chat-markers:0"]];
     }
@@ -2367,12 +2372,8 @@ NSString *const kData=@"data";
     [[DataLayer sharedInstance] resetContactsForAccount:self.accountNo];
     
     //we are now bound
-    _accountState = kStateBound;
     _connectedTime = [NSDate date];
-    NSDictionary* dic = @{@"AccountNo":self.accountNo, @"AccountName": self.connectionProperties.identity.jid};
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
-    [self accountStatusChanged];
-    _usableServersList = [[NSMutableArray alloc] init]; //reset list to start again with the highest SRV priority on next connect
+    _usableServersList = [[NSMutableArray alloc] init];     //reset list to start again with the highest SRV priority on next connect
     _exponentialBackoff = 0;
     
     //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
@@ -2404,6 +2405,16 @@ NSString *const kData=@"data";
     self.connectionProperties.supportsHTTPUpload = NO;
     self.connectionProperties.supportsPing = NO;
     self.connectionProperties.supportsRosterPreApproval = NO;
+    
+    //clear list of running mam queries
+    _runningMamQueries = [[NSMutableSet alloc] init];
+    
+    //indicate we are bound now, *after* initializing/resetting all the other data structures to avoid race conditions
+    _accountState = kStateBound;
+    NSDictionary* dic = @{@"AccountNo":self.accountNo, @"AccountName": self.connectionProperties.identity.jid};
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
+    [self accountStatusChanged];
+
     
     //now fetch roster, request disco and send initial presence
     [self fetchRoster];
@@ -3292,6 +3303,7 @@ NSString *const kData=@"data";
     message.actualFrom = actualFrom ? actualFrom : messageNode.fromUser;
     message.messageText = [body copy];     //this need to be the processed value since it may be decrypted
     message.to = messageNode.toUser ? messageNode.toUser : self.connectionProperties.identity.jid;
+    message.isMuc = [messageNode check:@"/<type=groupchat>"];
     message.messageId = [messageNode check:@"/@id"] ? [messageNode findFirst:@"/@id"] : [[NSUUID UUID] UUIDString];
     message.accountId = self.accountNo;
     message.encrypted = encrypted;
@@ -3329,16 +3341,20 @@ NSString *const kData=@"data";
     return array;
 }
 
--(void) sendDisplayMarkerForId:(NSString*) messageid to:(NSString*) to
+-(void) sendDisplayMarkerForMessage:(MLMessage*) msg
 {
     if(![[HelperTools defaultsDB] boolForKey:@"SendDisplayedMarkers"])
         return;
     
+    //don't send chatmarkers in channels
+    if(msg.isMuc && [@"channel" isEqualToString:msg.mucType])
+        return;
+    
     XMPPMessage* displayedNode = [[XMPPMessage alloc] init];
     //the message type is needed so that the store hint is accepted by the server
-    displayedNode.attributes[@"type"] = kMessageChatType;
-    displayedNode.attributes[@"to"] = to;
-    [displayedNode setDisplayed:messageid];
+    displayedNode.attributes[@"type"] = msg.isMuc ? @"groupchat" : @"chat";
+    displayedNode.attributes[@"to"] = msg.from;
+    [displayedNode setDisplayed:msg.messageId];
     [displayedNode setStoreHint];
     [self send:displayedNode];
 }

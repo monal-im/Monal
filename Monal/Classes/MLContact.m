@@ -21,6 +21,11 @@ NSString *const kAskSubscribe=@"subscribe";
 
 @implementation MLContact
 
++(BOOL) supportsSecureCoding
+{
+    return YES;
+}
+
 +(NSString*) ownDisplayNameForAccount:(xmpp*) account
 {
     NSDictionary* accountDic = [[DataLayer sharedInstance] detailsForAccount:account.accountNo];

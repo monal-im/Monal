@@ -747,7 +747,7 @@ enum msgSentState {
             if(lastUnreadMessage)
             {
                 DDLogDebug(@"Marking as displayed: %@", lastUnreadMessage.messageId);
-                [[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId] sendDisplayMarkerForId:lastUnreadMessage.messageId to:lastUnreadMessage.from];
+                [[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId] sendDisplayMarkerForMessage:lastUnreadMessage];
             }
             
             //update app badge
@@ -764,18 +764,25 @@ enum msgSentState {
 
 -(void) refreshData
 {
-    if(!self.contact.contactJid) return;
-    if(!_day) {
+    if(!self.contact.contactJid)
+        return;
+    if(!_day)
+    {
         NSMutableArray* messages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId];
         NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId];
-        if([unreadMsgCnt integerValue] == 0) self->_firstmsg=YES;
-
-        if(!self.jid) return;
+        
+        if([unreadMsgCnt integerValue] == 0)
+            self->_firstmsg=YES;
+        
+        if(!self.jid)
+            return;
+        
         MLMessage* unreadStatus = [[MLMessage alloc] init];
         unreadStatus.messageType = kMessageTypeStatus;
         unreadStatus.messageText = NSLocalizedString(@"Unread Messages Below", @"");
         unreadStatus.actualFrom = self.jid;
-
+        unreadStatus.isMuc = self.contact.isGroup;
+        
         NSInteger unreadPos = messages.count - 1;
         while(unreadPos >= 0)
         {
@@ -827,7 +834,7 @@ enum msgSentState {
     if(!messageID)
     {
         [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID messageType:messageType mimeType:nil size:nil];
-        [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:NO messageId:newMessageID
+        [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact isEncrypted:self.encryptChat isUpload:NO messageId:newMessageID
                             withCompletionHandler:nil];
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
     }
@@ -835,10 +842,8 @@ enum msgSentState {
     {
         [[MLXMPPManager sharedInstance]
                       sendMessage:messageText
-                        toContact:self.contact.contactJid
-                      fromAccount:self.contact.accountId
+                        toContact:self.contact
                       isEncrypted:self.encryptChat
-                            isMUC:self.contact.isGroup
                          isUpload:NO
                         messageId:newMessageID
             withCompletionHandler:nil
@@ -969,7 +974,7 @@ enum msgSentState {
                             
                             NSString* newMessageID = [[NSUUID UUID] UUIDString];
                             [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
-                            [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:YES messageId:newMessageID withCompletionHandler:nil];
+                            [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.encryptChat isUpload:YES messageId:newMessageID withCompletionHandler:nil];
                         }
                         DDLogVerbose(@"upload done");
                     });
@@ -1196,7 +1201,7 @@ enum msgSentState {
                 
                 NSString* newMessageID = [[NSUUID UUID] UUIDString];
                 [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
-                [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact.contactJid fromAccount:self.contact.accountId isEncrypted:self.encryptChat isMUC:self.contact.isGroup isUpload:YES messageId:newMessageID withCompletionHandler:nil];
+                [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.encryptChat isUpload:YES messageId:newMessageID withCompletionHandler:nil];
                 DDLogVerbose(@"upload done");
             });
         }];
@@ -1226,7 +1231,7 @@ enum msgSentState {
         return nil;
     }
     
-    NSNumber* messageDBId = [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:self.contact.accountId withMessage:message actuallyFrom:self.jid withId:messageId encrypted:self.encryptChat messageType:messageType mimeType:mimeType size:size];
+    NSNumber* messageDBId = [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:self.contact.accountId withMessage:message actuallyFrom:(self.contact.isGroup ? self.contact.accountNickInGroup : self.jid) withId:messageId encrypted:self.encryptChat messageType:messageType mimeType:mimeType size:size];
     if(messageDBId)
     {
         DDLogVerbose(@"added message");

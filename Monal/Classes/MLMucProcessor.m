@@ -133,9 +133,18 @@ static NSMutableDictionary* _uiHandler;
     }
 }
 
-+(void) processMessage:(XMPPMessage*) messageNode forAccount:(xmpp*) account
++(BOOL) processMessage:(XMPPMessage*) messageNode forAccount:(xmpp*) account
 {
     [self handleStatusCodes:messageNode forAccount:account];
+    
+    //TODO: implement indirect and direct muc invites including push notification if the app is in background
+    if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalReceivedMucInviteNotice object:nil userInfo:@{@"from": messageNode.from}];
+        return YES;     //stop processing in MLMessageProcessor
+    }
+    
+    return NO;          //continue processing in MLMessageProcessor
 }
 
 +(void) handleStatusCodes:(XMPPStanza*) node forAccount:(xmpp*) account

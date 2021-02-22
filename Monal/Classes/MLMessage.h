@@ -42,8 +42,11 @@ The of the message in the DB , should be int
 @property (nonatomic, copy) NSString *actualFrom;
 @property (nonatomic, copy) NSString *from;
 @property (nonatomic, copy) NSString *to;
+@property (nonatomic, assign) BOOL isMuc;
 
 @property (nonatomic, copy) NSString* messageType;
+@property (nonatomic, copy) NSString* mucType;
+
 @property (nonatomic, copy) NSString* filetransferMimeType;
 @property (nonatomic, copy) NSNumber* filetransferSize;
 

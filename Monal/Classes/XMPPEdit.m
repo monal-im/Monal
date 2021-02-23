@@ -484,13 +484,27 @@
             case 0: {
                 thecell.cellLabel.text = NSLocalizedString(@"XMPP ID", @"");
                 thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.tag = 2;
-                thecell.textInputField.keyboardType = UIKeyboardTypeEmailAddress;
-                thecell.textInputField.text = self.jid;
+                thecell.labelRight.hidden = YES;
+                if(self.editMode)
+                {
+                    // don't allow jid editing
+                    thecell.textInputField.hidden = YES;
+                    thecell.labelRight.text = self.jid;
+                    thecell.labelRight.hidden = NO;
+                }
+                else
+                {
+                    // allow entering jid on account creation
+                    thecell.textInputField.keyboardType = UIKeyboardTypeEmailAddress;
+                    thecell.textInputField.tag = 2;
+                    thecell.textInputField.hidden = NO;
+                    thecell.textInputField.placeholder = NSLocalizedString(@"Enter you XMPP ID here", @"");
+                }
                 break;
             }
             case 1: {
                 thecell.cellLabel.text = NSLocalizedString(@"Password", @"");
+                thecell.textInputField.placeholder = NSLocalizedString(@"Enter you password here", @"");
                 thecell.toggleSwitch.hidden = YES;
                 thecell.textInputField.secureTextEntry = YES;
                 thecell.textInputField.tag = 3;
@@ -502,7 +516,7 @@
                 thecell.toggleSwitch.hidden = YES;
                 thecell.textInputField.tag = 4;
                 thecell.textInputField.text = self.server;
-                thecell.textInputField.placeholder = NSLocalizedString(@"Hardcoded Hostname", @"");
+                thecell.textInputField.placeholder = NSLocalizedString(@"Optional Hardcoded Hostname", @"");
                 thecell.accessoryType = UITableViewCellAccessoryDetailButton;
                 break;
             }

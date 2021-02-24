@@ -1507,12 +1507,11 @@ static NSDateFormatter* dbFormatter;
 
 -(NSMutableArray*) activeContactDict
 {
-    NSString* query = @"select  distinct a.buddy_name, b.full_name, b.nick_name, a.account_id from activechats as a LEFT OUTER JOIN buddylist AS b ON a.buddy_name = b.buddy_name  AND a.account_id = b.account_id order by lastMessageTime desc";
-
-    NSMutableArray* results = [self.db executeReader:query];
+    NSMutableArray<NSDictionary*>* mergedContacts = [self activeContactsWithPinned:YES];
+    [mergedContacts addObjectsFromArray:[self activeContactsWithPinned:NO]];
     
-    NSMutableArray* toReturn = [[NSMutableArray alloc] initWithCapacity:results.count];
-    [results enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    NSMutableArray* toReturn = [[NSMutableArray alloc] initWithCapacity:mergedContacts.count];
+    [mergedContacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         NSMutableDictionary* dic = [[NSMutableDictionary alloc] initWithDictionary:(NSDictionary*)obj];
         if(!dic[@"full_name"] || ![dic[@"full_name"] length])
         {

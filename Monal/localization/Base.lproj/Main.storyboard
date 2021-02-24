@@ -482,27 +482,27 @@
             <objects>
                 <tableViewController title="Join Group Chat" id="GpF-k7-Z6D" customClass="MLJoinGroupViewController" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="9LZ-0p-JU3">
-                        <rect key="frame" x="0.0" y="0.0" width="704" height="995.5"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="680"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="aW3-bk-9lP" id="aW3-bk-9lP">
-                                <rect key="frame" x="0.0" y="55.5" width="704" height="51.5"/>
+                                <rect key="frame" x="0.0" y="55.5" width="375" height="43.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="aW3-bk-9lP" id="XkY-vh-b2N">
-                                    <rect key="frame" x="0.0" y="0.0" width="704" height="51.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </tableViewCellContentView>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="addButton" id="7bv-y5-bYi">
-                                <rect key="frame" x="0.0" y="107" width="704" height="51.5"/>
+                                <rect key="frame" x="0.0" y="99" width="375" height="43.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="7bv-y5-bYi" id="iZv-xu-LdO">
-                                    <rect key="frame" x="0.0" y="0.0" width="704" height="51.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Q7I-qj-4zk">
-                                            <rect key="frame" x="314.5" y="11" width="75" height="30"/>
+                                            <rect key="frame" x="150" y="7" width="75" height="30"/>
                                             <state key="normal" title="Join Group">
                                                 <color key="titleColor" red="0.4541509151" green="0.72539824249999996" blue="0.68004375699999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             </state>
@@ -519,14 +519,14 @@
                                 </tableViewCellContentView>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="AccountPickerCell" textLabel="fKZ-SZ-6l0" style="IBUITableViewCellStyleDefault" id="GG9-So-yLQ">
-                                <rect key="frame" x="0.0" y="158.5" width="704" height="51.5"/>
+                                <rect key="frame" x="0.0" y="142.5" width="375" height="43.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="GG9-So-yLQ" id="AaL-LX-P4L">
-                                    <rect key="frame" x="0.0" y="0.0" width="704" height="51.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="fKZ-SZ-6l0">
-                                            <rect key="frame" x="20" y="0.0" width="664" height="51.5"/>
+                                            <rect key="frame" x="16" y="0.0" width="343" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <nil key="textColor"/>
@@ -625,19 +625,19 @@
             <objects>
                 <tableViewController id="YbY-nY-vV9" customClass="MLAccountPickerViewController" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="o60-I1-AL7">
-                        <rect key="frame" x="0.0" y="0.0" width="704" height="995.5"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="680"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="AccountCell" textLabel="JKC-18-hqA" style="IBUITableViewCellStyleDefault" id="rxC-SJ-h0b">
-                                <rect key="frame" x="0.0" y="28" width="704" height="51.5"/>
+                                <rect key="frame" x="0.0" y="28" width="375" height="43.5"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="rxC-SJ-h0b" id="N7L-RB-F4y">
-                                    <rect key="frame" x="0.0" y="0.0" width="704" height="51.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="JKC-18-hqA">
-                                            <rect key="frame" x="20" y="0.0" width="664" height="51.5"/>
+                                            <rect key="frame" x="16" y="0.0" width="343" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <nil key="textColor"/>
@@ -1875,20 +1875,20 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="fileTransferCheckingDataInCell" id="kkB-nV-Rha" customClass="MLFileTransferDataCell">
-                                        <rect key="frame" x="0.0" y="1775" width="414" height="44"/>
+                                        <rect key="frame" x="0.0" y="2014" width="1024" height="52"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="kkB-nV-Rha" id="Nuo-4c-5h9">
-                                            <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="1024" height="52"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pWT-ep-xK6">
-                                                    <rect key="frame" x="15" y="4" width="260" height="36"/>
+                                                    <rect key="frame" x="15" y="4" width="260" height="44"/>
                                                     <subviews>
                                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Igx-IJ-NbC">
-                                                            <rect key="frame" x="4" y="8" width="252" height="13"/>
+                                                            <rect key="frame" x="4" y="8" width="252" height="21"/>
                                                             <subviews>
                                                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="down" translatesAutoresizingMaskIntoConstraints="NO" id="ggU-s5-wet">
-                                                                    <rect key="frame" x="10" y="-11" width="35" height="35"/>
+                                                                    <rect key="frame" x="10" y="-7" width="35" height="35"/>
                                                                     <color key="tintColor" red="0.23529411764705882" green="0.57647058823529407" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="width" constant="35" id="3Fo-IE-QIe"/>
@@ -1902,7 +1902,7 @@
                                                                     <nil key="highlightedColor"/>
                                                                 </label>
                                                                 <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="9fz-NH-Bht">
-                                                                    <rect key="frame" x="10" y="-11" width="35" height="35"/>
+                                                                    <rect key="frame" x="10" y="-7" width="35" height="35"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="height" constant="35" id="8eF-jM-95v"/>
                                                                         <constraint firstAttribute="width" constant="35" id="iGy-gu-0Ar"/>
@@ -1922,7 +1922,7 @@
                                                             </constraints>
                                                         </view>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hxB-Au-joJ">
-                                                            <rect key="frame" x="0.0" y="23" width="248" height="12"/>
+                                                            <rect key="frame" x="0.0" y="31" width="248" height="12"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                             <color key="textColor" systemColor="systemGrayColor"/>
                                                             <nil key="highlightedColor"/>
@@ -1961,20 +1961,20 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="fileTransferCheckingDataOutCell" id="MFe-mq-UIR" userLabel="fileTransferCheckingDataOutCell" customClass="MLFileTransferDataCell">
-                                        <rect key="frame" x="0.0" y="1819" width="414" height="44"/>
+                                        <rect key="frame" x="0.0" y="2066" width="1024" height="52"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="MFe-mq-UIR" id="NOZ-wn-b89">
-                                            <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="1024" height="52"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Abu-y5-C6c">
-                                                    <rect key="frame" x="139" y="4" width="260" height="36"/>
+                                                    <rect key="frame" x="749" y="4" width="260" height="44"/>
                                                     <subviews>
                                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="p1b-nZ-PBU">
-                                                            <rect key="frame" x="4" y="8" width="252" height="13"/>
+                                                            <rect key="frame" x="4" y="8" width="252" height="21"/>
                                                             <subviews>
                                                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="down" translatesAutoresizingMaskIntoConstraints="NO" id="2Vy-4w-p8O">
-                                                                    <rect key="frame" x="10" y="-11" width="35" height="35"/>
+                                                                    <rect key="frame" x="10" y="-7" width="35" height="35"/>
                                                                     <color key="tintColor" red="0.23529411759999999" green="0.57647058819999997" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="height" constant="35" id="7gX-wq-ID0"/>
@@ -1999,13 +1999,13 @@
                                                             </constraints>
                                                         </view>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sHz-Fj-KYq">
-                                                            <rect key="frame" x="0.0" y="23" width="248" height="12"/>
+                                                            <rect key="frame" x="0.0" y="31" width="248" height="12"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                                             <color key="textColor" systemColor="systemGrayColor"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
                                                         <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="sVd-Ov-wYX">
-                                                            <rect key="frame" x="10" y="0.66666666666666785" width="35" height="35"/>
+                                                            <rect key="frame" x="10" y="4.5" width="35" height="35"/>
                                                             <constraints>
                                                                 <constraint firstAttribute="height" constant="35" id="gA1-bj-atp"/>
                                                                 <constraint firstAttribute="width" constant="35" id="nBL-r1-Nba"/>
@@ -2047,14 +2047,14 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="fileTransferVideoInCell" id="1gw-h8-QWz" userLabel="fileTransferVideoInCell" customClass="MLFileTransferVideoCell">
-                                        <rect key="frame" x="0.0" y="1863" width="414" height="44"/>
+                                        <rect key="frame" x="0.0" y="2118" width="1024" height="52"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="1gw-h8-QWz" id="CEI-XX-N2N">
-                                            <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="1024" height="52"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <view alpha="0.80000000000000004" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="pmw-WW-t1R">
-                                                    <rect key="frame" x="15" y="0.0" width="200" height="44"/>
+                                                    <rect key="frame" x="15" y="0.0" width="200" height="52"/>
                                                     <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="200" id="3Am-LF-b0S"/>
@@ -2074,14 +2074,14 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="fileTransferVideoOutCell" id="ttO-y0-edw" userLabel="fileTransferVideoOutCell" customClass="MLFileTransferVideoCell">
-                                        <rect key="frame" x="0.0" y="1907" width="414" height="44"/>
+                                        <rect key="frame" x="0.0" y="2170" width="1024" height="52"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="ttO-y0-edw" id="uZe-ra-Fo0">
-                                            <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="1024" height="52"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="GMn-V0-9iP" userLabel="Video View">
-                                                    <rect key="frame" x="199" y="0.0" width="200" height="44"/>
+                                                    <rect key="frame" x="809" y="0.0" width="200" height="52"/>
                                                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="200" id="AmC-ft-68a"/>
@@ -2100,21 +2100,75 @@
                                             <outlet property="videoView" destination="GMn-V0-9iP" id="lZD-Wu-wUC"/>
                                         </connections>
                                     </tableViewCell>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="fileTransferAudioOutCell" id="wM6-Qh-x9P" userLabel="fileTransferAudioOutCell" customClass="MLFileTransferVideoCell">
+                                        <rect key="frame" x="0.0" y="2222" width="1024" height="52"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="wM6-Qh-x9P" id="Eqk-2h-Psw">
+                                            <rect key="frame" x="0.0" y="0.0" width="1024" height="52"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rlP-ag-yst" userLabel="Video View">
+                                                    <rect key="frame" x="809" y="0.0" width="200" height="52"/>
+                                                    <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="90" id="MH7-0X-DGG"/>
+                                                        <constraint firstAttribute="width" constant="200" id="cWk-X6-JTZ"/>
+                                                    </constraints>
+                                                </view>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstAttribute="trailing" secondItem="rlP-ag-yst" secondAttribute="trailing" constant="15" id="IjE-Gv-usI"/>
+                                                <constraint firstItem="rlP-ag-yst" firstAttribute="top" secondItem="Eqk-2h-Psw" secondAttribute="top" id="Pnv-mh-bDc"/>
+                                                <constraint firstAttribute="bottom" secondItem="rlP-ag-yst" secondAttribute="bottom" id="qwB-Gy-F5W"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <connections>
+                                            <outlet property="videoView" destination="rlP-ag-yst" id="OQr-T7-tOT"/>
+                                        </connections>
+                                    </tableViewCell>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="fileTransferAudioInCell" id="JFj-f8-GUQ" userLabel="fileTransferAudioInCell" customClass="MLFileTransferVideoCell">
+                                        <rect key="frame" x="0.0" y="2274" width="1024" height="52"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="JFj-f8-GUQ" id="i3b-le-uYZ">
+                                            <rect key="frame" x="0.0" y="0.0" width="1024" height="52"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <view alpha="0.80000001192092896" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="a86-1u-1oZ">
+                                                    <rect key="frame" x="15" y="0.0" width="200" height="52"/>
+                                                    <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="200" id="SPY-1N-BbV"/>
+                                                        <constraint firstAttribute="height" constant="90" id="dF8-mO-mCK"/>
+                                                    </constraints>
+                                                </view>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="a86-1u-1oZ" firstAttribute="top" secondItem="i3b-le-uYZ" secondAttribute="top" id="M7T-vr-dD4"/>
+                                                <constraint firstAttribute="bottom" secondItem="a86-1u-1oZ" secondAttribute="bottom" id="cry-7r-WZq"/>
+                                                <constraint firstItem="a86-1u-1oZ" firstAttribute="leading" secondItem="i3b-le-uYZ" secondAttribute="leading" constant="15" id="yCL-Al-nT9"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <connections>
+                                            <outlet property="videoView" destination="a86-1u-1oZ" id="w5t-vk-c3l"/>
+                                        </connections>
+                                    </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="fileTransferTextInCell" id="NfZ-U4-kmF" userLabel="fileTransferTextInCell" customClass="MLFileTransferTextCell">
-                                        <rect key="frame" x="0.0" y="1951" width="414" height="44"/>
+                                        <rect key="frame" x="0.0" y="2326" width="1024" height="52"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="NfZ-U4-kmF" id="VVA-mC-rel">
-                                            <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="1024" height="52"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="T7v-nr-OOA">
-                                                    <rect key="frame" x="15" y="4" width="260" height="36"/>
+                                                    <rect key="frame" x="15" y="4" width="260" height="44"/>
                                                     <subviews>
                                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="CfE-mz-ylG">
-                                                            <rect key="frame" x="4" y="8" width="252" height="13"/>
+                                                            <rect key="frame" x="4" y="8" width="252" height="21"/>
                                                             <subviews>
                                                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="file" translatesAutoresizingMaskIntoConstraints="NO" id="ryp-5G-2ic">
-                                                                    <rect key="frame" x="10" y="-11" width="35" height="35"/>
+                                                                    <rect key="frame" x="10" y="-7" width="35" height="35"/>
                                                                     <color key="tintColor" red="0.23529411759999999" green="0.57647058819999997" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="height" constant="35" id="9LO-NS-H1J"/>
@@ -2139,7 +2193,7 @@
                                                             </constraints>
                                                         </view>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Pa1-bS-3DG">
-                                                            <rect key="frame" x="0.0" y="23" width="248" height="12"/>
+                                                            <rect key="frame" x="0.0" y="31" width="248" height="12"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                             <color key="textColor" systemColor="systemGrayColor"/>
                                                             <nil key="highlightedColor"/>
@@ -2177,20 +2231,20 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="fileTransferTextOutCell" id="fpA-Cz-AIl" userLabel="fileTransferTextOutCell" customClass="MLFileTransferTextCell">
-                                        <rect key="frame" x="0.0" y="1995" width="414" height="44"/>
+                                        <rect key="frame" x="0.0" y="2378" width="1024" height="52"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="fpA-Cz-AIl" id="9Ow-bk-ili">
-                                            <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="1024" height="52"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <view contentMode="scaleToFill" ambiguous="YES" translatesAutoresizingMaskIntoConstraints="NO" id="kbM-qp-VlY">
-                                                    <rect key="frame" x="139" y="4" width="260" height="36"/>
+                                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kbM-qp-VlY">
+                                                    <rect key="frame" x="749" y="4" width="260" height="44"/>
                                                     <subviews>
                                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ecb-8z-Lhp">
-                                                            <rect key="frame" x="4" y="8" width="252" height="13"/>
+                                                            <rect key="frame" x="4" y="8" width="252" height="21"/>
                                                             <subviews>
                                                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="file" translatesAutoresizingMaskIntoConstraints="NO" id="ykr-fe-1Wz">
-                                                                    <rect key="frame" x="10" y="-11" width="35" height="35"/>
+                                                                    <rect key="frame" x="10" y="-7" width="35" height="35"/>
                                                                     <color key="tintColor" red="0.23529411759999999" green="0.57647058819999997" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                                     <constraints>
                                                                         <constraint firstAttribute="height" constant="35" id="S8b-gl-Qkk"/>
@@ -2215,7 +2269,7 @@
                                                             </constraints>
                                                         </view>
                                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vTA-mB-OiW">
-                                                            <rect key="frame" x="0.0" y="23" width="248" height="12"/>
+                                                            <rect key="frame" x="0.0" y="31" width="248" height="12"/>
                                                             <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                                             <color key="textColor" systemColor="systemGrayColor"/>
                                                             <nil key="highlightedColor"/>
@@ -2433,12 +2487,9 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="5zY-lR-WCu"/>
-        <segue reference="5bM-w5-CYw"/>
-        <segue reference="tEM-gR-7nN"/>
         <segue reference="Ecb-7N-zer"/>
         <segue reference="ndm-rg-MfL"/>
-        <segue reference="hqW-lo-9tZ"/>
+        <segue reference="tEM-gR-7nN"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="724-info" width="28" height="28"/>
@@ -2452,17 +2503,14 @@
         <systemColor name="darkTextColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
-        <systemColor name="darkTextColor">
-            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
-        <systemColor name="darkTextColor">
-            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
         <systemColor name="groupTableViewBackgroundColor">
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="labelColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="secondarySystemBackgroundColor">
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="separatorColor">
             <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.28999999999999998" colorSpace="custom" customColorSpace="sRGB"/>

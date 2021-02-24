@@ -1745,8 +1745,7 @@ enum msgSentState {
         else
         {
             //this is just a dummy to display something usable (the filetransfer url as link cell)
-            
-            // Use default text cell
+
             cell = (MLChatCell*)[self messageTableCellWithIdentifier:@"progress" andInbound:inDirection fromTable: tableView];
             cell.link = row.messageText;
             
@@ -2193,6 +2192,16 @@ enum msgSentState {
         [videoCell avplayerConfigWithUrlStr:videoStr fileName:videoFileName andVC:self];
                 
         cell = videoCell;
+    }
+    else if ([info[@"mimeType"] hasPrefix:@"audio/"])
+    {
+        //we may wan to make a new kind later but for now this is perfectly functional
+        MLFileTransferVideoCell* audioCell = (MLFileTransferVideoCell *) [self messageTableCellWithIdentifier:@"fileTransferAudio" andInbound:inDirection fromTable:tableView];
+        NSString *audioStr = info[@"cacheFile"];
+        NSString *audioFileName = info[@"filename"];
+        [audioCell avplayerConfigWithUrlStr:audioStr fileName:audioFileName andVC:self];
+                
+        cell = audioCell;
     }
     else
     {

@@ -22,7 +22,7 @@
 @property (nonatomic, strong) NSString* recipient;
 
 @property (nonatomic, strong) NSArray* accounts;
-@property (nonatomic, strong) NSMutableArray* recipients;
+@property (nonatomic, strong) NSArray<MLContact*>* recipients;
 
 @end
 
@@ -55,8 +55,8 @@ const u_int32_t MagicMapKitItem = 1 << 2;
     NSData* recipientsData = [[HelperTools defaultsDB] objectForKey:@"recipients"];
     
     NSError* error;
-    NSSet* objClasses = [NSSet setWithArray:@[[NSMutableArray class], [NSMutableDictionary class], [NSNumber class], [NSString class]]];
-    self.recipients = [NSKeyedUnarchiver unarchivedObjectOfClasses:objClasses fromData:recipientsData error:&error];
+    NSSet* objClasses = [NSSet setWithArray:@[[NSMutableArray class], [NSArray class], [NSMutableDictionary class], [NSDictionary class], [NSNumber class], [NSString class], [NSDate class], [NSObject class], [MLContact class]]];
+    self.recipients = (NSArray<MLContact*>*)[NSKeyedUnarchiver unarchivedObjectOfClasses:objClasses fromData:recipientsData error:&error];
     if(error) {
         DDLogError(@"Monal ShareViewController: %@", error);
     }
@@ -190,13 +190,9 @@ const u_int32_t MagicMapKitItem = 1 << 2;
         MLSelectionController* controller = (MLSelectionController *)[iosShareStoryboard instantiateViewControllerWithIdentifier:@"contacts"];
 
         // Create list of recipients for the selected account
-        NSMutableArray *recipientsToShow = [[NSMutableArray alloc] init];
-        for (NSMutableDictionary* row in self.recipients) {
-            if([[row objectForKey:@"account_id"] integerValue] == [[self.account objectForKey:@"account_id"] integerValue])
-            {
-                MLContact* contact = [MLContact contactFromDictionary:row];
-                [recipientsToShow addObject:@{@"contact": contact}];
-            }
+        NSMutableArray<NSDictionary*>* recipientsToShow = [[NSMutableArray alloc] init];
+        for (MLContact* contact in self.recipients) {
+            [recipientsToShow addObject:@{@"contact": contact}];
         }
 
         controller.options = recipientsToShow;

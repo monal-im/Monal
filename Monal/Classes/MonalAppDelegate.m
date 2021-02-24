@@ -516,7 +516,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) applicationWillResignActive:(UIApplication *)application
 {
-    NSMutableArray* activeContacts = [[DataLayer sharedInstance] activeContactDict];
+    NSArray<MLContact*>* activeContacts = [[DataLayer sharedInstance] activeContactDict];
     if(!activeContacts)
         return;
 

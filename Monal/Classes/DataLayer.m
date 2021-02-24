@@ -1503,33 +1503,21 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark active chats
 
--(NSMutableArray*) activeContactsWithPinned:(BOOL) pinned
+-(NSMutableArray<MLContact*>*) activeContactsWithPinned:(BOOL) pinned
 {
     NSString* query = @"SELECT a.buddy_name, a.account_id FROM activechats AS a JOIN buddylist AS b ON (a.buddy_name = b.buddy_name AND a.account_id = b.account_id) JOIN account ON a.account_id = account.account_id WHERE (account.username || '@' || account.domain) != a.buddy_name AND a.pinned=? ORDER BY lastMessageTime DESC;";
-    NSMutableArray* toReturn = [[NSMutableArray alloc] init];
+    NSMutableArray<MLContact*>* toReturn = [[NSMutableArray<MLContact*> alloc] init];
     for(NSDictionary* dic in [self.db executeReader:query andArguments:@[[NSNumber numberWithBool:pinned]]])
         [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];
     return toReturn;
 }
 
--(NSMutableArray*) activeContactDict
+-(NSArray<MLContact*>*) activeContactDict
 {
-    NSMutableArray<NSDictionary*>* mergedContacts = [self activeContactsWithPinned:YES];
+    NSMutableArray<MLContact*>* mergedContacts = [self activeContactsWithPinned:YES];
     [mergedContacts addObjectsFromArray:[self activeContactsWithPinned:NO]];
-    
-    NSMutableArray* toReturn = [[NSMutableArray alloc] initWithCapacity:mergedContacts.count];
-    [mergedContacts enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSMutableDictionary* dic = [[NSMutableDictionary alloc] initWithDictionary:(NSDictionary*)obj];
-        if(!dic[@"full_name"] || ![dic[@"full_name"] length])
-        {
-            //default is local part, see https://docs.modernxmpp.org/client/design/#contexts
-            //see also: MLContact.m (the only other source that decides what to use as display name)
-            NSDictionary* jidParts = [HelperTools splitJid:dic[@"buddy_name"]];
-            dic[@"full_name"] = jidParts[@"node"];
-        }
-        [toReturn addObject:dic];
-    }];
-    return toReturn;
+
+    return mergedContacts;
 }
 
 -(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo

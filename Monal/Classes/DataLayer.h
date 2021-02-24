@@ -216,8 +216,8 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSNumber*) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString* _Nullable) mimeType size:(NSNumber* _Nullable) size;
 
 #pragma mark active contacts
--(NSMutableArray*) activeContactsWithPinned:(BOOL) pinned;
--(NSMutableArray*) activeContactDict;
+-(NSMutableArray<MLContact*>*) activeContactsWithPinned:(BOOL) pinned;
+-(NSArray<MLContact*>*) activeContactDict;
 -(void) removeActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;
 -(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo;
 -(BOOL) isActiveBuddy:(NSString*) buddyname forAccount:(NSString*) accountNo;

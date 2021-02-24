@@ -2284,14 +2284,6 @@ NSString *const kData=@"data";
 
 +(NSDictionary*) invalidateState:(NSDictionary*) dic
 {
-#ifdef IS_ALPHA
-    @synchronized(_stateLockObject) {
-        //invalidate corrupt smacks states (this could potentially loose messages, but hey, the state is corrupt anyways)
-        if(!self.lastHandledInboundStanza || !self.lastHandledOutboundStanza || !self.lastOutboundStanza || !self.unAckedStanzas)
-            [self initSM3];
-    }
-#endif
-    
     NSArray* toKeep = @[@"lastHandledInboundStanza", @"lastHandledOutboundStanza", @"lastOutboundStanza", @"unAckedStanzas", @"loggedInOnce", @"lastInteractionDate"];
     
     NSMutableDictionary* newState = [[NSMutableDictionary alloc] init];

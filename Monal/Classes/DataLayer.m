@@ -1303,13 +1303,19 @@ static NSDateFormatter* dbFormatter;
     NSString* accountJid = [self jidOfAccount:accountNo];
     if(accountJid)
     {
-
-        NSString* query = @"SELECT x.* FROM (select distinct buddy_name AS thename ,'', nick_name, message_from AS buddy_name, a.account_id from message_history AS a LEFT OUTER JOIN buddylist AS b ON a.message_from=b.buddy_name AND a.account_id=b.account_id WHERE a.account_id=? UNION select distinct message_to as thename ,'',  nick_name, message_to as buddy_name, a.account_id from message_history as a left outer JOIN buddylist AS b ON a.message_to=b.buddy_name AND a.account_id=b.account_id WHERE a.account_id=? AND message_to!=\"(null)\" ) AS x WHERE buddy_name!=? ORDER BY thename COLLATE NOCASE;";
-        NSArray* params = @[accountNo, accountNo,
-                            accountJid];
-        //DDLogVerbose(query);
-        for(NSDictionary* dic in [self.db executeReader:query andArguments:params])
-            [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];
+        for(NSDictionary* contact in [self.db executeReader:@"SELECT DISTINCT \
+            account_id, \
+            CASE \
+                WHEN message_from=? THEN message_to \
+                ELSE message_from \
+            END AS buddy_name \
+            FROM message_history \
+            WHERE account_id=? AND (message_from=? OR message_to=?) \
+            ORDER BY buddy_name ASC; \
+            " andArguments:@[accountJid, accountNo, accountJid]])
+        {
+            [toReturn addObject:[self contactForUsername:contact[@"buddy_name"] forAccount:contact[@"account_id"]]];
+        }
     }
     return toReturn;
 }

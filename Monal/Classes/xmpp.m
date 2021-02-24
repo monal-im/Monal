@@ -2090,6 +2090,14 @@ NSString *const kData=@"data";
             self.unAckedStanzas = [stanzas mutableCopy];
             self.streamID = [dic objectForKey:@"streamID"];
             
+#ifdef IS_ALPHA
+            @synchronized(_stateLockObject) {
+                //invalidate corrupt smacks states (this could potentially loose messages, but hey, the state is corrupt anyways)
+                if(!self.lastHandledInboundStanza || !self.lastHandledOutboundStanza || !self.lastOutboundStanza || !self.unAckedStanzas)
+                    [self initSM3];
+            }
+#endif
+            
             //debug output
             DDLogVerbose(@"%@ --> readSmacksStateOnly(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
                 self.accountNo,
@@ -2135,6 +2143,14 @@ NSString *const kData=@"data";
             NSArray* stanzas = [dic objectForKey:@"unAckedStanzas"];
             self.unAckedStanzas = [stanzas mutableCopy];
             self.streamID = [dic objectForKey:@"streamID"];
+            
+#ifdef IS_ALPHA
+            @synchronized(_stateLockObject) {
+                //invalidate corrupt smacks states (this could potentially loose messages, but hey, the state is corrupt anyways)
+                if(!self.lastHandledInboundStanza || !self.lastHandledOutboundStanza || !self.lastOutboundStanza || !self.unAckedStanzas)
+                    [self initSM3];
+            }
+#endif
             
             NSDictionary* persistentIqHandlers = [dic objectForKey:@"iqHandlers"];
             @synchronized(_iqHandlers) {
@@ -2268,6 +2284,14 @@ NSString *const kData=@"data";
 
 +(NSDictionary*) invalidateState:(NSDictionary*) dic
 {
+#ifdef IS_ALPHA
+    @synchronized(_stateLockObject) {
+        //invalidate corrupt smacks states (this could potentially loose messages, but hey, the state is corrupt anyways)
+        if(!self.lastHandledInboundStanza || !self.lastHandledOutboundStanza || !self.lastOutboundStanza || !self.unAckedStanzas)
+            [self initSM3];
+    }
+#endif
+    
     NSArray* toKeep = @[@"lastHandledInboundStanza", @"lastHandledOutboundStanza", @"lastOutboundStanza", @"unAckedStanzas", @"loggedInOnce", @"lastInteractionDate"];
     
     NSMutableDictionary* newState = [[NSMutableDictionary alloc] init];

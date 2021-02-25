@@ -1085,7 +1085,7 @@ enum msgSentState {
         mediaPicker.delegate = self;
 #if TARGET_OS_MACCATALYST
        
-        UIAlertAction* fileAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"File", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertAction* fileAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Files", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [self attachfile:sender];
         }];
         

@@ -1063,28 +1063,27 @@ enum msgSentState {
 {
     [self stopEditing];
     [self.chatInput resignFirstResponder];
-    xmpp* account=[[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
+    xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
 
-    UIAlertController *actionControll = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Select Action",@ "")
+    UIAlertController *actionControll = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Select Action", @"")
                                                                             message:nil preferredStyle:UIAlertControllerStyleActionSheet];
 
     // Check for http upload support
     if(!account.connectionProperties.supportsHTTPUpload )
     {
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@ "")
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"")
                                                                        message:NSLocalizedString(@"This server does not appear to support HTTP file uploads (XEP-0363). Please ask the administrator to enable it.",@ "") preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [alert dismissViewControllerAnimated:YES completion:nil];
         }]];
         [self presentViewController:alert animated:YES completion:nil];
         
         return;
     } else {
-
         UIImagePickerController* mediaPicker = [[UIImagePickerController alloc] init];
         mediaPicker.delegate = self;
+
 #if TARGET_OS_MACCATALYST
-       
         UIAlertAction* fileAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Files", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [self attachfile:sender];
         }];
@@ -1092,8 +1091,6 @@ enum msgSentState {
         [fileAction setValue:[[UIImage imageNamed:@"file-attatchment"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
         [actionControll addAction:fileAction];
 #else
-
-
         UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             mediaPicker.sourceType = UIImagePickerControllerSourceTypeCamera;
 
@@ -1111,7 +1108,6 @@ enum msgSentState {
             mediaPicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
             mediaPicker.allowsEditing = NO;
             [self presentViewController:mediaPicker animated:YES completion:nil];
-       
         }];
         
         UIAlertAction* fileAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"File", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {

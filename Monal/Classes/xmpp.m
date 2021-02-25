@@ -1934,7 +1934,12 @@ NSString *const kData=@"data";
 
 #pragma mark messaging
 
--(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString *) messageId
+-(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString*) messageId
+{
+    [self sendMessage:message toContact:contact isEncrypted:encrypt isUpload:isUpload andMessageId:messageId withLMCId:nil];
+}
+
+-(void) sendMessage:(NSString*) message toContact:(MLContact*) contact isEncrypted:(BOOL) encrypt isUpload:(BOOL) isUpload andMessageId:(NSString*) messageId withLMCId:(NSString* _Nullable) LMCId
 {
     XMPPMessage* messageNode = [[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact.contactJid forKey:@"to"];
@@ -1976,6 +1981,10 @@ NSString *const kData=@"data";
 
     //for MAM
     [messageNode setStoreHint];
+    
+    //handle LMC
+    if(LMCId)
+        [messageNode setLMCFor:LMCId];
 
     [self send:messageNode];
 }
@@ -3450,15 +3459,6 @@ NSString *const kData=@"data";
 {
     self.statusMessage = message;
     [self sendPresence];
-}
-
--(void) sendLMCForId:(NSString*) messageid withNewBody:(NSString*) newBody to:(NSString*) to
-{
-    XMPPMessage* LMCNode = [[XMPPMessage alloc] init];
-    LMCNode.attributes[@"type"] = kMessageChatType;
-    LMCNode.attributes[@"to"] = to;
-    [LMCNode setLMCFor:messageid withNewBody:newBody];
-    [self send:LMCNode];
 }
 
 @end

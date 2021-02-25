@@ -2070,8 +2070,8 @@ enum msgSentState {
             if(newBody != nil)
             {
                 message.messageText = newBody;
-                
-                [self.xmppAccount sendLMCForId:message.messageId withNewBody:newBody to:message.to];
+
+                [self.xmppAccount sendMessage:newBody toContact:self.contact isEncrypted:(self.encryptChat || message.encrypted) isUpload:NO andMessageId:[[NSUUID UUID] UUIDString] withLMCId:message.messageId];
                 [[DataLayer sharedInstance] updateMessageHistory:message.messageDBId withText:newBody];
                 
                 [self->_messageTable beginUpdates];
@@ -2094,7 +2094,7 @@ enum msgSentState {
     }
     
     UIContextualAction* LMCDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
-        [self.xmppAccount sendLMCForId:message.messageId withNewBody:kMessageDeletedBody to:message.to];
+        [self.xmppAccount sendMessage:kMessageDeletedBody toContact:self.contact isEncrypted:(self.encryptChat || message.encrypted) isUpload:NO andMessageId:[[NSUUID UUID] UUIDString] withLMCId:message.messageId];
         [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
         
         [self->_messageTable beginUpdates];

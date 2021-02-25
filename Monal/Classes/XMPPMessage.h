@@ -39,7 +39,7 @@ FOUNDATION_EXPORT NSString* const kMessageHeadlineType;
  */
 -(void) setOobUrl:(NSString*) link;
 
--(void) setLMCFor:(NSString*) id withNewBody:(NSString*) newBody;
+-(void) setLMCFor:(NSString*) id;
 
 /**
  sets the receipt child element

@@ -70,10 +70,9 @@ NSString* const kMessageHeadlineType = @"headline";
     [self setBody:link];    //http filetransfers must have a message body equal to the oob link to be recognized as filetransfer
 }
 
--(void) setLMCFor:(NSString*) id withNewBody:(NSString*) newBody
+-(void) setLMCFor:(NSString*) id
 {
     [self addChild:[[MLXMLNode alloc] initWithElement:@"replace" andNamespace:@"urn:xmpp:message-correct:0" withAttributes:@{@"id": id} andChildren:@[] andData:nil]];
-    [self setBody:newBody];
 }
 
 /**

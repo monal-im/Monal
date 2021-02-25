@@ -1123,6 +1123,7 @@ enum msgSentState {
         }
         [fileAction setValue:[[UIImage imageNamed:@"file-attatchment"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
         [actionControll addAction:cameraAction];
+        [actionControll addAction:photosAction];
         [actionControll addAction:fileAction];
 #endif
     }

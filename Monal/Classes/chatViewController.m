@@ -1085,11 +1085,12 @@ enum msgSentState {
         mediaPicker.delegate = self;
 #if TARGET_OS_MACCATALYST
        
-        UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Images", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertAction* fileAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"File", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [self attachfile:sender];
         }];
         
-        [photosAction setValue:[[UIImage systemImageNamed:@"photo"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+        [fileAction setValue:[[UIImage imageNamed:@"file-attatchment"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
+        [actionControll addAction:fileAction];
 #else
 
 
@@ -1126,11 +1127,8 @@ enum msgSentState {
         }
         [fileAction setValue:[[UIImage imageNamed:@"file-attatchment"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
         [actionControll addAction:cameraAction];
-        [actionControll addAction:photosAction];
         [actionControll addAction:fileAction];
 #endif
-        
-        [actionControll addAction:photosAction];
     }
     
     UIAlertAction* gpsAlert = [UIAlertAction actionWithTitle:NSLocalizedString(@"Send Location",@ "") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {

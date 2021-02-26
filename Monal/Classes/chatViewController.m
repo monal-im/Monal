@@ -87,6 +87,11 @@
 @property (nonatomic, strong) void (^editingCallback)(NSString* newBody);
 @property (nonatomic, strong) NSMutableSet* previewedIds;
 
+@property (atomic) BOOL isAudioMessage;
+@property (nonatomic) UILongPressGestureRecognizer *longGestureRecognizer;
+
+@property (nonatomic) UIView *audioRecoderInfoView;
+
 #define lastMsgButtonSize 40.0
 
 @end
@@ -181,13 +186,19 @@ enum msgSentState {
     [self setChatInputHeightConstraints:YES];
     
     if (@available(iOS 13.0, *)) {
-        [self.sendButton setImage:[UIImage systemImageNamed:@"paperplane.fill"] forState:UIControlStateNormal];
+        [self.sendButton setImage:[UIImage systemImageNamed:@"mic"] forState:UIControlStateNormal];
         [self.plusButton setImage:[UIImage systemImageNamed:@"paperclip"] forState:UIControlStateNormal];
     } else {
-        [self.sendButton setImage:[UIImage imageNamed:@"648-paper-airplane"] forState:UIControlStateNormal];
+        [self.sendButton setImage:[UIImage imageNamed:@"microphone"] forState:UIControlStateNormal];
         [self.plusButton setImage:[UIImage imageNamed:@"907-plus-rounded-square"] forState:UIControlStateNormal];
     }
 
+    self.longGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(recordMessageAudio:)];
+    self.longGestureRecognizer.minimumPressDuration = 0.8;
+    [self.sendButton addGestureRecognizer:self.longGestureRecognizer];
+    
+    self.isAudioMessage = YES;
+    
     // setup refreshControl for infinite scrolling
     UIRefreshControl* refreshControl = [[UIRefreshControl alloc] init];
     [refreshControl addTarget:self action:@selector(loadOldMsgHistory:) forControlEvents:UIControlEventValueChanged];
@@ -706,7 +717,6 @@ enum msgSentState {
     }
 }
 
-
 #pragma mark rotation
 -(void) viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
@@ -719,7 +729,6 @@ enum msgSentState {
         [self lastMsgButtonPositionConfigWithSize:size];
     }];
 }
-
 
 #pragma mark gestures
 
@@ -907,6 +916,8 @@ enum msgSentState {
         [self.chatInput setText:@""];
         [self saveMessageDraft];
         
+        [self setSendButtonIconWithTextLength:0];
+        
         if(self.editingCallback)
             self.editingCallback(cleanString);
         else
@@ -925,6 +936,30 @@ enum msgSentState {
 -(IBAction)sendMessageText:(id)sender
 {
     [self resignTextView];
+}
+
+-(void)recordMessageAudio:(UILongPressGestureRecognizer*)gestureRecognizer{
+    [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+            if (granted) {
+                if (gestureRecognizer.state == UIGestureRecognizerStateBegan){
+                    [[MLAudioRecoderManager sharedInstance] setRecoderManagerDelegate:self];
+                    [[MLAudioRecoderManager sharedInstance] start];
+                } else if (gestureRecognizer.state == UIGestureRecognizerStateEnded){
+                    [[MLAudioRecoderManager sharedInstance] stop];
+                }
+            } else {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Please Allow Audio Access",@ "") message:NSLocalizedString(@"If you want to use audio message you will need to allow access in Settings-> Privacy-> Microphone.",@ "") preferredStyle:UIAlertControllerStyleAlert];
+                    
+                    UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                        
+                    }];
+                    
+                    [messageAlert addAction:closeAction];
+                    [self presentViewController:messageAlert animated:YES completion:nil];
+                });
+            }
+    }];
 }
 
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
@@ -1726,16 +1761,6 @@ enum msgSentState {
                     cell = fileTransferCell;
                 }
             }
-            //            else
-            //            {
-            //
-            //                NSString *mimeType = info[@"mimeType"];
-            //
-            //                NSLog(@"#[Jim] mimeType:%@", mimeType);
-            //
-            //TODO JIM: add handling for some other mime types and default handling for general files (e.g. "open this file" button) here
-            //TODO JIM: for now we just show the link as normal chat cell
-            //            }
         }
         else
         {
@@ -2475,6 +2500,33 @@ enum msgSentState {
         self.placeHolderText.hidden = YES;
     else
         self.placeHolderText.hidden = NO;
+        
+    [self setSendButtonIconWithTextLength:[textView.text length]];
+}
+
+-(void)setSendButtonIconWithTextLength:(NSUInteger)txtLength{
+    if (_isTyping == NO || txtLength == 0){
+        //Set button icon to audio recorder icon
+        if (@available(iOS 13.0, *)) {
+            [self.sendButton setImage:[UIImage systemImageNamed:@"mic"] forState:UIControlStateNormal];
+        } else {
+            [self.sendButton setImage:[UIImage imageNamed:@"microphone"] forState:UIControlStateNormal];
+        }
+        self.isAudioMessage = YES;
+        if (![self.longGestureRecognizer isEnabled]){
+            [self.longGestureRecognizer setEnabled:YES];
+        }
+    } else {
+        if (@available(iOS 13.0, *)) {
+            [self.sendButton setImage:[UIImage systemImageNamed:@"paperplane.fill"] forState:UIControlStateNormal];
+        } else {
+            [self.sendButton setImage:[UIImage imageNamed:@"648-paper-airplane"] forState:UIControlStateNormal];
+        }
+        self.isAudioMessage = NO;
+        if ([self.longGestureRecognizer isEnabled]){
+            [self.longGestureRecognizer setEnabled:NO];
+        }
+    }
 }
 
 #pragma mark - link preview
@@ -2662,4 +2714,79 @@ enum msgSentState {
     [self presentViewController:fileViewController animated:NO completion:nil];
 //    [self.navigationController pushViewController:fileViewController animated:NO];
 }
+
+#pragma mark - MLAudioRecoderManager delegate
+-(void)notifyStart{
+    CGFloat infoHeight = self.inputContainerView.frame.size.height;
+    CGFloat infoWidth = self.inputContainerView.frame.size.width;
+
+    UIColor *labelBackgroundColor = self.inputContainerView.backgroundColor;
+    self.audioRecoderInfoView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, infoWidth - 50, infoHeight)];
+    self.audioRecoderInfoView.backgroundColor = labelBackgroundColor;
+    UILabel *audioTimeInfoLabel = [[UILabel alloc] initWithFrame:CGRectMake(5, 0, infoWidth - 50, infoHeight)];
+    [audioTimeInfoLabel setText:NSLocalizedString(@"Recording audio", @"")];
+    [self.audioRecoderInfoView addSubview:audioTimeInfoLabel];
+    [self.inputContainerView addSubview:self.audioRecoderInfoView];
+}
+
+-(void)notifyStop:(NSURL *)fileURL{
+    [self.audioRecoderInfoView removeFromSuperview];
+    
+    [self showUploadHUD];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+        NSFileCoordinator* coordinator = [[NSFileCoordinator alloc] init];
+        
+            [coordinator coordinateReadingItemAtURL:fileURL options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
+                [MLFiletransfer uploadFile:newURL onAccount:self.xmppAccount withEncryption:self.encryptChat andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self showPotentialError:error];
+                        if(!error)
+                        {
+                            NSString* newMessageID = [[NSUUID UUID] UUIDString];
+                            [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
+                            [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.encryptChat isUpload:YES messageId:newMessageID withCompletionHandler:^(BOOL success, NSString *messageId) {
+                                [self hideUploadHUD];
+                            }];
+                        }
+                        DDLogVerbose(@"upload done");
+                    });
+                }];
+            }];
+        
+    });
+}
+
+-(void)updateCurrentTime:(NSTimeInterval)audioDuration{
+    int durationMinutes = (int)audioDuration/60;
+    int durationSeconds = (int)audioDuration - durationMinutes*60;
+    
+    for (UIView* subview in self.audioRecoderInfoView.subviews) {
+        if([subview isKindOfClass:[UILabel class]]){
+            UILabel *infoLabel = (UILabel*)subview;
+            [infoLabel setText:[NSString stringWithFormat:@"%02d:%02d", durationMinutes, durationSeconds]];
+            [infoLabel setTextColor:[UIColor blackColor]];
+        }
+    }
+}
+
+-(void)notifyResult:(BOOL)isSuccess error:(NSString *)errorMsg{
+    NSString *alertTitle = @"";
+    if (isSuccess){
+        alertTitle = NSLocalizedString(@"Recode Success", @"");
+    } else {
+        alertTitle = [NSString stringWithFormat:@"%@%@", NSLocalizedString(@"Recode Fail:", @""), errorMsg];
+    }
+    
+    UIAlertController *audioRecoderAlert = [UIAlertController alertControllerWithTitle:alertTitle
+                                                                        message:@"" preferredStyle:UIAlertControllerStyleAlert];
+    
+    [self presentViewController:audioRecoderAlert animated:YES completion:^{
+        dispatch_queue_t queue = dispatch_get_main_queue();
+        dispatch_after(1.0, queue, ^{
+            [audioRecoderAlert dismissViewControllerAnimated:YES completion:nil];
+        });
+    }];
+}
+
 @end

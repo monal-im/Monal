@@ -178,7 +178,33 @@ enum MLKeysTableViewControllerSections {
 }
 
 
--(void) MLQRCodeContactScannedWithJid:(NSString *)jid fingerprints:(NSDictionary<NSNumber *,NSString *> *)fingerprints
+-(void) MLQRCodeContactScannedWithJid:(NSString*)jid fingerprints:(NSDictionary<NSNumber*, NSString*>*)fingerprints
+{
+    // Close QR-Code scanner
+    [self.navigationController popViewControllerAnimated:YES];
+    // show warning if we scan a qr code for a other jid than we currently have open
+    if([self.contact.contactJid isEqualToString:jid])
+    {
+        // scanned for the same jid
+        [self resetTrustForJid:jid trustFingerprints:fingerprints];
+    }
+    else
+    {
+        // show warning
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"QR-Code: Fingerprints found", @"") message:[NSString stringWithFormat:@"%@: %@", NSLocalizedString(@"Do you want to trust the scanned fingerprints from", @""), jid] preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction* trustAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [self resetTrustForJid:jid trustFingerprints:fingerprints];
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }];
+        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        }];
+        [alert addAction:trustAction];
+        [alert addAction:closeAction];
+    }
+}
+
+-(void) resetTrustForJid:(NSString*) jid trustFingerprints:(NSDictionary<NSNumber*, NSString*>*) fingerprints
 {
     // untrust all devices from jid
     [self.account.omemo untrustAllDevicesFrom:jid];
@@ -207,8 +233,6 @@ enum MLKeysTableViewControllerSections {
             // TODO: save fingerprint and trust separately in another table
         }
     }
-    // Close QR-Code scanner
-    [self.navigationController popViewControllerAnimated:YES];
 }
 
 @end

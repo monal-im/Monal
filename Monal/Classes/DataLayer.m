@@ -2307,7 +2307,7 @@ static NSDateFormatter* dbFormatter;
                      'creationTimestamp' INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP, \
                      'pubSubRemovalTimestamp' INTEGER DEFAULT NULL, \
                      'keyUsed' INTEGER NOT NULL DEFAULT 0, \
-                     PRIMARY KEY('account_id', 'prekeyid', 'preKey'), \
+                     PRIMARY KEY('account_id', 'prekeyid'), \
                      FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE \
                  );"];
             [self.db executeNonQuery:@"DELETE FROM _signalPreKeyTMP WHERE account_id NOT IN (SELECT account_id FROM account)"];
@@ -2324,6 +2324,7 @@ static NSDateFormatter* dbFormatter;
                      FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE \
                  );"];
             [self.db executeNonQuery:@"DELETE FROM _signalSignedPreKeyTMP WHERE account_id NOT IN (SELECT account_id FROM account)"];
+            [self.db executeNonQuery:@"DELETE FROM _signalSignedPreKeyTMP WHERE (ROWID, account_id, signedPreKeyId, signedPreKey) NOT IN (SELECT ROWID, account_id, signedPreKeyId, signedPreKey FROM _signalSignedPreKeyTMP GROUP BY account_id);"];
             [self.db executeNonQuery:@"INSERT INTO signalSignedPreKey SELECT * FROM _signalSignedPreKeyTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _signalSignedPreKeyTMP;"];
         }];

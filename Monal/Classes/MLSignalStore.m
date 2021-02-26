@@ -296,7 +296,7 @@
 - (BOOL) storeSignedPreKey:(NSData*)signedPreKey signedPreKeyId:(uint32_t)signedPreKeyId
 {
     DDLogDebug(@"Storing signed prekey %lu", (unsigned long)signedPreKeyId);
-    BOOL success= [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalSignedPreKey (account_id, signedPreKeyId, signedPreKey) VALUES (?, ?, ?);" andArguments:@[self.accountId,  [NSNumber numberWithInteger:signedPreKeyId], signedPreKey]];
+    BOOL success = [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalSignedPreKey (account_id, signedPreKeyId, signedPreKey) VALUES (?, ?, ?) ON CONFLICT(account_id, signedPreKeyId) DO UPDATE SET signedPreKey=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:signedPreKeyId], signedPreKey, signedPreKey]];
     
     return success;
 }

@@ -191,16 +191,17 @@ enum MLKeysTableViewControllerSections {
     else
     {
         // show warning
-        UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"QR-Code: Fingerprints found", @"") message:[NSString stringWithFormat:@"%@: %@", NSLocalizedString(@"Do you want to trust the scanned fingerprints from", @""), jid] preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController* fingerprintAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"QR-Code: Fingerprints found", @"") message:[NSString stringWithFormat:@"%@: %@", NSLocalizedString(@"Do you want to trust the scanned fingerprints from", @""), jid] preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction* trustAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [self resetTrustForJid:jid trustFingerprints:fingerprints];
-            [alert dismissViewControllerAnimated:YES completion:nil];
+            [fingerprintAlert dismissViewControllerAnimated:YES completion:nil];
         }];
         UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-            [alert dismissViewControllerAnimated:YES completion:nil];
+            [fingerprintAlert dismissViewControllerAnimated:YES completion:nil];
         }];
-        [alert addAction:trustAction];
-        [alert addAction:closeAction];
+        [fingerprintAlert addAction:trustAction];
+        [fingerprintAlert addAction:closeAction];
+        [self presentViewController:fingerprintAlert animated:YES completion:nil];
     }
 }
 

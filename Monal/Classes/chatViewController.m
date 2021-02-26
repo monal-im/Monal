@@ -2150,7 +2150,7 @@ enum msgSentState {
     }
     
     //only allow editing for the 2 newest outgoing message that were sent in the last 2 minutes
-    if([[DataLayer sharedInstance] checkLMCEligible:message.messageDBId from:self.xmppAccount.connectionProperties.identity.jid])
+    if([[DataLayer sharedInstance] checkLMCEligible:message.messageDBId from:self.xmppAccount.connectionProperties.identity.jid encrypted:self.encryptChat])
         return [UISwipeActionsConfiguration configurationWithActions:@[
             LMCEditAction,
             LMCDeleteAction,

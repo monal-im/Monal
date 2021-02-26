@@ -229,7 +229,7 @@ static NSMutableDictionary* _typingNotifications;
             {
                 NSString* messageIdToReplace = [messageNode findFirst:@"{urn:xmpp:message-correct:0}replace@id"];
                 historyId = [[DataLayer sharedInstance] getHistoryIDForMessageId:messageIdToReplace from:messageNode.fromUser andAccount:account.accountNo];
-                if([[DataLayer sharedInstance] checkLMCEligible:historyId from:messageNode.fromUser])
+                if([[DataLayer sharedInstance] checkLMCEligible:historyId from:messageNode.fromUser encrypted:encrypted])
                 {
                     if(![body isEqualToString:kMessageDeletedBody])
                         [[DataLayer sharedInstance] updateMessageHistory:historyId withText:body];

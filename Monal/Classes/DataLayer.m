@@ -1216,22 +1216,30 @@ static NSDateFormatter* dbFormatter;
     return [self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE messageid=? AND message_from=? AND account_id=?;" andArguments:@[messageid, from, accountNo]];
 }
 
--(BOOL) checkLMCEligible:(NSNumber*) historyID from:(NSString*) from
+-(BOOL) checkLMCEligible:(NSNumber*) historyID from:(NSString*) from encrypted:(BOOL) encrypted
 {
     MLMessage* msg = [self messageForHistoryID:historyID];
     if(from == nil || msg == nil)
         return NO;
-    NSNumber* numberOfMessagesComingAfterThis = [self.db executeScalar:@"SELECT COUNT(message_history_id) FROM message_history WHERE message_history_id>? AND message_from=? AND message_to=? AND account_id=?;" andArguments:@[historyID, msg.from, msg.to, msg.accountId]];
+
     //only allow LMC for the 3 newest messages of this contact (or of us)
-    if(
-        numberOfMessagesComingAfterThis.intValue < 3
-        && [msg.messageType isEqualToString:kMessageTypeText]
-        && [msg.from isEqualToString:from]
-        //not needed according to holger
-        //&& ([NSDate date].timeIntervalSince1970 - msg.timestamp.timeIntervalSince1970) < 120
-    )
-        return YES;
-    return NO;
+    NSNumber* editAllowed = (NSNumber*)[self.db executeScalar:@"\
+        SELECT \
+            CASE \
+                WHEN (encrypted=? OR 1=?) THEN 1 \
+                ELSE 0 \
+            END \
+        FROM \
+            (SELECT account_id, message_history_id, message_from, message_to, encrypted, messageType FROM message_history WHERE account_id=? ORDER BY message_history_id DESC LIMIT 3) \
+        WHERE \
+            message_history_id=? AND message_from=? AND message_to=? AND account_id=? AND messageType=?; \
+        " andArguments:@[[NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:encrypted], msg.accountId, historyID, msg.from, msg.to, msg.accountId, msg.messageType]];
+    BOOL eligible = YES;
+    eligible &= editAllowed.intValue == 1;
+    eligible &= [msg.messageType isEqualToString:kMessageTypeText];
+    eligible &= [msg.from isEqualToString:from];
+
+    return eligible;
 }
 
 -(NSArray*) messageHistoryListDates:(NSString*) buddy forAccount: (NSString*) accountNo

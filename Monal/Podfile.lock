@@ -19,9 +19,9 @@ PODS:
   - OpenSSL-Universal (1.1.180)
   - pop (1.0.12)
   - SAMKeychain (1.5.3)
-  - SDWebImage (5.10.3):
-    - SDWebImage/Core (= 5.10.3)
-  - SDWebImage/Core (5.10.3)
+  - SDWebImage (5.10.4):
+    - SDWebImage/Core (= 5.10.4)
+  - SDWebImage/Core (5.10.4)
   - SignalProtocolC (2.3.2)
   - SignalProtocolObjC (1.1.0):
     - SignalProtocolC (~> 2.3.2)
@@ -83,7 +83,7 @@ SPEC CHECKSUMS:
   OpenSSL-Universal: 1aa4f6a6ee7256b83db99ec1ccdaa80d10f9af9b
   pop: d582054913807fd11fd50bfe6a539d91c7e1a55a
   SAMKeychain: 483e1c9f32984d50ca961e26818a534283b4cd5c
-  SDWebImage: e378178472b735e84b007bfb55514c97948a0598
+  SDWebImage: c666b97e1fa9c64b4909816a903322018f0a9c84
   SignalProtocolC: 051512e9f3abfeb4120c5e9673af9ae0ee370070
   SignalProtocolObjC: b992ed29c3b7b453510ff0102ed16ef143f7efd2
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
@@ -93,4 +93,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: f260408cc00e0473f028541b27e4b32d1eef1c0d
 
-COCOAPODS: 1.10.0
+COCOAPODS: 1.10.1

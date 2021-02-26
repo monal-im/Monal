@@ -2266,6 +2266,67 @@ static NSDateFormatter* dbFormatter;
                  PRIMARY KEY('account_id', 'room') \
              );"];
         }];
+
+        [self updateDBTo:5.009 withBlock:^{
+            // add foreign key to signalContactSession
+            [self.db executeNonQuery:@"ALTER TABLE signalContactSession RENAME TO _signalContactSessionTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE 'signalContactSession' ( \
+                     'account_id' int NOT NULL, \
+                     'contactName' text, \
+                     'contactDeviceId' int NOT NULL, \
+                     'recordData' BLOB, \
+                     PRIMARY KEY('account_id','contactName','contactDeviceId'), \
+                     FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, \
+                     FOREIGN KEY('account_id', 'contactName') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
+                 );"];
+            [self.db executeNonQuery:@"DELETE FROM _signalContactSessionTMP WHERE account_id NOT IN (SELECT account_id FROM account)"];
+            [self.db executeNonQuery:@"DELETE FROM _signalContactSessionTMP WHERE (account_id, contactName) NOT IN (SELECT account_id, buddy_name FROM buddylist)"];
+            [self.db executeNonQuery:@"INSERT INTO signalContactSession SELECT * FROM _signalContactSessionTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _signalContactSessionTMP;"];
+
+            // add foreign key to signalIdentity
+            [self.db executeNonQuery:@"ALTER TABLE signalIdentity RENAME TO _signalIdentityTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE 'signalIdentity' ( \
+                     'account_id' int NOT NULL, \
+                     'deviceid' int NOT NULL, \
+                     'identityPublicKey' BLOB NOT NULL, \
+                     'identityPrivateKey' BLOB NOT NULL, \
+                     PRIMARY KEY('account_id', 'deviceid'), \
+                     FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE \
+                 );"];
+            [self.db executeNonQuery:@"DELETE FROM _signalIdentityTMP WHERE account_id NOT IN (SELECT account_id FROM account)"];
+            [self.db executeNonQuery:@"INSERT INTO signalIdentity (account_id, deviceid, identityPublicKey, identityPrivateKey) SELECT account_id, deviceid, identityPublicKey, identityPrivateKey FROM _signalIdentityTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _signalIdentityTMP;"];
+
+            // add foreign key to signalPreKey
+            [self.db executeNonQuery:@"ALTER TABLE signalPreKey RENAME TO _signalPreKeyTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE 'signalPreKey' ( \
+                     'account_id' int NOT NULL, \
+                     'prekeyid' int NOT NULL, \
+                     'preKey' BLOB, \
+                     'creationTimestamp' INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP, \
+                     'pubSubRemovalTimestamp' INTEGER DEFAULT NULL, \
+                     'keyUsed' INTEGER NOT NULL DEFAULT 0, \
+                     PRIMARY KEY('account_id', 'prekeyid', 'preKey'), \
+                     FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE \
+                 );"];
+            [self.db executeNonQuery:@"DELETE FROM _signalPreKeyTMP WHERE account_id NOT IN (SELECT account_id FROM account)"];
+            [self.db executeNonQuery:@"INSERT INTO signalPreKey SELECT * FROM _signalPreKeyTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _signalPreKeyTMP;"];
+
+            // add foreign key to signalSignedPreKey
+            [self.db executeNonQuery:@"ALTER TABLE signalSignedPreKey RENAME TO _signalSignedPreKeyTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE 'signalSignedPreKey' ( \
+                     'account_id' int NOT NULL, \
+                     'signedPreKeyId' int NOT NULL, \
+                     'signedPreKey' BLOB, \
+                     PRIMARY KEY('account_id', 'signedPreKeyId'), \
+                     FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE \
+                 );"];
+            [self.db executeNonQuery:@"DELETE FROM _signalSignedPreKeyTMP WHERE account_id NOT IN (SELECT account_id FROM account)"];
+            [self.db executeNonQuery:@"INSERT INTO signalSignedPreKey SELECT * FROM _signalSignedPreKeyTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _signalSignedPreKeyTMP;"];
+        }];
     }];
     [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
     [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];

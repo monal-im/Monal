@@ -1,12 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "file_attachment.png",
+      "filename" : "microphone.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "file_attachment-2.png",
+      "filename" : "microphone@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

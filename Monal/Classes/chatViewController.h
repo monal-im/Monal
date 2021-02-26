@@ -20,8 +20,9 @@
 #import "MLFileTransferVideoCell.h"
 #import "MLFileTransferTextCell.h"
 #import "MLFileTransferFileViewController.h"
+#import "MLAudioRecoderManager.h"
 
-@interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate, CLLocationManagerDelegate, SearchResultDelegate, OpenFileDelegate>
+@interface chatViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIDocumentPickerDelegate, CLLocationManagerDelegate, SearchResultDelegate, OpenFileDelegate, AudioRecoderManagerDelegate>
 {
     UIView* containerView;
 	BOOL _firstmsg;

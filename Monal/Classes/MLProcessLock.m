@@ -23,16 +23,33 @@
 +(BOOL) checkRemoteRunning:(NSString*) processName
 {
     __block NSCondition* condition = [[NSCondition alloc] init];
+    __block BOOL response_received = NO;
+    
+    //lock condition object (needs to be locked for [condition signal] and [condition waitUntilDate:] to work correctly)
+    [condition lock];
+    
+    //send out ping and handle response
     DDLogVerbose(@"Pinging %@", processName);
     [[IPC sharedInstance] sendMessage:@"MLProcessLock.ping" withData:nil to:processName withResponseHandler:^(NSDictionary* response) {
-        DDLogVerbose(@"Got ping response from %@", processName);
-        //wake up other thread
+        DDLogVerbose(@"Got ping response from %@: %@", processName, response);
+        //lock condition, change response_received to YES and wake up other thread
+        [condition lock];
+        response_received = YES;
         [condition signal];
+        [condition unlock];
     }];
+    
     //wait for response blocking this thread for 1 second
-    BOOL timedOut = ![condition waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
-    DDLogVerbose(@"checkRemoteRunning:%@ returning %@", processName, !timedOut ? @"YES" : @"NO");
-    return !timedOut;
+    NSDate* timeout = [NSDate dateWithTimeIntervalSinceNow:1.0];
+    while(!response_received && [timeout timeIntervalSinceNow] > 0)
+        [condition waitUntilDate:timeout];
+    
+    //get state and unlock condition object
+    BOOL remote_running = response_received;
+    [condition unlock];
+    
+    DDLogVerbose(@"checkRemoteRunning:%@ returning %@", processName, remote_running ? @"YES" : @"NO");
+    return remote_running;
 }
 
 +(void) waitForRemoteStartup:(NSString*) processName

@@ -142,7 +142,9 @@
     NSDictionary* message = notification.userInfo;
     if([message[@"name"] isEqualToString:@"Monal.disconnectAll"])
     {
-        DDLogInfo(@"Got disconnectAll IPC message");
+        DDLogInfo(@"Got disconnectAll IPC message --> waiting");
+        [NSThread sleepForTimeInterval:4];
+        DDLogInfo(@"Got disconnectAll IPC message --> handling");
         [self feedAllWaitingHandlers];
     }
     else if([message[@"name"] isEqualToString:@"Monal.connectIfNecessary"])

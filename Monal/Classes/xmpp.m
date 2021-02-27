@@ -2099,7 +2099,7 @@ NSString *const kData=@"data";
             self.unAckedStanzas = [stanzas mutableCopy];
             self.streamID = [dic objectForKey:@"streamID"];
             
-#ifdef IS_ALPHA
+#ifndef IS_ALPHA
             @synchronized(_stateLockObject) {
                 //invalidate corrupt smacks states (this could potentially loose messages, but hey, the state is corrupt anyways)
                 if(!self.lastHandledInboundStanza || !self.lastHandledOutboundStanza || !self.lastOutboundStanza || !self.unAckedStanzas)
@@ -2153,7 +2153,7 @@ NSString *const kData=@"data";
             self.unAckedStanzas = [stanzas mutableCopy];
             self.streamID = [dic objectForKey:@"streamID"];
             
-#ifdef IS_ALPHA
+#ifndef IS_ALPHA
             @synchronized(_stateLockObject) {
                 //invalidate corrupt smacks states (this could potentially loose messages, but hey, the state is corrupt anyways)
                 if(!self.lastHandledInboundStanza || !self.lastHandledOutboundStanza || !self.lastOutboundStanza || !self.unAckedStanzas)

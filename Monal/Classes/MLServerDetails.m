@@ -31,32 +31,32 @@ enum MLServerDetailsSections {
 -(void) checkServerCaps:(MLXMPPConnection*) connection {
     if(connection.supportsSM3)
     {
-        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0198: Stream Management",@ ""), @"Description":NSLocalizedString(@"Resume a stream when disconnected. Results in faster reconnect and saves battery life.",@ "")}];
+        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0198: Stream Management", @""), @"Description":NSLocalizedString(@"Resume a stream when disconnected. Results in faster reconnect and saves battery life.", @"")}];
     }
     
     if(connection.supportsPush)
     {
-        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0357: Push Notifications",@ ""), @"Description":NSLocalizedString(@"Receive push notifications from via Apple even when disconnected. Vastly improves reliability.",@ "")}];
+        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0357: Push Notifications", @""), @"Description":NSLocalizedString(@"Receive push notifications from via Apple even when disconnected. Vastly improves reliability.", @"")}];
     }
     
     if(connection.usingCarbons2)
     {
-        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0280: Message Carbons",@ ""), @"Description":NSLocalizedString(@"Synchronize your messages on all loggedin devices.",@ "")}];
+        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0280: Message Carbons", @""), @"Description":NSLocalizedString(@"Synchronize your messages on all loggedin devices.", @"")}];
     }
     
     if(connection.supportsMam2)
     {
-        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0313: Message Archive Management",@ ""), @"Description":NSLocalizedString(@"Access message archives on the server.",@ "")}];
+        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0313: Message Archive Management", @""), @"Description":NSLocalizedString(@"Access message archives on the server.", @"")}];
     }
     
     if(self.xmppAccount.connectionProperties.supportsHTTPUpload)
     {
-        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0363: HTTP File Upload",@ ""), @"Description":NSLocalizedString(@"Upload files to the server to share with others.",@ "")}];
+        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0363: HTTP File Upload", @""), @"Description":NSLocalizedString(@"Upload files to the server to share with others.", @"")}];
     }
     
     if(connection.supportsClientState)
     {
-        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0352: Client State Indication",@ ""), @"Description":NSLocalizedString(@"Indicate when a particular device is active or inactive. Saves battery.",@ "")}];
+        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0352: Client State Indication", @""), @"Description":NSLocalizedString(@"Indicate when a particular device is active or inactive. Saves battery.", @"")}];
     }
 }
 
@@ -66,7 +66,7 @@ enum MLServerDetailsSections {
     for(id srvEntry in self.xmppAccount.discoveredServersList) {
         NSString* hostname = [srvEntry objectForKey:@"server"];
         NSNumber* port = [srvEntry objectForKey:@"port"];
-        NSString* isSecure = [[srvEntry objectForKey:@"isSecure"] boolValue] ? NSLocalizedString(@"Yes",@ "") : NSLocalizedString(@"No",@ "");
+        NSString* isSecure = [[srvEntry objectForKey:@"isSecure"] boolValue] ? NSLocalizedString(@"Yes", @"") : NSLocalizedString(@"No", @"");
         NSString* prio = [srvEntry objectForKey:@"priority"];
 
         // Check if entry is currently in use
@@ -83,7 +83,7 @@ enum MLServerDetailsSections {
             entryColor = @"Red";
         }
 
-        [self.srvRecords addObject:@{@"Title": [NSString stringWithFormat:NSLocalizedString(@"Server: %@",@ ""), hostname], @"Description": [NSString stringWithFormat:NSLocalizedString(@"Port: %@, Is Secure: %@, Prio: %@",@ ""), port, isSecure, prio], @"Color": entryColor}];
+        [self.srvRecords addObject:@{@"Title": [NSString stringWithFormat:NSLocalizedString(@"Server: %@", @""), hostname], @"Description": [NSString stringWithFormat:NSLocalizedString(@"Port: %@, Is Secure: %@, Prio: %@", @""), port, isSecure, prio], @"Color": entryColor}];
     }
 }
 
@@ -151,9 +151,9 @@ enum MLServerDetailsSections {
 -(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     if(section == SUPPORTED_SERVER_XEPS_SECTION) {
-        return NSLocalizedString(@"These are the modern XMPP capabilities Monal detected on your server after you have logged in.",@ "");
+        return NSLocalizedString(@"These are the modern XMPP capabilities Monal detected on your server after you have logged in.", @"");
     } else if(section == SRV_RECORS_SECTION) {
-        return NSLocalizedString(@"These are SRV resource records found for your domain",@ "");
+        return NSLocalizedString(@"These are SRV resource records found for your domain", @"");
     }
     return @"";
 }

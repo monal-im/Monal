@@ -53,7 +53,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
 +(id) sharedInstance
 {
     @synchronized(self) {
-        NSAssert(_responseHandlers!=nil, @"Please call [IPC initialize:@\"processName\" first!");
+        NSAssert(_responseHandlers!=nil, @"Please call [IPC initialize:@\"processName\"] first!");
         return _sharedInstance;
     }
 }

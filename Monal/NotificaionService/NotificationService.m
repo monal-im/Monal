@@ -147,9 +147,9 @@
     }
     else if([message[@"name"] isEqualToString:@"Monal.connectIfNecessary"])
     {
-        DDLogInfo(@"Got connectIfNecessary IPC message");
+        DDLogInfo(@"Got connectIfNecessary IPC message --> IGNORING!");
         //(re)connect all accounts
-        [[MLXMPPManager sharedInstance] connectIfNecessary];
+        //[[MLXMPPManager sharedInstance] connectIfNecessary];
     }
 }
 

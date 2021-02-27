@@ -426,7 +426,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 - (void)userNotificationCenter:(UNUserNotificationCenter*) center willPresentNotification:(UNNotification*) notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions options)) completionHandler;
 {
     DDLogInfo(@"userNotificationCenter:willPresentNotification:withCompletionHandler called");
-    //show local notifications while the app is open
+    //show local notifications while the app is open and ignore remote pushes
     if([notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
         completionHandler(UNNotificationPresentationOptionNone);
     } else {
@@ -507,6 +507,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 {
     DDLogInfo(@"Entering FG");
     [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
+    
+    //TODO: show "loading..." animation/modal
     
     //only proceed with foregrounding if the NotificationServiceExtension is not running
     if([MLProcessLock checkRemoteRunning:@"NotificationServiceExtension"])

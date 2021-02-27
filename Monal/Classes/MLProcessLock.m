@@ -42,7 +42,11 @@
     //wait for response blocking this thread for 1 second
     NSDate* timeout = [NSDate dateWithTimeIntervalSinceNow:1.0];
     while(!response_received && [timeout timeIntervalSinceNow] > 0)
+    {
+        DDLogError(@"Waiting for %f seconds...", (double)[timeout timeIntervalSinceNow]);
         [condition waitUntilDate:timeout];
+    }
+    DDLogError(@"waiting returned: response_received=%@, [timeout timeIntervalSinceNow]=%f", response_received ? @"YES" : @"NO", (double)[timeout timeIntervalSinceNow]);
     
     //get state and unlock condition object
     BOOL remote_running = response_received;

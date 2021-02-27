@@ -38,8 +38,9 @@
     self = [super init];
     DDLogInfo(@"Initializing push singleton");
     self.handlerList = [[NSMutableArray alloc] init];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filetransfersNowIdle:) name:kMonalFiletransfersIdle object:nil];
+    //use as much appex background time as possible (disconnect when the last push handler expires instead of when all accounts become idle)
+    //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
+    //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filetransfersNowIdle:) name:kMonalFiletransfersIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(xmppError:) name:kXMPPError object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
     return self;
@@ -114,8 +115,9 @@
         
         //we don't want to post any sync error notifications if the xmpp channel is idle and we're only downloading filetransfers
         //(e.g. [MLFiletransfer isIdle] is not YES)
-        if([self.handlerList count] <= 1 && ![[MLXMPPManager sharedInstance] allAccountsIdle])
+        if([self.handlerList count] <= 1)
         {
+            //post sync errors for all non-idle accounts
             [HelperTools updateSyncErrorsWithDeleteOnly:NO];
             
             //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas

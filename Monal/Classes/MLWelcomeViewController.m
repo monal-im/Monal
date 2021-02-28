@@ -41,7 +41,6 @@
     } else {
        page1.descColor = [UIColor blackColor];
     }
-    page1.titleIconView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"PeterRabbit7"]];
     page1.titleIconPositionY = 100.f;
     page1.titlePositionY = self.view.bounds.size.height/2 - 30;
     page1.descPositionY = self.view.bounds.size.height/2 - 70;
@@ -50,7 +49,6 @@
     page2.title = NSLocalizedString(@"Choices Galore", @"");
     page2.titleColor = [UIColor darkGrayColor];
     page2.desc = NSLocalizedString(@"Use your existing account or make a new one on the many servers around the world", @"");
-    page2.titleIconView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"PeterRabbit8"]];
     if (@available(iOS 13.0, *)) {
         page2.descColor = [UIColor labelColor];
     } else {
@@ -69,7 +67,6 @@
     } else {
         page3.descColor = [UIColor blackColor];
     }
-    page3.titleIconView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"PeterRabbit23"]];
     page3.titleIconPositionY = 100.f;
     page3.titlePositionY = self.view.bounds.size.height/2 - 30;
     page3.descPositionY = self.view.bounds.size.height/2 - 70;
@@ -83,7 +80,6 @@
     } else {
         page4.descColor=[UIColor blackColor];
     }
-    page4.titleIconView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"PeterRabbit24"]];
     page4.titleIconPositionY=100.f;
     page4.titlePositionY = self.view.bounds.size.height/2 - 30;
     page4.descPositionY = self.view.bounds.size.height/2 - 70;

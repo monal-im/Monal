@@ -30,40 +30,82 @@ enum MLServerDetailsSections {
 
 -(void) checkServerCaps:(MLXMPPConnection*) connection
 {
+    // supportsBlocking
+    [self.serverCaps addObject:@{
+        @"Title":NSLocalizedString(@"XEP-0191: Blocking Command", @""),
+        @"Description":NSLocalizedString(@"TODO", @""),
+        @"Color": connection.supportsBlocking ? @"Green" : @"Red"
+    }];
+
+    // supportsSM3
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0198: Stream Management", @""),
         @"Description":NSLocalizedString(@"Resume a stream when disconnected. Results in faster reconnect and saves battery life.", @""),
         @"Color": connection.supportsSM3 ? @"Green" : @"Red"
     }];
 
+    // supportsPing
+    [self.serverCaps addObject:@{
+        @"Title":NSLocalizedString(@"XEP-0199: XMPP Ping", @""),
+        @"Description":NSLocalizedString(@"TODO", @""),
+        @"Color": connection.supportsPing ? @"Green" : @"Red"
+    }];
+
+    // supportsRosterVersion
+    [self.serverCaps addObject:@{
+        @"Title":NSLocalizedString(@"XEP-0237: Roster Versioning", @""),
+        @"Description":NSLocalizedString(@"TODO", @""),
+        @"Color": connection.supportsRosterVersion ? @"Green" : @"Red"
+    }];
+
+    // usingCarbons2
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0280: Message Carbons", @""),
         @"Description":NSLocalizedString(@"Synchronize your messages on all loggedin devices.", @""),
         @"Color": connection.usingCarbons2 ? @"Green" : @"Red"
     }];
 
+    // supportsMam2
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0313: Message Archive Management", @""),
         @"Description":NSLocalizedString(@"Access message archives on the server.", @""),
         @"Color": connection.supportsMam2 ? @"Green" : @"Red"
     }];
 
+    // supportsClientState
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0352: Client State Indication", @""),
         @"Description":NSLocalizedString(@"Indicate when a particular device is active or inactive. Saves battery.", @""),
         @"Color": connection.supportsClientState ? @"Green" : @"Red"
     }];
 
+    // supportsPush / pushEnabled
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0357: Push Notifications", @""),
         @"Description":NSLocalizedString(@"Receive push notifications from via Apple even when disconnected. Vastly improves reliability.", @""),
-        @"Color": connection.supportsPush ? @"Green" : @"Red"
+        @"Color": connection.supportsPush ? (connection.pushEnabled ? @"Green" : @"Yellow") : @"Red"
     }];
 
+    // supportsHTTPUpload
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0363: HTTP File Upload", @""),
         @"Description":NSLocalizedString(@"Upload files to the server to share with others.", @""),
         @"Color": connection.supportsHTTPUpload ? @"Green" : @"Red"
+    }];
+
+    // supportsRosterPreApproval
+    [self.serverCaps addObject:@{
+        @"Title":NSLocalizedString(@"XEP-0379: Pre-Authenticated Roster Subscription", @""),
+        @"Description":NSLocalizedString(@"TODO", @""),
+        @"Color": connection.supportsRosterPreApproval ? @"Green" : @"Red"
+    }];
+
+    // supportsPubSub
+    [self.serverCaps addObject:@{
+        // see MLIQProcessor.m multiple xep required for pubsub
+        @"Title":NSLocalizedString(@"PubSub Support", @""),
+        @"Description":NSLocalizedString(@"TODO", @""),
+        @"Color": connection.supportsPubSub ? @"Green" : @"Red"
     }];
 }
 
@@ -146,10 +188,17 @@ enum MLServerDetailsSections {
         cell.textLabel.backgroundColor = UIColor.clearColor;
         cell.detailTextLabel.backgroundColor = UIColor.clearColor;
 
-        if([entryColor isEqualToString:@"Green"]) {
+        if([entryColor isEqualToString:@"Green"])
+        {
             [cell setBackgroundColor:[UIColor colorWithRed:0 green:0.8 blue:0 alpha:0.2]];
-        } else if([entryColor isEqualToString:@"Red"]) {
+        }
+        else if([entryColor isEqualToString:@"Red"])
+        {
             [cell setBackgroundColor:[UIColor colorWithRed:0.8 green:0 blue:0 alpha:0.2]];
+        }
+        else if([entryColor isEqualToString:@"Yellow"])
+        {
+            [cell setBackgroundColor:[UIColor colorWithRed:1.0 green:1.0 blue:0 alpha:0.2]];
         }
     }
     return cell;

@@ -172,8 +172,12 @@ NSString *const kData=@"data";
     //WARNING: pubsub node registrations should only be made *after* the first readState call
     [self readState];
     
-    // Init omemo
-    self.omemo = [[MLOMEMO alloc] initWithAccount:self];
+    // don't init omemo on account creation
+    if(accountNo.intValue >= 0)
+    {
+        // init omemo
+        self.omemo = [[MLOMEMO alloc] initWithAccount:self];
+    }
     
     //we want to get automatic avatar updates (XEP-0084)
     [self.pubsub registerForNode:@"urn:xmpp:avatar:metadata" withHandler:$newHandler(MLPubSubProcessor, avatarHandler)];

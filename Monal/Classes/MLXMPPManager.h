@@ -126,14 +126,17 @@ Sends a message to a specified contact in account. Calls completion handler on s
 @property (nonatomic, strong) NSString* pushToken;
 
 @property (nonatomic, readonly) BOOL isBackgrounded;
+@property (nonatomic, readonly) BOOL isNotInFocus;
 
 /**
  updates delivery status after message has been sent
  */
 -(void) handleSentMessage:(NSNotification*) notification;
 
+-(void) nowNoLongerInFocus;
+
 /**
- updtes client state on server as inactive
+ updates client state on server as inactive
  */
 -(void) nowBackgrounded;
 

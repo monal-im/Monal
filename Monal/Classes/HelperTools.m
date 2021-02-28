@@ -187,6 +187,16 @@ void logException(NSException* exception)
     return inBackground;
 }
 
++(BOOL) isNotInFocus
+{
+    __block BOOL isNotInFocus = NO;
+    isNotInFocus |= [HelperTools isAppExtension];
+    isNotInFocus |= [[MLXMPPManager sharedInstance] isBackgrounded];
+    isNotInFocus |= [[MLXMPPManager sharedInstance] isNotInFocus];
+
+    return isNotInFocus;
+}
+
 +(void) dispatchSyncReentrant:(monal_void_block_t) block onQueue:(dispatch_queue_t) queue
 {
     if(!queue)

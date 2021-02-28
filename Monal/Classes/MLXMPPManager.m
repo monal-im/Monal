@@ -159,6 +159,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     _connectedXMPP = [[NSMutableArray alloc] init];
     _hasConnectivity = NO;
     _isBackgrounded = NO;
+    _isNotInFocus = NO;
     
     [self defaultSettings];
     [self setPushToken:nil];       //load push settings from defaultsDB (can be overwritten later on in mainapp, but *not* in appex)
@@ -275,9 +276,16 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - app state
 
+-(void) nowNoLongerInFocus
+{
+    _isBackgrounded = NO;
+    _isNotInFocus = YES;
+}
+
 -(void) nowBackgrounded
 {
     _isBackgrounded = YES;
+    _isNotInFocus = YES;
     
     for(xmpp* xmppAccount in [self connectedXMPP])
         [xmppAccount setClientInactive];
@@ -286,6 +294,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 -(void) nowForegrounded
 {
     _isBackgrounded = NO;
+    _isNotInFocus = NO;
     
     //*** we don't need to check for a running service extension here because the appdelegate does this already for us ***
     

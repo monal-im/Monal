@@ -31,7 +31,10 @@ void logException(NSException* exception);
 +(void) configureFileProtectionFor:(NSString*) file;
 +(NSDictionary<NSString*, NSString*>*) splitJid:(NSString*) jid;
 +(void) updateSyncErrorsWithDeleteOnly:(BOOL) removeOnly;
+
 +(BOOL) isInBackground;
++(BOOL) isNotInFocus;
+
 +(void) dispatchSyncReentrant:(monal_void_block_t) block onQueue:(dispatch_queue_t) queue;
 +(void) activityLog;
 +(NSUserDefaults*) defaultsDB;

@@ -108,7 +108,7 @@
     BOOL muted = [[DataLayer sharedInstance] isMutedJid:message.actualFrom];
     if(!muted && showAlert)
     {
-        if([HelperTools isInBackground])
+        if([HelperTools isNotInFocus])
         {
             DDLogVerbose(@"notification manager should show notification in background: %@", message.messageText);
             [self showModernNotificaionForMessage:message withSound:sound];

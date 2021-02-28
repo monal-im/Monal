@@ -28,36 +28,43 @@ enum MLServerDetailsSections {
     [super viewDidLoad];
 }
 
--(void) checkServerCaps:(MLXMPPConnection*) connection {
-    if(connection.supportsSM3)
-    {
-        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0198: Stream Management", @""), @"Description":NSLocalizedString(@"Resume a stream when disconnected. Results in faster reconnect and saves battery life.", @"")}];
-    }
-    
-    if(connection.supportsPush)
-    {
-        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0357: Push Notifications", @""), @"Description":NSLocalizedString(@"Receive push notifications from via Apple even when disconnected. Vastly improves reliability.", @"")}];
-    }
-    
-    if(connection.usingCarbons2)
-    {
-        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0280: Message Carbons", @""), @"Description":NSLocalizedString(@"Synchronize your messages on all loggedin devices.", @"")}];
-    }
-    
-    if(connection.supportsMam2)
-    {
-        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0313: Message Archive Management", @""), @"Description":NSLocalizedString(@"Access message archives on the server.", @"")}];
-    }
-    
-    if(self.xmppAccount.connectionProperties.supportsHTTPUpload)
-    {
-        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0363: HTTP File Upload", @""), @"Description":NSLocalizedString(@"Upload files to the server to share with others.", @"")}];
-    }
-    
-    if(connection.supportsClientState)
-    {
-        [self.serverCaps addObject:@{@"Title":NSLocalizedString(@"XEP-0352: Client State Indication", @""), @"Description":NSLocalizedString(@"Indicate when a particular device is active or inactive. Saves battery.", @"")}];
-    }
+-(void) checkServerCaps:(MLXMPPConnection*) connection
+{
+    [self.serverCaps addObject:@{
+        @"Title":NSLocalizedString(@"XEP-0198: Stream Management", @""),
+        @"Description":NSLocalizedString(@"Resume a stream when disconnected. Results in faster reconnect and saves battery life.", @""),
+        @"Color": connection.supportsSM3 ? @"Green" : @"Red"
+    }];
+
+    [self.serverCaps addObject:@{
+        @"Title":NSLocalizedString(@"XEP-0280: Message Carbons", @""),
+        @"Description":NSLocalizedString(@"Synchronize your messages on all loggedin devices.", @""),
+        @"Color": connection.usingCarbons2 ? @"Green" : @"Red"
+    }];
+
+    [self.serverCaps addObject:@{
+        @"Title":NSLocalizedString(@"XEP-0313: Message Archive Management", @""),
+        @"Description":NSLocalizedString(@"Access message archives on the server.", @""),
+        @"Color": connection.supportsMam2 ? @"Green" : @"Red"
+    }];
+
+    [self.serverCaps addObject:@{
+        @"Title":NSLocalizedString(@"XEP-0352: Client State Indication", @""),
+        @"Description":NSLocalizedString(@"Indicate when a particular device is active or inactive. Saves battery.", @""),
+        @"Color": connection.supportsClientState ? @"Green" : @"Red"
+    }];
+
+    [self.serverCaps addObject:@{
+        @"Title":NSLocalizedString(@"XEP-0357: Push Notifications", @""),
+        @"Description":NSLocalizedString(@"Receive push notifications from via Apple even when disconnected. Vastly improves reliability.", @""),
+        @"Color": connection.supportsPush ? @"Green" : @"Red"
+    }];
+
+    [self.serverCaps addObject:@{
+        @"Title":NSLocalizedString(@"XEP-0363: HTTP File Upload", @""),
+        @"Description":NSLocalizedString(@"Upload files to the server to share with others.", @""),
+        @"Color": connection.supportsHTTPUpload ? @"Green" : @"Red"
+    }];
 }
 
 -(void) convertSRVRecordsToReadable {

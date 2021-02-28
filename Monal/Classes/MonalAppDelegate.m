@@ -314,9 +314,13 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     {
         DDLogInfo(@"Window lost focus (key window)...");
         [self updateUnread];
-        [self addBackgroundTask];
-        [[MLXMPPManager sharedInstance] nowBackgrounded];
-        [self checkIfBackgroundTaskIsStillNeeded];
+        if(NSProcessInfo.processInfo.isLowPowerModeEnabled)
+        {
+            DDLogInfo(@"LowPoderMode is active: nowBackgrounded to reduce power consumption");
+            [self addBackgroundTask];
+            [[MLXMPPManager sharedInstance] nowBackgrounded];
+            [self checkIfBackgroundTaskIsStillNeeded];
+        }
     }
     else if([notification.name isEqualToString:@"NSWindowDidBecomeKeyNotification"])
     {

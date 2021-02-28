@@ -321,6 +321,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             [[MLXMPPManager sharedInstance] nowBackgrounded];
             [self checkIfBackgroundTaskIsStillNeeded];
         }
+        else
+        {
+            [[MLXMPPManager sharedInstance] nowNoLongerInFocus];
+        }
     }
     else if([notification.name isEqualToString:@"NSWindowDidBecomeKeyNotification"])
     {
@@ -569,7 +573,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) showConnectionStatus:(NSNotification*) notification
 {
     //this will show an error banner but only if our app is foregrounded
-    if(![HelperTools isInBackground])
+    if(![HelperTools isNotInFocus])
     {
         dispatch_async(dispatch_get_main_queue(), ^{
             xmpp* xmppAccount = notification.object;

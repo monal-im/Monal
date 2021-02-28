@@ -740,7 +740,7 @@ enum msgSentState {
         if([MLNotificationManager sharedInstance].currentContact!=self.contact)
             return;
         
-        if(!_day && ![HelperTools isInBackground])
+        if(!_day && ![HelperTools isNotInFocus])
         {
             //get list of unread messages
             NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountId tillStanzaId:nil wasOutgoing:NO];
@@ -761,7 +761,7 @@ enum msgSentState {
             [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
         }
         else
-            DDLogDebug(@"Not marking messages as read because we are still in background: %@", [HelperTools isInBackground] ? @"YES" : @"NO");
+            DDLogDebug(@"Not marking messages as read because we are still in background: %@ notInFokus: %@", [HelperTools isInBackground] ? @"YES" : @"NO", [HelperTools isNotInFocus] ? @"YES" : @"NO");
     }
 }
 

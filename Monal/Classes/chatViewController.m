@@ -2149,8 +2149,8 @@ enum msgSentState {
         copyAction.image = [[[UIImage systemImageNamed:@"doc.on.doc.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
     
-    //only allow editing for the 2 newest outgoing message that were sent in the last 2 minutes
-    if([[DataLayer sharedInstance] checkLMCEligible:message.messageDBId from:self.xmppAccount.connectionProperties.identity.jid encrypted:self.encryptChat])
+    //only allow editing for the 3 newest message && only on outgoing messages
+    if([[DataLayer sharedInstance] checkLMCEligible:message.messageDBId from:self.xmppAccount.connectionProperties.identity.jid encrypted:(message.encrypted | self.encryptChat)])
         return [UISwipeActionsConfiguration configurationWithActions:@[
             LMCEditAction,
             LMCDeleteAction,

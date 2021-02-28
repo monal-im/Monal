@@ -28,6 +28,23 @@ enum MLServerDetailsSections {
     [super viewDidLoad];
 }
 
+-(void) viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    self.serverCaps = [[NSMutableArray alloc] init];
+    self.srvRecords = [[NSMutableArray alloc] init];
+
+    self.navigationItem.title = self.xmppAccount.connectionProperties.identity.domain;
+    self.tableView.allowsSelection = NO;
+
+    [self checkServerCaps:self.xmppAccount.connectionProperties];
+    [self convertSRVRecordsToReadable];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+}
+
 -(void) checkServerCaps:(MLXMPPConnection*) connection
 {
     // supportsBlocking
@@ -136,22 +153,6 @@ enum MLServerDetailsSections {
     }
 }
 
--(void) viewWillAppear:(BOOL)animated
-{
-    [super viewWillAppear:animated];
-    self.serverCaps = [[NSMutableArray alloc] init];
-    self.srvRecords = [[NSMutableArray alloc] init];
-    
-    self.navigationItem.title = self.xmppAccount.connectionProperties.identity.domain;
-
-    [self checkServerCaps:self.xmppAccount.connectionProperties];
-    [self convertSRVRecordsToReadable];
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-}
-
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -199,6 +200,10 @@ enum MLServerDetailsSections {
         else if([entryColor isEqualToString:@"Yellow"])
         {
             [cell setBackgroundColor:[UIColor colorWithRed:1.0 green:1.0 blue:0 alpha:0.2]];
+        }
+        else
+        {
+            [cell setBackgroundColor:nil];
         }
     }
     return cell;

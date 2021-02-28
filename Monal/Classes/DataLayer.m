@@ -2328,6 +2328,73 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"INSERT INTO signalSignedPreKey SELECT * FROM _signalSignedPreKeyTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _signalSignedPreKeyTMP;"];
         }];
+
+        [self updateDBTo:5.010 withBlock:^{
+            // add foreign key to activechats
+            [self.db executeNonQuery:@"ALTER TABLE activechats RENAME TO _activechatsTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE 'activechats' ( \
+                     'account_id' integer NOT NULL, \
+                     'buddy_name' varchar(50) NOT NULL COLLATE nocase, \
+                     'lastMessageTime' datetime, \
+                     'lastMesssage' blob, \
+                     'pinned' bool NOT NULL DEFAULT FALSE, \
+                     PRIMARY KEY('account_id', 'buddy_name'), \
+                     FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, \
+                     FOREIGN KEY('account_id', 'buddy_name') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
+                 );"];
+            [self.db executeNonQuery:@"DELETE FROM _activechatsTMP WHERE account_id NOT IN (SELECT account_id FROM account)"];
+            [self.db executeNonQuery:@"DELETE FROM _activechatsTMP WHERE (account_id, buddy_name) NOT IN (SELECT account_id, buddy_name FROM buddylist)"];
+            [self.db executeNonQuery:@"INSERT INTO activechats SELECT * FROM _activechatsTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _activechatsTMP;"];
+
+            // add foreign key to activechats
+            [self.db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE 'buddylist' ( \
+                     'buddy_id' integer NOT NULL, \
+                     'account_id' integer NOT NULL, \
+                     'buddy_name' varchar(255) COLLATE nocase, \
+                     'full_name' varchar(255), \
+                     'nick_name' varchar(255), \
+                     'iconhash' varchar(200), \
+                     'state' varchar(20), \
+                     'status' varchar(200), \
+                     'Muc' bool, \
+                     'muc_subject' varchar(1024), \
+                     'muc_nick' varchar(255), \
+                     'backgroundImage' text, \
+                     'encrypt' bool, \
+                     'subscription' varchar(50), \
+                     'ask' varchar(50), \
+                     'messageDraft' text, \
+                     'lastInteraction' INTEGER NOT NULL DEFAULT 0, \
+                     'blocked' BOOL DEFAULT FALSE, \
+                     'muc_type' VARCHAR(10) DEFAULT 'channel', \
+                     'lastMucStanzaId' text DEFAULT NULL, \
+                     UNIQUE('account_id', 'buddy_name'), \
+                     PRIMARY KEY('buddy_id' AUTOINCREMENT), \
+                     FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE \
+                 );"];
+            [self.db executeNonQuery:@"DELETE FROM _buddylistTMP WHERE account_id NOT IN (SELECT account_id FROM account)"];
+            [self.db executeNonQuery:@"INSERT INTO buddylist SELECT * FROM _buddylistTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _buddylistTMP;"];
+
+            // add foreign key to buddy_resources
+            [self.db executeNonQuery:@"ALTER TABLE buddy_resources RENAME TO _buddy_resourcesTMP;"];
+            [self.db executeNonQuery:@"CREATE TABLE 'buddy_resources' ( \
+                     'buddy_id' integer NOT NULL, \
+                     'resource' varchar(255, 0) NOT NULL, \
+                     'ver' varchar(20, 0), \
+                     'platform_App_Name' text, \
+                     'platform_App_Version' text, \
+                     'platform_OS' text, \
+                     PRIMARY KEY('buddy_id','resource'), \
+                     FOREIGN KEY('buddy_id') REFERENCES 'buddylist'('buddy_id') ON DELETE CASCADE \
+                 );"];
+            [self.db executeNonQuery:@"DELETE FROM _buddy_resourcesTMP WHERE buddy_id NOT IN (SELECT buddy_id FROM buddylist)"];
+            [self.db executeNonQuery:@"DELETE FROM _buddy_resourcesTMP WHERE (ROWID, buddy_id, resource) NOT IN (SELECT ROWID, buddy_id, resource FROM _buddy_resourcesTMP GROUP BY buddy_id, resource);"];
+            [self.db executeNonQuery:@"INSERT INTO buddy_resources (buddy_id, resource, ver, platform_App_Name, platform_App_Version, platform_OS) SELECT buddy_id, resource, ver, platform_App_Name, platform_App_Version, platform_OS FROM _buddy_resourcesTMP;"];
+            [self.db executeNonQuery:@"DROP TABLE _buddy_resourcesTMP;"];
+        }];
     }];
     [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
     [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];

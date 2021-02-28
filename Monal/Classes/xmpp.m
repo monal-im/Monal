@@ -2103,13 +2103,17 @@ NSString *const kData=@"data";
             self.unAckedStanzas = [stanzas mutableCopy];
             self.streamID = [dic objectForKey:@"streamID"];
             
-#ifndef IS_ALPHA
             @synchronized(_stateLockObject) {
                 //invalidate corrupt smacks states (this could potentially loose messages, but hey, the state is corrupt anyways)
-                if(!self.lastHandledInboundStanza || !self.lastHandledOutboundStanza || !self.lastOutboundStanza || !self.unAckedStanzas)
+                if(self.lastHandledInboundStanza == nil || self.lastHandledOutboundStanza == nil || self.lastOutboundStanza == nil || !self.unAckedStanzas)
+                {
+#ifndef IS_ALPHA
                     [self initSM3];
-            }
+#else
+                    NSAssert(false, @"corrupt smacks state");
 #endif
+                }
+            }
             
             //debug output
             DDLogVerbose(@"%@ --> readSmacksStateOnly(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@",
@@ -2157,13 +2161,17 @@ NSString *const kData=@"data";
             self.unAckedStanzas = [stanzas mutableCopy];
             self.streamID = [dic objectForKey:@"streamID"];
             
-#ifndef IS_ALPHA
             @synchronized(_stateLockObject) {
                 //invalidate corrupt smacks states (this could potentially loose messages, but hey, the state is corrupt anyways)
-                if(!self.lastHandledInboundStanza || !self.lastHandledOutboundStanza || !self.lastOutboundStanza || !self.unAckedStanzas)
+                if(self.lastHandledInboundStanza == nil || self.lastHandledOutboundStanza == nil || self.lastOutboundStanza == nil || !self.unAckedStanzas)
+                {
+#ifndef IS_ALPHA
                     [self initSM3];
-            }
+#else
+                    NSAssert(false, @"corrupt smacks state");
 #endif
+                }
+            }
             
             NSDictionary* persistentIqHandlers = [dic objectForKey:@"iqHandlers"];
             @synchronized(_iqHandlers) {

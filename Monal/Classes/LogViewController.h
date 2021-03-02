@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface LogViewController : UIViewController
+@interface LogViewController : UIViewController<UITextFieldDelegate>
 
 @property  (nonatomic,weak) IBOutlet UITextView *logView;
 

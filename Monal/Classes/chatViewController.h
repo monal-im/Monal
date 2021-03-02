@@ -46,6 +46,7 @@
 
 @property (nonatomic, weak) IBOutlet UIImageView *backgroundImage;
 @property (nonatomic, weak) IBOutlet UIView *transparentLayer;
+@property (weak, nonatomic) IBOutlet UIButton *audioRecordButton;
 
 
 @property (nonatomic, strong) NSString *day;

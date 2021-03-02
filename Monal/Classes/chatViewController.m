@@ -186,18 +186,14 @@ enum msgSentState {
     [self setChatInputHeightConstraints:YES];
     
     if (@available(iOS 13.0, *)) {
-        [self.sendButton setImage:[UIImage systemImageNamed:@"mic"] forState:UIControlStateNormal];
+        [self.sendButton setImage:[UIImage systemImageNamed:@"paperplane.fill"] forState:UIControlStateNormal];
         [self.plusButton setImage:[UIImage systemImageNamed:@"paperclip"] forState:UIControlStateNormal];
     } else {
-        [self.sendButton setImage:[UIImage imageNamed:@"microphone"] forState:UIControlStateNormal];
+        [self.sendButton setImage:[UIImage imageNamed:@"648-paper-airplane"] forState:UIControlStateNormal];
         [self.plusButton setImage:[UIImage imageNamed:@"907-plus-rounded-square"] forState:UIControlStateNormal];
     }
-
-    self.longGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(recordMessageAudio:)];
-    self.longGestureRecognizer.minimumPressDuration = 0.8;
-    [self.sendButton addGestureRecognizer:self.longGestureRecognizer];
     
-    self.isAudioMessage = YES;
+    [self initAudioRecordButton];
     
     // setup refreshControl for infinite scrolling
     UIRefreshControl* refreshControl = [[UIRefreshControl alloc] init];
@@ -247,6 +243,22 @@ enum msgSentState {
     [self.inputContainerView addSubview:self.lastMsgButton];
     MLChatInputContainer* inputView = (MLChatInputContainer*) self.inputContainerView;
     inputView.chatInputActionDelegate = self;
+}
+
+-(void) initAudioRecordButton
+{
+    self.longGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(recordMessageAudio:)];
+    self.longGestureRecognizer.minimumPressDuration = 0.8;
+    [self.audioRecordButton addGestureRecognizer:self.longGestureRecognizer];
+    
+    if (@available(iOS 13.0, *)) {
+        [self.audioRecordButton setImage:[UIImage systemImageNamed:@"mic"] forState:UIControlStateNormal];
+    } else {
+        [self.audioRecordButton setImage:[UIImage imageNamed:@"microphone"] forState:UIControlStateNormal];
+    }
+    
+    [self.sendButton setHidden:YES];
+    self.isAudioMessage = YES;
 }
 
 -(void) lastMsgButtonPositionConfigWithSize:(CGSize)size
@@ -2506,26 +2518,13 @@ enum msgSentState {
 
 -(void)setSendButtonIconWithTextLength:(NSUInteger)txtLength{
     if (_isTyping == NO || txtLength == 0){
-        //Set button icon to audio recorder icon
-        if (@available(iOS 13.0, *)) {
-            [self.sendButton setImage:[UIImage systemImageNamed:@"mic"] forState:UIControlStateNormal];
-        } else {
-            [self.sendButton setImage:[UIImage imageNamed:@"microphone"] forState:UIControlStateNormal];
-        }
         self.isAudioMessage = YES;
-        if (![self.longGestureRecognizer isEnabled]){
-            [self.longGestureRecognizer setEnabled:YES];
-        }
+        [self.audioRecordButton setHidden:NO];
+        [self.sendButton setHidden:YES];
     } else {
-        if (@available(iOS 13.0, *)) {
-            [self.sendButton setImage:[UIImage systemImageNamed:@"paperplane.fill"] forState:UIControlStateNormal];
-        } else {
-            [self.sendButton setImage:[UIImage imageNamed:@"648-paper-airplane"] forState:UIControlStateNormal];
-        }
         self.isAudioMessage = NO;
-        if ([self.longGestureRecognizer isEnabled]){
-            [self.longGestureRecognizer setEnabled:NO];
-        }
+        [self.audioRecordButton setHidden:YES];
+        [self.sendButton setHidden:NO];
     }
 }
 

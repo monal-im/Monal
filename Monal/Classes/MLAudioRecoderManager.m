@@ -32,10 +32,14 @@ NSURL *audioFileURL = nil;
     [audioSession setActive:YES error:&audioRecodSetActiveError];
     if (audioSessionCategoryError) {
         DDLogError(@"Audio Recoder set category error: %@", audioSessionCategoryError);
+        [self.recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio Recoder set category error: %@", audioSessionCategoryError)];
+        return;
     }
     
     if (audioRecodSetActiveError) {
         DDLogError(@"Audio Recoder set active error: %@", audioRecodSetActiveError);
+        [self.recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio Recoder set active error: %@", audioRecodSetActiveError)];
+        return;
     }
     
     NSError *recoderError = nil;
@@ -48,7 +52,6 @@ NSURL *audioFileURL = nil;
     audioFileURL = [NSURL fileURLWithPath:[self getAudioPath]];
     
     self.audioRecorder = [[AVAudioRecorder alloc] initWithURL:audioFileURL settings:recodSettings error:&recoderError];
-    DDLogError(@"Audio Recoder init error: %@", recoderError);
     
     if (recoderError) {
         [self.recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio recoder init fail.", @"")];
@@ -88,9 +91,9 @@ NSURL *audioFileURL = nil;
 
 - (void)audioRecorderDidFinishRecording:(AVAudioRecorder *)recorder successfully:(BOOL)flag{
     if (flag) {
-        [self.recoderManagerDelegate notifyResult:YES error:@""];
+        [self.recoderManagerDelegate notifyResult:YES error:nil];
     } else {
-        [self.recoderManagerDelegate notifyResult:NO error:@""];
+        [self.recoderManagerDelegate notifyResult:NO error:NSLocalizedString(@"Audio Recoder recode fail", @"")];
         DDLogError(@"Audio Recoder recode fail");
     }
 }

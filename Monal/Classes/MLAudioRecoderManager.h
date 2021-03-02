@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol AudioRecoderManagerDelegate
 
--(void)notifyResult:(BOOL)isSuccess error:(NSString*)errorMsg;
+-(void)notifyResult:(BOOL)isSuccess error:(NSString* _Nullable)errorMsg;
 -(void)notifyStart;
 -(void)notifyStop:(NSURL*)fileURL;
 -(void)updateCurrentTime:(NSTimeInterval) audioDuration;

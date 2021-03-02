@@ -1,7 +1,8 @@
-app_identifier "G7YU7X7KRJ.SworIM" # The bundle identifier of your app
-apple_id "" # Your Apple email address
+app_identifier("G7YU7X7KRJ.SworIM") # The bundle identifier of your app
+apple_id("") # Your Apple email address
 
-team_id "[[DEV_PORTAL_TEAM_ID]]"  # Developer Portal Team ID
+itc_team_id("") # App Store Connect Team ID
+team_id("") # Developer Portal Team ID
 
-# you can even provide different app identifiers, Apple IDs and team names per lane:
-# More information: https://github.com/fastlane/fastlane/blob/master/fastlane/docs/Appfile.md
+# For more information about the Appfile, see:
+#     https://docs.fastlane.tools/advanced/#appfile

@@ -37,6 +37,13 @@ DDLogFileInfo* _logInfo;
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
+    
+    self.logUDPHostname.delegate = self;
+    self.logUDPPort.delegate = self;
+    self.logUDPAESKey.delegate = self;
+    
+    UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideKeyboard)];
+    [self.view addGestureRecognizer:tapGestureRecognizer];    
 }
 
 -(void) viewDidAppear:(BOOL)animated
@@ -115,4 +122,13 @@ DDLogFileInfo* _logInfo;
     // Dispose of any resources that can be recreated.
 }
 
+-(BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    [textField resignFirstResponder];
+    return YES;
+}
+
+-(void)hideKeyboard{
+    [self.view endEditing:YES];
+}
 @end

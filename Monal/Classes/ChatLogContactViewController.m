@@ -24,10 +24,11 @@
 {
     [super viewWillAppear:animated];
  
-    self.navigationItem.title=self.contact.fullName;
+    self.navigationItem.title = self.contact.fullName;
 
     _tableData = [[DataLayer sharedInstance] messageHistoryListDates:self.contact.contactJid forAccount:self.contact.accountId];
-    self.navigationItem.title= NSLocalizedString(@"Log Date",@"");
+    self.navigationItem.title = NSLocalizedString(@"Log Date",@"");
+    self.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeAlways;
     [self.tableView reloadData];
 }
 
@@ -46,32 +47,30 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell* cell =[tableView dequeueReusableCellWithIdentifier:@"Cell"];
-    if(cell==nil)
+    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
+    if(cell == nil)
     {
-        cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ChatAccountCell"];
-        cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ChatAccountCell"];
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     }
     
-    cell.textLabel.text=[[_tableData objectAtIndex:indexPath.row] objectForKey:@"the_date"];
+    cell.textLabel.text = [[_tableData objectAtIndex:indexPath.row] objectForKey:@"the_date"];
     
     return cell;
 }
 
 #pragma mark tableview delegate
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSString* theDay = [[_tableData objectAtIndex:indexPath.row] objectForKey:@"the_date"];
-
     [self performSegueWithIdentifier:@"showDayHistory" sender:theDay];
-    
 }
-
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     if([segue.identifier isEqualToString:@"showDayHistory"])
     {
+        self.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;
         chatViewController *chat = segue.destinationViewController;
         chat.day=(NSString *)sender;
         [chat setupWithContact:self.contact];

@@ -29,9 +29,8 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.navigationItem.title=NSLocalizedString(@"Accounts With Logs",@"");
-    _chatLogTable=self.tableView;
-    
+    self.navigationItem.title = NSLocalizedString(@"Accounts With Logs",@"");
+    _chatLogTable = self.tableView;
 }
 
 - (void)didReceiveMemoryWarning
@@ -44,7 +43,7 @@
 -(void) viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+    self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeAllVisible;
     NSArray* accountList = [[DataLayer sharedInstance] accountList];
     dispatch_async(dispatch_get_main_queue(), ^{
         self->_tableData = accountList;
@@ -60,28 +59,25 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell* cell =[tableView dequeueReusableCellWithIdentifier:@"Cell"];
-    if(cell==nil)
+    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"Cell"];
+    if(cell == nil)
     {
-        cell=[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Cell"];
-        cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"Cell"];
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     }
     
-    cell.textLabel.text=[NSString stringWithFormat:@"%@@%@", [[_tableData objectAtIndex:indexPath.row] objectForKey:@"username"],
+    cell.textLabel.text=[NSString stringWithFormat:@"%@@%@",
+                         [[_tableData objectAtIndex:indexPath.row] objectForKey:@"username"],
                          [[_tableData objectAtIndex:indexPath.row] objectForKey:@"domain"]];
-    
-
- 
-        return cell;
-
+     
+    return cell;
 }
 
 #pragma mark tableview delegate
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-       [self performSegueWithIdentifier:@"showAccountLog" sender:[_tableData objectAtIndex:indexPath.row] ];
+       [self performSegueWithIdentifier:@"showAccountLog" sender:[_tableData objectAtIndex:indexPath.row]];
 }
-
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
@@ -90,15 +86,12 @@
         ChatLogAccountDetailViewController *chat = segue.destinationViewController;
         NSDictionary *dic = (NSDictionary *) sender;
         
-        NSString* accountName= [NSString stringWithFormat:@"%@@%@", [dic objectForKey:@"username"],
+        NSString* accountName = [NSString stringWithFormat:@"%@@%@", [dic objectForKey:@"username"],
                                 [dic objectForKey:@"domain"]];
-        NSString* accountId= [NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
+        NSString* accountId = [NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
         
-        chat.accountId=accountId;
-        chat.accountName=accountName;
-        
+        chat.accountId = accountId;
+        chat.accountName = accountName;
     }
 }
-
-
 @end

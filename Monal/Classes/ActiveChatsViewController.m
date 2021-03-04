@@ -522,7 +522,13 @@ static NSMutableSet* _smacksWarningDisplayed;
         {
             if([messageRow.filetransferMimeType hasPrefix:@"image/"])
                 [cell showStatusText:NSLocalizedString(@"📷 An Image", @"")];
-            else        //TODO JIM: add support for more mime types
+            else if([messageRow.filetransferMimeType hasPrefix:@"audio/"])
+                [cell showStatusText:NSLocalizedString(@"🎵 A Audiomessage", @"")];
+            else if([messageRow.filetransferMimeType hasPrefix:@"video/"])
+                [cell showStatusText:NSLocalizedString(@"🎥 A Video", @"")];
+            else if([messageRow.filetransferMimeType isEqualToString:@"application/pdf"])
+                [cell showStatusText:NSLocalizedString(@"📄 A Document", @"")];
+            else
                 [cell showStatusText:NSLocalizedString(@"📁 A File", @"")];
         }
         else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft])

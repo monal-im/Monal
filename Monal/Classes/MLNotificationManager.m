@@ -280,9 +280,6 @@
                             content.body = @"";
                         }
                     }
-                    DDLogDebug(@"Publishing notification with id %@", idval);
-                    [self publishNotificationContent:content withID:idval];
-                    return;
                 }
                 else if([mimeType hasPrefix:@"image/"])
                     content.body = NSLocalizedString(@"📷 An Image", @"");

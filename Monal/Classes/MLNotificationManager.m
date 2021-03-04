@@ -253,37 +253,53 @@
         if([message.messageType isEqualToString:kMessageTypeFiletransfer])
         {
             NSDictionary* info = [MLFiletransfer getFileInfoForMessage:message];
-            if(info && [info[@"mimeType"] hasPrefix:@"image/"])
+            if(info)
             {
-                content.body = NSLocalizedString(@"Sent an Image 📷", @"");
-                
-                UNNotificationAttachment* attachment;
-                if(![info[@"needsDownloading"] boolValue])
+                NSString* mimeType = info[@"mimeType"];
+                if([mimeType hasPrefix:@"image/"])
                 {
-                    NSString* typeHint = (NSString*)kUTTypePNG;
-                    if([info[@"mimeType"] isEqualToString:@"image/jpeg"])
-                        typeHint = (NSString*)kUTTypeJPEG;
-                    if([info[@"mimeType"] isEqualToString:@"image/png"])
-                        typeHint = (NSString*)kUTTypePNG;
-                    if([info[@"mimeType"] isEqualToString:@"image/png"])
-                        typeHint = (NSString*)kUTTypeGIF;
-                    NSError *error;
-                    attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
-                    if(error)
-                        DDLogError(@"Error %@", error);
-                    if(attachment)
+                    content.body = NSLocalizedString(@"Sent an Image 📷", @"");
+
+                    UNNotificationAttachment* attachment;
+                    if(![info[@"needsDownloading"] boolValue])
                     {
-                        content.attachments = @[attachment];
-                        content.body = @"";
+                        NSString* typeHint = (NSString*)kUTTypePNG;
+                        if([mimeType isEqualToString:@"image/jpeg"])
+                            typeHint = (NSString*)kUTTypeJPEG;
+                        if([mimeType isEqualToString:@"image/png"])
+                            typeHint = (NSString*)kUTTypePNG;
+                        if([mimeType isEqualToString:@"image/png"])
+                            typeHint = (NSString*)kUTTypeGIF;
+                        NSError *error;
+                        attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];
+                        if(error)
+                            DDLogError(@"Error %@", error);
+                        if(attachment)
+                        {
+                            content.attachments = @[attachment];
+                            content.body = @"";
+                        }
                     }
+                    DDLogDebug(@"Publishing notification with id %@", idval);
+                    [self publishNotificationContent:content withID:idval];
+                    return;
                 }
-                
-                DDLogDebug(@"Publishing notification with id %@", idval);
-                [self publishNotificationContent:content withID:idval];
-                return;
+                else if([mimeType hasPrefix:@"image/"])
+                    content.body = NSLocalizedString(@"📷 An Image", @"");
+                else if([mimeType hasPrefix:@"audio/"])
+                    content.body = NSLocalizedString(@"🎵 A Audiomessage", @"");
+                else if([mimeType hasPrefix:@"video/"])
+                    content.body = NSLocalizedString(@"🎥 A Video", @"");
+                else if([mimeType isEqualToString:@"application/pdf"])
+                    content.body = NSLocalizedString(@"📄 A Document", @"");
+                else
+                    content.body = NSLocalizedString(@"Sent a File 📁", @"");
             }
-            else        //TODO JIM: add support for more mime types
+            else
+            {
+                // empty info dict default to "Sent a file"
                 content.body = NSLocalizedString(@"Sent a File 📁", @"");
+            }
         }
         else if([message.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
             content.body = NSLocalizedString(@"Sent a Link 🔗", @"");

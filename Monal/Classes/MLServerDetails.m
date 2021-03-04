@@ -50,7 +50,7 @@ enum MLServerDetailsSections {
     // supportsBlocking
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0191: Blocking Command", @""),
-        @"Description":NSLocalizedString(@"TODO", @""),
+        @"Description":NSLocalizedString(@"XMPP protocol extension for communications blocking.", @""),
         @"Color": connection.supportsBlocking ? @"Green" : @"Red"
     }];
 
@@ -64,14 +64,14 @@ enum MLServerDetailsSections {
     // supportsPing
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0199: XMPP Ping", @""),
-        @"Description":NSLocalizedString(@"TODO", @""),
+        @"Description":NSLocalizedString(@"XMPP protocol extension for sending application-level pings over XML streams.", @""),
         @"Color": connection.supportsPing ? @"Green" : @"Red"
     }];
 
     // supportsRosterVersion
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0237: Roster Versioning", @""),
-        @"Description":NSLocalizedString(@"TODO", @""),
+        @"Description":NSLocalizedString(@"Defines a proposed modification to the XMPP roster protocol that enables versioning of rosters such that the server will not send the roster to the client if the roster has not been modified.", @""),
         @"Color": connection.supportsRosterVersion ? @"Green" : @"Red"
     }];
 
@@ -113,15 +113,15 @@ enum MLServerDetailsSections {
     // supportsRosterPreApproval
     [self.serverCaps addObject:@{
         @"Title":NSLocalizedString(@"XEP-0379: Pre-Authenticated Roster Subscription", @""),
-        @"Description":NSLocalizedString(@"TODO", @""),
+        @"Description":NSLocalizedString(@"Defines a protocol and URI scheme for pre-authenticated roster links that allow a third party to automatically obtain the user's presence subscription.", @""),
         @"Color": connection.supportsRosterPreApproval ? @"Green" : @"Red"
     }];
 
     // supportsPubSub
     [self.serverCaps addObject:@{
         // see MLIQProcessor.m multiple xep required for pubsub
-        @"Title":NSLocalizedString(@"PubSub Support", @""),
-        @"Description":NSLocalizedString(@"TODO", @""),
+        @"Title":NSLocalizedString(@"XEP-0330: Pubsub Subscription", @""),
+        @"Description":NSLocalizedString(@"Specification describe a method that allow a user to share a list of nodes on which it is Pubsub registered", @""),
         @"Color": connection.supportsPubSub ? @"Green" : @"Red"
     }];
 }

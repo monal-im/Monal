@@ -39,13 +39,19 @@
                             <constraint firstAttribute="width" constant="49" id="sJa-cB-ur2"/>
                         </constraints>
                     </switch>
+                    <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="5" minValue="1" maxValue="30" translatesAutoresizingMaskIntoConstraints="NO" id="tEn-lq-qzq">
+                        <rect key="frame" x="39.5" y="6" width="274.5" height="34"/>
+                    </slider>
                 </subviews>
                 <constraints>
+                    <constraint firstItem="r8c-Jr-MKH" firstAttribute="trailing" secondItem="tEn-lq-qzq" secondAttribute="leading" constant="8" id="7JN-9s-9AK"/>
                     <constraint firstAttribute="trailing" secondItem="YK7-IO-DiF" secondAttribute="trailing" constant="8" id="7cd-KZ-yeq"/>
                     <constraint firstItem="ZDH-II-Cc8" firstAttribute="trailing" secondItem="4FD-Uj-Ib9" secondAttribute="trailing" id="DTw-5b-VOw"/>
+                    <constraint firstAttribute="trailing" secondItem="tEn-lq-qzq" secondAttribute="trailing" constant="8" id="EZT-lA-9Bk"/>
                     <constraint firstItem="ZDH-II-Cc8" firstAttribute="trailing" secondItem="DMi-LI-zqm" secondAttribute="trailingMargin" constant="8" id="LTg-m3-oEl"/>
                     <constraint firstAttribute="trailing" secondItem="4FD-Uj-Ib9" secondAttribute="trailing" constant="8" id="Sov-Wt-Rvy"/>
                     <constraint firstItem="ZDH-II-Cc8" firstAttribute="leading" secondItem="r8c-Jr-MKH" secondAttribute="trailing" constant="8" id="WTa-SO-XVZ"/>
+                    <constraint firstItem="tEn-lq-qzq" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" constant="-5" id="XJt-g5-ad1"/>
                     <constraint firstItem="r8c-Jr-MKH" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" id="dkM-Bb-bcG"/>
                     <constraint firstItem="r8c-Jr-MKH" firstAttribute="leading" secondItem="DMi-LI-zqm" secondAttribute="leadingMargin" constant="-8" id="eLK-Ws-Cos"/>
                     <constraint firstItem="ZDH-II-Cc8" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" id="gL0-U4-7jo"/>
@@ -57,6 +63,7 @@
             <connections>
                 <outlet property="cellLabel" destination="r8c-Jr-MKH" id="EYp-Bu-pMd"/>
                 <outlet property="labelRight" destination="YK7-IO-DiF" id="mDJ-Ej-M9V"/>
+                <outlet property="slider" destination="tEn-lq-qzq" id="NzN-Id-6RI"/>
                 <outlet property="textInputField" destination="ZDH-II-Cc8" id="XuF-cf-PQ0"/>
                 <outlet property="toggleSwitch" destination="4FD-Uj-Ib9" id="01q-Cf-jRH"/>
             </connections>

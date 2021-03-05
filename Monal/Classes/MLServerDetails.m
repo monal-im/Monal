@@ -120,7 +120,7 @@ enum MLServerDetailsSections {
     // supportsPubSub
     [self.serverCaps addObject:@{
         // see MLIQProcessor.m multiple xep required for pubsub
-        @"Title":NSLocalizedString(@"PubSub Support", @""),
+        @"Title":NSLocalizedString(@"PEP Support", @""),
         @"Description":NSLocalizedString(@"Specification describe a method that allow a user to share a list of nodes on which it is Pubsub registered", @""),
         @"Color": connection.supportsPubSub ? @"Green" : @"Red"
     }];

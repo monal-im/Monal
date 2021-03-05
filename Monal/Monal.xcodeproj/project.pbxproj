@@ -229,6 +229,7 @@
 		26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = 26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */; };
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
 		2BA392FE2644C7215E2A6EEE /* Pods_Monal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6D6C5046292E68BB30C97B38 /* Pods_Monal.framework */; };
+		384E4EA725F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 384E4EA625F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m */; };
 		38720923251EDE07001837EB /* MLXEPSlashMeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */; };
 		389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 389E298925E901CA009A5268 /* MLAudioRecoderManager.m */; };
 		389E298D25E901CA009A5268 /* MLAudioRecoderManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */; };
@@ -825,6 +826,8 @@
 		288765A40DF7441C002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* SworIM_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SworIM_Prefix.pch; sourceTree = "<group>"; };
+		384E4EA525F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLAutoDownloadFiletransferSettingViewController.h; sourceTree = "<group>"; };
+		384E4EA625F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAutoDownloadFiletransferSettingViewController.m; sourceTree = "<group>"; };
 		3872091F251EDE07001837EB /* MLXEPSlashMeHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLXEPSlashMeHandler.h; sourceTree = "<group>"; };
 		38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLXEPSlashMeHandler.m; sourceTree = "<group>"; };
 		389E298925E901CA009A5268 /* MLAudioRecoderManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAudioRecoderManager.m; sourceTree = "<group>"; };
@@ -1277,6 +1280,8 @@
 				2678A987185A82BE003AF53B /* Chat Logs */,
 				C13EBB8C24DC685C008AADDA /* MLPrivacySettingsViewController.h */,
 				C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */,
+				384E4EA525F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.h */,
+				384E4EA625F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -2504,6 +2509,7 @@
 				261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */,
 				2602A70922A5431B006D3E72 /* MLRegSuccessViewController.m in Sources */,
 				26F396DC2197507200EF5720 /* GLTintButton.m in Sources */,
+				384E4EA725F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m in Sources */,
 				C15489B925680BBE00BBA2F0 /* MLQRCodeScanner.swift in Sources */,
 				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,
 				2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */,

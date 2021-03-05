@@ -8,11 +8,18 @@
 
 #import <UIKit/UIKit.h>
 
+@protocol MLSettingCellDelegate
+
+-(void)updateUI;
+
+@end
+
 @interface MLSettingCell : UITableViewCell <UITextFieldDelegate>
 
 @property (nonatomic, assign) BOOL switchEnabled;
 @property (nonatomic, assign) BOOL textEnabled;
 @property (nonatomic, weak) UIViewController* parent; 
+@property (nonatomic, weak) id <MLSettingCellDelegate> SettingCellDelegate;
 
 /**
  NSuserdefault key to use

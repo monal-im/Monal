@@ -61,6 +61,7 @@
 -(void) switchChange
 {
     [[HelperTools defaultsDB] setBool:_toggleSwitch.on forKey:_defaultKey];
+    [self.SettingCellDelegate updateUI];
 }
 
 #pragma mark uitextfield delegate

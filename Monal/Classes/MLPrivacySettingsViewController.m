@@ -20,6 +20,7 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
 
 @property (nonatomic, strong) NSArray* sectionArray;
 @property (nonatomic) BOOL isNotificationPrivacyOpened;
+@property (nonatomic) BOOL isSettingFileTransferMaxSize;
 
 @end
 
@@ -37,6 +38,7 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
     _settingsTable.backgroundView = nil;
     [_settingsTable setAllowsSelection:YES];
     self.isNotificationPrivacyOpened = NO;
+    self.isSettingFileTransferMaxSize = NO;
     
     self.sectionArray = @[NSLocalizedString(@"General", @"")];
 }
@@ -45,6 +47,11 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
 {
     [super viewWillAppear:animated];
     [[HelperTools defaultsDB] setObject:@YES forKey:@"HasSeenPrivacySettings"];
+    
+    if (self.isSettingFileTransferMaxSize) {
+        [self.settingsTable reloadData];
+        self.isSettingFileTransferMaxSize = NO;
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -258,10 +265,21 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
                     }
                     else
                     {
+                        cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AutoDownloadMediaCell"];
                         cell.textLabel.text = NSLocalizedString(@"Auto-Download Media", @"");
-                        cell.detailTextLabel.text = NSLocalizedString(@"Automatic media download", @"");
+                        BOOL isAutoDownLoadFiletransfers = [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"];
+                        if (!isAutoDownLoadFiletransfers) {
+                            cell.detailTextLabel.text = NSLocalizedString(@"Disabled", @"");
+                        } else {
+                            NSInteger maxSize = [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"];
+                            NSString *readableFileSize = [NSString stringWithFormat:@"%ld", maxSize/(1024*1024)];
+                            cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ %@ MB", NSLocalizedString(@"Up to", @""), readableFileSize];
+                        }
+                        
+                        cell.detailTextLabel.textColor = [UIColor lightGrayColor];
                         cell.defaultKey = @"AutodownloadFiletransfers";
-                        cell.switchEnabled = YES;
+                        cell.switchEnabled = NO;
+                        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                     }
                     break;
                 }
@@ -291,10 +309,20 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
                 {
                     if (self.isNotificationPrivacyOpened)
                     {
+                        cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AutoDownloadMediaCell"];
                         cell.textLabel.text = NSLocalizedString(@"Auto-Download Media", @"");
-                        cell.detailTextLabel.text = NSLocalizedString(@"Automatic media download", @"");
+                        BOOL isAutoDownLoadFiletransfers = [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"];
+                        if (!isAutoDownLoadFiletransfers) {
+                            cell.detailTextLabel.text = NSLocalizedString(@"Disabled", @"");
+                        } else {
+                            NSInteger maxSize = [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"];
+                            NSString *readableFileSize = [NSString stringWithFormat:@"%ld", maxSize/(1024*1024)];
+                            cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ %@ MB", NSLocalizedString(@"Up to", @""), readableFileSize];
+                        }
+                        cell.detailTextLabel.textColor = [UIColor lightGrayColor];
                         cell.defaultKey = @"AutodownloadFiletransfers";
-                        cell.switchEnabled = YES;
+                        cell.switchEnabled = NO;
+                        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                     }
                     break;
                 }
@@ -335,12 +363,18 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
                 case 5:
                 case 6:
                 case 7:
-                case 8:
+                case 9:
+                case 10:
                 {
                     break;
                 }
-                case 9:
+                case 8:
+                case 11:
                 {
+                    self.isSettingFileTransferMaxSize = YES;
+                    MLAutoDownloadFiletransferSettingViewController *transferFileSettingViewController = [[MLAutoDownloadFiletransferSettingViewController alloc] init];
+                    self.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeAutomatic;
+                    [self.navigationController pushViewController:transferFileSettingViewController animated:YES];
                     break;
                 }
             }

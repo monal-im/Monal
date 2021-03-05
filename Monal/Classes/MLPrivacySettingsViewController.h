@@ -8,7 +8,7 @@
 
 #import "MLSettingCell.h"
 #import <Foundation/Foundation.h>
-
+#import "MLAutoDownloadFiletransferSettingViewController.h"
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MLPrivacySettingsViewController : UITableViewController <UITextFieldDelegate>

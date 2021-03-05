@@ -409,6 +409,7 @@
     DDLogVerbose(@"xmpp edit view section %ld, row %ld", indexPath.section, indexPath.row);
 
     MLSwitchCell* thecell = (MLSwitchCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+    [thecell clear];
 
     // load cells from interface builder
     if(indexPath.section == 1)
@@ -417,26 +418,17 @@
         switch (indexPath.row)
         {
             case 0: {
-                thecell.cellLabel.text = NSLocalizedString(@"Enabled", @"");
-                thecell.textInputField.hidden = YES;
-                thecell.toggleSwitch.tag = 1;
-                thecell.toggleSwitch.on = self.enabled;
+                [thecell initCell:NSLocalizedString(@"Enabled", @"") withToggle:self.enabled andTag:1];
                 break;
             }
             case 1: {
+                [thecell initCell:NSLocalizedString(@"Display Name", @"") withTextField:self.rosterName andPlaceholder:NSLocalizedString(@"", @"") andTag:1];
                 thecell.cellLabel.text = NSLocalizedString(@"Display Name", @"");
-                thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.tag = 1;
                 thecell.textInputField.keyboardType = UIKeyboardTypeAlphabet;
-                thecell.textInputField.text = self.rosterName;
                 break;
             }
             case 2: {
-                thecell.cellLabel.text = NSLocalizedString(@"Status Message", @"");
-                thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.tag = 6;
-                thecell.textInputField.keyboardType = UIKeyboardTypeAlphabet;
-                thecell.textInputField.text = self.statusMessage;
+                [thecell initCell:NSLocalizedString(@"Status Message", @"") withTextField:self.statusMessage andPlaceholder:NSLocalizedString(@"Your status", @"") andTag:6];
                 break;
             }
         }
@@ -447,31 +439,20 @@
         {
             // general
             case 0: {
+                [thecell initTapCell:NSLocalizedString(@"Change Password", @"")];
                 thecell.cellLabel.text = NSLocalizedString(@"Change Password", @"");
-                thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.hidden = YES;
-                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                 break;
             }
             case 1: {
-                thecell.cellLabel.text = NSLocalizedString(@"My Keys", @"");
-                thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.hidden = YES;
-                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                [thecell initTapCell:NSLocalizedString(@"My Keys", @"")];
                 break;
             }
             case 2: {
-                thecell.cellLabel.text = NSLocalizedString(@"Message Archive Pref", @"");
-                thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.hidden = YES;
-                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                [thecell initTapCell:NSLocalizedString(@"Message Archive Pref", @"")];
                 break;
             }
             case 3: {
-                thecell.cellLabel.text = NSLocalizedString(@"Blocked Users", @"");
-                thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.hidden = YES;
-                thecell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                [thecell initTapCell:NSLocalizedString(@"Blocked Users", @"")];
                 break;
             }
         }
@@ -482,71 +463,42 @@
         {
             //advanced
             case 0: {
-                thecell.cellLabel.text = NSLocalizedString(@"XMPP ID", @"");
-                thecell.toggleSwitch.hidden = YES;
-                thecell.labelRight.hidden = YES;
                 if(self.editMode)
                 {
                     // don't allow jid editing
-                    thecell.textInputField.hidden = YES;
-                    thecell.labelRight.text = self.jid;
-                    thecell.labelRight.hidden = NO;
+                    [thecell initCell:NSLocalizedString(@"XMPP ID", @"") withLabel:self.jid];
                 }
                 else
                 {
                     // allow entering jid on account creation
+                    [thecell initCell:NSLocalizedString(@"XMPP ID", @"") withTextField:nil andPlaceholder:NSLocalizedString(@"Enter you XMPP ID here", @"") andTag:2];
                     thecell.textInputField.keyboardType = UIKeyboardTypeEmailAddress;
-                    thecell.textInputField.tag = 2;
-                    thecell.textInputField.hidden = NO;
-                    thecell.textInputField.placeholder = NSLocalizedString(@"Enter you XMPP ID here", @"");
                 }
                 break;
             }
             case 1: {
-                thecell.cellLabel.text = NSLocalizedString(@"Password", @"");
-                thecell.textInputField.placeholder = NSLocalizedString(@"Enter you password here", @"");
-                thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.secureTextEntry = YES;
-                thecell.textInputField.tag = 3;
-                thecell.textInputField.text = self.password;
+                [thecell initCell:NSLocalizedString(@"Password", @"") withTextField:self.password secureEntry:YES andPlaceholder:NSLocalizedString(@"Enter you password here", @"") andTag:3];
                 break;
             }
             case 2:  {
-                thecell.cellLabel.text = NSLocalizedString(@"Server", @"");
-                thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.tag = 4;
-                thecell.textInputField.text = self.server;
-                thecell.textInputField.placeholder = NSLocalizedString(@"Optional Hardcoded Hostname", @"");
+                [thecell initCell:NSLocalizedString(@"Server", @"") withTextField:self.server andPlaceholder:NSLocalizedString(@"Optional Hardcoded Hostname", @"") andTag:4];
                 thecell.accessoryType = UITableViewCellAccessoryDetailButton;
                 break;
             }
             case 3:  {
-                thecell.cellLabel.text = NSLocalizedString(@"Port", @"");
-                thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.tag = 5;
-                thecell.textInputField.text = self.port;
+                [thecell initCell:NSLocalizedString(@"Port", @"") withTextField:self.port andPlaceholder:NSLocalizedString(@"Optional Port", @"") andTag:5];
                 break;
             }
             case 4: {
-                thecell.cellLabel.text = NSLocalizedString(@"Direct TLS", @"");
-                thecell.textInputField.hidden = YES;
-                thecell.toggleSwitch.tag = 2;
-                thecell.toggleSwitch.on = self.directTLS;
+                [thecell initCell:NSLocalizedString(@"Direct TLS", @"") withToggle:self.directTLS andTag:2];
                 break;
             }
             case 5: {
-                thecell.cellLabel.text = NSLocalizedString(@"Resource", @"");
-                thecell.labelRight.text = self.resource;
-                thecell.labelRight.hidden = NO;
-                thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.hidden = YES;
+                [thecell initCell:NSLocalizedString(@"Resource", @"") withLabel:self.resource];
                 break;
             }
             case 6: {
-                thecell.cellLabel.text = NSLocalizedString(@"Clear own omemo session", @"DEBUG - XMPPEdit");
-                thecell.labelRight.hidden = YES;
-                thecell.toggleSwitch.hidden = YES;
-                thecell.textInputField.hidden = YES;
+                [thecell initCell:NSLocalizedString(@"Clear own omemo session", @"DEBUG - XMPPEdit") withLabel:nil];
                 break;
             }
         }
@@ -579,7 +531,6 @@
     {
         [thecell.toggleSwitch addTarget:self action:@selector(toggleSwitch:) forControlEvents:UIControlEventValueChanged];
     }
-    thecell.selectionStyle = UITableViewCellSelectionStyleNone;
     return thecell;
 }
 

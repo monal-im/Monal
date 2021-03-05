@@ -655,10 +655,32 @@
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <segue destination="773-b1-OH6" kind="show" identifier="fileTransferSettings" id="rhU-jD-RDG"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1hb-BU-yZL" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1613.0434782608697" y="5465.625"/>
+            <point key="canvasLocation" x="-2100" y="5466"/>
+        </scene>
+        <!--Auto Download Filetransfer Setting View Controller-->
+        <scene sceneID="JgU-N4-QVC">
+            <objects>
+                <viewController id="773-b1-OH6" customClass="MLAutoDownloadFiletransferSettingViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="KVB-MU-sLq"/>
+                        <viewControllerLayoutGuide type="bottom" id="LXr-1Q-clF"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="xJ7-tP-re2">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="UKT-0f-Hc6"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="AsT-uy-LTO" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1294" y="5466"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="qQX-m2-f0T">
@@ -976,7 +998,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Oit-GA-ZN1" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-2523.1884057971015" y="5465.625"/>
+            <point key="canvasLocation" x="-2907" y="5466"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>

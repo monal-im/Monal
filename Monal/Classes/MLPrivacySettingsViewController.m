@@ -20,7 +20,6 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
 
 @property (nonatomic, strong) NSArray* sectionArray;
 @property (nonatomic) BOOL isNotificationPrivacyOpened;
-@property (nonatomic) BOOL isSettingFileTransferMaxSize;
 
 @end
 
@@ -38,7 +37,6 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
     _settingsTable.backgroundView = nil;
     [_settingsTable setAllowsSelection:YES];
     self.isNotificationPrivacyOpened = NO;
-    self.isSettingFileTransferMaxSize = NO;
     
     self.sectionArray = @[NSLocalizedString(@"General", @"")];
 }
@@ -47,11 +45,6 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
 {
     [super viewWillAppear:animated];
     [[HelperTools defaultsDB] setObject:@YES forKey:@"HasSeenPrivacySettings"];
-    
-    if (self.isSettingFileTransferMaxSize) {
-        [self.settingsTable reloadData];
-        self.isSettingFileTransferMaxSize = NO;
-    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -83,7 +76,7 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
     switch (section) {
         case 0:
         {
-            if (self.self.isNotificationPrivacyOpened)
+            if(self.self.isNotificationPrivacyOpened)
             {
                 return 12;
             }
@@ -371,10 +364,7 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
                 case 8:
                 case 11:
                 {
-                    self.isSettingFileTransferMaxSize = YES;
-                    MLAutoDownloadFiletransferSettingViewController *transferFileSettingViewController = [[MLAutoDownloadFiletransferSettingViewController alloc] init];
-                    self.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeAutomatic;
-                    [self.navigationController pushViewController:transferFileSettingViewController animated:YES];
+                    [self performSegueWithIdentifier:@"fileTransferSettings" sender:nil];
                     break;
                 }
             }

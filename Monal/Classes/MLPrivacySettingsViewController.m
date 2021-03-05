@@ -13,9 +13,10 @@
 
 typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
     DisplayNameAndMessageRow = 1,
-    DisplayOnlyNameRow,
-    DisplayOnlyPlaceholderRow
+    DisplayOnlyNameRow = 2,
+    DisplayOnlyPlaceholderRow = 3
 };
+const long NotificationPrivacyOptionCnt = 3;
 
 @interface MLPrivacySettingsViewController()
 
@@ -79,15 +80,7 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
     switch (section) {
         case 0:
         {
-            if(self.self.isNotificationPrivacyOpened)
-            {
-                return 12;
-            }
-            else
-            {
-                return 9;
-            }
-            break;
+            return 9 + (self.isNotificationPrivacyOpened ? NotificationPrivacyOptionCnt : 0);
         }
         default:
         {
@@ -107,7 +100,8 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
         case 0:
         {
             long row = indexPath.row;
-            row += self.isNotificationPrivacyOpened ? 0 : 3;
+            // + non expanded notification options
+            row += self.isNotificationPrivacyOpened ? 0 : NotificationPrivacyOptionCnt;
 
             switch(row)
             {
@@ -201,7 +195,10 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
     switch (indexPath.section) {
         case 0:
         {
-            switch(indexPath.row)
+            long row = indexPath.row;
+            // + non expanded notification options
+            row += self.isNotificationPrivacyOpened ? 0 : NotificationPrivacyOptionCnt;
+            switch(row)
             {
                 case 0:
                 {
@@ -212,25 +209,20 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
                 case 2:
                 case 3:
                 {
-                    if (self.isNotificationPrivacyOpened)
-                    {
-                        MLSettingCell* cell = [tableView cellForRowAtIndexPath:indexPath];
-                        cell.accessoryType = UITableViewCellAccessoryCheckmark;
-                        [self setNotificationPrivacyOption:indexPath];
-                        [self openNotificationPrivacyFolder];
-                    }
+                    MLSwitchCell* cell = [tableView cellForRowAtIndexPath:indexPath];
+                    cell.accessoryType = UITableViewCellAccessoryCheckmark;
+                    [self setNotificationPrivacyOption:indexPath];
+                    [self openNotificationPrivacyFolder];
                     break;
                 }
                 case 4:
                 case 5:
                 case 6:
                 case 7:
+                case 8:
                 case 9:
                 case 10:
-                {
                     break;
-                }
-                case 8:
                 case 11:
                 {
                     [self performSegueWithIdentifier:@"fileTransferSettings" sender:nil];
@@ -269,42 +261,31 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
     [_settingsTable reloadData];
 }
 
--(void)checkStatusForCell:(MLSwitchCell*) settingCell atIndexPath:(NSIndexPath*) idxPath
+-(void)checkStatusForCell:(MLSwitchCell*) cell atIndexPath:(NSIndexPath*) idxPath
 {
     NotificationPrivacySettingOption privacySettionOption = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
+    // default: remove checkmark
+    cell.accessoryType = UITableViewCellAccessoryNone;
     
     switch (idxPath.row) {
         case DisplayNameAndMessageRow:
-            if (privacySettionOption == DisplayNameAndMessage )
+            if(privacySettionOption == DisplayNameAndMessage)
             {
-                settingCell.accessoryType = UITableViewCellAccessoryCheckmark;
-            }
-            else
-            {
-                settingCell.accessoryType = UITableViewCellAccessoryNone;
+                cell.accessoryType = UITableViewCellAccessoryCheckmark;
             }
             break;
         case DisplayOnlyNameRow:
-            if (privacySettionOption == DisplayOnlyName )
+            if(privacySettionOption == DisplayOnlyName)
             {
-                settingCell.accessoryType = UITableViewCellAccessoryCheckmark;
-            }
-            else
-            {
-                settingCell.accessoryType = UITableViewCellAccessoryNone;
+                cell.accessoryType = UITableViewCellAccessoryCheckmark;
             }
             break;
         case DisplayOnlyPlaceholderRow:
-            if (privacySettionOption == DisplayOnlyPlaceholder )
+            if(privacySettionOption == DisplayOnlyPlaceholder)
             {
-                settingCell.accessoryType = UITableViewCellAccessoryCheckmark;
-            }
-            else
-            {
-                settingCell.accessoryType = UITableViewCellAccessoryNone;
+                cell.accessoryType = UITableViewCellAccessoryCheckmark;
             }
             break;
-            
         default:
             break;
     }

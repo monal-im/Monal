@@ -12,7 +12,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MLAutoDownloadFiletransferSettingViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, MLSettingCellDelegate>
+@interface MLAutoDownloadFiletransferSettingViewController : UITableViewController <UITableViewDelegate, UITableViewDataSource, MLSettingCellDelegate>
 
 @end
 

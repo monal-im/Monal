@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MLSwitchCell : UITableViewCell
+@interface MLSwitchCell : UITableViewCell<UITextFieldDelegate>
 
 /**
  Label to the left
@@ -39,12 +39,16 @@ Label to the right
 
 -(void) initTapCell:(NSString*) leftLabel;
 
+// UILabel
 -(void) initCell:(NSString*) leftLabel withLabel:(NSString*) rightLabel;
 
+// UITextField
 -(void) initCell:(NSString*) leftLabel withTextField:(NSString*) rightText andPlaceholder:(NSString*) placeholder andTag:(uint16_t) tag;
-
 -(void) initCell:(NSString*) leftLabel withTextField:(NSString*) rightText secureEntry:(BOOL) secureEntry andPlaceholder:(NSString*) placeholder andTag:(uint16_t) tag;
+-(void) initCell:(NSString*) leftLabel withTextFieldDefaultsKey:(NSString*) key andPlaceholder:(NSString*) placeholder;
 
+// UISwitch
 -(void) initCell:(NSString*) leftLabel withToggle:(BOOL) toggleValue andTag:(uint16_t) tag;
+-(void) initCell:(NSString*) leftLabel withToggleDefaultsKey:(NSString*) key;
 
 @end

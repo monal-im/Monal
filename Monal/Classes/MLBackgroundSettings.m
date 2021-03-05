@@ -8,7 +8,7 @@
 
 #import "HelperTools.h"
 #import "MLBackgroundSettings.h"
-#import "MLSettingCell.h"
+#import "MLSwitchCell.h"
 #import "MLImageManager.h"
 @import CoreServices;
 @import AVFoundation;
@@ -27,15 +27,17 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.title=NSLocalizedString(@"Backgrounds",@"");
-    
+
+    [self.tableView registerNib:[UINib nibWithNibName:@"MLSwitchCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"AccountCell"];
+
+    self.title = NSLocalizedString(@"Backgrounds", @"");
+
     self.imageList = @[@"Golden_leaves_by_Mauro_Campanelli",
                        @"Stop_the_light_by_Mato_Rachela",
                        @"THE_'OUT'_STANDING_by_ydristi",
                        @"Tie_My_Boat_by_Ray_Garcia",
                        @"Winter_Fog_by_Daniel_Vesterskov",
                        ];
-    
 }
 
 - (void)didReceiveMemoryWarning {
@@ -55,22 +57,19 @@
 
 -(NSString *) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
-    return NSLocalizedString(@"Select a background to display behind conversations",@"");
+    return NSLocalizedString(@"Select a background to display behind conversations", @"");
 }
 
 -(NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
 {
-    return NSLocalizedString(@"Default chat backgrounds are from the Ubuntu project.",@"") ;
+    return NSLocalizedString(@"Default chat backgrounds are from the Ubuntu project.", @"") ;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     if(indexPath.row == 0)
     {
-        MLSettingCell* cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
-        cell.parent = self;
-        cell.switchEnabled = YES;
-        cell.defaultKey = @"ChatBackgrounds";
-        cell.textLabel.text = NSLocalizedString(@"Chat Backgrounds",@"");
+        MLSwitchCell* cell = (MLSwitchCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+        [cell initCell:NSLocalizedString(@"Chat Backgrounds", @"") withToggleDefaultsKey:@"ChatBackgrounds"];
         return cell;
     }
     else if(indexPath.row == 1)

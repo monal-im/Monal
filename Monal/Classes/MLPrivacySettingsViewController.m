@@ -9,6 +9,7 @@
 #import "MLPrivacySettingsViewController.h"
 #import "HelperTools.h"
 #import "MLConstants.h"
+#import "MLSwitchCell.h"
 
 typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
     DisplayNameAndMessageRow = 1,
@@ -28,6 +29,8 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    [self.tableView registerNib:[UINib nibWithNibName:@"MLSwitchCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"AccountCell"];
+
     // Do any additional setup after loading the view.
     self.navigationItem.title = NSLocalizedString(@"Privacy Settings", @"");
    
@@ -97,233 +100,99 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
-    MLSettingCell* cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
-    cell.parent = self;
-    
+    MLSwitchCell* cell = (MLSwitchCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+    [cell clear];
+
     switch (indexPath.section) {
         case 0:
         {
-            switch(indexPath.row)
+            long row = indexPath.row;
+            row += self.isNotificationPrivacyOpened ? 0 : 3;
+
+            switch(row)
             {
                 case 0:
                 {
-                    cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"AccountCell"];
-                    cell.textLabel.text = NSLocalizedString(@"Notification", @"");
                     NotificationPrivacySettingOption nOptions = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
-                    cell.detailTextLabel.text = [self getNsNotificationPrivacyOption:nOptions];
-                    cell.switchEnabled = NO;
+                    [cell initCell:NSLocalizedString(@"Notification", @"") withLabel:[self getNsNotificationPrivacyOption:nOptions]];
                     break;
                 }
                 //Notification options
                 case 1:
                 {
-                    if (self.isNotificationPrivacyOpened)
-                    {
-                        cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"AccountCell"];
-                        cell.textLabel.text = [@" - " stringByAppendingString:NSLocalizedString(@"Display Name And Message", @"")];
-                        cell.detailTextLabel.text = @"";
-                        cell.switchEnabled = NO;
-                        cell.textLabel.font = [UIFont systemFontOfSize:14.0];
-                        [self checkStatusForCell:cell atIndexPath:indexPath];
-                    }
-                    else
-                    {
-                        cell.textLabel.text = NSLocalizedString(@"Show Inline Images", @"");
-                        cell.detailTextLabel.text = NSLocalizedString(@"Will make a HTTP HEAD call on all links", @"");
-                        cell.defaultKey = @"ShowImages";
-                        cell.switchEnabled = YES;
-                    }
+                    [cell initCell:[@" - " stringByAppendingString:NSLocalizedString(@"Display Name And Message", @"")] withLabel:nil];
+                    [self checkStatusForCell:cell atIndexPath:indexPath];
                     break;
                 }
                 case 2:
                 {
-                    if (self.isNotificationPrivacyOpened)
-                    {
-                        cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"AccountCell"];
-                        cell.textLabel.text = [@" - " stringByAppendingString:NSLocalizedString(@"Display Only Name", @"")];
-                        cell.detailTextLabel.text = @"";
-                        cell.switchEnabled = NO;
-                        cell.textLabel.font = [UIFont systemFontOfSize:14.0];
-                        [self checkStatusForCell:cell atIndexPath:indexPath];
-                    }
-                    else
-                    {
-                        cell.textLabel.text = NSLocalizedString(@"Show Inline Geo Location", @"");
-                        cell.detailTextLabel.text = @"";
-                        cell.defaultKey = @"ShowGeoLocation";
-                        cell.switchEnabled = YES;
-                    }
+                    [cell initCell:[@" - " stringByAppendingString:NSLocalizedString(@"Display Only Name", @"")] withLabel:nil];
+                    [self checkStatusForCell:cell atIndexPath:indexPath];
                     break;
                 }
                 case 3:
                 {
-                    if (self.isNotificationPrivacyOpened)
-                    {
-                        cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"AccountCell"];
-                        cell.textLabel.text = [@" - " stringByAppendingString:NSLocalizedString(@"Display Only Placeholder", @"")];
-                        cell.detailTextLabel.text = @"";
-                        cell.switchEnabled = NO;
-                        cell.textLabel.font = [UIFont systemFontOfSize:14.0];
-                        [self checkStatusForCell:cell atIndexPath:indexPath];
-                    }
-                    else
-                    {
-                        cell.textLabel.text = NSLocalizedString(@"Send Last Interaction Time", @"");
-                        cell.detailTextLabel.text = NSLocalizedString(@"Automatically send when you were online", @"");
-                        cell.defaultKey = @"SendLastUserInteraction";
-                        cell.switchEnabled = YES;
-                    }
+                    [cell initCell:[@" - " stringByAppendingString:NSLocalizedString(@"Display Only Placeholder", @"")] withLabel:nil];
+                    [self checkStatusForCell:cell atIndexPath:indexPath];
                     break;
                 }
                 case 4:
                 {
-                    if (self.isNotificationPrivacyOpened)
-                    {
-                        cell.textLabel.text = NSLocalizedString(@"Show Inline Images", @"");
-                        cell.detailTextLabel.text = NSLocalizedString(@"Will make a HTTP HEAD call on all links", @"");
-                        cell.defaultKey = @"ShowImages";
-                        cell.switchEnabled = YES;
-                    }
-                    else
-                    {
-                        cell.textLabel.text = NSLocalizedString(@"Send Typing Notifications", @"");
-                        cell.detailTextLabel.text = NSLocalizedString(@"Tell my contacts when I'm typing", @"");
-                        cell.defaultKey = @"SendLastChatState";
-                        cell.switchEnabled = YES;
-                    }
+                    [cell initCell:NSLocalizedString(@"Show Inline Images", @"") withToggleDefaultsKey:@"ShowImages"];
                     break;
                 }
                 case 5:
                 {
-                    if (self.isNotificationPrivacyOpened)
-                    {
-                        cell.textLabel.text = NSLocalizedString(@"Show Inline Geo Location", @"");
-                        cell.detailTextLabel.text = @"";
-                        cell.defaultKey = @"ShowGeoLocation";
-                        cell.switchEnabled = YES;
-                    }
-                    else
-                    {
-                        cell.textLabel.text = NSLocalizedString(@"Send message received state", @"");
-                        cell.detailTextLabel.text = NSLocalizedString(@"Tell my contacts if my device received a message", @"");
-                        cell.defaultKey = @"SendReceivedMarkers";
-                        cell.switchEnabled = YES;
-                    }
+                    [cell initCell:NSLocalizedString(@"Show Inline Geo Location", @"") withToggleDefaultsKey:@"ShowGeoLocation"];
                     break;
                 }
                 case 6:
                 {
-                    if (self.isNotificationPrivacyOpened)
-                    {
-                        cell.textLabel.text = NSLocalizedString(@"Send Last Interaction Time", @"");
-                        cell.detailTextLabel.text = NSLocalizedString(@"Automatically send when you were online", @"");
-                        cell.defaultKey = @"SendLastUserInteraction";
-                        cell.switchEnabled = YES;
-                    }
-                    else
-                    {
-                        cell.textLabel.text = NSLocalizedString(@"Sync Read-Markers", @"");
-                        cell.detailTextLabel.text = NSLocalizedString(@"Tell my contacts if I've read a message", @"");
-                        cell.defaultKey = @"SendDisplayedMarkers";
-                        cell.switchEnabled = YES;
-                    }
+                    [cell initCell:NSLocalizedString(@"Send Last Interaction Time", @"") withToggleDefaultsKey:@"SendLastUserInteraction"];
                     break;
                 }
                 case 7:
                 {
-                    if (self.isNotificationPrivacyOpened)
-                    {
-                        cell.textLabel.text = NSLocalizedString(@"Send Typing Notifications", @"");
-                        cell.detailTextLabel.text = NSLocalizedString(@"Tell my contacts when I'm typing", @"");
-                        cell.defaultKey = @"SendLastChatState";
-                        cell.switchEnabled = YES;
-                    }
-                    else
-                    {
-                        cell.textLabel.text = NSLocalizedString(@"Show URL previews", @"");
-                        cell.detailTextLabel.text = NSLocalizedString(@"Automatically fetch previews of received links", @"");
-                        cell.defaultKey = @"ShowURLPreview";
-                        cell.switchEnabled = YES;
-                    }
+                    [cell initCell:NSLocalizedString(@"Send Typing Notifications", @"") withToggleDefaultsKey:@"SendLastChatState"];
                     break;
                 }
                 case 8:
                 {
-                    if (self.isNotificationPrivacyOpened)
-                    {
-                        cell.textLabel.text = NSLocalizedString(@"Send message received state", @"");
-                        cell.detailTextLabel.text = NSLocalizedString(@"Tell my contacts if my device received a message", @"");
-                        cell.defaultKey = @"SendReceivedMarkers";
-                        cell.switchEnabled = YES;
-                    }
-                    else
-                    {
-                        cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AutoDownloadMediaCell"];
-                        cell.textLabel.text = NSLocalizedString(@"Auto-Download Media", @"");
-                        BOOL isAutoDownLoadFiletransfers = [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"];
-                        if (!isAutoDownLoadFiletransfers) {
-                            cell.detailTextLabel.text = NSLocalizedString(@"Disabled", @"");
-                        } else {
-                            NSInteger maxSize = [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"];
-                            NSString *readableFileSize = [NSString stringWithFormat:@"%ld", maxSize/(1024*1024)];
-                            cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ %@ MB", NSLocalizedString(@"Up to", @""), readableFileSize];
-                        }
-                        
-                        cell.detailTextLabel.textColor = [UIColor lightGrayColor];
-                        cell.defaultKey = @"AutodownloadFiletransfers";
-                        cell.switchEnabled = NO;
-                        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-                    }
+                    [cell initCell:NSLocalizedString(@"Send message received state", @"") withToggleDefaultsKey:@"SendReceivedMarkers"];
                     break;
                 }
                 case 9:
                 {
-                    if (self.isNotificationPrivacyOpened)
-                    {
-                        cell.textLabel.text = NSLocalizedString(@"Sync Read-Markers", @"");
-                        cell.detailTextLabel.text = NSLocalizedString(@"Tell my contacts if I've read a message", @"");
-                        cell.defaultKey = @"SendDisplayedMarkers";
-                        cell.switchEnabled = YES;
-                    }
+                    [cell initCell:NSLocalizedString(@"Sync Read-Markers", @"") withToggleDefaultsKey:@"SendDisplayedMarkers"];
                     break;
                 }
                 case 10:
                 {
-                    if (self.isNotificationPrivacyOpened)
-                    {
-                        cell.textLabel.text = NSLocalizedString(@"Show URL previews", @"");
-                        cell.detailTextLabel.text = NSLocalizedString(@"Automatically fetch previews of received links", @"");
-                        cell.defaultKey = @"ShowURLPreview";
-                        cell.switchEnabled = YES;
-                    }
+                    [cell initCell:NSLocalizedString(@"Show URL previews", @"") withToggleDefaultsKey:@"ShowURLPreview"];
                     break;
                 }
                 case 11:
                 {
-                    if (self.isNotificationPrivacyOpened)
-                    {
-                        cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AutoDownloadMediaCell"];
-                        cell.textLabel.text = NSLocalizedString(@"Auto-Download Media", @"");
-                        BOOL isAutoDownLoadFiletransfers = [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"];
-                        if (!isAutoDownLoadFiletransfers) {
-                            cell.detailTextLabel.text = NSLocalizedString(@"Disabled", @"");
-                        } else {
-                            NSInteger maxSize = [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"];
-                            NSString *readableFileSize = [NSString stringWithFormat:@"%ld", maxSize/(1024*1024)];
-                            cell.detailTextLabel.text = [NSString stringWithFormat:@"%@ %@ MB", NSLocalizedString(@"Up to", @""), readableFileSize];
-                        }
-                        cell.detailTextLabel.textColor = [UIColor lightGrayColor];
-                        cell.defaultKey = @"AutodownloadFiletransfers";
-                        cell.switchEnabled = NO;
-                        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                    MLSettingCell* mediaCell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AutoDownloadMediaCell"];
+                    mediaCell.textLabel.text = NSLocalizedString(@"Auto-Download Media", @"");
+                    BOOL isAutoDownLoadFiletransfers = [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"];
+                    if (!isAutoDownLoadFiletransfers) {
+                        mediaCell.detailTextLabel.text = NSLocalizedString(@"Disabled", @"");
+                    } else {
+                        NSInteger maxSize = [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"];
+                        NSString *readableFileSize = [NSString stringWithFormat:@"%ld", maxSize/(1024*1024)];
+                        mediaCell.detailTextLabel.text = [NSString stringWithFormat:@"%@ %@ MB", NSLocalizedString(@"Up to", @""), readableFileSize];
                     }
-                    break;
+                    mediaCell.detailTextLabel.textColor = [UIColor lightGrayColor];
+                    mediaCell.defaultKey = @"AutodownloadFiletransfers";
+                    mediaCell.switchEnabled = NO;
+                    mediaCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                    return mediaCell;
                 }
             }
             break;
         }
     }
-    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }
 
@@ -400,7 +269,7 @@ typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
     [_settingsTable reloadData];
 }
 
--(void)checkStatusForCell:(MLSettingCell*) settingCell atIndexPath:(NSIndexPath*) idxPath
+-(void)checkStatusForCell:(MLSwitchCell*) settingCell atIndexPath:(NSIndexPath*) idxPath
 {
     NotificationPrivacySettingOption privacySettionOption = (NotificationPrivacySettingOption)[[HelperTools defaultsDB] integerForKey:@"NotificationPrivacySetting"];
     

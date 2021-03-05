@@ -656,7 +656,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <segue destination="773-b1-OH6" kind="show" identifier="fileTransferSettings" id="rhU-jD-RDG"/>
+                        <segue destination="JHU-eb-YRM" kind="show" identifier="fileTransferSettings" id="zfE-Ex-5St"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1hb-BU-yZL" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -664,23 +664,33 @@
             <point key="canvasLocation" x="-2100" y="5466"/>
         </scene>
         <!--Auto Download Filetransfer Setting View Controller-->
-        <scene sceneID="JgU-N4-QVC">
+        <scene sceneID="X4e-Cb-IHW">
             <objects>
-                <viewController id="773-b1-OH6" customClass="MLAutoDownloadFiletransferSettingViewController" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="KVB-MU-sLq"/>
-                        <viewControllerLayoutGuide type="bottom" id="LXr-1Q-clF"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="xJ7-tP-re2">
+                <tableViewController id="JHU-eb-YRM" customClass="MLAutoDownloadFiletransferSettingViewController" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="ZJ0-Yy-ghy">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                    </view>
-                    <navigationItem key="navigationItem" id="UKT-0f-Hc6"/>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="AsT-uy-LTO" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="1tW-Nf-ovP">
+                                <rect key="frame" x="0.0" y="28" width="414" height="43.666667938232422"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="1tW-Nf-ovP" id="OPZ-8v-S0G">
+                                    <rect key="frame" x="0.0" y="0.0" width="414" height="43.666667938232422"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="JHU-eb-YRM" id="Md3-bV-W2t"/>
+                            <outlet property="delegate" destination="JHU-eb-YRM" id="Vn9-b3-FCf"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" id="WtR-mL-Ibf"/>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="OEZ-xu-7wK" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1294" y="5466"/>
+            <point key="canvasLocation" x="-1286" y="5466"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="qQX-m2-f0T">

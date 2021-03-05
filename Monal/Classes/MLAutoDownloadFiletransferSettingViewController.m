@@ -7,6 +7,7 @@
 //
 
 #import "MLAutoDownloadFiletransferSettingViewController.h"
+#import "MLSwitchCell.h"
 
 enum MLAutoDownloadFiletransferSettingViewController {
     FiletransferSettingsGeneralSettings,
@@ -26,17 +27,11 @@ enum MLAutoDownloadFiletransferSettingViewController {
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+
+    [self.tableView registerNib:[UINib nibWithNibName:@"MLSwitchCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"AccountCell"];
+    
     self.navigationItem.title = NSLocalizedString(@"Auto-Download Media", @"");
     self.view.backgroundColor = [UIColor whiteColor];
-    
-    self.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;
-
-    filetransferSettingTableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, [[UIScreen mainScreen] bounds].size.height) style:UITableViewStyleGrouped];
-    filetransferSettingTableView.delegate = self;
-    filetransferSettingTableView.dataSource = self;
-    
-    [filetransferSettingTableView registerClass:[UITableViewCell self] forCellReuseIdentifier:@"settingsCell"];
-    [self.view addSubview:filetransferSettingTableView];
 }
 
 -(nullable NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -69,7 +64,8 @@ enum MLAutoDownloadFiletransferSettingViewController {
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"settingsCell" forIndexPath:indexPath];
+    MLSwitchCell* cell = (MLSwitchCell *)[tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
+    [cell clear];
 
     switch(indexPath.section)
     {
@@ -78,13 +74,7 @@ enum MLAutoDownloadFiletransferSettingViewController {
             {
                 case 0:
                 {
-                    cell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"AccountCell"];
-                    MLSettingCell* autoDownloadCell = (MLSettingCell *)cell;
-                    autoDownloadCell.SettingCellDelegate = self;
-                    autoDownloadCell.defaultKey = @"AutodownloadFiletransfers";
-                    autoDownloadCell.switchEnabled = YES;
-                    autoDownloadCell.textEnabled = NO;
-                    autoDownloadCell.textLabel.text = NSLocalizedString(@"Auto-Download Media", @"");
+                    [cell initCell:NSLocalizedString(@"Auto-Download Media", @"") withToggleDefaultsKey:@"AutodownloadFiletransfers"];
                     break;
                 }
                 default:
@@ -96,7 +86,7 @@ enum MLAutoDownloadFiletransferSettingViewController {
             {
                 case 0:
                 {
-                    UILabel* minLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 20, 50, 15)];
+                    /*UILabel* minLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 20, 50, 15)];
                     [minLabel setText:NSLocalizedString(@"1 MB", @"")];
                     [minLabel adjustsFontSizeToFitWidth];
                     [minLabel setTextColor:[UIColor grayColor]];
@@ -129,7 +119,7 @@ enum MLAutoDownloadFiletransferSettingViewController {
                     [slider setContinuous:YES];
 
                     [slider addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
-                    [cell.contentView addSubview:slider];
+                    [cell.contentView addSubview:slider];*/
                 }
                     break;
                 default:

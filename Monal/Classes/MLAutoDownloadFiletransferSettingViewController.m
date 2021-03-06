@@ -8,6 +8,7 @@
 
 #import "MLAutoDownloadFiletransferSettingViewController.h"
 #import "MLSwitchCell.h"
+#import "MLDefinitions.h"
 
 enum MLAutoDownloadFiletransferSettingViewController {
     FiletransferSettingsGeneralSettings,
@@ -78,7 +79,7 @@ enum MLAutoDownloadFiletransferSettingViewController {
                     break;
                 }
                 default:
-                    [HelperTools unreachable];
+                    unreachable();
             }
             break;
         case FiletransferSettingsAdvancedSettings:
@@ -123,12 +124,12 @@ enum MLAutoDownloadFiletransferSettingViewController {
                 }
                     break;
                 default:
-                    [HelperTools unreachable];
+                    unreachable();
                     break;
             }
             break;
         default:
-            [HelperTools unreachable];
+            unreachable();
     }
     return cell;
 }

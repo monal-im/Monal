@@ -713,11 +713,4 @@ void logException(NSException* exception)
     return qrCode.outputImage;
 }
 
-+(void) unreachable
-{
-#if defined(IS_ALPHA) || defined(DEBUG)
-    NSAssert(NO, @"unreachable");
-#endif
-}
-
 @end

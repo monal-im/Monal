@@ -68,8 +68,6 @@ void logException(NSException* exception);
 +(UIView*) MLCustomViewHeaderWithTitle:(NSString*) title;
 +(CIImage*) createQRCodeFromString:(NSString*) input;
 
-+(void) unreachable;
-
 @end
 
 NS_ASSUME_NONNULL_END

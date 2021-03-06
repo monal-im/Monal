@@ -885,6 +885,7 @@
 		C15D504A24C727CC002F75BB /* MLLogFileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLLogFileManager.m; sourceTree = "<group>"; };
 		C1613B572520723C0062C0C2 /* MLBasePaser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLBasePaser.h; sourceTree = "<group>"; };
 		C1613B592520723C0062C0C2 /* MLBasePaser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLBasePaser.m; sourceTree = "<group>"; };
+		C1850E5E25F34895003D506A /* MLDefinitions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDefinitions.h; sourceTree = "<group>"; };
 		C18E7578245E8AE900AE8FB7 /* MLPipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPipe.h; sourceTree = "<group>"; };
 		C18E7579245E8AE900AE8FB7 /* MLPipe.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPipe.m; sourceTree = "<group>"; };
 		C1943A4A25309A9D0036172F /* MLReloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLReloadCell.h; sourceTree = "<group>"; };
@@ -1717,6 +1718,7 @@
 				540E13A824CF78D00038FDA0 /* MLLogFormatter.h */,
 				541E4CBD254AA0B600FD7B28 /* MLHandler.h */,
 				541E4CBF254AA0E700FD7B28 /* MLHandler.m */,
+				C1850E5E25F34895003D506A /* MLDefinitions.h */,
 			);
 			name = tools;
 			sourceTree = "<group>";

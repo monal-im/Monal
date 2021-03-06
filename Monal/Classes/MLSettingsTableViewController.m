@@ -130,7 +130,7 @@ NS_ENUM(NSInteger, kSettingSection)
             break;
         }
         case kSettingSectionSupport: {
-            [cell initTapCell:self.appRows[indexPath.row]];
+            [cell initTapCell:self.supportRows[indexPath.row]];
             break;
         }
         case kSettingSectionAbout: {
@@ -145,7 +145,7 @@ NS_ENUM(NSInteger, kSettingSection)
 #endif
                 [cell initCell:@"Version" withLabel:versionTxt];
             } else {
-                [cell initTapCell:self.appRows[indexPath.row]];;
+                [cell initTapCell:self.aboutRows[indexPath.row]];;
             }
             break;
         }

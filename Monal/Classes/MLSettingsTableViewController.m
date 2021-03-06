@@ -8,6 +8,9 @@
 
 #import "MLSettingsTableViewController.h"
 #import "MLWebViewController.h"
+#import "MLSwitchCell.h"
+#import "MLDefinitions.h"
+
 @import SafariServices;
 
 NS_ENUM(NSInteger, kSettingSection)
@@ -38,6 +41,8 @@ NS_ENUM(NSInteger, kSettingSection)
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    [self.tableView registerNib:[UINib nibWithNibName:@"MLSwitchCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"AccountCell"];
+
     self.sections = @[NSLocalizedString(@"App", @""), NSLocalizedString(@"Support", @""), NSLocalizedString(@"About", @"")];
     
     self.appRows = @[
@@ -106,6 +111,8 @@ NS_ENUM(NSInteger, kSettingSection)
         case kSettingSectionApp: return self.appRows.count;
         case kSettingSectionSupport: return self.supportRows.count;
         case kSettingSectionAbout: return self.aboutRows.count;
+        default:
+            unreachable();
     }
     return 0;
 }
@@ -113,35 +120,37 @@ NS_ENUM(NSInteger, kSettingSection)
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"settingsCell" forIndexPath:indexPath];
     
+    MLSwitchCell* cell = [tableView dequeueReusableCellWithIdentifier:@"AccountCell" forIndexPath:indexPath];
+
     switch(indexPath.section)
     {
         case kSettingSectionApp: {
-            cell.textLabel.text = self.appRows[indexPath.row];
-            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+            [cell initTapCell:self.appRows[indexPath.row]];
             break;
         }
         case kSettingSectionSupport: {
-            cell.textLabel.text = self.supportRows[indexPath.row];
-            cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+            [cell initTapCell:self.appRows[indexPath.row]];
             break;
         }
         case kSettingSectionAbout: {
             if(indexPath.row == (self.aboutRows.count - 1))
             {
+                NSString* versionTxt = nil;
                 NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-                NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
-                NSString* build = [infoDict objectForKey:@"CFBundleVersion"];
-                
-                cell.textLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@)", @""), version, build];
-                cell.accessoryType = UITableViewCellAccessoryNone;
+#if IS_ALPHA
+                versionTxt = [NSString stringWithFormat:@"Alpha %@ (%s: %s UTC)", [infoDict objectForKey:@"CFBundleShortVersionString"], __DATE__, __TIME__];
+#else
+                versionTxt = [NSString stringWithFormat:@"%@ (%@)", [infoDict objectForKey:@"CFBundleShortVersionString"], [infoDict objectForKey:@"CFBundleVersion"]];
+#endif
+                [cell initCell:@"Version" withLabel:versionTxt];
             } else {
-                cell.textLabel.text = self.aboutRows[indexPath.row];
-                cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                [cell initTapCell:self.appRows[indexPath.row]];;
             }
             break;
         }
+        default:
+            unreachable();
     }
     return cell;
 }
@@ -159,7 +168,6 @@ NS_ENUM(NSInteger, kSettingSection)
     switch(indexPath.section)
     {
         case kSettingSectionApp: {
-           
             switch ((indexPath.row)) {
                 case 0:
                     [self performSegueWithIdentifier:@"showLogin" sender:self];
@@ -190,6 +198,7 @@ NS_ENUM(NSInteger, kSettingSection)
                     break;
 
                 default:
+                    unreachable();
                     break;
             }
             break;
@@ -231,10 +240,13 @@ NS_ENUM(NSInteger, kSettingSection)
                     break;
                
                 default:
+                    unreachable();
                     break;
             }
             break;
         }
+        default:
+            unreachable();
     }
 }
 

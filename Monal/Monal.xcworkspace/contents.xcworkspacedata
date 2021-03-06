@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:TestPlan.xctestplan">
+   </FileRef>
+   <FileRef
       location = "group:Monal.xcodeproj">
    </FileRef>
    <FileRef

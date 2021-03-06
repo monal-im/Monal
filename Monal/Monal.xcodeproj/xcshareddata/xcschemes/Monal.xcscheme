@@ -63,6 +63,16 @@
                ReferencedContainer = "container:Monal.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "C1850E7225F383F3003D506A"
+               BuildableName = "MonalUITests.xctest"
+               BlueprintName = "MonalUITests"
+               ReferencedContainer = "container:Monal.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

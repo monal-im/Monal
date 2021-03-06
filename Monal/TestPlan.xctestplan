@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "22AC57B3-E817-44FE-B3F9-25137606AFD7",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:Monal.xcodeproj",
+        "identifier" : "C1850E7225F383F3003D506A",
+        "name" : "MonalUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

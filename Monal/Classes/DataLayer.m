@@ -470,7 +470,7 @@ static NSDateFormatter* dbFormatter;
 }
 
 
--(NSArray<MLContact*>*) searchContactsWithString:(NSString*) search
+-(NSMutableArray<MLContact*>*) searchContactsWithString:(NSString*) search
 {
     NSString* likeString = [NSString stringWithFormat:@"%%%@%%", search];
     NSString* query = @"SELECT buddy_name, account_id FROM buddylist WHERE buddy_name LIKE ? OR full_name LIKE ? OR nick_name LIKE ? ORDER BY full_name, nick_name, buddy_name COLLATE NOCASE ASC;";
@@ -481,7 +481,7 @@ static NSDateFormatter* dbFormatter;
     return toReturn;
 }
 
--(NSMutableArray*) contactList
+-(NSMutableArray<MLContact*>*) contactList
 {
     //only list contacts having a roster entry (e.g. kSubBoth, kSubTo or kSubFrom)
     NSString* query = @"SELECT buddy_name, a.account_id, IFNULL(IFNULL(NULLIF(A.nick_name, ''), NULLIF(A.full_name, '')), buddy_name) AS 'sortkey' FROM buddylist AS A INNER JOIN account AS b ON a.account_id=b.account_id WHERE (a.subscription=? OR a.subscription=? OR a.subscription=?) AND b.enabled=1 AND (b.username || '@' || b.domain) != buddy_name ORDER BY sortkey COLLATE NOCASE ASC;";

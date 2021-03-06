@@ -21,7 +21,6 @@
 
 @interface ContactsViewController ()
 
-@property (nonatomic, strong) NSMutableArray<MLContact*>* searchResults ;
 @property (nonatomic, strong) UISearchController* searchController;
 
 @property (nonatomic, strong) NSMutableArray<MLContact*>* contacts;
@@ -44,7 +43,6 @@
     self.contactsTable.dataSource = self;
 
     self.contacts = [[NSMutableArray alloc] init];
-    self.searchResults = [[NSMutableArray alloc] init];
     
     [self.contactsTable reloadData];
     
@@ -143,17 +141,10 @@
 
 -(void) refreshDisplay
 {
-    NSMutableArray* results = [[DataLayer sharedInstance] contactList];
+    [self loadContactsWithFilter:nil];
     dispatch_async(dispatch_get_main_queue(), ^{
-        self.contacts = results;
         [self reloadTable];
     });
-    if(self.searchResults.count == 0)
-    {
-        dispatch_async(dispatch_get_main_queue(), ^{
-          [self reloadTable];
-        });
-    }
 }
 
 
@@ -176,22 +167,26 @@
     }
 }
 
+-(void) loadContactsWithFilter:(NSString*) filter
+{
+    if(filter && [filter length] > 0)
+        self.contacts = [[DataLayer sharedInstance] searchContactsWithString:filter];
+    else
+        self.contacts = [[DataLayer sharedInstance] contactList];
+}
+
 #pragma mark - Search Controller
 
 -(void) didDismissSearchController:(UISearchController*) searchController;
 {
-    [self.searchResults removeAllObjects];
+    // reset table to list of all contacts without a filter
+    [self loadContactsWithFilter:nil];
     [self reloadTable];
 }
 
 -(void) updateSearchResultsForSearchController:(UISearchController*) searchController;
 {
-    [self.searchResults removeAllObjects];
-    if(searchController.searchBar.text.length > 0)
-    {
-        NSString* term = [searchController.searchBar.text copy];
-        [self.searchResults addObjectsFromArray:[[DataLayer sharedInstance] searchContactsWithString:term]];
-    }
+    [self loadContactsWithFilter:searchController.searchBar.text];
     [self reloadTable];
 }
 
@@ -267,19 +262,12 @@
 
 - (NSInteger)tableView:(UITableView*) tableView numberOfRowsInSection:(NSInteger) section
 {
-    if(self.searchResults.count > 0)
-        return [self.searchResults count];
-    else
-        return [self.contacts count];
+    return [self.contacts count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    MLContact* row = nil;
-    if(self.searchResults.count > 0)
-        row = [self.searchResults objectAtIndex:indexPath.row];
-    else
-        row = [self.contacts objectAtIndex:indexPath.row];
+    MLContact* row = [self.contacts objectAtIndex:indexPath.row];
     
     MLContactCell* cell = [tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
     if(!cell)
@@ -367,17 +355,13 @@
     }]];
     
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+        // remove contact
         [[MLXMPPManager sharedInstance] removeContact:contact];
-        
-        if(self.searchResults.count == 0) {
-            [self.contactsTable beginUpdates];
-            [self.contacts removeObjectAtIndex:indexPath.row];
-            
-            [self.contactsTable deleteRowsAtIndexPaths:@[indexPath]
-                                      withRowAnimation:UITableViewRowAnimationAutomatic];
-            [self.contactsTable endUpdates];
-        }
-        
+        // remove contact from table
+        [self.contactsTable beginUpdates];
+        [self.contacts removeObjectAtIndex:indexPath.row];
+        [self.contactsTable deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+        [self.contactsTable endUpdates];
     }]];
     alert.popoverPresentationController.sourceView = self.tableView;
     [self presentViewController:alert animated:YES completion:nil];
@@ -391,25 +375,13 @@
 
 -(void) tableView:(UITableView*) tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath*) indexPath
 {
-    MLContact* contactDic;
-    if(self.searchResults.count > 0)
-        contactDic = [self.searchResults objectAtIndex:indexPath.row];
-    else
-        contactDic = [self.contacts objectAtIndex:indexPath.row];
+    MLContact* contactDic = [self.contacts objectAtIndex:indexPath.row];
     [self performSegueWithIdentifier:@"showDetails" sender:contactDic];
 }
 
 -(void) tableView:(UITableView*) tableView didSelectRowAtIndexPath:(NSIndexPath*) indexPath
 {
-    MLContact* row;
-    
-    if(self.searchResults.count > 0)
-        row = [self.searchResults objectAtIndex:indexPath.row];
-    else
-    {
-        if(indexPath.row < self.contacts.count)
-            row = [self.contacts objectAtIndex:indexPath.row];
-    }
+    MLContact* row = [self.contacts objectAtIndex:indexPath.row];
     
     [self dismissViewControllerAnimated:YES completion:^{
         if(self.selectContact)

@@ -55,9 +55,9 @@ extern NSString* const kMessageTypeFiletransfer;
  */
 -(BOOL) resetContactsForAccount:(NSString*) accountNo;
 
--(NSArray<MLContact*>*) searchContactsWithString:(NSString*) search;
+-(NSMutableArray<MLContact*>*) searchContactsWithString:(NSString*) search;
 
--(NSMutableArray*) contactList;
+-(NSMutableArray<MLContact*>*) contactList;
 -(NSArray*) resourcesForContact:(NSString*)contact ;
 -(NSArray*) getSoftwareVersionInfoForContact:(NSString*)contact resource:(NSString*)resource andAccount:(NSString*)account;
 -(void) setSoftwareVersionInfoForContact:(NSString*)contact

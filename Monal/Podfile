@@ -41,7 +41,7 @@ target 'Monal' do
   pod 'TOCropViewController'
   pod 'NotificationBannerSwift', '~> 3.0.6'
 
-  target 'Monal Tests' do
+  target 'MonalUITests' do
     inherit! :search_paths
     # Pods for testing
   end

@@ -101,12 +101,12 @@ enum MLAutoDownloadFiletransferSettingViewController {
                     [cell initCell:NSLocalizedString(@"Load over WiFi upto", @"") withSliderDefaultsKey:@"AutodownloadFiletransfersWifiMaxSize" minValue:1.0 maxValue:100.0 withLoadFunc:^(UILabel* labelToUpdate, float sliderValue) {
                         // byte -> mb
                         float mb = sliderValue / 1024 / 1024;
-                        labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Load over WiFi upto: %.1fMB", @""), mb];
+                        labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Load over WiFi upto: %.fMB", @""), mb];
 
                         return mb;
                     } withUpdateFunc:^(UILabel* labelToUpdate, float sliderValue) {
-                        float newValue = roundf(sliderValue * 10) / 10;
-                        labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Load over WiFi upto: %.1fMB", @""), newValue];
+                        float newValue = roundf(sliderValue);
+                        labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Load over WiFi upto: %.fMB", @""), newValue];
                         return newValue * 1024 * 1024;
                     }];
                     break;
@@ -116,12 +116,12 @@ enum MLAutoDownloadFiletransferSettingViewController {
                     [cell initCell:NSLocalizedString(@"Load over cellular upto", @"") withSliderDefaultsKey:@"AutodownloadFiletransfersMobileMaxSize" minValue:1.0 maxValue:100.0  withLoadFunc:^(UILabel* labelToUpdate, float sliderValue) {
                         // byte -> mb
                         float mb = sliderValue / 1024 / 1024;
-                        labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Load over cellular upto: %.1fMB", @""), mb];
+                        labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Load over cellular upto: %.fMB", @""), mb];
 
                         return mb;
                     } withUpdateFunc:^(UILabel* labelToUpdate, float sliderValue) {
-                        float newValue = roundf(sliderValue * 10) / 10;
-                        labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Load over cellular upto: %.1fMB", @""), newValue];
+                        float newValue = roundf(sliderValue);
+                        labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Load over cellular upto: %.fMB", @""), newValue];
                         // save in MB
                         return newValue * 1024 * 1024;
                     }];

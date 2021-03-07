@@ -60,7 +60,18 @@ enum MLAutoDownloadFiletransferSettingViewController {
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 1;
+    switch(section)
+    {
+        case FiletransferSettingsGeneralSettings:
+            return 1;
+        case FiletransferSettingsAdvancedSettings:
+            return 2;
+        default:
+            unreachable();
+            break;
+    }
+    unreachable();
+    return 0;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -87,42 +98,35 @@ enum MLAutoDownloadFiletransferSettingViewController {
             {
                 case 0:
                 {
-                    /*UILabel* minLabel = [[UILabel alloc] initWithFrame:CGRectMake(20, 20, 50, 15)];
-                    [minLabel setText:NSLocalizedString(@"1 MB", @"")];
-                    [minLabel adjustsFontSizeToFitWidth];
-                    [minLabel setTextColor:[UIColor grayColor]];
-                    [cell.contentView addSubview:minLabel];
+                    [cell initCell:NSLocalizedString(@"Load over WiFi upto", @"") withSliderDefaultsKey:@"AutodownloadFiletransfersWifiMaxSize" minValue:1.0 maxValue:100.0 withLoadFunc:^(UILabel* labelToUpdate, float sliderValue) {
+                        // byte -> mb
+                        float mb = sliderValue / 1024 / 1024;
+                        labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Load over WiFi upto: %.1fMB", @""), mb];
 
-                    UILabel* maxLabel = [[UILabel alloc] initWithFrame:CGRectMake(290, 20, 70, 15)];
-                    [maxLabel setText:NSLocalizedString(@"100 MB", @"")];
-                    [maxLabel adjustsFontSizeToFitWidth];
-                    [maxLabel setTextColor:[UIColor grayColor]];
-                    [cell.contentView addSubview:maxLabel];
-
-                    sliderResultLabel = [[UILabel alloc] initWithFrame:CGRectMake(120, 1, 100, 13)];
-                    [sliderResultLabel setTextAlignment:NSTextAlignmentCenter];
-                    [sliderResultLabel setTextColor:[UIColor grayColor]];
-
-                    [cell.contentView addSubview:sliderResultLabel];
-
-                    slider = [[UISlider alloc] init];
-                    slider.frame = CGRectMake(80, 20, 200, 20);
-                    [self updateUI];
-
-                    slider.minimumValue = 1;
-                    slider.maximumValue = 100;
-                    NSInteger maxSize = [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"];
-                    slider.value = maxSize / 1024 / 1024;
-
-                    [sliderResultLabel setText:[NSString stringWithFormat:@"%ld MB", maxSize / 1024 / 1024]];
-                    [sliderResultLabel adjustsFontSizeToFitWidth];
-
-                    [slider setContinuous:YES];
-
-                    [slider addTarget:self action:@selector(sliderValueChanged:) forControlEvents:UIControlEventValueChanged];
-                    [cell.contentView addSubview:slider];*/
-                }
+                        return mb;
+                    } withUpdateFunc:^(UILabel* labelToUpdate, float sliderValue) {
+                        float newValue = roundf(sliderValue * 10) / 10;
+                        labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Load over WiFi upto: %.1fMB", @""), newValue];
+                        return newValue * 1024 * 1024;
+                    }];
                     break;
+                }
+                case 1:
+                {
+                    [cell initCell:NSLocalizedString(@"Load over cellular upto", @"") withSliderDefaultsKey:@"AutodownloadFiletransfersMobileMaxSize" minValue:1.0 maxValue:100.0  withLoadFunc:^(UILabel* labelToUpdate, float sliderValue) {
+                        // byte -> mb
+                        float mb = sliderValue / 1024 / 1024;
+                        labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Load over cellular upto: %.1fMB", @""), mb];
+
+                        return mb;
+                    } withUpdateFunc:^(UILabel* labelToUpdate, float sliderValue) {
+                        float newValue = roundf(sliderValue * 10) / 10;
+                        labelToUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Load over cellular upto: %.1fMB", @""), newValue];
+                        // save in MB
+                        return newValue * 1024 * 1024;
+                    }];
+                    break;
+                }
                 default:
                     unreachable();
                     break;

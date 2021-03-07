@@ -10,6 +10,7 @@
 #import "HelperTools.h"
 #import "MLConstants.h"
 #import "MLSwitchCell.h"
+#import "MLDefinitions.h"
 
 typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
     DisplayNameAndMessageRow = 1,
@@ -101,7 +102,7 @@ const long NotificationPrivacyOptionCnt = 3;
         {
             long row = indexPath.row;
             // + non expanded notification options
-            row += self.isNotificationPrivacyOpened ? 0 : NotificationPrivacyOptionCnt;
+            row += (self.isNotificationPrivacyOpened || row == 0) ? 0 : NotificationPrivacyOptionCnt;
 
             switch(row)
             {
@@ -167,25 +168,18 @@ const long NotificationPrivacyOptionCnt = 3;
                 }
                 case 11:
                 {
-                    MLSettingCell* mediaCell = [[MLSettingCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AutoDownloadMediaCell"];
-                    mediaCell.textLabel.text = NSLocalizedString(@"Auto-Download Media", @"");
-                    BOOL isAutoDownLoadFiletransfers = [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"];
-                    if (!isAutoDownLoadFiletransfers) {
-                        mediaCell.detailTextLabel.text = NSLocalizedString(@"Disabled", @"");
-                    } else {
-                        NSInteger maxSize = [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"];
-                        NSString *readableFileSize = [NSString stringWithFormat:@"%ld", maxSize/(1024*1024)];
-                        mediaCell.detailTextLabel.text = [NSString stringWithFormat:@"%@ %@ MB", NSLocalizedString(@"Up to", @""), readableFileSize];
-                    }
-                    mediaCell.detailTextLabel.textColor = [UIColor lightGrayColor];
-                    mediaCell.defaultKey = @"AutodownloadFiletransfers";
-                    mediaCell.switchEnabled = NO;
-                    mediaCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-                    return mediaCell;
+                    [cell initTapCell:NSLocalizedString(@"Auto-Download Media Settings", @"")];
+                    break;
                 }
+                default:
+                    unreachable();
+                    break;
             }
             break;
         }
+        default:
+            unreachable()
+            break;
     }
     return cell;
 }
@@ -197,7 +191,7 @@ const long NotificationPrivacyOptionCnt = 3;
         {
             long row = indexPath.row;
             // + non expanded notification options
-            row += self.isNotificationPrivacyOpened ? 0 : NotificationPrivacyOptionCnt;
+            row += (self.isNotificationPrivacyOpened || row == 0) ? 0 : NotificationPrivacyOptionCnt;
             switch(row)
             {
                 case 0:

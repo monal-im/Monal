@@ -12,6 +12,7 @@
 @interface MLSwitchCell ()
 
 @property (nonatomic, strong) NSString* defaultsKey;
+@property (nonatomic, strong) sliderUpdate sliderFilter;
 
 @end
 
@@ -20,6 +21,7 @@
 -(void) clear
 {
     self.defaultsKey = nil;
+    self.sliderFilter = nil;
 
     self.cellLabel.text = nil;
 
@@ -93,6 +95,31 @@
     self.defaultsKey = key;
 }
 
+-(void) initCell:(NSString*) leftLabel withSliderDefaultsKey:(NSString*) key minValue:(float) minValue maxValue:(float) maxValue
+{
+    [self initCell:leftLabel withSliderDefaultsKey:key minValue:minValue maxValue:maxValue withLoadFunc:nil withUpdateFunc:nil];
+}
+
+-(void) initCell:(NSString*) leftLabel withSliderDefaultsKey:(NSString*) key minValue:(float) minValue maxValue:(float) maxValue withLoadFunc:(sliderUpdate) sliderLoad withUpdateFunc:(sliderUpdate) sliderUpdate
+{
+    [self clear];
+
+    self.cellLabel.text = leftLabel;
+
+    self.slider.minimumValue = minValue;
+    self.slider.maximumValue = maxValue;
+
+    if(sliderLoad)
+        self.slider.value = sliderLoad(self.cellLabel, [[HelperTools defaultsDB] floatForKey:key]);
+    else
+        self.slider.value = [[HelperTools defaultsDB] floatForKey:key];
+
+    [self.slider addTarget:self action:@selector(sliderChange) forControlEvents:UIControlEventValueChanged];
+    _defaultsKey = key;
+    self.sliderFilter = sliderUpdate;
+    self.slider.hidden = NO;
+}
+
 #pragma mark uiswitch delegate
 
 -(void) switchChange
@@ -101,6 +128,23 @@
         return;
     // save new switch state to defaultsDB
     [[HelperTools defaultsDB] setBool:_toggleSwitch.on forKey:self.defaultsKey];
+}
+
+#pragma mark uilabel delegate
+
+-(void) sliderChange
+{
+    if(self.defaultsKey == nil)
+        return;
+    float filteredValue;
+
+    if(self.sliderFilter == nil)
+        filteredValue = self.slider.value;
+    else
+        filteredValue = self.sliderFilter(self.cellLabel, self.slider.value);
+
+    // save new slider state to defaultsDB
+    [[HelperTools defaultsDB] setFloat:filteredValue forKey:self.defaultsKey];
 }
 
 #pragma mark uitextfield delegate

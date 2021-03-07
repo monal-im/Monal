@@ -110,6 +110,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     //upgrade syncErrorsDisplayed list
     [self upgradeObjectUserSettingsIfUnset:@"syncErrorsDisplayed" toDefault:@{}];
+
+    [self upgradeFloatUserSettingsIfUnset:@"AutodownloadFiletransfersMobileMaxSize" toDefault:5*1024*1024];     // 5 MiB
+    [self upgradeFloatUserSettingsIfUnset:@"AutodownloadFiletransfersWifiMaxSize" toDefault:32*1024*1024];     // 32 MiB
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal
@@ -128,6 +131,16 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     if(currentSettingVal == nil)
     {
         [[HelperTools defaultsDB] setInteger:defaultVal forKey:settingsName];
+        [[HelperTools defaultsDB] synchronize];
+    }
+}
+
+-(void) upgradeFloatUserSettingsIfUnset:(NSString*) settingsName toDefault:(float) defaultVal
+{
+    NSNumber* currentSettingVal = [[HelperTools defaultsDB] objectForKey:settingsName];
+    if(currentSettingVal == nil)
+    {
+        [[HelperTools defaultsDB] setFloat:defaultVal forKey:settingsName];
         [[HelperTools defaultsDB] synchronize];
     }
 }

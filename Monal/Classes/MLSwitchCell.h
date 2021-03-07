@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+typedef float (^sliderUpdate)(UILabel* labelToUpdate, float sliderValue);
+
 @interface MLSwitchCell : UITableViewCell<UITextFieldDelegate>
 
 /**
@@ -50,5 +52,9 @@ Label to the right
 // UISwitch
 -(void) initCell:(NSString*) leftLabel withToggle:(BOOL) toggleValue andTag:(uint16_t) tag;
 -(void) initCell:(NSString*) leftLabel withToggleDefaultsKey:(NSString*) key;
+
+// UISlider
+-(void) initCell:(NSString*) leftLabel withSliderDefaultsKey:(NSString*) key minValue:(float) minValue maxValue:(float) maxValue;
+-(void) initCell:(NSString*) leftLabel withSliderDefaultsKey:(NSString*) key minValue:(float) minValue maxValue:(float) maxValue withLoadFunc:(sliderUpdate) sliderLoad withUpdateFunc:(sliderUpdate) sliderUpdate;
 
 @end

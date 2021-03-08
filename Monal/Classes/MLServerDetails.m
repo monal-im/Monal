@@ -139,7 +139,7 @@ enum MLServerDetailsSections {
         NSString* entryColor = @"None";
         if([self.xmppAccount.connectionProperties.server.connectServer isEqualToString:hostname] &&
            self.xmppAccount.connectionProperties.server.connectPort == port &&
-           self.xmppAccount.connectionProperties.server.isDirectTLS == [isSecure boolValue])
+           self.xmppAccount.connectionProperties.server.isDirectTLS == [[srvEntry objectForKey:@"isSecure"] boolValue])
         {
             entryColor = @"Green";
             foundCurrentConn = YES;
@@ -149,7 +149,7 @@ enum MLServerDetailsSections {
             entryColor = @"Red";
         }
 
-        [self.srvRecords addObject:@{@"Title": [NSString stringWithFormat:NSLocalizedString(@"Server: %@", @""), hostname], @"Description": [NSString stringWithFormat:NSLocalizedString(@"Port: %@, Is Secure: %@, Prio: %@", @""), port, isSecure, prio], @"Color": entryColor}];
+        [self.srvRecords addObject:@{@"Title": [NSString stringWithFormat:NSLocalizedString(@"Server: %@", @""), hostname], @"Description": [NSString stringWithFormat:NSLocalizedString(@"Port: %@, Direct TLS: %@, Priority: %@", @""), port, isSecure, prio], @"Color": entryColor}];
     }
 }
 

@@ -470,11 +470,13 @@ void logException(NSException* exception)
     return [rfc3339DateFormatter stringFromDate:datetime];
 }
 
+//don't use this directly, but via createTimer() makro
 +(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andFile:(char*) file andLine:(int) line andFunc:(char*) func
 {
     return [self startTimer:timeout withHandler:handler andCancelHandler:nil andFile:file andLine:line andFunc:func];
 }
 
+//don't use this directly, but via createTimer() makro
 +(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func
 {
     NSString* fileStr = [NSString stringWithFormat:@"%s", file];

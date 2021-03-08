@@ -47,8 +47,6 @@ void logException(NSException* exception);
 +(NSString* _Nullable) formatLastInteraction:(NSDate*) lastInteraction;
 +(NSDate*) parseDateTimeString:(NSString*) datetime;
 +(NSString*) generateDateTimeString:(NSDate*) datetime;
-+(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andFile:(char*) file andLine:(int) line andFunc:(char*) func;
-+(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func;
 +(NSString*) encodeRandomResource;
 +(NSData* _Nullable) sha1:(NSData* _Nullable) data;
 +(NSString* _Nullable) stringSha1:(NSString* _Nullable) data;
@@ -67,6 +65,10 @@ void logException(NSException* exception);
 
 +(UIView*) MLCustomViewHeaderWithTitle:(NSString*) title;
 +(CIImage*) createQRCodeFromString:(NSString*) input;
+
+//don't use these two directly, but via createTimer() makro
++(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andFile:(char*) file andLine:(int) line andFunc:(char*) func;
++(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func;
 
 @end
 

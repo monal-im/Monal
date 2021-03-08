@@ -36,6 +36,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     NSMutableDictionary* _pushCompletions;
     UIBackgroundTaskIdentifier _bgTask;
     API_AVAILABLE(ios(13.0)) BGTask* _bgFetch;
+    monal_void_block_t _backgroundTimer;
 }
 @property (nonatomic, weak) ActiveChatsViewController* activeChats;
 @end
@@ -508,6 +509,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     DDLogInfo(@"Entering FG");
     [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
     
+    //cancel already running background timer, we are now foregrounded again
+    if(_backgroundTimer)
+        _backgroundTimer();
+    _backgroundTimer = nil;
+    
     //TODO: show "loading..." animation/modal
     
     //only proceed with foregrounding if the NotificationServiceExtension is not running
@@ -551,6 +557,18 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [self updateUnread];
     [self addBackgroundTask];
     [[MLXMPPManager sharedInstance] nowBackgrounded];
+    
+    //cancel old background timer if still running and start a new one
+    //this timer will fire after 20 seconds in background and disconnect gracefully (e.g. when fully idle the next time)
+    if(_backgroundTimer)
+        _backgroundTimer();
+    _backgroundTimer = createTimer(20.0, ^{
+        //mark timer as *not* running
+        _backgroundTimer = nil;
+        //retry background check (now handling idle state because no running background timer is blocking it)
+        [self checkIfBackgroundTaskIsStillNeeded];
+    });
+    
     [self checkIfBackgroundTaskIsStillNeeded];
 }
 
@@ -659,6 +677,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         DDLogInfo(@"### ALL ACCOUNTS IDLE AND FILETRANSFERS COMPLETE NOW ###");
         [HelperTools updateSyncErrorsWithDeleteOnly:YES];
         
+        if(_backgroundTimer)
+        {
+            DDLogInfo(@"### ignoring idle state because background timer is still running ###");
+            return;
+        }
+        
         //use a synchronized block to disconnect only once
         @synchronized(self) {
             DDLogInfo(@"### checking if background is still needed ###");
@@ -757,7 +781,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         [[MLXMPPManager sharedInstance] disconnectAll];
         
         [task setTaskCompletedWithSuccess:NO];
-        [self scheduleBackgroundFetchingTask];      //schedule new one if neccessary
+        [self scheduleBackgroundFetchingTask];      //schedule new one
         [DDLog flushLog];
     };
     

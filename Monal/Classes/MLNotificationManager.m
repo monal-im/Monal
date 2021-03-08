@@ -268,7 +268,7 @@
                             typeHint = (NSString*)kUTTypeJPEG;
                         if([mimeType isEqualToString:@"image/png"])
                             typeHint = (NSString*)kUTTypePNG;
-                        if([mimeType isEqualToString:@"image/png"])
+                        if([mimeType isEqualToString:@"image/gif"])
                             typeHint = (NSString*)kUTTypeGIF;
                         NSError *error;
                         attachment = [UNNotificationAttachment attachmentWithIdentifier:info[@"cacheId"] URL:[NSURL fileURLWithPath:info[@"cacheFile"]] options:@{UNNotificationAttachmentOptionsTypeHintKey:typeHint} error:&error];

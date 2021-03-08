@@ -120,8 +120,8 @@ enum MLServerDetailsSections {
     // supportsPubSub
     [self.serverCaps addObject:@{
         // see MLIQProcessor.m multiple xep required for pubsub
-        @"Title":NSLocalizedString(@"PEP Support", @""),
-        @"Description":NSLocalizedString(@"Specification describe a method that allow a user to share a list of nodes on which it is Pubsub registered", @""),
+        @"Title":NSLocalizedString(@"XEP-0163 Personal Eventing Protocol", @""),
+        @"Description":NSLocalizedString(@"This specification defines semantics for using the XMPP publish-subscribe protocol to broadcast state change events associated with an instant messaging and presence account.", @""),
         @"Color": connection.supportsPubSub ? @"Green" : @"Red"
     }];
 }

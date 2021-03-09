@@ -38,9 +38,8 @@
     self = [super init];
     DDLogInfo(@"Initializing push singleton");
     self.handlerList = [[NSMutableArray alloc] init];
-    //use as much appex background time as possible (disconnect when the last push handler expires instead of when all accounts become idle)
-    //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
-    //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filetransfersNowIdle:) name:kMonalFiletransfersIdle object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filetransfersNowIdle:) name:kMonalFiletransfersIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(xmppError:) name:kXMPPError object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
     return self;
@@ -237,6 +236,11 @@
 
 -(void) nowIdle:(NSNotification*) notification
 {
+    //delete sync errors of all now idle accounts
+    [HelperTools updateSyncErrorsWithDeleteOnly:YES];
+    
+    //use as much appex background time as possible (disconnect when the last push handler expires instead of when all accounts become idle)
+    /*
     //this method will be called inside the receive queue and immediately disconnect the account
     //this is needed to not leak incoming stanzas while no instance of the NotificaionService class is active
     xmpp* xmppAccount = (xmpp*)notification.object;
@@ -256,12 +260,19 @@
     [HelperTools updateSyncErrorsWithDeleteOnly:YES];
     
     [self checkIfEverythingIsIdle];
+    */
 }
 
 -(void) filetransfersNowIdle:(NSNotification*) notification
 {
+    //delete sync errors of all now idle accounts
+    [HelperTools updateSyncErrorsWithDeleteOnly:YES];
+    
+    //use as much appex background time as possible (disconnect when the last push handler expires instead of when all accounts become idle)
+    /*
     DDLogDebug(@"notification handler: all filetransfers complete now");
     [self checkIfEverythingIsIdle];
+    */
 }
 
 -(void) checkIfEverythingIsIdle

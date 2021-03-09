@@ -2502,7 +2502,7 @@ enum msgSentState {
 }
 
 -(void)setSendButtonIconWithTextLength:(NSUInteger)txtLength{
-    if (_isTyping == NO || txtLength == 0){
+    if (txtLength == 0){
         self.isAudioMessage = YES;
         [self.audioRecordButton setHidden:NO];
         [self.sendButton setHidden:YES];

@@ -113,26 +113,40 @@
     @synchronized(self) {
         DDLogInfo(@"Handling expired push: %lu", (unsigned long)[self.handlerList count]);
         
-        //we don't want to post any sync error notifications if the xmpp channel is idle and we're only downloading filetransfers
-        //(e.g. [MLFiletransfer isIdle] is not YES)
-        if([self.handlerList count] <= 1)
+        //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
+        if([self.handlerList count])
         {
-            //post sync errors for all non-idle accounts
-            [HelperTools updateSyncErrorsWithDeleteOnly:NO];
-            
-            //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
-            //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
-            [self feedAllWaitingHandlersWithCompletion:nil];
+            void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
+            [self.handlerList removeObject:handler];
+            [self callHandler:handler];
         }
-        else
+        
+        //disconnect if this was the last handler and no new push comes in in the next 500ms
+        if([self.handlerList count] == 0)
         {
-            //post a single silent notification using the next handler (that must have been the expired one because handlers expire in order)
-            if([self.handlerList count])
-            {
-                void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
-                [self.handlerList removeObject:handler];
-                [self callHandler:handler];
-            }
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                //wait 500ms to allow other pushed already queued on the device (but not yet delivered to us) to be delivered to us
+                //after a push expired we have ~5 seconds run time left to do the clean disconnect
+                //--> waiting 500ms before checking if this was the last push that expired (e.g. no new push came in) does not do any harm here
+                //WARNING: we have to closely watch apple...if they remove this 5 second gap between this call to the expiration handler and the actual
+                //appex freeze, this sleep will no longer be harmless and could even cause smacks state corruption (by not diconnecting cleanly and having stanzas
+                //still in the TCP queue delivered on next appex unfreeze een if the have been already handled by the mainapp)
+                usleep(500000);
+                
+                @synchronized(self) {
+                    //we don't want to post any sync error notifications if the xmpp channel is idle and we're only downloading filetransfers
+                    //(e.g. [MLFiletransfer isIdle] is not YES)
+                    if([self.handlerList count] == 0)
+                    {
+                        //post sync errors for all non-idle accounts
+                        [HelperTools updateSyncErrorsWithDeleteOnly:NO];
+                        
+                        //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
+                        //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
+                        [self feedAllWaitingHandlersWithCompletion:nil];
+                    }
+                }
+            });
         }
     }
 }

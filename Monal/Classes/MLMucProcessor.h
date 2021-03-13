@@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 +(void) setState:(NSDictionary*) state;
 +(NSDictionary*) state;
 
++(BOOL) isJoining:(NSString*) room;
 +(void) addUIHandler:(monal_id_block_t) handler forMuc:(NSString*) room;
 +(void) removeUIHandlerForMuc:(NSString*) room;
 

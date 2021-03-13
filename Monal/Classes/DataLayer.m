@@ -362,6 +362,9 @@ static NSDateFormatter* dbFormatter;
 
 -(BOOL) addContact:(NSString*) contact forAccount:(NSString*) accountNo nickname:(NSString*) nickName andMucNick:(NSString* _Nullable) mucNick
 {
+    if(!accountNo || !contact)
+        return NO;
+    
     return [self.db boolWriteTransaction:^{
         //data length check
         NSString* toPass;
@@ -373,23 +376,21 @@ static NSDateFormatter* dbFormatter;
             //fall back to an empty one if this contact is not already in our db
             if(!cleanNickName)
                 cleanNickName = @"";
-        } else {
-            cleanNickName = [nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         }
+        else
+            cleanNickName = [nickName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        
         if([cleanNickName length] > 50)
             toPass = [cleanNickName substringToIndex:49];
         else
             toPass = cleanNickName;
         
-        NSString* query = @"INSERT INTO buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'muc', 'muc_nick') VALUES(?, ?, ?, ?, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET nick_name=?;";
-        if(!accountNo || !contact)
-            return NO;
-        else
-        {
-            NSArray* params = @[accountNo, contact, @"", toPass, mucNick ? @1 : @0, mucNick ? mucNick : @"", toPass];
-            BOOL success = [self.db executeNonQuery:query andArguments:params];
-            return success;
-        }
+        //make this a muc again if it existed as muc already (an reuse the nickname from the old buddylist entry or muc_favorites entry)
+        NSString* mucNickToUse = mucNick;
+        if(!mucNickToUse)
+            mucNickToUse = [self ownNickNameforMuc:contact forAccount:accountNo];
+        
+        return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'full_name', 'nick_name', 'muc', 'muc_nick') VALUES(?, ?, ?, ?, ?, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET nick_name=?;" andArguments:@[accountNo, contact, @"", toPass, mucNickToUse ? @1 : @0, mucNickToUse ? mucNickToUse : @"", toPass]];
     }];
 }
 
@@ -1540,7 +1541,7 @@ static NSDateFormatter* dbFormatter;
 
 -(void) addActiveBuddies:(NSString*) buddyname forAccount:(NSString*) accountNo
 {
-    if(!buddyname)
+    if(!buddyname || !accountNo)
         return;
     
     [self.db voidWriteTransaction:^{
@@ -1555,6 +1556,9 @@ static NSDateFormatter* dbFormatter;
         }
         else
         {
+            //add contact if possible (ignore already existing contacts)
+            [self addContact:buddyname forAccount:accountNo nickname:nil andMucNick:nil];
+            
             // insert or update
             NSString* query = @"INSERT INTO activechats (buddy_name, account_id, lastMessageTime) VALUES(?, ?, current_timestamp) ON CONFLICT(buddy_name, account_id) DO UPDATE SET lastMessageTime=current_timestamp;";
             [self.db executeNonQuery:query andArguments:@[buddyname, accountNo]];

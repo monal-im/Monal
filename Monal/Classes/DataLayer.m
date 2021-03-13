@@ -2399,6 +2399,20 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"INSERT INTO buddy_resources (buddy_id, resource, ver, platform_App_Name, platform_App_Version, platform_OS) SELECT buddy_id, resource, ver, platform_App_Name, platform_App_Version, platform_OS FROM _buddy_resourcesTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _buddy_resourcesTMP;"];
         }];
+        
+        [self updateDBTo:5.011 withBlock:^{
+            [self.db executeNonQuery:@"CREATE TABLE 'muc_participants' ( \
+                     'account_id' INTEGER NOT NULL, \
+                     'room' VARCHAR(255) NOT NULL, \
+                     'room_nick' VARCHAR(255) NOT NULL, \
+                     'participant_jid' VARCHAR(255), \
+                     'affiliation' VARCHAR(255), \
+                     'role' VARCHAR(255), \
+                     PRIMARY KEY('account_id','room','room_nick'), \
+                     FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, \
+                     FOREIGN KEY('account_id', 'room') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
+                 );"];
+        }];
     }];
     [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
     [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];

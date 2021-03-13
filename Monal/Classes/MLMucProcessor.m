@@ -124,12 +124,29 @@ static NSMutableDictionary* _uiHandler;
     }
     
     //handle muc status codes
-    [self handleStatusCodes:presenceNode forAccount:account];
-    
-    //handle unavailable presences
-    if([presenceNode check:@"/<type=unavailable>"])
+    if([presenceNode check:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code"])
+        [self handleStatusCodes:presenceNode forAccount:account];
+    //handle non-self-presences
+    else
     {
-        //TODO: should we handle this at all?
+        //extract info if present (use an empty dict if no info is present)
+        NSMutableDictionary* item = [[presenceNode findFirst:@"{http://jabber.org/protocol/muc#user}x/item@@"] mutableCopy];
+        if(!item)
+            item = [[NSMutableDictionary alloc] init];
+        
+        //update jid to be a bare jid and add muc nick to our dict
+        if(item[@"jid"])
+            item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
+        item[@"nick"] = presenceNode.fromResource;
+        
+        //handle presences
+        if([presenceNode check:@"/<type=unavailable>"])
+            //TODO: is this the right place? unavailable does not necessarily mean the user is not in the room anymore,
+            //he could still be on the members list
+            //maybe do this only for channels, but not for groups??
+            [[DataLayer sharedInstance] removeMember:item fromMuc:presenceNode.fromUser forAccountId:account.accountNo];
+        else
+            [[DataLayer sharedInstance] addMember:item toMuc:presenceNode.fromUser forAccountId:account.accountNo];
     }
 }
 
@@ -184,10 +201,36 @@ static NSMutableDictionary* _uiHandler;
                 //this is a self-presence (marking the end of the presence flood if we are in joining state)
                 case 110:
                 {
-                    //check if we have joined already (we handle only non-joining self-presences here, joining self-presences are handled below)
+                    //check if we have joined already (we handle only non-joining self-presences here)
+                    //joining self-presences are handled below
                     if(![self isJoining:node.fromUser])
                         ;           //ignore non-joining self-presences for now
                     break;
+                }
+                //banned from room
+                case 301:
+                {
+                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got banned from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andAccount:account andIsSevere:YES];
+                }
+                //kicked from room
+                case 307:
+                {
+                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got kicked from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andAccount:account andIsSevere:YES];
+                }
+                //removed because of affiliation change --> reenter room
+                case 321:
+                {
+                    [self sendDiscoQueryFor:node.fromUser onAccount:account withJoin:YES];
+                }
+                //removed because room is now members only (an we are not a member)
+                case 322:
+                {
+                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because muc is now members-only: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andAccount:account andIsSevere:YES];
+                }
+                //removed because of system shutdown
+                case 332:
+                {
+                    [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because of system shutdown: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andAccount:account andIsSevere:YES];
                 }
                 default:
                     DDLogInfo(@"Got unhandled muc status code in presence from %@: %@", node.from, code);
@@ -204,7 +247,6 @@ static NSMutableDictionary* _uiHandler;
             }
             
             //we joined successfully --> add muc to our favorites (this will use the already up to date nick from buddylist db table)
-            //this is needed to whitelist this muc jid for incoming mam results
             [[DataLayer sharedInstance] addMucFavorite:node.fromUser forAccountId:account.accountNo andMucNick:nil];
             
             monal_id_block_t uiHandler = [self getUIHandlerForMuc:node.fromUser];
@@ -369,6 +411,9 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
         XMPPPresence* presence = [[XMPPPresence alloc] init];
         [presence joinRoom:iqNode.fromUser withNick:nick];
         [account send:presence];
+        
+        //load members list
+        //TODO: implement loading of members list (members, owner and admin list need all to be loaded separately)
     }
 $$
 

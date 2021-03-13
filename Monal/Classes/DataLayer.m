@@ -865,15 +865,46 @@ static NSDateFormatter* dbFormatter;
 -(BOOL) initMuc:(NSString*) room forAccountId:(NSString*) accountNo andMucNick:(NSString* _Nullable) mucNick
 {
     return [self.db boolWriteTransaction:^{
+        BOOL isMuc = [self isBuddyMuc:room forAccount:accountNo];
+        if(!isMuc)
+        {
+            // remove old buddy and add new one (this changes "normal" buddys to muc buddys if the aren't already tagged as mucs)
+            // this will clean up associated buddylist data, too (foreign keys etc.)
+            [self.db executeNonQuery:@"DELETE FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, room]];
+        }
+        
         NSString* nick = mucNick;
         if(!nick)
             nick = [self ownNickNameforMuc:room forAccount:accountNo];
         NSAssert(nick, @"Could not determine muc nick when adding muc");
         
-        // return old buddy and add new one (this changes "normal" buddys to muc buddys if the aren't already tagged as mucs
-        [self.db executeNonQuery:@"DELETE FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, room]];
-        return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'muc', 'muc_nick') VALUES(?, ?, ?, ?);" andArguments:@[accountNo, room, @1, mucNick ? mucNick : @""]];
+        return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'muc', 'muc_nick') VALUES(?, ?, 1, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET muc=1, muc_nick=?;" andArguments:@[accountNo, room, mucNick ? mucNick : @"", mucNick ? mucNick : @""]];
     }];
+}
+
+-(void) addMember:(NSDictionary*) member toMuc:(NSString*) room forAccountId:(NSString*) accountNo
+{
+    if(!member || !member[@"nick"] || !room || !accountNo)
+        return;
+    
+    //create entry if not already existing
+    [self.db executeNonQuery:@"INSERT OR IGNORE INTO muc_participants ('account_id', 'room', 'room_nick') VALUES(?, ?, ?);" andArguments:@[accountNo, room, member[@"nick"]]];
+    
+    //update entry with optional fields
+    if(member[@"jid"])
+        [self.db executeNonQuery:@"UPDATE muc_participants SET participant_jid=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[member[@"jid"], accountNo, room, member[@"nick"]]];
+    if(member[@"affiliation"])
+        [self.db executeNonQuery:@"UPDATE muc_participants SET affiliation=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[member[@"affiliation"], accountNo, room, member[@"nick"]]];
+    if(member[@"role"])
+        [self.db executeNonQuery:@"UPDATE muc_participants SET role=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[member[@"role"], accountNo, room, member[@"nick"]]];
+}
+
+-(void) removeMember:(NSDictionary*) member fromMuc:(NSString*) room forAccountId:(NSString*) accountNo
+{
+    if(!member || !member[@"nick"] || !room || !accountNo)
+        return;
+    
+    [self.db executeNonQuery:@"DELETE FROM muc_participants WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[accountNo, room, member[@"nick"]]];
 }
 
 -(void) addMucFavorite:(NSString*) room forAccountId:(NSString*) accountNo andMucNick:(NSString* _Nullable) mucNick
@@ -903,7 +934,7 @@ static NSDateFormatter* dbFormatter;
 -(BOOL) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     NSNumber* status = (NSNumber*)[self.db executeScalar:@"SELECT Muc FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
-    return [status boolValue];
+    return !status || [status boolValue];
 }
 
 -(NSString* _Nullable) ownNickNameforMuc:(NSString*) room forAccount:(NSString*) accountNo
@@ -2411,7 +2442,7 @@ static NSDateFormatter* dbFormatter;
                      PRIMARY KEY('account_id','room','room_nick'), \
                      FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, \
                      FOREIGN KEY('account_id', 'room') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
-                 );"];
+            );"];
         }];
     }];
     [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];

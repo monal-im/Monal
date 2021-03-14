@@ -61,8 +61,9 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 @property (nonatomic, assign) BOOL isPinned;
 @property (nonatomic, assign) BOOL isBlocked;
-
+@property (nonatomic, assign) BOOL isMuted;
 @property (nonatomic, assign) BOOL isActiveChat;
+@property (nonatomic, assign) BOOL isEncrypted;
 
 @property (nonatomic, assign) BOOL isGroup;
 @property (nonatomic, copy) NSString *groupSubject;

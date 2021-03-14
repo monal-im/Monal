@@ -86,6 +86,8 @@ NSString *const kAskSubscribe=@"subscribe";
     contact.state = [dic objectForKey:@"state"];
     contact.unreadCount = [[dic objectForKey:@"count"] integerValue];
     contact.isActiveChat = [[dic objectForKey:@"isActiveChat"] boolValue];
+    contact.isEncrypted = [[dic objectForKey:@"encrypt"] boolValue];
+    contact.isMuted = [[dic objectForKey:@"muted"] boolValue];
     return contact;
 }
 

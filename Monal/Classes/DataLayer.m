@@ -429,7 +429,7 @@ static NSDateFormatter* dbFormatter;
     if(!username || !accountNo)
         return nil;
     
-    NSArray* results = [self.db executeReader:@"SELECT b.buddy_name, state, status, b.full_name, b.nick_name, Muc, muc_subject, muc_type, muc_nick, b.account_id, lastMessageTime, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', blocked, \
+    NSArray* results = [self.db executeReader:@"SELECT b.buddy_name, state, status, b.full_name, b.nick_name, Muc, muc_subject, muc_type, muc_nick, b.account_id, lastMessageTime, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', blocked, encrypt, muted, \
         CASE \
             WHEN a.buddy_name IS NOT NULL THEN 1 \
             ELSE 0 \
@@ -460,6 +460,9 @@ static NSDateFormatter* dbFormatter;
             //@"muc_nick": nil,
             @"Muc": @NO,
             @"pinned": @NO,
+            @"blocked": @NO,
+            @"encrypt": @NO,
+            @"muted": @NO,
             @"status": @"",
             @"state": @"offline",
             @"count": @0,
@@ -934,6 +937,7 @@ static NSDateFormatter* dbFormatter;
 -(BOOL) isBuddyMuc:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     NSNumber* status = (NSNumber*)[self.db executeScalar:@"SELECT Muc FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
+
     return !status || [status boolValue];
 }
 
@@ -2443,6 +2447,10 @@ static NSDateFormatter* dbFormatter;
                      FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, \
                      FOREIGN KEY('account_id', 'room') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
             );"];
+        }];
+
+        [self updateDBTo:5.012 withBlock:^{
+            [self.db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN muted BOOL DEFAULT FALSE"];
         }];
     }];
     [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];

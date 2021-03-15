@@ -933,11 +933,9 @@ NSString *const kData=@"data";
                 [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                     //add whole processing of incoming stanzas to one big transaction
                     //this will make it impossible to leave inconsistent database entries on app crashes or iphone crashes/reboots
-                    //BUT: this does not currently play well with omemo bundle processing and is therefore commented out:(
-//                     [[DataLayer sharedInstance] createTransaction:^{
-//                        [self processInput:parsedStanza];
-//                     }];
-                    [self processInput:parsedStanza];
+                    [[DataLayer sharedInstance] createTransaction:^{
+                       [self processInput:parsedStanza];
+                    }];
                 }]] waitUntilFinished:YES];
             }]] waitUntilFinished:NO];
         }];

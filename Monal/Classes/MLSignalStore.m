@@ -197,20 +197,33 @@
     return devices;
 }
 
-- (NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*)addressName
+-(NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*)addressName
 {
     if(!addressName) return nil;
     
     NSArray* rows = [self.sqliteDatabase executeReader:@"SELECT DISTINCT contactDeviceId FROM signalContactIdentity WHERE account_id=? AND contactName=? AND removedFromDeviceList IS NULL;" andArguments:@[self.accountId, addressName]];
     
-    NSMutableArray *devices = [[NSMutableArray alloc] initWithCapacity:rows.count];
+    NSMutableArray* devices = [[NSMutableArray alloc] initWithCapacity:rows.count];
     
-    for(NSDictionary *row in rows)
+    for(NSDictionary* row in rows)
     {
-        NSNumber *number= [row objectForKey:@"contactDeviceId"];
-        [devices addObject:number];
+        [devices addObject:[row objectForKey:@"contactDeviceId"]];
     }
-    
+    return devices;
+}
+
+-(NSArray<NSNumber*>*) knownDevicesWithSessionEntryForName:(NSString*) addrName
+{
+    if(!addrName) return nil;
+
+    NSArray* rows = [self.sqliteDatabase executeReader:@"SELECT DISTINCT sci.contactDeviceId FROM signalContactIdentity as sci INNER JOIN signalContactSession as scs ON sci.account_id=scs.account_id AND sci.contactName=scs.contactName AND sci.contactDeviceId=scs.contactDeviceId WHERE sci.account_id=? AND sci.contactName=? AND sci.removedFromDeviceList IS NULL;" andArguments:@[self.accountId, addrName]];
+
+    NSMutableArray* devices = [[NSMutableArray alloc] initWithCapacity:rows.count];
+
+    for(NSDictionary* row in rows)
+    {
+        [devices addObject:[row objectForKey:@"contactDeviceId"]];
+    }
     return devices;
 }
 
@@ -219,7 +232,7 @@
  *
  * @return the number of deleted sessions on success, negative on failure
  */
-- (int) deleteAllSessionsForAddressName:(NSString*)addressName
+-(int) deleteAllSessionsForAddressName:(NSString*)addressName
 {
     [self.sqliteDatabase beginWriteTransaction];
     NSNumber* count = (NSNumber *) [self.sqliteDatabase executeScalar:@"COUNT * FROM  signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, addressName]];

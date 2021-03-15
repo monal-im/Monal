@@ -323,7 +323,7 @@ $$
     {
         NSAssert([self.accountJid caseInsensitiveCompare:self.account.connectionProperties.identity.jid] == NSOrderedSame, @"connection jid should be equal to the senderJid");
 
-        NSArray<NSNumber*>* existingDevices = [self.monalSignalStore knownDevicesForAddressName:source];
+        NSArray<NSNumber*>* existingDevices = [self.monalSignalStore knownDevicesWithSessionEntryForName:source];
 
         // query omemo bundles from devices that are not in our signalStorage
         // TODO: queryOMEMOBundleFrom when sending first msg without session

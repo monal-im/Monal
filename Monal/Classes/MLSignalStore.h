@@ -32,7 +32,8 @@
 /**
  all devices even those without sessions
  */
-- (NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*)addressName;
+-(NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*)addressName;
+-(NSArray<NSNumber*>*) knownDevicesWithSessionEntryForName:(NSString*) addrName;
 -(NSMutableArray *) readPreKeys;
 
 -(void) deleteDeviceforAddress:(SignalAddress*)address;

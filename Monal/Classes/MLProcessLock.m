@@ -84,13 +84,13 @@
 +(void) waitForRemoteStartup:(NSString*) processName
 {
     while(![[NSThread currentThread] isCancelled] && ![self checkRemoteRunning:processName])
-        usleep(50000);      //checkRemoteRunning did already wait for its timeout, don't wait too long here
+        [self sleep:0.050];     //checkRemoteRunning did already wait for its timeout, don't wait too long here
 }
 
 +(void) waitForRemoteTermination:(NSString*) processName
 {
     while(![[NSThread currentThread] isCancelled] && [self checkRemoteRunning:processName])
-        usleep(250000);    //checkRemoteRunning did not wait for its timeout, wait here
+        [self sleep:0.25];    //checkRemoteRunning did not wait for its timeout, wait here
 }
 
 +(void) lock
@@ -113,6 +113,18 @@
         DDLogVerbose(@"MLProcessLock responding to ping %@", message[@"id"]);
         [[IPC sharedInstance] respondToMessage:message withData:nil];
     }
+}
+
++(void) sleep:(NSTimeInterval) time
+{
+    BOOL was_called_in_mainthread = [NSThread isMainThread];
+    NSRunLoop* main_runloop = [NSRunLoop mainRunLoop];
+    //we have to spin the runloop instead of simply sleeping to not miss incoming IPC messages
+    //(pings coming from the appex for example)
+    if(was_called_in_mainthread)
+        [main_runloop runMode:[main_runloop currentMode] beforeDate:[NSDate dateWithTimeIntervalSinceNow:time]];
+    else
+        [NSThread sleepForTimeInterval:time];
 }
 
 @end

@@ -41,6 +41,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(nowIdle:) name:kMonalIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filetransfersNowIdle:) name:kMonalFiletransfersIdle object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(xmppError:) name:kXMPPError object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(updateUnread) name:kMonalUpdateUnread object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(incomingIPC:) name:kMonalIncomingIPC object:nil];
     return self;
 }
@@ -69,7 +70,7 @@
             [DDLog flushLog];
             [self feedAllWaitingHandlersWithCompletion:^{
                 //now call this new handler we did not add to our handlerList
-                [self callHandler:contentHandler];
+                [self generateNotificationForHandler:contentHandler];
             }];
             return;
         }
@@ -117,7 +118,7 @@
         {
             void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
             [self.handlerList removeObject:handler];
-            [self callHandler:handler];
+            [self generateNotificationForHandler:handler];
         }
         
         //disconnect if this was the last handler and no new push comes in in the next 500ms
@@ -166,7 +167,7 @@
     }
 }
 
--(void) callHandler:(void (^)(UNNotificationContent*)) handler
+-(UNMutableNotificationContent*) generateNotificationForHandler:(void (^)(UNNotificationContent*)) handler
 {
     //this is used with special extension filtering entitlement which does not show notifications with empty body, title and subtitle
     //but: app badge updates are still performed: use this to make sure the badge is up to date, even if a message got marked as read (by XEP-0333 etc.)
@@ -174,7 +175,9 @@
     NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUnreadMessages];
     DDLogInfo(@"Updating unread badge to: %@", unreadMsgCnt);
     emptyContent.badge = unreadMsgCnt;
-    handler(emptyContent);
+    if(handler)
+        handler(emptyContent);
+    return emptyContent;
 }
 
 -(void) feedAllWaitingHandlersWithCompletion:(monal_void_block_t) completion
@@ -200,7 +203,7 @@
             DDLogDebug(@"Feeding handler");
             void (^handler)(UNNotificationContent*) = [self.handlerList firstObject];
             [self.handlerList removeObject:handler];
-            [self callHandler:handler];
+            [self generateNotificationForHandler:handler];
         }
     }
     
@@ -302,6 +305,18 @@
             [self nowIdle:notification];
         });
     }
+}
+
+-(void) updateUnread
+{
+    UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+    UNMutableNotificationContent* content = [self generateNotificationForHandler:nil];
+    DDLogVerbose(@"updating app badge via updateUnread");
+    UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:@"badge_update" content:content trigger:nil];
+    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+        if(error)
+            DDLogError(@"Error posting local badge_update notification: %@", error);
+    }];
 }
 
 @end

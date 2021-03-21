@@ -163,7 +163,7 @@ extern NSString* const kMessageTypeFiletransfer;
 /*
  adds a specified message to the database
  */
--(NSNumber*) addMessageFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted backwards:(BOOL) backwards displayMarkerWanted:(BOOL) displayMarkerWanted;
+-(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted backwards:(BOOL) backwards displayMarkerWanted:(BOOL) displayMarkerWanted;
 
 /*
  Marks a message as sent. When the server acked it
@@ -202,7 +202,6 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 
--(NSArray *) allMessagesForContact:(NSString* ) buddy forAccount:(NSString *) accountNo;
 -(MLMessage*) lastMessageForContact:(NSString *) contact forAccount:(NSString *) accountNo;
 -(NSString*) lastStanzaIdForAccount:(NSString*) accountNo;
 -(void) setLastStanzaId:(NSString*) lastStanzaId forAccount:(NSString*) accountNo;
@@ -215,7 +214,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo;
 -(NSArray<MLMessage*>*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSString*) accountNo tillStanzaId:(NSString* _Nullable) stanzaId wasOutgoing:(BOOL) outgoing;
 
--(NSNumber*) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString* _Nullable) mimeType size:(NSNumber* _Nullable) size;
+-(NSNumber*) addMessageHistoryTo:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString* _Nullable) mimeType size:(NSNumber* _Nullable) size;
 
 #pragma mark active contacts
 -(NSMutableArray<MLContact*>*) activeContactsWithPinned:(BOOL) pinned;
@@ -261,18 +260,17 @@ extern NSString* const kMessageTypeFiletransfer;
 
 #pragma mark History Message Search
 /*
- search message by keyword in message, message_from, actual_from, messageType.
+ search message by keyword in message, buddy_name, messageType.
  */
 -(NSArray* _Nullable) searchResultOfHistoryMessageWithKeyWords:(NSString* _Nonnull) keyword
                                              accountNo:(NSString*  _Nonnull) accountNo;
 
 /*
- search message by keyword in message, message_from, actual_from, messageType.
+ search message by keyword in message, buddy_name, messageType.
  */
 -(NSArray* _Nullable) searchResultOfHistoryMessageWithKeyWords:(NSString* _Nonnull) keyword
                                              accountNo:(NSString*  _Nonnull) accountNo
-                                          betweenBuddy:(NSString*  _Nonnull) accountJid1
-                                              andBuddy:(NSString*  _Nonnull) accountJid2;
+                                             betweenBuddy:(NSString* _Nonnull) contactJid;
 
 -(NSArray*) getAllCachedImages;
 -(void) removeImageCacheTables;

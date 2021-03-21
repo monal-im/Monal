@@ -1280,7 +1280,7 @@ enum msgSentState {
         return nil;
     }
     
-    NSNumber* messageDBId = [[DataLayer sharedInstance] addMessageHistoryFrom:self.jid to:to forAccount:self.contact.accountId withMessage:message actuallyFrom:(self.contact.isGroup ? self.contact.accountNickInGroup : self.jid) withId:messageId encrypted:self.encryptChat messageType:messageType mimeType:mimeType size:size];
+    NSNumber* messageDBId = [[DataLayer sharedInstance] addMessageHistoryTo:to forAccount:self.contact.accountId withMessage:message actuallyFrom:(self.contact.isGroup ? self.contact.accountNickInGroup : self.jid) withId:messageId encrypted:self.encryptChat messageType:messageType mimeType:mimeType size:size];
     if(messageDBId)
     {
         DDLogVerbose(@"added message");
@@ -1333,8 +1333,7 @@ enum msgSentState {
         DDLogError(@"Notification without message");
     
     if([message.accountId isEqualToString:self.contact.accountId]
-       && ([message.from isEqualToString:self.contact.contactJid]
-           || [message.to isEqualToString:self.contact.contactJid] ))
+       && [message.buddyName isEqualToString:self.contact.contactJid])
     {
         dispatch_async(dispatch_get_main_queue(), ^{
             if(!self.messageList)
@@ -1699,7 +1698,7 @@ enum msgSentState {
     NSString* messageText = row.messageText;
     if([messageText length] > kMonalChatMaxAllowedTextLen)
         messageText = [NSString stringWithFormat:@"%@\n[...]", [messageText substringToIndex:kMonalChatMaxAllowedTextLen]];
-    BOOL inDirection = [row.from isEqualToString:self.contact.contactJid];
+    BOOL inboundDir = row.inbound;
 
     if([row.messageType isEqualToString:kMessageTypeStatus])
     {
@@ -1718,7 +1717,7 @@ enum msgSentState {
         
         if(info && ![info[@"needsDownloading"] boolValue])
         {
-            cell = [self fileTransferCellCheckerWithInfo:info direction:inDirection tableView:tableView andMsg:row];
+            cell = [self fileTransferCellCheckerWithInfo:info direction:inboundDir tableView:tableView andMsg:row];
         }
         else if (info && [info[@"needsDownloading"] boolValue])
         {
@@ -1728,7 +1727,7 @@ enum msgSentState {
                 //TODO JIM: explanation: this should not be automatically but only triggered by a button press
                 //TODO JIM: explanation: I'm doing this automatically here because we still lack those buttons
                 //TODO JIM: explanation: this only handles images, because we don't want to autodownload everything
-                MLFileTransferDataCell* fileTransferCell = (MLFileTransferDataCell *) [self messageTableCellWithIdentifier:@"fileTransferCheckingData" andInbound:inDirection fromTable:tableView];
+                MLFileTransferDataCell* fileTransferCell = (MLFileTransferDataCell *) [self messageTableCellWithIdentifier:@"fileTransferCheckingData" andInbound:inboundDir fromTable:tableView];
                 
                 NSString *fileType = info[@"mimeType"];
                 
@@ -1767,7 +1766,7 @@ enum msgSentState {
                 //TODO JIM: explanation: this was not yet checked, do an http head request to get mime type and size
                 //TODO JIM: explanation: this should not be automatically but only triggered by a button press
                 //TODO JIM: explanation: I'm doing this automatically here because we still lack those buttons
-                MLFileTransferDataCell* fileTransferCell = (MLFileTransferDataCell *) [self messageTableCellWithIdentifier:@"fileTransferCheckingData" andInbound:inDirection fromTable:tableView];
+                MLFileTransferDataCell* fileTransferCell = (MLFileTransferDataCell *) [self messageTableCellWithIdentifier:@"fileTransferCheckingData" andInbound:inboundDir fromTable:tableView];
                 NSString *hintStr = [NSString stringWithFormat:@"%@%@", NSLocalizedString(@"Check type and size on ", @""), info[@"filename"]];
                 [fileTransferCell.fileTransferHint setText:hintStr];
                 fileTransferCell.transferStatus = transferCheck;
@@ -1779,7 +1778,7 @@ enum msgSentState {
     }
     else if([row.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
     {
-        MLLinkCell* toreturn = (MLLinkCell *)[self messageTableCellWithIdentifier:@"link" andInbound:inDirection fromTable: tableView];
+        MLLinkCell* toreturn = (MLLinkCell *)[self messageTableCellWithIdentifier:@"link" andInbound:inboundDir fromTable: tableView];
 
         NSString* cleanLink = [messageText stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSArray* parts = [cleanLink componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -1823,7 +1822,7 @@ enum msgSentState {
 
             // Display inline map
             if(self.showGeoLocationsInline) {
-                MLChatMapsCell* mapsCell = (MLChatMapsCell *)[self messageTableCellWithIdentifier:@"maps" andInbound:inDirection fromTable: tableView];
+                MLChatMapsCell* mapsCell = (MLChatMapsCell *)[self messageTableCellWithIdentifier:@"maps" andInbound:inboundDir fromTable: tableView];
 
                 // Set lat / long used for map view and pin
                 mapsCell.latitude = [latitude doubleValue];
@@ -1833,7 +1832,7 @@ enum msgSentState {
                 cell = mapsCell;
             } else {
                 // Default to text cell
-                cell = [self messageTableCellWithIdentifier:@"text" andInbound:inDirection fromTable: tableView];
+                cell = [self messageTableCellWithIdentifier:@"text" andInbound:inboundDir fromTable: tableView];
                 NSMutableAttributedString* geoString = [[NSMutableAttributedString alloc] initWithString:messageText];
                 [geoString addAttribute:NSUnderlineStyleAttributeName value:@(NSUnderlineStyleSingle) range:[geoMatch rangeAtIndex:0]];
 
@@ -1846,7 +1845,7 @@ enum msgSentState {
         }
     } else {
         // Use default text cell
-        cell = (MLChatCell*)[self messageTableCellWithIdentifier:@"text" andInbound:inDirection fromTable: tableView];
+        cell = (MLChatCell*)[self messageTableCellWithIdentifier:@"text" andInbound:inboundDir fromTable: tableView];
         
         //make sure everything is set to defaults
         cell.bubbleImage.hidden=NO;
@@ -1897,7 +1896,7 @@ enum msgSentState {
             if([messageText hasPrefix:@"/me "])
             {
                 NSString* displayName;
-                if([row.from isEqualToString:self.jid])
+                if(row.inbound == NO)
                     displayName = [MLContact ownDisplayNameForAccount:self.xmppAccount];
                 else
                     displayName = [self.contact contactDisplayName];
@@ -1925,7 +1924,7 @@ enum msgSentState {
     if(cell == nil)
     {
         //this is just a dummy to display something usable (the filetransfer url as link cell)
-        MLLinkCell* toreturn = (MLLinkCell *)[self messageTableCellWithIdentifier:@"link" andInbound:inDirection fromTable: tableView];;
+        MLLinkCell* toreturn = (MLLinkCell *)[self messageTableCellWithIdentifier:@"link" andInbound:inboundDir fromTable: tableView];;
         toreturn.link = row.messageText;
         toreturn.messageBody.text = toreturn.link;
         
@@ -1954,8 +1953,7 @@ enum msgSentState {
     BOOL newSender = NO;
     if(indexPath.row > 0)
     {
-        NSString* priorSender = priorRow.from;
-        if(![priorSender isEqualToString:row.from])
+        if(priorRow.inbound != row.inbound)
             newSender = YES;
     }
     cell.date.text = [self formattedTimeStampWithSource:row.delayTimeStamp ? row.delayTimeStamp : row.timestamp];
@@ -1966,9 +1964,9 @@ enum msgSentState {
     // Do not hide the lockImage if the message was encrypted
     cell.lockImage.hidden = !row.encrypted;
     // Set correct layout in/Outbound
-    cell.outBound = !inDirection;
+    cell.outBound = !inboundDir;
     // Hide messageStatus on inbound messages
-    cell.messageStatus.hidden = inDirection;
+    cell.messageStatus.hidden = inboundDir;
     
     cell.parent = self;
     
@@ -1987,7 +1985,7 @@ enum msgSentState {
         {
             NSMutableAttributedString *attributedMsgString = [self.searchController doSearchKeyword:self.searchController.searchBar.text
                                                                                              onText:messageText
-                                                                                         andInbound:inDirection];
+                                                                                         andInbound:inboundDir];
             [cell.messageBody setAttributedText:attributedMsgString];
         }
     }

@@ -244,8 +244,8 @@ static NSMutableDictionary* _typingNotifications;
             if(historyId == nil && ![body isEqualToString:kMessageDeletedBody])
             {
                 historyId = [[DataLayer sharedInstance]
-                            addMessageFrom:messageNode.fromUser
-                                        to:messageNode.toUser
+                             addMessageToChatBuddy:[messageNode.from isEqualToString:account.connectionProperties.identity.jid] ? messageNode.from : messageNode.to
+                             withInboundDir:[messageNode.to isEqualToString:account.connectionProperties.identity.jid]
                                 forAccount:account.accountNo
                                 withBody:[body copy]
                             actuallyfrom:actualFrom

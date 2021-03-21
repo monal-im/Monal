@@ -15,10 +15,10 @@
     MLMessage* message = [[MLMessage alloc] init];
     message.accountId = [NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
     
-    message.from = [dic objectForKey:@"message_from"];
+    message.buddyName = [dic objectForKey:@"buddy_name"];
+    message.inbound = [(NSNumber*)[dic objectForKey:@"inbound"] boolValue];
     message.actualFrom = [dic objectForKey:@"af"];
     message.messageText = [dic objectForKey:@"message"];
-    message.to = [dic objectForKey:@"message_to"];
     message.isMuc = [(NSNumber*)[dic objectForKey:@"Muc"] boolValue];
     
     message.messageId = [dic objectForKey:@"messageid"];
@@ -52,10 +52,10 @@
 -(void) updateWithMessage:(MLMessage*) msg
 {
     self.accountId = msg.accountId;
-    self.from = msg.from;
+    self.buddyName = msg.buddyName;
+    self.inbound = msg.inbound;
     self.actualFrom = msg.actualFrom;
     self.messageText = msg.messageText;
-    self.to = msg.to;
     self.messageId = msg.messageId;
     self.stanzaId = msg.stanzaId;
     self.messageDBId = msg.messageDBId;

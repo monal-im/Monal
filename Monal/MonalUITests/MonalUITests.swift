@@ -31,11 +31,18 @@ class MonalUITests: XCTestCase {
 
     func intro(app: XCUIApplication)
     {
+        // wait for launch
+        sleep(4)
+
         let elementsQuery = app.scrollViews["intro_scroll"].otherElements
         elementsQuery.buttons["Welcome to Monal, Chat for free with your friends, colleagues and family!"].swipeLeft()
+        sleep(1)
         elementsQuery.buttons["Choices Galore, Use your existing account or make a new one on the many servers around the world"].swipeLeft()
+        sleep(1)
         elementsQuery.buttons["Escape The Garden, You are not trapped in a garden. Talk to anyone else without anyone tracking you."].swipeLeft()
+        sleep(1)
         elementsQuery.buttons["Spread The Word, If you like Monal, please let others know and leave a review"].swipeLeft()
+        sleep(1)
     }
 
     func testIntro() throws

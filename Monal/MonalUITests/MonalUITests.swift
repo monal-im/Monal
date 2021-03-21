@@ -23,12 +23,6 @@ class MonalUITests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testDBInit() throws {
-        let app = XCUIApplication()
-        app.launchArguments = ["--reset"]
-        app.launch()
-    }
-
     func intro(app: XCUIApplication)
     {
         // wait for launch
@@ -45,7 +39,13 @@ class MonalUITests: XCTestCase {
         sleep(1)
     }
 
-    func testIntro() throws
+    func test_0001_DBInit() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--reset"]
+        app.launch()
+    }
+
+    func test_0002_Intro() throws
     {
         let app = XCUIApplication()
         app.launchArguments = ["--reset"]
@@ -58,14 +58,25 @@ class MonalUITests: XCTestCase {
         elementsQuery2.secureTextFields["Password"].tap()
     }
 
-    func testIntroSkip() throws
+    func test_0003_IntroSkip() throws
     {
         let app = XCUIApplication()
         app.launchArguments = ["--reset"]
         app.launch()
     }
 
-    func testRegister() throws
+    func test_0004_ResetTime() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--reset"]
+        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
+            // This measures how long it takes to launch your application.
+            measure(metrics: [XCTApplicationLaunchMetric()]) {
+                app.launch()
+            }
+        }
+    }
+
+    func test_0005_Register() throws
     {
         let app = XCUIApplication()
         app.launchArguments = ["--reset"]
@@ -78,6 +89,8 @@ class MonalUITests: XCTestCase {
         registerStaticText.tap()
 
         app.scrollViews.otherElements.buttons["Terms of service"].tap()
+        // wait for safari window to open
+        sleep(5)
         app/*@START_MENU_TOKEN@*/.buttons["Done"]/*[[".otherElements[\"BrowserView?WebViewProcessID=41735\"]",".otherElements[\"TopBrowserBar\"].buttons[\"Done\"]",".buttons[\"Done\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/.tap()
         elementsQuery.textFields["Username"].tap()
         // create random username
@@ -86,14 +99,16 @@ class MonalUITests: XCTestCase {
         elementsQuery.secureTextFields["Password"].tap()
         elementsQuery.secureTextFields["Password"].typeText(randomPassword())
         registerStaticText.tap()
-
+        // wait for register hud
+        sleep(10)
         let startChattingStaticText = app.buttons["Start Chatting"]
         startChattingStaticText.tap()
+        sleep(1)
         app.navigationBars["Privacy Settings"].buttons["Close"].tap()
         startChattingStaticText.tap()
     }
 
-    func testLaunchPerformance() throws {
+    func test_0006_LaunchPerformance() throws {
         if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
             // This measures how long it takes to launch your application.
             measure(metrics: [XCTApplicationLaunchMetric()]) {

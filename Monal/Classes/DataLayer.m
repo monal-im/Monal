@@ -488,7 +488,7 @@ static NSDateFormatter* dbFormatter;
 -(NSMutableArray<MLContact*>*) contactList
 {
     //list all contacts without groups
-    NSString* query = @"SELECT buddy_name, a.account_id, IFNULL(IFNULL(NULLIF(A.nick_name, ''), NULLIF(A.full_name, '')), buddy_name) AS 'sortkey' FROM buddylist AS A INNER JOIN account AS b ON a.account_id=b.account_id WHERE b.enabled=1 AND (b.username || '@' || b.domain) != buddy_name ORDER BY sortkey COLLATE NOCASE ASC;";
+    NSString* query = @"SELECT B.buddy_name, B.account_id, IFNULL(IFNULL(NULLIF(B.nick_name, ''), NULLIF(B.full_name, '')), B.buddy_name) AS 'sortkey' FROM buddylist AS B INNER JOIN account AS A ON A.account_id=B.account_id WHERE A.enabled=1 AND (A.username || '@' || A.domain)!=buddy_name ORDER BY sortkey COLLATE NOCASE ASC;";
     NSMutableArray* toReturn = [[NSMutableArray alloc] init];
     for(NSDictionary* dic in [self.db executeReader:query])
         [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];

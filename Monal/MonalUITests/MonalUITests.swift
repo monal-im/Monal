@@ -200,8 +200,5 @@ class MonalUITests: XCTestCase {
         sendMsg(txt: randomString(length: 100))
         sendMsg(txt: randomString(length: 1000))
         sendMsg(txt: randomString(length: 2000))
-        sendMsg(txt: randomString(length: 3000))
-        sendMsg(txt: randomString(length: 4000))
-        sendMsg(txt: randomString(length: 3000))
     }
 }

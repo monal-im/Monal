@@ -145,8 +145,11 @@ static NSMutableDictionary* _uiHandler;
             //he could still be on the members list
             //maybe do this only for channels, but not for groups??
             [[DataLayer sharedInstance] removeMember:item fromMuc:presenceNode.fromUser forAccountId:account.accountNo];
+        /*
+         * TODO: thilo
         else
             [[DataLayer sharedInstance] addMember:item toMuc:presenceNode.fromUser forAccountId:account.accountNo];
+         */
     }
 }
 

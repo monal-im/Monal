@@ -2699,8 +2699,8 @@ NSString *const kData=@"data";
         for(MLMessage* msg in [self getOrderedMamPageFor:[response findFirst:@"{urn:xmpp:mam:2}fin@queryid"]])
             if(msg.messageText)
             {
-                NSNumber* historyId = [[DataLayer sharedInstance] addMessageFrom:msg.from
-                                                        to:msg.to
+                NSNumber* historyId = [[DataLayer sharedInstance] addMessageToChatBuddy:msg.buddyName
+                                            withInboundDir:msg.inbound
                                                 forAccount:self.accountNo
                                                   withBody:msg.messageText
                                               actuallyfrom:msg.actualFrom
@@ -3363,10 +3363,11 @@ NSString *const kData=@"data";
 -(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andMessageType:(NSString*) messageType andActualFrom:(NSString*) actualFrom
 {
     MLMessage* message = [[MLMessage alloc] init];
-    message.from = messageNode.fromUser;
+    message.buddyName = [messageNode.fromUser isEqualToString:self.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser;
+    message.inbound = [messageNode.toUser isEqualToString:self.connectionProperties.identity.jid];
     message.actualFrom = actualFrom ? actualFrom : messageNode.fromUser;
     message.messageText = [body copy];     //this need to be the processed value since it may be decrypted
-    message.to = messageNode.toUser ? messageNode.toUser : self.connectionProperties.identity.jid;
+    message.buddyName = messageNode.toUser ? messageNode.toUser : self.connectionProperties.identity.jid;
     message.isMuc = [messageNode check:@"/<type=groupchat>"];
     message.messageId = [messageNode check:@"/@id"] ? [messageNode findFirst:@"/@id"] : [[NSUUID UUID] UUIDString];
     message.accountId = self.accountNo;
@@ -3417,7 +3418,7 @@ NSString *const kData=@"data";
     XMPPMessage* displayedNode = [[XMPPMessage alloc] init];
     //the message type is needed so that the store hint is accepted by the server
     displayedNode.attributes[@"type"] = msg.isMuc ? @"groupchat" : @"chat";
-    displayedNode.attributes[@"to"] = msg.from;
+    displayedNode.attributes[@"to"] = msg.inbound ? msg.buddyName : self.connectionProperties.identity.jid;
     [displayedNode setDisplayed:msg.messageId];
     [displayedNode setStoreHint];
     [self send:displayedNode];

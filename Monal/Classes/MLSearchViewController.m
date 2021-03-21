@@ -249,8 +249,7 @@
 {
     NSArray* searchResultArray = [[DataLayer sharedInstance] searchResultOfHistoryMessageWithKeyWords:queryText
                                                                                                    accountNo:self.contact.accountId
-                                                                                                betweenBuddy:self.jid
-                                                                                                    andBuddy:self.contact.contactJid];
+                                                                                                betweenBuddy:self.contact.contactJid];
     [self.searchResultMessageList removeAllObjects];
     self.searchResultMessageList = [searchResultArray mutableCopy];
 }

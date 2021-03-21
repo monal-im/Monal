@@ -216,12 +216,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     if(!msgAccount)
         return;
 
-    NSString* buddyContactJid = newMessage.from;
-    if([msgAccount.connectionProperties.identity.jid isEqualToString:newMessage.from]) {
-        buddyContactJid = newMessage.to;
-    }
-
-    MLContact* contact = [[DataLayer sharedInstance] contactForUsername:buddyContactJid forAccount:newMessage.accountId];
+    MLContact* contact = [[DataLayer sharedInstance] contactForUsername:newMessage.buddyName forAccount:newMessage.accountId];
     if(!contact)
         return;
     

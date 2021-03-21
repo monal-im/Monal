@@ -520,8 +520,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     
     // Save message to history
     NSNumber* messageDBId = [[DataLayer sharedInstance]
-        addMessageHistoryFrom:account.connectionProperties.identity.jid
-                           to:contact.contactJid
+        addMessageHistoryTo:contact.contactJid
                    forAccount:contact.accountId
                   withMessage:message
                  actuallyFrom:(contact.isGroup ? contact.accountNickInGroup : account.connectionProperties.identity.jid)

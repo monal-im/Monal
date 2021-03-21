@@ -117,8 +117,7 @@
         {
             //don't show notifications for open chats
             if(
-                ![message.from isEqualToString:self.currentContact.contactJid] &&
-                ![message.to isEqualToString:self.currentContact.contactJid]
+                ![message.buddyName isEqualToString:self.currentContact.contactJid]
             )
                 [self showModernNotificaionForMessage:message withSound:sound];
             else
@@ -172,7 +171,7 @@
 
 -(NSString*) threadIdentifierWithMessage:(MLMessage*) message
 {
-    return [NSString stringWithFormat:@"%@_%@", message.accountId, message.from];
+    return [NSString stringWithFormat:@"%@_%@", message.accountId, message.buddyName];
 }
 
 -(void) publishNotificationContent:(UNMutableNotificationContent*) content withID:(NSString*) idval
@@ -203,7 +202,7 @@
 -(void) showModernNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound
 {
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
-    MLContact* contact = [[DataLayer sharedInstance] contactForUsername:message.from forAccount:message.accountId];
+    MLContact* contact = [[DataLayer sharedInstance] contactForUsername:message.buddyName forAccount:message.accountId];
     NSString* idval = [self identifierWithMessage:message];
     
     // Only show contact name if allowed
@@ -224,7 +223,7 @@
         //XEP-0245: The slash me Command
         if([message.messageText hasPrefix:@"/me "])
         {
-            BOOL isMuc = [[DataLayer sharedInstance] isBuddyMuc:message.from forAccount:message.accountId];
+            BOOL isMuc = [[DataLayer sharedInstance] isBuddyMuc:message.buddyName forAccount:message.accountId];
             msgText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:message.accountId
                                                                            displayName:[contact contactDisplayName]
                                                                             actualFrom:message.actualFrom
@@ -236,7 +235,7 @@
         content.threadIdentifier = [self threadIdentifierWithMessage:message];
         content.categoryIdentifier = @"message";
         content.userInfo = @{
-            @"fromContactJid": message.from,
+            @"fromContactJid": message.buddyName,
             @"fromContactAccountId": message.accountId,
             @"messageId": message.messageId
         };

@@ -22,6 +22,16 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy) NSString *accountId;
 
 /**
+  jid of the contact that this msg corresponds to
+ */
+@property (nonatomic, copy) NSString* buddyName;
+
+/**
+  indicating if the message was send from buddyName
+ */
+@property (nonatomic, assign) BOOL inbound;
+
+/**
  The message's local  unique identifier
  */
 @property (nonatomic, copy) NSString *messageId;
@@ -40,8 +50,6 @@ The of the message in the DB , should be int
  Actual sender will differ from the "from" when in a group chat
  */
 @property (nonatomic, copy) NSString *actualFrom;
-@property (nonatomic, copy) NSString *from;
-@property (nonatomic, copy) NSString *to;
 @property (nonatomic, assign) BOOL isMuc;
 
 @property (nonatomic, copy) NSString* messageType;

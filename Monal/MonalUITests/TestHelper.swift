@@ -10,11 +10,15 @@ import Foundation
 
 func randomPassword() -> String
 {
+    let passwordLen = Int.random(in: 20..<100)
+    return randomString(length: passwordLen)
+}
+
+func randomString(length: Int = 100) -> String
+{
     let alphabet: NSString = "qwertzuiopasdfghjklyxcvbnmQWERTZUIOPASDFGHJKLYXCVBNM1234567890!§$%&/()=?,.-;:_*'^"
     var password: String = ""
-    let passwordLen = Int.random(in: 20..<100)
-
-    for _ in 0 ..< passwordLen
+    for _ in 0 ..< length
     {
         var charElement = alphabet.character(at: Int(arc4random_uniform(UInt32(alphabet.length))))
         password += NSString(characters: &charElement, length: 1) as String

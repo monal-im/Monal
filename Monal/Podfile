@@ -7,6 +7,37 @@ platform :ios, '12.0'
 # ignore all warnings from all pods
 inhibit_all_warnings!
 
+def signalDeps
+  pod 'SignalProtocolObjC'
+  pod 'SignalProtocolC'
+end
+
+def monal
+  use_frameworks!
+  inhibit_all_warnings!
+  pod 'MBProgressHUD', '~> 1.2.0'
+  pod 'IDMPhotoBrowser'
+  pod 'SDWebImage', '~> 5.10.0'
+  pod 'DZNEmptyDataSet'
+  pod 'EAIntroView'
+  pod 'TOCropViewController'
+  pod 'NotificationBannerSwift', '~> 3.0.6'
+end
+
+def monalxmpp
+  # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
+  use_frameworks!
+  inhibit_all_warnings!
+  pod 'SAMKeychain'
+  pod 'TPCircularBuffer'
+  pod 'CocoaLumberjack'
+  pod 'sqlite3/perf-threadsafe', inhibit_warnings: true
+  signalDeps
+  #this is only for ios12. Remove for mac builds.
+  pod 'OpenSSL-Universal', '1.1.180'
+end
+
+
 target 'jrtplib-static' do
   # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
   use_frameworks!
@@ -25,41 +56,20 @@ target 'NotificaionService' do
   use_frameworks!
   inhibit_all_warnings!
   pod 'CocoaLumberjack'
-  pod 'SignalProtocolObjC'
-  pod 'SignalProtocolC'
+  signalDeps
 end
 
 target 'Monal' do
-  # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
-  use_frameworks!
-  inhibit_all_warnings!
-  pod 'MBProgressHUD', '~> 1.2.0'
-  pod 'IDMPhotoBrowser'
-  pod 'SDWebImage', '~> 5.10.0'
-  pod 'DZNEmptyDataSet'
-  pod 'EAIntroView'
-  pod 'TOCropViewController'
-  pod 'NotificationBannerSwift', '~> 3.0.6'
-
-  target 'MonalUITests' do
-    inherit! :search_paths
-    # Pods for testing
-  end
+  monal
 end
 
 target 'monalxmpp' do
-  # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
-  use_frameworks!
-  inhibit_all_warnings!
-  pod 'SAMKeychain'
-  pod 'TPCircularBuffer'
-  pod 'CocoaLumberjack'
-  pod 'SignalProtocolObjC'
-  pod 'SignalProtocolC'
-  pod 'sqlite3/perf-threadsafe', inhibit_warnings: true
+  monalxmpp
+end
 
-  #this is only for ios12. Remove for mac builds.
-  pod 'OpenSSL-Universal', '1.1.180'
+target 'MonalUITests' do
+  monalxmpp
+  monal
 end
 
 # see https://stackoverflow.com/a/36547646/3528174

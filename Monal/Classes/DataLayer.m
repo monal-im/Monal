@@ -938,7 +938,7 @@ static NSDateFormatter* dbFormatter;
 {
     NSNumber* status = (NSNumber*)[self.db executeScalar:@"SELECT Muc FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
 
-    return !status || [status boolValue];
+    return status != nil || [status boolValue];
 }
 
 -(NSString* _Nullable) ownNickNameforMuc:(NSString*) room forAccount:(NSString*) accountNo

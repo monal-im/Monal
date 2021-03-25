@@ -103,7 +103,7 @@ static NSMutableDictionary* _typingNotifications;
     //add contact if possible (ignore groupchats or already existing contacts)
     if(![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"])
     {
-        DDLogWarn(@"Adding unknown contact for %@ to local contactlist (not updating remote roster!)", messageNode.fromUser);
+        DDLogWarn(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", messageNode.fromUser);
         [[DataLayer sharedInstance] addContact:messageNode.fromUser forAccount:account.accountNo nickname:nil andMucNick:nil];
     }
     

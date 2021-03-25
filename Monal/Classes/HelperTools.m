@@ -131,6 +131,9 @@ void logException(NSException* exception)
         DDLogInfo(@"Updating syncError notifications: %@", syncErrorsDisplayed);
         for(xmpp* account in [MLXMPPManager sharedInstance].connectedXMPP)
         {
+            //ignore already disconnected accounts (they are always "idle" but this does not reflect the real sync state)
+            if(account.accountState < kStateReconnecting)
+                continue;
             NSString* syncErrorIdentifier = [NSString stringWithFormat:@"syncError::%@", account.connectionProperties.identity.jid];
             if(account.idle)
             {

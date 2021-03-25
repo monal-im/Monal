@@ -143,6 +143,8 @@
                         
                         //this was the last push in the pipeline --> disconnect to prevent double handling of incoming stanzas
                         //that could be handled in mainapp and later again in NSE on next NSE wakeup (because still queued in the freezed NSE)
+                        //use feedAllWaitingHandlersWithCompletion:nil instead of feedAllWaitingHandlers, because feedAllWaitingHandlers
+                        //would sync-dispatch to a new thread and use @synchronized there --> that would create a deadlock with this thread
                         [self feedAllWaitingHandlersWithCompletion:nil];
                     }
                 }

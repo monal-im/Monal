@@ -34,9 +34,9 @@ enum MLKeysTableViewControllerSections {
 - (void)viewDidLoad {
     [super viewDidLoad];
     if(self.ownKeys) {
-        self.navigationItem.title=NSLocalizedString(@"My Encryption Keys", @"");
+        self.navigationItem.title=NSLocalizedString(@"TITLE_NAVIGATION_MYKEYS", @"");
     } else  {
-        self.navigationItem.title=NSLocalizedString(@"Encryption Keys", @"");
+        self.navigationItem.title=NSLocalizedString(@"TITLE_NAVIGATION_ENCRYPTIONKEYS", @"");
     }
     self.ownKeyRow = -1;
 }
@@ -91,9 +91,9 @@ enum MLKeysTableViewControllerSections {
     if(section == 0)
     {
         if(self.ownKeys) {
-            toreturn = NSLocalizedString(@"These are your encryption keys. Each device is a different place you have logged in. You should trust a key when you have verified it.", @"");
+            toreturn = NSLocalizedString(@"TITLE_INFOTEXT_MYKEYS", @"");
         } else {
-            toreturn = NSLocalizedString(@"You should trust a key when you have verified it. Verify by comparing the key below to the one on your contact's screen.", @""); ///or scan their QR code
+            toreturn = NSLocalizedString(@"TITLE_INFOTEXT_CONTACTKEYS", @""); ///or scan their QR code
         }
     }
 
@@ -104,7 +104,7 @@ enum MLKeysTableViewControllerSections {
 {
     NSString* toreturn = nil;
     if(section == 0)
-        toreturn = NSLocalizedString(@"Monal uses OMEMO encryption to protect your conversations", @"");
+        toreturn = NSLocalizedString(@"TITLE_FOOTER_USESOMEMO", @"");
 
     return toreturn;
 }
@@ -191,12 +191,12 @@ enum MLKeysTableViewControllerSections {
     else
     {
         // show warning
-        UIAlertController* fingerprintAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"QR-Code: Fingerprints found", @"") message:[NSString stringWithFormat:@"%@: %@", NSLocalizedString(@"Do you want to trust the scanned fingerprints from", @""), jid] preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction* trustAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertController* fingerprintAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"ALERT_QRCODE_FINGERPRINTFOUND", @"") message:[NSString stringWithFormat:@"%@: %@", NSLocalizedString(@"ALERT_QRCODE_TRUSTFINGERPRINT", @""), jid] preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction* trustAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"YES", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [self resetTrustForJid:jid trustFingerprints:fingerprints];
             [fingerprintAlert dismissViewControllerAnimated:YES completion:nil];
         }];
-        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"NO", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
             [fingerprintAlert dismissViewControllerAnimated:YES completion:nil];
         }];
         [fingerprintAlert addAction:trustAction];

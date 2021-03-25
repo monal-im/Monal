@@ -145,8 +145,10 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
         [self.db endWriteTransaction];
     });
     
-    //use a dedicated thread to make sure this always runs
+    //use a dedicated and very high priority thread to make sure this always runs
     _serverThread = [[NSThread alloc] initWithTarget:self selector:@selector(serverThreadMain) object:nil];
+    //_serverThread.threadPriority = 1.0;
+    _serverThread.qualityOfService = NSQualityOfServiceUserInteractive;
     [_serverThread setName:@"IPCServerThread"];
     [_serverThread start];
     
@@ -155,7 +157,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
 
 -(void) serverThreadMain
 {
-    DDLogInfo(@"Now running IPC server for '%@'", _processName);
+    DDLogInfo(@"Now running IPC server for '%@' with thread priority %f...", _processName, [NSThread threadPriority]);
     //register darwin notification handler for "im.monal.ipc.wakeup:<process name>" which is used to wake up readNextMessage using the NSCondition
     CFNotificationCenterAddObserver(_darwinNotificationCenterRef, (__bridge void*) self, &darwinNotificationCenterCallback, (__bridge CFNotificationName)[NSString stringWithFormat:@"im.monal.ipc.wakeup:%@", _processName], NULL, 0);
     CFNotificationCenterAddObserver(_darwinNotificationCenterRef, (__bridge void*) self, &darwinNotificationCenterCallback, (__bridge CFNotificationName)@"im.monal.ipc.wakeup:*", NULL, 0);
@@ -173,7 +175,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
             queueName = @"_default";
         queueName = [NSString stringWithFormat:@"ipc.queue:%@", queueName];
         if(!_ipcQueues[queueName])
-            _ipcQueues[queueName] = dispatch_queue_create([queueName cStringUsingEncoding:NSUTF8StringEncoding], DISPATCH_QUEUE_SERIAL);
+            _ipcQueues[queueName] = dispatch_queue_create([queueName cStringUsingEncoding:NSUTF8StringEncoding], dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_USER_INTERACTIVE, 0));
         
         //handle all responses (don't trigger a kMonalIncomingIPC for responses)
         if(message[@"response_to"] && [message[@"response_to"] intValue] > 0)
@@ -198,6 +200,8 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
             dispatch_async(_ipcQueues[queueName], ^{
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIncomingIPC object:message[@"name"] userInfo:message];
             });
+        
+        DDLogDebug(@"Handled IPC message: %@", message);
     }
     //unregister darwin notification handler
     CFNotificationCenterRemoveObserver(_darwinNotificationCenterRef, (__bridge void*) self, (__bridge CFNotificationName)[NSString stringWithFormat:@"im.monal.ipc.wakeup:%@", _processName], NULL);

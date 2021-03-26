@@ -349,32 +349,55 @@ NSString *const kData=@"data";
 
 -(void) observeValueForKeyPath:(NSString*) keyPath ofObject:(id) object change:(NSDictionary *) change context:(void*) context
 {
-    //check for idle state every time the number of operations in _sendQueue or _receiveQueue changes
+    //check for idle state every time the number of operations in _sendQueue, _parseQueue or _receiveQueue changes
     if((object == _sendQueue || object == _receiveQueue || object == _parseQueue) && [@"operationCount" isEqual: keyPath])
     {
         //check idle state if this queue is empty and if so, publish kMonalIdle notification
         //only do the (more heavy but complete) idle check if we reache zero operations in the observed queue
-        //we dispatch the idle check and subsequent notification on the receive queue to account for races
-        //between the idle check and calls to disconnect issued in response to this idle notification
-        //NOTE: yes, doing the check for [_sendQueue operationCount] (inside [self idle]) from the receive queue is not race free.
+        //if the idle check returnes a state change from non-idle to idle, we dispatch the idle notification on the receive queue
+        //to account for races between the second idle check done in the idle notification handler and calls to disconnect
+        //issued in response to this idle notification
+        //NOTE: yes, doing the check for operationCount of all queues (inside [self idle]) from an arbitrary thread is not race free.
         //with such disconnects, but: we only want to track the send queue on a best effort basis (because network sends are best effort, too)
         //to some extent we want to make sure every stanza was physically sent out to the network before our app gets frozen by ios,
         //but we don't need to make this completely race free (network "races" can occur far more often than send queue races).
         //in a race the smacks unacked stanzas array will contain the not yet sent stanzas --> we won't loose stanzas when racing the send queue
         //with [self disconnect] through an idle check
+        //races on the idleness of the parse queue are even less severe and can be ignored entirely (they just have the effect as if a parsed
+        //stanza would not have been received by monal in the first place, because disconnect disrupted the network connection just before the
+        //stanza came in).
         //NOTE: we only want to do an idle check if we are not in the middle of a disconnect call because this can race when the _bgTask is expiring
         //and cancel the new _bgFetch because we are now idle (the dispatchAsyncOnReceiveQueue: will add a new task to the receive queue when
         //the send queue gets cleaned up and this task will run as soon as the disconnect is done and interfere with the configuration of the
         //_bgFetch and the syncError push notification both created on the main thread
         if(![object operationCount] && !_disconnectInProgres)
         {
-            DDLogVerbose(@"Adding idle state check to receive queue...");
-            [self dispatchAsyncOnReceiveQueue:^{
-                BOOL lastState = self->_lastIdleState;
-                //only send out idle notifications if we changed from non-idle to idle state
-                if(self.idle && !lastState)
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
-            }];
+            //make sure we do a real async dispatch not using the shortcut in dispatchAsyncOnReceiveQueue: because that could cause races
+            //BACKGROUND EXPLANATION: apple calls observeValueForKeyPath: after completing the operation on the NSOperationQueue from the same thread,
+            //the operation was executed in. But because the operation is already finished by the time this value observer is called,
+            //the next operation could already be executing in another thread, while this observer does the async dispatch to the receive queue.
+            //The async dispatch implemented in dispatchAsyncOnReceiveQueue: tests, if we are already inside the receive queue and, if so,
+            //executes the operation directly, without queueing it to the receive queue.
+            //This check is true, even if we are in the value observer (even though this code technically does not
+            //run inside an operation on the receive queue, the check for the runnin queue in our async dispatch function still detects (erroneously)
+            //that we still are "inside" the receive queue and calls the block directly rather than enqueueing a new operation on the receive queue.
+            //That means we now have *2* threads executing code in the receive queue despite the queue being a serial queue
+            //--> deadlocks or malicious concurrent access can happen
+            //example taken from the wild (steve): the idle check in the *old* receive queue mach thread calls disconnect and tries to write
+            //the final account state to the database while the next stanza is being processed in the *real* receive queue mach thread holding a
+            //database transaction open. Both threads race against each other and a deadlock occurs that finally results in a MLSQLite exception
+            //thrown because the sqlite3_busy_timeout triggers after 8 seconds.
+            
+            BOOL lastState = self->_lastIdleState;
+            //only send out idle notifications if we changed from non-idle to idle state
+            if(self.idle && !lastState)
+            {
+                DDLogVerbose(@"Adding idle state notification to receive queue...");
+                [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
+                    if(self.idle)       //make sure we are still idle, even if in receive queue now
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
+                }]] waitUntilFinished:NO];
+            }
         }
     }
 }

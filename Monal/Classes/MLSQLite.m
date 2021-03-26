@@ -6,6 +6,7 @@
 //  Copyright © 2020 Monal.im. All rights reserved.
 //
 
+#import <pthread.h>
 #import <sqlite3.h>
 #import "MLSQLite.h"
 #import "HelperTools.h"
@@ -101,12 +102,11 @@ static NSMutableDictionary* currentTransactions;
 
     //some settings (e.g. truncate is faster than delete)
     //this uses the private api because we have no thread local instance added to the threadData dictionary yet (and public apis check that)
-    sqlite3_busy_timeout(self->_database, 8000);
-    
-    //this queries must use our *internal* api which doesn't call testThreadInstanceForQuery:
+    //--> we must use the internal api because it does not call testThreadInstanceForQuery:
     [self executeNonQuery:@"PRAGMA synchronous=NORMAL;" andArguments:@[] withException:YES];
     [self executeNonQuery:@"PRAGMA truncate;" andArguments:@[] withException:YES];
     [self executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:@[] withException:YES];
+    sqlite3_busy_timeout(self->_database, 8000);
 
     return self;
 }
@@ -127,6 +127,15 @@ static NSMutableDictionary* currentTransactions;
             self->_database = NULL;
         }
     }
+}
+
+-(NSString*) calcThreadName
+{
+    __uint64_t tid;
+    if(pthread_threadid_np(NULL, &tid) == 0)
+        return [[NSString alloc] initWithFormat:@"%llu(%@) --> %@", tid, [NSThread currentThread].name, [NSThread currentThread]];
+    else
+        return [[NSString alloc] initWithFormat:@"missing threadId (%@) --> %@", [NSThread currentThread].name, [NSThread currentThread]];
 }
 
 #pragma mark - private sql api
@@ -342,7 +351,7 @@ static NSMutableDictionary* currentTransactions;
         }
     } while(!retval);
 #ifdef DEBUG
-    NSString* ownThread = [NSString stringWithFormat:@"%@", [NSThread currentThread]];
+    NSString* ownThread = [self calcThreadName];
     @synchronized(currentTransactions) {
         currentTransactions[ownThread] = [NSThread callStackSymbols];
     }
@@ -358,7 +367,7 @@ static NSMutableDictionary* currentTransactions;
     {
         [self executeNonQuery:@"COMMIT;"];		//commit only outermost transaction
 #ifdef DEBUG
-        NSString* ownThread = [NSString stringWithFormat:@"%@", [NSThread currentThread]];
+        NSString* ownThread = [self calcThreadName];
         @synchronized(currentTransactions) {
             [currentTransactions removeObjectForKey:ownThread];
         }

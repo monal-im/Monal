@@ -1,0 +1,24 @@
+commit 66f11dccad909f4042acec9b6e1128fd0d8b1c1b
+Author: Thilo Molitor <thilo@eightysoft.de>
+Date:   Fri Mar 26 01:00:33 2021 +0100
+
+    Fix race condition in value observer of receive queue
+    
+    make sure we do a real async dispatch not using the shortcut in dispatchAsyncOnReceiveQueue: because that could cause races
+    
+    BACKGROUND EXPLANATION:
+    apple calls observeValueForKeyPath: after completing the operation on the NSOperationQueue from the same thread,
+    the operation was executed in. But because the operation is already finished by the time this value observer is called,
+    the next operation could already be executing in another thread, while this observer does the async dispatch to the receive queue.
+    The async dispatch implemented in dispatchAsyncOnReceiveQueue: tests, if we are already inside the receive queue and, if so,
+    executes the operation directly, without queueing it to the receive queue.
+    This check is true, even if we are in the value observer (even though this code technically does not
+    run inside an operation on the receive queue, the check for the runnin queue in our async dispatch function still detects (erroneously)
+    that we still are "inside" the receive queue and calls the block directly rather than enqueueing a new operation on the receive queue.
+    That means we now have *2* threads executing code in the receive queue despite the queue being a serial queue
+    --> deadlocks or malicious concurrent access can happen
+    
+    example taken from the wild (steve): the idle check in the *old* receive queue mach thread calls disconnect and tries to write
+    the final account state to the database while the next stanza is being processed in the *real* receive queue mach thread holding a
+    database transaction open. Both threads race against each other and a deadlock occurs that finally results in a MLSQLite exception
+    thrown because the sqlite3_busy_timeout triggers after 8 seconds.

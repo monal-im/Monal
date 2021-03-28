@@ -76,7 +76,7 @@ enum MLKeysTableViewControllerSections {
     [cell.toggle addTarget:self action:@selector(toggleTrust:) forControlEvents:UIControlEventValueChanged];
     if(device.integerValue == self.account.omemo.monalSignalStore.deviceid)
     {
-        cell.deviceid.text = [NSString stringWithFormat:NSLocalizedString(@"%ld (This device)", @""), (long)device.integerValue];
+        cell.deviceid.text = [NSString stringWithFormat:NSLocalizedString(@"OMEMOKEY_THISDEVICE", @"Shows the own device ID to the user"), (long)device.integerValue];
         self.ownKeyRow = indexPath.row;
     } else  {
         cell.deviceid.text = [NSString stringWithFormat:@"%ld", (long)device.integerValue];
@@ -191,7 +191,7 @@ enum MLKeysTableViewControllerSections {
     else
     {
         // show warning
-        UIAlertController* fingerprintAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"ALERT_QRCODE_FINGERPRINTFOUND", @"") message:[NSString stringWithFormat:@"%@: %@", NSLocalizedString(@"ALERT_QRCODE_TRUSTFINGERPRINT", @""), jid] preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController* fingerprintAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"ALERT_QRCODE_FINGERPRINTFOUND_MSG", @"") message:[NSString stringWithFormat:@"%@: %@", NSLocalizedString(@"ALERT_QRCODE_TRUSTFINGERPRINT_MSG", @""), jid] preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction* trustAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"YES", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [self resetTrustForJid:jid trustFingerprints:fingerprints];
             [fingerprintAlert dismissViewControllerAnimated:YES completion:nil];

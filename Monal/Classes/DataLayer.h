@@ -157,7 +157,7 @@ extern NSString* const kMessageTypeFiletransfer;
 /**
  returns messages with the provided local id number
  */
--(NSArray*) messagesForHistoryIDs:(NSArray*) historyIDs;
+-(NSArray<MLMessage*>*) messagesForHistoryIDs:(NSArray<NSNumber*>*) historyIDs;
 -(MLMessage* _Nullable) messageForHistoryID:(NSNumber* _Nullable) historyID;
 
 /*
@@ -198,8 +198,8 @@ extern NSString* const kMessageTypeFiletransfer;
 #pragma mark - message history
 
 -(NSNumber*) lastMessageHistoryIdForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
--(NSMutableArray*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo beforeMsgHistoryID:(NSNumber*) msgHistoryID;
--(NSMutableArray*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
+-(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo beforeMsgHistoryID:(NSNumber*) msgHistoryID;
+-(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 
 -(NSArray *) allMessagesForContact:(NSString* ) buddy forAccount:(NSString *) accountNo;
@@ -213,7 +213,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 -(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo;
--(NSArray*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSString*) accountNo tillStanzaId:(NSString* _Nullable) stanzaId wasOutgoing:(BOOL) outgoing;
+-(NSArray<MLMessage*>*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSString*) accountNo tillStanzaId:(NSString* _Nullable) stanzaId wasOutgoing:(BOOL) outgoing;
 
 -(NSNumber*) addMessageHistoryFrom:(NSString*) from to:(NSString*) to forAccount:(NSString*) accountNo withMessage:(NSString*) message actuallyFrom:(NSString*) actualfrom withId:(NSString*) messageId encrypted:(BOOL) encrypted messageType:(NSString*) messageType mimeType:(NSString* _Nullable) mimeType size:(NSNumber* _Nullable) size;
 

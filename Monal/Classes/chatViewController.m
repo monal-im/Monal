@@ -53,7 +53,7 @@
 @property (nonatomic, strong)  MBProgressHUD *uploadHUD;
 @property (nonatomic, strong)  MBProgressHUD *gpsHUD;
 
-@property (nonatomic, strong) NSMutableArray* messageList;
+@property (nonatomic, strong) NSMutableArray<MLMessage*>* messageList;
 @property (nonatomic, strong) NSMutableArray* photos;
 @property (nonatomic, strong) UIDocumentPickerViewController *filePicker;
 
@@ -792,7 +792,7 @@ enum msgSentState {
         return;
     if(!_day)
     {
-        NSMutableArray* messages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId];
+        NSMutableArray<MLMessage*>* messages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId];
         NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId];
         
         if([unreadMsgCnt integerValue] == 0)

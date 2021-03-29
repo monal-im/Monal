@@ -2114,6 +2114,24 @@ enum msgSentState {
     {
         LMCEditAction.image = [[[UIImage systemImageNamed:@"pencil.circle.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
     }
+
+    UIContextualAction* quoteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
+        // Preserve user input
+        NSMutableString* quoteString = [[NSMutableString alloc] initWithFormat:@"%@\n", self.chatInput.text];
+        [message.messageText enumerateLinesUsingBlock:^(NSString* _Nonnull line, BOOL* _Nonnull stop) {
+            [quoteString appendFormat:@"> %@\n", line];
+        }];
+        // Append new empty line after quote
+        [quoteString appendString:@"\n"];
+        self.chatInput.text = quoteString;
+        self.placeHolderText.hidden = YES;
+        return completionHandler(YES);
+    }];
+    quoteAction.backgroundColor = UIColor.systemGreenColor;
+    if(@available(iOS 13.0, *))
+    {
+        quoteAction.image = [[[UIImage systemImageNamed:@"quote.bubble.fill"] imageWithHorizontallyFlippedOrientation] imageWithTintColor:UIColor.whiteColor renderingMode:UIImageRenderingModeAutomatic];
+    }
     
     UIContextualAction* LMCDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         [self.xmppAccount sendMessage:kMessageDeletedBody toContact:self.contact isEncrypted:(self.encryptChat || message.encrypted) isUpload:NO andMessageId:[[NSUUID UUID] UUIDString] withLMCId:message.messageId];
@@ -2177,11 +2195,13 @@ enum msgSentState {
             LMCEditAction,
             LMCDeleteAction,
             copyAction,
+            quoteAction
         ]];
     else
         return [UISwipeActionsConfiguration configurationWithActions:@[
             localDeleteAction,
             copyAction,
+            quoteAction
         ]];
 }
 

@@ -32,7 +32,7 @@
 #import "MLXEPSlashMeHandler.h"
 #import "MLSearchViewController.h"
 #import "MLFiletransfer.h"
-#import "EmojiUtilities.h"
+#import <MonalSwift/MonalSwift-Swift.h>
 
 @import QuartzCore;
 @import MobileCoreServices;
@@ -1879,7 +1879,7 @@ enum msgSentState {
         }
         else // Default case
         {
-            if(messageText.length ==2  && [EmojiUtilities containsEmoji:messageText]){
+            if(messageText.length ==2  && [MLEmoji containsEmojiWithText:messageText]){
                 UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize*3];
                 [cell.messageBody setFont:originalFont];
                 

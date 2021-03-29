@@ -225,6 +225,8 @@ static NSMutableSet* _smacksWarningDisplayed;
     if(!contact)
         return;
     
+    contact.unreadCount = [[[DataLayer sharedInstance] countUserUnreadMessages:buddyContactJid forAccount:newMessage.accountId] integerValue];
+    
     // contact.statusMessage = newMessage;
     [self insertOrMoveContact:contact completion:nil];
 }

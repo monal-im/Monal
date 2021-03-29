@@ -2085,6 +2085,7 @@ enum msgSentState {
     
     UIContextualAction* LMCEditAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         [self.chatInput setText:message.messageText];       //we want to begin editing using the old message
+        self.placeHolderText.hidden = YES;
         weakify(self);
         self.editingCallback = ^(NSString* newBody) {
             strongify(self);
@@ -2095,17 +2096,20 @@ enum msgSentState {
 
                 [self.xmppAccount sendMessage:newBody toContact:self.contact isEncrypted:(self.encryptChat || message.encrypted) isUpload:NO andMessageId:[[NSUUID UUID] UUIDString] withLMCId:message.messageId];
                 [[DataLayer sharedInstance] updateMessageHistory:message.messageDBId withText:newBody];
-                
+
                 [self->_messageTable beginUpdates];
                 [self->_messageTable reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
                 [self->_messageTable endUpdates];
-                
+
                 //update active chats if necessary
                 [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
                 return completionHandler(YES);
             }
             else
+            {
+                self.placeHolderText.hidden = NO;
                 [self.chatInput setText:@""];
+            }
             return completionHandler(NO);
         };
     }];
@@ -2117,7 +2121,10 @@ enum msgSentState {
 
     UIContextualAction* quoteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleNormal title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
         // Preserve user input
-        NSMutableString* quoteString = [[NSMutableString alloc] initWithFormat:@"%@\n", self.chatInput.text];
+        NSMutableString* quoteString = [[NSMutableString alloc] init];
+        if(self.chatInput.text.length > 0) {
+            [quoteString appendFormat:@"%@\n", self.chatInput.text];
+        }
         [message.messageText enumerateLinesUsingBlock:^(NSString* _Nonnull line, BOOL* _Nonnull stop) {
             [quoteString appendFormat:@"> %@\n", line];
         }];

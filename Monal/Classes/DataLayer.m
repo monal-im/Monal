@@ -1009,11 +1009,11 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark message Commands
 
--(NSArray*) messagesForHistoryIDs:(NSArray*) historyIDs
+-(NSArray<MLMessage*>*) messagesForHistoryIDs:(NSArray<NSNumber*>*) historyIDs
 {
     NSString* idList = [historyIDs componentsJoinedByString:@","];
     NSString* query = [NSString stringWithFormat:@"SELECT buddylist.Muc, buddylist.muc_type, IFNULL(actual_from, message_from) AS af, timestamp AS thetime, message_history.* FROM message_history, buddylist WHERE message_history.message_history_id IN(%@) AND buddylist.account_id = message_history.account_id AND buddylist.buddy_name = message_history.message_from;", idList];
-    NSMutableArray* retval = [[NSMutableArray alloc] init];
+    NSMutableArray<MLMessage*>* retval = [[NSMutableArray<MLMessage*> alloc] init];
     for(NSDictionary* dic in [self.db executeReader:query])
         [retval addObject:[MLMessage messageFromDictionary:dic withDateFormatter:dbFormatter]];
     return retval;
@@ -1023,7 +1023,7 @@ static NSDateFormatter* dbFormatter;
 {
     if(historyID == nil)
         return nil;
-    NSArray* result = [self messagesForHistoryIDs:@[historyID]];
+    NSArray<MLMessage*>* result = [self messagesForHistoryIDs:@[historyID]];
     if(![result count])
         return nil;
     return result[0];
@@ -1347,9 +1347,9 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSMutableArray *) messageHistoryContacts:(NSString*) accountNo
+-(NSMutableArray<MLContact*>*) messageHistoryContacts:(NSString*) accountNo
 {
-    NSMutableArray* toReturn = [[NSMutableArray alloc] init];
+    NSMutableArray<MLContact*>* toReturn = [[NSMutableArray<MLContact*> alloc] init];
     //returns a list of  buddy's with message history
     NSString* accountJid = [self jidOfAccount:accountNo];
     if(accountJid)
@@ -1379,7 +1379,7 @@ static NSDateFormatter* dbFormatter;
 }
 
 //message history
--(NSMutableArray*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo
+-(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     if(!accountNo || !buddy) {
         return nil;
@@ -1391,7 +1391,7 @@ static NSDateFormatter* dbFormatter;
 }
 
 //message history
--(NSMutableArray*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo beforeMsgHistoryID:(NSNumber*) msgHistoryID
+-(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo beforeMsgHistoryID:(NSNumber*) msgHistoryID
 {
     if(!accountNo || !buddy || msgHistoryID == nil)
         return nil;
@@ -1425,7 +1425,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(NSArray*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSString*) accountNo tillStanzaId:(NSString*) stanzaid wasOutgoing:(BOOL) outgoing
+-(NSArray<MLMessage*>*) markMessagesAsReadForBuddy:(NSString*) buddy andAccount:(NSString*) accountNo tillStanzaId:(NSString*) stanzaid wasOutgoing:(BOOL) outgoing
 {
     if(!buddy || !accountNo)
     {
@@ -1433,7 +1433,7 @@ static NSDateFormatter* dbFormatter;
         return @[];
     }
     
-    return [self.db idWriteTransaction:^{
+    return (NSArray<MLMessage*>*)[self.db idWriteTransaction:^{
         NSNumber* historyId;
         
         if(stanzaid)        //stanzaid or messageid given --> return all unread / not displayed messages until (and including) this one
@@ -1485,7 +1485,7 @@ static NSDateFormatter* dbFormatter;
         }
         
         //return NSArray of all updated MLMessages
-        return [self messagesForHistoryIDs:messageArray];
+        return (NSArray*)[self messagesForHistoryIDs:messageArray];
     }];
 }
 

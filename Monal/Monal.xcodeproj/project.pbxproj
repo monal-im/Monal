@@ -165,8 +165,6 @@
 		26B51C4918654D98002134C3 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26B51C4718654D98002134C3 /* LogViewController.m */; };
 		26B69A75131C522F002FCBEB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B69A74131C522F002FCBEB /* Security.framework */; };
 		26BDECDC1867B7790018670D /* CallViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26BDECDA1867B7790018670D /* CallViewController.m */; };
-		26BEEF8E25CBA23200F6FA19 /* EmojiUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 26BEEF8B25CBA23200F6FA19 /* EmojiUtilities.h */; };
-		26BEEF8F25CBA23200F6FA19 /* EmojiUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 26BEEF8D25CBA23200F6FA19 /* EmojiUtilities.m */; };
 		26C1EA6B1FF937320085547A /* MLNotificationSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */; };
 		26CC579623A0867400ABB92A /* monalxmpp.h in Headers */ = {isa = PBXBuildFile; fileRef = 26CC579423A0867400ABB92A /* monalxmpp.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		26CC57A223A086AA00ABB92A /* xmpp.m in Sources */ = {isa = PBXBuildFile; fileRef = 260C51D0177F08F50039634B /* xmpp.m */; };
@@ -255,6 +253,7 @@
 		B2F4C53CD9A8A4046C237072 /* Pods_NotificaionService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7E865A50FFD3C29AD8F3DFD0 /* Pods_NotificaionService.framework */; };
 		B6C2B2781C2EDD10E9341233 /* Pods_monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F17B168B23E046B18971F63 /* Pods_monalxmpp.framework */; };
 		BE24210F5A8DEA2D7DC913F1 /* Pods_shareSheet.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 12CB538E8FC0AAFD96856CDD /* Pods_shareSheet.framework */; };
+		C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10490482612ED2F0054AC9E /* MLEmoji.swift */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
 		C138464F25CD804D008EF0A0 /* MLOmemoQrCodeView.m in Sources */ = {isa = PBXBuildFile; fileRef = C138464E25CD804D008EF0A0 /* MLOmemoQrCodeView.m */; };
 		C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */; };
@@ -664,8 +663,6 @@
 		26B69A74131C522F002FCBEB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		26BDECD91867B7790018670D /* CallViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CallViewController.h; sourceTree = "<group>"; };
 		26BDECDA1867B7790018670D /* CallViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CallViewController.m; sourceTree = "<group>"; };
-		26BEEF8B25CBA23200F6FA19 /* EmojiUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmojiUtilities.h; sourceTree = "<group>"; };
-		26BEEF8D25CBA23200F6FA19 /* EmojiUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EmojiUtilities.m; sourceTree = "<group>"; };
 		26C1EA691FF937320085547A /* MLNotificationSettingsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLNotificationSettingsViewController.h; sourceTree = "<group>"; };
 		26C1EA6A1FF937320085547A /* MLNotificationSettingsViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLNotificationSettingsViewController.m; sourceTree = "<group>"; };
 		26C3456C1C68F9F0007F4BEC /* MLHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLHTTPRequest.h; sourceTree = "<group>"; };
@@ -850,6 +847,7 @@
 		AD0E234056402EE91A36D628 /* Pods-Monal.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal.adhoc.xcconfig"; path = "Target Support Files/Pods-Monal/Pods-Monal.adhoc.xcconfig"; sourceTree = "<group>"; };
 		B4C8C4A8BA0B48E5DA219993 /* Pods-jrtplib-static.appstore.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static.appstore.xcconfig"; path = "Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static.appstore.xcconfig"; sourceTree = "<group>"; };
 		B55DCA2ABBDB6E635D46D69A /* Pods-monalxmpp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-monalxmpp.debug.xcconfig"; path = "Target Support Files/Pods-monalxmpp/Pods-monalxmpp.debug.xcconfig"; sourceTree = "<group>"; };
+		C10490482612ED2F0054AC9E /* MLEmoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLEmoji.swift; sourceTree = "<group>"; };
 		C12436122434AB5D00B8F074 /* MLAttributedLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLAttributedLabel.h; sourceTree = "<group>"; };
 		C12436132434AB5D00B8F074 /* MLAttributedLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAttributedLabel.m; sourceTree = "<group>"; };
 		C138464D25CD804D008EF0A0 /* MLOmemoQrCodeView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLOmemoQrCodeView.h; sourceTree = "<group>"; };
@@ -1686,8 +1684,6 @@
 		26F7BB3A1115F8A300712672 /* tools */ = {
 			isa = PBXGroup;
 			children = (
-				26BEEF8B25CBA23200F6FA19 /* EmojiUtilities.h */,
-				26BEEF8D25CBA23200F6FA19 /* EmojiUtilities.m */,
 				5455BC3224EB776E0024D80F /* MLUDPLogger.h */,
 				5455BC3024EB776B0024D80F /* MLUDPLogger.m */,
 				540BD0D324D8D1FF0087A743 /* IPC.m */,
@@ -1705,6 +1701,7 @@
 				541E4CBD254AA0B600FD7B28 /* MLHandler.h */,
 				541E4CBF254AA0E700FD7B28 /* MLHandler.m */,
 				C1850E5E25F34895003D506A /* MLDefinitions.h */,
+				C10490482612ED2F0054AC9E /* MLEmoji.swift */,
 			);
 			name = tools;
 			sourceTree = "<group>";
@@ -1907,7 +1904,6 @@
 				389E298D25E901CA009A5268 /* MLAudioRecoderManager.h in Headers */,
 				541E4CBE254AA0B600FD7B28 /* MLHandler.h in Headers */,
 				5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */,
-				26BEEF8E25CBA23200F6FA19 /* EmojiUtilities.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2544,6 +2540,7 @@
 				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
 				2673CAC321D9244B00256507 /* MLResourcesTableViewController.m in Sources */,
 				264DCF9C23E11483004105CE /* MLNewViewController.m in Sources */,
+				C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */,
 				268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */,
 				2636C43F177BD58C001CA71F /* XMPPEdit.m in Sources */,
 				E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */,
@@ -2658,7 +2655,6 @@
 				54D2308424CB10EE00638D65 /* MLLogFileManager.m in Sources */,
 				26CC57B323A086CC00ABB92A /* XMPPIQ.m in Sources */,
 				C1613B5B2520723D0062C0C2 /* MLBasePaser.m in Sources */,
-				26BEEF8F25CBA23200F6FA19 /* EmojiUtilities.m in Sources */,
 				54179CC0251CBAFA008F398E /* XMPPStanza.m in Sources */,
 				26CC57CB23A0892800ABB92A /* MLPresenceProcessor.m in Sources */,
 				26CC57A423A086AA00ABB92A /* MLXMPPServer.m in Sources */,

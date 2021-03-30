@@ -47,8 +47,8 @@
         [condition unlock];
     }];
     
-    //wait for response blocking this thread for 1 second
-    NSDate* timeout = [NSDate dateWithTimeIntervalSinceNow:0.1];
+    //wait for response blocking this thread for 250ms
+    NSDate* timeout = [NSDate dateWithTimeIntervalSinceNow:0.250];
     DDLogVerbose(@"Waiting for %f seconds...", (double)[timeout timeIntervalSinceNow]);
     //we have to repeate the condition wait/runloop polling until we time out if the wakeup was not due to a received ping response
     while(!response_received && [timeout timeIntervalSinceNow] > 0)

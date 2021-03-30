@@ -72,6 +72,10 @@ target 'MonalUITests' do
   monal
 end
 
+target 'MonalXMPPUnitTests' do
+  monalxmpp
+end
+
 # see https://stackoverflow.com/a/36547646/3528174
 post_install do |installer|
 	fix_deployment_target(installer)

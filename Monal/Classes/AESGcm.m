@@ -8,7 +8,7 @@
 
 #import "MLConstants.h"
 #import "AESGcm.h"
-#import <MLCrypto/MLCrypto-Swift.h>
+#import <monalxmpp/monalxmpp-Swift.h>
 
 #if !TARGET_OS_MACCATALYST
 #include <openssl/evp.h>
@@ -16,6 +16,8 @@
 #define AES_BLOCK_SIZE 16
 #define AUTH_TAG_LENGTH 16
 #endif
+
+@class MLCrypto;
 
 @implementation AESGcm
 

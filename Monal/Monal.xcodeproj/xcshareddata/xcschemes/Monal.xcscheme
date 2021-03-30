@@ -67,11 +67,26 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "C1850E7225F383F3003D506A"
+               BlueprintIdentifier = "C1850EB425F38A2D003D506A"
                BuildableName = "MonalUITests.xctest"
                BlueprintName = "MonalUITests"
                ReferencedContainer = "container:Monal.xcodeproj">
             </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "C1049185261301530054AC9E"
+               BuildableName = "MonalXMPPUnitTests.xctest"
+               BlueprintName = "MonalXMPPUnitTests"
+               ReferencedContainer = "container:Monal.xcodeproj">
+            </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "MonalXMPPUnitTests">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>

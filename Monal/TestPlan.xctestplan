@@ -15,8 +15,18 @@
     {
       "target" : {
         "containerPath" : "container:Monal.xcodeproj",
-        "identifier" : "C1850E7225F383F3003D506A",
+        "identifier" : "C1850EB425F38A2D003D506A",
         "name" : "MonalUITests"
+      }
+    },
+    {
+      "skippedTests" : [
+        "MonalXMPPUnitTests"
+      ],
+      "target" : {
+        "containerPath" : "container:Monal.xcodeproj",
+        "identifier" : "C1049185261301530054AC9E",
+        "name" : "MonalXMPPUnitTests"
       }
     }
   ],

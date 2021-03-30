@@ -1913,52 +1913,54 @@ NSString *const kData=@"data";
 {
     NSAssert(stanza, @"stanza to send should not be nil");
     
-    //add outgoing mam queryids to our state (but don't persist state because this will be done by smacks code below)
-    NSString* mamQueryId = [stanza findFirst:@"/{jabber:client}iq/{urn:xmpp:mam:2}query@queryid"];
-    if(mamQueryId)
-        @synchronized(_stateLockObject) {
-            DDLogDebug(@"Adding mam queryid to list: %@", mamQueryId);
-            [_runningMamQueries addObject:mamQueryId];
-        }
-    
-    //always add stanzas (not nonzas!) to smacks queue to be resent later (if withSmacks=YES)
-    if(withSmacks && [stanza isKindOfClass:[XMPPStanza class]])
-    {
-        XMPPStanza* queued_stanza = [stanza copy];
-        if(![queued_stanza.element isEqualToString:@"iq"])      //add delay tag to message or presence stanzas but not to iq stanzas
+    [self dispatchAsyncOnReceiveQueue:^{
+        //add outgoing mam queryids to our state (but don't persist state because this will be done by smacks code below)
+        NSString* mamQueryId = [stanza findFirst:@"/{jabber:client}iq/{urn:xmpp:mam:2}query@queryid"];
+        if(mamQueryId)
+            @synchronized(_stateLockObject) {
+                DDLogDebug(@"Adding mam queryid to list: %@", mamQueryId);
+                [_runningMamQueries addObject:mamQueryId];
+            }
+        
+        //always add stanzas (not nonzas!) to smacks queue to be resent later (if withSmacks=YES)
+        if(withSmacks && [stanza isKindOfClass:[XMPPStanza class]])
         {
-            //only add a delay tag if not already present
-            if(![queued_stanza check:@"{urn:xmpp:delay}delay"])
-                [queued_stanza addDelayTagFrom:self.connectionProperties.identity.jid];
+            XMPPStanza* queued_stanza = [stanza copy];
+            if(![queued_stanza.element isEqualToString:@"iq"])      //add delay tag to message or presence stanzas but not to iq stanzas
+            {
+                //only add a delay tag if not already present
+                if(![queued_stanza check:@"{urn:xmpp:delay}delay"])
+                    [queued_stanza addDelayTagFrom:self.connectionProperties.identity.jid];
+            }
+            @synchronized(_stateLockObject) {
+                DDLogVerbose(@"ADD UNACKED STANZA: %@: %@", self.lastOutboundStanza, queued_stanza);
+                NSDictionary* dic = @{kQueueID:self.lastOutboundStanza, kStanza:queued_stanza};
+                [self.unAckedStanzas addObject:dic];
+                //increment for next call
+                self.lastOutboundStanza = [NSNumber numberWithInteger:[self.lastOutboundStanza integerValue] + 1];
+                //persist these changes (this has to be synchronous because we want so persist stanzas to db before actually sending them)
+                [self persistState];
+            }
         }
-        @synchronized(_stateLockObject) {
-            DDLogVerbose(@"ADD UNACKED STANZA: %@: %@", self.lastOutboundStanza, queued_stanza);
-            NSDictionary* dic = @{kQueueID:self.lastOutboundStanza, kStanza:queued_stanza};
-            [self.unAckedStanzas addObject:dic];
-            //increment for next call
-            self.lastOutboundStanza = [NSNumber numberWithInteger:[self.lastOutboundStanza integerValue] + 1];
-            //persist these changes (this has to be synchronous because we want so persist stanzas to db before actually sending them)
-            [self persistState];
+        
+        //only send nonzas if we are >kStateDisconnected and stanzas if we are >=kStateBound
+        //only exceptions: an outgoing bind request or jabber:iq:register stanza (this is allowed before binding a resource)
+        BOOL isBindRequest = [stanza isKindOfClass:[XMPPIQ class]] && [stanza check:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/resource"];
+        BOOL isRegisterRequest = [stanza isKindOfClass:[XMPPIQ class]] && [stanza check:@"{jabber:iq:register}query"];
+        if(
+            self.accountState>=kStateBound ||
+            (self.accountState>kStateDisconnected && (![stanza isKindOfClass:[XMPPStanza class]] || isBindRequest || isRegisterRequest))
+        )
+        {
+            [_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
+                DDLogDebug(@"SEND: %@", stanza);
+                [self->_outputQueue addObject:stanza];
+                [self writeFromQueue];      // try to send if there is space
+            }]];
         }
-    }
-    
-    //only send nonzas if we are >kStateDisconnected and stanzas if we are >=kStateBound
-    //only exceptions: an outgoing bind request or jabber:iq:register stanza (this is allowed before binding a resource)
-    BOOL isBindRequest = [stanza isKindOfClass:[XMPPIQ class]] && [stanza check:@"{urn:ietf:params:xml:ns:xmpp-bind}bind/resource"];
-    BOOL isRegisterRequest = [stanza isKindOfClass:[XMPPIQ class]] && [stanza check:@"{jabber:iq:register}query"];
-    if(
-        self.accountState>=kStateBound ||
-        (self.accountState>kStateDisconnected && (![stanza isKindOfClass:[XMPPStanza class]] || isBindRequest || isRegisterRequest))
-    )
-    {
-        [_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
-            DDLogDebug(@"SEND: %@", stanza);
-            [self->_outputQueue addObject:stanza];
-            [self writeFromQueue];      // try to send if there is space
-        }]];
-    }
-    else
-        DDLogDebug(@"NOT ADDING STANZA TO SEND QUEUE: %@", stanza);
+        else
+            DDLogDebug(@"NOT ADDING STANZA TO SEND QUEUE: %@", stanza);
+    }];
 }
 
 #pragma mark messaging

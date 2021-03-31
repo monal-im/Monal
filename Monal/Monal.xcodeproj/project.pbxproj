@@ -256,7 +256,7 @@
 		C104915D2612FFBC0054AC9E /* addContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 26EC40FE17BDD85F0031304D /* addContact.m */; };
 		C1049189261301530054AC9E /* MonalXMPPUnitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1049188261301530054AC9E /* MonalXMPPUnitTests.swift */; };
 		C104918B261301530054AC9E /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
-		C1049199261301710054AC9E /* MLCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1049198261301710054AC9E /* MLCrypto.swift */; };
+		C1049199261301710054AC9E /* MLCryptoTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1049198261301710054AC9E /* MLCryptoTest.swift */; };
 		C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = C12436132434AB5D00B8F074 /* MLAttributedLabel.m */; };
 		C138464F25CD804D008EF0A0 /* MLOmemoQrCodeView.m in Sources */ = {isa = PBXBuildFile; fileRef = C138464E25CD804D008EF0A0 /* MLOmemoQrCodeView.m */; };
 		C13EBB8E24DC685C008AADDA /* MLPrivacySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */; };
@@ -837,7 +837,7 @@
 		C1049186261301530054AC9E /* MonalXMPPUnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonalXMPPUnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1049188261301530054AC9E /* MonalXMPPUnitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonalXMPPUnitTests.swift; sourceTree = "<group>"; };
 		C104918A261301530054AC9E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C1049198261301710054AC9E /* MLCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLCrypto.swift; sourceTree = "<group>"; };
+		C1049198261301710054AC9E /* MLCryptoTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLCryptoTest.swift; sourceTree = "<group>"; };
 		C12436122434AB5D00B8F074 /* MLAttributedLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLAttributedLabel.h; sourceTree = "<group>"; };
 		C12436132434AB5D00B8F074 /* MLAttributedLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAttributedLabel.m; sourceTree = "<group>"; };
 		C138464D25CD804D008EF0A0 /* MLOmemoQrCodeView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLOmemoQrCodeView.h; sourceTree = "<group>"; };
@@ -1804,7 +1804,7 @@
 			isa = PBXGroup;
 			children = (
 				C1B940E926144AF500E9D290 /* AESGCMTest.m */,
-				C1049198261301710054AC9E /* MLCrypto.swift */,
+				C1049198261301710054AC9E /* MLCryptoTest.swift */,
 				C1049188261301530054AC9E /* MonalXMPPUnitTests.swift */,
 				C104918A261301530054AC9E /* Info.plist */,
 				C1B940E826144AF400E9D290 /* MonalXMPPUnitTests-Bridging-Header.h */,
@@ -2775,7 +2775,7 @@
 			files = (
 				C1049189261301530054AC9E /* MonalXMPPUnitTests.swift in Sources */,
 				C1B940EA26144AF500E9D290 /* AESGCMTest.m in Sources */,
-				C1049199261301710054AC9E /* MLCrypto.swift in Sources */,
+				C1049199261301710054AC9E /* MLCryptoTest.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

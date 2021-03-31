@@ -18,23 +18,21 @@ class MLCryptoTests: XCTestCase {
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
-    
+
     func testEncrypt() {
         let crypto = MLCrypto();
         let input = "Monal"
         let key = dataWithHexString(hex:"b1eccf9b3afc566e763ba0968e6b5b58");
         let encrypted = crypto.encryptGCM(key: key,decryptedContent: input.data(using: .utf8)!)
-        
+
         XCTAssert(encrypted != nil)
-        
+
         let decrypted = crypto.decryptGCM(key:key, encryptedContent:encrypted!.combined!)
         let result = String(data: decrypted!, encoding: .utf8)
         
-        XCTAssert(result==input);
-        
+        XCTAssert(result == input);
     }
-    
-    
+
     func dataWithHexString(hex: String) -> Data {
         var hex = hex
         var data = Data()

@@ -49,6 +49,8 @@ NS_ASSUME_NONNULL_BEGIN
 -(BOOL) isTrustedIdentity:(SignalAddress*)address identityKey:(NSData*)identityKey;
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 -(NSData *) getIdentityForAddress:(SignalAddress*)address;
+-(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
+
 -(void) sendLocalDevicesIfNeeded;
 -(void) markSessionAsStableForJid:(NSString*) jid andDevice:(NSNumber*) ridNum;
 -(void) untrustAllDevicesFrom:(NSString*)jid;

@@ -45,6 +45,7 @@
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 -(int) getInternalTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
 -(void) untrustAllDevicesFrom:(NSString*) jid;
+-(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
 
 -(int) getHighestPreyKeyId;
 -(int) getPreKeyCount;

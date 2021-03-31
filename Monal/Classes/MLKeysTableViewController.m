@@ -67,20 +67,12 @@ enum MLKeysTableViewControllerSections {
 #ifndef DISABLE_OMEMO
     NSNumber* device = [self.devices objectAtIndex:indexPath.row];
     SignalAddress* address = [[SignalAddress alloc] initWithName:self.contact.contactJid deviceId:(int) device.integerValue];
+    NSData* fingerprint = [self.account.omemo getIdentityForAddress:address];
 
-    NSData* identity = [self.account.omemo getIdentityForAddress:address];
+    NSNumber* trustLevel = [self.account.omemo getTrustLevel:address identityKey:fingerprint];
 
-    cell.key.text = [HelperTools signalHexKeyWithSpacesWithData:identity];
-    cell.toggle.on = [self.account.omemo isTrustedIdentity:address identityKey:identity];
-    cell.toggle.tag = 100 + indexPath.row;
+    [cell initWithFingerprint:fingerprint andDeviceId:device.longValue andTrustLevel:(UInt16)trustLevel.intValue ownKey:(device.integerValue == self.account.omemo.monalSignalStore.deviceid) andIndexPath:indexPath];
     [cell.toggle addTarget:self action:@selector(toggleTrust:) forControlEvents:UIControlEventValueChanged];
-    if(device.integerValue == self.account.omemo.monalSignalStore.deviceid)
-    {
-        cell.deviceid.text = [NSString stringWithFormat:NSLocalizedString(@"%ld (This device)", @""), (long)device.integerValue];
-        self.ownKeyRow = indexPath.row;
-    } else  {
-        cell.deviceid.text = [NSString stringWithFormat:@"%ld", (long)device.integerValue];
-    }
 #endif
     return cell;
 }
@@ -128,6 +120,8 @@ enum MLKeysTableViewControllerSections {
         newTrust = YES;
     }
     [self.account.omemo updateTrust:newTrust forAddress:address];
+    // reload UI Cell
+    [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:row inSection:keysSection]] withRowAnimation:UITableViewRowAnimationNone];
 #endif
 }
 

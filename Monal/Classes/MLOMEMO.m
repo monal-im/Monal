@@ -394,6 +394,11 @@ $$
     return [self.monalSignalStore isTrustedIdentity:address identityKey:identityKey];
 }
 
+-(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey
+{
+    return [self.monalSignalStore getTrustLevel:address identityKey:identityKey];
+}
+
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address
 {
     [self.monalSignalStore updateTrust:trust forAddress:address];

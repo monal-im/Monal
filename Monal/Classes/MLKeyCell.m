@@ -7,18 +7,47 @@
 //
 
 #import "MLKeyCell.h"
+#import "HelperTools.h"
+#import "MLSignalStore.h"
 
 @implementation MLKeyCell
 
-- (void)awakeFromNib {
+-(void)awakeFromNib
+{
     [super awakeFromNib];
     // Initialization code
 }
 
-- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+-(void)setSelected:(BOOL)selected animated:(BOOL)animated
+{
     [super setSelected:selected animated:animated];
 
     // Configure the view for the selected state
 }
 
+-(void)initWithFingerprint:(NSData*) fingerprint andDeviceId:(long) deviceId andTrustLevel:(UInt16) trustLevel ownKey:(BOOL) ownKey andIndexPath:(NSIndexPath*)indexPath
+{
+    self.key.text = [HelperTools signalHexKeyWithSpacesWithData:fingerprint];
+    self.toggle.on = trustLevel > MLOmemoNotTrusted;
+    self.toggle.tag = 100 + indexPath.row;
+
+    // set colors
+    if(trustLevel == MLOmemoToFU)
+    {
+        self.toggle.onTintColor = [UIColor yellowColor];
+    }
+    else
+    {
+        self.toggle.onTintColor = [UIColor greenColor];
+    }
+
+    if(ownKey)
+    {
+        self.deviceid.text = [NSString stringWithFormat:NSLocalizedString(@"%ld (This device)", @""), deviceId];
+    }
+    else
+    {
+        self.deviceid.text = [NSString stringWithFormat:@"%ld", deviceId];
+    }
+}
 @end

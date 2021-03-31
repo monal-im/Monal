@@ -13,22 +13,22 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSInteger, transferFileState) {
     transferCheck = 0,
-    transferImageTypeNeedDowndload,
-    transferAudioTypeNeedDowndload,
-    transferVideoTypeNeedDowndload,
     transferFileTypeNeedDowndload,
 };
 
 @interface MLFileTransferDataCell : MLBaseCell
 
-@property (weak, nonatomic) IBOutlet UIView *fileTransferBackgroundView;
-@property (weak, nonatomic) IBOutlet UIView *fileTransferBoarderView;
-@property (weak, nonatomic) IBOutlet UILabel *fileTransferHint;
-@property (weak, nonatomic) IBOutlet UILabel *sizeLabel;
-@property (weak, nonatomic) IBOutlet UIImageView *downloadImageView;
-@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *loadingView;
-@property (nonatomic, copy) NSNumber *messageDBId;
+@property (weak, nonatomic) IBOutlet UIView* fileTransferBackgroundView;
+@property (weak, nonatomic) IBOutlet UIView* fileTransferBoarderView;
+@property (weak, nonatomic) IBOutlet UILabel* fileTransferHint;
+@property (weak, nonatomic) IBOutlet UILabel* sizeLabel;
+@property (weak, nonatomic) IBOutlet UIImageView* downloadImageView;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView* loadingView;
+@property (nonatomic, copy) NSNumber* messageDBId;
 @property (nonatomic) transferFileState transferStatus;
+
+-(void) initCellForMessageId:(NSNumber*) messageId andFilename:(NSString*) filename andMimeType:(NSString* _Nullable) mimeType andFileSize:(long long) fileSize;
+
 @end
 
 NS_ASSUME_NONNULL_END

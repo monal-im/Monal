@@ -10,7 +10,7 @@
 #import "MLImageManager.h"
 #import "MLConstants.h"
 #import "MLFiletransfer.h"
-@import SafariServices;
+#import "MLDefinitions.h"
 
 @implementation MLFileTransferDataCell
 
@@ -48,31 +48,34 @@
     }
 }
 
-//-(BOOL)canPerformAction:(SEL)action withSender:(id)sender
-//{
-//    if(action == @selector(openlink:))
-//    {
-//        if(self.link)
-//            return YES;
-//    }
-//    return (action == @selector(copy:)) ;
-//}
+-(void) initCellForMessageId:(NSNumber*) messageId andFilename:(NSString*) filename andMimeType:(NSString* _Nullable) mimeType andFileSize:(long long) fileSize
+{
+    self.messageDBId = messageId;
+    // files without a mime type should be checked before download
+    self.transferStatus = mimeType ? transferFileTypeNeedDowndload : transferCheck;
 
-//-(void)openlink: (id) sender {
-//    
-//    if(self.link)
-//    {
-//        NSURL *url= [NSURL URLWithString:self.link];
-//        
-//        if ([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"]) {
-//            SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:url];
-//            [self.parent presentViewController:safariView animated:YES completion:nil];
-//        }        
-//    }
-//}
+    NSString* hintStr;
+    if(mimeType != nil)
+    {
+       hintStr = [NSString stringWithFormat:@"%@ %@ (%@).", NSLocalizedString(@"Download", @""), filename, mimeType];
+
+        NSString* readableFileSize = [NSByteCountFormatter stringFromByteCount:fileSize countStyle:NSByteCountFormatterCountStyleFile];
+        [self.sizeLabel setText:readableFileSize];
+
+    }
+    else
+    {
+       hintStr = [NSString stringWithFormat:@"%@%@", NSLocalizedString(@"Check type and size on ", @""), filename];
+        [self.sizeLabel setText:@""];
+    }
+    [self.fileTransferHint setText:hintStr];
+    
+    [self.loadingView setHidden:YES];
+    [self.downloadImageView setHidden:NO];
+}
 
 -(void)copy:(id)sender {
-    UIPasteboard *pboard = [UIPasteboard generalPasteboard];
+    UIPasteboard* pboard = [UIPasteboard generalPasteboard];
     pboard.string = self.messageBody.text;
 }
 
@@ -103,7 +106,7 @@
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
             
-    UITouch *touch = [touches anyObject];
+    UITouch* touch = [touches anyObject];
     CGPoint touchPoint = [touch locationInView:touch.view];
         
     CGPoint insidePoint = [self.fileTransferBackgroundView convertPoint:touchPoint fromView:touch.view];
@@ -118,18 +121,13 @@
             case transferCheck:
                 [MLFiletransfer checkMimeTypeAndSizeForHistoryID: self.messageDBId];
                 break;
-                        
-            case transferImageTypeNeedDowndload:
             case transferFileTypeNeedDowndload:
-            case transferVideoTypeNeedDowndload:
-            case transferAudioTypeNeedDowndload:
                 [MLFiletransfer downloadFileForHistoryID:self.messageDBId];
                 break;
             default:
+                unreachable();
                 break;
         }
-        
-        return;
     }
 }
 

@@ -55,7 +55,7 @@
                                         <visualEffectView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="v9x-8P-VIc">
                                             <rect key="frame" x="0.0" y="0.0" width="414" height="250.5"/>
                                             <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="DKM-65-0Zv">
-                                                <rect key="frame" x="0.0" y="0.0" width="414" height="250.5"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="414" height="251"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
                                                     <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="noicon" translatesAutoresizingMaskIntoConstraints="NO" id="Vhk-QO-bAB">
@@ -290,9 +290,16 @@
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Removed from Server" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BCJ-7G-EV4">
+                                            <rect key="frame" x="229" y="119" width="165" height="21"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
                                     </subviews>
                                     <constraints>
                                         <constraint firstItem="aTq-lO-Xbf" firstAttribute="top" secondItem="jlZ-Ph-l0I" secondAttribute="topMargin" id="Ar9-Y4-NfL"/>
+                                        <constraint firstItem="fop-Br-WiN" firstAttribute="trailing" secondItem="BCJ-7G-EV4" secondAttribute="trailing" constant="10" id="DE9-8G-bva"/>
                                         <constraint firstItem="BIp-1h-2Q5" firstAttribute="baseline" secondItem="aTq-lO-Xbf" secondAttribute="baseline" id="EpE-3h-KN5"/>
                                         <constraint firstItem="mLw-B4-BUu" firstAttribute="leading" secondItem="jlZ-Ph-l0I" secondAttribute="leadingMargin" constant="6" id="IsQ-Ue-k4I"/>
                                         <constraint firstItem="fop-Br-WiN" firstAttribute="leading" secondItem="jlZ-Ph-l0I" secondAttribute="leading" constant="22" id="KGY-Je-BSE"/>
@@ -302,6 +309,7 @@
                                         <constraint firstItem="fop-Br-WiN" firstAttribute="top" secondItem="aTq-lO-Xbf" secondAttribute="bottom" constant="10" id="aSl-4i-3Xs"/>
                                         <constraint firstItem="mLw-B4-BUu" firstAttribute="top" secondItem="fop-Br-WiN" secondAttribute="bottom" constant="8" id="avs-vo-BJd"/>
                                         <constraint firstItem="4kz-Xh-2Ui" firstAttribute="centerY" secondItem="mLw-B4-BUu" secondAttribute="centerY" id="ck0-yJ-JA9"/>
+                                        <constraint firstItem="BCJ-7G-EV4" firstAttribute="top" secondItem="4kz-Xh-2Ui" secondAttribute="top" id="ivz-xz-EDa"/>
                                         <constraint firstAttribute="trailing" secondItem="fop-Br-WiN" secondAttribute="trailing" constant="10" id="mVz-xs-iEH"/>
                                         <constraint firstItem="aTq-lO-Xbf" firstAttribute="leading" secondItem="jlZ-Ph-l0I" secondAttribute="leadingMargin" constant="6" id="tHg-1v-zCE"/>
                                     </constraints>
@@ -309,6 +317,7 @@
                                 <connections>
                                     <outlet property="deviceid" destination="BIp-1h-2Q5" id="no3-Yn-hZe"/>
                                     <outlet property="key" destination="fop-Br-WiN" id="IFC-NG-el8"/>
+                                    <outlet property="removedFromServerLabel" destination="BCJ-7G-EV4" id="nrW-s3-VaQ"/>
                                     <outlet property="toggle" destination="mLw-B4-BUu" id="E1u-xe-cPL"/>
                                 </connections>
                             </tableViewCell>

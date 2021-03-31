@@ -116,7 +116,6 @@ class MonalUITests: XCTestCase {
         elementsQuery.textFields["Username"].typeText(String(format: "MonalTestclient-%d", Int.random(in: 1000..<999999)))
 
         elementsQuery.secureTextFields["Password"].tap()
-        sleep(1)
         elementsQuery.secureTextFields["Password"].typeText(randomPassword())
         registerStaticText.tap()
         // wait for register hud
@@ -142,6 +141,7 @@ class MonalUITests: XCTestCase {
         app.launch()
 
         let chatsNavigationBar = app.navigationBars["Chats"]
+        sleep(1)
         chatsNavigationBar.buttons["Add"].tap()
 
         let tablesQuery = app.tables
@@ -178,7 +178,7 @@ class MonalUITests: XCTestCase {
         XCTAssertTrue(app.buttons["microphone"].exists)
     }
 
-    func test_0007_AddContact() throws {
+    func test_0008_AddContact() throws {
         let app = XCUIApplication()
         app.launch()
 

@@ -40,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 -(void) encryptMessage:(XMPPMessage*) messageNode withMessage:(NSString* _Nullable) message toContact:(NSString*) toContact;
 -(NSString* _Nullable) decryptMessage:(XMPPMessage*) messageNode;
--(void) sendKeyTransportElementIfNeeded:(NSString*) jid removeBrokenSessionForRid:(NSString*) rid;
+-(void) sendKeyTransportElement:(NSString*) jid removeBrokenSessionForRid:(NSString*) rid;
 
 
 -(BOOL) knownDevicesForAddressNameExist:(NSString*) addressName;
@@ -52,7 +52,6 @@ NS_ASSUME_NONNULL_BEGIN
 -(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
 
 -(void) sendLocalDevicesIfNeeded;
--(void) markSessionAsStableForJid:(NSString*) jid andDevice:(NSNumber*) ridNum;
 -(void) untrustAllDevicesFrom:(NSString*)jid;
 
 -(void) clearAllSessionsForJid:(NSString*) jid;

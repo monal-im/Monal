@@ -34,7 +34,6 @@
 @property (nonatomic, assign) BOOL loggedIn;
 
 // jid -> @[deviceID1, deviceID2]
-@property (nonatomic, strong) NSMutableDictionary* devicesWithBrokenSession;
 @property (nonatomic, strong) NSMutableDictionary* devicesThatAreNotInDeviceList;
 @end
 
@@ -56,7 +55,6 @@ const int KEY_SIZE = 16;
     self.openBundleFetchCnt = 0;
     self.closedBundleFetchCnt = 0;
 
-    self.devicesWithBrokenSession = [[NSMutableDictionary alloc] init];
     self.devicesThatAreNotInDeviceList = [[NSMutableDictionary alloc] init];
 
     [self setupSignal];
@@ -226,8 +224,6 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
             {
                 SignalAddress* address = [[SignalAddress alloc] initWithName:jid deviceId:rid.intValue];
                 [account.omemo.monalSignalStore markDeviceAsDeleted:address];
-                // We may have a broken session with a device that does not have a bundle anymore
-                [account.omemo sendKeyTransportElementIfNeeded:jid removeBrokenSessionForRid:rid];
             }
         }
     }
@@ -248,7 +244,6 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
         if(receivedKeys)
         {
             [account.omemo processOMEMOKeys:receivedKeys forJid:jid andRid:rid];
-            [account.omemo markSessionAsStableForJid:jid andDevice:[NSNumber numberWithInt:[rid intValue]]];
         }
     }
     if(account.omemo.openBundleFetchCnt > 1 && account.omemo.loggedIn)
@@ -272,17 +267,6 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
         }
     }
 $$
-
--(void) markSessionAsStableForJid:(NSString*) jid andDevice:(NSNumber*) ridNum
-{
-    // Remove device from broken sessions if needed
-    NSMutableSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:jid];
-    if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:ridNum])
-    {
-        [devicesWithBrokenSession removeObject:ridNum];
-        [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:jid];
-    }
-}
 
 -(void) queryOMEMODevices:(NSString *) jid
 {
@@ -323,7 +307,7 @@ $$
     {
         NSAssert([self.accountJid caseInsensitiveCompare:self.account.connectionProperties.identity.jid] == NSOrderedSame, @"connection jid should be equal to the senderJid");
 
-        NSArray<NSNumber*>* existingDevices = [self.monalSignalStore knownDevicesWithSessionEntryForName:source];
+        NSArray<NSNumber*>* existingDevices = [self.monalSignalStore knownDevicesWithValidSessionEntryForName:source];
 
         // query omemo bundles from devices that are not in our signalStorage
         // TODO: queryOMEMOBundleFrom when sending first msg without session
@@ -515,38 +499,27 @@ $$
             }
             // found a key
             // Build new session when a device session is marked as broken
-            [self sendKeyTransportElementIfNeeded:jid removeBrokenSessionForRid:rid];
+            [self sendKeyTransportElement:jid removeBrokenSessionForRid:rid];
             break;
         } while (++processedKeysIdx <= preKeyIds.count);
     }
 }
 
--(void) sendKeyTransportElementIfNeeded:(NSString*) jid removeBrokenSessionForRid:(NSString*) rid
+-(void) sendKeyTransportElement:(NSString*) jid removeBrokenSessionForRid:(NSString*) rid
 {
-    // Build new session when a device session is marked as broken
-    NSMutableSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:jid];
-    NSNumber* ridNum = [NSNumber numberWithInt:[rid intValue]];
-    if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:ridNum])
-    {
-        // The needed device bundle for this contact/device was fetched
-        // Send new keys
-        XMPPMessage* messageNode = [[XMPPMessage alloc] init];
-        [messageNode.attributes setObject:jid forKey:@"to"];
-        [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
+    // The needed device bundle for this contact/device was fetched
+    // Send new keys
+    XMPPMessage* messageNode = [[XMPPMessage alloc] init];
+    [messageNode.attributes setObject:jid forKey:@"to"];
+    [messageNode.attributes setObject:kMessageChatType forKey:@"type"];
 
-        // Send KeyTransportElement only to the one device (overrideDevices)
-        [self encryptMessage:messageNode withMessage:nil toContact:jid];
-        DDLogDebug(@"Send KeyTransportElement to jid: %@", jid);
-        if(self.account) [self.account send:messageNode];
+    // Send KeyTransportElement only to the one device (overrideDevices)
+    [self encryptMessage:messageNode withMessage:nil toContact:jid];
+    DDLogDebug(@"Send KeyTransportElement to jid: %@", jid);
+    if(self.account) [self.account send:messageNode];
 
-        // Remove device from list
-        [devicesWithBrokenSession removeObject:ridNum];
-        [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:jid];
-        DDLogDebug(@"Removed jid: %@, rid: %@ from devicesWithBrokenSession", jid, rid);
-        if([devicesWithBrokenSession count] != 0) {
-            return;
-        }
-    }
+    // Remove device from list
+    // TODO: remove broken session mark?
 }
 
 -(void) addEncryptionKeyForAllDevices:(NSArray*) devices encryptForJid:(NSString*) encryptForJid withEncryptedPayload:(MLEncryptedPayload*) encryptedPayload withXMLHeader:(MLXMLNode*) xmlHeader {
@@ -682,20 +655,10 @@ $$
         return;
     }
 
-    // get set of broken device sessions for the given contact
-    NSMutableSet<NSNumber*>* devicesWithInvalSession = [self.devicesWithBrokenSession objectForKey:contact];
-    if(!devicesWithInvalSession)
-    {
-        // first broken session for contact -> create new set
-        devicesWithInvalSession = [[NSMutableSet<NSNumber*> alloc] init];
-    }
-    // add device to broken session contact set
-    if([devicesWithInvalSession containsObject:deviceId])
-    {
-        return;
-    }
-    [devicesWithInvalSession addObject:deviceId];
-    [self.devicesWithBrokenSession setObject:devicesWithInvalSession forKey:contact];
+    SignalAddress* address = [[SignalAddress alloc] initWithName:contact deviceId:(uint32_t)deviceId.intValue];
+
+    // mark session as broken
+    [self.monalSignalStore markSessionAsBroken:address];
     
     // TODO:
     NSMutableSet<NSNumber*>* devicesThatAreNotInList = [self.devicesThatAreNotInDeviceList objectForKey:contact];
@@ -711,10 +674,6 @@ $$
     }
     [devicesThatAreNotInList addObject:deviceId];
     [self.devicesThatAreNotInDeviceList setObject:devicesThatAreNotInList forKey:contact];
-
-    // delete broken session from our storage
-    SignalAddress* address = [[SignalAddress alloc] initWithName:contact deviceId:(uint32_t)deviceId.intValue];
-    [self.monalSignalStore deleteSessionRecordForAddress:address];
 
     // DEBUG START
     if(![self.accountJid isEqualToString:contact])
@@ -826,14 +785,6 @@ $$
         }
         else
         {
-            // We seem to have a valid session -> remove device from broken session list
-            NSMutableSet<NSNumber*>* devicesWithBrokenSession = [self.devicesWithBrokenSession objectForKey:messageNode.fromUser];
-            if(devicesWithBrokenSession && [devicesWithBrokenSession containsObject:sid])
-            {
-                // Remove device from list
-                [devicesWithBrokenSession removeObject:sid];
-                [self.devicesWithBrokenSession setObject:devicesWithBrokenSession forKey:messageNode.fromUser];
-            }
             // save last successfull decryption time
             [self.monalSignalStore updateLastSuccessfulDecryptTime:address];
             // if no payload is available -> KeyTransportElement

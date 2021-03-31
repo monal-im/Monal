@@ -33,7 +33,7 @@
  all devices even those without sessions
  */
 -(NSArray<NSNumber*>*) knownDevicesForAddressName:(NSString*)addressName;
--(NSArray<NSNumber*>*) knownDevicesWithSessionEntryForName:(NSString*) addrName;
+-(NSArray<NSNumber*>*) knownDevicesWithValidSessionEntryForName:(NSString*) addrName;
 -(NSMutableArray *) readPreKeys;
 
 -(void) deleteDeviceforAddress:(SignalAddress*)address;
@@ -41,6 +41,8 @@
 -(void) markDeviceAsDeleted:(SignalAddress*)address;
 -(void) removeDeviceDeletedMark:(SignalAddress*)address;
 -(void) updateLastSuccessfulDecryptTime:(SignalAddress*)address;
+-(void) markSessionAsBroken:(SignalAddress*) address;
+-(BOOL) isSessionBrokenForJid:(NSString*) jid andDeviceId:(NSNumber*) deviceId;
 
 -(void) updateTrust:(BOOL) trust forAddress:(SignalAddress*)address;
 -(int) getInternalTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;

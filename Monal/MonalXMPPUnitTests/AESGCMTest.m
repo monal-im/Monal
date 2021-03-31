@@ -47,4 +47,53 @@
     [self encryptWithSize:32];
 }
 
+/*
+ * This test doesn't check for real IV uniqueness!
+ */
+-(void) testGenIV
+{
+    const UInt32 ivCnt = 40000;
+    NSMutableArray<NSData*>* ivArray = [[NSMutableArray<NSData*> alloc] init];
+
+    for(UInt32 i = 0; i < ivCnt; i++)
+    {
+        NSData* iv = [AESGcm genIV];
+        XCTAssertFalse([ivArray containsObject:iv], "IV should be unique");
+        [ivArray addObject:iv];
+    }
+}
+
+
+/*
+ * This test doesn't check for real key uniqueness!
+ */
+-(void) genKeyWithSize:(uint) size
+{
+    const UInt32 ivCnt = 40000;
+    NSMutableArray<NSData*>* ivArray = [[NSMutableArray<NSData*> alloc] init];
+
+    for(UInt32 i = 0; i < ivCnt; i++)
+    {
+        NSData* iv = [AESGcm genKey:size];
+        XCTAssertFalse([ivArray containsObject:iv], "key should be unique");
+        [ivArray addObject:iv];
+    }
+}
+
+/*
+ * This test doesn't check for real key uniqueness!
+ */
+-(void) testGenKey16
+{
+    [self genKeyWithSize:16];
+}
+
+/*
+ * This test doesn't check for real key uniqueness!
+ */
+-(void) testGenKey32
+{
+    [self genKeyWithSize:32];
+}
+
 @end

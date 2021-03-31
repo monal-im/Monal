@@ -2452,6 +2452,10 @@ static NSDateFormatter* dbFormatter;
         [self updateDBTo:5.012 withBlock:^{
             [self.db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN muted BOOL DEFAULT FALSE"];
         }];
+
+        [self updateDBTo:5.013 withBlock:^{
+            [self.db executeNonQuery:@"ALTER TABLE signalContactIdentity ADD COLUMN brokenSession BOOL DEFAULT FALSE"];
+        }];
     }];
     [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
     [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];

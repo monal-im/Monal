@@ -212,11 +212,11 @@
     return devices;
 }
 
--(NSArray<NSNumber*>*) knownDevicesWithSessionEntryForName:(NSString*) addrName
+-(NSArray<NSNumber*>*) knownDevicesWithValidSessionEntryForName:(NSString*) addrName
 {
     if(!addrName) return nil;
 
-    NSArray* rows = [self.sqliteDatabase executeReader:@"SELECT DISTINCT sci.contactDeviceId FROM signalContactIdentity as sci INNER JOIN signalContactSession as scs ON sci.account_id=scs.account_id AND sci.contactName=scs.contactName AND sci.contactDeviceId=scs.contactDeviceId WHERE sci.account_id=? AND sci.contactName=? AND sci.removedFromDeviceList IS NULL;" andArguments:@[self.accountId, addrName]];
+    NSArray* rows = [self.sqliteDatabase executeReader:@"SELECT DISTINCT sci.contactDeviceId FROM signalContactIdentity as sci INNER JOIN signalContactSession as scs ON sci.account_id=scs.account_id AND sci.contactName=scs.contactName AND sci.contactDeviceId=scs.contactDeviceId WHERE sci.account_id=? AND sci.contactName=? AND sci.removedFromDeviceList IS NULL AND sci.brokenSession=false;" andArguments:@[self.accountId, addrName]];
 
     NSMutableArray* devices = [[NSMutableArray alloc] initWithCapacity:rows.count];
 
@@ -434,9 +434,23 @@
     [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET removedFromDeviceList=NULL WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
 }
 
--(void) updateLastSuccessfulDecryptTime:(SignalAddress*)address
+/*
+ * update lastReceivedMsg to CURRENT_TIMESTAMP
+ * reset brokenSession to faöse
+ */
+-(void) updateLastSuccessfulDecryptTime:(SignalAddress*) address
 {
-    [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET lastReceivedMsg=CURRENT_TIMESTAMP WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+    [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET lastReceivedMsg=CURRENT_TIMESTAMP, brokenSession=false WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+}
+
+-(void) markSessionAsBroken:(SignalAddress*) address
+{
+    [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET brokenSession=false WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+}
+
+-(BOOL) isSessionBrokenForJid:(NSString*) jid andDeviceId:(NSNumber*) deviceId
+{
+    return [self.sqliteDatabase executeNonQuery:@"SELECT brokenSession FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, deviceId, jid]];
 }
 
 -(int) getInternalTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey

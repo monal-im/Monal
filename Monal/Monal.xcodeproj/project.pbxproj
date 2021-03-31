@@ -274,6 +274,7 @@
 		C1A80DA424D9552400B99E01 /* MLChatViewHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = C1A80DA324D9552400B99E01 /* MLChatViewHelper.m */; };
 		C1B1982625AB31B800D5028E /* MLBlockedUsersTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C1B1982525AB31B800D5028E /* MLBlockedUsersTableViewController.m */; };
 		C1B7DF6C2438883600C7F0C4 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */; };
+		C1B940EA26144AF500E9D290 /* AESGCMTest.m in Sources */ = {isa = PBXBuildFile; fileRef = C1B940E926144AF500E9D290 /* AESGCMTest.m */; };
 		C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */ = {isa = PBXBuildFile; fileRef = C1C839DA24F15DF800BBCF17 /* MLOMEMO.h */; };
 		C1C839DE24F15DF800BBCF17 /* MLOMEMO.m in Sources */ = {isa = PBXBuildFile; fileRef = C1C839DC24F15DF800BBCF17 /* MLOMEMO.m */; };
 		C1E4654824EE517000CA5AAF /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C1E4654624EE517000CA5AAF /* Localizable.strings */; };
@@ -620,7 +621,6 @@
 		269574E11C37307300544A60 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/usr/lib/libsqlite3.tbd; sourceTree = DEVELOPER_DIR; };
 		2696EED01791245A00BC54B8 /* chatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chatViewController.h; sourceTree = "<group>"; };
 		2696EED11791245A00BC54B8 /* chatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = chatViewController.m; sourceTree = "<group>"; };
-		26A711ED23C5635900FC6A86 /* AESGCMTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AESGCMTest.m; sourceTree = "<group>"; };
 		26A78ED623C2B59400C7CF40 /* MLPlaceholderViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLPlaceholderViewController.h; sourceTree = "<group>"; };
 		26A78ED723C2B59400C7CF40 /* MLPlaceholderViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLPlaceholderViewController.m; sourceTree = "<group>"; };
 		26AA70112146BBB800598605 /* shareSheet.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = shareSheet.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -873,6 +873,8 @@
 		C1B1982425AB31B800D5028E /* MLBlockedUsersTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLBlockedUsersTableViewController.h; sourceTree = "<group>"; };
 		C1B1982525AB31B800D5028E /* MLBlockedUsersTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLBlockedUsersTableViewController.m; sourceTree = "<group>"; };
 		C1B7DF6A2438883600C7F0C4 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/CoreLocation.framework; sourceTree = DEVELOPER_DIR; };
+		C1B940E826144AF400E9D290 /* MonalXMPPUnitTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MonalXMPPUnitTests-Bridging-Header.h"; sourceTree = "<group>"; };
+		C1B940E926144AF500E9D290 /* AESGCMTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AESGCMTest.m; sourceTree = "<group>"; };
 		C1C8394E24F0EDFD00BBCF17 /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = localization/external/ar.lproj/Main.strings; sourceTree = "<group>"; };
 		C1C8395024F0EE0300BBCF17 /* zh-Hant-HK */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant-HK"; path = "localization/external/zh-Hant-HK.lproj/Main.strings"; sourceTree = "<group>"; };
 		C1C8395224F0EE0A00BBCF17 /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = localization/external/cs.lproj/Main.strings; sourceTree = "<group>"; };
@@ -1345,7 +1347,6 @@
 				267B671B226A200D003DB850 /* AESGcm.m */,
 				267B671F226A222E003DB850 /* MLEncryptedPayload.h */,
 				267B6720226A222E003DB850 /* MLEncryptedPayload.m */,
-				26A711ED23C5635900FC6A86 /* AESGCMTest.m */,
 				C1850E6625F37EC0003D506A /* Monal Tests-Bridging-Header.h */,
 				C10490E22612F3D00054AC9E /* MLCrypto.swift */,
 				C10490EA2612F3E00054AC9E /* EncryptedPayload.swift */,
@@ -1697,7 +1698,7 @@
 			name = tools;
 			sourceTree = "<group>";
 		};
-		29B97314FDCFA39411CA2CEA = {
+		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
 				26AA70222146E2B900598605 /* shareSheet.entitlements */,
@@ -1802,9 +1803,11 @@
 		C1049187261301530054AC9E /* MonalXMPPUnitTests */ = {
 			isa = PBXGroup;
 			children = (
+				C1B940E926144AF500E9D290 /* AESGCMTest.m */,
 				C1049198261301710054AC9E /* MLCrypto.swift */,
 				C1049188261301530054AC9E /* MonalXMPPUnitTests.swift */,
 				C104918A261301530054AC9E /* Info.plist */,
+				C1B940E826144AF400E9D290 /* MonalXMPPUnitTests-Bridging-Header.h */,
 			);
 			path = MonalXMPPUnitTests;
 			sourceTree = "<group>";
@@ -2115,6 +2118,7 @@
 					};
 					C1049185261301530054AC9E = {
 						CreatedOnToolsVersion = 12.4;
+						LastSwiftMigration = 1240;
 					};
 					C1850EB425F38A2D003D506A = {
 						CreatedOnToolsVersion = 12.4;
@@ -2158,7 +2162,7 @@
 				fa,
 				"nb-NO",
 			);
-			mainGroup = 29B97314FDCFA39411CA2CEA;
+			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -2770,6 +2774,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C1049189261301530054AC9E /* MonalXMPPUnitTests.swift in Sources */,
+				C1B940EA26144AF500E9D290 /* AESGCMTest.m in Sources */,
 				C1049199261301710054AC9E /* MLCrypto.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4203,6 +4208,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = G7YU7X7KRJ.SworIM.MonalXMPPUnitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_BRIDGING_HEADER = "MonalXMPPUnitTests/MonalXMPPUnitTests-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -4269,6 +4275,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OBJC_BRIDGING_HEADER = "MonalXMPPUnitTests/MonalXMPPUnitTests-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -4336,6 +4343,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OBJC_BRIDGING_HEADER = "MonalXMPPUnitTests/MonalXMPPUnitTests-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

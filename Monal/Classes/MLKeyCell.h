@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) IBOutlet UILabel* key;
 @property (nonatomic, weak) IBOutlet UISwitch* toggle;
 
+-(void)initWithFingerprint:(NSData*) fingerprint andDeviceId:(long) deviceId andTrustLevel:(UInt16) trustLevel ownKey:(BOOL) ownKey andIndexPath:(NSIndexPath*)indexPath;
 
 @end
 

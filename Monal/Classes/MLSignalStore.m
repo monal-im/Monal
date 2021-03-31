@@ -449,7 +449,7 @@
     [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactName=?;" andArguments:@[[NSNumber numberWithInt:MLOmemoInternalNotTrusted], self.accountId, jid]];
 }
 
--(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey;
+-(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey
 {
     return (NSNumber*)[self.sqliteDatabase executeScalar:(@"SELECT \
                 CASE \

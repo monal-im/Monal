@@ -38,6 +38,7 @@
 @import QuartzCore;
 @import MobileCoreServices;
 @import AVFoundation;
+@import QuartzCore.CATransaction;
 
 @class MLEmoji;
 
@@ -1359,7 +1360,7 @@ enum msgSentState {
                     return;
                 }
             }
-            
+            [CATransaction begin];
             [self.messageList addObject:message];   //do not insert based on delay timestamp because that would make it possible to fake history entries
 
             [self->_messageTable beginUpdates];
@@ -1373,6 +1374,7 @@ enum msgSentState {
             [self->_messageTable endUpdates];
 
             [self scrollToBottom];
+            [CATransaction commit];
             
             if (self.searchController.isActive)
             {
@@ -1525,7 +1527,7 @@ enum msgSentState {
             NSIndexPath* path1 = [NSIndexPath indexPathForRow:bottom-1  inSection:messagesSection];
           //  if(![self.messageTable.indexPathsForVisibleRows containsObject:path1])
             {
-                [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:NO];
+                [self.messageTable scrollToRowAtIndexPath:path1 atScrollPosition:UITableViewScrollPositionBottom animated:YES];
             }
         }
     });

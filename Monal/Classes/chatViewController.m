@@ -1721,59 +1721,15 @@ enum msgSentState {
         }
         else if (info && [info[@"needsDownloading"] boolValue])
         {
-            if (info[@"mimeType"] != nil)
-            {
-                //TODO JIM: explanation: this was already checked (mime ype and size are known) but not yet downloaded --> download it
-                //TODO JIM: explanation: this should not be automatically but only triggered by a button press
-                //TODO JIM: explanation: I'm doing this automatically here because we still lack those buttons
-                //TODO JIM: explanation: this only handles images, because we don't want to autodownload everything
-                MLFileTransferDataCell* fileTransferCell = (MLFileTransferDataCell *) [self messageTableCellWithIdentifier:@"fileTransferCheckingData" andInbound:inboundDir fromTable:tableView];
-                
-                NSString *fileType = info[@"mimeType"];
-                
-                if([fileType hasPrefix:@"image/"])
-                {
-                    fileTransferCell.transferStatus = transferImageTypeNeedDowndload;
-                }
-                else if([fileType hasPrefix:@"video/"])
-                {
-                    fileTransferCell.transferStatus = transferVideoTypeNeedDowndload;
-                }
-                else if([fileType hasPrefix:@"audio/"])
-                {
-                    fileTransferCell.transferStatus = transferAudioTypeNeedDowndload;
-                }
-                else
-                {
-                    fileTransferCell.transferStatus = transferFileTypeNeedDowndload;
-                }
-                
-                NSString *hintStr = [NSString stringWithFormat:@"%@ %@ (%@).", NSLocalizedString(@"Download", @""), info[@"filename"], fileType];
-                NSString *fileSizeStr = info[@"size"];
-                long long fileSizeLongLongValue = fileSizeStr.longLongValue;
-                NSString *readableFileSize = [NSByteCountFormatter stringFromByteCount:fileSizeLongLongValue
-                                                                            countStyle:NSByteCountFormatterCountStyleFile];
-                
-                [fileTransferCell.loadingView setHidden:YES];
-                [fileTransferCell.downloadImageView setHidden:NO];
-                [fileTransferCell.sizeLabel setText:readableFileSize];
-                [fileTransferCell.fileTransferHint setText:hintStr];
-                fileTransferCell.messageDBId = row.messageDBId;
-                cell = fileTransferCell;
-            }
-            else
-            {
-                //TODO JIM: explanation: this was not yet checked, do an http head request to get mime type and size
-                //TODO JIM: explanation: this should not be automatically but only triggered by a button press
-                //TODO JIM: explanation: I'm doing this automatically here because we still lack those buttons
-                MLFileTransferDataCell* fileTransferCell = (MLFileTransferDataCell *) [self messageTableCellWithIdentifier:@"fileTransferCheckingData" andInbound:inboundDir fromTable:tableView];
-                NSString *hintStr = [NSString stringWithFormat:@"%@%@", NSLocalizedString(@"Check type and size on ", @""), info[@"filename"]];
-                [fileTransferCell.fileTransferHint setText:hintStr];
-                fileTransferCell.transferStatus = transferCheck;
-                [fileTransferCell.sizeLabel setText:@""];
-                fileTransferCell.messageDBId = row.messageDBId;
-                cell = fileTransferCell;
-            }
+            //TODO JIM: explanation: this was already checked (mime ype and size are known) but not yet downloaded --> download it
+            //TODO JIM: explanation: this should not be automatically but only triggered by a button press
+            //TODO JIM: explanation: I'm doing this automatically here because we still lack those buttons
+            //TODO JIM: explanation: this only handles images, because we don't want to autodownload everything
+            MLFileTransferDataCell* fileTransferCell = (MLFileTransferDataCell *) [self messageTableCellWithIdentifier:@"fileTransferCheckingData" andInbound:inboundDir fromTable:tableView];
+            NSString* fileSize = info[@"size"] ? info[@"size"] : @"0";
+            [fileTransferCell initCellForMessageId:row.messageDBId andFilename:info[@"filename"] andMimeType:info[@"mimeType"] andFileSize:fileSize.longLongValue];
+
+            cell = fileTransferCell;
         }
     }
     else if([row.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])

@@ -31,15 +31,20 @@
     self.toggle.on = trustLevel > MLOmemoNotTrusted;
     self.toggle.tag = 100 + indexPath.row;
 
-    // set colors
+    // set toggle color
     if(trustLevel == MLOmemoToFU)
-    {
         self.toggle.onTintColor = [UIColor yellowColor];
-    }
     else
-    {
         self.toggle.onTintColor = [UIColor greenColor];
-    }
+
+    // show "removed from server" label if needed
+    self.removedFromServerLabel.hidden = (trustLevel != MLOmemoTrustedButRemoved);
+
+    // set cell background color if we have not seen messages in a long time from this device
+    if (trustLevel == MLOmemoTrustedButNoMsgSeenInTime)
+        self.backgroundColor = [UIColor redColor];
+    else
+        self.backgroundColor = nil;
 
     if(ownKey)
     {

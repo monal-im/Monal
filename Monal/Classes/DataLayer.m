@@ -2488,8 +2488,8 @@ static NSDateFormatter* dbFormatter;
                 SELECT \
                     M.message_history_id, M.account_id, \
                     CASE \
-                        WHEN M.message_from=(A.username || '@' || A.domain) THEN M.message_from \
-                        ELSE M.message_to \
+                        WHEN M.message_from=(A.username || '@' || A.domain) THEN M.message_to \
+                        ELSE M.message_from \
                     END AS buddy_name, \
                     CASE \
                         WHEN M.message_from=(A.username || '@' || A.domain) THEN 0 \

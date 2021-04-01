@@ -885,29 +885,60 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(void) addMember:(NSDictionary*) member toMuc:(NSString*) room forAccountId:(NSString*) accountNo
+-(void) addParticipant:(NSDictionary*) participant toMuc:(NSString*) room forAccountId:(NSString*) accountNo
 {
-    if(!member || !member[@"nick"] || !room || !accountNo)
+    if(!participant || !participant[@"nick"] || !room || !accountNo)
         return;
     
     //create entry if not already existing
-    [self.db executeNonQuery:@"INSERT OR IGNORE INTO muc_participants ('account_id', 'room', 'room_nick') VALUES(?, ?, ?);" andArguments:@[accountNo, room, member[@"nick"]]];
+    [self.db executeNonQuery:@"INSERT OR IGNORE INTO muc_participants ('account_id', 'room', 'room_nick') VALUES(?, ?, ?);" andArguments:@[accountNo, room, participant[@"nick"]]];
+    
+    //update entry with optional fields (the first two fields are for members that are not just participants)
+    if(participant[@"jid"])
+        [self.db executeNonQuery:@"UPDATE muc_participants SET participant_jid=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[participant[@"jid"], accountNo, room, participant[@"nick"]]];
+    if(participant[@"affiliation"])
+        [self.db executeNonQuery:@"UPDATE muc_participants SET affiliation=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[participant[@"affiliation"], accountNo, room, participant[@"nick"]]];
+    if(participant[@"role"])
+        [self.db executeNonQuery:@"UPDATE muc_participants SET role=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[participant[@"role"], accountNo, room, participant[@"nick"]]];
+}
+
+-(void) removeParticipant:(NSDictionary*) participant fromMuc:(NSString*) room forAccountId:(NSString*) accountNo
+{
+    if(!participant || !participant[@"nick"] || !room || !accountNo)
+        return;
+    
+    [self.db executeNonQuery:@"DELETE FROM muc_participants WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[accountNo, room, participant[@"nick"]]];
+}
+
+-(void) addMember:(NSDictionary*) member toMuc:(NSString*) room forAccountId:(NSString*) accountNo
+{
+    if(!member || !member[@"jid"] || !room || !accountNo)
+        return;
+    
+    //create entry if not already existing
+    [self.db executeNonQuery:@"INSERT OR IGNORE INTO muc_members ('account_id', 'room', 'member_jid') VALUES(?, ?, ?);" andArguments:@[accountNo, room, member[@"jid"]]];
     
     //update entry with optional fields
-    if(member[@"jid"])
-        [self.db executeNonQuery:@"UPDATE muc_participants SET participant_jid=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[member[@"jid"], accountNo, room, member[@"nick"]]];
     if(member[@"affiliation"])
-        [self.db executeNonQuery:@"UPDATE muc_participants SET affiliation=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[member[@"affiliation"], accountNo, room, member[@"nick"]]];
-    if(member[@"role"])
-        [self.db executeNonQuery:@"UPDATE muc_participants SET role=? WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[member[@"role"], accountNo, room, member[@"nick"]]];
+        [self.db executeNonQuery:@"UPDATE muc_members SET affiliation=? WHERE account_id=? AND room=? AND member_jid=?;" andArguments:@[member[@"affiliation"], accountNo, room, member[@"jid"]]];
 }
 
 -(void) removeMember:(NSDictionary*) member fromMuc:(NSString*) room forAccountId:(NSString*) accountNo
 {
-    if(!member || !member[@"nick"] || !room || !accountNo)
+    if(!member || !member[@"jid"] || !room || !accountNo)
         return;
     
-    [self.db executeNonQuery:@"DELETE FROM muc_participants WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[accountNo, room, member[@"nick"]]];
+    [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=? AND member_jid=?;" andArguments:@[accountNo, room, member[@"jid"]]];
+}
+
+-(NSArray<NSDictionary<NSString*, id>*>*) getMembersAndParticipantsOfMuc:(NSString*) room forAccountId:(NSString*) accountNo
+{
+    NSMutableArray<NSDictionary<NSString*, id>*>* toReturn = [[NSMutableArray<NSDictionary<NSString*, id>*> alloc] init];
+    
+    [toReturn addObjectsFromArray:[self.db executeReader:@"SELECT *, 1 as 'online' FROM muc_participants WHERE account_id=? AND room=?;" andArguments:@[accountNo, room]]];
+    [toReturn addObjectsFromArray:[self.db executeReader:@"SELECT *, 0 as 'online' FROM muc_members WHERE account_id=? AND room=? AND NOT EXISTS(SELECT * FROM muc_participants WHERE muc_members.account_id=muc_participants.account_id AND muc_members.room=muc_participants.room AND muc_members.member_jid=muc_participants.participant_jid);" andArguments:@[accountNo, room]]];
+    
+    return toReturn;
 }
 
 -(void) addMucFavorite:(NSString*) room forAccountId:(NSString*) accountNo andMucNick:(NSString* _Nullable) mucNick
@@ -2506,6 +2537,18 @@ static NSDateFormatter* dbFormatter;
                 WHERE B.Muc=1) \
             "];
             [self.db executeNonQuery:@"DROP TABLE _message_historyTMP;"];
+        }];
+        
+        [self updateDBTo:5.015 withBlock:^{
+            [self.db executeNonQuery:@"CREATE TABLE 'muc_members' ( \
+                'account_id' INTEGER NOT NULL, \
+                'room' VARCHAR(255) NOT NULL, \
+                'member_jid' VARCHAR(255), \
+                'affiliation' VARCHAR(255), \
+                PRIMARY KEY('account_id','room','member_jid'), \
+                FOREIGN KEY('account_id') REFERENCES 'account'('account_id') ON DELETE CASCADE, \
+                FOREIGN KEY('account_id', 'room') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
+            );"];
         }];
     }];
     [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];

@@ -106,6 +106,13 @@ NSString* const kiqErrorType = @"error";
     [self addChild:bindNode];
 }
 
+-(void) setMucListQueryFor:(NSString*) listType
+{
+    [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/muc#admin" withAttributes:@{} andChildren:@[
+        [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"affiliation": listType} andChildren:@[] andData:nil]
+    ] andData:nil]];
+}
+
 -(void) setDiscoInfoNode
 {
     MLXMLNode* queryNode =[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"http://jabber.org/protocol/disco#info"];

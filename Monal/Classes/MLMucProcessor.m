@@ -141,15 +141,9 @@ static NSMutableDictionary* _uiHandler;
         
         //handle presences
         if([presenceNode check:@"/<type=unavailable>"])
-            //TODO: is this the right place? unavailable does not necessarily mean the user is not in the room anymore,
-            //he could still be on the members list
-            //maybe do this only for channels, but not for groups??
-            [[DataLayer sharedInstance] removeMember:item fromMuc:presenceNode.fromUser forAccountId:account.accountNo];
-        /*
-         * TODO: thilo
+            [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:account.accountNo];
         else
-            [[DataLayer sharedInstance] addMember:item toMuc:presenceNode.fromUser forAccountId:account.accountNo];
-         */
+            [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:account.accountNo];
     }
 }
 
@@ -415,15 +409,36 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
         [presence joinRoom:iqNode.fromUser withNick:nick];
         [account send:presence];
         
-        //load members list
-        //TODO: implement loading of members list (members, owner and admin list need all to be loaded separately)
+        //load members/admins/owners list
+        DDLogInfo(@"Querying members/adin/owner lists for muc %@...", iqNode.fromUser);
+        for(NSString* type in @[@"member", @"admin", @"owner"])
+        {
+            XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
+            [discoInfo setiqTo:iqNode.fromUser];
+            [discoInfo setMucListQueryFor:type];
+            [account sendIq:discoInfo withHandler:$newHandler(self, handleMembersList, $ID(type))];
+        }
+    }
+$$
+
+$$handler(handleMembersList, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, type))
+    DDLogInfo(@"Got %@s list from %@...", type, iqNode.fromUser);
+    for(NSDictionary* entry in [iqNode find:@"{http://jabber.org/protocol/muc#user}x/item@@"])
+    {
+        NSMutableDictionary* item = [entry mutableCopy];
+        if(!item)
+            continue;
+        //update jid to be a bare jid and add muc nick to our dict
+        if(item[@"jid"])
+            item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
+        [[DataLayer sharedInstance] addMember:item toMuc:iqNode.fromUser forAccountId:account.accountNo];
     }
 $$
 
 $$handler(handleMamResponseWithLatestId, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     DDLogVerbose(@"Got latest muc stanza id to prime database with: %@", [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
     //only do this if we got a valid stanza id (not null)
-    //if we did not get one we will get one when receiving the next message in this smacks session
+    //if we did not get one we will get one when receiving the next muc message in this smacks session
     //if the smacks session times out before we get a message and someone sends us one or more messages before we had a chance to establish
     //a new smacks session, this messages will get lost because we don't know how to query the archive for this message yet
     //once we successfully receive the first mam-archived message stanza (could even be an XEP-184 ack for a sent message),

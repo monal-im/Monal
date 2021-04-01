@@ -59,7 +59,10 @@ FOUNDATION_EXPORT NSString* const kiqErrorType;
 -(void) setMAMQueryAfter:(NSString*) uid;
 -(void) setMAMQueryForLatestId;
 
+-(void) setMucListQueryFor:(NSString*) listType;
+
 #pragma mark disco
+
 /**
  makes a disco info response for the server.
  @param node param passed is the xmpp node attribute that came in with the iq get

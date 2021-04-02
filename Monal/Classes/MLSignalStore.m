@@ -36,7 +36,7 @@
     return [MLSQLite sharedInstanceForFile:_dbPath];
 }
 
--(id) initWithAccountId:(NSString *) accountId{
+-(MLSignalStore*) initWithAccountId:(NSString *) accountId{
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSURL* containerUrl = [fileManager containerURLForSecurityApplicationGroupIdentifier:kAppGroup];
     _dbPath = [[containerUrl path] stringByAppendingPathComponent:@"sworim.sqlite"];

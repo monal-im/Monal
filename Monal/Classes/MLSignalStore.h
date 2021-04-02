@@ -25,7 +25,7 @@
 @property (nonatomic, strong) SignalSignedPreKey *signedPreKey;
 @property (nonatomic, strong) NSArray<SignalPreKey*>* preKeys;
 
--(id) initWithAccountId:(NSString *) accountId;
+-(MLSignalStore*) initWithAccountId:(NSString *) accountId;
 -(void) saveValues;
 
 -(NSData *) getIdentityForAddress:(SignalAddress*)address;

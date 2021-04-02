@@ -10,6 +10,7 @@
 #import "xmpp.h"
 #import "MLSQLite.h"
 #import "HelperTools.h"
+#import "MLDefinitions.h"
 #import "MLXMLNode.h"
 #import "XMPPPresence.h"
 #import "XMPPMessage.h"
@@ -1539,8 +1540,8 @@ static NSDateFormatter* dbFormatter;
 //count unread
 -(NSNumber*) countUnreadMessages
 {
-    // count # of meaages in message table
-    return [self.db executeScalar:@"SELECT COUNT(message_history_id) FROM message_history WHERE unread=1 AND inbound=1 AND NOT EXISTS(SELECT * FROM muteList WHERE jid=message_history.buddy_name);"];
+    // count # of msgs in message table
+    return [self.db executeScalar:@"SELECT COUNT(M.message_history_id) FROM message_history AS M INNER JOIN buddylist AS B ON M.account_id=B.account_id AND M.buddy_name=B.buddy_name WHERE M.unread=1 AND M.inbound=1 AND B.muted=0;"];
 }
 
 //set all unread messages to read
@@ -2550,6 +2551,15 @@ static NSDateFormatter* dbFormatter;
                 FOREIGN KEY('account_id', 'room') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
             );"];
         }];
+
+        // Migrate muteList to new format and delete old table
+        [self updateDBTo:5.016 withBlock:^{
+            [self.db executeNonQuery:@"UPDATE buddylist SET muted=1 \
+                WHERE buddy_name IN ( \
+                    SELECT DISTINCT jid FROM muteList \
+             );"];
+            [self.db executeNonQuery:@"DROP TABLE muteList;"];
+        }];
     }];
     [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
     [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
@@ -2559,35 +2569,35 @@ static NSDateFormatter* dbFormatter;
 }
 
 #pragma mark mute and block
--(void) muteJid:(NSString*) jid
+-(void) muteJid:(NSString*) jid onAccount:(NSString*) accountNo
 {
-    if(!jid) return;
-    NSString* query = @"INSERT INTO muteList(jid) VALUES(?);";
-    NSArray* params = @[jid];
-    [self.db executeNonQuery:query andArguments:params];
-}
-
--(void) unMuteJid:(NSString*) jid
-{
-    if(!jid) return;
-    NSString* query = @"DELETE FROM muteList WHERE jid=?;";
-    NSArray* params = @[jid];
-    [self.db executeNonQuery:query andArguments:params];
-}
-
--(BOOL) isMutedJid:(NSString*) jid
-{
-    if(!jid) return NO;
-    NSString* query = @"SELECT COUNT(jid) FROM muteList WHERE jid=?;";
-    NSArray* params = @[jid];
-    NSObject* val = [self.db executeScalar:query andArguments:params];
-        NSNumber* count = (NSNumber *) val;
-    BOOL toreturn = NO;
-    if(count.integerValue > 0)
+    if(!jid || !accountNo)
     {
-        toreturn = YES;
+        unreachable();
+        return;
     }
-    return toreturn;
+    [self.db executeNonQuery:@"UPDATE buddylist SET muted=1 WHERE account_id=? AND buddy_name=?" andArguments:@[accountNo, jid]];
+}
+
+-(void) unMuteJid:(NSString*) jid onAccount:(NSString*) accountNo
+{
+    if(!jid || !accountNo)
+    {
+        unreachable();
+        return;
+    }
+    [self.db executeNonQuery:@"UPDATE buddylist SET muted=0 WHERE account_id=? AND buddy_name=?" andArguments:@[accountNo, jid]];
+}
+
+-(BOOL) isMutedJid:(NSString*) jid onAccount:(NSString*) accountNo
+{
+    if(!jid || !accountNo)
+    {
+        unreachable();
+        return NO;
+    }
+    NSNumber* count = (NSNumber*)[self.db executeScalar:@"SELECT COUNT(buddy_name) FROM buddylist WHERE account_id=? AND buddy_name=? AND muted=1;" andArguments: @[accountNo, jid]];
+    return count.boolValue;
 }
 
 -(void) blockJid:(NSString*) jid withAccountNo:(NSString*) accountNo

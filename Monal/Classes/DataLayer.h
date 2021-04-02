@@ -235,10 +235,9 @@ extern NSString* const kMessageTypeFiletransfer;
 //set all unread messages to read
 -(void) setAllMessagesAsRead;
 
--(void) muteJid:(NSString *) jid;
--(void) unMuteJid:(NSString *) jid;
--(BOOL) isMutedJid:(NSString *) jid;
-
+-(void) muteJid:(NSString*) jid onAccount:(NSString*) accountNo;
+-(void) unMuteJid:(NSString*) jid onAccount:(NSString*) accountNo;
+-(BOOL) isMutedJid:(NSString*) jid onAccount:(NSString*) accountNo;
 
 -(void) blockJid:(NSString *) jid withAccountNo:(NSString*) accountNo;
 -(void) unBlockJid:(NSString *) jid withAccountNo:(NSString*) accountNo;

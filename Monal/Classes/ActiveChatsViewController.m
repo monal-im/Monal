@@ -574,7 +574,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     [[MLImageManager sharedInstance] getIconForContact:chatContact.contactJid andAccount:chatContact.accountId withCompletion:^(UIImage *image) {
         cell.userImage.image = image;
     }];
-    BOOL muted = [[DataLayer sharedInstance] isMutedJid:chatContact.contactJid];
+    BOOL muted = [[DataLayer sharedInstance] isMutedJid:chatContact.contactJid onAccount:chatContact.accountId];
     cell.muteBadge.hidden = !muted;
     return cell;
 }

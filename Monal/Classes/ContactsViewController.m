@@ -236,14 +236,14 @@
 {
     MLContact* contact = [self contactAtIndexPath:indexPath];
     if(contact)
-        [[DataLayer sharedInstance] muteJid:contact.contactJid];
+        [[DataLayer sharedInstance] muteJid:contact.contactJid onAccount:contact.accountId];
 }
 
 -(void) unMuteContactAtIndexPath:(NSIndexPath*) indexPath
 {
     MLContact* contact = [self contactAtIndexPath:indexPath];
     if(contact)
-        [[DataLayer sharedInstance] unMuteJid:contact.contactJid];
+        [[DataLayer sharedInstance] unMuteJid:contact.contactJid onAccount:contact.accountId];
 }
 
 
@@ -301,7 +301,7 @@
         cell.userImage.image = image;
     }];
     
-    BOOL muted = [[DataLayer sharedInstance] isMutedJid:row.contactJid];
+    BOOL muted = [[DataLayer sharedInstance] isMutedJid:row.contactJid onAccount:row.accountId];
     dispatch_async(dispatch_get_main_queue(), ^{
         cell.muteBadge.hidden = !muted;
     });

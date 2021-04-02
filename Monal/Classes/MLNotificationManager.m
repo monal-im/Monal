@@ -105,7 +105,7 @@
         return;
     
     DDLogVerbose(@"notification manager should show notification for: %@", message.messageText);
-    BOOL muted = [[DataLayer sharedInstance] isMutedJid:message.actualFrom];
+    BOOL muted = [[DataLayer sharedInstance] isMutedJid:message.actualFrom onAccount:message.accountId];
     if(!muted && showAlert)
     {
         if([HelperTools isNotInFocus])

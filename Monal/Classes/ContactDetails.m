@@ -591,16 +591,16 @@ enum ContactDetailsAboutRows {
 -(IBAction) muteContact:(id)sender
 {
     if(!self.isMuted) {
-        [[DataLayer sharedInstance] muteJid:self.contact.contactJid];
+        [[DataLayer sharedInstance] muteJid:self.contact.contactJid onAccount:self.accountNo];
     } else {
-        [[DataLayer sharedInstance] unMuteJid:self.contact.contactJid];
+        [[DataLayer sharedInstance] unMuteJid:self.contact.contactJid onAccount:self.accountNo];
     }
     [self refreshMute];
 }
 
 -(void) refreshMute
 {
-    BOOL muted = [[DataLayer sharedInstance] isMutedJid:self.contact.contactJid];
+    BOOL muted = [[DataLayer sharedInstance] isMutedJid:self.contact.contactJid onAccount:self.accountNo];
     self.isMuted = muted;
     dispatch_async(dispatch_get_main_queue(), ^{
         NSIndexPath* path = [NSIndexPath indexPathForRow:0 inSection:0];

@@ -826,7 +826,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSString*) getAvatarHashForContact:(NSString*) buddy andAccount:(NSString*) accountNo
 {
-    return [self.db idWriteTransaction:^{
+    return [self.db idReadTransaction:^{
         NSString* hash = [self.db executeScalar:@"SELECT iconhash FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
         if(!hash)       //try to get the hash of our own account
             hash = [self.db executeScalar:@"SELECT iconhash FROM account WHERE account_id=? AND printf('%s@%s', username, domain)=?;" andArguments:@[accountNo, buddy]];
@@ -933,7 +933,7 @@ static NSDateFormatter* dbFormatter;
 -(void) removeMember:(NSDictionary*) member fromMuc:(NSString*) room forAccountId:(NSString*) accountNo
 {
     if(!member || !member[@"jid"] || !room || !accountNo)
-        return;
+	        return;
     
     [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=? AND member_jid=?;" andArguments:@[accountNo, room, member[@"jid"]]];
 }
@@ -1355,7 +1355,7 @@ static NSDateFormatter* dbFormatter;
 
 -(NSArray*) messageHistoryDateForContact:(NSString*) contact forAccount:(NSString*) accountNo forDate:(NSString*) date
 {
-    return [self.db idWriteTransaction:^{
+    return [self.db idReadTransaction:^{
         NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? AND DATE(timestamp)=? ORDER BY message_history_id ASC;";
         NSArray* params = @[accountNo, contact, date];
         DDLogVerbose(@"%@", query);
@@ -1418,7 +1418,7 @@ static NSDateFormatter* dbFormatter;
 {
     if(!accountNo || !buddy || msgHistoryID == nil)
         return nil;
-    return [self.db idWriteTransaction:^{
+    return [self.db idReadTransaction:^{
         NSString* query = @"SELECT message_history_id FROM (SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? AND message_history_id<? ORDER BY message_history_id DESC LIMIT ?) ORDER BY message_history_id ASC;";
         NSNumber* msgLimit = @(kMonalChatFetchedMsgCnt);
         NSArray* params = @[accountNo, buddy, msgHistoryID, msgLimit];
@@ -1432,7 +1432,7 @@ static NSDateFormatter* dbFormatter;
     if(!accountNo || !contact)
         return nil;
     
-    return [self.db idWriteTransaction:^{
+    return [self.db idReadTransaction:^{
         //return message draft (if any)
         NSString* query = @"SELECT bl.messageDraft AS message, ac.lastMessageTime AS thetime, 'MessageDraft' AS messageType, '' AS af, '' AS filetransferMimeType, 0 AS filetransferSize, bl.Muc, bl.muc_type, bl.buddy_name FROM buddylist AS bl INNER JOIN activechats AS ac ON bl.account_id = ac.account_id AND bl.buddy_name = ac.buddy_name WHERE ac.account_id=? AND ac.buddy_name=? AND messageDraft IS NOT NULL AND messageDraft != '';";
         NSArray* params = @[accountNo, contact];
@@ -2794,9 +2794,11 @@ static NSDateFormatter* dbFormatter;
     if(lastInteractionTime)
         timestamp = [NSNumber numberWithInt:lastInteractionTime.timeIntervalSince1970];
 
-    NSString* query = @"UPDATE buddylist SET lastInteraction=? WHERE account_id=? AND buddy_name=?;";
-    NSArray* params = @[timestamp, accountNo, jid];
-    [self.db executeNonQuery:query andArguments:params];
+    [self.db voidWriteTransaction:^{
+        NSString* query = @"UPDATE buddylist SET lastInteraction=? WHERE account_id=? AND buddy_name=?;";
+        NSArray* params = @[timestamp, accountNo, jid];
+        [self.db executeNonQuery:query andArguments:params];
+    }];
 }
 
 #pragma mark - encryption
@@ -2835,7 +2837,7 @@ static NSDateFormatter* dbFormatter;
 {
     if(!keyword || !accountNo)
         return nil;
-    return [self.db idWriteTransaction:^{
+    return [self.db idReadTransaction:^{
         NSString *likeString = [NSString stringWithFormat:@"%%%@%%", keyword];
         NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id = ? AND (message like ? OR buddy_name LIKE ? OR messageType LIKE ?) ORDER BY timestamp ASC;";
         NSArray* params = @[accountNo, likeString, likeString, likeString];
@@ -2848,7 +2850,7 @@ static NSDateFormatter* dbFormatter;
 {
     if(!keyword || !accountNo)
         return nil;
-    return [self.db idWriteTransaction:^{
+    return [self.db idReadTransaction:^{
         NSString *likeString = [NSString stringWithFormat:@"%%%@%%", keyword];
         NSString* query = @"SELECT message_history_id FROM message_history WHERE account_id=? AND message LIKE ? AND buddy_name=? ORDER BY timestamp ASC;";
         NSArray* params = @[accountNo, likeString, contactJid];

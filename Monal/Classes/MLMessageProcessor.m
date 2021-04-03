@@ -297,9 +297,10 @@ static NSMutableDictionary* _typingNotifications;
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
                     
                     //update unread count in active chats list
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                        @"contact": [[DataLayer sharedInstance] contactForUsername:messageNode.toUser forAccount:account.accountNo]
-                    }];
+                    if([unread count])
+                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                            @"contact": [[DataLayer sharedInstance] contactForUsername:messageNode.toUser forAccount:account.accountNo]
+                        }];
                 }
                 
                 if(deleteMessage)
@@ -382,9 +383,10 @@ static NSMutableDictionary* _typingNotifications;
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
                 
                 //update unread count in active chats list
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                    @"contact": groupchatContact
-                }];
+                if([unread count])
+                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                        @"contact": groupchatContact
+                    }];
             }
             //incoming chat markers from participant
             //this will mark groupchat messages as read as soon as one of the participants sends a displayed chat-marker

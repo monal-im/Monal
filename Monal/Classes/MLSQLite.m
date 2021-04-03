@@ -347,7 +347,10 @@ static NSMutableDictionary* currentTransactions;
         if(!retval)
         {
             [NSThread sleepForTimeInterval:0.001f];		//wait one millisecond and retry again
-            DDLogWarn(@"Retrying transaction start...");
+            DDLogWarn(@"Retrying transaction start: %@", @{
+                @"newTransactionVia": [NSThread callStackSymbols],
+                @"currentTransactions": currentTransactions,
+            });
         }
     } while(!retval);
 #ifdef DEBUG

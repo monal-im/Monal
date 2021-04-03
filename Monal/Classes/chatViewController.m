@@ -1965,7 +1965,7 @@ enum msgSentState {
             } else  {
                 self.photos = [[NSMutableArray alloc] init];
                 MLChatImageCell* imageCell = (MLChatImageCell *) cell;
-                IDMPhoto* photo = [IDMPhoto photoWithImage:imageCell.thumbnailImage.image];
+                IDMPhoto* photo = [IDMPhoto photoWithImage:[imageCell getDisplayedImage]];
                 // photo.caption=[row objectForKey:@"caption"];
                 [self.photos addObject:photo];
             }
@@ -2142,7 +2142,7 @@ enum msgSentState {
         UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
         MLBaseCell* selectedCell = [self.messageTable cellForRowAtIndexPath:indexPath];
         if([selectedCell isKindOfClass:[MLChatImageCell class]])
-            pasteboard.image = ((MLChatImageCell*)selectedCell).thumbnailImage.image;
+            pasteboard.image = [(MLChatImageCell*)selectedCell getDisplayedImage];
         else if([selectedCell isKindOfClass:[MLLinkCell class]])
             pasteboard.URL = [NSURL URLWithString:((MLLinkCell*)selectedCell).link];
         else
@@ -2174,20 +2174,13 @@ enum msgSentState {
 -(MLBaseCell*) fileTransferCellCheckerWithInfo:(NSDictionary*)info direction:(BOOL)inDirection tableView:(UITableView*)tableView andMsg:(MLMessage*)row{
     MLBaseCell *cell = nil;
     //TODO JIM: explanation: this was already downloaded and it is an image --> show this image inline
-    if ([info[@"mimeType"] hasPrefix:@"image/"])
+    if([info[@"mimeType"] hasPrefix:@"image/"])
     {
-        MLChatImageCell* imageCell = (MLChatImageCell *) [self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable:tableView];
-        
-        if(imageCell.msg != row)
-        {
-            imageCell.msg = row;
-            imageCell.thumbnailImage.image = nil;
-            imageCell.loading = NO;
-            [imageCell loadImage];
-        }
+        MLChatImageCell* imageCell = (MLChatImageCell *)[self messageTableCellWithIdentifier:@"image" andInbound:inDirection fromTable:tableView];
+        [imageCell initCellWithMLMessage:row];
         cell = imageCell;
     }
-    else if ([info[@"mimeType"] hasPrefix:@"video/"])
+    else if([info[@"mimeType"] hasPrefix:@"video/"])
     {                
         MLFileTransferVideoCell* videoCell = (MLFileTransferVideoCell *) [self messageTableCellWithIdentifier:@"fileTransferVideo" andInbound:inDirection fromTable:tableView];
         NSString *videoStr = info[@"cacheFile"];
@@ -2196,7 +2189,7 @@ enum msgSentState {
                 
         cell = videoCell;
     }
-    else if ([info[@"mimeType"] hasPrefix:@"audio/"])
+    else if([info[@"mimeType"] hasPrefix:@"audio/"])
     {
         //we may wan to make a new kind later but for now this is perfectly functional
         MLFileTransferVideoCell* audioCell = (MLFileTransferVideoCell *) [self messageTableCellWithIdentifier:@"fileTransferAudio" andInbound:inDirection fromTable:tableView];

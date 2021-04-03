@@ -10,8 +10,18 @@
 #import "MLImageManager.h"
 #import "MLFiletransfer.h"
 #import "MLMessage.h"
+#import "MLDefinitions.h"
+
 @import QuartzCore;
 @import UIKit;
+
+@interface MLChatImageCell()
+
+@property (nonatomic, weak) IBOutlet UIImageView* thumbnailImage;
+@property (nonatomic, weak) IBOutlet UIActivityIndicatorView* spinner;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint* imageHeight;
+
+@end
 
 @implementation MLChatImageCell
 
@@ -24,28 +34,47 @@
     self.thumbnailImage.layer.masksToBounds = YES;
 }
 
--(void) loadImage
+// init a image cell if needed
+-(void) initCellWithMLMessage:(MLMessage*) message
 {
-    if(self.msg.messageText && self.thumbnailImage.image == nil && !self.loading)
+    // reset image view if we open a new message
+    if(self.messageHistoryId != message.messageDBId)
+    {
+        self.thumbnailImage.image = nil;
+    }
+    // init base cell
+    [super initCell:message];
+    // load image and display it in the UI if needed
+    [self loadImage:message];
+}
+
+/// Load the image from messageText (link) and display it in the UI
+-(void) loadImage:(MLMessage*) msg
+{
+    if(msg.messageText && self.thumbnailImage.image == nil)
     {
         [self.spinner startAnimating];
-        self.loading=YES;
-        NSString* currentLink = self.msg.messageText;
-        NSDictionary* info = [MLFiletransfer getFileInfoForMessage:self.msg];
+        NSDictionary* info = [MLFiletransfer getFileInfoForMessage:msg];
         if(info && [info[@"mimeType"] hasPrefix:@"image/"])
         {
-            if([currentLink isEqualToString:self.msg.messageText])
-            {
-                UIImage* image = [[UIImage alloc] initWithContentsOfFile:info[@"cacheFile"]];
-                [self.thumbnailImage setImage:image];
-                self.link = currentLink;
-                if(image && image.size.height > image.size.width)
-                    self.imageHeight.constant = 360;
-                self.loading = NO;
-                [self.spinner stopAnimating];
-            }
+            // uses cached file if the file was already downloaded
+            UIImage* image = [[UIImage alloc] initWithContentsOfFile:info[@"cacheFile"]];
+            [self.thumbnailImage setImage:image];
+            self.link = msg.messageText;
+            if(image && image.size.height > image.size.width)
+                self.imageHeight.constant = 360;
         }
+        else
+        {
+            unreachable();
+        }
+        [self.spinner stopAnimating];
     }
+}
+
+-(UIImage*) getDisplayedImage
+{
+    return self.thumbnailImage.image;
 }
 
 -(void) setSelected:(BOOL) selected animated:(BOOL) animated
@@ -62,7 +91,7 @@
 -(void) copy:(id) sender
 {
     UIPasteboard* pboard = [UIPasteboard generalPasteboard];
-    pboard.image = self.thumbnailImage.image; 
+    pboard.image = [self getDisplayedImage];
 }
 
 -(void) prepareForReuse

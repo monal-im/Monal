@@ -12,13 +12,9 @@
 
 @interface MLChatImageCell : MLBaseCell
 
-@property (nonatomic, weak) IBOutlet UIImageView *thumbnailImage;
-@property (nonatomic, weak) IBOutlet UIActivityIndicatorView *spinner;
-@property (nonatomic, weak) IBOutlet NSLayoutConstraint *imageHeight;
-@property (nonatomic, assign) BOOL loading;
-@property (nonatomic) MLMessage* msg;
+-(void) initCellWithMLMessage:(MLMessage*) message;
 
--(void) loadImage;
+-(UIImage*) getDisplayedImage;
 
 @end
 

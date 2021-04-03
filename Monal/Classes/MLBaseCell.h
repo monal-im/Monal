@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "MLConstants.h"
+#import "MLMessage.h"
 
 #define kDefaultTextHeight 20
 #define kDefaultTextOffset 5
@@ -53,5 +54,7 @@
  is the same as the prior cell's sender
  **/
 -(void) updateCellWithNewSender:(BOOL) newSender;
+
+-(void) initCell:(MLMessage*) message;
 
 @end

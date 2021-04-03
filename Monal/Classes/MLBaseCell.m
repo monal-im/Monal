@@ -8,17 +8,32 @@
 
 #import "HelperTools.h"
 #import "MLBaseCell.h"
+#import "MLMessage.h"
 
 @implementation MLBaseCell
 
 -(id) init
 {
     self = [super init];
+    [self setRetryButtonImage];
+    return self;
+}
+
+-(void) initCell:(MLMessage*) message
+{
+    [self setRetryButtonImage];
+
+    self.messageHistoryId = message.messageDBId;
+    self.messageBody.text = message.messageText;
+    self.outBound = !message.inbound;
+}
+
+-(void) setRetryButtonImage
+{
     if(@available(iOS 13.0, *))
         [self.retry setImage:[UIImage systemImageNamed:@"info.circle"] forState:UIControlStateNormal];
     else
         [self.retry setImage:[UIImage imageNamed:@"724-info"] forState:UIControlStateNormal];
-    return self;
 }
 
 - (void)awakeFromNib {

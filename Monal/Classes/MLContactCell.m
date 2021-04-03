@@ -51,19 +51,19 @@
     if(lastMessage)
     {
         if([lastMessage.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
-            [self showStatusText:NSLocalizedString(@"🔗 A Link", @"")];
+            [self showStatusText:NSLocalizedString(@"🔗 A Link", @"") inboundDir:lastMessage.inbound];
         else if([lastMessage.messageType isEqualToString:kMessageTypeFiletransfer])
         {
             if([lastMessage.filetransferMimeType hasPrefix:@"image/"])
-                [self showStatusText:NSLocalizedString(@"📷 An Image", @"")];
+                [self showStatusText:NSLocalizedString(@"📷 An Image", @"") inboundDir:lastMessage.inbound];
             else if([lastMessage.filetransferMimeType hasPrefix:@"audio/"])
-                [self showStatusText:NSLocalizedString(@"🎵 A Audiomessage", @"")];
+                [self showStatusText:NSLocalizedString(@"🎵 A Audiomessage", @"") inboundDir:lastMessage.inbound];
             else if([lastMessage.filetransferMimeType hasPrefix:@"video/"])
-                [self showStatusText:NSLocalizedString(@"🎥 A Video", @"")];
+                [self showStatusText:NSLocalizedString(@"🎥 A Video", @"") inboundDir:lastMessage.inbound];
             else if([lastMessage.filetransferMimeType isEqualToString:@"application/pdf"])
-                [self showStatusText:NSLocalizedString(@"📄 A Document", @"")];
+                [self showStatusText:NSLocalizedString(@"📄 A Document", @"") inboundDir:lastMessage.inbound];
             else
-                [self showStatusText:NSLocalizedString(@"📁 A File", @"")];
+                [self showStatusText:NSLocalizedString(@"📁 A File", @"") inboundDir:lastMessage.inbound];
         }
         else if ([lastMessage.messageType isEqualToString:kMessageTypeMessageDraft])
         {
@@ -71,17 +71,18 @@
             [self showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, 6)];
         }
         else if([lastMessage.messageType isEqualToString:kMessageTypeGeo])
-            [self showStatusText:NSLocalizedString(@"📍 A Location", @"")];
+            [self showStatusText:NSLocalizedString(@"📍 A Location", @"") inboundDir:lastMessage.inbound];
         else
         {
-            NSString* displayName;
-            xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
-            if(lastMessage.inbound == NO)
-                displayName = [MLContact ownDisplayNameForAccount:account];
-            else
-                displayName = [contact contactDisplayName];
             if([lastMessage.messageText hasPrefix:@"/me "])
             {
+                NSString* displayName;
+                xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:contact.accountId];
+                if(lastMessage.inbound == NO)
+                    displayName = [MLContact ownDisplayNameForAccount:account];
+                else
+                    displayName = [contact contactDisplayName];
+
                 NSString* replacedMessageText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:contact.accountId displayName:displayName actualFrom:lastMessage.actualFrom message:lastMessage.messageText isGroup:contact.isGroup];
 
                 NSRange replacedMsgAttrRange = NSMakeRange(0, replacedMessageText.length);
@@ -90,7 +91,7 @@
             }
             else
             {
-                [self showStatusText:lastMessage.messageText];
+                [self showStatusText:lastMessage.messageText inboundDir:lastMessage.inbound];
             }
         }
         if(lastMessage.timestamp)
@@ -103,17 +104,36 @@
     }
     else
     {
-        [self showStatusText:nil];
+        [self showStatusText:nil inboundDir:lastMessage.inbound];
         DDLogWarn(@"Active chat but no messages found in history for %@.", contact.contactJid);
     }
 }
 
--(void) showStatusText:(NSString *) text
+-(void) showStatusText:(NSString *) text inboundDir:(BOOL) inboundDir
 {
-    if(![self.statusText.text isEqualToString:text])
+    NSString* statusMessage = @"";
+    if(inboundDir == NO)
+        statusMessage = [NSString stringWithFormat:@"%@ ", NSLocalizedString(@"Me", @"")];
+    // set range of "Me" prefix that should be gray
+    NSRange meAttrRange = NSMakeRange(0, statusMessage.length);
+
+    if(text != nil)
     {
-        self.statusText.text = text;
-        [self setStatusTextLayout:text];
+        statusMessage = [statusMessage stringByAppendingString:text];
+        // set attribute settings
+        NSMutableAttributedString* attrStatusText = [[NSMutableAttributedString alloc] initWithString:statusMessage];
+        [attrStatusText addAttribute:NSForegroundColorAttributeName value:[UIColor lightGrayColor] range:meAttrRange];
+
+        if(![attrStatusText isEqualToAttributedString:self.statusText.originalAttributedText])
+        {
+            // only update UI if needed
+            self.statusText.attributedText = attrStatusText;
+            [self setStatusTextLayout:text];
+        }
+    }
+    else
+    {
+        self.statusText.text = nil;
     }
 }
 

@@ -208,18 +208,14 @@ static NSMutableSet* _smacksWarningDisplayed;
 
 -(void) handleNewMessage:(NSNotification*) notification
 {
-    MLMessage* newMessage = [notification.userInfo objectForKey:@"message"];
+    MLMessage* newMessage = notification.userInfo[@"message"];
+    MLContact* contact = notification.userInfo[@"contact"];
     xmpp* msgAccount = (xmpp*)notification.object;
+    if(!msgAccount)
+        return;
     if([newMessage.messageType isEqualToString:kMessageTypeStatus])
         return;
 
-    if(!msgAccount)
-        return;
-
-    MLContact* contact = [[DataLayer sharedInstance] contactForUsername:newMessage.buddyName forAccount:newMessage.accountId];
-    if(!contact)
-        return;
-    
     // contact.statusMessage = newMessage;
     [self insertOrMoveContact:contact completion:nil];
 }
@@ -504,8 +500,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     
     cell.accountNo = chatContact.accountId.integerValue;
     cell.username = chatContact.contactJid;
-    NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:chatContact.contactJid forAccount:chatContact.accountId];
-    cell.count = [unreadMsgCnt integerValue];
+    cell.count = chatContact.unreadCount;
     
     // Display msg draft or last msg
     MLMessage* messageRow = [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:chatContact.accountId];

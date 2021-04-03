@@ -309,6 +309,8 @@ static NSMutableDictionary* _typingNotifications;
                     DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyId);
                     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
                         @"message": message,
+                        @"historyId": historyId,
+                        @"contact": [[DataLayer sharedInstance] contactForUsername:message.buddyName forAccount:account.accountNo],
                     }];
                 }
                 else
@@ -323,10 +325,10 @@ static NSMutableDictionary* _typingNotifications;
                         @"message": message,
                         @"historyId": historyId,
                         @"showAlert": @(showAlert),
+                        @"contact": [[DataLayer sharedInstance] contactForUsername:message.buddyName forAccount:account.accountNo],
                     }];
                     
                     //try to automatically determine content type of filetransfers
-                    //TODO JIM: this should be the config key to enable/disable auto downloads
                     if(messageType == kMessageTypeFiletransfer && [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"])
                         [MLFiletransfer checkMimeTypeAndSizeForHistoryID:historyId];
                 }

@@ -467,11 +467,17 @@ static NSDateFormatter* dbFormatter;
             @"status": @"",
             @"state": @"offline",
             @"count": @0,
-            @"isActiveChat": @NO
+            @"isActiveChat": @NO,
+            @"count": [self countUserUnreadMessages:username forAccount:accountNo],
         }];
     }
     else
-        return [MLContact contactFromDictionary:results[0]];
+    {
+        //add unread message count to contact dict
+        NSMutableDictionary* contact = [results[0] mutableCopy];
+        contact[@"count"] = [self countUserUnreadMessages:username forAccount:accountNo];
+        return [MLContact contactFromDictionary:contact];
+    }
 }
 
 

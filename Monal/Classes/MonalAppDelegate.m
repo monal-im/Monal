@@ -734,7 +734,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) addBackgroundTask
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
+    [HelperTools dispatchSyncReentrant:^{
         if(_bgTask == UIBackgroundTaskInvalid)
         {
             //indicate we want to do work even if the app is put into background
@@ -760,7 +760,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                 _bgTask = UIBackgroundTaskInvalid;
             }];
         }
-    });
+    } onQueue:dispatch_get_main_queue()];
 }
 
 -(void) handleBackgroundFetchingTask:(BGTask*) task API_AVAILABLE(ios(13.0))

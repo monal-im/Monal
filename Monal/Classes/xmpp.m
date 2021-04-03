@@ -22,6 +22,7 @@
 #import "DataLayer.h"
 #import "HelperTools.h"
 #import "MLXMPPManager.h"
+#import "MLNotificationQueue.h"
 
 #import "MLImageManager.h"
 
@@ -954,15 +955,18 @@ NSString *const kData=@"data";
                 //use a synchronous dispatch to make sure no (old) tcp buffers of disconnected connections leak into the receive queue on app unfreeze
                 DDLogVerbose(@"Synchronously handling next stanza on receive queue (%lu stanzas queued in parse queue, %lu current operations in receive queue)", [self->_parseQueue operationCount], [self->_receiveQueue operationCount]);
                 [self->_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
-                    DDLogVerbose(@"Starting transaction for: %@", parsedStanza);
-                    //add whole processing of incoming stanzas to one big transaction
-                    //this will make it impossible to leave inconsistent database entries on app crashes or iphone crashes/reboots
-                    [[DataLayer sharedInstance] createTransaction:^{
-                        DDLogVerbose(@"Started transaction for: %@", parsedStanza);
-                        [self processInput:parsedStanza];
-                        DDLogVerbose(@"Ending transaction for: %@", parsedStanza);
-                    }];
-                    DDLogVerbose(@"Ended transaction for: %@", parsedStanza);
+                    [MLNotificationQueue queueNotificationsInBlock:^{
+                        //add whole processing of incoming stanzas to one big transaction
+                        //this will make it impossible to leave inconsistent database entries on app crashes or iphone crashes/reboots
+                        DDLogVerbose(@"Starting transaction for: %@", parsedStanza);
+                        [[DataLayer sharedInstance] createTransaction:^{
+                            DDLogVerbose(@"Started transaction for: %@", parsedStanza);
+                            [self processInput:parsedStanza];
+                            DDLogVerbose(@"Ending transaction for: %@", parsedStanza);
+                        }];
+                        DDLogVerbose(@"Ended transaction for: %@", parsedStanza);
+                    } onQueue:@"receiveQueue"];
+                    DDLogVerbose(@"Flushed all queued notifications...");
                 }]] waitUntilFinished:YES];
             }]] waitUntilFinished:NO];
         }];
@@ -1371,31 +1375,26 @@ NSString *const kData=@"data";
                         if([presenceNode check:@"{urn:xmpp:idle:1}idle@since"])
                         {
                             NSDate* lastInteraction = [[DataLayer sharedInstance] lastInteractionOfJid:presenceNode.fromUser forAccountNo:self.accountNo];
-                            
                             if([[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] compare:lastInteraction] == NSOrderedDescending)
                             {
-                                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                                    [[DataLayer sharedInstance] setLastInteraction:[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] forJid:presenceNode.fromUser andAccountNo:self.accountNo];
+                                [[DataLayer sharedInstance] setLastInteraction:[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] forJid:presenceNode.fromUser andAccountNo:self.accountNo];
 
-                                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
-                                        @"jid": presenceNode.fromUser,
-                                        @"accountNo": self.accountNo,
-                                        @"lastInteraction": [presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"],
-                                        @"isTyping": @NO
-                                    }];
-                                });
+                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                                    @"jid": presenceNode.fromUser,
+                                    @"accountNo": self.accountNo,
+                                    @"lastInteraction": [presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"],
+                                    @"isTyping": @NO
+                                }];
                             }
                         }
                         else
                         {
-                            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
-                                    @"jid": presenceNode.fromUser,
-                                    @"accountNo": self.accountNo,
-                                    @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:0],    //nil cannot directly be saved in NSDictionary
-                                    @"isTyping": @NO
-                                }];
-                            });
+                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                                @"jid": presenceNode.fromUser,
+                                @"accountNo": self.accountNo,
+                                @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:0],    //nil cannot directly be saved in NSDictionary
+                                @"isTyping": @NO
+                            }];
                         }
                     }
                     else

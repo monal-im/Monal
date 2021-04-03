@@ -240,6 +240,8 @@
 		54507CE8255D8C47007092F4 /* MLFiletransfer.h in Headers */ = {isa = PBXBuildFile; fileRef = 54507CE7255D8C47007092F4 /* MLFiletransfer.h */; };
 		5455BC3324EB776F0024D80F /* MLUDPLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 5455BC3024EB776B0024D80F /* MLUDPLogger.m */; };
 		5455BC3424EB776F0024D80F /* MLUDPLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = 5455BC3224EB776E0024D80F /* MLUDPLogger.h */; };
+		54A22D2526185C2900B56EAD /* MLNotificationQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 54A22D2426185C2900B56EAD /* MLNotificationQueue.m */; };
+		54A22D2D26185E7E00B56EAD /* MLNotificationQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 54A22D2C26185E7E00B56EAD /* MLNotificationQueue.h */; };
 		54D2307E24CB0F4600638D65 /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		54D2308424CB10EE00638D65 /* MLLogFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C15D504A24C727CC002F75BB /* MLLogFileManager.m */; };
 		54E594BD2523C34B00E4172B /* MLPubSub.h in Headers */ = {isa = PBXBuildFile; fileRef = 54E594BA2523C34900E4172B /* MLPubSub.h */; };
@@ -815,6 +817,8 @@
 		54507CE7255D8C47007092F4 /* MLFiletransfer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLFiletransfer.h; sourceTree = "<group>"; };
 		5455BC3024EB776B0024D80F /* MLUDPLogger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLUDPLogger.m; sourceTree = "<group>"; };
 		5455BC3224EB776E0024D80F /* MLUDPLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLUDPLogger.h; sourceTree = "<group>"; };
+		54A22D2426185C2900B56EAD /* MLNotificationQueue.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLNotificationQueue.m; sourceTree = "<group>"; };
+		54A22D2C26185E7E00B56EAD /* MLNotificationQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLNotificationQueue.h; sourceTree = "<group>"; };
 		54E594BA2523C34900E4172B /* MLPubSub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLPubSub.h; sourceTree = "<group>"; };
 		54E594BC2523C34A00E4172B /* MLPubSub.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLPubSub.m; sourceTree = "<group>"; };
 		6142E73A9912F6E327A8CD14 /* Pods-Monal Tests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Monal Tests.adhoc.xcconfig"; path = "Target Support Files/Pods-Monal Tests/Pods-Monal Tests.adhoc.xcconfig"; sourceTree = "<group>"; };
@@ -1676,6 +1680,7 @@
 		26F7BB3A1115F8A300712672 /* tools */ = {
 			isa = PBXGroup;
 			children = (
+				54A22D2C26185E7E00B56EAD /* MLNotificationQueue.h */,
 				5455BC3224EB776E0024D80F /* MLUDPLogger.h */,
 				5455BC3024EB776B0024D80F /* MLUDPLogger.m */,
 				540BD0D324D8D1FF0087A743 /* IPC.m */,
@@ -1694,6 +1699,7 @@
 				541E4CBF254AA0E700FD7B28 /* MLHandler.m */,
 				C1850E5E25F34895003D506A /* MLDefinitions.h */,
 				C10490482612ED2F0054AC9E /* MLEmoji.swift */,
+				54A22D2426185C2900B56EAD /* MLNotificationQueue.m */,
 			);
 			name = tools;
 			sourceTree = "<group>";
@@ -1908,6 +1914,7 @@
 				C1C839DD24F15DF800BBCF17 /* MLOMEMO.h in Headers */,
 				26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */,
 				C158D40025A0AB810005AA40 /* MLMucProcessor.h in Headers */,
+				54A22D2D26185E7E00B56EAD /* MLNotificationQueue.h in Headers */,
 				541E4CC4254D369200FD7B28 /* MLPubSubProcessor.h in Headers */,
 				389E298D25E901CA009A5268 /* MLAudioRecoderManager.h in Headers */,
 				541E4CBE254AA0B600FD7B28 /* MLHandler.h in Headers */,
@@ -2756,6 +2763,7 @@
 				C1C839DE24F15DF800BBCF17 /* MLOMEMO.m in Sources */,
 				26CC57B223A086CC00ABB92A /* MLXMLNode.m in Sources */,
 				26CC57A523A086AA00ABB92A /* MLXMPPIdentity.m in Sources */,
+				54A22D2526185C2900B56EAD /* MLNotificationQueue.m in Sources */,
 				54E594BE2523C34B00E4172B /* MLPubSub.m in Sources */,
 				26CC57B723A0876300ABB92A /* MLEncryptedPayload.m in Sources */,
 				26CC57B523A086CC00ABB92A /* XMPPMessage.m in Sources */,

@@ -18,6 +18,7 @@
 #import "MLOMEMO.h"
 #import "MLFiletransfer.h"
 #import "MLMucProcessor.h"
+#import "MLNotificationQueue.h"
 
 @interface MLPubSub ()
 -(void) handleHeadlineMessage:(XMPPMessage*) messageNode;

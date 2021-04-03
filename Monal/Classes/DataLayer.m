@@ -1491,7 +1491,7 @@ static NSDateFormatter* dbFormatter;
 -(BOOL) messageHistoryClean:(NSString*) buddy forAccount:(NSString*) accountNo
 {
     return [self.db boolWriteTransaction:^{
-        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=? AND buddy_name=?;" andArguments:@[kMessageTypeFiletransfer, accountNo, buddy, buddy]];
+        NSArray* messageHistoryIDs = [self.db executeScalarReader:@"SELECT message_history_id FROM message_history WHERE messageType=? AND account_id=? AND buddy_name=?;" andArguments:@[kMessageTypeFiletransfer, accountNo, buddy]];
         for(NSNumber* historyId in messageHistoryIDs)
             [MLFiletransfer deleteFileForMessage:[self messageForHistoryID:historyId]];
         return [self.db executeNonQuery:@"DELETE FROM message_history WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];

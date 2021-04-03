@@ -274,6 +274,28 @@ static NSMutableDictionary* currentTransactions;
     }
 }
 
+-(void) testTransactionsForQuery:(NSString*) query andArguments:(NSArray*) args
+{
+    //ignore pragma "queries" in this test --> pragma "queries" are allowed outside of transactions, too
+    if([[query uppercaseString] hasPrefix:@"PRAGMA "])
+        return;
+    NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+    if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
+    {
+        DDLogError(@"Tried to run query outside of transaction: '%@' having params %@", query ? query : @"", args ? args : @[]);
+#ifdef DEBUG
+        DDLogError(@"currentTransactions: %@", currentTransactions);
+#endif
+        @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Tried to run query outside of transaction!" userInfo:@{
+#ifdef DEBUG
+            @"currentTransactions": currentTransactions,
+#endif
+            @"query": query ? query : [NSNull null],
+            @"args": args ? args : [NSNull null]
+        }];
+    }
+}
+
 -(void) checkQuery:(NSString*) query
 {
     if(!query || [query length] == 0)
@@ -378,7 +400,7 @@ static NSMutableDictionary* currentTransactions;
     threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:[threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] - 1];
     if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
     {
-        [self executeNonQuery:@"COMMIT;"];		//commit only outermost transaction
+        [self executeNonQuery:@"COMMIT;" andArguments:@[] withException:YES];        //commit only outermost transaction
 #ifdef DEBUG
         NSString* ownThread = [self calcThreadName];
         @synchronized(currentTransactions) {
@@ -446,7 +468,7 @@ static NSMutableDictionary* currentTransactions;
     threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:[threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] - 1];
     if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
     {
-        [self executeNonQuery:@"COMMIT;"];		//commit only outermost transaction
+        [self executeNonQuery:@"COMMIT;" andArguments:@[] withException:YES];        //commit only outermost transaction
         threadData[@"_sqliteStartedReadTransaction"][_dbFile] = @NO;
 #ifdef DEBUG
         NSString* ownThread = [self calcThreadName];
@@ -465,8 +487,8 @@ static NSMutableDictionary* currentTransactions;
 -(id) executeScalar:(NSString*) query andArguments:(NSArray*) args
 {
     [self checkQuery:query];
-    
     [self testThreadInstanceForQuery:query andArguments:args];
+    [self testTransactionsForQuery:query andArguments:args];
     
     id __block toReturn;
     sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
@@ -498,8 +520,8 @@ static NSMutableDictionary* currentTransactions;
 -(NSArray*) executeScalarReader:(NSString*) query andArguments:(NSArray*) args
 {
     [self checkQuery:query];
-    
     [self testThreadInstanceForQuery:query andArguments:args];
+    [self testTransactionsForQuery:query andArguments:args];
     
     NSMutableArray* __block toReturn = [[NSMutableArray alloc] init];
     sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
@@ -533,8 +555,8 @@ static NSMutableDictionary* currentTransactions;
 -(NSMutableArray*) executeReader:(NSString*) query andArguments:(NSArray*) args
 {
     [self checkQuery:query];
-    
     [self testThreadInstanceForQuery:query andArguments:args];
+    [self testTransactionsForQuery:query andArguments:args];
 
     NSMutableArray* toReturn = [[NSMutableArray alloc] init];
     sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
@@ -572,18 +594,21 @@ static NSMutableDictionary* currentTransactions;
 -(BOOL) executeNonQuery:(NSString*) query
 {
     [self testThreadInstanceForQuery:query andArguments:@[]];
+    [self testTransactionsForQuery:query andArguments:@[]];
     return [self executeNonQuery:query andArguments:@[] withException:YES];
 }
 
 -(BOOL) executeNonQuery:(NSString*) query andArguments:(NSArray*) args
 {
     [self testThreadInstanceForQuery:query andArguments:args];
+    [self testTransactionsForQuery:query andArguments:args];
     return [self executeNonQuery:query andArguments:args withException:YES];
 }
 
 -(NSNumber*) lastInsertId
 {
     [self testThreadInstanceForQuery:@"lastInsertId" andArguments:nil];
+    [self testTransactionsForQuery:@"lastInsertId" andArguments:nil];
     return [NSNumber numberWithInt:(int)sqlite3_last_insert_rowid(self->_database)];
 }
 

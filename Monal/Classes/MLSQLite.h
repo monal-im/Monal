@@ -18,6 +18,12 @@ typedef BOOL (^monal_sqlite_bool_operations_t)(void);
 
 +(id) sharedInstanceForFile:(NSString*) dbFile;
 
+-(void) voidReadTransaction:(monal_void_block_t) operations;
+-(BOOL) boolReadTransaction:(monal_sqlite_bool_operations_t) operations;
+-(id) idReadTransaction:(monal_sqlite_operations_t) operations;
+-(void) beginReadTransaction;
+-(void) endReadTransaction;
+
 -(void) voidWriteTransaction:(monal_void_block_t) operations;
 -(BOOL) boolWriteTransaction:(monal_sqlite_bool_operations_t) operations;
 -(id) idWriteTransaction:(monal_sqlite_operations_t) operations;

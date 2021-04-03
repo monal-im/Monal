@@ -55,9 +55,13 @@ static NSMutableDictionary* currentTransactions;
         threadData[@"_sqliteInstancesForThread"] = [[NSMutableDictionary alloc] init];
     if(!threadData[@"_sqliteTransactionsRunning"])
         threadData[@"_sqliteTransactionsRunning"] = [[NSMutableDictionary alloc] init];
-    //save thread local data
-    threadData[@"_sqliteInstancesForThread"][dbFile] = newInstance;                    //save thread-local instance
-    threadData[@"_sqliteTransactionsRunning"][dbFile] = [NSNumber numberWithInt:0];    //init data for nested transactions
+    if(!threadData[@"_sqliteStartedReadTransaction"])
+        threadData[@"_sqliteStartedReadTransaction"] = [[NSMutableDictionary alloc] init];
+    //save thread-local instance
+    threadData[@"_sqliteInstancesForThread"][dbFile] = newInstance;
+    //init data for nested transactions
+    threadData[@"_sqliteTransactionsRunning"][dbFile] = [NSNumber numberWithInt:0];
+    threadData[@"_sqliteStartedReadTransaction"][dbFile] = @NO;
     return newInstance;
 }
 
@@ -338,6 +342,12 @@ static NSMutableDictionary* currentTransactions;
 {
     [self testThreadInstanceForQuery:@"beginWriteTransaction" andArguments:nil];
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+    if([threadData[@"_sqliteStartedReadTransaction"][_dbFile] boolValue])
+        @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Tried to start write transaction inside running read transaction!" userInfo:@{
+#ifdef DEBUG
+            @"currentTransactions": currentTransactions,
+#endif
+        }];
     threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] + 1)];
     if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 1)
         return;			//begin only outermost transaction
@@ -347,8 +357,8 @@ static NSMutableDictionary* currentTransactions;
         if(!retval)
         {
             [NSThread sleepForTimeInterval:0.001f];		//wait one millisecond and retry again
-            DDLogWarn(@"Retrying transaction start: %@", @{
-                @"newTransactionVia": [NSThread callStackSymbols],
+            DDLogWarn(@"Retrying write transaction start: %@", @{
+                @"newWriteTransactionVia": [NSThread callStackSymbols],
                 @"currentTransactions": currentTransactions,
             });
         }
@@ -369,6 +379,75 @@ static NSMutableDictionary* currentTransactions;
     if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
     {
         [self executeNonQuery:@"COMMIT;"];		//commit only outermost transaction
+#ifdef DEBUG
+        NSString* ownThread = [self calcThreadName];
+        @synchronized(currentTransactions) {
+            [currentTransactions removeObjectForKey:ownThread];
+        }
+#endif
+    }
+}
+
+-(void) voidReadTransaction:(monal_void_block_t) operations
+{
+    [self idReadTransaction:^(void){
+        operations();
+        return (NSObject*)nil;      //dummy return value
+    }];
+}
+
+-(BOOL) boolReadTransaction:(monal_sqlite_bool_operations_t) operations
+{
+    return [[self idReadTransaction:^(void){
+        return [NSNumber numberWithBool:operations()];
+    }] boolValue];
+}
+
+-(id) idReadTransaction:(monal_sqlite_operations_t) operations
+{
+    [self beginReadTransaction];
+    id retval = operations();
+    [self endReadTransaction];
+    return retval;
+}
+
+-(void) beginReadTransaction
+{
+    [self testThreadInstanceForQuery:@"beginReadTransaction" andArguments:nil];
+    NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+    threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] + 1)];
+    if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 1)
+        return;			//begin only outermost transaction
+    BOOL retval;
+    do {
+        retval=[self executeNonQuery:@"BEGIN DEFERRED TRANSACTION;" andArguments:@[] withException:NO];
+        if(!retval)
+        {
+            [NSThread sleepForTimeInterval:0.001f];		//wait one millisecond and retry again
+            DDLogWarn(@"Retrying read transaction start: %@", @{
+                @"newReadTransactionVia": [NSThread callStackSymbols],
+                @"currentTransactions": currentTransactions,
+            });
+        }
+    } while(!retval);
+    threadData[@"_sqliteStartedReadTransaction"][_dbFile] = @YES;
+#ifdef DEBUG
+    NSString* ownThread = [self calcThreadName];
+    @synchronized(currentTransactions) {
+        currentTransactions[ownThread] = [NSThread callStackSymbols];
+    }
+#endif
+}
+
+-(void) endReadTransaction
+{
+    [self testThreadInstanceForQuery:@"endReadTransaction" andArguments:nil];
+    NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
+    threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:[threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] - 1];
+    if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
+    {
+        [self executeNonQuery:@"COMMIT;"];		//commit only outermost transaction
+        threadData[@"_sqliteStartedReadTransaction"][_dbFile] = @NO;
 #ifdef DEBUG
         NSString* ownThread = [self calcThreadName];
         @synchronized(currentTransactions) {

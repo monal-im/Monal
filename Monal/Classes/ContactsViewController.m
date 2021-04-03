@@ -267,44 +267,14 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    MLContact* row = [self.contacts objectAtIndex:indexPath.row];
+    MLContact* contact = [self.contacts objectAtIndex:indexPath.row];
     
     MLContactCell* cell = [tableView dequeueReusableCellWithIdentifier:@"ContactCell"];
     if(!cell)
         cell = [[MLContactCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"ContactCell"];
-    
-    cell.count = 0;
-    cell.userImage.image = nil;
-    cell.statusText.text = @"";
-    
-    [cell showDisplayName:row.contactDisplayName];
-    
-    if(![row.statusMessage isEqualToString:@"(null)"] && ![row.statusMessage isEqualToString:@""])
-        [cell showStatusText:row.statusMessage];
-    else
-        [cell showStatusText:nil];
-    
-    if(row.isGroup && row.groupSubject)
-        [cell showStatusText:row.groupSubject];
-    
+    [cell initCell:contact withLastMessage:nil];
     cell.accessoryType = UITableViewCellAccessoryDetailDisclosureButton;
     
-    cell.accountNo = [row.accountId integerValue];
-    cell.username = row.contactJid;
-
-    NSNumber* unreadMessagesCnt = [[DataLayer sharedInstance] countUserUnreadMessages:cell.username forAccount:row.accountId];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        cell.count = [unreadMessagesCnt integerValue];
-    });
-
-    [[MLImageManager sharedInstance] getIconForContact:row.contactJid andAccount:row.accountId withCompletion:^(UIImage *image) {
-        cell.userImage.image = image;
-    }];
-    
-    BOOL muted = [[DataLayer sharedInstance] isMutedJid:row.contactJid onAccount:row.accountId];
-    dispatch_async(dispatch_get_main_queue(), ^{
-        cell.muteBadge.hidden = !muted;
-    });
     return cell;
 }
 

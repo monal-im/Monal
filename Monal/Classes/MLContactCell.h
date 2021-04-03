@@ -6,29 +6,25 @@
 //
 //
 #import "MLAttributedLabel.h"
+#import "MLContact.h"
+#import "MLMessage.h"
 
 @interface MLContactCell : UITableViewCell
 
-@property (nonatomic, assign) NSInteger count;
 @property (nonatomic, assign) NSInteger accountNo;
-@property (nonatomic, strong) NSString *username;
+@property (nonatomic, strong) NSString* _Nullable username;
 
-@property (nonatomic, weak) IBOutlet UILabel *displayName;
-@property (nonatomic, weak) IBOutlet UILabel *centeredDisplayName;
-@property (nonatomic, weak) IBOutlet UILabel *time;
+@property (nonatomic, weak) IBOutlet UILabel* _Nullable displayName;
+@property (nonatomic, weak) IBOutlet UILabel* _Nullable centeredDisplayName;
+@property (nonatomic, weak) IBOutlet UILabel* _Nullable time;
 
-@property (nonatomic, weak) IBOutlet MLAttributedLabel *statusText;
-@property (nonatomic, weak) IBOutlet UIImageView *userImage;
-@property (nonatomic, weak) IBOutlet UIButton *badge;
-@property (nonatomic, weak) IBOutlet UIImageView *muteBadge;
+@property (nonatomic, weak) IBOutlet MLAttributedLabel* _Nullable statusText;
+@property (nonatomic, weak) IBOutlet UIImageView* _Nullable userImage;
+@property (nonatomic, weak) IBOutlet UIButton* _Nullable badge;
+@property (nonatomic, weak) IBOutlet UIImageView* _Nullable muteBadge;
 
 @property (nonatomic, assign) BOOL isPinned;
 
--(void) showStatusText:(NSString *) text;
--(void) showStatusTextItalic:(NSString *) text withItalicRange:(NSRange)italicRange;
--(void) setStatusTextLayout:(NSString *) text;
--(void) showDisplayName:(NSString *) name;
-
--(void) setPinned:(BOOL) pinned;
+-(void) initCell:(MLContact* _Nonnull) contact withLastMessage:(MLMessage* _Nullable) lastMessage;
 
 @end

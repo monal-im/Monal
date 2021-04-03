@@ -783,6 +783,11 @@ enum msgSentState {
             MonalAppDelegate* appDelegate = (MonalAppDelegate*) [UIApplication sharedApplication].delegate;
             [appDelegate updateUnread];
             
+            // update unread counter
+            self.contact.unreadCount -= unread.count;
+            if(self.contact.unreadCount < 0)
+                self.contact.unreadCount = 0;
+
             //refresh contact in active contacts view
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
         }

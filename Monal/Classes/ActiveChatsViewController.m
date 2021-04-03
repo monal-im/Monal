@@ -21,13 +21,6 @@
 
 @interface ActiveChatsViewController ()
 
-@property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
-@property (nonatomic, strong)  NSDateFormatter* sourceDateFormat;
-@property (nonatomic, strong)  NSCalendar *gregorian;
-@property (nonatomic, assign)  NSInteger thisyear;
-@property (nonatomic, assign)  NSInteger thismonth;
-@property (nonatomic, assign)  NSInteger thisday;
-
 @property (nonatomic, strong) NSMutableArray* unpinnedContacts;
 @property (nonatomic, strong) NSMutableArray* pinnedContacts;
 
@@ -108,7 +101,6 @@ static NSMutableSet* _smacksWarningDisplayed;
     
     self.chatListTable.emptyDataSetSource = self;
     self.chatListTable.emptyDataSetDelegate = self;
-    [self setupDateObjects];
 }
 
 
@@ -491,87 +483,17 @@ static NSMutableSet* _smacksWarningDisplayed;
     // Select correct contact array
     if(indexPath.section == pinnedChats) {
         chatContact = [self.pinnedContacts objectAtIndex:indexPath.row];
-        // mark pinned chats
-        [cell setPinned:YES];
     } else {
         chatContact = [self.unpinnedContacts objectAtIndex:indexPath.row];
-        [cell setPinned:NO];
     }
-    [cell showDisplayName:chatContact.contactDisplayName];
+
     
-    cell.accountNo = chatContact.accountId.integerValue;
-    cell.username = chatContact.contactJid;
-    cell.count = chatContact.unreadCount;
     
     // Display msg draft or last msg
-    MLMessage* messageRow = [[DataLayer sharedInstance] lastMessageForContact:cell.username forAccount:chatContact.accountId];
-    if(messageRow)
-    {
-        if([messageRow.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
-            [cell showStatusText:NSLocalizedString(@"🔗 A Link", @"")];
-        else if([messageRow.messageType isEqualToString:kMessageTypeFiletransfer])
-        {
-            if([messageRow.filetransferMimeType hasPrefix:@"image/"])
-                [cell showStatusText:NSLocalizedString(@"📷 An Image", @"")];
-            else if([messageRow.filetransferMimeType hasPrefix:@"audio/"])
-                [cell showStatusText:NSLocalizedString(@"🎵 A Audiomessage", @"")];
-            else if([messageRow.filetransferMimeType hasPrefix:@"video/"])
-                [cell showStatusText:NSLocalizedString(@"🎥 A Video", @"")];
-            else if([messageRow.filetransferMimeType isEqualToString:@"application/pdf"])
-                [cell showStatusText:NSLocalizedString(@"📄 A Document", @"")];
-            else
-                [cell showStatusText:NSLocalizedString(@"📁 A File", @"")];
-        }
-        else if ([messageRow.messageType isEqualToString:kMessageTypeMessageDraft])
-        {
-            NSString* draftPreview = [NSString stringWithFormat:NSLocalizedString(@"Draft: %@", @""), messageRow.messageText];
-            [cell showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, 6)];
-        }
-        else if([messageRow.messageType isEqualToString:kMessageTypeGeo])
-            [cell showStatusText:NSLocalizedString(@"📍 A Location", @"")];
-        else
-        {
-            NSString* displayName;
-            xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:chatContact.accountId];
-            if([messageRow.actualFrom isEqualToString:account.connectionProperties.identity.jid])
-                displayName = [MLContact ownDisplayNameForAccount:account];
-            else
-                displayName = [chatContact contactDisplayName];
-            if([messageRow.messageText hasPrefix:@"/me "])
-            {
-                NSString* replacedMessageText = [[MLXEPSlashMeHandler sharedInstance] stringSlashMeWithAccountId:chatContact.accountId
-                                                                                                     displayName:displayName
-                                                                                                      actualFrom:messageRow.actualFrom
-                                                                                                         message:messageRow.messageText
-                                                                                                         isGroup:chatContact.isGroup];
+    MLMessage* messageRow = [[DataLayer sharedInstance] lastMessageForContact:chatContact.contactJid forAccount:chatContact.accountId];
 
-                NSRange replacedMsgAttrRange = NSMakeRange(0, replacedMessageText.length);
+    [cell initCell:chatContact withLastMessage:messageRow];
 
-                [cell showStatusTextItalic:replacedMessageText withItalicRange:replacedMsgAttrRange];
-            }
-            else
-            {
-                [cell showStatusText:messageRow.messageText];
-            }
-        }
-        if(messageRow.timestamp)
-        {
-            cell.time.text = [self formattedDateWithSource:messageRow.timestamp];
-            cell.time.hidden = NO;
-        }
-        else
-            cell.time.hidden = YES;
-    }
-    else
-    {
-        [cell showStatusText:nil];
-        DDLogWarn(@"Active chat but no messages found in history for %@.", chatContact.contactJid);
-    }
-    [[MLImageManager sharedInstance] getIconForContact:chatContact.contactJid andAccount:chatContact.accountId withCompletion:^(UIImage *image) {
-        cell.userImage.image = image;
-    }];
-    BOOL muted = [[DataLayer sharedInstance] isMutedJid:chatContact.contactJid onAccount:chatContact.accountId];
-    cell.muteBadge.hidden = !muted;
     return cell;
 }
 
@@ -687,56 +609,6 @@ static NSMutableSet* _smacksWarningDisplayed;
         self.tableView.tableFooterView = [UIView new];
     }
     return toreturn;
-}
-
-#pragma mark - date
-
--(NSString*) formattedDateWithSource:(NSDate*) sourceDate
-{
-    NSInteger msgday = [self.gregorian components:NSCalendarUnitDay fromDate:sourceDate].day;
-    NSInteger msgmonth = [self.gregorian components:NSCalendarUnitMonth fromDate:sourceDate].month;
-    NSInteger msgyear = [self.gregorian components:NSCalendarUnitYear fromDate:sourceDate].year;
-    
-    BOOL showFullDate = YES;
-    
-    //if([sourceDate timeIntervalSinceDate:priorDate]<60*60) showFullDate=NO;
-    
-    if (((self.thisday != msgday) || (self.thismonth != msgmonth) || (self.thisyear != msgyear)) && showFullDate )
-    {
-        // note: if it isnt the same day we want to show the full  day
-        [self.destinationDateFormat setDateStyle:NSDateFormatterMediumStyle];
-        //no more need for seconds
-        [self.destinationDateFormat setTimeStyle:NSDateFormatterNoStyle];
-    }
-    else
-    {
-        //today just show time
-        [self.destinationDateFormat setDateStyle:NSDateFormatterNoStyle];
-        [self.destinationDateFormat setTimeStyle:NSDateFormatterShortStyle];
-    }
-    
-    NSString *dateString = [self.destinationDateFormat stringFromDate:sourceDate];
-    return dateString ? dateString : @"";
-}
-
--(void) setupDateObjects
-{
-    self.destinationDateFormat = [[NSDateFormatter alloc] init];
-    [self.destinationDateFormat setLocale:[NSLocale currentLocale]];
-    [self.destinationDateFormat setDoesRelativeDateFormatting:YES];
-    
-    self.sourceDateFormat = [[NSDateFormatter alloc] init];
-    [self.sourceDateFormat setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-    [self.sourceDateFormat setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
-    
-    self.gregorian = [[NSCalendar alloc]
-                      initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
-    NSDate* now = [NSDate date];
-    self.thisday = [self.gregorian components:NSCalendarUnitDay fromDate:now].day;
-    self.thismonth = [self.gregorian components:NSCalendarUnitMonth fromDate:now].month;
-    self.thisyear = [self.gregorian components:NSCalendarUnitYear fromDate:now].year;
-    
-    
 }
 
 #pragma mark -mac menu

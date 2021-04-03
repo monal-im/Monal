@@ -12,6 +12,7 @@
 #import "DataLayer.h"
 #import "MLImageManager.h"
 #import "HelperTools.h"
+#import "MLNotificationQueue.h"
 
 @interface MLIQProcessor()
 
@@ -102,7 +103,7 @@
             }
         }
         // notify the views
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalBlockListRefresh object:account userInfo:@{@"accountNo": account.accountNo}];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalBlockListRefresh object:account userInfo:@{@"accountNo": account.accountNo}];
     }
 }
 
@@ -268,7 +269,7 @@ $$
                                              forContact:[contact objectForKey:@"jid"]
                                              andAccount:account.accountNo];
             
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                 @"contact": [[DataLayer sharedInstance] contactForUsername:[contact objectForKey:@"jid"] forAccount:account.accountNo]
             }];
         }
@@ -436,7 +437,7 @@ $$handler(handleMamPrefs, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
         return;
     }
     if([iqNode check:@"{urn:xmpp:mam:2}prefs@default"])
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMLMAMPref object:self userInfo:@{@"mamPref": [iqNode findFirst:@"{urn:xmpp:mam:2}prefs@default"]}];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMLMAMPref object:self userInfo:@{@"mamPref": [iqNode findFirst:@"{urn:xmpp:mam:2}prefs@default"]}];
     else
     {
         DDLogError(@"MAM prefs query returned unexpected result: %@", iqNode);
@@ -501,7 +502,7 @@ $$handler(handleBlocklist, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
         }
         [account updateLocalBlocklistCache:blockedJids];
         // notify the views
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalBlockListRefresh object:account userInfo:@{@"accountNo": account.accountNo}];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalBlockListRefresh object:account userInfo:@{@"accountNo": account.accountNo}];
     }
 $$
 
@@ -533,7 +534,7 @@ $$
                                                               appVersion:iqAppVersion
                                                            andPlatformOS:iqPlatformOS];
             
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalXmppUserSoftWareVersionRefresh
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalXmppUserSoftWareVersionRefresh
                                                                 object:account
                                                               userInfo:@{@"platform_App_Name":iqAppName,
                                                                          @"platform_App_Version":iqAppVersion,

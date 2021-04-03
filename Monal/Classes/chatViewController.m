@@ -32,6 +32,7 @@
 #import "MLXEPSlashMeHandler.h"
 #import "MLSearchViewController.h"
 #import "MLFiletransfer.h"
+#import "MLNotificationQueue.h"
 
 #import <Monal-Swift.h>
 
@@ -681,7 +682,7 @@ enum msgSentState {
     BOOL success = [self saveMessageDraft];
     if(success) {
         // Update status message for contact to show current draft
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
     }
     [super viewWillDisappear:animated];
     [MLNotificationManager sharedInstance].currentAccountNo = nil;
@@ -783,7 +784,7 @@ enum msgSentState {
             [appDelegate updateUnread];
             
             //refresh contact in active contacts view
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
         }
         else
             DDLogDebug(@"Not marking messages as read because we are still in background: %@ notInFokus: %@", [HelperTools isInBackground] ? @"YES" : @"NO", [HelperTools isNotInFocus] ? @"YES" : @"NO");
@@ -864,7 +865,7 @@ enum msgSentState {
         [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID messageType:messageType mimeType:nil size:nil];
         [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact isEncrypted:self.encryptChat isUpload:NO messageId:newMessageID
                             withCompletionHandler:nil];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
     }
     else
     {
@@ -878,7 +879,7 @@ enum msgSentState {
         ];
     }
 
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":self.contact}];
+    [[MLNotificationQueue currentQueue] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":self.contact}];
 }
 
 -(void) sendChatState:(BOOL) isTyping
@@ -2061,7 +2062,7 @@ enum msgSentState {
                 [self->_messageTable endUpdates];
 
                 //update active chats if necessary
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
                 return completionHandler(YES);
             }
             else
@@ -2109,7 +2110,7 @@ enum msgSentState {
         [self->_messageTable endUpdates];
         
         //update active chats if necessary
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
         
         return completionHandler(YES);
     }];
@@ -2128,7 +2129,7 @@ enum msgSentState {
         [self->_messageTable endUpdates];
         
         //update active chats if necessary
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
         
         return completionHandler(YES);
     }];

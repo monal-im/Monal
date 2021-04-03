@@ -20,6 +20,7 @@
 #import "xmpp.h"
 #import "MLPubSub.h"
 #import "DataLayer.h"
+#import "MLNotificationQueue.h"
 
 #include <stdlib.h>
 
@@ -85,7 +86,7 @@ const int KEY_SIZE = 16;
         if(!self.openBundleFetchCnt && self.loggedIn) // check if we have a session were we loggedIn
         {
             [self sendLocalDevicesIfNeeded];
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedOmemoBundleFetch object:self userInfo:@{@"accountNo": self.account.accountNo}];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalFinishedOmemoBundleFetch object:self userInfo:@{@"accountNo": self.account.accountNo}];
         }
     }
 }
@@ -204,7 +205,7 @@ $$
     NSString* bundleNode = [NSString stringWithFormat:@"eu.siacs.conversations.axolotl.bundles:%@", deviceid];
 
     self.openBundleFetchCnt++;
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalUpdateBundleFetchStatus object:self userInfo:@{
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateBundleFetchStatus object:self userInfo:@{
         @"accountNo": self.account.accountNo,
         @"completed": @(self.closedBundleFetchCnt),
         @"all": @(self.openBundleFetchCnt + self.closedBundleFetchCnt)
@@ -250,7 +251,7 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
     {
         account.omemo.openBundleFetchCnt--;
         account.omemo.closedBundleFetchCnt++;
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalUpdateBundleFetchStatus object:account.omemo userInfo:@{
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateBundleFetchStatus object:account.omemo userInfo:@{
             @"accountNo": account.accountNo,
             @"completed": @(account.omemo.closedBundleFetchCnt),
             @"all": @(account.omemo.openBundleFetchCnt + account.omemo.closedBundleFetchCnt)
@@ -263,7 +264,7 @@ $$handler(handleBundleFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
         if(account.omemo.hasCatchUpDone && account.omemo.loggedIn)
         {
             [account.omemo sendLocalDevicesIfNeeded];
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedOmemoBundleFetch object:self userInfo:@{@"accountNo": account.accountNo}];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalFinishedOmemoBundleFetch object:self userInfo:@{@"accountNo": account.accountNo}];
         }
     }
 $$

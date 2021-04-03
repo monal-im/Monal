@@ -20,6 +20,7 @@
 #import "HelperTools.h"
 #import "MLChatViewHelper.h"
 #import "MLOMEMO.h"
+#import "MLNotificationQueue.h"
 
 
 @interface ContactDetails()
@@ -444,7 +445,7 @@ enum ContactDetailsAboutRows {
                 // Update button text
                 [self.tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationNone];
                 // Update color in activeViewController
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact":self.contact, @"pinningChanged": @YES}];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact":self.contact, @"pinningChanged": @YES}];
                 break;
             }
             case OMEMOClearSessionRow:  {

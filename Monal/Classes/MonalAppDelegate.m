@@ -20,6 +20,7 @@
 #import "MLProcessLock.h"
 #import "MLFiletransfer.h"
 #import "xmpp.h"
+#import "MLNotificationQueue.h"
 
 @import NotificationBannerSwift;
 
@@ -478,12 +479,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             //remove notifications of all remotely read messages (indicated by sending a response message)
             for(MLMessage* msg in unread)
             {
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
                 [account sendDisplayMarkerForMessage:msg];
             }
             
             //update unread count in active chats list
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                 @"contact": fromContact
             }];
             
@@ -524,7 +525,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     }
     
     //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:self userInfo:nil];
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
     
     [self addBackgroundTask];
     [[MLXMPPManager sharedInstance] nowForegrounded];

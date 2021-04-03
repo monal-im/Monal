@@ -313,7 +313,7 @@ NSString *const kData=@"data";
 -(void) invalidXMLError
 {
     DDLogError(@"Server returned invalid xml!");
-    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"Server returned invalid xml!", @""), @"isSevere": @NO}];
+    [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"Server returned invalid xml!", @""), @"isSevere": @NO}];
     [self reconnect];
     return;
 }
@@ -342,7 +342,7 @@ NSString *const kData=@"data";
 -(void) accountStatusChanged
 {
     // Send notification that our account state has changed
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalAccountStatusChanged object:self userInfo:@{
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalAccountStatusChanged object:self userInfo:@{
             kAccountID: self.accountNo,
             kAccountState: [[NSNumber alloc] initWithInt:(int)self.accountState],
     }];
@@ -396,6 +396,7 @@ NSString *const kData=@"data";
                 DDLogVerbose(@"Adding idle state notification to receive queue...");
                 [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                     if(self.idle)       //make sure we are still idle, even if in receive queue now
+                        //don't queue this notification because it should be handled in the receive queue
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
                 }]] waitUntilFinished:NO];
             }
@@ -508,7 +509,7 @@ NSString *const kData=@"data";
     if((localIStream==nil) || (localOStream==nil))
     {
         DDLogError(@"Connection failed");
-        [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"Unable to connect to server!", @""), @"isSevere": @NO}];
+        [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"Unable to connect to server!", @""), @"isSevere": @NO}];
         [self reconnect];
         return;
     }
@@ -567,7 +568,7 @@ NSString *const kData=@"data";
         if(![[row objectForKey:@"isEnabled"] boolValue])
         {
             DDLogInfo(@"SRV entry prohibits XMPP connection for server %@", self.connectionProperties.identity.domain);
-            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{
+            [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{
                 @"message": [NSString stringWithFormat:NSLocalizedString(@"SRV entry prohibits XMPP connection for server %@", @""), self.connectionProperties.identity.domain],
                 @"isSevere": @YES
             }];
@@ -1182,7 +1183,7 @@ NSString *const kData=@"data";
                     {
                         XMPPMessage* messageNode = (XMPPMessage*)node;
                         if(messageNode.xmppId)
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalSentMessageNotice object:self userInfo:@{kMessageId:messageNode.xmppId}];
+                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalSentMessageNotice object:self userInfo:@{kMessageId:messageNode.xmppId}];
                     }
                 }
             }
@@ -1379,7 +1380,7 @@ NSString *const kData=@"data";
                             {
                                 [[DataLayer sharedInstance] setLastInteraction:[presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"] forJid:presenceNode.fromUser andAccountNo:self.accountNo];
 
-                                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                                [[MLNotificationQueue currentQueue] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
                                     @"jid": presenceNode.fromUser,
                                     @"accountNo": self.accountNo,
                                     @"lastInteraction": [presenceNode findFirst:@"{urn:xmpp:idle:1}idle@since|datetime"],
@@ -1389,7 +1390,7 @@ NSString *const kData=@"data";
                         }
                         else
                         {
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
                                 @"jid": presenceNode.fromUser,
                                 @"accountNo": self.accountNo,
                                 @"lastInteraction": [[NSDate date] initWithTimeIntervalSince1970:0],    //nil cannot directly be saved in NSDictionary
@@ -1661,6 +1662,7 @@ NSString *const kData=@"data";
                     {
                         self->_catchupDone = YES;
                         DDLogVerbose(@"Now posting kMonalFinishedCatchup notification");
+                        //don't queue this notification because it should be handled in the receive queue
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:@{@"accountNo": self.accountNo}];
                     }
                 }];
@@ -1708,7 +1710,7 @@ NSString *const kData=@"data";
                     message = NSLocalizedString(@"There was a SASL error on the server.", @"");
             }
 
-            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @YES}];
+            [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @YES}];
             [self disconnect];
         }
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-sasl}challenge"])
@@ -1748,7 +1750,7 @@ NSString *const kData=@"data";
             NSString* message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error: %@", @""), errorReason];
             if(errorText && ![errorText isEqualToString:@""])
                 message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error %@: %@", @""), errorReason, errorText];
-            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
+            [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
             [self reconnect];
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}features"])
@@ -1790,7 +1792,7 @@ NSString *const kData=@"data";
                         //no supported auth mechanism
                         //TODO: implement SCRAM SHA1 and SHA256 based auth
                         DDLogInfo(@"no supported auth mechanism, disconnecting!");
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"no supported auth mechanism, disconnecting!", @""), @"isSevere": @YES}];
+                        [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"no supported auth mechanism, disconnecting!", @""), @"isSevere": @YES}];
                         [self disconnect];
                     }
                 }
@@ -1850,7 +1852,7 @@ NSString *const kData=@"data";
             NSString* message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error: %@", @""), errorReason];
             if(errorText && ![errorText isEqualToString:@""])
                 message = [NSString stringWithFormat:NSLocalizedString(@"XMPP stream error %@: %@", @""), errorReason, errorText];
-            [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
+            [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
             [self reconnect];
         }
         else if([parsedStanza check:@"/{http://etherx.jabber.org/streams}features"])
@@ -2475,6 +2477,7 @@ NSString *const kData=@"data";
     //indicate we are bound now, *after* initializing/resetting all the other data structures to avoid race conditions
     _accountState = kStateBound;
     NSDictionary* dic = @{@"AccountNo":self.accountNo, @"AccountName": self.connectionProperties.identity.jid};
+    //don't queue this notification because it should be handled in the receive queue
     [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
     [self accountStatusChanged];
 
@@ -3159,7 +3162,7 @@ NSString *const kData=@"data";
             {
                 // Do not show "Connection refused" message if there are more SRV records to try
                 if(!_SRVDiscoveryDone || (_SRVDiscoveryDone && [_usableServersList count] == 0) || st_error.code != 61)
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
+                    [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": message, @"isSevere": @NO}];
             }
 
             DDLogInfo(@"stream error, calling reconnect");
@@ -3354,6 +3357,7 @@ NSString *const kData=@"data";
     if(!_catchupDone)
     {
         _catchupDone = YES;
+        //don't queue this notification because it should be handled in the receive queue
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self  userInfo:@{@"accountNo": self.accountNo}];
 
     }

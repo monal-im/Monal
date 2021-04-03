@@ -63,7 +63,7 @@ static NSMutableDictionary* _typingNotifications;
             errorType:errorType
             errorReason:errorText
         ];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageErrorNotice object:nil userInfo:@{
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageErrorNotice object:nil userInfo:@{
             @"MessageID": [messageNode findFirst:@"/@id"],
             @"errorType": errorType,
             @"errorReason": errorText
@@ -175,7 +175,7 @@ static NSMutableDictionary* _typingNotifications;
             [[DataLayer sharedInstance] updateMucSubject:subject forAccount:account.accountNo andRoom:messageNode.fromUser];
             //TODO: this stuff has to be changed (why send a kMonalNewMessageNotice instead of a special kMonalMucSubjectChanged one?)
             MLMessage* message = [account parseMessageToMLMessage:messageNode withBody:subject andEncrypted:NO andMessageType:kMessageTypeStatus andActualFrom:actualFrom];
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
                 @"message": message,
                 @"subject": subject,
             }];
@@ -295,11 +295,11 @@ static NSMutableDictionary* _typingNotifications;
                     
                     //remove notifications of all remotely read messages (indicated by sending a response message)
                     for(MLMessage* msg in unread)
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
                     
                     //update unread count in active chats list
                     if([unread count])
-                        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                             @"contact": [[DataLayer sharedInstance] contactForUsername:messageNode.toUser forAccount:account.accountNo]
                         }];
                 }
@@ -309,7 +309,7 @@ static NSMutableDictionary* _typingNotifications;
                     [[DataLayer sharedInstance] deleteMessageHistory:historyId];
                     
                     DDLogInfo(@"Sending out kMonalDeletedMessageNotice notification for historyId %@", historyId);
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
                         @"message": message,
                         @"historyId": historyId,
                         @"contact": [[DataLayer sharedInstance] contactForUsername:message.buddyName forAccount:account.accountNo],
@@ -323,7 +323,7 @@ static NSMutableDictionary* _typingNotifications;
                         [[DataLayer sharedInstance] addActiveBuddies:messageNode.toUser forAccount:account.accountNo];
                     
                     DDLogInfo(@"Sending out kMonalNewMessageNotice notification for historyId %@", historyId);
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
                         @"message": message,
                         @"historyId": historyId,
                         @"showAlert": @(showAlert),
@@ -355,7 +355,7 @@ static NSMutableDictionary* _typingNotifications;
             [[DataLayer sharedInstance] setMessageId:msgId received:YES];
             
             //Post notice
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageReceivedNotice object:self userInfo:@{kMessageId:msgId}];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageReceivedNotice object:self userInfo:@{kMessageId:msgId}];
         }
     }
     
@@ -381,11 +381,11 @@ static NSMutableDictionary* _typingNotifications;
                 
                 //remove notifications of all remotely read messages (indicated by sending a display marker)
                 for(MLMessage* msg in unread)
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
                 
                 //update unread count in active chats list
                 if([unread count])
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                         @"contact": groupchatContact
                     }];
             }
@@ -399,7 +399,7 @@ static NSMutableDictionary* _typingNotifications;
                 NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:messageNode.fromUser andAccount:account.accountNo tillStanzaId:[messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"] wasOutgoing:YES];
                 DDLogDebug(@"Marked as displayed: %@", unread);
                 for(MLMessage* msg in unread)
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageDisplayedNotice object:account userInfo:@{@"message":msg, kMessageId:msg.messageId}];
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageDisplayedNotice object:account userInfo:@{@"message":msg, kMessageId:msg.messageId}];
             }
         }
     }
@@ -414,7 +414,7 @@ static NSMutableDictionary* _typingNotifications;
             NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:messageNode.fromUser andAccount:account.accountNo tillStanzaId:[messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"] wasOutgoing:YES];
             DDLogDebug(@"Marked as displayed: %@", unread);
             for(MLMessage* msg in unread)
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageDisplayedNotice object:account userInfo:@{@"message":msg, kMessageId:msg.messageId}];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageDisplayedNotice object:account userInfo:@{@"message":msg, kMessageId:msg.messageId}];
         }
         
         //incoming chat markers from own account (carbon copy)
@@ -428,10 +428,10 @@ static NSMutableDictionary* _typingNotifications;
             
             //remove notifications of all remotely read messages (indicated by sending a display marker)
             for(MLMessage* msg in unread)
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
             
             //update unread count in active chats list
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                 @"contact": [[DataLayer sharedInstance] contactForUsername:messageNode.toUser forAccount:account.accountNo]
             }];
         }
@@ -469,7 +469,7 @@ static NSMutableDictionary* _typingNotifications;
                 !composing
             )
             {
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalLastInteractionUpdatedNotice object:self userInfo:@{
                     @"jid": messageNode.fromUser,
                     @"accountNo": account.accountNo,
                     @"isTyping": composing ? @YES : @NO
@@ -485,7 +485,7 @@ static NSMutableDictionary* _typingNotifications;
                     if(composing)
                     {
                         _typingNotifications[messageNode.fromUser] = createTimer(60, (^{
-                            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalLastInteractionUpdatedNotice object:[[NSDate date] initWithTimeIntervalSince1970:0] userInfo:@{
+                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalLastInteractionUpdatedNotice object:[[NSDate date] initWithTimeIntervalSince1970:0] userInfo:@{
                                 @"jid": jid,
                                 @"accountNo": account.accountNo,
                                 @"isTyping": @NO

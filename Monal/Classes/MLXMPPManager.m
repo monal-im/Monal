@@ -13,6 +13,7 @@
 #import "DataLayer.h"
 #import "HelperTools.h"
 #import "xmpp.h"
+#import "MLNotificationQueue.h"
 
 @import Network;
 @import MobileCoreServices;
@@ -245,6 +246,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                 {
                     DDLogVerbose(@"scheduling background fetching task to start app in background once our connectivity gets restored (will be ignored in appex)");
                     //this will automatically start the app if connectivity gets restored
+                    //don't queue this notification because it should be handled immediately
                     [[NSNotificationCenter defaultCenter] postNotificationName:kScheduleBackgroundFetchingTask object:nil];
                 }
             }
@@ -539,7 +541,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
                 completion(successSend, messageIdSend);
         }];
         DDLogVerbose(@"Notifying active chats of change for contact %@", contact);
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":contact}];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMLMessageSentToContact object:self userInfo:@{@"contact":contact}];
     }
     else
         DDLogError(@"Could not add message to history!");

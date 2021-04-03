@@ -14,6 +14,7 @@
 #import "MLConstants.h"
 #import "xmpp.h"
 #import "MLFiletransfer.h"
+#import "MLNotificationQueue.h"
 
 @import UserNotifications;
 @import CoreServices;
@@ -143,7 +144,7 @@
     [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
     
     //update app badge
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalUpdateUnread object:nil];
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateUnread object:nil];
 }
 
 -(void) handleDeletedMessage:(NSNotification*) notification
@@ -161,7 +162,7 @@
     [center removeDeliveredNotificationsWithIdentifiers:@[idval]];
     
     //update app badge
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalUpdateUnread object:nil];
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalUpdateUnread object:nil];
 }
 
 -(NSString*) identifierWithMessage:(MLMessage*) message

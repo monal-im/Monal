@@ -15,6 +15,7 @@
 #import "MLConstants.h"
 #import "DataLayer.h"
 #import "MLImageManager.h"
+#import "MLNotificationQueue.h"
 
 @interface MLPubSubProcessor()
 
@@ -74,7 +75,7 @@ $$handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
         [account accountStatusChanged];     //inform ui of this change (accountStatusChanged will force a ui reload which will also reload the avatars)
         MLContact* contact = [[DataLayer sharedInstance] contactForUsername:jid forAccount:account.accountNo];
         if(contact)     //ignore updates for jids not in our roster
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                 @"contact": contact
             }];
         DDLogInfo(@"Avatar of '%@' fetched and updated successfully", jid);
@@ -100,7 +101,7 @@ $$handler(rosterNameHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NS
                 [[DataLayer sharedInstance] setFullName:[data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"] forContact:jid andAccount:account.accountNo];
                 MLContact* contact = [[DataLayer sharedInstance] contactForUsername:jid forAccount:account.accountNo];
                 if(contact)     //ignore updates for jids not in our roster
-                    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                         @"contact": contact
                     }];
             }
@@ -123,7 +124,7 @@ $$handler(rosterNameHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NS
             [[DataLayer sharedInstance] setFullName:@"" forContact:jid andAccount:account.accountNo];
             MLContact* contact = [[DataLayer sharedInstance] contactForUsername:jid forAccount:account.accountNo];
             if(contact)     //ignore updates for jids not in our roster
-                [[NSNotificationCenter defaultCenter] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                     @"contact": contact
                 }];
         }

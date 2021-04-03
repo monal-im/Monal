@@ -157,13 +157,13 @@
     if([notification.userInfo[@"accountNo"] isEqualToString:self.accountNo])
     {
         [[HelperTools defaultsDB] setBool:YES forKey:@"HasSeenLogin"];
-    #ifndef DISABLE_OMEMO
+#ifndef DISABLE_OMEMO
         dispatch_async(dispatch_get_main_queue(), ^{
             self.loginHUD.label.text = NSLocalizedString(@"Loading omemo bundles", @"");
         });
-    #else
+#else
         [self kMonalFinishedOmemoBundleFetch];
-    #endif
+#endif
     }
 }
 

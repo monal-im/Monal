@@ -17,6 +17,7 @@
 #import "MLServerDetails.h"
 #import "MLSwitchCell.h"
 #import "MLOMEMO.h"
+#import "MLNotificationQueue.h"
 
 @import MobileCoreServices;
 @import AVFoundation;
@@ -328,7 +329,7 @@
     UIAlertAction *yesAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
 
         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
         [self.db removeAccount:self.accountno];
         [SAMKeychain deletePasswordForService:kMonalKeychainName account:[NSString stringWithFormat:@"%@",self.accountno]];
 
@@ -365,7 +366,7 @@
     UIAlertAction *yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
 
         [self.db clearMessages:self.accountno];
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
 
         MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeCustomView;

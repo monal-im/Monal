@@ -16,6 +16,7 @@
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
+#import "MLNotificationQueue.h"
 
 #define CURRENT_MUC_STATE_VERSION @1
 
@@ -154,7 +155,7 @@ static NSMutableDictionary* _uiHandler;
     //TODO: implement indirect and direct muc invites including push notification if the app is in background
     if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
     {
-        [[NSNotificationCenter defaultCenter] postNotificationName:kMonalReceivedMucInviteNotice object:nil userInfo:@{@"from": messageNode.from}];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalReceivedMucInviteNotice object:nil userInfo:@{@"from": messageNode.from}];
         return YES;     //stop processing in MLMessageProcessor
     }
     

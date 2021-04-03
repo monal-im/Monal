@@ -14,6 +14,7 @@
 #import "MLUDPLogger.h"
 #import "XMPPStanza.h"
 #import "xmpp.h"
+#import "MLNotificationQueue.h"
 
 @import UserNotifications;
 @import CoreImage;
@@ -38,7 +39,7 @@ void logException(NSException* exception)
         message = [HelperTools extractXMPPError:node withDescription:description];
     else
         message = description;
-    [[NSNotificationCenter defaultCenter] postNotificationName:kXMPPError object:account userInfo:@{@"message": message, @"isSevere":@(isSevere)}];
+    [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:account userInfo:@{@"message": message, @"isSevere":@(isSevere)}];
 }
 
 +(NSDictionary*) pushServer

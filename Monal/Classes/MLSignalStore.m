@@ -234,15 +234,12 @@
  */
 -(int) deleteAllSessionsForAddressName:(NSString*)addressName
 {
-    [self.sqliteDatabase beginWriteTransaction];
-    NSNumber* count = (NSNumber *) [self.sqliteDatabase executeScalar:@"COUNT * FROM  signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, addressName]];
-    
-    [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, addressName]];
-    
-    [self.sqliteDatabase endWriteTransaction];
-    return count.intValue;
+    return [[self.sqliteDatabase idWriteTransaction:^{
+        NSNumber* count = (NSNumber*) [self.sqliteDatabase executeScalar:@"COUNT * FROM  signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, addressName]];
+        [self.sqliteDatabase executeNonQuery:@"DELETE FROM signalContactSession WHERE account_id=? AND contactName=?;" andArguments:@[self.accountId, addressName]];
+        return count;
+    }] intValue];
 }
-
 
 /**
  * Load a local serialized PreKey record.
@@ -380,16 +377,12 @@
  */
 - (BOOL) saveIdentity:(SignalAddress*)address identityKey:(nullable NSData*)identityKey;
 {
-    [self.sqliteDatabase beginWriteTransaction];
-    NSData* dbIdentity= (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
-    if(dbIdentity)
-    {
-        [self.sqliteDatabase endWriteTransaction];
-        return YES;
-    }
-    BOOL success = [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalContactIdentity (account_id, contactName, contactDeviceId, identity, trustLevel) values (?, ?, ?, ?, 1);" andArguments:@[self.accountId,address.name,[NSNumber numberWithInteger:address.deviceId], identityKey]];
-    [self.sqliteDatabase endWriteTransaction];
-    return success;
+    return [self.sqliteDatabase boolWriteTransaction:^{
+        NSData* dbIdentity= (NSData *)[self.sqliteDatabase executeScalar:@"SELECT IDENTITY FROM signalContactIdentity WHERE account_id=? AND contactDeviceId=? AND contactName=?;" andArguments:@[self.accountId, [NSNumber numberWithInteger:address.deviceId], address.name]];
+        if(dbIdentity)
+            return YES;
+        return [self.sqliteDatabase executeNonQuery:@"INSERT INTO signalContactIdentity (account_id, contactName, contactDeviceId, identity, trustLevel) values (?, ?, ?, ?, 1);" andArguments:@[self.accountId,address.name,[NSNumber numberWithInteger:address.deviceId], identityKey]];
+    }];
 }
 
 /**

@@ -21,14 +21,10 @@ typedef BOOL (^monal_sqlite_bool_operations_t)(void);
 -(void) voidReadTransaction:(monal_void_block_t) operations;
 -(BOOL) boolReadTransaction:(monal_sqlite_bool_operations_t) operations;
 -(id) idReadTransaction:(monal_sqlite_operations_t) operations;
--(void) beginReadTransaction;
--(void) endReadTransaction;
 
 -(void) voidWriteTransaction:(monal_void_block_t) operations;
 -(BOOL) boolWriteTransaction:(monal_sqlite_bool_operations_t) operations;
 -(id) idWriteTransaction:(monal_sqlite_operations_t) operations;
--(void) beginWriteTransaction;
--(void) endWriteTransaction;
 
 -(id _Nullable) executeScalar:(NSString*) query;
 -(id _Nullable) executeScalar:(NSString*) query andArguments:(NSArray*) args;

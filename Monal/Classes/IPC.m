@@ -113,36 +113,39 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
     static dispatch_once_t once;
     static const int VERSION = 2;
     dispatch_once(&once, ^{
+        BOOL fileExists = [fileManager fileExistsAtPath:_dbFile];
         //create initial database if file not exists
-        if(![fileManager fileExistsAtPath:_dbFile])
+        if(!fileExists)
         {
             //this can not be used inside a transaction --> turn on WAL mode before executing any other db operations
-            [self.db executeNonQuery:@"pragma journal_mode=WAL;"];
-            [self.db beginWriteTransaction];
-            [self.db executeNonQuery:@"CREATE TABLE ipc(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), source VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);"];
-            [self.db executeNonQuery:@"CREATE TABLE versions(name VARCHAR(255) NOT NULL PRIMARY KEY, version INTEGER NOT NULL);"];
-            [self.db executeNonQuery:@"INSERT INTO versions (name, version) VALUES('db', '1');"];
+            //this will create the database file and open the database because it is the first MLSQlite call done for this file
+            //turning on WAL mode has to be done *outside* of any transactions
+            [self.db executeNonQuery:@"PRAGMA journal_mode=WAL;"];
         }
-        else
-            [self.db beginWriteTransaction];
-        
-        //upgrade database version if needed
-        NSNumber* version = (NSNumber*)[self.db executeScalar:@"SELECT version FROM versions WHERE name='db';"];
-        DDLogInfo(@"IPC db version: %@", version);
-        if([version integerValue] < 2)
-        {
-            [self.db executeNonQuery:@"ALTER TABLE ipc ADD COLUMN response_to INTEGER NOT NULL DEFAULT 0;"];
-        }
-        //any upgrade done --> update version table and delete all old ipc messages
-        if([version integerValue] < VERSION)
-        {
-            //always truncate ipc table on version upgrade
-            [self.db executeNonQuery:@"DELETE FROM ipc;"];
-            [self.db executeNonQuery:@"UPDATE versions SET version=? WHERE name='db';" andArguments:@[[NSNumber numberWithInt:VERSION]]];
-            DDLogInfo(@"IPC db upgraded to version: %d", VERSION);
-        }
-        
-        [self.db endWriteTransaction];
+        [self.db voidWriteTransaction:^{
+            if(!fileExists)
+            {
+                [self.db executeNonQuery:@"CREATE TABLE ipc(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), source VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);"];
+                [self.db executeNonQuery:@"CREATE TABLE versions(name VARCHAR(255) NOT NULL PRIMARY KEY, version INTEGER NOT NULL);"];
+                [self.db executeNonQuery:@"INSERT INTO versions (name, version) VALUES('db', '1');"];
+            }
+            
+            //upgrade database version if needed
+            NSNumber* version = (NSNumber*)[self.db executeScalar:@"SELECT version FROM versions WHERE name='db';"];
+            DDLogInfo(@"IPC db version: %@", version);
+            if([version integerValue] < 2)
+            {
+                [self.db executeNonQuery:@"ALTER TABLE ipc ADD COLUMN response_to INTEGER NOT NULL DEFAULT 0;"];
+            }
+            //any upgrade done --> update version table and delete all old ipc messages
+            if([version integerValue] < VERSION)
+            {
+                //always truncate ipc table on version upgrade
+                [self.db executeNonQuery:@"DELETE FROM ipc;"];
+                [self.db executeNonQuery:@"UPDATE versions SET version=? WHERE name='db';" andArguments:@[[NSNumber numberWithInt:VERSION]]];
+                DDLogInfo(@"IPC db upgraded to version: %d", VERSION);
+            }
+        }];
     });
     
     //use a dedicated and very high priority thread to make sure this always runs
@@ -238,26 +241,23 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
 
 -(NSDictionary*) readIpcMessageFor:(NSString*) destination
 {
-    NSDictionary* retval = nil;
-    
-    [self.db beginWriteTransaction];
-    
-    //delete old entries that timed out
-    NSNumber* timestamp = [NSNumber numberWithInt:[NSDate date].timeIntervalSince1970];
-    [self.db executeNonQuery:@"DELETE FROM ipc WHERE timeout<?;" andArguments:@[timestamp]];
-    
-    //load a *single* message from table and delete it afterwards
-    NSArray* rows = [self.db executeReader:@"SELECT * FROM ipc WHERE destination=? OR destination='*' ORDER BY id ASC LIMIT 1;" andArguments:@[destination]];
-    if([rows count])
-    {
-        retval = rows[0];
-        if(![retval[@"destination"] isEqualToString:@"*"])      //broadcast will be deleted by their timeout value only
-            [self.db executeNonQuery:@"DELETE FROM ipc WHERE id=?;" andArguments:@[retval[@"id"]]];
-    }
-    
-    [self.db endWriteTransaction];
-    
-    return retval;
+    return [self.db idWriteTransaction:^{
+        NSDictionary* retval = nil;
+        
+        //delete old entries that timed out
+        NSNumber* timestamp = [NSNumber numberWithInt:[NSDate date].timeIntervalSince1970];
+        [self.db executeNonQuery:@"DELETE FROM ipc WHERE timeout<?;" andArguments:@[timestamp]];
+        
+        //load a *single* message from table and delete it afterwards
+        NSArray* rows = [self.db executeReader:@"SELECT * FROM ipc WHERE destination=? OR destination='*' ORDER BY id ASC LIMIT 1;" andArguments:@[destination]];
+        if([rows count])
+        {
+            retval = rows[0];
+            if(![retval[@"destination"] isEqualToString:@"*"])      //broadcast will be deleted by their timeout value only
+                [self.db executeNonQuery:@"DELETE FROM ipc WHERE id=?;" andArguments:@[retval[@"id"]]];
+        }
+        return retval;
+    }];
 }
 
 -(NSNumber*) writeIpcMessage:(NSString*) name withData:(NSData* _Nullable) data andResponseId:(NSNumber*) responseId to:(NSString*) destination
@@ -268,18 +268,16 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
     
     DDLogDebug(@"writeIpcMessage:%@ withData:%@ andResponseId:%@ to:%@", name, data, responseId, destination);
     
-    [self.db beginWriteTransaction];
-    
-    //delete old entries that timed out
-    NSNumber* timestamp = [NSNumber numberWithInt:[NSDate date].timeIntervalSince1970];
-    [self.db executeNonQuery:@"DELETE FROM ipc WHERE timeout<?;" andArguments:@[timestamp]];
-    
-    //save message to table
-    NSNumber* timeout = @([timestamp intValue] + MSG_TIMEOUT);        //timeout for every message
-    [self.db executeNonQuery:@"INSERT INTO ipc (name, source, destination, data, timeout, response_to) VALUES(?, ?, ?, ?, ?, ?);" andArguments:@[name, _processName, destination, data, timeout, responseId]];
-    NSNumber* id = [self.db lastInsertId];
-    
-    [self.db endWriteTransaction];
+    NSNumber* id = [self.db idWriteTransaction:^{
+        //delete old entries that timed out
+        NSNumber* timestamp = [NSNumber numberWithInt:[NSDate date].timeIntervalSince1970];
+        [self.db executeNonQuery:@"DELETE FROM ipc WHERE timeout<?;" andArguments:@[timestamp]];
+        
+        //save message to table
+        NSNumber* timeout = @([timestamp intValue] + MSG_TIMEOUT);        //timeout for every message
+        [self.db executeNonQuery:@"INSERT INTO ipc (name, source, destination, data, timeout, response_to) VALUES(?, ?, ?, ?, ?, ?);" andArguments:@[name, _processName, destination, data, timeout, responseId]];
+        return [self.db lastInsertId];
+    }];
     
     //send out darwin notification to wake up other processes waiting for IPC
     if(![destination isEqualToString:@"*"])

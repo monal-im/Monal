@@ -68,22 +68,21 @@
 
 -(void) setCount:(NSInteger)count
 {
-    if(_count != count)
+    if(_count == count)
+        return;
+
+    _count = count;
+    if(_count > 0)
     {
-        _count = count;
-        if(_count > 0)
-        {
-            self.badge.hidden = NO;
-            [self.badge setTitle:[NSString stringWithFormat:@"%ld", (long)_count] forState:UIControlStateNormal];
-        }
+        // show number of unread messages
+        [self.badge setTitle:[NSString stringWithFormat:@"%ld", (long)_count] forState:UIControlStateNormal];
+        self.badge.hidden = NO;
     }
-    else{
-        if(!self.badge.hidden)
-        {
-            //handle initial load
-            self.badge.hidden = YES;
-            [self.badge setTitle:@"" forState:UIControlStateNormal];
-        }
+    else
+    {
+        // hide number of unread messages
+        [self.badge setTitle:@"" forState:UIControlStateNormal];
+        self.badge.hidden = YES;
     }
 }
 

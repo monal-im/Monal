@@ -166,6 +166,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(void) refreshContact:(NSNotification*) notification
 {
     MLContact* contact = [notification.userInfo objectForKey:@"contact"];
+    DDLogInfo(@"Refreshing contact %@ at %@: unread=%lu", contact.contactJid, contact.accountId, (unsigned long)contact.unreadCount);
     
     if([notification.userInfo objectForKey:@"pinningChanged"]) {
         // if pinning changed we have to move the user to a other section

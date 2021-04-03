@@ -34,6 +34,7 @@
     [stack addObject:queue];
     //call the context our contextmanager manages (a monal_void_block_t block)
     block();
+    DDLogDebug(@"Flushing queue, current stack: %@", stack);
     //remove own queue from stack again
     [stack removeLastObject];
     //this will deallocate and flush the queue to the next queue in our stack (or send them to the notification center if no queue is left on the stack)
@@ -106,7 +107,7 @@
         for(NSDictionary* entry in _entries)
             [queuedNotificationNames addObject:entry[@"name"]];
     }
-    return [NSString stringWithFormat:@"%@", queuedNotificationNames];
+    return [NSString stringWithFormat:@"%@: %@", self.name, queuedNotificationNames];
 }
 
 +(NSMutableArray*) getThreadLocalNotificationQueueStack

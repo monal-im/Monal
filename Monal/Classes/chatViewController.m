@@ -2597,8 +2597,10 @@ enum msgSentState {
     self.messageTable.contentInset = contentInsets;
     self.messageTable.scrollIndicatorInsets = contentInsets;
     
-    
-    [self scrollToBottom];
+    // Only scroll to bottom of the message table if a chat is opened
+    // don't scroll down on other events like closing a image preview
+    if(self.viewDidAppear == NO)
+        [self scrollToBottom];
 }
 
 - (void)keyboardDidHide:(NSNotification*)aNotification

@@ -846,6 +846,12 @@
 		C12436132434AB5D00B8F074 /* MLAttributedLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLAttributedLabel.m; sourceTree = "<group>"; };
 		C138464D25CD804D008EF0A0 /* MLOmemoQrCodeView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLOmemoQrCodeView.h; sourceTree = "<group>"; };
 		C138464E25CD804D008EF0A0 /* MLOmemoQrCodeView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLOmemoQrCodeView.m; sourceTree = "<group>"; };
+		C13CF819261A00D0005452E5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "localization/external/zh-Hans.lproj/Main.strings"; sourceTree = SOURCE_ROOT; };
+		C13CF81A261A00FD005452E5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "localization/external/zh-Hans.lproj/Login.strings"; sourceTree = SOURCE_ROOT; };
+		C13CF81B261A00FD005452E5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "localization/external/zh-Hans.lproj/Settings.strings"; sourceTree = SOURCE_ROOT; };
+		C13CF81C261A00FE005452E5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "localization/external/zh-Hans.lproj/ContactDetails.strings"; sourceTree = SOURCE_ROOT; };
+		C13CF81D261A00FE005452E5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "localization/external/zh-Hans.lproj/iosShare.strings"; sourceTree = "<group>"; };
+		C13CF81E261A00FE005452E5 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "localization/external/zh-Hans.lproj/Localizable.strings"; sourceTree = SOURCE_ROOT; };
 		C13E640625BD405700763D6F /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "localization/external/zh-Hant.lproj/Localizable.strings"; sourceTree = SOURCE_ROOT; };
 		C13E640825BD406600763D6F /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "localization/external/pt-BR.lproj/Localizable.strings"; sourceTree = SOURCE_ROOT; };
 		C13E640925BD406700763D6F /* pt-PT */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-PT"; path = "localization/external/pt-PT.lproj/Localizable.strings"; sourceTree = SOURCE_ROOT; };
@@ -2168,6 +2174,7 @@
 				el,
 				fa,
 				"nb-NO",
+				"zh-Hans",
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			productRefGroup = 19C28FACFE9D520D11CA2CBB /* Products */;
@@ -2875,6 +2882,7 @@
 				C1C839AD24F0EFC900BBCF17 /* sv */,
 				C1C839AF24F0EFD200BBCF17 /* tr */,
 				C1C839C824F1255600BBCF17 /* zh-Hant-HK */,
+				C13CF81D261A00FE005452E5 /* zh-Hans */,
 			);
 			name = iosShare.storyboard;
 			sourceTree = "<group>";
@@ -2912,6 +2920,7 @@
 				C1C8399A24F0EF8E00BBCF17 /* sv */,
 				C1C8399C24F0EF9000BBCF17 /* tr */,
 				C1C839C624F1254600BBCF17 /* zh-Hant-HK */,
+				C13CF81C261A00FE005452E5 /* zh-Hans */,
 			);
 			name = ContactDetails.storyboard;
 			sourceTree = SOURCE_ROOT;
@@ -2949,6 +2958,7 @@
 				C1C8398724F0EF5600BBCF17 /* tr */,
 				C1C8398924F0EF5A00BBCF17 /* sv */,
 				C1C839C424F1254200BBCF17 /* zh-Hant-HK */,
+				C13CF81B261A00FD005452E5 /* zh-Hans */,
 			);
 			name = Settings.storyboard;
 			sourceTree = SOURCE_ROOT;
@@ -2986,6 +2996,7 @@
 				C1C8397424F0EEE800BBCF17 /* cs */,
 				C1C8397624F0EEEB00BBCF17 /* ar */,
 				C1C839C224F1253400BBCF17 /* zh-Hant-HK */,
+				C13CF81A261A00FD005452E5 /* zh-Hans */,
 			);
 			name = Login.storyboard;
 			sourceTree = SOURCE_ROOT;
@@ -3023,6 +3034,7 @@
 				C1C8395E24F0EE2C00BBCF17 /* el */,
 				C1C8396324F0EEBA00BBCF17 /* nb-NO */,
 				C1C839C024F1252B00BBCF17 /* tr */,
+				C13CF819261A00D0005452E5 /* zh-Hans */,
 			);
 			name = Main.storyboard;
 			sourceTree = SOURCE_ROOT;
@@ -3059,6 +3071,7 @@
 				C13E640625BD405700763D6F /* zh-Hant */,
 				C13E640825BD406600763D6F /* pt-BR */,
 				C13E640925BD406700763D6F /* pt-PT */,
+				C13CF81E261A00FE005452E5 /* zh-Hans */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";

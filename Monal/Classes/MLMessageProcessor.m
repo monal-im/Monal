@@ -116,6 +116,7 @@ static NSMutableDictionary* _typingNotifications;
         //add contact if possible (ignore groupchats or already existing contacts)
         DDLogWarn(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", messageNode.fromUser);
         [[DataLayer sharedInstance] addContact:messageNode.fromUser forAccount:account.accountNo nickname:nil andMucNick:nil];
+        [[DataLayer sharedInstance] addContact:messageNode.toUser forAccount:account.accountNo nickname:nil andMucNick:nil];
     }
     
     NSString* stanzaid = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];

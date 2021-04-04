@@ -101,9 +101,19 @@ static NSMutableDictionary* _typingNotifications;
         return;
     }
     
-    //add contact if possible (ignore groupchats or already existing contacts)
-    if(![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"])
+    if([[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"])
     {
+        // Ignore all group chat msgs from unkown groups
+        if([[DataLayer sharedInstance] isContactInList:messageNode.toUser forAccount:account.accountNo] == NO)
+        {
+            // ignore message
+            DDLogWarn(@"Ignoring groupchat message from %@", messageNode.toUser);
+            return;
+        }
+    }
+    else
+    {
+        //add contact if possible (ignore groupchats or already existing contacts)
         DDLogWarn(@"Adding possibly unknown contact for %@ to local contactlist (not updating remote roster!), doing nothing if contact is already known...", messageNode.fromUser);
         [[DataLayer sharedInstance] addContact:messageNode.fromUser forAccount:account.accountNo nickname:nil andMucNick:nil];
     }

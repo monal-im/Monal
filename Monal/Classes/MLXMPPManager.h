@@ -128,6 +128,8 @@ Sends a message to a specified contact in account. Calls completion handler on s
 @property (nonatomic, readonly) BOOL isBackgrounded;
 @property (nonatomic, readonly) BOOL isNotInFocus;
 
+@property (nonatomic, readonly) BOOL onMobile;
+
 /**
  updates delivery status after message has been sent
  */

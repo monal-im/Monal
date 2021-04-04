@@ -174,6 +174,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     _hasConnectivity = NO;
     _isBackgrounded = NO;
     _isNotInFocus = NO;
+    _onMobile = NO;
     
     [self defaultSettings];
     [self setPushToken:nil];       //load push settings from defaultsDB (can be overwritten later on in mainapp, but *not* in appex)
@@ -215,7 +216,14 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     _path_monitor = nw_path_monitor_create();
     nw_path_monitor_set_queue(_path_monitor, q_background);
     nw_path_monitor_set_update_handler(_path_monitor, ^(nw_path_t path) {
-        DDLogVerbose(@"*** nw_path_monitor update_handler called");
+        DDLogVerbose(@"*** nw_path_monitor: update_handler called");
+        if(@available(iOS 13.0, *))
+        {
+            DDLogDebug(@"*** nw_path_monitor: nw_path_is_constrained=%@", nw_path_is_constrained(path) ? @"YES" : @"NO");
+            DDLogDebug(@"*** nw_path_monitor: nw_path_is_expensive=%@", nw_path_is_expensive(path) ? @"YES" : @"NO");
+            _onMobile = nw_path_is_constrained(path) || nw_path_is_expensive(path);
+            DDLogDebug(@"*** nw_path_monitor: on 'mobile' --> %@", _onMobile ? @"YES" : @"NO");
+        }
         if(nw_path_get_status(path) == nw_path_status_satisfied && !self->_hasConnectivity)
         {
             DDLogVerbose(@"reachable");

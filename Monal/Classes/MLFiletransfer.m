@@ -14,6 +14,7 @@
 #import "MLEncryptedPayload.h"
 #import "xmpp.h"
 #import "AESGcm.h"
+#import "MLXMPPManager.h"
 
 @import MobileCoreServices;
 
@@ -104,13 +105,13 @@ static NSMutableSet* _currentlyTransfering;
             [self markAsComplete:historyId];
             
             //try to autodownload if sizes match
-            //TODO JIM: these are the settings used for size checks and autodownload allowed checks
+            long autodownloadMaxSize = [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersWifiMaxSize"];
+            if([[MLXMPPManager sharedInstance] onMobile])
+               autodownloadMaxSize = [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMobileMaxSize"];
             if(
                 [[HelperTools defaultsDB] boolForKey:@"AutodownloadFiletransfers"] &&
                 [contentLength intValue] >= 0 &&        //-1 means we don't know the size --> don't autodownload files of unknown sizes
-                [contentLength integerValue] <= [[HelperTools defaultsDB] integerForKey:@"AutodownloadFiletransfersMaxSize"] &&
-                //TODO JIM: this should be checked for image filetransfers only or mabe removed entirely in favor of AutodownloadFiletransfers
-                [[HelperTools defaultsDB] boolForKey:@"ShowImages"]
+                [contentLength integerValue] <= autodownloadMaxSize
             )
             {
                 DDLogInfo(@"Autodownloading file");

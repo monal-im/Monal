@@ -113,11 +113,14 @@ NSString *const kAskSubscribe=@"subscribe";
     [coder encodeObject:self.mucType forKey:@"mucType"];
     [coder encodeBool:self.isGroup forKey:@"isGroup"];
     [coder encodeBool:self.isPinned forKey:@"isPinned"];
+    [coder encodeBool:self.isBlocked forKey:@"isBlocked"];
     [coder encodeObject:self.statusMessage forKey:@"statusMessage"];
     [coder encodeObject:self.state forKey:@"state"];
     [coder encodeInteger:self.unreadCount forKey:@"unreadCount"];
     [coder encodeObject:self.lastMessageTime forKey:@"lastMessageTime"];
     [coder encodeBool:self.isActiveChat forKey:@"isActiveChat"];
+    [coder encodeBool:self.isEncrypted forKey:@"isEncrypted"];
+    [coder encodeBool:self.isMuted forKey:@"isMuted"];
 }
 
 -(instancetype) initWithCoder:(NSCoder*) coder
@@ -134,11 +137,14 @@ NSString *const kAskSubscribe=@"subscribe";
     self.mucType = [coder decodeObjectForKey:@"mucType"];
     self.isGroup = [coder decodeBoolForKey:@"isGroup"];
     self.isPinned = [coder decodeBoolForKey:@"isPinned"];
+    self.isBlocked = [coder decodeBoolForKey:@"isBlocked"];
     self.statusMessage = [coder decodeObjectForKey:@"statusMessage"];
     self.state = [coder decodeObjectForKey:@"state"];
     self.unreadCount = [coder decodeIntegerForKey:@"unreadCount"];
     self.lastMessageTime = [coder decodeObjectForKey:@"lastMessageTime"];
     self.isActiveChat = [coder decodeBoolForKey:@"isActiveChat"];
+    self.isEncrypted = [coder decodeBoolForKey:@"isEncrypted"];
+    self.isMuted = [coder decodeBoolForKey:@"isMuted"];
     return self;
 }
 
@@ -155,11 +161,14 @@ NSString *const kAskSubscribe=@"subscribe";
     self.mucType = contact.mucType;
     self.isGroup = contact.isGroup;
     self.isPinned = contact.isPinned;
+    self.isBlocked = contact.isBlocked;
     self.statusMessage = contact.statusMessage;
     self.state = contact.state;
     self.unreadCount = contact.unreadCount;
-    self.lastMessageTime = contact.lastMessageTime;
     self.isActiveChat = contact.isActiveChat;
+    self.isEncrypted = contact.isEncrypted;
+    self.isMuted = contact.isEncrypted;
+    self.lastMessageTime = contact.lastMessageTime;
 }
 
 @end

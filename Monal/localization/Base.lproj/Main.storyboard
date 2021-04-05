@@ -230,7 +230,6 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="680"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                        <color key="sectionIndexBackgroundColor" systemColor="systemBackgroundColor"/>
                         <connections>
                             <outlet property="dataSource" destination="6Ao-6z-tB7" id="U7P-Iw-tsb"/>
                             <outlet property="delegate" destination="6Ao-6z-tB7" id="m7e-a4-sdI"/>
@@ -2822,7 +2821,7 @@
     <inferredMetricsTieBreakers>
         <segue reference="Ecb-7N-zer"/>
         <segue reference="ndm-rg-MfL"/>
-        <segue reference="tEM-gR-7nN"/>
+        <segue reference="hqW-lo-9tZ"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="724-info" width="28" height="28"/>

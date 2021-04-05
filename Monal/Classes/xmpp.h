@@ -77,6 +77,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 @property (nonatomic, strong) NSString* accountNo;
 
 @property (nonatomic, readonly) xmppState accountState;
+@property (nonatomic, readonly) BOOL reconnectInProgress;
 
 // discovered properties
 @property (nonatomic, strong) NSArray* discoveredServersList;

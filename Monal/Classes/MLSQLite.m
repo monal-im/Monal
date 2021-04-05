@@ -397,7 +397,7 @@ static NSMutableDictionary* currentTransactions;
 {
     [self testThreadInstanceForQuery:@"endWriteTransaction" andArguments:nil];
     NSMutableDictionary* threadData = [[NSThread currentThread] threadDictionary];
-    threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:[threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] - 1];
+		    threadData[@"_sqliteTransactionsRunning"][_dbFile] = [NSNumber numberWithInt:[threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] - 1];
     if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] == 0)
     {
         [self executeNonQuery:@"COMMIT;" andArguments:@[] withException:YES];        //commit only outermost transaction

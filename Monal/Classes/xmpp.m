@@ -1312,7 +1312,16 @@ NSString *const kData=@"data";
                 presenceNode.from = self.connectionProperties.identity.jid;
             if(!presenceNode.to)
                 presenceNode.to = self.connectionProperties.identity.fullJid;
-
+            
+            //sanity: check if toUser points to us and throw it away if not
+            if(![self.connectionProperties.identity.jid isEqualToString:presenceNode.toUser])
+            {
+                DDLogError(@"sanity check failed presence node, ignoring presence: %@", presenceNode);
+                //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
+                [self incrementLastHandledStanza];
+                return;
+            }
+            
             if([presenceNode.fromUser isEqualToString:self.connectionProperties.identity.jid])
             {
                 DDLogInfo(@"got self presence");
@@ -1462,6 +1471,14 @@ NSString *const kData=@"data";
             if(!outerMessageNode.to)
                 outerMessageNode.to = self.connectionProperties.identity.fullJid;
             
+            //sanity: check if toUser points to us and throw it away if not
+            if(![self.connectionProperties.identity.jid isEqualToString:outerMessageNode.toUser])
+            {
+                DDLogError(@"sanity check failed for outer message node, ignoring message: %@", outerMessageNode);
+                //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
+                [self incrementLastHandledStanza];
+                return;
+            }
             //extract inner message if mam result or carbon copy
             //the original "outer" message will be kept in outerMessageNode while the forwarded stanza will be stored in messageNode
             if([outerMessageNode check:@"{urn:xmpp:mam:2}result"])          //mam result
@@ -1514,6 +1531,15 @@ NSString *const kData=@"data";
             if(!messageNode.to)
                 messageNode.to = self.connectionProperties.identity.fullJid;
             
+            //sanity: check if toUser points to us and throw it away if not
+            if(![self.connectionProperties.identity.jid isEqualToString:messageNode.toUser])
+            {
+                DDLogError(@"sanity check failed for inner message node, ignoring message: %@", messageNode);
+                //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
+                [self incrementLastHandledStanza];
+                return;
+            }
+            
             //assert on wrong from and to values
             NSAssert(![messageNode.fromUser containsString:@"/"], @"messageNode.fromUser contains resource!");
             NSAssert(![messageNode.toUser containsString:@"/"], @"messageNode.toUser contains resource!");
@@ -1545,19 +1571,21 @@ NSString *const kData=@"data";
         {
             XMPPIQ* iqNode = (XMPPIQ*)parsedStanza;
             
-            //sanity: check if iq id and type attributes are present and throw it away if not
-            if(![parsedStanza check:@"/@id"] || ![parsedStanza check:@"/@type"])
-            {
-                //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
-                [self incrementLastHandledStanza];
-                return;
-            }
-            
             //sanitize: no from or to always means own bare jid
             if(!iqNode.from)
                 iqNode.from = self.connectionProperties.identity.jid;
             if(!iqNode.to)
                 iqNode.to = self.connectionProperties.identity.fullJid;
+            
+            //sanity: check if iq id and type attributes are present and toUser points to us and throw it away if not
+            //use parsedStanza instead of iqNode to be sure we get the raw values even if ids etc. get added automaticaly to iq stanzas if accessed as XMPPIQ* object
+            if(![parsedStanza check:@"/@id"] || ![parsedStanza check:@"/@type"] || ![self.connectionProperties.identity.jid isEqualToString:iqNode.toUser])
+            {
+                DDLogError(@"sanity check failed for iq node, ignoring iq: %@", iqNode);
+                //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)
+                [self incrementLastHandledStanza];
+                return;
+            }
             
             //remove handled mam queries from _runningMamQueries
             if([iqNode check:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"])

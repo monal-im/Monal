@@ -697,8 +697,8 @@ static NSDateFormatter* dbFormatter;
 {
     [self.db voidWriteTransaction:^{
         [self setResourceOnline:presenceObj forAccount:accountNo];
-        NSString* query = @"UPDATE buddylist SET state='', muc=? WHERE account_id=? AND buddy_name=? AND state='offline';";
-        NSArray* params = @[@([presenceObj check:@"{http://jabber.org/protocol/muc#user}x"]), accountNo, presenceObj.fromUser];
+        NSString* query = @"UPDATE buddylist SET state='' WHERE account_id=? AND buddy_name=? AND state='offline';";
+        NSArray* params = @[accountNo, presenceObj.fromUser];
         [self.db executeNonQuery:query andArguments:params];
     }];
 }

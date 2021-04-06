@@ -423,7 +423,7 @@
                 break;
             }
             case 1: {
-                [thecell initCell:NSLocalizedString(@"Display Name", @"") withTextField:self.rosterName andPlaceholder:NSLocalizedString(@"", @"") andTag:1];
+                [thecell initCell:NSLocalizedString(@"Display Name", @"") withTextField:self.rosterName andPlaceholder:@"" andTag:1];
                 thecell.cellLabel.text = NSLocalizedString(@"Display Name", @"");
                 thecell.textInputField.keyboardType = UIKeyboardTypeAlphabet;
                 break;
@@ -472,13 +472,13 @@
                 else
                 {
                     // allow entering jid on account creation
-                    [thecell initCell:NSLocalizedString(@"XMPP ID", @"") withTextField:nil andPlaceholder:NSLocalizedString(@"Enter you XMPP ID here", @"") andTag:2];
+                    [thecell initCell:NSLocalizedString(@"XMPP ID", @"") withTextField:nil andPlaceholder:NSLocalizedString(@"Enter your XMPP ID here", @"") andTag:2];
                     thecell.textInputField.keyboardType = UIKeyboardTypeEmailAddress;
                 }
                 break;
             }
             case 1: {
-                [thecell initCell:NSLocalizedString(@"Password", @"") withTextField:self.password secureEntry:YES andPlaceholder:NSLocalizedString(@"Enter you password here", @"") andTag:3];
+                [thecell initCell:NSLocalizedString(@"Password", @"") withTextField:self.password secureEntry:YES andPlaceholder:NSLocalizedString(@"Enter your password here", @"") andTag:3];
                 break;
             }
             case 2:  {

@@ -210,7 +210,7 @@ NS_ENUM(NSInteger, kSettingSection)
                     break;
                     
                 case 1:
-                     [self openLink:@"https://github.com/anurodhp/Monal/issues"];
+                     [self openLink:@"https://github.com/monal-im/Monal/issues"];
                     break;
                 default:
                     break;

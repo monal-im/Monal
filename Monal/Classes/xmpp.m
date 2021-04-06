@@ -1531,8 +1531,8 @@ NSString *const kData=@"data";
             if(!messageNode.to)
                 messageNode.to = self.connectionProperties.identity.fullJid;
             
-            //sanity: check if toUser points to us and throw it away if not
-            if(![self.connectionProperties.identity.jid isEqualToString:messageNode.toUser])
+            //sanity: check if toUser or fromUser points to us and throw it away if not
+            if([self.connectionProperties.identity.jid isEqualToString:messageNode.toUser] == NO && [self.connectionProperties.identity.jid isEqualToString:messageNode.fromUser] == NO)
             {
                 DDLogError(@"sanity check failed for inner message node, ignoring message: %@", messageNode);
                 //mark stanza as handled even if we don't process it further (we still received it, so we have to count it)

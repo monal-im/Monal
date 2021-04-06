@@ -18,10 +18,16 @@ fi
 ls -l ~/Library/MobileDevice/Provisioning\ Profiles/
 
 echo ""
+echo "*******************************************"
+echo "*     Update localizations submodules     *"
+echo "*******************************************"
+git submodule update --remote --init
+
+echo ""
 echo "***************************************"
 echo "*     Installing macOS & iOS Pods     *"
 echo "***************************************"
-pod install
+pod install --repo-update
 
 echo ""
 echo "***************************"

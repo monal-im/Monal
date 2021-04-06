@@ -198,7 +198,7 @@
     if(pinned) {
         self.backgroundColor = [UIColor colorNamed:@"activeChatsPinnedColor"];
     } else {
-        self.backgroundColor = UIColor.clearColor;
+        self.backgroundColor = nil;
     }
 }
 

@@ -238,6 +238,9 @@ NS_ENUM(NSInteger, kSettingSection)
                 case 4:
                     [self performSegueWithIdentifier:@"showLogs" sender:self];
                     break;
+                    
+                case 5:
+                    break;
                
                 default:
                     unreachable();

@@ -48,22 +48,26 @@
 
 -(void) displayLastMessage:(MLMessage* _Nullable) lastMessage forContact:(MLContact*) contact
 {
+    NSString* senderOfLastGroupMsg; // set to nick of sender in a group chat
+    if(contact.isGroup == YES)
+        senderOfLastGroupMsg = lastMessage.actualFrom;
+
     if(lastMessage)
     {
         if([lastMessage.messageType isEqualToString:kMessageTypeUrl] && [[HelperTools defaultsDB] boolForKey:@"ShowURLPreview"])
-            [self showStatusText:NSLocalizedString(@"🔗 A Link", @"") inboundDir:lastMessage.inbound];
+            [self showStatusText:NSLocalizedString(@"🔗 A Link", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
         else if([lastMessage.messageType isEqualToString:kMessageTypeFiletransfer])
         {
             if([lastMessage.filetransferMimeType hasPrefix:@"image/"])
-                [self showStatusText:NSLocalizedString(@"📷 An Image", @"") inboundDir:lastMessage.inbound];
+                [self showStatusText:NSLocalizedString(@"📷 An Image", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
             else if([lastMessage.filetransferMimeType hasPrefix:@"audio/"])
-                [self showStatusText:NSLocalizedString(@"🎵 A Audiomessage", @"") inboundDir:lastMessage.inbound];
+                [self showStatusText:NSLocalizedString(@"🎵 A Audiomessage", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
             else if([lastMessage.filetransferMimeType hasPrefix:@"video/"])
-                [self showStatusText:NSLocalizedString(@"🎥 A Video", @"") inboundDir:lastMessage.inbound];
+                [self showStatusText:NSLocalizedString(@"🎥 A Video", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
             else if([lastMessage.filetransferMimeType isEqualToString:@"application/pdf"])
-                [self showStatusText:NSLocalizedString(@"📄 A Document", @"") inboundDir:lastMessage.inbound];
+                [self showStatusText:NSLocalizedString(@"📄 A Document", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
             else
-                [self showStatusText:NSLocalizedString(@"📁 A File", @"") inboundDir:lastMessage.inbound];
+                [self showStatusText:NSLocalizedString(@"📁 A File", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
         }
         else if ([lastMessage.messageType isEqualToString:kMessageTypeMessageDraft])
         {
@@ -71,7 +75,7 @@
             [self showStatusTextItalic:draftPreview withItalicRange:NSMakeRange(0, 6)];
         }
         else if([lastMessage.messageType isEqualToString:kMessageTypeGeo])
-            [self showStatusText:NSLocalizedString(@"📍 A Location", @"") inboundDir:lastMessage.inbound];
+            [self showStatusText:NSLocalizedString(@"📍 A Location", @"") inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
         else
         {
             if([lastMessage.messageText hasPrefix:@"/me "])
@@ -91,7 +95,7 @@
             }
             else
             {
-                [self showStatusText:lastMessage.messageText inboundDir:lastMessage.inbound];
+                [self showStatusText:lastMessage.messageText inboundDir:lastMessage.inbound fromUser:senderOfLastGroupMsg];
             }
         }
         if(lastMessage.timestamp)
@@ -104,16 +108,19 @@
     }
     else
     {
-        [self showStatusText:nil inboundDir:lastMessage.inbound];
+        [self showStatusText:nil inboundDir:lastMessage.inbound fromUser:nil];
         DDLogWarn(@"Active chat but no messages found in history for %@.", contact.contactJid);
     }
 }
 
--(void) showStatusText:(NSString *) text inboundDir:(BOOL) inboundDir
+-(void) showStatusText:(NSString *) text inboundDir:(BOOL) inboundDir fromUser:(NSString* _Nullable) fromUser
 {
     NSString* statusMessage = @"";
     if(inboundDir == NO)
         statusMessage = [NSString stringWithFormat:@"%@ ", NSLocalizedString(@"Me", @"")];
+    else if(inboundDir == YES && fromUser != nil && fromUser.length > 0)
+        statusMessage = [NSString stringWithFormat:@"%@: ", fromUser];
+
     // set range of "Me" prefix that should be gray
     NSRange meAttrRange = NSMakeRange(0, statusMessage.length);
 
@@ -194,7 +201,7 @@
 -(void) setPinned:(BOOL) pinned
 {
     self.isPinned = pinned;
-    
+
     if(pinned) {
         self.backgroundColor = [UIColor colorNamed:@"activeChatsPinnedColor"];
     } else {

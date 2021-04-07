@@ -16,7 +16,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r8c-Jr-MKH">
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Label" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r8c-Jr-MKH">
                         <rect key="frame" x="8" y="11" width="218" height="21"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>
@@ -40,7 +40,7 @@
                         </constraints>
                     </switch>
                     <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="5" minValue="1" maxValue="30" translatesAutoresizingMaskIntoConstraints="NO" id="tEn-lq-qzq">
-                        <rect key="frame" x="55.5" y="6" width="258.5" height="34"/>
+                        <rect key="frame" x="261" y="6" width="53" height="34"/>
                     </slider>
                 </subviews>
                 <constraints>
@@ -48,7 +48,9 @@
                     <constraint firstAttribute="trailing" secondItem="YK7-IO-DiF" secondAttribute="trailing" constant="8" id="7cd-KZ-yeq"/>
                     <constraint firstItem="ZDH-II-Cc8" firstAttribute="trailing" secondItem="4FD-Uj-Ib9" secondAttribute="trailing" id="DTw-5b-VOw"/>
                     <constraint firstAttribute="trailing" secondItem="tEn-lq-qzq" secondAttribute="trailing" constant="8" id="EZT-lA-9Bk"/>
+                    <constraint firstAttribute="bottom" secondItem="r8c-Jr-MKH" secondAttribute="bottom" constant="8" id="GPy-3O-Xf0"/>
                     <constraint firstItem="ZDH-II-Cc8" firstAttribute="trailing" secondItem="DMi-LI-zqm" secondAttribute="trailingMargin" constant="8" id="LTg-m3-oEl"/>
+                    <constraint firstItem="4FD-Uj-Ib9" firstAttribute="leading" secondItem="r8c-Jr-MKH" secondAttribute="trailing" constant="8" id="MLc-CT-YwJ"/>
                     <constraint firstAttribute="trailing" secondItem="4FD-Uj-Ib9" secondAttribute="trailing" constant="8" id="Sov-Wt-Rvy"/>
                     <constraint firstItem="ZDH-II-Cc8" firstAttribute="leading" secondItem="r8c-Jr-MKH" secondAttribute="trailing" constant="8" id="WTa-SO-XVZ"/>
                     <constraint firstItem="tEn-lq-qzq" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" constant="-5" id="XJt-g5-ad1"/>

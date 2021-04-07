@@ -10,6 +10,7 @@
 #import "HelperTools.h"
 #import "MonalAppDelegate.h"
 #import "MLDefinitions.h"
+#import "DataLayer.h"
 
 int main(int argc, char *argv[]) {
     @autoreleasepool {
@@ -43,7 +44,10 @@ int main(int argc, char *argv[]) {
             // reset NSUserDefaults
             [[NSUserDefaults alloc] removePersistentDomainForName:kAppGroup];
         }
-        
+        else if([NSProcessInfo.processInfo.arguments containsObject:@"--invalidateAccountStates"])
+        {
+            [[DataLayer sharedInstance] invalidateAllAccountStates];
+        }
         int retVal = UIApplicationMain(argc, argv, nil, NSStringFromClass([MonalAppDelegate class]));
         return retVal;
     }

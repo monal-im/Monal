@@ -279,6 +279,8 @@ extern NSString* const kMessageTypeFiletransfer;
 -(NSArray*) getAllMessagesForFiletransferUrl:(NSString*) url;
 -(void) upgradeImageMessagesToFiletransferMessages;
 
+
+-(void) invalidateAllAccountStates;
 @end
 
 NS_ASSUME_NONNULL_END

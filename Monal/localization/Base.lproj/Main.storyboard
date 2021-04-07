@@ -692,7 +692,7 @@
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" keyboardDismissMode="interactive" dataMode="prototypes" style="plain" separatorStyle="none" rowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Kkq-aZ-5fP">
-                                <rect key="frame" x="0.0" y="0.0" width="1024" height="1332"/>
+                                <rect key="frame" x="0.0" y="0.0" width="1024" height="1358"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <gestureRecognizers/>
                                 <constraints>
@@ -962,7 +962,7 @@
                                             <outlet property="thumbnailImage" destination="GlC-dn-bvj" id="iHP-Iz-z5V"/>
                                         </connections>
                                     </tableViewCell>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" indentationWidth="10" reuseIdentifier="mapsInCell" rowHeight="242" translatesAutoresizingMaskIntoConstraints="NO" id="xhf-eh-Dkx" customClass="MLChatMapsCell">
                                         <rect key="frame" x="0.0" y="541" width="1024" height="242"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xhf-eh-Dkx" id="BdL-U7-BOc">
@@ -2645,6 +2645,7 @@
                             <constraint firstItem="Kkq-aZ-5fP" firstAttribute="leading" secondItem="ZKQ-3D-6NG" secondAttribute="leading" id="SIK-A8-KjT"/>
                             <constraint firstItem="Kkq-aZ-5fP" firstAttribute="top" secondItem="Riz-2Q-bcU" secondAttribute="top" id="T8K-jc-eWo"/>
                             <constraint firstItem="ZKQ-3D-6NG" firstAttribute="trailing" secondItem="SEk-WZ-Rcm" secondAttribute="trailing" id="Vxx-8b-Xhg"/>
+                            <constraint firstItem="ZKQ-3D-6NG" firstAttribute="bottom" secondItem="Kkq-aZ-5fP" secondAttribute="bottom" constant="8" id="l0B-p3-Pbr"/>
                             <constraint firstItem="cUR-xM-Mq7" firstAttribute="leading" secondItem="Riz-2Q-bcU" secondAttribute="leadingMargin" constant="-20" id="nxB-c0-v3z"/>
                             <constraint firstItem="ZKQ-3D-6NG" firstAttribute="trailing" secondItem="Kkq-aZ-5fP" secondAttribute="trailing" id="xwD-cC-ws0"/>
                             <constraint firstAttribute="bottom" secondItem="SEk-WZ-Rcm" secondAttribute="bottom" constant="20" symbolic="YES" id="y5H-Ps-mKI"/>
@@ -2821,7 +2822,7 @@
     <inferredMetricsTieBreakers>
         <segue reference="Ecb-7N-zer"/>
         <segue reference="ndm-rg-MfL"/>
-        <segue reference="hqW-lo-9tZ"/>
+        <segue reference="RNX-bQ-8Zb"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="724-info" width="28" height="28"/>

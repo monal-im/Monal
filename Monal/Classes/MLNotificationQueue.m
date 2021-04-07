@@ -52,6 +52,7 @@
 //this is compatible to [NSNotificationCenter defaultCenter]
 -(void) postNotificationName:(NSNotificationName) notificationName object:(id _Nullable) notificationObject userInfo:(id _Nullable) notificationUserInfo
 {
+    DDLogDebug(@"Queueing notification: %@", notificationName);
     //create queue entry (handle nil arguments)
     NSMutableDictionary* entry = [[NSMutableDictionary alloc] init];
     entry[@"name"] = notificationName;
@@ -77,7 +78,6 @@
 {
     [self postNotificationName:notification.name object:notification.object userInfo:notification.userInfo];
 }
-
 
 -(NSUInteger) flush
 {

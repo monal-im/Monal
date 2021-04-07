@@ -397,6 +397,16 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
         //we don't need to force saving of our new state because once this incoming iq gets counted by smacks the whole state will be saved
     }
     
+    //load members/admins/owners list (even if not joining, because initMuc: above will delee the old list and we always have to refill it)
+    DDLogInfo(@"Querying members/admin/owner lists for muc %@...", iqNode.fromUser);
+    for(NSString* type in @[@"member", @"admin", @"owner"])
+    {
+        XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
+        [discoInfo setiqTo:iqNode.fromUser];
+        [discoInfo setMucListQueryFor:type];
+        [account sendIq:discoInfo withHandler:$newHandler(self, handleMembersList, $ID(type))];
+    }
+    
     // now try to join this room if requested
     if(join)
     {
@@ -405,20 +415,12 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
             [_joining addObject:iqNode.fromUser];       //add room to "currently joining" list
             //we don't need to force saving of our new state because once this outgoing join presence gets handled by smacks the whole state will be saved
         }
+        
         NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:iqNode.fromUser forAccount:account.accountNo];
         XMPPPresence* presence = [[XMPPPresence alloc] init];
         [presence joinRoom:iqNode.fromUser withNick:nick];
         [account send:presence];
         
-        //load members/admins/owners list
-        DDLogInfo(@"Querying members/adin/owner lists for muc %@...", iqNode.fromUser);
-        for(NSString* type in @[@"member", @"admin", @"owner"])
-        {
-            XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
-            [discoInfo setiqTo:iqNode.fromUser];
-            [discoInfo setMucListQueryFor:type];
-            [account sendIq:discoInfo withHandler:$newHandler(self, handleMembersList, $ID(type))];
-        }
     }
 $$
 

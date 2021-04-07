@@ -104,7 +104,7 @@ static NSMutableDictionary* _typingNotifications;
     if([[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"])
     {
         // Ignore all group chat msgs from unkown groups
-        if([[DataLayer sharedInstance] isContactInList:messageNode.toUser forAccount:account.accountNo] == NO)
+        if([[DataLayer sharedInstance] isContactInList:messageNode.fromUser forAccount:account.accountNo] == NO)
         {
             // ignore message
             DDLogWarn(@"Ignoring groupchat message from %@", messageNode.toUser);
@@ -125,8 +125,13 @@ static NSMutableDictionary* _typingNotifications;
     
     NSString* stanzaid = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];
     //check stanza-id @by according to the rules outlined in XEP-0359
-    if(!stanzaid && [account.connectionProperties.identity.jid isEqualToString:[messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@by"]])
-        stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
+    if(!stanzaid)
+    {
+        if(![messageNode check:@"/<type=groupchat>"] && [account.connectionProperties.identity.jid isEqualToString:[messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@by"]])
+            stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
+        else if([messageNode check:@"/<type=groupchat>"] && [messageNode.fromUser isEqualToString:[messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@by"]])
+            stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
+    }
     
     //handle muc status changes or invites (this checks for the muc namespace itself)
     if([MLMucProcessor processMessage:messageNode forAccount:account])
@@ -143,11 +148,11 @@ static NSMutableDictionary* _typingNotifications;
         }
     }
     
-    //NSString* ownNick;
+    NSString* ownNick;
     NSString* actualFrom = messageNode.fromUser;
     if([messageNode check:@"/<type=groupchat>"] && messageNode.fromResource)
     {
-        //ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser forAccount:account.accountNo];
+        ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser forAccount:account.accountNo];
         actualFrom = messageNode.fromResource;
     }
 
@@ -259,9 +264,14 @@ static NSMutableDictionary* _typingNotifications;
             //handle normal messages or LMC messages that can not be found (but ignore deletion LMCs)
             if(historyId == nil && ![body isEqualToString:kMessageDeletedBody])
             {
+                //inbound value for 1:1 chats
+                BOOL inbound = [messageNode.toUser isEqualToString:account.connectionProperties.identity.jid];
+                //inbound value for groupchat messages
+                if([messageNode check:@"/<type=groupchat>"])
+                    inbound = ![actualFrom isEqualToString:ownNick];
                 historyId = [[DataLayer sharedInstance]
                              addMessageToChatBuddy:[messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser
-                             withInboundDir:[messageNode.toUser isEqualToString:account.connectionProperties.identity.jid]
+                             withInboundDir:inbound
                                 forAccount:account.accountNo
                                 withBody:[body copy]
                             actuallyfrom:actualFrom
@@ -381,14 +391,10 @@ static NSMutableDictionary* _typingNotifications;
         //ignore unknown groupchats or channel-type mucs or stanzas from the groupchat itself (e.g. not from a participant having a full jid)
         if(groupchatContact.isGroup && [groupchatContact.mucType isEqualToString:@"group"] && messageNode.fromResource)
         {
-            NSString* ownGroupchatNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser forAccount:account.accountNo];
-            //this should never happen because we've checked that we know this groupchat above
-            NSAssert(ownGroupchatNick, @"Could not determine muc nick when receiving chat-markers");
-            
             //incoming chat markers from own account (muc echo, muc "carbon")
             //WARNING: kMonalMessageDisplayedNotice goes to chatViewController, kMonalDisplayedMessageNotice goes to MLNotificationManager and activeChatsViewController/chatViewController
             //e.g.: kMonalMessageDisplayedNotice means "remote party read our message" and kMonalDisplayedMessageNotice means "we read a message"
-            if([ownGroupchatNick isEqualToString:messageNode.fromResource])
+            if([actualFrom isEqualToString:ownNick])
             {
                 DDLogInfo(@"Got OWN muc display marker in %@ for message id: %@", messageNode.fromUser, [messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"]);
                 NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:messageNode.fromUser andAccount:account.accountNo tillStanzaId:[messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"] wasOutgoing:NO];

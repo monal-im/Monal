@@ -1235,7 +1235,7 @@ static NSDateFormatter* dbFormatter;
                     query = @"insert into message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
                     params = @[accountNo, buddyName, [NSNumber numberWithBool:inbound], dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@""];
                 }
-                DDLogVerbose(@"%@", query);
+                DDLogVerbose(@"%@ params:%@", query, params);
                 BOOL success = [self.db executeNonQuery:query andArguments:params];
                 if(!success)
                     return (NSNumber*)nil;
@@ -1247,7 +1247,7 @@ static NSDateFormatter* dbFormatter;
             {
                 NSString* query = @"insert into message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
                 NSArray* params = @[accountNo, buddyName, [NSNumber numberWithBool:inbound], dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:sent], messageid ? messageid : @"", messageType, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
-                DDLogVerbose(@"%@", query);
+                DDLogVerbose(@"%@ params:%@", query, params);
                 BOOL success = [self.db executeNonQuery:query andArguments:params];
                 if(!success)
                     return (NSNumber*)nil;

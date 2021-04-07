@@ -394,6 +394,11 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
         }
     }
     
+    DDLogDebug(@"Upating muc contact...");
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+        @"contact": [[DataLayer sharedInstance] contactForUsername:iqNode.fromUser forAccount:account.accountNo]
+    }];
+    
     @synchronized(_stateLockObject) {
         _roomFeatures[iqNode.fromUser] = features;
         //we don't need to force saving of our new state because once this incoming iq gets counted by smacks the whole state will be saved

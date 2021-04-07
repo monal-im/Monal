@@ -427,7 +427,6 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
         XMPPPresence* presence = [[XMPPPresence alloc] init];
         [presence joinRoom:iqNode.fromUser withNick:nick];
         [account send:presence];
-        
     }
 $$
 

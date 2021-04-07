@@ -13,6 +13,7 @@
 #import "MLHandler.h"
 #import "xmpp.h"
 #import "DataLayer.h"
+#import "XMPPDataForm.h"
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
@@ -357,7 +358,8 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
     }
     
     //extract further muc infos
-    NSString* mucName = [iqNode findFirst:@"identity<category=conference>@name"];
+    XMPPDataForm* dataForm = [iqNode findFirst:@"{http://jabber.org/protocol/disco#info}query/{jabber:x:data}x"];
+    NSString* mucName = dataForm[@"muc#roomconfig_roomname"];
     NSString* mucType = @"channel";
     //both are needed for omemo, see discussion with holger 2021-01-02/03 -- tmolitor
     if([features containsObject:@"muc_nonanonymous"] && [features containsObject:@"muc_membersonly"])

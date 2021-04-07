@@ -185,11 +185,11 @@ static NSMutableDictionary* _typingNotifications;
             encrypted = YES;
         }
         
-        if(!body && [messageNode check:@"/<type=headline>/subject#"])
+        if(!body && [messageNode check:@"/<type=groupchat>/subject#"])
         {
-            NSString* subject = [messageNode findFirst:@"/<type=headline>/subject#"];
+            NSString* subject = [messageNode findFirst:@"/<type=groupchat>/subject#"];
             NSString* currentSubject = [[DataLayer sharedInstance] mucSubjectforAccount:account.accountNo andRoom:messageNode.fromUser];
-            if(!subject || [subject isEqualToString:currentSubject])
+            if(subject == nil || [subject isEqualToString:currentSubject])
                 return;
             
             [[DataLayer sharedInstance] updateMucSubject:subject forAccount:account.accountNo andRoom:messageNode.fromUser];

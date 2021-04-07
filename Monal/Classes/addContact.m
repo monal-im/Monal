@@ -14,6 +14,7 @@
 #import "MLAccountPickerViewController.h"
 #import "DataLayer.h"
 #import "xmpp.h"
+#import "MLOMEMO.h"
 
 @class MLQRCodeScanner;
 
@@ -59,6 +60,10 @@
                 // and approve the new contact
                 [[MLXMPPManager sharedInstance] approveContact:contactObj];
             }
+#ifndef DISABLE_OMEMO
+            // Request omemo devicelist
+            [account.omemo queryOMEMODevices:contactObj.contactJid];
+#endif// DISABLE_OMEMO
 
             UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Permission Requested", @"") message:NSLocalizedString(@"The new contact will be added to your contacts list when the person you've added has approved your request.", @"") preferredStyle:UIAlertControllerStyleAlert];
             UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {

@@ -310,7 +310,7 @@ static NSMutableSet* _currentlyTransfering;
 
 +(void) uploadUIImage:(UIImage*) image onAccount:(xmpp*) account withEncryption:(BOOL) encrypt andCompletion:(void (^)(NSString* _Nullable url, NSString* _Nullable mimeType, NSNumber* _Nullable size, NSError* _Nullable error)) completion
 {
-    double jpegQuality = 0.75;          //TODO JIM: make this configurable in upload/download settings
+    double imageQuality = [[HelperTools defaultsDB] doubleForKey:@"ImageUploadQuality"];
     
     DDLogInfo(@"Uploading image from UIImage object");
     
@@ -318,8 +318,8 @@ static NSMutableSet* _currentlyTransfering;
     NSString* tempname = [NSString stringWithFormat:@"%@.tmp", [[NSUUID UUID] UUIDString]];
     NSError* error;
     NSString* file = [_documentCacheDir stringByAppendingPathComponent:tempname];
-    DDLogDebug(@"Tempstoring jpeg encoded file having quality %f at %@", jpegQuality, file);
-    NSData* imageData = UIImageJPEGRepresentation(image, jpegQuality);
+    DDLogDebug(@"Tempstoring jpeg encoded file having quality %f at %@", imageQuality, file);
+    NSData* imageData = UIImageJPEGRepresentation(image, imageQuality);
     [imageData writeToFile:file options:NSDataWritingAtomic error:&error];
     if(error)
     {

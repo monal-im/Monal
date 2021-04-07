@@ -114,6 +114,9 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
     [self upgradeFloatUserSettingsIfUnset:@"AutodownloadFiletransfersMobileMaxSize" toDefault:5*1024*1024];     // 5 MiB
     [self upgradeFloatUserSettingsIfUnset:@"AutodownloadFiletransfersWifiMaxSize" toDefault:32*1024*1024];     // 32 MiB
+
+    // upgrade default image quality
+    [self upgradeFloatUserSettingsIfUnset:@"ImageUploadQuality" toDefault:0.75];
 }
 
 -(void) upgradeBoolUserSettingsIfUnset:(NSString*) settingsName toDefault:(BOOL) defaultVal

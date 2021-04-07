@@ -19,6 +19,8 @@
 #import "MLNewViewController.h"
 #import "MLXEPSlashMeHandler.h"
 
+@import QuartzCore.CATransaction;
+
 @interface ActiveChatsViewController ()
 
 @property (nonatomic, strong) NSMutableArray* unpinnedContacts;
@@ -140,15 +142,18 @@ static NSMutableSet* _smacksWarningDisplayed;
     dispatch_async(dispatch_get_main_queue(), ^{
         if(self.chatListTable.hasUncommittedUpdates)
             return;
+        [CATransaction begin];
         [UIView performWithoutAnimation:^{
             [self.chatListTable beginUpdates];
             resizeSections(self.chatListTable, unpinnedChats, unpinnedCntDiff);
             resizeSections(self.chatListTable, pinnedChats, pinnedCntDiff);
             self.unpinnedContacts = newUnpinnedContacts;
             self.pinnedContacts = newPinnedContacts;
-            [self.chatListTable reloadData];
+            [self.chatListTable reloadSections:[NSIndexSet indexSetWithIndex:pinnedChats] withRowAnimation:UITableViewRowAnimationNone];
+            [self.chatListTable reloadSections:[NSIndexSet indexSetWithIndex:unpinnedChats] withRowAnimation:UITableViewRowAnimationNone];
             [self.chatListTable endUpdates];
         }];
+        [CATransaction commit];
 
         MonalAppDelegate* appDelegate = (MonalAppDelegate*)[UIApplication sharedApplication].delegate;
         [appDelegate updateUnread];
@@ -273,12 +278,10 @@ static NSMutableSet* _smacksWarningDisplayed;
     [super viewWillAppear:animated];
     // load contacts
     self.lastSelectedUser = nil;
-    if(self.unpinnedContacts.count == 0) {
-        [self refreshDisplay];
-    }
-    // only check if the login screen has to be shown if there are no active chats
     if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
     {
+        [self refreshDisplay];
+        // only check if the login screen has to be shown if there are no active chats
         [self segueToIntroScreensIfNeeded];
     }
 }

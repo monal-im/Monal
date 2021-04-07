@@ -330,6 +330,7 @@ static NSMutableDictionary* _uiHandler;
 {
     if(roomJid == nil || account == nil)
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Room jid or account must not be nil!" userInfo:nil];
+    roomJid = [roomJid lowercaseString];
     DDLogInfo(@"Querying disco for muc %@...", roomJid);
     XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoInfo setiqTo:roomJid];

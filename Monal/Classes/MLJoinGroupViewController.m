@@ -206,6 +206,7 @@
             - combinedRoom -> room name incl conference server
             - [self showGroupPasswordForm];
         */
+        combinedRoom = [combinedRoom lowercaseString];
         [self displayJoinHUD];
         [MLMucProcessor addUIHandler:^(id _data) {
             NSDictionary* data = (NSDictionary*)_data;

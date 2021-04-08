@@ -2902,13 +2902,6 @@ static NSDateFormatter* dbFormatter;
 
 #pragma mark - Filetransfers
 
--(NSArray*) getAllCachedImages
-{
-    return [self.db idReadTransaction:^{
-        return [self.db executeReader:@"SELECT DISTINCT * FROM imageCache;"];
-    }];
-}
-
 -(NSArray*) getAllMessagesForFiletransferUrl:(NSString*) url
 {
     return [self.db idReadTransaction:^{
@@ -2923,6 +2916,15 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
+// (deprecated) should only be used to upgrade to new table format
+-(NSArray*) getAllCachedImages
+{
+    return [self.db idReadTransaction:^{
+        return [self.db executeReader:@"SELECT DISTINCT * FROM imageCache;"];
+    }];
+}
+
+// (deprecated) should only be used to upgrade to new table format
 -(void) removeImageCacheTables
 {
     [self.db voidWriteTransaction:^{

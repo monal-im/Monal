@@ -1066,7 +1066,10 @@ static NSDateFormatter* dbFormatter;
 {
     return [self.db boolReadTransaction:^{
         NSNumber* status = (NSNumber*)[self.db executeScalar:@"SELECT Muc FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, buddy]];
-        return (BOOL)(status != nil || [status boolValue]);
+        if(status == nil)
+            return NO;
+        else
+            return [status boolValue];
     }];
 }
 

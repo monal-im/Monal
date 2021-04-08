@@ -267,7 +267,7 @@ static NSMutableDictionary* _typingNotifications;
                 //inbound value for 1:1 chats
                 BOOL inbound = [messageNode.toUser isEqualToString:account.connectionProperties.identity.jid];
                 //inbound value for groupchat messages
-                if([messageNode check:@"/<type=groupchat>"])
+                if(ownNick != nil)
                     inbound = ![actualFrom isEqualToString:ownNick];
                 historyId = [[DataLayer sharedInstance]
                              addMessageToChatBuddy:[messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser
@@ -385,7 +385,7 @@ static NSMutableDictionary* _typingNotifications;
     }
     
     //handle chat-markers in groupchats slightly different
-    if([messageNode check:@"{urn:xmpp:chat-markers:0}displayed@id"] && [messageNode check:@"/<type=groupchat>"])
+    if([messageNode check:@"{urn:xmpp:chat-markers:0}displayed@id"] && ownNick != nil)
     {
         MLContact* groupchatContact = [[DataLayer sharedInstance] contactForUsername:messageNode.fromUser forAccount:account.accountNo];
         //ignore unknown groupchats or channel-type mucs or stanzas from the groupchat itself (e.g. not from a participant having a full jid)

@@ -2288,9 +2288,6 @@ enum msgSentState {
 
 -(void) loadOldMsgHistory:(id) sender
 {
-    if(self.contact.isGroup)
-        return;
-
     // Load older messages from db
     NSMutableArray* oldMessages = nil;
     if(self.messageList.count > 0) {
@@ -2327,13 +2324,13 @@ enum msgSentState {
         //now load more (older) messages from mam if not
         DDLogVerbose(@"Loading more messages from mam before stanzaId %@", oldestStanzaId);
         weakify(self);
-        [self.xmppAccount setMAMQueryMostRecentForJid:self.contact.contactJid before:oldestStanzaId withCompletion:^(NSArray* _Nullable messages) {
+        [self.xmppAccount setMAMQueryMostRecentForContact:self.contact before:oldestStanzaId withCompletion:^(NSArray* _Nullable messages) {
             strongify(self);
             if(!messages)
             {
+                //xmpp.m will already show the error to the user, no need to show this error here again
                 DDLogError(@"Got backscrolling mam error");
                 self.moreMessagesAvailable = NO;
-                //TODO: error happened --> display this to user?
             }
             else
             {

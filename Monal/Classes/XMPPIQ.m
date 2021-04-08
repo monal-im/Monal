@@ -177,26 +177,15 @@ NSString* const kiqErrorType = @"error";
     [self addChild:queryNode];
 }
 
--(void) setMAMQueryLatestMessagesForJid:(NSString*) jid before:(NSString*) uid
+-(void) setMAMQueryLatestMessagesForJid:(NSString* _Nullable) jid before:(NSString* _Nullable) uid
 {
+    XMPPDataForm* form = [[XMPPDataForm alloc] initWithType:@"submit" andFormType:@"urn:xmpp:mam:2"];
+    if(jid)
+        form[@"with"] = jid;
     MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{
         @"queryid": [NSString stringWithFormat:@"MLhistory:%@", [[NSUUID UUID] UUIDString]]
     } andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data" withAttributes:@{
-            @"type": @"submit"
-        } andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"field" withAttributes:@{
-                @"var": @"FORM_TYPE",
-                @"type": @"hidden"
-            } andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:@"urn:xmpp:mam:2"]
-            ] andData:nil],
-            [[MLXMLNode alloc] initWithElement:@"field" withAttributes:@{
-                @"var": @"with",
-            } andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:jid]
-            ] andData:nil]
-        ] andData:nil],
+        form,
         [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"max" withAttributes:@{} andChildren:@[] andData:@"50"],
             [[MLXMLNode alloc] initWithElement:@"before" withAttributes:@{} andChildren:@[] andData:uid]
@@ -210,21 +199,9 @@ NSString* const kiqErrorType = @"error";
     MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{
         @"queryid": [NSString stringWithFormat:@"MLignore:%@", [[NSUUID UUID] UUIDString]]
     } andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data" withAttributes:@{
-            @"type": @"submit"
-        } andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"field" withAttributes:@{
-                @"var": @"FORM_TYPE",
-                @"type": @"hidden"
-            } andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:@"urn:xmpp:mam:2"]
-            ] andData:nil],
-            [[MLXMLNode alloc] initWithElement:@"field" withAttributes:@{
-                @"var": @"end",
-            } andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:[HelperTools generateDateTimeString:[NSDate date]]]
-            ] andData:nil]
-        ] andData:nil],
+        [[XMPPDataForm alloc] initWithType:@"submit" formType:@"urn:xmpp:mam:2" andDictionary:@{
+            @"end": [HelperTools generateDateTimeString:[NSDate date]]
+        }],
         [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"max" withAttributes:@{} andChildren:@[] andData:@"1"],
             [[MLXMLNode alloc] initWithElement:@"before"]
@@ -238,16 +215,7 @@ NSString* const kiqErrorType = @"error";
     MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{
         @"queryid": [NSString stringWithFormat:@"MLcatchup:%@", [[NSUUID UUID] UUIDString]]
     } andChildren:@[
-        [[MLXMLNode alloc] initWithElement:@"x" andNamespace:@"jabber:x:data" withAttributes:@{
-            @"type": @"submit"
-        } andChildren:@[
-            [[MLXMLNode alloc] initWithElement:@"field" withAttributes:@{
-                @"var": @"FORM_TYPE",
-                @"type": @"hidden"
-            } andChildren:@[
-                [[MLXMLNode alloc] initWithElement:@"value" withAttributes:@{} andChildren:@[] andData:@"urn:xmpp:mam:2"]
-            ] andData:nil],
-        ] andData:nil],
+        [[XMPPDataForm alloc] initWithType:@"submit" andFormType:@"urn:xmpp:mam:2"],
         [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
             [[MLXMLNode alloc] initWithElement:@"max" withAttributes:@{} andChildren:@[] andData:@"50"],
             [[MLXMLNode alloc] initWithElement:@"after" withAttributes:@{} andChildren:@[] andData:uid]

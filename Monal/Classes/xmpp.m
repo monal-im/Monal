@@ -2719,8 +2719,9 @@ NSString *const kData=@"data";
     [self sendIq:query withHandler:$newHandler(MLIQProcessor, handleMamPrefs)];
 }
 
--(void) setMAMQueryMostRecentForJid:(NSString*) jid before:(NSString*) uid withCompletion:(void (^)(NSArray* _Nullable)) completion
+-(void) setMAMQueryMostRecentForContact:(MLContact*) contact before:(NSString*) uid withCompletion:(void (^)(NSArray* _Nullable)) completion
 {
+    NSString* jid = contact.contactJid;
     NSMutableArray* __block messageList = [[NSMutableArray alloc] init];
     monal_iq_handler_t __block responseHandler;
     __block void (^query)(NSString* before);
@@ -2775,11 +2776,18 @@ NSString *const kData=@"data";
     query = ^(NSString* _Nullable before) {
         DDLogDebug(@"Loading (next) mam:2 page before: %@", before);
         XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
-        [query setMAMQueryLatestMessagesForJid:jid before:before];
+        if(contact.isGroup)
+        {
+            [query setiqTo:jid];
+            [query setMAMQueryLatestMessagesForJid:nil before:before];
+        }
+        else
+            [query setMAMQueryLatestMessagesForJid:jid before:before];
         //we always want to use blocks here because we want to make sure we get not interrupted by an app crash/restart
         //which would make us use incomplete mam pages that would produce holes in history (those are very hard to remove/fill afterwards)
         [self sendIq:query withResponseHandler:responseHandler andErrorHandler:^(XMPPIQ* error) {
             DDLogWarn(@"Got mam:2 before-query error, returning %lu messages to ui", (unsigned long)[messageList count]);
+            [HelperTools postError:NSLocalizedString(@"Could not load (all) old messages", @"") withNode:error andAccount:self andIsSevere:NO];
             if(![messageList count])
                 completion(nil);            //call completion with nil, if there was an error or xmpp reconnect that prevented us to get any messages
             else

@@ -268,22 +268,22 @@ static NSMutableDictionary* _typingNotifications;
                 BOOL inbound = [messageNode.toUser isEqualToString:account.connectionProperties.identity.jid];
                 //inbound value for groupchat messages
                 if(ownNick != nil)
-                    inbound = ![actualFrom isEqualToString:ownNick];
+                    inbound = ![ownNick isEqualToString:actualFrom];
                 historyId = [[DataLayer sharedInstance]
                              addMessageToChatBuddy:[messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser
-                             withInboundDir:inbound
-                                forAccount:account.accountNo
-                                withBody:[body copy]
-                            actuallyfrom:actualFrom
-                                    sent:YES
-                                    unread:unread
-                                messageId:messageId
-                        serverMessageId:stanzaid
-                            messageType:messageType
-                        andOverrideDate:[messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"]
-                                encrypted:encrypted
-                                backwards:NO
-                    displayMarkerWanted:[messageNode check:@"{urn:xmpp:chat-markers:0}markable"]
+                                    withInboundDir:inbound
+                                        forAccount:account.accountNo
+                                          withBody:[body copy]
+                                      actuallyfrom:actualFrom
+                                              sent:YES
+                                            unread:unread
+                                         messageId:messageId
+                                   serverMessageId:stanzaid
+                                       messageType:messageType
+                                   andOverrideDate:[messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"]
+                                         encrypted:encrypted
+                                         backwards:NO
+                               displayMarkerWanted:[messageNode check:@"{urn:xmpp:chat-markers:0}markable"]
                 ];
             }
             

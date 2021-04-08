@@ -2730,7 +2730,8 @@ NSString *const kData=@"data";
         for(MLMessage* msg in [self getOrderedMamPageFor:[response findFirst:@"{urn:xmpp:mam:2}fin@queryid"]])
             if(msg.messageText)
             {
-                NSNumber* historyId = [[DataLayer sharedInstance] addMessageToChatBuddy:msg.buddyName
+                NSNumber* historyId = [[DataLayer sharedInstance] 
+                                     addMessageToChatBuddy:msg.buddyName
                                             withInboundDir:msg.inbound
                                                 forAccount:self.accountNo
                                                   withBody:msg.messageText

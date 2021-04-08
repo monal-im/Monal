@@ -3401,9 +3401,14 @@ NSString *const kData=@"data";
 
 -(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andMessageType:(NSString*) messageType andActualFrom:(NSString*) actualFrom
 {
+    //inbound value for 1:1 chats
+    BOOL inbound = [messageNode.toUser isEqualToString:self.connectionProperties.identity.jid];
+    //inbound value for groupchat messages
+    if([messageNode check:@"/<type=groupchat>"] && messageNode.fromResource)
+        inbound = ![actualFrom isEqualToString:[[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser forAccount:self.accountNo]];
     MLMessage* message = [[MLMessage alloc] init];
     message.buddyName = [messageNode.fromUser isEqualToString:self.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser;
-    message.inbound = [messageNode.toUser isEqualToString:self.connectionProperties.identity.jid];
+    message.inbound = inbound;
     message.actualFrom = actualFrom ? actualFrom : messageNode.fromUser;
     message.messageText = [body copy];     //this need to be the processed value since it may be decrypted
     message.buddyName = messageNode.toUser ? messageNode.toUser : self.connectionProperties.identity.jid;
@@ -3420,9 +3425,9 @@ NSString *const kData=@"data";
     return message;
 }
 
--(void) addMessageToMamPageArray:(XMPPMessage*) messageNode forOuterMessageNode:(XMPPMessage*) outerMessageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andMessageType:(NSString*) messageType
+-(void) addMessageToMamPageArray:(XMPPMessage*) messageNode forOuterMessageNode:(XMPPMessage*) outerMessageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andMessageType:(NSString*) messageType andActualFrom:(NSString*) actualFrom
 {
-    MLMessage* message = [self parseMessageToMLMessage:messageNode withBody:body andEncrypted:encrypted andMessageType:messageType andActualFrom:nil];
+    MLMessage* message = [self parseMessageToMLMessage:messageNode withBody:body andEncrypted:encrypted andMessageType:messageType andActualFrom:actualFrom];
     message.stanzaId = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];       //use the stanza id provided directly by mam
     @synchronized(_mamPageArrays) {
         if(!_mamPageArrays[[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]])

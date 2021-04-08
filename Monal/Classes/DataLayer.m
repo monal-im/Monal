@@ -2708,6 +2708,13 @@ static NSDateFormatter* dbFormatter;
              );"];
             [self.db executeNonQuery:@"DROP TABLE muteList;"];
         }];
+        // Delete all muc's
+        [self updateDBTo:5.017 withBlock:^{
+            [self.db executeNonQuery:@"DELETE FROM buddylist WHERE Muc=1;"];
+            [self.db executeNonQuery:@"DELETE FROM muc_participants;"];
+            [self.db executeNonQuery:@"DELETE FROM muc_members;"];
+            [self.db executeNonQuery:@"DELETE FROM muc_favorites;"];
+        }];
     }];
     [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
     [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];

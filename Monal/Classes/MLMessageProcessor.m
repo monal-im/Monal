@@ -155,6 +155,7 @@ static NSMutableDictionary* _typingNotifications;
         }
     }
     
+    NSString* buddyName = [messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser;
     NSString* ownNick;
     NSString* actualFrom = messageNode.fromUser;
     if([messageNode check:@"/<type=groupchat>"] && messageNode.fromResource)
@@ -162,6 +163,12 @@ static NSMutableDictionary* _typingNotifications;
         ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser forAccount:account.accountNo];
         actualFrom = messageNode.fromResource;
     }
+    
+    //inbound value for 1:1 chats
+    BOOL inbound = [messageNode.toUser isEqualToString:account.connectionProperties.identity.jid];
+    //inbound value for groupchat messages
+    if(ownNick != nil)
+        inbound = ![ownNick isEqualToString:actualFrom];
     
     if([messageNode check:@"/<type=groupchat>/subject#"])
     {
@@ -192,12 +199,6 @@ static NSMutableDictionary* _typingNotifications;
     {
         BOOL unread = YES;
         BOOL showAlert = YES;
-        
-        //inbound value for 1:1 chats
-        BOOL inbound = [messageNode.toUser isEqualToString:account.connectionProperties.identity.jid];
-        //inbound value for groupchat messages
-        if(ownNick != nil)
-            inbound = ![ownNick isEqualToString:actualFrom];
         
         //if incoming or mam catchup we do want an alert, otherwise we don't
         if(
@@ -275,7 +276,7 @@ static NSMutableDictionary* _typingNotifications;
             if(historyId == nil && ![body isEqualToString:kMessageDeletedBody])
             {
                 historyId = [[DataLayer sharedInstance]
-                             addMessageToChatBuddy:[messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser
+                             addMessageToChatBuddy:buddyName
                                     withInboundDir:inbound
                                         forAccount:account.accountNo
                                           withBody:[body copy]
@@ -317,10 +318,10 @@ static NSMutableDictionary* _typingNotifications;
                 //if true we can mark all messages from this buddy as already read by us (using the other client)
                 //WARNING: kMonalMessageDisplayedNotice goes to chatViewController, kMonalDisplayedMessageNotice goes to MLNotificationManager and activeChatsViewController/chatViewController
                 //e.g.: kMonalMessageDisplayedNotice means "remote party read our message" and kMonalDisplayedMessageNotice means "we read a message"
-                if(body && stanzaid && ![messageNode.toUser isEqualToString:account.connectionProperties.identity.jid])
+                if(body && stanzaid && !inbound)
                 {
-                    DDLogInfo(@"Got outgoing message to contact '%@' sent by another client, removing all notifications for unread messages of this contact", messageNode.toUser);
-                    NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:messageNode.toUser andAccount:account.accountNo tillStanzaId:stanzaid wasOutgoing:NO];
+                    DDLogInfo(@"Got outgoing message to contact '%@' sent by another client, removing all notifications for unread messages of this contact", buddyName);
+                    NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:buddyName andAccount:account.accountNo tillStanzaId:stanzaid wasOutgoing:NO];
                     DDLogDebug(@"Marked as read: %@", unread);
                     
                     //remove notifications of all remotely read messages (indicated by sending a response message)
@@ -330,7 +331,7 @@ static NSMutableDictionary* _typingNotifications;
                     //update unread count in active chats list
                     if([unread count])
                         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                            @"contact": [[DataLayer sharedInstance] contactForUsername:messageNode.toUser forAccount:account.accountNo]
+                            @"contact": [[DataLayer sharedInstance] contactForUsername:buddyName forAccount:account.accountNo]
                         }];
                 }
                 
@@ -347,10 +348,7 @@ static NSMutableDictionary* _typingNotifications;
                 }
                 else
                 {
-                    if(![messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid])
-                        [[DataLayer sharedInstance] addActiveBuddies:messageNode.fromUser forAccount:account.accountNo];
-                    else
-                        [[DataLayer sharedInstance] addActiveBuddies:messageNode.toUser forAccount:account.accountNo];
+                    [[DataLayer sharedInstance] addActiveBuddies:buddyName forAccount:account.accountNo];
                     
                     DDLogInfo(@"Sending out kMonalNewMessageNotice notification for historyId %@", historyId);
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
@@ -392,17 +390,17 @@ static NSMutableDictionary* _typingNotifications;
     //handle chat-markers in groupchats slightly different
     if([messageNode check:@"{urn:xmpp:chat-markers:0}displayed@id"] && ownNick != nil)
     {
-        MLContact* groupchatContact = [[DataLayer sharedInstance] contactForUsername:messageNode.fromUser forAccount:account.accountNo];
+        MLContact* groupchatContact = [[DataLayer sharedInstance] contactForUsername:buddyName forAccount:account.accountNo];
         //ignore unknown groupchats or channel-type mucs or stanzas from the groupchat itself (e.g. not from a participant having a full jid)
         if(groupchatContact.isGroup && [groupchatContact.mucType isEqualToString:@"group"] && messageNode.fromResource)
         {
             //incoming chat markers from own account (muc echo, muc "carbon")
             //WARNING: kMonalMessageDisplayedNotice goes to chatViewController, kMonalDisplayedMessageNotice goes to MLNotificationManager and activeChatsViewController/chatViewController
             //e.g.: kMonalMessageDisplayedNotice means "remote party read our message" and kMonalDisplayedMessageNotice means "we read a message"
-            if([actualFrom isEqualToString:ownNick])
+            if(inbound)
             {
-                DDLogInfo(@"Got OWN muc display marker in %@ for message id: %@", messageNode.fromUser, [messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"]);
-                NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:messageNode.fromUser andAccount:account.accountNo tillStanzaId:[messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"] wasOutgoing:NO];
+                DDLogInfo(@"Got OWN muc display marker in %@ for message id: %@", buddyName, [messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"]);
+                NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:buddyName andAccount:account.accountNo tillStanzaId:[messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"] wasOutgoing:NO];
                 DDLogDebug(@"Marked as read: %@", unread);
                 
                 //remove notifications of all remotely read messages (indicated by sending a display marker)
@@ -422,19 +420,19 @@ static NSMutableDictionary* _typingNotifications;
             else
             {
                 DDLogInfo(@"Got remote muc display marker from %@ for message id: %@", messageNode.from, [messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"]);
-                NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:messageNode.fromUser andAccount:account.accountNo tillStanzaId:[messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"] wasOutgoing:YES];
+                NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:buddyName andAccount:account.accountNo tillStanzaId:[messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"] wasOutgoing:YES];
                 DDLogDebug(@"Marked as displayed: %@", unread);
                 for(MLMessage* msg in unread)
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageDisplayedNotice object:account userInfo:@{@"message":msg, kMessageId:msg.messageId}];
             }
         }
     }
-    else
+    else if([messageNode check:@"{urn:xmpp:chat-markers:0}displayed@id"])
     {
         //incoming chat markers from contact
         //WARNING: kMonalMessageDisplayedNotice goes to chatViewController, kMonalDisplayedMessageNotice goes to MLNotificationManager and activeChatsViewController/chatViewController
         //e.g.: kMonalMessageDisplayedNotice means "remote party read our message" and kMonalDisplayedMessageNotice means "we read a message"
-        if([messageNode check:@"{urn:xmpp:chat-markers:0}displayed@id"] && [messageNode.toUser isEqualToString:account.connectionProperties.identity.jid])
+        if(inbound)
         {
             DDLogInfo(@"Got remote display marker from %@ for message id: %@", messageNode.fromUser, [messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"]);
             NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:messageNode.fromUser andAccount:account.accountNo tillStanzaId:[messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"] wasOutgoing:YES];
@@ -442,11 +440,10 @@ static NSMutableDictionary* _typingNotifications;
             for(MLMessage* msg in unread)
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageDisplayedNotice object:account userInfo:@{@"message":msg, kMessageId:msg.messageId}];
         }
-        
         //incoming chat markers from own account (carbon copy)
         //WARNING: kMonalMessageDisplayedNotice goes to chatViewController, kMonalDisplayedMessageNotice goes to MLNotificationManager and activeChatsViewController/chatViewController
         //e.g.: kMonalMessageDisplayedNotice means "remote party read our message" and kMonalDisplayedMessageNotice means "we read a message"
-        if([messageNode check:@"{urn:xmpp:chat-markers:0}displayed@id"] && ![messageNode.toUser isEqualToString:account.connectionProperties.identity.jid])
+        else
         {
             DDLogInfo(@"Got OWN display marker to %@ for message id: %@", messageNode.toUser, [messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"]);
             NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:messageNode.toUser andAccount:account.accountNo tillStanzaId:[messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"] wasOutgoing:NO];

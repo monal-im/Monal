@@ -1220,44 +1220,28 @@ static NSDateFormatter* dbFormatter;
             // note: if it isnt the same day we want to show the full  day
             NSString* dateString = [formatter stringFromDate:destinationDate];
             
-            //do not do this in MUC
-            if(inbound == NO) // TODO: thilo check
+            NSString* query;
+            NSArray* params;
+            if(backwards)
             {
-                NSString* query;
-                NSArray* params;
-                if(backwards)
-                {
-                    NSNumber* nextHisoryId = [NSNumber numberWithInt:[(NSNumber*)[self.db executeScalar:@"SELECT MIN(message_history_id) FROM message_history;"] intValue] - 1];
-                    DDLogVerbose(@"Inserting backwards with history id %@", nextHisoryId);
-                    query = @"insert into message_history (message_history_id, account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-                    params = @[nextHisoryId, accountNo, buddyName, [NSNumber numberWithBool:inbound], dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@""];
-                }
-                else
-                {
-                    //we use autoincrement here instead of MAX(message_history_id) + 1 to be a little bit faster (but at the cost of "duplicated code")
-                    query = @"insert into message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-                    params = @[accountNo, buddyName, [NSNumber numberWithBool:inbound], dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@""];
-                }
-                DDLogVerbose(@"%@ params:%@", query, params);
-                BOOL success = [self.db executeNonQuery:query andArguments:params];
-                if(!success)
-                    return (NSNumber*)nil;
-                NSNumber* historyId = [self.db lastInsertId];
-                [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
-                return historyId;
+                NSNumber* nextHisoryId = [NSNumber numberWithInt:[(NSNumber*)[self.db executeScalar:@"SELECT MIN(message_history_id) FROM message_history;"] intValue] - 1];
+                DDLogVerbose(@"Inserting backwards with history id %@", nextHisoryId);
+                query = @"insert into message_history (message_history_id, account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                params = @[nextHisoryId, accountNo, buddyName, [NSNumber numberWithBool:inbound], dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@""];
             }
             else
             {
-                NSString* query = @"insert into message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-                NSArray* params = @[accountNo, buddyName, [NSNumber numberWithBool:inbound], dateString, message, actualfrom, [NSNumber numberWithInteger:unread], [NSNumber numberWithInteger:sent], messageid ? messageid : @"", messageType, [NSNumber numberWithInteger:encrypted], stanzaid?stanzaid:@"" ];
-                DDLogVerbose(@"%@ params:%@", query, params);
-                BOOL success = [self.db executeNonQuery:query andArguments:params];
-                if(!success)
-                    return (NSNumber*)nil;
-                NSNumber* historyId = [self.db lastInsertId];
-                [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
-                return historyId;
+                //we use autoincrement here instead of MAX(message_history_id) + 1 to be a little bit faster (but at the cost of "duplicated code")
+                query = @"insert into message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                params = @[accountNo, buddyName, [NSNumber numberWithBool:inbound], dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@""];
             }
+            DDLogVerbose(@"%@ params:%@", query, params);
+            BOOL success = [self.db executeNonQuery:query andArguments:params];
+            if(!success)
+                return (NSNumber*)nil;
+            NSNumber* historyId = [self.db lastInsertId];
+            [self updateActiveBuddy:actualfrom setTime:dateString forAccount:accountNo];
+            return historyId;
         }
         else
         {

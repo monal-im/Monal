@@ -168,7 +168,10 @@ static NSMutableDictionary* _typingNotifications;
     BOOL inbound = [messageNode.toUser isEqualToString:account.connectionProperties.identity.jid];
     //inbound value for groupchat messages
     if(ownNick != nil)
+    {
         inbound = ![ownNick isEqualToString:actualFrom];
+        DDLogDebug(@"This is muc, inbound is now: %@ (ownNick: %@, actualFrom: %@)", inbound ? @"YES": @"NO", ownNick, actualFrom);
+    }
     
     if([messageNode check:@"/<type=groupchat>/subject#"])
     {
@@ -397,7 +400,7 @@ static NSMutableDictionary* _typingNotifications;
             //incoming chat markers from own account (muc echo, muc "carbon")
             //WARNING: kMonalMessageDisplayedNotice goes to chatViewController, kMonalDisplayedMessageNotice goes to MLNotificationManager and activeChatsViewController/chatViewController
             //e.g.: kMonalMessageDisplayedNotice means "remote party read our message" and kMonalDisplayedMessageNotice means "we read a message"
-            if(inbound)
+            if(!inbound)
             {
                 DDLogInfo(@"Got OWN muc display marker in %@ for message id: %@", buddyName, [messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"]);
                 NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:buddyName andAccount:account.accountNo tillStanzaId:[messageNode findFirst:@"{urn:xmpp:chat-markers:0}displayed@id"] wasOutgoing:NO];

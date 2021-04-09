@@ -155,8 +155,33 @@ static NSMutableDictionary* _typingNotifications;
         ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser forAccount:account.accountNo];
         actualFrom = messageNode.fromResource;
     }
-
-    if([messageNode check:@"body"] || [messageNode check:@"/<type=headline>/subject#"] || decrypted)
+    
+    if([messageNode check:@"/<type=groupchat>/subject#"])
+    {
+        NSString* subject = [messageNode findFirst:@"/<type=groupchat>/subject#"];
+        NSString* currentSubject = [[DataLayer sharedInstance] mucSubjectforAccount:account.accountNo andRoom:messageNode.fromUser];
+        DDLogInfo(@"Got MUC subject for %@: %@", messageNode.fromUser, subject);
+        
+        if(subject == nil || [subject isEqualToString:currentSubject])
+            return;
+        
+        DDLogVerbose(@"Updating subject in database: %@", subject);
+        [[DataLayer sharedInstance] updateMucSubject:subject forAccount:account.accountNo andRoom:messageNode.fromUser];
+        
+        //TODO: this stuff has to be changed (why send a kMonalNewMessageNotice instead of a special kMonalMucSubjectChanged one?)
+        MLMessage* message = [account parseMessageToMLMessage:messageNode withBody:subject andEncrypted:NO andMessageType:kMessageTypeStatus andActualFrom:actualFrom];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
+            @"message": message,
+            @"subject": subject,
+        }];
+        return;
+    }
+    
+    //ignore all other groupchat messages coming from bare jid (only handle subject updates above)
+    if([messageNode check:@"/<type=groupchat>"] && !messageNode.fromResource)
+        return;
+    
+    if([messageNode check:@"body"] || decrypted)
     {
         BOOL unread = YES;
         BOOL showAlert = YES;
@@ -184,27 +209,6 @@ static NSMutableDictionary* _typingNotifications;
             body = decrypted;
             encrypted = YES;
         }
-        
-        if(!body && [messageNode check:@"/<type=groupchat>/subject#"])
-        {
-            NSString* subject = [messageNode findFirst:@"/<type=groupchat>/subject#"];
-            NSString* currentSubject = [[DataLayer sharedInstance] mucSubjectforAccount:account.accountNo andRoom:messageNode.fromUser];
-            if(subject == nil || [subject isEqualToString:currentSubject])
-                return;
-            
-            [[DataLayer sharedInstance] updateMucSubject:subject forAccount:account.accountNo andRoom:messageNode.fromUser];
-            //TODO: this stuff has to be changed (why send a kMonalNewMessageNotice instead of a special kMonalMucSubjectChanged one?)
-            MLMessage* message = [account parseMessageToMLMessage:messageNode withBody:subject andEncrypted:NO andMessageType:kMessageTypeStatus andActualFrom:actualFrom];
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
-                @"message": message,
-                @"subject": subject,
-            }];
-            return;
-        }
-        
-        //ignore all other groupchat messages coming from bare jid (only handle subject updates above)
-        if([messageNode check:@"/<type=groupchat>"] && !messageNode.fromResource)
-            return;
         
         //messages with oob tag are filetransfers (but only if they are https urls)
         NSString* lowercaseBody = [body lowercaseString];

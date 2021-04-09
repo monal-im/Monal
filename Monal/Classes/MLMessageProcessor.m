@@ -369,6 +369,9 @@ static NSMutableDictionary* _typingNotifications;
         }
     }
     
+    if([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLhistory:"])
+        return;
+    
     //handle message receipts
     if(
         ([messageNode check:@"{urn:xmpp:receipts}received@id"] || [messageNode check:@"{urn:xmpp:chat-markers:0}received@id"]) &&

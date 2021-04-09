@@ -2775,15 +2775,21 @@ NSString *const kData=@"data";
         }
     };
     query = ^(NSString* _Nullable before) {
-        DDLogDebug(@"Loading (next) mam:2 page before: %@", before);
         XMPPIQ* query = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
         if(contact.isGroup)
         {
+            if(!before)
+                before = [[DataLayer sharedInstance] lastStanzaIdForMuc:jid andAccount:self.accountNo];
             [query setiqTo:jid];
             [query setMAMQueryLatestMessagesForJid:nil before:before];
         }
         else
+        {
+            if(!before)
+                before = [[DataLayer sharedInstance] lastStanzaIdForAccount:self.accountNo];
             [query setMAMQueryLatestMessagesForJid:jid before:before];
+        }
+        DDLogDebug(@"Loading (next) mam:2 page before: %@", before);
         //we always want to use blocks here because we want to make sure we get not interrupted by an app crash/restart
         //which would make us use incomplete mam pages that would produce holes in history (those are very hard to remove/fill afterwards)
         [self sendIq:query withResponseHandler:responseHandler andErrorHandler:^(XMPPIQ* error) {

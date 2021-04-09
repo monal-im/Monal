@@ -3412,7 +3412,6 @@ NSString *const kData=@"data";
     message.inbound = inbound;
     message.actualFrom = actualFrom ? actualFrom : messageNode.fromUser;
     message.messageText = [body copy];     //this need to be the processed value since it may be decrypted
-    message.buddyName = messageNode.toUser ? messageNode.toUser : self.connectionProperties.identity.jid;
     message.isMuc = [messageNode check:@"/<type=groupchat>"];
     message.messageId = [messageNode check:@"/@id"] ? [messageNode findFirst:@"/@id"] : [[NSUUID UUID] UUIDString];
     message.accountId = self.accountNo;

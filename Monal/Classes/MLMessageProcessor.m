@@ -133,6 +133,13 @@ static NSMutableDictionary* _typingNotifications;
             stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
     }
     
+    NSString* messageId = [messageNode findFirst:@"/@id"];
+    if(!messageId.length)
+    {
+        DDLogWarn(@"Empty ID using random UUID");
+        messageId = [[NSUUID UUID] UUIDString];
+    }
+    
     //handle muc status changes or invites (this checks for the muc namespace itself)
     if([MLMucProcessor processMessage:messageNode forAccount:account])
         return;     //the muc processor said we have stop processing
@@ -186,9 +193,15 @@ static NSMutableDictionary* _typingNotifications;
         BOOL unread = YES;
         BOOL showAlert = YES;
         
+        //inbound value for 1:1 chats
+        BOOL inbound = [messageNode.toUser isEqualToString:account.connectionProperties.identity.jid];
+        //inbound value for groupchat messages
+        if(ownNick != nil)
+            inbound = ![ownNick isEqualToString:actualFrom];
+        
         //if incoming or mam catchup we do want an alert, otherwise we don't
         if(
-            [messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] ||
+            !inbound ||
             (
                 [outerMessageNode check:@"{urn:xmpp:mam:2}result"] &&
                 ![[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLcatchup:"]
@@ -227,13 +240,6 @@ static NSMutableDictionary* _typingNotifications;
         }
         DDLogInfo(@"Got message of type: %@", messageType);
         
-        NSString* messageId = [messageNode findFirst:@"/@id"];
-        if(!messageId.length)
-        {
-            DDLogWarn(@"Empty ID using random UUID");
-            messageId = [[NSUUID UUID] UUIDString];
-        }
-        
         //history messages have to be collected mam-page wise and reordered before inserted into db
         //because mam always sorts the messages in a page by timestamp in ascending order
         //we don't want to call postPersistAction, too, beause we don't want to display push notifications for old messages
@@ -268,11 +274,6 @@ static NSMutableDictionary* _typingNotifications;
             //handle normal messages or LMC messages that can not be found (but ignore deletion LMCs)
             if(historyId == nil && ![body isEqualToString:kMessageDeletedBody])
             {
-                //inbound value for 1:1 chats
-                BOOL inbound = [messageNode.toUser isEqualToString:account.connectionProperties.identity.jid];
-                //inbound value for groupchat messages
-                if(ownNick != nil)
-                    inbound = ![ownNick isEqualToString:actualFrom];
                 historyId = [[DataLayer sharedInstance]
                              addMessageToChatBuddy:[messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser
                                     withInboundDir:inbound

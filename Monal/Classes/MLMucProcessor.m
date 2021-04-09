@@ -125,28 +125,25 @@ static NSMutableDictionary* _uiHandler;
         return;
     }
     
-    //handle muc status codes
+    //handle muc status codes in self-presences
     if([presenceNode check:@"/{jabber:client}presence/{http://jabber.org/protocol/muc#user}x/status@code"])
         [self handleStatusCodes:presenceNode forAccount:account];
-    //handle non-self-presences
+    
+    //extract info if present (use an empty dict if no info is present)
+    NSMutableDictionary* item = [[presenceNode findFirst:@"{http://jabber.org/protocol/muc#user}x/item@@"] mutableCopy];
+    if(!item)
+        item = [[NSMutableDictionary alloc] init];
+    
+    //update jid to be a bare jid and add muc nick to our dict
+    if(item[@"jid"])
+        item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
+    item[@"nick"] = presenceNode.fromResource;
+    
+    //handle presences
+    if([presenceNode check:@"/<type=unavailable>"])
+        [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:account.accountNo];
     else
-    {
-        //extract info if present (use an empty dict if no info is present)
-        NSMutableDictionary* item = [[presenceNode findFirst:@"{http://jabber.org/protocol/muc#user}x/item@@"] mutableCopy];
-        if(!item)
-            item = [[NSMutableDictionary alloc] init];
-        
-        //update jid to be a bare jid and add muc nick to our dict
-        if(item[@"jid"])
-            item[@"jid"] = [HelperTools splitJid:item[@"jid"]][@"user"];
-        item[@"nick"] = presenceNode.fromResource;
-        
-        //handle presences
-        if([presenceNode check:@"/<type=unavailable>"])
-            [[DataLayer sharedInstance] removeParticipant:item fromMuc:presenceNode.fromUser forAccountId:account.accountNo];
-        else
-            [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:account.accountNo];
-    }
+        [[DataLayer sharedInstance] addParticipant:item toMuc:presenceNode.fromUser forAccountId:account.accountNo];
 }
 
 +(BOOL) processMessage:(XMPPMessage*) messageNode forAccount:(xmpp*) account
@@ -433,7 +430,7 @@ $$
 
 $$handler(handleMembersList, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, type))
     DDLogInfo(@"Got %@s list from %@...", type, iqNode.fromUser);
-    for(NSDictionary* entry in [iqNode find:@"{http://jabber.org/protocol/muc#user}x/item@@"])
+    for(NSDictionary* entry in [iqNode find:@"{http://jabber.org/protocol/muc#admin}query/item@@"])
     {
         NSMutableDictionary* item = [entry mutableCopy];
         if(!item)

@@ -17,6 +17,7 @@
 #import "MLPubSub.h"
 #import "MLOMEMO.h"
 
+#import "MLStream.h"
 #import "MLPipe.h"
 #import "MLProcessLock.h"
 #import "DataLayer.h"
@@ -466,49 +467,57 @@ NSString *const kData=@"data";
 -(void) initTLS
 {
     DDLogInfo(@"configuring/starting tls handshake");
-	NSMutableDictionary *settings = [[NSMutableDictionary alloc] init];
-	[settings setObject:self.connectionProperties.identity.domain forKey:(NSString*)kCFStreamSSLPeerName];
-
-	//this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
-	DDLogInfo(@"configuring SSL handshake");
-	if(CFWriteStreamSetProperty((__bridge CFWriteStreamRef)self->_oStream, kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings))
-		DDLogInfo(@"Set TLS properties on streams. Security level %@", [self->_oStream propertyForKey:NSStreamSocketSecurityLevelKey]);
-	else
-	{
-		DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
-		DDLogInfo(@"Set TLS properties on streams.security level %@", [self->_oStream propertyForKey:NSStreamSocketSecurityLevelKey]);
-	}
-
-	//see this for extracting the sslcontext of the cfstream: https://stackoverflow.com/a/26726525/3528174
-	//see this for creating the proper protocols array: https://github.com/LLNL/FRS/blob/master/Pods/AWSIoT/AWSIoT/Internal/AWSIoTMQTTClient.m
-	//WARNING: this will only have an effect if the TLS handshake was not already started (e.g. the TCP socket is not connected) and
-	//         will be ignored otherwise
+    NSMutableDictionary* settings = [[NSMutableDictionary alloc] init];
+    [settings setObject:self.connectionProperties.identity.domain forKey:(NSString*)kCFStreamSSLPeerName];
+    
+    //this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
+    DDLogInfo(@"configuring SSL handshake");
+    if(CFWriteStreamSetProperty((__bridge CFWriteStreamRef)self->_oStream, kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings))
+        DDLogInfo(@"Set TLS properties on streams. Security level %@", [self->_oStream propertyForKey:NSStreamSocketSecurityLevelKey]);
+    else
+    {
+        DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
+        DDLogInfo(@"Set TLS properties on streams.security level %@", [self->_oStream propertyForKey:NSStreamSocketSecurityLevelKey]);
+    }
+    
+    //see this for extracting the sslcontext of the cfstream: https://stackoverflow.com/a/26726525/3528174
+    //see this for creating the proper protocols array: https://github.com/LLNL/FRS/blob/master/Pods/AWSIoT/AWSIoT/Internal/AWSIoTMQTTClient.m
+    //WARNING: this will only have an effect if the TLS handshake was not already started (e.g. the TCP socket is not connected) and
+    //         will be ignored otherwise
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-	SSLContextRef sslContext = (__bridge SSLContextRef) [_oStream propertyForKey: (__bridge NSString *) kCFStreamPropertySSLContext ];
-	CFStringRef strs[1];
-	strs[0] = CFSTR("xmpp-client");
-	CFArrayRef protocols = CFArrayCreate(NULL, (void *)strs, 1, &kCFTypeArrayCallBacks);
-	SSLSetALPNProtocols(sslContext, protocols);
-	CFRelease(protocols);
+    SSLContextRef sslContext = (__bridge SSLContextRef)[_oStream propertyForKey:(__bridge NSString*)kCFStreamPropertySSLContext];
+    CFStringRef strs[1];
+    strs[0] = CFSTR("xmpp-client");
+    CFArrayRef protocols = CFArrayCreate(NULL, (void *)strs, 1, &kCFTypeArrayCallBacks);
+    SSLSetALPNProtocols(sslContext, protocols);
+    CFRelease(protocols);
 #pragma clang diagnostic pop
 }
 
 -(void) createStreams
 {
     DDLogInfo(@"stream creating to server: %@ port: %@ directTLS: %@", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort, self.connectionProperties.server.isDirectTLS ? @"YES" : @"NO");
-
+    
     NSInputStream* localIStream;
     NSOutputStream* localOStream;
-
-    [NSStream getStreamsToHostWithName:self.connectionProperties.server.connectServer port:self.connectionProperties.server.connectPort.integerValue inputStream:&localIStream outputStream:&localOStream];
-
+    
+    if(self.connectionProperties.server.isDirectTLS == YES)
+    {
+        DDLogInfo(@"starting directSSL");
+        [MLStream connectWithSNIDomain:self.connectionProperties.identity.domain connectHost:self.connectionProperties.server.connectServer connectPort:self.connectionProperties.server.connectPort inputStream:&localIStream outputStream:&localOStream];
+    }
+    else
+    {
+        [NSStream getStreamsToHostWithName:self.connectionProperties.server.connectServer port:self.connectionProperties.server.connectPort.integerValue inputStream:&localIStream outputStream:&localOStream];
+    }
+    
     if(localOStream)
         _oStream = localOStream;
     
     if((localIStream==nil) || (localOStream==nil))
     {
-        DDLogError(@"Connection failed");
+        DDLogError(@"failed to create streams");
         [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{@"message": NSLocalizedString(@"Unable to connect to server!", @""), @"isSevere": @NO}];
         [self reconnect];
         return;
@@ -520,12 +529,6 @@ NSString *const kData=@"data";
         _iPipe = [[MLPipe alloc] initWithInputStream:localIStream andOuterDelegate:self];
     [_oStream setDelegate:self];
     [_oStream scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-    
-    if(self.connectionProperties.server.isDirectTLS==YES)
-    {
-        DDLogInfo(@"starting directSSL");
-        [self initTLS];
-    }
     [self startXMPPStream:NO];     //send xmpp stream start (this is the first one for this connection --> we don't need to clear the receive queue)
     
     //open sockets and start connecting (including TLS handshake if isDirectTLS==YES)
@@ -569,7 +572,7 @@ NSString *const kData=@"data";
         {
             DDLogInfo(@"SRV entry prohibits XMPP connection for server %@", self.connectionProperties.identity.domain);
             [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:self userInfo:@{
-                @"message": [NSString stringWithFormat:NSLocalizedString(@"SRV entry prohibits XMPP connection for server %@", @""), self.connectionProperties.identity.domain],
+                @"message": [NSString stringWithFormat:NSLocalizedString(@"SRV entry prohibits XMPP connection for domain %@", @""), self.connectionProperties.identity.domain],
                 @"isSevere": @YES
             }];
             return YES;
@@ -3159,12 +3162,12 @@ NSString *const kData=@"data";
 
 - (void)stream:(NSStream*) stream handleEvent:(NSStreamEvent) eventCode
 {
-    DDLogVerbose(@"Stream has event");
+    DDLogVerbose(@"Stream %@ has event", stream);
     switch(eventCode)
     {
         case NSStreamEventOpenCompleted:
         {
-            DDLogVerbose(@"Stream open completed");
+            DDLogVerbose(@"Stream %@ open completed", stream);
             break;
         }
         
@@ -3172,7 +3175,7 @@ NSString *const kData=@"data";
         case NSStreamEventHasSpaceAvailable:
         {
             [_sendQueue addOperationWithBlock: ^{
-                DDLogVerbose(@"Stream has space to write");
+                DDLogVerbose(@"Stream %@ has space to write", stream);
                 self->_streamHasSpace=YES;
                 [self writeFromQueue];
             }];
@@ -3180,16 +3183,16 @@ NSString *const kData=@"data";
         }
         
         //for reading
-        case  NSStreamEventHasBytesAvailable:
+        case NSStreamEventHasBytesAvailable:
         {
-            DDLogError(@"Stream has bytes to read (should not be called!)");
+            DDLogError(@"Stream %@ has bytes to read (should not be called!)", stream);
             break;
         }
         
         case NSStreamEventErrorOccurred:
         {
             NSError* st_error = [stream streamError];
-            DDLogError(@"Stream error code=%ld domain=%@ local desc:%@",(long)st_error.code,st_error.domain,  st_error.localizedDescription);
+            DDLogError(@"Stream %@ error code=%ld domain=%@ local desc:%@", stream, (long)st_error.code,st_error.domain, st_error.localizedDescription);
 
             NSString *message = st_error.localizedDescription;
 
@@ -3231,13 +3234,13 @@ NSString *const kData=@"data";
         
         case NSStreamEventNone:
         {
-            DDLogVerbose(@"Stream event none");
+            DDLogVerbose(@"Stream %@ event none", stream);
             break;
         }
         
         case NSStreamEventEndEncountered:
         {
-            DDLogInfo(@"%@ Stream end encountered, trying to reconnect", [stream class]);
+            DDLogInfo(@"%@ Stream %@ encountered eof, trying to reconnect", [stream class], stream);
             [self reconnect];
             break;
         }

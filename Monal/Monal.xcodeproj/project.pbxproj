@@ -229,6 +229,8 @@
 		540F625F24BA951E0008A6D8 /* HelperTools.m in Sources */ = {isa = PBXBuildFile; fileRef = C1AAC3E324B5EF4100BB15D6 /* HelperTools.m */; };
 		54179CC0251CBAFA008F398E /* XMPPStanza.m in Sources */ = {isa = PBXBuildFile; fileRef = 54179CBF251CBAF9008F398E /* XMPPStanza.m */; };
 		54179CC3251CBB2B008F398E /* XMPPStanza.h in Headers */ = {isa = PBXBuildFile; fileRef = 54179CC2251CBB2B008F398E /* XMPPStanza.h */; };
+		541B6AB4262BC9040038B936 /* MLStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 541B6AB2262BC9040038B936 /* MLStream.m */; };
+		541B6AB5262BC9040038B936 /* MLStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 541B6AB3262BC9040038B936 /* MLStream.h */; };
 		541E4CBC254AA08700FD7B28 /* MLSQLite.h in Headers */ = {isa = PBXBuildFile; fileRef = 541E4CBB254AA08600FD7B28 /* MLSQLite.h */; };
 		541E4CBE254AA0B600FD7B28 /* MLHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 541E4CBD254AA0B600FD7B28 /* MLHandler.h */; };
 		541E4CC0254AA0E700FD7B28 /* MLHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 541E4CBF254AA0E700FD7B28 /* MLHandler.m */; };
@@ -806,6 +808,8 @@
 		540E13A824CF78D00038FDA0 /* MLLogFormatter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLLogFormatter.h; sourceTree = "<group>"; };
 		54179CBF251CBAF9008F398E /* XMPPStanza.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XMPPStanza.m; sourceTree = "<group>"; };
 		54179CC2251CBB2B008F398E /* XMPPStanza.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XMPPStanza.h; sourceTree = "<group>"; };
+		541B6AB2262BC9040038B936 /* MLStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLStream.m; sourceTree = "<group>"; };
+		541B6AB3262BC9040038B936 /* MLStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLStream.h; sourceTree = "<group>"; };
 		541E4CBB254AA08600FD7B28 /* MLSQLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSQLite.h; sourceTree = "<group>"; };
 		541E4CBD254AA0B600FD7B28 /* MLHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLHandler.h; sourceTree = "<group>"; };
 		541E4CBF254AA0E700FD7B28 /* MLHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLHandler.m; sourceTree = "<group>"; };
@@ -1686,6 +1690,8 @@
 		26F7BB3A1115F8A300712672 /* tools */ = {
 			isa = PBXGroup;
 			children = (
+				541B6AB3262BC9040038B936 /* MLStream.h */,
+				541B6AB2262BC9040038B936 /* MLStream.m */,
 				54A22D2C26185E7E00B56EAD /* MLNotificationQueue.h */,
 				5455BC3224EB776E0024D80F /* MLUDPLogger.h */,
 				5455BC3024EB776B0024D80F /* MLUDPLogger.m */,
@@ -1911,6 +1917,7 @@
 				54179CC3251CBB2B008F398E /* XMPPStanza.h in Headers */,
 				544656BD25349133006B2953 /* XMPPDataForm.h in Headers */,
 				54507CE8255D8C47007092F4 /* MLFiletransfer.h in Headers */,
+				541B6AB5262BC9040038B936 /* MLStream.h in Headers */,
 				540E13A224CDCE3B0038FDA0 /* MLProcessLock.h in Headers */,
 				541E4CBC254AA08700FD7B28 /* MLSQLite.h in Headers */,
 				C1613B5A2520723D0062C0C2 /* MLBasePaser.h in Headers */,
@@ -2751,6 +2758,7 @@
 				26CC57C823A0892100ABB92A /* MLMessage.m in Sources */,
 				26CC57A623A086AA00ABB92A /* MLXMPPConnection.m in Sources */,
 				540BD0D424D8D2000087A743 /* IPC.m in Sources */,
+				541B6AB4262BC9040038B936 /* MLStream.m in Sources */,
 				26CC57CF23A08D5B00ABB92A /* jingleCall.m in Sources */,
 				26CC57DA23A08DD800ABB92A /* MLXMPPManager.m in Sources */,
 				26CC57D123A08D5B00ABB92A /* IPAddress.m in Sources */,

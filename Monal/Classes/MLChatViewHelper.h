@@ -7,12 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "MLContact.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MLChatViewHelper<ClassType> : NSObject
 
-+(void) toggleEncryption:(BOOL*) currentState forAccount:(NSString*) accountNo forContactJid:(NSString*) contactJid withKnownDevices:(NSArray*) knownDevies withSelf:(ClassType) andSelf afterToggle:(void (^)(void)) afterToggle;
++(void) toggleEncryptionForContact:(MLContact*) contact withKnownDevices:(NSArray*) knownDevices withSelf:(id) andSelf afterToggle:(void (^)(void)) afterToggle;
 
 @end
 

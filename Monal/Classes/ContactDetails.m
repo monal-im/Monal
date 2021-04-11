@@ -24,11 +24,6 @@
 
 
 @interface ContactDetails()
-@property (nonatomic, assign) BOOL isMuted;
-@property (nonatomic, assign) BOOL isEncrypted;
-@property (nonatomic, assign) BOOL isSubscribed;
-@property (nonatomic, strong) NSString* subMessage;
-
 @property (nonatomic, strong) NSString* accountNo;
 @property (nonatomic, strong) xmpp* xmppAccount;
 @property (nonatomic, weak) UITextField* currentTextField;
@@ -101,37 +96,11 @@ enum ContactDetailsAboutRows {
 
     self.accountNo = self.contact.accountId;
 
-    self.isEncrypted = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.accountNo];
     self.contact.isBlocked = ([[DataLayer sharedInstance] isBlockedJid:self.contact.contactJid withAccountNo:self.accountNo] == kBlockingMatchedNodeHost);
 
     NSDictionary* newSub = [[DataLayer sharedInstance] getSubscriptionForContact:self.contact.contactJid andAccount:self.contact.accountId];
     self.contact.ask = [newSub objectForKey:@"ask"];
     self.contact.subscription = [newSub objectForKey:@"subscription"];
-
-    if(!self.contact.subscription || ![self.contact.subscription isEqualToString:kSubBoth]) {
-        self.isSubscribed = NO;
-
-        if([self.contact.subscription isEqualToString:kSubNone]){
-            self.subMessage = NSLocalizedString(@"Neither can see keys.", @"");
-        }
-
-        else if([self.contact.subscription isEqualToString:kSubTo]){
-             self.subMessage = NSLocalizedString(@"You can see their keys. They can't see yours", @"");
-        }
-
-        else if([self.contact.subscription isEqualToString:kSubFrom]){
-             self.subMessage = NSLocalizedString(@"They can see your keys. You can't see theirs", @"");
-        } else {
-              self.subMessage = NSLocalizedString(@"Unknown Subcription", @"");
-        }
-
-        if([self.contact.ask isEqualToString:kAskSubscribe])
-        {
-            self.subMessage =[NSString  stringWithFormat:NSLocalizedString(@"%@ (Pending Approval)", @""), self.subMessage];
-        }
-    } else  {
-        self.isSubscribed = YES;
-    }
 
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.accountNo];
 
@@ -219,50 +188,7 @@ enum ContactDetailsAboutRows {
     {
         MLContactDetailHeader* detailCell = (MLContactDetailHeader *)[tableView dequeueReusableCellWithIdentifier:@"headerCell"];
 
-        // Set jid field
-        if(self.contact.isGroup)
-        {
-            detailCell.jid.text=[NSString stringWithFormat:@"%@ (%lu)", self.contact.contactJid, self.groupMemberCount];
-            //hide things that aren't relevant
-            detailCell.phoneButton.hidden = YES;
-            detailCell.isContact.hidden = YES;
-        }
-        else
-        {
-            detailCell.jid.text = self.contact.contactJid;
-            detailCell.isContact.hidden = self.isSubscribed;
-            detailCell.isContact.text = self.subMessage;
-        }
-
-        // Set human readable lastInteraction field
-        NSDate* lastInteractionDate = [[DataLayer sharedInstance] lastInteractionOfJid:self.contact.contactJid forAccountNo:self.contact.accountId];
-        NSString* lastInteractionStr;
-        if(lastInteractionDate.timeIntervalSince1970 > 0)
-            lastInteractionStr = [NSDateFormatter localizedStringFromDate:lastInteractionDate dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
-        else
-            lastInteractionStr = NSLocalizedString(@"now", @"");
-        detailCell.lastInteraction.text = [NSString stringWithFormat:NSLocalizedString(@"Last seen: %@", @""), lastInteractionStr];
-
-        if(self.contact.isGroup || !self.isSubscribed) {
-            detailCell.lockButton.hidden = YES;
-        }
-
-        [[MLImageManager sharedInstance] getIconForContact:self.contact.contactJid andAccount:self.contact.accountId withCompletion:^(UIImage* image) {
-            detailCell.buddyIconView.image = image;
-            //   detailCell.background.image = image;
-        }];
-
-        detailCell.background.image = [UIImage imageNamed:@"Tie_My_Boat_by_Ray_Garcia"];
-
-        if(self.isMuted)
-            [detailCell.muteButton setImage:[UIImage imageNamed:@"847-moon-selected"] forState:UIControlStateNormal];
-        else
-            [detailCell.muteButton setImage:[UIImage imageNamed:@"847-moon"] forState:UIControlStateNormal];
-
-        if(self.isEncrypted)
-            [detailCell.lockButton setImage:[UIImage imageNamed:@"744-locked-selected"] forState:UIControlStateNormal];
-        else
-            [detailCell.lockButton setImage:[UIImage imageNamed:@"745-unlocked"] forState:UIControlStateNormal];
+        [detailCell loadContentForContact:self.contact];
 
         return detailCell;
     }
@@ -321,11 +247,11 @@ enum ContactDetailsAboutRows {
         }
         else if(indexPath.row == SubscribedStateRow)
         {
-            if(self.contact.isGroup)
+            if(self.contact.isGroup == YES)
                 thecell.textLabel.text = NSLocalizedString(@"Leave Conversation", @"");
             else
             {
-                if(self.isSubscribed)
+                if([self.contact isSubscripted] == YES)
                     thecell.textLabel.text = NSLocalizedString(@"Remove Contact", @"");
                 else
                     thecell.textLabel.text = NSLocalizedString(@"Add Contact", @"");
@@ -408,7 +334,7 @@ enum ContactDetailsAboutRows {
                 if(self.contact.isGroup) {
                     [self removeContact]; // works for muc too
                 } else  {
-                    if(self.isSubscribed)
+                    if([self.contact isSubscripted] == YES)
                     {
                         [self removeContact];
                     }  else  {
@@ -478,7 +404,8 @@ enum ContactDetailsAboutRows {
     [self presentViewController:alert animated:YES completion:nil];
 }
 
--(void) removeContact {
+-(void) removeContact
+{
     NSString* messageString = [NSString stringWithFormat:NSLocalizedString(@"Remove %@ from contacts?", @""), self.contact.contactJid];
     NSString* detailString = NSLocalizedString(@"They will no longer see when you are online. They may not be able to send you encrypted messages.", @"");
 
@@ -591,7 +518,7 @@ enum ContactDetailsAboutRows {
 
 -(IBAction) muteContact:(id)sender
 {
-    if(!self.isMuted) {
+    if(self.contact.isMuted == NO) {
         [[DataLayer sharedInstance] muteJid:self.contact.contactJid onAccount:self.accountNo];
     } else {
         [[DataLayer sharedInstance] unMuteJid:self.contact.contactJid onAccount:self.accountNo];
@@ -601,8 +528,7 @@ enum ContactDetailsAboutRows {
 
 -(void) refreshMute
 {
-    BOOL muted = [[DataLayer sharedInstance] isMutedJid:self.contact.contactJid onAccount:self.accountNo];
-    self.isMuted = muted;
+    self.contact.isMuted = [[DataLayer sharedInstance] isMutedJid:self.contact.contactJid onAccount:self.accountNo];
     dispatch_async(dispatch_get_main_queue(), ^{
         NSIndexPath* path = [NSIndexPath indexPathForRow:0 inSection:0];
         [self.tableView reloadRowsAtIndexPaths:@[path] withRowAnimation:UITableViewRowAnimationNone];
@@ -613,7 +539,8 @@ enum ContactDetailsAboutRows {
 {
 #ifndef DISABLE_OMEMO
     NSArray* devices = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid];
-    [MLChatViewHelper<ContactDetails*> toggleEncryption:&(self->_isEncrypted) forAccount:self.accountNo forContactJid:self.contact.contactJid withKnownDevices:devices withSelf:self afterToggle:^() {
+    [MLChatViewHelper<ContactDetails*>
+        toggleEncryptionForContact:self.contact withKnownDevices:devices withSelf:self afterToggle:^() {
         [self refreshLock];
     }];
 #endif

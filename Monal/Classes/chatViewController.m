@@ -63,7 +63,6 @@
 @property (nonatomic, strong) NSMutableArray* photos;
 @property (nonatomic, strong) UIDocumentPickerViewController *filePicker;
 
-@property (nonatomic, assign) BOOL encryptChat;
 @property (nonatomic, assign) BOOL sendLocation; // used for first request
 
 @property (nonatomic, strong) NSDate* lastMamDate;
@@ -434,7 +433,7 @@ enum msgSentState {
 {
 #ifndef DISABLE_OMEMO
     NSArray* devices = [self.xmppAccount.omemo knownDevicesForAddressName:self.contact.contactJid];
-    [MLChatViewHelper<chatViewController*> toggleEncryption:&(self->_encryptChat) forAccount:self.xmppAccount.accountNo forContactJid:self.contact.contactJid withKnownDevices:devices withSelf:self afterToggle:^() {
+    [MLChatViewHelper<chatViewController*> toggleEncryptionForContact:self.contact withKnownDevices:devices withSelf:self afterToggle:^() {
         [self displayEncryptionStateInUI];
     }];
 #endif
@@ -442,7 +441,7 @@ enum msgSentState {
 
 -(void) displayEncryptionStateInUI
 {
-    if(self.encryptChat) {
+    if(self.contact.isEncrypted) {
         [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"744-locked-received"]];
     } else {
         [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"745-unlocked"]];
@@ -601,7 +600,6 @@ enum msgSentState {
     [self stopEditing];
     self.xmppAccount = [[MLXMPPManager sharedInstance] getConnectedAccountForID:self.contact.accountId];
     if(!self.xmppAccount) DDLogDebug(@"Disabled account detected");
-    self.encryptChat = [[DataLayer sharedInstance] shouldEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
     
     [MLNotificationManager sharedInstance].currentAccountNo = self.contact.accountId;
     [MLNotificationManager sharedInstance].currentContact = self.contact;
@@ -652,11 +650,11 @@ enum msgSentState {
     if(self.xmppAccount) {
         BOOL omemoDeviceForContactFound = [self.xmppAccount.omemo knownDevicesForAddressNameExist:self.contact.contactJid];
         if(!omemoDeviceForContactFound) {
-            if(self.encryptChat && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo]) {
+            if(self.contact.isEncrypted && [[DataLayer sharedInstance] isAccountEnabled:self.xmppAccount.accountNo]) {
                 UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Encryption Not Supported", @"") message:NSLocalizedString(@"This contact does not appear to have any devices that support encryption.", @"") preferredStyle:UIAlertControllerStyleAlert];
                 [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Disable Encryption", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                     // Disable encryption
-                    self.encryptChat = NO;
+                    self.contact.isEncrypted = NO;
                     [self updateUIElements];
                     [[DataLayer sharedInstance] disableEncryptForJid:self.contact.contactJid andAccountNo:self.contact.accountId];
                     [alert dismissViewControllerAnimated:YES completion:nil];
@@ -878,7 +876,7 @@ enum msgSentState {
     if(!messageID)
     {
         [self addMessageto:self.contact.contactJid withMessage:messageText andId:newMessageID messageType:messageType mimeType:nil size:nil];
-        [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact isEncrypted:self.encryptChat isUpload:NO messageId:newMessageID
+        [[MLXMPPManager sharedInstance] sendMessage:messageText toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:NO messageId:newMessageID
                             withCompletionHandler:nil];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:self.xmppAccount userInfo:@{@"contact": self.contact}];
     }
@@ -887,7 +885,7 @@ enum msgSentState {
         [[MLXMPPManager sharedInstance]
                       sendMessage:messageText
                         toContact:self.contact
-                      isEncrypted:self.encryptChat
+                      isEncrypted:self.contact.isEncrypted
                          isUpload:NO
                         messageId:newMessageID
             withCompletionHandler:nil
@@ -1033,7 +1031,7 @@ enum msgSentState {
         for(NSURL* url in urls)
         {
             [coordinator coordinateReadingItemAtURL:url options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
-                [MLFiletransfer uploadFile:newURL onAccount:self.xmppAccount withEncryption:self.encryptChat andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
+                [MLFiletransfer uploadFile:newURL onAccount:self.xmppAccount withEncryption:self.contact.isEncrypted andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [self showPotentialError:error];
                         if(!error)
@@ -1044,7 +1042,7 @@ enum msgSentState {
                             
                             NSString* newMessageID = [[NSUUID UUID] UUIDString];
                             [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
-                            [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.encryptChat isUpload:YES messageId:newMessageID withCompletionHandler:nil];
+                            [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:nil];
                         }
                         DDLogVerbose(@"upload done");
                     });
@@ -1258,7 +1256,7 @@ enum msgSentState {
 
     [self showUploadHUD];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [MLFiletransfer uploadUIImage:selectedImage onAccount:self.xmppAccount withEncryption:self.encryptChat andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
+        [MLFiletransfer uploadUIImage:selectedImage onAccount:self.xmppAccount withEncryption:self.contact.isEncrypted andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self showPotentialError:error];
                 if(!error)
@@ -1266,7 +1264,7 @@ enum msgSentState {
                 
                 NSString* newMessageID = [[NSUUID UUID] UUIDString];
                 [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
-                [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.encryptChat isUpload:YES messageId:newMessageID withCompletionHandler:nil];
+                [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:nil];
                 DDLogVerbose(@"upload done");
             });
         }];
@@ -1296,7 +1294,7 @@ enum msgSentState {
         return nil;
     }
     
-    NSNumber* messageDBId = [[DataLayer sharedInstance] addMessageHistoryTo:to forAccount:self.contact.accountId withMessage:message actuallyFrom:(self.contact.isGroup ? self.contact.accountNickInGroup : self.jid) withId:messageId encrypted:self.encryptChat messageType:messageType mimeType:mimeType size:size];
+    NSNumber* messageDBId = [[DataLayer sharedInstance] addMessageHistoryTo:to forAccount:self.contact.accountId withMessage:message actuallyFrom:(self.contact.isGroup ? self.contact.accountNickInGroup : self.jid) withId:messageId encrypted:self.contact.isEncrypted messageType:messageType mimeType:mimeType size:size];
     if(messageDBId)
     {
         DDLogVerbose(@"added message");
@@ -2088,7 +2086,7 @@ enum msgSentState {
             {
                 message.messageText = newBody;
 
-                [self.xmppAccount sendMessage:newBody toContact:self.contact isEncrypted:(self.encryptChat || message.encrypted) isUpload:NO andMessageId:[[NSUUID UUID] UUIDString] withLMCId:message.messageId];
+                [self.xmppAccount sendMessage:newBody toContact:self.contact isEncrypted:(self.contact.isEncrypted || message.encrypted) isUpload:NO andMessageId:[[NSUUID UUID] UUIDString] withLMCId:message.messageId];
                 [[DataLayer sharedInstance] updateMessageHistory:message.messageDBId withText:newBody];
 
                 [self->_messageTable beginUpdates];
@@ -2135,7 +2133,7 @@ enum msgSentState {
     }
     
     UIContextualAction* LMCDeleteAction = [UIContextualAction contextualActionWithStyle:UIContextualActionStyleDestructive title:@"" handler:^(UIContextualAction* action, UIView* sourceView, void (^completionHandler)(BOOL actionPerformed)) {
-        [self.xmppAccount sendMessage:kMessageDeletedBody toContact:self.contact isEncrypted:(self.encryptChat || message.encrypted) isUpload:NO andMessageId:[[NSUUID UUID] UUIDString] withLMCId:message.messageId];
+        [self.xmppAccount sendMessage:kMessageDeletedBody toContact:self.contact isEncrypted:(self.contact.isEncrypted || message.encrypted) isUpload:NO andMessageId:[[NSUUID UUID] UUIDString] withLMCId:message.messageId];
         [[DataLayer sharedInstance] deleteMessageHistory:message.messageDBId];
         
         [self->_messageTable beginUpdates];
@@ -2191,7 +2189,7 @@ enum msgSentState {
     }
     
     //only allow editing for the 3 newest message && only on outgoing messages
-    if([[DataLayer sharedInstance] checkLMCEligible:message.messageDBId from:self.xmppAccount.connectionProperties.identity.jid encrypted:(message.encrypted | self.encryptChat)])
+    if([[DataLayer sharedInstance] checkLMCEligible:message.messageDBId from:self.xmppAccount.connectionProperties.identity.jid encrypted:(message.encrypted | self.contact.isEncrypted)])
         return [UISwipeActionsConfiguration configurationWithActions:@[
             LMCEditAction,
             LMCDeleteAction,
@@ -2735,14 +2733,14 @@ enum msgSentState {
         NSFileCoordinator* coordinator = [[NSFileCoordinator alloc] init];
         
             [coordinator coordinateReadingItemAtURL:fileURL options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
-                [MLFiletransfer uploadFile:newURL onAccount:self.xmppAccount withEncryption:self.encryptChat andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
+                [MLFiletransfer uploadFile:newURL onAccount:self.xmppAccount withEncryption:self.contact.isEncrypted andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [self showPotentialError:error];
                         if(!error)
                         {
                             NSString* newMessageID = [[NSUUID UUID] UUIDString];
                             [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
-                            [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.encryptChat isUpload:YES messageId:newMessageID withCompletionHandler:^(BOOL success, NSString *messageId) {
+                            [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:^(BOOL success, NSString *messageId) {
                                 [self hideUploadHUD];
                             }];
                         }

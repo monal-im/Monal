@@ -1554,14 +1554,29 @@ NSString *const kData=@"data";
             
             //add newest stanzaid to database *after* processing the message, but only for non-mam messages or mam catchup
             //(e.g. those messages going forward in time not backwards)
-            NSString* stanzaid = [outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLcatchup:"] ? [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"] : nil;
-            //if not from mam response: use stanzaid from message and check stnaza-id @by according to the rules outlined in XEP-0359
-            if(!stanzaid && [self.connectionProperties.identity.jid isEqualToString:[messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@by"]])
-                stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
-            if(stanzaid)
+            if(![outerMessageNode check:@"{urn:xmpp:mam:2}result"] || [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLcatchup:"])
             {
-                DDLogVerbose(@"Updating lastStanzaId in database to: %@", stanzaid);
-                [[DataLayer sharedInstance] setLastStanzaId:stanzaid forAccount:self.accountNo];
+                NSString* stanzaid = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];
+                //extract stanza-id from message itself and check stanza-id @by according to the rules outlined in XEP-0359
+                if(!stanzaid)
+                {
+                    if(![messageNode check:@"/<type=groupchat>"] && [self.connectionProperties.identity.jid isEqualToString:[messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@by"]])
+                        stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
+                    else if([messageNode check:@"/<type=groupchat>"] && [messageNode.fromUser isEqualToString:[messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@by"]])
+                        stanzaid = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
+                }
+                
+                //handle stanzaids of groupchats differently (because groupchat messages do not enter the user's mam archive, but only the archive of the muc server)
+                if(stanzaid && [messageNode check:@"/<type=groupchat>"])
+                {
+                    DDLogVerbose(@"Updating lastStanzaId of muc archive %@ in database to: %@", messageNode.fromUser, stanzaid);
+                    [[DataLayer sharedInstance] setLastStanzaId:stanzaid forMuc:messageNode.fromUser andAccount:self.accountNo];
+                }
+                else if(stanzaid && ![messageNode check:@"/<type=groupchat>"])
+                {
+                    DDLogVerbose(@"Updating lastStanzaId of user archive in database to: %@", stanzaid);
+                    [[DataLayer sharedInstance] setLastStanzaId:stanzaid forAccount:self.accountNo];
+                }
             }
             
             //only mark stanza as handled *after* processing it

@@ -818,6 +818,9 @@ $$
                     DDLogError(@"Could not decrypt message: iv length: %lu", (unsigned long)iv.length);
                     return NSLocalizedString(@"Error while decrypting: iv.length != 12", @"");
                 }
+                if(encryptedPayload == nil) {
+                    return NSLocalizedString(@"Error: Received message is empty", @"");
+                }
                 NSData* decodedPayload = [HelperTools dataWithBase64EncodedString:encryptedPayload];
                 if(decodedPayload == nil || key == nil || iv == nil || auth == nil)
                 {

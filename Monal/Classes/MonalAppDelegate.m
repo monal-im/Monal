@@ -510,11 +510,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     DDLogInfo(@"Entering FG");
     [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
     
-    //cancel already running background timer, we are now foregrounded again
-    if(_backgroundTimer)
-        _backgroundTimer();
-    _backgroundTimer = nil;
-    
     //TODO: show "loading..." animation/modal
     
     //only proceed with foregrounding if the NotificationServiceExtension is not running
@@ -526,6 +521,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     
     //trigger view updates (this has to be done because the NotificationServiceExtension could have updated the database some time ago)
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
+    
+    //cancel already running background timer, we are now foregrounded again
+    if(_backgroundTimer)
+        _backgroundTimer();
+    _backgroundTimer = nil;
     
     [self addBackgroundTask];
     [[MLXMPPManager sharedInstance] nowForegrounded];

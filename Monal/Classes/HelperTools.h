@@ -70,6 +70,8 @@ void logException(NSException* exception);
 +(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andFile:(char*) file andLine:(int) line andFunc:(char*) func;
 +(monal_void_block_t) startTimer:(double) timeout withHandler:(monal_void_block_t) handler andCancelHandler:(monal_void_block_t _Nullable) cancelHandler andFile:(char*) file andLine:(int) line andFunc:(char*) func;
 
++(NSString*)appBuildVersionInfo;
+
 @end
 
 NS_ASSUME_NONNULL_END

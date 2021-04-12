@@ -10,6 +10,7 @@
 #import "MLWebViewController.h"
 #import "MLSwitchCell.h"
 #import "MLDefinitions.h"
+#import "HelperTools.h"
 
 @import SafariServices;
 
@@ -137,13 +138,8 @@ NS_ENUM(NSInteger, kSettingSection)
             if(indexPath.row == (self.aboutRows.count - 1))
             {
                 NSString* versionTxt = nil;
-                NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-#if IS_ALPHA
-                versionTxt = [NSString stringWithFormat:@"Alpha %@ (%s: %s UTC)", [infoDict objectForKey:@"CFBundleShortVersionString"], __DATE__, __TIME__];
-#else
-                versionTxt = [NSString stringWithFormat:@"%@ (%@)", [infoDict objectForKey:@"CFBundleShortVersionString"], [infoDict objectForKey:@"CFBundleVersion"]];
-#endif
-                [cell initCell:@"Version" withLabel:versionTxt];
+                versionTxt = [HelperTools appBuildVersionInfo];
+                [cell initCell:self.aboutRows[indexPath.row] withLabel:versionTxt];
             } else {
                 [cell initTapCell:self.aboutRows[indexPath.row]];;
             }
@@ -240,6 +236,10 @@ NS_ENUM(NSInteger, kSettingSection)
                     break;
                     
                 case 5:
+                {
+                    UIPasteboard *pastboard = UIPasteboard.generalPasteboard;
+                    pastboard.string = [HelperTools appBuildVersionInfo];
+                }
                     break;
                
                 default:

@@ -155,6 +155,58 @@
             </objects>
             <point key="canvasLocation" x="-688" y="8535"/>
         </scene>
+        <!--Settings About View Controller-->
+        <scene sceneID="p1f-hF-bD0">
+            <objects>
+                <viewController storyboardIdentifier="SettingsAboutViewController" id="dQo-BQ-ha4" customClass="MLSettingsAboutViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="BAD-80-kSv"/>
+                        <viewControllerLayoutGuide type="bottom" id="scY-EY-mYr"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lJ1-tR-x8n">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="AppLogo" translatesAutoresizingMaskIntoConstraints="NO" id="8hz-B0-TtG">
+                                <rect key="frame" x="132" y="89" width="150" height="150"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="150" id="91q-Nr-rYC"/>
+                                    <constraint firstAttribute="height" constant="150" id="bJq-gC-iPu"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <integer key="value" value="20"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </imageView>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="XdN-jW-LyI">
+                                <rect key="frame" x="20" y="282" width="374" height="65"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="65" id="gQc-Oi-4y1"/>
+                                </constraints>
+                                <color key="textColor" systemColor="labelColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="XdN-jW-LyI" firstAttribute="leading" secondItem="lJ1-tR-x8n" secondAttribute="leadingMargin" id="CY5-UL-8Cd"/>
+                            <constraint firstItem="XdN-jW-LyI" firstAttribute="trailing" secondItem="lJ1-tR-x8n" secondAttribute="trailingMargin" id="IPn-Yu-Dt8"/>
+                            <constraint firstItem="8hz-B0-TtG" firstAttribute="centerX" secondItem="lJ1-tR-x8n" secondAttribute="centerX" id="IPt-Ft-QQf"/>
+                            <constraint firstItem="8hz-B0-TtG" firstAttribute="top" secondItem="BAD-80-kSv" secondAttribute="bottom" constant="45" id="vLr-yY-Wwd"/>
+                            <constraint firstItem="XdN-jW-LyI" firstAttribute="top" secondItem="8hz-B0-TtG" secondAttribute="bottom" constant="43" id="vmy-4w-JG5"/>
+                        </constraints>
+                    </view>
+                    <value key="contentSizeForViewInPopover" type="size" width="420" height="500"/>
+                    <connections>
+                        <outlet property="aboutVersion" destination="XdN-jW-LyI" id="rEj-7L-zfv"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="pN1-GD-F9F" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="155.07246376811597" y="6701.7857142857138"/>
+        </scene>
         <!--Navigation Controller-->
         <scene sceneID="3Wl-U9-M4t">
             <objects>
@@ -1007,6 +1059,7 @@
     </inferredMetricsTieBreakers>
     <resources>
         <image name="740-gear" width="28" height="28"/>
+        <image name="AppLogo" width="341.33334350585938" height="341.33334350585938"/>
         <systemColor name="darkTextColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

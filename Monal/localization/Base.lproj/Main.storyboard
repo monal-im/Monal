@@ -328,6 +328,9 @@
                             <constraint firstAttribute="bottom" secondItem="mSj-cI-xo2" secondAttribute="bottom" constant="29" id="tMp-Od-ics"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="backgroundImageView" destination="mSj-cI-xo2" id="Sk3-4F-Rao"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="N6F-F8-vjp" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>

@@ -7,10 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "HelperTools.h"
+#import "MLImageManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MLPlaceholderViewController : UIViewController
+@property (weak, nonatomic) IBOutlet UIImageView* backgroundImageView;
 
 @end
 

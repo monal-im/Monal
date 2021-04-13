@@ -137,8 +137,7 @@ NS_ENUM(NSInteger, kSettingSection)
         case kSettingSectionAbout: {
             if(indexPath.row == (self.aboutRows.count - 1))
             {
-                NSString* versionTxt = nil;
-                versionTxt = [HelperTools appBuildVersionInfo];
+                NSString* versionTxt = [HelperTools appBuildVersionInfo];
                 [cell initCell:self.aboutRows[indexPath.row] withLabel:versionTxt];
             } else {
                 [cell initTapCell:self.aboutRows[indexPath.row]];;
@@ -237,7 +236,7 @@ NS_ENUM(NSInteger, kSettingSection)
                     
                 case 5:
                 {
-                    UIPasteboard *pastboard = UIPasteboard.generalPasteboard;
+                    UIPasteboard* pastboard = UIPasteboard.generalPasteboard;
                     pastboard.string = [HelperTools appBuildVersionInfo];
                 }
                     break;

@@ -632,26 +632,26 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         UIMenu *detailsMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.detail" options:UIMenuOptionsDisplayInline children:@[detailsCommand]];
         [builder insertSiblingMenu:detailsMenu afterMenuForIdentifier:@"im.monal.new"];
                 
-        UIKeyCommand *deleteCommand = [UIKeyCommand commandWithTitle:@"Delete Conversation" image:nil action:@selector(deleteConversation) input:@"\b" modifierFlags:UIKeyModifierCommand propertyList:nil];
+        UIKeyCommand* deleteCommand = [UIKeyCommand commandWithTitle:@"Delete Conversation" image:nil action:@selector(deleteConversation) input:@"\b" modifierFlags:UIKeyModifierCommand propertyList:nil];
         
-        UIMenu *deleteMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.delete" options:UIMenuOptionsDisplayInline children:@[deleteCommand]];
+        UIMenu* deleteMenu = [UIMenu menuWithTitle:@"" image:nil identifier:@"im.monal.delete" options:UIMenuOptionsDisplayInline children:@[deleteCommand]];
         [builder insertSiblingMenu:deleteMenu afterMenuForIdentifier:@"im.monal.detail"];
         
         [builder removeMenuForIdentifier:UIMenuHelp];
         
         [builder replaceChildrenOfMenuForIdentifier:UIMenuAbout fromChildrenBlock:^NSArray<UIMenuElement *> * _Nonnull(NSArray<UIMenuElement *> * _Nonnull items) {
-            UICommand *itemCommand = (UICommand*)items.firstObject;
-            UICommand *aboutCommand = [UICommand commandWithTitle:itemCommand.title image:nil action:@selector(aboutWindow) propertyList:nil];
-            NSArray *menuItems = @[aboutCommand];
+            UICommand* itemCommand = (UICommand*)items.firstObject;
+            UICommand* aboutCommand = [UICommand commandWithTitle:itemCommand.title image:nil action:@selector(aboutWindow) propertyList:nil];
+            NSArray* menuItems = @[aboutCommand];
             return menuItems;
         }];
     }
 }
 
 -(void) aboutWindow {
-    UIStoryboard *settingStoryBoard = [UIStoryboard storyboardWithName:@"Settings" bundle:nil];
-    MLSettingsAboutViewController *settingAboutViewController = [settingStoryBoard instantiateViewControllerWithIdentifier:@"SettingsAboutViewController"];
-    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:settingAboutViewController];
+    UIStoryboard* settingStoryBoard = [UIStoryboard storyboardWithName:@"Settings" bundle:nil];
+    MLSettingsAboutViewController* settingAboutViewController = [settingStoryBoard instantiateViewControllerWithIdentifier:@"SettingsAboutViewController"];
+    UINavigationController* navigationController = [[UINavigationController alloc] initWithRootViewController:settingAboutViewController];
     [self.window.rootViewController presentViewController:navigationController animated:NO completion:nil];
 }
 

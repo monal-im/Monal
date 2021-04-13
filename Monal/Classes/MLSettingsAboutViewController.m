@@ -19,12 +19,12 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    NSString *versionTxt = [HelperTools appBuildVersionInfo];
+    NSString* versionTxt = [HelperTools appBuildVersionInfo];
     [self.aboutVersion setText:versionTxt];
     
-    UITapGestureRecognizer *tapReCognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(copyTxt:)];
+    UITapGestureRecognizer* tapReCognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(copyTxt:)];
     [self.aboutVersion addGestureRecognizer:tapReCognizer];
-    UIBarButtonItem *rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemClose target:self action:@selector(close:)];
+    UIBarButtonItem* rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemClose target:self action:@selector(close:)];
     self.navigationItem.rightBarButtonItem = rightBarButtonItem;
 }
 

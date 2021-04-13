@@ -111,7 +111,10 @@ const u_int32_t MagicMapKitItem = 1 << 2;
             MKMapItem* mapItem = [NSKeyedUnarchiver unarchivedObjectOfClass:[MKMapItem class] fromData:item error:&err];
             DDLogWarn(@"%@", err);
             [payload setObject:[NSString stringWithFormat:@"geo:%f,%f", mapItem.placemark.coordinate.latitude, mapItem.placemark.coordinate.longitude] forKey:@"url"];
-            if(self.contentText.length) [payload setObject:self.contentText forKey:@"comment"];
+            if(self.contentText.length > 0)
+            {
+                [payload setObject:self.contentText forKey:@"comment"];
+            }
             [self savePayloadMsgAndComplete:payload];
         }];
     }
@@ -120,13 +123,19 @@ const u_int32_t MagicMapKitItem = 1 << 2;
         NSItemProvider* provider = [magicIdentifyerDic objectForKey:[NSNumber numberWithUnsignedInt:MagicPublicUrl]];
         [provider loadItemForTypeIdentifier:@"public.url" options:NULL completionHandler:^(NSURL<NSSecureCoding>*  _Nullable item, NSError * _Null_unspecified error) {
             [payload setObject:item.absoluteString forKey:@"url"];
-            if(self.contentText.length) [payload setObject:self.contentText forKey:@"comment"];
+            if(self.contentText.length > 0)
+            {
+                [payload setObject:self.contentText forKey:@"comment"];
+            }
             [self savePayloadMsgAndComplete:payload];
         }];
     }
     else if((magicIdentifyer & MagicPlainTxt) > 0)
     {
-        if(self.contentText.length) [payload setObject:self.contentText forKey:@"comment"];
+        if(self.contentText.length > 0)
+        {
+            [payload setObject:self.contentText forKey:@"comment"];
+        }
         [self savePayloadMsgAndComplete:payload];
     }
 }

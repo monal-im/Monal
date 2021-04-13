@@ -307,7 +307,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="1024" height="1366"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Tie_My_Boat_by_Ray_Garcia" translatesAutoresizingMaskIntoConstraints="NO" id="mSj-cI-xo2">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="mSj-cI-xo2">
                                 <rect key="frame" x="-20" y="29" width="1064" height="1308"/>
                             </imageView>
                             <view alpha="0.25" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kLJ-ds-UJ6">

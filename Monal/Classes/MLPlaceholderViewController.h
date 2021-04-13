@@ -13,7 +13,6 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MLPlaceholderViewController : UIViewController
-@property (weak, nonatomic) IBOutlet UIImageView* backgroundImageView;
 
 @end
 

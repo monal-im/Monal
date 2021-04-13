@@ -10,6 +10,8 @@
 
 @interface MLPlaceholderViewController ()
 
+@property (weak, nonatomic) IBOutlet UIImageView *backgroundImageView;
+
 @end
 
 @implementation MLPlaceholderViewController
@@ -30,10 +32,19 @@
     [self updateBackground];
 }
 
--(void) updateBackground {
+-(void) viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+-(void) updateBackground
+{
     BOOL backgrounds = [[HelperTools defaultsDB] boolForKey:@"ChatBackgrounds"];
     
-    if(backgrounds){
+    if(backgrounds)
+    {
         self.backgroundImageView.hidden = NO;
         NSString* imageName = [[HelperTools defaultsDB] objectForKey:@"BackgroundImage"];
         if(imageName)
@@ -41,12 +52,19 @@
             if([imageName isEqualToString:@"CUSTOM"])
             {
                 self.backgroundImageView.image = [[MLImageManager sharedInstance] getBackground];
-            } else  {
+            }
+            else
+            {
                 self.backgroundImageView.image = [UIImage imageNamed:imageName];
             }
         }
-        
-    } else {
+        else
+        {
+            self.backgroundImageView.hidden = YES;
+        }
+    }
+    else
+    {
         self.backgroundImageView.hidden = YES;
     }
 }

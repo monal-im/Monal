@@ -28,7 +28,8 @@
     self.navigationItem.rightBarButtonItem = rightBarButtonItem;
 }
 
-- (NSArray<UIKeyCommand *>*)keyCommands {
+- (NSArray<UIKeyCommand *>*)keyCommands 
+{
     return @[
         [UIKeyCommand keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(close:)]
     ];

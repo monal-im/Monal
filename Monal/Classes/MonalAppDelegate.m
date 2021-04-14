@@ -648,7 +648,8 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     }
 }
 
--(void) aboutWindow {
+-(void) aboutWindow
+{
     UIStoryboard* settingStoryBoard = [UIStoryboard storyboardWithName:@"Settings" bundle:nil];
     MLSettingsAboutViewController* settingAboutViewController = [settingStoryBoard instantiateViewControllerWithIdentifier:@"SettingsAboutViewController"];
     UINavigationController* navigationController = [[UINavigationController alloc] initWithRootViewController:settingAboutViewController];

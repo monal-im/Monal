@@ -469,7 +469,9 @@
 
 -(void) untrustAllDevicesFrom:(NSString*) jid
 {
-    [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactName=?;" andArguments:@[[NSNumber numberWithInt:MLOmemoInternalNotTrusted], self.accountId, jid]];
+    [self.sqliteDatabase voidWriteTransaction:^{
+        [self.sqliteDatabase executeNonQuery:@"UPDATE signalContactIdentity SET trustLevel=? WHERE account_id=? AND contactName=?;" andArguments:@[[NSNumber numberWithInt:MLOmemoInternalNotTrusted], self.accountId, jid]];
+    }];
 }
 
 -(NSNumber*) getTrustLevel:(SignalAddress*)address identityKey:(NSData*)identityKey

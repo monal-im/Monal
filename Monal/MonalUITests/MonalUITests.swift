@@ -23,7 +23,7 @@ class MonalUITests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func intro(app: XCUIApplication)
+    private func intro(app: XCUIApplication)
     {
         // wait for launch
         sleep(1)
@@ -39,7 +39,7 @@ class MonalUITests: XCTestCase {
         sleep(1)
     }
 
-    func introSkip(app: XCUIApplication)
+    private func introSkip(app: XCUIApplication)
     {
         // wait for launch
         sleep(1)
@@ -47,16 +47,49 @@ class MonalUITests: XCTestCase {
         sleep(1)
     }
 
+    private func createStartArgs() -> [String]
+    {
+        return createStartArgs(extraArgs: [])
+    }
+
+    private func createStartArgs(extraArgs: [String]) -> [String]
+    {
+        var startArgs : [String] = ["--disableAnimations"]
+        // append extraArgs
+        startArgs.append(contentsOf: extraArgs)
+
+        return startArgs
+    }
+
+    private func sendMsg(txt: String)
+    {
+        let app = XCUIApplication()
+
+        XCTAssertTrue(app.buttons["microphone"].exists)
+        XCTAssertFalse(app.buttons["Send"].exists)
+
+        app.textViews["NewChatMessageTextField"].tap()
+        app.textViews["NewChatMessageTextField"].typeText(txt)
+        // send button should appeared
+        XCTAssertTrue(app.buttons["Send"].exists)
+        XCTAssertFalse(app.buttons["microphone"].exists)
+
+        app.buttons["Send"].tap()
+        // send button should be hidden
+        XCTAssertFalse(app.buttons["Send"].exists)
+        XCTAssertTrue(app.buttons["microphone"].exists)
+    }
+
     func test_0001_DBInit() throws {
         let app = XCUIApplication()
-        app.launchArguments = ["--reset"]
+        app.launchArguments = createStartArgs(extraArgs: ["--reset"])
         app.launch()
     }
 
     func test_0002_Intro() throws
     {
         let app = XCUIApplication()
-        app.launchArguments = ["--reset"]
+        app.launchArguments = createStartArgs(extraArgs: ["--reset"])
         app.launch()
 
         intro(app: app)
@@ -69,7 +102,7 @@ class MonalUITests: XCTestCase {
     func test_0003_IntroSkip() throws
     {
         let app = XCUIApplication()
-        app.launchArguments = ["--reset"]
+        app.launchArguments = createStartArgs(extraArgs: ["--reset"])
         app.launch()
 
         introSkip(app: app)
@@ -86,8 +119,8 @@ class MonalUITests: XCTestCase {
 
     func test_0004_ResetTime() throws {
         let app = XCUIApplication()
-        app.launchArguments = ["--reset"]
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
+        app.launchArguments = createStartArgs(extraArgs: ["--reset"])
+        if #available(iOS 13.0, *) {
             // This measures how long it takes to launch your application.
             measure(metrics: [XCTApplicationLaunchMetric()]) {
                 app.launch()
@@ -98,7 +131,7 @@ class MonalUITests: XCTestCase {
     func test_0005_Register() throws
     {
         let app = XCUIApplication()
-        app.launchArguments = ["--reset"]
+        app.launchArguments =  createStartArgs(extraArgs: ["--reset"])
         app.launch()
 
         introSkip(app: app)
@@ -128,7 +161,7 @@ class MonalUITests: XCTestCase {
     }
 
     func test_0006_LaunchPerformance() throws {
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, *) {
+        if #available(iOS 13.0, *) {
             // This measures how long it takes to launch your application.
             measure(metrics: [XCTApplicationLaunchMetric()]) {
                 XCUIApplication().launch()
@@ -138,6 +171,7 @@ class MonalUITests: XCTestCase {
 
     func test_0007_PlusAndContactsButtons() throws {
         let app = XCUIApplication()
+        app.launchArguments = createStartArgs()
         app.launch()
 
         let chatsNavigationBar = app.navigationBars["Chats"]
@@ -160,26 +194,9 @@ class MonalUITests: XCTestCase {
         contactsNavigationBar.buttons["Close"].tap()
     }
 
-    func sendMsg(txt: String)
-    {
-        let app = XCUIApplication()
-        XCTAssertTrue(app.buttons["microphone"].exists)
-        XCTAssertFalse(app.buttons["Send"].exists)
-
-        app.textViews["NewChatMessageTextField"].tap()
-        app.textViews["NewChatMessageTextField"].typeText(txt)
-        // send button should appeared
-        XCTAssertTrue(app.buttons["Send"].exists)
-        XCTAssertFalse(app.buttons["microphone"].exists)
-
-        app.buttons["Send"].tap()
-        // send button should be hidden
-        XCTAssertFalse(app.buttons["Send"].exists)
-        XCTAssertTrue(app.buttons["microphone"].exists)
-    }
-
     func test_0008_AddContact() throws {
         let app = XCUIApplication()
+        app.launchArguments = createStartArgs()
         app.launch()
 
         app.navigationBars["Chats"].buttons["Add"].tap()

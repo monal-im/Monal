@@ -185,16 +185,17 @@
 
     DDLogVerbose(@"Saving");
 
-    if([self.jid length] == 0)
+    NSString* lowerJid = [self.jid.lowercaseString copy];
+    NSString* domain;
+    NSString* user;
+
+    if([lowerJid length] == 0)
     {
         [self alertWithTitle:NSLocalizedString(@"XMPP ID missing", @"") andMsg:NSLocalizedString(@"You have not entered your XMPP ID yet", @"")];
         return;
     }
 
-    NSString* domain;
-    NSString* user;
-
-    if([self.jid characterAtIndex:0] == '@')
+    if([lowerJid characterAtIndex:0] == '@')
     {
         //first char =@ means no username in jid
         [self alertWithTitle:NSLocalizedString(@"Username missing", @"") andMsg:NSLocalizedString(@"Your entered XMPP ID is missing the username", @"")];
@@ -543,7 +544,7 @@
 {
     if (section == 0)
     {
-        UIView *avatarView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.frame.size.width, 100)];
+        UIView* avatarView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.tableView.frame.size.width, 100)];
         avatarView.backgroundColor = [UIColor clearColor];
         avatarView.userInteractionEnabled = YES;
         
@@ -554,7 +555,7 @@
         self.userAvatarImageView.clipsToBounds = YES;
         self.userAvatarImageView.userInteractionEnabled = YES;
         
-        UITapGestureRecognizer *touchUserAvatarRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(getPhotoAction:)];
+        UITapGestureRecognizer* touchUserAvatarRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(getPhotoAction:)];
         [self.userAvatarImageView addGestureRecognizer:touchUserAvatarRecognizer];
         
         [[MLImageManager sharedInstance] getIconForContact:self.jid andAccount:self.accountno withCompletion:^(UIImage *image) {
@@ -686,10 +687,10 @@
         {
             MLKeysTableViewController* keys = (MLKeysTableViewController*)segue.destinationViewController;
             keys.ownKeys = YES;
-            MLContact *contact = [[MLContact alloc] init];
+            MLContact* contact = [[MLContact alloc] init];
             contact.contactJid = self.jid;
             contact.accountId = self.accountno;
-            keys.contact=contact;
+            keys.contact = contact;
         }
     }
     else if([segue.identifier isEqualToString:@"showPassChange"])

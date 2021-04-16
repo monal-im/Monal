@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
         [HelperTools configureLogging];
 
         // check start arguments
+        // reset sworim and ipc database for UI Tests
         if([NSProcessInfo.processInfo.arguments containsObject:@"--reset"])
         {
             // reset db
@@ -44,7 +45,13 @@ int main(int argc, char *argv[]) {
             // reset NSUserDefaults
             [[NSUserDefaults alloc] removePersistentDomainForName:kAppGroup];
         }
-        else if([NSProcessInfo.processInfo.arguments containsObject:@"--invalidateAccountStates"])
+        // invalidate account states
+        if([NSProcessInfo.processInfo.arguments containsObject:@"--disableAnimations"])
+        {
+            [UIView setAnimationsEnabled:NO];
+        }
+        // invalidate account states
+        if([NSProcessInfo.processInfo.arguments containsObject:@"--invalidateAccountStates"])
         {
             [[DataLayer sharedInstance] invalidateAllAccountStates];
         }

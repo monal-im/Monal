@@ -71,7 +71,7 @@
 
 -(IBAction)registerAccount:(id) sender
 {
-    if(self.jid.text.length==0 || self.password.text.length==0)
+    if(self.jid.text.length == 0 || self.password.text.length == 0)
         {
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No Empty Values", @"") message:NSLocalizedString(@"Please make sure you have entered a username, password.", @"") preferredStyle:UIAlertControllerStyleAlert];
             [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
@@ -81,7 +81,7 @@
             return;
         }
     
-    if([self.jid.text rangeOfString:@"@"].location!=NSNotFound)
+    if([self.jid.text rangeOfString:@"@"].location != NSNotFound)
     {
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid username", @"") message:NSLocalizedString(@"The username does not need to have an @ symbol. Please try again.", @"") preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
@@ -91,28 +91,28 @@
         return;
     }
     
-    self.loginHUD= [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    self.loginHUD.label.text=NSLocalizedString(@"Signing Up", @"");
-    self.loginHUD.mode=MBProgressHUDModeIndeterminate;
+    self.loginHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    self.loginHUD.label.text = NSLocalizedString(@"Signing Up", @"");
+    self.loginHUD.mode = MBProgressHUDModeIndeterminate;
     self.loginHUD.removeFromSuperViewOnHide=YES;
     
-    NSString *jid = [self.jid.text copy];
-    NSString *pass =[self.password.text copy];
-    NSString *code =[self.captcha.text copy];
+    NSString* jid = [self.jid.text.lowercaseString copy];
+    NSString* pass = [self.password.text copy];
+    NSString* code = [self.captcha.text copy];
     [self createXMPPInstance];
 
-    self.loginHUD.hidden=NO;
+    self.loginHUD.hidden = NO;
     
     [self.xmppAccount registerUser:jid withPassword:pass captcha:code andHiddenFields: self.hiddenFields withCompletion:^(BOOL success, NSString *message) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.loginHUD.hidden=YES;
+            self.loginHUD.hidden = YES;
             [self.xmppAccount disconnect:YES];
             
-            if(!success)
+            if(success == NO)
             {
-                NSString *displayMessage = message;
-                if(displayMessage.length==0) displayMessage = NSLocalizedString(@"Could not register your username. Please check your code or change the username and try again.", @"");
-                UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
+                NSString* displayMessage = message;
+                if(displayMessage.length == 0) displayMessage = NSLocalizedString(@"Could not register your username. Please check your code or change the username and try again.", @"");
+                UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
                 [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                     [alert dismissViewControllerAnimated:YES completion:nil];
                 }]];
@@ -120,14 +120,14 @@
             }
             else
             {
-                NSMutableDictionary *dic  = [[NSMutableDictionary alloc] init];
+                NSMutableDictionary* dic = [[NSMutableDictionary alloc] init];
                 [dic setObject:kRegServer forKey:kDomain];
-                [dic setObject:self.jid.text forKey:kUsername];
+                [dic setObject:jid forKey:kUsername];
                 [dic setObject:[HelperTools encodeRandomResource] forKey:kResource];
                 [dic setObject:@YES forKey:kEnabled];
                 [dic setObject:@NO forKey:kDirectTLS];
                 
-                NSString *passwordText = [self.password.text copy];
+                NSString* passwordText = [self.password.text copy];
                 
                 NSNumber* accountID = [[DataLayer sharedInstance] addAccountWithDictionary:dic];
                 if(accountID) {

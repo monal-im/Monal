@@ -39,7 +39,7 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
-    self.navigationItem.title=NSLocalizedString(@"Accounts",@"");
+    self.navigationItem.title=NSLocalizedString(@"TITLE_ACCOUNTS",@"");
    
     self.accountsTable=self.tableView;
     self.accountsTable.delegate=self;
@@ -95,8 +95,8 @@
 {
     self.hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     self.hud.removeFromSuperViewOnHide=YES;
-    self.hud.label.text = NSLocalizedString(@"Reconnecting", @"");
-    self.hud.detailsLabel.text = NSLocalizedString(@"Will logout and reconnect any connected accounts.", @"");
+    self.hud.label.text = NSLocalizedString(@"LABEL_RECONNECTING", @"");
+    self.hud.detailsLabel.text = NSLocalizedString(@"LABEL_ALLACCOUNTS_LOGOUT_RECONNECT", @"");
     [[MLXMPPManager sharedInstance] logoutAll];
     createTimer(1.0, (^{
         [[MLXMPPManager sharedInstance] connectIfNecessary];
@@ -194,13 +194,13 @@
     switch (section) {
         case 0:
         {
-            return NSLocalizedString(@"Accounts",@"");
+            return NSLocalizedString(@"TITLE_ACCOUNTS",@"");
             break;
         }
             
         case 1:
         {
-            return NSLocalizedString(@"Add New Account",@"");
+            return NSLocalizedString(@"TITLE_ADD_NEW_ACCOUNT",@"");
             break;
         }
             
@@ -273,11 +273,11 @@
                 
                 NSDate* connectedTime = [[MLXMPPManager sharedInstance] connectedTimeFor: [NSString stringWithFormat:@"%@", [[_accountList objectAtIndex:indexPath.row] objectForKey:@"account_id"]]];
                 if(connectedTime) {
-                    cell.detailTextLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Connected since: %@", @""), [self.uptimeFormatter stringFromDate:connectedTime]];
+                    cell.detailTextLabel.text = [NSString stringWithFormat:NSLocalizedString(@"LABEL_CONNECTED_SINCE", @""), [self.uptimeFormatter stringFromDate:connectedTime]];
                 }
             }
             else {
-                accessory.image = [UIImage imageNamed:NSLocalizedString(@"Disconnected", @"")];
+                accessory.image = [UIImage imageNamed:NSLocalizedString(@"IMAGE_DISCONNECTED", @"")];
                 cell.accessoryView = accessory;
             }
         }
@@ -295,13 +295,13 @@
 
         if(indexPath.row == 0)
         {
-            cell.textLabel.text = NSLocalizedString(@"XMPP", @"");
-            cell.detailTextLabel.text = NSLocalizedString(@"Jabber, Prosody, ejabberd etc.   ", @"");
+            cell.textLabel.text = NSLocalizedString(@"LABEL_XMPP", @"");
+            cell.detailTextLabel.text = NSLocalizedString(@"TEXTLABEL_PROVIDER_EXAMPLES", @"");
         }
         else
         {
-            cell.textLabel.text = NSLocalizedString(@"XMPP: QR-Code", @"");
-            cell.detailTextLabel.text = NSLocalizedString(@"Login with a QR-Code", @"");
+            cell.textLabel.text = NSLocalizedString(@"TEXTLABEL_XMPP_QRCODE", @"");
+            cell.detailTextLabel.text = NSLocalizedString(@"TEXTLABEL_LOGIN_QRCODE", @"");
         }
         return cell;
     }

@@ -331,7 +331,7 @@
                 else if(event == NSStreamEventEndEncountered && self.open_called && self.shared_state.open)
                     [_delegate stream:self handleEvent:event];
                 else
-                    unreachable();
+                    DDLogDebug(@"Ignored event %ld", (long)event);
             }
         });
         //trigger wakeup of runloop to execute the block as soon as possible

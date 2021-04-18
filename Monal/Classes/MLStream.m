@@ -172,20 +172,24 @@
 -(NSInteger) write:(const uint8_t*) buffer maxLength:(NSUInteger) len
 {
     @synchronized(self.shared_state) {
-        if(self.closed /*|| !self.open_called || !self.shared_state.open*/)
+        if(self.closed)
             return -1;
     }
     //the call to dispatch_get_main_queue() is a dummy because we are using DISPATCH_DATA_DESTRUCTOR_DEFAULT which is performed inline
     dispatch_data_t data = dispatch_data_create(buffer, len, dispatch_get_main_queue(), DISPATCH_DATA_DESTRUCTOR_DEFAULT);
     
     //support tcp fast open for all data sent before the connection got opened
-    if(!self.open_called)
+    /*if(!self.open_called)
     {
         DDLogInfo(@"Sending TCP fast open early data: %@", data);
         nw_connection_send(self.shared_state.connection, data, NW_CONNECTION_DEFAULT_MESSAGE_CONTEXT, NO, NW_CONNECTION_SEND_IDEMPOTENT_CONTENT);
         return len;
-    }
+    }*/
     
+    @synchronized(self.shared_state) {
+        if(self.closed || !self.open_called || !self.shared_state.open)
+            return -1;
+    }
     @synchronized(self) {
         _writing++;
     }
@@ -215,7 +219,7 @@
 -(BOOL) hasSpaceAvailable
 {
     @synchronized(self) {
-        return /*self.open_called && self.shared_state.open &&*/ !self.closed && _writing == 0;
+        return self.open_called && self.shared_state.open && !self.closed && _writing == 0;
     }
 }
 

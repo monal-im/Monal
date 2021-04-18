@@ -535,7 +535,7 @@ NSString *const kData=@"data";
     {
         //make sure we really try to send this initial xmpp stream header as early data for tcp fast open even though the tcp stream did not yet trigger
         //an NSStreamEventHasSpaceAvailable event because it was not even opened yet
-        self->_streamHasSpace = YES;
+        //self->_streamHasSpace = YES;
         [self startXMPPStream:NO];     //send xmpp stream start (this is the first one for this connection --> we don't need to clear the receive queue)
     }
     else

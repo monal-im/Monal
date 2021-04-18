@@ -529,7 +529,17 @@ NSString *const kData=@"data";
         _iPipe = [[MLPipe alloc] initWithInputStream:localIStream andOuterDelegate:self];
     [_oStream setDelegate:self];
     [_oStream scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-    [self startXMPPStream:NO];     //send xmpp stream start (this is the first one for this connection --> we don't need to clear the receive queue)
+    
+    //tcp fast open is only supperted when connecting through network framework which is only supported when using direct tls
+    if(self.connectionProperties.server.isDirectTLS == YES)
+    {
+        //make sure we really try to send this initial xmpp stream header as early data for tcp fast open even though the tcp stream did not yet trigger
+        //an NSStreamEventHasSpaceAvailable event because it was not even opened yet
+        self->_streamHasSpace = YES;
+        [self startXMPPStream:NO];     //send xmpp stream start (this is the first one for this connection --> we don't need to clear the receive queue)
+    }
+    else
+        [self startXMPPStream:NO];     //send xmpp stream start (this is the first one for this connection --> we don't need to clear the receive queue)
     
     //open sockets and start connecting (including TLS handshake if isDirectTLS==YES)
     DDLogInfo(@"opening TCP streams");
@@ -3168,6 +3178,9 @@ NSString *const kData=@"data";
         case NSStreamEventOpenCompleted:
         {
             DDLogVerbose(@"Stream %@ open completed", stream);
+            //reset _streamHasSpace to its default value until the fist NSStreamEventHasSpaceAvailable event occurs
+            if(stream == _oStream)
+                self->_streamHasSpace = NO;
             break;
         }
         

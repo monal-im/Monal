@@ -172,11 +172,20 @@
 -(NSInteger) write:(const uint8_t*) buffer maxLength:(NSUInteger) len
 {
     @synchronized(self.shared_state) {
-        if(self.closed || !self.open_called || !self.shared_state.open)
+        if(self.closed /*|| !self.open_called || !self.shared_state.open*/)
             return -1;
     }
     //the call to dispatch_get_main_queue() is a dummy because we are using DISPATCH_DATA_DESTRUCTOR_DEFAULT which is performed inline
     dispatch_data_t data = dispatch_data_create(buffer, len, dispatch_get_main_queue(), DISPATCH_DATA_DESTRUCTOR_DEFAULT);
+    
+    //support tcp fast open for all data sent before the connection got opened
+    if(!self.open_called)
+    {
+        DDLogInfo(@"Sending TCP fast open early data: %@", data);
+        nw_connection_send(self.shared_state.connection, data, NW_CONNECTION_DEFAULT_MESSAGE_CONTEXT, NO, NW_CONNECTION_SEND_IDEMPOTENT_CONTENT);
+        return len;
+    }
+    
     @synchronized(self) {
         _writing++;
     }
@@ -206,14 +215,14 @@
 -(BOOL) hasSpaceAvailable
 {
     @synchronized(self) {
-        return self.open_called && self.shared_state.open && _writing == 0;
+        return /*self.open_called && self.shared_state.open &&*/ !self.closed && _writing == 0;
     }
 }
 
 -(NSStreamStatus) streamStatus
 {
     @synchronized(self) {
-        if(self.open_called && self.shared_state.open && _writing > 0)
+        if(self.open_called && self.shared_state.open && !self.closed && _writing > 0)
             return NSStreamStatusWriting;
     }
     return [super streamStatus];
@@ -245,7 +254,10 @@
         sec_protocol_options_add_tls_application_protocol(options, "xmpp-client");
         sec_protocol_options_set_tls_resumption_enabled(options, 1);
         sec_protocol_options_set_tls_tickets_enabled(options, 1);
-    }, NW_PARAMETERS_DEFAULT_CONFIGURATION);
+    }, ^(nw_protocol_options_t tcp_options) {
+        nw_tcp_options_set_enable_fast_open(tcp_options, YES);      //enable tcp fast open
+        nw_tcp_options_set_no_delay(tcp_options, YES);              //disable nagle's algorithm
+    });
     nw_parameters_set_fast_open_enabled(parameters, YES);
     
     //create and configure connectiojn object

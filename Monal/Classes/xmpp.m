@@ -1856,13 +1856,25 @@ NSString *const kData=@"data";
             else
             {
                 if([parsedStanza check:@"{urn:xmpp:csi:0}csi"])
+                {
+                    DDLogInfo(@"Server supports CSI");
                     self.connectionProperties.supportsClientState = YES;
+                }
                 if([parsedStanza check:@"{urn:xmpp:sm:3}sm"])
+                {
+                    DDLogInfo(@"Server supports SM3");
                     self.connectionProperties.supportsSM3 = YES;
+                }
                 if([parsedStanza check:@"{urn:xmpp:features:rosterver}ver"])
+                {
+                    DDLogInfo(@"Server supports roster versioning");
                     self.connectionProperties.supportsRosterVersion = YES;
+                }
                 if([parsedStanza check:@"{urn:xmpp:features:pre-approval}sub"])
+                {
+                    DDLogInfo(@"Server supports roster pre approval");
                     self.connectionProperties.supportsRosterPreApproval = YES;
+                }
                 
                 MLXMLNode* resumeNode = nil;
                 @synchronized(_stateLockObject) {
@@ -2154,7 +2166,7 @@ NSString *const kData=@"data";
         [[DataLayer sharedInstance] persistState:values forAccount:self.accountNo];
 
         //debug output
-        DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHand	ledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d",
+        DDLogVerbose(@"%@ --> persistState(saved at %@):\n\tlastHand	ledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientState=%d",
             self.accountNo,
             values[@"stateSavedAt"],
             self.lastHandledInboundStanza,
@@ -2168,7 +2180,8 @@ NSString *const kData=@"data";
             self.connectionProperties.supportsHTTPUpload,
             self.connectionProperties.pushEnabled,
             self.connectionProperties.supportsPubSub,
-            self.connectionProperties.supportsBlocking
+            self.connectionProperties.supportsBlocking,
+            self.connectionProperties.supportsClientState
         );
     }
 }
@@ -2354,7 +2367,7 @@ NSString *const kData=@"data";
                 _runningMamQueries = [[dic objectForKey:@"runningMamQueries"] mutableCopy];
             
             //debug output
-            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d",
+            DDLogVerbose(@"%@ --> readState(saved at %@):\n\tlastHandledInboundStanza=%@,\n\tlastHandledOutboundStanza=%@,\n\tlastOutboundStanza=%@,\n\t#unAckedStanzas=%lu%s,\n\tstreamID=%@,\n\tlastInteractionDate=%@\n\tpersistentIqHandlers=%@\n\tsupportsPush=%d\n\tsupportsHttpUpload=%d\n\tpushEnabled=%d\n\tsupportsPubSub=%d\n\tsupportsBlocking=%d\n\tsupportsClientSate=%d",
                 self.accountNo,
                 dic[@"stateSavedAt"],
                 self.lastHandledInboundStanza,
@@ -2368,7 +2381,8 @@ NSString *const kData=@"data";
                 self.connectionProperties.supportsHTTPUpload,
                 self.connectionProperties.pushEnabled,
                 self.connectionProperties.supportsPubSub,
-                self.connectionProperties.supportsBlocking
+                self.connectionProperties.supportsBlocking,
+                self.connectionProperties.supportsClientState
             );
             if(self.unAckedStanzas)
                 for(NSDictionary* dic in self.unAckedStanzas)

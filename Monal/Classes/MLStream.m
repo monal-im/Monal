@@ -319,9 +319,9 @@
 {
     self = [super init];
     self.shared_state = shared;
-    self.open_called = NO;
-    self.closed = NO;
     @synchronized(self.shared_state) {
+        self.open_called = NO;
+        self.closed = NO;
         self.delegate = self;
     }
     return self;
@@ -419,16 +419,18 @@
 
 -(NSStreamStatus) streamStatus
 {
-    if(!self.open_called || self.closed)
-        return NSStreamStatusNotOpen;
-    if(self.open_called)
-        return NSStreamStatusOpening;
-    if(self.open_called && self.shared_state.open)
-        return NSStreamStatusOpen;
-    if(self.closed)
-        return NSStreamStatusClosed;
-    if(self.shared_state.error)
-        return NSStreamStatusError;
+    @synchronized(self.shared_state) {
+        if(!self.open_called || self.closed)
+            return NSStreamStatusNotOpen;
+        if(self.open_called)
+            return NSStreamStatusOpening;
+        if(self.open_called && self.shared_state.open)
+            return NSStreamStatusOpen;
+        if(self.closed)
+            return NSStreamStatusClosed;
+        if(self.shared_state.error)
+            return NSStreamStatusError;
+    }
     unreachable();
     return 0;
 }

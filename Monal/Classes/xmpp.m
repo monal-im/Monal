@@ -464,37 +464,6 @@ NSString *const kData=@"data";
     DDLogVerbose(@"Cleanup of sendQueue finished");
 }
 
--(void) initTLS
-{
-    DDLogInfo(@"configuring/starting tls handshake");
-    NSMutableDictionary* settings = [[NSMutableDictionary alloc] init];
-    [settings setObject:self.connectionProperties.identity.domain forKey:(NSString*)kCFStreamSSLPeerName];
-    
-    //this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
-    DDLogInfo(@"configuring SSL handshake");
-    if(CFWriteStreamSetProperty((__bridge CFWriteStreamRef)self->_oStream, kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings))
-        DDLogInfo(@"Set TLS properties on streams. Security level %@", [self->_oStream propertyForKey:NSStreamSocketSecurityLevelKey]);
-    else
-    {
-        DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
-        DDLogInfo(@"Set TLS properties on streams.security level %@", [self->_oStream propertyForKey:NSStreamSocketSecurityLevelKey]);
-    }
-    
-    //see this for extracting the sslcontext of the cfstream: https://stackoverflow.com/a/26726525/3528174
-    //see this for creating the proper protocols array: https://github.com/LLNL/FRS/blob/master/Pods/AWSIoT/AWSIoT/Internal/AWSIoTMQTTClient.m
-    //WARNING: this will only have an effect if the TLS handshake was not already started (e.g. the TCP socket is not connected) and
-    //         will be ignored otherwise
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    SSLContextRef sslContext = (__bridge SSLContextRef)[_oStream propertyForKey:(__bridge NSString*)kCFStreamPropertySSLContext];
-    CFStringRef strs[1];
-    strs[0] = CFSTR("xmpp-client");
-    CFArrayRef protocols = CFArrayCreate(NULL, (void *)strs, 1, &kCFTypeArrayCallBacks);
-    SSLSetALPNProtocols(sslContext, protocols);
-    CFRelease(protocols);
-#pragma clang diagnostic pop
-}
-
 -(void) createStreams
 {
     DDLogInfo(@"stream creating to server: %@ port: %@ directTLS: %@", self.connectionProperties.server.connectServer, self.connectionProperties.server.connectPort, self.connectionProperties.server.isDirectTLS ? @"YES" : @"NO");
@@ -1933,9 +1902,22 @@ NSString *const kData=@"data";
         }
         else if([parsedStanza check:@"/{urn:ietf:params:xml:ns:xmpp-tls}proceed"])
         {
-            [_iPipe drainInputStream];      //remove all pending data before starting tls handshake
-            [self initTLS];
+            //remove all pending data before starting tls handshake
+            [_iPipe drainInputStream];
+            
+            //this will create an sslContext and, if the underlying TCP socket is already connected, immediately start the ssl handshake
+            DDLogInfo(@"configuring/starting tls handshake");
+            NSMutableDictionary* settings = [[NSMutableDictionary alloc] init];
+            [settings setObject:self.connectionProperties.identity.domain forKey:(NSString*)kCFStreamSSLPeerName];
+            if(CFWriteStreamSetProperty((__bridge CFWriteStreamRef)self->_oStream, kCFStreamPropertySSLSettings, (__bridge CFTypeRef)settings))
+                DDLogInfo(@"Set TLS properties on streams. Security level %@", [self->_oStream propertyForKey:NSStreamSocketSecurityLevelKey]);
+            else
+            {
+                DDLogError(@"not sure.. Could not confirm Set TLS properties on streams.");
+                DDLogInfo(@"Set TLS properties on streams.security level %@", [self->_oStream propertyForKey:NSStreamSocketSecurityLevelKey]);
+            }
             self->_startTLSComplete=YES;
+            
             //stop everything coming after this (we don't want to process stanzas that came in *before* a secure TLS context was established!)
             //if we do not do this we could be prone to mitm attacks injecting xml elements into the stream before it gets encrypted
             //such xml elements would then get processed as received *after* the TLS initialization

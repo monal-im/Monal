@@ -441,6 +441,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     if([response.notification.request.content.categoryIdentifier isEqualToString:@"message"])
     {
         DDLogVerbose(@"notification action triggered for %@", response.notification.request.content.userInfo);
+        [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
         [self connectIfNecessary];
         
         MLContact* fromContact = [[DataLayer sharedInstance] contactForUsername:response.notification.request.content.userInfo[@"fromContactJid"] forAccount:response.notification.request.content.userInfo[@"fromContactAccountId"]];

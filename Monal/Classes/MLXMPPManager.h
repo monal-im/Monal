@@ -147,8 +147,6 @@ Sends a message to a specified contact in account. Calls completion handler on s
  */
 -(void) nowForegrounded;
 
--(void) pingAllAccounts;
-
 /**
  fetch entity software version
  */

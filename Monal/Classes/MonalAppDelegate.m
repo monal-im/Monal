@@ -98,7 +98,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     if(@available(iOS 13.0, *))
         DDLogError(@"Voip push shouldnt arrive on ios13.");
     else
-        [self incomingPushWithCompletionHandler:^(UIBackgroundFetchResult result) {
+        [self incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result) {
             completion();
         }];
 }
@@ -422,7 +422,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) application:(UIApplication*) application didReceiveRemoteNotification:(NSDictionary*) userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
 {
     DDLogVerbose(@"got didReceiveRemoteNotification: %@", userInfo);
-    [self incomingPushWithCompletionHandler:completionHandler];
+    [self incomingWakeupWithCompletionHandler:completionHandler];
 }
 
 - (void)userNotificationCenter:(UNUserNotificationCenter*) center willPresentNotification:(UNNotification*) notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions options)) completionHandler;
@@ -442,7 +442,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     {
         DDLogVerbose(@"notification action triggered for %@", response.notification.request.content.userInfo);
         [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
-        [self connectIfNecessary];
+        //add our completion handler to handler queue
+        [self incomingWakeupWithCompletionHandler:^(UIBackgroundFetchResult result) {
+            completionHandler();
+        }];
         
         MLContact* fromContact = [[DataLayer sharedInstance] contactForUsername:response.notification.request.content.userInfo[@"fromContactJid"] forAccount:response.notification.request.content.userInfo[@"fromContactAccountId"]];
         NSString* messageId = response.notification.request.content.userInfo[@"messageId"];
@@ -457,8 +460,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             if(!textResponse.userText.length)
             {
                 DDLogWarn(@"User tried to send empty text response!");
-                if(completionHandler)
-                    completionHandler();
                 return;
             }
             
@@ -492,8 +493,12 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             [self updateUnread];
         }
     }
-    if(completionHandler)
-        completionHandler();
+    else
+    {
+        //all completion handler directly (we did not handle anything and no connectIfNecessary was called)
+        if(completionHandler)
+            completionHandler();
+    }
 }
 
 
@@ -506,7 +511,28 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 #pragma mark - backgrounding
 
-- (void) applicationWillEnterForeground:(UIApplication *)application
+-(void) startBackgroundTimer
+{
+    //cancel old background timer if still running and start a new one
+    //this timer will fire after 20 seconds in background and disconnect gracefully (e.g. when fully idle the next time)
+    if(_backgroundTimer)
+        _backgroundTimer();
+    _backgroundTimer = createTimer(20.0, ^{
+        //mark timer as *not* running
+        _backgroundTimer = nil;
+        //retry background check (now handling idle state because no running background timer is blocking it)
+        [self checkIfBackgroundTaskIsStillNeeded];
+    });
+}
+
+-(void) stopBackgroundTimer
+{
+    if(_backgroundTimer)
+        _backgroundTimer();
+    _backgroundTimer = nil;
+}
+
+-(void) applicationWillEnterForeground:(UIApplication *)application
 {
     DDLogInfo(@"Entering FG");
     [[IPC sharedInstance] sendMessage:@"Monal.disconnectAll" withData:nil to:@"NotificationServiceExtension"];
@@ -524,9 +550,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:self userInfo:nil];
     
     //cancel already running background timer, we are now foregrounded again
-    if(_backgroundTimer)
-        _backgroundTimer();
-    _backgroundTimer = nil;
+    [self stopBackgroundTimer];
     
     [self addBackgroundTask];
     [[MLXMPPManager sharedInstance] nowForegrounded];
@@ -560,17 +584,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [self addBackgroundTask];
     [[MLXMPPManager sharedInstance] nowBackgrounded];
     
-    //cancel old background timer if still running and start a new one
-    //this timer will fire after 20 seconds in background and disconnect gracefully (e.g. when fully idle the next time)
-    if(_backgroundTimer)
-        _backgroundTimer();
-    _backgroundTimer = createTimer(20.0, ^{
-        //mark timer as *not* running
-        _backgroundTimer = nil;
-        //retry background check (now handling idle state because no running background timer is blocking it)
-        [self checkIfBackgroundTaskIsStillNeeded];
-    });
-    
+    [self startBackgroundTimer];
     [self checkIfBackgroundTaskIsStillNeeded];
 }
 
@@ -866,26 +880,27 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [[MLXMPPManager sharedInstance] connectIfNecessary];
 }
 
--(void) incomingPushWithCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
+-(void) incomingWakeupWithCompletionHandler:(void (^)(UIBackgroundFetchResult result)) completionHandler
 {
     if(![HelperTools isInBackground])
     {
-        DDLogError(@"Ignoring incomingPushWithCompletionHandler: because app is in FG!");
+        DDLogError(@"Ignoring incomingWakeupWithCompletionHandler: because app is in FG!");
         completionHandler(UIBackgroundFetchResultNoData);
         return;
     }
     
-    DDLogInfo(@"got incomingPushWithCompletionHandler");
+    NSString* completionId = [[NSUUID UUID] UUIDString];
+    DDLogInfo(@"got incomingWakeupWithCompletionHandler with ID %@", completionId);
     
-    // should any accounts reconnect?
-    [[MLXMPPManager sharedInstance] pingAllAccounts];
+    //don't use self connectIfNecessary] because we already have a background task here
+    //that gets stopped once we call the completionHandler
+    [[MLXMPPManager sharedInstance] connectIfNecessary];
     
     //register push completion handler and associated timer
-    NSString* completionId = [[NSUUID UUID] UUIDString];
     _pushCompletions[completionId] = @{
         @"handler": completionHandler,
         @"timer": createTimer(28.0, (^{
-            DDLogWarn(@"### Push timer triggered!! ###");
+            DDLogWarn(@"### Wakeup timer triggered for ID %@ ###", completionId);
             [_pushCompletions removeObjectForKey:completionId];
             completionHandler(UIBackgroundFetchResultFailed);
         }))

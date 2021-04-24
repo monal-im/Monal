@@ -335,16 +335,6 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 
 #pragma mark - Connection related
 
--(void) pingAllAccounts
-{
-    for(xmpp* xmppAccount in [self connectedXMPP])
-    {
-        [xmppAccount unfreezed];
-        if(_hasConnectivity)
-            [xmppAccount sendPing:SHORT_PING];     //short ping timeout to quickly check if connectivity is still okay
-    }
-}
-
 -(void) rejectContact:(MLContact*) contact
 {
     xmpp* account = [self getConnectedAccountForID:contact.accountId];

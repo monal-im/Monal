@@ -48,6 +48,7 @@
     BOOL _isTyping;
     monal_void_block_t _cancelTypingNotification;
     monal_void_block_t _cancelLastInteractionTimer;
+    NSMutableDictionary<NSString*, MLContact*>* _localMLContactCache;
 }
 
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
@@ -130,6 +131,8 @@ enum msgSentState {
     self.showGeoLocationsInline = [[HelperTools defaultsDB] boolForKey: @"ShowGeoLocation"];
     self.sendLastChatState = [[HelperTools defaultsDB] boolForKey: @"SendLastChatState"];
     self.previewedIds = [[NSMutableSet alloc] init];
+    
+    _localMLContactCache = [[NSMutableDictionary<NSString*, MLContact*> alloc] init];
 }
 
 -(void) setupWithContact:(MLContact*) contact
@@ -420,6 +423,9 @@ enum msgSentState {
 }
 
 -(void) handleForeGround {
+    @synchronized(_localMLContactCache) {
+        [_localMLContactCache removeAllObjects];
+    }
     [self refreshData];
     [self reloadTable];
 }
@@ -445,6 +451,9 @@ enum msgSentState {
 
 -(void) refreshContact:(NSNotification*) notification
 {
+    @synchronized(_localMLContactCache) {
+        [_localMLContactCache removeAllObjects];
+    }
     MLContact* contact = [notification.userInfo objectForKey:@"contact"];
     if(self.contact && [self.contact.contactJid isEqualToString:contact.contactJid] && [self.contact.accountId isEqual:contact.accountId])
         [self updateUIElements];
@@ -1894,7 +1903,16 @@ enum msgSentState {
         cell = toreturn;
     }
     // Only display names for groups
-    cell.name.text = self.contact.isGroup ? row.actualFrom : @"";
+    if(self.contact.isGroup)
+    {
+        if([@"group" isEqualToString:self.contact.mucType] && row.participantJid)
+        {
+            MLContact* groupContact = [self getMLContactForJid:row.participantJid andAccount:row.accountId];
+            cell.name.text = [groupContact contactDisplayName];
+        }
+        else
+            cell.name.text = row.actualFrom;
+    }
     cell.name.hidden = !self.contact.isGroup;
 
     MLMessage* priorRow = nil;
@@ -1954,6 +1972,16 @@ enum msgSentState {
     }
     
     return cell;
+}
+
+-(MLContact*) getMLContactForJid:(NSString*) jid andAccount:(NSString*) accountNo
+{
+    NSString* cacheKey = [NSString stringWithFormat:@"%@|%@", jid, accountNo];
+    @synchronized(_localMLContactCache) {
+        if(_localMLContactCache[cacheKey])
+            return _localMLContactCache[cacheKey];
+        return _localMLContactCache[cacheKey] = [[DataLayer sharedInstance] contactForUsername:jid forAccount:accountNo];
+    }
 }
 
 #pragma mark - tableview delegate

@@ -2760,6 +2760,7 @@ NSString *const kData=@"data";
                                                 forAccount:self.accountNo
                                                   withBody:msg.messageText
                                               actuallyfrom:msg.actualFrom
+                                            participantJid:msg.participantJid
                                                       sent:YES              //old history messages have always been sent (they are coming from the server)
                                                     unread:NO               //old history messages have always been read (we don't want to show them as new)
                                                  messageId:msg.messageId

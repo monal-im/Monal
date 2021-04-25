@@ -186,7 +186,7 @@ static NSMutableSet* _currentlyTransfering;
                 
                 //decrypt data with given key and iv
                 NSData* encryptedData = [NSData dataWithContentsOfURL:location];
-                if(encryptedData && encryptedData.length > 0 && key && iv)
+                if(encryptedData && encryptedData.length > 0 && key && key.length == 32 && iv && iv.length == 12)
                 {
                     NSData* decryptedData = [AESGcm decrypt:encryptedData withKey:key andIv:iv withAuth:nil];
                     [decryptedData writeToFile:cacheFile options:NSDataWritingAtomic error:&error];
@@ -198,6 +198,13 @@ static NSMutableSet* _currentlyTransfering;
                         return;
                     }
                     [HelperTools configureFileProtectionFor:cacheFile];
+                }
+                else
+                {
+                    DDLogError(@"Failed to decrypt file (iv, key, data length checks failed)");
+                    [self setErrorType:NSLocalizedString(@"Download error", @"") andErrorText:NSLocalizedString(@"Failed to decrypt filetransfer", @"") forMessageId:msg.messageId];
+                    [self markAsComplete:historyId];
+                    return;
                 }
             }
             else        //cleartext filetransfer

@@ -1015,7 +1015,7 @@ static NSDateFormatter* dbFormatter;
 -(void) removeMember:(NSDictionary*) member fromMuc:(NSString*) room forAccountId:(NSString*) accountNo
 {
     if(!member || !member[@"jid"] || !room || !accountNo)
-	        return;
+        return;
     
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=? AND member_jid=?;" andArguments:@[accountNo, room, member[@"jid"]]];
@@ -1024,6 +1024,8 @@ static NSDateFormatter* dbFormatter;
 
 -(NSArray<NSDictionary<NSString*, id>*>*) getMembersAndParticipantsOfMuc:(NSString*) room forAccountId:(NSString*) accountNo
 {
+    if(!room || !accountNo)
+        return [[NSMutableArray<NSDictionary<NSString*, id>*> alloc] init];
     return [self.db idReadTransaction:^{
         NSMutableArray<NSDictionary<NSString*, id>*>* toReturn = [[NSMutableArray<NSDictionary<NSString*, id>*> alloc] init];
         
@@ -1187,7 +1189,7 @@ static NSDateFormatter* dbFormatter;
     return result[0];
 }
 
--(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted backwards:(BOOL) backwards displayMarkerWanted:(BOOL) displayMarkerWanted
+-(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom participantJid:(NSString*) participantJid sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted backwards:(BOOL) backwards displayMarkerWanted:(BOOL) displayMarkerWanted
 {
     if(!buddyName || !message)
         return nil;
@@ -1226,14 +1228,14 @@ static NSDateFormatter* dbFormatter;
             {
                 NSNumber* nextHisoryId = [NSNumber numberWithInt:[(NSNumber*)[self.db executeScalar:@"SELECT MIN(message_history_id) FROM message_history;"] intValue] - 1];
                 DDLogVerbose(@"Inserting backwards with history id %@", nextHisoryId);
-                query = @"insert into message_history (message_history_id, account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-                params = @[nextHisoryId, accountNo, buddyName, [NSNumber numberWithBool:inbound], dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@""];
+                query = @"insert into message_history (message_history_id, account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid, participant_jid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                params = @[nextHisoryId, accountNo, buddyName, [NSNumber numberWithBool:inbound], dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@"", participantJid != nil ? participantJid : [NSNull null]];
             }
             else
             {
                 //we use autoincrement here instead of MAX(message_history_id) + 1 to be a little bit faster (but at the cost of "duplicated code")
-                query = @"insert into message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-                params = @[accountNo, buddyName, [NSNumber numberWithBool:inbound], dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@""];
+                query = @"insert into message_history (account_id, buddy_name, inbound, timestamp, message, actual_from, unread, sent, displayMarkerWanted, messageid, messageType, encrypted, stanzaid, participant_jid) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                params = @[accountNo, buddyName, [NSNumber numberWithBool:inbound], dateString, message, actualfrom, [NSNumber numberWithBool:unread], [NSNumber numberWithBool:sent], [NSNumber numberWithBool:displayMarkerWanted], messageid?messageid:@"", messageType, [NSNumber numberWithBool:encrypted], stanzaid?stanzaid:@"", participantJid != nil ? participantJid : [NSNull null]];
             }
             DDLogVerbose(@"%@ params:%@", query, params);
             BOOL success = [self.db executeNonQuery:query andArguments:params];
@@ -2686,7 +2688,7 @@ static NSDateFormatter* dbFormatter;
                 FOREIGN KEY('account_id', 'room') REFERENCES 'buddylist'('account_id', 'buddy_name') ON DELETE CASCADE \
             );"];
         }];
-
+        
         // Migrate muteList to new format and delete old table
         [self updateDBTo:5.016 withBlock:^{
             [self.db executeNonQuery:@"UPDATE buddylist SET muted=1 \
@@ -2695,12 +2697,17 @@ static NSDateFormatter* dbFormatter;
              );"];
             [self.db executeNonQuery:@"DROP TABLE muteList;"];
         }];
+        
         // Delete all muc's
         [self updateDBTo:5.017 withBlock:^{
             [self.db executeNonQuery:@"DELETE FROM buddylist WHERE Muc=1;"];
             [self.db executeNonQuery:@"DELETE FROM muc_participants;"];
             [self.db executeNonQuery:@"DELETE FROM muc_members;"];
             [self.db executeNonQuery:@"DELETE FROM muc_favorites;"];
+        }];
+        
+        [self updateDBTo:5.018 withBlock:^{
+            [self.db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN participant_jid TEXT DEFAULT NULL"];
         }];
     }];
     [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];

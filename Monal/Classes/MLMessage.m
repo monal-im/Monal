@@ -28,6 +28,7 @@
         message.timestamp = [formatter dateFromString:[dic objectForKey:@"thetime"]]; 
     message.messageType = [dic objectForKey:@"messageType"];
     message.mucType = [dic objectForKey:@"muc_type"];
+    message.participantJid = [dic objectForKey:@"participant_jid"];
     
     message.hasBeenDisplayed = [(NSNumber*)[dic objectForKey:@"displayed"] boolValue];
     message.hasBeenReceived = [(NSNumber*)[dic objectForKey:@"received"] boolValue];
@@ -56,11 +57,14 @@
     self.inbound = msg.inbound;
     self.actualFrom = msg.actualFrom;
     self.messageText = msg.messageText;
+    self.isMuc = msg.isMuc;
     self.messageId = msg.messageId;
     self.stanzaId = msg.stanzaId;
     self.messageDBId = msg.messageDBId;
     self.timestamp = msg.timestamp;
     self.messageType = msg.messageType;
+    self.mucType = msg.mucType;
+    self.participantJid = msg.participantJid;
     self.hasBeenDisplayed = msg.hasBeenDisplayed;
     self.hasBeenReceived = msg.hasBeenReceived;
     self.hasBeenSent = msg.hasBeenSent;

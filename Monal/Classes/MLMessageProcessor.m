@@ -158,10 +158,12 @@ static NSMutableDictionary* _typingNotifications;
     NSString* buddyName = [messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser;
     NSString* ownNick;
     NSString* actualFrom = messageNode.fromUser;
+    NSString* participantJid = nil;
     if([messageNode check:@"/<type=groupchat>"] && messageNode.fromResource)
     {
         ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser forAccount:account.accountNo];
         actualFrom = messageNode.fromResource;
+        participantJid = [messageNode findFirst:@"/<type=groupchat>/{http://jabber.org/protocol/muc#user}x/item@jid"];
     }
     
     //inbound value for 1:1 chats
@@ -284,6 +286,7 @@ static NSMutableDictionary* _typingNotifications;
                                         forAccount:account.accountNo
                                           withBody:[body copy]
                                       actuallyfrom:actualFrom
+                                    participantJid:participantJid
                                               sent:YES
                                             unread:unread
                                          messageId:messageId

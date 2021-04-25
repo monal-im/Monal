@@ -54,6 +54,7 @@ The of the message in the DB , should be int
 
 @property (nonatomic, copy) NSString* messageType;
 @property (nonatomic, copy) NSString* mucType;
+@property (nonatomic, copy) NSString* participantJid;
 
 @property (nonatomic, copy) NSString* filetransferMimeType;
 @property (nonatomic, copy) NSNumber* filetransferSize;

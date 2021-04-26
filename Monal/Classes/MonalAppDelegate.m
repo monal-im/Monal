@@ -35,7 +35,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 @interface MonalAppDelegate()
 {
-    NSMutableDictionary* _pushCompletions;
+    NSMutableDictionary* _wakeupCompletions;
     UIBackgroundTaskIdentifier _bgTask;
     API_AVAILABLE(ios(13.0)) BGTask* _bgFetch;
     monal_void_block_t _backgroundTimer;
@@ -711,14 +711,14 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         DDLogInfo(@"### ALL ACCOUNTS IDLE AND FILETRANSFERS COMPLETE NOW ###");
         [HelperTools updateSyncErrorsWithDeleteOnly:YES];
         
-        if(_backgroundTimer)
-        {
-            DDLogInfo(@"### ignoring idle state because background timer is still running ###");
-            return;
-        }
-        
         //use a synchronized block to disconnect only once
         @synchronized(self) {
+            if(_backgroundTimer || [_wakeupCompletions count])
+            {
+                DDLogInfo(@"### ignoring idle state because background timer or piush completion times are still running ###");
+                return;
+            }
+            
             DDLogInfo(@"### checking if background is still needed ###");
             BOOL background = [HelperTools isInBackground];
             if(background)
@@ -748,19 +748,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                         DDLogDebug(@"no background tasks running, nothing to stop");
                     [DDLog flushLog];
                 } onQueue:dispatch_get_main_queue()];
-            }
-            if([_pushCompletions count])
-            {
-                //we don't need to call disconnectAll if we are in background here, because we already did this in the if above (don't reorder these 2 ifs!)
-                DDLogInfo(@"### All accounts idle, calling push completion handlers ###");
-                [DDLog flushLog];
-                for(NSString* completionId in _pushCompletions)
-                {
-                    //cancel running timer and push completion handler
-                    ((monal_void_block_t)_pushCompletions[completionId][@"timer"])();
-                    ((pushCompletion)_pushCompletions[completionId][@"handler"])(UIBackgroundFetchResultNewData);
-                    [_pushCompletions removeObjectForKey:completionId];
-                }
             }
         }
     }
@@ -915,12 +902,25 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     
     //register push completion handler and associated timer
-    _pushCompletions[completionId] = @{
+    _wakeupCompletions[completionId] = @{
         @"handler": completionHandler,
         @"timer": createTimer(28.0, (^{
             DDLogWarn(@"### Wakeup timer triggered for ID %@ ###", completionId);
-            [_pushCompletions removeObjectForKey:completionId];
-            completionHandler(UIBackgroundFetchResultFailed);
+            [HelperTools dispatchSyncReentrant:^{
+                @synchronized(self) {
+                    if([_wakeupCompletions objectForKey:completionId] != nil)
+                    {
+                        //remove this handler from list
+                        [_wakeupCompletions removeObjectForKey:completionId];
+                        
+                        //retry background check (now handling idle state because no running background timer is blocking it)
+                        [self checkIfBackgroundTaskIsStillNeeded];
+                        
+                        //call completion (should be done *after* the idle state check because it could freeze the app)
+                        completionHandler(UIBackgroundFetchResultFailed);
+                    }
+                }
+            } onQueue:dispatch_get_main_queue()];
         }))
     };
 }

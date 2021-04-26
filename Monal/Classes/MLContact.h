@@ -28,6 +28,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 +(MLContact*) contactFromDictionary:(NSDictionary*) dic;
 +(MLContact*) contactFromDictionary:(NSDictionary*) dic withDateFormatter:(NSDateFormatter*) formatter;
+-(BOOL) isSubscribed;
 
 
 /**

@@ -7,6 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "HelperTools.h"
+#import "MLImageManager.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

@@ -216,7 +216,14 @@ struct XMPPLoginQRCode : Codable
     {
         if(loginData.usedProtocol == "xmpp")
         {
-            self.loginDelegate?.MLQRCodeAccountLoginScanned(jid: loginData.address, password: loginData.password)
+            if(self.loginDelegate != nil)
+            {
+                self.loginDelegate?.MLQRCodeAccountLoginScanned(jid: loginData.address, password: loginData.password)
+            }
+            else
+            {
+                errorMsg(title: NSLocalizedString("Wrong menu", comment: "QR-Code-Scanner: account scan wrong menu"), msg: NSLocalizedString("The qrcode contains login credentials for a acount. Go to settings and rescan the qrcode", comment: "QR-Code-Scanner: account scan wrong menu"), startCaptureOnClose: true)
+            }
         }
     }
 
@@ -264,8 +271,16 @@ struct XMPPLoginQRCode : Codable
                         }
                     }
                     // call handler
-                    self.contactDelegate?.MLQRCodeContactScanned(jid: parsedJid, fingerprints: omemoFingerprints)
-                    return
+                    if(self.contactDelegate != nil)
+                    {
+                        self.contactDelegate?.MLQRCodeContactScanned(jid: parsedJid, fingerprints: omemoFingerprints)
+                        return
+                    }
+                    else
+                    {
+                        errorMsg(title: NSLocalizedString("Wrong menu", comment: "QR-Code-Scanner: jid scan wrong menu"), msg: NSLocalizedString("The qrcode contains a jid. Rescan the qrcode in the add user menu", comment: "QR-Code-Scanner: jid scan wrong menu"), startCaptureOnClose: true)
+                        return
+                    }
                 }
             }
         }

@@ -92,7 +92,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     [self upgradeObjectUserSettingsIfUnset:@"udpLoggerPort" toDefault:@""];
 
     // upgrade ASCII wallpaper name
-    if([[[HelperTools defaultsDB] stringForKey:@"BackgroundImage"] isEqualToString:@"Tie_My_Boat_by_Ray_García"]) {
+    if([[[HelperTools defaultsDB] stringForKey:@"BackgroundImage"] isEqualToString:@"Tie_My_Boat_by_Ray_García"] || [[HelperTools defaultsDB] stringForKey:@"BackgroundImage"] == nil) {
         [[HelperTools defaultsDB] setObject:@"Tie_My_Boat_by_Ray_Garcia" forKey:@"BackgroundImage"];
     }
 

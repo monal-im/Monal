@@ -719,7 +719,7 @@ void logException(NSException* exception)
     return qrCode.outputImage;
 }
 
-+(NSString*)appBuildVersionInfo
++(NSString*) appBuildVersionInfo
 {
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     #if IS_ALPHA
@@ -727,7 +727,6 @@ void logException(NSException* exception)
     #else
         NSString* versionTxt = [NSString stringWithFormat:@"%@ (%@)", [infoDict objectForKey:@"CFBundleShortVersionString"], [infoDict objectForKey:@"CFBundleVersion"]];
     #endif
-    
     return  versionTxt;
 }
 

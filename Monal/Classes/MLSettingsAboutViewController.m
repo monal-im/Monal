@@ -10,25 +10,26 @@
 #import "HelperTools.h"
 
 @interface MLSettingsAboutViewController ()
-@property (weak, nonatomic) IBOutlet UITextView *aboutVersion;
+@property (weak, nonatomic) IBOutlet UITextView* aboutVersion;
 
 @end
 
 @implementation MLSettingsAboutViewController
 
-- (void)viewDidLoad {
+- (void) viewDidLoad
+{
     [super viewDidLoad];
 
     NSString* versionTxt = [HelperTools appBuildVersionInfo];
     [self.aboutVersion setText:versionTxt];
-    
-    UITapGestureRecognizer* tapReCognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(copyTxt:)];
-    [self.aboutVersion addGestureRecognizer:tapReCognizer];
-    UIBarButtonItem* rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemClose target:self action:@selector(close:)];
-    self.navigationItem.rightBarButtonItem = rightBarButtonItem;
+
+    if (@available(iOS 13.0, *)) {
+        UIBarButtonItem* rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemClose target:self action:@selector(close:)];
+        self.navigationItem.rightBarButtonItem = rightBarButtonItem;
+    }
 }
 
-- (NSArray<UIKeyCommand *>*)keyCommands 
+- (NSArray<UIKeyCommand*>*) keyCommands
 {
     return @[
         [UIKeyCommand keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(close:)]
@@ -40,9 +41,9 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
--(void) copyTxt:(id)sender
+-(IBAction) copyTxt:(id)sender
 {
-    UIPasteboard *pasteBoard = UIPasteboard.generalPasteboard;
+    UIPasteboard* pasteBoard = UIPasteboard.generalPasteboard;
     pasteBoard.string = self.aboutVersion.text;
 }
 

@@ -1901,18 +1901,23 @@ enum msgSentState {
         cell = toreturn;
     }
     // Only display names for groups
+    BOOL hideName = YES;
     if(self.contact.isGroup)
     {
         if([@"group" isEqualToString:self.contact.mucType] && row.participantJid)
         {
+            hideName = (indexPath.row >= 1
+                         && [self.messageList[indexPath.row - 1].participantJid isEqualToString:row.participantJid]);
             MLContact* groupContact = [self getMLContactForJid:row.participantJid andAccount:row.accountId];
-            cell.name.text = [groupContact contactDisplayName];
+            cell.name.text = hideName == YES ? nil : [groupContact contactDisplayName];
         }
-        else
-            cell.name.text = row.actualFrom;
+        else {
+            hideName = (indexPath.row >= 1
+                             && [self.messageList[indexPath.row - 1].actualFrom isEqualToString:row.actualFrom]);
+            cell.name.text = hideName == YES ? nil : row.actualFrom;
+        }
     }
-    cell.name.hidden = !self.contact.isGroup;
-
+    cell.name.hidden = hideName;
     MLMessage* priorRow = nil;
     if(indexPath.row > 0)
     {

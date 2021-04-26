@@ -251,7 +251,7 @@ enum ContactDetailsAboutRows {
                 thecell.textLabel.text = NSLocalizedString(@"Leave Conversation", @"");
             else
             {
-                if([self.contact isSubscripted] == YES)
+                if([self.contact isSubscribed] == YES)
                     thecell.textLabel.text = NSLocalizedString(@"Remove Contact", @"");
                 else
                     thecell.textLabel.text = NSLocalizedString(@"Add Contact", @"");
@@ -334,7 +334,7 @@ enum ContactDetailsAboutRows {
                 if(self.contact.isGroup) {
                     [self removeContact]; // works for muc too
                 } else  {
-                    if([self.contact isSubscripted] == YES)
+                    if([self.contact isSubscribed] == YES)
                     {
                         [self removeContact];
                     }  else  {

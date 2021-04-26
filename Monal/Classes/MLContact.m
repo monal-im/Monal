@@ -171,4 +171,10 @@ NSString *const kAskSubscribe=@"subscribe";
     self.lastMessageTime = contact.lastMessageTime;
 }
 
+-(BOOL) isSubscribed
+{
+    return [self.subscription isEqualToString:kSubBoth]
+        || [self.subscription isEqualToString:kSubFrom];
+}
+
 @end

@@ -309,22 +309,15 @@
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="mSj-cI-xo2">
                                 <rect key="frame" x="-20" y="29" width="1064" height="1308"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </imageView>
-                            <view alpha="0.25" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kLJ-ds-UJ6">
-                                <rect key="frame" x="-20" y="29" width="1064" height="1337"/>
-                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="hDP-Qt-VUN"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="hDP-Qt-VUN" firstAttribute="trailing" secondItem="kLJ-ds-UJ6" secondAttribute="trailing" constant="-20" id="7zd-0p-M1A"/>
                             <constraint firstItem="mSj-cI-xo2" firstAttribute="leading" secondItem="hDP-Qt-VUN" secondAttribute="leading" constant="-20" id="DbE-MV-Gco"/>
                             <constraint firstItem="mSj-cI-xo2" firstAttribute="top" secondItem="Kkf-cA-1XK" secondAttribute="top" constant="29" id="LN0-ep-dyg"/>
                             <constraint firstItem="hDP-Qt-VUN" firstAttribute="trailing" secondItem="mSj-cI-xo2" secondAttribute="trailing" constant="-20" id="SZl-rm-jau"/>
-                            <constraint firstItem="kLJ-ds-UJ6" firstAttribute="leading" secondItem="hDP-Qt-VUN" secondAttribute="leading" constant="-20" id="ViH-se-FWs"/>
-                            <constraint firstAttribute="bottom" secondItem="kLJ-ds-UJ6" secondAttribute="bottom" id="VqY-QK-6ML"/>
-                            <constraint firstItem="kLJ-ds-UJ6" firstAttribute="top" secondItem="Kkf-cA-1XK" secondAttribute="top" constant="29" id="tLa-QD-UL5"/>
                             <constraint firstAttribute="bottom" secondItem="mSj-cI-xo2" secondAttribute="bottom" constant="29" id="tMp-Od-ics"/>
                         </constraints>
                     </view>

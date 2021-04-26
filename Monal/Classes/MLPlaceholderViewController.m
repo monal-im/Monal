@@ -47,7 +47,6 @@
     
     if(backgrounds == YES)
     {
-        self.backgroundImageView.hidden = NO;
         NSString* imageName = [[HelperTools defaultsDB] objectForKey:@"BackgroundImage"];
         if(imageName != nil)
         {
@@ -62,12 +61,12 @@
         }
         else
         {
-            self.backgroundImageView.hidden = YES;
+            self.backgroundImageView.image = nil;
         }
     }
     else
     {
-        self.backgroundImageView.hidden = YES;
+        self.backgroundImageView.image = nil;
     }
 }
 

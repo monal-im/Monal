@@ -16,7 +16,8 @@
 
 @implementation MLPlaceholderViewController
 
-- (void)viewDidLoad {
+- (void) viewDidLoad
+{
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
@@ -25,7 +26,8 @@
 }
 
 
--(void) viewWillAppear:(BOOL)animated {
+-(void) viewWillAppear:(BOOL)animated
+{
     [super viewWillAppear:animated];
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
     
@@ -43,11 +45,11 @@
 {
     BOOL backgrounds = [[HelperTools defaultsDB] boolForKey:@"ChatBackgrounds"];
     
-    if(backgrounds)
+    if(backgrounds == YES)
     {
         self.backgroundImageView.hidden = NO;
         NSString* imageName = [[HelperTools defaultsDB] objectForKey:@"BackgroundImage"];
-        if(imageName)
+        if(imageName != nil)
         {
             if([imageName isEqualToString:@"CUSTOM"])
             {

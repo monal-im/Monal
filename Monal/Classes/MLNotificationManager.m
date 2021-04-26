@@ -106,8 +106,14 @@
         return;
     
     DDLogVerbose(@"notification manager should show notification for: %@", message.messageText);
-    BOOL muted = [[DataLayer sharedInstance] isMutedJid:message.actualFrom onAccount:message.accountId];
-    if(!muted && showAlert)
+    BOOL muted = [[DataLayer sharedInstance] isMutedJid:message.buddyName onAccount:message.accountId];
+    if(message.isMuc == YES)
+    {
+        if(message.participantJid != nil) {
+            muted |= [[DataLayer sharedInstance] isMutedJid:message.participantJid onAccount:message.accountId];
+        }
+    }
+    if(muted == NO && showAlert == YES)
     {
         if([HelperTools isNotInFocus])
         {

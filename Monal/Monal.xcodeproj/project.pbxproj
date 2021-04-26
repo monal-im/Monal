@@ -286,6 +286,7 @@
 		E89DD32625C6626400925F62 /* MLFileTransferVideoCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32125C6626300925F62 /* MLFileTransferVideoCell.m */; };
 		E89DD32725C6626400925F62 /* MLFileTransferFileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32225C6626300925F62 /* MLFileTransferFileViewController.m */; };
 		E89DD32825C6626400925F62 /* MLFileTransferTextCell.m in Sources */ = {isa = PBXBuildFile; fileRef = E89DD32425C6626400925F62 /* MLFileTransferTextCell.m */; };
+		E8CF9CC726249640001A1952 /* MLSettingsAboutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E8CF9CC026249640001A1952 /* MLSettingsAboutViewController.m */; };
 		E8DED06225388BE8003167FF /* MLSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E8DED06125388BE8003167FF /* MLSearchViewController.m */; };
 /* End PBXBuildFile section */
 
@@ -983,6 +984,8 @@
 		E89DD32225C6626300925F62 /* MLFileTransferFileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLFileTransferFileViewController.m; sourceTree = "<group>"; };
 		E89DD32325C6626400925F62 /* MLFileTransferTextCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLFileTransferTextCell.h; sourceTree = "<group>"; };
 		E89DD32425C6626400925F62 /* MLFileTransferTextCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLFileTransferTextCell.m; sourceTree = "<group>"; };
+		E8CF9CBF26249640001A1952 /* MLSettingsAboutViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSettingsAboutViewController.h; sourceTree = "<group>"; };
+		E8CF9CC026249640001A1952 /* MLSettingsAboutViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSettingsAboutViewController.m; sourceTree = "<group>"; };
 		E8DED05F25388BE8003167FF /* MLSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLSearchViewController.h; sourceTree = "<group>"; };
 		E8DED06125388BE8003167FF /* MLSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLSearchViewController.m; sourceTree = "<group>"; };
 		EF5FE59D4A5076BE0A48DDE4 /* Pods-jrtplib-static.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-jrtplib-static.debug.xcconfig"; path = "Target Support Files/Pods-jrtplib-static/Pods-jrtplib-static.debug.xcconfig"; sourceTree = "<group>"; };
@@ -1284,6 +1287,8 @@
 				C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */,
 				384E4EA525F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.h */,
 				384E4EA625F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.m */,
+				E8CF9CBF26249640001A1952 /* MLSettingsAboutViewController.h */,
+				E8CF9CC026249640001A1952 /* MLSettingsAboutViewController.m */,
 			);
 			name = Settings;
 			sourceTree = "<group>";
@@ -2627,6 +2632,7 @@
 				261A628E176C15AD00059090 /* ChatLogsViewController.m in Sources */,
 				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
 				2673CAC321D9244B00256507 /* MLResourcesTableViewController.m in Sources */,
+				E8CF9CC726249640001A1952 /* MLSettingsAboutViewController.m in Sources */,
 				264DCF9C23E11483004105CE /* MLNewViewController.m in Sources */,
 				C10490492612ED2F0054AC9E /* MLEmoji.swift in Sources */,
 				268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */,

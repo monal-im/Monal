@@ -473,7 +473,7 @@
                 else
                 {
                     // allow entering jid on account creation
-                    [thecell initCell:NSLocalizedString(@"XMPP ID", @"") withTextField:nil andPlaceholder:NSLocalizedString(@"Enter your XMPP ID here", @"") andTag:2];
+                    [thecell initCell:NSLocalizedString(@"XMPP ID", @"") withTextField:self.jid andPlaceholder:NSLocalizedString(@"Enter your XMPP ID here", @"") andTag:2];
                     thecell.textInputField.keyboardType = UIKeyboardTypeEmailAddress;
                 }
                 break;

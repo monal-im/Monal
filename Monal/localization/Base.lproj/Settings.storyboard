@@ -181,12 +181,16 @@
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="XdN-jW-LyI">
                                 <rect key="frame" x="20" y="282" width="374" height="65"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <gestureRecognizers/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="65" id="gQc-Oi-4y1"/>
                                 </constraints>
                                 <color key="textColor" systemColor="labelColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="eG1-ub-3KC" appends="YES" id="IOr-P2-wDK"/>
+                                </connections>
                             </textView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -204,6 +208,11 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="pN1-GD-F9F" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="eG1-ub-3KC">
+                    <connections>
+                        <action selector="copyTxt:" destination="dQo-BQ-ha4" id="A5R-q6-6Qn"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="155.07246376811597" y="6701.7857142857138"/>
         </scene>

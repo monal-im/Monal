@@ -108,7 +108,7 @@
         @"fileName": logMessage.fileName,
         @"function": logMessage.function,
         @"line": [NSNumber numberWithInteger:logMessage.line],
-        @"tag": logMessage.tag ? logMessage.tag : [NSNull null],
+        @"tag": logMessage.representedObject ? logMessage.representedObject : [NSNull null],
         @"options": [NSNumber numberWithInteger:logMessage.options],
         @"timestamp": [[[NSISO8601DateFormatter alloc] init] stringFromDate:logMessage.timestamp],
         @"threadID": logMessage.threadID,

@@ -40,6 +40,13 @@
                        ];
 }
 
+-(void) viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+
+    [self sendBackgroundChangeNotification];
+}
+
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
@@ -176,10 +183,15 @@
     [self presentViewController:nav animated:YES completion:nil];
 }
 
--(void) close {
-    [[HelperTools defaultsDB] setObject:[self.imageList objectAtIndex:self.displayedPhotoIndex] forKey:@"BackgroundImage"];
+-(void) sendBackgroundChangeNotification
+{
     //don't queue this notification because it should be handled immediately
     [[NSNotificationCenter defaultCenter] postNotificationName:kMonalBackgroundChanged object:nil userInfo:nil];
+}
+
+-(void) close {
+    [[HelperTools defaultsDB] setObject:[self.imageList objectAtIndex:self.displayedPhotoIndex] forKey:@"BackgroundImage"];
+    [self sendBackgroundChangeNotification];
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 

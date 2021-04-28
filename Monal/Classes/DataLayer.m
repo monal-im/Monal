@@ -498,7 +498,6 @@ static NSDateFormatter* dbFormatter;
                 @"state": @"offline",
                 @"count": @0,
                 @"isActiveChat": @NO,
-                @"count": [self countUserUnreadMessages:username forAccount:accountNo],
             }];
         }
         else

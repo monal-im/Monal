@@ -1839,17 +1839,9 @@ static NSDateFormatter* dbFormatter;
     // checking db version and upgrading if necessary
     DDLogInfo(@"Database version check");
     
-    NSNumber* dbversionWithoutTransaction = [self.db idReadTransaction:^{
-        return [self.db executeScalar:@"SELECT dbversion FROM dbversion;"];
-    }];
-    //this has to be done only when upgrading from a db < 4.82 because only older databases use DELETE journal_mode
+    //set wal mode (this setting is permanent): https://www.sqlite.org/pragma.html#pragma_journal_mode
     //this is a special case because it can not be done while in a transaction!!!
-    if([dbversionWithoutTransaction doubleValue] < 4.83)
-    {
-        //set wal mode (this setting is permanent): https://www.sqlite.org/pragma.html#pragma_journal_mode
-        [self.db executeNonQuery:@"PRAGMA journal_mode=WAL;"];
-        DDLogWarn(@"transaction mode set to WAL");
-    }
+    [self.db enableWAL];
     
     //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
     [self.db executeNonQuery:@"PRAGMA legacy_alter_table=on;"];

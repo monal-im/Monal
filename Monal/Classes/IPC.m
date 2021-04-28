@@ -120,7 +120,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
             //this can not be used inside a transaction --> turn on WAL mode before executing any other db operations
             //this will create the database file and open the database because it is the first MLSQlite call done for this file
             //turning on WAL mode has to be done *outside* of any transactions
-            [self.db executeNonQuery:@"PRAGMA journal_mode=WAL;"];
+            [self.db enableWAL];
         }
         [self.db voidWriteTransaction:^{
             if(!fileExists)

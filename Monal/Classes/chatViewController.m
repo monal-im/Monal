@@ -1900,29 +1900,34 @@ enum msgSentState {
         
         cell = toreturn;
     }
+    MLMessage* priorRow = nil;
+    if(indexPath.row > 0)
+    {
+        priorRow = [self.messageList objectAtIndex:indexPath.row-1];
+    }
     // Only display names for groups
     BOOL hideName = YES;
     if(self.contact.isGroup)
     {
         if([@"group" isEqualToString:self.contact.mucType] && row.participantJid)
         {
-            hideName = (indexPath.row >= 1
-                         && [self.messageList[indexPath.row - 1].participantJid isEqualToString:row.participantJid]);
+            hideName = (priorRow != nil
+                         && [priorRow.participantJid isEqualToString:row.participantJid]);
             MLContact* groupContact = [self getMLContactForJid:row.participantJid andAccount:row.accountId];
             cell.name.text = hideName == YES ? nil : [groupContact contactDisplayName];
         }
         else {
-            hideName = (indexPath.row >= 1
-                             && [self.messageList[indexPath.row - 1].actualFrom isEqualToString:row.actualFrom]);
+            hideName = (priorRow != nil
+                             && [priorRow.actualFrom isEqualToString:row.actualFrom]);
             cell.name.text = hideName == YES ? nil : row.actualFrom;
         }
     }
-    cell.name.hidden = hideName;
-    MLMessage* priorRow = nil;
-    if(indexPath.row > 0)
+    if(hideName == YES)
     {
-        priorRow = [self.messageList objectAtIndex:indexPath.row-1];
+        // remove hidden text for better constraints
+        cell.name.text = nil;
     }
+    cell.name.hidden = hideName;
     
     if(row.hasBeenDisplayed)
         cell.messageStatus.text = kDisplayed;

@@ -218,6 +218,10 @@
 		38720923251EDE07001837EB /* MLXEPSlashMeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 38720921251EDE07001837EB /* MLXEPSlashMeHandler.m */; };
 		389E298C25E901CA009A5268 /* MLAudioRecoderManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 389E298925E901CA009A5268 /* MLAudioRecoderManager.m */; };
 		389E298D25E901CA009A5268 /* MLAudioRecoderManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */; };
+		3D2B1870262A12A10092E181 /* MLUploadQueueItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D2B186F262A12A10092E181 /* MLUploadQueueItem.m */; };
+		3D4BC2C92626294200292F14 /* MLUploadQueueDocumentCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D4BC2C82626294200292F14 /* MLUploadQueueDocumentCell.m */; };
+		3D9EE5342617677700135D46 /* MLUploadQueueImageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3D9EE5332617677700135D46 /* MLUploadQueueImageCell.m */; };
+		3DBAD1E62627A2BC0078BD27 /* MLUploadQueueBaseCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 3DBAD1E52627A2BC0078BD27 /* MLUploadQueueBaseCell.m */; };
 		540A3FAD24D674BD0008965D /* MLSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 540A3FAC24D674BD0008965D /* MLSQLite.m */; };
 		540BD0D224D8D1F40087A743 /* IPC.h in Headers */ = {isa = PBXBuildFile; fileRef = 540BD0D124D8D1F20087A743 /* IPC.h */; };
 		540BD0D424D8D2000087A743 /* IPC.m in Sources */ = {isa = PBXBuildFile; fileRef = 540BD0D324D8D1FF0087A743 /* IPC.m */; };
@@ -798,6 +802,14 @@
 		389E298925E901CA009A5268 /* MLAudioRecoderManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLAudioRecoderManager.m; sourceTree = "<group>"; };
 		389E298B25E901CA009A5268 /* MLAudioRecoderManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLAudioRecoderManager.h; sourceTree = "<group>"; };
 		39B989B9775C0725A810D271 /* Pods-MonalUITests.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalUITests.adhoc.xcconfig"; path = "Target Support Files/Pods-MonalUITests/Pods-MonalUITests.adhoc.xcconfig"; sourceTree = "<group>"; };
+		3D2B186E262A12A10092E181 /* MLUploadQueueItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueItem.h; sourceTree = "<group>"; };
+		3D2B186F262A12A10092E181 /* MLUploadQueueItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueItem.m; sourceTree = "<group>"; };
+		3D4BC2C72626294200292F14 /* MLUploadQueueDocumentCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueDocumentCell.h; sourceTree = "<group>"; };
+		3D4BC2C82626294200292F14 /* MLUploadQueueDocumentCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueDocumentCell.m; sourceTree = "<group>"; };
+		3D9EE5322617677700135D46 /* MLUploadQueueImageCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueImageCell.h; sourceTree = "<group>"; };
+		3D9EE5332617677700135D46 /* MLUploadQueueImageCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueImageCell.m; sourceTree = "<group>"; };
+		3DBAD1E42627A2BC0078BD27 /* MLUploadQueueBaseCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLUploadQueueBaseCell.h; sourceTree = "<group>"; };
+		3DBAD1E52627A2BC0078BD27 /* MLUploadQueueBaseCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLUploadQueueBaseCell.m; sourceTree = "<group>"; };
 		3EB7A7084FA9A8F68A3D251C /* Pods-MonalXMPPUnitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MonalXMPPUnitTests.debug.xcconfig"; path = "Target Support Files/Pods-MonalXMPPUnitTests/Pods-MonalXMPPUnitTests.debug.xcconfig"; sourceTree = "<group>"; };
 		4A614910EEF29D66DD4B37E3 /* Pods-NotificaionService.adhoc.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotificaionService.adhoc.xcconfig"; path = "Target Support Files/Pods-NotificaionService/Pods-NotificaionService.adhoc.xcconfig"; sourceTree = "<group>"; };
 		540A3FAC24D674BD0008965D /* MLSQLite.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLSQLite.m; sourceTree = "<group>"; };
@@ -1236,6 +1248,8 @@
 			children = (
 				2696EED11791245A00BC54B8 /* chatViewController.m */,
 				2696EED01791245A00BC54B8 /* chatViewController.h */,
+				3D2B186E262A12A10092E181 /* MLUploadQueueItem.h */,
+				3D2B186F262A12A10092E181 /* MLUploadQueueItem.m */,
 				26FE3BC91C61A6C3003CC230 /* MLResizingTextView.h */,
 				26FE3BCA1C61A6C3003CC230 /* MLResizingTextView.m */,
 				268DD58417C4541000C673A9 /* MLChatCell.h */,
@@ -1264,6 +1278,12 @@
 				E89DD32425C6626400925F62 /* MLFileTransferTextCell.m */,
 				E89DD31F25C6626300925F62 /* MLFileTransferVideoCell.h */,
 				E89DD32125C6626300925F62 /* MLFileTransferVideoCell.m */,
+				3D9EE5322617677700135D46 /* MLUploadQueueImageCell.h */,
+				3D4BC2C72626294200292F14 /* MLUploadQueueDocumentCell.h */,
+				3D4BC2C82626294200292F14 /* MLUploadQueueDocumentCell.m */,
+				3DBAD1E42627A2BC0078BD27 /* MLUploadQueueBaseCell.h */,
+				3DBAD1E52627A2BC0078BD27 /* MLUploadQueueBaseCell.m */,
+				3D9EE5332617677700135D46 /* MLUploadQueueImageCell.m */,
 			);
 			name = ChatViews;
 			sourceTree = "<group>";
@@ -2615,6 +2635,7 @@
 				26158AF21FFA6E4500E53BDC /* MLWebViewController.m in Sources */,
 				26B51C4918654D98002134C3 /* LogViewController.m in Sources */,
 				C1943A4C25309A9D0036172F /* MLReloadCell.m in Sources */,
+				3D4BC2C92626294200292F14 /* MLUploadQueueDocumentCell.m in Sources */,
 				262E51971AD8CB7200788351 /* MLTextInputCell.m in Sources */,
 				263DFAC32187D0E00038E716 /* MLLinkCell.m in Sources */,
 				E89DD32525C6626400925F62 /* MLFileTransferDataCell.m in Sources */,
@@ -2645,6 +2666,7 @@
 				267C99082067D7BE00AB876C /* MLGroupChatTableViewController.m in Sources */,
 				26BDECDC1867B7790018670D /* CallViewController.m in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
+				3D9EE5342617677700135D46 /* MLUploadQueueImageCell.m in Sources */,
 				26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */,
 				2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
@@ -2653,6 +2675,7 @@
 				26189C8B238A526500EAD70C /* MLSubscriptionTableViewController.m in Sources */,
 				26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */,
 				C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */,
+				3DBAD1E62627A2BC0078BD27 /* MLUploadQueueBaseCell.m in Sources */,
 				26D59D9020711969006F1DEE /* MLJoinGroupViewController.m in Sources */,
 				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,
 				26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */,
@@ -2665,6 +2688,7 @@
 				26A8ADD717C031BA0033990D /* ContactDetails.m in Sources */,
 				2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */,
 				26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */,
+				3D2B1870262A12A10092E181 /* MLUploadQueueItem.m in Sources */,
 				2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */,
 				26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */,
 				26D0940C22A33E9B009C7AEF /* MLRegisterViewController.m in Sources */,

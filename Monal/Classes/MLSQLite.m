@@ -35,7 +35,7 @@ static NSMutableDictionary* currentTransactions;
     else
     {
         DDLogError(@"sqlite initialize: sqlite3 not configured ok");
-        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"sqlite3_config() failed" userInfo:nil];
+        @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"sqlite3_config() failed" userInfo:nil];
     }
     
     sqlite3_initialize();
@@ -83,7 +83,7 @@ static NSMutableDictionary* currentTransactions;
     {
         //database error message
         DDLogError(@"Error opening database: %@", _dbFile);
-        @throw [NSException exceptionWithName:@"RuntimeException" reason:@"sqlite3_open_v2() failed" userInfo:nil];
+        @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"sqlite3_open_v2() failed" userInfo:nil];
     }
     
     //use this observer because dealloc will not be called in the same thread as the sqlite statements got prepared
@@ -93,7 +93,7 @@ static NSMutableDictionary* currentTransactions;
             if([threadData[@"_sqliteTransactionsRunning"][self->_dbFile] intValue] > 1)
             {
                 DDLogError(@"Transaction leak in NSThreadWillExitNotification: trying to close sqlite3 connection while transaction still open");
-                @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Transaction leak in NSThreadWillExitNotification: trying to close sqlite3 connection while transaction still open" userInfo:threadData];
+                @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Transaction leak in NSThreadWillExitNotification: trying to close sqlite3 connection while transaction still open" userInfo:threadData];
             }
             if(self->_database)
             {
@@ -105,8 +105,8 @@ static NSMutableDictionary* currentTransactions;
     }];
 
     //some settings (e.g. truncate is faster than delete)
-    //this uses the private api because we have no thread local instance added to the threadData dictionary yet (and public apis check that)
-    //--> we must use the internal api because it does not call testThreadInstanceForQuery:
+    //this uses the private api because we have no thread local instance added to the threadData dictionary yet and we don't use a transaction either (and public apis check both)
+    //--> we must use the internal api because it does not call testThreadInstanceForQuery: testTransactionsForQuery:
     [self executeNonQuery:@"PRAGMA synchronous=NORMAL;" andArguments:@[] withException:YES];
     [self executeNonQuery:@"PRAGMA truncate;" andArguments:@[] withException:YES];
     [self executeNonQuery:@"PRAGMA foreign_keys=on;" andArguments:@[] withException:YES];
@@ -122,7 +122,7 @@ static NSMutableDictionary* currentTransactions;
         if([threadData[@"_sqliteTransactionsRunning"][_dbFile] intValue] > 1)
         {
             DDLogError(@"Transaction leak in dealloc: trying to close sqlite3 connection while transaction still open");
-            @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Transaction leak in dealloc: trying to close sqlite3 connection while transaction still open" userInfo:threadData];
+            @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Transaction leak in dealloc: trying to close sqlite3 connection while transaction still open" userInfo:threadData];
         }
         if(self->_database)
         {
@@ -335,6 +335,30 @@ static NSMutableDictionary* currentTransactions;
     return toReturn;
 }
 
+-(id) internalExecuteScalar:(NSString*) query andArguments:(NSArray*) args
+{
+    id __block toReturn;
+    sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
+    if(statement != NULL)
+    {
+        int step;
+        if((step=sqlite3_step(statement)) == SQLITE_ROW)
+        {
+            toReturn = [self getColumn:0 ofStatement:statement];
+            while((step=sqlite3_step(statement)) == SQLITE_ROW) {}     //clear data of all other rows
+        }
+        sqlite3_finalize(statement);
+        if(step != SQLITE_DONE)
+            [self throwErrorForQuery:query andArguments:args];
+    }
+    else
+    {
+        //if noting else
+        [self throwErrorForQuery:query andArguments:args];
+    }
+    return toReturn;
+}
+
 #pragma mark - public API
 
 -(void) voidWriteTransaction:(monal_void_block_t) operations
@@ -490,26 +514,7 @@ static NSMutableDictionary* currentTransactions;
     [self testThreadInstanceForQuery:query andArguments:args];
     [self testTransactionsForQuery:query andArguments:args];
     
-    id __block toReturn;
-    sqlite3_stmt* statement = [self prepareQuery:query withArgs:args];
-    if(statement != NULL)
-    {
-        int step;
-        if((step=sqlite3_step(statement)) == SQLITE_ROW)
-        {
-            toReturn = [self getColumn:0 ofStatement:statement];
-            while((step=sqlite3_step(statement)) == SQLITE_ROW) {}     //clear data of all other rows
-        }
-        sqlite3_finalize(statement);
-        if(step != SQLITE_DONE)
-            [self throwErrorForQuery:query andArguments:args];
-    }
-    else
-    {
-        //if noting else
-        [self throwErrorForQuery:query andArguments:args];
-    }
-    return toReturn;
+    return [self internalExecuteScalar:query andArguments:args];
 }
 
 -(NSArray*) executeScalarReader:(NSString*) query
@@ -612,10 +617,30 @@ static NSMutableDictionary* currentTransactions;
     return [NSNumber numberWithInt:(int)sqlite3_last_insert_rowid(self->_database)];
 }
 
+-(void) enableWAL
+{
+    NSString* mode = [self internalExecuteScalar:@"PRAGMA journal_mode;" andArguments:@[]];
+    if([mode isEqualToString:@"wal"])
+        return;
+    mode = [self internalExecuteScalar:@"PRAGMA journal_mode=WAL;" andArguments:@[]];
+    if([mode isEqualToString:@"wal"])
+        DDLogWarn(@"Transaction mode set to WAL");
+    else
+        @throw [NSException exceptionWithName:@"SQLite3Exception" reason:@"Failed to enable sqlite WAL mode" userInfo:@{
+            @"file": _dbFile,
+            @"mode": mode
+        }];
+}
+
 -(void) checkpointWal
 {
     NSArray* result = [self executeReader:@"PRAGMA wal_checkpoint(TRUNCATE);"];
     DDLogInfo(@"Chekpointing returned: %@", result);
+}
+
+-(void) vaccum
+{
+    [self executeNonQuery:@"VACCUM;" andArguments:@[] withException:YES];
 }
 
 @end

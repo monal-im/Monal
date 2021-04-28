@@ -8,6 +8,7 @@
 
 #import "chatViewController.h"
 #import "MLChatCell.h"
+#import "MLDefinitions.h"
 #import "MLLinkCell.h"
 #import "MLChatImageCell.h"
 #import "MLChatMapsCell.h"
@@ -19,6 +20,10 @@
 #import "xmpp.h"
 #import "MLOMEMO.h"
 #import "MLMetaInfo.h"
+
+#import "MLUploadQueueItem.h"
+#import "MLUploadQueueDocumentCell.h"
+#import "MLUploadQueueImageCell.h"
 
 #import "IDMPhotoBrowser.h"
 #import "ContactDetails.h"
@@ -35,6 +40,10 @@
 #import "MLNotificationQueue.h"
 
 #import <Monal-Swift.h>
+#import <stdatomic.h>
+
+#define UPLOAD_TYPE_IMAGE @"UploadTypeImage";
+#define UPLOAD_TYPE_URL @"UploadTypeURL";
 
 @import QuartzCore;
 @import MobileCoreServices;
@@ -88,6 +97,10 @@
 //SearchViewController, SearchResultViewController
 @property (nonatomic, strong) MLSearchViewController* searchController;
 @property (nonatomic, strong) NSMutableArray* searchResultMessageList;
+
+// Upload Queue
+@property (nonatomic, strong) NSMutableOrderedSet<MLUploadQueueItem*>* uploadQueue;
+@property (nonatomic, strong) NSLayoutConstraint* uploadMenuConstraint;
 
 @property (nonatomic, strong) void (^editingCallback)(NSString* newBody);
 @property (nonatomic, strong) NSMutableSet* previewedIds;
@@ -147,7 +160,7 @@ enum msgSentState {
     [super viewDidLoad];
     
     [self initNavigationBarItems];
-    
+
     [self setupDateObjects];
     containerView = self.view;
     self.messageTable.scrollsToTop = YES;
@@ -187,8 +200,18 @@ enum msgSentState {
     // Set max height of the chatInput (The chat should be still readable while the HW-Keyboard is active
     self.chatInputConstraintHWKeyboard = [NSLayoutConstraint constraintWithItem:self.chatInput attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationLessThanOrEqual toItem:nil attribute:NSLayoutAttributeHeight multiplier:1 constant:self.view.frame.size.height * 0.6];
     self.chatInputConstraintSWKeyboard = [NSLayoutConstraint constraintWithItem:self.chatInput attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationLessThanOrEqual toItem:nil attribute:NSLayoutAttributeHeight multiplier:1 constant:self.view.frame.size.height * 0.4];
+    self.uploadMenuConstraint = [NSLayoutConstraint
+                                constraintWithItem:self.uploadMenuView
+                                attribute:NSLayoutAttributeHeight
+                                relatedBy:NSLayoutRelationEqual
+                                toItem:nil
+                                attribute:NSLayoutAttributeNotAnAttribute
+                                multiplier:1.0
+                                constant:200];
     [self.inputContainerView addConstraint:self.chatInputConstraintHWKeyboard];
     [self.inputContainerView addConstraint:self.chatInputConstraintSWKeyboard];
+    [self.uploadMenuView addConstraint:self.uploadMenuConstraint];
+    [NSLayoutConstraint deactivateConstraints:@[self.uploadMenuConstraint]]; // Queue is empty by default -> upload menu will not be visible after loading view
     
     [self setChatInputHeightConstraints:YES];
     
@@ -208,7 +231,13 @@ enum msgSentState {
     refreshControl.attributedTitle = [[NSAttributedString alloc] initWithString:NSLocalizedString(@"Loading more Messages from Server", @"")];
     [self.messageTable setRefreshControl:refreshControl];
     self.moreMessagesAvailable = YES;
-    //Init search button item.
+
+    self.uploadQueue = [[NSMutableOrderedSet<MLUploadQueueItem*> alloc] init];
+
+    [self.messageTable addInteraction:[[UIDropInteraction alloc] initWithDelegate:self]];
+    [self.inputContainerView addInteraction:[[UIDropInteraction alloc] initWithDelegate:self]];
+    
+    // Init search button item.
     [self initSearchButtonItem];
 }
 
@@ -335,17 +364,17 @@ enum msgSentState {
     }
 }
 
--(void)doReloadHistoryForSearch
+-(void) doReloadHistoryForSearch
 {
     [self loadOldMsgHistory];
 }
 
-- (void)doReloadActionForAllTableView
+- (void) doReloadActionForAllTableView
 {
     [self.messageTable reloadData];
 }
 
-- (void)doGetMsgData
+- (void) doGetMsgData
 {
     for (int idx = 0; idx<self.messageList.count; idx++)
     {
@@ -417,7 +446,7 @@ enum msgSentState {
     // activate / disable constraints depending on keyboard type
     self.chatInputConstraintHWKeyboard.active = hwKeyboardPresent;
     self.chatInputConstraintSWKeyboard.active = !hwKeyboardPresent;
-    
+
     [self.inputContainerView layoutIfNeeded];
 }
 
@@ -933,7 +962,7 @@ enum msgSentState {
         }));
 }
 
--(void)resignTextView
+-(void) resignTextView
 {
     [self tempfreezeAutoloading];
 
@@ -963,12 +992,13 @@ enum msgSentState {
     [self sendChatState:NO];
 }
 
--(IBAction)sendMessageText:(id)sender
+-(IBAction) sendMessageText:(id)sender
 {
     [self resignTextView];
+    [self emptyUploadQueue];
 }
 
--(void)recordMessageAudio:(UILongPressGestureRecognizer*)gestureRecognizer{
+-(void) recordMessageAudio:(UILongPressGestureRecognizer*)gestureRecognizer{
     [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
             if (granted) {
                 if (gestureRecognizer.state == UIGestureRecognizerStateBegan){
@@ -1009,7 +1039,7 @@ enum msgSentState {
 
 
 #pragma mark - doc picker
--(IBAction)attachfile:(id)sender
+-(IBAction) attachfile:(id)sender
 {
     [self stopEditing];
     [self.chatInput resignFirstResponder];
@@ -1019,41 +1049,16 @@ enum msgSentState {
     return;
 }
 
-- (void) documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls
+-(void) documentPicker:(UIDocumentPickerViewController*) controller didPickDocumentsAtURLs:(NSArray<NSURL*>*)urls
 {
     if(urls.count == 0)
         return;
-    
-    [self showUploadHUD];
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        __block int filesToUpload = (int)urls.count;
-        NSFileCoordinator* coordinator = [[NSFileCoordinator alloc] init];
-        for(NSURL* url in urls)
-        {
-            [coordinator coordinateReadingItemAtURL:url options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
-                [MLFiletransfer uploadFile:newURL onAccount:self.xmppAccount withEncryption:self.contact.isEncrypted andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        [self showPotentialError:error];
-                        if(!error)
-                        {
-                            filesToUpload--;
-                            if(filesToUpload == 0)
-                                [self hideUploadHUD];
-                            
-                            NSString* newMessageID = [[NSUUID UUID] UUIDString];
-                            [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
-                            [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:nil];
-                        }
-                        DDLogVerbose(@"upload done");
-                    });
-                }];
-            }];
-        }
-    });
+
+    [self addDocumentsToQueue:urls];
 }
 
 #pragma mark  - location delegate
-- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
+-(void) locationManager:(CLLocationManager*) manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
     CLAuthorizationStatus gpsStatus = [CLLocationManager authorizationStatus];
     if(gpsStatus == kCLAuthorizationStatusAuthorizedAlways || gpsStatus == kCLAuthorizationStatusAuthorizedWhenInUse) {
         if(self.sendLocation) {
@@ -1063,7 +1068,8 @@ enum msgSentState {
     }
 }
 
--(void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray<CLLocation *> *)locations {
+-(void) locationManager:(CLLocationManager*) manager didUpdateLocations:(NSArray<CLLocation*>*) locations
+{
     [self.locationManager stopUpdatingLocation];
 
     // Only send geo message if gpsHUD is visible
@@ -1076,24 +1082,28 @@ enum msgSentState {
     if(gpsLoc == nil) {
         return;
     }
-    self.gpsHUD.hidden=YES;
+    self.gpsHUD.hidden = YES;
     // Send location
     [self sendMessage:[NSString stringWithFormat:@"geo:%f,%f", gpsLoc.coordinate.latitude, gpsLoc.coordinate.longitude] withType:kMessageTypeGeo];
 }
 
-- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
+- (void) locationManager:(CLLocationManager*) manager didFailWithError:(NSError*) error
+{
     DDLogError(@"Error while fetching location %@", error);
 }
 
--(void) makeLocationManager {
-    if(self.locationManager == nil) {
+-(void) makeLocationManager
+{
+    if(self.locationManager == nil)
+    {
         self.locationManager = [[CLLocationManager alloc] init];
         self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
         self.locationManager.delegate = self;
     }
 }
 
--(void) displayGPSHUD {
+-(void) displayGPSHUD
+{
     // Setup HUD
     if(!self.gpsHUD) {
         self.gpsHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
@@ -1110,7 +1120,7 @@ enum msgSentState {
             // Stop locationManager & hide gpsHUD screen
             [self.locationManager stopUpdatingLocation];
             self.gpsHUD.hidden = YES;
-
+        
             // Display warning
             UIAlertController *gpsWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No GPS location received", @"")
                                                                                 message:NSLocalizedString(@"Monal did not received a gps location. Please try again later.", @"") preferredStyle:UIAlertControllerStyleAlert];
@@ -1120,6 +1130,16 @@ enum msgSentState {
             [self presentViewController:gpsWarning animated:YES completion:nil];
         }
     });
+}
+
+-(PHPickerViewController*)generatePHPickerViewController API_AVAILABLE(ios(14))
+{
+    PHPickerConfiguration* phConf = [[PHPickerConfiguration alloc] init];
+    phConf.selectionLimit = 0;
+    phConf.filter = PHPickerFilter.imagesFilter;
+    PHPickerViewController* picker = [[PHPickerViewController alloc] initWithConfiguration:phConf];
+    picker.delegate = self;
+    return picker;
 }
 
 #pragma mark - attachment picker
@@ -1170,15 +1190,19 @@ enum msgSentState {
         }];
 
         UIAlertAction* photosAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Photos", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            mediaPicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
-            mediaPicker.allowsEditing = NO;
-            [self presentViewController:mediaPicker animated:YES completion:nil];
+            if(@available(iOS 14, *)) {
+                [self presentViewController:[self generatePHPickerViewController] animated:YES completion:nil];
+            } else {
+                mediaPicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+                mediaPicker.allowsEditing = NO;
+                [self presentViewController:mediaPicker animated:YES completion:nil];
+            }
         }];
         
         UIAlertAction* fileAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"File", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [self presentViewController:self.filePicker animated:YES completion:nil];
         }];
-        
+
         // Set image
         if (@available(iOS 13.0, *)) {
             [cameraAction setValue:[[UIImage systemImageNamed:@"camera"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
@@ -1246,29 +1270,45 @@ enum msgSentState {
     [self presentViewController:actionControll animated:YES completion:nil];
 }
 
+- (void) picker:(PHPickerViewController*) picker didFinishPicking:(NSArray<PHPickerResult*>*) results API_AVAILABLE(ios(14)) {
+    [self dismissViewControllerAnimated:YES completion:nil];
+    for(PHPickerResult* userSelection in results) {
+        NSItemProvider* provider = userSelection.itemProvider;
+        assert(provider != nil);
+        /*
+        [provider loadItemForTypeIdentifier:(NSString*) kUTTypeImage options:nil completionHandler:^(__kindof id<NSSecureCoding>  _Nullable item, NSError * _Null_unspecified error) {
+            assert([((NSObject*)item) isKindOfClass: [NSURL class]]);
+            NSURL* url = (NSURL*)item;
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self addImagesToQueue:@[url]];
+            });
+        }];
+        */
+        [provider loadObjectOfClass:[UIImage class] completionHandler:^(__kindof id<NSItemProviderReading>  _Nullable object, NSError * _Nullable error) {
+#ifdef TARGET_OS_SIMULATOR
+            if(NSStringFromClass([object class]) == nil) {
+                DDLogError(@"Could not add user-selected image to the upload queue! This is a known issue for iOS Simulator when trying to load HDR images, see https://developer.apple.com/forums/thread/665265");
+                return;
+            }
+#endif
+            assert([object isKindOfClass: [UIImage class]]);
+            UIImage* image = (UIImage*)object;
+
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self addRawImagesToQueue:@[image]];
+            });
+        }];
+    }
+}
+
 -(void) imagePickerController:(UIImagePickerController*) picker didFinishPickingMediaWithInfo:(NSDictionary<NSString*, id>*) info
 {
     [self dismissViewControllerAnimated:YES completion:nil];
-
     UIImage* selectedImage = info[UIImagePickerControllerEditedImage];
     if(!selectedImage)
         selectedImage = info[UIImagePickerControllerOriginalImage];
 
-    [self showUploadHUD];
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [MLFiletransfer uploadUIImage:selectedImage onAccount:self.xmppAccount withEncryption:self.contact.isEncrypted andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self showPotentialError:error];
-                if(!error)
-                    [self hideUploadHUD];
-                
-                NSString* newMessageID = [[NSUUID UUID] UUIDString];
-                [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
-                [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:nil];
-                DDLogVerbose(@"upload done");
-            });
-        }];
-    });
+    [self addRawImagesToQueue:@[selectedImage]];
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker
@@ -1394,7 +1434,7 @@ enum msgSentState {
                 [self doSetMsgPathIdx:bottom withDBId:message.messageDBId];
                 [self.searchController getSearchData:self.self.searchController.searchBar.text];
                 [self.searchController setResultToolBar];
-            }            
+            }
             
             [self refreshCounter];
         });
@@ -1821,7 +1861,7 @@ enum msgSentState {
         cell.bubbleImage.hidden=NO;
         UIFont* originalFont = [UIFont systemFontOfSize:17.0f];
         [cell.messageBody setFont:originalFont];
-
+    
         // Check if message contains a url
         NSString* lowerCase = [messageText lowercaseString];
         NSRange pos = [lowerCase rangeOfString:@"https://"];
@@ -1880,7 +1920,7 @@ enum msgSentState {
                                                                                                                                    withFont:italicFont];
                 
                 [cell.messageBody setAttributedText:attributedMsgString];
-            } else {                
+            } else {
                 // Reset attributes
                 UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize];
                 [cell.messageBody setFont:originalFont];
@@ -1966,7 +2006,7 @@ enum msgSentState {
     }
     
     [cell updateCellWithNewSender:newSender];
-        
+
     if(!cell.link) [self resetHistoryAttributeForCell:cell];
     if(self.searchController.isActive && row.messageDBId)
     {
@@ -2224,7 +2264,7 @@ enum msgSentState {
         cell = imageCell;
     }
     else if([info[@"mimeType"] hasPrefix:@"video/"])
-    {                
+    {
         MLFileTransferVideoCell* videoCell = (MLFileTransferVideoCell *) [self messageTableCellWithIdentifier:@"fileTransferVideo" andInbound:inDirection fromTable:tableView];
         NSString *videoStr = info[@"cacheFile"];
         NSString *videoFileName = info[@"filename"];
@@ -2239,7 +2279,7 @@ enum msgSentState {
         NSString *audioStr = info[@"cacheFile"];
         NSString *audioFileName = info[@"filename"];
         [audioCell avplayerConfigWithUrlStr:audioStr fileName:audioFileName andVC:self];
-                
+
         cell = audioCell;
     }
     else
@@ -2308,12 +2348,12 @@ enum msgSentState {
     }
     
     CGFloat bottomLength = scrollView.frame.size.height + curOffset;
-        
+
     if (scrollView.contentSize.height <= bottomLength)
     {
         [self.lastMsgButton setHidden:YES];
     }
-        
+
     self.lastOffset = curOffset;
 }
 
@@ -2425,7 +2465,7 @@ enum msgSentState {
         CGPoint newOffset = CGPointMake(contentOffset.x, contentOffset.y + sizeAfterAddingMessages.height - sizeBeforeAddingMessages.height);
         self->_messageTable.contentOffset = newOffset;
         [self->_messageTable endUpdates];
-		
+
 		[self doSetNotLoadingHistory];
     });
 }
@@ -2516,16 +2556,20 @@ enum msgSentState {
         self.placeHolderText.hidden = YES;
     else
         self.placeHolderText.hidden = NO;
-        
+
     [self setSendButtonIconWithTextLength:[textView.text length]];
 }
 
--(void)setSendButtonIconWithTextLength:(NSUInteger)txtLength{
-    if (txtLength == 0){
+-(void) setSendButtonIconWithTextLength:(NSUInteger)txtLength
+{
+    if ((txtLength == 0) && (self.uploadQueue.count == 0))
+    {
         self.isAudioMessage = YES;
         [self.audioRecordButton setHidden:NO];
         [self.sendButton setHidden:YES];
-    } else {
+    }
+    else
+    {
         self.isAudioMessage = NO;
         [self.audioRecordButton setHidden:YES];
         [self.sendButton setHidden:NO];
@@ -2537,18 +2581,23 @@ enum msgSentState {
 -(void) loadPreviewWithUrlForRow:(NSIndexPath *) indexPath withCompletion:(void (^)(void))completion
 {
     MLMessage* row;
-    if(indexPath.row < self.messageList.count) {
+    if(indexPath.row < self.messageList.count)
+    {
         row = [self.messageList objectAtIndex:indexPath.row];
-    } else {
+    }
+    else
+    {
         DDLogError(@"Attempt to access beyond bounds");
     }
-  
+
     //prevent duplicated calls from cell animations
-    if([self.previewedIds containsObject:row.messageDBId]) {
+    if([self.previewedIds containsObject:row.messageDBId])
+    {
         return;
     }
-    
-    if(row.url) {
+
+    if(row.url)
+    {
         NSMutableURLRequest* headRequest = [[NSMutableURLRequest alloc] initWithURL: row.url];
         headRequest.HTTPMethod = @"HEAD";
         headRequest.cachePolicy = NSURLRequestReturnCacheDataElseLoad;
@@ -2558,19 +2607,21 @@ enum msgSentState {
             NSDictionary* headers = ((NSHTTPURLResponse*)response).allHeaderFields;
             NSString* mimeType = [[headers objectForKey:@"Content-Type"] lowercaseString];
             NSNumber* contentLength = [headers objectForKey:@"Content-Length"] ? [NSNumber numberWithInt:([[headers objectForKey:@"Content-Length"] intValue])] : @(-1);
-        
+
             if(mimeType.length==0) {return;}
             if(![mimeType hasPrefix:@"text"]) {return;}
             if(contentLength.intValue>500*1024) {return;} //limit to half a meg of HTML
-            
+
             [self downloadPreviewWithRow:indexPath];
-            
+
         }] resume];
-          
-    } else  if(completion) completion();
+
+    }
+    else if(completion)
+        completion();
 }
 
--(void) downloadPreviewWithRow:(NSIndexPath *) indexPath
+-(void) downloadPreviewWithRow:(NSIndexPath*) indexPath
 {
     MLMessage* row;
     if(indexPath.row < self.messageList.count) {
@@ -2588,7 +2639,8 @@ enum msgSentState {
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:row.url];
     [request setValue:@"facebookexternalhit/1.1" forHTTPHeaderField:@"User-Agent"]; //required on some sites for og tags e.g. youtube
     request.timeoutInterval = 10;
-    [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+    [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error)
+    {
         
         NSString *body = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         // prevent repeated calls to this logic  by setting to non null
@@ -2606,12 +2658,15 @@ enum msgSentState {
 
 #pragma mark - photo browser delegate
 
-- (NSUInteger)numberOfPhotosInPhotoBrowser:(IDMPhotoBrowser *)photoBrowser {
+- (NSUInteger)numberOfPhotosInPhotoBrowser:(IDMPhotoBrowser*) photoBrowser
+{
     return self.photos.count;
 }
 
-- (id <IDMPhoto>)photoBrowser:(IDMPhotoBrowser *)photoBrowser photoAtIndex:(NSUInteger)index {
-    if (index < self.photos.count) {
+- (id <IDMPhoto>)photoBrowser:(IDMPhotoBrowser*) photoBrowser photoAtIndex:(NSUInteger)index
+{
+    if (index < self.photos.count)
+    {
         return [self.photos objectAtIndex:index];
     }
     return nil;
@@ -2721,7 +2776,8 @@ enum msgSentState {
 }
 
 #pragma mark - MLAudioRecoderManager delegate
--(void)notifyStart{
+-(void)notifyStart
+{
     CGFloat infoHeight = self.inputContainerView.frame.size.height;
     CGFloat infoWidth = self.inputContainerView.frame.size.width;
 
@@ -2734,7 +2790,8 @@ enum msgSentState {
     [self.inputContainerView addSubview:self.audioRecoderInfoView];
 }
 
--(void)notifyStop:(NSURL *)fileURL{
+-(void)notifyStop:(NSURL*) fileURL
+{
     [self.audioRecoderInfoView removeFromSuperview];
     
     [self showUploadHUD];
@@ -2762,7 +2819,8 @@ enum msgSentState {
     });
 }
 
--(void)updateCurrentTime:(NSTimeInterval)audioDuration{
+-(void) updateCurrentTime:(NSTimeInterval) audioDuration
+{
     int durationMinutes = (int)audioDuration/60;
     int durationSeconds = (int)audioDuration - durationMinutes*60;
     
@@ -2775,15 +2833,16 @@ enum msgSentState {
     }
 }
 
--(void)notifyResult:(BOOL)isSuccess error:(NSString *)errorMsg{
-    NSString *alertTitle = @"";
-    if (isSuccess){
+-(void) notifyResult:(BOOL)isSuccess error:(NSString*) errorMsg
+{
+    NSString* alertTitle = @"";
+    if(isSuccess) {
         alertTitle = NSLocalizedString(@"Recode Success", @"");
     } else {
         alertTitle = [NSString stringWithFormat:@"%@%@", NSLocalizedString(@"Recode Fail:", @""), errorMsg];
     }
-    
-    UIAlertController *audioRecoderAlert = [UIAlertController alertControllerWithTitle:alertTitle
+
+    UIAlertController* audioRecoderAlert = [UIAlertController alertControllerWithTitle:alertTitle
                                                                         message:@"" preferredStyle:UIAlertControllerStyleAlert];
     
     [self presentViewController:audioRecoderAlert animated:YES completion:^{
@@ -2792,6 +2851,228 @@ enum msgSentState {
             [audioRecoderAlert dismissViewControllerAnimated:YES completion:nil];
         });
     }];
+}
+
+# pragma mark - Upload Queue (Backend)
+-(void) addDocumentsToQueue:(NSArray<NSURL*>*) urls
+{
+    for(NSUInteger i = 0; i < urls.count; i++)
+    {
+        [self.uploadQueue addObject:[[MLUploadQueueItem alloc] initWithURL:urls[i]]];
+    }
+    [self addToUIQueue:urls.count];
+}
+
+-(void) addImagesToQueue:(NSArray<NSURL*>*) urls
+{
+    for(NSUInteger i = 0; i < urls.count; i++)
+    {
+        UIImage* image = [UIImage imageWithData:[NSData dataWithContentsOfURL:urls[i]]];
+        if(image == nil) { // FIXME Fallback to generic document for unsupported file? Some NSURLs may be invalid
+            NSError* error = nil;
+            if([urls[i] checkResourceIsReachableAndReturnError:&error] == NO)
+            {
+                DDLogError(@"Fallback to image URL did not work! Error: %@", error.localizedDescription);
+                return;
+            }
+            [self.uploadQueue addObject:[[MLUploadQueueItem alloc] initWithURL:urls[i]]];
+        } else {
+            [self.uploadQueue addObject:[[MLUploadQueueItem alloc] initWithImage:image imageUrl:urls[i]]];
+        }
+    }
+    [self addToUIQueue:urls.count];
+}
+
+// raw image -> no URL info to check duplicates
+-(void) addRawImagesToQueue:(NSArray<UIImage*>*) images
+{
+    for(NSUInteger i = 0; i < images.count; i++)
+    {
+        [self.uploadQueue addObject:[[MLUploadQueueItem alloc] initWithImage:images[i]]];
+    }
+    [self addToUIQueue:images.count];
+}
+
+-(void) handleMediaUploadCompletion:(NSString*) url withMime:(NSString*) mimeType withSize:(NSNumber*) size withError:(NSError*) error
+{
+    [self showPotentialError:error];
+    if(!error)
+    {
+        NSString* newMessageID = [[NSUUID UUID] UUIDString];
+        [self addMessageto:self.contact.contactJid withMessage:url andId:newMessageID messageType:kMessageTypeFiletransfer mimeType:mimeType size:size];
+        [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:nil];
+    }
+    DDLogVerbose(@"upload done");
+    [self.uploadQueue removeObjectAtIndex:0];
+    [self.uploadMenuView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:0 inSection:0]]];
+    [self emptyUploadQueue];
+}
+
+-(void) emptyUploadQueue
+{
+    if(self.uploadQueue.count == 0)
+    {
+        [self hideUploadHUD];
+        return;
+    }
+    assert(self.uploadQueue.count >= 1);
+    [self showUploadHUD];
+    [self.uploadMenuView removeConstraint:self.uploadMenuConstraint];
+
+    DDLogVerbose(@"start dispatch");
+    MLUploadQueueItem* uploadItem = self.uploadQueue.firstObject;
+    if([uploadItem getType] == UPLOAD_QUEUE_TYPE_RAW_IMAGE || [uploadItem getType] == UPLOAD_QUEUE_TYPE_IMAGE_WITH_URL)
+    {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            [MLFiletransfer uploadUIImage:[uploadItem getImage] onAccount:self.xmppAccount withEncryption:self.contact.isEncrypted andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self handleMediaUploadCompletion:url withMime:mimeType withSize:size withError:error];
+                });
+            }];
+        });
+    }
+    else if([uploadItem getType] == UPLOAD_QUEUE_TYPE_URL)
+    {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            NSFileCoordinator* coordinator = [[NSFileCoordinator alloc] init];
+            [coordinator coordinateReadingItemAtURL:[uploadItem getURL] options:NSFileCoordinatorReadingForUploading error:nil byAccessor:^(NSURL * _Nonnull newURL) {
+                [MLFiletransfer uploadFile:newURL onAccount:self.xmppAccount withEncryption:self.contact.isEncrypted andCompletion:^(NSString* url, NSString* mimeType, NSNumber* size, NSError* error) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self handleMediaUploadCompletion:url withMime:mimeType withSize:size withError:error];
+                    });
+                }];
+            }];
+        });
+    } else {
+        unreachable();
+    }
+}
+
+# pragma mark - Upload Queue (UI)
+-(void) addToUIQueue:(NSUInteger) newItems;
+{
+    if(self.uploadQueue.count - newItems == 0) // Queue was previously empty
+    {
+        [NSLayoutConstraint activateConstraints:@[self.uploadMenuConstraint]];
+        // Force reload of view because this fails after the queue was emptied once otherwise
+        [self.uploadMenuView setNeedsDisplay];
+        [self.uploadMenuView layoutIfNeeded];
+        [CATransaction flush];
+    }
+    [self.uploadMenuView performBatchUpdates:^{
+        /* for(NSUInteger i = self.uploadQueue.count - newItems + 1; i < self.uploadQueue.count; i++)
+        {
+            [self.uploadMenuView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:(i) inSection:0]]];
+        }*/
+    } completion:^(BOOL finished)
+    {
+        [self.uploadMenuView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.uploadQueue.count inSection:0] atScrollPosition:UICollectionViewScrollPositionRight animated:YES];
+        [self.uploadMenuView reloadSections:[NSIndexSet indexSetWithIndex:0]]; // FIXME jan
+    }];
+    [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
+}
+
+- (nonnull __kindof UICollectionViewCell *)collectionView:(nonnull UICollectionView *)collectionView cellForItemAtIndexPath:(nonnull NSIndexPath *)indexPath
+{
+    if(indexPath.item == self.uploadQueue.count)
+    { // the '+' tile
+        return [self.uploadMenuView dequeueReusableCellWithReuseIdentifier:@"addToUploadQueueCell" forIndexPath:indexPath];
+    }
+    else
+    { // some image in the queue
+        assert(self.uploadQueue.count >= indexPath.item);
+        MLUploadQueueItem* uploadItem = self.uploadQueue[indexPath.item];
+        if([uploadItem getType] == UPLOAD_QUEUE_TYPE_RAW_IMAGE || [uploadItem getType] == UPLOAD_QUEUE_TYPE_IMAGE_WITH_URL)
+        {
+            MLUploadQueueImageCell* cell = (MLUploadQueueImageCell*) [self.uploadMenuView dequeueReusableCellWithReuseIdentifier:@"UploadQueueImageCell" forIndexPath:indexPath];
+            [cell initCellWithImage:[uploadItem getImage] index:indexPath.item];
+            [cell setUploadQueueDelegate:self];
+            return cell;
+        }
+        else if ([uploadItem getType] == UPLOAD_QUEUE_TYPE_URL)
+        {
+            MLUploadQueueDocumentCell* cell = (MLUploadQueueDocumentCell*) [self.uploadMenuView dequeueReusableCellWithReuseIdentifier:@"UploadQueueDocumentCell" forIndexPath:indexPath];
+            [cell initCellWithURL:[uploadItem getURL] index:indexPath.item];
+            [cell setUploadQueueDelegate:self];
+            return cell;
+        }
+        else
+        {
+            unreachable();
+            return nil;
+        }
+        // https://developer.apple.com/documentation/uikit/uicollectionview/1618063-dequeuereusablecellwithreuseiden?language=objc?
+    }
+}
+
+- (NSInteger) numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+{
+    return 1;
+}
+
+- (NSInteger)collectionView:(nonnull UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    assert(section == 0);
+    return self.uploadQueue.count + 1;
+}
+
+- (void) notifyUploadQueueRemoval:(NSUInteger) index
+{
+    assert(index < self.uploadQueue.count);
+    [self.uploadQueue removeObjectAtIndex:index];
+    [self.uploadMenuView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:index inSection:0]]];
+
+    // Fix all indices accordingly
+    // [self.uploadMenuView reloadSections:[NSIndexSet indexSetWithIndex:0]]; // <- simpler as the for loop, but does not look good
+    for(NSUInteger i = 0; i < self.uploadQueue.count; i++)
+    {
+        MLUploadQueueBaseCell* tmp = (MLUploadQueueImageCell*)[self.uploadMenuView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:i inSection: 0]];
+        tmp.index = i;
+    }
+
+    // Don't show uploadMenuView if queue is empty again
+    if(self.uploadQueue.count == 0)
+    {
+         [NSLayoutConstraint deactivateConstraints:@[self.uploadMenuConstraint]];
+         [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
+    }
+}
+
+- (IBAction)addImageToUploadQueue
+{
+    if (@available(iOS 14, *)) {
+        [self presentViewController:[self generatePHPickerViewController] animated:YES completion:nil];
+    } else {
+        UIImagePickerController* mediaPicker = [[UIImagePickerController alloc] init];
+        mediaPicker.delegate = self;
+        mediaPicker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+        mediaPicker.allowsEditing = NO;
+        [self presentViewController:mediaPicker animated:YES completion:nil];
+    }
+}
+
+- (void) dropInteraction:(UIDropInteraction*) interaction performDrop:(id<UIDropSession>)session
+{
+    for(UIDragItem* item in session.items)
+    {
+        NSItemProvider* provider = item.itemProvider;
+        assert(provider != nil);
+        assert([provider hasItemConformingToTypeIdentifier:(NSString*) kUTTypeItem]);
+        [provider loadItemForTypeIdentifier:(NSString*) kUTTypeItem options:nil completionHandler:^(id <NSSecureCoding> urlItem, NSError *error)
+        {
+            if ([(NSObject*)urlItem isKindOfClass: [NSURL class]])
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self addDocumentsToQueue:@[(NSURL*) urlItem]];
+                });
+            }
+        }];
+    }
+}
+
+- (UIDropProposal*) dropInteraction:(UIDropInteraction *)interaction sessionDidUpdate:(id<UIDropSession>)session
+{
+    return [[UIDropProposal alloc] initWithDropOperation:UIDropOperationCopy];
 }
 
 @end

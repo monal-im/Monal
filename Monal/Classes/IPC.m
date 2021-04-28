@@ -114,14 +114,11 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
     static const int VERSION = 2;
     dispatch_once(&once, ^{
         BOOL fileExists = [fileManager fileExistsAtPath:_dbFile];
-        //create initial database if file not exists
-        if(!fileExists)
-        {
-            //this can not be used inside a transaction --> turn on WAL mode before executing any other db operations
-            //this will create the database file and open the database because it is the first MLSQlite call done for this file
-            //turning on WAL mode has to be done *outside* of any transactions
-            [self.db enableWAL];
-        }
+        //first command creates initial database if file does not exist
+        //this can not be used inside a transaction --> turn on WAL mode before executing any other db operations
+        //this will create the database file and open the database because it is the first MLSQlite call done for this file
+        //turning on WAL mode has to be done *outside* of any transactions
+        [self.db enableWAL];
         [self.db voidWriteTransaction:^{
             if(!fileExists)
             {

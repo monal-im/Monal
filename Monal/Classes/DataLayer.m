@@ -1802,7 +1802,7 @@ static NSDateFormatter* dbFormatter;
 
 #pragma db Commands
 
--(void) updateDBTo:(double) version withBlock:(monal_void_block_t) block
+-(BOOL) updateDBTo:(double) version withBlock:(monal_void_block_t) block
 {
     static BOOL accountStateInvalidated = NO;
     if([(NSNumber*)[self.db executeScalar:@"SELECT dbversion FROM dbversion;"] doubleValue] < version)
@@ -1814,7 +1814,9 @@ static NSDateFormatter* dbFormatter;
         accountStateInvalidated = YES;
         [self.db executeNonQuery:@"UPDATE dbversion SET dbversion=?;" andArguments:@[[NSNumber numberWithDouble:version]]];
         DDLogDebug(@"Upgrade to %@ success", [NSNumber numberWithDouble:version]);
+        return YES;
     }
+    return NO;
 }
 
 -(void) invalidateAllAccountStates
@@ -1846,29 +1848,31 @@ static NSDateFormatter* dbFormatter;
     //needed for sqlite >= 3.26.0 (see https://sqlite.org/lang_altertable.html point 2)
     [self.db executeNonQuery:@"PRAGMA legacy_alter_table=on;"];
     [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
+    [self.db executeNonQuery:@"PRAGMA secure_delete=on;"];
+    __block BOOL dbUpdated = NO;
     [self.db voidWriteTransaction:^{
         NSNumber* dbversion = (NSNumber*)[self.db executeScalar:@"select dbversion from dbversion;"];
         DDLogInfo(@"Got db version %@", dbversion);
 
-        [self updateDBTo:2.0 withBlock:^{
+        dbUpdated |= [self updateDBTo:2.0 withBlock:^{
             [self.db executeNonQuery:@"drop table muc_favorites"];
             [self.db executeNonQuery:@"CREATE TABLE IF NOT EXISTS \"muc_favorites\" (\"mucid\" integer NOT NULL primary key autoincrement,\"room\" varchar(255,0),\"nick\" varchar(255,0),\"autojoin\" bool, account_id int);"];
         }];
 
-        [self updateDBTo:2.1 withBlock:^{
+        dbUpdated |= [self updateDBTo:2.1 withBlock:^{
             [self.db executeNonQuery:@"alter table message_history add column received bool;"];
         }];
 
-        [self updateDBTo:2.2 withBlock:^{
+        dbUpdated |= [self updateDBTo:2.2 withBlock:^{
             [self.db executeNonQuery:@"alter table buddylist add column synchPoint datetime;"];
         }];
 
-        [self updateDBTo:2.3 withBlock:^{
+        dbUpdated |= [self updateDBTo:2.3 withBlock:^{
             [self.db executeNonQuery:@"UPDATE account SET resource=?;" andArguments:@[[HelperTools encodeRandomResource]]];
         }];
 
         //OMEMO begins below
-        [self updateDBTo:3.1 withBlock:^{
+        dbUpdated |= [self updateDBTo:3.1 withBlock:^{
             [self.db executeNonQuery:@"CREATE TABLE signalIdentity (deviceid int NOT NULL PRIMARY KEY, account_id int NOT NULL unique,identityPublicKey BLOB,identityPrivateKey BLOB)"];
             [self.db executeNonQuery:@"CREATE TABLE signalSignedPreKey (account_id int NOT NULL,signedPreKeyId int not null,signedPreKey BLOB);"];
 
@@ -1888,16 +1892,16 @@ static NSDateFormatter* dbFormatter;
         }];
 
 
-        [self updateDBTo:3.2 withBlock:^{
+        dbUpdated |= [self updateDBTo:3.2 withBlock:^{
             [self.db executeNonQuery:@"CREATE TABLE muteList (jid varchar(50));"];
             [self.db executeNonQuery:@"CREATE TABLE blockList (jid varchar(50));"];
         }];
 
-        [self updateDBTo:3.3 withBlock:^{
+        dbUpdated |= [self updateDBTo:3.3 withBlock:^{
             [self.db executeNonQuery:@"alter table buddylist add column encrypt bool;"];
         }];
 
-        [self updateDBTo:3.4 withBlock:^{
+        dbUpdated |= [self updateDBTo:3.4 withBlock:^{
             [self.db executeNonQuery:@"alter table activechats add COLUMN lastMessageTime datetime "];
 
             //iterate current active and set their times
@@ -1914,39 +1918,39 @@ static NSDateFormatter* dbFormatter;
             }];
         }];
 
-        [self updateDBTo:3.5 withBlock:^{
+        dbUpdated |= [self updateDBTo:3.5 withBlock:^{
             [self.db executeNonQuery:@"CREATE UNIQUE INDEX uniqueContact on buddylist (buddy_name, account_id);"];
             [self.db executeNonQuery:@"delete from buddy_resources"];
             [self.db executeNonQuery:@"CREATE UNIQUE INDEX uniqueResource on buddy_resources (buddy_id, resource);"];
         }];
 
 
-        [self updateDBTo:3.6 withBlock:^{
+        dbUpdated |= [self updateDBTo:3.6 withBlock:^{
             [self.db executeNonQuery:@"CREATE TABLE imageCache (url varchar(255), path varchar(255) );"];
         }];
 
-        [self updateDBTo:3.7 withBlock:^{
+        dbUpdated |= [self updateDBTo:3.7 withBlock:^{
             [self.db executeNonQuery:@"alter table message_history add column stanzaid text;"];
         }];
 
-        [self updateDBTo:3.8 withBlock:^{
+        dbUpdated |= [self updateDBTo:3.8 withBlock:^{
             [self.db executeNonQuery:@"alter table account add column airdrop bool;"];
         }];
 
-        [self updateDBTo:3.9 withBlock:^{
+        dbUpdated |= [self updateDBTo:3.9 withBlock:^{
             [self.db executeNonQuery:@"alter table account add column rosterVersion varchar(50);"];
         }];
 
-        [self updateDBTo:4.0 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.0 withBlock:^{
             [self.db executeNonQuery:@"alter table message_history add column errorType varchar(50);"];
             [self.db executeNonQuery:@"alter table message_history add column errorReason varchar(50);"];
         }];
 
-        [self updateDBTo:4.1 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.1 withBlock:^{
             [self.db executeNonQuery:@"CREATE TABLE subscriptionRequests(requestid integer not null primary key AUTOINCREMENT,account_id integer not null,buddy_name varchar(50) collate nocase, UNIQUE(account_id,buddy_name))"];
         }];
 
-        [self updateDBTo:4.2 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.2 withBlock:^{
             NSArray* contacts = [self.db executeReader:@"select distinct account_id, buddy_name, lastMessageTime from activechats;"];
             [self.db executeNonQuery:@"delete from activechats;"];
             [contacts enumerateObjectsUsingBlock:^(NSDictionary * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
@@ -1975,28 +1979,28 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"CREATE UNIQUE INDEX ux_account_buddy ON activechats(account_id, buddy_name)"];
         }];
 
-        [self updateDBTo:4.3 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.3 withBlock:^{
 
             [self.db executeNonQuery:@"alter table buddylist add column subscription varchar(50)"];
             [self.db executeNonQuery:@"alter table buddylist add column ask varchar(50)"];
         }];
 
-        [self updateDBTo:4.4 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.4 withBlock:^{
 
             [self.db executeNonQuery:@"update account set rosterVersion='0';"];
         }];
 
-        [self updateDBTo:4.5 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.5 withBlock:^{
 
             [self.db executeNonQuery:@"alter table account add column state blob;"];
         }];
 
-        [self updateDBTo:4.6 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.6 withBlock:^{
 
             [self.db executeNonQuery:@"alter table buddylist add column messageDraft text;"];
         }];
 
-        [self updateDBTo:4.7 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.7 withBlock:^{
 
             // Delete column password,account_name from account, set default value for rosterVersion to 0, increased varchar size
             [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
@@ -2008,13 +2012,13 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
 
-        [self updateDBTo:4.71 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.71 withBlock:^{
 
             // Only reset server to '' when server == domain
             [self.db executeNonQuery:@"UPDATE account SET server='' where server=domain;"];
         }];
         
-        [self updateDBTo:4.72 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.72 withBlock:^{
 
             // Delete column protocol_id from account and drop protocol table
             [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
@@ -2026,7 +2030,7 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"DROP TABLE protocol;"];
         }];
         
-        [self updateDBTo:4.73 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.73 withBlock:^{
 
             // Delete column oauth from account
             [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
@@ -2037,7 +2041,7 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
-        [self updateDBTo:4.74 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.74 withBlock:^{
             // Rename column oldstyleSSL to directTLS
             [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
@@ -2047,7 +2051,7 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
-        [self updateDBTo:4.75 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.75 withBlock:^{
             // Delete column secure from account
             [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
@@ -2057,12 +2061,12 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
-        [self updateDBTo:4.76 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.76 withBlock:^{
             // Add column for the last interaction of a contact
             [self.db executeNonQuery:@"alter table buddylist add column lastInteraction INTEGER NOT NULL DEFAULT 0;"];
         }];
         
-        [self updateDBTo:4.77 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.77 withBlock:^{
             // drop legacy caps tables
             [self.db executeNonQuery:@"DROP TABLE IF EXISTS legacy_caps;"];
             [self.db executeNonQuery:@"DROP TABLE IF EXISTS buddy_resources_legacy_caps;"];
@@ -2073,7 +2077,7 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"CREATE INDEX timeindex ON ver_timestamp(timestamp);" ];
         }];
         
-        [self updateDBTo:4.78 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.78 withBlock:^{
             // drop airdrop column
             [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
@@ -2083,11 +2087,11 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
-        [self updateDBTo:4.80 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.80 withBlock:^{
             [self.db executeNonQuery:@"CREATE TABLE ipc(id integer NOT NULL PRIMARY KEY AUTOINCREMENT, name VARCHAR(255), destination VARCHAR(255), data BLOB, timeout INTEGER NOT NULL DEFAULT 0);"];
         }];
         
-        [self updateDBTo:4.81 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.81 withBlock:^{
             // Remove silly chats
             NSMutableArray* results = [self.db executeReader:@"select account_id, username, domain from account"];
             for(NSDictionary* row in results) {
@@ -2099,7 +2103,7 @@ static NSDateFormatter* dbFormatter;
             }
         }];
         
-        [self updateDBTo:4.82 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.82 withBlock:^{
             //use the more appropriate name "sent" for the "delivered" column of message_history
             [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;"];
@@ -2109,11 +2113,11 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
-        [self updateDBTo:4.83 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.83 withBlock:^{
             [self.db executeNonQuery:@"alter table activechats add column pinned bool DEFAULT FALSE;"];
         }];
         
-        [self updateDBTo:4.84 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.84 withBlock:^{
             [self.db executeNonQuery:@"DROP TABLE IF EXISTS ipc;"];
             [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             //remove synchPoint from db
@@ -2132,7 +2136,7 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
-        [self updateDBTo:4.85 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.85 withBlock:^{
             //Performing upgrade on buddy_resources.
             [self.db executeNonQuery:@"ALTER TABLE buddy_resources ADD platform_App_Name text;"];
             [self.db executeNonQuery:@"ALTER TABLE buddy_resources ADD platform_App_Version text;"];
@@ -2143,12 +2147,12 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"CREATE TABLE ver_info(ver VARCHAR(32), cap VARCHAR(255), PRIMARY KEY (ver,cap));"];
         }];
         
-        [self updateDBTo:4.86 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.86 withBlock:^{
             //add new stanzaid field to account table that always points to the last received stanzaid (even if that does not have a body)
             [self.db executeNonQuery:@"ALTER TABLE account ADD lastStanzaId text;"];
         }];
         
-        [self updateDBTo:4.87 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.87 withBlock:^{
             //populate new stanzaid field in account table from message_history table
             NSString* stanzaId = (NSString*)[self.db executeScalar:@"SELECT stanzaid FROM message_history WHERE stanzaid!='' ORDER BY message_history_id DESC LIMIT 1;"];
             DDLogVerbose(@"Populating lastStanzaId with id %@ from history table", stanzaId);
@@ -2158,7 +2162,7 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"UPDATE message_history SET stanzaid='';"];
         }];
 
-        [self updateDBTo:4.9 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.9 withBlock:^{
             // add timestamps to omemo prekeys
             [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE signalPreKey RENAME TO _signalPreKeyTMP;"];
@@ -2168,17 +2172,17 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
-        [self updateDBTo:4.91 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.91 withBlock:^{
             //not needed anymore (better handled by 4.97)
         }];
         
-        [self updateDBTo:4.92 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.92 withBlock:^{
             //add displayed and displayMarkerWanted fields
             [self.db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN displayed BOOL DEFAULT FALSE;"];
             [self.db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN displayMarkerWanted BOOL DEFAULT FALSE;"];
         }];
         
-        [self updateDBTo:4.93 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.93 withBlock:^{
             //full_name should not be buddy_name anymore, but the user provided XEP-0172 nickname
             //and nick_name will be the roster name, if given
             //if none of these two are given, the local part of the jid (called node in prosody and in jidSplit:) will be used, like in other clients
@@ -2187,28 +2191,28 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"UPDATE account SET rosterVersion=?;" andArguments:@[@""]];
         }];
         
-        [self updateDBTo:4.94 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.94 withBlock:^{
             [self.db executeNonQuery:@"ALTER TABLE account ADD COLUMN rosterName TEXT;"];
         }];
         
-        [self updateDBTo:4.95 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.95 withBlock:^{
             [self.db executeNonQuery:@"ALTER TABLE account ADD COLUMN iconhash VARCHAR(200);"];
         }];
         
-        [self updateDBTo:4.96 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.96 withBlock:^{
             //not needed anymore (better handled by 4.97)
         }];
         
-        [self updateDBTo:4.97 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.97 withBlock:^{
             [self invalidateAllAccountStates];
         }];
         
-        [self updateDBTo:4.98 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.98 withBlock:^{
             [self.db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN filetransferMimeType VARCHAR(32) DEFAULT 'application/octet-stream';"];
             [self.db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN filetransferSize INTEGER DEFAULT 0;"];
         }];
 
-        [self updateDBTo:4.990 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.990 withBlock:^{
             // remove dupl entries from activechats && budylist
             [self.db executeNonQuery:@"DELETE FROM activechats \
                 WHERE ROWID NOT IN \
@@ -2224,7 +2228,7 @@ static NSDateFormatter* dbFormatter;
                     )"];
         }];
         
-        [self updateDBTo:4.991 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.991 withBlock:^{
             //remove dirty, online, new from db
             [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;"];
@@ -2235,11 +2239,11 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
-        [self updateDBTo:4.992 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.992 withBlock:^{
             [self.db executeNonQuery:@"ALTER TABLE account ADD COLUMN statusMessage TEXT;"];
         }];
         
-        [self updateDBTo:4.993 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.993 withBlock:^{
             //make filetransferMimeType and filetransferSize have NULL as default value
             //(this makes it possible to distinguish unknown values from known ones)
             [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
@@ -2254,18 +2258,18 @@ static NSDateFormatter* dbFormatter;
 
         // skipping 4.994 due to invalid command
 
-        [self updateDBTo:4.995 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.995 withBlock:^{
             [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueActiveChat ON activechats(buddy_name, account_id);"];
         }];
 
-        [self updateDBTo:4.996 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.996 withBlock:^{
             //remove all icon hashes to reload all icons on next app/nse start
             //(the db upgrade mechanism will make sure that no smacks resume will take place and pep pushes come in for all avatars)
             [self.db executeNonQuery:@"UPDATE account SET iconhash='';"];
             [self.db executeNonQuery:@"UPDATE buddylist SET iconhash='';"];
         }];
         
-        [self updateDBTo:4.997 withBlock:^{
+        dbUpdated |= [self updateDBTo:4.997 withBlock:^{
             [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             //create unique constraint for (account_id, buddy_name) on activechats table
             [self.db executeNonQuery:@"ALTER TABLE activechats RENAME TO _activechatsTMP;"];
@@ -2283,7 +2287,7 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
 
-        [self updateDBTo:5.000 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.000 withBlock:^{
             // cleanup omemo tables
             [self.db executeNonQuery:@"DELETE FROM signalContactIdentity WHERE account_id NOT IN (SELECT account_id FROM account);"];
             [self.db executeNonQuery:@"DELETE FROM signalContactKey WHERE account_id NOT IN (SELECT account_id FROM account);"];
@@ -2292,7 +2296,7 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"DELETE FROM signalSignedPreKey WHERE account_id NOT IN (SELECT account_id FROM account);"];
         }];
         
-        [self updateDBTo:5.001 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.001 withBlock:^{
             //do this in 5.0 branch as well
             
             [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
@@ -2312,12 +2316,12 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
 
-        [self updateDBTo:5.002 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.002 withBlock:^{
             [self.db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN blocked BOOL DEFAULT FALSE;"];
             [self.db executeNonQuery:@"DROP TABLE blockList;"];
         }];
 
-        [self updateDBTo:5.003 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.003 withBlock:^{
             [self.db executeNonQuery:@"CREATE TABLE 'blocklistCache' (\
                 'account_id' TEXT NOT NULL, \
                 'node' TEXT, \
@@ -2343,7 +2347,7 @@ static NSDateFormatter* dbFormatter;
          * 1: ToFU
          * 2: trust
          */
-        [self updateDBTo:5.004 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.004 withBlock:^{
             [self.db executeNonQuery:@"ALTER TABLE signalContactIdentity RENAME TO _signalContactIdentityTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE 'signalContactIdentity' ( \
                  'account_id' INTEGER NOT NULL, \
@@ -2371,7 +2375,7 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"DROP TABLE _signalContactIdentityTMP;"];
         }];
         
-        [self updateDBTo:5.005 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.005 withBlock:^{
             //remove group_name and filename columns from buddylist, resize buddy_name, full_name, nick_name and muc_subject columns and add lastStanzaId column (only used for mucs)
             [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;"];
@@ -2387,7 +2391,7 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"CREATE TABLE muc_favorites (room VARCHAR(255) PRIMARY KEY, nick varchar(255), account_id INTEGER, UNIQUE(room, account_id));"];
         }];
         
-        [self updateDBTo:5.006 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.006 withBlock:^{
             // recreate blocklistCache - fixes foreign key
             [self.db executeNonQuery:@"ALTER TABLE blocklistCache RENAME TO _blocklistCacheTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE 'blocklistCache' (\
@@ -2432,13 +2436,13 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"INSERT OR IGNORE INTO buddylist ('account_id', 'buddy_name', 'muc') SELECT account_id, (username || '@' || domain), 0 FROM account;"];
         }];
 
-        [self updateDBTo:5.007 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.007 withBlock:^{
             // remove broken omemo sessions
             [self.db executeNonQuery:@"DELETE FROM signalContactIdentity WHERE (account_id, contactName) NOT IN (SELECT account_id, contactName FROM signalContactSession);"];
             [self.db executeNonQuery:@"DELETE FROM signalContactSession WHERE (account_id, contactName) NOT IN (SELECT account_id, contactName FROM signalContactIdentity);"];
         }];
 
-        [self updateDBTo:5.008 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.008 withBlock:^{
             [self.db executeNonQuery:@"DROP TABLE muc_favorites;"];
             [self.db executeNonQuery:@"CREATE TABLE 'muc_favorites' ( \
                  'account_id' INTEGER NOT NULL, \
@@ -2451,7 +2455,7 @@ static NSDateFormatter* dbFormatter;
              );"];
         }];
 
-        [self updateDBTo:5.009 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.009 withBlock:^{
             // add foreign key to signalContactSession
             [self.db executeNonQuery:@"ALTER TABLE signalContactSession RENAME TO _signalContactSessionTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE 'signalContactSession' ( \
@@ -2513,7 +2517,7 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"DROP TABLE _signalSignedPreKeyTMP;"];
         }];
 
-        [self updateDBTo:5.010 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.010 withBlock:^{
             // add foreign key to activechats
             [self.db executeNonQuery:@"ALTER TABLE activechats RENAME TO _activechatsTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE 'activechats' ( \
@@ -2580,7 +2584,7 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"DROP TABLE _buddy_resourcesTMP;"];
         }];
         
-        [self updateDBTo:5.011 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.011 withBlock:^{
             [self.db executeNonQuery:@"CREATE TABLE 'muc_participants' ( \
                      'account_id' INTEGER NOT NULL, \
                      'room' VARCHAR(255) NOT NULL, \
@@ -2594,15 +2598,15 @@ static NSDateFormatter* dbFormatter;
             );"];
         }];
 
-        [self updateDBTo:5.012 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.012 withBlock:^{
             [self.db executeNonQuery:@"ALTER TABLE buddylist ADD COLUMN muted BOOL DEFAULT FALSE"];
         }];
 
-        [self updateDBTo:5.013 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.013 withBlock:^{
             [self.db executeNonQuery:@"ALTER TABLE signalContactIdentity ADD COLUMN brokenSession BOOL DEFAULT FALSE"];
         }];
 
-        [self updateDBTo:5.014 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.014 withBlock:^{
             [self.db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;"];
             // Create a backup before changing a lot of the table style
             [self.db executeNonQuery:@"CREATE TABLE message_history_backup AS SELECT * FROM _message_historyTMP WHERE 0"];
@@ -2668,7 +2672,7 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"DROP TABLE _message_historyTMP;"];
         }];
         
-        [self updateDBTo:5.015 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.015 withBlock:^{
             [self.db executeNonQuery:@"CREATE TABLE 'muc_members' ( \
                 'account_id' INTEGER NOT NULL, \
                 'room' VARCHAR(255) NOT NULL, \
@@ -2681,7 +2685,7 @@ static NSDateFormatter* dbFormatter;
         }];
         
         // Migrate muteList to new format and delete old table
-        [self updateDBTo:5.016 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.016 withBlock:^{
             [self.db executeNonQuery:@"UPDATE buddylist SET muted=1 \
                 WHERE buddy_name IN ( \
                     SELECT DISTINCT jid FROM muteList \
@@ -2690,17 +2694,23 @@ static NSDateFormatter* dbFormatter;
         }];
         
         // Delete all muc's
-        [self updateDBTo:5.017 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.017 withBlock:^{
             [self.db executeNonQuery:@"DELETE FROM buddylist WHERE Muc=1;"];
             [self.db executeNonQuery:@"DELETE FROM muc_participants;"];
             [self.db executeNonQuery:@"DELETE FROM muc_members;"];
             [self.db executeNonQuery:@"DELETE FROM muc_favorites;"];
         }];
         
-        [self updateDBTo:5.018 withBlock:^{
+        dbUpdated |= [self updateDBTo:5.018 withBlock:^{
             [self.db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN participant_jid TEXT DEFAULT NULL"];
         }];
     }];
+    // Vacuum after db updates
+    if(dbUpdated == YES)
+    {
+        // optimize db
+        [self.db vacuum];
+    }
     [self.db executeNonQuery:@"PRAGMA legacy_alter_table=off;"];
     [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
     

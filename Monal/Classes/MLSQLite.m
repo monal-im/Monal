@@ -638,9 +638,12 @@ static NSMutableDictionary* currentTransactions;
     DDLogInfo(@"Chekpointing returned: %@", result);
 }
 
--(void) vaccum
+// optimize db
+-(void) vacuum
 {
-    [self executeNonQuery:@"VACCUM;" andArguments:@[] withException:YES];
+    DDLogDebug(@"Vacuum DB");
+    [self executeNonQuery:@"VACUUM;" andArguments:@[] withException:YES];
+    DDLogDebug(@"Vacuum DB success");
 }
 
 @end

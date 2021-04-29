@@ -2003,13 +2003,11 @@ static NSDateFormatter* dbFormatter;
         dbUpdated |= [self updateDBTo:4.7 withBlock:^{
 
             // Delete column password,account_name from account, set default value for rosterVersion to 0, increased varchar size
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'protocol_id' integer NOT NULL, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'oldstyleSSL' bool, 'oauth' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
             [self.db executeNonQuery:@"INSERT INTO account (account_id, protocol_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state) SELECT account_id, protocol_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state from _accountTMP;"];
             [self.db executeNonQuery:@"UPDATE account SET rosterVersion='0' WHERE rosterVersion is NULL;"];
             [self.db executeNonQuery:@"DROP TABLE _accountTMP;"];
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
 
         dbUpdated |= [self updateDBTo:4.71 withBlock:^{
@@ -2021,44 +2019,36 @@ static NSDateFormatter* dbFormatter;
         dbUpdated |= [self updateDBTo:4.72 withBlock:^{
 
             // Delete column protocol_id from account and drop protocol table
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'oldstyleSSL' bool, 'oauth' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
             [self.db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, oauth, airdrop, rosterVersion, state from _accountTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _accountTMP;"];
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
             [self.db executeNonQuery:@"DROP TABLE protocol;"];
         }];
         
         dbUpdated |= [self updateDBTo:4.73 withBlock:^{
 
             // Delete column oauth from account
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'oldstyleSSL' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
             [self.db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, airdrop, rosterVersion, state from _accountTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _accountTMP;"];
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
         dbUpdated |= [self updateDBTo:4.74 withBlock:^{
             // Rename column oldstyleSSL to directTLS
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'secure' bool, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
             [self.db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, directTLS, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, secure, resource, domain, enabled, selfsigned, oldstyleSSL, airdrop, rosterVersion, state from _accountTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _accountTMP;"];
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
         dbUpdated |= [self updateDBTo:4.75 withBlock:^{
             // Delete column secure from account
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'airdrop' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
             [self.db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, airdrop, rosterVersion, state) SELECT account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, airdrop, rosterVersion, state from _accountTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _accountTMP;"];
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
         dbUpdated |= [self updateDBTo:4.76 withBlock:^{
@@ -2079,12 +2069,10 @@ static NSDateFormatter* dbFormatter;
         
         dbUpdated |= [self updateDBTo:4.78 withBlock:^{
             // drop airdrop column
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE account RENAME TO _accountTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE 'account' ('account_id' integer NOT NULL PRIMARY KEY AUTOINCREMENT, 'server' varchar(1023) NOT NULL, 'other_port' integer, 'username' varchar(1023) NOT NULL, 'resource'  varchar(1023) NOT NULL, 'domain' varchar(1023) NOT NULL, 'enabled' bool, 'selfsigned' bool, 'directTLS' bool, 'rosterVersion' varchar(50) DEFAULT 0, 'state' blob);"];
             [self.db executeNonQuery:@"INSERT INTO account (account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, rosterVersion, state) SELECT account_id, server, other_port, username, resource, domain, enabled, selfsigned, directTLS, rosterVersion, state from _accountTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _accountTMP;"];
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
         dbUpdated |= [self updateDBTo:4.80 withBlock:^{
@@ -2105,12 +2093,10 @@ static NSDateFormatter* dbFormatter;
         
         dbUpdated |= [self updateDBTo:4.82 withBlock:^{
             //use the more appropriate name "sent" for the "delivered" column of message_history
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE 'message_history' (message_history_id integer not null primary key AUTOINCREMENT, account_id integer, message_from text collate nocase, message_to text collate nocase, timestamp datetime, message blob, actual_from text collate nocase, messageid text, messageType text, sent bool, received bool, unread bool, encrypted bool, previewText text, previewImage text, stanzaid text, errorType text, errorReason text);"];
             [self.db executeNonQuery:@"INSERT INTO message_history (message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, sent, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason) SELECT message_history_id, account_id, message_from, message_to, timestamp, message, actual_from, messageid, messageType, delivered, received, unread, encrypted, previewText, previewImage, stanzaid, errorType, errorReason from _message_historyTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _message_historyTMP;"];
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
         dbUpdated |= [self updateDBTo:4.83 withBlock:^{
@@ -2119,7 +2105,6 @@ static NSDateFormatter* dbFormatter;
         
         dbUpdated |= [self updateDBTo:4.84 withBlock:^{
             [self.db executeNonQuery:@"DROP TABLE IF EXISTS ipc;"];
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             //remove synchPoint from db
             [self.db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(50) collate nocase, full_name varchar(50), nick_name varchar(50), group_name varchar(50), iconhash varchar(200), filename varchar(100), state varchar(20), status varchar(200), online bool, dirty bool, new bool, Muc bool, muc_subject varchar(255), muc_nick varchar(255), backgroundImage text, encrypt bool, subscription varchar(50), ask varchar(50), messageDraft text, lastInteraction INTEGER NOT NULL DEFAULT 0);"];
@@ -2133,7 +2118,6 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"DROP TABLE _message_historyTMP;"];
             [self.db executeNonQuery:@"CREATE INDEX stanzaidIndex on message_history(stanzaid collate nocase);"];
             [self.db executeNonQuery:@"CREATE INDEX messageidIndex on message_history(messageid collate nocase);"];
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
         dbUpdated |= [self updateDBTo:4.85 withBlock:^{
@@ -2164,12 +2148,10 @@ static NSDateFormatter* dbFormatter;
 
         dbUpdated |= [self updateDBTo:4.9 withBlock:^{
             // add timestamps to omemo prekeys
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE signalPreKey RENAME TO _signalPreKeyTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE 'signalPreKey' ('account_id' int NOT NULL, 'prekeyid' int NOT NULL, 'preKey' BLOB, 'creationTimestamp' INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP, 'pubSubRemovalTimestamp' INTEGER DEFAULT NULL, 'keyUsed' INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (account_id, prekeyid, preKey));"];
             [self.db executeNonQuery:@"INSERT INTO signalPreKey (account_id, prekeyid, preKey) SELECT account_id, prekeyid, preKey FROM _signalPreKeyTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _signalPreKeyTMP;"];
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
         dbUpdated |= [self updateDBTo:4.91 withBlock:^{
@@ -2230,13 +2212,11 @@ static NSDateFormatter* dbFormatter;
         
         dbUpdated |= [self updateDBTo:4.991 withBlock:^{
             //remove dirty, online, new from db
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(50) collate nocase, full_name varchar(50), nick_name varchar(50), group_name varchar(50), iconhash varchar(200), filename varchar(100), state varchar(20), status varchar(200), Muc bool, muc_subject varchar(255), muc_nick varchar(255), backgroundImage text, encrypt bool, subscription varchar(50), ask varchar(50), messageDraft text, lastInteraction INTEGER NOT NULL DEFAULT 0);"];
             [self.db executeNonQuery:@"INSERT INTO buddylist (buddy_id, account_id, buddy_name, full_name, nick_name, group_name, iconhash, filename, state, status, Muc, muc_subject, muc_nick, backgroundImage, encrypt, subscription, ask, messageDraft, lastInteraction) SELECT buddy_id, account_id, buddy_name, full_name, nick_name, group_name, iconhash, filename, state, status, Muc, muc_subject, muc_nick, backgroundImage, encrypt, subscription, ask, messageDraft, lastInteraction FROM _buddylistTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _buddylistTMP;"];
             [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact on buddylist(buddy_name, account_id);"];
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
         
         dbUpdated |= [self updateDBTo:4.992 withBlock:^{
@@ -2246,14 +2226,12 @@ static NSDateFormatter* dbFormatter;
         dbUpdated |= [self updateDBTo:4.993 withBlock:^{
             //make filetransferMimeType and filetransferSize have NULL as default value
             //(this makes it possible to distinguish unknown values from known ones)
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE message_history RENAME TO _message_historyTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE message_history (message_history_id integer not null primary key AUTOINCREMENT, account_id integer, message_from text collate nocase, message_to text collate nocase, timestamp datetime, message blob, actual_from text collate nocase, messageid text collate nocase, messageType text, sent bool, received bool, unread bool, encrypted bool, previewText text, previewImage text, stanzaid text collate nocase, errorType text collate nocase, errorReason text, displayed BOOL DEFAULT FALSE, displayMarkerWanted BOOL DEFAULT FALSE, filetransferMimeType VARCHAR(32) DEFAULT NULL, filetransferSize INTEGER DEFAULT NULL);"];
             [self.db executeNonQuery:@"INSERT INTO message_history SELECT * FROM _message_historyTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _message_historyTMP;"];
             [self.db executeNonQuery:@"CREATE INDEX stanzaidIndex on message_history(stanzaid collate nocase);"];
             [self.db executeNonQuery:@"CREATE INDEX messageidIndex on message_history(messageid collate nocase);"];
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
 
         // skipping 4.994 due to invalid command
@@ -2270,7 +2248,6 @@ static NSDateFormatter* dbFormatter;
         }];
         
         dbUpdated |= [self updateDBTo:4.997 withBlock:^{
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             //create unique constraint for (account_id, buddy_name) on activechats table
             [self.db executeNonQuery:@"ALTER TABLE activechats RENAME TO _activechatsTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE activechats (account_id integer not null, buddy_name varchar(50) collate nocase, lastMessageTime datetime, lastMesssage blob, pinned bool DEFAULT FALSE, UNIQUE(account_id, buddy_name));"];
@@ -2284,7 +2261,6 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"INSERT INTO buddylist SELECT * FROM _buddylistTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _buddylistTMP;"];
             [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact on buddylist(buddy_name, account_id);"];
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
 
         dbUpdated |= [self updateDBTo:5.000 withBlock:^{
@@ -2299,7 +2275,6 @@ static NSDateFormatter* dbFormatter;
         dbUpdated |= [self updateDBTo:5.001 withBlock:^{
             //do this in 5.0 branch as well
             
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             //create unique constraint for (account_id, buddy_name) on activechats table
             [self.db executeNonQuery:@"ALTER TABLE activechats RENAME TO _activechatsTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE activechats (account_id integer not null, buddy_name varchar(50) collate nocase, lastMessageTime datetime, lastMesssage blob, pinned bool DEFAULT FALSE, UNIQUE(account_id, buddy_name));"];
@@ -2313,7 +2288,6 @@ static NSDateFormatter* dbFormatter;
             [self.db executeNonQuery:@"INSERT INTO buddylist SELECT * FROM _buddylistTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _buddylistTMP;"];
             [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact on buddylist(buddy_name, account_id);"];
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
         }];
 
         dbUpdated |= [self updateDBTo:5.002 withBlock:^{
@@ -2377,14 +2351,12 @@ static NSDateFormatter* dbFormatter;
         
         dbUpdated |= [self updateDBTo:5.005 withBlock:^{
             //remove group_name and filename columns from buddylist, resize buddy_name, full_name, nick_name and muc_subject columns and add lastStanzaId column (only used for mucs)
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=off;"];
             [self.db executeNonQuery:@"ALTER TABLE buddylist RENAME TO _buddylistTMP;"];
             [self.db executeNonQuery:@"CREATE TABLE buddylist(buddy_id integer not null primary key AUTOINCREMENT, account_id integer not null, buddy_name varchar(255) collate nocase, full_name varchar(255), nick_name varchar(255), iconhash varchar(200), state varchar(20), status varchar(200), Muc bool, muc_subject varchar(1024), muc_nick varchar(255), backgroundImage text, encrypt bool, subscription varchar(50), ask varchar(50), messageDraft text, lastInteraction INTEGER NOT NULL DEFAULT 0, blocked BOOL DEFAULT FALSE, muc_type VARCHAR(10) DEFAULT 'channel', lastMucStanzaId text DEFAULT NULL, UNIQUE(account_id, buddy_name));"];
             [self.db executeNonQuery:@"INSERT INTO buddylist SELECT buddy_id, account_id, buddy_name, full_name, nick_name, iconhash, state, status, Muc, muc_subject, muc_nick, backgroundImage, encrypt, subscription, ask, messageDraft, lastInteraction, blocked, 'channel', NULL FROM _buddylistTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _buddylistTMP;"];
             [self.db executeNonQuery:@"CREATE UNIQUE INDEX IF NOT EXISTS uniqueContact ON buddylist(buddy_name, account_id);"];
             [self.db executeNonQuery:@"UPDATE buddylist SET muc_type='channel' WHERE Muc = true;"];     //muc default type
-            [self.db executeNonQuery:@"PRAGMA foreign_keys=on;"];
             
             //create new muc favorites table
             [self.db executeNonQuery:@"DROP TABLE muc_favorites;"];

@@ -125,7 +125,7 @@ static NSDateFormatter* dbFormatter;
     return [MLSQLite sharedInstanceForFile:dbPath];
 }
 
--(NSString*) exportDB
+-(NSString* _Nullable) exportDB
 {
     NSFileManager* fileManager = [NSFileManager defaultManager];
     NSString* temporaryFilename = [NSString stringWithFormat:@"%@.db", [[NSProcessInfo processInfo] globallyUniqueString]];

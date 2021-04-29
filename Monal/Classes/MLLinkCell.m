@@ -34,7 +34,7 @@
     
     if(self.link)
     {
-        NSURL *url= [NSURL URLWithString:self.link];
+        NSURL* url= [NSURL URLWithString:[self.link stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
         if([url.scheme isEqualToString:@"xmpp"] )
         {
             MonalAppDelegate* delegate =(MonalAppDelegate*) [UIApplication sharedApplication].delegate;

@@ -41,7 +41,7 @@ typedef BOOL (^monal_sqlite_bool_operations_t)(void);
 -(NSNumber*) lastInsertId;
 -(void) checkpointWal;
 -(void) enableWAL;
--(void) vaccum;
+-(void) vacuum;
 
 @end
 

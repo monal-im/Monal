@@ -224,8 +224,8 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
         {
             DDLogDebug(@"*** nw_path_monitor: nw_path_is_constrained=%@", nw_path_is_constrained(path) ? @"YES" : @"NO");
             DDLogDebug(@"*** nw_path_monitor: nw_path_is_expensive=%@", nw_path_is_expensive(path) ? @"YES" : @"NO");
-            _onMobile = nw_path_is_constrained(path) || nw_path_is_expensive(path);
-            DDLogDebug(@"*** nw_path_monitor: on 'mobile' --> %@", _onMobile ? @"YES" : @"NO");
+            self->_onMobile = nw_path_is_constrained(path) || nw_path_is_expensive(path);
+            DDLogDebug(@"*** nw_path_monitor: on 'mobile' --> %@", self->_onMobile ? @"YES" : @"NO");
         }
         if(nw_path_get_status(path) == nw_path_status_satisfied && !self->_hasConnectivity)
         {

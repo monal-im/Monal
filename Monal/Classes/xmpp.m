@@ -1968,9 +1968,9 @@ NSString *const kData=@"data";
         //add outgoing mam queryids to our state (but don't persist state because this will be done by smacks code below)
         NSString* mamQueryId = [stanza findFirst:@"/{jabber:client}iq/{urn:xmpp:mam:2}query@queryid"];
         if(mamQueryId)
-            @synchronized(_stateLockObject) {
+            @synchronized(self->_stateLockObject) {
                 DDLogDebug(@"Adding mam queryid to list: %@", mamQueryId);
-                [_runningMamQueries addObject:mamQueryId];
+                [self->_runningMamQueries addObject:mamQueryId];
             }
         
         //always add stanzas (not nonzas!) to smacks queue to be resent later (if withSmacks=YES)
@@ -1983,7 +1983,7 @@ NSString *const kData=@"data";
                 if(![queued_stanza check:@"{urn:xmpp:delay}delay"])
                     [queued_stanza addDelayTagFrom:self.connectionProperties.identity.jid];
             }
-            @synchronized(_stateLockObject) {
+            @synchronized(self->_stateLockObject) {
                 DDLogVerbose(@"ADD UNACKED STANZA: %@: %@", self.lastOutboundStanza, queued_stanza);
                 NSDictionary* dic = @{kQueueID:self.lastOutboundStanza, kStanza:queued_stanza};
                 [self.unAckedStanzas addObject:dic];
@@ -2003,7 +2003,7 @@ NSString *const kData=@"data";
             (self.accountState>kStateDisconnected && (![stanza isKindOfClass:[XMPPStanza class]] || isBindRequest || isRegisterRequest))
         )
         {
-            [_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
+            [self->_sendQueue addOperation:[NSBlockOperation blockOperationWithBlock:^{
                 DDLogDebug(@"SEND: %@", stanza);
                 [self->_outputQueue addObject:stanza];
                 [self writeFromQueue];      // try to send if there is space

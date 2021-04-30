@@ -120,14 +120,14 @@
     nw_connection_receive(self.shared_state.connection, 1, BUFFER_SIZE, ^(dispatch_data_t content, nw_content_context_t context, bool is_complete, nw_error_t receive_error) {
         DDLogVerbose(@"nw_connection_receive got callback");
         
-        _reading = NO;
+        self->_reading = NO;
         
         //handle content received
         if(content != NULL)
         {
             if([(NSData*)content length] > 0)
             {
-                _buf = (NSData*)content;
+                self->_buf = (NSData*)content;
                 [self generateEvent:NSStreamEventHasBytesAvailable];
             }
         }
@@ -195,7 +195,7 @@
     }
     nw_connection_send(self.shared_state.connection, data, NW_CONNECTION_DEFAULT_MESSAGE_CONTEXT, NO, ^(nw_error_t  _Nullable error) {
         @synchronized(self) {
-            _writing--;
+            self->_writing--;
         }
         if(error)
         {
@@ -337,15 +337,15 @@
         CFRunLoopPerformBlock([self.shared_state.runLoop getCFRunLoop], (__bridge CFStringRef)self.shared_state.runLoopMode, ^{
             @synchronized(self.shared_state) {
                 if(event == NSStreamEventOpenCompleted && self.open_called && self.shared_state.open)
-                    [_delegate stream:self handleEvent:event];
+                    [self->_delegate stream:self handleEvent:event];
                 else if(event == NSStreamEventHasBytesAvailable && self.open_called && self.shared_state.open)
-                    [_delegate stream:self handleEvent:event];
+                    [self->_delegate stream:self handleEvent:event];
                 else if(event == NSStreamEventHasSpaceAvailable && self.open_called && self.shared_state.open)
-                    [_delegate stream:self handleEvent:event];
+                    [self->_delegate stream:self handleEvent:event];
                 else if(event == NSStreamEventErrorOccurred)
-                    [_delegate stream:self handleEvent:event];
+                    [self->_delegate stream:self handleEvent:event];
                 else if(event == NSStreamEventEndEncountered && self.open_called && self.shared_state.open)
-                    [_delegate stream:self handleEvent:event];
+                    [self->_delegate stream:self handleEvent:event];
                 else
                     DDLogDebug(@"Ignored event %ld", (long)event);
             }

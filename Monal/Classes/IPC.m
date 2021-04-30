@@ -272,7 +272,7 @@ void darwinNotificationCenterCallback(CFNotificationCenterRef center, void* obse
         
         //save message to table
         NSNumber* timeout = @([timestamp intValue] + MSG_TIMEOUT);        //timeout for every message
-        [self.db executeNonQuery:@"INSERT INTO ipc (name, source, destination, data, timeout, response_to) VALUES(?, ?, ?, ?, ?, ?);" andArguments:@[name, _processName, destination, data, timeout, responseId]];
+        [self.db executeNonQuery:@"INSERT INTO ipc (name, source, destination, data, timeout, response_to) VALUES(?, ?, ?, ?, ?, ?);" andArguments:@[name, self->_processName, destination, data, timeout, responseId]];
         return [self.db lastInsertId];
     }];
     

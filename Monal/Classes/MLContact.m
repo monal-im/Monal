@@ -177,4 +177,42 @@ NSString *const kAskSubscribe=@"subscribe";
         || [self.subscription isEqualToString:kSubFrom];
 }
 
++(MLContact*) contactFromJid:(NSString*) jid andAccountNo:(NSString*) accountNo
+{
+    assert(jid != nil);
+    assert(accountNo != nil && accountNo.intValue >= 0);
+    // MLContact* contact = [MLContact contactFromDictionary:[[DataLayer sharedInstance] dictForUsername:jid forAccount:accountNo]];
+    NSDictionary* contactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:jid forAccount:accountNo];
+
+    // check if we know this contact and return a dummy one if not
+    if(contactDict == nil)
+    {
+        DDLogWarn(@"Returning dummy MLContact for %@ on accountNo %@", jid, accountNo);
+        return [self contactFromDictionary:@{
+            @"buddy_name": jid,
+            @"nick_name": @"",
+            @"full_name": @"",
+            @"subscription": kSubNone,
+            @"ask": @"",
+            @"account_id": accountNo,
+            //@"muc_subject": nil,
+            //@"muc_nick": nil,
+            @"Muc": @NO,
+            @"pinned": @NO,
+            @"blocked": @NO,
+            @"encrypt": @NO,
+            @"muted": @NO,
+            @"status": @"",
+            @"state": @"offline",
+            @"count": @0,
+            @"isActiveChat": @NO,
+        }];
+    }
+    else
+    {
+        // add unread message count to contact dict
+        return [self contactFromDictionary:contactDict];
+    }
+}
+
 @end

@@ -398,7 +398,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         [[DataLayer sharedInstance] addActiveBuddies:mucJid forAccount:account.accountNo];
         
         dispatch_async(dispatch_get_main_queue(), ^{
-            MLContact* contact = [[DataLayer sharedInstance] contactForUsername:mucJid forAccount:account.accountNo];
+            MLContact* contact = [MLContact contactFromJid:mucJid andAccountNo:account.accountNo];
             [(ActiveChatsViewController*)self.activeChats presentChatWithRow:contact];
             [(ActiveChatsViewController*)self.activeChats refreshDisplay];
         });
@@ -448,7 +448,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
             completionHandler();
         }];
         
-        MLContact* fromContact = [[DataLayer sharedInstance] contactForUsername:response.notification.request.content.userInfo[@"fromContactJid"] forAccount:response.notification.request.content.userInfo[@"fromContactAccountId"]];
+        MLContact* fromContact = [MLContact contactFromJid:response.notification.request.content.userInfo[@"fromContactJid"] andAccountNo:response.notification.request.content.userInfo[@"fromContactAccountId"]];
         NSString* messageId = response.notification.request.content.userInfo[@"messageId"];
         xmpp* account = [[MLXMPPManager sharedInstance] getConnectedAccountForID:fromContact.accountId];
         NSAssert(fromContact, @"fromContact should not be nil");

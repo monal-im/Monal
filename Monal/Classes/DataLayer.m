@@ -453,11 +453,11 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(MLContact*) contactForUsername:(NSString*) username forAccount:(NSString*) accountNo
+-(NSDictionary*) contactDictionaryForUsername:(NSString*) username forAccount:(NSString*) accountNo
 {
     if(!username || !accountNo)
         return nil;
-    
+
     return [self.db idReadTransaction:^{
         NSArray* results = [self.db executeReader:@"SELECT b.buddy_name, state, status, b.full_name, b.nick_name, Muc, muc_subject, muc_type, muc_nick, b.account_id, lastMessageTime, 0 AS 'count', subscription, ask, IFNULL(pinned, 0) AS 'pinned', blocked, encrypt, muted, \
             CASE \
@@ -474,37 +474,18 @@ static NSDateFormatter* dbFormatter;
                 @"count": [NSNumber numberWithInteger:[results count]],
                 @"results": results ? results : @"(null)"
             }];
-        
-        //check if we know this contact and return a dummy one if not
+
         if([results count] == 0)
         {
-            DDLogWarn(@"Returning dummy MLContact for %@ on accountNo %@", username, accountNo);
-            return [MLContact contactFromDictionary:@{
-                @"buddy_name": username,
-                @"nick_name": @"",
-                @"full_name": @"",
-                @"subscription": kSubNone,
-                @"ask": @"",
-                @"account_id": accountNo,
-                //@"muc_subject": nil,
-                //@"muc_nick": nil,
-                @"Muc": @NO,
-                @"pinned": @NO,
-                @"blocked": @NO,
-                @"encrypt": @NO,
-                @"muted": @NO,
-                @"status": @"",
-                @"state": @"offline",
-                @"count": @0,
-                @"isActiveChat": @NO,
-            }];
+            return (NSMutableDictionary*)nil;
         }
         else
         {
-            //add unread message count to contact dict
+            assert([results count] == 1);
+            // add unread message count to contact dict
             NSMutableDictionary* contact = [results[0] mutableCopy];
             contact[@"count"] = [self countUserUnreadMessages:username forAccount:accountNo];
-            return [MLContact contactFromDictionary:contact];
+            return contact;
         }
     }];
 }
@@ -518,7 +499,7 @@ static NSDateFormatter* dbFormatter;
         NSArray* params = @[likeString, likeString, likeString];
         NSMutableArray<MLContact*>* toReturn = [[NSMutableArray alloc] init];
         for(NSDictionary* dic in [self.db executeReader:query andArguments:params])
-            [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];
+            [toReturn addObject: [MLContact contactFromJid:dic[@"buddy_name"] andAccountNo:dic[@"account_id"]]];
         return toReturn;
     }];
 }
@@ -530,7 +511,7 @@ static NSDateFormatter* dbFormatter;
         NSString* query = @"SELECT B.buddy_name, B.account_id, IFNULL(IFNULL(NULLIF(B.nick_name, ''), NULLIF(B.full_name, '')), B.buddy_name) AS 'sortkey' FROM buddylist AS B INNER JOIN account AS A ON A.account_id=B.account_id WHERE A.enabled=1 AND (A.username || '@' || A.domain)!=buddy_name ORDER BY sortkey COLLATE NOCASE ASC;";
         NSMutableArray* toReturn = [[NSMutableArray alloc] init];
         for(NSDictionary* dic in [self.db executeReader:query])
-            [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];
+            [toReturn addObject:[MLContact contactFromJid:dic[@"buddy_name"] andAccountNo:dic[@"account_id"]]];
         return toReturn;
     }];
 }
@@ -773,7 +754,7 @@ static NSDateFormatter* dbFormatter;
         NSString* query = @"SELECT account_id, buddy_name FROM subscriptionRequests;";
         NSMutableArray* toReturn = [[NSMutableArray alloc] init];
         for(NSDictionary* dic in [self.db executeReader:query])
-            [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];
+            [toReturn addObject:[MLContact contactFromJid:dic[@"buddy_name"] andAccountNo:dic[@"account_id"]]];
         return toReturn;
     }];
 }
@@ -1541,7 +1522,7 @@ static NSDateFormatter* dbFormatter;
                 ORDER BY buddy_name ASC; \
                 " andArguments:@[accountNo]])
             {
-                [toReturn addObject:[self contactForUsername:contact[@"buddy_name"] forAccount:contact[@"account_id"]]];
+                [toReturn addObject:[MLContact contactFromJid:contact[@"buddy_name"] andAccountNo:contact[@"account_id"]]];
             }
         }
         return toReturn;
@@ -1745,7 +1726,7 @@ static NSDateFormatter* dbFormatter;
         NSString* query = @"SELECT a.buddy_name, a.account_id FROM activechats AS a JOIN buddylist AS b ON (a.buddy_name = b.buddy_name AND a.account_id = b.account_id) JOIN account ON a.account_id = account.account_id WHERE (account.username || '@' || account.domain) != a.buddy_name AND a.pinned=? ORDER BY lastMessageTime DESC;";
         NSMutableArray<MLContact*>* toReturn = [[NSMutableArray<MLContact*> alloc] init];
         for(NSDictionary* dic in [self.db executeReader:query andArguments:@[[NSNumber numberWithBool:pinned]]])
-            [toReturn addObject:[self contactForUsername:dic[@"buddy_name"] forAccount:dic[@"account_id"]]];
+            [toReturn addObject:[MLContact contactFromJid:dic[@"buddy_name"] andAccountNo:dic[@"account_id"]]];
         return toReturn;
     }];
 }

@@ -2027,7 +2027,7 @@ enum msgSentState {
     @synchronized(_localMLContactCache) {
         if(_localMLContactCache[cacheKey])
             return _localMLContactCache[cacheKey];
-        return _localMLContactCache[cacheKey] = [[DataLayer sharedInstance] contactForUsername:jid forAccount:accountNo];
+        return _localMLContactCache[cacheKey] = [MLContact contactFromJid:jid andAccountNo:accountNo];
     }
 }
 

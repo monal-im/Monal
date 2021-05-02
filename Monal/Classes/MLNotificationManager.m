@@ -209,7 +209,7 @@
 -(void) showModernNotificaionForMessage:(MLMessage*) message withSound:(BOOL) sound
 {
     UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
-    MLContact* contact = [[DataLayer sharedInstance] contactForUsername:message.buddyName forAccount:message.accountId];
+    MLContact* contact = [MLContact contactFromJid:message.buddyName andAccountNo:message.accountId];
     NSString* idval = [self identifierWithMessage:message];
     
     // Only show contact name if allowed

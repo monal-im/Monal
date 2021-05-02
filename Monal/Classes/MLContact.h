@@ -26,10 +26,9 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 +(NSString*) ownDisplayNameForAccount:(xmpp*) account;
 
-+(MLContact*) contactFromDictionary:(NSDictionary*) dic;
-+(MLContact*) contactFromDictionary:(NSDictionary*) dic withDateFormatter:(NSDateFormatter*) formatter;
 -(BOOL) isSubscribed;
 
++(MLContact*) contactFromJid:(NSString*) jid andAccountNo:(NSString*) accountNo;
 
 /**
  account number in the database should be an integer

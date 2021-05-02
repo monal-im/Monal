@@ -723,7 +723,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
             NSAssert(recipient != nil, @"Recipient missing");
             NSAssert(recipient != nil, @"Recipient missing");
             BOOL encryptMessages = [[DataLayer sharedInstance] shouldEncryptForJid:recipient andAccountNo:accountID];
-            MLContact* contact = [[DataLayer sharedInstance] contactForUsername:recipient forAccount:accountID];
+            MLContact* contact = [MLContact contactFromJid:recipient andAccountNo:accountID];
             
             if([row objectForKey:@"comment"]) {
                 [self sendMessageAndAddToHistory:[row objectForKey:@"comment"] toContact:contact isEncrypted:encryptMessages isUpload:NO withCompletionHandler:^(BOOL successSendObject, NSString* messageIdSentObject) { }];

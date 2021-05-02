@@ -362,7 +362,7 @@ static NSMutableDictionary* _typingNotifications;
                     //update unread count in active chats list
                     if([unread count])
                         [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                            @"contact": [[DataLayer sharedInstance] contactForUsername:buddyName forAccount:account.accountNo]
+                            @"contact": [MLContact contactFromJid:buddyName andAccountNo:account.accountNo],
                         }];
                 }
                 
@@ -374,7 +374,7 @@ static NSMutableDictionary* _typingNotifications;
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalDeletedMessageNotice object:account userInfo:@{
                         @"message": message,
                         @"historyId": historyId,
-                        @"contact": [[DataLayer sharedInstance] contactForUsername:message.buddyName forAccount:account.accountNo],
+                        @"contact": [MLContact contactFromJid:message.buddyName andAccountNo:account.accountNo],
                     }];
                 }
                 else
@@ -386,7 +386,7 @@ static NSMutableDictionary* _typingNotifications;
                         @"message": message,
                         @"historyId": historyId,
                         @"showAlert": @(showAlert),
-                        @"contact": [[DataLayer sharedInstance] contactForUsername:message.buddyName forAccount:account.accountNo],
+                        @"contact": [MLContact contactFromJid:message.buddyName andAccountNo:account.accountNo],
                     }];
                     
                     //try to automatically determine content type of filetransfers
@@ -421,7 +421,7 @@ static NSMutableDictionary* _typingNotifications;
     //handle chat-markers in groupchats slightly different
     if([messageNode check:@"{urn:xmpp:chat-markers:0}displayed@id"] && ownNick != nil)
     {
-        MLContact* groupchatContact = [[DataLayer sharedInstance] contactForUsername:buddyName forAccount:account.accountNo];
+        MLContact* groupchatContact = [MLContact contactFromJid:buddyName andAccountNo:account.accountNo];
         //ignore unknown groupchats or channel-type mucs or stanzas from the groupchat itself (e.g. not from a participant having a full jid)
         if(groupchatContact.isGroup && [groupchatContact.mucType isEqualToString:@"group"] && messageNode.fromResource)
         {
@@ -485,7 +485,7 @@ static NSMutableDictionary* _typingNotifications;
             
             //update unread count in active chats list
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                @"contact": [[DataLayer sharedInstance] contactForUsername:messageNode.toUser forAccount:account.accountNo]
+                @"contact": [MLContact contactFromJid:messageNode.toUser andAccountNo:account.accountNo]
             }];
         }
     }

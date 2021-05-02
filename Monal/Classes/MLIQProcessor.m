@@ -243,9 +243,7 @@ $$
         }
         else
         {
-            MLContact* contactObj = [[MLContact alloc] init];
-            contactObj.contactJid = [contact objectForKey:@"jid"];
-            contactObj.accountId = account.accountNo;
+            MLContact* contactObj = [MLContact contactFromJid:[contact objectForKey:@"jid"] andAccountNo:account.accountNo];
 
             if([[contact objectForKey:@"subscription"] isEqualToString:kSubFrom]) //already subscribed
             {
@@ -270,7 +268,7 @@ $$
                                              andAccount:account.accountNo];
             
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                @"contact": [[DataLayer sharedInstance] contactForUsername:[contact objectForKey:@"jid"] forAccount:account.accountNo]
+                @"contact": [MLContact contactFromJid:[contact objectForKey:@"jid"] andAccountNo:account.accountNo]
             }];
         }
     }

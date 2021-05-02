@@ -2864,15 +2864,17 @@ enum msgSentState {
 # pragma mark - Upload Queue (Backend)
 -(void) addDocumentsToQueue:(NSArray<NSURL*>*) urls
 {
+    NSMutableArray<MLUploadQueueItem*>* newItems = [[NSMutableArray<MLUploadQueueItem*> alloc] init];
     for(NSUInteger i = 0; i < urls.count; i++)
     {
-        [self.uploadQueue addObject:[[MLUploadQueueItem alloc] initWithURL:urls[i]]];
+        [newItems addObject:[[MLUploadQueueItem alloc] initWithURL:urls[i]]];
     }
-    [self addToUIQueue:urls.count];
+    [self addToUIQueue:newItems];
 }
 
 -(void) addImagesToQueue:(NSArray<NSURL*>*) urls
 {
+    NSMutableArray<MLUploadQueueItem*>* newItems = [[NSMutableArray<MLUploadQueueItem*> alloc] init];
     for(NSUInteger i = 0; i < urls.count; i++)
     {
         UIImage* image = [UIImage imageWithData:[NSData dataWithContentsOfURL:urls[i]]];
@@ -2883,22 +2885,23 @@ enum msgSentState {
                 DDLogError(@"Fallback to image URL did not work! Error: %@", error.localizedDescription);
                 return;
             }
-            [self.uploadQueue addObject:[[MLUploadQueueItem alloc] initWithURL:urls[i]]];
+            [newItems addObject:[[MLUploadQueueItem alloc] initWithURL:urls[i]]];
         } else {
-            [self.uploadQueue addObject:[[MLUploadQueueItem alloc] initWithImage:image imageUrl:urls[i]]];
+            [newItems addObject:[[MLUploadQueueItem alloc] initWithImage:image imageUrl:urls[i]]];
         }
     }
-    [self addToUIQueue:urls.count];
+    [self addToUIQueue:newItems];
 }
 
 // raw image -> no URL info to check duplicates
 -(void) addRawImagesToQueue:(NSArray<UIImage*>*) images
 {
+    NSMutableArray<MLUploadQueueItem*>* newItems = [[NSMutableArray<MLUploadQueueItem*> alloc] init];
     for(NSUInteger i = 0; i < images.count; i++)
     {
-        [self.uploadQueue addObject:[[MLUploadQueueItem alloc] initWithImage:images[i]]];
+        [newItems addObject:[[MLUploadQueueItem alloc] initWithImage:images[i]]];
     }
-    [self addToUIQueue:images.count];
+    [self addToUIQueue:newItems];
 }
 
 -(void) handleMediaUploadCompletion:(NSString*) url withMime:(NSString*) mimeType withSize:(NSNumber*) size withError:(NSError*) error
@@ -2957,25 +2960,34 @@ enum msgSentState {
 }
 
 # pragma mark - Upload Queue (UI)
--(void) addToUIQueue:(NSUInteger) newItems;
+-(void) addToUIQueue:(NSArray<MLUploadQueueItem*>*) newItems;
 {
-    if(self.uploadQueue.count - newItems == 0) // Queue was previously empty
+    if(self.uploadQueue.count == 0 && newItems.count > 0) // Queue was previously empty but will be filled now
     {
         [NSLayoutConstraint activateConstraints:@[self.uploadMenuConstraint]];
-        // Force reload of view because this fails after the queue was emptied once otherwise
+        // Force reload of view because this fails after the queue was emptied once otherwise. The '+' cell may also not be in the collection view yet when this function is called.
+        [self.uploadQueue addObjectsFromArray:newItems];
+        [self.uploadMenuView reloadSections:[NSIndexSet indexSetWithIndex:0]];
         [self.uploadMenuView setNeedsDisplay];
         [self.uploadMenuView layoutIfNeeded];
         [CATransaction flush];
+        [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
+        return;
     }
     [self.uploadMenuView performBatchUpdates:^{
-        /* for(NSUInteger i = self.uploadQueue.count - newItems + 1; i < self.uploadQueue.count; i++)
+        // Move '+' to the end of the queue
+        [self.uploadMenuView moveItemAtIndexPath:[NSIndexPath indexPathForItem:(self.uploadQueue.count) inSection:0] toIndexPath:[NSIndexPath indexPathForItem:(self.uploadQueue.count + newItems.count) inSection:0]];
+        // Add all new elements
+        // for(NSUInteger i = self.uploadQueue.count - newItems; i < self.uploadQueue.count; i++)
+        NSUInteger start = self.uploadQueue.count;
+        for(NSUInteger i = 0; i < newItems.count; i++)
         {
-            [self.uploadMenuView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:(i) inSection:0]]];
-        }*/
+            [self.uploadQueue addObject:newItems[i]];
+            [self.uploadMenuView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:(start + i) inSection:0]]];
+        }
     } completion:^(BOOL finished)
     {
         [self.uploadMenuView scrollToItemAtIndexPath:[NSIndexPath indexPathForItem:self.uploadQueue.count inSection:0] atScrollPosition:UICollectionViewScrollPositionRight animated:YES];
-        [self.uploadMenuView reloadSections:[NSIndexSet indexSetWithIndex:0]]; // FIXME jan
     }];
     [self setSendButtonIconWithTextLength:[self.chatInput.text length]];
 }

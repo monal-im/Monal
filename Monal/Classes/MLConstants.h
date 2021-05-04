@@ -63,6 +63,7 @@ typedef enum NotificationPrivacySettingOption {
 
 //all other constants needed
 #define kMonalNewMessageNotice @"kMLNewMessageNotice"
+#define kMonalMucSubjectChanged @"kMonalMucSubjectChanged"
 #define kMonalDeletedMessageNotice @"kMonalDeletedMessageNotice"
 #define kMonalDisplayedMessageNotice @"kMonalDisplayedMessageNotice"
 #define kMonalHistoryMessagesNotice @"kMonalHistoryMessagesNotice"

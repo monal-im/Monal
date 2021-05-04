@@ -1531,13 +1531,12 @@ NSString *const kData=@"data";
             //only process mam results when they are *not* for priming the database with the initial stanzaid (the id will be taken from the iq result)
             //we do this because we don't want to randomly add one single message to our history db after the user installs the app / adds a new account
             //if the user wants to see older messages he can retrieve them using the ui (endless upscrolling through mam)
-            if(!([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLignore:"]))
-                [MLMessageProcessor processMessage:messageNode andOuterMessage:outerMessageNode forAccount:self];
-            
-            //add newest stanzaid to database *after* processing the message, but only for non-mam messages or mam catchup
-            //(e.g. those messages going forward in time not backwards)
+            //we don't want to process messages going backwards in time, too (e.g. MLhistory:* mam queries)
             if(![outerMessageNode check:@"{urn:xmpp:mam:2}result"] || [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLcatchup:"])
             {
+                //process message
+                [MLMessageProcessor processMessage:messageNode andOuterMessage:outerMessageNode forAccount:self];
+                
                 NSString* stanzaid = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];
                 //extract stanza-id from message itself and check stanza-id @by according to the rules outlined in XEP-0359
                 if(!stanzaid)
@@ -1560,6 +1559,8 @@ NSString *const kData=@"data";
                     [[DataLayer sharedInstance] setLastStanzaId:stanzaid forAccount:self.accountNo];
                 }
             }
+            else if([[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLhistory:"])
+                [self addMessageToMamPageArray:@{@"outerMessageNode": outerMessageNode, @"messageNode": messageNode}];       //add message to mam page array to be processed later
             
             //only mark stanza as handled *after* processing it
             [self incrementLastHandledStanza];
@@ -2745,42 +2746,83 @@ NSString *const kData=@"data";
 
 -(void) setMAMQueryMostRecentForContact:(MLContact*) contact before:(NSString*) uid withCompletion:(void (^)(NSArray* _Nullable)) completion
 {
-    NSString* jid = contact.contactJid;
-    NSMutableArray* __block messageList = [[NSMutableArray alloc] init];
+    //the completion handler will get nil, if an error prevented us toget any messaes, an empty array, if the upper end of our archive was reached or an array
+    //of newly loaded mlmessages in all other cases
+    unsigned int __block retrievedBodies = 0;
+    NSMutableArray* __block pageList = [[NSMutableArray alloc] init];
+    void __block (^query)(NSString* before);
     monal_iq_handler_t __block responseHandler;
-    __block void (^query)(NSString* before);
-    responseHandler = ^(XMPPIQ* response) {
-        //insert messages having a body into the db and check if they are alread in there
-        for(MLMessage* msg in [self getOrderedMamPageFor:[response findFirst:@"{urn:xmpp:mam:2}fin@queryid"]])
-            if(msg.messageText)
-            {
-                NSNumber* historyId = [[DataLayer sharedInstance] 
-                                     addMessageToChatBuddy:msg.buddyName
-                                            withInboundDir:msg.inbound
-                                                forAccount:self.accountNo
-                                                  withBody:msg.messageText
-                                              actuallyfrom:msg.actualFrom
-                                            participantJid:msg.participantJid
-                                                      sent:YES              //old history messages have always been sent (they are coming from the server)
-                                                    unread:NO               //old history messages have always been read (we don't want to show them as new)
-                                                 messageId:msg.messageId
-                                           serverMessageId:msg.stanzaId
-                                               messageType:msg.messageType
-                                           andOverrideDate:msg.delayTimeStamp
-                                                 encrypted:msg.encrypted
-                                                 backwards:YES
-                                       displayMarkerWanted:NO
-                ];
-                msg.messageDBId = historyId;        //retrofit messageDBId
-                //add successfully added messages to our display list
-                if(historyId != nil)
-                    [messageList addObject:msg];
-            }
+    monal_void_block_t callUI = ^{
+        //if we did not retrieve any body messages we don't need to process metadata sanzas (if any), but signal we reached the end of our archive
+        //callUI() will only be called with retrievedBodies == 0 if we reached the upper end of our mam archive, because iq errors have already been
+        //handled in the iq error handler below
+        if(retrievedBodies == 0)
+        {
+            completion(@[]);
+            return;
+        }
         
-        DDLogDebug(@"collected mam:2 before-pages now contain %lu messages in summary not already in history", (unsigned long)[messageList count]);
-        //call completion to display all messages saved in db if we have enough messages or reached end of mam archive
-        if([messageList count] >= 25)
-            completion(messageList);
+        NSMutableArray* __block historyIdList = [[NSMutableArray alloc] init];
+        NSNumber* __block historyId = [NSNumber numberWithInt:[[[DataLayer sharedInstance] getSmallestHistoryId] intValue] - retrievedBodies];
+        
+        //process all queued mam stanzas in a dedicated db write transaction
+        [[DataLayer sharedInstance] createTransaction:^{
+            //ignore all notifications generated while processing the queued stanzas
+            [MLNotificationQueue queueNotificationsInBlock:^{
+                //iterate through all pages and their messages forward in time (pages have already been sorted forward in time internally)
+                for(NSArray* page in [[pageList reverseObjectEnumerator] allObjects])
+                {
+                    //process received message stanzas and manipulate the db accordingly
+                    //if a new message got added to the history db, the message processor will return a MLMessage instance containing the history id of the newly created entry
+                    for(NSDictionary* data in page)
+                    {
+                        DDLogVerbose(@"Handling mam page entry: %@", data);
+                        MLMessage* msg = [MLMessageProcessor processMessage:data[@"messageNode"] andOuterMessage:data[@"outerMessageNode"] forAccount:self withHistoryId:historyId];
+                        //add successfully added messages to our display list
+                        //stanzas not transporting a body will be processed, too, but the message processor will return nil for these
+                        if(msg != nil)
+                        {
+                            [historyIdList addObject:msg.messageDBId];      //we only need the history id to fetch a fresh copy later
+                            historyId = [NSNumber numberWithInt:[historyId intValue] + 1];      //calculate next history id
+                        }
+                    }
+                }
+                
+                //throw away all queued notifications before leaving this context
+                [(MLNotificationQueue*)[MLNotificationQueue currentQueue] clear];
+            } onQueue:@"MLhistoryIgnoreQueue"];
+        }];
+        
+        DDLogDebug(@"collected mam:2 before-pages now contain %lu messages in summary not already in history", (unsigned long)[historyIdList count]);
+        NSAssert([historyIdList count] <= retrievedBodies, @"did add more messages to historydb table than bodies collected!");
+        if([historyIdList count] < retrievedBodies)
+            DDLogWarn(@"Got %lu mam history messages already contained in history db, possibly ougoing messages that did not have a stanzaid yet!", (unsigned long)(retrievedBodies - [historyIdList count]));
+        if(![historyIdList count])
+            completion(nil);            //call completion with nil to signal an error, if we could not get any messages not yet in history db
+        else
+        {
+            //query db (again) for the real MLMessage to account for changes in history table by non-body metadata messages received after the body-message
+            completion([[DataLayer sharedInstance] messagesForHistoryIDs:historyIdList]);
+        }
+    };
+    responseHandler = ^(XMPPIQ* response) {
+        NSMutableArray* mamPage = [self getOrderedMamPageFor:[response findFirst:@"{urn:xmpp:mam:2}fin@queryid"]];
+        
+        //count new bodies
+        for(NSDictionary* data in mamPage)
+            if([data[@"messageNode"] check:@"body#"])
+                retrievedBodies++;
+        
+        //add new mam page to page list
+        [pageList addObject:mamPage];
+        
+        //check if we need to load more messages
+        if(retrievedBodies > 25)
+        {
+            //call completion to display all messages saved in db
+            callUI();
+        }
+        //query fo more messages or call completion to display all messages saved in db if we reached the end of our mam archive
         else
         {
             //page through to get more messages (a page possibly contains fewer than 25 messages having a body)
@@ -2794,8 +2836,10 @@ NSString *const kData=@"data";
             }
             else
             {
-                DDLogDebug(@"Reached upper end of mam:2 archive, returning %lu messages to ui", (unsigned long)[messageList count]);
-                completion(messageList);    //can be fewer than 25 messages because we reached the upper end of the mam archive
+                DDLogDebug(@"Reached upper end of mam:2 archive, returning %lu messages to ui", (unsigned long)retrievedBodies);
+                //can be fewer than 25 messages because we reached the upper end of the mam archive
+                //even zero body-messages could be true
+                callUI();
             }
         }
     };
@@ -2804,26 +2848,29 @@ NSString *const kData=@"data";
         if(contact.isGroup)
         {
             if(!before)
-                before = [[DataLayer sharedInstance] lastStanzaIdForMuc:jid andAccount:self.accountNo];
-            [query setiqTo:jid];
+                before = [[DataLayer sharedInstance] lastStanzaIdForMuc:contact.contactJid andAccount:self.accountNo];
+            [query setiqTo:contact.contactJid];
             [query setMAMQueryLatestMessagesForJid:nil before:before];
         }
         else
         {
             if(!before)
                 before = [[DataLayer sharedInstance] lastStanzaIdForAccount:self.accountNo];
-            [query setMAMQueryLatestMessagesForJid:jid before:before];
+            [query setMAMQueryLatestMessagesForJid:contact.contactJid before:before];
         }
         DDLogDebug(@"Loading (next) mam:2 page before: %@", before);
         //we always want to use blocks here because we want to make sure we get not interrupted by an app crash/restart
         //which would make us use incomplete mam pages that would produce holes in history (those are very hard to remove/fill afterwards)
         [self sendIq:query withResponseHandler:responseHandler andErrorHandler:^(XMPPIQ* error) {
-            DDLogWarn(@"Got mam:2 before-query error, returning %lu messages to ui", (unsigned long)[messageList count]);
+            DDLogWarn(@"Got mam:2 before-query error, returning %lu messages to ui", (unsigned long)retrievedBodies);
             [HelperTools postError:NSLocalizedString(@"Could not load (all) old messages", @"") withNode:error andAccount:self andIsSevere:NO];
-            if(![messageList count])
-                completion(nil);            //call completion with nil, if there was an error or xmpp reconnect that prevented us to get any messages
+            if(retrievedBodies == 0)
+                completion(nil);            //call completion with nil, if there was an error or xmpp reconnect that prevented us to get any body-messages
             else
-                completion(messageList);    //we had an error but did already load some messages --> update ui anyways
+            {
+                //we had an error but we did already load some body-messages --> update ui anyways
+                callUI();
+            }
         }];
     };
     query(uid);
@@ -3434,53 +3481,24 @@ NSString *const kData=@"data";
     }
 }
 
--(MLMessage*) parseMessageToMLMessage:(XMPPMessage*) messageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andMessageType:(NSString*) messageType andActualFrom:(NSString*) actualFrom
+-(void) addMessageToMamPageArray:(NSDictionary*) messageDictionary
 {
-    //inbound value for 1:1 chats
-    BOOL inbound = [messageNode.toUser isEqualToString:self.connectionProperties.identity.jid];
-    //inbound value for groupchat messages
-    if([messageNode check:@"/<type=groupchat>"] && messageNode.fromResource)
-        inbound = ![actualFrom isEqualToString:[[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser forAccount:self.accountNo]];
-    MLMessage* message = [[MLMessage alloc] init];
-    message.buddyName = [messageNode.fromUser isEqualToString:self.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser;
-    message.inbound = inbound;
-    message.actualFrom = actualFrom ? actualFrom : messageNode.fromUser;
-    message.messageText = [body copy];     //this need to be the processed value since it may be decrypted
-    message.isMuc = [messageNode check:@"/<type=groupchat>"];
-    message.messageId = [messageNode check:@"/@id"] ? [messageNode findFirst:@"/@id"] : [[NSUUID UUID] UUIDString];
-    message.accountId = self.accountNo;
-    message.encrypted = encrypted;
-    message.delayTimeStamp = [messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"];
-    message.timestamp = [NSDate date];
-    message.messageType = messageType;
-    message.hasBeenSent = YES;      //if it came in it has been sent to the server
-    message.stanzaId = [messageNode findFirst:@"{urn:xmpp:sid:0}stanza-id@id"];
-    message.displayMarkerWanted = [messageNode check:@"{urn:xmpp:chat-markers:0}markable"];
-    return message;
-}
-
--(void) addMessageToMamPageArray:(XMPPMessage*) messageNode forOuterMessageNode:(XMPPMessage*) outerMessageNode withBody:(NSString*) body andEncrypted:(BOOL) encrypted andMessageType:(NSString*) messageType andActualFrom:(NSString*) actualFrom
-{
-    MLMessage* message = [self parseMessageToMLMessage:messageNode withBody:body andEncrypted:encrypted andMessageType:messageType andActualFrom:actualFrom];
-    message.stanzaId = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@id"];       //use the stanza id provided directly by mam
     @synchronized(_mamPageArrays) {
-        if(!_mamPageArrays[[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]])
-            _mamPageArrays[[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]] = [[NSMutableArray alloc] init];
-        [_mamPageArrays[[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]] addObject:message];
+        if(!_mamPageArrays[[messageDictionary[@"outerMessageNode"] findFirst:@"{urn:xmpp:mam:2}result@queryid"]])
+            _mamPageArrays[[messageDictionary[@"outerMessageNode"] findFirst:@"{urn:xmpp:mam:2}result@queryid"]] = [[NSMutableArray alloc] init];
+        [_mamPageArrays[[messageDictionary[@"outerMessageNode"] findFirst:@"{urn:xmpp:mam:2}result@queryid"]] addObject:messageDictionary];
     }
 }
 
--(NSArray* _Nullable) getOrderedMamPageFor:(NSString*) mamQueryId
+-(NSMutableArray*) getOrderedMamPageFor:(NSString*) mamQueryId
 {
-    NSArray* array;
+    NSMutableArray* array;
     @synchronized(_mamPageArrays) {
-        if(!_mamPageArrays[mamQueryId])
-            return @[];     //return empty array if nothing can be found (after app crash etc.)
-        array = [_mamPageArrays[mamQueryId] copy];          //this creates an unmutable array from the mutable one
+        if(_mamPageArrays[mamQueryId] == nil)
+            return [[NSMutableArray alloc] init];       //return empty array if nothing can be found (after app crash etc.)
+        array = _mamPageArrays[mamQueryId];
         [_mamPageArrays removeObjectForKey:mamQueryId];
     }
-    if([mamQueryId hasPrefix:@"MLhistory:"])
-        array = [[array reverseObjectEnumerator] allObjects];
     return array;
 }
 

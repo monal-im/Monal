@@ -162,11 +162,12 @@ extern NSString* const kMessageTypeFiletransfer;
  */
 -(NSArray<MLMessage*>*) messagesForHistoryIDs:(NSArray<NSNumber*>*) historyIDs;
 -(MLMessage* _Nullable) messageForHistoryID:(NSNumber* _Nullable) historyID;
+-(NSNumber*) getSmallestHistoryId;
 
 /*
  adds a specified message to the database
  */
--(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom participantJid:(NSString*_Nullable) participantJid sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted backwards:(BOOL) backwards displayMarkerWanted:(BOOL) displayMarkerWanted;
+-(NSNumber*) addMessageToChatBuddy:(NSString*) buddyName withInboundDir:(BOOL) inbound forAccount:(NSString*) accountNo withBody:(NSString*) message actuallyfrom:(NSString*) actualfrom participantJid:(NSString*_Nullable) participantJid sent:(BOOL) sent unread:(BOOL) unread messageId:(NSString*) messageid serverMessageId:(NSString*) stanzaid messageType:(NSString*) messageType andOverrideDate:(NSDate*) messageDate encrypted:(BOOL) encrypted displayMarkerWanted:(BOOL) displayMarkerWanted usingHistoryId:(NSNumber* _Nullable) historyId;
 
 /*
  Marks a message as sent. When the server acked it
@@ -196,7 +197,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) updateMessageHistory:(NSNumber*) messageNo withText:(NSString*) newText;
 -(NSNumber* _Nullable) getHistoryIDForMessageId:(NSString*) messageid from:(NSString*) from andAccount:(NSString*) accountNo;
 
--(BOOL) checkLMCEligible:(NSNumber*) historyID from:(NSString*) from encrypted:(BOOL) encrypted;
+-(BOOL) checkLMCEligible:(NSNumber*) historyID encrypted:(BOOL) encrypted isMLhistory:(BOOL) isMLhistory;
 
 #pragma mark - message history
 

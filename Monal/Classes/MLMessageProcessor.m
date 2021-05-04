@@ -33,8 +33,29 @@ static NSMutableDictionary* _typingNotifications;
     _typingNotifications = [[NSMutableDictionary alloc] init];
 }
 
-+(void) processMessage:(XMPPMessage*) messageNode andOuterMessage:(XMPPMessage*) outerMessageNode forAccount:(xmpp*) account
++(MLMessage* _Nullable) processMessage:(XMPPMessage*) messageNode andOuterMessage:(XMPPMessage*) outerMessageNode forAccount:(xmpp*) account
 {
+    return [self processMessage:messageNode andOuterMessage:outerMessageNode forAccount:account withHistoryId:nil];
+}
+
++(MLMessage* _Nullable) processMessage:(XMPPMessage*) messageNode andOuterMessage:(XMPPMessage*) outerMessageNode forAccount:(xmpp*) account withHistoryId:(NSNumber* _Nullable) historyIdToUse
+{
+    NSAssert(messageNode != nil, @"messageNode should not be nil!");
+    NSAssert(outerMessageNode != nil, @"outerMessageNode should not be nil!");
+    NSAssert(account != nil, @"account should not be nil!");
+    
+    //this will be the return value f tis method
+    //(a valid MLMessage, if this was a new message added to the db or nil, if it was another stanza not added
+    //directly to the message_history table (but possibly altering it, e.g. marking someentr as read)
+    MLMessage* message = nil;
+    
+    //history messages have already been collected mam-page wise and reordered before they are inserted into db db
+    //(that's because mam always sorts the messages in a page by timestamp in ascending order)
+    BOOL isMLhistory = NO;
+    if([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLhistory:"])
+        isMLhistory = YES;
+    NSAssert(!isMLhistory || historyIdToUse != nil, @"processing of MLhistory: mam messages is only possible if a history id was given");
+    
     if([messageNode check:@"/<type=error>"])
     {
         DDLogError(@"Error type message received");
@@ -42,7 +63,7 @@ static NSMutableDictionary* _typingNotifications;
         if(![messageNode check:@"/@id"])
         {
             DDLogError(@"Ignoring error messages having an empty ID");
-            return;
+            return message;
         }
         
         NSString* errorType = [messageNode findFirst:@"error@type"];
@@ -69,22 +90,22 @@ static NSMutableDictionary* _typingNotifications;
             @"errorReason": errorText
         }];
 
-        return;
+        return message;
     }
     
     //ignore prosody mod_muc_notifications muc push stanzas (they are only needed to trigger an apns push)
     if([messageNode check:@"{http://quobis.com/xmpp/muc#push}notification"])
-        return;
+        return message;
     
     if([messageNode check:@"/<type=headline>/{http://jabber.org/protocol/pubsub#event}event"])
     {
         [account.pubsub handleHeadlineMessage:messageNode];
-        return;
+        return message;
     }
     
     //ignore self messages after this (only pubsub data is from self)
     if([messageNode.fromUser isEqualToString:messageNode.toUser])
-        return;
+        return message;
     
     //ignore muc PMs (after discussion with holger we don't want to support that)
     if(![[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"] && [messageNode check:@"{http://jabber.org/protocol/muc#user}x"])
@@ -98,7 +119,7 @@ static NSMutableDictionary* _typingNotifications;
         ] andData:nil]];
         [errorReply setStoreHint];
         [account send:errorReply];
-        return;
+        return message;
     }
     
     if([[messageNode findFirst:@"/@type"] isEqualToString:@"groupchat"])
@@ -108,7 +129,7 @@ static NSMutableDictionary* _typingNotifications;
         {
             // ignore message
             DDLogWarn(@"Ignoring groupchat message from %@", messageNode.toUser);
-            return;
+            return message;
         }
     }
     else
@@ -142,17 +163,16 @@ static NSMutableDictionary* _typingNotifications;
     
     //handle muc status changes or invites (this checks for the muc namespace itself)
     if([MLMucProcessor processMessage:messageNode forAccount:account])
-        return;     //the muc processor said we have stop processing
+        return message;     //the muc processor said we have stop processing
     
     NSString* decrypted;
     if([messageNode check:@"/{jabber:client}message/{eu.siacs.conversations.axolotl}encrypted/header"])
     {
         NSString* queryId = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"];
-        if(queryId && [queryId hasPrefix:@"MLhistory:"]) {
+        if(queryId && [queryId hasPrefix:@"MLhistory:"])
             decrypted = NSLocalizedString(@"Message was encrypted with omemo and can't be decrypted anymore", @"");
-        } else {
+        else
             decrypted = [account.omemo decryptMessage:messageNode];
-        }
     }
     
     NSString* buddyName = [messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] ? messageNode.toUser : messageNode.fromUser;
@@ -177,35 +197,37 @@ static NSMutableDictionary* _typingNotifications;
     
     if([messageNode check:@"/<type=groupchat>/subject#"])
     {
-        NSString* subject = [messageNode findFirst:@"/<type=groupchat>/subject#"];
-        NSString* currentSubject = [[DataLayer sharedInstance] mucSubjectforAccount:account.accountNo andRoom:messageNode.fromUser];
-        DDLogInfo(@"Got MUC subject for %@: %@", messageNode.fromUser, subject);
-        
-        if(subject == nil || [subject isEqualToString:currentSubject])
-            return;
-        
-        DDLogVerbose(@"Updating subject in database: %@", subject);
-        [[DataLayer sharedInstance] updateMucSubject:subject forAccount:account.accountNo andRoom:messageNode.fromUser];
-        
-        //TODO: this stuff has to be changed (why send a kMonalNewMessageNotice instead of a special kMonalMucSubjectChanged one?)
-        MLMessage* message = [account parseMessageToMLMessage:messageNode withBody:subject andEncrypted:NO andMessageType:kMessageTypeStatus andActualFrom:actualFrom];
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalNewMessageNotice object:account userInfo:@{
-            @"message": message,
-            @"subject": subject,
-        }];
-        return;
+        if(!isMLhistory)
+        {
+            NSString* subject = [messageNode findFirst:@"/<type=groupchat>/subject#"];
+            NSString* currentSubject = [[DataLayer sharedInstance] mucSubjectforAccount:account.accountNo andRoom:messageNode.fromUser];
+            DDLogInfo(@"Got MUC subject for %@: %@", messageNode.fromUser, subject);
+            
+            if(subject == nil || [subject isEqualToString:currentSubject])
+                return message;
+            
+            DDLogVerbose(@"Updating subject in database: %@", subject);
+            [[DataLayer sharedInstance] updateMucSubject:subject forAccount:account.accountNo andRoom:messageNode.fromUser];
+            
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalMucSubjectChanged object:account userInfo:@{
+                @"room": messageNode.fromUser,
+                @"subject": subject,
+            }];
+        }
+        return message;
     }
     
     //ignore all other groupchat messages coming from bare jid (only handle subject updates above)
     if([messageNode check:@"/<type=groupchat>"] && !messageNode.fromResource)
-        return;
+        return message;
     
     if([messageNode check:@"body"] || decrypted)
     {
         BOOL unread = YES;
         BOOL showAlert = YES;
         
-        //if incoming or mam catchup we do want an alert, otherwise we don't
+        //if incoming or mam catchup we DO want an alert, otherwise we don't
+        //this will set unread=NO for MLhistory mssages, too (which is desired)
         if(
             !inbound ||
             (
@@ -246,16 +268,6 @@ static NSMutableDictionary* _typingNotifications;
         }
         DDLogInfo(@"Got message of type: %@", messageType);
         
-        //history messages have to be collected mam-page wise and reordered before inserted into db
-        //because mam always sorts the messages in a page by timestamp in ascending order
-        //we don't want to call postPersistAction, too, beause we don't want to display push notifications for old messages
-        if([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLhistory:"])
-        {
-            DDLogInfo(@"Adding message to mam page array to be inserted into history later on");
-            [account addMessageToMamPageArray:messageNode forOuterMessageNode:outerMessageNode withBody:body andEncrypted:encrypted andMessageType:messageType andActualFrom:actualFrom];
-            return;
-        }
-        
         if(body)
         {
             NSNumber* historyId = nil;
@@ -266,7 +278,7 @@ static NSMutableDictionary* _typingNotifications;
             {
                 NSString* messageIdToReplace = [messageNode findFirst:@"{urn:xmpp:message-correct:0}replace@id"];
                 historyId = [[DataLayer sharedInstance] getHistoryIDForMessageId:messageIdToReplace from:messageNode.fromUser andAccount:account.accountNo];
-                if([[DataLayer sharedInstance] checkLMCEligible:historyId from:messageNode.fromUser encrypted:encrypted])
+                if([[DataLayer sharedInstance] checkLMCEligible:historyId encrypted:encrypted isMLhistory:isMLhistory])
                 {
                     if(![body isEqualToString:kMessageDeletedBody])
                         [[DataLayer sharedInstance] updateMessageHistory:historyId withText:body];
@@ -294,18 +306,20 @@ static NSMutableDictionary* _typingNotifications;
                                        messageType:messageType
                                    andOverrideDate:[messageNode findFirst:@"{urn:xmpp:delay}delay@stamp|datetime"]
                                          encrypted:encrypted
-                                         backwards:NO
                                displayMarkerWanted:[messageNode check:@"{urn:xmpp:chat-markers:0}markable"]
+                                    usingHistoryId:historyIdToUse
                 ];
             }
             
-            MLMessage* message = [[DataLayer sharedInstance] messageForHistoryID:historyId];
+            message = [[DataLayer sharedInstance] messageForHistoryID:historyId];
             if(message != nil && historyId != nil)      //check historyId to make static analyzer happy
             {
+                //send receive markers if requested, but DON'T do so for MLhistory messages
                 if(
                     [[HelperTools defaultsDB] boolForKey:@"SendReceivedMarkers"] &&
                     ([messageNode check:@"{urn:xmpp:receipts}request"] || [messageNode check:@"{urn:xmpp:chat-markers:0}markable"]) &&
-                    ![messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid]
+                    ![messageNode.fromUser isEqualToString:account.connectionProperties.identity.jid] &&
+                    !isMLhistory
                 )
                 {
                     XMPPMessage* receiptNode = [[XMPPMessage alloc] init];
@@ -322,9 +336,10 @@ static NSMutableDictionary* _typingNotifications;
 
                 //check if we have an outgoing message sent from another client on our account
                 //if true we can mark all messages from this buddy as already read by us (using the other client)
+                //this only holds rue for non-MLhistory messages of course
                 //WARNING: kMonalMessageDisplayedNotice goes to chatViewController, kMonalDisplayedMessageNotice goes to MLNotificationManager and activeChatsViewController/chatViewController
                 //e.g.: kMonalMessageDisplayedNotice means "remote party read our message" and kMonalDisplayedMessageNotice means "we read a message"
-                if(body && stanzaid && !inbound)
+                if(body && stanzaid && !inbound && !isMLhistory)
                 {
                     DDLogInfo(@"Got outgoing message to contact '%@' sent by another client, removing all notifications for unread messages of this contact", buddyName);
                     NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:buddyName andAccount:account.accountNo tillStanzaId:stanzaid wasOutgoing:NO];
@@ -372,9 +387,6 @@ static NSMutableDictionary* _typingNotifications;
         }
     }
     
-    if([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLhistory:"])
-        return;
-    
     //handle message receipts
     if(
         ([messageNode check:@"{urn:xmpp:receipts}received@id"] || [messageNode check:@"{urn:xmpp:chat-markers:0}received@id"]) &&
@@ -417,10 +429,9 @@ static NSMutableDictionary* _typingNotifications;
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalDisplayedMessageNotice object:account userInfo:@{@"message":msg}];
                 
                 //update unread count in active chats list
-                if([unread count])
-                    [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                        @"contact": groupchatContact
-                    }];
+                [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+                    @"contact": groupchatContact
+                }];
             }
             //incoming chat markers from participant
             //this will mark groupchat messages as read as soon as one of the participants sends a displayed chat-marker
@@ -469,8 +480,8 @@ static NSMutableDictionary* _typingNotifications;
         }
     }
     
-    //handle typing notifications but ignore them in appex
-    if(![HelperTools isAppExtension])
+    //handle typing notifications but ignore them in appex or for history fetches
+    if(![HelperTools isAppExtension] && !([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLhistory:"]))
     {
         //only use "is typing" messages when not older than 2 minutes (always allow "not typing" messages)
         if(
@@ -528,6 +539,8 @@ static NSMutableDictionary* _typingNotifications;
             }
         }
     }
+    
+    return message;
 }
 
 @end

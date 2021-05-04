@@ -2239,7 +2239,7 @@ enum msgSentState {
     }
     
     //only allow editing for the 3 newest message && only on outgoing messages
-    if([[DataLayer sharedInstance] checkLMCEligible:message.messageDBId from:self.xmppAccount.connectionProperties.identity.jid encrypted:(message.encrypted | self.contact.isEncrypted)])
+    if([[DataLayer sharedInstance] checkLMCEligible:message.messageDBId encrypted:(message.encrypted | self.contact.isEncrypted) isMLhistory:NO])
         return [UISwipeActionsConfiguration configurationWithActions:@[
             LMCEditAction,
             LMCDeleteAction,

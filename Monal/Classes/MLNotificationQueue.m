@@ -34,7 +34,6 @@
     [stack addObject:queue];
     //call the context our contextmanager manages (a monal_void_block_t block)
     block();
-    DDLogDebug(@"Flushing queue, current stack: %@", stack);
     //remove own queue from stack again
     [stack removeLastObject];
     //this will deallocate and flush the queue to the next queue in our stack (or send them to the notification center if no queue is left on the stack)
@@ -81,6 +80,7 @@
 
 -(NSUInteger) flush
 {
+    DDLogDebug(@"Flushing queue '%@', current stack: %@", [self name], [[[[self class] getThreadLocalNotificationQueueStack] reverseObjectEnumerator] allObjects]);
     NSArray* toFlush;
     @synchronized(_entries) {
         toFlush = _entries;
@@ -93,6 +93,17 @@
             @throw [NSException exceptionWithName:@"NotificationQueueException" reason:[NSString stringWithFormat:@"Tried to add more entries to queue while flushing: %@", _queueName] userInfo:nil];
     }
     return [toFlush count];
+}
+
+-(NSUInteger) clear
+{
+    DDLogDebug(@"Clearing queue '%@', current stack: %@", [self name], [[[[self class] getThreadLocalNotificationQueueStack] reverseObjectEnumerator] allObjects]);
+    NSUInteger retval;
+    @synchronized(_entries) {
+        retval = [_entries count];
+        _entries = [[NSMutableArray alloc] init];
+    }
+    return retval;
 }
 
 -(NSString*) name

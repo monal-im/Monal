@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 +(void) queueNotificationsInBlock:(monal_void_block_t) block onQueue:(NSString*) queueName;
 -(NSUInteger) flush;
+-(NSUInteger) clear;
 
 +(id) currentQueue;
 -(void) postNotificationName:(NSNotificationName) notificationName object:(id _Nullable) notificationObject userInfo:(id _Nullable) notificationUserInfo;

@@ -2401,27 +2401,33 @@ enum msgSentState {
         //now load more (older) messages from mam if not
         DDLogVerbose(@"Loading more messages from mam before stanzaId %@", oldestStanzaId);
         weakify(self);
-        [self.xmppAccount setMAMQueryMostRecentForContact:self.contact before:oldestStanzaId withCompletion:^(NSArray* _Nullable messages) {
-            strongify(self);
-            if(!messages)
-            {
-                //xmpp.m will already show the error to the user, no need to show this error here again
-                DDLogError(@"Got backscrolling mam error");
-                self.moreMessagesAvailable = NO;
-            }
-            else
-            {
-                if([messages count] == 0) {
-                    self.moreMessagesAvailable = NO;
-                }
-                DDLogVerbose(@"Got backscrolling mam response: %lu", (unsigned long)[messages count]);
-                [self insertOldMessages:messages];      //this array is already in reverse order
-            }
-            //allow next mam fetch
+        [self.xmppAccount setMAMQueryMostRecentForContact:self.contact before:oldestStanzaId withCompletion:^(NSArray* _Nullable messages, NSString* _Nullable error) {
             dispatch_async(dispatch_get_main_queue(), ^{
+                strongify(self);
+                if(!messages)
+                {
+                    NSString* errorText = error;
+                    if(!error)
+                        errorText = NSLocalizedString(@"Unexpected error: All messages already present in local history!", @"");
+                    DDLogError(@"Got backscrolling mam error: %@", errorText);
+                    UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not load (all) old messages", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Could not load (all) old messages from your server archive. Please try again later. %@", @""), errorText] preferredStyle:UIAlertControllerStyleAlert];
+                    [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                        [alert dismissViewControllerAnimated:YES completion:nil];
+                    }]];
+                    [self presentViewController:alert animated:YES completion:nil];
+                }
+                else
+                {
+                    if([messages count] == 0) {
+                        self.moreMessagesAvailable = NO;
+                    }
+                    DDLogVerbose(@"Got backscrolling mam response: %lu", (unsigned long)[messages count]);
+                    [self insertOldMessages:messages];      //this array is already in reverse order
+                }
+                //allow next mam fetch
                 self.isLoadingMam = NO;
                 if(sender)
-                    [(UIRefreshControl *)sender endRefreshing];
+                    [(UIRefreshControl*)sender endRefreshing];
             });
         }];
     }

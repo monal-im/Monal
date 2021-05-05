@@ -20,16 +20,6 @@ FOUNDATION_EXPORT NSString* const kMessageHeadlineType;
 -(id) initWithXMPPMessage:(XMPPMessage*) msg;
 
 /**
- Sets the id attribute of the element
- */
--(void) setXmppId:(NSString*) idval;
-
-/**
- returns value of id attribute if set
- */
--(NSString *) xmppId;
-
-/**
  Sets the body child element
  */
 -(void) setBody:(NSString*) messageBody;

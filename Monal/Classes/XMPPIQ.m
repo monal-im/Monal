@@ -22,11 +22,10 @@ NSString* const kiqErrorType = @"error";
 {
     self = [super initWithElement:@"iq"];
     [self setXMLNS:@"jabber:client"];
-    if(iqid && iqType)
-    {
-        [self setId:iqid];
-        [self.attributes setObject:iqType forKey:@"type"];
-    }
+    if(iqid)
+        self.id = iqid;
+    if(iqType)
+        self.attributes[@"type"] = iqType;
     return self;
 }
 
@@ -49,16 +48,6 @@ NSString* const kiqErrorType = @"error";
     if(iq.from)
         [self setiqTo:iq.from];
     return self;
-}
-
--(NSString*) getId
-{
-    return [self.attributes objectForKey:@"id"];
-}
-
--(void) setId:(NSString*) id
-{
-    [self.attributes setObject:id forKey:@"id"];
 }
 
 #pragma mark iq set

@@ -1164,8 +1164,8 @@ NSString *const kData=@"data";
                     if([node isKindOfClass:[XMPPMessage class]])
                     {
                         XMPPMessage* messageNode = (XMPPMessage*)node;
-                        if(messageNode.xmppId)
-                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalSentMessageNotice object:self userInfo:@{kMessageId:messageNode.xmppId}];
+                        if(messageNode.id)
+                            [[MLNotificationQueue currentQueue] postNotificationName:kMonalSentMessageNotice object:self userInfo:@{kMessageId:messageNode.id}];
                     }
                 }
             }
@@ -1939,7 +1939,7 @@ NSString *const kData=@"data";
 {
     if(resultHandler || errorHandler)
         @synchronized(_iqHandlers) {
-            _iqHandlers[[iq getId]] = @{@"id": [iq getId], @"resultHandler":resultHandler, @"errorHandler":errorHandler};
+            _iqHandlers[iq.id] = @{@"id":iq.id, @"resultHandler":resultHandler, @"errorHandler":errorHandler};
         }
     [self send:iq];
 }
@@ -1950,7 +1950,7 @@ NSString *const kData=@"data";
     {
         DDLogVerbose(@"Adding %@ to iqHandlers...", handler);
         @synchronized(_iqHandlers) {
-            _iqHandlers[[iq getId]] = handler;
+            _iqHandlers[iq.id] = handler;
         }
     }
     [self send:iq];     //this will also call persistState --> we don't need to do this here explicitly (to make sure our iq delegate is stored to db)
@@ -2027,7 +2027,7 @@ NSString *const kData=@"data";
 {
     XMPPMessage* messageNode = [[XMPPMessage alloc] init];
     [messageNode.attributes setObject:contact.contactJid forKey:@"to"];
-    [messageNode setXmppId:messageId];
+    messageNode.id = messageId;
 
 #ifdef IS_ALPHA
     // encrypt messages that should not be encrypted (but still use plaintext body for devices not speaking omemo)

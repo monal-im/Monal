@@ -194,6 +194,9 @@ static NSMutableDictionary* _typingNotifications;
         ownNick = [[DataLayer sharedInstance] ownNickNameforMuc:messageNode.fromUser forAccount:account.accountNo];
         actualFrom = messageNode.fromResource;
         participantJid = [messageNode findFirst:@"/<type=groupchat>/{http://jabber.org/protocol/muc#user}x/item@jid"];
+        if(participantJid == nil)
+            participantJid = [[DataLayer sharedInstance] getParticipantForNick:actualFrom inRoom:messageNode.fromUser forAccountId:account.accountNo];
+        DDLogInfo(@"Extracted participantJid: %@", participantJid);
     }
     
     //inbound value for 1:1 chats

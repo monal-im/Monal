@@ -962,6 +962,10 @@ static NSDateFormatter* dbFormatter;
             nick = [self ownNickNameforMuc:room forAccount:accountNo];
         NSAssert(nick, @"Could not determine muc nick when adding muc");
         
+        //clean up old muc data (will be refilled by incoming presences and/or disco queries)
+        [self.db executeNonQuery:@"DELETE FROM muc_participants WHERE account_id=? AND room=?;" andArguments:@[accountNo, room]];
+        [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=?;" andArguments:@[accountNo, room]];
+        
         return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'muc', 'muc_nick') VALUES(?, ?, 1, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET muc=1, muc_nick=?;" andArguments:@[accountNo, room, mucNick ? mucNick : @"", mucNick ? mucNick : @""]];
     }];
 }
@@ -1017,6 +1021,15 @@ static NSDateFormatter* dbFormatter;
     
     [self.db voidWriteTransaction:^{
         [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=? AND member_jid=?;" andArguments:@[accountNo, room, member[@"jid"]]];
+    }];
+}
+
+-(NSString* _Nullable) getParticipantForNick:(NSString*) nick inRoom:(NSString*) room forAccountId:(NSString*) accountNo
+{
+    if(!nick || !room || !accountNo)
+        return nil;
+    return [self.db idReadTransaction:^{
+        return [self.db executeScalar:@"SELECT participant_jid FROM muc_participants WHERE account_id=? AND room=? AND room_nick=?;" andArguments:@[accountNo, room, nick]];
     }];
 }
 

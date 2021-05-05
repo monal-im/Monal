@@ -107,10 +107,10 @@ void logException(NSException* exception)
     NSArray* parts = [jid componentsSeparatedByString:@"/"];
     
     retval[@"user"] = [[parts objectAtIndex:0] lowercaseString];        //intended to not break code that expects lowercase
-    if([parts count]>1 && ![[parts objectAtIndex:1] isEqualToString:@""])
+    if([parts count] > 1 && [[parts objectAtIndex:1] isEqualToString:@""] == NO)
         retval[@"resource"] = [parts objectAtIndex:1];                  //resources are case sensitive
     parts = [retval[@"user"] componentsSeparatedByString:@"@"];
-    if([parts count]>1)
+    if([parts count] > 1)
     {
         retval[@"node"] = [[parts objectAtIndex:0] lowercaseString];    //intended to not break code that expects lowercase
         retval[@"host"] = [[parts objectAtIndex:1] lowercaseString];    //intended to not break code that expects lowercase

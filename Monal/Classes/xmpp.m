@@ -2744,7 +2744,7 @@ NSString *const kData=@"data";
     [self sendIq:query withHandler:$newHandler(MLIQProcessor, handleMamPrefs)];
 }
 
--(void) setMAMQueryMostRecentForContact:(MLContact*) contact before:(NSString*) uid withCompletion:(void (^)(NSArray* _Nullable)) completion
+-(void) setMAMQueryMostRecentForContact:(MLContact*) contact before:(NSString*) uid withCompletion:(void (^)(NSArray* _Nullable, NSString* _Nullable error)) completion
 {
     //the completion handler will get nil, if an error prevented us toget any messaes, an empty array, if the upper end of our archive was reached or an array
     //of newly loaded mlmessages in all other cases
@@ -2758,7 +2758,7 @@ NSString *const kData=@"data";
         //handled in the iq error handler below
         if(retrievedBodies == 0)
         {
-            completion(@[]);
+            completion(@[], nil);
             return;
         }
         
@@ -2798,11 +2798,14 @@ NSString *const kData=@"data";
         if([historyIdList count] < retrievedBodies)
             DDLogWarn(@"Got %lu mam history messages already contained in history db, possibly ougoing messages that did not have a stanzaid yet!", (unsigned long)(retrievedBodies - [historyIdList count]));
         if(![historyIdList count])
-            completion(nil);            //call completion with nil to signal an error, if we could not get any messages not yet in history db
+        {
+            //call completion with nil to signal an error, if we could not get any messages not yet in history db
+            completion(nil, nil);
+        }
         else
         {
             //query db (again) for the real MLMessage to account for changes in history table by non-body metadata messages received after the body-message
-            completion([[DataLayer sharedInstance] messagesForHistoryIDs:historyIdList]);
+            completion([[DataLayer sharedInstance] messagesForHistoryIDs:historyIdList], nil);
         }
     };
     responseHandler = ^(XMPPIQ* response) {
@@ -2863,9 +2866,11 @@ NSString *const kData=@"data";
         //which would make us use incomplete mam pages that would produce holes in history (those are very hard to remove/fill afterwards)
         [self sendIq:query withResponseHandler:responseHandler andErrorHandler:^(XMPPIQ* error) {
             DDLogWarn(@"Got mam:2 before-query error, returning %lu messages to ui", (unsigned long)retrievedBodies);
-            [HelperTools postError:NSLocalizedString(@"Could not load (all) old messages", @"") withNode:error andAccount:self andIsSevere:NO];
             if(retrievedBodies == 0)
-                completion(nil);            //call completion with nil, if there was an error or xmpp reconnect that prevented us to get any body-messages
+            {
+                //call completion with nil, if there was an error or xmpp reconnect that prevented us to get any body-messages
+                completion(nil, [HelperTools extractXMPPError:error withDescription:nil]);
+            }
             else
             {
                 //we had an error but we did already load some body-messages --> update ui anyways

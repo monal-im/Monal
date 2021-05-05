@@ -200,7 +200,7 @@ Decline a call request
  -(void) requestHTTPSlotWithParams:(NSDictionary *)params andCompletion:(void(^)(NSString *url,  NSError *error)) completion;
 
 
--(void) setMAMQueryMostRecentForContact:(MLContact*) contact before:(NSString* _Nullable) uid withCompletion:(void (^)(NSArray* _Nullable)) completion;
+-(void) setMAMQueryMostRecentForContact:(MLContact*) contact before:(NSString* _Nullable) uid withCompletion:(void (^)(NSArray* _Nullable, NSString* _Nullable error)) completion;
 -(void) setMAMPrefs:(NSString*) preference;
 -(void) getMAMPrefs;
 

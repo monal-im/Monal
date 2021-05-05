@@ -166,11 +166,21 @@ static NSMutableDictionary* _typingNotifications;
         return message;     //the muc processor said we have stop processing
     
     NSString* decrypted;
-    if([messageNode check:@"/{jabber:client}message/{eu.siacs.conversations.axolotl}encrypted/header"])
+    if([messageNode check:@"{eu.siacs.conversations.axolotl}encrypted/header"])
     {
-        NSString* queryId = [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"];
-        if(queryId && [queryId hasPrefix:@"MLhistory:"])
-            decrypted = NSLocalizedString(@"Message was encrypted with omemo and can't be decrypted anymore", @"");
+        if(isMLhistory)
+        {
+            //only show error for real messages having a fallback body, not for silent key exchange messages
+            if([messageNode check:@"body#"])
+            {
+//use the fallback body on alpha builds (changes are good this fallback body really is the cleartext of the message because of "opportunistic" encryption)
+#ifndef IS_ALPHA
+                decrypted = NSLocalizedString(@"Message was encrypted with omemo and can't be decrypted anymore", @"");
+#endif
+            }
+            else
+                DDLogInfo(@"Ignoring encrypted mam history message without fallback body");
+        }
         else
             decrypted = [account.omemo decryptMessage:messageNode];
     }
@@ -221,7 +231,7 @@ static NSMutableDictionary* _typingNotifications;
     if([messageNode check:@"/<type=groupchat>"] && !messageNode.fromResource)
         return message;
     
-    if([messageNode check:@"body"] || decrypted)
+    if([messageNode check:@"body#"] || decrypted)
     {
         BOOL unread = YES;
         BOOL showAlert = YES;
@@ -230,10 +240,7 @@ static NSMutableDictionary* _typingNotifications;
         //this will set unread=NO for MLhistory mssages, too (which is desired)
         if(
             !inbound ||
-            (
-                [outerMessageNode check:@"{urn:xmpp:mam:2}result"] &&
-                ![[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLcatchup:"]
-            )
+            ([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && ![[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLcatchup:"])
         )
         {
             DDLogVerbose(@"Setting showAlert to NO");
@@ -480,8 +487,8 @@ static NSMutableDictionary* _typingNotifications;
         }
     }
     
-    //handle typing notifications but ignore them in appex or for history fetches
-    if(![HelperTools isAppExtension] && !([outerMessageNode check:@"{urn:xmpp:mam:2}result"] && [[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"] hasPrefix:@"MLhistory:"]))
+    //handle typing notifications but ignore them in appex or for mam fetches (*any* mam fetches are ignored here, chatstates should *never* be in a mam archive!)
+    if(![HelperTools isAppExtension] && ![outerMessageNode check:@"{urn:xmpp:mam:2}result"])
     {
         //only use "is typing" messages when not older than 2 minutes (always allow "not typing" messages)
         if(

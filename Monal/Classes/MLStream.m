@@ -8,7 +8,6 @@
 
 #include <Network/Network.h>
 #import "MLConstants.h"
-#import "MLDefinitions.h"
 #import "MLStream.h"
 
 #define BUFFER_SIZE 4096

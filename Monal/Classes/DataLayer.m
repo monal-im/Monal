@@ -10,7 +10,6 @@
 #import "xmpp.h"
 #import "MLSQLite.h"
 #import "HelperTools.h"
-#import "MLDefinitions.h"
 #import "MLXMLNode.h"
 #import "XMPPPresence.h"
 #import "XMPPMessage.h"

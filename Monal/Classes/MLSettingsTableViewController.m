@@ -9,7 +9,6 @@
 #import "MLSettingsTableViewController.h"
 #import "MLWebViewController.h"
 #import "MLSwitchCell.h"
-#import "MLDefinitions.h"
 #import "HelperTools.h"
 
 @import SafariServices;

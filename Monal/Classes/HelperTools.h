@@ -14,6 +14,7 @@
 #define createTimer(timeout, handler, ...)						metamacro_if_eq(0, metamacro_argcount(__VA_ARGS__))([HelperTools startTimer:timeout withHandler:handler andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__])(_createTimer(timeout, handler, __VA_ARGS__))
 #define _createTimer(timeout, handler, cancelHandler, ...)		[HelperTools startTimer:timeout withHandler:handler andCancelHandler:cancelHandler andFile:(char*)__FILE__ andLine:__LINE__ andFunc:(char*)__func__]
 
+
 NS_ASSUME_NONNULL_BEGIN
 
 @class MLXMLNode;

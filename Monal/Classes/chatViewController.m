@@ -8,7 +8,6 @@
 
 #import "chatViewController.h"
 #import "MLChatCell.h"
-#import "MLDefinitions.h"
 #import "MLLinkCell.h"
 #import "MLChatImageCell.h"
 #import "MLChatMapsCell.h"

@@ -49,6 +49,17 @@ typedef enum NotificationPrivacySettingOption {
 #define nilWrapper(var) (var ? var : [NSNull null])
 #define nilExtractor(var) (var == [NSNull null] ? nil : var)
 
+#if defined(IS_ALPHA) || defined(DEBUG)
+    #define unreachable() { \
+        DDLogWarn(@"unreachable: %s %d %s", __FILE__, __LINE__, __func__); \
+        NSAssert(NO, @"unreachable"); \
+    }
+#else
+    #define unreachable() { \
+        DDLogWarn(@"unreachable: %s %d %s", __FILE__, __LINE__, __func__); \
+    }
+#endif
+
 //some xmpp related constants
 #define kRegServer @"yax.im"
 #define kMessageDeletedBody @"eu.siacs.conversations.message_deleted"

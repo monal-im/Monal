@@ -39,6 +39,7 @@ void logException(NSException* exception)
         message = [HelperTools extractXMPPError:node withDescription:description];
     else
         message = description;
+    DDLogError(@"Notifying user about %@ error: %@", isSevere ? @"SEVERE" : @"non-severe", message);
     [[MLNotificationQueue currentQueue] postNotificationName:kXMPPError object:account userInfo:@{@"message": message, @"isSevere":@(isSevere)}];
 }
 

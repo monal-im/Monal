@@ -123,7 +123,8 @@
 $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
-        DDLogWarn(@"Mam catchup query returned error: %@", [iqNode findFirst:@"error"]);
+        DDLogError(@"Mam catchup query returned error: %@", [iqNode findFirst:@"error"]);
+        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query for new messages on account %@", @""), account.connectionProperties.identity.jid] withNode:iqNode andAccount:account andIsSevere:YES];
         [account mamFinished];
         return;
     }
@@ -143,6 +144,12 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
 $$
 
 $$handler(handleMamResponseWithLatestId, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogWarn(@"Mam latest stanzaid query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
+        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query newest stanzaid for account %@", @""), account.connectionProperties.identity.jid] withNode:iqNode andAccount:account andIsSevere:YES];
+        return;
+    }
     DDLogVerbose(@"Got latest stanza id to prime database with: %@", [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
     //only do this if we got a valid stanza id (not null)
     //if we did not get one we will get one when receiving the next message in this smacks session
@@ -160,6 +167,7 @@ $$handler(handleCarbonsEnabled, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"carbon enable iq returned error: %@", [iqNode findFirst:@"error"]);
+        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enable carbons for account %@", @""), account.connectionProperties.identity.jid] withNode:iqNode andAccount:account andIsSevere:YES];
         return;
     }
     account.connectionProperties.usingCarbons2 = YES;

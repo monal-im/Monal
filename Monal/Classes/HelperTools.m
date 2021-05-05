@@ -722,11 +722,11 @@ void logException(NSException* exception)
 +(NSString*) appBuildVersionInfo
 {
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-    #if IS_ALPHA
+#ifdef IS_ALPHA
         NSString* versionTxt = [NSString stringWithFormat:@"Alpha %@ (%s: %s UTC)", [infoDict objectForKey:@"CFBundleShortVersionString"], __DATE__, __TIME__];
-    #else
+#else
         NSString* versionTxt = [NSString stringWithFormat:@"%@ (%@)", [infoDict objectForKey:@"CFBundleShortVersionString"], [infoDict objectForKey:@"CFBundleVersion"]];
-    #endif
+#endif
     return  versionTxt;
 }
 

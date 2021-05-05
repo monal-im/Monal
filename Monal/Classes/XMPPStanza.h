@@ -15,6 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 -(void) addDelayTagFrom:(NSString*) from;
 
+@property (atomic, strong) NSString* _Nullable id;
+
 @property (atomic, strong) NSString* _Nullable from;
 @property (atomic, strong) NSString* _Nullable fromUser;
 @property (atomic, strong) NSString* _Nullable fromNode;

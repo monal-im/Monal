@@ -21,6 +21,23 @@
     [self addChild:delay];
 }
 
+-(NSString*) id
+{
+    @synchronized(self.attributes) {
+        return self.attributes[@"id"];
+    }
+}
+
+-(void) setId:(NSString* _Nullable) id
+{
+    @synchronized(self.attributes) {
+        if(!id)
+            [self.attributes removeObjectForKey:@"id"];
+        else
+            self.attributes[@"id"] = id;
+    }
+}
+
 -(void) setFrom:(NSString*) from
 {
     NSDictionary* jid = [HelperTools splitJid:from];

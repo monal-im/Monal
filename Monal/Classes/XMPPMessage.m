@@ -21,7 +21,7 @@ NSString* const kMessageHeadlineType = @"headline";
     self = [super init];
     self.element = @"message";
     [self setXMLNS:@"jabber:client"];
-    [self setXmppId:[[NSUUID UUID] UUIDString]];        //default value, can be overwritten later on
+    self.id = [[NSUUID UUID] UUIDString];       //default value, can be overwritten later on
     return self;
 }
 
@@ -31,19 +31,16 @@ NSString* const kMessageHeadlineType = @"headline";
     return self;
 }
 
--(void) setXmppId:(NSString*) idval
+//this oerwrites the setter of XMPPStanza
+-(void) setId:(NSString*) idval
 {
-    self.attributes[@"id"] = idval;
+    [super setId:idval];
     //add origin id to indicate we are using uuids for our stanza ids
-    if([self check:@"{urn:xmpp:sid:0}origin-id"])       //modify existing origin id
+    //(modify origin id, if already present)
+    if([self check:@"{urn:xmpp:sid:0}origin-id"])
         ((MLXMLNode*)[self findFirst:@"{urn:xmpp:sid:0}origin-id"]).attributes[@"id"] = idval;
     else
         [self addChild:[[MLXMLNode alloc] initWithElement:@"origin-id" andNamespace:@"urn:xmpp:sid:0" withAttributes:@{@"id":idval} andChildren:@[] andData:nil]];
-}
-
--(NSString*) xmppId
-{
-    return self.attributes[@"id"];
 }
 
 -(void) setBody:(NSString*) messageBody

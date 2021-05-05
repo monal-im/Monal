@@ -687,7 +687,7 @@
         {
             MLKeysTableViewController* keys = (MLKeysTableViewController*)segue.destinationViewController;
             keys.ownKeys = YES;
-            MLContact* contact = [MLContact contactFromJid:self.jid andAccountNo:self.accountno];
+            MLContact* contact = [MLContact createContactFromJid:self.jid andAccountNo:self.accountno];
             keys.contact = contact;
         }
     }

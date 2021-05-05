@@ -42,7 +42,7 @@
         {
             xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:_selectedRow];
 
-            MLContact* contactObj = [MLContact contactFromJid:self.contactName.text andAccountNo:account.accountNo];
+            MLContact* contactObj = [MLContact createContactFromJid:self.contactName.text andAccountNo:account.accountNo];
 
             [[MLXMPPManager sharedInstance] addContact:contactObj];
             BOOL approve = NO;

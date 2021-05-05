@@ -384,7 +384,7 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
     }
     if(mucName && [mucName length])
     {
-        MLContact* mucContact = [MLContact contactFromJid:iqNode.fromUser andAccountNo:account.accountNo];
+        MLContact* mucContact = [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo];
         if(![mucName isEqualToString:mucContact.fullName])
         {
             DDLogInfo(@"Configuring muc %@ to use name '%@'...", iqNode.fromUser, mucName);
@@ -394,7 +394,7 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
     
     DDLogDebug(@"Upating muc contact...");
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-        @"contact": [MLContact contactFromJid:iqNode.fromUser andAccountNo:account.accountNo]
+        @"contact": [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo]
     }];
     
     @synchronized(_stateLockObject) {

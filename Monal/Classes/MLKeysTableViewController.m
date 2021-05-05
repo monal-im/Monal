@@ -158,7 +158,7 @@ enum MLKeysTableViewControllerSections {
     if([segue.identifier isEqualToString:@"showOwnQRCode"])
     {
         MLOmemoQrCodeView* oQrCodeView = segue.destinationViewController;
-        MLContact* ownContact = [MLContact contactFromJid:self.account.connectionProperties.identity.jid andAccountNo:self.account.accountNo];
+        MLContact* ownContact = [MLContact createContactFromJid:self.account.connectionProperties.identity.jid andAccountNo:self.account.accountNo];
 
         oQrCodeView.contact = ownContact;
     }

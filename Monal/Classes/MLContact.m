@@ -177,7 +177,7 @@ NSString *const kAskSubscribe=@"subscribe";
         || [self.subscription isEqualToString:kSubFrom];
 }
 
-+(MLContact*) contactFromJid:(NSString*) jid andAccountNo:(NSString*) accountNo
++(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSString*) accountNo
 {
     assert(jid != nil);
     assert(accountNo != nil && accountNo.intValue >= 0);

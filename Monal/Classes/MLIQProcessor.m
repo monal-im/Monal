@@ -243,7 +243,7 @@ $$
         }
         else
         {
-            MLContact* contactObj = [MLContact contactFromJid:[contact objectForKey:@"jid"] andAccountNo:account.accountNo];
+            MLContact* contactObj = [MLContact createContactFromJid:[contact objectForKey:@"jid"] andAccountNo:account.accountNo];
 
             if([[contact objectForKey:@"subscription"] isEqualToString:kSubFrom]) //already subscribed
             {
@@ -268,7 +268,7 @@ $$
                                              andAccount:account.accountNo];
             
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                @"contact": [MLContact contactFromJid:[contact objectForKey:@"jid"] andAccountNo:account.accountNo]
+                @"contact": [MLContact createContactFromJid:[contact objectForKey:@"jid"] andAccountNo:account.accountNo]
             }];
         }
     }

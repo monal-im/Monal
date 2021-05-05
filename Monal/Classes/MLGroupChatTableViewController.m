@@ -108,7 +108,7 @@
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSDictionary* dic = self.favorites[indexPath.row];
-    MLContact* group = [MLContact contactFromJid:dic[@"room"] andAccountNo:dic[@"account_id"]];
+    MLContact* group = [MLContact createContactFromJid:dic[@"room"] andAccountNo:dic[@"account_id"]];
     
     if(self.selectGroup)
         self.selectGroup(group);

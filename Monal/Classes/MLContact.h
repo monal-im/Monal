@@ -28,7 +28,7 @@ FOUNDATION_EXPORT NSString* const kAskSubscribe;
 
 -(BOOL) isSubscribed;
 
-+(MLContact*) contactFromJid:(NSString*) jid andAccountNo:(NSString*) accountNo;
++(MLContact*) createContactFromJid:(NSString*) jid andAccountNo:(NSString*) accountNo;
 
 /**
  account number in the database should be an integer

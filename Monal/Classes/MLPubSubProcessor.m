@@ -73,7 +73,7 @@ $$handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
         [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:[data[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]];
         [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:jid andAccount:account.accountNo];
         [account accountStatusChanged];     //inform ui of this change (accountStatusChanged will force a ui reload which will also reload the avatars)
-        MLContact* contact = [[DataLayer sharedInstance] contactForUsername:jid forAccount:account.accountNo];
+        MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
         if(contact)     //ignore updates for jids not in our roster
             [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                 @"contact": contact
@@ -99,7 +99,7 @@ $$handler(rosterNameHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NS
             {
                 DDLogInfo(@"Got nickname of %@: %@", jid, [data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"]);
                 [[DataLayer sharedInstance] setFullName:[data[itemId] findFirst:@"{http://jabber.org/protocol/nick}nick#"] forContact:jid andAccount:account.accountNo];
-                MLContact* contact = [[DataLayer sharedInstance] contactForUsername:jid forAccount:account.accountNo];
+                MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
                 if(contact)     //ignore updates for jids not in our roster
                     [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                         @"contact": contact
@@ -122,7 +122,7 @@ $$handler(rosterNameHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NS
         {
             DDLogInfo(@"Nickname of %@ got retracted", jid);
             [[DataLayer sharedInstance] setFullName:@"" forContact:jid andAccount:account.accountNo];
-            MLContact* contact = [[DataLayer sharedInstance] contactForUsername:jid forAccount:account.accountNo];
+            MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
             if(contact)     //ignore updates for jids not in our roster
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                     @"contact": contact

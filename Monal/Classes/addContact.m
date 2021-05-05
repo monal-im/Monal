@@ -42,10 +42,8 @@
         {
             xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:_selectedRow];
 
-            MLContact* contactObj = [[MLContact alloc] init];
-                      contactObj.contactJid = self.contactName.text;
-                      contactObj.accountId = account.accountNo;
-            
+            MLContact* contactObj = [MLContact createContactFromJid:self.contactName.text andAccountNo:account.accountNo];
+
             [[MLXMPPManager sharedInstance] addContact:contactObj];
             BOOL approve = NO;
             // approve contact ahead of time if possible

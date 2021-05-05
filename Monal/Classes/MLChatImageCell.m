@@ -10,7 +10,6 @@
 #import "MLImageManager.h"
 #import "MLFiletransfer.h"
 #import "MLMessage.h"
-#import "MLDefinitions.h"
 
 @import QuartzCore;
 @import UIKit;

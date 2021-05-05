@@ -883,7 +883,6 @@
 		C15D504A24C727CC002F75BB /* MLLogFileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLLogFileManager.m; sourceTree = "<group>"; };
 		C1613B572520723C0062C0C2 /* MLBasePaser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLBasePaser.h; sourceTree = "<group>"; };
 		C1613B592520723C0062C0C2 /* MLBasePaser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLBasePaser.m; sourceTree = "<group>"; };
-		C1850E5E25F34895003D506A /* MLDefinitions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLDefinitions.h; sourceTree = "<group>"; };
 		C1850E6625F37EC0003D506A /* Monal Tests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Monal Tests-Bridging-Header.h"; sourceTree = "<group>"; };
 		C1850EB525F38A2D003D506A /* MonalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1850EB725F38A2D003D506A /* MonalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonalUITests.swift; sourceTree = "<group>"; };
@@ -1734,7 +1733,6 @@
 				540E13A824CF78D00038FDA0 /* MLLogFormatter.h */,
 				541E4CBD254AA0B600FD7B28 /* MLHandler.h */,
 				541E4CBF254AA0E700FD7B28 /* MLHandler.m */,
-				C1850E5E25F34895003D506A /* MLDefinitions.h */,
 				C10490482612ED2F0054AC9E /* MLEmoji.swift */,
 				54A22D2426185C2900B56EAD /* MLNotificationQueue.m */,
 			);

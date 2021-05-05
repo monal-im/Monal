@@ -8,7 +8,6 @@
 
 #import "MLAutoDownloadFiletransferSettingViewController.h"
 #import "MLSwitchCell.h"
-#import "MLDefinitions.h"
 
 enum MLAutoDownloadFiletransferSettingViewController {
     FiletransferSettingsGeneralSettings,

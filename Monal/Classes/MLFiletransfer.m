@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "MLConstants.h"
 #import "MLFiletransfer.h"
-#import "HelperTools.h"
 #import "DataLayer.h"
 #import "MLEncryptedPayload.h"
 #import "xmpp.h"

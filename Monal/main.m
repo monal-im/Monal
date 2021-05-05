@@ -9,7 +9,6 @@
 #import <UIKit/UIKit.h>
 #import "HelperTools.h"
 #import "MonalAppDelegate.h"
-#import "MLDefinitions.h"
 #import "DataLayer.h"
 
 int main(int argc, char *argv[]) {

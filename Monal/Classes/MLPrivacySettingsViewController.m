@@ -10,7 +10,6 @@
 #import "HelperTools.h"
 #import "MLConstants.h"
 #import "MLSwitchCell.h"
-#import "MLDefinitions.h"
 
 typedef NS_ENUM(NSInteger, NSNotificationPrivacyOptionRow) {
     DisplayNameAndMessageRow = 1,

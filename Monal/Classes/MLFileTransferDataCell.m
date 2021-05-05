@@ -10,7 +10,7 @@
 #import "MLImageManager.h"
 #import "MLConstants.h"
 #import "MLFiletransfer.h"
-#import "MLDefinitions.h"
+#import "HelperTools.h"
 
 @implementation MLFileTransferDataCell
 

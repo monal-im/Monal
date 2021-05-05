@@ -8,7 +8,6 @@
 
 #import "MLUploadQueueItem.h"
 #import "MLConstants.h"
-#import "MLDefinitions.h"
 
 @interface MLUploadQueueItem()
 {

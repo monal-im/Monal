@@ -2367,11 +2367,12 @@ enum msgSentState {
 {
     // Load older messages from db
     NSMutableArray* oldMessages = nil;
-    if(self.messageList.count > 0) {
-        oldMessages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId beforeMsgHistoryID:((MLMessage*)[self.messageList objectAtIndex:0]).messageDBId];
-    }
+    NSNumber* beforeId = nil;
+    if(self.messageList.count > 0)
+        beforeId = ((MLMessage*)[self.messageList objectAtIndex:0]).messageDBId;
+    oldMessages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount:self.contact.accountId beforeMsgHistoryID:beforeId];
 
-    if(!self.isLoadingMam && [oldMessages count] < kMonalChatFetchedMsgCnt)
+    if(!self.isLoadingMam && [oldMessages count] < kMonalBackscrollingMsgCount)
     {
         self.isLoadingMam = YES;        //don't allow multiple parallel mam fetches
         
@@ -2398,7 +2399,7 @@ enum msgSentState {
             }
         }
         
-        //now load more (older) messages from mam if not
+        //now load more (older) messages from mam
         DDLogVerbose(@"Loading more messages from mam before stanzaId %@", oldestStanzaId);
         weakify(self);
         [self.xmppAccount setMAMQueryMostRecentForContact:self.contact before:oldestStanzaId withCompletion:^(NSArray* _Nullable messages, NSString* _Nullable error) {
@@ -2422,7 +2423,7 @@ enum msgSentState {
                         self.moreMessagesAvailable = NO;
                     }
                     DDLogVerbose(@"Got backscrolling mam response: %lu", (unsigned long)[messages count]);
-                    [self insertOldMessages:messages];      //this array is already in reverse order
+                    [self insertOldMessages:[[messages reverseObjectEnumerator] allObjects]];
                 }
                 //allow next mam fetch
                 self.isLoadingMam = NO;
@@ -2431,13 +2432,15 @@ enum msgSentState {
             });
         }];
     }
-    else if(!self.isLoadingMam && [oldMessages count] >= kMonalChatFetchedMsgCnt)
+    else if(!self.isLoadingMam && [oldMessages count] >= kMonalBackscrollingMsgCount)
     {
         if(sender)
-            [(UIRefreshControl *)sender endRefreshing];
+            [(UIRefreshControl*)sender endRefreshing];
     }
     
-    if(oldMessages && [oldMessages count] > 0) {
+    //insert everything we got from the db so far
+    if(oldMessages && [oldMessages count] > 0)
+    {
         //use reverse order to insert messages from newest to oldest (bottom to top in chatview)
         [self insertOldMessages:[[oldMessages reverseObjectEnumerator] allObjects]];
     }

@@ -108,6 +108,7 @@ extern NSString* const kMessageTypeFiletransfer;
 -(void) removeMember:(NSDictionary*) member fromMuc:(NSString*) room forAccountId:(NSString*) accountNo;
 -(void) addParticipant:(NSDictionary*) participant toMuc:(NSString*) room forAccountId:(NSString*) accountNo;
 -(void) removeParticipant:(NSDictionary*) participant fromMuc:(NSString*) room forAccountId:(NSString*) accountNo;
+-(NSString* _Nullable) getParticipantForNick:(NSString*) nick inRoom:(NSString*) room forAccountId:(NSString*) accountNo;
 -(NSArray<NSDictionary<NSString*, id>*>*) getMembersAndParticipantsOfMuc:(NSString*) room forAccountId:(NSString*) accountNo;
 -(void) addMucFavorite:(NSString*) room forAccountId:(NSString*) accountNo andMucNick:(NSString* _Nullable) mucNick;
 -(NSString*) lastStanzaIdForMuc:(NSString* _Nonnull) room andAccount:(NSString* _Nonnull) accountNo;

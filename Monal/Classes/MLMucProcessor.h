@@ -27,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 +(BOOL) processMessage:(XMPPMessage*) messageNode forAccount:(xmpp*) account;
 
 +(void) sendDiscoQueryFor:(NSString*) roomJid onAccount:(xmpp*) account withJoin:(BOOL) join;
++(void) ping:(NSString*) roomJid onAccount:(xmpp*) account;
 
 @end
 

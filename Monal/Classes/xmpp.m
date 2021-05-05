@@ -46,7 +46,7 @@
 #import "AESGcm.h"
 
 
-#define STATE_VERSION 2
+#define STATE_VERSION 3
 
 
 NSString *const kQueueID=@"queueID";
@@ -98,7 +98,7 @@ NSString *const kData=@"data";
     monal_void_block_t _cancelReconnectTimer;
     NSMutableArray* _smacksAckHandler;
     NSMutableDictionary* _iqHandlers;
-    NSMutableSet* _runningMamQueries;
+    NSMutableDictionary* _runningMamQueries;
     BOOL _SRVDiscoveryDone;
     BOOL _startTLSComplete;
     BOOL _catchupDone;
@@ -220,7 +220,7 @@ NSString *const kData=@"data";
     _outputQueue = [[NSMutableArray alloc] init];
     _iqHandlers = [[NSMutableDictionary alloc] init];
     _mamPageArrays = [[NSMutableDictionary alloc] init];
-    _runningMamQueries = [[NSMutableSet alloc] init];
+    _runningMamQueries = [[NSMutableDictionary alloc] init];
 
     _SRVDiscoveryDone = NO;
     _discoveredServersList = [[NSMutableArray alloc] init];
@@ -1464,7 +1464,7 @@ NSString *const kData=@"data";
                 //wrap everything in lock instead of writing the boolean result into a temp var because incrementLastHandledStanza
                 //is wrapped in this lock, too (and we don't call anything else here)
                 @synchronized(_stateLockObject) {
-                    if(![_runningMamQueries containsObject:[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]])
+                    if(_runningMamQueries[[outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]] == nil)
                     {
                         DDLogError(@"mam results must be asked for, ignoring this spoofed mam result having queryid: %@!", [outerMessageNode findFirst:@"{urn:xmpp:mam:2}result@queryid"]);
                         DDLogError(@"allowed mam queryids are: %@", _runningMamQueries);
@@ -1582,10 +1582,12 @@ NSString *const kData=@"data";
             }
             
             //remove handled mam queries from _runningMamQueries
-            if([iqNode check:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"])
-                [_runningMamQueries removeObject:[iqNode findFirst:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"]];
-            else if([iqNode check:@"/<type=error>/{urn:xmpp:mam:2}fin@queryid"])
-                [_runningMamQueries removeObject:[iqNode findFirst:@"/<type=error>/{urn:xmpp:mam:2}fin@queryid"]];
+            if([iqNode check:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"] && _runningMamQueries[[iqNode findFirst:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"]] != nil)
+                [_runningMamQueries removeObjectForKey:[iqNode findFirst:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"]];
+            else if([iqNode check:@"/<type=error>"])
+                for(NSString* mamQueryId in _runningMamQueries)
+                    if([iqNode.id isEqual:((XMPPIQ*)_runningMamQueries[mamQueryId]).id])
+                        [_runningMamQueries removeObjectForKey:mamQueryId];
             
             //process registered iq handlers
             if(_iqHandlers[[iqNode findFirst:@"/@id"]])
@@ -1972,7 +1974,7 @@ NSString *const kData=@"data";
         if(mamQueryId)
             @synchronized(self->_stateLockObject) {
                 DDLogDebug(@"Adding mam queryid to list: %@", mamQueryId);
-                [self->_runningMamQueries addObject:mamQueryId];
+                self->_runningMamQueries[mamQueryId] = stanza;
             }
         
         //always add stanzas (not nonzas!) to smacks queue to be resent later (if withSmacks=YES)
@@ -2526,7 +2528,7 @@ NSString *const kData=@"data";
     self.connectionProperties.supportsRosterPreApproval = NO;
     
     //clear list of running mam queries
-    _runningMamQueries = [[NSMutableSet alloc] init];
+    _runningMamQueries = [[NSMutableDictionary alloc] init];
     
     //indicate we are bound now, *after* initializing/resetting all the other data structures to avoid race conditions
     _accountState = kStateBound;

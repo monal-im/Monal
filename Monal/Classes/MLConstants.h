@@ -109,9 +109,9 @@ typedef enum NotificationPrivacySettingOption {
 #define kMonalChatMaxAllowedTextLen 2048
 
 #if TARGET_OS_MACCATALYST
-#define kMonalChatFetchedMsgCnt 75
+#define kMonalBackscrollingMsgCount 75
 #else
-#define kMonalChatFetchedMsgCnt 50
+#define kMonalBackscrollingMsgCount 50
 #endif
 
 //contact cells

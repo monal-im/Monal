@@ -202,7 +202,7 @@ extern NSString* const kMessageTypeFiletransfer;
 #pragma mark - message history
 
 -(NSNumber*) lastMessageHistoryIdForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
--(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo beforeMsgHistoryID:(NSNumber*) msgHistoryID;
+-(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo beforeMsgHistoryID:(NSNumber* _Nullable) msgHistoryID;
 -(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo;
 
 

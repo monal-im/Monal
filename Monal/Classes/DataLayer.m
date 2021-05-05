@@ -1558,14 +1558,21 @@ static NSDateFormatter* dbFormatter;
 }
 
 //message history
--(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo beforeMsgHistoryID:(NSNumber*) msgHistoryID
+-(NSMutableArray<MLMessage*>*) messagesForContact:(NSString*) buddy forAccount:(NSString*) accountNo beforeMsgHistoryID:(NSNumber* _Nullable) msgHistoryID
 {
-    if(!accountNo || !buddy || msgHistoryID == nil)
+    if(!accountNo || !buddy)
         return nil;
     return [self.db idReadTransaction:^{
+        NSNumber* historyIdToUse = msgHistoryID;
+        //fall back to newest message in history (including this message in this case)
+        if(historyIdToUse == nil)
+        {
+            //we are querying with < relation below, but want to include the newest message nontheless
+            historyIdToUse = @([[self lastMessageHistoryIdForContact:buddy forAccount:accountNo] intValue] + 1);
+        }
         NSString* query = @"SELECT message_history_id FROM (SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? AND message_history_id<? ORDER BY message_history_id DESC LIMIT ?) ORDER BY message_history_id ASC;";
-        NSNumber* msgLimit = @(kMonalChatFetchedMsgCnt);
-        NSArray* params = @[accountNo, buddy, msgHistoryID, msgLimit];
+        NSNumber* msgLimit = @(kMonalBackscrollingMsgCount);
+        NSArray* params = @[accountNo, buddy, historyIdToUse, msgLimit];
         NSArray* results = [self.db executeScalarReader:query andArguments:params];
         return [self messagesForHistoryIDs:results];
     }];

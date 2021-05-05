@@ -335,6 +335,51 @@ static NSMutableDictionary* _uiHandler;
     [account sendIq:discoInfo withHandler:$newHandler(self, handleDiscoResponse, $ID(roomJid), $BOOL(join))];
 }
 
++(void) ping:(NSString*) roomJid onAccount:(xmpp*) account
+{
+    NSAssert([[DataLayer sharedInstance] isBuddyMuc:roomJid forAccount:account.accountNo], @"Tried to muc-ping non-muc jid!");
+    
+    XMPPIQ* ping = [[XMPPIQ alloc] initWithType:kiqGetType];
+    [ping setiqTo:roomJid];
+    ping.toResource = [[DataLayer sharedInstance] ownNickNameforMuc:roomJid forAccount:account.accountNo];
+    [ping setPing];
+    //we don't need to handle this across smacks resumes or reconnects, because a new ping will be issued n the next smacks resume
+    //(and reconnets will reconnect to mucs anyways)
+    [account sendIq:ping withResponseHandler:^(XMPPIQ* result) {
+        DDLogInfo(@"Muc ping returned: we are still connected, everything is fine");
+    } andErrorHandler:^(XMPPIQ* error){
+        DDLogWarn([HelperTools extractXMPPError:error withDescription:@"Muc ping returned error"]);
+        if([error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}not-acceptable"])
+        {
+            DDLogWarn(@"Ping failed with 'not-acceptable' --> we have to reconnect");
+            [self sendDiscoQueryFor:roomJid onAccount:account withJoin:YES];
+        }
+        else if(
+            [error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}service-unavailable"] ||
+            [error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}feature-not-implemented"]
+        )
+        {
+            DDLogInfo(@"The client is joined, but the pinged client does not implement XMPP Ping (XEP-0199) --> do nothing");
+        }
+        else if([error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
+        {
+            DDLogInfo(@"The client is joined, but the occupant just changed their name (e.g. initiated by a different client) --> do nothing");
+        }
+        else if(
+            [error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}remote-server-not-found"] ||
+            [error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}remote-server-timeout"]
+        )
+        {
+            DDLogError(@"The remote server is unreachable for unspecified reasons; this can be a temporary network failure or a server outage. No decision can be made based on this; Treat like a timeout --> d nothing");
+        }
+        else
+        {
+            DDLogWarn(@"Any other error happened: The client is probably not joined any more. It should perform a re-join. --> we have to reconnect");
+            [self sendDiscoQueryFor:roomJid onAccount:account withJoin:YES];
+        }
+    }];
+}
+
 $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, roomJid), $_BOOL(join))
     if([iqNode check:@"/<type=error>"])
     {
@@ -376,6 +421,11 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
         //add new muc buddy (potentially deleting a non-muc buddy having the same jid)
         DDLogInfo(@"Adding new muc %@ using nick '%@' to buddylist...", iqNode.fromUser, nick);
         [[DataLayer sharedInstance] initMuc:iqNode.fromUser forAccountId:account.accountNo andMucNick:nick];
+    }
+    else
+    {
+        DDLogInfo(@"Clearing muc participants and members tables for %@", iqNode.fromUser);
+        
     }
     if(![mucType isEqualToString:[[DataLayer sharedInstance] getMucTypeOfRoom:iqNode.fromUser andAccount:account.accountNo]])
     {

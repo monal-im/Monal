@@ -384,7 +384,7 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Querying muc info returned an error: %@", [iqNode findFirst:@"error"]);
-        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@", @""), roomJid] forMuc:roomJid withNode:iqNode andAccount:account andIsSevere:YES];
+        [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@ on account %@", @""), roomJid, account.connectionProperties.identity.jid] forMuc:roomJid withNode:iqNode andAccount:account andIsSevere:YES];
         return;
     }
     NSAssert([iqNode.fromUser isEqualToString:roomJid], @"Disco response jid not matching query jid!");
@@ -493,6 +493,12 @@ $$handler(handleMembersList, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(N
 $$
 
 $$handler(handleMamResponseWithLatestId, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
+    if([iqNode check:@"/<type=error>"])
+    {
+        DDLogWarn(@"Muc mam latest stanzaid query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
+        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query newest stanzaid for groupchat %@ on account %@", @""), iqNode.fromUser, account.connectionProperties.identity.jid] withNode:iqNode andAccount:account andIsSevere:YES];
+        return;
+    }
     DDLogVerbose(@"Got latest muc stanza id to prime database with: %@", [iqNode findFirst:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"]);
     //only do this if we got a valid stanza id (not null)
     //if we did not get one we will get one when receiving the next muc message in this smacks session
@@ -508,7 +514,8 @@ $$
 $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
-        DDLogWarn(@"Muc mam catchup query returned error: %@", [iqNode findFirst:@"error"]);
+        DDLogWarn(@"Muc mam catchup query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
+        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query new messages for groupchat %@ on account %@", @""), iqNode.fromUser, account.connectionProperties.identity.jid] withNode:iqNode andAccount:account andIsSevere:YES];
         return;
     }
     if(![[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue] && [iqNode check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"])

@@ -1585,7 +1585,7 @@ NSString *const kData=@"data";
             if([iqNode check:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"] && _runningMamQueries[[iqNode findFirst:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"]] != nil)
                 [_runningMamQueries removeObjectForKey:[iqNode findFirst:@"/<type=result>/{urn:xmpp:mam:2}fin@queryid"]];
             else if([iqNode check:@"/<type=error>"])
-                for(NSString* mamQueryId in _runningMamQueries)
+                for(NSString* mamQueryId in [_runningMamQueries allKeys])
                     if([iqNode.id isEqual:((XMPPIQ*)_runningMamQueries[mamQueryId]).id])
                         [_runningMamQueries removeObjectForKey:mamQueryId];
             

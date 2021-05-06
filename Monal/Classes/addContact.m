@@ -29,8 +29,8 @@
 {
     if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
     {
-        UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No connected accounts", @"") message:NSLocalizedString(@"Please make sure at least one account has connected before trying to add a contact.", @"") preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"TITLE_ACCOUNT_CONNECTION_INFORMATION", @"") message:NSLocalizedString(@"TITLE_INFOTEXT_CONNECT_ACCOUNT_BEFORE_ADDING_USER", @"") preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"CLOSE", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         }];
         [messageAlert addAction:closeAction];
         
@@ -60,8 +60,8 @@
                 [[MLXMPPManager sharedInstance] approveContact:contactObj];
             }
 
-            UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Permission Requested", @"") message:NSLocalizedString(@"The new contact will be added to your contacts list when the person you've added has approved your request.", @"") preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"TITLE_PERMISSION_REQUESTED", @"") message:NSLocalizedString(@"MESSAGE_CONTACT_ADDED_WHEN_APPROVED", @"") preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"CLOSE", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
                 if(self.completion) self.completion(contactObj);
                 [self dismissViewControllerAnimated:YES completion:nil];
             }];
@@ -71,8 +71,8 @@
         }
         else
         {
-            UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@"") message:NSLocalizedString(@"Name can't be empty", @"") preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+            UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"ERROR",@"") message:NSLocalizedString(@"MESSAGE_NAME_EMPTY", @"") preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"CLOSE", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
                 
             }];
             [messageAlert addAction:closeAction];
@@ -104,7 +104,7 @@
 -(void) viewDidLoad
 {
     [super viewDidLoad];
-    self.navigationItem.title = NSLocalizedString(@"Add Contact", @"");
+    self.navigationItem.title = NSLocalizedString(@"TITLE_ADD_CONTACT", @"");
         
     [self.tableView registerNib:[UINib nibWithNibName:@"MLTextInputCell"
                                                bundle:[NSBundle mainBundle]]
@@ -131,7 +131,7 @@
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     if(section == 0)
-        return NSLocalizedString(@"Contacts are usually in the format: username@dom.ain", @"");
+        return NSLocalizedString(@"MESSAGE_JID_FORMAT_INFO", @"");
     else
         return nil;
 }
@@ -161,7 +161,7 @@
     {
         if(indexPath.row == 0){
             UITableViewCell* accountCell = [tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
-            accountCell.textLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Using Account: %@", @""), [[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:_selectedRow]];
+            accountCell.textLabel.text = [NSString stringWithFormat:NSLocalizedString(@"LABEL_ACCOUNT_IN_USE", @""), [[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:_selectedRow]];
             accountCell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
 
             return accountCell;
@@ -169,7 +169,7 @@
         
         MLTextInputCell* textCell = [tableView dequeueReusableCellWithIdentifier:@"TextCell"];
         self.contactName = textCell.textInput;
-        self.contactName.placeholder = NSLocalizedString(@"Contact Jid", @"");
+        self.contactName.placeholder = NSLocalizedString(@"PLACEHOLDER_CONTACT_JID", @"");
         self.contactName.delegate=self;
 
         return textCell;

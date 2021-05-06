@@ -2704,9 +2704,15 @@ static NSDateFormatter* dbFormatter;
         dbUpdated |= [self updateDBTo:5.018 withBlock:^{
             [self.db executeNonQuery:@"ALTER TABLE message_history ADD COLUMN participant_jid TEXT DEFAULT NULL"];
         }];
+        
         // delete message_history backup table
         dbUpdated |= [self updateDBTo:5.019 withBlock:^{
             [self.db executeNonQuery:@"DROP TABLE message_history_backup;"];
+        }];
+        
+        //update muc favorites to have the autojoin flag set
+        dbUpdated |= [self updateDBTo:5.020 withBlock:^{
+            [self.db executeNonQuery:@"UPDATE muc_favorites SET autojoin=1;"];
         }];
     }];
     // Vacuum after db updates

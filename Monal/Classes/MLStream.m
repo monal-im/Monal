@@ -88,7 +88,7 @@
     else
     {
         _buf = [[NSData alloc] init];
-        [self shedule_read];
+        [self schedule_read];
     }
     return len;
 }
@@ -112,7 +112,7 @@
     return [super streamStatus];
 }
 
--(void) shedule_read
+-(void) schedule_read
 {
     _reading = YES;
     DDLogVerbose(@"calling nw_connection_receive");
@@ -153,7 +153,7 @@
     @synchronized(self.shared_state) {
         [super generateEvent:event];
         if(event == NSStreamEventOpenCompleted && self.open_called && self.shared_state.open)
-            [self shedule_read];
+            [self schedule_read];
     }
 }
 
@@ -329,10 +329,10 @@
 -(void) generateEvent:(NSStreamEvent) event
 {
     @synchronized(self.shared_state) {
-        //don't shedule delegate calls if no runloop was specified
+        //don't schedule delegate calls if no runloop was specified
         if(self.shared_state.runLoop == nil)
             return;
-        //shedule the delegate calls in the runloop that was registered
+        //schedule the delegate calls in the runloop that was registered
         CFRunLoopPerformBlock([self.shared_state.runLoop getCFRunLoop], (__bridge CFStringRef)self.shared_state.runLoopMode, ^{
             @synchronized(self.shared_state) {
                 if(event == NSStreamEventOpenCompleted && self.open_called && self.shared_state.open)

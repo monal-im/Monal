@@ -515,7 +515,18 @@ $$handler(handleCatchup, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode))
     if([iqNode check:@"/<type=error>"])
     {
         DDLogWarn(@"Muc mam catchup query %@ returned error: %@", iqNode.id, [iqNode findFirst:@"error"]);
-        [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query new messages for groupchat %@ on account %@", @""), iqNode.fromUser, account.connectionProperties.identity.jid] withNode:iqNode andAccount:account andIsSevere:YES];
+        
+        //handle weird XEP-0313 monkey-patching XEP-0059 behaviour (WHY THE HELL??)
+        if([iqNode check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found"])
+        {
+            XMPPIQ* mamQuery = [[XMPPIQ alloc] initWithId:[[NSUUID UUID] UUIDString] andType:kiqSetType];
+            [mamQuery setiqTo:iqNode.fromUser];
+            DDLogInfo(@"Querying COMPLETE muc mam:2 archive for catchup");
+            [mamQuery setCompleteMAMQuery];
+            [account sendIq:mamQuery withHandler:$newHandler(self, handleCatchup)];
+        }
+        else
+            [HelperTools postError:[NSString stringWithFormat:NSLocalizedString(@"Failed to query new messages for groupchat %@ on account %@", @""), iqNode.fromUser, account.connectionProperties.identity.jid] withNode:iqNode andAccount:account andIsSevere:YES];
         return;
     }
     if(![[iqNode findFirst:@"{urn:xmpp:mam:2}fin@complete|bool"] boolValue] && [iqNode check:@"{urn:xmpp:mam:2}fin/{http://jabber.org/protocol/rsm}set/last#"])

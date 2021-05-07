@@ -213,6 +213,19 @@ NSString* const kiqErrorType = @"error";
     [self addChild:queryNode];
 }
 
+-(void) setCompleteMAMQuery
+{
+    MLXMLNode* queryNode = [[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"urn:xmpp:mam:2" withAttributes:@{
+        @"queryid": [NSString stringWithFormat:@"MLcatchup:%@", [[NSUUID UUID] UUIDString]]
+    } andChildren:@[
+        [[XMPPDataForm alloc] initWithType:@"submit" andFormType:@"urn:xmpp:mam:2"],
+        [[MLXMLNode alloc] initWithElement:@"set" andNamespace:@"http://jabber.org/protocol/rsm" withAttributes:@{} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"max" withAttributes:@{} andChildren:@[] andData:@"50"]
+        ] andData:nil]
+    ] andData:nil];
+    [self addChild:queryNode];
+}
+
 -(void) setRemoveFromRoster:(NSString*) jid
 {
     [self addChild:[[MLXMLNode alloc] initWithElement:@"query" andNamespace:@"jabber:iq:roster" withAttributes:@{} andChildren:@[

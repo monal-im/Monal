@@ -718,7 +718,7 @@ NSString *const kData=@"data";
             self->_cancelReconnectTimer();
         self->_cancelReconnectTimer = nil;
         
-        for(NSString* iqid in self->_iqHandlers)
+        for(NSString* iqid in [self->_iqHandlers allKeys])
             if(![self->_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
             {
                 NSDictionary* data = (NSDictionary*)self->_iqHandlers[iqid];
@@ -764,7 +764,7 @@ NSString *const kData=@"data";
                 self.unAckedStanzas = stanzas;
                 
                 //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
-                for(NSString* iqid in self->_iqHandlers)
+                for(NSString* iqid in [self->_iqHandlers allKeys])
                 {
                     DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
                     if([self->_iqHandlers[iqid] isKindOfClass:[MLHandler class]])

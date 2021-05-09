@@ -1411,7 +1411,7 @@ static NSDateFormatter* dbFormatter;
     }];
 }
 
--(BOOL) checkLMCEligible:(NSNumber*) historyID encrypted:(BOOL) encrypted isMLhistory:(BOOL) isMLhistory
+-(BOOL) checkLMCEligible:(NSNumber*) historyID encrypted:(BOOL) encrypted historyBaseID:(NSNumber* _Nullable) historyBaseID
 {
     return [self.db boolReadTransaction:^{
         MLMessage* msg = [self messageForHistoryID:historyID];
@@ -1422,7 +1422,7 @@ static NSDateFormatter* dbFormatter;
             return NO;
         
         //use the oldest 3 messages, if we are processing a MLhistory mam fetch, and the newest 3, if we are going forward in time
-        if(isMLhistory)
+        if(historyBaseID != nil)
         {
             //only allow LMC for the 3 newest messages of this contact (or of us)
             editAllowed = (NSNumber*)[self.db executeScalar:@"\
@@ -1432,10 +1432,10 @@ static NSDateFormatter* dbFormatter;
                         ELSE 0 \
                     END \
                 FROM \
-                    (SELECT message_history_id, inbound, encrypted, messageType FROM message_history WHERE account_id=? AND buddy_name=? ORDER BY message_history_id ASC LIMIT 3) \
+                    (SELECT message_history_id, inbound, encrypted, messageType FROM message_history WHERE account_id=? AND buddy_name=? AND message_history_id<? ORDER BY message_history_id ASC LIMIT 3) \
                 WHERE \
-                    message_history_id=? AND inbound=? AND messageType=?; \
-                " andArguments:@[[NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:encrypted], msg.accountId, msg.buddyName, historyID, [NSNumber numberWithBool:msg.inbound], msg.messageType]];
+                    message_history_id=?; \
+                " andArguments:@[[NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:encrypted], msg.accountId, msg.buddyName, historyBaseID, historyID]];
         }
         else
         {
@@ -1449,8 +1449,8 @@ static NSDateFormatter* dbFormatter;
                 FROM \
                     (SELECT message_history_id, inbound, encrypted, messageType FROM message_history WHERE account_id=? AND buddy_name=? ORDER BY message_history_id DESC LIMIT 3) \
                 WHERE \
-                    message_history_id=? AND inbound=? AND messageType=?; \
-                " andArguments:@[[NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:encrypted], msg.accountId, msg.buddyName, historyID, [NSNumber numberWithBool:msg.inbound], msg.messageType]];
+                    message_history_id=?; \
+                " andArguments:@[[NSNumber numberWithBool:encrypted], [NSNumber numberWithBool:encrypted], msg.accountId, msg.buddyName, historyID]];
         }
         BOOL eligible = YES;
         eligible &= editAllowed.intValue == 1;

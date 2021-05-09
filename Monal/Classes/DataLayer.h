@@ -104,6 +104,7 @@ extern NSString* const kMessageTypeFiletransfer;
 #pragma mark - MUC
 
 -(BOOL) initMuc:(NSString*) room forAccountId:(NSString*) accountNo andMucNick:(NSString* _Nullable) mucNick;
+-(void) cleanupMembersAndParticipantsListFor:(NSString*) room forAccountId:(NSString*) accountNo;
 -(void) addMember:(NSDictionary*) member toMuc:(NSString*) room forAccountId:(NSString*) accountNo;
 -(void) removeMember:(NSDictionary*) member fromMuc:(NSString*) room forAccountId:(NSString*) accountNo;
 -(void) addParticipant:(NSDictionary*) participant toMuc:(NSString*) room forAccountId:(NSString*) accountNo;

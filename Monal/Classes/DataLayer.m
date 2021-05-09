@@ -943,12 +943,16 @@ static NSDateFormatter* dbFormatter;
             nick = [self ownNickNameforMuc:room forAccount:accountNo];
         NSAssert(nick, @"Could not determine muc nick when adding muc");
         
-        //clean up old muc data (will be refilled by incoming presences and/or disco queries)
-        [self.db executeNonQuery:@"DELETE FROM muc_participants WHERE account_id=? AND room=?;" andArguments:@[accountNo, room]];
-        [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=?;" andArguments:@[accountNo, room]];
-        
+        [self cleanupMembersAndParticipantsListFor:room forAccountId:accountNo];
         return [self.db executeNonQuery:@"INSERT INTO buddylist ('account_id', 'buddy_name', 'muc', 'muc_nick') VALUES(?, ?, 1, ?) ON CONFLICT(account_id, buddy_name) DO UPDATE SET muc=1, muc_nick=?;" andArguments:@[accountNo, room, mucNick ? mucNick : @"", mucNick ? mucNick : @""]];
     }];
+}
+
+-(void) cleanupMembersAndParticipantsListFor:(NSString*) room forAccountId:(NSString*) accountNo
+{
+    //clean up old muc data (will be refilled by incoming presences and/or disco queries)
+    [self.db executeNonQuery:@"DELETE FROM muc_participants WHERE account_id=? AND room=?;" andArguments:@[accountNo, room]];
+    [self.db executeNonQuery:@"DELETE FROM muc_members WHERE account_id=? AND room=?;" andArguments:@[accountNo, room]];
 }
 
 -(void) addParticipant:(NSDictionary*) participant toMuc:(NSString*) room forAccountId:(NSString*) accountNo
@@ -1036,7 +1040,7 @@ static NSDateFormatter* dbFormatter;
             nick = [self ownNickNameforMuc:room forAccount:accountNo];
         NSAssert(nick, @"Could not determine muc nick when adding muc");
         
-        [self.db executeNonQuery:@"INSERT INTO muc_favorites (room, nick, account_id) VALUES(?, ?, ?) ON CONFLICT(room, account_id) DO UPDATE SET nick=?;" andArguments:@[room, nick, accountNo, nick]];
+        [self.db executeNonQuery:@"INSERT INTO muc_favorites (room, nick, account_id, autojoin) VALUES(?, ?, ?, 1) ON CONFLICT(room, account_id) DO UPDATE SET nick=?;" andArguments:@[room, nick, accountNo, nick]];
     }];
 }
 
@@ -1070,7 +1074,7 @@ static NSDateFormatter* dbFormatter;
 -(NSString* _Nullable) ownNickNameforMuc:(NSString*) room forAccount:(NSString*) accountNo
 {
     return [self.db idReadTransaction:^{
-        NSString* nick = (NSString*)[self.db executeScalar:@"SELECT muc_nick FROM buddylist WHERE account_id=? AND buddy_name=?;" andArguments:@[accountNo, room]];
+        NSString* nick = (NSString*)[self.db executeScalar:@"SELECT muc_nick FROM buddylist WHERE account_id=? AND buddy_name=? and muc=1;" andArguments:@[accountNo, room]];
         // fallback to nick in muc_favorites
         if(!nick || nick.length == 0)
             nick = (NSString*)[self.db executeScalar:@"SELECT nick FROM muc_favorites WHERE account_id=? AND room=?;" andArguments:@[accountNo, room]];

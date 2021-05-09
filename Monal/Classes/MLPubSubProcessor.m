@@ -8,14 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
+#import "MLConstants.h"
 #import "MLPubSubProcessor.h"
 #import "MLPubSub.h"
 #import "MLHandler.h"
 #import "xmpp.h"
-#import "MLConstants.h"
 #import "DataLayer.h"
 #import "MLImageManager.h"
 #import "MLNotificationQueue.h"
+#import "MLMucProcessor.h"
 
 @interface MLPubSubProcessor()
 
@@ -127,6 +128,104 @@ $$handler(rosterNameHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NS
                 [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
                     @"contact": contact
                 }];
+        }
+    }
+$$
+
+$$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSString*, type), $_ID(NSDictionary*, data))
+    if(![jid isEqualToString:account.connectionProperties.identity.jid])
+    {
+        DDLogWarn(@"Ignoring bookmarks update not coming from our own jid");
+        return;
+    }
+    
+    NSMutableDictionary* ownFavorites = [[NSMutableDictionary alloc] init];
+    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
+        ownFavorites[entry[@"room"]] = entry;
+    
+    //new/updated bookmarks
+    if([type isEqualToString:@"publish"] && data[@"current"] != nil)
+    {
+        for(NSString* itemId in data)
+        {
+            //iterate through all conference elements provided
+            NSMutableSet* bookmarkedMucs = [[NSMutableSet alloc] init];
+            for(MLXMLNode* conference in [data[itemId] find:@"{storage:bookmarks}storage/conference"])
+            {
+                //we ignore the conference name (the name willbe taken from the muc itself)
+                //NSString* name = [conference findFirst:@"/@name"];
+                NSString* room = [conference findFirst:@"/@jid"];
+                //ignore non-xep-compliant entries
+                if(!room)
+                {
+                    DDLogError(@"Received non-xep-compliant bookmarks entry, ignoring: %@", conference);
+                    continue;
+                }
+                [bookmarkedMucs addObject:room];
+                NSString* nick = [conference findFirst:@"nick#"];
+                NSNumber* autojoin = [conference findFirst:@"/@autojoin|bool"];
+                if(autojoin == nil)
+                    autojoin = @NO;     //default value specified in xep
+                
+                //check if this is a new entry with autojoin=true
+                if(ownFavorites[room] == nil && [autojoin boolValue])
+                {
+                    DDLogInfo(@"Entering muc '%@' on acount %@ because it got added to bookmarks...", room, account.accountNo);
+                    //add muc to favorites table and try to join it afterwards
+                    [[DataLayer sharedInstance] addMucFavorite:room forAccountId:account.accountNo andMucNick:nick];
+                    [MLMucProcessor sendDiscoQueryFor:room onAccount:account withJoin:YES];
+                }
+                //check if it is a known entry that canged autojoin to false
+                else if(ownFavorites[room] != nil && ![autojoin boolValue])
+                {
+                    DDLogInfo(@"Leaving muc '%@' on acount %@ because not listed as autojoin=true in bookmarks...", room, account.accountNo);
+                    //delete local favorites entry and leave room afterwards
+                    [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
+                    [MLMucProcessor leave:room onAccount:account];
+                }
+                //check for nickname changes
+                else if(ownFavorites[room] != nil && nick != nil)
+                {
+                    NSString* oldNick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+                    if(![nick isEqualToString:oldNick])
+                    {
+                        DDLogInfo(@"Updating muc '%@' nick on account %@ in database to nick provided by bookmarks: '%@'...", room, account.accountNo, nick);
+                        
+                        //update muc nickname in database
+                        [[DataLayer sharedInstance] updateOwnNickName:nick forMuc:room forAccount:account.accountNo];
+                        [[DataLayer sharedInstance] addMucFavorite:room forAccountId:account.accountNo andMucNick:nick];        //this will upate the already existing favorites entry
+                        
+                        //rejoin the muc (e.g. change nick)
+                        //we don't have to do a full disco because we are sure this is a real muc and we are joined already
+                        //(only real mucs are part of our local favorites list and this list is joined automatically)
+                        [MLMucProcessor sendJoinPresenceFor:room onAccount:account];
+                    }
+                }
+            }
+            
+            //remove and leave all mucs removed from bookmarks
+            NSMutableSet* toLeave = [NSMutableSet setWithArray:[ownFavorites allKeys]];
+            [toLeave  minusSet:bookmarkedMucs];
+            for(NSString* room in toLeave)
+            {
+                DDLogInfo(@"Leaving muc '%@' on acount %@ because not listed in bookmarks anymore...", room, account.accountNo);
+                //delete local favorites entry and leave room afterwards
+                [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
+                [MLMucProcessor leave:room onAccount:account];
+            }
+            
+            break;      //we only need the first pep item (there should be only one item in the first place)
+        }
+    }
+    //deleted/purged node or retracted item (e.g. all bookmarks deleted)
+    else
+    {
+        //remove and leave all mucs
+        for(NSString* room in ownFavorites)
+        {
+            //delete local favorites entry and leave room afterwards
+            [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
+            [MLMucProcessor leave:room onAccount:account];
         }
     }
 $$

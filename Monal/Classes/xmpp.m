@@ -187,6 +187,11 @@ NSString *const kData=@"data";
     //we want to get automatic roster name updates (XEP-0172)
     [self.pubsub registerForNode:@"http://jabber.org/protocol/nick" withHandler:$newHandler(MLPubSubProcessor, rosterNameHandler)];
     
+#ifdef IS_ALPHA
+    //we want to get automatic bookmark updates (XEP-0048)
+    [self.pubsub registerForNode:@"storage:bookmarks" withHandler:$newHandler(MLPubSubProcessor, bookmarksHandler)];
+#endif
+    
     return self;
 }
 

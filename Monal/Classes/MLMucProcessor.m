@@ -315,12 +315,18 @@ static NSMutableDictionary* _uiHandler;
     }
 }
 
-//TODO: implement this?
-+(void) leave
++(void) leave:(NSString*) room onAccount:(xmpp*) account
 {
-    //XMPPPresence* presence = [[XMPPPresence alloc] init];
-    //[presence leaveRoom:muc.contactJid onServer:nil withNick:muc.accountNickInGroup];
-    //[account send:presence];
+    NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+    if(nick == nil)
+    {
+        DDLogError(@"Cannot leave room '%@' on account %@ because nick is nil!", room, account.accountNo);
+        return;
+    }
+    DDLogInfo(@"Leaving room '%@' on account %@ using nick '%@'...", room, account.accountNo, nick);
+    XMPPPresence* presence = [[XMPPPresence alloc] init];
+    [presence leaveRoom:room withNick:nick];
+    [account send:presence];
 }
 
 +(void) sendDiscoQueryFor:(NSString*) roomJid onAccount:(xmpp*) account withJoin:(BOOL) join
@@ -396,6 +402,10 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
     if(![features containsObject:@"http://jabber.org/protocol/muc"])
     {
         DDLogError(@"muc disco returned that this jid is not a muc!");
+        
+        //delete muc from favorites table to be sure we don't try to rejoin it
+        [[DataLayer sharedInstance] deleteMuc:iqNode.fromUser forAccountId:account.accountNo];
+        
         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@: This is not a groupchat!", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:nil andAccount:account andIsSevere:YES];
         return;
     }
@@ -425,7 +435,7 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
     else
     {
         DDLogInfo(@"Clearing muc participants and members tables for %@", iqNode.fromUser);
-        
+        [[DataLayer sharedInstance] cleanupMembersAndParticipantsListFor:iqNode.fromUser forAccountId:account.accountNo];
     }
     if(![mucType isEqualToString:[[DataLayer sharedInstance] getMucTypeOfRoom:iqNode.fromUser andAccount:account.accountNo]])
     {
@@ -464,19 +474,22 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
     
     // now try to join this room if requested
     if(join)
-    {
-        DDLogInfo(@"Trying to join muc %@...", iqNode.fromUser);
-        @synchronized(_stateLockObject) {
-            [_joining addObject:iqNode.fromUser];       //add room to "currently joining" list
-            //we don't need to force saving of our new state because once this outgoing join presence gets handled by smacks the whole state will be saved
-        }
-        
-        NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:iqNode.fromUser forAccount:account.accountNo];
-        XMPPPresence* presence = [[XMPPPresence alloc] init];
-        [presence joinRoom:iqNode.fromUser withNick:nick];
-        [account send:presence];
-    }
+        [self sendJoinPresenceFor:iqNode.fromUser onAccount:account];
 $$
+
++(void) sendJoinPresenceFor:(NSString*) room onAccount:(xmpp*) account
+{
+    NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+    DDLogInfo(@"Trying to join muc '%@' with nick '%@' on account %@...", room, nick, account.accountNo);
+    @synchronized(_stateLockObject) {
+        [_joining addObject:room];       //add room to "currently joining" list
+        //we don't need to force saving of our new state because once this outgoing join presence gets handled by smacks the whole state will be saved
+    }
+    
+    XMPPPresence* presence = [[XMPPPresence alloc] init];
+    [presence joinRoom:room withNick:nick];
+    [account send:presence];
+}
 
 $$handler(handleMembersList, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSString*, type))
     DDLogInfo(@"Got %@s list from %@...", type, iqNode.fromUser);

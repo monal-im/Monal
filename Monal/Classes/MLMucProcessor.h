@@ -19,7 +19,6 @@ NS_ASSUME_NONNULL_BEGIN
 +(void) setState:(NSDictionary*) state;
 +(NSDictionary*) state;
 
-+(BOOL) isJoining:(NSString*) room;
 +(void) addUIHandler:(monal_id_block_t) handler forMuc:(NSString*) room;
 +(void) removeUIHandlerForMuc:(NSString*) room;
 
@@ -28,6 +27,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 +(void) sendDiscoQueryFor:(NSString*) roomJid onAccount:(xmpp*) account withJoin:(BOOL) join;
 +(void) ping:(NSString*) roomJid onAccount:(xmpp*) account;
++(void) sendJoinPresenceFor:(NSString*) room onAccount:(xmpp*) account;
++(void) leave:(NSString*) room onAccount:(xmpp*) account;
 
 @end
 

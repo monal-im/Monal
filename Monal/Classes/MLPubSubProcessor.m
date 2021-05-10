@@ -61,10 +61,10 @@ $$handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSStri
     }
 $$
 
-$$handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(XMPPIQ*, errorReason), $_ID(NSDictionary*, data))
+$$handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(XMPPIQ*, errorReason), $_ID(NSDictionary*, data))
     //ignore errors here (e.g. simply don't update the avatar image)
     //(this should never happen if other clients and servers behave properly)
-    if(errorIq || errorReason)
+    if(!success)
     {
         DDLogWarn(@"Got avatar image fetch error from jid %@: errorIq=%@, errorReason=%@", jid, errorIq, errorReason);
         return;
@@ -75,11 +75,9 @@ $$handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $
         [[MLImageManager sharedInstance] setIconForContact:jid andAccount:account.accountNo WithData:[data[avatarHash] findFirst:@"{urn:xmpp:avatar:data}data#|base64"]];
         [[DataLayer sharedInstance] setAvatarHash:avatarHash forContact:jid andAccount:account.accountNo];
         [account accountStatusChanged];     //inform ui of this change (accountStatusChanged will force a ui reload which will also reload the avatars)
-        MLContact* contact = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
-        if(contact)     //ignore updates for jids not in our roster
-            [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
-                @"contact": contact
-            }];
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
+            @"contact": [MLContact createContactFromJid:jid andAccountNo:account.accountNo]
+        }];
         DDLogInfo(@"Avatar of '%@' fetched and updated successfully", jid);
     }
 $$

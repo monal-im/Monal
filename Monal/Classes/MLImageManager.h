@@ -38,6 +38,7 @@
  retrieves a uiimage for the icon. returns noicon.png if nothing is found. never returns nil.
  */
 -(void) getIconForContact:(NSString*_Nonnull) contact andAccount:(NSString *_Nonnull) accountNo withCompletion:(void (^_Nullable)(UIImage *_Nullable))completion;
++(UIImage* _Nonnull) circularImage:(UIImage* _Nonnull) image;
 
 -(UIImage *_Nullable) getBackground;
 

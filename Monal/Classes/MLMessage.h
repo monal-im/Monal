@@ -116,7 +116,7 @@ The of the message in the DB , should be int
 /**
  Converts a dictonary to a message object Provide a formatter for the format the dates will be in
  */
-+(MLMessage *) messageFromDictionary:(NSDictionary *) dic withDateFormatter:(NSDateFormatter *) formatter;
++(MLMessage *) messageFromDictionary:(NSDictionary *) dic;
 
 -(void) updateWithMessage:(MLMessage*) msg;
 

@@ -10,7 +10,7 @@
 
 @implementation MLMessage
 
-+(MLMessage*) messageFromDictionary:(NSDictionary*) dic withDateFormatter:(NSDateFormatter*) formatter
++(MLMessage*) messageFromDictionary:(NSDictionary*) dic
 {
     MLMessage* message = [[MLMessage alloc] init];
     message.accountId = [NSString stringWithFormat:@"%@", [dic objectForKey:@"account_id"]];
@@ -24,8 +24,7 @@
     message.messageId = [dic objectForKey:@"messageid"];
     message.stanzaId = [dic objectForKey:@"stanzaid"];
     message.messageDBId = [dic objectForKey:@"message_history_id"];
-    if(formatter)
-        message.timestamp = [formatter dateFromString:[dic objectForKey:@"thetime"]]; 
+    message.timestamp = [dic objectForKey:@"thetime"];
     message.messageType = [dic objectForKey:@"messageType"];
     message.mucType = [dic objectForKey:@"muc_type"];
     message.participantJid = [dic objectForKey:@"participant_jid"];
@@ -78,6 +77,5 @@
     self.filetransferMimeType = msg.filetransferMimeType;
     self.filetransferSize = msg.filetransferSize;
 }
-
 
 @end

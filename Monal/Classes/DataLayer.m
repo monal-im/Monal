@@ -1173,7 +1173,12 @@ static NSDateFormatter* dbFormatter;
             WHERE M.message_history_id IN(%@);", idList];
         NSMutableArray<MLMessage*>* retval = [[NSMutableArray<MLMessage*> alloc] init];
         for(NSDictionary* dic in [self.db executeReader:query])
-            [retval addObject:[MLMessage messageFromDictionary:dic withDateFormatter:dbFormatter]];
+        {
+            NSMutableDictionary* message = [dic mutableCopy];
+            if(message[@"thetime"])
+                message[@"thetime"] = [dbFormatter dateFromString:message[@"thetime"]];
+            [retval addObject:[MLMessage messageFromDictionary:message]];
+        }
         return retval;
     }];
 }
@@ -1589,7 +1594,12 @@ static NSDateFormatter* dbFormatter;
         NSArray* params = @[accountNo, contact];
         NSArray* results = [self.db executeReader:query andArguments:params];
         if([results count])
-            return [MLMessage messageFromDictionary:results[0] withDateFormatter:dbFormatter];
+        {
+            NSMutableDictionary* message = [(NSDictionary*)results[0] mutableCopy];
+            if(message[@"thetime"])
+                message[@"thetime"] = [dbFormatter dateFromString:message[@"thetime"]];
+            return [MLMessage messageFromDictionary:message];
+        }
         
         //return "real" last message
         NSNumber* historyID = [self.db executeScalar:@"SELECT message_history_id FROM message_history WHERE account_id=? AND buddy_name=? ORDER BY message_history_id DESC LIMIT 1;" andArguments:@[accountNo, contact]];

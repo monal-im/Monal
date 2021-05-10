@@ -251,10 +251,18 @@
         {
             NSString* filename = [[HelperTools defaultsDB] objectForKey:@"AlertSoundFile"];
             if(filename)
-                content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif",filename]];
+            {
+                content.sound = [UNNotificationSound soundNamed:[NSString stringWithFormat:@"AlertSounds/%@.aif", filename]];
+                DDLogDebug(@"Using user configured alert sound: %@", content.sound);
+            }
             else
+            {
                 content.sound = [UNNotificationSound defaultSound];
+                DDLogDebug(@"Using default alert sound: %@", content.sound);
+            }
         }
+        else
+            DDLogDebug(@"Using no alert sound");
 
         if([message.messageType isEqualToString:kMessageTypeFiletransfer])
         {

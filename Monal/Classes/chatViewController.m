@@ -1892,7 +1892,7 @@ enum msgSentState {
         }
         else // Default case
         {
-            if(messageText.length == 2  && [MLEmoji containsEmojiWithText:messageText]) {
+            if([MLEmoji containsEmojiWithText:messageText]) {
                 UIFont* originalFont = [UIFont systemFontOfSize:cell.messageBody.font.pointSize*3];
                 [cell.messageBody setFont:originalFont];
                 

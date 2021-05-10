@@ -15,13 +15,13 @@ public class MLEmoji: NSObject
     {
         for scalar in text.unicodeScalars
         {
-            let isEmoji = scalar.properties.isEmoji
+            let isEmoji = scalar.properties.isEmoji && scalar.properties.isEmojiPresentation
 
-            if(isEmoji)
+            if(!isEmoji)
             {
-                return true
+                return false
             }
         }
-        return false
+        return true
     }
 }

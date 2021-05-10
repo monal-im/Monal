@@ -17,6 +17,7 @@
 #import "MLImageManager.h"
 #import "MLNotificationQueue.h"
 #import "MLMucProcessor.h"
+#import "XMPPIQ.h"
 
 @interface MLPubSubProcessor()
 
@@ -60,12 +61,12 @@ $$handler(avatarHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSStri
     }
 $$
 
-$$handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSDictionary*, data))
+$$handler(handleAvatarFetchResult, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(XMPPIQ*, errorReason), $_ID(NSDictionary*, data))
     //ignore errors here (e.g. simply don't update the avatar image)
     //(this should never happen if other clients and servers behave properly)
-    if(errorIq)
+    if(errorIq || errorReason)
     {
-        DDLogError(@"Got avatar image fetch error from jid %@: %@", jid, errorIq);
+        DDLogWarn(@"Got avatar image fetch error from jid %@: errorIq=%@, errorReason=%@", jid, errorIq, errorReason);
         return;
     }
     
@@ -230,10 +231,38 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
     }
 $$
 
-$$handler(avatarDataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSString*, imageHash), $_ID(NSData*, imageData))
+$$handler(rosterNamePublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    if(!success)
+    {
+        DDLogWarn(@"Could not publish roster name to pep!");
+        [self handleErrorWithDescription:NSLocalizedString(@"Failed to publish own nickname on account %@", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
+        return;
+    }
+$$
+
+$$handler(avatarDeleted, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    if(!success)
+    {
+        DDLogWarn(@"Could not delete avatar image from pep!");
+        [self handleErrorWithDescription:NSLocalizedString(@"Failed to delete own avatar on account %@", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
+        return;
+    }
+$$
+
+$$handler(avatarMetadataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    if(!success)
+    {
+        DDLogWarn(@"Could not publish avatar metadata to pep!");
+        [self handleErrorWithDescription:NSLocalizedString(@"Failed to publish own avatar on account %@", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
+        return;
+    }
+$$
+
+$$handler(avatarDataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSString*, imageHash), $_ID(NSData*, imageData))
     if(!success)
     {
         DDLogWarn(@"Could not publish avatar image data for hash %@!", imageHash);
+        [self handleErrorWithDescription:NSLocalizedString(@"Failed to publish own avatar on account %@", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:NO];
         return;
     }
     
@@ -253,7 +282,15 @@ $$handler(avatarDataPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(NSStr
     onNode:@"urn:xmpp:avatar:metadata" withConfigOptions:@{
         @"pubsub#persist_items": @"true",
         @"pubsub#access_model": @"presence"
-    }];
+    } andHandler:$newHandler(self, avatarMetadataPublished)];
 $$
+
++(void) handleErrorWithDescription:(NSString*) description andAccount:(xmpp*) account andErrorIq:(XMPPIQ*) errorIq andErrorReason:(NSString*) errorReason andIsSevere:(BOOL) isSevere
+{
+    if(errorIq)
+        [HelperTools postError:description withNode:errorIq andAccount:account andIsSevere:isSevere];
+    else if(errorReason)
+        [HelperTools postError:[NSString stringWithFormat:@"%@: %@", description, errorReason] withNode:nil andAccount:account andIsSevere:isSevere];
+}
 
 @end

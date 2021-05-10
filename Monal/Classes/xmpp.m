@@ -402,7 +402,7 @@ NSString *const kData=@"data";
                 DDLogVerbose(@"Adding idle state notification to receive queue...");
                 [_receiveQueue addOperations:@[[NSBlockOperation blockOperationWithBlock:^{
                     if(self.idle)       //make sure we are still idle, even if in receive queue now
-                        //don't queue this notification because it should be handled in the receive queue
+                        //don't queue this notification because it should be handled INLINE inside the receive queue
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalIdle object:self];
                 }]] waitUntilFinished:NO];
             }
@@ -1696,7 +1696,7 @@ NSString *const kData=@"data";
                     {
                         self->_catchupDone = YES;
                         DDLogVerbose(@"Now posting kMonalFinishedCatchup notification");
-                        //don't queue this notification because it should be handled in the receive queue
+                        //don't queue this notification because it should be handled INLINE inside the receive queue
                         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self userInfo:@{@"accountNo": self.accountNo}];
                     }
                 }];
@@ -2538,7 +2538,7 @@ NSString *const kData=@"data";
     //indicate we are bound now, *after* initializing/resetting all the other data structures to avoid race conditions
     _accountState = kStateBound;
     NSDictionary* dic = @{@"AccountNo":self.accountNo, @"AccountName": self.connectionProperties.identity.jid};
-    //don't queue this notification because it should be handled in the receive queue
+    //don't queue this notification because it should be handled INLINE inside the receive queue
     [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
     [self accountStatusChanged];
 
@@ -3489,7 +3489,7 @@ NSString *const kData=@"data";
     if(!_catchupDone)
     {
         _catchupDone = YES;
-        //don't queue this notification because it should be handled in the receive queue
+        //don't queue this notification because it should be handled INLINE inside the receive queue
         [[NSNotificationCenter defaultCenter] postNotificationName:kMonalFinishedCatchup object:self  userInfo:@{@"accountNo": self.accountNo}];
 
     }
@@ -3538,7 +3538,7 @@ NSString *const kData=@"data";
 {
     DDLogInfo(@"Publishing own nickname: %@", rosterName);
     if(!rosterName || !rosterName.length)
-        [self.pubsub deleteNode:@"http://jabber.org/protocol/nick"];
+        [self.pubsub deleteNode:@"http://jabber.org/protocol/nick" andHandler:$newHandler(MLPubSubProcessor, rosterNamePublished)];
     else
         [self.pubsub publishItem:
             [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": @"current"} andChildren:@[
@@ -3547,7 +3547,7 @@ NSString *const kData=@"data";
         onNode:@"http://jabber.org/protocol/nick" withConfigOptions:@{
             @"pubsub#persist_items": @"true",
             @"pubsub#access_model": @"presence"
-        }];
+        } andHandler:$newHandler(MLPubSubProcessor, rosterNamePublished)];
 }
 
 -(NSData*) resizeAvatarImage:(UIImage*) image
@@ -3582,8 +3582,8 @@ NSString *const kData=@"data";
         if(!image)
         {
             DDLogInfo(@"Retracting own avatar image");
-            [self.pubsub deleteNode:@"urn:xmpp:avatar:metadata"];
-            [self.pubsub deleteNode:@"urn:xmpp:avatar:data"];
+            [self.pubsub deleteNode:@"urn:xmpp:avatar:metadata" andHandler:$newHandler(MLPubSubProcessor, avatarDeleted)];
+            [self.pubsub deleteNode:@"urn:xmpp:avatar:data" andHandler:$newHandler(MLPubSubProcessor, avatarDeleted)];
         }
         else
         {

@@ -14,6 +14,7 @@
 #import "XMPPStanza.h"
 #import "XMPPIQ.h"
 #import "XMPPMessage.h"
+#import "HelperTools.h"
 
 #define CURRENT_PUBSUB_DATA_VERSION @4
 
@@ -58,7 +59,7 @@
     }
 }
 
-//handler --> $$handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(MLXMLNode*, errorIq), $_ID(NSDictionary*, data))
+//handler --> $$handler(xxx, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSDictionary*, data))
 -(void) fetchNode:(NSString*) node from:(NSString*) jid withItemsList:(NSArray*) itemsList andHandler:(MLHandler*) handler
 {
     DDLogInfo(@"Fetching node '%@' at jid '%@' using callback %@...", node, jid, handler);
@@ -89,7 +90,7 @@
     )];
 }
 
-//handler --> $$handler(xxx, $_ID(xmpp*, account), $_BOOL(success))
+//handler --> $$handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) configureNode:(NSString*) node withConfigOptions:(NSDictionary*) configOptions andHandler:(MLHandler*) handler
 {
     if(!_account.connectionProperties.supportsPubSub)
@@ -125,7 +126,7 @@
     [self publishItem:item onNode:node withConfigOptions:configOptions andHandler:nil];
 }
 
-//handler --> $$handler(xxx, $_ID(xmpp*, account), $_BOOL(success))
+//handler --> $$handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) publishItem:(MLXMLNode*) item onNode:(NSString*) node withConfigOptions:(NSDictionary* _Nullable) configOptions andHandler:(MLHandler* _Nullable) handler
 {
     if(!_account.connectionProperties.supportsPubSub)
@@ -156,7 +157,7 @@
     [self retractItemWithId:itemId onNode:node andHandler:nil];
 }
 
-//handler --> $$handler(xxx, $_ID(xmpp*, account), $_BOOL(success))
+//handler --> $$handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) retractItemWithId:(NSString*) itemId onNode:(NSString*) node andHandler:(MLHandler*) handler
 {
     if(!_account.connectionProperties.supportsPubSub)
@@ -182,7 +183,7 @@
     [self purgeNode:node andHandler:nil];
 }
 
-//handler --> $$handler(xxx, $_ID(xmpp*, account), $_BOOL(success))
+//handler --> $$handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) purgeNode:(NSString*) node andHandler:(MLHandler*) handler
 {
     if(!_account.connectionProperties.supportsPubSub)
@@ -205,7 +206,7 @@
     [self deleteNode:node andHandler:nil];
 }
 
-//handler --> $$handler(xxx, $_ID(xmpp*, account), $_BOOL(success))
+//handler --> $$handler(xxx, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
 -(void) deleteNode:(NSString*) node andHandler:(MLHandler*) handler
 {
     if(!_account.connectionProperties.supportsPubSub)
@@ -446,7 +447,7 @@ $$handler(handleConfigureResult1, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $
     {
         DDLogError(@"Got error iq for pubsub configure request 1: %@", iqNode);
         //signal error
-        $call(handler, $ID(account), $BOOL(success, NO));
+        $call(handler, $ID(account), $BOOL(success, NO), $ID(errorIq, iqNode));
         return;
     }
     
@@ -463,7 +464,7 @@ $$handler(handleConfigureResult1, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $
         ] andData:nil]];
         [account send:query];
         //signal error
-        $call(handler, $ID(account), $BOOL(success, NO));
+        $call(handler, $ID(account), $BOOL(success, NO), $ID(errorReason, NSLocalizedString(@"Unexpected server response: invalid PEP config form", @"")));
         return;
     }
     
@@ -481,7 +482,7 @@ $$handler(handleConfigureResult1, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $
             ] andData:nil]];
             [account send:query];
             //signal error
-            $call(handler, $ID(account), $BOOL(success, NO));
+            $call(handler, $ID(account), $BOOL(success, NO), $ID(errorReason, NSLocalizedString(@"Unexpected server response: missing required fields in PEP config form", @"")));
             return;
         }
         else
@@ -503,7 +504,7 @@ $$handler(handleConfigureResult2, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $
     {
         DDLogError(@"Got error iq for pubsub configure request 2: %@", iqNode);
         //signal error
-        $call(handler, $ID(account), $BOOL(success, NO));
+        $call(handler, $ID(account), $BOOL(success, NO), $ID(errorIq, iqNode));
         return;
     }
     //inform handler of successful completion of config request
@@ -539,7 +540,7 @@ $$handler(handlePublishResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
             )];
             return;
         }
-        $call(handler, $ID(account), $BOOL(success, NO));
+        $call(handler, $ID(account), $BOOL(success, NO), $ID(errorIq, iqNode));
         return;
     }
     $call(handler, $ID(account), $BOOL(success, YES));
@@ -549,7 +550,7 @@ $$handler(handleRetractResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Retract for item '%@' of node '%@' failed: %@", itemId, node, iqNode);
-        $call(handler, $ID(account), $BOOL(success, NO));
+        $call(handler, $ID(account), $BOOL(success, NO), $ID(errorIq, iqNode));
         return;
     }
     $call(handler, $ID(account), $BOOL(success, YES));
@@ -559,7 +560,7 @@ $$handler(handlePurgeOrDeleteResult, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode)
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Purge/Delete of node '%@' failed: %@", node, iqNode);
-        $call(handler, $ID(account), $BOOL(success, NO));
+        $call(handler, $ID(account), $BOOL(success, NO), $ID(errorIq, iqNode));
         return;
     }
     $call(handler, $ID(account), $BOOL(success, YES));

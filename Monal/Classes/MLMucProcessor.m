@@ -154,16 +154,27 @@ static NSMutableDictionary* _uiHandler;
 
 +(BOOL) processMessage:(XMPPMessage*) messageNode forAccount:(xmpp*) account
 {
+    //handle muc status codes
     [self handleStatusCodes:messageNode forAccount:account];
     
-    //TODO: implement indirect and direct muc invites including push notification if the app is in background
+    //handle mediated invites
     if([messageNode check:@"{http://jabber.org/protocol/muc#user}x/invite"])
     {
-        [[MLNotificationQueue currentQueue] postNotificationName:kMonalReceivedMucInviteNotice object:nil userInfo:@{@"from": messageNode.from}];
+        DDLogInfo(@"Got mediated muc invite from %@ for %@ --> joining...", [messageNode findFirst:@"{http://jabber.org/protocol/muc#user}x/invite@from"], messageNode.fromUser);
+        [self sendDiscoQueryFor:messageNode.fromUser onAccount:account withJoin:YES];
         return YES;     //stop processing in MLMessageProcessor
     }
     
-    return NO;          //continue processing in MLMessageProcessor
+    //handle direct invites
+    if([messageNode check:@"{jabber:x:conference}x@jid"] && [[messageNode findFirst:@"{jabber:x:conference}x@jid"] length] > 0)
+    {
+        DDLogInfo(@"Got direct muc invite from %@ for %@ --> joining...", messageNode.fromUser, [messageNode findFirst:@"{jabber:x:conference}x@jid"]);
+        [self sendDiscoQueryFor:[messageNode findFirst:@"{jabber:x:conference}x@jid"] onAccount:account withJoin:YES];
+        return YES;     //stop processing in MLMessageProcessor
+    }
+    
+    //continue processing in MLMessageProcessor
+    return NO;
 }
 
 +(void) handleStatusCodes:(XMPPStanza*) node forAccount:(xmpp*) account

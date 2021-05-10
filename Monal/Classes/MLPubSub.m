@@ -395,6 +395,7 @@ $$handler(handleFetch, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSStrin
         //call fetch callback (if given) with error iq node
         $call(handler,
             $ID(account),
+            $BOOL(success, NO),
             $ID(jid, iqNode.fromUser),
             $ID(errorIq, iqNode)
         );
@@ -410,6 +411,7 @@ $$handler(handleFetch, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID(NSStrin
         //call fetch callback (if given)
         $call(handler,
             $ID(account),
+            $BOOL(success, YES),
             $ID(jid, iqNode.fromUser),
             $ID(data)
         );

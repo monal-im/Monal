@@ -336,7 +336,7 @@
         NSString* itemId = [item findFirst:@"/@id"];
         if(!itemId)
             itemId = @"";
-        data[itemId] = item;
+        data[itemId] = [item copy];     //make a copy to make sure the original iq stanza won't be changed by a handler modifying the items
     }
     return data;
 }

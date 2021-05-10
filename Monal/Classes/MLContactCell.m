@@ -39,9 +39,19 @@
     [self setCount:(long)contact.unreadCount];
     [self displayLastMessage:lastMessage forContact:contact];
 
-    [[MLImageManager sharedInstance] getIconForContact:contact.contactJid andAccount:contact.accountId withCompletion:^(UIImage *image) {
-        self.userImage.image = image;
-    }];
+    if(@available(iOS 13.0, *))
+    {
+        if(contact.isGroup)
+            self.userImage.image = [UIImage systemImageNamed:@"person.2.fill"];
+        else
+            [[MLImageManager sharedInstance] getIconForContact:contact.contactJid andAccount:contact.accountId withCompletion:^(UIImage *image) {
+                self.userImage.image = image;
+            }];
+    }
+    else
+        [[MLImageManager sharedInstance] getIconForContact:contact.contactJid andAccount:contact.accountId withCompletion:^(UIImage *image) {
+            self.userImage.image = image;
+        }];
     BOOL muted = [[DataLayer sharedInstance] isMutedJid:contact.contactJid onAccount:contact.accountId];
     self.muteBadge.hidden = !muted;
 }

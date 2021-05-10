@@ -153,7 +153,7 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
             NSMutableSet* bookmarkedMucs = [[NSMutableSet alloc] init];
             for(MLXMLNode* conference in [data[itemId] find:@"{storage:bookmarks}storage/conference"])
             {
-                //we ignore the conference name (the name willbe taken from the muc itself)
+                //we ignore the conference name (the name will be taken from the muc itself)
                 //NSString* name = [conference findFirst:@"/@name"];
                 NSString* room = [conference findFirst:@"/@jid"];
                 //ignore non-xep-compliant entries
@@ -171,7 +171,7 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
                 //check if this is a new entry with autojoin=true
                 if(ownFavorites[room] == nil && [autojoin boolValue])
                 {
-                    DDLogInfo(@"Entering muc '%@' on acount %@ because it got added to bookmarks...", room, account.accountNo);
+                    DDLogInfo(@"Entering muc '%@' on account %@ because it got added to bookmarks...", room, account.accountNo);
                     //add muc to favorites table and try to join it afterwards
                     [[DataLayer sharedInstance] addMucFavorite:room forAccountId:account.accountNo andMucNick:nick];
                     [MLMucProcessor sendDiscoQueryFor:room onAccount:account withJoin:YES];
@@ -179,10 +179,10 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
                 //check if it is a known entry that canged autojoin to false
                 else if(ownFavorites[room] != nil && ![autojoin boolValue])
                 {
-                    DDLogInfo(@"Leaving muc '%@' on acount %@ because not listed as autojoin=true in bookmarks...", room, account.accountNo);
+                    DDLogInfo(@"Leaving muc '%@' on account %@ because not listed as autojoin=true in bookmarks...", room, account.accountNo);
                     //delete local favorites entry and leave room afterwards
                     [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-                    [MLMucProcessor leave:room onAccount:account];
+                    [MLMucProcessor leave:room onAccount:account withBookmarksUpdate:NO];
                 }
                 //check for nickname changes
                 else if(ownFavorites[room] != nil && nick != nil)
@@ -209,10 +209,10 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
             [toLeave  minusSet:bookmarkedMucs];
             for(NSString* room in toLeave)
             {
-                DDLogInfo(@"Leaving muc '%@' on acount %@ because not listed in bookmarks anymore...", room, account.accountNo);
+                DDLogInfo(@"Leaving muc '%@' on account %@ because not listed in bookmarks anymore...", room, account.accountNo);
                 //delete local favorites entry and leave room afterwards
                 [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-                [MLMucProcessor leave:room onAccount:account];
+                [MLMucProcessor leave:room onAccount:account withBookmarksUpdate:NO];
             }
             
             break;      //we only need the first pep item (there should be only one item in the first place)
@@ -224,10 +224,130 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
         //remove and leave all mucs
         for(NSString* room in ownFavorites)
         {
+            DDLogInfo(@"Leaving muc '%@' on account %@ because all bookmarks got deleted...", room, account.accountNo);
             //delete local favorites entry and leave room afterwards
             [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-            [MLMucProcessor leave:room onAccount:account];
+            [MLMucProcessor leave:room onAccount:account withBookmarksUpdate:NO];
         }
+    }
+$$
+
+$$handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason), $_ID(NSDictionary*, data))
+    if(!success)
+    {
+        DDLogWarn(@"Could not fetch bookmarks from pep prior to publishing!");
+        [self handleErrorWithDescription:NSLocalizedString(@"Failed to save groupchat bookmarks", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:YES];
+        return;
+    }
+    
+    NSMutableDictionary* ownFavorites = [[NSMutableDictionary alloc] init];
+    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
+        ownFavorites[entry[@"room"]] = entry;
+    
+    for(NSString* itemId in data)
+    {
+        //ignore non-xep-compliant data and continue as if no data was received at all
+        if(![data[itemId] check:@"{storage:bookmarks}storage"])
+        {
+            DDLogError(@"Received non-xep-compliant bookmarks data: %@", data);
+            break;
+        }
+        
+        NSMutableSet* bookmarkedMucs = [[NSMutableSet alloc] init];
+        for(MLXMLNode* conference in [data[itemId] find:@"{storage:bookmarks}storage/conference"])
+        {
+            //we ignore the conference name (the name will be taken from the muc itself)
+            //NSString* name = [conference findFirst:@"/@name"];
+            NSString* room = [conference findFirst:@"/@jid"];
+            //ignore non-xep-compliant entries
+            if(!room)
+            {
+                DDLogError(@"Received non-xep-compliant bookmarks entry, ignoring: %@", conference);
+                continue;
+            }
+            [bookmarkedMucs addObject:room];
+            NSNumber* autojoin = [conference findFirst:@"/@autojoin|bool"];
+            if(autojoin == nil)
+                autojoin = @NO;     //default value specified in xep
+            
+            //check if the bookmark exists with autojoin==false and only update the autojoin and nick values, if true
+            if(ownFavorites[room] && ![autojoin boolValue])
+            {
+                DDLogInfo(@"Updating autojoin of bookmarked muc '%@' on account %@ to 'true'...", room, account.accountNo);
+                
+                //add or update nickname
+                if(![conference check:@"nick"])
+                    [conference addChild:[[MLXMLNode alloc] initWithElement:@"nick"]];
+                ((MLXMLNode*)[conference findFirst:@"nick"]).data = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
+                
+                //update autojoin value to true
+                conference.attributes[@"autojoin"] = @"true";
+            }
+        }
+        
+        //add all mucs not yet listed in bookmarks
+        NSMutableSet* toAdd = [NSMutableSet setWithArray:[ownFavorites allKeys]];
+        [toAdd  minusSet:bookmarkedMucs];
+        for(NSString* room in toAdd)
+        {
+            DDLogInfo(@"Adding muc '%@' on account %@ to bookmarks...", room, account.accountNo);
+            [[data[itemId] findFirst:@"{storage:bookmarks}storage"] addChild:[[MLXMLNode alloc] initWithElement:@"conference" withAttributes:@{
+                @"jid": room,
+                @"name": [[MLContact createContactFromJid:room andAccountNo:account.accountNo] contactDisplayName],
+                @"autojoin": @"true",
+            } andChildren:@[
+                [[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:[[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo]]
+            ] andData:nil]];
+        }
+        
+        //remove all mucs not listed in local favorites table
+        NSMutableSet* toRemove = [bookmarkedMucs mutableCopy];
+        [toRemove  minusSet:[NSMutableSet setWithArray:[ownFavorites allKeys]]];
+        for(NSString* room in toRemove)
+        {
+            DDLogInfo(@"Removing muc '%@' on account %@ from bookmarks...", room, account.accountNo);
+            [[data[itemId] findFirst:@"{storage:bookmarks}storage"] removeChild:[data[itemId] findFirst:[NSString stringWithFormat:@"{storage:bookmarks}storage/conference<jid=%@>", room]]];
+        }
+        
+        //publish new bookmarks
+        [account.pubsub publishItem:data[itemId] onNode:@"storage:bookmarks" withConfigOptions:@{
+            @"pubsub#persist_items": @"true",
+            @"pubsub#access_model": @"whitelist"
+        } andHandler:$newHandler(self, bookmarksPublished)];
+        
+        //we only need the first pep item (there should be only one item in the first place)
+        return;
+    }
+    
+    DDLogInfo(@"no pep item was found: publish our bookmarks the first time");
+    NSMutableArray* conferences = [[NSMutableArray alloc] init];
+    for(NSString* room in ownFavorites)
+    {
+        DDLogInfo(@"Adding muc '%@' on account %@ to bookmarks...", room, account.accountNo);
+        [conferences addObject:[[MLXMLNode alloc] initWithElement:@"conference" withAttributes:@{
+            @"jid": room,
+            @"name": [[MLContact createContactFromJid:room andAccountNo:account.accountNo] contactDisplayName],
+            @"autojoin": @"true",
+        } andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:[[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo]]
+        ] andData:nil]];
+    }
+    [account.pubsub publishItem:
+        [[MLXMLNode alloc] initWithElement:@"item" withAttributes:@{@"id": @"current"} andChildren:@[
+            [[MLXMLNode alloc] initWithElement:@"storage" andNamespace:@"storage:bookmarks" withAttributes:@{} andChildren:conferences andData:nil]
+        ] andData:nil]
+    onNode:@"storage:bookmarks" withConfigOptions:@{
+        @"pubsub#persist_items": @"true",
+        @"pubsub#access_model": @"whitelist"
+    } andHandler:$newHandler(self, bookmarksPublished)];
+$$
+
+$$handler(bookmarksPublished, $_ID(xmpp*, account), $_BOOL(success), $_ID(XMPPIQ*, errorIq), $_ID(NSString*, errorReason))
+    if(!success)
+    {
+        DDLogWarn(@"Could not publish bookmarks to pep!");
+        [self handleErrorWithDescription:NSLocalizedString(@"Failed to save groupchat bookmarks", @"") andAccount:account andErrorIq:errorIq andErrorReason:errorReason andIsSevere:YES];
+        return;
     }
 $$
 

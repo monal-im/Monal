@@ -2895,26 +2895,11 @@ NSString *const kData=@"data";
 -(void) joinMuc:(NSString* _Nonnull) room
 {
     [MLMucProcessor sendDiscoQueryFor:room onAccount:self withJoin:YES];
-    //TODO MUC: join muc interactively and add to favorites once we joined successful
 }
 
 -(void) leaveMuc:(NSString* _Nonnull) room
 {
-    //TODO MUC: leave room and remove from favorites
-}
-
--(void) queryMucType:(NSString*) room withCompletion:(xmppCompletion) completion
-{
-    //TODO MUC: used only by ui (shouldn't this whole method be a proxy to MLMucProcessor?)
-    XMPPIQ* mucInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
-    [mucInfo setiqTo:room];
-    [mucInfo setDiscoInfoNode];
-    [self sendIq:mucInfo withResponseHandler:^(XMPPIQ* response) {
-        //TODO MUC: implement this
-    } andErrorHandler:^(XMPPIQ* error) {
-        completion(NO, [HelperTools extractXMPPError:error withDescription:@"Failed to query MUC description"]);
-    }];
-    [self sendIq:mucInfo withHandler:$newHandler(MLIQProcessor, handleAccountDiscoInfo)];
+    [MLMucProcessor leave:room onAccount:self withBookmarksUpdate:YES];
 }
 
 #pragma mark- XMPP add and remove contact

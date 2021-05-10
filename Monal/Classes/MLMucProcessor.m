@@ -18,8 +18,10 @@
 #import "XMPPMessage.h"
 #import "XMPPPresence.h"
 #import "MLNotificationQueue.h"
+#import "MLPubSub.h"
+#import "MLPubSubProcessor.h"
 
-#define CURRENT_MUC_STATE_VERSION @1
+#define CURRENT_MUC_STATE_VERSION @2
 
 @interface MLMucProcessor()
 
@@ -34,6 +36,7 @@ static NSObject* _stateLockObject;
 //persistent state
 static NSMutableDictionary* _roomFeatures;
 static NSMutableSet* _joining;
+static NSMutableSet* _firstJoin;
 
 //this won't be persisted because it is only for the ui
 static NSMutableDictionary* _uiHandler;
@@ -43,6 +46,7 @@ static NSMutableDictionary* _uiHandler;
     _stateLockObject = [[NSObject alloc] init];
     _roomFeatures = [[NSMutableDictionary alloc] init];
     _joining = [[NSMutableSet alloc] init];
+    _firstJoin = [[NSMutableSet alloc] init];
     _uiHandler = [[NSMutableDictionary alloc] init];
 }
 
@@ -56,6 +60,7 @@ static NSMutableDictionary* _uiHandler;
     @synchronized(_stateLockObject) {
         _roomFeatures = [state[@"roomFeatures"] mutableCopy];
         _joining = [state[@"joining"] mutableCopy];
+        _firstJoin = [state[@"firstJoin"] mutableCopy];
     }
 }
 
@@ -65,7 +70,8 @@ static NSMutableDictionary* _uiHandler;
         return @{
             @"version": CURRENT_MUC_STATE_VERSION,
             @"roomFeatures": _roomFeatures,
-            @"joining": _joining
+            @"joining": _joining,
+            @"firstJoin": _firstJoin,
         };
     }
 }
@@ -243,7 +249,13 @@ static NSMutableDictionary* _uiHandler;
             }
             
             //we joined successfully --> add muc to our favorites (this will use the already up to date nick from buddylist db table)
+            //and update bookmarks if this was the first timewe joined this muc
             [[DataLayer sharedInstance] addMucFavorite:node.fromUser forAccountId:account.accountNo andMucNick:nil];
+            @synchronized(_stateLockObject) {
+                if([_firstJoin containsObject:node.fromUser])
+                    [self updateBookmarksForAccount:account];
+                [_firstJoin removeObject:node.fromUser];
+            }
             
             monal_id_block_t uiHandler = [self getUIHandlerForMuc:node.fromUser];
             if(uiHandler)
@@ -315,7 +327,7 @@ static NSMutableDictionary* _uiHandler;
     }
 }
 
-+(void) leave:(NSString*) room onAccount:(xmpp*) account
++(void) leave:(NSString*) room onAccount:(xmpp*) account withBookmarksUpdate:(BOOL) updateBookmarks
 {
     NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
     if(nick == nil)
@@ -327,6 +339,13 @@ static NSMutableDictionary* _uiHandler;
     XMPPPresence* presence = [[XMPPPresence alloc] init];
     [presence leaveRoom:room withNick:nick];
     [account send:presence];
+    
+    //delete muc from favorites table
+    [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
+    
+    //update bookmarks if requested
+    if(updateBookmarks)
+        [self updateBookmarksForAccount:account];
 }
 
 +(void) sendDiscoQueryFor:(NSString*) roomJid onAccount:(xmpp*) account withJoin:(BOOL) join
@@ -343,7 +362,13 @@ static NSMutableDictionary* _uiHandler;
 
 +(void) ping:(NSString*) roomJid onAccount:(xmpp*) account
 {
-    NSAssert([[DataLayer sharedInstance] isBuddyMuc:roomJid forAccount:account.accountNo], @"Tried to muc-ping non-muc jid!");
+    if(![[DataLayer sharedInstance] isBuddyMuc:roomJid forAccount:account.accountNo])
+    {
+        DDLogWarn(@"Tried to muc-ping non-muc jid '%@', trying to join regularily with disco...", roomJid);
+        //this will check if this jid really is not a muc and delete it fom favorites and bookmarks, if not (and join normally if it turns out is a muc after all)
+        [self sendDiscoQueryFor:roomJid onAccount:account withJoin:YES];
+        return;
+    }
     
     XMPPIQ* ping = [[XMPPIQ alloc] initWithType:kiqGetType];
     [ping setiqTo:roomJid];
@@ -403,9 +428,10 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
     {
         DDLogError(@"muc disco returned that this jid is not a muc!");
         
-        //delete muc from favorites table to be sure we don't try to rejoin it
+        //delete muc from favorites table to be sure we don't try to rejoin it and update bookmarks afterwards (to make sure this muc isn't accidentally left in our boomkmarks)
         [[DataLayer sharedInstance] deleteMuc:iqNode.fromUser forAccountId:account.accountNo];
-        
+        [self updateBookmarksForAccount:account];
+    
         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@: This is not a groupchat!", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:nil andAccount:account andIsSevere:YES];
         return;
     }
@@ -431,6 +457,10 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
         //add new muc buddy (potentially deleting a non-muc buddy having the same jid)
         DDLogInfo(@"Adding new muc %@ using nick '%@' to buddylist...", iqNode.fromUser, nick);
         [[DataLayer sharedInstance] initMuc:iqNode.fromUser forAccountId:account.accountNo andMucNick:nick];
+        //add this room to firstJoin list
+        @synchronized(_stateLockObject) {
+            [_firstJoin addObject:iqNode.fromUser];
+        }
     }
     else
     {
@@ -582,4 +612,10 @@ $$
         [HelperTools postError:description withNode:node andAccount:account andIsSevere:isSevere];
 }
 
++(void) updateBookmarksForAccount:(xmpp*) account
+{
+#ifdef IS_ALPHA
+    [account.pubsub fetchNode:@"storage:bookmarks" from:account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookarksFetchResult)];
+#endif
+}
 @end

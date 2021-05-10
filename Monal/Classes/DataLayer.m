@@ -485,6 +485,9 @@ static NSDateFormatter* dbFormatter;
             // add unread message count to contact dict
             NSMutableDictionary* contact = [results[0] mutableCopy];
             contact[@"count"] = [self countUserUnreadMessages:username forAccount:accountNo];
+            //correctly extract timestamp
+            if(contact[@"lastMessageTime"])
+                contact[@"lastMessageTime"] = [dbFormatter dateFromString:contact[@"lastMessageTime"]];
             return contact;
         }
     }];

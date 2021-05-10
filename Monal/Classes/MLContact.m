@@ -88,13 +88,7 @@ NSString *const kAskSubscribe=@"subscribe";
     contact.isActiveChat = [[dic objectForKey:@"isActiveChat"] boolValue];
     contact.isEncrypted = [[dic objectForKey:@"encrypt"] boolValue];
     contact.isMuted = [[dic objectForKey:@"muted"] boolValue];
-    return contact;
-}
-
-+(MLContact*) contactFromDictionary:(NSDictionary*) dic withDateFormatter:(NSDateFormatter*) formatter
-{
-    MLContact* contact = [self contactFromDictionary:dic];
-    contact.lastMessageTime = [formatter dateFromString:[dic objectForKey:@"lastMessageTime"]]; 
+    contact.lastMessageTime = [dic objectForKey:@"lastMessageTime"];
     return contact;
 }
 
@@ -117,10 +111,10 @@ NSString *const kAskSubscribe=@"subscribe";
     [coder encodeObject:self.statusMessage forKey:@"statusMessage"];
     [coder encodeObject:self.state forKey:@"state"];
     [coder encodeInteger:self.unreadCount forKey:@"unreadCount"];
-    [coder encodeObject:self.lastMessageTime forKey:@"lastMessageTime"];
     [coder encodeBool:self.isActiveChat forKey:@"isActiveChat"];
     [coder encodeBool:self.isEncrypted forKey:@"isEncrypted"];
     [coder encodeBool:self.isMuted forKey:@"isMuted"];
+    [coder encodeObject:self.lastMessageTime forKey:@"lastMessageTime"];
 }
 
 -(instancetype) initWithCoder:(NSCoder*) coder
@@ -141,10 +135,10 @@ NSString *const kAskSubscribe=@"subscribe";
     self.statusMessage = [coder decodeObjectForKey:@"statusMessage"];
     self.state = [coder decodeObjectForKey:@"state"];
     self.unreadCount = [coder decodeIntegerForKey:@"unreadCount"];
-    self.lastMessageTime = [coder decodeObjectForKey:@"lastMessageTime"];
     self.isActiveChat = [coder decodeBoolForKey:@"isActiveChat"];
     self.isEncrypted = [coder decodeBoolForKey:@"isEncrypted"];
     self.isMuted = [coder decodeBoolForKey:@"isMuted"];
+    self.lastMessageTime = [coder decodeObjectForKey:@"lastMessageTime"];
     return self;
 }
 
@@ -183,11 +177,11 @@ NSString *const kAskSubscribe=@"subscribe";
     assert(accountNo != nil && accountNo.intValue >= 0);
     // MLContact* contact = [MLContact contactFromDictionary:[[DataLayer sharedInstance] dictForUsername:jid forAccount:accountNo]];
     NSDictionary* contactDict = [[DataLayer sharedInstance] contactDictionaryForUsername:jid forAccount:accountNo];
-
+    
     // check if we know this contact and return a dummy one if not
     if(contactDict == nil)
     {
-        DDLogWarn(@"Returning dummy MLContact for %@ on accountNo %@", jid, accountNo);
+        DDLogInfo(@"Returning dummy MLContact for %@ on accountNo %@", jid, accountNo);
         return [self contactFromDictionary:@{
             @"buddy_name": jid,
             @"nick_name": @"",
@@ -209,10 +203,7 @@ NSString *const kAskSubscribe=@"subscribe";
         }];
     }
     else
-    {
-        // add unread message count to contact dict
         return [self contactFromDictionary:contactDict];
-    }
 }
 
 @end

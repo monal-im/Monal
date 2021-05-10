@@ -68,6 +68,9 @@
         self.navigationItem.rightBarButtonItem.image = [UIImage systemImageNamed:@"person.3.fill"];
     else
         self.navigationItem.rightBarButtonItem.image = [UIImage imageNamed:@"974-users"];
+    
+    //remove button (TODO: remove this button and screen altogether)
+    self.navigationItem.rightBarButtonItem = nil;
 }
 
 -(void) dealloc

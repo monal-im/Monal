@@ -493,7 +493,7 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
         }
     }
     
-    DDLogDebug(@"Upating muc contact...");
+    DDLogDebug(@"Updating muc contact...");
     [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRefresh object:account userInfo:@{
         @"contact": [MLContact createContactFromJid:iqNode.fromUser andAccountNo:account.accountNo]
     }];

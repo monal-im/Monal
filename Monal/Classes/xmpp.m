@@ -1364,7 +1364,7 @@ NSString *const kData=@"data";
                         [[DataLayer sharedInstance] setBuddyState:presenceNode forAccount:self.accountNo];
                         [[DataLayer sharedInstance] setBuddyStatus:presenceNode forAccount:self.accountNo];
 
-                        //handle last interaction time (dispatch database update in own background thread)
+                        //handle last interaction time (only updae db if the last interaction time is NEWER than the one already in our db, needed for multiclient setups)
                         if([presenceNode check:@"{urn:xmpp:idle:1}idle@since"])
                         {
                             NSDate* lastInteraction = [[DataLayer sharedInstance] lastInteractionOfJid:presenceNode.fromUser forAccountNo:self.accountNo];

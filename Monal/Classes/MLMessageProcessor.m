@@ -327,7 +327,7 @@ static NSMutableDictionary* _typingNotifications;
             message = [[DataLayer sharedInstance] messageForHistoryID:historyId];
             if(message != nil && historyId != nil)      //check historyId to make static analyzer happy
             {
-                //send receive markers if requested, but DON'T do so for MLhistory messages
+                //send receive markers if requested, but DON'T do so for MLhistory messages (and don't do so for channel type mucs)
                 if(
                     [[HelperTools defaultsDB] boolForKey:@"SendReceivedMarkers"] &&
                     ([messageNode check:@"{urn:xmpp:receipts}request"] || [messageNode check:@"{urn:xmpp:chat-markers:0}markable"]) &&
@@ -335,16 +335,21 @@ static NSMutableDictionary* _typingNotifications;
                     !isMLhistory
                 )
                 {
-                    XMPPMessage* receiptNode = [[XMPPMessage alloc] init];
-                    //the message type is needed so that the store hint is accepted by the server --> mirror the incoming type
-                    receiptNode.attributes[@"type"] = [messageNode findFirst:@"/@type"];
-                    receiptNode.attributes[@"to"] = messageNode.fromUser;
-                    if([messageNode check:@"{urn:xmpp:receipts}request"])
-                        [receiptNode setReceipt:[messageNode findFirst:@"/@id"]];
-                    if([messageNode check:@"{urn:xmpp:chat-markers:0}markable"])
-                        [receiptNode setChatmarkerReceipt:[messageNode findFirst:@"/@id"]];
-                    [receiptNode setStoreHint];
-                    [account send:receiptNode];
+                    MLContact* contact = [MLContact createContactFromJid:buddyName andAccountNo:account.accountNo];
+                    //ignore unknown groupchats or channel-type mucs or stanzas from the groupchat itself (e.g. not from a participant having a full jid)
+                    if(!contact.isGroup || ([contact.mucType isEqualToString:@"group"] && messageNode.fromResource))
+                    {
+                        XMPPMessage* receiptNode = [[XMPPMessage alloc] init];
+                        //the message type is needed so that the store hint is accepted by the server --> mirror the incoming type
+                        receiptNode.attributes[@"type"] = [messageNode findFirst:@"/@type"];
+                        receiptNode.attributes[@"to"] = messageNode.fromUser;
+                        if([messageNode check:@"{urn:xmpp:receipts}request"])
+                            [receiptNode setReceipt:[messageNode findFirst:@"/@id"]];
+                        if([messageNode check:@"{urn:xmpp:chat-markers:0}markable"])
+                            [receiptNode setChatmarkerReceipt:[messageNode findFirst:@"/@id"]];
+                        [receiptNode setStoreHint];
+                        [account send:receiptNode];
+                    }
                 }
 
                 //check if we have an outgoing message sent from another client on our account

@@ -199,14 +199,12 @@ enum ContactDetailsAboutRows {
             MLTextInputCell* cell = (MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
             if(self.contact.isGroup)
             {
-                cell.textInput.enabled = NO;
-                cell.textInput.text = self.contact.accountNickInGroup;
+                [cell initTextCell:self.contact.accountNickInGroup andPlaceholder:nil andDelegate:nil];
+                [cell disableEditMode];
             }
             else
             {
-                cell.textInput.text = [self.contact contactDisplayName];
-                cell.textInput.placeholder = NSLocalizedString(@"Set a nickname for this contact", @"");
-                cell.textInput.delegate = self;
+                [cell initTextCell:[self.contact contactDisplayName] andPlaceholder:NSLocalizedString(@"Set a nickname for this contact", @"") andDelegate:self];
             }
             return cell;
         }

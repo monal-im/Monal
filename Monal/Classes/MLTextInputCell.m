@@ -8,6 +8,10 @@
 
 #import "MLTextInputCell.h"
 
+@interface MLTextInputCell()
+@property (nonatomic, weak) IBOutlet UITextField* textInput;
+@end
+
 @implementation MLTextInputCell
 
 - (void)awakeFromNib {
@@ -22,9 +26,36 @@
     // Configure the view for the selected state
 }
 
--(void) setKeyboardToMailLayout
+-(void) setupCellWithText:(NSString*) text andPlaceholder:(NSString*) placeholder
 {
+    self.textInput.text = text;
+    self.textInput.secureTextEntry = NO;
+    self.textInput.placeholder = placeholder;
+    self.textInput.enabled = YES;
+}
+
+-(void) initTextCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate;
+{
+    [self setupCellWithText:text andPlaceholder:placeholder];
+    [self.textInput setKeyboardType:UIKeyboardTypeDefault];
+}
+
+-(void) initMailCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate;
+{
+    [self setupCellWithText:text andPlaceholder:placeholder];
     [self.textInput setKeyboardType:UIKeyboardTypeEmailAddress];
+}
+
+-(void) initPasswordCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate;
+{
+    [self setupCellWithText:text andPlaceholder:placeholder];
+    self.textInput.secureTextEntry = YES;
+    [self.textInput setKeyboardType:UIKeyboardTypeDefault];
+}
+
+-(void) disableEditMode
+{
+    self.textInput.enabled = NO;
 }
 
 @end

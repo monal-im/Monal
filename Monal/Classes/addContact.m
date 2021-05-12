@@ -162,19 +162,16 @@
 {
     if(indexPath.section == 0)
     {
-        if(indexPath.row == 0){
+        if(indexPath.row == 0)
+        {
             UITableViewCell* accountCell = [tableView dequeueReusableCellWithIdentifier:@"AccountCell"];
             accountCell.textLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Using Account: %@", @""), [[MLXMPPManager sharedInstance] getAccountNameForConnectedRow:_selectedRow]];
             accountCell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
 
             return accountCell;
         }
-        
         MLTextInputCell* textCell = [tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-        self.contactName = textCell.textInput;
-        self.contactName.placeholder = NSLocalizedString(@"Contact Jid", @"");
-        [textCell setKeyboardToMailLayout];
-        self.contactName.delegate = self;
+        [textCell initMailCell:nil andPlaceholder:NSLocalizedString(@"Contact Jid", @"") andDelegate:self];
 
         return textCell;
     }

@@ -148,11 +148,7 @@
     else if(indexPath.section == 1)
     {
         MLTextInputCell* thecell = (MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-        thecell.textInput.placeholder = NSLocalizedString(@"Room", @"");
-        [thecell setKeyboardToMailLayout];
-        thecell.textInput.delegate = self;
-        self.roomField = thecell.textInput;
-        self.roomField.text = [_groupData objectForKey:@"room"];
+        [thecell initMailCell:[_groupData objectForKey:@"room"] andPlaceholder:NSLocalizedString(@"Room", @"") andDelegate:self];
         return thecell;
     }
     else

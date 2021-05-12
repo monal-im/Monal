@@ -9,8 +9,11 @@
 #import <UIKit/UIKit.h>
 
 @interface MLTextInputCell : UITableViewCell
-@property (nonatomic, weak) IBOutlet UITextField *textInput;
 
--(void) setKeyboardToMailLayout;
+-(void) initTextCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate;
+-(void) initMailCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate;
+-(void) initPasswordCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate;
+
+-(void) disableEditMode;
 
 @end

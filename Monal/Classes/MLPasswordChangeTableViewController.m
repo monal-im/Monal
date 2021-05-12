@@ -155,13 +155,10 @@
 {
     if(indexPath.section == 0)
     {
-        MLTextInputCell *textCell =[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
+        MLTextInputCell* textCell = [tableView dequeueReusableCellWithIdentifier:@"TextCell"];
         if(indexPath.row == 0)
         {
-            self.password =textCell.textInput;
-            self.password.placeholder = NSLocalizedString(@"New Password", @"");
-            self.password.delegate=self;
-            self.password.secureTextEntry=YES;
+            [textCell initPasswordCell:nil andPlaceholder:NSLocalizedString(@"New Password", @"") andDelegate:self];
         }
         return textCell;
     }

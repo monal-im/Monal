@@ -32,6 +32,8 @@
     self.textInput.secureTextEntry = NO;
     self.textInput.placeholder = placeholder;
     self.textInput.enabled = YES;
+    // enable autocorrection
+    self.textInput.autocorrectionType = UITextAutocorrectionTypeYes;
 }
 
 -(void) initTextCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate;
@@ -44,6 +46,8 @@
 {
     [self setupCellWithText:text andPlaceholder:placeholder];
     [self.textInput setKeyboardType:UIKeyboardTypeEmailAddress];
+    // disable autocorrection
+    self.textInput.autocorrectionType = UITextAutocorrectionTypeNo;
 }
 
 -(void) initPasswordCell:(NSString*) text andPlaceholder:(NSString*) placeholder andDelegate:(id) delegate;

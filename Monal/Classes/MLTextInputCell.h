@@ -16,4 +16,6 @@
 
 -(void) disableEditMode;
 
+-(NSString*) getText;
+
 @end

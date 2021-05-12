@@ -18,6 +18,10 @@
 
 @class MLQRCodeScanner;
 
+@interface addContact ()
+@property (nonatomic, strong)  MLTextInputCell* contactField;
+@end
+
 @implementation addContact
 
 
@@ -38,11 +42,11 @@
         [self presentViewController:messageAlert animated:YES completion:nil];
     }
     else  {
-        if(self.contactName.text.length > 0)
+        if([self.contactField getText].length > 0)
         {
             xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:_selectedRow];
 
-            MLContact* contactObj = [MLContact createContactFromJid:self.contactName.text andAccountNo:account.accountNo];
+            MLContact* contactObj = [MLContact createContactFromJid:[self.contactField getText] andAccountNo:account.accountNo];
 
             [[MLXMPPManager sharedInstance] addContact:contactObj];
             BOOL approve = NO;
@@ -74,7 +78,7 @@
         }
         else
         {
-            UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error",@"") message:NSLocalizedString(@"Name can't be empty", @"") preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Jid Invalid", @"") message:NSLocalizedString(@"Name can't be empty", @"") preferredStyle:UIAlertControllerStyleAlert];
             UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
                 
             }];
@@ -171,8 +175,8 @@
             return accountCell;
         }
         MLTextInputCell* textCell = [tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-        [textCell initMailCell:nil andPlaceholder:NSLocalizedString(@"Contact Jid", @"") andDelegate:self];
-
+        [textCell initMailCell:self.contactName andPlaceholder:NSLocalizedString(@"Contact Jid", @"") andDelegate:self];
+        self.contactField = textCell;
         return textCell;
     }
     else
@@ -210,7 +214,7 @@
 
 -(void) MLQRCodeContactScannedWithJid:(NSString *)jid fingerprints:(NSDictionary<NSNumber *,NSString *> *)fingerprints
 {
-    self.contactName.text = jid;
+    self.contactName = [jid copy];
     // Close QR-Code scanner
     [self.navigationController popViewControllerAnimated:YES];
 }

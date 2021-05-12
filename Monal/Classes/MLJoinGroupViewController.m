@@ -20,7 +20,7 @@
 
 @interface MLJoinGroupViewController ()
 @property (nonatomic, weak)  UITextField* accountName;
-@property (nonatomic, weak) UITextField* roomField;
+@property (nonatomic, weak) MLTextInputCell* roomField;
 @property (nonatomic, strong) UIBarButtonItem* closeButton;
 
 @property (nonatomic, strong) MBProgressHUD* joinHUD;
@@ -149,6 +149,7 @@
     {
         MLTextInputCell* thecell = (MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
         [thecell initMailCell:[_groupData objectForKey:@"room"] andPlaceholder:NSLocalizedString(@"Room", @"") andDelegate:self];
+        self.roomField = thecell;
         return thecell;
     }
     else
@@ -190,7 +191,7 @@
     {
         xmpp* account = [MLXMPPManager sharedInstance].connectedXMPP[_selectedRow];
 
-        NSString* room = [self.roomField.text copy];
+        NSString* room = [self.roomField getText];
 
         NSString* combinedRoom = room;
         if([combinedRoom componentsSeparatedByString:@"@"].count == 1) {

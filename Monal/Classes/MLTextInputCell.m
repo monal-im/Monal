@@ -62,4 +62,9 @@
     self.textInput.enabled = NO;
 }
 
+-(NSString*) getText
+{
+    return [self.textInput.text copy];
+}
+
 @end

@@ -17,7 +17,7 @@
     UIBarButtonItem* _closeButton;
 }
 
-@property (nonatomic, weak)  UITextField* contactName;
+@property (nonatomic, strong) NSString* contactName;
 @property (nonatomic, strong) contactCompletion completion;
 
 -(IBAction) addPress:(id)sender;

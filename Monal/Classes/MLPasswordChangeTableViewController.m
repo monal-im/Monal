@@ -12,7 +12,7 @@
 
 
 @interface MLPasswordChangeTableViewController ()
-@property (nonatomic, weak)  UITextField* password;
+@property (nonatomic, weak)  MLTextInputCell* password;
 @property (nonatomic, strong) MBProgressHUD *progress;
 @end
 
@@ -37,31 +37,30 @@
     }
     else
     {
-        if(self.password.text.length>0)
+        if([self.password getText].length > 0)
         {
+            self.progress = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+            self.progress.label.text = NSLocalizedString(@"Changing Password", @"");
+            self.progress.mode = MBProgressHUDModeIndeterminate;
+            self.progress.removeFromSuperViewOnHide = YES;
+            self.progress.hidden = NO;
             
-            self.progress= [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-            self.progress.label.text=NSLocalizedString(@"Changing Password", @"");
-            self.progress.mode=MBProgressHUDModeIndeterminate;
-            self.progress.removeFromSuperViewOnHide=YES;
-            self.progress.hidden=NO;
-            
-            [self.xmppAccount changePassword:self.password.text withCompletion:^(BOOL success, NSString *message) {
+            [self.xmppAccount changePassword:[self.password getText] withCompletion:^(BOOL success, NSString *message) {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    self.progress.hidden=YES;
-                    NSString *title =NSLocalizedString(@"Error",@ "");
-                    NSString *displayMessage =message;
-                    if(success) {
-                        title=NSLocalizedString(@"Success",@ "");
-                        displayMessage=NSLocalizedString(@"The password has been changed",@ "");
+                    self.progress.hidden = YES;
+                    NSString* title = NSLocalizedString(@"Error", @"");
+                    NSString* displayMessage = message;
+                    if(success == YES) {
+                        title = NSLocalizedString(@"Success", @"");
+                        displayMessage = NSLocalizedString(@"The password has been changed", @"");
                
-                       [[MLXMPPManager sharedInstance] updatePassword:self.password.text forAccount:self.xmppAccount.accountNo];
+                       [[MLXMPPManager sharedInstance] updatePassword:[self.password getText] forAccount:self.xmppAccount.accountNo];
                     } else  {
-                        if(displayMessage.length==0) displayMessage=NSLocalizedString(@"Could not change the password",@ "");
+                        if(displayMessage.length == 0) displayMessage = NSLocalizedString(@"Could not change the password", @"");
                     }
                     
-                    UIAlertController *messageAlert =[UIAlertController alertControllerWithTitle:title message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
-                    UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                    UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:title message:displayMessage preferredStyle:UIAlertControllerStyleAlert];
+                    UIAlertAction *closeAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
                         
                     }];
                     [messageAlert addAction:closeAction];
@@ -159,6 +158,7 @@
         if(indexPath.row == 0)
         {
             [textCell initPasswordCell:nil andPlaceholder:NSLocalizedString(@"New Password", @"") andDelegate:self];
+            self.password = textCell;
         }
         return textCell;
     }

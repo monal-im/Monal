@@ -281,8 +281,8 @@ void logException(NSException* exception)
     id<DDLogFileManager> logFileManager = [[MLLogFileManager alloc] initWithLogsDirectory:[containerUrl path]];
     self.fileLogger = [[DDFileLogger alloc] initWithLogFileManager:logFileManager];
     [self.fileLogger setLogFormatter:formatter];
-    self.fileLogger.rollingFrequency = 60 * 60 * 24;    // 24 hour rolling
-    self.fileLogger.logFileManager.maximumNumberOfLogFiles = 3;
+    self.fileLogger.rollingFrequency = 60 * 60 * 48;    // 48 hour rolling
+    self.fileLogger.logFileManager.maximumNumberOfLogFiles = 5;
     self.fileLogger.maximumFileSize = 1024 * 1024 * 64;
     [DDLog addLogger:self.fileLogger];
     

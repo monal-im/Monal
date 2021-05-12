@@ -42,7 +42,7 @@
     if(@available(iOS 13.0, *))
     {
         if(contact.isGroup)
-            self.userImage.image = [MLImageManager circularImage:[UIImage systemImageNamed:@"person.2.fill"]];
+            self.userImage.image = [MLImageManager circularImage:[UIImage imageNamed:@"noicon_muc"]];
         else
             [[MLImageManager sharedInstance] getIconForContact:contact.contactJid andAccount:contact.accountId withCompletion:^(UIImage *image) {
                 self.userImage.image = image;

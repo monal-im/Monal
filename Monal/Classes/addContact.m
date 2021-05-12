@@ -173,7 +173,8 @@
         MLTextInputCell* textCell = [tableView dequeueReusableCellWithIdentifier:@"TextCell"];
         self.contactName = textCell.textInput;
         self.contactName.placeholder = NSLocalizedString(@"Contact Jid", @"");
-        self.contactName.delegate=self;
+        [textCell setKeyboardToMailLayout];
+        self.contactName.delegate = self;
 
         return textCell;
     }

@@ -149,8 +149,7 @@
     {
         MLTextInputCell* thecell = (MLTextInputCell *)[tableView dequeueReusableCellWithIdentifier:@"TextCell"];
         thecell.textInput.placeholder = NSLocalizedString(@"Room", @"");
-
-        thecell.textInput.keyboardType = UIKeyboardTypeEmailAddress;
+        [thecell setKeyboardToMailLayout];
         thecell.textInput.delegate = self;
         self.roomField = thecell.textInput;
         self.roomField.text = [_groupData objectForKey:@"room"];

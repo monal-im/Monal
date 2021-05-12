@@ -11,4 +11,6 @@
 @interface MLTextInputCell : UITableViewCell
 @property (nonatomic, weak) IBOutlet UITextField *textInput;
 
+-(void) setKeyboardToMailLayout;
+
 @end

@@ -22,4 +22,9 @@
     // Configure the view for the selected state
 }
 
+-(void) setKeyboardToMailLayout
+{
+    [self.textInput setKeyboardType:UIKeyboardTypeEmailAddress];
+}
+
 @end

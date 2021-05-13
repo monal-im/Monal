@@ -207,8 +207,15 @@
     }
     else if([segue.identifier isEqualToString:@"qrContactScan"])
     {
-        MLQRCodeScanner* qrCodeScanner = (MLQRCodeScanner *) segue.destinationViewController;
-        qrCodeScanner.contactDelegate = self;
+        if(@available(iOS 12.0, macCatalyst 14.0, *))
+        {
+            MLQRCodeScanner* qrCodeScanner = (MLQRCodeScanner *) segue.destinationViewController;
+            qrCodeScanner.contactDelegate = self;
+        }
+        else
+        {
+            [MLQRCodeScannerCatalina showCatalinaWarningWithView:self];
+        }
     }
 }
 

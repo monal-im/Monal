@@ -311,8 +311,15 @@
 {
     if([segue.identifier isEqualToString:@"scanQRCode"])
     {
-        MLQRCodeScanner* qrCodeScanner = (MLQRCodeScanner*)segue.destinationViewController;
-        qrCodeScanner.loginDelegate = self;
+        if(@available(iOS 12.0, macCatalyst 14.0, *))
+        {
+            MLQRCodeScanner* qrCodeScanner = (MLQRCodeScanner*)segue.destinationViewController;
+            qrCodeScanner.loginDelegate = self;
+        }
+        else
+        {
+            [MLQRCodeScannerCatalina showCatalinaWarningWithView:self];
+        }
     }
     else if([segue.identifier isEqualToString:@"showPrivacySettings"])
     {

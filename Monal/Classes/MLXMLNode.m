@@ -543,20 +543,14 @@ static NSRegularExpression* attributeFilterRegex;
     }
 }
 
-+(NSString *) escapeForXMPPSingleQuote:(NSString *) targetString
++(NSString*) escapeForXMPP:(NSString*) targetString
 {
-    NSMutableString *mutable=[targetString mutableCopy];
-    [mutable replaceOccurrencesOfString:@"'" withString:@"&apos;" options:NSLiteralSearch range:NSMakeRange(0, mutable.length)];
-    return [mutable copy];
-}
-
-+(NSString *) escapeForXMPP:(NSString *) targetString
-{
-    NSMutableString *mutable=[targetString mutableCopy];
-    [mutable replaceOccurrencesOfString:@"&" withString:@"&amp;" options:NSLiteralSearch range:NSMakeRange(0, mutable.length)];
+    NSMutableString* mutable = [targetString mutableCopy];
     [mutable replaceOccurrencesOfString:@"<" withString:@"&lt;" options:NSLiteralSearch range:NSMakeRange(0, mutable.length)];
     [mutable replaceOccurrencesOfString:@">" withString:@"&gt;" options:NSLiteralSearch range:NSMakeRange(0, mutable.length)];
-    
+    [mutable replaceOccurrencesOfString:@"&" withString:@"&amp;" options:NSLiteralSearch range:NSMakeRange(0, mutable.length)];
+    [mutable replaceOccurrencesOfString:@"'" withString:@"&apos;" options:NSLiteralSearch range:NSMakeRange(0, mutable.length)];
+    [mutable replaceOccurrencesOfString:@"\"" withString:@"&quot;" options:NSLiteralSearch range:NSMakeRange(0, mutable.length)];
     return [mutable copy];
 }
 
@@ -578,7 +572,7 @@ static NSRegularExpression* attributeFilterRegex;
         //handle xmlns inheritance (don't add namespace to childs if it should be the same like the parent's one)
         if([key isEqualToString:@"xmlns"] && self.parent && [_attributes[@"xmlns"] isEqualToString:self.parent.attributes[@"xmlns"]])
             continue;
-        [outputString appendString:[NSString stringWithFormat:@" %@='%@'", key, [MLXMLNode escapeForXMPPSingleQuote:(NSString *)[_attributes objectForKey:key]]]];
+        [outputString appendString:[NSString stringWithFormat:@" %@='%@'", key, [MLXMLNode escapeForXMPP:(NSString*)_attributes[key]]]];
     }
     
     if([_children count] || (_data && ![_data isEqualToString:@""]))

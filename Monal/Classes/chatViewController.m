@@ -1138,7 +1138,7 @@ enum msgSentState {
 {
     PHPickerConfiguration* phConf = [[PHPickerConfiguration alloc] init];
     phConf.selectionLimit = 0;
-    phConf.filter = PHPickerFilter.imagesFilter;
+    phConf.filter = [PHPickerFilter anyFilterMatchingSubfilters:@[PHPickerFilter.imagesFilter, PHPickerFilter.videosFilter]];
     PHPickerViewController* picker = [[PHPickerViewController alloc] initWithConfiguration:phConf];
     picker.delegate = self;
     return picker;

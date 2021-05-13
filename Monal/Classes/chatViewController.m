@@ -2268,8 +2268,8 @@ enum msgSentState {
     else if([info[@"mimeType"] hasPrefix:@"video/"])
     {
         MLFileTransferVideoCell* videoCell = (MLFileTransferVideoCell *) [self messageTableCellWithIdentifier:@"fileTransferVideo" andInbound:inDirection fromTable:tableView];
-        NSString *videoStr = info[@"cacheFile"];
-        NSString *videoFileName = info[@"filename"];
+        NSString* videoStr = info[@"cacheFile"];
+        NSString* videoFileName = info[@"filename"];
         [videoCell avplayerConfigWithUrlStr:videoStr fileName:videoFileName andVC:self];
                 
         cell = videoCell;

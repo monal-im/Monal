@@ -1004,7 +1004,27 @@ enum msgSentState {
     }];
 }
 
--(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+-(BOOL) shouldPerformSegueWithIdentifier:(NSString*) identifier sender:(id) sender
+{
+    if([identifier isEqualToString:@"showDetails"])
+    {
+        //don't show contact details for mucs (they will get their own muc details later on)
+        if(self.contact.isGroup)
+            return NO;
+    }
+    return YES;
+}
+
+//this is needed to prevent segues invoked programmatically
+-(void) performSegueWithIdentifier:(NSString*) identifier sender:(id) sender
+{
+    if([self shouldPerformSegueWithIdentifier:identifier sender:sender] == NO)
+        return;
+    [super performSegueWithIdentifier:identifier sender:sender];
+}
+
+
+-(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     [self sendChatState:NO];
 

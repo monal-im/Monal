@@ -28,7 +28,7 @@ You can get the current releases in the App Store:
 
 You can join this public chat (MUC) via XMPP:
 
-## monal@chat.yax.im
+## xmpp:monal@chat.yax.im?join
 
 ## Donations and Support
 
@@ -36,7 +36,7 @@ Monal is developed by volunteers and community collaboration. The work which has
 
 - Donate via [GitHub Sponsors](https://github.com/sponsors/tmolitor-stud-tu)
 - Donate via [Libera Pay](https://liberapay.com/tmolitor)
-- For EU citizens you can ask the respective core developer for the IBAN number. Please contact Thilo Molitor via mail to thilo+monal@eightysoft.de
+- EU citizens can donate via SEPA, too. Just contact Thilo Molitor via mail to thilo+monal@eightysoft.de to get his IBAN.
 
 Here you can read about further [support of the development](https://github.com/monal-im/Monal/issues/363)!
 Find general information in the [Monal Wiki](https://github.com/monal-im/Monal/wiki).

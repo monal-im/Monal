@@ -290,7 +290,12 @@
 
 -(NSString*) tableView:(UITableView*) tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath*) indexPath
 {
-    return NSLocalizedString(@"Remove Contact",@"");
+    NSAssert(indexPath.section == 0, @"Wrong section");
+    MLContact* contact = self.contacts[indexPath.row];
+    if(contact.isGroup == YES)
+        return NSLocalizedString(@"Remove Conversation", @"");
+    else
+        return NSLocalizedString(@"Remove Contact", @"");
 }
 
 -(BOOL) tableView:(UITableView*) tableView canEditRowAtIndexPath:(NSIndexPath*) indexPath

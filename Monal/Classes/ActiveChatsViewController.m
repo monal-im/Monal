@@ -509,8 +509,19 @@ static NSMutableSet* _smacksWarningDisplayed;
 }
 
 
--(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
-    return NSLocalizedString(@"Archive chat", @"");
+-(NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    MLContact* contact;
+    if(indexPath.section == pinnedChats)
+    {
+        contact = self.pinnedContacts[indexPath.row];
+    } else {
+        contact = self.unpinnedContacts[indexPath.row];
+    }
+    if(contact.isGroup == YES)
+        return NSLocalizedString(@"Leave Conversation", @"");
+    else
+        return NSLocalizedString(@"Archive chat", @"");
 }
 
 

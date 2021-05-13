@@ -33,7 +33,6 @@ AVPlayer *avplayer;
 {
     avplayerVC = [[AVPlayerViewController alloc] init];
     avplayerVC.showsPlaybackControls = YES;
-    avplayerVC.player.volume = 0;
 #if TARGET_OS_MACCATALYST
     avplayerVC.allowsPictureInPicturePlayback = NO;
 #else

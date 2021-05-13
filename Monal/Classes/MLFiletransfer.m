@@ -14,6 +14,7 @@
 #import "xmpp.h"
 #import "AESGcm.h"
 #import "MLXMPPManager.h"
+#import "MLNotificationQueue.h"
 
 @import MobileCoreServices;
 
@@ -97,8 +98,7 @@ static NSMutableSet* _currentlyTransfering;
             //send out update notification (and update used MLMessage object directly instead of reloading it from db after updating the db)
             msg.filetransferMimeType = mimeType;
             msg.filetransferSize = contentLength;
-            //don't queue this notification because it should be handled immediately
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageFiletransferUpdateNotice object:nil userInfo:@{@"message": msg}];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:nil userInfo:@{@"message": msg}];
             
             //check done, remove from "currently checking/downloading list"
             [self markAsComplete:historyId];
@@ -230,8 +230,7 @@ static NSMutableSet* _currentlyTransfering;
             //send out update notification (and update used MLMessage object directly instead of reloading it from db after updating the db)
             msg.filetransferMimeType = mimeType;
             msg.filetransferSize = filetransferSize;
-            //don't queue this notification because it should be handled immediately
-            [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageFiletransferUpdateNotice object:nil userInfo:@{@"message": msg}];
+            [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageFiletransferUpdateNotice object:nil userInfo:@{@"message": msg}];
             
             //download done, remove from "currently checking/downloading list"
             [self markAsComplete:historyId];
@@ -484,8 +483,7 @@ static NSMutableSet* _currentlyTransfering;
     ];
     
     //inform chatview of error
-    //don't queue this notification because it should be handled immediately
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMonalMessageErrorNotice object:nil userInfo:@{
+    [[MLNotificationQueue currentQueue] postNotificationName:kMonalMessageErrorNotice object:nil userInfo:@{
         @"MessageID": messageId,
         @"errorType": errorType,
         @"errorReason": errorText

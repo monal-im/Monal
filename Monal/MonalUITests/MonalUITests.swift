@@ -75,6 +75,8 @@ class MonalUITests: XCTestCase {
         XCTAssertFalse(app.buttons["microphone"].exists)
 
         app.buttons["Send"].tap()
+        // wait for sending on slow systems
+        sleep(5)
         // send button should be hidden
         XCTAssertFalse(app.buttons["Send"].exists)
         XCTAssertTrue(app.buttons["microphone"].exists)
@@ -117,7 +119,7 @@ class MonalUITests: XCTestCase {
         closeButton.tap()
     }
 
-    func test_0004_ResetTime() throws {
+    /*func test_0004_ResetTime() throws {
         let app = XCUIApplication()
         app.launchArguments = createStartArgs(extraArgs: ["--reset"])
         if #available(iOS 13.0, *) {
@@ -126,7 +128,7 @@ class MonalUITests: XCTestCase {
                 app.launch()
             }
         }
-    }
+    }*/
 
     func test_0005_Register() throws
     {
@@ -160,14 +162,14 @@ class MonalUITests: XCTestCase {
         startChattingStaticText.tap()
     }
 
-    func test_0006_LaunchPerformance() throws {
+    /*func test_0006_LaunchPerformance() throws {
         if #available(iOS 13.0, *) {
             // This measures how long it takes to launch your application.
             measure(metrics: [XCTApplicationLaunchMetric()]) {
                 XCUIApplication().launch()
             }
         }
-    }
+    }*/
 
     func test_0007_PlusAndContactsButtons() throws {
         let app = XCUIApplication()
@@ -189,8 +191,6 @@ class MonalUITests: XCTestCase {
         chatsNavigationBar.buttons["Compose"].tap()
 
         let contactsNavigationBar = app.navigationBars["Contacts"]
-        contactsNavigationBar.children(matching: .button).element(boundBy: 1).tap()
-        app.navigationBars["Group Chat"].buttons["Contacts"].tap()
         contactsNavigationBar.buttons["Close"].tap()
     }
 

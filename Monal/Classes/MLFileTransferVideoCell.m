@@ -29,7 +29,7 @@ AVPlayer *avplayer;
     // Configure the view for the selected state
 }
 
--(void)avplayerVCInit
+-(void) avplayerVCInit
 {
     avplayerVC = [[AVPlayerViewController alloc] init];
     avplayerVC.showsPlaybackControls = YES;
@@ -43,36 +43,20 @@ AVPlayer *avplayer;
     avplayerVC.videoGravity = AVLayerVideoGravityResizeAspect;
 }
 
--(NSURL*)fileURLFromStr:(NSString*) fileUrlStr andFileName:(NSString*) fileName
-{
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSArray *fileNameComponent = [fileName componentsSeparatedByString:@"."];
-    NSString * fileExtension = @"";
-    if (fileNameComponent.count > 1){
-        fileExtension = fileNameComponent.lastObject;
-    }
-    //Add SymbolicLink to play video file.
-    NSString *fileLink = [fileUrlStr stringByAppendingPathExtension:fileExtension];
-    if (![fileManager fileExistsAtPath:fileLink])
-    {
-        NSError *fileError = nil;
-        [fileManager createSymbolicLinkAtPath:fileLink withDestinationPath:fileUrlStr error:&fileError];
-    }
-    
-    return  [[NSURL alloc] initFileURLWithPath:fileLink];
-}
-
--(void)avplayerConfigWithUrlStr:(NSString*)fileUrlStr fileName:(NSString*) fileName andVC:(UIViewController*) vc{
-    
-    for (UIView *subView in self.videoView.subviews)
+-(void) avplayerConfigWithUrlStr:(NSString*)fileUrlStr andMimeType:(NSString*) mimeType fileName:(NSString*) fileName andVC:(UIViewController*) vc{
+    for (UIView* subView in self.videoView.subviews)
     {
         [subView removeFromSuperview];
     }
-
     [self avplayerVCInit];
-        
-    NSURL *videoFileUrl = [self fileURLFromStr:fileUrlStr andFileName:fileName];
-    avplayer = [AVPlayer playerWithURL:videoFileUrl];
+
+    NSURL* videoFileUrl = [[NSURL alloc] initFileURLWithPath:fileUrlStr isDirectory:NO];
+    if(videoFileUrl == nil)
+        return;
+    AVURLAsset* videoAsset = [[AVURLAsset alloc] initWithURL:videoFileUrl options:@{
+        @"AVURLAssetOutOfBandMIMETypeKey": mimeType
+    }];
+    avplayer = [AVPlayer playerWithPlayerItem:[AVPlayerItem playerItemWithAsset:videoAsset]];
     avplayerVC.player = avplayer;
     
     [self.videoView addSubview:avplayerVC.view];

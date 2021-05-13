@@ -2270,7 +2270,7 @@ enum msgSentState {
         MLFileTransferVideoCell* videoCell = (MLFileTransferVideoCell *) [self messageTableCellWithIdentifier:@"fileTransferVideo" andInbound:inDirection fromTable:tableView];
         NSString* videoStr = info[@"cacheFile"];
         NSString* videoFileName = info[@"filename"];
-        [videoCell avplayerConfigWithUrlStr:videoStr fileName:videoFileName andVC:self];
+        [videoCell avplayerConfigWithUrlStr:videoStr andMimeType:info[@"mimeType"] fileName:videoFileName andVC:self];
                 
         cell = videoCell;
     }
@@ -2280,7 +2280,7 @@ enum msgSentState {
         MLFileTransferVideoCell* audioCell = (MLFileTransferVideoCell *) [self messageTableCellWithIdentifier:@"fileTransferAudio" andInbound:inDirection fromTable:tableView];
         NSString *audioStr = info[@"cacheFile"];
         NSString *audioFileName = info[@"filename"];
-        [audioCell avplayerConfigWithUrlStr:audioStr fileName:audioFileName andVC:self];
+        [audioCell avplayerConfigWithUrlStr:audioStr andMimeType:info[@"mimeType"] fileName:audioFileName andVC:self];
 
         cell = audioCell;
     }

@@ -321,25 +321,23 @@
 
 - (IBAction) deleteAccountClicked: (id) sender
 {
-    DDLogVerbose(@"Deleting");
-
-    UIAlertController *questionAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Delete Account", @"") message:NSLocalizedString(@"This will remove this account and the associated data from this device.", @"") preferredStyle:UIAlertControllerStyleActionSheet];
-    UIAlertAction *noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+    UIAlertController* questionAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Delete Account", @"") message:NSLocalizedString(@"This will remove this account and the associated data from this device.", @"") preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertAction* noAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"No", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         //do nothing when "no" was pressed
     }];
-    UIAlertAction *yesAction =[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-
+    UIAlertAction* yesAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction* action) {
+        DDLogVerbose(@"Deleting accountNo %@", self.accountno);
         [[MLXMPPManager sharedInstance] disconnectAccount:self.accountno];
         [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
         [self.db removeAccount:self.accountno];
-        [SAMKeychain deletePasswordForService:kMonalKeychainName account:[NSString stringWithFormat:@"%@",self.accountno]];
+        [SAMKeychain deletePasswordForService:kMonalKeychainName account:[NSString stringWithFormat:@"%@", self.accountno]];
 
-        MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        MBProgressHUD* hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         hud.mode = MBProgressHUDModeCustomView;
-        hud.removeFromSuperViewOnHide=YES;
-        hud.label.text =NSLocalizedString(@"Success", @"");
-        hud.detailsLabel.text =NSLocalizedString(@"The account has been deleted", @"");
-        UIImage *image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+        hud.removeFromSuperViewOnHide = YES;
+        hud.label.text = NSLocalizedString(@"Success", @"");
+        hud.detailsLabel.text = NSLocalizedString(@"The account has been deleted", @"");
+        UIImage* image = [[UIImage imageNamed:@"success"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         hud.customView = [[UIImageView alloc] initWithImage:image];
         [hud hideAnimated:YES afterDelay:1.0f];
         
@@ -347,13 +345,11 @@
             [self.navigationController popViewControllerAnimated:YES];
         });
     }];
-
     [questionAlert addAction:noAction];
     [questionAlert addAction:yesAction];
     questionAlert.popoverPresentationController.sourceView = sender;
 
     [self presentViewController:questionAlert animated:YES completion:nil];
-
 }
 
 - (IBAction) clearHistoryClicked: (id) sender

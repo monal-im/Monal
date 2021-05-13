@@ -341,6 +341,9 @@
         hud.customView = [[UIImageView alloc] initWithImage:image];
         [hud hideAnimated:YES afterDelay:1.0f];
         
+        // trigger UI removal
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalRefresh object:nil userInfo:nil];
+
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             [self.navigationController popViewControllerAnimated:YES];
         });

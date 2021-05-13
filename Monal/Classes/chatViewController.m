@@ -1019,7 +1019,16 @@ enum msgSentState {
 -(void) performSegueWithIdentifier:(NSString*) identifier sender:(id) sender
 {
     if([self shouldPerformSegueWithIdentifier:identifier sender:sender] == NO)
+    {
+        // Display warning
+        UIAlertController* groupDetailsWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Groupchat/channel details", @"")
+                                                                            message:NSLocalizedString(@"Groupchat/channel details are currently not implemented in Monal.", @"") preferredStyle:UIAlertControllerStyleAlert];
+        [groupDetailsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ok", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            [groupDetailsWarning dismissViewControllerAnimated:YES completion:nil];
+        }]];
+        [self presentViewController:groupDetailsWarning animated:YES completion:nil];
         return;
+    }
     [super performSegueWithIdentifier:identifier sender:sender];
 }
 

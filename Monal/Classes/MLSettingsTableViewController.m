@@ -51,8 +51,7 @@ NS_ENUM(NSInteger, kSettingSection)
         NSLocalizedString(@"Privacy Settings",@""),
         NSLocalizedString(@"Notifications",@""),
         NSLocalizedString(@"Backgrounds",@""),
-        NSLocalizedString(@"Sounds",@""),
-        NSLocalizedString(@"Chat Logs",@"")
+        NSLocalizedString(@"Sounds",@"")
     ];
     self.supportRows = @[
         NSLocalizedString(@"Email Support", @""),
@@ -185,10 +184,6 @@ NS_ENUM(NSInteger, kSettingSection)
 
                 case 5:
                     [self performSegueWithIdentifier:@"showSounds" sender:self];
-                    break;
-
-                case 6:
-                    [self performSegueWithIdentifier:@"showChatLog" sender:self];
                     break;
 
                 default:

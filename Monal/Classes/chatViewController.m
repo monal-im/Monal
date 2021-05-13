@@ -60,16 +60,16 @@
 }
 
 @property (nonatomic, strong)  NSDateFormatter* destinationDateFormat;
-@property (nonatomic, strong)  NSCalendar *gregorian;
+@property (nonatomic, strong)  NSCalendar* gregorian;
 @property (nonatomic, assign)  NSInteger thisyear;
 @property (nonatomic, assign)  NSInteger thismonth;
 @property (nonatomic, assign)  NSInteger thisday;
-@property (nonatomic, strong)  MBProgressHUD *uploadHUD;
-@property (nonatomic, strong)  MBProgressHUD *gpsHUD;
+@property (nonatomic, strong)  MBProgressHUD* uploadHUD;
+@property (nonatomic, strong)  MBProgressHUD* gpsHUD;
 
 @property (nonatomic, strong) NSMutableArray<MLMessage*>* messageList;
 @property (nonatomic, strong) NSMutableArray* photos;
-@property (nonatomic, strong) UIDocumentPickerViewController *filePicker;
+@property (nonatomic, strong) UIDocumentPickerViewController* filePicker;
 
 @property (nonatomic, assign) BOOL sendLocation; // used for first request
 
@@ -105,9 +105,9 @@
 @property (nonatomic, strong) NSMutableSet* previewedIds;
 
 @property (atomic) BOOL isAudioMessage;
-@property (nonatomic) UILongPressGestureRecognizer *longGestureRecognizer;
+@property (nonatomic) UILongPressGestureRecognizer* longGestureRecognizer;
 
-@property (nonatomic) UIView *audioRecoderInfoView;
+@property (nonatomic) UIView* audioRecoderInfoView;
 
 #define lastMsgButtonSize 40.0
 
@@ -632,19 +632,7 @@ enum msgSentState {
     [MLNotificationManager sharedInstance].currentAccountNo = self.contact.accountId;
     [MLNotificationManager sharedInstance].currentContact = self.contact;
     
-    if(self.day)
-    {
-        DDLogInfo(@"Showing special day history view");
-        [[NSNotificationCenter defaultCenter] removeObserver:self];
-        self.inputContainerView.hidden = YES;
-        [self refreshData];
-        [self updateUIElements];
-        [self updateNavBarLastInteractionLabel:nil];
-        return;
-    }
-    else
-        self.inputContainerView.hidden = NO;
-    
+    self.inputContainerView.hidden = NO;
     [self handleForeGround];
     [self updateUIElements];
     [self updateNavBarLastInteractionLabel:nil];
@@ -802,7 +790,7 @@ enum msgSentState {
         if([MLNotificationManager sharedInstance].currentContact!=self.contact)
             return;
         
-        if(!_day && ![HelperTools isNotInFocus])
+        if(![HelperTools isNotInFocus])
         {
             //get list of unread messages
             NSArray* unread = [[DataLayer sharedInstance] markMessagesAsReadForBuddy:self.contact.contactJid andAccount:self.contact.accountId tillStanzaId:nil wasOutgoing:NO];
@@ -836,46 +824,41 @@ enum msgSentState {
 {
     if(!self.contact.contactJid)
         return;
-    if(!_day)
+
+    NSMutableArray<MLMessage*>* messages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId];
+    NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId];
+    
+    if([unreadMsgCnt integerValue] == 0)
+        self->_firstmsg=YES;
+    
+    if(!self.jid)
+        return;
+    
+    MLMessage* unreadStatus = [[MLMessage alloc] init];
+    unreadStatus.messageType = kMessageTypeStatus;
+    unreadStatus.messageText = NSLocalizedString(@"Unread Messages Below", @"");
+    unreadStatus.actualFrom = self.jid;
+    unreadStatus.isMuc = self.contact.isGroup;
+    
+    NSInteger unreadPos = messages.count - 1;
+    while(unreadPos >= 0)
     {
-        NSMutableArray<MLMessage*>* messages = [[DataLayer sharedInstance] messagesForContact:self.contact.contactJid forAccount: self.contact.accountId];
-        NSNumber* unreadMsgCnt = [[DataLayer sharedInstance] countUserUnreadMessages:self.contact.contactJid forAccount: self.contact.accountId];
-        
-        if([unreadMsgCnt integerValue] == 0)
-            self->_firstmsg=YES;
-        
-        if(!self.jid)
-            return;
-        
-        MLMessage* unreadStatus = [[MLMessage alloc] init];
-        unreadStatus.messageType = kMessageTypeStatus;
-        unreadStatus.messageText = NSLocalizedString(@"Unread Messages Below", @"");
-        unreadStatus.actualFrom = self.jid;
-        unreadStatus.isMuc = self.contact.isGroup;
-        
-        NSInteger unreadPos = messages.count - 1;
-        while(unreadPos >= 0)
+        MLMessage* row = [messages objectAtIndex:unreadPos];
+        if(!row.unread)
         {
-            MLMessage* row = [messages objectAtIndex:unreadPos];
-            if(!row.unread)
-            {
-                unreadPos++; //move back down one
-                break;
-            }
-            unreadPos--; //move up the list
+            unreadPos++; //move back down one
+            break;
         }
-
-        if(unreadPos <= messages.count - 1 && unreadPos > 0) {
-            [messages insertObject:unreadStatus atIndex:unreadPos];
-        }
-
-        self.messageList = messages;
-		[self doSetNotLoadingHistory];
-        [self refreshCounter];
+        unreadPos--; //move up the list
     }
-    else  { // load log for this day
-        self.messageList = [[[DataLayer sharedInstance] messageHistoryDateForContact:self.contact.contactJid forAccount:self.contact.accountId forDate:self.day] mutableCopy];
+
+    if(unreadPos <= messages.count - 1 && unreadPos > 0) {
+        [messages insertObject:unreadStatus atIndex:unreadPos];
     }
+
+    self.messageList = messages;
+    [self doSetNotLoadingHistory];
+    [self refreshCounter];
 }
 
 #pragma mark - textview

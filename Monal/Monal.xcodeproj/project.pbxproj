@@ -25,7 +25,6 @@
 		261A6281176C055400059090 /* ContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A627F176C055400059090 /* ContactsViewController.m */; };
 		261A6285176C156500059090 /* ActiveChatsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A6284176C156500059090 /* ActiveChatsViewController.m */; };
 		261A628B176C159000059090 /* AccountsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A628A176C159000059090 /* AccountsViewController.m */; };
-		261A628E176C15AD00059090 /* ChatLogsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 261A628D176C15AD00059090 /* ChatLogsViewController.m */; };
 		261E542523A0A1D300394F59 /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		261E542623A0A1D300394F59 /* monalxmpp.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		262797AF178A577300B85D94 /* MLContactCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 262797AE178A577300B85D94 /* MLContactCell.m */; };
@@ -143,8 +142,6 @@
 		2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABF21D9242E00256507 /* MLKeysTableViewController.m */; };
 		2673CAC321D9244B00256507 /* MLResourcesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CAC221D9244B00256507 /* MLResourcesTableViewController.m */; };
 		2673CAC621D9D3F700256507 /* MLKeyCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CAC521D9D3F700256507 /* MLKeyCell.m */; };
-		2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */; };
-		2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2678A98D185AB739003AF53B /* ChatLogContactViewController.m */; };
 		267C99082067D7BE00AB876C /* MLGroupChatTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 267C99072067D7BE00AB876C /* MLGroupChatTableViewController.m */; };
 		267C9921206DE23100AB876C /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267C9920206DE23100AB876C /* UserNotifications.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */; };
@@ -433,8 +430,6 @@
 		261A6284176C156500059090 /* ActiveChatsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActiveChatsViewController.m; sourceTree = "<group>"; };
 		261A6289176C159000059090 /* AccountsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccountsViewController.h; sourceTree = "<group>"; };
 		261A628A176C159000059090 /* AccountsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AccountsViewController.m; sourceTree = "<group>"; };
-		261A628C176C15AD00059090 /* ChatLogsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatLogsViewController.h; sourceTree = "<group>"; };
-		261A628D176C15AD00059090 /* ChatLogsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogsViewController.m; sourceTree = "<group>"; };
 		262265CF2144148A00B18F83 /* libapple_crypto.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libapple_crypto.tbd; path = usr/lib/libapple_crypto.tbd; sourceTree = SDKROOT; };
 		262265D12144156A00B18F83 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcrypto.a; path = "Pods/OpenSSL-Universal/lib-macos/libcrypto.a"; sourceTree = "<group>"; };
 		262265D521441FA300B18F83 /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libssl.a; path = "Pods/OpenSSL-Universal/lib-macos/libssl.a"; sourceTree = "<group>"; };
@@ -607,10 +602,6 @@
 		2673CAC221D9244B00256507 /* MLResourcesTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLResourcesTableViewController.m; sourceTree = "<group>"; };
 		2673CAC421D9D3F700256507 /* MLKeyCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLKeyCell.h; sourceTree = "<group>"; };
 		2673CAC521D9D3F700256507 /* MLKeyCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLKeyCell.m; sourceTree = "<group>"; };
-		2678A989185A8320003AF53B /* ChatLogAccountDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatLogAccountDetailViewController.h; sourceTree = "<group>"; };
-		2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogAccountDetailViewController.m; sourceTree = "<group>"; };
-		2678A98C185AB739003AF53B /* ChatLogContactViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatLogContactViewController.h; sourceTree = "<group>"; };
-		2678A98D185AB739003AF53B /* ChatLogContactViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatLogContactViewController.m; sourceTree = "<group>"; };
 		267B671A226A200D003DB850 /* AESGcm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AESGcm.h; sourceTree = "<group>"; };
 		267B671B226A200D003DB850 /* AESGcm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AESGcm.m; sourceTree = "<group>"; };
 		267B671F226A222E003DB850 /* MLEncryptedPayload.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLEncryptedPayload.h; sourceTree = "<group>"; };
@@ -1301,7 +1292,6 @@
 				265BD14F21A2D15600A59251 /* MLBackgroundSettings.m */,
 				26B0CA8721AE2E3C0080B133 /* MLSoundsTableViewController.h */,
 				26B0CA8821AE2E3C0080B133 /* MLSoundsTableViewController.m */,
-				2678A987185A82BE003AF53B /* Chat Logs */,
 				C13EBB8C24DC685C008AADDA /* MLPrivacySettingsViewController.h */,
 				C13EBB8D24DC685C008AADDA /* MLPrivacySettingsViewController.m */,
 				384E4EA525F1E21A00D384A3 /* MLAutoDownloadFiletransferSettingViewController.h */,
@@ -1361,19 +1351,6 @@
 			);
 			name = "View Controllers";
 			path = Classes;
-			sourceTree = "<group>";
-		};
-		2678A987185A82BE003AF53B /* Chat Logs */ = {
-			isa = PBXGroup;
-			children = (
-				261A628C176C15AD00059090 /* ChatLogsViewController.h */,
-				261A628D176C15AD00059090 /* ChatLogsViewController.m */,
-				2678A989185A8320003AF53B /* ChatLogAccountDetailViewController.h */,
-				2678A98A185A8320003AF53B /* ChatLogAccountDetailViewController.m */,
-				2678A98C185AB739003AF53B /* ChatLogContactViewController.h */,
-				2678A98D185AB739003AF53B /* ChatLogContactViewController.m */,
-			);
-			name = "Chat Logs";
 			sourceTree = "<group>";
 		};
 		267B671E226A2208003DB850 /* Crypto */ = {
@@ -2648,7 +2625,6 @@
 				2609B5291FD5B26800F09FA1 /* MLSplitViewDelegate.m in Sources */,
 				2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */,
 				261A628B176C159000059090 /* AccountsViewController.m in Sources */,
-				261A628E176C15AD00059090 /* ChatLogsViewController.m in Sources */,
 				26FE3BCB1C61A6C3003CC230 /* MLResizingTextView.m in Sources */,
 				2673CAC321D9244B00256507 /* MLResourcesTableViewController.m in Sources */,
 				E8CF9CC726249640001A1952 /* MLSettingsAboutViewController.m in Sources */,
@@ -2666,7 +2642,6 @@
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				3D9EE5342617677700135D46 /* MLUploadQueueImageCell.m in Sources */,
 				26347D861790FFDE006FF64F /* MLInfoCell.m in Sources */,
-				2678A98E185AB739003AF53B /* ChatLogContactViewController.m in Sources */,
 				2696EED21791245A00BC54B8 /* chatViewController.m in Sources */,
 				C104915D2612FFBC0054AC9E /* addContact.m in Sources */,
 				26F396D921968A8600EF5720 /* GLRoundedView.m in Sources */,
@@ -2687,7 +2662,6 @@
 				2644D4921FF0064C00F46AB5 /* MLChatImageCell.m in Sources */,
 				26F396D621968A4300EF5720 /* GLCapsuleView.m in Sources */,
 				3D2B1870262A12A10092E181 /* MLUploadQueueItem.m in Sources */,
-				2678A98B185A8320003AF53B /* ChatLogAccountDetailViewController.m in Sources */,
 				26AAAADC2295742500200433 /* MLPasswordChangeTableViewController.m in Sources */,
 				26D0940C22A33E9B009C7AEF /* MLRegisterViewController.m in Sources */,
 				262E51921AD8CAC600788351 /* MLButtonCell.m in Sources */,

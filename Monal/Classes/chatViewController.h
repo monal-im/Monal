@@ -52,7 +52,6 @@
 @property (weak, nonatomic) IBOutlet UIButton* audioRecordButton;
 
 
-@property (nonatomic, strong) NSString* day;
 @property (nonatomic, strong) MLContact* contact;
 
 /**

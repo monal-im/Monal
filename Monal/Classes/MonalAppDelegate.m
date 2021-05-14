@@ -282,7 +282,14 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         DDLogInfo(@"calling MonalAppDelegate configureBackgroundFetchingTask");
         [self configureBackgroundFetchingTask];
     }
-    
+    // Play audio even if phone is in silent mode
+    NSError* audioSessionError;
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&audioSessionError];
+    if(audioSessionError != nil)
+    {
+        DDLogWarn(@"Couldn't set AVAudioSession to AVAudioSessionCategoryPlayback: %@", audioSessionError);
+    }
+
     NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
     NSString* version = [infoDict objectForKey:@"CFBundleShortVersionString"];
     NSString* buildDate = [NSString stringWithUTF8String:__DATE__];
@@ -306,14 +313,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         [[MLXMPPManager sharedInstance] nowBackgrounded];
     else
         [[MLXMPPManager sharedInstance] nowForegrounded];
-
-    // Play audio even if phone is in silent mode
-    NSError* audioSessionError;
-    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&audioSessionError];
-    if(audioSessionError != nil)
-    {
-        DDLogWarn(@"Couldn't set AVAudioSession to AVAudioSessionCategoryPlayback: %@", audioSessionError);
-    }
 
     return YES;
 }

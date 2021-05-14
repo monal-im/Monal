@@ -1323,11 +1323,26 @@ enum msgSentState {
 -(void) imagePickerController:(UIImagePickerController*) picker didFinishPickingMediaWithInfo:(NSDictionary<NSString*, id>*) info
 {
     [self dismissViewControllerAnimated:YES completion:nil];
-    UIImage* selectedImage = info[UIImagePickerControllerEditedImage];
-    if(!selectedImage)
-        selectedImage = info[UIImagePickerControllerOriginalImage];
 
-    [self addRawImagesToQueue:@[selectedImage]];
+    if(info[UIImagePickerControllerMediaType] == nil)
+        return;
+    else if([info[UIImagePickerControllerMediaType] isEqualToString:(NSString*)kUTTypeImage])
+    {
+        UIImage* selectedImage = info[UIImagePickerControllerEditedImage];
+        if(!selectedImage)
+            selectedImage = info[UIImagePickerControllerOriginalImage];
+        [self addRawImagesToQueue:@[selectedImage]];
+    }
+    else if([info[UIImagePickerControllerMediaType] isEqualToString:(NSString*)kUTTypeMovie])
+    {
+        NSAssert(info[UIImagePickerControllerMediaURL] != nil, @"Expected video url");
+        [self addImagesToQueue:@[info[UIImagePickerControllerMediaURL]]];
+    }
+    else
+    {
+        DDLogWarn(@"Created MediaType: %@ without handler", info[UIImagePickerControllerMediaType]);
+        unreachable();
+    }
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker

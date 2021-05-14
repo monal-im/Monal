@@ -1285,30 +1285,37 @@ enum msgSentState {
     [self dismissViewControllerAnimated:YES completion:nil];
     for(PHPickerResult* userSelection in results) {
         NSItemProvider* provider = userSelection.itemProvider;
-        assert(provider != nil);
-        /*
-        [provider loadItemForTypeIdentifier:(NSString*) kUTTypeImage options:nil completionHandler:^(__kindof id<NSSecureCoding>  _Nullable item, NSError * _Null_unspecified error) {
-            assert([((NSObject*)item) isKindOfClass: [NSURL class]]);
-            NSURL* url = (NSURL*)item;
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self addImagesToQueue:@[url]];
-            });
-        }];
-        */
-        [provider loadObjectOfClass:[UIImage class] completionHandler:^(__kindof id<NSItemProviderReading>  _Nullable object, NSError * _Nullable error) {
-#ifdef TARGET_OS_SIMULATOR
-            if(NSStringFromClass([object class]) == nil) {
-                DDLogError(@"Could not add user-selected image to the upload queue! This is a known issue for iOS Simulator when trying to load HDR images, see https://developer.apple.com/forums/thread/665265");
-                return;
-            }
-#endif
-            assert([object isKindOfClass: [UIImage class]]);
-            UIImage* image = (UIImage*)object;
+        NSAssert(provider != nil, @"Expected a NSItemProvider");
+        if([provider hasItemConformingToTypeIdentifier:@"com.apple.quicktime-movie"] == YES)
+        {
+            [provider loadItemForTypeIdentifier:@"com.apple.quicktime-movie" options:nil completionHandler:^(NSURL* path, NSError* error)
+             {
+                if(error != nil)
+                    DDLogInfo(@"Error while parsing video provider: %@", error);
+                if(path == nil)
+                    DDLogInfo(@"Video provider passed empty path");
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self addImagesToQueue:@[path]];
+                });
+            }];
+        }
+        else
+        {
+            [provider loadObjectOfClass:[UIImage class] completionHandler:^(__kindof id<NSItemProviderReading>  _Nullable object, NSError * _Nullable error) {
+    #ifdef TARGET_OS_SIMULATOR
+                if(NSStringFromClass([object class]) == nil) {
+                    DDLogError(@"Could not add user-selected image to the upload queue! This is a known issue for iOS Simulator when trying to load HDR images, see https://developer.apple.com/forums/thread/665265");
+                    return;
+                }
+    #endif
+                assert([object isKindOfClass: [UIImage class]]);
+                UIImage* image = (UIImage*)object;
 
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self addRawImagesToQueue:@[image]];
-            });
-        }];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self addRawImagesToQueue:@[image]];
+                });
+            }];
+        }
     }
 }
 
@@ -2891,12 +2898,12 @@ enum msgSentState {
     {
         UIImage* image = [UIImage imageWithData:[NSData dataWithContentsOfURL:urls[i]]];
         if(image == nil) { // FIXME Fallback to generic document for unsupported file? Some NSURLs may be invalid
-            NSError* error = nil;
+            /*NSError* error = nil;
             if([urls[i] checkResourceIsReachableAndReturnError:&error] == NO)
             {
                 DDLogError(@"Fallback to image URL did not work! Error: %@", error.localizedDescription);
                 return;
-            }
+            }*/
             [newItems addObject:[[MLUploadQueueItem alloc] initWithURL:urls[i]]];
         } else {
             [newItems addObject:[[MLUploadQueueItem alloc] initWithImage:image imageUrl:urls[i]]];
@@ -2926,8 +2933,11 @@ enum msgSentState {
         [[MLXMPPManager sharedInstance] sendMessage:url toContact:self.contact isEncrypted:self.contact.isEncrypted isUpload:YES messageId:newMessageID withCompletionHandler:nil];
     }
     DDLogVerbose(@"upload done");
-    [self.uploadQueue removeObjectAtIndex:0];
-    [self.uploadMenuView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:0 inSection:0]]];
+    if(self.uploadQueue.count > 0)
+    {
+        [self.uploadQueue removeObjectAtIndex:0];
+        [self.uploadMenuView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:0 inSection:0]]];
+    }
     [self emptyUploadQueue];
 }
 

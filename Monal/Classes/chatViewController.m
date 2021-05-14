@@ -1176,9 +1176,6 @@ enum msgSentState {
         
         return;
     } else {
-        UIImagePickerController* mediaPicker = [[UIImagePickerController alloc] init];
-        mediaPicker.delegate = self;
-
 #if TARGET_OS_MACCATALYST
         UIAlertAction* fileAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Files", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             [self attachfile:sender];
@@ -1187,8 +1184,12 @@ enum msgSentState {
         [fileAction setValue:[[UIImage imageNamed:@"file-attatchment"] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal] forKey:@"image"];
         [actionControll addAction:fileAction];
 #else
+        UIImagePickerController* mediaPicker = [[UIImagePickerController alloc] init];
+        mediaPicker.delegate = self;
+
         UIAlertAction* cameraAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Camera", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
             mediaPicker.sourceType = UIImagePickerControllerSourceTypeCamera;
+            mediaPicker.mediaTypes = @[(NSString*)kUTTypeImage, (NSString*)kUTTypeMovie];
 
             [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
                 if(granted)

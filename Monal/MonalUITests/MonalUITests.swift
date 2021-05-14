@@ -71,14 +71,14 @@ class MonalUITests: XCTestCase {
         app.textViews["NewChatMessageTextField"].tap()
         app.textViews["NewChatMessageTextField"].typeText(txt)
         // send button should appeared
-        XCTAssertTrue(app.buttons["Send"].exists)
+        XCTAssertTrue(app.buttons["send"].exists)
         XCTAssertFalse(app.buttons["microphone"].exists)
 
-        app.buttons["Send"].tap()
+        app.buttons["send"].tap()
         // wait for sending on slow systems
         sleep(5)
         // send button should be hidden
-        XCTAssertFalse(app.buttons["Send"].exists)
+        XCTAssertFalse(app.buttons["send"].exists)
         XCTAssertTrue(app.buttons["microphone"].exists)
     }
 
@@ -209,8 +209,8 @@ class MonalUITests: XCTestCase {
         tablesQuery.staticTexts["Add Contact"].tap()
         app.alerts["Permission Requested"].scrollViews.otherElements.buttons["Close"].tap()
         // wait for segue to chatView
-        sleep(2)
-        XCTAssertFalse(app.buttons["Send"].exists)
+        sleep(10)
+        XCTAssertFalse(app.buttons["send"].exists)
         app.textViews["NewChatMessageTextField"].tap()
 
         sendMsg(txt: "ping")

@@ -2694,7 +2694,7 @@
                         </textView>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kYa-y4-X5Z" userLabel="SendButton">
                             <rect key="frame" x="370" y="170" width="36" height="30"/>
-                            <accessibility key="accessibilityConfiguration" label="Send"/>
+                            <accessibility key="accessibilityConfiguration" identifier="send" label="Send"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="36" id="NRJ-Qj-1DA"/>
                                 <constraint firstAttribute="height" constant="30" id="ZPw-Mb-D1d"/>
@@ -2731,6 +2731,7 @@
                         </label>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="p5g-C7-nvT" userLabel="AudioButton">
                             <rect key="frame" x="370" y="170" width="36" height="30"/>
+                            <accessibility key="accessibilityConfiguration" identifier="microphone"/>
                             <constraints>
                                 <constraint firstAttribute="height" constant="30" id="dpb-If-XvF"/>
                                 <constraint firstAttribute="width" constant="36" id="uM4-4m-Jhb"/>

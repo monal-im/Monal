@@ -125,7 +125,7 @@
                     <view key="view" contentMode="scaleToFill" id="j3K-AL-mmv">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
                     <navigationItem key="navigationItem" id="TgJ-pD-QFd"/>
                 </viewController>
@@ -377,6 +377,7 @@
                             </toolbar>
                             <textField opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Hostname/IP of Logserver" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ZMn-v1-NOh" userLabel="logHostname">
                                 <rect key="frame" x="8" y="8" width="174" height="34"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <accessibility key="accessibilityConfiguration" hint="UDP Log Hostname"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="150" id="sYc-az-OgS"/>
@@ -389,6 +390,7 @@
                             </textField>
                             <textField opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Port of Logserver" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="IVO-3g-xoO" userLabel="logPort">
                                 <rect key="frame" x="190" y="8" width="140.33333333333337" height="34"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <accessibility key="accessibilityConfiguration" hint="UDP Log Port"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="40" id="PtZ-Tm-cpv"/>
@@ -401,6 +403,7 @@
                             </textField>
                             <textField opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="AES Encryption Key" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="C84-JQ-3RM" userLabel="logAESKey">
                                 <rect key="frame" x="8" y="144" width="322" height="34"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <accessibility key="accessibilityConfiguration" hint="UDP Log AES Key"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
@@ -410,6 +413,7 @@
                             </textField>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="PLEASE MAKE SURE TO USE A KEY WITH PROPER ENTROPY!!" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" translatesAutoresizingMaskIntoConstraints="NO" id="SEe-lB-dT4" userLabel="logAESHint">
                                 <rect key="frame" x="8" y="180" width="398" height="40.666666666666657"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" systemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
@@ -419,9 +423,10 @@
                             </label>
                             <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="Cu2-OK-XWy" userLabel="logSwitch">
                                 <rect key="frame" x="357" y="8" width="51" height="31"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </switch>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="ZMn-v1-NOh" firstAttribute="leading" secondItem="EB3-va-n1E" secondAttribute="leading" constant="8" id="3GD-k0-pHL"/>
                             <constraint firstItem="87s-YI-3sS" firstAttribute="trailing" secondItem="JYm-gw-Mhc" secondAttribute="trailing" id="5yw-SJ-WwJ"/>

@@ -171,10 +171,10 @@ enum msgSentState {
     _isTyping = NO;
     self.hidesBottomBarWhenPushed=YES;
     
-    self.chatInput.layer.borderColor=[UIColor lightGrayColor].CGColor;
-    self.chatInput.layer.cornerRadius=3.0f;
-    self.chatInput.layer.borderWidth=0.5f;
-    self.chatInput.textContainerInset=UIEdgeInsetsMake(5, 0, 5, 0);
+    self.chatInput.layer.borderColor = [UIColor lightGrayColor].CGColor;
+    self.chatInput.layer.cornerRadius = 3.0f;
+    self.chatInput.layer.borderWidth = 0.5f;
+    self.chatInput.textContainerInset = UIEdgeInsetsMake(5, 0, 5, 0);
     
     self.messageTable.rowHeight = UITableViewAutomaticDimension;
     self.messageTable.estimatedRowHeight = UITableViewAutomaticDimension;
@@ -255,7 +255,7 @@ enum msgSentState {
     [cusView addSubview:self.navBarIcon];
     [cusView addSubview:self.navBarContactJid];
     [cusView addSubview:self.navBarLastInteraction];
-    UITapGestureRecognizer *customViewTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(commandIPressed:)];
+    UITapGestureRecognizer* customViewTapRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(commandIPressed:)];
     [cusView addGestureRecognizer:customViewTapRecognizer];
     self.navigationItem.leftBarButtonItems = @[[[UIBarButtonItem alloc] initWithCustomView:cusView]];
     self.navigationItem.leftItemsSupplementBackButton = YES;
@@ -420,7 +420,6 @@ enum msgSentState {
     {
         return YES;
     }
-    
     return NO;
 }
 
@@ -469,11 +468,10 @@ enum msgSentState {
 
 -(void) displayEncryptionStateInUI
 {
-    if(self.contact.isEncrypted) {
+    if(self.contact.isEncrypted)
         [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"744-locked-received"]];
-    } else {
+    else
         [self.navBarEncryptToggleButton setImage:[UIImage imageNamed:@"745-unlocked"]];
-    }
 }
 
 -(void) refreshContact:(NSNotification*) notification
@@ -504,7 +502,8 @@ enum msgSentState {
     
     jidLabelText = contactDisplayName;
 
-    if(self.contact.isGroup) {
+    if(self.contact.isGroup)
+    {
         NSArray* members = [[DataLayer sharedInstance] getMembersAndParticipantsOfMuc:self.contact.contactJid forAccountId:self.xmppAccount.accountNo];
         if(members.count > 0)
             jidLabelText = [NSString stringWithFormat:@"%@ (%ld)", contactDisplayName, members.count];
@@ -597,7 +596,7 @@ enum msgSentState {
     NSAssert(self.contact.contactJid, @"can not open chat for empty contact jid");
     NSAssert(self.contact.accountId, @"can not open chat for empty account id");
     
-    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
     [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleDeletedMessage:) name:kMonalDeletedMessageNotice object:nil];
     [nc addObserver:self selector:@selector(handleSentMessage:) name:kMonalSentMessageNotice object:nil];
@@ -632,7 +631,6 @@ enum msgSentState {
     [MLNotificationManager sharedInstance].currentAccountNo = self.contact.accountId;
     [MLNotificationManager sharedInstance].currentContact = self.contact;
     
-    self.inputContainerView.hidden = NO;
     [self handleForeGround];
     [self updateUIElements];
     [self updateNavBarLastInteractionLabel:nil];
@@ -2824,7 +2822,7 @@ enum msgSentState {
     CGFloat infoHeight = self.inputContainerView.frame.size.height;
     CGFloat infoWidth = self.inputContainerView.frame.size.width;
 
-    UIColor *labelBackgroundColor = self.inputContainerView.backgroundColor;
+    UIColor* labelBackgroundColor = self.inputContainerView.backgroundColor;
     self.audioRecoderInfoView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, infoWidth - 50, infoHeight)];
     self.audioRecoderInfoView.backgroundColor = labelBackgroundColor;
     UILabel *audioTimeInfoLabel = [[UILabel alloc] initWithFrame:CGRectMake(5, 0, infoWidth - 50, infoHeight)];

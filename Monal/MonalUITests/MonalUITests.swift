@@ -64,7 +64,7 @@ class MonalUITests: XCTestCase {
     private func sendMsg(txt: String)
     {
         let app = XCUIApplication()
-
+        sleep(5)
         XCTAssertTrue(app.buttons["microphone"].exists)
         XCTAssertFalse(app.buttons["Send"].exists)
 

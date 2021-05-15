@@ -60,6 +60,13 @@ typedef enum NotificationPrivacySettingOption {
     }
 #endif
 
+// https://clang-analyzer.llvm.org/faq.html#unlocalized_string
+__attribute__((annotate("returns_localized_nsstring")))
+static inline NSString* LocalizationNotNeeded(NSString* s)
+{
+  return s;
+}
+
 //some xmpp related constants
 #define kRegServer @"yax.im"
 #define kMessageDeletedBody @"eu.siacs.conversations.message_deleted"

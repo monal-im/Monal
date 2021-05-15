@@ -297,6 +297,13 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     NSString* buildTime = [NSString stringWithUTF8String:__TIME__];
     DDLogInfo(@"App started: %@", [NSString stringWithFormat:NSLocalizedString(@"Version %@ (%@ %@ UTC)", @ ""), version, buildDate, buildTime]);
     
+    //init background/foreground status
+    //this has to be done here to make sure we have the correct state when he app got started through notification quick actions
+    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
+        [[MLXMPPManager sharedInstance] nowBackgrounded];
+    else
+        [[MLXMPPManager sharedInstance] nowForegrounded];
+    
     //should any accounts connect?
     [self connectIfNecessary];
     
@@ -308,12 +315,6 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowHandling:) name:@"NSWindowDidResignKeyNotification" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowHandling:) name:@"NSWindowDidBecomeKeyNotification" object:nil];
 #endif
-    
-    //init background/foreground status
-    if([UIApplication sharedApplication].applicationState==UIApplicationStateBackground)
-        [[MLXMPPManager sharedInstance] nowBackgrounded];
-    else
-        [[MLXMPPManager sharedInstance] nowForegrounded];
 
     return YES;
 }

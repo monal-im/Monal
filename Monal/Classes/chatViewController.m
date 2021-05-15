@@ -2445,7 +2445,7 @@ enum msgSentState {
                 {
                     NSString* errorText = error;
                     if(!error)
-                        errorText = NSLocalizedString(@"Unexpected error: All messages already present in local history!", @"");
+                        errorText = NSLocalizedString(@"All messages already present in local history!", @"");
                     DDLogError(@"Got backscrolling mam error: %@", errorText);
                     UIAlertController* alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Could not load (all) old messages", @"") message:[NSString stringWithFormat:NSLocalizedString(@"Could not load (all) old messages from your server archive. Please try again later. %@", @""), errorText] preferredStyle:UIAlertControllerStyleAlert];
                     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {

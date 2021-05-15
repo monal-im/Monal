@@ -2878,7 +2878,11 @@ NSString *const kData=@"data";
             if(retrievedBodies == 0)
             {
                 //call completion with nil, if there was an error or xmpp reconnect that prevented us to get any body-messages
-                completion(nil, [HelperTools extractXMPPError:error withDescription:nil]);
+                //but only for non-item-not-found errors
+                if([@"item-not-found" isEqualToString:[error findFirst:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}internal-server-error/../{urn:ietf:params:xml:ns:xmpp-stanzas}text#"]])
+                    completion(nil, nil);
+                else
+                    completion(nil, [HelperTools extractXMPPError:error withDescription:nil]);
             }
             else
             {

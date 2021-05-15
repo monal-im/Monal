@@ -103,10 +103,10 @@ enum MLKeysTableViewControllerSections {
 
 -(void) toggleTrust:(id) sender
 {
+#ifndef DISABLE_OMEMO
     UISwitch* button = (UISwitch *)sender;
     NSInteger row = button.tag - 100;
 
-#ifndef DISABLE_OMEMO
     NSNumber* device = [self.devices objectAtIndex:row];
     SignalAddress* address = [[SignalAddress alloc] initWithName:self.contact.contactJid deviceId:(int) device.integerValue];
 

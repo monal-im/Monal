@@ -236,6 +236,14 @@ enum msgSentState {
     [self.messageTable addInteraction:[[UIDropInteraction alloc] initWithDelegate:self]];
     [self.inputContainerView addInteraction:[[UIDropInteraction alloc] initWithDelegate:self]];
     
+#ifdef DISABLE_OMEMO
+    NSMutableArray* rightBarButtons = [[NSMutableArray alloc] init];
+    for(UIBarButtonItem* entry in self.navigationItem.rightBarButtonItems)
+        if(entry.action != @selector(toggleEncryption:))
+            [rightBarButtons addObject:entry];
+    self.navigationItem.rightBarButtonItems = rightBarButtons;
+#endif
+    
     // Init search button item.
     [self initSearchButtonItem];
 }

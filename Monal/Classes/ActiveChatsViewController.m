@@ -370,6 +370,37 @@ static NSMutableSet* _smacksWarningDisplayed;
     return NO;
 }
 
+-(BOOL) shouldPerformSegueWithIdentifier:(NSString*) identifier sender:(id) sender
+{
+    if([identifier isEqualToString:@"showDetails"])
+    {
+        //don't show contact details for mucs (they will get their own muc details later on)
+        if(((MLContact*)sender).isGroup)
+            return NO;
+    }
+    return YES;
+}
+
+//this is needed to prevent segues invoked programmatically
+-(void) performSegueWithIdentifier:(NSString*) identifier sender:(id) sender
+{
+    if([self shouldPerformSegueWithIdentifier:identifier sender:sender] == NO)
+    {
+        if([identifier isEqualToString:@"showDetails"])
+        {
+            // Display warning
+            UIAlertController* groupDetailsWarning = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Groupchat/channel details", @"")
+                                                                                message:NSLocalizedString(@"Groupchat/channel details are currently not implemented in Monal.", @"") preferredStyle:UIAlertControllerStyleAlert];
+            [groupDetailsWarning addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Ok", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+                [groupDetailsWarning dismissViewControllerAnimated:YES completion:nil];
+            }]];
+            [self presentViewController:groupDetailsWarning animated:YES completion:nil];
+        }
+        return;
+    }
+    [super performSegueWithIdentifier:identifier sender:sender];
+}
+
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     DDLogInfo(@"Got segue identifier '%@'", segue.identifier);

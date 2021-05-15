@@ -647,7 +647,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 }
 
 #pragma mark -mac menu
--(void) showNew {
+-(void) showContacts {
     // Only segue if at least one account is enabled
     if([self showAccountNumberWarningIfNeeded]) {
         return;

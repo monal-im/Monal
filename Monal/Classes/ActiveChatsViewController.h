@@ -20,7 +20,7 @@
 -(void) presentChatWithRow:(MLContact *)row;
 -(void) refreshDisplay;
 
--(void) showNew;
+-(void) showContacts;
 -(void) deleteConversation;
 -(void) showSettings;
 -(void) showDetails;

@@ -679,7 +679,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
 -(void) showNew
 {
-    [self.activeChats showNew];
+    [self.activeChats showContacts];
 }
 
 -(void) deleteConversation

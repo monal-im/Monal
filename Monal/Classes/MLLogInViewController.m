@@ -162,7 +162,7 @@
             self.loginHUD.label.text = NSLocalizedString(@"Loading omemo bundles", @"");
         });
 #else
-        [self kMonalFinishedOmemoBundleFetch];
+        [self omemoBundleFetchFinished:nil];
 #endif
     }
 }

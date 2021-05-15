@@ -14,7 +14,7 @@
 #define kDefaultTextOffset 5
 
 #define kSending NSLocalizedString(@"Sending...", @"")
-#define kSent NSLocalizedString(@"Sent", @"")
+#define kSent NSLocalizedString(@"", @"")
 #define kReceived LocalizationNotNeeded(@"✓")
 #define kDisplayed LocalizationNotNeeded(@"✓✓")
 

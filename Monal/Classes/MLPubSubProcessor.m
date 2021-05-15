@@ -170,8 +170,10 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
                 if(ownFavorites[room] == nil && [autojoin boolValue])
                 {
                     DDLogInfo(@"Entering muc '%@' on account %@ because it got added to bookmarks...", room, account.accountNo);
-                    //add muc to favorites table and try to join it afterwards
-                    [[DataLayer sharedInstance] addMucFavorite:room forAccountId:account.accountNo andMucNick:nick];
+                    //save nick to favorites table if provided and try to join afterwards (this is necessary to use the provided nick on first join)
+                    if(nick)
+                        [[DataLayer sharedInstance] addMucFavorite:room forAccountId:account.accountNo andMucNick:nick];
+                    //try to join muc, this will add it to / update our favorites table once we joined successfully
                     [MLMucProcessor sendDiscoQueryFor:room onAccount:account withJoin:YES];
                 }
                 //check if it is a known entry that canged autojoin to false

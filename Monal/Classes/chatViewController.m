@@ -832,6 +832,7 @@ enum msgSentState {
     if(!self.jid)
         return;
     
+    //TODO: use a factory method for this!!
     MLMessage* unreadStatus = [[MLMessage alloc] init];
     unreadStatus.messageType = kMessageTypeStatus;
     unreadStatus.messageText = NSLocalizedString(@"Unread Messages Below", @"");

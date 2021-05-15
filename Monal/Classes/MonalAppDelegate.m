@@ -49,6 +49,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 {
     self = [super init];
     _bgTask = UIBackgroundTaskInvalid;
+    _wakeupCompletions = [[NSMutableDictionary alloc] init];
     return self;
 }
 
@@ -720,9 +721,9 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         
         //use a synchronized block to disconnect only once
         @synchronized(self) {
-            if(_backgroundTimer || [_wakeupCompletions count])
+            if(_backgroundTimer != nil || [_wakeupCompletions count] > 0)
             {
-                DDLogInfo(@"### ignoring idle state because background timer or piush completion times are still running ###");
+                DDLogInfo(@"### ignoring idle state because background timer or wakeup completion timers are still running ###");
                 return;
             }
             
@@ -904,32 +905,39 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     NSString* completionId = [[NSUUID UUID] UUIDString];
     DDLogInfo(@"got incomingWakeupWithCompletionHandler with ID %@", completionId);
     
-    //don't use self connectIfNecessary] because we already have a background task here
+    //don't use *self* connectIfNecessary] because we already have a background task here
     //that gets stopped once we call the completionHandler
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     
     //register push completion handler and associated timer
-    _wakeupCompletions[completionId] = @{
-        @"handler": completionHandler,
-        @"timer": createTimer(28.0, (^{
-            DDLogWarn(@"### Wakeup timer triggered for ID %@ ###", completionId);
-            [HelperTools dispatchSyncReentrant:^{
-                @synchronized(self) {
-                    if([_wakeupCompletions objectForKey:completionId] != nil)
-                    {
-                        //remove this handler from list
-                        [_wakeupCompletions removeObjectForKey:completionId];
-                        
-                        //retry background check (now handling idle state because no running background timer is blocking it)
-                        [self checkIfBackgroundTaskIsStillNeeded];
-                        
-                        //call completion (should be done *after* the idle state check because it could freeze the app)
-                        completionHandler(UIBackgroundFetchResultFailed);
+    @synchronized(self) {
+        _wakeupCompletions[completionId] = @{
+            @"handler": completionHandler,
+            @"timer": createTimer(25.0, (^{
+                DDLogWarn(@"### Wakeup timer triggered for ID %@ ###", completionId);
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    @synchronized(self) {
+                        if([_wakeupCompletions objectForKey:completionId] != nil)
+                        {
+                            DDLogInfo(@"Handling wakeup completion %@", completionId);
+                            
+                            //remove this handler from list
+                            [_wakeupCompletions removeObjectForKey:completionId];
+                            
+                            //retry background check (now handling idle state because no running background timer is blocking it)
+                            [self checkIfBackgroundTaskIsStillNeeded];
+                            
+                            //call completion (should be done *after* the idle state check because it could freeze the app)
+                            completionHandler(UIBackgroundFetchResultFailed);
+                        }
+                        else
+                            DDLogWarn(@"Wakeup completion %@ got already handled and was removed from list!", completionId);
                     }
-                }
-            } onQueue:dispatch_get_main_queue()];
-        }))
-    };
+                });
+            }))
+        };
+        DDLogInfo(@"Added timer %@ to wakeup completion list...", completionId);
+    }
 }
 
 @end

@@ -143,7 +143,7 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
         ownFavorites[entry[@"room"]] = entry;
     
     //new/updated bookmarks
-    if([type isEqualToString:@"publish"] && data[@"current"] != nil)
+    if([type isEqualToString:@"publish"])
     {
         for(NSString* itemId in data)
         {
@@ -215,20 +215,18 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
                 [MLMucProcessor leave:room onAccount:account withBookmarksUpdate:NO];
             }
             
-            break;      //we only need the first pep item (there should be only one item in the first place)
+            return;      //we only need the first pep item (there should be only one item in the first place)
         }
+        //FALLTHROUGH to "delete all" if no item was found
     }
     //deleted/purged node or retracted item (e.g. all bookmarks deleted)
-    else
+    //--> remove and leave all mucs
+    for(NSString* room in ownFavorites)
     {
-        //remove and leave all mucs
-        for(NSString* room in ownFavorites)
-        {
-            DDLogInfo(@"Leaving muc '%@' on account %@ because all bookmarks got deleted...", room, account.accountNo);
-            //delete local favorites entry and leave room afterwards
-            [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
-            [MLMucProcessor leave:room onAccount:account withBookmarksUpdate:NO];
-        }
+        DDLogInfo(@"Leaving muc '%@' on account %@ because all bookmarks got deleted...", room, account.accountNo);
+        //delete local favorites entry and leave room afterwards
+        [[DataLayer sharedInstance] deleteMuc:room forAccountId:account.accountNo];
+        [MLMucProcessor leave:room onAccount:account withBookmarksUpdate:NO];
     }
 $$
 

@@ -133,8 +133,8 @@ const int KEY_SIZE = 16;
     if([self.ownReceivedDeviceList count] == 0) {
         // we need to publish a new devicelist if we did not receive our own list after a new connection
         // Generate single use keys
-        [self generateNewKeysIfNeeded];
-        [self sendOMEMOBundle];
+        if([self generateNewKeysIfNeeded] == NO)
+            [self sendOMEMOBundle];
 
         [self sendOMEMODeviceWithForce:YES];
         [self.ownReceivedDeviceList addObject:[NSNumber numberWithInt:(self.monalSignalStore.deviceid)]];

@@ -463,6 +463,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     {
         DDLogVerbose(@"got account and cleaning up.. ");
         [account disconnect:YES];
+        account = nil;
         DDLogVerbose(@"done cleaning up account ");
     }
 }

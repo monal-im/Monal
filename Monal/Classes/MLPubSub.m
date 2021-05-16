@@ -20,7 +20,7 @@
 
 @interface MLPubSub ()
 {
-    xmpp* _account;
+    __weak xmpp* _account;
     NSMutableDictionary* _registeredHandlers;
 }
 @end

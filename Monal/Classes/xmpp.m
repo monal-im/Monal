@@ -277,6 +277,7 @@ NSString *const kData=@"data";
 
 -(void) dealloc
 {
+    DDLogInfo(@"Deallocating account %@ object %@", self.accountNo, self);
     if(_outputBuffer)
         free(_outputBuffer);
     _outputBuffer = nil;
@@ -287,6 +288,7 @@ NSString *const kData=@"data";
     [_parseQueue cancelAllOperations];
     [_receiveQueue cancelAllOperations];
     [_sendQueue cancelAllOperations];
+    DDLogInfo(@"Done deallocating account %@ object %@", self.accountNo, self);
 }
 
 -(void) setCapsHash:(NSString* _Nonnull) hash
@@ -2552,9 +2554,8 @@ NSString *const kData=@"data";
     
     //indicate we are bound now, *after* initializing/resetting all the other data structures to avoid race conditions
     _accountState = kStateBound;
-    NSDictionary* dic = @{@"AccountNo":self.accountNo, @"AccountName": self.connectionProperties.identity.jid};
     //don't queue this notification because it should be handled INLINE inside the receive queue
-    [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:dic];
+    [[NSNotificationCenter defaultCenter] postNotificationName:kMLHasConnectedNotice object:self];
     [self accountStatusChanged];
     
     //now fetch roster, request disco and send initial presence

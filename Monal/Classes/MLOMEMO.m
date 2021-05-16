@@ -30,7 +30,7 @@
 
 @property (nonatomic, strong) NSString* accountJid;
 
-@property (nonatomic, strong) xmpp* account;
+@property (nonatomic, weak) xmpp* account;
 @property (nonatomic, strong) NSMutableSet<NSNumber*>* ownReceivedDeviceList;
 @property (nonatomic, assign) BOOL loggedIn;
 
@@ -66,22 +66,30 @@ const int KEY_SIZE = 16;
     return self;
 }
 
--(void) loggedIn:(NSNotification *) notification {
-    NSDictionary* dic = notification.object;
-    if(!dic) return;
-    NSString* accountNo = [dic objectForKey:@"AccountNo"];
-    if(!accountNo) return;
-    if([self.account.accountNo isEqualToString:accountNo]) {
+-(void) dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+-(void) loggedIn:(NSNotification*) notification
+{
+    xmpp* notiAccount = notification.object;
+    if(!notiAccount || !self.account)
+        return;
+    if(self.account == notiAccount)
+    {
         self.loggedIn = YES;
         // We don't have to clear ownReceivedDeviceList as it would have been cleared by a reconnect
     }
 }
 
--(void) catchupDone:(NSNotification *) notification {
+-(void) catchupDone:(NSNotification*) notification
+{
     xmpp* notiAccount = notification.object;
-    if(!notiAccount) return;
-
-    if([self.account.accountNo isEqualToString:notiAccount.accountNo]) {
+    if(!notiAccount || !self.account)
+        return;
+    if(self.account == notiAccount)
+    {
         self.hasCatchUpDone = YES;
         if(!self.openBundleFetchCnt && self.loggedIn) // check if we have a session were we loggedIn
         {

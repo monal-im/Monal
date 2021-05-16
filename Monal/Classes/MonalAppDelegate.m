@@ -30,6 +30,8 @@
 
 #import <AVKit/AVKit.h>
 
+#define GRACEFUL_TIMEOUT 20.0
+
 typedef void (^pushCompletion)(UIBackgroundFetchResult result);
 static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 
@@ -524,10 +526,10 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
 -(void) startBackgroundTimer
 {
     //cancel old background timer if still running and start a new one
-    //this timer will fire after 20 seconds in background and disconnect gracefully (e.g. when fully idle the next time)
+    //this timer will fire after GRACEFUL_TIMEOUT seconds in background and disconnect gracefully (e.g. when fully idle the next time)
     if(_backgroundTimer)
         _backgroundTimer();
-    _backgroundTimer = createTimer(20.0, ^{
+    _backgroundTimer = createTimer(GRACEFUL_TIMEOUT, ^{
         //mark timer as *not* running
         _backgroundTimer = nil;
         //retry background check (now handling idle state because no running background timer is blocking it)
@@ -910,11 +912,11 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
     //that gets stopped once we call the completionHandler
     [[MLXMPPManager sharedInstance] connectIfNecessary];
     
-    //register push completion handler and associated timer
+    //register push completion handler and associated timer (use the GRACEFUL_TIMEOUT here, too)
     @synchronized(self) {
         _wakeupCompletions[completionId] = @{
             @"handler": completionHandler,
-            @"timer": createTimer(25.0, (^{
+            @"timer": createTimer(GRACEFUL_TIMEOUT, (^{
                 DDLogWarn(@"### Wakeup timer triggered for ID %@ ###", completionId);
                 dispatch_async(dispatch_get_main_queue(), ^{
                     @synchronized(self) {
@@ -929,6 +931,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
                             [self checkIfBackgroundTaskIsStillNeeded];
                             
                             //call completion (should be done *after* the idle state check because it could freeze the app)
+                            DDLogInfo(@"Calling wakeup completion handler...");
                             completionHandler(UIBackgroundFetchResultFailed);
                         }
                         else

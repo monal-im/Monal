@@ -29,8 +29,6 @@
 
 @implementation MLMucProcessor
 
-#pragma mark - state
-
 static NSObject* _stateLockObject;
 
 //persistent state
@@ -82,8 +80,6 @@ static NSMutableDictionary* _uiHandler;
         return [_joining containsObject:room];
     }
 }
-
-#pragma mark - handler
 
 +(void) addUIHandler:(monal_id_block_t) handler forMuc:(NSString*) room
 {
@@ -346,7 +342,15 @@ static NSMutableDictionary* _uiHandler;
         DDLogError(@"Cannot leave room '%@' on account %@ because nick is nil!", room, account.accountNo);
         return;
     }
+    @synchronized(_stateLockObject) {
+        if([_joining containsObject:room])
+        {
+            DDLogInfo(@"Aborting join of room '%@' on account %@", room, account.accountNo);
+            [_joining removeObject:room];
+        }
+    }
     DDLogInfo(@"Leaving room '%@' on account %@ using nick '%@'...", room, account.accountNo, nick);
+    //send unsubscribe even if we are not fully joined (join aborted), just to make sure we *really* leave ths muc
     XMPPPresence* presence = [[XMPPPresence alloc] init];
     [presence leaveRoom:room withNick:nick];
     [account send:presence];
@@ -365,6 +369,15 @@ static NSMutableDictionary* _uiHandler;
         @throw [NSException exceptionWithName:@"RuntimeException" reason:@"Room jid or account must not be nil!" userInfo:nil];
     roomJid = [roomJid lowercaseString];
     DDLogInfo(@"Querying disco for muc %@...", roomJid);
+    //mark room as "joining" as soon as possible to make sure we can handle join "aborts" (e.g. when processing bookmark pdates while a joining disco queryis alead in flight)
+    //this will fix race condition that makes us join a muc directly after it got removed from our favorites table and leaved through a bookmark update
+    if(join)
+    {
+        @synchronized(_stateLockObject) {
+            [_joining addObject:roomJid];       //add room to "currently joining" list
+            //we don't need to force saving of our new state because once this outgoing iq query gets handled by smacks the whole state will be saved
+        }
+    }
     XMPPIQ* discoInfo = [[XMPPIQ alloc] initWithType:kiqGetType];
     [discoInfo setiqTo:roomJid];
     [discoInfo setDiscoInfoNode];
@@ -385,16 +398,21 @@ static NSMutableDictionary* _uiHandler;
     [ping setiqTo:roomJid];
     ping.toResource = [[DataLayer sharedInstance] ownNickNameforMuc:roomJid forAccount:account.accountNo];
     [ping setPing];
-    //we don't need to handle this across smacks resumes or reconnects, because a new ping will be issued n the next smacks resume
-    //(and reconnets will reconnect to mucs anyways)
+    //we don't need to handle this across smacks resumes or reconnects, because a new ping will be issued on the next smacks resume
+    //(and full reconnets will rejoin all mucs anyways)
     [account sendIq:ping withResponseHandler:^(XMPPIQ* result) {
         DDLogInfo(@"Muc ping returned: we are still connected, everything is fine");
     } andErrorHandler:^(XMPPIQ* error){
         DDLogWarn([HelperTools extractXMPPError:error withDescription:@"Muc ping returned error"]);
         if([error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}not-acceptable"])
         {
-            DDLogWarn(@"Ping failed with 'not-acceptable' --> we have to reconnect");
-            [self sendDiscoQueryFor:roomJid onAccount:account withJoin:YES];
+            DDLogWarn(@"Ping failed with 'not-acceptable' --> we have to re-join");
+            //check if muc is still in our favorites table before we try to join it (could be deleted by a bookmarks updae just after we sent out our ping)
+            //this has to be done to avoid such a race condition that would otherwise re-add the muc back
+            if([self checkIfStillBookmarked:roomJid onAccount:account])
+                [self sendDiscoQueryFor:roomJid onAccount:account withJoin:YES];
+            else
+                DDLogWarn(@"Not re-joining because this muc got removed from favorites table in the meantime");
         }
         else if(
             [error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}service-unavailable"] ||
@@ -412,12 +430,17 @@ static NSMutableDictionary* _uiHandler;
             [error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}remote-server-timeout"]
         )
         {
-            DDLogError(@"The remote server is unreachable for unspecified reasons; this can be a temporary network failure or a server outage. No decision can be made based on this; Treat like a timeout --> d nothing");
+            DDLogError(@"The remote server is unreachable for unspecified reasons; this can be a temporary network failure or a server outage. No decision can be made based on this; Treat like a timeout --> do nothing");
         }
         else
         {
-            DDLogWarn(@"Any other error happened: The client is probably not joined any more. It should perform a re-join. --> we have to reconnect");
-            [self sendDiscoQueryFor:roomJid onAccount:account withJoin:YES];
+            DDLogWarn(@"Any other error happened: The client is probably not joined any more. It should perform a re-join. --> we have to re-join");
+            //check if muc is still in our favorites table before we try to join it (could be deleted by a bookmarks updae just after we sent out our ping)
+            //this has to be done to avoid such a race condition that would otherwise re-add the muc back
+            if([self checkIfStillBookmarked:roomJid onAccount:account])
+                [self sendDiscoQueryFor:roomJid onAccount:account withJoin:YES];
+            else
+                DDLogWarn(@"Not re-joining because this muc got removed from favorites table in the meantime");
         }
     }];
 }
@@ -444,6 +467,13 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
         [self updateBookmarksForAccount:account];
     
         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@: This is not a groupchat!", @""), iqNode.fromUser] forMuc:iqNode.fromUser withNode:nil andAccount:account andIsSevere:YES];
+        return;
+    }
+    
+    //the join was aborted by a call to leave
+    if(![self isJoining:iqNode.fromUser])
+    {
+        DDLogWarn(@"Ignoring muc disco result for '%@' on account %@: not joining anymore...", iqNode.fromUser, account.accountNo);
         return;
     }
     
@@ -629,4 +659,13 @@ $$
     [account.pubsub fetchNode:@"storage:bookmarks" from:account.connectionProperties.identity.jid withItemsList:nil andHandler:$newHandler(MLPubSubProcessor, handleBookarksFetchResult)];
 #endif
 }
+
++(BOOL) checkIfStillBookmarked:(NSString*) room onAccount:(xmpp*) account
+{
+    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
+        if([room isEqualToString:entry[@"room"]])
+            return YES;
+    return NO;
+}
+
 @end

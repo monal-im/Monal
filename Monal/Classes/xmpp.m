@@ -109,6 +109,7 @@ NSString *const kData=@"data";
     BOOL _lastIdleState;
     NSMutableDictionary* _mamPageArrays;
     BOOL _firstLoginForThisInstance;
+    NSString* _internalID;
     
     //registration related stuff
     BOOL _registration;
@@ -164,6 +165,8 @@ NSString *const kData=@"data";
 {
     //initialize ivars depending on provided arguments
     self = [super init];
+    _internalID = [[NSUUID UUID] UUIDString];
+    DDLogVerbose(@"Created account %@ with id %@", accountNo, _internalID);
     self.accountNo = accountNo;
     self.connectionProperties = [[MLXMPPConnection alloc] initWithServer:server andIdentity:identity];
     
@@ -234,19 +237,19 @@ NSString *const kData=@"data";
     _exponentialBackoff = 0;
     
     _parseQueue = [[NSOperationQueue alloc] init];
-    _parseQueue.name = [NSString stringWithFormat:@"parseQueue[%@]", self.accountNo];
+    _parseQueue.name = [NSString stringWithFormat:@"parseQueue[%@:%@]", self.accountNo, _internalID];
     _parseQueue.qualityOfService = NSQualityOfServiceUtility;
     _parseQueue.maxConcurrentOperationCount = 1;
     [_parseQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
     
     _receiveQueue = [[NSOperationQueue alloc] init];
-    _receiveQueue.name = [NSString stringWithFormat:@"receiveQueue[%@]", self.accountNo];
+    _receiveQueue.name = [NSString stringWithFormat:@"receiveQueue[%@:%@]", self.accountNo, _internalID];
     _receiveQueue.qualityOfService = NSQualityOfServiceUtility;
     _receiveQueue.maxConcurrentOperationCount = 1;
     [_receiveQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
 
     _sendQueue = [[NSOperationQueue alloc] init];
-    _sendQueue.name = [NSString stringWithFormat:@"sendQueue[%@]", self.accountNo];
+    _sendQueue.name = [NSString stringWithFormat:@"sendQueue[%@:%@]", self.accountNo, _internalID];
     _sendQueue.qualityOfService = NSQualityOfServiceUtility;
     _sendQueue.maxConcurrentOperationCount = 1;
     [_sendQueue addObserver:self forKeyPath:@"operationCount" options:NSKeyValueObservingOptionNew context:nil];
@@ -723,17 +726,19 @@ NSString *const kData=@"data";
             self->_cancelReconnectTimer();
         self->_cancelReconnectTimer = nil;
         
-        for(NSString* iqid in [self->_iqHandlers allKeys])
-            if(![self->_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
-            {
-                NSDictionary* data = (NSDictionary*)self->_iqHandlers[iqid];
-                if(data[@"errorHandler"])
+        @synchronized(_iqHandlers) {
+            for(NSString* iqid in [self->_iqHandlers allKeys])
+                if(![self->_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
                 {
-                    DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
+                    NSDictionary* data = (NSDictionary*)self->_iqHandlers[iqid];
                     if(data[@"errorHandler"])
-                        ((monal_iq_handler_t)data[@"errorHandler"])(nil);
+                    {
+                        DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
+                        if(data[@"errorHandler"])
+                            ((monal_iq_handler_t)data[@"errorHandler"])(nil);
+                    }
                 }
-            }
+        }
         
         if(explicitLogout && self->_accountState>=kStateHasStream)
         {
@@ -769,15 +774,17 @@ NSString *const kData=@"data";
                 self.unAckedStanzas = stanzas;
                 
                 //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
-                for(NSString* iqid in [self->_iqHandlers allKeys])
-                {
-                    DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-                    if([self->_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
-                        $invalidate(self->_iqHandlers[iqid], $ID(account, self));
-                    else if(self->_iqHandlers[iqid][@"errorHandler"])
-                        ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
+                @synchronized(_iqHandlers) {
+                    for(NSString* iqid in [self->_iqHandlers allKeys])
+                    {
+                        DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
+                        if([self->_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
+                            $invalidate(self->_iqHandlers[iqid], $ID(account, self));
+                        else if(self->_iqHandlers[iqid][@"errorHandler"])
+                            ((monal_iq_handler_t)self->_iqHandlers[iqid][@"errorHandler"])(nil);
+                    }
+                    self->_iqHandlers = [[NSMutableDictionary alloc] init];
                 }
-                self->_iqHandlers = [[NSMutableDictionary alloc] init];
 
                 //persist these changes
                 [self persistState];
@@ -1595,17 +1602,23 @@ NSString *const kData=@"data";
                         [_runningMamQueries removeObjectForKey:mamQueryId];
             
             //process registered iq handlers
-            if(_iqHandlers[[iqNode findFirst:@"/@id"]])
+            id iqHandler = nil;
+            @synchronized(_iqHandlers) {
+                iqHandler = _iqHandlers[[iqNode findFirst:@"/@id"]];
+            }
+            if(iqHandler)
             {
-                if([_iqHandlers[[iqNode findFirst:@"/@id"]] isKindOfClass:[MLHandler class]])
-                    $call(_iqHandlers[[iqNode findFirst:@"/@id"]], $ID(account, self), $ID(iqNode));
-                else if([iqNode check:@"/<type=result>"] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"resultHandler"])
-                    ((monal_iq_handler_t) _iqHandlers[[iqNode findFirst:@"/@id"]][@"resultHandler"])(iqNode);
-                else if([iqNode check:@"/<type=error>"] && _iqHandlers[[iqNode findFirst:@"/@id"]][@"errorHandler"])
-                    ((monal_iq_handler_t) _iqHandlers[[iqNode findFirst:@"/@id"]][@"errorHandler"])(iqNode);
+                if([iqHandler isKindOfClass:[MLHandler class]])
+                    $call(iqHandler, $ID(account, self), $ID(iqNode));
+                else if([iqNode check:@"/<type=result>"] && iqHandler[@"resultHandler"])
+                    ((monal_iq_handler_t) iqHandler[@"resultHandler"])(iqNode);
+                else if([iqNode check:@"/<type=error>"] && iqHandler[@"errorHandler"])
+                    ((monal_iq_handler_t) iqHandler[@"errorHandler"])(iqNode);
                 
                 //remove handler after calling it
-                [_iqHandlers removeObjectForKey:[iqNode findFirst:@"/@id"]];
+                @synchronized(_iqHandlers) {
+                    [_iqHandlers removeObjectForKey:[iqNode findFirst:@"/@id"]];
+                }
             }
             else            //only process iqs that have not already been handled by a registered iq handler
             {
@@ -2503,13 +2516,15 @@ NSString *const kData=@"data";
     _exponentialBackoff = 0;
     
     //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
-    for(NSString* iqid in _iqHandlers)
-    {
-        DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-        if([_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
-            $invalidate(_iqHandlers[iqid], $ID(account, self));
-        else if(_iqHandlers[iqid][@"errorHandler"])
-            ((monal_iq_handler_t)_iqHandlers[iqid][@"errorHandler"])(nil);
+    @synchronized(_iqHandlers) {
+        for(NSString* iqid in _iqHandlers)
+        {
+            DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
+            if([_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
+                $invalidate(_iqHandlers[iqid], $ID(account, self));
+            else if(_iqHandlers[iqid][@"errorHandler"])
+                ((monal_iq_handler_t)_iqHandlers[iqid][@"errorHandler"])(nil);
+        }
     }
     _iqHandlers = [[NSMutableDictionary alloc] init];
     

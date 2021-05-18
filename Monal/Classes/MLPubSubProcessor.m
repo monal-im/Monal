@@ -238,6 +238,7 @@ $$handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID
         return;
     }
     
+    BOOL changed = NO;
     NSMutableDictionary* ownFavorites = [[NSMutableDictionary alloc] init];
     for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
         ownFavorites[entry[@"room"]] = entry;
@@ -280,6 +281,7 @@ $$handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID
                 
                 //update autojoin value to true
                 conference.attributes[@"autojoin"] = @"true";
+                changed = YES;
             }
         }
         
@@ -296,6 +298,7 @@ $$handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID
             } andChildren:@[
                 [[MLXMLNode alloc] initWithElement:@"nick" withAttributes:@{} andChildren:@[] andData:[[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo]]
             ] andData:nil]];
+            changed = YES;
         }
         
         //remove all mucs not listed in local favorites table
@@ -305,15 +308,24 @@ $$handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID
         {
             DDLogInfo(@"Removing muc '%@' on account %@ from bookmarks...", room, account.accountNo);
             [[data[itemId] findFirst:@"{storage:bookmarks}storage"] removeChild:[data[itemId] findFirst:[NSString stringWithFormat:@"{storage:bookmarks}storage/conference<jid=%@>", room]]];
+            changed = YES;
         }
         
-        //publish new bookmarks
-        [account.pubsub publishItem:data[itemId] onNode:@"storage:bookmarks" withConfigOptions:@{
-            @"pubsub#persist_items": @"true",
-            @"pubsub#access_model": @"whitelist"
-        } andHandler:$newHandler(self, bookmarksPublished)];
+        //publish new bookmarks if something was changed
+        if(changed)
+            [account.pubsub publishItem:data[itemId] onNode:@"storage:bookmarks" withConfigOptions:@{
+                @"pubsub#persist_items": @"true",
+                @"pubsub#access_model": @"whitelist"
+            } andHandler:$newHandler(self, bookmarksPublished)];
         
         //we only need the first pep item (there should be only one item in the first place)
+        return;
+    }
+    
+    //don't publish an empty bookmarks node if there is nothing to publish at all
+    if([ownFavorites count] == 0)
+    {
+        DDLogInfo(@"neither a pep item was found, nor do we have any local mu favorites: don't publish anything");
         return;
     }
     

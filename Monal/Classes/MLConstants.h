@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <TargetConditionals.h>
 #import "MLHandler.h"
 
 @import CocoaLumberjack;

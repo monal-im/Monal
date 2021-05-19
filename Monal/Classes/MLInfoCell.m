@@ -78,7 +78,7 @@
            else
            {
 #if !TARGET_OS_MACCATALYST
-               _spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+               _spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleLarge];
 #endif
            }
            CGRect frame = _spinner.frame;

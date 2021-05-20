@@ -2961,8 +2961,10 @@ enum msgSentState {
     DDLogVerbose(@"upload done");
     if(self.uploadQueue.count > 0)
     {
-        [self.uploadQueue removeObjectAtIndex:0];
-        [self.uploadMenuView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:0 inSection:0]]];
+        [self.uploadMenuView performBatchUpdates:^{
+            [self.uploadQueue removeObjectAtIndex:0];
+            [self.uploadMenuView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:0 inSection:0]]];
+        } completion:nil];
     }
     [self emptyUploadQueue];
 }

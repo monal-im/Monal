@@ -336,6 +336,7 @@ static NSMutableDictionary* _uiHandler;
 
 +(void) leave:(NSString*) room onAccount:(xmpp*) account withBookmarksUpdate:(BOOL) updateBookmarks
 {
+    room = [room lowercaseString];
     NSString* nick = [[DataLayer sharedInstance] ownNickNameforMuc:room forAccount:account.accountNo];
     if(nick == nil)
     {
@@ -662,8 +663,9 @@ $$
 
 +(BOOL) checkIfStillBookmarked:(NSString*) room onAccount:(xmpp*) account
 {
+    room = [room lowercaseString];
     for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
-        if([room isEqualToString:entry[@"room"]])
+        if([room isEqualToString:[entry[@"room"] lowercaseString]])
             return YES;
     return NO;
 }

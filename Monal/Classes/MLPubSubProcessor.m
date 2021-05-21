@@ -153,7 +153,7 @@ $$handler(bookmarksHandler, $_ID(xmpp*, account), $_ID(NSString*, jid), $_ID(NSS
             {
                 //we ignore the conference name (the name will be taken from the muc itself)
                 //NSString* name = [conference findFirst:@"/@name"];
-                NSString* room = [conference findFirst:@"/@jid"];
+                NSString* room = [[conference findFirst:@"/@jid"] lowercaseString];
                 //ignore non-xep-compliant entries
                 if(!room)
                 {
@@ -257,7 +257,7 @@ $$handler(handleBookarksFetchResult, $_ID(xmpp*, account), $_BOOL(success), $_ID
         {
             //we ignore the conference name (the name will be taken from the muc itself)
             //NSString* name = [conference findFirst:@"/@name"];
-            NSString* room = [conference findFirst:@"/@jid"];
+            NSString* room = [[conference findFirst:@"/@jid"] lowercaseString];
             //ignore non-xep-compliant entries
             if(!room)
             {

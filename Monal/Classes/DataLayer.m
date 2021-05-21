@@ -2731,6 +2731,20 @@ static NSDateFormatter* dbFormatter;
         dbUpdated |= [self updateDBTo:5.020 withBlock:^{
             [self.db executeNonQuery:@"UPDATE muc_favorites SET autojoin=1;"];
         }];
+
+        // jid's should be lower only
+        dbUpdated |= [self updateDBTo:5.021 withBlock:^{
+            [self.db executeNonQuery:@"UPDATE account SET username=LOWER(username), domain=LOWER(domain);"];
+            [self.db executeNonQuery:@"UPDATE activechats SET buddy_name=lower(buddy_name);"];
+            [self.db executeNonQuery:@"UPDATE buddylist SET buddy_name=LOWER(buddy_name);"];
+            [self.db executeNonQuery:@"UPDATE message_history SET buddy_name=LOWER(buddy_name), actual_from=LOWER(actual_from), participant_jid=LOWER(participant_jid);"];
+            [self.db executeNonQuery:@"UPDATE muc_members SET room=LOWER(room);"];
+            [self.db executeNonQuery:@"UPDATE muc_participants SET room=LOWER(room);"];
+            [self.db executeNonQuery:@"UPDATE muc_participants SET room=LOWER(room);"];
+            [self.db executeNonQuery:@"UPDATE signalContactIdentity SET contactName=LOWER(contactName);"];
+            [self.db executeNonQuery:@"UPDATE signalContactSession SET contactName=LOWER(contactName);"];
+            [self.db executeNonQuery:@"UPDATE subscriptionRequests SET buddy_name=LOWER(buddy_name);"];
+        }];
     }];
     // Vacuum after db updates
     if(dbUpdated == YES)

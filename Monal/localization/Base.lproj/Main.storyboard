@@ -400,6 +400,7 @@
                         <segue destination="2g1-pP-Xxv" kind="presentation" identifier="showIntro" id="nUl-6E-4GO"/>
                         <segue destination="DkD-PA-Cmm" kind="presentation" identifier="showLogin" id="sv2-wf-aN0"/>
                         <segue destination="cmS-oG-cv9" kind="presentation" identifier="showPrivacySettings" id="zkg-JY-Ot9"/>
+                        <segue destination="iM6-Fx-aHL" kind="showDetail" identifier="showConversationPlaceholder" id="xp1-3q-JGG"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ENC-uh-UXW" userLabel="First Responder" sceneMemberID="firstResponder"/>

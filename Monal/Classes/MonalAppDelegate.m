@@ -410,7 +410,7 @@ static NSString* kBackgroundFetchingTask = @"im.monal.fetch";
         
         dispatch_async(dispatch_get_main_queue(), ^{
             MLContact* contact = [MLContact createContactFromJid:mucJid andAccountNo:account.accountNo];
-            [(ActiveChatsViewController*)self.activeChats presentChatWithRow:contact];
+            [(ActiveChatsViewController*)self.activeChats presentChatWithContact:contact];
             [(ActiveChatsViewController*)self.activeChats refreshDisplay];
         });
     }

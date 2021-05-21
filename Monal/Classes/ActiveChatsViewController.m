@@ -73,12 +73,14 @@ static NSMutableSet* _smacksWarningDisplayed;
     
     self.view = self.chatListTable;
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalRefresh object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshDisplay) name:kMonalMessageFiletransferUpdateNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNewMessage:) name:kMonalDeletedMessageNotice object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(messageSent:) name:kMLMessageSentToContact object:nil];
+    NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
+    [nc addObserver:self selector:@selector(refreshDisplay) name:kMonalRefresh object:nil];
+    [nc addObserver:self selector:@selector(handleContactRemoved:) name:kMonalContactRemoved object:nil];
+    [nc addObserver:self selector:@selector(refreshDisplay) name:kMonalMessageFiletransferUpdateNotice object:nil];
+    [nc addObserver:self selector:@selector(refreshContact:) name:kMonalContactRefresh object:nil];
+    [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalNewMessageNotice object:nil];
+    [nc addObserver:self selector:@selector(handleNewMessage:) name:kMonalDeletedMessageNotice object:nil];
+    [nc addObserver:self selector:@selector(messageSent:) name:kMLMessageSentToContact object:nil];
     
     [_chatListTable registerNib:[UINib nibWithNibName:@"MLContactCell"
                                                bundle:[NSBundle mainBundle]]
@@ -196,6 +198,23 @@ static NSMutableSet* _smacksWarningDisplayed;
     }
 }
 
+-(void) handleContactRemoved:(NSNotification*) notification
+{
+    MLContact* removedContact = [notification.userInfo objectForKey:@"contact"];
+    if(removedContact == nil)
+    {
+        unreachable();
+    }
+    // ignore all removals that aren't in foreground
+    if([self.lastSelectedUser.accountId isEqualToString:removedContact.accountId] == NO || [self.lastSelectedUser.contactJid isEqualToString:removedContact.contactJid] == NO)
+        return;
+    // remove contact from activechats table
+    [self refreshDisplay];
+    // open placeholder
+    [self presentChatWithContact:nil];
+}
+
+
 -(void) messageSent:(NSNotification *) notification
 {
     MLContact* contact = [notification.userInfo objectForKey:@"contact"];
@@ -277,9 +296,9 @@ static NSMutableSet* _smacksWarningDisplayed;
 {
     [super viewWillAppear:animated];
     // load contacts
-    self.lastSelectedUser = nil;
     if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
     {
+        self.lastSelectedUser = nil;
         [self refreshDisplay];
         // only check if the login screen has to be shown if there are no active chats
         [self segueToIntroScreensIfNeeded];
@@ -347,9 +366,19 @@ static NSMutableSet* _smacksWarningDisplayed;
     // Dispose of any resources that can be recreated.
 }
 
--(void) presentChatWithRow:(MLContact *)row
+-(void) presentChatWithContact:(MLContact*) contact
 {
-    [self  performSegueWithIdentifier:@"showConversation" sender:row];
+    if(contact == nil)
+    {
+        // show placeholder
+        [self performSegueWithIdentifier:@"showConversationPlaceholder" sender:contact];
+    }
+    else
+    {
+        // open chat
+        [self performSegueWithIdentifier:@"showConversation" sender:contact];
+    }
+    self.lastSelectedUser = contact;
 }
 
 /*
@@ -454,7 +483,7 @@ static NSMutableSet* _smacksWarningDisplayed;
                     }
                     NSIndexPath* path = [NSIndexPath indexPathForRow:0 inSection:sectionToUse];
                     [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
-                    [self presentChatWithRow:selectedContact];
+                    [self presentChatWithContact:selectedContact];
                 }];
             });
         };
@@ -474,7 +503,7 @@ static NSMutableSet* _smacksWarningDisplayed;
                   [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
                       NSIndexPath* path = [NSIndexPath indexPathForRow:0 inSection:unpinnedChats];
                                         [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
-                                          [self presentChatWithRow:selectedContact];
+                                          [self presentChatWithContact:selectedContact];
                   }];
               });
           };
@@ -546,7 +575,7 @@ static NSMutableSet* _smacksWarningDisplayed;
 }
 
 
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath 
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
     return YES;
 }
@@ -586,8 +615,7 @@ static NSMutableSet* _smacksWarningDisplayed;
     // Only open contact chat when it is not opened yet -> macOS
     if(selected.contactJid == self.lastSelectedUser.contactJid) return;
     
-    [self presentChatWithRow:selected];
-    self.lastSelectedUser = selected;
+    [self presentChatWithContact:selected];
 }
 
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath

@@ -422,6 +422,9 @@ enum ContactDetailsAboutRows {
 
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         [[MLXMPPManager sharedInstance] removeContact:self.contact];
+        // announce that the contact was removed
+        [[MLNotificationQueue currentQueue] postNotificationName:kMonalContactRemoved object:self userInfo:@{@"contact": self.contact}];
+        [self dismissViewControllerAnimated:YES completion:nil];
     }]];
 
     alert.popoverPresentationController.sourceView = self.tableView;

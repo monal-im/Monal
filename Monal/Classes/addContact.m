@@ -15,11 +15,15 @@
 #import "DataLayer.h"
 #import "xmpp.h"
 #import "MLOMEMO.h"
+#import "MBProgressHUD.h"
+#import "MLMucProcessor.h"
 
 @class MLQRCodeScanner;
 
 @interface addContact ()
-@property (nonatomic, strong)  MLTextInputCell* contactField;
+@property (nonatomic, strong) MLTextInputCell* contactField;
+@property (nonatomic, strong) MBProgressHUD* joinHUD;
+@property (nonatomic, strong) MBProgressHUD* checkHUD;
 @end
 
 @implementation addContact
@@ -30,63 +34,148 @@
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
+-(void) displayJoinHUD
+{
+    // setup HUD
+    if(!self.joinHUD)
+    {
+        self.joinHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        self.joinHUD.removeFromSuperViewOnHide = NO;
+        self.joinHUD.label.text = NSLocalizedString(@"Joining Group", @"addContact - Join Group HUD");
+        self.joinHUD.detailsLabel.text = NSLocalizedString(@"Trying to join group", @"addContact - Join Group HUD");
+    }
+    self.joinHUD.hidden = NO;
+}
+
+-(void) hideJoinHUD
+{
+    if(self.joinHUD)
+        self.joinHUD.hidden = YES;
+}
+
+-(void) displayCheckHUD
+{
+    // setup HUD
+    if(!self.checkHUD)
+    {
+        self.checkHUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        self.checkHUD.removeFromSuperViewOnHide = NO;
+        self.checkHUD.label.text = NSLocalizedString(@"Checking", @"addContact - checking HUD");
+        self.checkHUD.detailsLabel.text = NSLocalizedString(@"Checking if the jid you provided is correct", @"addContact - checking HUD");
+    }
+    self.checkHUD.hidden = NO;
+}
+
+-(void) hideCheckHUD
+{
+    if(self.checkHUD)
+        self.checkHUD.hidden = YES;
+}
+
 -(IBAction) addPress:(id)sender
 {
     if([[MLXMPPManager sharedInstance].connectedXMPP count] == 0)
     {
-        UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No connected accounts", @"") message:NSLocalizedString(@"Please make sure at least one account has connected before trying to add a contact.", @"") preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No connected accounts", @"") message:NSLocalizedString(@"Please make sure at least one account has connected before trying to add a contact or channel.", @"") preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         }];
         [messageAlert addAction:closeAction];
         
         [self presentViewController:messageAlert animated:YES completion:nil];
+        return;
     }
-    else  {
-        if([self.contactField getText].length > 0)
-        {
-            xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:_selectedRow];
-
-            MLContact* contactObj = [MLContact createContactFromJid:[self.contactField getText] andAccountNo:account.accountNo];
-
-            [[MLXMPPManager sharedInstance] addContact:contactObj];
-            BOOL approve = NO;
-            // approve contact ahead of time if possible
-            if(account.connectionProperties.supportsRosterPreApproval) {
-                approve = YES;
-            } else if([[DataLayer sharedInstance] hasContactRequestForAccount:account.accountNo andBuddyName:contactObj.contactJid]) {
-                approve = YES;
-            }
-            if(approve) {
-                // delete existing contact request if exists
-                [[DataLayer sharedInstance] deleteContactRequest:contactObj];
-                // and approve the new contact
-                [[MLXMPPManager sharedInstance] approveContact:contactObj];
-            }
-#ifndef DISABLE_OMEMO
-            // Request omemo devicelist
-            [account.omemo queryOMEMODevices:contactObj.contactJid];
-#endif// DISABLE_OMEMO
-
-            UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Permission Requested", @"") message:NSLocalizedString(@"The new contact will be added to your contacts list when the person you've added has approved your request.", @"") preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-                if(self.completion) self.completion(contactObj);
-                [self dismissViewControllerAnimated:YES completion:nil];
-            }];
-            [messageAlert addAction:closeAction];
-
-            [self presentViewController:messageAlert animated:YES completion:nil];
-        }
-        else
-        {
-            UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Jid Invalid", @"") message:NSLocalizedString(@"Name can't be empty", @"") preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-                
-            }];
-            [messageAlert addAction:closeAction];
-            
-            [self presentViewController:messageAlert animated:YES completion:nil];
-        }
+    
+    NSDictionary<NSString*, NSString*>* jidComponents = [HelperTools splitJid:[self.contactField getText]];
+    DDLogVerbose(@"Jid validity: node(%lu)='%@', host(%lu)='%@'", (unsigned long)[jidComponents[@"node"] length], jidComponents[@"node"], (unsigned long)[jidComponents[@"host"] length], jidComponents[@"host"]);
+    //check jid to have at least a node and host value to make a correct user and alert otherwise
+    if(!jidComponents[@"node"] || jidComponents[@"node"].length == 0 || jidComponents[@"host"].length == 0)
+    {
+        UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Jid Invalid", @"") message:NSLocalizedString(@"The jid has to be in the form 'user@domain.tld' to be correct.", @"") preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+        }];
+        [messageAlert addAction:closeAction];
+        [self presentViewController:messageAlert animated:YES completion:nil];
+        return;
     }
+    //use the canonized jid from now on (lowercased, resource removed etc.)
+    NSString* jid = jidComponents[@"user"];
+    
+    [self addJid:jid];
+}
+
+-(void) addJid:(NSString*) jid
+{
+    [self displayCheckHUD];
+    xmpp* account = [[MLXMPPManager sharedInstance].connectedXMPP objectAtIndex:_selectedRow];
+    [account checkJidType:jid withCompletion:^(NSString* type, NSString* _Nullable errorMessage) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self hideCheckHUD];
+            if([type isEqualToString:@"account"])
+            {
+                MLContact* contactObj = [MLContact createContactFromJid:jid andAccountNo:account.accountNo];
+                [[MLXMPPManager sharedInstance] addContact:contactObj];
+
+                UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Permission Requested", @"") message:NSLocalizedString(@"The new contact will be added to your contacts list when the person you've added has approved your request.", @"") preferredStyle:UIAlertControllerStyleAlert];
+                UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                    if(self.completion)
+                        self.completion(contactObj);
+                    [self dismissViewControllerAnimated:YES completion:nil];
+                }];
+                [messageAlert addAction:closeAction];
+                [self presentViewController:messageAlert animated:YES completion:nil];
+            }
+            else if([type isEqualToString:@"muc"])
+            {
+                [self displayJoinHUD];
+                [MLMucProcessor addUIHandler:^(id _data) {
+                    NSDictionary* data = (NSDictionary*)_data;
+                    [self hideJoinHUD];
+                    if([data[@"success"] boolValue])
+                    {
+                        if(self.completion)
+                            self.completion([MLContact createContactFromJid:jid andAccountNo:account.accountNo]);
+                        [self dismissViewControllerAnimated:YES completion:nil];
+                    }
+                    else
+                    {
+                        UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error entering groupchat", @"") message:data[@"errorMessage"] preferredStyle:UIAlertControllerStyleAlert];
+                        [messageAlert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                        }]];
+                        [self presentViewController:messageAlert animated:YES completion:nil];
+                    }
+                } forMuc:jid];
+                [account joinMuc:jid];
+            }
+            else
+            {
+                UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:errorMessage preferredStyle:UIAlertControllerStyleAlert];
+                UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                }];
+                [messageAlert addAction:closeAction];
+                [self presentViewController:messageAlert animated:YES completion:nil];
+            }
+        });
+    }];
+}
+
+-(void) showGroupPasswordForm
+{
+    UIAlertController* passwordForm = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Group requires a password", @"") message:nil preferredStyle:UIAlertControllerStyleAlert];
+    // add password field to alert
+    [passwordForm addTextFieldWithConfigurationHandler:^(UITextField* passwordField) {
+        passwordField.secureTextEntry = YES;
+        passwordField.placeholder = NSLocalizedString(@"Group Password", @"MLJoinGroupViewController - Group Password Form");
+    }];
+
+    UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"") style:UIAlertActionStyleDefault
+       handler:^(UIAlertAction * action) {
+        [self displayJoinHUD];
+        // TODO: thilo check password
+        [passwordForm dismissViewControllerAnimated:YES completion:nil];
+        [self hideJoinHUD];
+    }];
+    [passwordForm addAction:defaultAction];
+    [self presentViewController:passwordForm animated:YES completion:nil];
 }
 
 #pragma mark - textfield delegate
@@ -111,7 +200,7 @@
 -(void) viewDidLoad
 {
     [super viewDidLoad];
-    self.navigationItem.title = NSLocalizedString(@"Add Contact", @"");
+    self.navigationItem.title = NSLocalizedString(@"Add Contact or Channel", @"");
         
     [self.tableView registerNib:[UINib nibWithNibName:@"MLTextInputCell"
                                                bundle:[NSBundle mainBundle]]
@@ -138,7 +227,7 @@
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
     if(section == 0)
-        return NSLocalizedString(@"Contacts are usually in the format: username@dom.ain", @"");
+        return NSLocalizedString(@"Contact and Channel Jids  are usually in the format: name@domain.tld", @"");
     else
         return nil;
 }
@@ -175,7 +264,7 @@
             return accountCell;
         }
         MLTextInputCell* textCell = [tableView dequeueReusableCellWithIdentifier:@"TextCell"];
-        [textCell initMailCell:self.contactName andPlaceholder:NSLocalizedString(@"Contact Jid", @"") andDelegate:self];
+        [textCell initMailCell:self.contactName andPlaceholder:NSLocalizedString(@"Contact or Channel Jid", @"") andDelegate:self];
         self.contactField = textCell;
         return textCell;
     }

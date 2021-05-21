@@ -149,7 +149,7 @@ typedef void (^monal_iq_handler_t)(XMPPIQ* _Nullable);
 
 -(void) updateRosterItem:(NSString*) jid withName:(NSString*) name;
 
-#pragma mark set connection attributes
+-(void) checkJidType:(NSString*) jid withCompletion:(void (^)(NSString* type, NSString* _Nullable errorMessage)) completion;
 
 /**
  join a room on the conference server

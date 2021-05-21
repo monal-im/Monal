@@ -7,7 +7,6 @@
 //
 
 #import "MLNewViewController.h"
-#import "MLJoinGroupViewController.h"
 #import "MLSubscriptionTableViewController.h"
 #import "addContact.h"
 
@@ -17,42 +16,35 @@
 
 @implementation MLNewViewController
 
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     [super viewDidLoad];
 }
 
 #pragma mark - Table view data source
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+-(NSInteger)numberOfSectionsInTableView:(UITableView*) tableView
+{
     return 1;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return 3;
-}
-
--(IBAction) close:(id) sender
+-(NSInteger)tableView:(UITableView*) tableView numberOfRowsInSection:(NSInteger) section
 {
-    [self dismissViewControllerAnimated:YES completion:nil];
+    return 2;
 }
 
--(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+-(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     if([segue.identifier isEqualToString:@"newContact"])
     {
-       addContact* newScreen = (addContact *)segue.destinationViewController;
-       newScreen.completion = ^(MLContact *selectedContact) {
-           if(self.selectContact) self.selectContact(selectedContact);
+       addContact* newScreen = (addContact*) segue.destinationViewController;
+       newScreen.completion = ^(MLContact* selectedContact) {
+           if(self.selectContact)
+               self.selectContact(selectedContact);
        };
     }
-    else if([segue.identifier isEqualToString:@"newGroup"])
+    else if([segue.identifier isEqualToString:@"acceptContact"])
     {
-        MLJoinGroupViewController* newScreen = (MLJoinGroupViewController *)segue.destinationViewController;
-        newScreen.completion = ^(MLContact *selectedContact) {
-            if(self.selectContact) self.selectContact(selectedContact);
-        };
-    }
-    else if([segue.identifier isEqualToString:@"acceptContact"]) {
         //MLSubscriptionTableViewController* newScreen = (MLSubscriptionTableViewController *)segue.destinationViewController;
     }
 }

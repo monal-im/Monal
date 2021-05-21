@@ -78,11 +78,7 @@
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     MLContact *contact = self.requests[indexPath.row];
-    [[MLXMPPManager sharedInstance] approveContact:contact];
-    [[DataLayer sharedInstance] deleteContactRequest:contact];
-    if([contact.subscription isEqualToString:kSubFrom]  || [contact.subscription isEqualToString:kSubNone] ) {
-        [[MLXMPPManager sharedInstance] addContact:contact];
-    }
+    [[MLXMPPManager sharedInstance] addContact:contact];
     [self.requests removeObjectAtIndex:indexPath.row];
     [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
 }

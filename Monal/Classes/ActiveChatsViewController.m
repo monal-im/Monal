@@ -93,13 +93,11 @@ static NSMutableSet* _smacksWarningDisplayed;
         self.splitViewController.primaryBackgroundStyle = UISplitViewControllerBackgroundStyleSidebar;
 #endif
         self.settingsButton.image = [UIImage systemImageNamed:@"gearshape.fill"];
-        self.addButton.image = [UIImage systemImageNamed:@"plus"];
         self.composeButton.image = [UIImage systemImageNamed:@"person.2.fill"];
     }
     else
     {
         self.settingsButton.image = [UIImage imageNamed:@"973-user"];
-        self.addButton.image = [UIImage imageNamed:@"907-plus-rounded-square"];
         self.composeButton.image = [UIImage imageNamed:@"704-compose"];
     }
     
@@ -488,26 +486,6 @@ static NSMutableSet* _smacksWarningDisplayed;
             });
         };
     }
-    else if([segue.identifier isEqualToString:@"showNew"])
-      {
-          // Only segue if at least one account is enabled
-          if([self showAccountNumberWarningIfNeeded]) {
-              return;
-          }
-          UINavigationController* nav = segue.destinationViewController;
-          MLNewViewController* newScreen = (MLNewViewController *)nav.topViewController;
-          newScreen.selectContact = ^(MLContact *selectedContact) {
-              [[DataLayer sharedInstance] addActiveBuddies:selectedContact.contactJid forAccount:selectedContact.accountId];
-              //no success may mean its already there
-              dispatch_async(dispatch_get_main_queue(), ^{
-                  [self insertOrMoveContact:selectedContact completion:^(BOOL finished) {
-                      NSIndexPath* path = [NSIndexPath indexPathForRow:0 inSection:unpinnedChats];
-                                        [self.chatListTable selectRowAtIndexPath:path animated:NO scrollPosition:UITableViewScrollPositionNone];
-                                          [self presentChatWithContact:selectedContact];
-                  }];
-              });
-          };
-      }
 }
 
 -(NSMutableArray*) getChatArrayForSection:(size_t) section

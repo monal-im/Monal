@@ -142,7 +142,6 @@
 		2673CAC021D9242E00256507 /* MLKeysTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CABF21D9242E00256507 /* MLKeysTableViewController.m */; };
 		2673CAC321D9244B00256507 /* MLResourcesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CAC221D9244B00256507 /* MLResourcesTableViewController.m */; };
 		2673CAC621D9D3F700256507 /* MLKeyCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 2673CAC521D9D3F700256507 /* MLKeyCell.m */; };
-		267C99082067D7BE00AB876C /* MLGroupChatTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 267C99072067D7BE00AB876C /* MLGroupChatTableViewController.m */; };
 		267C9921206DE23100AB876C /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 267C9920206DE23100AB876C /* UserNotifications.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		268C1E4A1FDAD08700BD6921 /* MLDetailsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268C1E491FDAD08700BD6921 /* MLDetailsTableViewCell.m */; };
 		268DD58617C4541000C673A9 /* MLChatCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 268DD58517C4541000C673A9 /* MLChatCell.m */; };
@@ -192,7 +191,6 @@
 		26CC57EB23A08F4400ABB92A /* monalxmpp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 26CC579223A0867400ABB92A /* monalxmpp.framework */; };
 		26D0940C22A33E9B009C7AEF /* MLRegisterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */; };
 		26D4389123A5EB6C00242AAA /* MLConstants.h in Headers */ = {isa = PBXBuildFile; fileRef = 262D9EAB17924532009292B4 /* MLConstants.h */; };
-		26D59D9020711969006F1DEE /* MLJoinGroupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D8F20711969006F1DEE /* MLJoinGroupViewController.m */; };
 		26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D59D9220714F32006F1DEE /* UIColor+Theme.m */; };
 		26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D7C05D23D6AFD800CA123C /* MLChatInputContainer.m */; };
 		26D89F061A890672009B147C /* MLSwitchCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 26D89F051A890672009B147C /* MLSwitchCell.m */; };
@@ -606,8 +604,6 @@
 		267B671B226A200D003DB850 /* AESGcm.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AESGcm.m; sourceTree = "<group>"; };
 		267B671F226A222E003DB850 /* MLEncryptedPayload.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLEncryptedPayload.h; sourceTree = "<group>"; };
 		267B6720226A222E003DB850 /* MLEncryptedPayload.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLEncryptedPayload.m; sourceTree = "<group>"; };
-		267C99062067D7BE00AB876C /* MLGroupChatTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLGroupChatTableViewController.h; sourceTree = "<group>"; };
-		267C99072067D7BE00AB876C /* MLGroupChatTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLGroupChatTableViewController.m; sourceTree = "<group>"; };
 		267C9920206DE23100AB876C /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		267ECD6A1B746C340025337F /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		267ECD6C1B746C660025337F /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk/System/Library/Frameworks/CFNetwork.framework; sourceTree = DEVELOPER_DIR; };
@@ -657,8 +653,6 @@
 		26CF3EA91780D6B7002B7085 /* XMPPIQ.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XMPPIQ.m; sourceTree = "<group>"; };
 		26D0940A22A33E9A009C7AEF /* MLRegisterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MLRegisterViewController.m; sourceTree = "<group>"; };
 		26D0940B22A33E9B009C7AEF /* MLRegisterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MLRegisterViewController.h; sourceTree = "<group>"; };
-		26D59D8E20711969006F1DEE /* MLJoinGroupViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLJoinGroupViewController.h; sourceTree = "<group>"; };
-		26D59D8F20711969006F1DEE /* MLJoinGroupViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MLJoinGroupViewController.m; sourceTree = "<group>"; };
 		26D59D9120714F32006F1DEE /* UIColor+Theme.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "UIColor+Theme.h"; path = "Classes/UIColor+Theme.h"; sourceTree = "<group>"; };
 		26D59D9220714F32006F1DEE /* UIColor+Theme.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = "UIColor+Theme.m"; path = "Classes/UIColor+Theme.m"; sourceTree = "<group>"; };
 		26D7C05C23D6AFD800CA123C /* MLChatInputContainer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MLChatInputContainer.h; sourceTree = "<group>"; };
@@ -1369,17 +1363,6 @@
 			name = Crypto;
 			sourceTree = "<group>";
 		};
-		267C99052067D78900AB876C /* Group Chat */ = {
-			isa = PBXGroup;
-			children = (
-				267C99062067D7BE00AB876C /* MLGroupChatTableViewController.h */,
-				267C99072067D7BE00AB876C /* MLGroupChatTableViewController.m */,
-				26D59D8E20711969006F1DEE /* MLJoinGroupViewController.h */,
-				26D59D8F20711969006F1DEE /* MLJoinGroupViewController.m */,
-			);
-			name = "Group Chat";
-			sourceTree = "<group>";
-		};
 		268BCCFD140B23E10025E4D1 /* jrtplib-static */ = {
 			isa = PBXGroup;
 			children = (
@@ -1646,7 +1629,6 @@
 		26DB52121777EA5100B50353 /* Tab views */ = {
 			isa = PBXGroup;
 			children = (
-				267C99052067D78900AB876C /* Group Chat */,
 				2644D4961FF29E1900F46AB5 /* Settings */,
 				2644D48F1FF004B800F46AB5 /* ChatViews */,
 				268C1E471FDACDD300BD6921 /* Contact Details */,
@@ -2637,7 +2619,6 @@
 				26E3ED871FEC0CB7008ABDA5 /* MLServerDetails.m in Sources */,
 				2673CAC621D9D3F700256507 /* MLKeyCell.m in Sources */,
 				C138464F25CD804D008EF0A0 /* MLOmemoQrCodeView.m in Sources */,
-				267C99082067D7BE00AB876C /* MLGroupChatTableViewController.m in Sources */,
 				26BDECDC1867B7790018670D /* CallViewController.m in Sources */,
 				262797AF178A577300B85D94 /* MLContactCell.m in Sources */,
 				3D9EE5342617677700135D46 /* MLUploadQueueImageCell.m in Sources */,
@@ -2649,7 +2630,6 @@
 				26A78ED823C2B59400C7CF40 /* MLPlaceholderViewController.m in Sources */,
 				C12436142434AB5D00B8F074 /* MLAttributedLabel.m in Sources */,
 				3DBAD1E62627A2BC0078BD27 /* MLUploadQueueBaseCell.m in Sources */,
-				26D59D9020711969006F1DEE /* MLJoinGroupViewController.m in Sources */,
 				26D59D9320714F32006F1DEE /* UIColor+Theme.m in Sources */,
 				26D7C05E23D6AFD800CA123C /* MLChatInputContainer.m in Sources */,
 				2633CB4723215558006D0277 /* MLXMPPActivityItem.m in Sources */,

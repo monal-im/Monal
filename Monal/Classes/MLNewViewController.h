@@ -12,7 +12,6 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MLNewViewController : UITableViewController
--(IBAction) close:(id) sender;
 @property (nonatomic, strong) contactCompletion selectContact;
 @end
 

@@ -392,9 +392,6 @@ enum ContactDetailsAboutRows {
 
     [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Yes", @"") style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
         [[MLXMPPManager sharedInstance] addContact:self.contact];
-        if([self.contact.state isEqualToString:kSubTo]  || [self.contact.state isEqualToString:kSubNone] ) {
-            [[MLXMPPManager sharedInstance] approveContact:self.contact]; //incase there was a pending request
-        }
     }]];
 
     alert.popoverPresentationController.sourceView = self.tableView;

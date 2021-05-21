@@ -13,10 +13,10 @@
 #import "chatViewController.h"
 #import "ContactDetails.h"
 #import "addContact.h"
+#import "MLNewViewController.h"
 #import "CallViewController.h"
 #import "MonalAppDelegate.h"
 #import "UIColor+Theme.h"
-#import "MLGroupChatTableViewController.h"
 #import "xmpp.h"
 
 @interface ContactsViewController ()
@@ -65,12 +65,9 @@
     self.tableView.emptyDataSetDelegate = self;
     
     if(@available(iOS 13.0, *))
-        self.navigationItem.rightBarButtonItem.image = [UIImage systemImageNamed:@"person.3.fill"];
+        self.navigationItem.rightBarButtonItem.image = [UIImage systemImageNamed:@"plus"];
     else
-        self.navigationItem.rightBarButtonItem.image = [UIImage imageNamed:@"974-users"];
-    
-    //remove button (TODO: remove this button and screen altogether)
-    self.navigationItem.rightBarButtonItem = nil;
+        self.navigationItem.rightBarButtonItem.image = [UIImage imageNamed:@"907-plus-rounded-square"];
 }
 
 -(void) dealloc
@@ -200,16 +197,13 @@
     if([segue.identifier isEqualToString:@"showDetails"])
     {
         UINavigationController* nav = segue.destinationViewController;
-        ContactDetails* details = (ContactDetails *)nav.topViewController;
+        ContactDetails* details = (ContactDetails*)nav.topViewController;
         details.contact = sender;
     }
-    else if([segue.identifier isEqualToString:@"showGroups"])
+    else if([segue.identifier isEqualToString:@"showNewMenu"])
     {
-        MLGroupChatTableViewController* groups = (MLGroupChatTableViewController *)segue.destinationViewController;
-        groups.selectGroup = ^(MLContact *selectedContact) {
-            if(self.selectContact) self.selectContact(selectedContact);
-            [self close:nil];
-        };
+        MLNewViewController* newView = segue.destinationViewController;
+        newView.selectContact = self.selectContact;
     }
 }
 

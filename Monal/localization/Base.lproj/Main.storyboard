@@ -48,7 +48,7 @@
                                             <rect key="frame" x="0.0" y="0.0" width="674.5" height="43.666667938232422"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Add a New Contact" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="7Cs-k6-7n4">
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Add new Contact or Channel" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="7Cs-k6-7n4">
                                                     <rect key="frame" x="20" y="0.0" width="646.5" height="43.666667938232422"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
@@ -59,26 +59,6 @@
                                         </tableViewCellContentView>
                                         <connections>
                                             <segue destination="aFU-Vb-8Jd" kind="show" identifier="newContact" id="WAQ-fk-E3p"/>
-                                        </connections>
-                                    </tableViewCell>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" textLabel="7dx-xo-wIB" style="IBUITableViewCellStyleDefault" id="4Zj-AS-qNN">
-                                        <rect key="frame" x="0.0" y="68.166667938232422" width="704" height="43.666667938232422"/>
-                                        <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="4Zj-AS-qNN" id="rm4-QM-SyN">
-                                            <rect key="frame" x="0.0" y="0.0" width="674.5" height="43.666667938232422"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <subviews>
-                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Join a Group Chat" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="7dx-xo-wIB">
-                                                    <rect key="frame" x="20" y="0.0" width="646.5" height="43.666667938232422"/>
-                                                    <autoresizingMask key="autoresizingMask"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                    <nil key="textColor"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
-                                            </subviews>
-                                        </tableViewCellContentView>
-                                        <connections>
-                                            <segue destination="GpF-k7-Z6D" kind="show" identifier="newGroup" id="5bM-w5-CYw"/>
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" textLabel="SmS-bT-id6" style="IBUITableViewCellStyleDefault" id="YU8-iS-6uu">
@@ -98,7 +78,7 @@
                                             </subviews>
                                         </tableViewCellContentView>
                                         <connections>
-                                            <segue destination="2y9-NE-wpV" kind="show" identifier="acceptContact" id="7Dv-Y3-MpQ"/>
+                                            <segue destination="2y9-NE-wpV" kind="show" identifier="showSubscriptionRequests" id="7Dv-Y3-MpQ"/>
                                         </connections>
                                     </tableViewCell>
                                 </cells>
@@ -110,13 +90,6 @@
                         </connections>
                     </tableView>
                     <toolbarItems/>
-                    <navigationItem key="navigationItem" title="New" id="Msw-bP-HIu">
-                        <barButtonItem key="rightBarButtonItem" title="Close" id="IGd-kM-9BO">
-                            <connections>
-                                <action selector="close:" destination="NFY-nW-WDm" id="UTN-eO-MHz"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="nAt-MP-Xfz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -141,7 +114,7 @@
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="21P-WC-8yr">
                                             <rect key="frame" x="309" y="11" width="86" height="30"/>
-                                            <state key="normal" title="Add Contact">
+                                            <state key="normal" title="Add Contact or Channel">
                                                 <color key="titleColor" red="0.4541509151" green="0.72539824249999996" blue="0.68004375699999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             </state>
                                             <connections>
@@ -181,7 +154,7 @@
                             <outlet property="delegate" destination="aFU-Vb-8Jd" id="yBG-Yo-9U4"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Add Contact" id="HYb-u1-ZN3">
+                    <navigationItem key="navigationItem" title="Add Contact or Channel" id="HYb-u1-ZN3">
                         <barButtonItem key="rightBarButtonItem" systemItem="camera" id="DDj-bI-xft" customClass="MLQR">
                             <connections>
                                 <segue destination="aVg-Rg-rcj" kind="show" identifier="qrContactScan" id="rqQ-Ib-mG5"/>
@@ -244,7 +217,7 @@
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" id="2vX-Wb-Pa6">
                             <connections>
-                                <segue destination="nW7-fq-iEr" kind="show" identifier="showGroups" id="U4S-rm-QvZ"/>
+                                <segue destination="NFY-nW-WDm" kind="show" identifier="showNewMenu" id="U4S-rm-QvZ"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -384,11 +357,6 @@
                                     </segue>
                                 </connections>
                             </barButtonItem>
-                            <barButtonItem title="Add" id="wNA-vF-ohQ">
-                                <connections>
-                                    <segue destination="elF-QS-Bpm" kind="presentation" identifier="showNew" id="tor-VM-YxS"/>
-                                </connections>
-                            </barButtonItem>
                         </rightBarButtonItems>
                     </navigationItem>
                     <connections>
@@ -422,133 +390,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="gjp-uF-kE3" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-3851" y="-784"/>
-        </scene>
-        <!--Group Chat-->
-        <scene sceneID="4hU-MM-WBZ">
-            <objects>
-                <tableViewController clearsSelectionOnViewWillAppear="NO" id="nW7-fq-iEr" customClass="MLGroupChatTableViewController" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="S3v-FE-7ei">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="680"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
-                        <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="ListItem" textLabel="4yZ-Nr-4ym" detailTextLabel="sff-9g-z31" style="IBUITableViewCellStyleSubtitle" id="7HG-lP-zEv">
-                                <rect key="frame" x="0.0" y="49.5" width="375" height="55.5"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="7HG-lP-zEv" id="GDN-DL-D7y">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="55.5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="4yZ-Nr-4ym">
-                                            <rect key="frame" x="16" y="10" width="33" height="20.5"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                            <nil key="textColor"/>
-                                            <nil key="highlightedColor"/>
-                                            <attributedString key="userComments">
-                                                <fragment content="#bc-ignore!"/>
-                                            </attributedString>
-                                        </label>
-                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Detail" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="sff-9g-z31">
-                                            <rect key="frame" x="16" y="31.5" width="33" height="14.5"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                            <nil key="textColor"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                    </subviews>
-                                </tableViewCellContentView>
-                            </tableViewCell>
-                        </prototypes>
-                        <connections>
-                            <outlet property="dataSource" destination="nW7-fq-iEr" id="l2S-WV-bfd"/>
-                            <outlet property="delegate" destination="nW7-fq-iEr" id="0rh-uA-Jaa"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" title="Group Chat" id="k0T-5X-FQu"/>
-                    <connections>
-                        <segue destination="GpF-k7-Z6D" kind="show" identifier="editGroup" id="ndm-rg-MfL"/>
-                    </connections>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="Cbc-HF-LG0" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="590" y="-3314"/>
-        </scene>
-        <!--Join Group Chat-->
-        <scene sceneID="kig-36-J1j">
-            <objects>
-                <tableViewController title="Join Group Chat" id="GpF-k7-Z6D" customClass="MLJoinGroupViewController" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="9LZ-0p-JU3">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="680"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
-                        <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="aW3-bk-9lP" id="aW3-bk-9lP">
-                                <rect key="frame" x="0.0" y="49.5" width="375" height="43.5"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="aW3-bk-9lP" id="XkY-vh-b2N">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                </tableViewCellContentView>
-                            </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="addButton" id="7bv-y5-bYi">
-                                <rect key="frame" x="0.0" y="93" width="375" height="43.5"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="7bv-y5-bYi" id="iZv-xu-LdO">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Q7I-qj-4zk">
-                                            <rect key="frame" x="150" y="7" width="75" height="30"/>
-                                            <state key="normal" title="Join Group">
-                                                <color key="titleColor" red="0.4541509151" green="0.72539824249999996" blue="0.68004375699999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                            </state>
-                                            <connections>
-                                                <action selector="addPress:" destination="GpF-k7-Z6D" eventType="touchUpInside" id="1Tq-1E-8jt"/>
-                                                <action selector="addPress:" destination="aFU-Vb-8Jd" eventType="touchUpInside" id="qVT-vD-6ty"/>
-                                            </connections>
-                                        </button>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="Q7I-qj-4zk" firstAttribute="centerY" secondItem="iZv-xu-LdO" secondAttribute="centerY" id="ajg-1g-Tpx"/>
-                                        <constraint firstItem="Q7I-qj-4zk" firstAttribute="centerX" secondItem="iZv-xu-LdO" secondAttribute="centerX" id="bLP-X5-U7e"/>
-                                    </constraints>
-                                </tableViewCellContentView>
-                            </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="AccountPickerCell" textLabel="fKZ-SZ-6l0" style="IBUITableViewCellStyleDefault" id="GG9-So-yLQ">
-                                <rect key="frame" x="0.0" y="136.5" width="375" height="43.5"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="GG9-So-yLQ" id="AaL-LX-P4L">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="fKZ-SZ-6l0">
-                                            <rect key="frame" x="16" y="0.0" width="343" height="43.5"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                            <nil key="textColor"/>
-                                            <nil key="highlightedColor"/>
-                                            <attributedString key="userComments">
-                                                <fragment content="#bc-ignore!"/>
-                                            </attributedString>
-                                        </label>
-                                    </subviews>
-                                </tableViewCellContentView>
-                            </tableViewCell>
-                        </prototypes>
-                        <connections>
-                            <outlet property="dataSource" destination="GpF-k7-Z6D" id="Frs-3H-82d"/>
-                            <outlet property="delegate" destination="GpF-k7-Z6D" id="3t6-lJ-64G"/>
-                        </connections>
-                    </tableView>
-                    <navigationItem key="navigationItem" title="Join Group Chat" id="yIE-Ub-BAk"/>
-                    <connections>
-                        <segue destination="YbY-nY-vV9" kind="show" identifier="showAccountPicker" id="Ecb-7N-zer"/>
-                    </connections>
-                </tableViewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="zeF-qp-qgY" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2967" y="-2608"/>
         </scene>
         <!--Contact Requests-->
         <scene sceneID="1it-dR-aTE">
@@ -2919,8 +2760,6 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="Ecb-7N-zer"/>
-        <segue reference="ndm-rg-MfL"/>
         <segue reference="tEM-gR-7nN"/>
     </inferredMetricsTieBreakers>
     <resources>

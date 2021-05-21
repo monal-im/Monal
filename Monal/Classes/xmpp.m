@@ -1334,7 +1334,7 @@ NSString *const kData=@"data";
             {
                 if([presenceNode check:@"/<type=subscribe>"])
                 {
-                    MLContact* contact = [MLContact createContactFromJid:self.accountNo andAccountNo:presenceNode.fromUser];
+                    MLContact* contact = [MLContact createContactFromJid:presenceNode.fromUser andAccountNo:self.accountNo];
 
                     // check if we need a contact request
                     NSDictionary* contactSub = [[DataLayer sharedInstance] getSubscriptionForContact:contact.contactJid andAccount:contact.accountId];

@@ -445,11 +445,11 @@
                 break;
             }
             case 1: {
-                [thecell initTapCell:NSLocalizedString(@"My Keys", @"")];
+                [thecell initTapCell:NSLocalizedString(@"Encryption Keys (OMEMO)", @"")];
                 break;
             }
             case 2: {
-                [thecell initTapCell:NSLocalizedString(@"Message Archive Pref", @"")];
+                [thecell initTapCell:NSLocalizedString(@"Message Archive Preferences", @"")];
                 break;
             }
             case 3: {

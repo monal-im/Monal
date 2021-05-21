@@ -183,7 +183,7 @@ NSString *const kAskSubscribe=@"subscribe";
     {
         DDLogInfo(@"Returning dummy MLContact for %@ on accountNo %@", jid, accountNo);
         return [self contactFromDictionary:@{
-            @"buddy_name": jid,
+            @"buddy_name": jid.lowercaseString,
             @"nick_name": @"",
             @"full_name": @"",
             @"subscription": kSubNone,

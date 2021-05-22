@@ -125,9 +125,29 @@
                     <view key="view" contentMode="scaleToFill" id="j3K-AL-mmv">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <wkWebView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ZFr-N9-O7O">
+                                <rect key="frame" x="0.0" y="8" width="414" height="888"/>
+                                <color key="backgroundColor" red="0.36078431370000003" green="0.38823529410000002" blue="0.4039215686" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <wkWebViewConfiguration key="configuration" allowsAirPlayForMediaPlayback="NO" allowsPictureInPictureMediaPlayback="NO">
+                                    <dataDetectorTypes key="dataDetectorTypes" none="YES"/>
+                                    <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
+                                    <wkPreferences key="preferences"/>
+                                </wkWebViewConfiguration>
+                            </wkWebView>
+                        </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="ZFr-N9-O7O" firstAttribute="top" secondItem="4tM-wk-rpv" secondAttribute="bottom" constant="8" id="8l9-GG-hR3"/>
+                            <constraint firstItem="fJD-9Z-7hH" firstAttribute="top" secondItem="ZFr-N9-O7O" secondAttribute="bottom" id="BG1-2v-TF5"/>
+                            <constraint firstAttribute="trailing" secondItem="ZFr-N9-O7O" secondAttribute="trailing" id="HcJ-Ij-g4y"/>
+                            <constraint firstItem="ZFr-N9-O7O" firstAttribute="leading" secondItem="j3K-AL-mmv" secondAttribute="leading" id="rUP-py-s2N"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="TgJ-pD-QFd"/>
+                    <connections>
+                        <outlet property="webview" destination="ZFr-N9-O7O" id="h1w-dT-Pbu"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="MFP-Bo-fMd" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

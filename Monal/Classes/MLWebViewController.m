@@ -9,19 +9,16 @@
 #import "MLWebViewController.h"
 
 @interface MLWebViewController ()
-
+@property (weak, nonatomic) IBOutlet WKWebView* webview;
+@property (nonatomic, strong) NSURL* urltoLoad;
 @end
 
 @implementation MLWebViewController
 
-- (void)viewDidLoad {
+-(void) viewDidLoad
+{
     [super viewDidLoad];
-    WKWebViewConfiguration *theConfiguration = [[WKWebViewConfiguration alloc] init];
-    self.webview = [[WKWebView alloc] initWithFrame:self.view.frame configuration:theConfiguration];
-    self.webview.contentMode=UIViewContentModeScaleAspectFill;
-    self.webview.navigationDelegate=self;
-    [self.view addSubview:self.webview];
-   
+    self.webview.contentMode = UIViewContentModeScaleAspectFill;
 }
 
 -(void) viewWillAppear:(BOOL)animated
@@ -31,19 +28,25 @@
     {
         [self.webview loadFileURL:self.urltoLoad allowingReadAccessToURL:self.urltoLoad];
     } else  {
-        NSURLRequest *nsrequest=[NSURLRequest requestWithURL: self.urltoLoad];
+        NSURLRequest* nsrequest = [NSURLRequest requestWithURL: self.urltoLoad];
         [self.webview loadRequest:nsrequest];
     }
-    
-    self.navigationItem.largeTitleDisplayMode=UINavigationItemLargeTitleDisplayModeNever;
-    
+    self.navigationItem.largeTitleDisplayMode = UINavigationItemLargeTitleDisplayModeNever;
 }
 
-- (void)didReceiveMemoryWarning {
+-(void) didReceiveMemoryWarning
+{
     [super didReceiveMemoryWarning];
-  
 }
 
+-(void) initEmptyPage
+{
+    [self initViewWithUrl:nil];
+}
 
+-(void) initViewWithUrl:(NSURL*) url
+{
+    self.urltoLoad = url;
+}
 
 @end

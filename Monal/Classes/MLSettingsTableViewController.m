@@ -315,17 +315,17 @@ NS_ENUM(NSInteger, kSettingSection)
 }
 
 
--(void)  prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
+-(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
     if([segue.identifier isEqualToString:@"showOpenSource"])
     {
-        UINavigationController *nav = (UINavigationController *)  segue.destinationViewController;
-        MLWebViewController *web = (MLWebViewController *) nav.topViewController;
+        UINavigationController* nav = (UINavigationController*)  segue.destinationViewController;
+        MLWebViewController* web = (MLWebViewController*) nav.topViewController;
         
         NSBundle* mainBundle = [NSBundle mainBundle];
         NSString* myFile = [mainBundle pathForResource: @"opensource" ofType: @"html"];
-    
-        web.urltoLoad=[NSURL fileURLWithPath:myFile];
+
+        [web initViewWithUrl:[NSURL fileURLWithPath:myFile]];
     }
 }
 

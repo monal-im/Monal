@@ -9,7 +9,9 @@
 #import <UIKit/UIKit.h>
 @import WebKit;
 
-@interface MLWebViewController : UIViewController <WKNavigationDelegate>
-@property (nonatomic, strong)  WKWebView  *webview;
-@property  (nonatomic, strong) NSURL *urltoLoad;
+@interface MLWebViewController : UIViewController
+
+-(void) initEmptyPage;
+-(void) initViewWithUrl:(NSURL*) url;
+
 @end

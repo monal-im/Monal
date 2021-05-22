@@ -2755,7 +2755,6 @@ static NSDateFormatter* dbFormatter;
                 PRIMARY KEY('account_id','buddy_name') \
             );"];
             [self.db executeNonQuery:@"DELETE FROM _subscriptionRequestsTMP WHERE account_id NOT IN (SELECT account_id FROM account)"];
-            [self.db executeNonQuery:@"DELETE FROM _subscriptionRequestsTMP WHERE (account_id, buddy_name) NOT IN (SELECT account_id, buddy_name FROM buddylist)"];
             [self.db executeNonQuery:@"INSERT INTO subscriptionRequests (account_id, buddy_name) SELECT account_id, buddy_name FROM _subscriptionRequestsTMP;"];
             [self.db executeNonQuery:@"DROP TABLE _subscriptionRequestsTMP;"];
         }];

@@ -498,7 +498,7 @@ static NSDateFormatter* dbFormatter;
 {
     return [self.db idReadTransaction:^{
         NSString* likeString = [NSString stringWithFormat:@"%%%@%%", search];
-        NSString* query = @"SELECT buddy_name, account_id FROM buddylist WHERE buddy_name LIKE ? OR full_name LIKE ? OR nick_name LIKE ? ORDER BY full_name, nick_name, buddy_name COLLATE NOCASE ASC;";
+        NSString* query = @"SELECT buddy_name, A.account_id FROM buddylist AS B INNER JOIN account AS A ON A.account_id=B.account_id WHERE A.enabled=1 AND (A.username || '@' || A.domain)!=buddy_name AND buddy_name LIKE ? OR full_name LIKE ? OR nick_name LIKE ? ORDER BY full_name, nick_name, buddy_name COLLATE NOCASE ASC;";
         NSArray* params = @[likeString, likeString, likeString];
         NSMutableArray<MLContact*>* toReturn = [[NSMutableArray alloc] init];
         for(NSDictionary* dic in [self.db executeReader:query andArguments:params])

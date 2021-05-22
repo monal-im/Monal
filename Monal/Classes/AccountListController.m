@@ -15,7 +15,7 @@
 
 @property (nonatomic, strong) NSIndexPath* selected; // User-selected account - needed for segue
 @property (nonatomic, strong) UITableView* accountsTable;
-@property (nonatomic, strong) NSArray* accountList;
+@property (nonatomic, strong) NSArray<NSDictionary*>* accountList;
 
 @end
 
@@ -77,7 +77,9 @@
 {
     [cell initTapCell:@"\n\n"];
     cell = [cell initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"AccountCell"];
-    if([(NSString*)[[self.accountList objectAtIndex:accNo] objectForKey:@"domain"] length] > 0) {
+    NSDictionary* account = [self.accountList objectAtIndex:accNo];
+    NSAssert(account != nil, @"Expected non nil account in row %lu", (unsigned long)accNo);
+    if([(NSString*)[account objectForKey:@"domain"] length] > 0) {
         cell.textLabel.text = [NSString stringWithFormat:@"%@@%@", [[self.accountList objectAtIndex:accNo] objectForKey:@"username"],
                                 [[self.accountList objectAtIndex:accNo] objectForKey:@"domain"]];
     }
@@ -89,7 +91,7 @@
     UIImageView* accessory = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 30, 30)];
     cell.detailTextLabel.text = nil;
 
-    if([[[self.accountList objectAtIndex:accNo] objectForKey:@"enabled"] boolValue] == YES)
+    if([[account objectForKey:@"enabled"] boolValue] == YES)
     {
         cell.imageView.image = [UIImage imageNamed:@"888-checkmark"];
         if([[MLXMPPManager sharedInstance] isAccountForIdConnected: [NSString stringWithFormat:@"%@", [[self.accountList objectAtIndex:accNo] objectForKey:@"account_id"]]])
@@ -107,6 +109,12 @@
             accessory.image = [UIImage imageNamed:NSLocalizedString(@"Disconnected", @"")];
             cell.accessoryView = accessory;
         }
+    }
+    else
+    {
+        cell.imageView.image = [UIImage imageNamed:@"disabled"];
+        accessory.image = nil;
+        cell.accessoryView = accessory;
     }
 }
 

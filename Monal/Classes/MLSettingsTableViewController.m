@@ -83,11 +83,13 @@ NS_ENUM(NSInteger, kSettingSection)
     ];
 
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
+#if !TARGET_OS_MACCATALYST
     if (@available(iOS 13.0, *)) {
         self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
     } else {
         // Fallback on earlier versions
     }
+#endif
 }
 
 -(void) viewWillAppear:(BOOL)animated

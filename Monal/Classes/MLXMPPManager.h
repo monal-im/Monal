@@ -86,6 +86,7 @@
 /**
  update the password in the keychan and update memory cache
  */
+-(BOOL) isValidPassword:(NSString*) password forAccount:(NSString*) accountNo;
 -(void) updatePassword:(NSString*) password forAccount:(NSString*) accountNo;
 
 #pragma mark Jingle VOIP

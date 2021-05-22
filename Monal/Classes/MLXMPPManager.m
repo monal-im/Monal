@@ -500,12 +500,17 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
     DDLogVerbose(@"manager connectIfNecessary done");
 }
 
--(void) updatePassword:(NSString *) password forAccount:(NSString *) accountNo
+-(void) updatePassword:(NSString*) password forAccount:(NSString*) accountNo
 {
     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
     [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountNo];
     xmpp* xmpp = [self getConnectedAccountForID:accountNo];
     [xmpp.connectionProperties.identity updatPassword:password];
+}
+
+-(BOOL) isValidPassword:(NSString*) password forAccount:(NSString*) accountNo
+{
+    return [password isEqualToString:[SAMKeychain passwordForService:kMonalKeychainName account:accountNo]];
 }
 
 #pragma mark -  XMPP commands

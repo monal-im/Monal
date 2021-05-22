@@ -2103,7 +2103,7 @@ enum msgSentState {
                     browser.delegate=self;
 
                     UIBarButtonItem* close = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close", @"") style:UIBarButtonItemStyleDone target:self action:@selector(closePhotos)];
-                    browser.navigationItem.rightBarButtonItem = close;
+                    browser.navigationItem.leftBarButtonItem = close;
 
                     //                browser.displayActionButton = YES; // Show action button to allow sharing, copying, etc (defaults to YES)
                     //                browser.displayNavArrows = NO; // Whether to display left and right nav arrows on toolbar (defaults to NO)

@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) IBOutlet UIImageView *QRCode;
 
 
--(IBAction) close:(id)sender;
+-(IBAction) close:(id) sender;
 
 @end
 

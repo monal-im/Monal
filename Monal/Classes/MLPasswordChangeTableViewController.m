@@ -28,7 +28,7 @@
 {
     if(!self.xmppAccount)
     {
-        UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No connected accounts",@"") message:NSLocalizedString(@"Please make sure you are connected before changing your password.",@"") preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"No connected accounts", @"") message:NSLocalizedString(@"Please make sure you are connected before changing your password.", @"") preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction *closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {}];
         [messageAlert addAction:closeAction];
 
@@ -40,8 +40,8 @@
         {
             if([[MLXMPPManager sharedInstance] isValidPassword:[self.passwordOld getText] forAccount:self.xmppAccount.accountNo] == NO)
             {
-                UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid Password!",@"") message:NSLocalizedString(@"The current password is not correct.",@"") preferredStyle:UIAlertControllerStyleAlert];
-                UIAlertAction *closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close",@ "") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {}];
+                UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Invalid Password!", @"") message:NSLocalizedString(@"The current password is not correct.", @"") preferredStyle:UIAlertControllerStyleAlert];
+                UIAlertAction *closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {}];
                 [messageAlert addAction:closeAction];
 
                 [self presentViewController:messageAlert animated:YES completion:nil];

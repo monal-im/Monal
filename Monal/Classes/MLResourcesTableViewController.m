@@ -105,17 +105,17 @@
             switch (indexPath.row) {
                 case 0:
                     cell.textLabel.text = [NSString stringWithFormat:@"%@%@",
-                                              NSLocalizedString(@"Name: ",@""),
+                                              NSLocalizedString(@"Name: ", @""),
                                               (versionDataDictionary[@"platform_App_Name"] == nil) ? @"":versionDataDictionary[@"platform_App_Name"]];
                     break;
                 case 1:
                     cell.textLabel.text = [NSString stringWithFormat:@"%@%@",
-                                              NSLocalizedString(@"Os: ",@""),
+                                              NSLocalizedString(@"Os: ", @""),
                                               (versionDataDictionary[@"platform_OS"] == nil) ? @"":versionDataDictionary[@"platform_OS"]];
                     break;
                 case 2:
                     cell.textLabel.text = [NSString stringWithFormat:@"%@%@",
-                                              NSLocalizedString(@"Version: ",@""),
+                                              NSLocalizedString(@"Version: ", @""),
                                               (versionDataDictionary[@"platform_App_Version"] == nil) ? @"":versionDataDictionary[@"platform_App_Version"]];
                     break;
                 default:

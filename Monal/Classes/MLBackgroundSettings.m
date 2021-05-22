@@ -82,7 +82,7 @@
     else if(indexPath.row == 1)
     {
         UITableViewCell* cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SelectCell"];
-        cell.textLabel.text = NSLocalizedString(@"Select Background",@"");
+        cell.textLabel.text = NSLocalizedString(@"Select Background", @"");
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         return cell;
     }
@@ -90,9 +90,9 @@
     {
         UITableViewCell* cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"SelectCell"];
 #if TARGET_OS_MACCATALYST
-        cell.textLabel.text = NSLocalizedString(@"Select File",@"");
+        cell.textLabel.text = NSLocalizedString(@"Select File", @"");
 #else
-        cell.textLabel.text = NSLocalizedString(@"Select From Photos",@"");
+        cell.textLabel.text = NSLocalizedString(@"Select From Photos", @"");
 #endif
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         return cell;
@@ -161,9 +161,9 @@
     // Create browser (must be done each time photo browser is
     // displayed. Photo browser objects cannot be re-used)
     IDMPhotoBrowser* browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
-    browser.navigationItem.title = NSLocalizedString(@"Select a Background",@"");
+    browser.navigationItem.title = NSLocalizedString(@"Select a Background", @"");
     browser.delegate = self;
-    UIBarButtonItem* close = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close",@"") style:UIBarButtonItemStyleDone target:self action:@selector(close)];
+    UIBarButtonItem* close = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close", @"") style:UIBarButtonItemStyleDone target:self action:@selector(close)];
     browser.navigationItem.leftBarButtonItem = close;
     
     browser.autoHideInterface = NO;

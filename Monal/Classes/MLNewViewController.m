@@ -31,7 +31,7 @@
     return 3;
 }
 
--(IBAction) close:(id)sender
+-(IBAction) close:(id) sender
 {
     [self dismissViewControllerAnimated:YES completion:nil];
 }

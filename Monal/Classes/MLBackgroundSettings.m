@@ -144,40 +144,40 @@
     self.photos = [NSMutableArray array];
 
     NSString *currentBackground = [[HelperTools defaultsDB] objectForKey:@"BackgroundImage"];
-    self.selectedIndex=-1;
+    self.selectedIndex = -1;
     // Add photos
     [self.imageList enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        NSString *name =(NSString *) obj;
-        IDMPhoto *photo= [IDMPhoto photoWithImage:[UIImage imageNamed:name]];
+        NSString* name = (NSString*) obj;
+        IDMPhoto* photo = [IDMPhoto photoWithImage:[UIImage imageNamed:name]];
         photo.caption = [name stringByReplacingOccurrencesOfString:@"_" withString:@" "];
         [self.photos addObject:photo];
         
         if([currentBackground isEqualToString:name])
         {
-            self.selectedIndex=idx;
+            self.selectedIndex = idx;
         }
     }];
  
     // Create browser (must be done each time photo browser is
     // displayed. Photo browser objects cannot be re-used)
-    IDMPhotoBrowser *browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
-    browser.navigationItem.title=NSLocalizedString(@"Select a Background",@"");
-    browser.delegate=self;
-    UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close",@"") style:UIBarButtonItemStyleDone target:self action:@selector(close)];
-    browser.navigationItem.rightBarButtonItem=close;
+    IDMPhotoBrowser* browser = [[IDMPhotoBrowser alloc] initWithPhotos:self.photos];
+    browser.navigationItem.title = NSLocalizedString(@"Select a Background",@"");
+    browser.delegate = self;
+    UIBarButtonItem* close = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close",@"") style:UIBarButtonItemStyleDone target:self action:@selector(close)];
+    browser.navigationItem.leftBarButtonItem = close;
     
-    browser.autoHideInterface=NO;
+    browser.autoHideInterface = NO;
     browser.displayArrowButton = YES;
     browser.displayCounterLabel = YES;
-    browser.displayActionButton=NO;
-    browser.displayToolbar=YES;
+    browser.displayActionButton = NO;
+    browser.displayToolbar = YES;
     
     self.leftImage=[UIImage imageNamed:@"IDMPhotoBrowser_arrowLeft"];
     self.rightImage=[UIImage imageNamed:@"IDMPhotoBrowser_arrowRight"];
-    browser.leftArrowImage =self.leftImage;
-    browser.rightArrowImage =self.rightImage;
+    browser.leftArrowImage = self.leftImage;
+    browser.rightArrowImage = self.rightImage;
 
-    UINavigationController *nav =[[UINavigationController alloc] initWithRootViewController:browser];
+    UINavigationController* nav =[[UINavigationController alloc] initWithRootViewController:browser];
 
     // Present
     [self presentViewController:nav animated:YES completion:nil];

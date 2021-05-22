@@ -27,7 +27,7 @@
     self.jid.text= self.registeredAccount; 
 }
 
--(IBAction) close:(id)sender
+-(IBAction) close:(id) sender
 {
     // open privacy settings
     if(![[HelperTools defaultsDB] boolForKey:@"HasSeenPrivacySettings"]) {

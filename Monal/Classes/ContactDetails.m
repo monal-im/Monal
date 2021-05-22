@@ -490,7 +490,7 @@ enum ContactDetailsAboutRows {
             browser.leftArrowImage = self.leftImage;
             browser.rightArrowImage = self.rightImage;
             UIBarButtonItem* close = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close", @"") style:UIBarButtonItemStyleDone target:self action:@selector(closePhotos)];
-                          browser.navigationItem.rightBarButtonItem = close;
+                          browser.navigationItem.leftBarButtonItem = close;
 
             UINavigationController* nav =[[UINavigationController alloc] initWithRootViewController:browser];
 

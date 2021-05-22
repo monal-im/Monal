@@ -10,6 +10,8 @@
 #import "MonalAppDelegate.h"
 #import "HelperTools.h"
 #import "DataLayer.h"
+#import "MBProgressHUD.h"
+#import "MLXMPPManager.h"
 
 
 @interface LogViewController ()
@@ -17,6 +19,8 @@
 @property (weak, nonatomic) IBOutlet UITextField* logUDPPort;
 @property (weak, nonatomic) IBOutlet UISwitch* logUDPSwitch;
 @property (weak, nonatomic) IBOutlet UITextField* logUDPAESKey;
+@property (nonatomic, strong) MBProgressHUD* hud;
+@property (weak, nonatomic) IBOutlet UINavigationItem* navbar;
 
 @end
 
@@ -62,7 +66,7 @@ DDLogFileInfo* _logInfo;
     [self scrollToBottom];
 }
 
-- (void)viewWillDisappear:(BOOL)animated {
+-(void) viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
 
     [[HelperTools defaultsDB] setBool:self.logUDPSwitch.on forKey:@"udpLoggerEnabled"];
@@ -72,7 +76,7 @@ DDLogFileInfo* _logInfo;
     [[HelperTools defaultsDB] synchronize];
 }
 
-- (IBAction)sqliteExportAction:(id)sender {
+-(IBAction) sqliteExportAction:(id)sender {
     NSString* dbFile = [[DataLayer sharedInstance] exportDB];
     if(dbFile == nil)
         return;
@@ -80,7 +84,7 @@ DDLogFileInfo* _logInfo;
     [self presentViewController:shareController animated:YES completion:^{}];
 }
 
--(IBAction)shareAction:(id)sender
+-(IBAction) shareAction:(id)sender
 {
     UIActivityViewController* shareController = [[UIActivityViewController alloc] initWithActivityItems:@[[NSURL fileURLWithPath:_logInfo.filePath]] applicationActivities:nil];
     [self presentViewController:shareController animated:YES completion:^{}];
@@ -104,31 +108,47 @@ DDLogFileInfo* _logInfo;
  * Toolbar button
  */
 
-- (IBAction)rewindButton:(id)sender {
+-(IBAction) rewindButton:(id)sender {
     [self scrollToTop];
 }
 
-- (IBAction)fastForwardButton:(id)sender {
+-(IBAction) fastForwardButton:(id)sender {
     [self scrollToBottom];;
 }
 
-- (IBAction)refreshButton:(id)sender {
+-(IBAction) refreshButton:(id)sender {
     [self reloadLog];
 }
 
-- (void)didReceiveMemoryWarning
+-(void) didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 
--(BOOL)textFieldShouldReturn:(UITextField *)textField
+-(BOOL) textFieldShouldReturn:(UITextField *)textField
 {
     [textField resignFirstResponder];
     return YES;
 }
 
--(void)hideKeyboard{
+-(void) hideKeyboard
+{
     [self.view endEditing:YES];
 }
+
+-(IBAction) reconnect:(id) sender
+{
+    self.hud = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    self.hud.removeFromSuperViewOnHide = YES;
+    self.hud.label.text = NSLocalizedString(@"Reconnecting", @"");
+    self.hud.detailsLabel.text = NSLocalizedString(@"Will logout and reconnect any connected accounts.", @"");
+    [[MLXMPPManager sharedInstance] logoutAll];
+    createTimer(1.0, (^{
+        [[MLXMPPManager sharedInstance] connectIfNecessary];
+    }));
+    [self.hud hideAnimated:YES afterDelay:3.0f];
+    self.hud = nil;
+}
+
 @end

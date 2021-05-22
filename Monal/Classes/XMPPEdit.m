@@ -83,7 +83,7 @@
     self.avatarChanged = NO;
     self.rosterNameChanged = NO;
     self.statusMessageChanged = NO;
-    
+
     if(self.originIndex && self.originIndex.section == 0)
     {
         //edit

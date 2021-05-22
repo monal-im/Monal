@@ -18,6 +18,6 @@
 @property (nonatomic, weak) UITableView* contactsTable;
 @property (nonatomic, strong) contactCompletion selectContact; 
 
--(IBAction) close:(id)sender;
+-(IBAction) close:(id) sender;
 
 @end 

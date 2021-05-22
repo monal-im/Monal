@@ -10,9 +10,10 @@
 @import MessageUI;
 @import StoreKit;
 #import "MLConstants.h"
+#import "AccountListController.h"
 
-@interface MLSettingsTableViewController : UITableViewController <MFMailComposeViewControllerDelegate, SKStoreProductViewControllerDelegate>
+@interface MLSettingsTableViewController : AccountListController <MFMailComposeViewControllerDelegate, SKStoreProductViewControllerDelegate>
 
-- (IBAction)close:(id)sender;
+- (IBAction)close:(id) sender;
 
 @end

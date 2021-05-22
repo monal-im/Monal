@@ -24,8 +24,8 @@
     [self.aboutVersion setText:versionTxt];
 
     if (@available(iOS 13.0, *)) {
-        UIBarButtonItem* rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemClose target:self action:@selector(close:)];
-        self.navigationItem.rightBarButtonItem = rightBarButtonItem;
+        UIBarButtonItem* leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemClose target:self action:@selector(close:)];
+        self.navigationItem.leftBarButtonItem = leftBarButtonItem;
     }
 }
 

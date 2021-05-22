@@ -10,12 +10,16 @@
 #import "MLWebViewController.h"
 #import "MLSwitchCell.h"
 #import "HelperTools.h"
+#import "DataLayer.h"
+#import "MLXMPPManager.h"
+#import "XMPPEdit.h"
 
 @import SafariServices;
 
 NS_ENUM(NSInteger, kSettingSection)
 {
-    kSettingSectionApp = 0,
+    kSettingSectionAccounts = 0,
+    kSettingSectionApp,
     kSettingSectionSupport,
     kSettingSectionAbout,
     kSettingSectionCount
@@ -24,35 +28,44 @@ NS_ENUM(NSInteger, kSettingSection)
 @interface MLSettingsTableViewController ()
 
 @property (nonatomic, strong) NSArray* sections;
+@property (nonatomic, strong) NSArray* accountRows;
 @property (nonatomic, strong) NSArray* appRows;
 @property (nonatomic, strong) NSArray* supportRows;
 @property (nonatomic, strong) NSArray* aboutRows;
+@property (nonatomic, strong) NSDateFormatter* uptimeFormatter;
+
+@property (nonatomic, strong) NSIndexPath* selected;
 
 @end
 
 @implementation MLSettingsTableViewController 
 
 
-- (IBAction)close:(id)sender
+- (IBAction) close:(id) sender
 {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-- (void)viewDidLoad {
+- (void) viewDidLoad {
     [super viewDidLoad];
-    
+    [self setupAccountsView];
+
     [self.tableView registerNib:[UINib nibWithNibName:@"MLSwitchCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"AccountCell"];
 
-    self.sections = @[NSLocalizedString(@"App", @""), NSLocalizedString(@"Support", @""), NSLocalizedString(@"About", @"")];
-    
-    self.appRows = @[
-        NSLocalizedString(@"Quick Setup", @""),
-        NSLocalizedString(@"Accounts",@""),
-        NSLocalizedString(@"Privacy Settings",@""),
-        NSLocalizedString(@"Notifications",@""),
-        NSLocalizedString(@"Backgrounds",@""),
-        NSLocalizedString(@"Sounds",@"")
+    self.sections = @[NSLocalizedString(@"Accounts", @""), NSLocalizedString(@"App", @""), NSLocalizedString(@"Support", @""), NSLocalizedString(@"About", @"")];
+
+    self.accountRows = @[
+        NSLocalizedString(@"Add Account", @""),
+        NSLocalizedString(@"Add Account (advanced)", @"")
     ];
+
+    self.appRows = @[
+        NSLocalizedString(@"Privacy Settings", @""),
+        NSLocalizedString(@"Notifications", @""),
+        NSLocalizedString(@"Backgrounds", @""),
+        NSLocalizedString(@"Sounds", @"")
+    ];
+
     self.supportRows = @[
         NSLocalizedString(@"Email Support", @""),
         NSLocalizedString(@"Submit A Bug", @"")
@@ -70,32 +83,32 @@ NS_ENUM(NSInteger, kSettingSection)
     ];
 
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
-#if !TARGET_OS_MACCATALYST
     if (@available(iOS 13.0, *)) {
         self.splitViewController.primaryBackgroundStyle=UISplitViewControllerBackgroundStyleSidebar;
     } else {
         // Fallback on earlier versions
     }
-#endif
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+-(void) viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [self refreshAccountList];
+
+    self.selected = nil;
 }
 
 #pragma mark - key commands
 
--(BOOL)canBecomeFirstResponder {
+-(BOOL) canBecomeFirstResponder {
     return YES;
 }
 
-- (NSArray<UIKeyCommand *>*)keyCommands {
+-(NSArray<UIKeyCommand*>*) keyCommands {
     return @[
         [UIKeyCommand keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(close:)]
     ];
 }
-
 
 #pragma mark - Table view data source
 
@@ -107,6 +120,7 @@ NS_ENUM(NSInteger, kSettingSection)
 {
     switch(section)
     {
+        case kSettingSectionAccounts: return [self getAccountNum] + self.accountRows.count;
         case kSettingSectionApp: return self.appRows.count;
         case kSettingSectionSupport: return self.supportRows.count;
         case kSettingSectionAbout: return self.aboutRows.count;
@@ -116,14 +130,56 @@ NS_ENUM(NSInteger, kSettingSection)
     return 0;
 }
 
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+-(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
 {
-    
-    MLSwitchCell* cell = [tableView dequeueReusableCellWithIdentifier:@"AccountCell" forIndexPath:indexPath];
+    if([segue.identifier isEqualToString:@"showOpenSource"])
+    {
+        UINavigationController* nav = (UINavigationController*) segue.destinationViewController;
+        MLWebViewController* web = (MLWebViewController*) nav.topViewController;
 
+        NSBundle* mainBundle = [NSBundle mainBundle];
+        NSString* myFile = [mainBundle pathForResource: @"opensource" ofType: @"html"];
+
+        [web initViewWithUrl:[NSURL fileURLWithPath:myFile]];
+    }
+    else if([segue.identifier isEqualToString:@"editXMPP"])
+    {
+        XMPPEdit* editor = (XMPPEdit*) segue.destinationViewController.childViewControllers.firstObject; // segue.destinationViewController;
+
+        if(self.selected && self.selected.row >= [self getAccountNum])
+        {
+            editor.accountno = @"-1";
+        }
+        else
+        {
+            assert(self.selected);
+            editor.originIndex = self.selected;
+            editor.accountno = [self getAccountNoByIndex:self.selected.row];
+        }
+    }
+}
+
+
+- (UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
+{
+    MLSwitchCell* cell = [tableView dequeueReusableCellWithIdentifier:@"AccountCell" forIndexPath:indexPath];
     switch(indexPath.section)
     {
+        case kSettingSectionAccounts: {
+            if(indexPath.row < [self getAccountNum])
+            {
+                // User selected an account
+                [self initContactCell:cell forAccNo:indexPath.row];
+            }
+            else
+            {
+                // User selected one of the 'add account' promts
+                NSUInteger selectedOption = indexPath.row - [self getAccountNum];
+                assert(selectedOption < self.accountRows.count);
+                [cell initTapCell:self.accountRows[selectedOption]];
+            }
+            break;
+        }
         case kSettingSectionApp: {
             [cell initTapCell:self.appRows[indexPath.row]];
             break;
@@ -137,8 +193,10 @@ NS_ENUM(NSInteger, kSettingSection)
             {
                 NSString* versionTxt = [HelperTools appBuildVersionInfo];
                 [cell initCell:self.aboutRows[indexPath.row] withLabel:versionTxt];
-            } else {
-                [cell initTapCell:self.aboutRows[indexPath.row]];;
+            }
+            else
+            {
+                [cell initTapCell:self.aboutRows[indexPath.row]];
             }
             break;
         }
@@ -149,40 +207,54 @@ NS_ENUM(NSInteger, kSettingSection)
 }
 
 
--(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+-(NSString*) tableView:(UITableView*) tableView titleForHeaderInSection:(NSInteger) section
 {
-    return (section != kSettingSectionApp) ? self.sections[section] : 0;
+    return (section != kSettingSectionAccounts) ? self.sections[section] : 0;
 }
 
 
--(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+-(void)tableView:(UITableView*) tableView didSelectRowAtIndexPath:(NSIndexPath*) indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     switch(indexPath.section)
     {
+        case kSettingSectionAccounts: {
+            self.selected = indexPath;
+            if(indexPath.row < [self getAccountNum])
+            {
+                [self performSegueWithIdentifier:@"editXMPP" sender:self];
+            }
+            else
+            {
+                NSUInteger selection = indexPath.row - [self getAccountNum];
+                switch(selection) {
+                    case 0:
+                        [self performSegueWithIdentifier:@"showLogin" sender:self];
+                        break;
+                    case 1:
+                        [self performSegueWithIdentifier:@"editXMPP" sender:self];
+                        break;
+                    default:
+                        unreachable();
+                }
+            }
+        }
+            break;
         case kSettingSectionApp: {
             switch ((indexPath.row)) {
                 case 0:
-                    [self performSegueWithIdentifier:@"showLogin" sender:self];
-                    break;
-
-                case 1:
-                    [self performSegueWithIdentifier:@"showAccounts" sender:self];
-                    break;
-
-                case 2:
                     [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
                     break;
 
-                case 3:
+                case 1:
                     [self performSegueWithIdentifier:@"showNotification" sender:self];
                     break;
 
-                case 4:
+                case 2:
                     [self performSegueWithIdentifier:@"showBackgrounds" sender:self];
                     break;
 
-                case 5:
+                case 3:
                     [self performSegueWithIdentifier:@"showSounds" sender:self];
                     break;
 
@@ -197,7 +269,7 @@ NS_ENUM(NSInteger, kSettingSection)
                 case 0:
                     [self composeMail];
                     break;
-                    
+
                 case 1:
                      [self openLink:@"https://github.com/monal-im/Monal/issues"];
                     break;
@@ -251,7 +323,7 @@ NS_ENUM(NSInteger, kSettingSection)
     NSURL* url = [NSURL URLWithString:link];
     
     if ([url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"]) {
-        SFSafariViewController *safariView = [[ SFSafariViewController alloc] initWithURL:url];
+        SFSafariViewController* safariView = [[ SFSafariViewController alloc] initWithURL:url];
         [self presentViewController:safariView animated:YES completion:nil];
     }
 }
@@ -259,7 +331,7 @@ NS_ENUM(NSInteger, kSettingSection)
 #pragma mark - Actions
 
 
-- (void)openStoreProductViewControllerWithITunesItemIdentifier:(NSInteger)iTunesItemIdentifier {
+-(void) openStoreProductViewControllerWithITunesItemIdentifier:(NSInteger) iTunesItemIdentifier {
     SKStoreProductViewController *storeViewController = [[SKStoreProductViewController alloc] init];
     
     storeViewController.delegate = self;
@@ -280,7 +352,7 @@ NS_ENUM(NSInteger, kSettingSection)
     
 }
 
--(void)composeMail
+-(void) composeMail
 {
     if([MFMailComposeViewController canSendMail]) {
         MFMailComposeViewController* composeVC = [[MFMailComposeViewController alloc] init];
@@ -288,8 +360,9 @@ NS_ENUM(NSInteger, kSettingSection)
         [composeVC setToRecipients:@[@"info@monal.im"]];
         [self presentViewController:composeVC animated:YES completion:nil];
     }
-    else  {
-        UIAlertController* messageAlert =[UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:NSLocalizedString(@"There is no configured email account. Please email info@monal.im .", @"") preferredStyle:UIAlertControllerStyleAlert];
+    else
+    {
+        UIAlertController* messageAlert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Error", @"") message:NSLocalizedString(@"There is no configured email account. Please email info@monal.im .", @"") preferredStyle:UIAlertControllerStyleAlert];
         UIAlertAction* closeAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Close", @"") style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
         }];
         [messageAlert addAction:closeAction];
@@ -313,20 +386,4 @@ NS_ENUM(NSInteger, kSettingSection)
 -(void)productViewControllerDidFinish:(SKStoreProductViewController *)viewController {
     [viewController dismissViewControllerAnimated:YES completion:nil];
 }
-
-
--(void) prepareForSegue:(UIStoryboardSegue*) segue sender:(id) sender
-{
-    if([segue.identifier isEqualToString:@"showOpenSource"])
-    {
-        UINavigationController* nav = (UINavigationController*)  segue.destinationViewController;
-        MLWebViewController* web = (MLWebViewController*) nav.topViewController;
-        
-        NSBundle* mainBundle = [NSBundle mainBundle];
-        NSString* myFile = [mainBundle pathForResource: @"opensource" ofType: @"html"];
-
-        [web initViewWithUrl:[NSURL fileURLWithPath:myFile]];
-    }
-}
-
 @end

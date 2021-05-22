@@ -504,7 +504,7 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 {
     [SAMKeychain setAccessibilityType:kSecAttrAccessibleAfterFirstUnlock];
     [SAMKeychain setPassword:password forService:kMonalKeychainName account:accountNo];
-    xmpp* xmpp =[self getConnectedAccountForID:accountNo];
+    xmpp* xmpp = [self getConnectedAccountForID:accountNo];
     [xmpp.connectionProperties.identity updatPassword:password];
 }
 

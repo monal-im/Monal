@@ -34,6 +34,11 @@
     self.toggleSwitch.hidden = YES;
     
     self.slider.hidden = YES;
+
+    self.imageView.image = nil;
+    self.textLabel.text = nil;
+    self.detailTextLabel.text = nil;
+    self.accessoryView = nil;
     
     self.accessoryType = UITableViewCellAccessoryNone;
 }

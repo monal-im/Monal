@@ -19,6 +19,7 @@
 {
     [super viewDidLoad];
     self.webview.contentMode = UIViewContentModeScaleAspectFill;
+    self.splitViewController.preferredDisplayMode = UISplitViewControllerDisplayModeAllVisible;
 }
 
 -(void) viewWillAppear:(BOOL)animated

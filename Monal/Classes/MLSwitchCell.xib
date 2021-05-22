@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -16,20 +16,23 @@
                 <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Label" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r8c-Jr-MKH">
-                        <rect key="frame" x="8" y="11" width="218" height="21"/>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="Label" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r8c-Jr-MKH">
+                        <rect key="frame" x="8" y="11" width="120" height="21"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="right" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YK7-IO-DiF">
-                        <rect key="frame" x="243" y="11" width="78" height="21"/>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="right" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="YK7-IO-DiF">
+                        <rect key="frame" x="8" y="8" width="304" height="28"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
-                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ZDH-II-Cc8">
-                        <rect key="frame" x="234" y="11" width="78" height="21"/>
+                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" textAlignment="right" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ZDH-II-Cc8">
+                        <rect key="frame" x="8" y="14" width="304" height="22"/>
+                        <constraints>
+                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="6hs-n0-kIU"/>
+                        </constraints>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <textInputTraits key="textInputTraits"/>
                     </textField>
@@ -39,27 +42,24 @@
                             <constraint firstAttribute="width" constant="49" id="sJa-cB-ur2"/>
                         </constraints>
                     </switch>
-                    <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="5" minValue="1" maxValue="30" translatesAutoresizingMaskIntoConstraints="NO" id="tEn-lq-qzq">
+                    <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="5" minValue="1" maxValue="30" translatesAutoresizingMaskIntoConstraints="NO" id="tEn-lq-qzq">
                         <rect key="frame" x="261" y="6" width="53" height="34"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     </slider>
                 </subviews>
                 <constraints>
-                    <constraint firstItem="tEn-lq-qzq" firstAttribute="leading" secondItem="r8c-Jr-MKH" secondAttribute="trailing" constant="8" id="7JN-9s-9AK"/>
-                    <constraint firstAttribute="trailing" secondItem="YK7-IO-DiF" secondAttribute="trailing" constant="8" id="7cd-KZ-yeq"/>
-                    <constraint firstItem="ZDH-II-Cc8" firstAttribute="trailing" secondItem="4FD-Uj-Ib9" secondAttribute="trailing" id="DTw-5b-VOw"/>
-                    <constraint firstAttribute="trailing" secondItem="tEn-lq-qzq" secondAttribute="trailing" constant="8" id="EZT-lA-9Bk"/>
-                    <constraint firstAttribute="bottom" secondItem="r8c-Jr-MKH" secondAttribute="bottom" constant="8" id="GPy-3O-Xf0"/>
-                    <constraint firstItem="ZDH-II-Cc8" firstAttribute="trailing" secondItem="DMi-LI-zqm" secondAttribute="trailingMargin" constant="8" id="LTg-m3-oEl"/>
-                    <constraint firstItem="4FD-Uj-Ib9" firstAttribute="leading" secondItem="r8c-Jr-MKH" secondAttribute="trailing" constant="8" id="MLc-CT-YwJ"/>
-                    <constraint firstAttribute="trailing" secondItem="4FD-Uj-Ib9" secondAttribute="trailing" constant="8" id="Sov-Wt-Rvy"/>
-                    <constraint firstItem="ZDH-II-Cc8" firstAttribute="leading" secondItem="r8c-Jr-MKH" secondAttribute="trailing" constant="8" id="WTa-SO-XVZ"/>
-                    <constraint firstItem="tEn-lq-qzq" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" constant="-5" id="XJt-g5-ad1"/>
-                    <constraint firstItem="r8c-Jr-MKH" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" id="dkM-Bb-bcG"/>
-                    <constraint firstItem="r8c-Jr-MKH" firstAttribute="leading" secondItem="DMi-LI-zqm" secondAttribute="leadingMargin" constant="-8" id="eLK-Ws-Cos"/>
-                    <constraint firstItem="ZDH-II-Cc8" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" id="gL0-U4-7jo"/>
-                    <constraint firstItem="YK7-IO-DiF" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" id="lAN-1O-wPT"/>
-                    <constraint firstItem="YK7-IO-DiF" firstAttribute="leading" secondItem="r8c-Jr-MKH" secondAttribute="leading" constant="8" id="pGc-Ir-4KZ"/>
-                    <constraint firstItem="4FD-Uj-Ib9" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="topMargin" constant="-5" id="qN3-vA-V8h"/>
+                    <constraint firstItem="YK7-IO-DiF" firstAttribute="bottom" secondItem="r8c-Jr-MKH" secondAttribute="bottom" id="1sy-ax-Cvq"/>
+                    <constraint firstItem="4FD-Uj-Ib9" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="top" constant="6" id="4fg-xd-lHq"/>
+                    <constraint firstAttribute="bottom" secondItem="r8c-Jr-MKH" secondAttribute="bottom" constant="8" id="7Fg-Me-9wR"/>
+                    <constraint firstAttribute="trailing" secondItem="ZDH-II-Cc8" secondAttribute="trailing" constant="8" id="Ib0-oo-Q3I"/>
+                    <constraint firstAttribute="trailing" secondItem="4FD-Uj-Ib9" secondAttribute="trailing" constant="8" id="bmV-Bx-G5I"/>
+                    <constraint firstItem="ZDH-II-Cc8" firstAttribute="leading" secondItem="r8c-Jr-MKH" secondAttribute="leading" id="buN-7Z-lV7"/>
+                    <constraint firstItem="r8c-Jr-MKH" firstAttribute="leading" secondItem="DMi-LI-zqm" secondAttribute="leading" constant="8" id="c6a-qP-ghi"/>
+                    <constraint firstItem="r8c-Jr-MKH" firstAttribute="top" secondItem="DMi-LI-zqm" secondAttribute="top" constant="8" id="cgZ-DB-LIO"/>
+                    <constraint firstAttribute="trailing" secondItem="YK7-IO-DiF" secondAttribute="trailing" constant="8" id="dCq-o8-pep"/>
+                    <constraint firstItem="YK7-IO-DiF" firstAttribute="leading" secondItem="r8c-Jr-MKH" secondAttribute="trailing" constant="8" id="gaE-YG-89u"/>
+                    <constraint firstItem="ZDH-II-Cc8" firstAttribute="bottom" secondItem="r8c-Jr-MKH" secondAttribute="bottom" id="p5f-Cg-aiF"/>
+                    <constraint firstItem="YK7-IO-DiF" firstAttribute="top" secondItem="r8c-Jr-MKH" secondAttribute="top" id="qVA-K4-IC0"/>
                 </constraints>
             </tableViewCellContentView>
             <connections>

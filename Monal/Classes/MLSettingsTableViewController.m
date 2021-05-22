@@ -16,13 +16,52 @@
 
 @import SafariServices;
 
-NS_ENUM(NSInteger, kSettingSection)
-{
-    kSettingSectionAccounts = 0,
+enum kSettingSection {
+    kSettingSectionAccounts,
     kSettingSectionApp,
     kSettingSectionSupport,
     kSettingSectionAbout,
     kSettingSectionCount
+};
+
+enum SettingsAccountRows {
+    QuickSettingsRow,
+    AdvancedSettingsRow,
+    SettingsAccountRowsCnt
+};
+
+enum SettingsAppRows {
+    PrivacySettingsRow,
+    NotificationsRow,
+    BackgroundsRow,
+    SoundsRow,
+    SettingsAppRowsCnt
+};
+
+enum SettingsSupportRow {
+    EmailRow,
+    SubmitABugRow,
+    SettingsSupportRowCnt
+};
+
+enum SettingsAboutRows {
+    RateMonalRow,
+    OpenSourceRow,
+    PrivacyRow,
+    AboutRow,
+#ifdef DEBUG
+    LogRow,
+#endif
+    VersionRow,
+    SettingsAboutRowsCnt
+};
+
+//this will hold all disabled rows of all enums (this is needed because the code below still references these rows)
+enum DummySettingsRows {
+    DummySettingsRowsBegin = 100,
+#ifndef DEBUG
+    LogRow,
+#endif
 };
 
 @interface MLSettingsTableViewController ()
@@ -31,7 +70,6 @@ NS_ENUM(NSInteger, kSettingSection)
 @property (nonatomic, strong) NSArray* accountRows;
 @property (nonatomic, strong) NSArray* appRows;
 @property (nonatomic, strong) NSArray* supportRows;
-@property (nonatomic, strong) NSArray* aboutRows;
 @property (nonatomic, strong) NSDateFormatter* uptimeFormatter;
 
 @property (nonatomic, strong) NSIndexPath* selected;
@@ -41,46 +79,17 @@ NS_ENUM(NSInteger, kSettingSection)
 @implementation MLSettingsTableViewController 
 
 
-- (IBAction) close:(id) sender
+-(IBAction) close:(id) sender
 {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-- (void) viewDidLoad {
+-(void) viewDidLoad
+{
     [super viewDidLoad];
     [self setupAccountsView];
 
     [self.tableView registerNib:[UINib nibWithNibName:@"MLSwitchCell" bundle:[NSBundle mainBundle]] forCellReuseIdentifier:@"AccountCell"];
-
-    self.sections = @[NSLocalizedString(@"Accounts", @""), NSLocalizedString(@"App", @""), NSLocalizedString(@"Support", @""), NSLocalizedString(@"About", @"")];
-
-    self.accountRows = @[
-        NSLocalizedString(@"Add Account", @""),
-        NSLocalizedString(@"Add Account (advanced)", @"")
-    ];
-
-    self.appRows = @[
-        NSLocalizedString(@"Privacy Settings", @""),
-        NSLocalizedString(@"Notifications", @""),
-        NSLocalizedString(@"Backgrounds", @""),
-        NSLocalizedString(@"Sounds", @"")
-    ];
-
-    self.supportRows = @[
-        NSLocalizedString(@"Email Support", @""),
-        NSLocalizedString(@"Submit A Bug", @"")
-    ];
-
-    self.aboutRows = @[
-        NSLocalizedString(@"Rate Monal", @""),
-        NSLocalizedString(@"Open Source", @""),
-        NSLocalizedString(@"Privacy", @""),
-        NSLocalizedString(@"About", @""),
-#ifdef DEBUG
-        NSLocalizedString(@"Log", @""),
-#endif
-        NSLocalizedString(@"Version", @"")
-    ];
 
     self.splitViewController.preferredDisplayMode=UISplitViewControllerDisplayModeAllVisible;
 #if !TARGET_OS_MACCATALYST
@@ -102,30 +111,31 @@ NS_ENUM(NSInteger, kSettingSection)
 
 #pragma mark - key commands
 
--(BOOL) canBecomeFirstResponder {
+-(BOOL) canBecomeFirstResponder
+{
     return YES;
 }
 
--(NSArray<UIKeyCommand*>*) keyCommands {
-    return @[
-        [UIKeyCommand keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(close:)]
-    ];
+-(NSArray<UIKeyCommand*>*) keyCommands
+{
+    return @[[UIKeyCommand keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(close:)]];
 }
 
 #pragma mark - Table view data source
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+-(NSInteger) numberOfSectionsInTableView:(UITableView*) tableView
+{
     return kSettingSectionCount;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     switch(section)
     {
-        case kSettingSectionAccounts: return [self getAccountNum] + self.accountRows.count;
-        case kSettingSectionApp: return self.appRows.count;
-        case kSettingSectionSupport: return self.supportRows.count;
-        case kSettingSectionAbout: return self.aboutRows.count;
+        case kSettingSectionAccounts: return [self getAccountNum] + SettingsAccountRowsCnt;
+        case kSettingSectionApp: return SettingsAppRowsCnt;
+        case kSettingSectionSupport: return SettingsSupportRowCnt;
+        case kSettingSectionAbout: return SettingsAboutRowsCnt;
         default:
             unreachable();
     }
@@ -161,11 +171,10 @@ NS_ENUM(NSInteger, kSettingSection)
     }
 }
 
-
-- (UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
+-(UITableViewCell*) tableView:(UITableView*) tableView cellForRowAtIndexPath:(NSIndexPath*) indexPath
 {
     MLSwitchCell* cell = [tableView dequeueReusableCellWithIdentifier:@"AccountCell" forIndexPath:indexPath];
-    switch(indexPath.section)
+    switch((int)indexPath.section)
     {
         case kSettingSectionAccounts: {
             if(indexPath.row < [self getAccountNum])
@@ -175,30 +184,82 @@ NS_ENUM(NSInteger, kSettingSection)
             }
             else
             {
+                NSAssert(indexPath.row - [self getAccountNum] < SettingsAccountRowsCnt, @"Tried to tap onto a row ment to be for a concrete account, not for quick or advanced settings");
                 // User selected one of the 'add account' promts
-                NSUInteger selectedOption = indexPath.row - [self getAccountNum];
-                assert(selectedOption < self.accountRows.count);
-                [cell initTapCell:self.accountRows[selectedOption]];
+                switch(indexPath.row - [self getAccountNum]) {
+                    case QuickSettingsRow:
+                        [cell initTapCell:NSLocalizedString(@"Add Account", @"")];
+                        break;
+                    case AdvancedSettingsRow:
+                        [cell initTapCell:NSLocalizedString(@"Add Account (advanced)", @"")];
+                        break;
+                    default:
+                        unreachable();
+                }
             }
             break;
         }
         case kSettingSectionApp: {
-            [cell initTapCell:self.appRows[indexPath.row]];
+            switch(indexPath.row) {
+                case PrivacySettingsRow:
+                    [cell initTapCell:NSLocalizedString(@"Privacy Settings", @"")];
+                    break;
+                case NotificationsRow:
+                    [cell initTapCell:NSLocalizedString(@"Notifications", @"")];
+                    break;
+                case BackgroundsRow:
+                    [cell initTapCell:NSLocalizedString(@"Backgrounds", @"")];
+                    break;
+                case SoundsRow:
+                    [cell initTapCell:NSLocalizedString(@"Sounds", @"")];
+                    break;
+                default:
+                    unreachable();
+            }
             break;
         }
         case kSettingSectionSupport: {
-            [cell initTapCell:self.supportRows[indexPath.row]];
+            switch(indexPath.row) {
+                case EmailRow:
+                    [cell initTapCell:NSLocalizedString(@"Email Support", @"")];
+                    break;
+                case SubmitABugRow:
+                    [cell initTapCell:NSLocalizedString(@"Submit A Bug", @"")];
+                    break;
+                default:
+                    unreachable();
+            }
             break;
         }
         case kSettingSectionAbout: {
-            if(indexPath.row == (self.aboutRows.count - 1))
-            {
-                NSString* versionTxt = [HelperTools appBuildVersionInfo];
-                [cell initCell:self.aboutRows[indexPath.row] withLabel:versionTxt];
-            }
-            else
-            {
-                [cell initTapCell:self.aboutRows[indexPath.row]];
+            switch(indexPath.row) {
+                case RateMonalRow: {
+                    [cell initTapCell:NSLocalizedString(@"Rate Monal", @"")];
+                    break;
+                }
+                case OpenSourceRow: {
+                    [cell initTapCell:NSLocalizedString(@"Open Source", @"")];
+                    break;
+                }
+                case PrivacyRow: {
+                    [cell initTapCell:NSLocalizedString(@"Privacy", @"")];
+                    break;
+                }
+                case AboutRow: {
+                    [cell initTapCell:NSLocalizedString(@"About", @"")];
+                    break;
+                }
+                case LogRow: {
+                    [cell initTapCell:NSLocalizedString(@"Log", @"")];
+                    break;
+                }
+                case VersionRow: {
+                    [cell initCell:NSLocalizedString(@"Version", @"") withLabel:[HelperTools appBuildVersionInfo]];
+                    break;
+                }
+                default: {
+                    unreachable();
+                }
             }
             break;
         }
@@ -208,12 +269,22 @@ NS_ENUM(NSInteger, kSettingSection)
     return cell;
 }
 
-
 -(NSString*) tableView:(UITableView*) tableView titleForHeaderInSection:(NSInteger) section
 {
-    return (section != kSettingSectionAccounts) ? self.sections[section] : 0;
+    switch(section) {
+        case kSettingSectionAccounts:
+            return nil;             //the account section does not need a heading (its the first one)
+        case kSettingSectionApp:
+            return NSLocalizedString(@"App", @"");
+        case kSettingSectionSupport:
+            return NSLocalizedString(@"Support", @"");
+        case kSettingSectionAbout:
+            return NSLocalizedString(@"About", @"");
+        default:
+            unreachable();
+    }
+    return nil;     //needed to make the compiler happy
 }
-
 
 -(void)tableView:(UITableView*) tableView didSelectRowAtIndexPath:(NSIndexPath*) indexPath
 {
@@ -223,95 +294,78 @@ NS_ENUM(NSInteger, kSettingSection)
         case kSettingSectionAccounts: {
             self.selected = indexPath;
             if(indexPath.row < [self getAccountNum])
-            {
                 [self performSegueWithIdentifier:@"editXMPP" sender:self];
-            }
             else
             {
-                NSUInteger selection = indexPath.row - [self getAccountNum];
-                switch(selection) {
-                    case 0:
+                switch(indexPath.row - [self getAccountNum]) {
+                    case QuickSettingsRow:
                         [self performSegueWithIdentifier:@"showLogin" sender:self];
                         break;
-                    case 1:
+                    case AdvancedSettingsRow:
                         [self performSegueWithIdentifier:@"editXMPP" sender:self];
                         break;
                     default:
                         unreachable();
                 }
             }
-        }
             break;
+        }
         case kSettingSectionApp: {
-            switch ((indexPath.row)) {
-                case 0:
+            switch(indexPath.row) {
+                case PrivacySettingsRow:
                     [self performSegueWithIdentifier:@"showPrivacySettings" sender:self];
                     break;
-
-                case 1:
+                case NotificationsRow:
                     [self performSegueWithIdentifier:@"showNotification" sender:self];
                     break;
-
-                case 2:
+                case BackgroundsRow:
                     [self performSegueWithIdentifier:@"showBackgrounds" sender:self];
                     break;
-
-                case 3:
+                case SoundsRow:
                     [self performSegueWithIdentifier:@"showSounds" sender:self];
                     break;
-
                 default:
                     unreachable();
-                    break;
             }
             break;
         }
         case kSettingSectionSupport: {
-            switch ((indexPath.row)) {
-                case 0:
+            switch(indexPath.row) {
+                case EmailRow:
                     [self composeMail];
                     break;
-
-                case 1:
-                     [self openLink:@"https://github.com/monal-im/Monal/issues"];
+                case SubmitABugRow:
+                    [self openLink:@"https://github.com/monal-im/Monal/issues"];
                     break;
                 default:
-                    break;
+                    unreachable();
             }
             break;
         }
         case kSettingSectionAbout: {
-            switch ((indexPath.row)) {
-                case 0:
+            switch(indexPath.row) {
+                case RateMonalRow:
                     [self openStoreProductViewControllerWithITunesItemIdentifier:317711500];
                     break;
-                    
-                case 1:
+                case OpenSourceRow:
                     [self performSegueWithIdentifier:@"showOpenSource" sender:self];
                     break;
-                    
-                case 2:
+                case PrivacyRow:
                     [self openLink:@"https://monal.im/privacy-policy/"];
                     break;
-                    
-                case 3:
+                case AboutRow:
                     [self openLink:@"https://monal.im/about/"];
                     break;
-                    
-                case 4:
+                case LogRow:
                     [self performSegueWithIdentifier:@"showLogs" sender:self];
                     break;
-                    
-                case 5:
-                {
+                case VersionRow: {
                     UIPasteboard* pastboard = UIPasteboard.generalPasteboard;
                     pastboard.string = [HelperTools appBuildVersionInfo];
-                }
                     break;
-               
+                }
                 default:
                     unreachable();
-                    break;
             }
             break;
         }

@@ -19,6 +19,7 @@
 @import UserNotifications;
 @import CoreImage;
 @import CoreImage.CIFilterBuiltins;
+@import UIKit;
 
 static DDFileLogger* _fileLogger;
 
@@ -729,6 +730,24 @@ void logException(NSException* exception)
         NSString* versionTxt = [NSString stringWithFormat:@"%@ (%@)", [infoDict objectForKey:@"CFBundleShortVersionString"], [infoDict objectForKey:@"CFBundleVersion"]];
 #endif
     return  versionTxt;
+}
+
++(BOOL) deviceUsesSplitView
+{
+#if TARGET_OS_MACCATALYST
+    return YES;
+#else
+    switch ([[UIDevice currentDevice] userInterfaceIdiom]) {
+        case UIUserInterfaceIdiomPad:
+            return YES;
+            break;
+        case UIUserInterfaceIdiomPhone:
+            return NO;
+        default:
+            unreachable();
+            return NO;
+    }
+#endif
 }
 
 @end

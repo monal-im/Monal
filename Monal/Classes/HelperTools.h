@@ -73,6 +73,8 @@ void logException(NSException* exception);
 
 +(NSString*) appBuildVersionInfo;
 
++(BOOL) deviceUsesSplitView;
+
 @end
 
 NS_ASSUME_NONNULL_END

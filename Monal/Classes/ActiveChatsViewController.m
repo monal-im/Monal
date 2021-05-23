@@ -293,10 +293,12 @@ static NSMutableSet* _smacksWarningDisplayed;
 -(void) viewWillAppear:(BOOL) animated
 {
     [super viewWillAppear:animated];
+    // reset account selection on non split view systems
+    if([HelperTools deviceUsesSplitView] == NO)
+       self.lastSelectedUser = nil;
     // load contacts
     if(self.unpinnedContacts.count == 0 && self.pinnedContacts.count == 0)
     {
-        self.lastSelectedUser = nil;
         [self refreshDisplay];
         // only check if the login screen has to be shown if there are no active chats
         [self segueToIntroScreensIfNeeded];

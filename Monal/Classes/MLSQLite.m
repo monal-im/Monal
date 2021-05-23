@@ -408,7 +408,9 @@ static NSMutableDictionary* currentTransactions;
             [NSThread sleepForTimeInterval:0.001f];		//wait one millisecond and retry again
             DDLogWarn(@"Retrying write transaction start: %@", @{
                 @"newWriteTransactionVia": [NSThread callStackSymbols],
+#ifdef DEBUG
                 @"currentTransactions": currentTransactions,
+#endif
             });
         }
     } while(!retval);
@@ -475,7 +477,9 @@ static NSMutableDictionary* currentTransactions;
             [NSThread sleepForTimeInterval:0.001f];		//wait one millisecond and retry again
             DDLogWarn(@"Retrying read transaction start: %@", @{
                 @"newReadTransactionVia": [NSThread callStackSymbols],
+#ifdef DEBUG
                 @"currentTransactions": currentTransactions,
+#endif
             });
         }
     } while(!retval);

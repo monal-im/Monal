@@ -23,8 +23,8 @@
 
 @interface ActiveChatsViewController ()
 
-@property (nonatomic, strong) NSMutableArray* unpinnedContacts;
-@property (nonatomic, strong) NSMutableArray* pinnedContacts;
+@property (atomic, strong) NSMutableArray* unpinnedContacts;
+@property (atomic, strong) NSMutableArray* pinnedContacts;
 
 @property (nonatomic, strong) MLContact* lastSelectedUser;
 @property (nonatomic, strong) NSIndexPath *lastSelectedIndexPath;

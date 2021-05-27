@@ -375,6 +375,12 @@ static NSMutableDictionary* _uiHandler;
     if(join)
     {
         @synchronized(_stateLockObject) {
+            //don't join twice
+            if([_joining containsObject:roomJid])
+            {
+                DDLogInfo(@"Already joining muc %@, not doing it twice", roomJid);
+                return;
+            }
             [_joining addObject:roomJid];       //add room to "currently joining" list
             //we don't need to force saving of our new state because once this outgoing iq query gets handled by smacks the whole state will be saved
         }

@@ -21,7 +21,7 @@
 #import "MLPubSub.h"
 #import "MLPubSubProcessor.h"
 
-#define CURRENT_MUC_STATE_VERSION @2
+#define CURRENT_MUC_STATE_VERSION @3
 
 @interface MLMucProcessor()
 
@@ -35,6 +35,7 @@ static NSObject* _stateLockObject;
 static NSMutableDictionary* _roomFeatures;
 static NSMutableSet* _joining;
 static NSMutableSet* _firstJoin;
+static NSDate* _lastPing;
 
 //this won't be persisted because it is only for the ui
 static NSMutableDictionary* _uiHandler;
@@ -46,6 +47,7 @@ static NSMutableDictionary* _uiHandler;
     _joining = [[NSMutableSet alloc] init];
     _firstJoin = [[NSMutableSet alloc] init];
     _uiHandler = [[NSMutableDictionary alloc] init];
+    _lastPing = [NSDate date];
 }
 
 +(void) setState:(NSDictionary*) state
@@ -59,6 +61,7 @@ static NSMutableDictionary* _uiHandler;
         _roomFeatures = [state[@"roomFeatures"] mutableCopy];
         _joining = [state[@"joining"] mutableCopy];
         _firstJoin = [state[@"firstJoin"] mutableCopy];
+        _lastPing = state[@"lastPing"];
     }
 }
 
@@ -70,6 +73,7 @@ static NSMutableDictionary* _uiHandler;
             @"roomFeatures": _roomFeatures,
             @"joining": _joining,
             @"firstJoin": _firstJoin,
+            @"lastPing": _lastPing,
         };
     }
 }
@@ -410,6 +414,18 @@ static NSMutableDictionary* _uiHandler;
     [discoInfo setiqTo:roomJid];
     [discoInfo setDiscoInfoNode];
     [account sendIq:discoInfo withHandler:$newHandler(self, handleDiscoResponse, $ID(roomJid), $BOOL(join))];
+}
+
++(void) pingAllMucsOnAccount:(xmpp*) account
+{
+    if([[NSDate date] timeIntervalSinceDate:_lastPing] < 3600)
+    {
+        DDLogInfo(@"Not pinging all mucs, last ping was less than an hour ago: %@",_lastPing);
+        return;
+    }
+    _lastPing = [NSDate date];
+    for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:account.accountNo])
+        [self ping:entry[@"room"] onAccount:account];
 }
 
 +(void) ping:(NSString*) roomJid onAccount:(xmpp*) account

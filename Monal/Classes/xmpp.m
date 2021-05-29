@@ -1700,9 +1700,7 @@ NSString *const kData=@"data";
             }
             
             //ping all mucs to check if we are still connected (XEP-0410)
-            for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:self.accountNo])
-                if([entry[@"autojoin"] boolValue])
-                    [MLMucProcessor ping:entry[@"room"] onAccount:self];
+            [MLMucProcessor pingAllMucsOnAccount:self];
             
             @synchronized(_stateLockObject) {
                 //signal finished catchup if our current outgoing stanza counter is acked, this introduces an additional roundtrip to make sure
@@ -2590,8 +2588,7 @@ NSString *const kData=@"data";
     
     //join MUCs from muc_favorites db
     for(NSDictionary* entry in [[DataLayer sharedInstance] listMucsForAccount:self.accountNo])
-        if([entry[@"autojoin"] boolValue])
-            [MLMucProcessor sendDiscoQueryFor:entry[@"room"] onAccount:self withJoin:YES];
+        [MLMucProcessor sendDiscoQueryFor:entry[@"room"] onAccount:self withJoin:YES];
 }
 
 -(void) setBlocked:(BOOL) blocked forJid:(NSString* _Nonnull) blockedJid

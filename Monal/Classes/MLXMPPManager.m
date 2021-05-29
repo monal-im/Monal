@@ -470,14 +470,18 @@ static const int pingFreqencyMinutes = 5;       //about the same Conversations u
 }
 
 
--(void) logoutAll
+-(void) reconnectAll
 {
     NSArray* allAccounts = [[DataLayer sharedInstance] accountList];        //this will also "disconnect" disabled account, just to make sure
     for(NSDictionary* account in allAccounts)
     {
-        DDLogVerbose(@"Disconnecting account %@@%@", [account objectForKey:@"username"], [account objectForKey:@"domain"]);
-        [self disconnectAccount:[NSString stringWithFormat:@"%@", [account objectForKey:kAccountID]]];
+        DDLogVerbose(@"Forcefully disconnecting account %@ (%@@%@)", [account objectForKey:kAccountID], [account objectForKey:@"username"], [account objectForKey:@"domain"]);
+        xmpp* xmppAccount = [self getConnectedAccountForID:[account objectForKey:kAccountID]];
+        [xmppAccount disconnect:YES];
     }
+    createTimer(1.0, (^{
+        [self connectIfNecessary];
+    }));
 }
 
 -(void) disconnectAll

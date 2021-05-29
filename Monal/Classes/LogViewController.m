@@ -143,10 +143,7 @@ DDLogFileInfo* _logInfo;
     self.hud.removeFromSuperViewOnHide = YES;
     self.hud.label.text = NSLocalizedString(@"Reconnecting", @"");
     self.hud.detailsLabel.text = NSLocalizedString(@"Will logout and reconnect any connected accounts.", @"");
-    [[MLXMPPManager sharedInstance] logoutAll];
-    createTimer(1.0, (^{
-        [[MLXMPPManager sharedInstance] connectIfNecessary];
-    }));
+    [[MLXMPPManager sharedInstance] reconnectAll];
     [self.hud hideAnimated:YES afterDelay:3.0f];
     self.hud = nil;
 }

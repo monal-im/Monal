@@ -32,7 +32,7 @@
 /**
  logout all accounts
  */
--(void) logoutAll;
+-(void) reconnectAll;
 
 -(void) disconnectAll;
 

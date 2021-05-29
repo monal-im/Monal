@@ -115,6 +115,9 @@ static NSMutableDictionary* _uiHandler;
         
         //try to join again
         DDLogInfo(@"Retrying muc join of %@ with new nick (appended underscore): %@", presenceNode.fromUser, nick);
+        @synchronized(_stateLockObject) {
+            [_joining removeObject:presenceNode.fromUser];
+        }
         [self sendDiscoQueryFor:presenceNode.fromUser onAccount:account withJoin:YES];
         return;
     }
@@ -123,6 +126,9 @@ static NSMutableDictionary* _uiHandler;
     if([presenceNode findFirst:@"/<type=error>"])
     {
         DDLogError(@"got muc error presence!");
+        @synchronized(_stateLockObject) {
+            [_joining removeObject:presenceNode.fromUser];
+        }
         [self handleError:NSLocalizedString(@"Groupchat error", @"") forMuc:presenceNode.fromUser withNode:presenceNode andAccount:account andIsSevere:YES];
         return;
     }
@@ -219,26 +225,41 @@ static NSMutableDictionary* _uiHandler;
                 //banned from room
                 case 301:
                 {
+                    @synchronized(_stateLockObject) {
+                        [_joining removeObject:node.fromUser];
+                    }
                     [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got banned from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andAccount:account andIsSevere:YES];
                 }
                 //kicked from room
                 case 307:
                 {
+                    @synchronized(_stateLockObject) {
+                        [_joining removeObject:node.fromUser];
+                    }
                     [self handleError:[NSString stringWithFormat:NSLocalizedString(@"You got kicked from: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andAccount:account andIsSevere:YES];
                 }
                 //removed because of affiliation change --> reenter room
                 case 321:
                 {
+                    @synchronized(_stateLockObject) {
+                        [_joining removeObject:node.fromUser];
+                    }
                     [self sendDiscoQueryFor:node.fromUser onAccount:account withJoin:YES];
                 }
                 //removed because room is now members only (an we are not a member)
                 case 322:
                 {
+                    @synchronized(_stateLockObject) {
+                        [_joining removeObject:node.fromUser];
+                    }
                     [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because muc is now members-only: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andAccount:account andIsSevere:YES];
                 }
                 //removed because of system shutdown
                 case 332:
                 {
+                    @synchronized(_stateLockObject) {
+                        [_joining removeObject:node.fromUser];
+                    }
                     [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Kicked, because of system shutdown: %@", @""), node.fromUser] forMuc:node.fromUser withNode:node andAccount:account andIsSevere:YES];
                 }
                 default:
@@ -396,6 +417,9 @@ static NSMutableDictionary* _uiHandler;
     if(![[DataLayer sharedInstance] isBuddyMuc:roomJid forAccount:account.accountNo])
     {
         DDLogWarn(@"Tried to muc-ping non-muc jid '%@', trying to join regularily with disco...", roomJid);
+        @synchronized(_stateLockObject) {
+            [_joining removeObject:roomJid];
+        }
         //this will check if this jid really is not a muc and delete it fom favorites and bookmarks, if not (and join normally if it turns out is a muc after all)
         [self sendDiscoQueryFor:roomJid onAccount:account withJoin:YES];
         return;
@@ -414,6 +438,9 @@ static NSMutableDictionary* _uiHandler;
         if([error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}not-acceptable"])
         {
             DDLogWarn(@"Ping failed with 'not-acceptable' --> we have to re-join");
+            @synchronized(_stateLockObject) {
+                [_joining removeObject:roomJid];
+            }
             //check if muc is still in our favorites table before we try to join it (could be deleted by a bookmarks updae just after we sent out our ping)
             //this has to be done to avoid such a race condition that would otherwise re-add the muc back
             if([self checkIfStillBookmarked:roomJid onAccount:account])
@@ -442,6 +469,9 @@ static NSMutableDictionary* _uiHandler;
         else
         {
             DDLogWarn(@"Any other error happened: The client is probably not joined any more. It should perform a re-join. --> we have to re-join");
+            @synchronized(_stateLockObject) {
+                [_joining removeObject:roomJid];
+            }
             //check if muc is still in our favorites table before we try to join it (could be deleted by a bookmarks updae just after we sent out our ping)
             //this has to be done to avoid such a race condition that would otherwise re-add the muc back
             if([self checkIfStillBookmarked:roomJid onAccount:account])
@@ -456,6 +486,9 @@ $$handler(handleDiscoResponse, $_ID(xmpp*, account), $_ID(XMPPIQ*, iqNode), $_ID
     if([iqNode check:@"/<type=error>"])
     {
         DDLogError(@"Querying muc info returned an error: %@", [iqNode findFirst:@"error"]);
+        @synchronized(_stateLockObject) {
+            [_joining removeObject:iqNode.fromUser];
+        }
         [self handleError:[NSString stringWithFormat:NSLocalizedString(@"Failed to enter groupchat %@", @""), roomJid] forMuc:roomJid withNode:iqNode andAccount:account andIsSevere:YES];
         return;
     }

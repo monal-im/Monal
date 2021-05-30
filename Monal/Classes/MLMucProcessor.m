@@ -449,7 +449,12 @@ static NSMutableDictionary* _uiHandler;
     //(and full reconnets will rejoin all mucs anyways)
     [account sendIq:ping withResponseHandler:^(XMPPIQ* result) {
         DDLogInfo(@"Muc ping returned: we are still connected, everything is fine");
-    } andErrorHandler:^(XMPPIQ* error){
+    } andErrorHandler:^(XMPPIQ* error) {
+        if(error == nil)
+        {
+            DDLogWarn(@"Ping handler for %@ got invalidated, aborting ping...", roomJid);
+            return;
+        }
         DDLogWarn([HelperTools extractXMPPError:error withDescription:@"Muc ping returned error"]);
         if([error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}not-acceptable"])
         {

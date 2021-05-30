@@ -1081,8 +1081,9 @@ NSString *const kData=@"data";
                 [ping setPing];
                 [self sendIq:ping withResponseHandler:^(XMPPIQ* result) {
                     handler();
-                } andErrorHandler:^(XMPPIQ* error){
-                    handler();
+                } andErrorHandler:^(XMPPIQ* error) {
+                    if(error != nil)
+                        handler();
                 }];
             }
         }
@@ -2525,16 +2526,19 @@ NSString *const kData=@"data";
     
     //inform all old iq handlers of invalidation and clear _iqHandlers dictionary afterwards
     @synchronized(_iqHandlers) {
-        for(NSString* iqid in _iqHandlers)
+        //make sure this works even if the invalidation handlers add a new iq to the list
+        NSMutableDictionary* handlersCopy = [_iqHandlers mutableCopy];
+        _iqHandlers = [[NSMutableDictionary alloc] init];
+        
+        for(NSString* iqid in handlersCopy)
         {
             DDLogWarn(@"Invalidating iq handler for iq id '%@'", iqid);
-            if([_iqHandlers[iqid] isKindOfClass:[MLHandler class]])
-                $invalidate(_iqHandlers[iqid], $ID(account, self));
-            else if(_iqHandlers[iqid][@"errorHandler"])
-                ((monal_iq_handler_t)_iqHandlers[iqid][@"errorHandler"])(nil);
+            if([handlersCopy[iqid] isKindOfClass:[MLHandler class]])
+                $invalidate(handlersCopy[iqid], $ID(account, self));
+            else if(handlersCopy[iqid][@"errorHandler"])
+                ((monal_iq_handler_t)handlersCopy[iqid][@"errorHandler"])(nil);
         }
     }
-    _iqHandlers = [[NSMutableDictionary alloc] init];
     
     //force new disco queries because we landed here because of a failed smacks resume
     //(or the account got forcibly disconnected/reconnected or this is the very first login of this account)
@@ -2675,7 +2679,7 @@ NSString *const kData=@"data";
         });
     } andErrorHandler:^(XMPPIQ* error) {
         if(completion)
-            completion(nil, [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: [HelperTools extractXMPPError:error withDescription:@"Upload Error"]}]);
+            completion(nil, error == nil ? [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: NSLocalizedString(@"Upload Error: your account got disconnected while requesting upload slot", @"")}] : [NSError errorWithDomain:@"MonalError" code:0 userInfo:@{NSLocalizedDescriptionKey: [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Upload Error", @"")]}]);
     }];
 }
 
@@ -2899,7 +2903,7 @@ NSString *const kData=@"data";
             {
                 //call completion with nil, if there was an error or xmpp reconnect that prevented us to get any body-messages
                 //but only for non-item-not-found errors
-                if([error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}internal-server-error"] && [@"item-not-found" isEqualToString:[error findFirst:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"]])
+                if(error == nil || ([error check:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}internal-server-error"] && [@"item-not-found" isEqualToString:[error findFirst:@"error<type=cancel>/{urn:ietf:params:xml:ns:xmpp-stanzas}text#"]]))
                     completion(nil, nil);
                 else
                     completion(nil, [HelperTools extractXMPPError:error withDescription:nil]);
@@ -2945,7 +2949,7 @@ NSString *const kData=@"data";
         //any other error probably means the remote server is not reachable or (even more likely) the jid is incorrect
         NSString* errorDescription = [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Unexpected error while checking type of jid:", @"")];
         DDLogError(@"checkJidType got an error, informing user: %@", errorDescription);
-        return completion(@"error", errorDescription);
+        return completion(@"error", error == nil ? NSLocalizedString(@"Unexpected error while checking type of jid, please try again", @"") : errorDescription);
     }];
 }
 
@@ -3187,7 +3191,7 @@ NSString *const kData=@"data";
         //dispatch completion handler outside of the receiveQueue
         if(completion)
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                completion(NO, error ? [HelperTools extractXMPPError:error withDescription:@"Could not change password"] : @"");
+                completion(NO, error ? [HelperTools extractXMPPError:error withDescription:NSLocalizedString(@"Could not change password", @"")] : NSLocalizedString(@"Could not change password: your account is currently not conneced", @""));
             });
     }];
 }
